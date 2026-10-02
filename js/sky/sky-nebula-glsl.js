@@ -9,7 +9,7 @@
  * 溅射片（SPLAT）：成员星在盘面局部坐标上溅出密度，累加进一张 RT。
  *   RGB = 团色 × 密度；A = 密度 × 该团厚度 01 × 亮度 —— 体积片元据此还原「这一点的气层有多厚」。
  * 体积（VOL）：单张面片，片元沿视线穿过 ±HT 的气层步进 STEPS 次，每个样本只在它所在团的厚度之内发光 / 吸收，
- *   前向后合成——斜视 / 旋转有真视差与侧壁，近侧的阵营色与势力边界照样清楚；STEPS ≤ 1 即原平面光斑。
+ *   前向后合成——斜视 / 旋转有真视差与侧壁，近侧的阵营色与势力边界照样清楚；STEPS ≤ 1 使用同材质的静态密度近似。
  */
 (function (g) {
   'use strict';
@@ -79,6 +79,7 @@
       'float occupied=0.0;for(int k=0;k<9;k++){vec4 test=texture2D(tSplat,vUv+span*(float(k)*0.25-1.0)+warp*0.12);occupied=max(occupied,max(test.r,max(test.g,test.b)));if(occupied>0.0002)break;}',
       'if(occupied<=0.0002)discard;',
       'float ns=clamp(uNS,2.0,float(STEPS)),tr=1.0,energy=0.0;vec3 acc=vec3(0.0);',
+      /* Fixed per-pixel offsets distribute the finite depth samples. */
       'float jt=fract(52.9829189*fract(dot(gl_FragCoord.xy,vec2(0.06711056,0.00583715))))-0.5;',
       'for(int i=0;i<STEPS;i++){if(float(i)>=ns)break;',
       'float h=sgn*((float(i)+0.5+jt)/ns*2.0-1.0);vec2 us=vUv+span*h+warp*0.12;',
@@ -116,7 +117,7 @@
       'float tr=1.0;vec3 acc=vec3(0.0);',
       'for(int j=0;j<4;j++){float h=float(j)*0.5-0.75;vec4 layer=detail(us,h,warp);vec2 lf=structure(layer);',
       'float a=1.0-exp(-1.25*(1.0-exp(-dm*3.0))*(0.18+lf.x));',
-      'acc+=tr*a*lightGas(sm,dm,lf);tr*=1.0-a;}',
+      'acc+=tr*a*lightGas(sm,dm,lf);tr*=1.0-a;}' +
       'float al=1.0-tr;c=acc/max(al,0.0001)*pow(al,0.65)*scattering(vUv,warp);',
       '#endif',
       'c*=uAlpha*1.70;gl_FragColor=vec4(c,max(c.r,max(c.g,c.b)));}'

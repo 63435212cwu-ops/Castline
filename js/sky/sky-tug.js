@@ -137,9 +137,9 @@
     if (!ph) return;
     var t0 = g.performance.now(), S = scene(), rr = TU.rep * rad, map = {}, c = S && S.camera, low, red, k, h, i;
     if (S !== hk || S.nodeOf(D.k) !== D.n || book() !== G0) return sleep(hk, 1);
-    if (ph === 1 && D.camTarget && S.controls && S.controls.target) {
-      S.controls.target.copy(D.camTarget);
-      if (D.camPos && S.camera) { S.camera.position.copy(D.camPos); S.camera.lookAt(D.camTarget); S.camera.updateMatrixWorld(true); }
+    if (ph === 1 && P && P.camTarget && S.controls && S.controls.target) {
+      S.controls.target.copy(P.camTarget);
+      if (P.camPos && S.camera) { S.camera.position.copy(P.camPos); S.camera.lookAt(P.camTarget); S.camera.updateMatrixWorld(true); }
     }
     if (ph === 1 && !ready(S)) { drop(); if (!ph) return; }   /* 换态 = 松手 */
     dt = Math.min(0.05, Math.max(0, +dt || 0)); tPh += dt;

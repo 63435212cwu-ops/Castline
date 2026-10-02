@@ -4,9 +4,9 @@
   var d = g.document, root = d && d.documentElement, stage, layer, raf = 0, clean = [], pulseTimer = 0, px = .5, py = .44, reduced = false;
   function mq() { try { return !!(g.matchMedia && g.matchMedia('(prefers-reduced-motion: reduce)').matches); } catch (e) { return false; } }
   function low() { var b = d && d.body; return !!(root && root.getAttribute('data-tier') === 'low') || !!(b && b.classList.contains('skylab-still')); }
-  function active() { var b = d && d.body; return !!(b && (b.classList.contains('sky-shell') || b.classList.contains('atlas-workspace') || b.classList.contains('atlas-2d'))); }
+  function active() { var b = d && d.body; return !!(b && !(b.classList.contains('sky-shell') && b.classList.contains('skd-gl')) && (b.classList.contains('sky-shell') || b.classList.contains('atlas-workspace') || b.classList.contains('atlas-2d'))); }
   function pulse() {
-    if (!d.body || reduced || low()) return;
+    if (!active() || reduced || low()) return;
     d.body.classList.remove('mystic-surge');
     if (g.requestAnimationFrame) g.requestAnimationFrame(function () { d.body.classList.add('mystic-surge'); });
     if (pulseTimer) g.clearTimeout(pulseTimer);

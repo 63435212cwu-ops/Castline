@@ -22,6 +22,8 @@ python3 tests/deep_client_contract.py
 "$ATLAS_NODE" tests/atlas_source_contract.js
 "$ATLAS_NODE" tests/deep_client_contract.js
 "$ATLAS_NODE" tests/atlas_workspace_state_contract.js
+"$ATLAS_NODE" tests/sky_cloud_noise_contract.js
+"$ATLAS_NODE" tests/sky_tug_camera_contract.js
 "$ATLAS_JSC" tests/atlas_lifecycle_contract.js
 "$ATLAS_JSC" tests/domain_alignment_contract.js
 "$ATLAS_JSC" tests/scene_camp_halo_contract.js

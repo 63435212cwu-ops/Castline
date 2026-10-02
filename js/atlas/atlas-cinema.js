@@ -7,6 +7,7 @@
   var d = g.document, root = d && d.documentElement, stage = null, layer = null;
   var raf = 0, px = .5, py = .44, flight = 0, reduced = false, low = false, clean = [], cutTimer = 0;
   function media() { try { return !!(g.matchMedia && g.matchMedia('(prefers-reduced-motion: reduce)').matches); } catch (e) { return false; } }
+  function nativeSky() { return !!(d.body && d.body.classList.contains('sky-shell') && d.body.classList.contains('skd-gl')); }
   function quiet() { return media() || !!(d.body && (d.body.classList.contains('skylab-still') || d.body.classList.contains('atlas-motion-quiet'))); }
   function vars() {
     reduced = quiet(); low = !!(d.body && d.body.getAttribute('data-tier') === 'low');
@@ -37,13 +38,13 @@
       root.style.setProperty('--cinema-meteor-angle', (-34 + Math.random() * 28).toFixed(2) + 'deg');
     }
     function move(e) {
-      if (reduced || low || !stage) return;
+      if (nativeSky() || reduced || low || !stage) return;
       px = Math.max(0, Math.min(1, e.clientX / Math.max(1, g.innerWidth)));
       py = Math.max(0, Math.min(1, e.clientY / Math.max(1, g.innerHeight)));
       if (!raf) raf = g.requestAnimationFrame(function () { raf = 0; vars(); });
     }
     function down(e) {
-      if (reduced || low || !stage || e.pointerType === 'mouse' && e.button > 0) return;
+      if (nativeSky() || reduced || low || !stage || e.pointerType === 'mouse' && e.button > 0) return;
       flight = Math.min(1, flight + .58); vars();
       if (d.body) d.body.classList.add('cinema-flight');
       occult('cinema-pulse', 920);
@@ -54,7 +55,7 @@
       g.setTimeout(function () { flight = 0; vars(); }, reduced ? 0 : 720);
     }
     function cut(e) {
-      if (reduced || low || !d.body) return;
+      if (nativeSky() || reduced || low || !d.body) return;
       if (cutTimer) g.clearTimeout(cutTimer);
       d.body.classList.remove('cinema-cut', 'cinema-gate', 'cinema-meteor');
       seedMeteor();

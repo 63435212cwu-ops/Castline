@@ -21,7 +21,7 @@ var R = 1, pitch = 0, anchor = null, mesh = null, splatPoints = null;
 var splatScene = null, splatCam = null, splatRT = null;
 var planeGeo = null, volN = -1, splatGeo = null, matNeb = null, matSplat = null, posAttr = null, list = null, noiseTex = null;
 var uGroupK = [], uGroupT = [], uRT = null, uTimeU = null, uAlphaU = null, tSplatU = null, uCamU = null, uNSU = null, v2 = null;
-var uTime = 0, frozenT = -1, rtSize = 0, i, k, col, gd, w, nd, src;
+var uTime = 0, lastAnim = null, rtSize = 0, i, k, col, gd, w, nd, src;
 var zSum = [], zSq = [], zN = [], gThick = [];
 var tmpV = new THREE.Vector3(), tmpC = new THREE.Color();
 
@@ -245,10 +245,14 @@ if (Math.abs(target - alpha) < 1e-4) { alpha = target; }
 if (uAlphaU) { uAlphaU.value = alpha; }
 if (mesh) { mesh.visible = alpha > 0.002; }
 
-if (tier === 'low' || reducedMotion) {
-if (frozenT < 0) { frozenT = tAnim || 0; }
-uTime = frozenT;
-} else { frozenT = -1; uTime = tAnim || 0; }
+/* Integrate only active animation time. Resuming after a low-tier / reduced
+   pause must continue this gas shape, not jump to the host's later phase.
+   The host delta preserves calm mode; the dt bound drops hidden-tab gaps. */
+var anim = typeof tAnim === 'number' && isFinite(tAnim) ? tAnim : null;
+if (tier !== 'low' && !reducedMotion && lastAnim !== null && anim !== null) {
+uTime += Math.min(t, 0.05, Math.max(0, anim - lastAnim));
+}
+lastAnim = anim;
 if (uTimeU) { uTimeU.value = uTime; }
 /* 相机在盘面本地空间（片元据此求视线）；步进数按画布像素量降（uniform，不重编译） */
 if (uCamU && anchor && volN > 1 && mesh && mesh.visible) {
@@ -282,7 +286,6 @@ function setTier(t) {
 if (t !== 'high' && t !== 'mid' && t !== 'low') { return; }
 if (t === tier) { return; }
 tier = t;
-if (!td().fbm) { frozenT = -1; uTime = 0; }
 ensureRT(); ensureGeo(); ensureNebMat();
 if (mesh) { mesh.material = matNeb; mesh.geometry = planeGeo; }
 needSplat = true;

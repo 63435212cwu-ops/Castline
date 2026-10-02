@@ -9,7 +9,7 @@
   function frozen() {
     var body = g.document && g.document.body;
     var root = g.document && g.document.documentElement;
-    return dead || reduced || !!(g.document && g.document.hidden) || !!((root && root.getAttribute('data-tier') === 'low') || (body && (body.getAttribute('data-tier') === 'low' || body.classList.contains('skylab-still'))));
+    return dead || reduced || !!(g.document && g.document.hidden) || !!((root && root.getAttribute('data-tier') === 'low') || (body && (body.getAttribute('data-tier') === 'low' || body.classList.contains('skylab-still') || body.classList.contains('sky-shell') && body.classList.contains('skd-gl'))));
   }
   function mount() {
     var stage = g.document && g.document.getElementById('stage');
