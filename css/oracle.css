@@ -1,0 +1,66 @@
+/* Castline · 深层样式（v27 · S5 token收编版）
+   独立文件，与 app.css / arcana.css 都不重叠：全部选择器带 cl-orc / #clXxx 前缀。
+   语义沿用全局令牌：金/琥珀 = var(--abyss-signal) · 紫罗兰 = var(--abyss-violet) · 薄荷 = var(--abyss-mint) · 绯红 = var(--abyss-hot)。 */
+
+/* ---------------------------------------------------------------- ⑤ 典藏罗盘
+   左下、秘印之上。盘上每个数都是真的（真实方位角 / 真实成员数 / 真实点灯强度），
+   所以它不是装饰件而是一块**读数窗** —— 视线扫过时能确认"灯此刻在哪一座"。 */
+/* 位置换到**右下**：左下 bottom:118px 那一片是「作品总览」面板的地盘，
+   而 .cl-orc-folio 的 z-index 19 低于 .hud 的 20 —— 盘整块被面板盖住，
+   只有落在面板下沿之外的说明文字露了出来（v27-eye.png 左下那行孤零零的 SIGN-06）。
+   右下是真的空地：右缘卷脊在 x>1400，底部提示条在中间，右坞未选中时不在。 */
+.cl-orc-folio{
+  position:fixed;right:92px;bottom:26px;z-index:19;pointer-events:none;
+  width:188px;opacity:.78;
+  transition:opacity var(--abyss-dur-medium, .6s) ease;
+}
+.cl-orc-folio canvas{display:block;width:188px;height:188px}
+.cl-orc-folio .fo-cap{
+  margin-top:-6px;padding-left:2px;
+  display:flex;flex-direction:column;gap:2px;
+}
+.cl-orc-folio .fo-cap b{
+  font:400 var(--abyss-fs-xs, 10px)/1.35 var(--mono,ui-monospace);letter-spacing:.02em;color:var(--abyss-tier-hi); /* T5 刻度豁免：罗盘读数窗，整行只有方位角 / 成员数 / 光度三组刻度数字 */
+  white-space:nowrap;
+}
+.cl-orc-folio .fo-cap s{
+  text-decoration:none;font:var(--abyss-fs-2xs, 11px)/1.25 var(--mono,ui-monospace);letter-spacing:.1em;color:var(--abyss-lad-10);
+}
+body.cl-arc-off .cl-orc-folio{opacity:0}
+/* 矮屏、窄屏都让位给秘印与索引面板 */
+@media (max-height:900px){.cl-orc-folio{width:150px;bottom:22px}.cl-orc-folio canvas{width:150px;height:150px}}
+@media (max-height:790px),(max-width:1180px){.cl-orc-folio{display:none}}
+
+/* ---------------------------------------------------------------- ⑥ 色温分级
+   z-index 4：在画布之上、在 .hud（z-index 20）之下 —— 所以它只调色画面，绝不碰面板文字的可读性。
+   两层分工：gr-temp 用 soft-light 做色温巡回，gr-vig 用普通叠加做晕影，互不干扰。 */
+.cl-orc-grade{position:fixed;inset:0;z-index:4;pointer-events:none}
+.cl-orc-grade i{position:absolute;inset:0;display:block}
+/* opacity .55 + 亮紫中心在 soft-light 下会把**黑位**整片抬起来 —— 深空变成淡紫雾，
+   星点与背景的对比塌掉（v27-eye.png 一眼可见）。分级只该动中间调，不该动黑位：
+   中心几乎全透明、只在中远景补一点冷紫，opacity 收到 .20。 */
+.cl-orc-grade .gr-temp{
+  mix-blend-mode:soft-light;opacity:.20;
+  background:radial-gradient(120% 90% at 50% 42%,rgba(96,72,168,.10) 0%,rgba(30,18,62,.22) 62%,rgba(10,7,24,.42) 100%);
+  animation:orcTemp 214s ease-in-out infinite;
+}
+.cl-orc-grade .gr-vig{
+  /* 晕影：四角压暗 + 极慢呼吸。这是"电影感"最便宜的一笔 —— 视线自然被收到画面中央 */
+  background:radial-gradient(115% 88% at 50% 46%,transparent 46%,rgba(3,2,10,.34) 78%,rgba(2,1,7,.62) 100%);
+  animation:orcVig 41s ease-in-out infinite;
+}
+body.cl-arc-off .cl-orc-grade{opacity:0;transition:opacity var(--abyss-dur-medium, .5s) ease}
+
+/* 三个色温：幽紫（时间） → 深海青（距离） → 余烬金（人物）。
+   214 s 一轮、且与 3D 层的 21 s 心跳、观测框的 27 s 都不整除 —— 三条节律永远错拍。 */
+@keyframes orcTemp{
+  0%,100%{filter:hue-rotate(0deg) saturate(1);opacity:.15}
+  33%    {filter:hue-rotate(-26deg) saturate(1.14);opacity:.195}
+  66%    {filter:hue-rotate(20deg) saturate(.92);opacity:.1125}
+}
+@keyframes orcVig{0%,100%{opacity:.86}50%{opacity:1}}
+
+@media (prefers-reduced-motion:reduce){
+  .cl-orc-grade .gr-temp,.cl-orc-grade .gr-vig{animation:none}
+  .cl-orc-folio{display:none}
+}

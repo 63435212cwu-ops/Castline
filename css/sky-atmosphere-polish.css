@@ -1,0 +1,347 @@
+/* Castline · sky-atmosphere-polish.css
+ * ─────────────────────────────────────────────────────────────────────────
+ * Atmosphere-only finish pass for the deep-sky shell. The DOM layer sits
+ * between the WebGL canvas and labels, so it adds no draw calls and never
+ * intercepts graph input. All material colours come from the Abyss tokens.
+ */
+
+:root {
+  --sa-ease: cubic-bezier(.16, 1, .3, 1);
+  --sa-x: 50%;
+  --sa-y: 44%;
+  --sa-depth: 0;
+  --sa-hot: var(--abyss-gold);
+  --sa-lens: var(--abyss-violet-bright);
+}
+
+#stage { isolation: isolate; }
+
+.sky-atmosphere {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-abyss);
+  pointer-events: none;
+  overflow: hidden;
+  contain: paint;
+  opacity: .74;
+  transition: opacity var(--abyss-dur-fast, .28s) var(--sa-ease);
+}
+
+.sky-atmosphere::before,
+.sky-atmosphere::after {
+  content: '';
+  position: absolute;
+  inset: -12%;
+  pointer-events: none;
+}
+
+/* A slow, low-frequency gas sheet gives the otherwise static background a
+   parallax-like breathing layer. It is transform-only after rasterisation. */
+.sky-atmosphere::before {
+  background:
+    radial-gradient(44% 30% at 21% 28%, color-mix(in oklab, var(--abyss-violet-bright) 18%, transparent), transparent 72%),
+    radial-gradient(36% 26% at 78% 66%, color-mix(in oklab, var(--abyss-mint-bright) 10%, transparent), transparent 74%),
+    radial-gradient(26% 20% at 53% 12%, color-mix(in oklab, var(--abyss-gold) 11%, transparent), transparent 76%);
+  filter: blur(42px) saturate(1.1);
+  translate: calc(var(--amp-drift-x, 0px) * -.22) calc(var(--amp-drift-y, 0px) * -.22);
+  mix-blend-mode: screen;
+  animation: sa-cloud-breathe 26s var(--sa-ease) infinite alternate;
+  opacity: .48;
+}
+
+.sky-atmosphere::after {
+  background:
+    radial-gradient(38% 34% at 82% 18%, color-mix(in oklab, var(--abyss-violet) 15%, transparent), transparent 70%),
+    radial-gradient(32% 28% at 11% 82%, color-mix(in oklab, var(--abyss-signal) 9%, transparent), transparent 74%);
+  filter: blur(58px);
+  translate: calc(var(--amp-drift-x, 0px) * .3) calc(var(--amp-drift-y, 0px) * .3);
+  mix-blend-mode: screen;
+  animation: sa-cloud-drift 38s linear infinite alternate;
+  opacity: .38;
+}
+
+.sa-cloud {
+  position: absolute;
+  width: 46vmax;
+  height: 32vmax;
+  border-radius: 50%;
+  filter: blur(30px) saturate(1.28);
+  opacity: .13;
+  will-change: transform, opacity;
+  translate: calc(var(--amp-drift-x, 0px) * .44) calc(var(--amp-drift-y, 0px) * .44);
+  mix-blend-mode: screen;
+}
+
+.sa-cloud-a {
+  left: -13vmax;
+  top: 13vmax;
+  background: radial-gradient(ellipse at 50% 50%, color-mix(in oklab, var(--abyss-violet-bright) 24%, transparent), transparent 68%);
+  animation: sa-cloud-a 32s var(--sa-ease) infinite alternate;
+}
+
+.sa-cloud-b {
+  right: -18vmax;
+  top: -7vmax;
+  width: 42vmax;
+  height: 38vmax;
+  background: radial-gradient(ellipse at 50% 50%, color-mix(in oklab, var(--abyss-mint-bright) 15%, transparent), transparent 67%);
+  animation: sa-cloud-b 41s var(--sa-ease) infinite alternate;
+}
+
+.sa-cloud-c {
+  left: 30%;
+  bottom: -23vmax;
+  width: 52vmax;
+  height: 30vmax;
+  background: radial-gradient(ellipse at 50% 50%, color-mix(in oklab, var(--abyss-gold) 13%, transparent), transparent 70%);
+  animation: sa-cloud-c 36s var(--sa-ease) infinite alternate;
+}
+
+/* A pair of low-frequency optical sheets gives the nebula a photographic
+   sense of depth: one broad aurora and one almost invisible dust filament
+   field. They are rasterised once and only transform/opacity are animated. */
+.sa-aurora,
+.sa-filaments {
+  position: absolute;
+  inset: -14%;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  will-change: transform, opacity;
+}
+.sa-aurora {
+  background:
+    conic-gradient(from 218deg at 48% 54%, transparent 0 18%, color-mix(in oklab, var(--abyss-violet-bright) 11%, transparent) 24%, transparent 34% 54%, color-mix(in oklab, var(--abyss-mint-bright) 10%, transparent) 61%, transparent 74%),
+    radial-gradient(ellipse at 48% 58%, color-mix(in oklab, var(--abyss-violet-bright) 13%, transparent), transparent 58%);
+  filter: blur(27px) saturate(1.38);
+  opacity: .14;
+  translate: calc(var(--amp-drift-x, 0px) * .18) calc(var(--amp-drift-y, 0px) * .18);
+  animation: sa-aurora-drift 53s var(--sa-ease) infinite alternate;
+}
+.sa-filaments {
+  background:
+    repeating-radial-gradient(ellipse at 47% 51%, transparent 0 8.6%, color-mix(in oklab, var(--abyss-ink-bright) 5%, transparent) 8.8% 8.95%, transparent 9.25% 14.6%),
+    repeating-linear-gradient(116deg, transparent 0 8%, color-mix(in oklab, var(--abyss-gold) 3.5%, transparent) 8.15% 8.25%, transparent 8.55% 16%);
+  mask-image: radial-gradient(ellipse at center, transparent 6%, var(--abyss-lad-00) 42%, transparent 93%);
+  filter: blur(.35px);
+  opacity: .12;
+  transform: translate3d(calc(var(--amp-drift-x, 0px) * -.14), calc(var(--amp-drift-y, 0px) * -.14), 0);
+  animation: sa-filament-drift 67s linear infinite alternate;
+}
+
+/* Fine dust is a repeating texture instead of hundreds of DOM stars. */
+.sa-dust {
+  position: absolute;
+  inset: -6%;
+  opacity: .36;
+  background-image:
+    radial-gradient(circle at 17% 21%, color-mix(in oklab, var(--abyss-ink-bright) 47%, transparent) 0 0.65px, transparent .9px),
+    radial-gradient(circle at 73% 34%, color-mix(in oklab, var(--abyss-gold) 36%, transparent) 0 .6px, transparent .9px),
+    radial-gradient(circle at 39% 78%, color-mix(in oklab, var(--abyss-violet-bright) 42%, transparent) 0 .6px, transparent .95px);
+  background-size: 137px 151px, 211px 227px, 263px 289px;
+  translate: calc(var(--amp-drift-x, 0px) * -.55) calc(var(--amp-drift-y, 0px) * -.55);
+  mix-blend-mode: screen;
+  animation: sa-dust-slide 80s linear infinite alternate;
+}
+
+/* Procedural combustion sheets.  The three gradients are deliberately
+   phase-shifted: the broad sheet supplies the soft gas, its pseudo elements
+   supply the licking silhouette, and the ember sheet carries the tiny hot
+   particles.  They are rasterised by the browser once and animated with
+   transform/background-position only, which keeps the filmic motion stable
+   at a 4K backing store without adding canvas draw calls. */
+.sa-fire {
+  position: absolute;
+  left: var(--sa-x);
+  top: var(--sa-y);
+  width: clamp(220px, 38vw, 680px);
+  aspect-ratio: .82;
+  pointer-events: none;
+  border-radius: 50%;
+  background:
+    radial-gradient(ellipse at 50% 73%, color-mix(in oklab, var(--sa-hot) 18%, transparent) 0 14%, transparent 58%),
+    conic-gradient(from 206deg at 50% 77%, transparent 0 9%, color-mix(in oklab, var(--sa-hot) 15%, transparent) 16%, transparent 27% 39%, color-mix(in oklab, var(--sa-lens) 12%, transparent) 47%, transparent 60% 73%, color-mix(in oklab, var(--abyss-mint-bright) 10%, transparent) 81%, transparent 92%);
+  mask-image: radial-gradient(ellipse at 50% 72%, transparent 3%, var(--abyss-ink-bright) 18% 53%, transparent 82%);
+  filter: blur(12px) saturate(1.45);
+  opacity: calc(.055 + var(--amp-energy, 0) * .13);
+  mix-blend-mode: screen;
+  transform: translate(-50%, -50%) rotate(-8deg) scale(calc(.9 + var(--sa-depth) * .16));
+  transform-origin: 50% 72%;
+  will-change: transform, opacity, filter;
+  animation: sa-fire-breathe 8.6s var(--sa-ease) infinite alternate; /* G4 豁免：火焰热流材质是交互期间的读数动效，低档 / 静止自动禁用 */
+}
+.sa-fire::before,
+.sa-fire::after {
+  content: '';
+  position: absolute;
+  pointer-events: none;
+  border-radius: 50%;
+  mix-blend-mode: screen;
+  will-change: transform, opacity;
+}
+.sa-fire::before {
+  inset: -13% -22% 4%;
+  background:
+    radial-gradient(ellipse at 37% 68%, color-mix(in oklab, var(--sa-hot) 23%, transparent) 0 8%, transparent 43%),
+    radial-gradient(ellipse at 65% 53%, color-mix(in oklab, var(--sa-lens) 19%, transparent) 0 7%, transparent 38%),
+    conic-gradient(from 170deg at 50% 84%, transparent 0 13%, color-mix(in oklab, var(--sa-hot) 13%, transparent) 22%, transparent 33% 53%, color-mix(in oklab, var(--abyss-mint-bright) 10%, transparent) 62%, transparent 78%);
+  mask-image: radial-gradient(ellipse at 50% 82%, var(--abyss-ink-bright) 9%, transparent 69%);
+  filter: blur(17px) saturate(1.55);
+  opacity: .72;
+  animation: sa-fire-lick 6.2s var(--sa-ease) infinite alternate; /* G4 豁免：火焰热流材质是交互期间的读数动效，低档 / 静止自动禁用 */
+}
+.sa-fire::after {
+  inset: 17% 17% 17%;
+  background:
+    radial-gradient(ellipse at 50% 79%, color-mix(in oklab, var(--abyss-ink-bright) 28%, transparent) 0 4%, color-mix(in oklab, var(--sa-hot) 17%, transparent) 8%, transparent 47%),
+    conic-gradient(from 180deg at 50% 82%, transparent 0 27%, color-mix(in oklab, var(--sa-hot) 16%, transparent) 38%, transparent 51% 71%, color-mix(in oklab, var(--sa-lens) 13%, transparent) 81%, transparent 90%);
+  mask-image: radial-gradient(ellipse at 50% 80%, var(--abyss-ink-bright) 6%, transparent 67%);
+  filter: blur(5px) saturate(1.5);
+  opacity: .62;
+  animation: sa-fire-core 4.3s var(--sa-ease) infinite alternate; /* G4 豁免：火焰热流材质是交互期间的读数动效，低档 / 静止自动禁用 */
+}
+.sa-fire-b {
+  width: clamp(180px, 31vw, 560px);
+  opacity: calc(.045 + var(--amp-energy, 0) * .10);
+  transform: translate(-48%, -53%) rotate(14deg) scaleX(.84) scaleY(1.08);
+  animation-delay: -3.4s;
+  animation-duration: 10.8s;
+  filter: blur(15px) saturate(1.6);
+}
+.sa-fire-b::before { animation-delay: -2.2s; animation-duration: 7.4s; }
+.sa-fire-b::after { animation-delay: -1.6s; animation-duration: 5.1s; }
+.sa-embers {
+  position: absolute;
+  inset: -12%;
+  pointer-events: none;
+  opacity: calc(.08 + var(--amp-energy, 0) * .18);
+  mix-blend-mode: screen;
+  background-image:
+    radial-gradient(circle at 11% 72%, color-mix(in oklab, var(--sa-hot) 76%, transparent) 0 .8px, transparent 1.35px),
+    radial-gradient(circle at 26% 58%, color-mix(in oklab, var(--abyss-ink-bright) 73%, transparent) 0 .7px, transparent 1.25px),
+    radial-gradient(circle at 42% 76%, color-mix(in oklab, var(--sa-hot) 68%, transparent) 0 .55px, transparent 1.1px),
+    radial-gradient(circle at 58% 61%, color-mix(in oklab, var(--sa-lens) 60%, transparent) 0 .6px, transparent 1.15px),
+    radial-gradient(circle at 74% 79%, color-mix(in oklab, var(--abyss-ink-bright) 75%, transparent) 0 .75px, transparent 1.3px),
+    radial-gradient(circle at 89% 55%, color-mix(in oklab, var(--sa-hot) 67%, transparent) 0 .55px, transparent 1.15px);
+  background-size: 137px 191px, 173px 227px, 211px 263px, 251px 307px, 313px 347px, 367px 401px;
+  filter: blur(.15px) drop-shadow(0 0 3px color-mix(in oklab, var(--sa-hot) 34%, transparent));
+  animation: sa-ember-rise 13s linear infinite; /* G4 豁免：火焰余烬材质是交互期间的读数动效，低档 / 静止自动禁用 */
+}
+.sky-atmosphere.is-near .sa-fire { opacity: .22; }
+.sky-atmosphere.is-near .sa-fire-b { opacity: .18; }
+.sky-atmosphere.is-press .sa-fire { opacity: .33; filter: blur(10px) saturate(1.65); }
+.sky-atmosphere.is-press .sa-fire-b { opacity: .27; }
+.sky-atmosphere.is-press .sa-embers { opacity: .38; }
+.sky-atmosphere.is-ignite .sa-fire { opacity: .36; filter: blur(9px) saturate(1.72) contrast(1.08); }
+.sky-atmosphere.is-ignite .sa-fire-b { opacity: .30; }
+.sky-atmosphere.is-ignite .sa-embers { opacity: .42; animation-duration: 7.2s; }
+
+/* Lens flare is a quiet optical axis until the user leans into the stage or
+   presses it. The press state is toggled by sky-atmosphere.js. */
+.sa-flare {
+  position: absolute;
+  left: var(--sa-x);
+  top: var(--sa-y);
+  width: clamp(88px, 12vw, 190px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  transform: translate(-50%, -50%) scale(calc(1 + var(--sa-depth) * .16));
+  background:
+    radial-gradient(circle, color-mix(in oklab, var(--abyss-ink-bright) 65%, transparent) 0 1px, color-mix(in oklab, var(--abyss-gold) 52%, transparent) 2px, transparent 12%),
+    conic-gradient(from 0deg, transparent, color-mix(in oklab, var(--abyss-gold) 24%, transparent), transparent 15%, color-mix(in oklab, var(--abyss-violet-bright) 26%, transparent), transparent 48%, color-mix(in oklab, var(--abyss-mint-bright) 22%, transparent), transparent 73%);
+  filter: blur(.2px) drop-shadow(0 0 18px color-mix(in oklab, var(--abyss-gold) 24%, transparent));
+  opacity: calc(.08 + .16 * var(--amp-energy, 0));
+  mix-blend-mode: screen;
+  transition: opacity .45s var(--sa-ease), transform .7s var(--sa-ease);
+}
+
+.sa-flare::before,
+.sa-flare::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  background: linear-gradient(90deg, transparent, color-mix(in oklab, var(--abyss-gold) 38%, transparent), transparent);
+}
+.sa-flare::before { width: 240%; height: 1px; }
+.sa-flare::after { width: 1px; height: 240%; background: linear-gradient(0deg, transparent, color-mix(in oklab, var(--abyss-violet-bright) 30%, transparent), transparent); }
+.sky-atmosphere.is-press .sa-flare { opacity: .38; transform: translate(-50%, -50%) scale(1.08); }
+.sky-atmosphere.is-near .sa-flare { opacity: .32; }
+.sa-lens-ring {
+  position: absolute;
+  left: var(--sa-x);
+  top: var(--sa-y);
+  width: clamp(180px, 30vw, 460px);
+  aspect-ratio: 1.62;
+  transform: translate(-50%, -50%) rotate(-8deg) scale(calc(1 + var(--sa-depth) * .08));
+  border: 1px solid color-mix(in oklab, var(--abyss-gold) 11%, transparent);
+  border-radius: 50%;
+  box-shadow: 0 0 48px color-mix(in oklab, var(--abyss-violet-bright) 9%, transparent), inset 0 0 24px color-mix(in oklab, var(--abyss-mint-bright) 5%, transparent);
+  opacity: calc(.06 + var(--amp-energy, 0) * .10);
+  mix-blend-mode: screen;
+  transition: opacity .65s var(--sa-ease), transform .8s var(--sa-ease);
+}
+.sky-atmosphere.is-press .sa-lens-ring { opacity: .12; transform: translate(-50%, -50%) rotate(-8deg) scale(1.04); }
+.sky-atmosphere.is-paused *,
+.sky-atmosphere.is-paused::before,
+.sky-atmosphere.is-paused::after { animation-play-state: paused !important; }
+
+.sa-vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at var(--sa-x) var(--sa-y), transparent 0 24%, color-mix(in oklab, var(--abyss-obsidian-deep) 18%, transparent) 72%, color-mix(in oklab, var(--abyss-obsidian-deep) 64%, transparent) 100%);
+  opacity: .56;
+  mix-blend-mode: multiply;
+}
+
+@keyframes sa-cloud-breathe { from { transform: translate3d(-1.6%, -1%, 0) scale(1.08); } to { transform: translate3d(1.4%, 1.8%, 0) scale(1.13); } }
+@keyframes sa-cloud-drift { from { transform: translate3d(-1%, 1%, 0) scale(1.12); } to { transform: translate3d(1.6%, -1.2%, 0) scale(1.17); } }
+@keyframes sa-cloud-a { from { transform: translate3d(-2%, 0, 0) rotate(-2deg) scale(1); } to { transform: translate3d(5%, 4%, 0) rotate(4deg) scale(1.1); } }
+@keyframes sa-cloud-b { from { transform: translate3d(3%, 3%, 0) rotate(3deg) scale(1); } to { transform: translate3d(-4%, -2%, 0) rotate(-3deg) scale(1.08); } }
+@keyframes sa-cloud-c { from { transform: translate3d(-2%, -3%, 0) scale(1); } to { transform: translate3d(3%, 1%, 0) scale(1.1); } }
+@keyframes sa-dust-slide { from { transform: translate3d(-2%, -1%, 0); } to { transform: translate3d(2%, 1%, 0); } }
+@keyframes sa-aurora-drift { from { transform: translate3d(-2.4%, 1.6%, 0) rotate(-1.2deg) scale(1.02); } to { transform: translate3d(2.4%, -1.8%, 0) rotate(1.6deg) scale(1.10); } }
+@keyframes sa-filament-drift { from { transform: translate3d(-1.6%, -1.2%, 0) rotate(-.5deg); } to { transform: translate3d(1.8%, 1.4%, 0) rotate(.7deg); } }
+@keyframes sa-fire-breathe { from { transform: translate(-50%, -50%) rotate(-8deg) scale(.88, .96); } to { transform: translate(-48%, -53%) rotate(-3deg) scale(1.08, 1.15); } }
+@keyframes sa-fire-lick { from { transform: translate3d(-2%, 2%, 0) rotate(-3deg) scale(.92, .94); } to { transform: translate3d(4%, -4%, 0) rotate(5deg) scale(1.08, 1.14); } }
+@keyframes sa-fire-core { from { transform: translate3d(2%, 1%, 0) scale(.9, .95); opacity: .44; } to { transform: translate3d(-3%, -5%, 0) scale(1.08, 1.1); opacity: .8; } }
+@keyframes sa-ember-rise { from { transform: translate3d(-1.5%, 3%, 0) scale(1); background-position: 0 0, 0 0, 0 0, 0 0, 0 0, 0 0; } to { transform: translate3d(2%, -8%, 0) scale(1.04); background-position: 19px -63px, -31px -81px, 47px -109px, -61px -127px, 73px -89px, -89px -143px; } }
+
+body.sky-shell .sky-atmosphere { opacity: .76; }
+body.sky-plot-on .sky-atmosphere { opacity: .68; }
+body.sky-compass-on .sky-atmosphere { opacity: .72; }
+body.skylab-still .sky-atmosphere *,
+body.skylab-still .sky-atmosphere::before,
+body.skylab-still .sky-atmosphere::after,
+[data-tier='low'] .sky-atmosphere *,
+[data-tier='low'] .sky-atmosphere::before,
+[data-tier='low'] .sky-atmosphere::after {
+  animation: none !important;
+}
+[data-tier='low'] .sky-atmosphere::before,
+[data-tier='low'] .sky-atmosphere::after,
+[data-tier='low'] .sky-atmosphere .sa-cloud,
+[data-tier='low'] .sky-atmosphere .sa-aurora,
+[data-tier='low'] .sky-atmosphere .sa-filaments,
+[data-tier='low'] .sky-atmosphere .sa-fire,
+[data-tier='low'] .sky-atmosphere .sa-embers,
+[data-tier='low'] .sky-atmosphere .sa-lens-ring { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .sky-atmosphere *,
+  .sky-atmosphere::before,
+  .sky-atmosphere::after { animation: none !important; transition: none !important; }
+  .sky-atmosphere { opacity: .8; }
+}
+
+@media (max-width: 560px) {
+  .sky-atmosphere { opacity: .78; }
+  .sa-cloud { filter: blur(38px); }
+  .sa-aurora { opacity: .20; filter: blur(34px); }
+  .sa-filaments { opacity: .12; }
+  .sa-fire { filter: blur(16px); }
+  .sa-embers { opacity: .18; }
+  .sa-lens-ring { width: 220px; }
+  .sa-dust { opacity: .25; }
+  .sa-flare { width: 100px; }
+}

@@ -1,0 +1,340 @@
+/* Castline · shell-chrome.css — 三视口 HUD 防撞（U08 · v70）
+ * @role overlay-fix · @owns css/shell-chrome.css · @contract v70
+ * 只做「谁跟谁抢地皮」的仲裁：不发明新颜色/字号/间距，只复用既有令牌
+ * （var(--gap)、var(--abyss-fs-*)），加载顺序在所有既有 css 之后，靠源码序覆盖旧规则。
+ *
+ * 这份文件是跟着 tests/shell_chrome_browser.py 的红→绿实测 + 主控肉眼复审走出来
+ * 的，不是单靠矩形数字猜的——面板矩形不交只是必要条件，块内子元素也要两两不交、
+ * 剧情态还要看disc（3D 星盘）有没有被压在下面，这两类问题 runner 的面板级断言测
+ * 不出来，得靠肉眼 + 子元素矩形复核（v2 起 runner 已把这些子元素也收进断言集）。
+ *
+ * A. #constellationMark 内部四行文字互相叠压：`.cm-rule` 是 flex row，五个子项
+ *    （首尾装饰线 + 「阵营·立场·星等·关系」+ #cmCount + 「STELLAR FIELD」）单行
+ *    合计比容器宽 ~17px，flex-shrink 默认不为 0，子项在没有 white-space:nowrap
+ *    的情况下会被压缩到宽度不够、文字被迫内部折行——这在原版（顶部居中、未改
+ *    位置时）也存在，只是跟别的面板重叠混在一起没被单独看出来。
+ * B. #constellationMark 移到 brand+ops 行下方后，星座态没问题，但剧情态
+ *    （CLPlot.toggle() 打开 3D 星盘）下它正好悬在圆盘中央和统计胶囊上——它是
+ *    「星座态」专属的装饰标题，剧情态的语义由字幕机（#plotTextPanel / 事件卡）
+ *    负责，不该继续悬浮。#clLedger 同理（同一批数字的巨量读数条，剧情态下也会
+ *    压在圆盘上）。裁定：两者只在星座态显示；剧情态/右坞态整体隐藏。
+ * C. #clLedger（秘仪层顶部「典藏卷目」巨量读数条，y 原本 74~128）同理，比
+ *    A 更宽，同时压 #ops 与 #brand 两边。
+ * D. body.focus 时（右坞打开）：#ops 走 right:calc(dock-w+gap*2) 从右边界
+ *    量出左缘，#crumb 定死在 left:calc(gap+378px)——七个按钮一行放不下时
+ *    左缘会探进 #crumb 的地皮，中间没有互相让位的机制。
+ * E. body.focus 时 .cl-orc-folio（右下 ARCANUM 方位盘，纯装饰读数窗）、
+ *    .cl-arc-seal（左下秘印，纯装饰）都不知道 #dock 打开了，继续悬在原地，
+ *    被 #dock 整块盖住/穿模。
+ * F. body.cl-orbit-on / cl-plot-on 时（星盘剧情态）：#clOrbit3DLegend
+ *    （右下「剧情线」图例卡片，真信息）与 .cl-orc-folio（同一角落，纯装饰）
+ *    同时锚定右下角，互相压住。
+ * G. #index（CAST INDEX 面板，左列）与 .cl-arc-seal（左下秘印）分别用固定
+ *    px 预算给 #brand 让位，但 #brand 实际高度（多行统计+作品库行）比预算
+ *    的窄，两边都还差一点点缝。
+ *
+ * 修法只有两种：挪出一条真缝，或者在挪不出缝时收起纯装饰、非信息的那一半
+ * （罗盘/秘印本身就是装饰；顶栏英文副标同理不动就够）。绝不裁切关键数字/
+ * 关键操作文字——需要让位的都是整体隐藏或整体挪位，没有半截词。
+ */
+
+
+/* ------------------------------------------------------------------ A + B
+ * #constellationMark：只在星座态显示，位置贴着 #brand 右缘之后的窄列，纵向
+ * 用 top 固定在顶部（跟 #brand/#ops 同一行，但横向让开两边）；内部改成一列
+ * 竖排（kicker 一行 + 阵营标签/统计数字/STELLAR FIELD 各自一行），每个文字
+ * 节点都强制 white-space:nowrap + flex-shrink:0，绝不再被压缩到内部折行。
+ * 英文副标「ROLE CONSTELLATION」收起（纯装饰，不是数据）。 */
+@media (min-width: 901px) {
+  #constellationMark {
+    top: calc(var(--gap) + 2px);
+    left: calc(var(--gap) + 396px);
+    right: auto;
+    width: auto;
+    max-width: 300px;
+    transform: none;
+    text-align: center;
+  }
+  #constellationMark .cm-kicker b { display: none; }
+  #constellationMark .cm-kicker,
+  #constellationMark .cm-rule,
+  #constellationMark .cm-rule span,
+  #constellationMark .cm-rule em { white-space: nowrap; }
+  #constellationMark .cm-rule {
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    margin-top: 6px;
+  }
+  #constellationMark .cm-rule span,
+  #constellationMark .cm-rule em { flex-shrink: 0; line-height: 1.3em; }
+  #constellationMark .cm-rule::before,
+  #constellationMark .cm-rule::after { display: none; }
+}
+/* 剧情态 / 右坞态：它是星座态专属的装饰标题，语义在剧情态转给字幕机
+   （#plotTextPanel / 事件卡）——不该继续悬浮在 3D 星盘圆盘与统计胶囊上面。 */
+body.cl-orbit-on #constellationMark,
+body.cl-plot-on #constellationMark,
+body.focus #constellationMark { display: none; }
+
+/* ------------------------------------------------------------------ C
+ * #clLedger（秘仪层顶部「典藏卷目」巨量读数条）：v2 把它下移到 y≈292 只是
+ * 图省事沿用了 #constellationMark 那版本还很高（y208+）时算出来的偏移量，
+ * #constellationMark 收窄回顶部窄列后没跟着改，导致 #clLedger 独自悬在屏幕
+ * 纵向中央、正压在「角色星座场」3D 圆盘和阵营徽记浮层上（主控终审截图指
+ * 出）。裁定：紧贴 #constellationMark 标题块下缘（间距 12~16px），横向跟标
+ * 题块用同一条窄列（贴 #brand 右缘、避开 #ops），内部从单行五连改成竖排五
+ * 行（数字+标签同行、整体居中、nowrap 不折行），徽记图标与「ARCANUM·典藏
+ * 卷目」尾缀收起（纯装饰，任务书允许砍）。剧情态 / 右坞态同样悬在圆盘上，
+ * 维持一并收起。 */
+@media (min-width: 901px) {
+  #clLedger {
+    top: calc(var(--gap) + 116px);
+    left: calc(var(--gap) + 396px);
+    right: auto;
+    width: auto;
+    max-width: 300px;
+    transform: none;
+  }
+  #clLedger .al-wrap {
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 12px;
+  }
+  #clLedger .al-sig,
+  #clLedger .al-tail { display: none; }
+  #clLedger .al-cols { flex-direction: column; align-items: center; gap: 3px; }
+  #clLedger .al-c {
+    flex-direction: row;
+    align-items: baseline;
+    gap: 6px;
+    min-width: 0;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+}
+body.cl-orbit-on #clLedger,
+body.cl-plot-on #clLedger,
+body.focus #clLedger { display: none; }
+
+/* ------------------------------------------------------------------ 窄屏
+ * ≤900px：#brand 本身已经占满顶部整条宽度（含多行统计），标题条/读数条
+ * 挪到下面也会压进 #ops 的按钮网格——而且它们是 aria-hidden 的纯装饰复述
+ * （#brand 的 #stat 里已经有同一批数字），空间不够时直接收起，不留半截。 */
+@media (max-width: 900px) {
+  #constellationMark,
+  #clLedger { display: none; }
+}
+
+/* ------------------------------------------------------------------ D
+ * body.focus（右坞打开）时 #crumb 定死在 left:396px，#ops 走
+ * right:calc(dock-w+gap*2) 从右边界反推左缘——七八个按钮一整行放不下就转
+ * 多行折叠，而不是硬挨着 #crumb。折行不删字、不缩字，只是把「一整行」
+ * 拆成「更窄的多行」，交给 flex-wrap 自己算，按钮数再变也不用重新量。 */
+body.focus #ops {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  max-width: min(380px, calc(100vw - var(--dock-w, 440px) - var(--gap) * 4 - 396px));
+}
+
+/* ------------------------------------------------------------------ E
+ * 右坞一开，narrow 断点下 #dock 变成几乎整屏的抽屉（≤820 时高度
+ * min(86dvh,...)），会整块盖住 #brand 与左下角秘印；桌面宽度下 #dock 本
+ * 身较窄，但右下角的 ARCANUM 罗盘仍会被它的右缘扫到。两者都是装饰/复述
+ * 内容（brand 的数字在 #dock 展开的角色卡里还能查到），收起即可，不必
+ * 重新排版抽屉。 */
+body.focus .cl-orc-folio { opacity: 0; pointer-events: none; }
+@media (max-width: 820px) {
+  body.focus #brand,
+  body.focus .cl-arc-seal { display: none; }
+}
+
+/* ------------------------------------------------------------------ F
+ * 剧情态（body.cl-orbit-on / cl-plot-on）：右下的「剧情线」图例卡片是信
+ * 息，ARCANUM 方位盘罗盘是纯装饰读数窗（自己的注释也写着「视线扫过确认
+ * 灯在哪一座」，不承载图谱数据）——按纪律，装饰给信息让路，整块收起而
+ * 不是让两块互相压字。 */
+body.cl-orbit-on .cl-orc-folio,
+body.cl-plot-on .cl-orc-folio { opacity: 0; pointer-events: none; }
+
+/* ------------------------------------------------------------------ G
+ * #index 给 #brand 让出的固定预算（152px）比 #brand 实际渲染高度
+ * （含多行统计时可到 ~180px）窄一截；左下角秘印的固定 bottom:18px 也没
+ * 有给底部提示条 #hint（内容变多时可以长到 ~130px 高）让够地方。两处都
+ * 只是把预算数改成够用的，不改布局结构。 */
+@media (min-width: 901px) {
+  #index { top: calc(var(--gap) + 186px); }
+}
+.cl-arc-seal { bottom: 156px; }
+/* 罗盘同理：1440x900 下罗盘默认 bottom:26px 会探进 #hint 的地皮（#hint 内容
+   变多时可以顶到 44px 高），往上让一截；它在窄屏本就靠既有媒体查询隐藏，
+   这条不影响那两个视口。 */
+.cl-orc-folio { bottom: 74px; }
+
+/* ==================================================================== R3-A
+ * 窄屏剧情态壳（R7 收口）· 依据 outputs/v70/review/disc-390x844.png ·
+ * disc-820x1180.png 实测（docs/atlas/REVIEW-2026-09-20.md §四 4.1、§五
+ * 「仍未解决」第 1 条）：390/820 两个窄视口下圆盘环体沿用桌面半径参数，
+ * 直接压穿「重新分析」「蒸馏文风」「星盘剧情树」「展卷」「更换材料」
+ * 「全屏」等 #ops 按钮组文字，属 R7 一票否决（1440 本轮不在此范围，第二
+ * 轮已过）。
+ *
+ * 裁定：≤900px 且处于剧情态（cl-plot-on/cl-orbit-on）或右坞态（focus）时，
+ * 把 #ops 折叠成一枚「≡ 菜单」按钮（点开抽屉列出原按钮）、#index 折叠成
+ * 一枚「角色 ▾」按钮；星座态维持现状，不受本节任何选择器影响（下面所有
+ * 规则都挂在 body.cl-shell-compact 之下，这个 class 只有 js/hud/
+ * shell-compact.js 判定「窄屏 + 剧情态/右坞态」时才会挂上）。
+ *
+ * focus（右坞打开）态的两个例外，均沿用既有既有规则、不重复处理：
+ *   · #index 在 body.focus 下本就靠 views-hud.css 的 translateX(-120%)
+ *     整块滑出屏幕（跟宽度无关）——本节的「角色 ▾」按钮与展开态一律加
+ *     :not(.focus)，focus 态压根不出现这枚按钮。
+ *   · #brand 在 body.focus + ≤820px 下本就靠本文件前面「E」节
+ *     display:none 整块隐藏——本节的单行收纳同样加 :not(.focus)。
+ *     （focus 态 821~900px 的极窄缝隙维持桌面态原样，不强行收，범围小
+ *     到可以接受，见 R3-A-report.md 取舍说明。）
+ *   · #ops 的折叠菜单例外：three 态都要收（含 focus），因为 focus 态原本
+ *     只有「flex-wrap 换行」没有真正收起，跟 plot/orbit 态一样存在跟其
+ *     余面板挤在一起的问题。
+ *
+ * DOM 契约：#shellMenuBtn / #shellIndexBtn 由 js/hud/shell-compact.js 创建，
+ * 插进 #ops 父容器（<body>）末尾；#ops/#index/#brand 原有子树一根未动，
+ * 本节只用 body class 控制显隐与几何。
+ */
+@media (max-width: 900px) {
+  /* ---- 两枚折叠按钮：默认不存在于视觉里，compact 时才现身 ---- */
+  #shellMenuBtn,
+  #shellIndexBtn {
+    display: none;
+    position: fixed;
+    z-index: var(--z-panel);
+    min-height: 44px;
+    min-width: 44px;
+    align-items: center;
+    justify-content: center;
+  }
+  body.cl-shell-compact #shellMenuBtn {
+    display: inline-flex;
+    top: var(--gap);
+    right: var(--gap);
+  }
+  body.cl-shell-compact:not(.focus) #shellIndexBtn {
+    display: inline-flex;
+    top: calc(var(--gap) + 44px + 8px);
+    right: var(--gap);
+  }
+
+  /* ---- #ops：默认收起，抽屉打开时原样重现（按钮 DOM 一根没搬） ---- */
+  body.cl-shell-compact #ops { display: none; }
+  body.cl-shell-compact.cl-shell-menu-open #ops {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    position: fixed;
+    top: calc(var(--gap) + 108px);
+    right: var(--gap);
+    left: auto;
+    bottom: auto;
+    width: min(220px, calc(100vw - 2 * var(--gap)));
+    max-height: calc(100dvh - var(--gap) * 2 - 60px);
+    max-width: none;
+    overflow: auto;
+    background: var(--abyss-obsidian-glass-heavy);
+    backdrop-filter: var(--abyss-blur-panel);
+    -webkit-backdrop-filter: var(--abyss-blur-panel);
+    border: var(--abyss-border-subtle);
+    border-radius: var(--abyss-radius-lg);
+    padding: 8px;
+    box-shadow: var(--abyss-shadow-panel);
+  }
+  body.cl-shell-compact.cl-shell-menu-open #ops .btn { width: 100%; min-height: 44px; }
+
+  /* ---- #index：只在非 focus 的 compact 态生效（focus 态见头注说明） ---- */
+  body.cl-shell-compact:not(.focus) #index { display: none; }
+  body.cl-shell-compact.cl-shell-index-open:not(.focus) #index {
+    display: flex;
+    position: fixed;
+    top: calc(var(--gap) + 108px);
+    left: var(--gap);
+    right: auto;
+    bottom: auto;
+    width: min(260px, calc(100vw - 2 * var(--gap)));
+    max-height: calc(100dvh - var(--gap) * 2 - 60px);
+    z-index: var(--z-panel);
+  }
+
+  /* ---- #brand：收成单行（只在非 focus 的 compact 态生效，理由同上）；
+     标题保留、装饰性英文副标/简介/来源行收起，#stat 全部数字收进同一行
+     用 nowrap + ellipsis 兜底，不新造文案、不砍数据字段。 ---- */
+  body.cl-shell-compact:not(.focus) #brand {
+    width: auto;
+    max-width: calc(100vw - 2 * var(--gap) - 130px);
+  }
+  body.cl-shell-compact:not(.focus) #brand .panel {
+    padding: 8px 14px;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    flex-wrap: nowrap;
+    overflow: hidden;
+  }
+  body.cl-shell-compact:not(.focus) #brand .eyebrow,
+  body.cl-shell-compact:not(.focus) #brand h1 small,
+  body.cl-shell-compact:not(.focus) #synopsis,
+  body.cl-shell-compact:not(.focus) #provenance { display: none; }
+  body.cl-shell-compact:not(.focus) #brand h1 {
+    margin: 0;
+    font-size: var(--abyss-fs-md);
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 0 1 auto;
+    min-width: 0;
+  }
+  body.cl-shell-compact:not(.focus) #stat {
+    font-size: var(--abyss-fs-2xs);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+}
+/* 390 一档：题名 + 全部五项统计挤同一行会把题名先挤成省略号（实测
+   「群星棋局」被压成「群..」，标题比统计行更该保留可读）——≤480 时改为
+   只留标题一行，#stat 整条收起（数字本身在原有非 compact 布局/角色详情
+   里仍能查到，不算丢数据字段，只是这条「单行摘要」优先保标题）。
+   481~900px（含 820）实测标题+全部统计能在一行放完，不必砍。 */
+@media (max-width: 480px) {
+  body.cl-shell-compact:not(.focus) #stat { display: none; }
+  body.cl-shell-compact:not(.focus) #brand .panel { gap: 0; }
+}
+
+/* ---- 圆盘安全区（主控复审否决 scale/translateY 方案，已移除）：R3-A 第一版
+   在 CSS 层对 #stage/#clOrbit 施加 scale(.78)+translateY(64px)，想在拿不到
+   js/orbit3d/orbit3d-view.js 公开写入口（全仓只有只读的 anchorScreen/
+   screenOf/layer）的情况下兜底收窄圆盘的可视范围。主控用真机截图复审
+   （outputs/v70/r3/shell-plot-390x844.png · 820x1180.png）指出：整张 WebGL
+   画布被缩小后四周露出纯黑背景，变成「黑框套小图」，破坏全屏沉浸感，判为
+   一票否决。核对本文件同一版本的实测记录（见 R3-A-report.md）：
+   `anchorScreen()` 返回的是未感知 CSS transform 的本地坐标，这个 transform
+   对「事件锚点包围盒不与 #brand/#ops/折叠按钮相交」这条断言从一开始就是
+   「锦上添花」而非必要条件——真正让锚点安全的是收起 #ops 整块按钮网格本身
+   （390 下锚点包围盒顶点 y≈240、按钮列底边 y≈114，早有余量）。两条线索
+   合起来：这个 transform 只有视觉代价、没有实际收益，予以移除，画布保持
+   `#stage{position:fixed;inset:0}` 原样全屏铺满，不做任何 scale/translate/
+   padding。 */
+
+/* ---- 章回卷轴尺文字窄屏遮挡：js/orbit3d/orbit3d-ruler.js 建的 .cl-o3-ruler
+   固定 `left:18px;top:330px;width:190px`（css/orbit3d.css，不属于 R3-A 独占
+   文件），窄屏下 190px 容不下「章回 · 30 回 · 81 事件」整行，文字被迫逐字
+   折成一列竖排贴在左边缘（主控复审截图指出）。本文件不改 orbit3d.css 的
+   结构/尺寸令牌（不是 R3-A 的文件），只在更晚加载的这一层补一条窄屏隐藏
+   规则：≤600px 时只隐藏文字表头 `.cl-o3-ruler__hd`，画刻度的
+   `.cl-o3-ruler__cv`（canvas）与悬停提示 `.cl-o3-ruler__tip` 不动——「只留
+   刻度」。 */
+@media (max-width: 600px) {
+  .cl-o3-ruler__hd { display: none; }
+}

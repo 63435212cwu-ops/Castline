@@ -1,0 +1,244 @@
+/*
+ * Castline · module-frontier-upgrade.css
+ *
+ * A last visual pass for the supporting graph modules.  The core atlas
+ * geometry remains untouched; this layer gives its reading surfaces one
+ * coherent deep-space material: a quiet star field, a raised glass edge and
+ * a small amount of motion that follows focus rather than competing with it.
+ * Every colour, type scale, timing curve and stacking level comes from the
+ * existing abyss/cosmic token system.
+ */
+
+:root {
+  --module-lens: var(--abyss-violet-bright);
+  --module-hot: var(--abyss-gold);
+  --module-cool: var(--abyss-mint-bright);
+  --module-panel: var(--abyss-obsidian-glass-heavy);
+  --module-hair: color-mix(in oklab, var(--module-lens) 24%, transparent);
+  --module-hair-hot: color-mix(in oklab, var(--module-hot) 42%, transparent);
+  --module-ease: var(--abyss-ease-out);
+  --module-spring: var(--abyss-ease-bounce-seal);
+  --module-fast: var(--abyss-dur-fast);
+  --module-soft: var(--abyss-dur-normal);
+}
+
+body.atlas-workspace[data-atlas-view="annulus"] { --module-lens: var(--abyss-gold); --module-hot: var(--abyss-signal-bright); }
+body.atlas-workspace[data-atlas-view="gem"] { --module-lens: var(--abyss-mint); --module-hot: var(--abyss-mint-bright); }
+body.atlas-workspace[data-atlas-view="domains"] { --module-lens: var(--abyss-violet-bright); --module-hot: var(--abyss-violet); }
+
+/* Shared surface treatment.  The grain is deliberately made from gradients,
+ * so it does not add another canvas or a texture request to the stage. */
+.radar-wrap,
+.plot-text-panel,
+.info-arch .ia-card {
+  isolation: isolate;
+  background:
+    radial-gradient(100% 90% at 0% 0%, color-mix(in oklab, var(--module-lens) 10%, transparent), transparent 62%),
+    radial-gradient(85% 80% at 100% 100%, color-mix(in oklab, var(--module-cool) 7%, transparent), transparent 64%),
+    var(--module-panel);
+  border-color: var(--module-hair);
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklab, var(--abyss-ink-bright) 10%, transparent),
+    0 18px 50px color-mix(in oklab, var(--abyss-obsidian-deep) 54%, transparent);
+}
+
+.radar-wrap::before,
+.plot-text-panel::before,
+.info-arch .ia-card::before {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-abyss);
+  border-radius: inherit;
+  pointer-events: none;
+  content: "";
+  opacity: .34;
+  background-image:
+    radial-gradient(circle at 14% 22%, color-mix(in oklab, var(--module-hot) 44%, transparent) 0 .7px, transparent 1.4px),
+    radial-gradient(circle at 75% 66%, color-mix(in oklab, var(--module-cool) 32%, transparent) 0 .6px, transparent 1.3px),
+    radial-gradient(circle at 52% 38%, color-mix(in oklab, var(--module-lens) 34%, transparent) 0 .65px, transparent 1.4px);
+  background-size: 127px 151px, 181px 209px, 241px 233px;
+  mix-blend-mode: screen;
+}
+
+/* ── Radar / attribute observatory ─────────────────────────────────────── */
+.radar-wrap {
+  position: relative;
+  overflow: visible;
+  border-radius: var(--abyss-radius-md);
+  transition: border-color var(--module-soft) var(--module-ease), box-shadow var(--module-soft) var(--module-ease), transform var(--module-soft) var(--module-ease);
+}
+.radar-wrap::after {
+  position: absolute;
+  inset: 9%;
+  border: 1px dashed color-mix(in oklab, var(--module-lens) 16%, transparent);
+  border-radius: 50%;
+  pointer-events: none;
+  content: "";
+  opacity: .58;
+  animation: moduleRadarOrbit var(--abyss-dur-orbit-slow) linear infinite;
+}
+.radar-wrap:hover,
+.radar-wrap:focus-within {
+  transform: translateY(-2px);
+  border-color: var(--module-hair-hot);
+  box-shadow: inset 0 1px 0 color-mix(in oklab, var(--abyss-ink-bright) 15%, transparent), 0 25px 68px color-mix(in oklab, var(--abyss-obsidian-deep) 66%, transparent), 0 0 28px color-mix(in oklab, var(--module-lens) 14%, transparent);
+}
+.radar-wrap .radar-3d,
+.radar-wrap .radar-svg {
+  position: relative;
+  z-index: var(--z-chart);
+  filter: drop-shadow(0 0 12px color-mix(in oklab, var(--module-lens) 13%, transparent));
+  transition: filter var(--module-soft) var(--module-ease), transform var(--module-soft) var(--module-ease);
+}
+.radar-wrap:hover .radar-3d,
+.radar-wrap:focus-within .radar-3d { filter: drop-shadow(0 0 18px color-mix(in oklab, var(--module-lens) 23%, transparent)); transform: scale(1.012); }
+.radar-3d .rd-grid { stroke: color-mix(in oklab, var(--module-lens) 32%, transparent); stroke-dasharray: 1 5; }
+.radar-3d .rd-grid-outer { stroke: color-mix(in oklab, var(--module-hot) 50%, transparent); stroke-dasharray: 5 3; }
+.radar-3d .rd-axis { stroke: color-mix(in oklab, var(--module-lens) 26%, transparent); transition: stroke var(--module-fast) var(--module-ease), opacity var(--module-fast) var(--module-ease); }
+.radar-3d .rd-axis:hover,
+.radar-3d .rd-axis.rd-motion-hover { stroke: var(--module-hot); filter: drop-shadow(0 0 7px color-mix(in oklab, var(--module-hot) 58%, transparent)); }
+.radar-3d .rd-shape { filter: drop-shadow(0 0 10px color-mix(in oklab, var(--module-hot) 27%, transparent)); transform-origin: 50% 50%; animation: moduleRadarShape var(--abyss-dur-medium) var(--module-ease) both; }
+.radar-3d .rd-dot,
+.radar-3d .rd-vert { transition: r var(--module-fast) var(--module-spring), fill var(--module-fast) var(--module-ease), filter var(--module-fast) var(--module-ease); }
+.radar-3d .rd-dot:hover,
+.radar-3d .rd-vert:hover,
+.radar-3d .rd-vert.rd-motion-hover { filter: drop-shadow(0 0 8px var(--module-hot)); }
+.radar-3d .rd-name { transition: fill var(--module-fast) var(--module-ease), filter var(--module-fast) var(--module-ease); }
+.radar-3d .rd-lab:hover .rd-name,
+.radar-3d .rd-lab.on .rd-name { fill: var(--abyss-ink-bright); filter: drop-shadow(0 0 8px color-mix(in oklab, var(--module-hot) 50%, transparent)); }
+.radar-caption,
+.radar-readout { position: relative; z-index: var(--z-chart); }
+.radar-caption { border-top-color: var(--module-hair); background: linear-gradient(90deg, transparent, color-mix(in oklab, var(--module-lens) 7%, transparent), transparent); }
+
+@keyframes moduleRadarOrbit { to { transform: rotate(360deg); } }
+@keyframes moduleRadarShape { from { opacity: .18; transform: scale(.88) rotate(-3deg); } to { opacity: 1; transform: scale(1) rotate(0); } }
+
+/* ── Plot orbit / orbital story line ───────────────────────────────────── */
+.cl-orbit__arc { transition: stroke var(--module-fast) var(--module-ease), stroke-width var(--module-fast) var(--module-ease), filter var(--module-fast) var(--module-ease), opacity var(--module-fast) var(--module-ease); }
+.cl-orbit__arc.is-hover,
+.cl-orbit__arc.is-active { stroke-width: calc(var(--cl-orbit-ring-w) + 1px); filter: drop-shadow(0 0 9px color-mix(in oklab, currentColor 58%, transparent)); }
+.cl-orbit__ring--time { stroke-dasharray: 1 9; }
+.cl-orbit__node.is-active { filter: drop-shadow(0 0 11px color-mix(in oklab, var(--module-hot) 74%, transparent)); }
+.cl-orbit__card { border-color: var(--module-hair); background: linear-gradient(145deg, color-mix(in oklab, var(--module-lens) 11%, var(--module-panel)), var(--module-panel)); box-shadow: 0 18px 42px color-mix(in oklab, var(--abyss-obsidian-deep) 58%, transparent), inset 0 1px 0 color-mix(in oklab, var(--abyss-ink-bright) 11%, transparent); transition: border-color var(--module-fast) var(--module-ease), box-shadow var(--module-fast) var(--module-ease), translate var(--module-fast) var(--module-spring); }
+.cl-orbit__card:hover,
+.cl-orbit__card:focus-within { border-color: var(--module-hair-hot); box-shadow: 0 23px 58px color-mix(in oklab, var(--abyss-obsidian-deep) 70%, transparent), 0 0 24px color-mix(in oklab, var(--module-lens) 15%, transparent); translate: 0 -3px; }
+.cl-orbit__heat i { box-shadow: 0 0 8px currentColor; }
+
+.cl-o3-deck { border-color: var(--module-hair); border-radius: var(--abyss-radius-md); box-shadow: 0 20px 55px color-mix(in oklab, var(--abyss-obsidian-deep) 62%, transparent), inset 0 1px 0 color-mix(in oklab, var(--abyss-ink-bright) 10%, transparent); backdrop-filter: var(--abyss-blur-panel) saturate(1.3); transition: border-color var(--module-soft) var(--module-ease), box-shadow var(--module-soft) var(--module-ease), translate var(--module-soft) var(--module-ease); }
+.cl-o3-deck:hover { border-color: var(--module-hair-hot); translate: 0 -2px; }
+.cl-o3-deck__event:hover,
+.cl-o3-deck__name:hover { color: var(--module-hot); text-shadow: 0 0 12px color-mix(in oklab, var(--module-hot) 42%, transparent); }
+
+/* ── Text story tree ───────────────────────────────────────────────────── */
+.plot-text-panel { border-color: var(--module-hair); border-radius: var(--abyss-radius-md); backdrop-filter: var(--abyss-blur-panel) saturate(1.22); box-shadow: -18px 26px 70px color-mix(in oklab, var(--abyss-obsidian-deep) 68%, transparent), inset 0 1px 0 color-mix(in oklab, var(--abyss-ink-bright) 10%, transparent); }
+.plot-text-panel.on { animation: modulePanelRise var(--module-soft) var(--module-ease) both; }
+.pt-head { background: linear-gradient(105deg, color-mix(in oklab, var(--module-hot) 12%, transparent), color-mix(in oklab, var(--module-lens) 10%, transparent) 58%, transparent); border-bottom-color: var(--module-hair); }
+.pt-meta { border-bottom-color: var(--module-hair); }
+.pt-stat-pill { background: color-mix(in oklab, var(--module-lens) 9%, transparent); border-color: color-mix(in oklab, var(--module-lens) 24%, transparent); transition: border-color var(--module-fast) var(--module-ease), background var(--module-fast) var(--module-ease); }
+.pt-stat-pill:hover { border-color: var(--module-hair-hot); background: color-mix(in oklab, var(--module-hot) 10%, transparent); }
+.pt-search-bar input { border-color: var(--module-hair); background: color-mix(in oklab, var(--module-panel) 72%, transparent); transition: border-color var(--module-fast) var(--module-ease), box-shadow var(--module-fast) var(--module-ease); }
+.pt-search-bar input:focus { border-color: var(--module-hot); box-shadow: 0 0 0 3px color-mix(in oklab, var(--module-hot) 12%, transparent), 0 0 20px color-mix(in oklab, var(--module-hot) 12%, transparent); }
+.pt-list { scrollbar-color: color-mix(in oklab, var(--module-lens) 45%, transparent) transparent; }
+.pt-item { border-color: color-mix(in oklab, var(--module-lens) 22%, var(--abyss-line)); background: linear-gradient(105deg, color-mix(in oklab, var(--module-lens) 5%, transparent), color-mix(in oklab, var(--module-panel) 84%, transparent)); box-shadow: inset 0 1px 0 color-mix(in oklab, var(--abyss-ink-bright) 7%, transparent); transition: border-color var(--module-fast) var(--module-ease), background var(--module-fast) var(--module-ease), transform var(--module-fast) var(--module-spring), box-shadow var(--module-fast) var(--module-ease); }
+.pt-item:hover { border-color: var(--module-hair-hot); background: linear-gradient(105deg, color-mix(in oklab, var(--module-hot) 10%, transparent), color-mix(in oklab, var(--module-panel) 78%, transparent)); transform: translate3d(4px, -1px, 0); box-shadow: 0 10px 24px color-mix(in oklab, var(--abyss-obsidian-deep) 46%, transparent), inset 0 1px 0 color-mix(in oklab, var(--abyss-ink-bright) 10%, transparent); }
+.pt-item.active { border-color: var(--module-cool); box-shadow: 0 0 0 1px color-mix(in oklab, var(--module-cool) 20%, transparent), 0 0 24px color-mix(in oklab, var(--module-cool) 15%, transparent); }
+.pt-item::before { transition: background var(--module-fast) var(--module-ease), box-shadow var(--module-fast) var(--module-ease), transform var(--module-fast) var(--module-spring); }
+.pt-item:hover::before { box-shadow: 0 0 0 4px color-mix(in oklab, var(--module-hot) 14%, transparent), 0 0 12px var(--module-hot); }
+.pt-char-pill { border-color: color-mix(in oklab, var(--module-lens) 24%, transparent); background: color-mix(in oklab, var(--module-lens) 8%, transparent); transition: border-color var(--module-fast) var(--module-ease), color var(--module-fast) var(--module-ease); }
+
+@keyframes modulePanelRise { from { opacity: 0; transform: translate3d(0, 12px, 0) scale(.988); } to { opacity: 1; transform: none; } }
+
+/* ── Reference index: cards read as six small windows into the same sky ── */
+.info-arch .ia-shell { border-color: var(--module-hair); box-shadow: 0 28px 84px color-mix(in oklab, var(--abyss-obsidian-deep) 68%, transparent), inset 0 1px 0 color-mix(in oklab, var(--abyss-ink-bright) 11%, transparent); }
+.info-arch .ia-card { position: relative; border-color: var(--module-hair); border-radius: var(--abyss-radius-sm); transition: border-color var(--module-fast) var(--module-ease), box-shadow var(--module-fast) var(--module-ease), transform var(--module-fast) var(--module-spring); }
+.info-arch .ia-card:hover { border-color: var(--module-hair-hot); transform: translateY(-3px); box-shadow: 0 18px 44px color-mix(in oklab, var(--abyss-obsidian-deep) 52%, transparent), 0 0 22px color-mix(in oklab, var(--module-lens) 10%, transparent); }
+.ia-kpi { border-color: color-mix(in oklab, var(--module-lens) 20%, var(--ia-line)); background: linear-gradient(145deg, color-mix(in oklab, var(--module-lens) 8%, transparent), var(--cosmic-tile-bg)); transition: border-color var(--module-fast) var(--module-ease), transform var(--module-fast) var(--module-spring); }
+.ia-kpi:hover { border-color: var(--module-hair-hot); transform: translateY(-2px); }
+.ia-cast-row:hover,.ia-thread:hover,.ia-rel:hover,.ia-attr:hover { background: color-mix(in oklab, var(--module-lens) 8%, transparent); }
+.ia-spine-point:hover,.ia-more:hover { border-color: var(--module-hair-hot); box-shadow: 0 0 18px color-mix(in oklab, var(--module-hot) 12%, transparent); }
+.ia-chapter-bar { box-shadow: 0 -2px 10px color-mix(in oklab, var(--tone) 38%, transparent); transition: height var(--module-soft) var(--module-ease), filter var(--module-fast) var(--module-ease), box-shadow var(--module-fast) var(--module-ease); }
+.ia-chapter:hover .ia-chapter-bar,.ia-chapter:focus-visible .ia-chapter-bar { filter: brightness(1.35) saturate(1.2); box-shadow: 0 0 14px color-mix(in oklab, var(--tone) 58%, transparent); }
+.ia-detail-body blockquote { border-left-color: var(--module-hot); box-shadow: inset 0 0 22px color-mix(in oklab, var(--module-hot) 8%, transparent); }
+
+/* ── Domains / relationship constellation ─────────────────────────────── */
+.cl-domains-lamp { border-color: color-mix(in oklab, currentColor 30%, transparent); background: linear-gradient(135deg, color-mix(in oklab, currentColor 12%, transparent), color-mix(in oklab, var(--module-panel) 75%, transparent)); box-shadow: inset 0 1px 0 color-mix(in oklab, var(--abyss-ink-bright) 9%, transparent), 0 10px 26px color-mix(in oklab, var(--abyss-obsidian-deep) 42%, transparent); transition: border-color var(--module-fast) var(--module-ease), box-shadow var(--module-fast) var(--module-ease), filter var(--module-fast) var(--module-ease), opacity var(--cl-dom-dur) var(--cl-dom-ease); }
+.cl-domains-lamp:hover,.cl-domains-lamp:focus-visible,.cl-domains-lamp.is-hot { transform: translate(-50%, -50%) translate(var(--cl-dom-x), var(--cl-dom-y)); border-color: color-mix(in oklab, currentColor 82%, transparent); filter: drop-shadow(0 0 13px color-mix(in oklab, currentColor 44%, transparent)); }
+.cl-domains-lamp__dot { box-shadow: 0 0 0 3px color-mix(in oklab, currentColor 11%, transparent), 0 0 14px currentColor; transition: box-shadow var(--module-fast) var(--module-ease), transform var(--module-fast) var(--module-spring); }
+.cl-domains-lamp:hover .cl-domains-lamp__dot,.cl-domains-lamp.is-hot .cl-domains-lamp__dot { transform: scale(1.15); box-shadow: 0 0 0 5px color-mix(in oklab, currentColor 16%, transparent), 0 0 22px currentColor; }
+.cl-dom-legend { border-color: var(--module-hair); box-shadow: 0 16px 42px color-mix(in oklab, var(--abyss-obsidian-deep) 58%, transparent); backdrop-filter: var(--abyss-blur-panel) saturate(1.25); }
+.cl-dom-legend__row { border-radius: var(--abyss-radius-xs); transition: background var(--module-fast) var(--module-ease), transform var(--module-fast) var(--module-spring); }
+.cl-dom-legend__row:hover { background: color-mix(in oklab, var(--module-lens) 9%, transparent); transform: translateX(3px); }
+
+/* ── Preview console / timeline ───────────────────────────────────────── */
+.atlas-preview-hud.on .aph-shell { border-color: var(--module-hair-hot); box-shadow: 0 24px 82px color-mix(in oklab, var(--abyss-obsidian-deep) 68%, transparent), inset 0 1px 0 color-mix(in oklab, var(--module-hot) 18%, transparent), 0 0 30px color-mix(in oklab, var(--module-lens) 9%, transparent); }
+.aph-controls,.aph-timeline { box-shadow: inset 0 1px 0 color-mix(in oklab, var(--abyss-ink-bright) 7%, transparent), 0 9px 26px color-mix(in oklab, var(--abyss-obsidian-deep) 28%, transparent); }
+.aph-badge,.aph-gbtn { transition: color var(--module-fast) var(--module-ease), background var(--module-fast) var(--module-ease), box-shadow var(--module-fast) var(--module-ease), transform var(--module-fast) var(--module-spring); }
+.aph-badge:hover,.aph-gbtn:hover,.aph-badge:focus-visible,.aph-gbtn:focus-visible { transform: translateY(-2px); box-shadow: inset 0 0 0 1px var(--module-hair-hot), 0 7px 18px color-mix(in oklab, var(--module-lens) 15%, transparent); }
+.aph-track { position: relative; }
+.aph-track::before { position: absolute; inset: 50% 0 auto; height: 1px; background: linear-gradient(90deg, transparent, var(--module-hair-hot), transparent); content: ""; pointer-events: none; }
+.aph-cursor { color: var(--module-hot); text-shadow: 0 0 10px color-mix(in oklab, var(--module-hot) 45%, transparent); }
+.aph-evidence { border-color: var(--module-hair-hot); box-shadow: -18px 24px 56px color-mix(in oklab, var(--abyss-obsidian-deep) 68%, transparent), inset 0 1px 0 color-mix(in oklab, var(--abyss-ink-bright) 11%, transparent); animation: modulePanelRise var(--module-soft) var(--module-ease) both; }
+
+/* ── Three-dimensional card edges / bottom reading surfaces ───────────── */
+.skd-deck,.skg-deck { --skc3-persp: 1200px; --skc3-hover: 12px; --skc3-lift: 18px; }
+.skd-deck .skd-card,.skg-deck .skg-card { transform-style: preserve-3d; transition: border-color var(--module-fast) var(--module-ease), filter var(--module-fast) var(--module-ease), transform var(--module-fast) var(--module-spring); }
+.skd-deck .skd-card:hover,.skg-deck .skg-card:hover { filter: brightness(1.08) saturate(1.08); }
+.skd-deck .skd-card__bar { box-shadow: inset 0 -1px 0 color-mix(in oklab, var(--c) 28%, transparent); transition: background var(--module-fast) var(--module-ease), transform var(--module-fast) var(--module-spring); }
+.skd-deck .skd-card__bar:hover { background: color-mix(in oklab, var(--c) 9%, transparent); transform: translateX(2px); }
+.sky-card,.skc-card { border-color: var(--module-hair); box-shadow: 0 16px 46px color-mix(in oklab, var(--abyss-obsidian-deep) 58%, transparent), inset 0 1px 0 color-mix(in oklab, var(--abyss-ink-bright) 10%, transparent); transition: border-color var(--module-fast) var(--module-ease), box-shadow var(--module-fast) var(--module-ease), transform var(--module-fast) var(--module-spring); }
+.sky-card:hover,.skc-card:hover { border-color: var(--module-hair-hot); transform: translateY(-3px); box-shadow: 0 22px 58px color-mix(in oklab, var(--abyss-obsidian-deep) 68%, transparent), 0 0 24px color-mix(in oklab, var(--module-lens) 14%, transparent); }
+
+/* All three controls share the same quiet endpoint. */
+:is(body.skylab-still,[data-tier="low"]) :is(.radar-wrap,.plot-text-panel,.info-arch .ia-card,.cl-o3-deck,.cl-o3-legend,.cl-orbit__card,.cl-domains-lamp,.cl-dom-legend,.aph-shell,.aph-controls,.aph-timeline,.aph-badge,.aph-gbtn,.aph-evidence,.skd-deck,.skg-deck,.sky-card,.skc-card),
+:is(body.skylab-still,[data-tier="low"]) :is(.radar-wrap,.plot-text-panel,.info-arch .ia-card,.cl-o3-deck,.cl-o3-legend,.cl-orbit__card,.cl-domains-lamp,.cl-dom-legend,.aph-shell,.aph-controls,.aph-timeline,.aph-evidence,.skd-deck,.skg-deck,.sky-card,.skc-card) * {
+  transition: none !important;
+  animation: none !important;
+}
+:is(body.skylab-still,[data-tier="low"]) :is(.cl-orbit__card:hover,.cl-orbit__card:focus-within,.cl-o3-deck:hover) { translate: none; }
+[data-tier="low"] :is(.radar-wrap,.plot-text-panel,.cl-o3-deck,.cl-o3-legend,.cl-dom-legend) { backdrop-filter: none; -webkit-backdrop-filter: none; }
+:is(body.lab-noglow,body.skylab-noglow,[data-tier="low"]) :is(.radar-wrap,.plot-text-panel,.info-arch .ia-card,.cl-orbit__arc,.cl-orbit__node,.cl-orbit__card,.cl-o3-deck,.cl-o3-legend,.cl-domains-lamp,.cl-dom-legend,.aph-shell,.aph-controls,.aph-timeline,.aph-evidence,.aph-cursor,.skd-deck,.skg-deck,.sky-card,.skc-card),
+:is(body.lab-noglow,body.skylab-noglow,[data-tier="low"]) :is(.radar-wrap,.plot-text-panel,.info-arch .ia-card,.cl-orbit__card,.cl-o3-deck,.cl-o3-legend,.cl-domains-lamp,.cl-dom-legend,.aph-evidence,.skd-deck,.skg-deck,.sky-card,.skc-card) * { filter: none !important; box-shadow: none !important; text-shadow: none !important; }
+
+/* Reduced-motion and low-tier contracts keep the same final visual state. */
+@media (prefers-reduced-motion: reduce) {
+  .radar-wrap::after,.radar-3d .rd-shape { animation: none; }
+  .radar-wrap,.radar-wrap:hover,.radar-wrap:focus-within,.radar-wrap:hover .radar-3d,.radar-wrap:focus-within .radar-3d,
+  .pt-item:hover,.info-arch .ia-card:hover,.ia-kpi:hover,
+  
+  .sky-card:hover,.skc-card:hover { transform: none; }
+  .plot-text-panel.on,.aph-evidence { animation: none; }
+  .cl-o3-deck:hover,.cl-orbit__card:hover,.cl-orbit__card:focus-within { translate: none; }
+  .cl-dom-legend__row:hover,.skd-deck .skd-card__bar:hover { transform: none; }
+  .radar-wrap *, .plot-text-panel *, .info-arch .ia-card *, .cl-o3-deck *, .cl-dom-legend *, .skd-deck *, .sky-card *, .skc-card * { transition: none !important; animation: none !important; }
+}
+[data-tier="low"] .radar-wrap::after,body.skylab-still .radar-wrap::after { display: none; }
+body.skylab-still .radar-wrap *,body.skylab-still .plot-text-panel *,body.skylab-still .info-arch .ia-card *,body.skylab-still .cl-o3-deck *,body.skylab-still .cl-dom-legend *,body.skylab-still .skd-deck *,body.skylab-still .sky-card *,body.skylab-still .skc-card * { transition: none !important; animation: none !important; }
+[data-tier="low"] .radar-wrap *,[data-tier="low"] .plot-text-panel *,[data-tier="low"] .info-arch .ia-card *,[data-tier="low"] .cl-o3-deck *,[data-tier="low"] .cl-dom-legend *,[data-tier="low"] .skd-deck *,[data-tier="low"] .sky-card *,[data-tier="low"] .skc-card * { transition: none !important; animation: none !important; }
+[data-tier="low"] .radar-wrap:hover,[data-tier="low"] .info-arch .ia-card:hover,[data-tier="low"] .sky-card:hover,[data-tier="low"] .skc-card:hover { transform: none; }
+[data-tier="low"] .cl-dom-legend__row:hover,[data-tier="low"] .skd-deck .skd-card__bar:hover { transform: none; }
+
+@media (max-width: 720px) {
+  .radar-wrap { border-radius: var(--abyss-radius-sm); }
+  .plot-text-panel { right: 10px; bottom: 12px; width: min(420px, calc(100vw - 20px)); max-width: none; }
+  .info-arch .ia-card:hover { transform: none; }
+  .cl-o3-deck,.cl-o3-legend { backdrop-filter: var(--abyss-blur-subtle); }
+}
+
+/* ── Remaining reading modules share the same instrument edge ──────────── */
+:is(.cl-plot-deck,.atlas-stage-panel,.atlas-footprint,.cl-score-root,.cl-ann-ledger,.gem-shell,.domains-panel) {
+  border-color: color-mix(in oklab, var(--module-lens) 22%, var(--abyss-line));
+  box-shadow: inset 0 1px 0 color-mix(in oklab, var(--abyss-ink-bright) 9%, transparent), 0 16px 42px color-mix(in oklab, var(--abyss-obsidian-deep) 44%, transparent);
+}
+:is(.cl-plot-deck,.atlas-stage-panel,.atlas-footprint,.cl-score-root,.cl-ann-ledger,.gem-shell,.domains-panel):focus-within {
+  border-color: var(--module-hair-hot);
+  box-shadow: inset 0 1px 0 color-mix(in oklab, var(--abyss-ink-bright) 13%, transparent), 0 20px 52px color-mix(in oklab, var(--abyss-obsidian-deep) 58%, transparent), 0 0 20px color-mix(in oklab, var(--module-lens) 12%, transparent);
+}
+.cl-plot-deck .pl-row,
+.atlas-footprint .af-linebtn,
+.cl-score-genhead,
+.cl-ann-ledger__sort { transition: border-color var(--module-fast) var(--module-ease), background var(--module-fast) var(--module-ease), color var(--module-fast) var(--module-ease), transform var(--module-fast) var(--module-spring); }
+.cl-plot-deck .pl-row:hover,
+.atlas-footprint .af-linebtn:hover,
+.cl-score-genhead:hover,
+.cl-ann-ledger__sort:hover { border-color: var(--module-hair-hot); background: color-mix(in oklab, var(--module-lens) 8%, transparent); transform: translateX(2px); }
+:is(body.skylab-still,[data-tier="low"]) :is(.cl-plot-deck .pl-row,.atlas-footprint .af-linebtn,.cl-score-genhead,.cl-ann-ledger__sort):hover { transform: none; }

@@ -1,0 +1,162 @@
+/*!
+ * @role css-token
+ * @owns css/sky-groups.css
+ * @budget drawcalls=0 points=0 vertices=0 rtpx=0 passes=0
+ * @contract deep-sky/3
+ * ------------------------------------------------------------
+ * 分组卡片叠（星座态左侧，与剧情卡片叠同一语汇）：容器与卡片基座自带一份（不依赖 sky-deck.css 的加载结果，
+ * 两叠在同一个左栏、永不同时显示）；`skg-` 前缀只放分组特有：占比条 · 主星行 · 关系分类条 · 往来团 · 成员。
+ * 只引用 --skd-* / --z-* 令牌；JS 只写 --c --i --d --share --w 与四个版位变量。窄屏 = 底部抽屉。
+ * 展开体（主星行 · 关系分类条 · 往来团 · 主线段 · 成员）在 css/sky-groups-body.css；3D 堆叠 / 倾斜在 css/sky-cards-3d.css。
+ * ============================================================ */
+
+/* ---- 容器（与 .skd-deck 同一版位与观感） ---- */
+.skg-deck {
+  position: fixed;
+  left: var(--skd-deck-left, 20px);
+  top: var(--skd-deck-top, 96px);
+  width: var(--skd-deck-w, 320px);
+  /* 高度贴内容（10 张卡不必撑出一整栏空板），最高到左栏底边，超出由滚动区滚 */
+  max-height: calc(100vh - var(--skd-deck-top, 96px) - var(--skd-deck-bottom, 118px));
+  z-index: var(--z-panel);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 10px 10px 12px;
+  box-sizing: border-box;
+  color: var(--skd-ink-2);
+  font-family: var(--skd-font-sans);
+  font-size: var(--skd-fs-sm);
+  background:
+    radial-gradient(1px 1px at 22% 12%, var(--skd-star), transparent 70%),
+    radial-gradient(1px 1px at 78% 34%, color-mix(in oklch, var(--skd-cool) 60%, transparent), transparent 70%),
+    radial-gradient(130% 55% at 0% 0%, color-mix(in oklch, var(--skd-violet) 12%, transparent), transparent 62%),
+    linear-gradient(180deg, color-mix(in oklch, var(--skd-void-1) 84%, transparent), color-mix(in oklch, var(--skd-void-0) 70%, transparent));
+  border: 1px solid var(--skd-hair);
+  border-radius: var(--skd-radius);
+  box-shadow: var(--skd-shadow-panel);
+  opacity: 0;
+  transform: translate3d(-14px, 0, 0);
+  transition: opacity var(--skd-dur-soft) var(--skd-ease-out), transform var(--skd-dur-focus) var(--skd-ease-out);
+  pointer-events: none;
+  contain: layout paint;
+}
+.skg-deck.is-on { opacity: 1; transform: none; pointer-events: auto; }
+.skg-deck[hidden] { display: none; }
+.skg-deck.is-folded .skg-viewport { display: none; }
+.skg-deck.is-folded { padding-bottom: 4px; }
+
+/* ---- 头部：标题按钮（展开 / 收起整叠）+ 计数 ---- */
+.skg-head { display: flex; align-items: baseline; gap: 10px; flex: 0 0 auto; }
+.skg-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  color: inherit;
+}
+.skg-toggle .skd-deck__title { font-family: var(--skd-font-serif); font-size: var(--skd-fs-md); color: var(--skd-brass); letter-spacing: var(--skd-track); white-space: nowrap; }
+.skg-toggle .skd-deck__title::before { content: '✦'; margin-right: 0.45em; color: var(--skd-brass-hot); text-shadow: var(--skd-glow-brass); }
+.skg-chev { width: 0; height: 0; border-left: 4px solid transparent; border-right: 4px solid transparent; border-top: 5px solid var(--skd-brass-dim); transition: transform var(--skd-dur-flick) var(--skd-ease-out); }
+.skg-deck.is-folded .skg-chev { transform: rotate(-90deg); }
+.skg-head .skd-deck__count { flex: 1 1 auto; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; text-align: right; font-family: var(--skd-font-mono); font-size: var(--skd-fs-xs); color: var(--skd-ink-3); font-variant-numeric: tabular-nums; }
+
+/* ---- 滚动区 ---- */
+.skg-viewport {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--skd-hair-brass) transparent;
+  outline: none;
+  -webkit-mask-image: linear-gradient(to bottom, transparent, black 12px, black calc(100% - 16px), transparent);
+  mask-image: linear-gradient(to bottom, transparent, black 12px, black calc(100% - 16px), transparent);
+}
+/* 上下各留出渐隐带的高度：面板贴内容高时，首末两张不被渐隐吃掉 */
+.skg-list { display: flex; flex-direction: column; padding: 6px 0 16px; }
+
+/* ---- 卡：后一张压住前一张的底座（负外边距），展开时让位；3D 观感在 sky-cards-3d.css ---- */
+.skg-deck .skg-card {
+  --c: var(--skd-ink-3);
+  position: relative;
+  box-sizing: border-box;
+  flex: 0 0 auto;
+  margin-bottom: -9px;
+  border: 1px solid color-mix(in oklch, var(--c) 22%, var(--skd-hair));
+  border-radius: var(--skd-radius-s);
+  background:
+    radial-gradient(1px 1px at 16% 30%, color-mix(in oklch, var(--skd-star) 40%, transparent), transparent 70%),
+    radial-gradient(1px 1px at 72% 26%, color-mix(in oklch, var(--skd-star) 24%, transparent), transparent 70%),
+    radial-gradient(150% 100% at 0% 0%, color-mix(in oklch, var(--c) 16%, transparent), transparent 60%),
+    linear-gradient(180deg, var(--skd-void-2), var(--skd-void-1) 80%);
+  box-shadow: 0 -8px 14px -10px color-mix(in oklch, var(--skd-void-0) 96%, transparent), inset 0 1px 0 color-mix(in oklch, var(--c) 40%, transparent);
+  color: var(--skd-ink-2);
+  transition: border-color var(--skd-dur-soft) var(--skd-ease-out), filter var(--skd-dur-soft) var(--skd-ease-out);
+}
+.skg-deck .skg-card.is-open { margin-bottom: 6px; }
+.skg-deck .skg-bar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: var(--bar, 34px);
+  padding: 0 10px 0 12px;
+  cursor: pointer;
+  user-select: none;
+}
+.skg-deck .skg-card .skd-card__sigil { flex: 0 0 auto; width: 1em; text-align: center; font-style: normal; font-size: var(--skd-fs-sm); color: var(--c); }
+.skg-deck .skg-card .skd-card__sigil::before { content: '◆'; }
+.skg-deck .skg-card.is-core .skd-card__sigil { color: var(--skd-brass-hot); text-shadow: var(--skd-glow-brass); }
+.skg-deck .skg-card.is-core .skd-card__sigil::before { content: '◈'; }
+.skg-deck .skg-card.is-field .skd-card__sigil::before { content: '◇'; }
+.skg-deck .skg-card .skd-card__name { flex: 0 0 auto; max-width: 7.5em; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: var(--skd-fs-sm); color: var(--skd-ink); }
+.skg-deck .skg-card .skd-card__span { flex: 0 0 auto; font-family: var(--skd-font-mono); font-size: var(--skd-fs-xs); color: var(--skd-ink-3); font-variant-numeric: tabular-nums; }
+/* 收起时的主星名：团名之后、人数之前，占剩下的宽度，放不下就省略；展开后展开体里有全文，这里隐去 */
+.skg-deck .skg-bar__leads { flex: 1 1 auto; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: var(--skd-fs-xs); color: var(--skd-ink-3); transition: opacity var(--skd-dur-soft) var(--skd-ease-out); }
+.skg-deck .skg-card.is-hot .skg-bar__leads { color: var(--skd-ink-2); }
+.skg-deck .skg-card.is-open .skg-bar__leads { opacity: 0; }
+/* 标题条露出的只有上面 27px（下一张卡压住底座 9px）：内容在露出段里居中；展开卡与末卡整条露出，不收 */
+.skg-deck .skg-card:not(.is-open):not(:last-child) .skg-bar { padding-bottom: 7px; }
+/* 占比条：卡顶沿一道按占比的宽度（一眼看出团的大小；底缘会被下一张卡压住，所以放顶沿，接着顶沿本色亮线） */
+.skg-share {
+  position: absolute;
+  left: 0;
+  top: -1px;
+  height: 2px;
+  border-top-left-radius: var(--skd-radius-s);
+  width: calc(var(--share, 0) * 100%);
+  background: linear-gradient(90deg, color-mix(in oklch, var(--c) 80%, transparent), transparent);
+  pointer-events: none;
+}
+.skg-deck .skg-card.is-hot { border-color: color-mix(in oklch, var(--c) 60%, transparent); }
+.skg-deck .skg-card.is-hot .skg-bar { background: linear-gradient(90deg, color-mix(in oklch, var(--c) 22%, transparent), transparent 85%); box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--c) 40%, transparent), 0 0 22px color-mix(in oklch, var(--c) 22%, transparent); }
+.skg-deck .skg-card.is-focus .skg-bar { box-shadow: inset 0 0 0 1px var(--skd-hair-brass); }
+.skg-toggle:focus, .skg-deck .skg-card button:focus { outline: 1px solid var(--skd-hair-brass); outline-offset: 3px; border-radius: var(--skd-radius-s); color: var(--skd-brass-hot); }
+.skg-deck .skg-card.is-sel { border-color: var(--skd-hair-brass); }
+.skg-deck .skg-card.is-sel .skd-card__name { color: var(--skd-brass-hot); }
+.skg-deck.is-entering .skg-card { animation: skg-in var(--skd-dur-focus) var(--skd-ease-out) both; animation-delay: calc(min(var(--i, 0), 16) * 24ms); }
+/* 入场只动独立的 translate 属性：与 sky-cards-3d.css 的 Z 堆叠 transform 相乘，落定时不跳 */
+@keyframes skg-in { from { opacity: 0; translate: -20px 0; } to { opacity: 1; translate: 0 0; } }
+
+/* ---- 窄屏：底部抽屉（标题条点开收起） ---- */
+@media (max-width: 900px) {
+  /* 底边让过视角栏（窄屏它在图例上方一行）；收起时只剩标题条，贴左不横跨 */
+  .skg-deck { left: 12px; right: 12px; width: auto; top: auto; bottom: 150px; max-height: 42vh; }
+  .skg-deck.is-folded { right: auto; bottom: 150px; padding: 6px 12px; }
+  .skg-deck.is-folded .skd-deck__count { flex: 0 0 auto; }
+}
+/* ---- 低成本档与减弱动效 ---- */
+[data-tier='low'] .skg-deck.is-entering .skg-card { animation: none; opacity: 1; }
+[data-tier='low'] .skg-share, [data-tier='low'] .skg-card__cls-bar i { box-shadow: none; }
+@media (prefers-reduced-motion: reduce) {
+  .skg-deck, .skg-deck .skg-card, .skg-deck .skg-chev { transition: none; }
+  .skg-deck.is-entering .skg-card { animation: none; opacity: 1; }
+}
+body.skylab-still .skg-deck, body.skylab-still .skg-card { transition: none; }
+body.skylab-still .skg-deck.is-entering .skg-card { animation: none; opacity: 1; }

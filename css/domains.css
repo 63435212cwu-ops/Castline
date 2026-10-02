@@ -1,0 +1,156 @@
+/*
+@role css-token
+@owns css/domains.css
+@budget dom_nodes: 每灯 ≤3 节点 (dot/name/sub) · 无自起动画 · css_lint 漂移 0
+@contract Castline v80 · 星座「剧情星域 Domains」W4 (2026-09-22 · 冻结)
+*/
+/* 星域线灯层：容器 + 线灯徽章。颜色/尺寸/时长只引 --cl-dom-* 与 --z-hud，无裸 hex。 */
+
+.cl-domains-lamps {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: var(--z-hud);
+}
+
+.cl-domains-lamps.is-hidden {
+  display: none;
+}
+
+.cl-domains-lamp {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform: translate(-50%, -50%) translate(var(--cl-dom-x), var(--cl-dom-y));
+  display: inline-flex;
+  align-items: center;
+  gap: var(--cl-dom-lamp-gap);
+  height: var(--cl-dom-lamp-h);
+  max-width: var(--cl-dom-lamp-maxw);
+  padding: 0 8px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--cl-dom-bg) 72%, transparent);
+  border: 1px solid color-mix(in srgb, var(--cl-dom-ink) 12%, transparent);
+  backdrop-filter: blur(8px);
+  color: var(--cl-dom-ink);
+  font: var(--cl-dom-fs-name) var(--cl-dom-font);
+  white-space: nowrap;
+  opacity: var(--cl-dom-a-lamp);
+  pointer-events: auto;
+  cursor: pointer;
+  transition: opacity var(--cl-dom-dur) var(--cl-dom-ease);   /* 主控：坐标逐帧写，transform 不能有过渡（会拖尾、与星点错位） */
+}
+
+.cl-domains-lamp__dot {
+  width: var(--cl-dom-lamp-dot);
+  height: var(--cl-dom-lamp-dot);
+  border-radius: 50%;
+  background: currentColor;
+  flex: none;
+}
+
+/* 避让只移动徽章，不移动信息锚；细引线把两者的对应关系保留在画面中。 */
+.cl-domains-lamp.has-leader::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: var(--cl-dom-leader-length);
+  height: 1px;
+  transform: rotate(var(--cl-dom-leader-angle)) translateX(var(--cl-dom-leader-start));
+  transform-origin: left center;
+  background: color-mix(in srgb, var(--cl-dom-ink) 25%, transparent);
+  pointer-events: none;
+  z-index: var(--z-abyss);
+}
+
+.cl-domains-lamp__name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cl-domains-lamp__sub {
+  font-size: var(--cl-dom-fs-sub);
+  color: var(--cl-dom-ink-2);
+}
+
+.cl-domains-lamp[data-gen="0"] .cl-domains-lamp__dot { color: var(--cl-dom-gen-0); }
+.cl-domains-lamp[data-gen="1"] .cl-domains-lamp__dot { color: var(--cl-dom-gen-1); }
+.cl-domains-lamp[data-gen="2"] .cl-domains-lamp__dot { color: var(--cl-dom-gen-2); }
+.cl-domains-lamp[data-gen="3"] .cl-domains-lamp__dot { color: var(--cl-dom-gen-3); }
+.cl-domains-lamp[data-gen="4"] .cl-domains-lamp__dot { color: var(--cl-dom-gen-4); }
+.cl-domains-lamp[data-gen="5"] .cl-domains-lamp__dot { color: var(--cl-dom-gen-5); }
+
+.cl-domains-lamp.is-hot {
+  opacity: 1;
+  box-shadow: 0 0 0 1px currentColor;
+}
+
+.cl-domains-lamp.is-dim {
+  opacity: 0.12;   /* 目检：.25 的淡灯还盖着星名，像脏迹 */
+}
+
+.cl-domains-lamp.is-dot .cl-domains-lamp__name,
+.cl-domains-lamp.is-dot .cl-domains-lamp__sub {
+  display: none;
+}
+
+.cl-domains-lamp.is-dot {
+  padding: 0;
+  width: calc(var(--cl-dom-lamp-dot) + 8px);
+  height: calc(var(--cl-dom-lamp-dot) + 8px);
+  justify-content: center;
+}
+
+.cl-domains-lamp.is-behind,
+.cl-domains-lamp.is-solo-off {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cl-domains-lamp {
+    transition: none;
+  }
+}
+
+[data-tier="low"] .cl-domains-lamp {
+  backdrop-filter: none;
+}
+
+/* ── v90 W4 · 星域线灯的热流 ──
+ * 灯心与徽章边缘用两条极慢的氛围循环保持「活着」的感觉；位置仍由
+ * domains-lamps 逐帧写入，动画只影响局部亮度，不制造拖尾或错位。 */
+.cl-domains-lamp::before {
+  content: '';
+  position: absolute;
+  inset: 1px;
+  border: 1px solid color-mix(in srgb, currentColor 24%, transparent);
+  border-radius: inherit;
+  opacity: .28;
+  pointer-events: none;
+  transform: scale(.92);
+  animation: cl-domains-lamp-ripple 26s ease-in-out infinite;
+}
+.cl-domains-lamp__dot {
+  box-shadow: 0 0 0 1px color-mix(in srgb, currentColor 18%, transparent),
+    0 0 8px color-mix(in srgb, currentColor 52%, transparent);
+  animation: cl-domains-lamp-breath 24s ease-in-out infinite;
+}
+.cl-domains-lamp.is-hot::before { opacity: .6; }
+.cl-domains-lamp.is-hot .cl-domains-lamp__dot { animation-duration: 20s; }
+
+@keyframes cl-domains-lamp-ripple {
+  0%, 100% { opacity: .16; transform: scale(.92); }
+  50% { opacity: .42; transform: scale(1.02); }
+}
+@keyframes cl-domains-lamp-breath {
+  0%, 100% { opacity: .72; transform: scale(.9); }
+  50% { opacity: 1; transform: scale(1.13); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cl-domains-lamp::before,
+  .cl-domains-lamp__dot { animation: none; }
+}
+[data-tier="low"] .cl-domains-lamp::before,
+[data-tier="low"] .cl-domains-lamp__dot { animation: none; }

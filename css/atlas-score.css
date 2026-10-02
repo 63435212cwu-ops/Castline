@@ -1,0 +1,855 @@
+/* Castline · atlas-score.css — 剧情线谱（阅读姿态）样式
+ * @contract v70（CONTRACT.md §2 CLAtlasScore · §4 令牌）
+ *
+ * 令牌纪律：css/atlas-tokens.css 由 U10 并行产出、本单元落地时尚未存在——本文件按契约 §4 的
+ * 名称引用 --cl-atlas-*，一律用 CSS 变量 fallback 语法退到 css/abyss-tokens.css 里已经存在、
+ * 语义最接近的同源令牌（金/琥珀/紫/薄荷已有原生 token；玫瑰金退到 --abyss-hot，靛退到
+ * --abyss-violet-dim，均为色相近似的过渡映射，非新造色值；一旦 atlas-tokens.css 落地，前段
+ * var(--cl-atlas-*) 会自动接管，无需改这份文件）。全文件不写裸色值，也不写 style="（新文件在
+ * tests/inline_style_lint.py 的 ratchet 基线为 0，写一次即永久红——坐标一律走 SVG 几何属性，
+ * 由 js/atlas/atlas-score.js 用 setAttribute 完成，这份 CSS 只管外观，不管位置）。
+ */
+
+.cl-score-root {
+  position: relative;
+  color: var(--cl-text-primary, var(--abyss-ink));
+  font-family: var(--abyss-font-sans);
+  outline: none;
+  --sc-row-h: var(--cl-atlas-row-h, 32px);
+}
+@media (pointer: coarse) {
+  .cl-score-root { --sc-row-h: var(--cl-atlas-row-h, 40px); }
+}
+
+.cl-score-badge {
+  position: absolute;
+  top: 18px; right: 0;
+  z-index: var(--z-hud, 100);
+  padding: var(--abyss-sp-xs, 4px) var(--abyss-sp-md, 10px);
+  font-size: var(--cl-atlas-fs-1, var(--abyss-fs-2xs));
+  color: var(--cl-text-tertiary, var(--abyss-ink-3));
+  background: var(--cl-panel-bg-subtle, var(--abyss-obsidian-glass-subtle));
+  border: 1px solid var(--cl-border-subtle, var(--abyss-line));
+}
+.cl-score-badge.is-derived,
+.cl-score-badge.is-mixed { color: var(--cl-atlas-status-open, var(--abyss-signal)); }
+
+.cl-score-empty { padding: var(--abyss-sp-lg, 16px); }
+.cl-score-empty-reason {
+  color: var(--cl-text-tertiary, var(--abyss-ink-3));
+  font-size: var(--cl-atlas-fs-2, var(--abyss-fs-sm));
+}
+
+/* ── 章轴（sticky top） ───────────────────────────────────────────── */
+.cl-score-axis {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-hud, 100);
+  display: flex;
+  background: var(--cl-panel-bg, var(--abyss-obsidian-glass));
+  border-bottom: 1px solid var(--cl-border, var(--abyss-border, var(--abyss-line)));
+  overflow: hidden;
+}
+.cl-score-axis-spacer {
+  flex: 0 0 auto;
+  width: var(--cl-atlas-rowhead-w, 200px);
+}
+.cl-score-axis-svg { display: block; overflow: visible; }
+.cl-score-axis-col line {
+  stroke: var(--cl-atlas-tick, var(--cl-border-subtle, var(--abyss-line)));
+  stroke-width: 1;
+}
+.cl-score-axis-col text {
+  fill: var(--cl-text-tertiary, var(--abyss-ink-3));
+  font-size: var(--cl-atlas-fs-1, 8px);
+  font-family: var(--abyss-font-mono);
+}
+/* R3-D #3：分桶列（200+ 章分桶后）悬停/键盘 focus 显示桶内真实章名列表（<title> + aria-label，
+   见 atlas-score.js buildAxisSvgHtml）——这里只加一个可发现的 hover/focus 提示，不遮章轴本身。 */
+.cl-score-axis-col.is-bucket { cursor: help; outline: none; }
+.cl-score-axis-col.is-bucket:hover line,
+.cl-score-axis-col.is-bucket:focus-visible line {
+  stroke: var(--cl-atlas-turn, var(--abyss-signal-bright));
+  stroke-width: 2;
+}
+
+/* ── 主体 / 分组 ─────────────────────────────────────────────────── */
+.cl-score-body { position: relative; }
+.cl-score-gen + .cl-score-gen { border-top: 1px dashed var(--cl-border-subtle, var(--abyss-line)); }
+.cl-score-genhead {
+  display: flex;
+  align-items: center;
+  gap: var(--abyss-sp-sm, 6px);
+  padding: var(--abyss-sp-xs, 4px) var(--abyss-sp-md, 10px);
+  font-size: var(--cl-atlas-fs-1, var(--abyss-fs-2xs));
+  color: var(--cl-text-secondary, var(--abyss-ink-2));
+  cursor: pointer;
+  user-select: none;
+  background: var(--cl-panel-bg-subtle, var(--abyss-obsidian-glass-subtle));
+}
+.cl-score-genhead:hover,
+.cl-score-genhead:focus-visible { color: var(--cl-text-primary, var(--abyss-ink)); }
+.cl-score-genrows { display: block; }
+.cl-score-genrows.is-collapsed .cl-score-row { display: none; }
+.cl-score-genhead::before {
+  content: "▾";
+  display: inline-block;
+  transition: transform var(--cl-atlas-dur-1, var(--abyss-dur-instant, 80ms)) var(--cl-atlas-ease, var(--abyss-ease-out-abyss));
+}
+.cl-score-genrows.is-collapsed + .cl-score-genhead::before,
+.cl-score-genhead[aria-expanded="false"]::before { transform: rotate(-90deg); }
+
+/* ── R5-M ①：主线更替说明条（分组头之间，代次数-1 条）───────────────────────────── */
+.cl-score-succession {
+  display: flex;
+  align-items: center;
+  gap: var(--abyss-sp-xs, 4px);
+  padding: var(--abyss-sp-xs, 4px) var(--abyss-sp-md, 10px);
+  font-size: var(--cl-atlas-fs-3, var(--abyss-fs-xs));
+  color: var(--cl-text-tertiary, var(--abyss-ink-3));
+  background: var(--cl-panel-bg-subtle, var(--abyss-obsidian-glass-subtle));
+  border-top: 1px dashed var(--cl-border-subtle, var(--abyss-line));
+  border-bottom: 1px dashed var(--cl-border-subtle, var(--abyss-line));
+  outline: none;
+}
+.cl-score-succession-glyph { flex: 0 0 auto; }
+.cl-score-succession.is-known .cl-score-succession-glyph line,
+.cl-score-succession.is-known .cl-score-succession-glyph circle { stroke: var(--cl-atlas-handoff, var(--abyss-hot)); fill: var(--cl-atlas-handoff, var(--abyss-hot)); }
+.cl-score-succession.is-unknown .cl-score-succession-glyph line,
+.cl-score-succession.is-unknown .cl-score-succession-glyph circle {
+  stroke: var(--cl-atlas-status-unknown, var(--abyss-ink-3));
+  fill: var(--cl-atlas-status-unknown, var(--abyss-ink-3));
+  stroke-dasharray: 2 2;
+}
+.cl-score-succession-text { color: var(--cl-text-secondary, var(--abyss-ink-2)); }
+.cl-score-succession.is-known .cl-score-succession-text { color: var(--cl-text-primary, var(--abyss-ink)); }
+.cl-score-succession-reason {
+  color: var(--cl-text-tertiary, var(--abyss-ink-3));
+  font-size: var(--cl-atlas-fs-4, var(--abyss-fs-2xs));
+}
+.cl-score-succession-reason::before { content: "· "; }
+.cl-score-succession:focus-visible { outline: 1px solid var(--cl-atlas-turn, var(--abyss-signal-bright)); outline-offset: -1px; }
+
+/* ── 行 ───────────────────────────────────────────────────────────── */
+.cl-score-row {
+  display: flex;
+  align-items: stretch;
+  min-height: calc(var(--sc-row-h) * 1.5);
+  border-bottom: 1px solid var(--cl-border-subtle, var(--abyss-line));
+  /* R3-D #1 实测修正（真机复现，不是猜的）：position:sticky 的可移动范围是按「它自己的
+     containing block」算的——.cl-score-rowhead 的 containing block 是这个 .cl-score-row，
+     不是 .atlas-stage-host。row 本身是 width:auto 的 flex 容器，天生只会撑到「填满父级
+     可用宽度」（比如窄屏 384px），track 里内容再宽也只是 overflow:visible 视觉溢出、不会
+     把 row 自己的布局盒撑大——所以 rowhead sticky 只能在 384px 范围内挪，超出这个范围后
+     （真机验证阈值 = row 布局宽度 - rowhead 宽度）就会跟着内容一起被拖走，露馅正是「横滚
+     到后面 sticky 突然失效」。min-width:max-content 让 row 的布局盒下限跟着最宽的 flex 子项
+     （.cl-score-track，已同款修正）走，content 比视口窄时仍然 100% 撑满（不影响
+     border-bottom 通栏），content 更宽时才真正跟着变宽——sticky 可移动范围因此和真实可
+     横滚范围一致。 */
+  min-width: max-content;
+}
+.cl-score-row.is-filtered-out { display: none; }
+.cl-score-row.is-focused {
+  background: var(--cl-panel-bg-subtle, var(--abyss-obsidian-glass-subtle));
+  /* 左侧 3px gen 色条：inset box-shadow 不占布局宽度，不用改行内 padding 就能加一条边。
+     data-gen 缺席（gen 不可判定）时退回中性色，不编造代次。 */
+  box-shadow: inset 3px 0 0 0 var(--cl-atlas-branch, var(--abyss-ink-2));
+}
+.cl-score-row.is-focused[data-gen="0"] { box-shadow: inset 3px 0 0 0 var(--cl-atlas-gen-0, var(--abyss-gold)); }
+.cl-score-row.is-focused[data-gen="1"] { box-shadow: inset 3px 0 0 0 var(--cl-atlas-gen-1, var(--abyss-signal)); }
+.cl-score-row.is-focused[data-gen="2"] { box-shadow: inset 3px 0 0 0 var(--cl-atlas-gen-2, var(--abyss-hot)); }
+.cl-score-row.is-focused[data-gen="3"] { box-shadow: inset 3px 0 0 0 var(--cl-atlas-gen-3, var(--abyss-violet)); }
+.cl-score-row.is-focused[data-gen="4"] { box-shadow: inset 3px 0 0 0 var(--cl-atlas-gen-4, var(--abyss-violet-dim, var(--abyss-violet))); }
+.cl-score-row.is-focused[data-gen="5"] { box-shadow: inset 3px 0 0 0 var(--cl-atlas-gen-5, var(--abyss-mint)); }
+.cl-score-row.is-focused .cl-score-rowhead { color: var(--cl-text-primary, var(--abyss-ink)); }
+/* 主控二轮修正：setFocus/键盘导航时其余行统一压暗，靠根级一条 class 托管（不用逐行遍历加 opacity），
+   焦点行自己被 :not(.is-focused) 排除，不受影响。 */
+.cl-score-root.is-score-dimmed .cl-score-row:not(.is-focused) { opacity: .45; }
+.cl-score-row { transition: opacity var(--cl-atlas-dur-2, 160ms) var(--cl-atlas-ease, var(--abyss-ease-out-abyss)); }
+@media (prefers-reduced-motion: reduce) {
+  .cl-score-row { transition: none; }
+}
+/* R5-M ④：聚焦一条线时，除了同代次其他线 opacity .45（上面已有），分组头也随根级 dimmed
+   状态整体压暗——但聚焦行自己所在的代次组、以及紧邻的上一代/下一代分组头（js
+   updateGenProximity() 打上 .is-gen-near）必须保持 opacity 1，方便沿着代次顺序定位「往前/
+   往后翻一代是谁」，不必先取消聚焦才能看清邻代标题。 */
+.cl-score-root.is-score-dimmed .cl-score-genhead { opacity: .45; }
+.cl-score-root.is-score-dimmed .cl-score-gen.is-gen-near .cl-score-genhead { opacity: 1; }
+.cl-score-genhead { transition: opacity var(--cl-atlas-dur-2, 160ms) var(--cl-atlas-ease, var(--abyss-ease-out-abyss)); }
+@media (prefers-reduced-motion: reduce) {
+  .cl-score-genhead { transition: none; }
+}
+
+.cl-score-rowhead {
+  position: sticky;
+  left: 0;
+  z-index: var(--z-chart, 10);
+  flex: 0 0 auto;
+  width: var(--cl-atlas-rowhead-w, 200px);
+  display: flex;
+  flex-wrap: wrap;
+  align-content: center;
+  align-items: center;
+  gap: 1px var(--abyss-sp-xs, 4px);
+  padding: 3px var(--abyss-sp-sm, 6px);
+  background: var(--cl-panel-bg, var(--abyss-obsidian-glass));
+  color: var(--cl-text-secondary, var(--abyss-ink-2));
+  font-size: var(--cl-atlas-fs-2, var(--abyss-fs-sm));
+  cursor: pointer;
+  overflow: hidden;
+}
+.cl-score-rowcap { flex: 0 0 auto; display: inline-flex; }
+.cl-score-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--cl-text-primary, var(--abyss-ink));
+  font-weight: 600;
+}
+/* 主控二轮修正：状态词从「与线名同层级的独立浮字」降级成副标里的小字（fs-4），真正的状态
+   识别交给行头帽 glyph（cl-score-rowcap 现在画 resolved/suspended/open/unknown 的真实形状）；
+   进行中沿用 --cl-atlas-status-open，不新造颜色。 */
+.cl-score-status {
+  white-space: nowrap;
+  font-size: var(--cl-atlas-fs-4, 7px);
+  font-weight: 600;
+}
+.cl-score-subline {
+  flex: 0 0 100%;
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+  font-size: var(--cl-atlas-fs-1, var(--abyss-fs-2xs));
+  color: var(--cl-text-tertiary, var(--abyss-ink-3));
+}
+.cl-score-status.is-resolved { color: var(--cl-atlas-status-resolved, var(--abyss-mint)); }
+.cl-score-status.is-suspended { color: var(--cl-atlas-status-suspended, var(--abyss-ink-3)); }
+.cl-score-status.is-open { color: var(--cl-atlas-status-open, var(--abyss-gold)); }
+.cl-score-status.is-conflict,
+.cl-score-status.is-unknown { color: var(--cl-atlas-status-unknown, var(--abyss-hot-dim)); font-style: italic; }
+/* R3-D #1：subline 三段（状态 / 领衔 / 双长度）用相邻兄弟选择器补分隔点，桌面态视觉与二轮
+   完全一致；窄屏媒体查询只需隐藏前两段 + 清空紧跟其后的分隔点，不用改 JS 拼串。 */
+.cl-score-status + .cl-score-lead::before { content: " · "; }
+.cl-score-lead + .cl-score-len::before { content: " · "; }
+/* VISUAL-CHARTER §5.2：「标签+数值」词组不得被拆断——「跨 N 章」「M 事」整体不换行。 */
+.cl-score-len { display: block; white-space: nowrap; }
+.cl-score-subline .cl-score-lead + .cl-score-len::before { content: ""; }
+.cl-score-len-compact { display: none; }
+/* R7-G ②：行头首/末章名（span 已知才渲染的独立一行，对齐旧 HUD 线卡的信息密度；
+   行头宽度有限时 ellipsis 截断，全文走 JS 侧同款 title 属性）。 */
+.cl-score-span-range { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* R6-D: evidence-backed cross-generation handoffs; one restrained thread. */
+.cl-score-body { position: relative; }
+.cl-score-connections { position: absolute; left: 0; top: 0; pointer-events: none; overflow: visible; }
+.cl-score-connection { fill: none; stroke: var(--cl-atlas-handoff, var(--abyss-hot)); stroke-width: 1; opacity: .55; vector-effect: non-scaling-stroke; }
+.cl-score-connection[data-gen="0"] { stroke: var(--cl-atlas-gen-0, var(--abyss-gold)); }
+.cl-score-connection[data-gen="1"] { stroke: var(--cl-atlas-gen-1, var(--abyss-signal)); }
+.cl-score-connection[data-gen="2"] { stroke: var(--cl-atlas-gen-2, var(--abyss-hot)); }
+.cl-score-connection[data-gen="3"] { stroke: var(--cl-atlas-gen-3, var(--abyss-violet)); }
+.cl-score-connection[data-gen="4"] { stroke: var(--cl-atlas-gen-4, var(--abyss-violet)); }
+.cl-score-connection[data-gen="5"] { stroke: var(--cl-atlas-gen-5, var(--abyss-mint)); }
+.cl-score-chip.cl-score-chip-lead { color: var(--abyss-gold); border-color: var(--cl-border-gold, var(--abyss-gold)); }
+.cl-score-chip.cl-score-chip-core { color: var(--cl-text-primary, var(--abyss-ink)); }
+.cl-score-chip-core .cl-score-chip-glyph { opacity: .55; }
+.cl-score-chip.cl-score-chip-minor { color: var(--cl-text-tertiary, var(--abyss-ink-3)); }
+.cl-score-chip[data-role="lead"] .cl-score-chip-glyph { color: var(--abyss-gold); opacity: 1; }
+.cl-score-chip[data-role="lead"] .cl-score-chip-glyph circle { fill: var(--abyss-gold); }
+.cl-score-chip[data-role="core"] .cl-score-chip-glyph { color: var(--abyss-gold); opacity: .5; }
+.cl-score-chip[data-role="minor"] .cl-score-chip-glyph { color: var(--abyss-ink-3); opacity: .45; }
+.cl-score-chip[aria-pressed="true"] { outline: 1px solid var(--abyss-gold); outline-offset: 1px; }
+.has-character-footprint .cl-score-tick { opacity: .22; }
+.has-character-footprint .cl-score-tick.is-character-footprint { opacity: 1; stroke: var(--abyss-gold); stroke-width: 3; }
+@media (max-width: 900px) {
+  .cl-score-subline { overflow: visible; text-overflow: clip; white-space: normal; }
+  /* R7-G ②：首尾章名段在 ≤900px 一并隐藏（390/820 行头已压到 ≤112/96px，放不下），
+     只保双长度（cl-score-len-compact）完整显示——390 那条断言不受影响。 */
+  .cl-score-subline .cl-score-status, .cl-score-subline .cl-score-lead, .cl-score-subline .cl-score-len, .cl-score-subline .cl-score-span-range { display: none; }
+  .cl-score-len-compact { display: block; overflow-wrap: anywhere; line-height: 1.5; }
+}
+
+.cl-score-track {
+  position: relative;
+  flex: 1 1 auto;
+  /* R3-D #1 实测修正：min-width:0 允许 track 的自身布局盒被 flex 压扁到远小于内容宽度
+     （比如只剩视口可用宽度），子元素只是靠 overflow:visible「视觉溢出」而不撑大这个盒子——
+     .atlas-stage-host 的 scrollWidth 因为吃到了视觉溢出的 ink 范围，量出来是对的（比如
+     1012px），但 position:sticky 的「可移动范围」是按**这个盒子自己的布局宽度**算的，不是
+     按视觉溢出范围算的。真机验证：390 宽下 track 布局盒只有 ~272px 可移动余量，横滚超过
+     这个量之后 .cl-score-rowhead / 新增的 .cl-score-cast sticky 就会跟着内容一起被拖走
+     （复现：host.scrollLeft 从 0 加到 300+ 时 rowhead rect.left 从 0 突然开始线性变负）。
+     min-width:max-content 让这个盒子的宽度下限跟着最宽的子元素（带 width 属性的 <svg>，
+     真实宽度 totalW）走，不再被压扁，sticky 的可移动范围就和真实可横滚范围一致了——
+     这是唯一动到的属性，align-items:flex-start 之前解决的是另一个问题（内容被拉伸/换行），
+     两条互不冲突。 */
+  min-width: max-content;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  overflow: visible;
+}
+.cl-score-svg { display: block; overflow: visible; }
+
+/* ── 条 / 帽 / 分叉 / 转折 / 接头（几何全部来自元素属性，颜色走 class） ──────── */
+.cl-score-bar { fill: var(--cl-atlas-branch, var(--cl-text-tertiary, var(--abyss-ink-3))); }
+.cl-score-bar-main.gen-0 { fill: var(--cl-atlas-gen-0, var(--abyss-gold)); }
+.cl-score-bar-main.gen-1 { fill: var(--cl-atlas-gen-1, var(--abyss-signal)); }
+.cl-score-bar-main.gen-2 { fill: var(--cl-atlas-gen-2, var(--abyss-hot)); }
+.cl-score-bar-main.gen-3 { fill: var(--cl-atlas-gen-3, var(--abyss-violet)); }
+.cl-score-bar-main.gen-4 { fill: var(--cl-atlas-gen-4, var(--abyss-violet-dim, var(--abyss-violet))); }
+.cl-score-bar-main.gen-5 { fill: var(--cl-atlas-gen-5, var(--abyss-mint)); }
+.cl-score-bar-main.gen-x { fill: var(--cl-text-tertiary, var(--abyss-ink-3)); }
+/* 主控修正第 3 点：支线/细枝底色用「父线代次」的 --cl-atlas-gen-<gen>-dim（U10 已在
+   css/atlas-tokens.css 落地这套 -dim 变体），让人一眼看出这条支线挂在哪一代主线下面；
+   parentId 解不出 gen（line.gen==null，JS 侧记成 gen-x class）时才退回中性的 --cl-atlas-branch。
+   twig 复用同一色但透明度更低（opacity .68 vs branch .82），层级感来自透明度不是色相。 */
+.cl-score-bar-branch,
+.cl-score-bar-twig { fill: var(--cl-atlas-branch, var(--abyss-ink-2)); }
+.cl-score-bar-branch { opacity: .82; }
+.cl-score-bar-twig { opacity: .68; }
+.cl-score-bar-branch.gen-0, .cl-score-bar-twig.gen-0 { fill: var(--cl-atlas-gen-0-dim, var(--cl-atlas-branch, var(--abyss-ink-2))); }
+.cl-score-bar-branch.gen-1, .cl-score-bar-twig.gen-1 { fill: var(--cl-atlas-gen-1-dim, var(--cl-atlas-branch, var(--abyss-ink-2))); }
+.cl-score-bar-branch.gen-2, .cl-score-bar-twig.gen-2 { fill: var(--cl-atlas-gen-2-dim, var(--cl-atlas-branch, var(--abyss-ink-2))); }
+.cl-score-bar-branch.gen-3, .cl-score-bar-twig.gen-3 { fill: var(--cl-atlas-gen-3-dim, var(--cl-atlas-branch, var(--abyss-ink-2))); }
+.cl-score-bar-branch.gen-4, .cl-score-bar-twig.gen-4 { fill: var(--cl-atlas-gen-4-dim, var(--cl-atlas-branch, var(--abyss-ink-2))); }
+.cl-score-bar-branch.gen-5, .cl-score-bar-twig.gen-5 { fill: var(--cl-atlas-gen-5-dim, var(--cl-atlas-branch, var(--abyss-ink-2))); }
+.cl-score-bar-branch.gen-x, .cl-score-bar-twig.gen-x { fill: var(--cl-atlas-branch, var(--abyss-ink-2)); }
+.cl-score-bar.is-span-unknown {
+  stroke: var(--cl-atlas-status-unknown, var(--abyss-ink-3));
+  stroke-width: 1;
+  stroke-dasharray: 2 2;
+}
+
+.cl-score-cap-start { fill: var(--cl-text-primary, var(--abyss-ink)); }
+.cl-score-cap-end.is-resolved { fill: var(--cl-atlas-status-resolved, var(--abyss-mint, currentColor)); }
+.cl-score-cap-end.is-suspended { fill: none; stroke: var(--cl-atlas-status-suspended, var(--abyss-ink-3)); stroke-width: 1.4; }
+.cl-score-cap-end.is-open { fill: none; stroke: var(--cl-atlas-status-open, var(--abyss-gold)); stroke-width: 1.4; stroke-dasharray: 2 2; }
+.cl-score-cap-end.is-unknown circle { fill: none; stroke: var(--cl-atlas-status-unknown, var(--abyss-ink-3)); stroke-width: 1; }
+.cl-score-cap-end.is-unknown text { fill: var(--cl-atlas-status-unknown, var(--abyss-ink-3)); font-size: var(--cl-atlas-fs-4, 9.5px); }
+
+.cl-score-tick { stroke: var(--cl-atlas-tick, var(--cl-border, var(--abyss-line))); stroke-width: 1; }
+.cl-score-tick.is-focused { stroke: var(--cl-atlas-turn, var(--abyss-signal-bright)); stroke-width: 2; }
+.cl-score-tick-hit { stroke: transparent; stroke-width: 10; cursor: pointer; }
+.cl-score-tick-hit:hover { stroke: var(--cl-panel-bg-heavy, var(--abyss-obsidian-glass-heavy)); }
+
+.cl-score-turn { fill: var(--cl-atlas-turn, var(--abyss-signal-bright)); }
+
+.cl-score-handoff line { stroke: var(--cl-atlas-handoff, var(--abyss-hot)); stroke-width: 1.4; }
+.cl-score-handoff circle { fill: var(--cl-atlas-handoff, var(--abyss-hot)); }
+.cl-score-handoff.is-unknown line,
+.cl-score-handoff.is-unknown circle {
+  stroke: var(--cl-atlas-status-unknown, var(--abyss-ink-3));
+  fill: var(--cl-atlas-status-unknown, var(--abyss-ink-3));
+  stroke-dasharray: 2 2;
+  opacity: .7;
+}
+/* 主控二轮修正：接头「让位者→接棒者·第N章·理由」提示——native <title> 兜底悬浮提示之外，
+   再自绘一个可 hover/focus 都亮起的标签（SVG 原生 title 在键盘 focus 下不出现，不够无障碍）。 */
+.cl-score-handoff { cursor: pointer; outline: none; }
+.cl-score-handoff-tip { opacity: 0; pointer-events: none; transition: opacity var(--cl-atlas-dur-1, 80ms) linear; }
+.cl-score-handoff:hover .cl-score-handoff-tip,
+.cl-score-handoff:focus .cl-score-handoff-tip,
+.cl-score-handoff:focus-visible .cl-score-handoff-tip { opacity: 1; }
+.cl-score-handoff-tip-bg {
+  fill: var(--cl-panel-bg-heavy, var(--abyss-obsidian-glass-heavy));
+  stroke: var(--cl-atlas-handoff, var(--abyss-hot));
+  stroke-width: 1;
+}
+.cl-score-handoff.is-unknown .cl-score-handoff-tip-bg { stroke: var(--cl-atlas-status-unknown, var(--abyss-ink-3)); }
+.cl-score-handoff-tip-text {
+  fill: var(--cl-text-primary, var(--abyss-ink));
+  font-size: var(--cl-atlas-fs-1, 8px);
+  font-family: var(--abyss-font-sans);
+}
+@media (prefers-reduced-motion: reduce) {
+  .cl-score-handoff-tip { transition: none; }
+}
+
+.cl-score-fork { fill: none; stroke: var(--cl-atlas-branch, var(--abyss-ink-3)); stroke-width: 1; opacity: .75; }
+
+/* ── R7-F：未归线事件轨（JS 只在真有未归线事件时产出 DOM；全归线时这一整段无对应元素）────
+   视觉纪律：暗、克制、可辨但不抢戏——无代次色（不上 gen-N）、无实体条（虚线基线）、刻度也
+   压成暗色虚线；与正式线的「实条 + 代次色」保持明确距离，读者一眼能区分「这不是一条剧情线」。
+   行头/轨道结构与 .cl-score-row / .cl-score-track 同构（同一 rowhead 宽度变量与 sticky 口径），
+   窄屏媒体查询改 --cl-atlas-rowhead-w 时自动跟着变窄，不需要另写断点。 */
+.cl-score-orphan { border-top: 1px dashed var(--cl-border-subtle, var(--abyss-line)); }
+.cl-score-orphan-row {
+  display: flex;
+  align-items: stretch;
+  min-height: calc(var(--sc-row-h) * 1.25);
+  min-width: max-content;
+}
+.cl-score-orphan-rowhead {
+  position: sticky;
+  left: 0;
+  z-index: var(--z-chart, 10);
+  flex: 0 0 auto;
+  width: var(--cl-atlas-rowhead-w, 200px);
+  display: flex;
+  align-items: center;
+  padding: 3px var(--abyss-sp-sm, 6px);
+  background: var(--cl-panel-bg, var(--abyss-obsidian-glass));
+  cursor: default;
+  overflow: hidden;
+  outline: none;
+}
+.cl-score-orphan-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--cl-text-tertiary, var(--abyss-ink-3));
+  font-size: var(--cl-atlas-fs-1, var(--abyss-fs-2xs));
+  font-style: italic;
+}
+.cl-score-orphan-track {
+  flex: 1 1 auto;
+  min-width: max-content;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: visible;
+}
+.cl-score-orphan-baseline {
+  stroke: var(--cl-atlas-status-unknown, var(--abyss-ink-3));
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+  opacity: .45;
+}
+.cl-score-tick.cl-score-orphan-tick {
+  stroke: var(--cl-atlas-status-unknown, var(--abyss-ink-3));
+  stroke-width: 1;
+  stroke-dasharray: 2 2;
+  opacity: .65;
+}
+/* 焦点/角色足迹两态必须压过上面这条暗化（同优先级时靠后写）：原有 .cl-score-tick.is-focused
+   与 .has-character-footprint 的规则在这里显式对未归线刻度重申，避免暗色虚线态吞掉点亮。 */
+.cl-score-tick.cl-score-orphan-tick.is-focused { opacity: 1; stroke-dasharray: none; }
+.has-character-footprint .cl-score-tick.cl-score-orphan-tick { opacity: .22; }
+.has-character-footprint .cl-score-tick.cl-score-orphan-tick.is-character-footprint {
+  opacity: 1;
+  stroke: var(--abyss-gold);
+  stroke-width: 3;
+  stroke-dasharray: none;
+}
+/* 事件卡的「未归线」标：与 cl-score-card-empty 同一低调语系，但加一道虚线小胶囊让它能当
+   一个有名字的标记被看见——不是裸的「没有数据」文案。 */
+.cl-score-card-orphan {
+  font-style: normal;
+  border: 1px dashed var(--cl-border-subtle, var(--abyss-line));
+  border-radius: 999px;
+  padding: 0 var(--abyss-sp-xs, 4px);
+}
+
+/* ── 参与者带 ─────────────────────────────────────────────────────── */
+.cl-score-cast {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: var(--abyss-sp-xs, 4px);
+  padding: 2px var(--abyss-sp-sm, 6px) 3px;
+  overflow: hidden;
+}
+.cl-score-cast.is-expanded { flex-wrap: wrap; overflow: visible; }
+/* 主控修正第 4 点：host ≥1100 且条尾剩余 ≥260px 时，参与者带经 <foreignObject> 内嵌到条尾
+   之后同一行（js 侧 layout() 判定），这里只管这个内嵌态自己不换行、垂直居中撑满行高。 */
+.cl-score-cast-inline {
+  height: 100%;
+  align-items: center;
+  flex-wrap: nowrap;
+  overflow: hidden;
+  padding: 0;
+}
+.cl-score-chip {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 3px;
+  white-space: nowrap;
+  border: 1px solid var(--cl-border-subtle, var(--abyss-line));
+  background: var(--cl-panel-bg-subtle, var(--abyss-obsidian-glass-subtle));
+  color: var(--cl-text-secondary, var(--abyss-ink-2));
+  font-size: var(--cl-atlas-fs-1, var(--abyss-fs-2xs));
+  padding: 1px var(--abyss-sp-xs, 4px);
+  cursor: pointer;
+  line-height: 1.5;
+}
+.cl-score-chip:hover,
+.cl-score-chip:focus-visible { border-color: var(--cl-border-gold, var(--abyss-gold)); color: var(--cl-text-primary, var(--abyss-ink)); }
+.cl-score-chip-lead .cl-score-chip-glyph.is-fallback circle { fill: var(--cl-gold, var(--abyss-gold)); }
+.cl-score-chip-core .cl-score-chip-glyph.is-fallback circle { fill: var(--cl-text-secondary, var(--abyss-ink-2)); }
+.cl-score-chip-minor .cl-score-chip-glyph.is-fallback circle { fill: none; stroke: var(--cl-text-tertiary, var(--abyss-ink-3)); stroke-width: 1; }
+.cl-score-chip.is-extra { display: none; }
+.cl-score-cast.is-expanded .cl-score-chip.is-extra { display: inline-flex; }
+.cl-score-chip-more { font-family: var(--abyss-font-mono); }
+
+/* R3-D #1：窄屏「+N」展开——不是原地 wrap（会把行高越撑越高），是紧跟着的独立块，
+   自己横向滚动看全量（数量不确定，wrap 到多行在 112px 宽行头旁边的窄条里体验更差）。 */
+.cl-score-cast-more {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: var(--abyss-sp-xs, 4px);
+  padding: 2px var(--abyss-sp-sm, 6px) 4px;
+  overflow-x: auto;
+  max-width: 100%;
+}
+.cl-score-cast-more[hidden] { display: none; }
+
+/* ── R3-D 窄屏（≤600px）阅读姿态收口 ─────────────────────────────────────────────
+   1) 行头压到 ≤112px：名一行省略号（既有 .cl-score-name 规则已支持）+ 副标只留「跨N章·M事」；
+   2) 参与者带随视口 sticky（left=行头宽），横向滚事件条时不再被裁出视口——之前只在「行首」
+      可见，滚走事件轴后完全看不到（REVIEW #11 的真实成因，见 R3-D 任务书）。 */
+@media (max-width: 600px) {
+  /* --cl-atlas-rowhead-w 是本文件内部坐标变量（非 U10 契约令牌，全文件 fallback 200px），
+     在 .cl-score-root 上重定义即可让 axis-spacer / rowhead / eventcard / 参与者带 sticky
+     四处已有的 var(--cl-atlas-rowhead-w,200px) 引用统一改口径，不用逐处另写一份窄屏宽度。 */
+  .cl-score-root { --cl-atlas-rowhead-w: 112px; }
+  .cl-score-rowhead {
+    padding: 2px var(--abyss-sp-xs, 4px);
+    font-size: var(--cl-atlas-fs-2, 11px);
+  }
+  .cl-score-status,
+  .cl-score-lead { display: none; }
+  .cl-score-lead + .cl-score-len::before { content: ""; }
+  .cl-score-cast:not(.is-cast-inline) {
+    position: sticky;
+    left: var(--cl-atlas-rowhead-w, 112px);
+    z-index: var(--z-chart, 10);
+    background: var(--cl-panel-bg, var(--abyss-obsidian-glass));
+    max-width: calc(100vw - var(--cl-atlas-rowhead-w, 112px) - 8px);
+  }
+}
+
+/* ── R5-M ②：820 平板（601–900px）两级刻度收口 ───────────────────────────────────
+   行头压到 ≤96px（比 R3-D 的 112px 更紧，配合 js layout() 的两级变宽列——主刻度列留够章号
+   数字宽度、次刻度列只留短刻度线宽），让 22 行在 814px clientWidth 内不必再靠 score 容器
+   自己横向滚（js/atlas/atlas-score.js computeTwoLevelWidths() 按这段腾出的 avail 精确算列宽，
+   两处数字必须一起看，改一处要连带看另一处）。390（≤600px）走上面 R3-D 既有方案，不进这段；
+   1440（>900px）走原有均匀列宽，也不进这段。 */
+@media (min-width: 601px) and (max-width: 900px) {
+  .cl-score-root { --cl-atlas-rowhead-w: 96px; }
+  .cl-score-rowhead {
+    padding: 2px var(--abyss-sp-xs, 4px);
+    font-size: var(--cl-atlas-fs-2, 11px);
+  }
+  .cl-score-status,
+  .cl-score-lead { display: none; }
+  .cl-score-lead + .cl-score-len::before { content: ""; }
+}
+/* 两级刻度视觉分级：主刻度（is-axis-major，每 5 章一个）线更粗、文字更亮；次刻度
+   （is-axis-minor）只画细短线，不带文字——js buildAxisSvgHtml() 已经按 majorMask 只在主刻度
+   列输出 <text>，这里只补一层粗细/明暗对比，不新增颜色令牌。 */
+.cl-score-axis-col.is-axis-major line { stroke-width: 1.4; }
+.cl-score-axis-col.is-axis-major text {
+  fill: var(--cl-text-secondary, var(--abyss-ink-2));
+  font-weight: 600;
+}
+.cl-score-axis-col.is-axis-minor line { stroke-width: .75; opacity: .6; }
+
+/* ── 事件卡（主控二轮修正：从「底部一排裸标签」重设计成靠近被点行的层级卡片）──────────────
+   定位：绝对定位在 .cl-score-body 内（body 是 position:relative），left/width 让位给行头宽度
+   （静态 CSS，不遮 .cl-score-rowhead 那一列）；top 由 js positionEventCard() 按行的
+   offsetTop/实测卡片高度算出「贴在行上方还是下方」，写进 .style.top（动态坐标，不是新增
+   style=" 违规——inline_style_lint 的 ratchet 只数字面量 style=" 出现次数，.style. 属性赋值
+   走的是 DOM API，不落进那个字符串统计）。 */
+.cl-score-eventcard {
+  position: absolute;
+  left: var(--cl-atlas-rowhead-w, 200px);
+  right: var(--abyss-sp-lg, 16px);
+  z-index: var(--z-panel, 200);
+  max-width: 480px;
+  max-height: 70vh;
+  overflow: auto;
+  padding: var(--abyss-sp-md, 10px) var(--abyss-sp-lg, 16px) var(--abyss-sp-md, 10px) var(--abyss-sp-md, 10px);
+  background: var(--cl-panel-bg-heavy, var(--abyss-obsidian-glass-heavy));
+  border: 1px solid var(--cl-border, var(--abyss-line));
+  color: var(--cl-text-primary, var(--abyss-ink));
+  /* R5-M ③：开合节律——关闭 120ms、打开 160ms ease-out（下面 :not(.is-hidden) 覆盖成
+     160ms）。用 opacity+visibility 而不是 display:none 表达隐藏态，是因为 display:none 无法
+     参与过渡（元素从 none 变 block 那一刻已经是终值，浏览器不会补间）；visibility 延迟到过渡
+     结束才切换，保证隐藏期间不可点击也不占可访问性焦点顺序。连续方向键切事件时 showEventCard()
+     只替换 .cl-score-eventcard-body 的 innerHTML、不触碰 is-hidden，这条过渡因此只在真正
+     打开/关闭那一次触发，不会在切事件时重新播放而“闪”。 */
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(4px);
+  transition: opacity 120ms var(--cl-atlas-ease, var(--abyss-ease-out-abyss)),
+    transform 120ms var(--cl-atlas-ease, var(--abyss-ease-out-abyss)),
+    visibility 0s linear 120ms;
+}
+.cl-score-eventcard:not(.is-hidden) {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  transition: opacity 160ms var(--cl-atlas-ease, var(--abyss-ease-out-abyss)),
+    transform 160ms var(--cl-atlas-ease, var(--abyss-ease-out-abyss)),
+    visibility 0s linear 0s;
+}
+@media (prefers-reduced-motion: reduce) {
+  .cl-score-eventcard,
+  .cl-score-eventcard:not(.is-hidden) { transition: none; }
+}
+.cl-score-eventcard.is-pos-below { border-top: 2px solid var(--cl-atlas-turn, var(--abyss-signal-bright)); }
+.cl-score-eventcard.is-pos-above { border-bottom: 2px solid var(--cl-atlas-turn, var(--abyss-signal-bright)); }
+/* R3-D #2：横向对齐被点刻度——默认卡片贴刻度右侧（accent 摆左边，朝着刻度）；空间不够时
+   JS 翻到刻度左侧（.is-anchor-flip，accent 摆右边）。左右各自独立于上面的上/下 accent。 */
+.cl-score-eventcard:not(.is-anchor-flip) { border-left: 2px solid var(--cl-atlas-turn, var(--abyss-signal-bright)); }
+.cl-score-eventcard.is-anchor-flip { border-right: 2px solid var(--cl-atlas-turn, var(--abyss-signal-bright)); }
+.cl-score-eventcard.is-hidden { pointer-events: none; }
+.cl-score-eventcard-close {
+  position: absolute;
+  top: var(--abyss-sp-xs, 4px);
+  right: var(--abyss-sp-sm, 6px);
+  background: none;
+  border: none;
+  color: var(--cl-text-tertiary, var(--abyss-ink-3));
+  cursor: pointer;
+  font-family: var(--abyss-font-mono);
+  font-size: var(--cl-atlas-fs-2, var(--abyss-fs-sm));
+}
+.cl-score-eventcard-close:hover,
+.cl-score-eventcard-close:focus-visible { color: var(--cl-text-primary, var(--abyss-ink)); }
+.cl-score-eventcard-body { display: block; }
+.cl-score-card-title {
+  margin: 0 var(--abyss-sp-lg, 16px) var(--abyss-sp-xs, 4px) 0;
+  font-size: var(--cl-atlas-fs-1, var(--abyss-fs-lg));
+  font-weight: 700;
+  color: var(--cl-text-primary, var(--abyss-ink));
+}
+.cl-score-card-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--abyss-sp-xs, 4px);
+  margin-bottom: var(--abyss-sp-sm, 6px);
+}
+.cl-score-card-pill {
+  display: inline-block;
+  padding: 1px var(--abyss-sp-sm, 6px);
+  border: 1px solid var(--cl-border-subtle, var(--abyss-line));
+  border-radius: 999px;
+  font-size: var(--cl-atlas-fs-2, var(--abyss-fs-sm));
+  color: var(--cl-text-secondary, var(--abyss-ink-2));
+}
+.cl-score-card-pill-chap { color: var(--cl-text-tertiary, var(--abyss-ink-3)); }
+.cl-score-card-pill-kind { border-color: var(--cl-border-gold, var(--abyss-gold)); color: var(--cl-atlas-status-open, var(--abyss-gold)); }
+.cl-score-card-cast {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--abyss-sp-xs, 4px);
+  margin-bottom: var(--abyss-sp-sm, 6px);
+}
+.cl-score-card-chip { cursor: default; }
+.cl-score-card-lines {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--abyss-sp-sm, 6px);
+  margin-bottom: var(--abyss-sp-sm, 6px);
+  font-size: var(--cl-atlas-fs-2, var(--abyss-fs-sm));
+  color: var(--cl-text-secondary, var(--abyss-ink-2));
+}
+.cl-score-card-line { display: inline-flex; align-items: center; gap: 4px; }
+.cl-score-card-linebar {
+  display: inline-block;
+  width: 3px;
+  height: 12px;
+  border-radius: 2px;
+  background: currentColor;
+}
+/* 所属线色条复用 track 条同一套 gen 上色规则（cl-score-bar-main/branch/twig.gen-N），
+   这里只是把 <rect fill> 语义换成 <span background>，颜色令牌是同一份，不重造。 */
+.cl-score-card-linebar.cl-score-bar-main.gen-0 { background: var(--cl-atlas-gen-0, var(--abyss-gold)); }
+.cl-score-card-linebar.cl-score-bar-main.gen-1 { background: var(--cl-atlas-gen-1, var(--abyss-signal)); }
+.cl-score-card-linebar.cl-score-bar-main.gen-2 { background: var(--cl-atlas-gen-2, var(--abyss-hot)); }
+.cl-score-card-linebar.cl-score-bar-main.gen-3 { background: var(--cl-atlas-gen-3, var(--abyss-violet)); }
+.cl-score-card-linebar.cl-score-bar-main.gen-4 { background: var(--cl-atlas-gen-4, var(--abyss-violet-dim, var(--abyss-violet))); }
+.cl-score-card-linebar.cl-score-bar-main.gen-5 { background: var(--cl-atlas-gen-5, var(--abyss-mint)); }
+.cl-score-card-linebar.cl-score-bar-branch,
+.cl-score-card-linebar.cl-score-bar-twig { background: var(--cl-atlas-branch, var(--abyss-ink-2)); }
+.cl-score-card-empty { color: var(--cl-text-tertiary, var(--abyss-ink-3)); font-style: italic; font-size: var(--cl-atlas-fs-2, var(--abyss-fs-sm)); }
+/* 原文引句：最多 3 行，超出才露出展开按钮（js 用 scrollHeight>clientHeight 判定是否真的被裁）。 */
+.cl-score-card-quote {
+  margin: 0 0 var(--abyss-sp-sm, 6px);
+  padding: var(--abyss-sp-xs, 4px) 0 var(--abyss-sp-xs, 4px) var(--abyss-sp-md, 10px);
+  border-left: 2px solid var(--cl-atlas-handoff, var(--abyss-hot));
+}
+.cl-score-card-quote-text {
+  margin: 0;
+  color: var(--cl-text-secondary, var(--abyss-ink-2));
+  font-size: var(--cl-atlas-fs-2, var(--abyss-fs-sm));
+  font-style: italic;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+}
+.cl-score-card-quote[data-quote-state="expanded"] .cl-score-card-quote-text {
+  -webkit-line-clamp: unset;
+  overflow: visible;
+}
+.cl-score-card-quote-toggle {
+  margin-top: 2px;
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--cl-atlas-status-open, var(--abyss-gold));
+  cursor: pointer;
+  font-size: var(--cl-atlas-fs-1, var(--abyss-fs-2xs));
+}
+.cl-score-card-summary {
+  margin: 0 0 var(--abyss-sp-md, 10px);
+  color: var(--cl-text-secondary, var(--abyss-ink-2));
+  font-size: var(--cl-atlas-fs-2, var(--abyss-fs-sm));
+}
+.cl-score-card-locate {
+  display: inline-block;
+  padding: var(--abyss-sp-xs, 4px) var(--abyss-sp-md, 10px);
+  border: 1px solid var(--cl-border-gold, var(--abyss-gold));
+  border-radius: 3px;
+  background: none;
+  color: var(--cl-atlas-status-open, var(--abyss-gold));
+  cursor: pointer;
+  font-size: var(--cl-atlas-fs-2, var(--abyss-fs-sm));
+}
+.cl-score-card-locate:hover,
+.cl-score-card-locate:focus-visible { background: var(--cl-panel-bg-subtle, var(--abyss-obsidian-glass-subtle)); }
+
+/* ── 无障碍 / 降级 ────────────────────────────────────────────────── */
+.cl-score-root:focus-visible,
+.cl-score-row:focus-visible,
+.cl-score-chip:focus-visible,
+.cl-score-genhead:focus-visible {
+  outline: 2px solid var(--abyss-signal-bright, var(--cl-gold));
+  outline-offset: -2px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .cl-score-genhead::before { transition: none; }
+}
+
+/* ── v71 W2 · U7：代次总览轨（GEN OVERVIEW RAIL）──────────────────────────────────
+   章轴之下、第一代次组之上；每代一格，格宽 = 该代事件数占比（flexGrow 由 js layout() 按
+   data-grow 用 DOM API 写入，本文件不写任何坐标/宽度字面内联）。视觉语言与线谱同源：
+   代次色用 --cl-atlas-gen-*（主线/格名/活跃格描边），支线/末梢叠影用 -dim 低饱和基色，
+   状态帽语义不在这条轨上重复（轨只讲「代次规模与跨度」，不讲收束状态）。 */
+.cl-score-overview {
+  display: flex;
+  align-items: stretch;
+  gap: 2px;
+  padding: var(--abyss-sp-xs, 4px) var(--abyss-sp-sm, 6px);
+  background: var(--cl-panel-bg, var(--abyss-obsidian-glass));
+  border-bottom: 1px solid var(--cl-border, var(--abyss-border, var(--abyss-line)));
+  overflow-x: auto;
+}
+.cl-score-ovcell {
+  flex: 1 1 0;
+  min-width: 64px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: var(--abyss-sp-xs, 4px) var(--abyss-sp-sm, 6px);
+  background: var(--cl-panel-bg-subtle, var(--abyss-obsidian-glass-subtle));
+  border: 1px solid var(--cl-border-subtle, var(--abyss-line));
+  border-radius: var(--cl-atlas-radius, var(--abyss-radius-sm));
+  color: var(--cl-text-secondary, var(--abyss-ink-2));
+  font-family: var(--abyss-font-sans);
+  text-align: left;
+  cursor: pointer;
+  overflow: hidden;
+  /* 错峰入场：延迟由 js 按格序写入（26ms/格），这里只定义动画本体 */
+  opacity: 0;
+  transform: translateY(-4px);
+  animation: cl-score-ov-in var(--cl-atlas-dur-2, 160ms) var(--cl-atlas-ease, var(--abyss-ease-out-abyss)) forwards;
+}
+@keyframes cl-score-ov-in {
+  to { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cl-score-ovcell { animation: none; opacity: 1; transform: none; }
+}
+.cl-score-ovcell:hover,
+.cl-score-ovcell:focus-visible {
+  border-color: var(--cl-border-gold, var(--abyss-gold));
+  color: var(--cl-text-primary, var(--abyss-ink));
+}
+.cl-score-ovcell:focus-visible {
+  outline: 2px solid var(--abyss-signal-bright, var(--cl-gold));
+  outline-offset: -2px;
+}
+/* 当前活跃主线所在代次高亮：代次色描边 + 格名提亮（颜色只是第二通道，is-active 格同时
+   在格名前多一枚「▸」符号，色盲/低饱和下仍可辨）。 */
+.cl-score-ovcell.is-active { border-color: var(--cl-text-secondary, var(--abyss-ink-2)); }
+.cl-score-ovcell.is-active .cl-score-ov-gen::before { content: "▸ "; }
+.cl-score-ovcell.is-active.gen-0 { border-color: var(--cl-atlas-gen-0, var(--abyss-gold)); }
+.cl-score-ovcell.is-active.gen-1 { border-color: var(--cl-atlas-gen-1, var(--abyss-signal)); }
+.cl-score-ovcell.is-active.gen-2 { border-color: var(--cl-atlas-gen-2, var(--abyss-hot)); }
+.cl-score-ovcell.is-active.gen-3 { border-color: var(--cl-atlas-gen-3, var(--abyss-violet)); }
+.cl-score-ovcell.is-active.gen-4 { border-color: var(--cl-atlas-gen-4, var(--abyss-violet-dim, var(--abyss-violet))); }
+.cl-score-ovcell.is-active.gen-5 { border-color: var(--cl-atlas-gen-5, var(--abyss-mint)); }
+.cl-score-ovcell.is-active.gen-x { border-color: var(--cl-text-secondary, var(--abyss-ink-2)); }
+
+.cl-score-ov-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--abyss-sp-xs, 4px);
+  font-size: var(--cl-atlas-fs-3, var(--abyss-fs-2xs));
+}
+.cl-score-ov-gen { font-weight: 600; white-space: nowrap; }
+.cl-score-ovcell.gen-0 .cl-score-ov-gen { color: var(--cl-atlas-gen-0, var(--abyss-gold)); }
+.cl-score-ovcell.gen-1 .cl-score-ov-gen { color: var(--cl-atlas-gen-1, var(--abyss-signal)); }
+.cl-score-ovcell.gen-2 .cl-score-ov-gen { color: var(--cl-atlas-gen-2, var(--abyss-hot)); }
+.cl-score-ovcell.gen-3 .cl-score-ov-gen { color: var(--cl-atlas-gen-3, var(--abyss-violet)); }
+.cl-score-ovcell.gen-4 .cl-score-ov-gen { color: var(--cl-atlas-gen-4, var(--abyss-violet-dim, var(--abyss-violet))); }
+.cl-score-ovcell.gen-5 .cl-score-ov-gen { color: var(--cl-atlas-gen-5, var(--abyss-mint)); }
+.cl-score-ovcell.gen-x .cl-score-ov-gen { color: var(--cl-text-tertiary, var(--abyss-ink-3)); font-style: italic; }
+.cl-score-ov-events {
+  color: var(--cl-text-tertiary, var(--abyss-ink-3));
+  font-family: var(--abyss-font-mono);
+  white-space: nowrap;
+}
+.cl-score-ov-main {
+  font-size: var(--cl-atlas-fs-2, var(--abyss-fs-sm));
+  color: var(--cl-text-primary, var(--abyss-ink));
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cl-score-ov-main.is-none { color: var(--cl-text-tertiary, var(--abyss-ink-3)); font-style: italic; }
+.cl-score-ov-sub {
+  font-size: var(--cl-atlas-fs-4, var(--abyss-fs-2xs));
+  color: var(--cl-text-tertiary, var(--abyss-ink-3));
+  white-space: nowrap;
+}
+
+/* 迷你甘特：该代全部线的跨度叠影——主线最亮（代次色实心），支线/末梢半透明低饱和，
+   叠在一起形成密度感；几何（x/width/y/height）全部来自 js 写的 SVG 属性。 */
+.cl-score-ov-gantt {
+  display: block;
+  width: 100%;
+  height: 14px;
+  margin-top: 2px;
+}
+.cl-score-ov-span.is-branch { fill: var(--cl-atlas-branch-dim, var(--cl-atlas-branch, var(--abyss-ink-2))); opacity: .5; }
+.cl-score-ov-span.is-twig { fill: var(--cl-atlas-twig-dim, var(--cl-atlas-twig, var(--abyss-ink-3))); opacity: .4; }
+.cl-score-ov-span.is-main.gen-0 { fill: var(--cl-atlas-gen-0, var(--abyss-gold)); }
+.cl-score-ov-span.is-main.gen-1 { fill: var(--cl-atlas-gen-1, var(--abyss-signal)); }
+.cl-score-ov-span.is-main.gen-2 { fill: var(--cl-atlas-gen-2, var(--abyss-hot)); }
+.cl-score-ov-span.is-main.gen-3 { fill: var(--cl-atlas-gen-3, var(--abyss-violet)); }
+.cl-score-ov-span.is-main.gen-4 { fill: var(--cl-atlas-gen-4, var(--abyss-violet-dim, var(--abyss-violet))); }
+.cl-score-ov-span.is-main.gen-5 { fill: var(--cl-atlas-gen-5, var(--abyss-mint)); }
+.cl-score-ov-span.is-main.gen-x { fill: var(--cl-text-tertiary, var(--abyss-ink-3)); }
+
+/* ≤40 线（未折叠）紧凑态：轨更矮、副标收起、甘特压扁——信息保留，视觉让位给正文。 */
+.cl-score-overview.is-compact .cl-score-ovcell { padding: 2px var(--abyss-sp-xs, 4px); }
+.cl-score-overview.is-compact .cl-score-ov-sub { display: none; }
+.cl-score-overview.is-compact .cl-score-ov-gantt { height: 8px; margin-top: 1px; }
+
+/* 总览轨点击后的 scrollIntoView(block:'start') 落点补偿：sticky 章轴（约 19px）+ 总览轨
+   自身高度，避免目标代次组头被吸顶元素遮住（纯 CSS scroll-margin，js 不算像素）。 */
+.cl-score-gen { scroll-margin-top: 108px; }
+
+@media (max-width: 600px) {
+  .cl-score-ovcell { min-width: 56px; }
+  .cl-score-ov-main { display: none; }
+}

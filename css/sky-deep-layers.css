@@ -1,0 +1,277 @@
+/* @role micro（微交互动效师）· 原 回微互
+ * @owns css/sky-deep-layers.css
+ * @budget kb 7（纯样式层：drawcalls 0 / points 0 / vertices 0 / rtpx 0 / passes 0）
+ * @contract deep-sky/1
+ * 说明：WebGL 光层接管后，SVG 只负责清晰的字与命中。本文件不改任何几何类，
+ *       只切可见性、字重、描边与光晕；本文件在旧 sky*.css 之后加载。
+ * 约定：宿主在 WebGL 光层可用时给 body 加 .skd-gl。 */
+
+/* ── 星盘 .sky-disc：几何归零，字与命中留存 ───────────────────── */
+body.skd-gl .sky-disc .sd-arc,
+body.skd-gl .sky-disc .sd-dot,
+body.skd-gl .sky-disc .sd-ring,
+body.skd-gl .sky-disc .sd-tick,
+body.skd-gl .sky-disc .sd-dormant,
+body.skd-gl .sky-disc .sd-comet,
+body.skd-gl .sky-disc .sd-cur-mark {
+  stroke-opacity: 0;
+  fill-opacity: 0;
+}
+
+.sky-disc .sd-label {
+  font-family: var(--skd-font-serif);
+  letter-spacing: .08em;
+  fill: var(--skd-ink-2);
+  paint-order: stroke;
+  stroke: var(--skd-void-0);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
+.sky-disc .sd-label.is-main {
+  fill: var(--skd-brass-hot);
+  font-size: var(--skd-fs-md);
+  letter-spacing: .22em;
+}
+.sky-disc .sd-label.is-on { fill: var(--skd-ink); }
+.sky-disc.is-plot.sd-emph .sd-label.is-on:not(.is-fit) { opacity: 0; }
+/* 悬停与键盘焦点等价（只切描边色，不引入额外时长令牌） */
+.sky-disc .sd-label:hover,
+.sky-disc .sd-label:focus-visible { fill: var(--skd-ink); }
+
+.sky-disc .sd-num,
+.sky-disc .sd-cur-num {
+  font-family: var(--skd-font-mono, monospace);
+  fill: var(--skd-ink-3);
+  font-size: var(--skd-fs-xs);
+}
+.sky-disc .sd-cur-num { fill: var(--skd-brass-hot); }
+
+/* 参与者光丝：几何仍可命中，流动只作读数 */
+.sky-disc .sd-tether path {
+  stroke-width: 1.4px;
+  stroke-linecap: round;
+  stroke-dasharray: 3 7;
+  filter: drop-shadow(0 0 3px currentColor);
+  animation: skd-flow 1.6s linear infinite; /* G4 豁免：仅悬停期间的读数动效 */
+}
+.sky-disc .sd-tether circle { filter: drop-shadow(0 0 6px currentColor); }
+.sky-disc .sd-knot {
+  fill: var(--skd-brass-hot);
+  stroke: var(--skd-void-0);
+}
+
+/* ── 星域 .sky-field：束与星云交回 WebGL，轮廓与团名留给 SVG ──── */
+body.skd-gl .sky-field .sf-thread,
+body.skd-gl .sky-field .sf-beam,
+body.skd-gl .sky-field .sf-beam-core,
+body.skd-gl .sky-field .sf-tint {
+  opacity: 0;
+}
+
+.sky-field .sf-rim {
+  stroke: var(--skd-hair-brass);
+  stroke-width: 1px;
+  opacity: .55;
+}
+.sky-field .sf-core {
+  stroke: var(--skd-hair-2);
+  stroke-dasharray: 2 6;
+}
+.sky-field .sf-edge { stroke: var(--skd-hair-2); }
+
+.sky-field .sf-name .sf-n {
+  font-family: var(--skd-font-serif);
+  letter-spacing: .42em;
+  fill: color-mix(in oklch, var(--sf-c) 62%, var(--skd-ink));
+  paint-order: stroke;
+  stroke: var(--skd-void-0);
+  stroke-width: 4px;
+  filter: drop-shadow(0 0 6px color-mix(in oklch, var(--sf-c) 55%, transparent));
+}
+.sky-field .sf-name.is-hot .sf-n,
+.sky-field .sf-name:hover .sf-n,
+.sky-field .sf-name:focus-visible .sf-n {
+  fill: var(--skd-ink);
+}
+.sky-field .sf-k {
+  font-family: var(--skd-font-mono, monospace);
+  fill: var(--skd-ink-3);
+  font-size: var(--skd-fs-xs);
+}
+.sky-field .sf-name.is-sel .sf-n {
+  text-decoration: underline;
+  text-decoration-color: var(--sf-c);
+}
+
+/* ── 罗盘 .sky-compass（SVG 挂在 body 下）──────────────────── */
+.sky-compass .skc-ring {
+  stroke: var(--skd-hair-brass);
+  stroke-dasharray: 1 5;
+  opacity: .7;
+}
+/* 罗盘 SVG 里有一条常驻流动的因果链：同一张 SVG 上任何常亮的 drop-shadow 都会被逐帧重新栅格化
+   （孙悟空 87 颗珠实测 60 → 28 fps）。所以常亮的辉光一律用描边光圈代替，滤镜只留给悬停时的那一两个元素 */
+.sky-compass .skc-link {
+  stroke-width: 1.2px;
+}
+.sky-compass .skc-link.is-lit {
+  stroke-width: 1.8px;
+  stroke-dasharray: 4 6;
+  animation: skd-flow 1.4s linear infinite; /* G4 豁免：仅悬停期间的读数动效 */
+}
+.sky-compass .skc-sat-star {
+  stroke: color-mix(in oklch, var(--skc-c) 38%, transparent);
+  stroke-width: 4px;
+  paint-order: stroke;
+}
+.sky-compass .skc-sat.is-lit .skc-sat-star { stroke: color-mix(in oklch, var(--skc-c) 45%, transparent); stroke-width: 5px; paint-order: stroke; }
+.sky-compass .skc-sat-name {
+  font-family: var(--skd-font-serif);
+  fill: var(--skd-ink);
+  paint-order: stroke;
+  stroke: var(--skd-void-0);
+  stroke-width: 3px;
+}
+.sky-compass .skc-sat-kind {
+  font-family: var(--skd-font-mono, monospace);
+  fill: var(--skd-ink-3);
+}
+.sky-compass .skc-sat.is-lit .skc-sat-name,
+.sky-compass .skc-sat:hover .skc-sat-name,
+.sky-compass .skc-sat:focus-visible .skc-sat-name {
+  fill: var(--skd-brass-hot);
+}
+
+/* 因果链：流向即读数，节拍不可长于契约可读窗口 */
+.sky-compass .skc-chain-line {
+  stroke: var(--skd-brass);
+  stroke-width: 1.4px;
+  stroke-dasharray: 2 10;
+  animation: skd-flow 2.4s steps(24) infinite; /* G4 豁免：因果流向即读数；steps(24) = 10 Hz，压掉逐帧重绘 */
+}
+.sky-compass .skc-step { stroke: var(--skd-hair-brass); }
+.sky-compass .skc-ev { fill: var(--skd-ink-2); }
+.sky-compass .skc-ev.is-key {
+  fill: var(--skd-brass-hot);
+  stroke: color-mix(in oklch, var(--skd-brass) 40%, transparent);
+  stroke-width: 3.5px;
+  paint-order: stroke;
+}
+.sky-compass .skc-ev.is-on {
+  fill: var(--skd-ink);
+  /* 描边光圈代替 drop-shadow：同一张 SVG 上有常驻的因果链流光，滤镜会被逐帧重栅格化（4K 罗盘掉 6 fps） */
+  stroke: color-mix(in oklch, var(--skd-brass-hot) 45%, transparent);
+  stroke-width: 7px;
+  paint-order: stroke;
+}
+.sky-compass .skc-ev-label {
+  font-family: var(--skd-font-serif);
+  fill: var(--skd-ink-2);
+  paint-order: stroke;
+  stroke: var(--skd-void-0);
+  stroke-width: 3px;
+}
+.sky-compass .skc-chain-title {
+  font-family: var(--skd-font-mono, monospace);
+  fill: var(--skd-ink-3);
+  letter-spacing: .2em;
+}
+
+/* 罗盘入场（一次性，sky-deep 加减 .skd-cascade）：因果珠按回序点燃，联系对象与连线按强弱浮现。
+   卫星组的位置写在 transform 属性上，所以它们只动透明度，不动 CSS transform */
+.sky-compass.skd-cascade .skc-ev {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: skd-ev-in var(--skd-dur-focus) var(--skd-ease-out) both;
+  animation-delay: calc(var(--skd-i, 0) * var(--skd-dur-fly));
+}
+.sky-compass.skd-cascade .skc-sat,
+.sky-compass.skd-cascade .skc-link {
+  animation: skd-fade-in var(--skd-dur-focus) var(--skd-ease-out) both;
+  animation-delay: calc(var(--skd-i, 0) * var(--skd-dur-focus));
+}
+@keyframes skd-ev-in {
+  from { opacity: 0; transform: scale(.2); }
+  55% { opacity: 1; transform: scale(1.8); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes skd-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* 关系星轨图例：光层把联系对象按关系类型放上晶体外的三道星轨（只列有卫星的轨） */
+body.skd-gl .skc-note[data-orbit]::after {
+  content: '星轨 ' attr(data-orbit);
+  display: inline-flex;
+  align-items: center;
+  color: var(--skd-ink-3);
+  letter-spacing: var(--skd-track);
+  padding-left: 16px;
+  background: radial-gradient(closest-side, var(--skd-ink-2), transparent) left center / 7px 7px no-repeat;
+}
+
+@keyframes skd-flow {
+  to { stroke-dashoffset: -20; }
+}
+
+/* ── 减弱动效：流动一律冻结，终态＝静止虚线，字与命中不变 ───── */
+@media (prefers-reduced-motion: reduce) {
+  .sky-disc .sd-tether path,
+  .sky-compass .skc-link.is-lit,
+  .sky-compass .skc-chain-line {
+    animation: none;
+  }
+}
+body.skylab-still .sd-tether path,
+body.skylab-still .skc-link.is-lit,
+body.skylab-still .skc-chain-line {
+  animation: none;
+}
+
+/* ── 低端档：省掉每帧 drop-shadow 与虚线流动，命中与字全留 ───── */
+[data-tier="low"] .sd-tether path,
+[data-tier="low"] .sf-name .sf-n,
+[data-tier="low"] .skc-chain-line {
+  filter: none;
+  animation: none;
+}
+
+/* 主线空档（此段未识别主线）保留为淡点线：光层不画它，SVG 这一笔要留着说实话 */
+body.skd-gl .sky-disc .sd-dormant{stroke-opacity:.55}
+.sky-disc .sd-dormant{stroke:var(--skd-ink-3);stroke-dasharray:1 5;stroke-width:1.2px}
+/* 卷界：分卷重排章号时写在刻度环外 */
+.sky-disc .sd-vol{font-family:var(--skd-font-mono);font-size:var(--skd-fs-xs);fill:var(--skd-brass);letter-spacing:.18em;text-anchor:middle;dominant-baseline:middle;paint-order:stroke;stroke:var(--skd-void-0);stroke-width:3px}
+.sky-disc.is-backdrop .sd-vol{visibility:hidden}
+
+/* 星名：与团名同一宋体字族、细字距，深空描影 + 极淡冷辉光（星名是读数，不发强光） */
+body.sky-shell #labels .cl-lab.char .ln{font-family:var(--skd-font-serif);letter-spacing:.07em;text-shadow:0 0 4px var(--skd-void-0),0 0 10px oklch(80% .06 285 / .22)}
+body.sky-shell #labels .cl-lab.char .ln[data-b]::before{font-family:var(--skd-font-mono);color:var(--skd-brass);opacity:.72}
+
+/* 窄屏：视角工具条改到右下、横排，不压盘面 */
+@media (max-width: 560px){
+  .skd-views{top:auto;bottom:96px;right:12px;transform:none;flex-direction:row}
+}
+
+/* 触屏：画布上的单指拖动 / 双指捏合交给镜头（旋转 / 缩放平移），不让浏览器拿去滚动或整页缩放 */
+body.sky-shell #gl{touch-action:none}
+
+/* 背景态星盘在光层下没有可见内容：不做整张 SVG 的模糊栅格化 */
+body.skd-gl .sky-disc.is-backdrop{filter:none}
+
+/* 旧壳的氛围层（全屏 screen 混合的辉光帷幕 + 视野两侧滚动的铭文列）在光层下关掉：深空天球接管氛围；
+   全屏混合层每帧都要跟着画布重新合成，4K 下很贵，还会给深空蒙一层紫粉 */
+body.skd-gl::after,
+body.skd-gl #labels::before,
+body.skd-gl #labels::after { content: none; animation: none; }
+
+/* 晶体引线：drop-shadow 滤镜让 32 条引线逐帧离屏模糊（原生 4K 罗盘 54 → 60 fps）；光层下改用略粗的描边、不开滤镜 */
+body.skd-gl .cl-lead{filter:none;stroke-width:1.15}
+body.skd-gl .cl-lead.pk{filter:none;stroke-width:1.9}
+
+/* 合成层隔离：读层 SVG 与标签层各自一层——它们逐帧更新时只重光栅自己，不再连带整页根层（旋转 / 星盘 / 罗盘时根层每帧整屏重绘） */
+body.skd-gl .sky-field,
+body.skd-gl .sky-disc,
+body.skd-gl .sky-compass,
+body.skd-gl #labels,
+body.skd-gl .cl-leads { will-change: transform; overflow: hidden; contain: strict; }

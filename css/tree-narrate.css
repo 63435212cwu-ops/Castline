@@ -1,0 +1,146 @@
+/*!
+ * @role css-token
+ * @owns css/tree-narrate.css
+ * @budget n/a
+ * @contract v44（v43 基线 + 章梭三件 ⟪章/章读数/章⟫ + 跟读开关）
+ *
+ * 播控条 #clNarrate（叙事自动播放 v43 · 章梭/跟读 v44）样式。
+ * 约定：全部颜色/圆角/间距/阴影/字阶只引用既有令牌；本文件不写 hex。
+ * DOM 固定：div#clNarrate > button#clNarratePlay · button#clNarrateSpeed · span#clNarrateProg
+ *          · button#clNarrateJumpPrev · span#clNarrateJumpLbl · button#clNarrateJumpNext
+ *          · button#clNarrateFollow。
+ * z-index 8 < 图例 12，不抢既有面板层级。播控条自身不做动画。
+ */
+
+@layer components {
+
+  /* 容器：贴底居中的玻璃牌层；整条穿透，只有按钮吃点击 */
+  #clNarrate {
+    position: fixed;
+    left: 50%;
+    bottom: 1.5rem;
+    transform: translateX(-50%);
+    z-index: 8;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.35rem 0.6rem;
+    background: var(--glass);
+    border: 1px solid var(--line);
+    border-radius: 1.75rem;
+    font-family: var(--sans);
+    pointer-events: none;
+    -webkit-backdrop-filter: blur(0.4rem) saturate(1.2);
+    backdrop-filter: blur(0.4rem) saturate(1.2);
+  }
+
+  /* 按钮：控件本体，恢复点击；三态齐备。章梭 ⟪章/章⟫ 与跟读开关同族同规格 */
+  #clNarratePlay,
+  #clNarrateSpeed,
+  #clNarrateJumpPrev,
+  #clNarrateJumpNext,
+  #clNarrateFollow {
+    pointer-events: auto;
+    box-sizing: border-box;
+    min-height: 1.75rem;
+    padding: 0.35rem 0.7rem;
+    font-family: var(--mono);
+    font-size: 12px;
+    line-height: 1;
+    color: var(--ink-2);
+    background: var(--glass-2);
+    border: 1px solid var(--line-2);
+    border-radius: 1rem;
+    cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  #clNarratePlay:hover,
+  #clNarrateSpeed:hover,
+  #clNarrateJumpPrev:hover,
+  #clNarrateJumpNext:hover,
+  #clNarrateFollow:hover {
+    color: var(--ink);
+    border-color: var(--line);
+  }
+
+  #clNarratePlay:active,
+  #clNarrateSpeed:active,
+  #clNarrateJumpPrev:active,
+  #clNarrateJumpNext:active,
+  #clNarrateFollow:active {
+    color: var(--ink-2);
+    background: var(--glass);
+  }
+
+  #clNarratePlay:focus-visible,
+  #clNarrateSpeed:focus-visible,
+  #clNarrateJumpPrev:focus-visible,
+  #clNarrateJumpNext:focus-visible,
+  #clNarrateFollow:focus-visible {
+    outline: 0.125rem solid var(--cyan);
+    outline-offset: 0.125rem;
+    color: var(--ink);
+  }
+
+  /* 播放中一眼可辨：按钮描边与文字色转向 cyan 系 */
+  #clNarrate[data-playing="1"] #clNarratePlay {
+    color: var(--cyan-2);
+    border-color: var(--cyan);
+  }
+
+  /* 进度文字：纯读数，保持穿透 */
+  #clNarrateProg {
+    pointer-events: none;
+    padding: 0 0.35rem;
+    font-family: var(--mono);
+    font-size: 12px;
+    line-height: 1;
+    color: var(--ink-3);
+    white-space: nowrap;
+  }
+
+  /* ── v44 · 章梭三件 ──────────────────────────────────────────────
+     靠左多留半格外距，把「章」这一族与播控族在视觉上分开，不借 DOM 分隔符。 */
+  #clNarrateJumpPrev {
+    margin-left: 0.35rem;
+  }
+
+  /* 章读数：比进度读数重一档——它是「现在在哪一章」的主读数 */
+  #clNarrateJumpLbl {
+    pointer-events: none;
+    padding: 0 0.35rem;
+    font-family: var(--mono);
+    font-size: 12px;
+    line-height: 1;
+    color: var(--ink-2);
+    white-space: nowrap;
+  }
+
+  /* ── v44 · 跟读开关 ──────────────────────────────────────────────
+     data-on="1" 时描边与文字色转 cyan 系，与「播放中」同一套语义配色。 */
+  #clNarrateFollow[data-on="1"] {
+    color: var(--cyan-2);
+    border-color: var(--cyan);
+  }
+
+  /* 低端档：省电——撤掉毛玻璃与饱和增强，退回实底玻璃 */
+  [data-tier="low"] #clNarrate {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background: var(--glass-2);
+  }
+}
+
+/* reduced-motion：播控条不做动画，显式清零任何被继承进来的过渡/动画。
+   !important 仅用于此显式归零场景（角色卡第 6 条允许并注明理由）。 */
+@media (prefers-reduced-motion: reduce) {
+  #clNarrate,
+  #clNarrate * {
+    transition: none !important;
+    animation: none !important;
+  }
+}

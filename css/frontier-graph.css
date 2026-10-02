@@ -1,0 +1,158 @@
+/*
+ * Castline · frontier-graph.css
+ *
+ * A late, presentation-only pass for the three atlas lenses.  It deliberately
+ * touches existing classes only: SVG geometry, WebGL layout, hit areas and
+ * state wiring stay owned by the Annulus / Gem / Domains modules.  The layer
+ * adds depth, light response and a coherent lens temperature to the field.
+ */
+
+:root {
+  --frontier-graph-ease: var(--abyss-ease-out);
+  --frontier-graph-spring: var(--abyss-ease-bounce-seal);
+  --frontier-graph-dur: var(--abyss-dur-fast);
+  --frontier-graph-lens: var(--abyss-violet-bright);
+  --frontier-graph-hot: var(--abyss-gold);
+}
+
+/* Each lens carries a quiet colour temperature through the same deep field. */
+body.atlas-workspace[data-atlas-view="annulus"] {
+  --frontier-graph-lens: var(--abyss-gold);
+  --frontier-graph-hot: var(--abyss-signal-bright);
+}
+body.atlas-workspace[data-atlas-view="gem"] {
+  --frontier-graph-lens: var(--abyss-mint);
+  --frontier-graph-hot: var(--abyss-mint-bright);
+}
+body.atlas-workspace[data-atlas-view="domains"] {
+  --frontier-graph-lens: var(--abyss-violet-bright);
+  --frontier-graph-hot: var(--abyss-violet);
+}
+
+body.atlas-workspace[data-atlas-view] #stage::before {
+  background-image:
+    radial-gradient(38% 34% at 50% 46%, color-mix(in oklab, var(--frontier-graph-lens) 7%, transparent), transparent 78%),
+    var(--cosmic-stage-haze), var(--cosmic-stage-grid);
+  transition: opacity var(--frontier-graph-dur) var(--frontier-graph-ease);
+}
+body.atlas-workspace[data-atlas-view] #stage::after {
+  background:
+    radial-gradient(28% 28% at var(--frontier-pointer-x, 50%) var(--frontier-pointer-y, 44%), color-mix(in oklab, var(--frontier-graph-lens) 8%, transparent), transparent 76%),
+    var(--cosmic-stage-vignette);
+  transition: opacity var(--frontier-graph-dur) var(--frontier-graph-ease), background var(--frontier-graph-dur) var(--frontier-graph-ease);
+}
+body.atlas-workspace[data-atlas-view] #gl {
+  transition: filter var(--frontier-graph-dur) var(--frontier-graph-ease);
+  filter: saturate(1.1) contrast(1.04) brightness(.97);
+}
+body.atlas-workspace[data-atlas-view="gem"] #gl { filter: saturate(1.18) contrast(1.05) brightness(.98); }
+body.atlas-workspace[data-atlas-view="domains"] #gl { filter: saturate(1.14) contrast(1.06) brightness(.96); }
+
+/* Annulus · give the semantic SVG a shallow luminous plane and tactile focus. */
+body.is-ann .cl-ann-layer {
+  isolation: isolate;
+  filter: drop-shadow(0 0 22px color-mix(in oklab, var(--frontier-graph-lens) 11%, transparent));
+}
+.cl-ann-arc.is-focus,
+.cl-ann-arc.is-hover,
+.cl-ann-head.is-active {
+  filter: drop-shadow(0 0 7px color-mix(in oklab, var(--frontier-graph-hot) 56%, transparent));
+}
+.cl-ann-arc.is-hit:hover,
+.cl-ann-head.is-hit:hover {
+  filter: drop-shadow(0 0 11px color-mix(in oklab, var(--frontier-graph-hot) 72%, transparent));
+}
+.cl-ann-bead {
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: transform var(--frontier-graph-dur) var(--frontier-graph-spring), filter var(--frontier-graph-dur) var(--frontier-graph-ease);
+}
+.cl-ann-bead.is-hit:hover,
+.cl-ann-bead.is-hit:focus-visible {
+  transform: scale(1.16);
+  filter: drop-shadow(0 0 8px color-mix(in oklab, var(--frontier-graph-hot) 66%, transparent));
+}
+.cl-ann-label.is-on,
+.cl-ann-label.is-focus { filter: drop-shadow(0 0 5px color-mix(in oklab, var(--frontier-graph-hot) 48%, transparent)); }
+
+/* Gem · a soft caustic beneath the crystal makes the SVG read as a volume. */
+.cl-gem-host {
+  position: relative;
+  isolation: isolate;
+}
+.cl-gem-host::before {
+  content: '';
+  position: absolute;
+  left: 12%;
+  right: 12%;
+  top: 10%;
+  bottom: 9%;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(ellipse at 50% 48%, color-mix(in oklab, var(--frontier-graph-lens) 17%, transparent), transparent 67%);
+  filter: blur(16px);
+  opacity: .72;
+  transition: opacity var(--frontier-graph-dur) var(--frontier-graph-ease), background var(--frontier-graph-dur) var(--frontier-graph-ease);
+}
+.cl-gem {
+  transform-origin: 50% 50%;
+  transform-style: preserve-3d;
+}
+.cl-gem-poly[data-face="attr"],
+.cl-gem-fill[data-face="attr"] { filter: drop-shadow(0 0 6px color-mix(in oklab, var(--cl-gem-attr-bright) 28%, transparent)); }
+.cl-gem-poly[data-face="meta"],
+.cl-gem-fill[data-face="meta"] { filter: drop-shadow(0 0 6px color-mix(in oklab, var(--cl-gem-meta-bright) 28%, transparent)); }
+.cl-gem-axis.is-on { stroke-width: calc(var(--cl-gem-stroke) + .45px); filter: drop-shadow(0 0 5px color-mix(in oklab, var(--frontier-graph-hot) 52%, transparent)); }
+.cl-gem-vertex.is-hot,
+.cl-gem-badge.is-hit:hover { filter: drop-shadow(0 0 10px color-mix(in oklab, var(--frontier-graph-hot) 72%, transparent)); }
+.cl-gem-title { text-shadow: 0 0 8px color-mix(in oklab, var(--frontier-graph-lens) 34%, transparent); }
+
+/* Domains · active lamps bloom without moving their JS-owned anchors. */
+.cl-domains-lamps { isolation: isolate; }
+.cl-domains-lamp__dot {
+  box-shadow: 0 0 9px currentColor;
+  transition: box-shadow var(--frontier-graph-dur) var(--frontier-graph-ease), transform var(--frontier-graph-dur) var(--frontier-graph-spring);
+}
+.cl-domains-lamp.is-hot .cl-domains-lamp__dot {
+  transform: scale(1.24);
+  box-shadow: 0 0 4px currentColor, 0 0 15px currentColor;
+}
+.cl-domains-lamp.is-hot .cl-domains-lamp__name { text-shadow: 0 0 8px color-mix(in oklab, currentColor 42%, transparent); }
+
+/* Sky disc · preserve the thin cartographic lines while adding a live edge. */
+.sky-disc.is-plot .sd-arc.is-on,
+.sky-disc.is-plot .sd-knot.is-on,
+.sky-disc.is-plot .sd-cur-mark {
+  filter: drop-shadow(0 0 6px color-mix(in oklab, var(--sd-c, var(--frontier-graph-lens)) 54%, transparent));
+}
+.sky-disc.is-plot .sd-label.is-on,
+.sky-disc.is-plot .sd-label.is-main { filter: drop-shadow(0 0 6px color-mix(in oklab, var(--frontier-graph-hot) 44%, transparent)); }
+.sky-disc.is-plot .sd-dot.is-main { filter: drop-shadow(0 0 4px color-mix(in oklab, var(--frontier-graph-hot) 56%, transparent)); }
+
+/* Preview console · an instrument-like focus ring follows the active lens. */
+.atlas-preview-hud.on .aph-shell {
+  border-color: color-mix(in oklab, var(--frontier-graph-lens) 26%, transparent);
+  box-shadow: 0 18px 54px color-mix(in oklab, var(--abyss-obsidian-deep) 50%, transparent), inset 0 1px 0 color-mix(in oklab, var(--frontier-graph-lens) 16%, transparent);
+}
+.aph-badge[aria-pressed="true"] .g-halo { stroke: var(--frontier-graph-lens); }
+.aph-badge[aria-pressed="true"] .aph-badge-g { filter: drop-shadow(0 0 8px color-mix(in oklab, var(--frontier-graph-lens) 58%, transparent)); }
+.aph-gbtn:active,
+.aph-badge:active { transform: translateY(1px) scale(.975); }
+
+@media (prefers-reduced-motion: reduce) {
+  body.atlas-workspace[data-atlas-view] #stage::before,
+  body.atlas-workspace[data-atlas-view] #stage::after,
+  body.atlas-workspace[data-atlas-view] #gl,
+  .cl-ann-bead,
+  .cl-gem-host::before,
+  .cl-domains-lamp__dot { transition: none !important; }
+}
+body[data-tier="low"].atlas-workspace[data-atlas-view] #stage::before,
+body[data-tier="low"].atlas-workspace[data-atlas-view] #stage::after,
+body[data-tier="low"].atlas-workspace[data-atlas-view] #gl,
+body[data-tier="low"] .cl-ann-bead,
+body[data-tier="low"] .cl-gem-host::before,
+body[data-tier="low"] .cl-domains-lamp__dot,
+body.skylab-still .cl-ann-bead,
+body.skylab-still .cl-gem-host::before,
+body.skylab-still .cl-domains-lamp__dot { transition: none !important; }

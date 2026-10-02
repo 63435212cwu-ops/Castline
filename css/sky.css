@@ -1,0 +1,246 @@
+/* 一片星空、三种图谱：星座为主体、星盘为背景、罗盘为单人。只引令牌：--abyss-* / --cl-atlas-* / --z-*。 */
+
+/* ── 星盘层：夹在 WebGL 画布与星名标签之间（三级线重 · 名字不压彩色弧 · 背景态径向淡出） ───────────── */
+/* 遮罩半径：剧情态放到 400%（整屏不透明），背景态收到 100%（视口外缘处归零）——注册成 <percentage> 才能随状态过渡 */
+@property --sd-veil{syntax:'<percentage>';inherits:false;initial-value:400%}
+.sky-disc,.sky-legend{--sd-groove:color-mix(in oklab,var(--abyss-ink-3) 60%,var(--abyss-violet-bright))}
+.sky-disc{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none;--sd-veil:400%;--sd-halo:var(--abyss-obsidian-deep);
+  -webkit-mask-image:radial-gradient(farthest-side at 50% 50%,var(--abyss-obsidian-deep) calc(var(--sd-veil) * .52),transparent var(--sd-veil));
+  mask-image:radial-gradient(farthest-side at 50% 50%,var(--abyss-obsidian-deep) calc(var(--sd-veil) * .52),transparent var(--sd-veil));
+  transition:opacity var(--cl-atlas-dur-3) var(--cl-atlas-ease),filter var(--cl-atlas-dur-3) var(--cl-atlas-ease),--sd-veil var(--cl-atlas-dur-3) var(--cl-atlas-ease)}
+.sky-disc.is-hidden{opacity:0;visibility:hidden}
+/* 背景态：只剩主线环 + 刻度环两道环，低亮、虚化；支线与细纹完全隐去；伸出视口的部分在屏幕边缘前淡出，不留被切断的硬环 */
+.sky-disc.is-backdrop{opacity:.3;filter:blur(3.2px) saturate(.6);--sd-veil:100%}
+.sky-disc.is-backdrop .sd-arc.is-named,.sky-disc.is-backdrop .sd-arc.is-quiet,.sky-disc.is-backdrop .sd-dot,.sky-disc.is-backdrop .sd-start,.sky-disc.is-backdrop .sd-dormant{opacity:0}
+.sky-disc.is-backdrop .sd-tick{opacity:.3}
+.sky-disc.is-plot{opacity:1;filter:none}
+.sky-disc.is-backdrop .sd-teth,.sky-disc.is-backdrop .sd-cursor{display:none}
+/* 名字 / 回数 / 接棒结在背景态只是隐身（不是 display:none）：唤醒时透明度过渡才跑得起来，名字最后淡入 */
+.sky-disc.is-backdrop .sd-labels,.sky-disc.is-backdrop .sd-num,.sky-disc.is-backdrop .sd-ho{visibility:hidden}
+.sky-disc.is-backdrop .sd-label{opacity:0}
+.sky-disc .g0{--sd-c:var(--cl-atlas-gen-0)}.sky-disc .g1{--sd-c:var(--cl-atlas-gen-1)}.sky-disc .g2{--sd-c:var(--cl-atlas-gen-2)}
+.sky-disc .g3{--sd-c:var(--cl-atlas-gen-3)}.sky-disc .g4{--sd-c:var(--cl-atlas-gen-4)}.sky-disc .g5{--sd-c:var(--cl-atlas-gen-5)}
+
+/* 刻度环：发丝环 + 每回细刻 + 主刻；回数是等宽小字（元信息级） */
+.sd-ring{fill:none;stroke:var(--abyss-ink-3);stroke-width:.8;opacity:.6}
+.sd-tick{fill:none;stroke:var(--abyss-ink-3);stroke-width:.7;opacity:.42}
+.sd-tick.is-major{stroke:var(--abyss-ink-2);stroke-width:1;opacity:.75}
+.sd-start{fill:none;stroke:var(--abyss-gold);stroke-width:.8;stroke-dasharray:1.5 3.5;opacity:.42}
+.sd-num{font:var(--abyss-fs-xs) var(--abyss-font-mono);fill:var(--abyss-ink-3);text-anchor:middle;dominant-baseline:middle;letter-spacing:.06em;font-variant-numeric:tabular-nums}
+.sd-num.is-masked{opacity:0}
+
+/* 三级线重：主线 = 全饱和阶段色、最粗 · 具名支线 = 同阶段色降彩度 · 细纹 = 统一 1px 淡紫灰点线（不分色，整片读作一道细纹带） */
+.sd-arc{fill:none;stroke:var(--sd-c,var(--abyss-ink-2));stroke-linecap:round;
+  transition:opacity var(--cl-atlas-dur-1) var(--cl-atlas-ease),stroke-width var(--cl-atlas-dur-1) var(--cl-atlas-ease),stroke var(--cl-atlas-dur-1) var(--cl-atlas-ease)}
+.sd-arc.is-main{stroke-width:var(--sd-w,8px);opacity:1}
+.sd-arc.is-named{stroke:oklch(from var(--sd-c) calc(l + .05) calc(c * .55) h);stroke-width:var(--sd-w,3px);opacity:.9}
+.sd-arc.is-quiet{stroke:var(--sd-groove);stroke-width:1px;stroke-dasharray:0 3;opacity:.78}
+.sd-dormant{fill:none;stroke:var(--sd-groove);stroke-width:1.4;stroke-dasharray:0 5;stroke-linecap:round;opacity:.7}
+/* 事件点：主线带上是暗色小孔（像穿孔的胶片），支线上是细亮点 */
+.sd-dot{fill:var(--abyss-ink-bright);opacity:.55}
+.sd-dot.is-main{fill:var(--abyss-obsidian-deep);opacity:.5}
+.sd-knot{fill:var(--abyss-obsidian-deep);stroke:var(--abyss-gold);stroke-width:1.2}
+.sd-hit{fill:none;stroke:transparent;stroke-width:14px;stroke-linecap:round;pointer-events:none}
+.sky-disc.is-plot .sd-hit{pointer-events:stroke;cursor:pointer}
+
+/* 名字两级：主线段名（衬线、宽字距、阶段色，写在主线环外侧）> 支线名（无衬线、近白，写在自己弧线内侧）。
+ * 字轨由 JS 按屏幕 px 平移出来，不压任何彩色弧；深空描边只负责把背后的细纹 / 星点让开，不做底牌 */
+.sd-label{font:var(--abyss-fs-2xs) var(--abyss-font-sans);fill:color-mix(in oklab,var(--sd-c) 22%,var(--abyss-ink));letter-spacing:.08em;dominant-baseline:central;text-anchor:middle;
+  paint-order:stroke;stroke:var(--sd-halo);stroke-width:3px;stroke-linejoin:round;opacity:0;
+  transition:opacity var(--cl-atlas-dur-2) var(--cl-atlas-ease)}
+.sd-label.is-main{font:var(--abyss-fs-base) var(--abyss-font-serif);fill:var(--sd-c);letter-spacing:.2em;stroke-width:3.4px}
+.sky-disc.is-plot .sd-label.is-fit{opacity:1}
+
+/* 悬停 / 选中：其余退暗，被点亮的线加粗并回到全饱和阶段色（高彩度只留给悬停 / 选中 / 播放） */
+.sky-disc.sd-emph .sd-arc{opacity:.14}
+.sky-disc.sd-emph .sd-arc.is-kin{opacity:.42}
+.sky-disc.sd-emph .sd-arc.is-on{opacity:1;stroke-width:calc(var(--sd-w,3px) + 2px)}
+.sky-disc.sd-emph .sd-arc.is-named.is-on{stroke:var(--sd-c)}
+.sky-disc.sd-emph .sd-arc.is-quiet.is-on{stroke:var(--sd-c);stroke-width:2.4px;stroke-dasharray:none}
+.sky-disc.sd-emph .sd-arc.is-main.is-on{stroke-width:calc(var(--sd-w,8px) + 3px)}
+/* 其余名字退到三成亮度（仍可作方位参照），被点亮那条的名字全亮；未放下的名字悬停时照样出现 */
+.sky-disc.sd-emph .sd-label{opacity:0}
+.sky-disc.is-plot.sd-emph .sd-label.is-fit{opacity:.3}
+.sky-disc.sd-emph .sd-label.is-on,.sky-disc.is-plot.sd-emph .sd-label.is-on{opacity:1}
+.sky-disc.sd-emph .sd-dot{opacity:.25}
+
+/* 播放：未来暗、已过去半亮、正在发生最亮（活跃的支线 / 细纹亮回阶段色） */
+.sky-disc.sd-timed .sd-arc.is-future{opacity:.12}
+.sky-disc.sd-timed .sd-arc.is-past{opacity:.5}
+.sky-disc.sd-timed .sd-arc.is-live{opacity:1}
+.sky-disc.sd-timed .sd-arc.is-named.is-live{stroke:var(--sd-c)}
+.sky-disc.sd-timed .sd-arc.is-quiet.is-live{stroke:var(--sd-c);stroke-width:1.4px;stroke-dasharray:none}
+.sky-disc.sd-timed .sd-label{opacity:0}
+.sky-disc.is-plot.sd-timed .sd-label.is-fit{opacity:.3}
+.sky-disc.is-plot.sd-timed .sd-label.is-live.is-fit{opacity:1}
+/* 悬停 / 选中的那条线名字永远全亮（压过播放态的退暗） */
+.sky-disc.sd-emph .sd-label.is-on,.sky-disc.is-plot.sd-emph .sd-label.is-on.is-fit{opacity:1}
+.sd-cur-mark{fill:none;stroke:var(--abyss-gold);stroke-width:2.4;stroke-linecap:round}
+.sd-cur-num{font:var(--abyss-fs-sm) var(--abyss-font-mono);fill:var(--abyss-gold);text-anchor:middle;dominant-baseline:middle;paint-order:stroke;stroke:var(--sd-halo);stroke-width:3px}
+.sd-comet{fill:var(--sd-c);stroke:var(--abyss-ink-bright);stroke-width:1}
+
+/* 参与者连线：从线上最近处拉到星座里的那颗星 */
+.sd-tether path{fill:none;stroke:var(--sd-c);stroke-width:1.1;opacity:.78}
+.sd-tether circle{fill:none;stroke:var(--sd-c);stroke-width:1.3}
+
+/* 生长动画（开启剧情）：主线沿时间画出，支线按开始时间依次长出，细纹按开始时间依次浮现，名字最后淡入 */
+.sky-disc.sd-reset .sd-arc:not(.is-quiet){stroke-dasharray:1 1;stroke-dashoffset:1;transition:none}
+.sky-disc.sd-reset .sd-arc.is-quiet,.sky-disc.sd-reset .sd-label,.sky-disc.sd-reset .sd-label.is-fit,.sky-disc.sd-reset .sd-dot,.sky-disc.sd-reset .sd-knot{opacity:0;transition:none}
+.sky-disc.sd-grow .sd-arc:not(.is-quiet){stroke-dasharray:1 1;stroke-dashoffset:0;
+  transition:stroke-dashoffset var(--cl-atlas-dur-2) var(--cl-atlas-ease) var(--sd-delay,0s),opacity var(--cl-atlas-dur-1) var(--cl-atlas-ease)}
+.sky-disc.sd-grow .sd-arc.is-main{transition-duration:var(--cl-atlas-dur-3),var(--cl-atlas-dur-1)}
+.sky-disc.sd-grow .sd-arc.is-quiet{transition:opacity var(--cl-atlas-dur-3) var(--cl-atlas-ease) var(--sd-delay,0s)}
+.sky-disc.sd-grow .sd-label,.sky-disc.sd-grow .sd-label.is-fit{transition-delay:var(--sd-name-delay,2s)}
+.sky-disc.sd-grow .sd-dot,.sky-disc.sd-grow .sd-knot{transition:opacity var(--cl-atlas-dur-2) var(--cl-atlas-ease) 1.7s}
+@media (prefers-reduced-motion: reduce){.sky-disc,.sd-arc,.sd-label{transition:none!important}}
+
+/* ── 顶栏 · 底栏 ───────────────────────────────────────────── */
+.sky-hud{position:fixed;inset:0;pointer-events:none;z-index:var(--z-hud)}
+.sky-top,.sky-crumb,.sky-bottom>*{pointer-events:auto}
+.sky-top{position:absolute;top:14px;left:20px;right:20px;height:46px;display:flex;align-items:center;gap:var(--abyss-space-md);padding:0 var(--abyss-space-md);
+  border:1px solid color-mix(in oklab,var(--abyss-violet-bright) 22%,transparent);border-radius:var(--abyss-radius-md);
+  background:color-mix(in oklab,var(--abyss-obsidian) 62%,transparent);box-shadow:var(--abyss-shadow-flat)}
+.sky-brand{display:flex;align-items:baseline;gap:var(--abyss-space-sm);min-width:0;flex:1 1 auto;white-space:nowrap;overflow:hidden}
+.sky-sigil{width:8px;height:8px;border:1px solid var(--abyss-gold);transform:rotate(45deg);align-self:center;flex:none}
+.sky-word{font:var(--abyss-fs-xs) var(--abyss-font-mono);letter-spacing:.28em;color:var(--abyss-gold)}
+.sky-title{font:var(--abyss-fs-md) var(--abyss-font-serif);letter-spacing:.12em;color:var(--abyss-ink-bright)}
+.sky-sub{font:var(--abyss-fs-xs) var(--abyss-font-mono);color:var(--abyss-ink-3);letter-spacing:.06em;overflow:hidden;text-overflow:ellipsis}
+.sky-group{display:flex;gap:2px;padding:2px;border-radius:var(--abyss-radius-full);border:1px solid color-mix(in oklab,var(--abyss-ink-3) 30%,transparent);flex:none}
+.sky-group[hidden]{display:none}
+.sky-group button{border:0;background:none;color:var(--abyss-ink-3);font:var(--abyss-fs-sm) var(--abyss-font-sans);letter-spacing:.1em;padding:5px 12px;border-radius:var(--abyss-radius-full);cursor:pointer;
+  transition:color var(--cl-atlas-dur-1) var(--cl-atlas-ease),background var(--cl-atlas-dur-1) var(--cl-atlas-ease)}
+.sky-group button:hover{color:var(--abyss-ink)}
+.sky-group button[aria-checked=true]{color:var(--abyss-obsidian-deep);background:var(--abyss-gold)}
+.sky-actions{display:flex;align-items:center;gap:var(--abyss-space-sm);flex:none}
+.sky-plot,.sky-icon,.sky-speed,.sky-crumb button{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 12px;border-radius:var(--abyss-radius-full);
+  border:1px solid color-mix(in oklab,var(--abyss-violet-bright) 30%,transparent);background:none;color:var(--abyss-ink-2);font:var(--abyss-fs-sm) var(--abyss-font-sans);letter-spacing:.1em;cursor:pointer;
+  transition:color var(--cl-atlas-dur-1) var(--cl-atlas-ease),border-color var(--cl-atlas-dur-1) var(--cl-atlas-ease),background var(--cl-atlas-dur-1) var(--cl-atlas-ease)}
+.sky-plot:hover,.sky-icon:hover,.sky-speed:hover,.sky-crumb button:hover{color:var(--abyss-ink-bright);border-color:var(--abyss-gold)}
+.sky-plot[aria-pressed=true]{color:var(--abyss-obsidian-deep);background:var(--abyss-gold);border-color:var(--abyss-gold)}
+.sky-hud svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.3;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.sky-hud svg .gl-fill{fill:currentColor;stroke:none}
+.sky-hud svg .gl-dim{opacity:.45}
+.sky-hud svg .gl-hot{stroke-width:2.2}
+.sky-search{display:flex;align-items:center;gap:4px;border-bottom:1px solid color-mix(in oklab,var(--abyss-ink-3) 45%,transparent);height:30px}
+.sky-search input{width:150px;background:none;border:0;outline:0;color:var(--abyss-ink);font:var(--abyss-fs-sm) var(--abyss-font-sans);letter-spacing:.06em}
+.sky-search input::placeholder{color:var(--abyss-ink-3)}
+.sky-search button{border:0;background:none;color:var(--abyss-ink-2);cursor:pointer;padding:0 2px;display:flex}
+.sky-crumb{position:absolute;top:70px;left:20px;display:flex;align-items:center;gap:var(--abyss-space-sm);font:var(--abyss-fs-sm) var(--abyss-font-sans);color:var(--abyss-ink-3)}
+.sky-crumb[hidden]{display:none}
+.sky-crumb b{font:var(--abyss-fs-md) var(--abyss-font-serif);color:var(--abyss-ink-bright);letter-spacing:.12em}
+.sky-crumb-kind{font:var(--abyss-fs-xs) var(--abyss-font-mono);letter-spacing:.24em;color:var(--abyss-gold)}
+.sky-bottom{position:absolute;left:20px;right:20px;bottom:16px;display:flex;flex-direction:column;align-items:center;gap:var(--abyss-space-sm);pointer-events:none}
+.sky-legend{display:flex;flex-wrap:wrap;justify-content:center;gap:4px 18px;font:var(--abyss-fs-xs) var(--abyss-font-sans);color:var(--abyss-ink-3);letter-spacing:.08em}
+.sky-legend .lg{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.sky-legend .lg i{display:inline-block;width:22px;height:0;border-top:2px solid var(--abyss-ink-2)}
+.sky-legend .lg-main i{border-top:5px solid var(--cl-atlas-gen-0);border-radius:3px}
+.sky-legend .lg-named i{border-top:3px solid oklch(from var(--cl-atlas-gen-1) calc(l + .05) calc(c * .55) h);border-radius:2px}
+.sky-legend .lg-quiet i{height:3px;border-top:0;background:radial-gradient(circle,var(--sd-groove) 0 .7px,transparent 1.1px) 0 50%/3.2px 3px repeat-x}
+.sky-legend .lg-len i{width:26px;height:9px;border:1px solid var(--abyss-ink-3);border-bottom:0;border-radius:13px 13px 0 0}
+.sky-legend .lg-hint{color:var(--abyss-ink-2)}
+.sky-player{display:flex;align-items:center;gap:var(--abyss-space-md);width:min(980px,100%);height:44px;padding:0 var(--abyss-space-md);
+  border:1px solid color-mix(in oklab,var(--abyss-violet-bright) 22%,transparent);border-radius:var(--abyss-radius-full);background:color-mix(in oklab,var(--abyss-obsidian) 66%,transparent)}
+.sky-player[hidden]{display:none}
+.sky-player .sky-icon{width:32px;padding:0;justify-content:center}
+.sky-speed{width:44px;padding:0;justify-content:center;font:var(--abyss-fs-xs) var(--abyss-font-mono)}
+.sky-player input[type=range]{flex:0 0 min(300px,34%);accent-color:var(--abyss-gold);height:18px}
+.sky-caption{flex:1 1 auto;min-width:0;display:flex;align-items:baseline;gap:var(--abyss-space-sm);white-space:nowrap;overflow:hidden;font:var(--abyss-fs-sm) var(--abyss-font-sans);color:var(--abyss-ink-2)}
+.sky-caption b{font:var(--abyss-fs-sm) var(--abyss-font-mono);color:var(--abyss-gold);font-weight:400}
+.sky-caption span{color:var(--abyss-ink-3);overflow:hidden;text-overflow:ellipsis}
+.sky-caption i{font-style:normal;color:var(--abyss-ink-bright);overflow:hidden;text-overflow:ellipsis}
+.sky-caption em{font-style:normal;margin-left:auto;color:var(--abyss-ink-3);font:var(--abyss-fs-xs) var(--abyss-font-mono)}
+
+/* 悬停卡：一条线的「长短与参与者」——三行，不写长文 */
+.sky-card{position:fixed;left:var(--sc-x,0);top:var(--sc-y,0);z-index:var(--z-tooltip);max-width:300px;padding:10px 12px;pointer-events:none;
+  border:1px solid color-mix(in oklab,var(--abyss-violet-bright) 30%,transparent);border-radius:var(--abyss-radius-sm);background:color-mix(in oklab,var(--abyss-obsidian-deep) 88%,transparent);box-shadow:var(--abyss-shadow-panel)}
+.sky-card[hidden]{display:none}
+.sky-card.is-dock{max-width:none;right:12px}
+.sky-card .sc-k{font:var(--abyss-fs-xs) var(--abyss-font-mono);letter-spacing:.14em;color:var(--sd-c,var(--abyss-gold))}
+.sky-card .g0{--sd-c:var(--cl-atlas-gen-0)}.sky-card .g1{--sd-c:var(--cl-atlas-gen-1)}.sky-card .g2{--sd-c:var(--cl-atlas-gen-2)}
+.sky-card .g3{--sd-c:var(--cl-atlas-gen-3)}.sky-card .g4{--sd-c:var(--cl-atlas-gen-4)}.sky-card .g5{--sd-c:var(--cl-atlas-gen-5)}
+.sky-card .sc-t{font:var(--abyss-fs-lg) var(--abyss-font-serif);color:var(--abyss-ink-bright);letter-spacing:.1em;margin:3px 0}
+.sky-card .sc-m{font:var(--abyss-fs-xs) var(--abyss-font-mono);color:var(--abyss-ink-2)}
+.sky-card .sc-theme{font:var(--abyss-fs-xs) var(--abyss-font-mono);color:var(--abyss-ink-3);margin-left:8px;letter-spacing:.1em}
+.sky-card .sc-m b{color:var(--abyss-gold);font-weight:400}
+.sky-card .sc-c{font:var(--abyss-fs-sm) var(--abyss-font-sans);color:var(--abyss-ink);margin-top:4px;line-height:1.45}
+
+/* 星空壳接管后：旧三页签工作区、年轮 SVG、星核、账本、剧情星簇钮一律退场 */
+body.sky-shell #atlasPreviewHUD,body.sky-shell .cl-ann-layer,body.sky-shell #atlasAggregate,body.sky-shell .cl-o3-ruler,body.sky-shell #atlasLab{display:none!important}
+/* 剧情态：星座只留被点亮者的名字（scene litOnly）；团名铭文淡出，免得压在盘面上 */
+body.sky-shell .cl-camp-halo-labels{transition:opacity var(--cl-atlas-dur-2) var(--cl-atlas-ease)}
+body.sky-shell.sky-plot-on .cl-camp-halo-labels{opacity:0}
+/* 罗盘态：人物名由面包屑承担，晶体上方的浮动名签与分类切换退场 */
+body.sky-shell.sky-compass-on #labels .cl-lab.char{visibility:hidden}
+body.sky-shell.sky-compass-on .sky-group{display:none}
+.sky-crumb-meta{font:var(--abyss-fs-xs) var(--abyss-font-mono);color:var(--abyss-ink-3);letter-spacing:.08em}
+.sky-crumb-meta b{font:inherit;color:var(--abyss-gold);font-weight:400;letter-spacing:.08em}
+body.sky-shell.atlas-tools-open #ops{top:68px}
+/* 旧壳专属入口（剧情树 / 展卷 / 三图预演）在星空壳里没有落点，收起；剧情由顶栏「剧情」唤醒 */
+body.sky-shell #btnStage,body.sky-shell #btnAtlas,body.sky-shell #btnPreview{display:none!important}
+
+/* 窄屏 */
+@media (max-width:900px){
+  .sky-top{top:10px;left:10px;right:10px;height:auto;min-height:44px;flex-wrap:wrap;padding:6px var(--abyss-space-sm);gap:6px var(--abyss-space-sm)}
+  .sky-sub{display:none}
+  .sky-group{order:3;flex:1 1 100%;justify-content:center;overflow-x:auto}
+  .sky-group button{padding:4px 10px}
+  .sky-search input{width:110px}
+  .sky-crumb{top:108px;left:12px}
+  .sky-bottom{left:10px;right:10px;bottom:10px}
+  .sky-player input[type=range]{flex-basis:30%}
+}
+@media (max-width:560px){
+  .sky-crumb{top:66px;left:10px;right:10px;flex-wrap:nowrap;white-space:nowrap;overflow:hidden}
+  .sky-crumb button{flex:none;white-space:nowrap}
+  .sky-crumb-meta,.sky-crumb-kind{display:none}
+}
+@media (max-width:480px){
+  .sky-word,.sky-plot span,.sky-icon span{display:none}
+  .sky-search input{width:0;padding:0;transition:width var(--cl-atlas-dur-1) var(--cl-atlas-ease)}
+  .sky-search.is-open input{width:120px}
+  .sky-search{border-bottom-color:transparent}
+  .sky-search.is-open{border-bottom-color:color-mix(in oklab,var(--abyss-ink-3) 45%,transparent)}
+  .sky-caption span,.sky-caption em{display:none}
+  .sky-player{gap:var(--abyss-space-sm)}
+  .sky-legend .lg-quiet,.sky-legend .lg-len{display:none}
+}
+
+/* ── 罗盘外圈：关系对象轨道 + 因果事件链 ─────────────────────── */
+.sky-compass{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:var(--z-chart);opacity:0;visibility:hidden;
+  transition:opacity var(--cl-atlas-dur-3) var(--cl-atlas-ease)}
+.sky-compass.is-on{opacity:1;visibility:visible}
+.skc-ring{fill:none;stroke:color-mix(in oklab,var(--abyss-violet-bright) 26%,transparent);stroke-width:.8;stroke-dasharray:1 4}
+.skc-ring.is-inner{stroke-dasharray:none;opacity:.35}
+.skc-link{fill:none;stroke:var(--skc-c,var(--abyss-ink-3));stroke-width:1;opacity:.55;transition:opacity var(--cl-atlas-dur-1) var(--cl-atlas-ease)}
+.skc-sat{pointer-events:auto;cursor:pointer;--skc-c:var(--abyss-ink-2);transition:opacity var(--cl-atlas-dur-1) var(--cl-atlas-ease)}
+.skc-link.r-ally,.skc-sat.r-ally{--skc-c:var(--abyss-gold)}
+.skc-link.r-kin,.skc-sat.r-kin{--skc-c:var(--abyss-signal)}
+.skc-link.r-bond,.skc-sat.r-bond{--skc-c:var(--abyss-signal-bright)}
+.skc-link.r-oppose,.skc-sat.r-oppose{--skc-c:var(--abyss-camp-oppose)}
+.skc-link.r-dark,.skc-sat.r-dark{--skc-c:var(--abyss-violet)}
+.skc-link.r-cooccur,.skc-sat.r-cooccur{--skc-c:var(--abyss-violet-bright)}
+.skc-link.r-dark{stroke-dasharray:4 3}
+.skc-link.r-kin{stroke-dasharray:7 2.5 .1 2.5}
+.skc-link.r-bond,.skc-link.is-derived{stroke-dasharray:.1 3.6;stroke-width:1.8;stroke-linecap:round}
+.skc-sat-hit{fill:transparent}
+.skc-sat-star{fill:var(--skc-c);stroke:var(--abyss-obsidian-deep);stroke-width:1}
+.skc-sat-name{font:var(--abyss-fs-sm) var(--abyss-font-serif);fill:var(--abyss-ink-bright);letter-spacing:.1em;paint-order:stroke;stroke:var(--abyss-obsidian-deep);stroke-width:3px}
+.skc-sat-kind{font:var(--abyss-fs-xs) var(--abyss-font-mono);fill:var(--skc-c);letter-spacing:.06em;paint-order:stroke;stroke:var(--abyss-obsidian-deep);stroke-width:3px}
+.skc-sat:hover .skc-sat-star,.skc-sat:focus .skc-sat-star,.skc-sat.is-lit .skc-sat-star{stroke:var(--abyss-ink-bright);stroke-width:1.6}
+.skc-sat:focus{outline:none}
+.skc-sat:focus-visible .skc-sat-name{fill:var(--abyss-gold)}
+.sky-compass.skc-emph .skc-sat:not(.is-lit){opacity:.35}
+.skc-chain-line{fill:none;stroke:color-mix(in oklab,var(--abyss-ink-3) 40%,transparent);stroke-width:1}
+.skc-step{fill:none;stroke:var(--abyss-ink-2);stroke-width:1;opacity:.6}
+.skc-arrow{fill:none;stroke:var(--abyss-ink-2);stroke-width:1.2;stroke-linecap:round;stroke-linejoin:round}
+.skc-ev{fill:var(--sd-c,var(--abyss-ink-2));stroke:var(--abyss-obsidian-deep);stroke-width:1;pointer-events:auto;cursor:help;transition:r var(--cl-atlas-dur-1) var(--cl-atlas-ease)}
+.skc-ev.g0{--sd-c:var(--cl-atlas-gen-0)}.skc-ev.g1{--sd-c:var(--cl-atlas-gen-1)}.skc-ev.g2{--sd-c:var(--cl-atlas-gen-2)}
+.skc-ev.g3{--sd-c:var(--cl-atlas-gen-3)}.skc-ev.g4{--sd-c:var(--cl-atlas-gen-4)}.skc-ev.g5{--sd-c:var(--cl-atlas-gen-5)}
+.skc-ev.is-key{stroke:var(--abyss-ink-bright);stroke-width:1.2}
+.sky-compass.skc-emph .skc-ev:not(.is-on){opacity:.3}
+.skc-ev.is-on{stroke:var(--abyss-gold);stroke-width:2}
+.skc-ev-label{font:var(--abyss-fs-xs) var(--abyss-font-sans);fill:var(--abyss-ink-2);text-anchor:middle;letter-spacing:.06em;paint-order:stroke;stroke:var(--abyss-obsidian-deep);stroke-width:3px}
+.skc-ch{font:var(--abyss-fs-xs) var(--abyss-font-mono);fill:var(--abyss-ink-3)}
+.skc-chain-title{font:var(--abyss-fs-xs) var(--abyss-font-mono);fill:var(--abyss-ink-3);text-anchor:middle;letter-spacing:.2em}
+.skc-card{z-index:var(--z-tooltip)}
+@media (prefers-reduced-motion: reduce){.sky-compass,.skc-link,.skc-sat,.skc-ev{transition:none!important}}

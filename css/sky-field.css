@@ -1,0 +1,115 @@
+/* 星域层 + 星名解剖——平面天球星座的扇区、团名、组间束丝；星空壳里星名的统一写法 */
+
+/* ── 星域层 ───────────────────────────────────────── */
+.sky-field{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none;
+  --sf-halo:var(--abyss-obsidian-deep);transition:opacity var(--cl-atlas-dur-3) var(--cl-atlas-ease)}
+.sky-field.is-hidden,.sky-field.is-empty{opacity:0;visibility:hidden}
+.sky-field.is-dim{opacity:.34}
+.sky-field.is-dim .sf-names,.sky-field.is-dim .sf-silk{opacity:0;visibility:hidden}
+/* 读层分两块：.sf-geo 整张 SVG（光层接管时轮廓在 WebGL、其余几层本就隐形 → 不画）· .sf-names 每个团名一层 div（包一枚小 SVG；
+   平移 / 透明度只写在 div 上 = 合成器挪层不重绘——写在 <svg> 根上 Blink 会逐帧重排字） */
+.sf-geo{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.sky-field.sf-gl .sf-geo{display:none}
+.sf-names{position:absolute;inset:0}
+.sf-nm{position:absolute;left:0;top:0;pointer-events:none;will-change:transform,opacity}
+.sf-nv{display:block;overflow:visible;transition:opacity var(--skd-dur-soft) var(--skd-ease-out)}
+/* 无空位、只能压在界面栏上时淡到栏下（旋转中团名扫过卡片面板 / 顶栏边，不被栏边切一半） */
+.sf-nm.is-under .sf-nv{opacity:0}
+.sf-nm.is-under .sf-name{pointer-events:none}
+.sf-nm.is-off{visibility:hidden}
+.sf-nm.is-leave{opacity:0;transition:opacity var(--skd-dur-soft) var(--skd-ease-out)}
+.sf-nm.is-leave .sf-name{pointer-events:none}
+
+/* 扇区：极淡的星云底色（加色叠在深空上）；悬停 / 选中才提亮 */
+.sf-tint{fill:var(--sf-c);fill-opacity:.028;stroke:none;mix-blend-mode:screen;transition:fill-opacity var(--cl-atlas-dur-2) var(--cl-atlas-ease)}
+.sf-tint.is-core{fill-opacity:.05}
+.sf-tint.is-field{fill-opacity:.012}
+.sf-tint.is-hot{fill-opacity:.06}
+
+/* 盘心光束：主角团照向各团的光，宽度 = 联系数；径向遮罩淡出（mask 用明度，stop 取最亮墨色） */
+.sf-bm0{stop-color:var(--abyss-ink-bright);stop-opacity:1}
+.sf-bm1{stop-color:var(--abyss-ink-bright);stop-opacity:.5}
+.sf-bm2{stop-color:var(--abyss-ink-bright);stop-opacity:0}
+.sf-beam{fill:var(--sf-c);fill-opacity:calc(var(--sf-k,.5) * .16);stroke:none;mix-blend-mode:screen;transition:fill-opacity var(--cl-atlas-dur-2) var(--cl-atlas-ease)}
+.sf-beam-core{fill:none;stroke:var(--sf-c);stroke-width:calc(var(--sf-w,1) * 1px);stroke-opacity:.34;stroke-linecap:round;mix-blend-mode:screen}
+.sf-beam.is-on{fill-opacity:calc(var(--sf-k,.5) * .34)}
+.sf-beam-core.is-on{stroke-opacity:.7}
+.sky-field.sf-emph .sf-beam:not(.is-on){fill-opacity:.02}
+.sky-field.sf-emph .sf-beam-core:not(.is-on){stroke-opacity:.08}
+.sf-beams{opacity:0;transition:opacity var(--cl-atlas-dur-3) var(--cl-atlas-ease)}
+.sky-field.is-born .sf-beams{opacity:1;transition-delay:.9s}
+.sky-field.is-dim .sf-beams{opacity:0}
+
+/* 界线：外缘一道发丝圆 + 扇区之间的放射发丝；盘心团一道点线圆 */
+.sf-rim{fill:none;stroke:var(--abyss-ink-2);stroke-opacity:.16;stroke-width:1;vector-effect:non-scaling-stroke}
+.sf-core{fill:none;stroke:var(--abyss-gold);stroke-opacity:.22;stroke-width:1;stroke-dasharray:1 4;stroke-linecap:round}
+.sf-edge{fill:none;stroke:var(--abyss-ink-2);stroke-opacity:.3;stroke-width:1}
+.sf-emblem{fill:var(--abyss-gold);fill-opacity:.1;stroke:var(--abyss-gold);stroke-opacity:.32;stroke-width:1;stroke-linejoin:round}
+
+/* 团名：衬线宽字距，正立横排；人数等宽小字上标；团色只做一层淡染 */
+.sf-name{pointer-events:auto;cursor:pointer;opacity:0;transition:opacity var(--cl-atlas-dur-3) var(--cl-atlas-ease)}
+.sky-field.is-born .sf-name{opacity:.9;transition-delay:.7s}
+.sf-n{font:var(--abyss-fs-md) var(--abyss-font-serif);letter-spacing:.32em;
+  fill:color-mix(in oklab,var(--sf-c) 42%,var(--abyss-ink-bright));
+  paint-order:stroke;stroke:var(--sf-halo);stroke-width:4px;stroke-linejoin:round}
+.sf-k{font:var(--abyss-fs-2xs) var(--abyss-font-mono);letter-spacing:.06em;fill:var(--abyss-ink-3);
+  paint-order:stroke;stroke:var(--sf-halo);stroke-width:3px}
+.sf-name.is-core .sf-n{font-size:var(--abyss-fs-sm);letter-spacing:.4em;fill:color-mix(in oklab,var(--abyss-gold) 70%,var(--abyss-ink-bright))}
+.sf-name.is-field .sf-n{fill:var(--abyss-ink-3)}
+.sf-hit{fill:transparent;stroke:none}
+.sf-name:hover .sf-n,.sf-name.is-hot .sf-n,.sf-name.is-sel .sf-n{fill:var(--abyss-ink-bright)}
+.sf-name.is-sel .sf-k{fill:var(--abyss-gold)}
+/* 选中团名是当前视角锚点：用一圈克制的冷暖混合辉光把它从拥挤的星名中捞出来，
+   不改变字宽与避让盒，仍由现有 is-sel 状态驱动。 */
+.sf-name.is-sel .sf-n{filter:drop-shadow(0 0 7px color-mix(in oklch,var(--sf-c) 72%,var(--abyss-gold) 28%))}
+.sky-field.sf-emph .sf-name:not(.is-hot):not(.is-sel){opacity:.42}
+
+/* 组间束丝：跨组关系经两端扇区的轮毂点汇成一股；加色叠出主干的亮度 */
+.sf-thread{fill:none;stroke:var(--sf-c);stroke-width:calc(var(--sf-w,1) * 1px);stroke-opacity:var(--sf-o,.16);stroke-linecap:round;mix-blend-mode:screen;
+  transition:stroke-opacity var(--cl-atlas-dur-2) var(--cl-atlas-ease)}
+.sf-thread.is-dash1{stroke-dasharray:6 5}
+.sf-thread.is-dash2{stroke-dasharray:1.5 4}
+.sf-thread.is-dash3{stroke-dasharray:7 4 1.5 4}
+.sky-field.sf-emph .sf-thread{stroke-opacity:.05}
+/* SVG 回退层与 WebGL 束丝保持同一读法：激活关系先扫过一遍，再停在清晰的虚线态。
+   这是一次性的交互确认（≤300ms），不会给整张图增加常驻循环。 */
+.sky-field.sf-emph .sf-thread.is-on{stroke-opacity:.72;stroke-dashoffset:15;animation:sf-thread-sweep 280ms cubic-bezier(.2,.8,.4,1) both}
+.sky-field.sf-emph .sf-thread.is-on:not(.is-dash1):not(.is-dash2):not(.is-dash3){stroke-dasharray:7 8}
+@keyframes sf-thread-sweep{from{stroke-dashoffset:15;opacity:.28}to{stroke-dashoffset:0;opacity:1}}
+.sf-silk{opacity:0;transition:opacity var(--cl-atlas-dur-3) var(--cl-atlas-ease)}
+.sky-field.is-born .sf-silk{opacity:1;transition-delay:1s}
+
+/* 换分组重描（Q8.3 · O5）：新团名先以发丝描出字形轮廓（每一笔自起点生长），轮廓将满时字色浮现、轮廓退去；
+   --sf-d = 自 12 点顺时针的错峰延迟，与光层扇区边同一节拍（CLSkyFieldGl.beat）；光层不在时 SVG 扇区边同样描出 */
+.sf-nm.is-draw .sf-name{opacity:.9;transition:none}
+.sky-field .sf-name .sf-n.sf-nd{fill:none;stroke:color-mix(in oklch,var(--sf-c) 58%,var(--skd-star));stroke-width:.7px;paint-order:normal;
+  stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 3px color-mix(in oklch,var(--sf-c) 70%,transparent));
+  stroke-dasharray:var(--sf-dl,64) var(--sf-dl,64);stroke-dashoffset:var(--sf-dl,64);opacity:0;pointer-events:none}
+.sky-field .sf-nm.is-draw .sf-n.sf-nd{animation:sf-pen var(--skd-dur-focus) var(--skd-ease-inout) var(--sf-d,0s) both,sf-pen-out var(--skd-dur-soft) var(--skd-ease-out) calc(var(--sf-d,0s) + var(--skd-dur-focus)) both}
+.sky-field .sf-nm.is-draw .sf-n:not(.sf-nd),.sky-field .sf-nm.is-draw .sf-k{animation:sf-ink var(--skd-dur-soft) var(--skd-ease-out) calc(var(--sf-d,0s) + var(--skd-dur-focus) * .62) both}
+.sky-field.is-redraw .sf-edge{stroke-dasharray:1 1;animation:sf-edge-pen var(--skd-dur-focus) var(--skd-ease-inout) var(--sf-d,0s) both}
+@keyframes sf-pen{from{stroke-dashoffset:var(--sf-dl,64);opacity:1}to{stroke-dashoffset:0;opacity:1}}
+@keyframes sf-pen-out{from{opacity:1}to{opacity:0}}
+@keyframes sf-ink{from{opacity:0}to{opacity:1}}
+@keyframes sf-edge-pen{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}
+
+@media (prefers-reduced-motion:reduce){
+  .sky-field,.sf-name,.sf-silk,.sf-tint,.sf-thread,.sf-beams,.sf-beam,.sf-nm,.sf-nv{transition:none}
+  .sky-field.is-born .sf-name,.sky-field.is-born .sf-silk,.sky-field.is-born .sf-beams{transition-delay:0s}
+  .sf-nm *,.sky-field .sf-edge,.sky-field .sf-thread.is-on{animation:none}
+}
+body.skylab-still .sf-nm,body.skylab-still .sf-nv,body.skylab-still .sf-name{transition:none}
+body.skylab-still .sf-nm *,body.skylab-still .sky-field .sf-edge,body.skylab-still .sky-field .sf-thread.is-on{animation:none}
+@media (max-width:560px){
+  .sf-n{font-size:var(--abyss-fs-sm);letter-spacing:.2em}
+  .sf-name.is-core .sf-n{font-size:var(--abyss-fs-xs);letter-spacing:.28em}
+}
+
+/* ── 星空壳里的星名：去掉引线竖杠与暗底牌，统一用深空描边；拜耳字母小而淡 ── */
+body.sky-shell #labels .cl-lab.char::before{display:none}
+body.sky-shell #labels .cl-lab.char{padding-left:10px;text-shadow:0 0 6px var(--abyss-obsidian-deep),0 0 2px var(--abyss-obsidian-deep),0 0 1px var(--abyss-obsidian-deep)}
+body.sky-shell #labels .cl-lab.char.lf{padding-left:0;padding-right:10px}
+body.sky-shell #labels .cl-lab.char .ln,body.sky-shell #labels .cl-lab.char.lf .ln{background:none;padding:0;margin:0;font-weight:500;letter-spacing:.08em}
+body.sky-shell #labels .cl-lab.char .ln[data-b]::before{opacity:.5}
+body.sky-shell #labels .cl-lab.char.t0 .ln{font-size:var(--abyss-fs-md)}
+body.sky-shell #labels .cl-lab.char.minor .ln{font-weight:400;color:var(--abyss-ink-2)}

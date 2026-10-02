@@ -1,0 +1,208 @@
+/*
+ * Castline · responsive-shell.css
+ *
+ * A small, late-loaded shell layer.  It owns viewport geometry only; chart
+ * data, SVG coordinates and the three view modules keep their existing CSS.
+ * The dock remains a flex column so its body, rather than its header, owns
+ * the scroll position on short screens.
+ */
+:root {
+  --shell-top: max(var(--gap), env(safe-area-inset-top));
+  --shell-right: max(var(--gap), env(safe-area-inset-right));
+  --shell-bottom: max(var(--gap), env(safe-area-inset-bottom));
+  --shell-left: max(var(--gap), env(safe-area-inset-left));
+}
+
+html,
+body { min-width: 0; min-height: 100%; }
+
+/* Keep the shell's important controls reachable with keyboard and touch. */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--abyss-signal-bright);
+  outline-offset: 3px;
+}
+#dockClose,
+.dk-nav button,
+#dockToc a,
+#dockBody button,
+#dockBody a,
+#ops .btn,
+#crumb .btn { min-height: 44px; }
+#dockClose { min-width: 44px; }
+.dk-nav { min-height: 44px; }
+#dockToc a { display: inline-flex; align-items: center; }
+
+/* Desktop keeps the established 440px composition while reserving a stable
+   safe area for the controls that move with the focused dock. */
+@media (min-width: 1101px) {
+  :root { --dock-w: clamp(400px, 30.56vw, 440px); }
+  #dock {
+    right: var(--shell-right);
+    top: var(--shell-top);
+    bottom: var(--shell-bottom);
+    width: var(--dock-w);
+    max-height: calc(100dvh - var(--shell-top) - var(--shell-bottom));
+    z-index: var(--z-dock);
+  }
+  #dock .panel { min-height: 0; }
+  #dockHead { flex: 0 0 auto; }
+  #dockBody { min-height: 0; overflow: auto; overscroll-behavior: contain; padding-bottom: 64px; }
+  body.focus #timeline { right: calc(var(--dock-w) + var(--shell-right) + var(--gap)); }
+  body.focus #runbar { right: calc(var(--dock-w) + var(--shell-right) + var(--gap)); }
+  #ops.docked,
+  #viewbar.docked { right: calc(var(--dock-w) + var(--shell-right) + var(--gap)); }
+}
+
+/* Tablet: a genuine side drawer leaves a useful canvas strip instead of
+   compressing the scene into a second column. */
+@media (min-width: 821px) and (max-width: 1100px) {
+  :root { --dock-w: min(440px, calc(100vw - 2 * var(--gap))); }
+  #dock {
+    right: var(--shell-right);
+    top: var(--shell-top);
+    bottom: var(--shell-bottom);
+    width: var(--dock-w);
+    height: auto;
+    max-height: calc(100dvh - var(--shell-top) - var(--shell-bottom));
+    z-index: var(--z-dock);
+  }
+  #dock .panel { min-height: 0; }
+  #dockHead { padding: 14px 17px 10px; }
+  #dockHead h2 { font-size: var(--abyss-fs-2xl); }
+  #dockBody { min-height: 0; overflow: auto; overscroll-behavior: contain; padding-inline: 17px; padding-bottom: 64px; }
+  #dockBody .radar-wrap { max-width: 500px; margin-inline: auto; }
+  #dockToc { max-height: 58px; overflow-x: auto; overflow-y: hidden; flex-wrap: nowrap; }
+  #dockToc a { flex: 0 0 auto; }
+  #ops { max-width: calc(100vw - 2 * var(--gap)); flex-wrap: wrap; justify-content: flex-end; }
+  #ops.docked { right: var(--shell-right); }
+  body.focus #timeline,
+  body.focus #runbar { right: calc(var(--dock-w) + var(--shell-right) + var(--gap)); }
+  #index { display: flex; }
+}
+
+/* Shared chart sizing.  The SVG keeps its viewBox and footer; only its CSS
+   box is allowed to become narrower. */
+#dockBody,
+#dockBody .sec,
+#dockBody .radar-wrap,
+#dockBody .radar-caption,
+#dockBody #rdEvHost { min-width: 0; }
+.radar-wrap { width: 100%; max-width: 100%; overflow: visible; }
+svg.radar-3d { display: block; width: 100%; max-width: 100%; height: auto; min-width: 0; }
+.radar-caption { white-space: normal; line-height: 1.5; }
+.radar-readout { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.radar-readout > div { min-width: 0; }
+.radar-readout span,
+.radar-readout b { overflow-wrap: anywhere; }
+.radar-3d .rd-lab:focus-visible .rd-chip,
+.radar-3d .rd-lab:focus .rd-chip { stroke: var(--abyss-ink-bright); stroke-width: 1.8; }
+
+@media (min-width: 821px) and (max-width: 1100px) {
+  #dockBody .radar-wrap {
+    width: min(100%, 440px);
+    max-inline-size: 440px;
+    margin-inline: auto;
+  }
+  #dockBody .radar-caption { max-inline-size: 440px; margin-inline: auto; }
+}
+
+/* Narrow screens use a full-width bottom drawer.  It is still a normal flex
+   panel: the title/navigation stay reachable and long evidence remains in
+   #dockBody instead of being clipped or removed. */
+@media (max-width: 820px) {
+  :root { --dock-w: min(440px, calc(100vw - 2 * var(--gap))); }
+  #dock {
+    left: var(--shell-left);
+    right: var(--shell-right);
+    top: auto;
+    bottom: var(--shell-bottom);
+    width: auto;
+    height: min(86dvh, calc(100dvh - var(--shell-bottom) - 8px));
+    max-height: calc(100dvh - var(--shell-bottom) - 8px);
+    transform: translateY(calc(100% + 40px));
+    z-index: var(--z-dock);
+  }
+  #dock.on { transform: none; }
+  #dock .panel { min-height: 0; }
+  #dockHead { padding: 12px 14px 8px; }
+  #dockHead h2 { margin: 4px 0 2px; font-size: var(--abyss-fs-xl); line-height: 1.15; overflow-wrap: anywhere; padding-right: 38px; }
+  #dockHead .idn { line-height: 1.45; overflow-wrap: anywhere; }
+  #dockClose { right: 8px; top: 8px; }
+  .dk-nav { margin-top: 6px; gap: 4px; flex-wrap: wrap; }
+  .dk-nav button { padding-inline: 10px; }
+  #dockToc { max-height: 52px; padding: 4px 10px; overflow-x: auto; overflow-y: hidden; flex-wrap: nowrap; scrollbar-width: thin; }
+  #dockToc a { flex: 0 0 auto; padding-inline: 9px; }
+  #dockBody { padding: 4px 14px max(64px, env(safe-area-inset-bottom)); overflow: auto; overscroll-behavior: contain; }
+  #dockBody .sec { padding-block: 13px 8px; }
+  .radar-wrap { min-height: clamp(260px, 72vw, 330px); }
+  svg.radar-3d { min-height: clamp(250px, 68vw, 320px); }
+  .radar-caption { gap: 6px; }
+  .radar-readout { gap: 4px; padding-inline: 7px; }
+  #ops {
+    left: var(--shell-left);
+    right: var(--shell-right);
+    top: calc(var(--shell-top) + 196px);
+    max-width: none;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+    max-height: calc(100dvh - var(--shell-top) - 142px);
+    overflow: auto;
+    padding-bottom: 2px;
+  }
+  #ops .btn { min-width: 0; padding-inline: 8px; overflow-wrap: anywhere; }
+  #ops.docked { right: var(--shell-right); }
+  body.focus #timeline,
+  body.focus #runbar { right: var(--shell-right); }
+  #hint { max-width: calc(100vw - 2 * var(--gap)); line-height: 1.6; }
+}
+
+/* At the 820px boundary keep the radar a readable chart, not a full-width
+   desktop canvas.  Its viewBox preserves the complete outline and footer. */
+@media (min-width: 600px) and (max-width: 820px) {
+  #dockBody .radar-wrap {
+    width: min(100%, 440px);
+    max-inline-size: 440px;
+    margin-inline: auto;
+  }
+  #dockBody .radar-caption { max-inline-size: 330px; margin-inline: auto; }
+}
+
+/* Very narrow phones: give the brand and command rail separate rows so the
+   legacy flex toolbar can never cover the identity card. */
+@media (max-width: 480px) {
+  #brand { left: var(--shell-left); top: var(--shell-top); width: calc(100vw - var(--shell-left) - var(--shell-right)); }
+  #brand .panel { padding: 11px 13px 10px; }
+  #brand h1 { font-size: var(--abyss-fs-xl); }
+  #stat { line-height: 1.65; }
+  #ops { top: calc(var(--shell-top) + 196px); }
+  #dock { left: 0; right: 0; bottom: 0; height: min(92dvh, calc(100dvh - 8px)); max-height: calc(100dvh - 8px); }
+  #dockBody { padding-inline: 12px; }
+  #dockHead { padding-inline: 12px; }
+  #dockHead .dk-stats {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px 8px;
+    margin-top: 8px;
+    padding-top: 7px;
+  }
+  #dockBody .radar-wrap {
+    width: min(100%, 330px);
+    max-inline-size: 330px;
+    margin-inline: auto;
+  }
+  .radar-wrap { min-height: 270px; }
+  svg.radar-3d { min-height: 260px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #dock, #dockBody, #dockToc, #dockHead, #ops, #brand { transition: none; }
+  #dockHead, .sec, .radar-3d .rd-scene, .radar-3d .rd-data,
+  .radar-3d .rd-shape, .radar-3d .rd-shape-aura, .radar-3d .rd-grid-outer,
+  .radar-wrap::before { animation: none; }
+  .radar-3d .rd-lab:focus-visible .rd-chip { transition: none; }
+}

@@ -1,0 +1,153 @@
+/* Three atlases, one stage. Text remains an opt-in evidence layer. */
+.atlas-preview-hud{display:none;position:fixed;inset:16px 24px auto;z-index:var(--z-hud);pointer-events:none;color:var(--abyss-ink-bright);font:var(--abyss-fs-base)/1.5 var(--abyss-font-sans)}
+.atlas-preview-hud.on{display:block}
+.aph-shell{max-width:1400px;margin:auto}
+/* v90 F5 · 星图控制台：铭牌（head）+ 黑曜玻璃刻度带（controls）+ 章节星轨（timeline）。
+   控件 = 发丝描边字形 + 小字名，无粗边框；悬停只亮一圈发丝环；激活 = 金色环光 + 名字提亮。 */
+.aph-head{display:flex;align-items:center;gap:6px;min-height:32px;padding:0 2px 5px;border-bottom:1px solid color-mix(in oklab,var(--abyss-violet-bright) 12%,transparent);background:linear-gradient(90deg,transparent,color-mix(in oklab,var(--abyss-gold) 9%,transparent) 3%,transparent 38%)}
+.aph-kicker{font:var(--abyss-fs-2xs)/1.2 var(--abyss-font-mono);letter-spacing:.17em;color:var(--abyss-gold);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.aph-sigil{flex:none;width:7px;height:7px;margin:0 4px 0 2px;border:1px solid var(--abyss-gold);transform:rotate(45deg);box-shadow:var(--abyss-glow-signal)}
+.aph-state{margin-left:8px;margin-right:auto;color:var(--abyss-ink-3);font-size:var(--abyss-fs-2xs);white-space:nowrap}
+/* 字形按钮（铭牌、副控件、星轨两端共用） */
+.aph-gbtn{pointer-events:auto;display:inline-flex;align-items:center;gap:5px;height:32px;padding:0 9px 0 6px;border:0;border-radius:var(--abyss-radius-full);background:none;color:var(--abyss-ink-2);font:var(--abyss-fs-2xs)/1 var(--abyss-font-sans);letter-spacing:.06em;white-space:nowrap;cursor:pointer;transition:color var(--cl-atlas-dur-1) var(--cl-atlas-ease),box-shadow var(--cl-atlas-dur-1) var(--cl-atlas-ease),opacity var(--cl-atlas-dur-1) var(--cl-atlas-ease)}
+.aph-gbtn:hover,.aph-gbtn:focus-visible{color:var(--abyss-ink-bright);box-shadow:inset 0 0 0 1px color-mix(in oklab,var(--abyss-violet-bright) 30%,transparent);outline:none}
+.aph-gbtn[aria-pressed=true],.aph-gbtn[aria-expanded=true]{color:var(--abyss-gold);box-shadow:inset 0 0 0 1px color-mix(in oklab,var(--abyss-gold) 34%,transparent)}
+.aph-gbtn:disabled{opacity:.34;cursor:default;box-shadow:none;color:var(--abyss-ink-2)}
+.aph-gbtn.aph-close{padding:0 7px}
+.aph-g{flex:none;width:18px;height:18px;overflow:visible;--aph-lit:var(--abyss-ink-bright)}
+.aph-gbtn[aria-pressed=true] .aph-g,.aph-gbtn[aria-expanded=true] .aph-g{--aph-lit:var(--abyss-signal-bright)}
+.atlas-preview-hud .g-line{fill:none;stroke:currentColor;stroke-width:1px;vector-effect:non-scaling-stroke;stroke-linecap:round;stroke-linejoin:round}
+.atlas-preview-hud .g-faint{opacity:.5}
+.atlas-preview-hud .g-lit{stroke:var(--aph-lit,currentColor)}
+.atlas-preview-hud .g-bead{fill:var(--aph-lit,currentColor)}
+.atlas-preview-hud .g-star{fill:currentColor}
+.atlas-preview-hud .g-knob{fill:var(--abyss-obsidian);stroke:currentColor;stroke-width:1px;vector-effect:non-scaling-stroke}
+.aph-play .g-pause,.aph-play[aria-pressed=true] .g-play{display:none}
+.aph-play[aria-pressed=true] .g-pause{display:inline}
+/* 刻度带：一条低对比黑曜玻璃细带，发丝上下缘向两端淡出 */
+.aph-controls{position:relative;display:flex;align-items:center;gap:0;min-height:44px;margin-top:7px;padding:2px 8px;border-style:solid;border-width:1px 0;border-image:linear-gradient(90deg,transparent,color-mix(in oklab,var(--abyss-violet-bright) 20%,transparent) 10%,color-mix(in oklab,var(--abyss-violet-bright) 20%,transparent) 90%,transparent) 1;background:linear-gradient(90deg,transparent,color-mix(in oklab,var(--abyss-obsidian-surface) 62%,transparent) 8%,color-mix(in oklab,var(--abyss-obsidian-surface) 62%,transparent) 92%,transparent)}
+/* 三图星徽 */
+.aph-modes{display:flex;align-items:center;gap:2px;padding-right:10px;margin-right:8px;border-right:1px solid color-mix(in oklab,var(--abyss-violet-bright) 16%,transparent)}
+.aph-badge{pointer-events:auto;display:inline-flex;align-items:center;gap:7px;height:40px;padding:0 13px 0 5px;border:0;border-radius:var(--abyss-radius-full);background:none;color:var(--abyss-ink-3);cursor:pointer;--aph-lit:var(--abyss-ink-2);transition:color var(--cl-atlas-dur-1) var(--cl-atlas-ease),box-shadow var(--cl-atlas-dur-1) var(--cl-atlas-ease)}
+.aph-badge-g{flex:none;width:30px;height:30px;overflow:visible;transition:filter var(--cl-atlas-dur-1) var(--cl-atlas-ease)}
+.aph-badge .aph-nm{font:var(--abyss-fs-base)/1 var(--abyss-font-serif);letter-spacing:.14em;color:var(--abyss-ink-3);transition:color var(--cl-atlas-dur-1) var(--cl-atlas-ease),text-shadow var(--cl-atlas-dur-1) var(--cl-atlas-ease)}
+.aph-badge .g-halo{fill:color-mix(in oklab,var(--abyss-gold) 7%,transparent);stroke:var(--abyss-gold);stroke-width:1px;vector-effect:non-scaling-stroke;opacity:0;transition:opacity var(--cl-atlas-dur-1) var(--cl-atlas-ease)}
+.aph-badge:hover,.aph-badge:focus-visible{color:var(--abyss-ink-2);box-shadow:inset 0 0 0 1px color-mix(in oklab,var(--abyss-violet-bright) 26%,transparent);outline:none}
+.aph-badge:hover .aph-nm,.aph-badge:focus-visible .aph-nm{color:var(--abyss-ink-2)}
+.aph-badge[aria-pressed=true]{color:var(--abyss-gold);--aph-lit:var(--abyss-signal-bright)}
+.aph-badge[aria-pressed=true] .g-halo{opacity:.62}
+.aph-badge[aria-pressed=true] .aph-badge-g{filter:drop-shadow(0 0 5px color-mix(in oklab,var(--abyss-gold) 55%,transparent))}
+.aph-badge[aria-pressed=true] .aph-nm{color:var(--abyss-gold);text-shadow:0 0 8px color-mix(in oklab,var(--abyss-gold) 45%,transparent)}
+/* 副控件 · 玻璃药丸 select */
+.aph-subcontrols{display:flex;align-items:center;gap:2px;flex-wrap:nowrap;min-width:0}
+.aph-pill{pointer-events:auto;position:relative;display:inline-flex;align-items:center;gap:3px;height:28px;margin:0 3px;padding:0 3px 0 8px;border-radius:var(--abyss-radius-full);background:color-mix(in oklab,var(--abyss-obsidian-elevated) 58%,transparent);box-shadow:inset 0 0 0 1px color-mix(in oklab,var(--abyss-violet-bright) 20%,transparent);color:var(--abyss-ink-2);transition:box-shadow var(--cl-atlas-dur-1) var(--cl-atlas-ease)}
+.aph-pill:hover,.aph-pill:focus-within{box-shadow:inset 0 0 0 1px color-mix(in oklab,var(--abyss-gold) 34%,transparent);color:var(--abyss-ink-bright)}
+.aph-pill .aph-g{width:16px;height:16px}
+.aph-pill select{-webkit-appearance:none;appearance:none;max-width:124px;height:26px;border:0;background:none;color:var(--abyss-ink);font:var(--abyss-fs-2xs)/1 var(--abyss-font-sans);letter-spacing:.05em;padding:0 16px 0 2px;cursor:pointer;outline:none}
+.aph-pill select option{background:var(--abyss-obsidian-surface);color:var(--abyss-ink)}
+.aph-pill::after{content:'';position:absolute;right:9px;top:50%;width:4px;height:4px;margin-top:-4px;border:solid var(--abyss-ink-3);border-width:0 1px 1px 0;transform:rotate(45deg);pointer-events:none}
+/* 搜索：细下划线 + ⌕ 字形 */
+.aph-search{order:3;display:flex;align-items:center;margin-left:auto;pointer-events:auto;width:min(290px,26vw);height:32px;border-bottom:1px solid color-mix(in oklab,var(--abyss-violet-bright) 26%,transparent);transition:border-color var(--cl-atlas-dur-1) var(--cl-atlas-ease)}
+.aph-search:focus-within{border-bottom-color:color-mix(in oklab,var(--abyss-gold) 60%,transparent)}
+.aph-search input{width:100%;min-width:0;border:0;background:none;color:var(--abyss-ink-bright);padding:6px 4px 5px 6px;font:var(--abyss-fs-base)/1.3 var(--abyss-font-sans);outline:none}
+.aph-search input::placeholder{color:var(--abyss-ink-3)}
+.aph-search input::-webkit-search-cancel-button{-webkit-appearance:none}
+.aph-search button{flex:none;display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;padding:0;border:0;border-radius:var(--abyss-radius-full);background:none;color:var(--abyss-ink-2);cursor:pointer;transition:color var(--cl-atlas-dur-1) var(--cl-atlas-ease),box-shadow var(--cl-atlas-dur-1) var(--cl-atlas-ease)}
+.aph-search button:hover,.aph-search button:focus-visible{color:var(--abyss-gold);box-shadow:inset 0 0 0 1px color-mix(in oklab,var(--abyss-violet-bright) 30%,transparent);outline:none}
+/* 章节星轨带：同一种黑曜玻璃细带 */
+.aph-timeline{display:flex;align-items:center;gap:8px;position:fixed;left:24px;right:24px;bottom:40px;max-width:1180px;margin:auto;padding:5px 12px;pointer-events:auto;border-style:solid;border-width:1px 0;border-image:linear-gradient(90deg,transparent,color-mix(in oklab,var(--abyss-violet-bright) 22%,transparent) 8%,color-mix(in oklab,var(--abyss-violet-bright) 22%,transparent) 92%,transparent) 1;background:linear-gradient(90deg,transparent,color-mix(in oklab,var(--abyss-obsidian) 78%,transparent) 5%,color-mix(in oklab,var(--abyss-obsidian) 78%,transparent) 95%,transparent)}
+.aph-timeline .aph-gbtn{height:34px}
+/* 「静止 / 恢复动效」切换不得改变按钮宽度（否则挤动星轨，x↔序号映射漂移） */
+.aph-reduced{width:88px;justify-content:center}
+.aph-play{width:34px;justify-content:center;padding:0;box-shadow:inset 0 0 0 1px color-mix(in oklab,var(--abyss-violet-bright) 18%,transparent)}
+/* 游标读数定宽：读数变长不得挤动星轨宽度（星轨 x ↔ range 值一一对应） */
+.aph-cursor{flex:0 0 176px;width:176px;font:var(--abyss-fs-2xs)/1.4 var(--abyss-font-mono);max-width:176px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--abyss-ink-2);letter-spacing:.03em}
+.aph-caption{position:fixed;bottom:14px;left:24px;right:24px;color:var(--abyss-ink-3);font:var(--abyss-fs-2xs)/1.4 var(--abyss-font-mono);text-align:center;pointer-events:none}
+.aph-evidence{position:fixed;right:26px;top:128px;bottom:145px;overflow:auto;width:min(380px,calc(100vw - 52px));padding:22px;background:var(--cosmic-panel-bg-strong);border:1px solid var(--cosmic-panel-border);box-shadow:var(--cosmic-panel-shadow);pointer-events:auto;user-select:text}
+.aph-evidence[hidden],.atlas-preview-hud [hidden]{display:none !important}
+.aph-evidence>button{float:right;min-width:36px;min-height:36px;border:1px solid var(--cosmic-panel-border-soft)}
+.aph-evidence h3{font:var(--abyss-fs-lg)/1.6 var(--abyss-font-serif);margin:0 0 12px;color:var(--abyss-ink-bright)}
+.aph-evidence p{margin:10px 0;color:var(--cosmic-text-body)}
+.aph-evidence blockquote{border-left:2px solid var(--abyss-signal);padding-left:14px;margin:16px 0;color:var(--abyss-ink-bright);white-space:pre-wrap}
+.aph-evidence small{color:var(--cosmic-text-muted)}
+body.atlas-workspace #brand,body.atlas-workspace #index,body.atlas-workspace #overview,body.atlas-workspace #hint,body.atlas-workspace #crumb,body.atlas-workspace #constellationMark,body.atlas-workspace #clViewOrb,body.atlas-workspace #shellMenuBtn,body.atlas-workspace #shellIndexBtn,body.atlas-workspace #plotTextPanel,body.atlas-workspace #clJumpHUD{display:none!important}
+body.atlas-workspace #ops{display:none!important}
+body.atlas-workspace.atlas-tools-open #ops{display:flex!important;top:66px;right:24px;left:auto;max-width:min(580px,calc(100vw - 48px));flex-wrap:wrap;background:var(--cosmic-panel-bg-strong);padding:14px;border:1px solid var(--cosmic-panel-border);z-index:var(--z-panel);opacity:1;pointer-events:auto}
+body.atlas-workspace #dock{visibility:hidden;pointer-events:none!important}
+body.atlas-workspace #dock *{pointer-events:none!important}
+body.atlas-workspace .cl-ann-ledger,body.atlas-workspace .cl-o3-deck,body.atlas-workspace .cl-plot-deck{display:none!important}
+body.atlas-workspace[data-atlas-view=gem] .cl-domains-lamps,body.atlas-workspace[data-atlas-view=gem] .cl-domains-hulls{visibility:hidden}
+body.atlas-workspace[data-atlas-view=annulus] #labels{visibility:hidden;opacity:0!important;pointer-events:none!important}
+body.atlas-workspace[data-atlas-view=annulus] #labels *{pointer-events:none!important}
+body.atlas-workspace[data-atlas-view=annulus] #aphFace,body.atlas-workspace[data-atlas-view=domains] #aphFace{display:none}
+body.atlas-workspace:not([data-atlas-view=gem]) .aph-pill-peer{display:none}
+body.atlas-workspace:not([data-atlas-view=domains]) .aph-pill-lens{display:none}
+body.atlas-workspace:not([data-atlas-view=annulus]) #aphUnfold{display:none}
+body.noview #atlasPreviewHUD{display:none}
+body.ia-open #atlasPreviewHUD{visibility:hidden}
+body.atlas-workspace #atlasStage{z-index:var(--z-panel)}
+body.atlas-workspace #labels .cl-lab.chap,body.atlas-workspace #labels .cl-lab.hub,body.atlas-workspace .cl-arc-spine,body.atlas-workspace .cl-arc-seal,body.atlas-workspace .cl-orc-folio{visibility:hidden!important;pointer-events:none!important}
+body.atlas-workspace .cl-arc-sigil{display:none!important}
+body.atlas-workspace #labels .cl-lab{transition:opacity var(--abyss-dur-fast),filter var(--abyss-dur-fast)}
+body.atlas-workspace #labels .cl-lab.char{max-width:min(260px,var(--cl-label-room,calc(100vw - 64px)));box-sizing:border-box}
+body.atlas-workspace #labels .cl-lab.char .ls,body.atlas-workspace #labels .cl-lab.char .lx{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+body.atlas-workspace[data-atlas-lens=camps] .cl-domains-lamps{display:none}
+body.atlas-workspace #stage::before{opacity:.35}
+.analysis-depth{display:flex;flex-direction:column;gap:4px;font:var(--abyss-fs-base)/1.5 var(--abyss-font-sans);color:var(--cosmic-text-body)}
+.analysis-depth select{color:var(--abyss-ink-bright);background:var(--cosmic-control-bg);border:1px solid var(--cosmic-panel-border);padding:7px}
+.analysis-depth small{max-width:300px;color:var(--cosmic-text-muted);font-size:var(--abyss-fs-2xs)}
+.atlas-local-layer{position:fixed;inset:0;z-index:var(--z-hud);pointer-events:none}
+body.atlas-local-open .cl-ann-layer,body.atlas-local-open #labels,body.atlas-local-open .cl-domains-lamps{opacity:.22;pointer-events:none}
+body.atlas-local-open .cl-ann-layer .is-hit{pointer-events:none}
+.atlas-local-layer svg{width:100%;height:100%;overflow:visible}
+.atlas-local-layer{animation:atlasLocalEnter var(--cl-atlas-dur-2) var(--cl-atlas-ease) both}
+@keyframes atlasLocalEnter{from{opacity:0}to{opacity:1}}
+.atlas-local-well{fill:var(--cosmic-stage-base);opacity:.94;stroke:var(--cosmic-panel-border)}
+.atlas-local-orbit{stroke:var(--cosmic-panel-border-soft);fill:none;stroke-dasharray:3 8}
+.atlas-local-link{stroke:var(--abyss-violet-bright);stroke-width:1.25;fill:none;opacity:.6}
+.atlas-local-link[data-kind=causal]{stroke:var(--abyss-hot-bright);stroke-dasharray:5 3}
+.atlas-local-node{pointer-events:auto;cursor:pointer;outline:none}
+.atlas-local-node circle,.atlas-local-node path{fill:var(--cosmic-stage-base);stroke:var(--abyss-gold);stroke-width:1.5}
+.atlas-local-node[data-kind=event] circle{stroke:var(--abyss-violet-bright)}
+.atlas-local-node:hover circle,.atlas-local-node:focus circle{fill:var(--cosmic-control-active);stroke-width:3}
+.atlas-local-node.is-selected circle,.atlas-local-node.is-selected path{fill:color-mix(in oklab,var(--abyss-gold) 22%,var(--cosmic-stage-base));stroke:var(--abyss-gold);stroke-width:3;filter:drop-shadow(0 0 5px color-mix(in oklab,var(--abyss-gold) 52%,transparent))}
+.atlas-local-node text{fill:var(--abyss-ink-bright);font:var(--abyss-fs-base)/1.3 var(--abyss-font-sans);text-anchor:middle;pointer-events:none}
+.atlas-local-title{fill:var(--abyss-gold);font:var(--abyss-fs-md)/1.2 var(--abyss-font-serif);text-anchor:middle}
+.atlas-local-hint{fill:var(--cosmic-text-muted);font:var(--abyss-fs-2xs)/1.3 var(--abyss-font-mono);text-anchor:middle}
+.atlas-local-page{pointer-events:auto;cursor:pointer}
+.atlas-local-page text{fill:var(--abyss-gold);font:var(--abyss-fs-base)/1.3 var(--abyss-font-sans);text-anchor:middle}
+.atlas-local-page rect{fill:var(--cosmic-control-bg);stroke:var(--cosmic-panel-border)}
+.atlas-local-page-status{fill:var(--cosmic-text-muted);font:var(--abyss-fs-2xs)/1.3 var(--abyss-font-mono);text-anchor:middle;letter-spacing:.04em}
+.atlas-aggregate{position:fixed;left:auto;top:auto;right:max(24px,calc((100vw - 1180px) / 2));bottom:108px;transform:none;z-index:var(--z-tooltip);width:76px;height:76px;padding:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;border-radius:50%;border:1px solid color-mix(in oklab,var(--abyss-violet-bright) 42%,transparent);background:color-mix(in oklab,var(--abyss-obsidian) 62%,transparent);color:var(--abyss-gold);font:var(--abyss-fs-lg)/1.1 var(--abyss-font-mono);letter-spacing:.02em;cursor:pointer;transition:border-color var(--cl-atlas-dur-1) var(--cl-atlas-ease),box-shadow var(--cl-atlas-dur-1) var(--cl-atlas-ease)}
+/* v90 F5（F1-host.patch）：剧情星簇钮离开盘心（盘心归 F1 星核），落在章节星轨右端上方；发丝双环 + 计数，不再是实心大圆盘 */
+.atlas-aggregate::before{content:'';position:absolute;inset:5px;border-radius:50%;border:1px dashed color-mix(in oklab,var(--abyss-violet-bright) 34%,transparent);pointer-events:none}
+.atlas-aggregate:hover,.atlas-aggregate:focus-visible{border-color:color-mix(in oklab,var(--abyss-gold) 60%,transparent);box-shadow:0 0 12px color-mix(in oklab,var(--abyss-gold) 26%,transparent);outline:none}
+.atlas-aggregate small{display:block;color:var(--abyss-ink-3);font:var(--abyss-fs-2xs)/1.2 var(--abyss-font-sans);letter-spacing:.06em}
+body:has(#aphEvidenceCard:not([hidden])) .atlas-aggregate{display:none!important}
+.atlas-aggregate[hidden],body.atlas-local-open .atlas-aggregate,body:not([data-atlas-view=annulus]) .atlas-aggregate,body.ia-open .atlas-aggregate{display:none!important}
+@media(max-width:900px){
+ .atlas-preview-hud{inset:12px 14px auto}.aph-state{display:none}.aph-kicker{letter-spacing:.06em;margin-right:auto}
+ .aph-controls{flex-wrap:wrap;row-gap:0;padding:1px 6px}.aph-modes{order:1}.aph-search{order:2;width:min(260px,34vw)}
+ .aph-subcontrols{order:3;flex-basis:100%;min-height:36px;border-top:1px solid color-mix(in oklab,var(--abyss-violet-bright) 11%,transparent)}
+ .aph-timeline{left:12px;right:12px;bottom:36px;padding:4px 8px;gap:6px}.aph-cursor{flex-basis:150px;width:150px;max-width:150px}
+ .aph-caption{left:14px;right:14px;bottom:10px}
+ .aph-evidence{inset:auto 12px 112px;width:auto;max-height:45vh}
+ .atlas-aggregate{right:12px;bottom:102px}
+}
+@media(max-width:480px){
+ .aph-head{gap:2px}.aph-head .aph-gbtn{padding:0 7px 0 5px}
+ .aph-modes{flex:none;padding-right:4px;margin-right:0;border-right:0}.aph-badge{height:40px;padding:0 9px 0 3px;gap:5px}.aph-badge-g{width:28px;height:28px}.aph-badge .aph-nm{letter-spacing:.08em}
+ .aph-subcontrols{justify-content:flex-start;gap:4px}.aph-subcontrols .aph-gbtn{width:34px;height:34px;justify-content:center;padding:0}.aph-subcontrols .aph-nm{display:none}.aph-pill select{max-width:96px}
+ /* 搜索收成 ⌕ 字形；点开覆盖星徽行展开输入 */
+ .aph-search{width:34px;height:34px;margin-left:auto;border-bottom-color:transparent}.aph-search input{display:none}.aph-search button{width:34px;height:34px}
+ .aph-search.is-open{position:absolute;left:6px;right:6px;top:4px;width:auto;height:36px;background:var(--abyss-obsidian-glass-heavy);border-bottom-color:color-mix(in oklab,var(--abyss-gold) 60%,transparent)}
+ .aph-search.is-open input{display:block}
+ .aph-timeline{display:grid;grid-template-columns:auto 1fr auto;grid-template-areas:"txt txt txt" "play track still";row-gap:0;column-gap:6px;padding:2px 8px 4px;bottom:32px}
+ .aph-play{grid-area:play}.aph-track{grid-area:track;min-width:0}.aph-reduced{grid-area:still}.aph-cursor{grid-area:txt;justify-self:end;width:auto;max-width:100%;line-height:1.3;text-align:right}
+ .aph-reduced .aph-nm{display:none}.aph-reduced{width:34px;justify-content:center;padding:0}
+ .aph-caption{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;bottom:8px}
+ .aph-evidence{inset:auto 12px 118px}
+ .atlas-aggregate{right:12px;bottom:110px;width:64px;height:64px;font-size:var(--abyss-fs-md)}.atlas-aggregate::before{inset:4px}
+}
+@media(prefers-reduced-motion:reduce){.atlas-local-layer *{transition:none!important;animation:none!important}.atlas-preview-hud,.atlas-preview-hud *{transition:none!important}}
+body[data-tier=low] .atlas-preview-hud,body[data-tier=low] .atlas-preview-hud *{transition:none!important}

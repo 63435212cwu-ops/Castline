@@ -1,0 +1,487 @@
+/**
+ * Castline · abyss-tokens.css — 深渊星典全局设计令牌（CORE · S1 / S2）
+ * ============================================================================
+ * 来源：mystic-grand-refactor-plan「深渊星典」§4 S1 深渊色谱 · S2 字体三重奏。
+ * 定位：三图（雷达 / 星座场 / 星盘剧情树）共用的**唯一**色彩与字体真相层。
+ *       本文件不选择器、不绘制，只发布变量；任何模块不得再自造色阶或字族。
+ *
+ * ── 为什么把 radar-theme.css 的 :root 整块搬到这里 ──────────────────────────
+ * S1 原文：「把 radar-theme.css:27-160 的 --abyss-* 体系升格为全局色谱」。
+ * 搬家前该块只被雷达一个体系消费；星座与树各自硬编码，于是「同一片深渊」在
+ * 三图里是三种黑。搬家后变量作用域仍是 :root（值不变、行为不变），但**归属**
+ * 从「雷达私有」变成「三图共有」——后续 R/C/T 各线的色彩引用一律落这里。
+ *
+ * ── S1.1 十九级明度阶梯的构造（可复现，非手调） ─────────────────────────────
+ * plan 原文只给了两个端点名（午夜蓝 #0b1026 → 深渊紫 #07060d）与总数 19，
+ * 但这两点的 Oklab 明度只差 5.4（L*=12.8 vs 18.2），19 级均分下来每级 ΔL*≈0.3，
+ * 肉眼与显示器都不可分辨——按字面实现会得到一条**不可用**的阶梯。
+ * 因此按「阶梯必须能当取色验收标尺」这一用途反推：阶梯覆盖 UI 全部明度范围，
+ * 并把 G1 生成块（app.css:40-46）已存在的 8 个灰阶锚点**精确钉在阶梯索引上**。
+ *   #030206→lad-00 · #07060d→lad-01 · #0b1026→lad-02 · #14121f→lad-03
+ *   #1a1728→lad-04 · #2c2740→lad-05 · #8f86a8→lad-11 · #bfb8cf→lad-15
+ *   #f4efe6→lad-18
+ * 生成方式：Oklab 空间分段线性插值（RGB 空间插值会在暗部偏色），
+ * 脚本见 reports/mystic-refactor-batch4.md 附录。8 个锚点回代误差 = 0。
+ *
+ * ── 兼容与回退 ──────────────────────────────────────────────────────────────
+ * radar-theme.css 仍保留同名变量的**消费**，不再重复定义。若本文件缺失，
+ * 雷达样式会失去 --abyss-* 而退化为字面回退值（各 var() 第二参数），不炸版。
+ * ============================================================================
+ */
+
+:root{
+  /* ══════════════════════════════════════════════════════════════════════════
+     S1.1 · 深渊明度阶梯（Abyss Luminance Ladder · 19 级 · L0 最深 → L18 最亮）
+     用途：任何「面 / 线 / 字」的明度必须落在这 19 级之一，或 S1.3 五色之一。
+     ══════════════════════════════════════════════════════════════════════════ */
+  --abyss-lad-00:#030206;   /* L*= 9.28  底锥 · obsidian-deep */
+  --abyss-lad-01:#07060d;   /* L*=12.82  G1 --grey-bg · 深渊 0（总纲背景档） */
+  --abyss-lad-02:#0b1026;   /* L*=18.21  午夜蓝（plan 端点 A） */
+  --abyss-lad-03:#14121f;   /* L*=19.14  G1 --grey-s1 */
+  --abyss-lad-04:#1a1728;   /* L*=21.69  G1 --grey-s2 */
+  --abyss-lad-05:#2c2740;   /* L*=29.02  G1 --grey-s3 */
+  --abyss-lad-06:#3b3650;   /* L*=34.95 */
+  --abyss-lad-07:#4b4561;   /* L*=40.80 */
+  --abyss-lad-08:#5b5472;   /* L*=46.44 */
+  --abyss-lad-09:#6c6484;   /* L*=52.27 */
+  --abyss-lad-10:#7d7596;   /* L*=58.16 */
+  --abyss-lad-11:#8f86a8;   /* L*=63.99  G1 --grey-s4（--ink-3） */
+  --abyss-lad-12:#9b92b2;   /* L*=67.86 */
+  --abyss-lad-13:#a79fbb;   /* L*=71.85 */
+  --abyss-lad-14:#b3abc5;   /* L*=75.62 */
+  --abyss-lad-15:#bfb8cf;   /* L*=79.55  G1 --grey-s5（--ink-2） */
+  --abyss-lad-16:#d0cad7;   /* L*=84.77 */
+  --abyss-lad-17:#e2dcdf;   /* L*=90.01 */
+  --abyss-lad-18:#f4efe6;   /* L*=95.35  G1 --grey-ink（--ink） */
+
+  /* S1.2 · 阶梯常量（供 JS / 探针读取，避免两处各写一份 19） */
+  --abyss-lad-min:0;
+  --abyss-lad-max:18;
+  --abyss-lad-count:19;
+
+  /* ══════════════════════════════════════════════════════════════════════════
+     S1.3 · 语义五色（Semantic Five）—— 有彩色，不在阶梯上，但**明度必须可指认**
+     括号内为最近阶梯索引（实测 ΔL* ≤ 2.3，见 batch4 附录）。
+     ══════════════════════════════════════════════════════════════════════════ */
+  --abyss-gold:#ffd27a;                                     /* 金    → lad-17 ΔL*=1.54 */
+  --abyss-ink:var(--ink,#f4efe6);
+  --abyss-ink-bright:#ffffff;
+  --abyss-ink-2:var(--ink-2,#bfb8cf);
+  --abyss-ink-3:var(--ink-3,#7d7696);
+  --abyss-ink-muted:rgba(191,184,207,.45);
+  --abyss-ink-ghost:rgba(244,239,230,.45);
+
+  /* ══════════════════════════════════════════════════════════════════════════
+     S1.4 · 星座场阵营色血缘（palette.js:26-28 的 CAMP_CSS 投影到阶梯亮部）
+     星渊宪法 C1：星座 = 阵营 · 色相 = 立场。阵营色恒沉、事件色恒亮。
+     下表让 CSS 侧也能指认「这条阵营色对应阶梯第几级」，与 palette.js 单一真相对齐。
+     ══════════════════════════════════════════════════════════════════════════ */
+  --abyss-camp-main:#ffd27a;      /* 主角方 → lad-17 */
+  --abyss-camp-ally:#f6dfa4;      /* 盟友   → lad-17 */
+  --abyss-camp-neutral:#cbbcf0;   /* 中立   → lad-16 */
+  --abyss-camp-sway:#ffa07a;      /* 摇摆   → lad-15 */
+  --abyss-camp-oppose:#ff5d73;    /* 对立   → lad-12 */
+  --abyss-camp-none:#8d84a8;      /* 未定   → lad-11 */
+
+  /* ══════════════════════════════════════════════════════════════════════════
+     以下为 radar-theme.css 原 :root 块原文搬迁（R2 深渊令牌 · 值不变）
+     ══════════════════════════════════════════════════════════════════════════ */
+
+  /* 黑曜石系列深色基底 (Obsidian Series) */
+  --abyss-obsidian:var(--bg,#07060d);                      /* 深渊 0 · 背景 */
+  --abyss-obsidian-deep:var(--abyss-lad-00);
+  --abyss-obsidian-surface:#0e0a1a;
+  --abyss-obsidian-elevated:#15102a;
+  --abyss-obsidian-glass:rgba(7,6,13,.86);
+  --abyss-obsidian-glass-heavy:rgba(11,8,20,.95);
+  --abyss-obsidian-glass-subtle:rgba(18,13,34,.62);
+  --abyss-obsidian-bg:linear-gradient(135deg,rgba(14,10,28,.92) 0%,rgba(7,6,13,.96) 100%);
+  --abyss-obsidian-subtle:rgba(14,10,28,.72);
+  --abyss-glass-blur:12px;
+  /* RGB 通道数值（便于局部 alpha 运算与 color-mix） */
+  --abyss-rgb-obsidian:7,6,13;
+  --abyss-rgb-mint:122,240,200;
+  --abyss-rgb-signal:255,180,92;
+  --abyss-rgb-violet:166,136,255;
+  --abyss-rgb-hot:255,92,124;
+  --abyss-rgb-mint-bright:154,245,210;
+  --abyss-rgb-signal-bright:255,217,160;
+  --abyss-rgb-violet-bright:201,184,255;
+  /* 核心语义色彩谱系（全部链向 G1 生成块，禁止再写裸值） */
+  --abyss-mint:rgb(var(--abyss-rgb-mint));                 /* v80：断开 --mint→--sem-mint→--abyss-mint 循环（循环令牌 = 全部失效） */                        /* 薄荷翡翠 */
+  --abyss-mint-bright:rgb(var(--abyss-rgb-mint-bright));
+  --abyss-mint-dim:#46a888;
+  --abyss-sem-mint-base:var(--abyss-mint);
+  --abyss-sem-mint-bright:var(--abyss-mint-bright);
+  --abyss-sem-mint-dim:var(--abyss-mint-dim);
+  --abyss-mint-subtle:rgba(122,240,200,.12);
+  --abyss-mint-glow:rgba(122,240,200,.55);
+  --abyss-signal:rgb(var(--abyss-rgb-signal));                    /* 太阳琥珀 */
+  --abyss-signal-bright:rgb(var(--abyss-rgb-signal-bright));
+  --abyss-signal-dim:#c47c2c;
+  --abyss-sem-signal-base:var(--abyss-signal);
+  --abyss-sem-signal-bright:var(--abyss-signal-bright);
+  --abyss-sem-signal-dim:var(--abyss-signal-dim);
+  --abyss-signal-subtle:rgba(255,180,92,.14);
+  --abyss-signal-glow:rgba(255,180,92,.60);
+  --abyss-violet:rgb(var(--abyss-rgb-violet));                    /* 虚空秘紫 */
+  --abyss-violet-bright:rgb(var(--abyss-rgb-violet-bright));
+  --abyss-violet-dim:var(--sem-violetLo,#6a4fd6);
+  --abyss-sem-violet-base:var(--abyss-violet);
+  --abyss-sem-violet-bright:var(--abyss-sem-violet-bright);
+  --abyss-sem-violet-dim:var(--abyss-sem-violet-dim);
+  --abyss-violet-subtle:rgba(166,136,255,.15);
+  --abyss-violet-glow:rgba(166,136,255,.50);
+  --abyss-hot:var(--hot,#ff5c7c);                          /* 炽烈绯红 */
+  --abyss-hot-bright:#ff8ca3;
+  --abyss-hot-dim:#ba2846;
+  --abyss-sem-hot-base:var(--abyss-hot);
+  --abyss-sem-hot-bright:var(--abyss-hot-bright);
+  --abyss-sem-hot-dim:var(--abyss-hot-dim);
+  --abyss-hot-subtle:rgba(255,92,124,.15);
+  --abyss-hot-glow:rgba(255,92,124,.60);
+  --abyss-crimson:var(--abyss-hot);                        /* HUD 旧名同源 */
+  --abyss-crimson-bright:var(--abyss-hot-bright);
+  --abyss-crimson-glow:rgba(255,92,124,.60);
+  /* 线框与边框标准 (Lines & Borders) */
+  --abyss-line:rgba(172,156,230,.16);
+  --abyss-line-2:rgba(255,180,92,.42);
+  --abyss-line-mint:rgba(122,240,200,.38);
+  --abyss-border-subtle:1px solid var(--abyss-line);
+  --abyss-border-mint:1px solid var(--abyss-line-mint);
+  --abyss-border-signal:1px solid rgba(255,180,92,.40);
+  --abyss-border-violet:1px solid rgba(166,136,255,.40);
+  /* 霓虹光晕预设 (Glow Presets) */
+  --abyss-glow:0 0 10px rgba(122,240,200,.55);
+  --abyss-glow-mint:0 0 12px rgba(122,240,200,.65);
+  --abyss-glow-signal:0 0 12px rgba(255,180,92,.65);
+  --abyss-glow-violet:0 0 12px rgba(166,136,255,.58);
+  --abyss-glow-hot:0 0 12px rgba(255,92,124,.65);
+  --abyss-glow-card:0 18px 54px rgba(0,0,0,.65),0 0 26px rgba(122,240,200,.16);
+  /* 档位色彩谱系 (Tier Spectrum) */
+  --abyss-tier-legend:#fff1c4;
+  --abyss-tier-legend-glow:0 0 16px rgba(255,214,150,.6);
+  --abyss-tier-legend-border:rgba(255,214,150,.55);
+  --abyss-tier-legend-bg:rgba(255,241,196,.14);
+  --abyss-tier-hi:#ffd9a0;
+  --abyss-tier-hi-glow:0 0 14px rgba(255,180,92,.5);
+  --abyss-tier-hi-border:rgba(255,180,92,.48);
+  --abyss-tier-hi-bg:rgba(255,180,92,.12);
+  --abyss-tier-up:#9af5d2;
+  --abyss-tier-up-glow:0 0 12px rgba(122,240,200,.5);
+  --abyss-tier-up-border:rgba(122,240,200,.45);
+  --abyss-tier-up-bg:rgba(122,240,200,.12);
+  --abyss-tier-mid:#e4dcff;
+  --abyss-tier-mid-glow:0 0 10px rgba(166,136,255,.40);
+  --abyss-tier-mid-border:rgba(166,136,255,.38);
+  --abyss-tier-mid-bg:rgba(166,136,255,.10);
+  --abyss-tier-low:#a39cb8;
+  --abyss-tier-low-glow:0 0 6px rgba(163,156,184,.25);
+  --abyss-tier-low-border:rgba(163,156,184,.28);
+  --abyss-tier-low-bg:rgba(163,156,184,.08);
+  /* 空间间距阶梯 (Spacing · 雷达系) */
+  --abyss-space-2xs:2px;
+  --abyss-space-xs:4px;
+  --abyss-space-sm:8px;
+  --abyss-space-md:12px;
+  --abyss-space-lg:16px;
+  --abyss-space-xl:20px;
+  --abyss-space-2xl:28px;
+  /* 空间间距阶梯 (Spacing · HUD 系) */
+  --abyss-sp-2xs:2px;
+  --abyss-sp-xs:4px;
+  --abyss-sp-sm:6px;
+  --abyss-sp-md:10px;
+  --abyss-sp-lg:14px;
+  /* 填充百分比 (Fill Percent · 进度槽宽度基准) */
+  --abyss-pct:50%;
+
+  /* ══════════════════════════════════════════════════════════════════════════
+     S2 · 字体三重奏（Typography Trio）
+     Serif = 碑文体/神圣文本（铭文环 · 年轮 · 原型名）
+     Sans  = 数据标签与 HUD
+     Mono  = 一切数值（统一 tabular-nums，列对齐）
+     铁律：全站字族 ≤ 3 种。
+     ══════════════════════════════════════════════════════════════════════════ */
+  --abyss-font-sans:var(--sans,system-ui,sans-serif);
+  --abyss-font-mono:ui-monospace,SFMono-Regular,Menlo,monospace;   /* v80：断开 --mono→--abyss-font-mono 循环 */
+  --abyss-font-serif:"Songti SC","STSong","Noto Serif SC","Source Han Serif SC",SimSun,serif;
+  /* 数值角色：字族 + 等宽数字 + 关闭连字，三者必须同时给，否则列仍会跳 */
+  --abyss-font-num:var(--abyss-font-mono);
+  --abyss-num-feat:"tnum" 1,"lnum" 1,"zero" 0;
+  /* 字阶 (G3 阶梯 · 原样搬迁) */
+  --abyss-fs-2xs:11px;   /* G3：8.5px 上探 */
+  --abyss-fs-xs:10px;
+  --abyss-fs-sm:11.5px;
+  --abyss-fs-base:13px;
+  --abyss-fs-md:14.5px;
+  --abyss-fs-lg:16px;
+  --abyss-fs-xl:20px;
+  --abyss-fs-2xl:26px;
+
+  /* ══════════════════════════════════════════════════════════════════════════
+     A6 · 动效全域统一 (Motion Tokens · 13 档时长 · 7 档缓动)
+     方案：全部 transition/animation 时长映射进 --abyss-dur-* 13 档
+     ══════════════════════════════════════════════════════════════════════════ */
+  --abyss-dur-instant:80ms;       /* 1. 瞬时微光/点击反馈 */
+  --abyss-dur-micro:140ms;        /* 2. 微交互 hover / 焦点反馈 */
+  --abyss-dur-fast:220ms;         /* 3. 快速展开 / 提示淡出 */
+  --abyss-dur-normal:360ms;       /* 4. 标准过渡 / 面板升降 */
+  --abyss-dur-medium:520ms;       /* 5. 中速展开 / 抽屉切换 */
+  --abyss-dur-slow:780ms;         /* 6. 慢速巡回 / 视图切换 */
+  --abyss-dur-breath:1200ms;      /* 7. 呼吸周期 / 脉搏基准 (1.2s) */
+  --abyss-dur-pulse:2400ms;       /* 8. 信标脉动 / 仪式长呼吸 (2.4s) */
+  --abyss-dur-cycle:4800ms;       /* 9. 环形周期 / 星轨初级 (4.8s) */
+  --abyss-dur-tide:9600ms;        /* 10. 潮汐起伏 / 能量流转 (9.6s) */
+  --abyss-dur-aeon:18000ms;       /* 11. 星盘极慢自旋 (18s) */
+  --abyss-dur-cosmic:36000ms;     /* 12. 宇宙大周期 (36s) */
+  --abyss-dur-orbit:72000ms;      /* 13. 公转全周期 (72s) */
+  --abyss-dur-oracle:214s;        /* A6 孤值登记：色温巡回长周期错拍节律 */
+
+  /* S8 / 既有别名兼容 */
+  --abyss-dur-glint:120ms;
+  --abyss-dur-shift:300ms;
+  --abyss-dur-ritual:900ms;
+  --abyss-dur-epoch:2400ms;
+  --abyss-dur-norm:var(--abyss-dur-normal);
+  --abyss-dur-orbit-fast:32s;
+  --abyss-dur-orbit-slow:var(--abyss-dur-orbit);
+
+  /* A6 · 7 种标准缓动曲线 */
+  --abyss-ease-sacred:cubic-bezier(0.16,1,0.3,1);        /* 1. 神圣缓动 · 平滑减速 */
+  --abyss-ease-mech:steps(8,end);                         /* 2. 机械阶跃 · 8步时钟 */
+  --abyss-ease-tide:cubic-bezier(0.37,0,0.63,1);          /* 3. 潮汐正弦 · 往复平滑 */
+  --abyss-ease-out:cubic-bezier(0.16,1,0.3,1);            /* 4. 出场减速 */
+  --abyss-ease-back:cubic-bezier(0.34,1.32,0.64,1);       /* 5. 弹性回弹 */
+  --abyss-ease-spring:cubic-bezier(0.34,1.56,0.64,1);     /* 6. 深渊弹簧 */
+  --abyss-ease-smooth:cubic-bezier(0.4,0,0.2,1);          /* 7. 柔和双向 */
+  --abyss-ease-in-abyss:cubic-bezier(0.7,0,0.84,0);
+  --abyss-ease-out-abyss:cubic-bezier(0.16,1,0.3,1);
+  --abyss-ease-in-out-sacred:cubic-bezier(0.77,0,0.175,1);
+  --abyss-ease-bounce-seal:cubic-bezier(0.34,1.56,0.64,1);
+  --abyss-ease-float:cubic-bezier(0.445,0.05,0.55,0.95);
+  /* 赛博倒角切口 (Cyber Chamfers) */
+  --abyss-clip-corner:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px));
+  --abyss-clip-corner-sm:polygon(0 0,calc(100% - 6px) 0,100% 6px,100% 100%,6px 100%,0 calc(100% - 6px));
+  --abyss-clip-chamfer:polygon(0 6px,6px 0,calc(100% - 6px) 0,100% 6px,100% calc(100% - 6px),calc(100% - 6px) 100%,6px 100%,0 calc(100% - 6px));
+  --abyss-clip-chamfer-sm:polygon(0 4px,4px 0,calc(100% - 4px) 0,100% 4px,100% calc(100% - 4px),calc(100% - 4px) 100%,4px 100%,0 calc(100% - 4px));
+
+  /* ══════════════════════════════════════════════════════════════════════════
+     A2 · 别名过渡层 (Alias Transition Layer)
+     收编旧文件 var(--mono) / var(--signal) / var(--font-serif) 等散落别名
+     ══════════════════════════════════════════════════════════════════════════ */
+  --cl-bg:var(--abyss-obsidian);
+  --cl-line:var(--abyss-line);
+  --cl-signal:var(--abyss-signal);
+  --cl-gold:var(--abyss-gold);
+  --mono:var(--abyss-font-mono);
+  --font-serif:var(--abyss-font-serif);
+  --font-sans:var(--abyss-font-sans);
+  --signal:var(--abyss-signal);
+  --cl-panel-bg:var(--abyss-obsidian-glass);
+  --cl-panel-bg-heavy:var(--abyss-obsidian-glass-heavy);
+  --cl-panel-bg-subtle:var(--abyss-obsidian-glass-subtle);
+  --cl-border:var(--abyss-border);
+  --cl-border-subtle:var(--abyss-border-subtle);
+  --cl-border-gold:var(--abyss-border-gold);
+  --cl-border-glow:var(--abyss-border-glow);
+  --cl-text-primary:var(--abyss-ink);
+  --cl-text-secondary:var(--abyss-ink-2);
+  --cl-text-tertiary:var(--abyss-ink-3);
+  --cl-text-muted:var(--abyss-ink-muted);
+  --cl-glow-gold:var(--abyss-glow-gold);
+  --cl-glow-cyan:var(--abyss-glow-cyan);
+  --cl-glow-magenta:var(--abyss-glow-magenta);
+
+  /* G1 --grey-* 别名层迁移收口 (F4) */
+  --grey-bg:var(--abyss-lad-01);
+  --grey-s1:var(--abyss-lad-03);
+  --grey-s2:var(--abyss-lad-04);
+  --grey-s3:var(--abyss-lad-05);
+  --grey-s4:var(--abyss-lad-11);
+  --grey-s5:var(--abyss-lad-15);
+  --grey-ink:var(--abyss-lad-18);
+
+  /* ══════════════════════════════════════════════════════════════════════════
+     A5 · z-index 八档音阶立法 (8-Tier Scale)
+     废除 2600 等野生值，立法 0 / 10 / 100 / 200 / 300 / 400 / 500 / 600 八档音阶
+     ══════════════════════════════════════════════════════════════════════════ */
+  --z-abyss:0;       /* 背景 / canvas */
+  --z-chart:10;      /* 图谱 / 连线 / 轨道 */
+  --z-hud:100;       /* 常驻 HUD / 标尺 */
+  --z-panel:200;     /* 浮动面板 / 卡片 / 抽屉 */
+  --z-tooltip:300;   /* 气泡提示 Tooltip / Popover */
+  --z-dock:400;      /* 导航底座 Dock */
+  --z-modal:500;     /* 模态弹窗 / 遮罩 */
+  --z-ritual:600;    /* 顶级通知 / 仪式过渡 Toast */
+
+  /* ══════════════════════════════════════════════════════════════════════════
+     D6 · 信息层级量化 (Information Hierarchy · 四档音阶)
+     主数值：fs-xl + mono + 100% 亮
+     标签：  fs-sm + 75%
+     辅助：  fs-2xs + 55%
+     铭文：  serif + 45%
+     ══════════════════════════════════════════════════════════════════════════ */
+  --info-primary-fs:var(--abyss-fs-xl);
+  --info-primary-font:var(--abyss-font-mono);
+  --info-primary-color:var(--abyss-ink-bright);
+  --info-primary-opacity:1;
+
+  --info-secondary-fs:var(--abyss-fs-sm);
+  --info-secondary-font:var(--abyss-font-sans);
+  --info-secondary-color:var(--abyss-ink-2);
+  --info-secondary-opacity:0.75;
+
+  --info-tertiary-fs:var(--abyss-fs-2xs);
+  --info-tertiary-font:var(--abyss-font-sans);
+  --info-tertiary-color:var(--abyss-ink-3);
+  --info-tertiary-opacity:0.55;
+
+  --info-rune-fs:var(--abyss-fs-2xs);
+  --info-rune-font:var(--abyss-font-serif);
+  --info-rune-color:var(--abyss-ink-ghost);
+  --info-rune-opacity:0.45;
+
+  /* ══════════════════════════════════════════════════════════════════════════
+     C1 · COSMIC VISUAL SURFACE（终版星空前端的表面令牌）
+     这一组只描述「表面如何承载信息」，不改变任何数据语义：舞台氛围、
+     玻璃卡片、控制件和图表底板共用同一套材质。消费方只引用 --cosmic-*，
+     这样后续换色/换材质只需改这一处。
+     ══════════════════════════════════════════════════════════════════════════ */
+  --cosmic-stage-base:var(--abyss-lad-00);
+  --cosmic-stage-haze:
+    radial-gradient(65% 58% at 17% 22%,rgba(92,67,182,.18),transparent 70%),
+    radial-gradient(56% 54% at 84% 78%,rgba(39,126,151,.12),transparent 72%),
+    radial-gradient(48% 45% at 50% 48%,rgba(166,136,255,.065),transparent 74%);
+  --cosmic-stage-vignette:
+    radial-gradient(82% 76% at 50% 48%,transparent 42%,rgba(3,2,6,.08) 70%,rgba(3,2,6,.68) 100%),
+    linear-gradient(180deg,rgba(3,2,6,.18),transparent 26%,transparent 76%,rgba(3,2,6,.32));
+  --cosmic-stage-grid:
+    linear-gradient(90deg,rgba(166,136,255,.022) 1px,transparent 1px),
+    linear-gradient(0deg,rgba(166,136,255,.022) 1px,transparent 1px);
+  --cosmic-panel-bg:
+    linear-gradient(148deg,rgba(25,18,49,.86),rgba(8,7,19,.90) 58%,rgba(10,8,24,.94));
+  --cosmic-panel-bg-strong:
+    linear-gradient(148deg,rgba(25,18,49,.97),rgba(7,6,15,.97) 58%,rgba(12,8,24,.98));
+  --cosmic-panel-bg-soft:
+    linear-gradient(148deg,rgba(25,18,49,.64),rgba(8,7,19,.72) 58%,rgba(10,8,24,.78));
+  --cosmic-panel-border:rgba(190,171,238,.28);
+  --cosmic-panel-border-soft:rgba(190,171,238,.16);
+  --cosmic-panel-edge:rgba(255,210,122,.62);
+  --cosmic-panel-shadow:0 22px 58px rgba(3,2,6,.62),0 2px 18px rgba(77,49,132,.16),inset 0 1px 0 rgba(255,246,229,.075),inset 0 -1px 0 rgba(90,58,150,.16);
+  --cosmic-panel-shadow-float:0 28px 72px rgba(3,2,6,.74),0 0 36px rgba(104,74,188,.20),inset 0 1px 0 rgba(255,246,229,.09);
+  --cosmic-control-bg:rgba(10,8,24,.72);
+  --cosmic-control-hover:rgba(66,47,106,.56);
+  --cosmic-control-active:rgba(255,180,92,.16);
+  --cosmic-control-shadow:0 8px 24px rgba(255,180,92,.22),inset 0 1px 0 rgba(255,246,229,.42);
+  --cosmic-inset-hi:inset 0 1px 0 rgba(255,246,229,.04);
+  --cosmic-inset-hi-soft:inset 0 1px 0 rgba(255,246,229,.05);
+  --cosmic-active-glow:0 0 18px rgba(255,180,92,.18);
+  --cosmic-active-inset:inset 0 0 18px rgba(255,180,92,.06);
+  --cosmic-active-bg:linear-gradient(90deg,rgba(255,180,92,.20),transparent 92%);
+  --cosmic-head-wash:linear-gradient(135deg,rgba(255,180,92,.13),transparent 42%);
+  --cosmic-input-bg:rgba(3,2,10,.54);
+  --cosmic-tile-bg:linear-gradient(135deg,rgba(31,23,58,.46),rgba(7,7,16,.25));
+  --cosmic-tile-hover:linear-gradient(135deg,rgba(255,180,92,.14),rgba(13,10,28,.28));
+  --cosmic-tile-shadow:inset 0 1px 0 rgba(255,246,229,.04),0 12px 28px rgba(3,2,6,.24);
+  --cosmic-radar-filter:drop-shadow(0 0 20px rgba(166,136,255,.14));
+  --cosmic-modal-bg:rgba(3,2,6,.82);
+  --cosmic-mobile-panel-shadow:0 18px 48px rgba(3,2,6,.66),inset 0 1px 0 rgba(255,246,229,.06);
+  --cosmic-mobile-dock-shadow:0 -18px 60px rgba(3,2,6,.72),inset 0 1px 0 rgba(255,246,229,.08);
+  --cosmic-grid-line:rgba(172,156,230,.15);
+  --cosmic-text-head:var(--abyss-ink-bright);
+  --cosmic-text-body:var(--abyss-lad-16);
+  --cosmic-text-muted:var(--abyss-lad-11);
+  --cosmic-gold:var(--abyss-gold);
+  --cosmic-violet:var(--abyss-violet-bright);
+  --cosmic-mint:var(--abyss-mint-bright);
+  --cosmic-hot:var(--abyss-hot-bright);
+  --cosmic-focus-ring:0 0 0 1px rgba(255,210,122,.72),0 0 0 4px rgba(255,180,92,.12),0 0 24px rgba(255,180,92,.24);
+  --cosmic-focus-ring-violet:0 0 0 1px rgba(201,184,255,.62),0 0 0 4px rgba(166,136,255,.11),0 0 24px rgba(166,136,255,.24);
+
+  /* ══════════════════════════════════════════════════════════════════════════
+     S4 · 增补六大设计令牌族（Shadow, Blur, Glow, Fade, Texture, Radius）
+     ══════════════════════════════════════════════════════════════════════════ */
+  /* 1. 投影五档 (Shadow) */
+  --abyss-shadow-flat:0 2px 6px rgba(3,2,6,.45);
+  --abyss-shadow-panel:0 8px 24px -4px rgba(3,2,6,.65),0 2px 8px rgba(3,2,6,.35);
+  --abyss-shadow-deep:0 16px 40px -8px rgba(3,2,6,.82),0 4px 16px rgba(3,2,6,.45);
+  --abyss-shadow-cinematic:0 24px 64px -12px rgba(3,2,6,.92),0 8px 28px rgba(7,6,13,.6);
+  --abyss-shadow-portal:0 32px 80px -16px rgba(3,2,6,.96),0 0 32px rgba(122,240,200,.12);
+
+  /* 2. 毛玻璃档位 (Blur) */
+  --abyss-blur-none:none;
+  --abyss-blur-subtle:blur(4px);
+  --abyss-blur-panel:blur(12px);
+  --abyss-blur-modal:blur(20px);
+  --abyss-blur-heavy:blur(32px);
+  --abyss-blur-deep:blur(48px);
+
+  /* 3. 辉光五档 (Glow) */
+  --abyss-glow-dim:0 0 8px rgba(122,240,200,.15);
+  --abyss-glow-soft:0 0 14px rgba(122,240,200,.28);
+  --abyss-glow-mid:0 0 22px rgba(122,240,200,.45),0 0 6px rgba(122,240,200,.65);
+  --abyss-glow-strong:0 0 36px rgba(122,240,200,.65),0 0 12px rgba(122,240,200,.85);
+  --abyss-glow-critical:0 0 54px rgba(255,107,107,.75),0 0 18px rgba(255,107,107,.95);
+
+  /* 4. 透明阶梯 (Fade) */
+  --abyss-fade-08:0.08;
+  --abyss-fade-16:0.16;
+  --abyss-fade-32:0.32;
+  --abyss-fade-64:0.64;
+  --abyss-fade-96:0.96;
+
+  /* 5. 纹理引用 (Texture) */
+  --abyss-texture-noise:radial-gradient(circle at 50% 50%,rgba(244,239,230,.02) 1px,transparent 1px);
+  --abyss-texture-stardust:radial-gradient(circle at 20% 30%,rgba(122,240,200,.04) 1px,transparent 1px);
+  --abyss-texture-grid:linear-gradient(to right,rgba(122,240,200,.03) 1px,transparent 1px),linear-gradient(to bottom,rgba(122,240,200,.03) 1px,transparent 1px);
+
+  /* 6. 圆角阶梯 (Radius) */
+  --abyss-radius-none:0;
+  --abyss-radius-xs:2px;
+  --abyss-radius-sm:4px;
+  --abyss-radius-md:8px;
+  --abyss-radius-lg:12px;
+  --abyss-radius-xl:18px;
+  --abyss-radius-full:9999px;
+}
+
+/* S2 配套：数值角色统一勾子。任何「数值」元素挂 .abyss-num 即得 Mono + 等宽数字。
+ * 不强制改造既有 DOM —— 这是给后续 R/C/T 三条线的新件用的，旧件按批迁移。 */
+.abyss-num{
+  font-family:var(--abyss-font-num);
+  font-variant-numeric:tabular-nums lining-nums;
+  font-feature-settings:var(--abyss-num-feat);
+  letter-spacing:.02em;
+}
+/* S2 配套：铭文角色。神圣文本（年轮 / 原型名 / 铭文环）一律 Serif。 */
+.abyss-inscription{
+  font-family:var(--abyss-font-serif);
+  font-weight:400;
+}
+
+/* D6 配套：信息四档角色类。一切显示件字号/亮度从中取值，杜绝小字密麻看不清主从。 */
+.cl-info-primary, .info-primary {
+  font-family: var(--info-primary-font);
+  font-size: var(--info-primary-fs);
+  color: var(--info-primary-color);
+  opacity: var(--info-primary-opacity);
+}
+.cl-info-secondary, .info-secondary {
+  font-family: var(--info-secondary-font);
+  font-size: var(--info-secondary-fs);
+  color: var(--info-secondary-color);
+  opacity: var(--info-secondary-opacity);
+}
+.cl-info-tertiary, .info-tertiary {
+  font-family: var(--info-tertiary-font);
+  font-size: var(--info-tertiary-fs);
+  color: var(--info-tertiary-color);
+  opacity: var(--info-tertiary-opacity);
+}
+.cl-info-rune, .info-rune {
+  font-family: var(--info-rune-font);
+  font-size: var(--info-rune-fs);
+  color: var(--info-rune-color);
+  opacity: var(--info-rune-opacity);
+}

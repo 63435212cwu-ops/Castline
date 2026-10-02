@@ -1,0 +1,145 @@
+/* Castline · 视觉系统 —— views-nav.css (S1 五域拆解) */
+/* ================================================================ v16
+   运行 HUD / 作品库 / 时间轴 / 选项框 / 索引工具 / 动效令牌
+   ================================================================ */
+:root{
+  --e-out:cubic-bezier(.16,1,.3,1);       /* 出场：快进慢收 */
+  --e-io:cubic-bezier(.65,0,.35,1);       /* 位移 */
+  --e-back:cubic-bezier(.34,1.32,.64,1);  /* 轻过冲 */
+  --tl-h:96px;
+}
+
+
+/* ---------- 时间轴与工具条 (原 733-888) ---------- */
+/* ---------- 左侧栏位重排（时间轴带占据底部） ---------- */
+#index{top:calc(var(--gap) + 152px);bottom:calc(var(--gap) + 150px)}
+body.ov-open #index{bottom:calc(var(--gap) + 108px + 46vh)}
+#overview{bottom:calc(var(--gap) + var(--tl-h) + 8px);max-height:46vh;display:flex}
+#overview .panel{display:flex;flex-direction:column;min-height:0}
+#ovBody{overflow:auto;min-height:0;padding-right:4px}
+#hint{bottom:calc(var(--gap) + var(--tl-h) + 12px)}
+body.focus #hint,body.noview #hint{opacity:0}
+
+/* ---------- 索引工具条 ---------- */
+.ix-head{display:flex;align-items:center;justify-content:space-between;padding:0 14px 8px;gap:8px}
+.ix-head .eyebrow{padding:0}
+.ix-sort{display:flex;gap:2px}
+.ix-sort button,.ix-filter button{font-family:var(--mono);font-size:var(--abyss-fs-2xs);letter-spacing:.1em;color:var(--ink-3);border:1px solid var(--line);padding:2px 6px;transition:.15s}
+.ix-sort button:hover,.ix-filter button:hover{color:var(--ink);border-color:var(--line-2)}
+.ix-sort button.on,.ix-filter button.on{color:#1a1206;background:var(--cyan);border-color:var(--cyan)}
+.ix-filter{display:flex;flex-wrap:wrap;gap:4px;padding:0 12px 8px}
+.ix-filter:empty{display:none}
+#idxSearch{display:block;font-size:12px}
+.idx.cursor{background:rgba(255,180,92,.1);border-left-color:var(--cyan-2)}
+.idx .rl{min-width:52px;text-align:right}
+
+/* ---------- 时间轴带 ---------- */
+#timeline{left:var(--gap);right:var(--gap);bottom:var(--gap);height:var(--tl-h);transition:right .55s var(--e-out),transform .5s var(--e-out),opacity .4s}
+body.focus #timeline{right:calc(var(--dock-w) + var(--gap) * 2)}
+body.noview #timeline{transform:translateY(140%);opacity:0;pointer-events:none}
+#timeline .panel{height:100%;display:flex;flex-direction:column;padding:8px 14px 6px}
+.tl-head{display:flex;align-items:center;gap:12px}
+.tl-legend{display:flex;gap:8px;flex-wrap:wrap;margin-left:auto}
+.tl-legend span{font-family:var(--mono);font-size:var(--abyss-fs-2xs);letter-spacing:.12em;color:var(--ink-3);position:relative;padding-left:9px}
+.tl-legend span::before{content:"";position:absolute;left:0;top:4px;width:5px;height:5px;background:currentColor;box-shadow:0 0 6px currentColor}
+.tl-legend .k-冲突{color:var(--hot)}.tl-legend .k-转折{color:var(--warm)}.tl-legend .k-高燃{color:#ffd166}.tl-legend .k-领悟{color:var(--cold)}.tl-legend .k-抉择{color:#c8a7ff}.tl-legend .k-关系{color:#ff9ad5}.tl-legend .k-日常{color:var(--ink-3)}
+.tl-fold{color:var(--ink-3);font-family:var(--mono);font-size:12px;padding:0 2px}
+.tl-fold:hover{color:var(--abyss-ink-bright)}
+#timeline.folded{height:auto}
+#timeline.folded #tlBody{display:none}
+#tlBody{flex:1;min-height:0;display:flex;flex-direction:column;gap:3px;margin-top:5px}
+#tlBars{flex:1;display:flex;align-items:flex-end;gap:2px;min-height:0;position:relative}
+#tlBars::after{content:"";position:absolute;left:0;right:0;bottom:0;height:1px;background:linear-gradient(90deg,transparent,var(--line-2) 12%,var(--line-2) 88%,transparent)}
+.tb{flex:1;min-width:2px;height:100%;display:flex;align-items:flex-end;justify-content:center;position:relative;cursor:pointer;animation:tbIn .55s var(--e-out) both}
+@keyframes tbIn{from{transform:scaleY(0);transform-origin:bottom;opacity:0}}
+.tb .bar{display:flex;flex-direction:column-reverse;width:100%;max-width:26px;min-height:3px;background:rgba(170,150,232,.07);overflow:hidden;transition:filter .25s var(--e-out),transform .25s var(--e-out);transform-origin:bottom}
+.tb .bar i{display:block;width:100%;min-height:1px;background:#5a4a8a;opacity:.72}
+.tb .bar i.k-冲突{background:#8e3550}.tb .bar i.k-转折{background:#8a6234}.tb .bar i.k-高燃{background:#8a7330}.tb .bar i.k-领悟{background:#2f7d70}.tb .bar i.k-抉择{background:#5f4b8e}.tb .bar i.k-关系{background:#8a4a72}.tb .bar i.k-日常{background:#3a3050}
+/* 主导类型：给柱顶一条 1.5px 的亮帽，密度之外再给一层"这段是什么戏"的读法 */
+.tb .bar::before{content:"";display:block;height:2px;flex:none;background:var(--cyan);opacity:.9;box-shadow:0 0 6px currentColor}
+.tb .bar.dom-冲突::before{background:var(--hot)}.tb .bar.dom-转折::before{background:var(--warm)}.tb .bar.dom-高燃::before{background:#ffd166}.tb .bar.dom-领悟::before{background:var(--cold)}.tb .bar.dom-抉择::before{background:#c8a7ff}.tb .bar.dom-关系::before{background:#ff9ad5}.tb .bar.dom-日常::before{background:#6b6288}
+.tb .mine{position:absolute;left:50%;bottom:0;width:2px;transform:translateX(-50%);background:#fff1da;box-shadow:0 0 10px var(--cyan);animation:mbUp .6s var(--e-out) both}
+.tb:hover .bar{filter:brightness(1.55) saturate(1.15);transform:scaleY(1.06)}
+.tb:hover::before{content:"";position:absolute;left:50%;top:0;bottom:0;width:1px;transform:translateX(-50%);background:linear-gradient(180deg,transparent,rgba(255,180,92,.35))}
+.tb.on .bar{filter:brightness(1.8) saturate(1.2)}
+.tb.on::after{content:"";position:absolute;left:0;right:0;bottom:-4px;height:2px;background:var(--cyan);box-shadow:0 0 10px var(--cyan)}
+#tlAxis{display:flex;justify-content:space-between;font-family:var(--mono);font-size:var(--abyss-fs-2xs);letter-spacing:.1em;color:var(--ink-3)}
+#tlAxis .mid{color:var(--ink-2)}
+
+/* ---------- 视觉流与视图微件 (原 1028-2089) ---------- */
+/* ================================================================ v17
+   视图控制条 · 标签 LOD 档位 / 长尾折叠 / 实时计数
+   ================================================================ */
+#viewbar{right:var(--gap);top:calc(var(--gap) + 46px);width:262px;
+  transition:right .55s var(--e-out),opacity .4s var(--e-out),transform .4s var(--e-out)}
+#viewbar.docked{right:calc(var(--dock-w) + var(--gap) * 2)}
+#viewbar .panel{padding:10px 12px 9px;display:flex;flex-direction:column;gap:7px}
+.vb-row{display:flex;align-items:center;gap:9px}
+.vb-k{font-family:var(--mono);font-size:var(--abyss-fs-2xs);letter-spacing:.2em;color:var(--ink-3);min-width:26px}
+.seg{display:flex;flex:1;border:1px solid var(--line);background:rgba(12,9,24,.5)}
+.seg button{flex:1;font-family:var(--mono);font-size:var(--abyss-fs-2xs);letter-spacing:.05em;padding:5px 0;
+  color:var(--ink-3);background:none;border:0;border-right:1px solid var(--line);cursor:pointer;transition:.18s}
+.seg button:last-child{border-right:0}
+.seg button:hover{color:var(--ink);background:rgba(255,180,92,.08)}
+.seg button.on{color:#1a1206;background:linear-gradient(180deg,var(--abyss-signal-bright),#e0862e);font-weight:600;text-shadow:none}
+.vb-threshold{display:flex;align-items:center;gap:9px;padding:1px 0 2px}
+.vb-threshold input[type=range]{appearance:none;-webkit-appearance:none;flex:1;min-width:74px;height:3px;border:0;border-radius:2px;background:linear-gradient(90deg,var(--cyan-2),rgba(170,150,232,.16));outline:none;cursor:pointer}
+.vb-threshold input[type=range]::-webkit-slider-thumb{appearance:none;-webkit-appearance:none;width:10px;height:10px;border-radius:50%;border:1px solid var(--abyss-signal-bright);background:#e0862e;box-shadow:0 0 7px rgba(255,180,92,.7);cursor:pointer}
+.vb-threshold input[type=range]::-moz-range-thumb{width:9px;height:9px;border-radius:50%;border:1px solid var(--abyss-signal-bright);background:#e0862e;box-shadow:0 0 7px rgba(255,180,92,.7);cursor:pointer}
+.vb-threshold>b{min-width:46px;text-align:right;font:var(--abyss-fs-xs) var(--mono);letter-spacing:.05em;color:var(--cyan);font-weight:400}  /* T5 刻度豁免 */
+.tgl{font-family:var(--mono);font-size:var(--abyss-fs-2xs);letter-spacing:.08em;padding:5px 9px;color:var(--ink-3);
+  background:rgba(12,9,24,.5);border:1px solid var(--line);cursor:pointer;transition:.18s}
+.tgl b{color:var(--ink-2);font-weight:500}
+.tgl:hover{color:var(--ink);border-color:var(--line-2)}
+.tgl.on{border-color:rgba(255,180,92,.55);color:var(--cyan)}
+.tgl.on b{color:var(--cyan)}
+.vb-meter{margin-left:auto;font-family:var(--mono);font-size:var(--abyss-fs-2xs);color:var(--ink-3);letter-spacing:.04em;white-space:nowrap}
+.vb-meter b{color:var(--ink-2);font-weight:500}
+.vb-meter i{color:var(--cyan);font-style:normal}
+.vb-foot{gap:7px}
+.vb-hint{font-size:var(--abyss-fs-2xs);letter-spacing:.1em;color:rgba(190,180,222,.34);text-align:right;margin-left:auto;flex:1}
+.tgl.pins{border-color:rgba(122,240,200,.45);color:var(--abyss-mint)}
+.tgl.pins b{color:var(--abyss-mint)}
+.vb-fps{font-family:var(--mono);font-size:var(--abyss-fs-2xs);color:var(--ink-3);letter-spacing:.06em;white-space:nowrap}
+.vb-fps.mid{color:var(--warm)}
+.vb-fps.bad{color:var(--hot)}
+body.focus #viewbar{opacity:.45}
+body.focus #viewbar:hover{opacity:1}
+body.noview #viewbar{opacity:0;transform:translateY(-8px);pointer-events:none}
+@media (max-width:1500px){#viewbar{width:238px}}
+
+/* v17.4 信息镜头：只改变视觉重心，不重复绘制数据。 */
+#vbLayer{min-width:250px}
+#vbLayer button{font-size:var(--abyss-fs-2xs)}
+body[data-info-layer="evidence"] #timeline .panel,
+body[data-info-layer="evidence"] #peek.on{border-color:rgba(122,240,200,.62);box-shadow:0 0 28px rgba(122,240,200,.12)}
+body[data-info-layer="relations"] .fiber-rel{filter:brightness(1.45) saturate(1.25)}
+body[data-info-layer="relations"] #overview .panel{border-color:rgba(255,92,122,.42)}
+body[data-info-layer="arc"] #timeline .panel{border-color:rgba(170,150,232,.72);box-shadow:0 0 30px rgba(170,150,232,.14)}
+body[data-info-layer="arc"] .tl-bar{filter:saturate(1.35) brightness(1.16)}
+body[data-info-layer="overview"] #overview .panel{border-color:rgba(255,180,92,.42)}
+@media (max-width:900px){#vbLayer{min-width:0}.vb-layer button{padding-inline:4px}}
+
+/* 点位审计的轻量视觉反馈：不遮挡数据，只在存在风险时给出边缘信号。 */
+body[data-point-risk="mid"] #overview .panel{box-shadow:0 0 24px rgba(255,180,92,.11);border-color:rgba(255,180,92,.58)}
+body[data-point-risk="high"] #overview .panel{box-shadow:0 0 30px rgba(255,92,122,.16);border-color:rgba(255,92,122,.62)}
+body[data-point-risk="clear"] #overview .panel{box-shadow:0 0 20px rgba(122,240,200,.08)}
+
+
+/* Timeline and evidence cards: more material separation, less neon wash. */
+#timeline .panel{background:linear-gradient(180deg,rgba(15,12,26,.95),rgba(7,7,15,.92));box-shadow:0 -12px 40px rgba(0,0,0,.23),inset 0 1px 0 rgba(255,246,229,.05)}
+#tlBars::after{background:linear-gradient(90deg,transparent,rgba(255,190,111,.55) 12%,rgba(255,190,111,.55) 88%,transparent);box-shadow:0 0 10px rgba(255,180,92,.24)}
+.tb .bar{background:rgba(134,117,189,.10);box-shadow:inset 0 1px 0 rgba(255,255,255,.05)}
+.tb:hover .bar{filter:brightness(1.35) saturate(1.08);transform:scaleY(1.035)}
+#hint{color:rgba(194,184,210,.52)}
+
+.cl-viewbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px;
+  background: var(--cl-panel-bg, rgba(7,6,13,.86));
+  border: 1px solid var(--cl-border-subtle, rgba(255,210,122,.15));
+  border-radius: 20px;
+}
+

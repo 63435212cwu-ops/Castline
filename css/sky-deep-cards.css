@@ -1,0 +1,306 @@
+/*!
+ * @role css-token
+ * @owns css/sky-deep-cards.css
+ * @budget n/a
+ * @contract deep-sky/1
+ *
+ * 角色：css-token（样式与令牌工程师）· 单元：cardcss
+ * 职责：深空观星台「信息卡」样式层。DOM 由 CLSkyCards 构造，落在旧样式已定位好的
+ *       .sky-card / .skc-card 容器里；本文件只上玻璃面与卡内排版，不碰定位。
+ * 纪律：① 无 #hex / rgb()（一切颜色走 var(--skd-*)）
+ *       ② font-size 只用 var(--skd-fs-*)；z-index 只用 var(--z-*)（本文件不设 z-index）
+ *       ③ 无循环动画（出现动效一次性，循环若新增必须 ≥ 20s）
+ *       ④ 选择器 ≤ 2 级；BEM（.skd-block__element.is-state）
+ *       ⑤ 字体只用契约字体栈 var(--skd-font-sans/serif/mono)
+ *       ⑥ 过渡一律 var(--skd-dur-*) var(--skd-ease-*)；末段有 reduced-motion 与
+ *          [data-tier="low"] 两条降级路径（终态直给，不留半途状态）
+ * 单位白名单（规格逐条给定，非自由值）：12px 14px / 320px / 1px / 4px / 6px / 8px /
+ *   5px / 3px / 4px / 999px / 3.2em / 2em / 1em / 1.5 / 1.3 / 0 8px 等阴影扩散值。
+ */
+
+/* ── 容器换肤（定位、left/top、position、z-index 归旧样式） ───────────── */
+.sky-card,
+.skc-card {
+  box-sizing: border-box;
+  overflow: hidden;
+  padding: 12px 14px;
+  max-width: 320px;
+  background: linear-gradient(180deg, var(--skd-glass-strong), var(--skd-glass));
+  -webkit-backdrop-filter: blur(var(--skd-blur)) saturate(1.3);
+  backdrop-filter: blur(var(--skd-blur)) saturate(1.3);
+  border: 1px solid var(--skd-hair);
+  border-radius: var(--skd-radius);
+  box-shadow: var(--skd-shadow-panel);
+  animation: skd-card-in var(--skd-dur-soft) var(--skd-ease-out);
+}
+
+/* 顶边一道黄铜渐隐发丝 */
+.sky-card::before,
+.skc-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 14px;
+  right: 14px;
+  height: 1px;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, var(--skd-hair-brass), transparent);
+}
+
+@keyframes skd-card-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* ── 眉标 / 势力点 / 权重 ─────────────────────────────────────────────── */
+.skd-card__kicker {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--skd-font-mono);
+  font-size: var(--skd-fs-xs);
+  letter-spacing: var(--skd-track);
+  color: var(--skd-ink-3);
+}
+
+.skd-dot {
+  flex: none;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--skd-c, var(--skd-brass));
+  box-shadow: 0 0 8px var(--skd-c, var(--skd-brass));
+}
+
+.skd-card__mag {
+  margin-left: auto;
+  font-family: var(--skd-font-serif);
+  color: var(--skd-brass);
+}
+
+/* ── 标题 ────────────────────────────────────────────────────────────── */
+.skd-card__title {
+  margin: 4px 0 2px;
+  font-family: var(--skd-font-serif);
+  font-size: var(--skd-fs-lg);
+  color: var(--skd-ink);
+  text-shadow: var(--skd-glow-ink);
+}
+
+.skd-card__title small {
+  margin-left: 8px;
+  font-family: var(--skd-font-sans);
+  font-size: var(--skd-fs-xs);
+  color: var(--skd-ink-3);
+}
+
+/* ── 副题 / 正文（正文最多 4 行） ───────────────────────────────────── */
+.skd-card__sub,
+.skd-card__body {
+  font-family: var(--skd-font-sans);
+  font-size: var(--skd-fs-sm);
+  line-height: 1.5;
+  color: var(--skd-ink-2);
+}
+
+.skd-card__body {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+  overflow: hidden;
+}
+
+/* ── 数值条 ──────────────────────────────────────────────────────────── */
+.skd-card__stats {
+  display: flex;
+  gap: 14px;
+  margin-top: 8px;
+}
+
+.skd-card__stats span {
+  font-size: var(--skd-fs-xs);
+  color: var(--skd-ink-3);
+}
+
+.skd-card__stats b {
+  margin-right: 3px;
+  font-family: var(--skd-font-mono);
+  font-size: var(--skd-fs-md);
+  font-weight: 500;
+  color: var(--skd-ink);
+}
+
+/* ── 提示 / 页脚（1px 发丝分隔） ─────────────────────────────────────── */
+.skd-card__hint,
+.skd-card__foot {
+  margin-top: 8px;
+  padding-top: 6px;
+  border-top: 1px solid var(--skd-hair);
+  font-family: var(--skd-font-mono);
+  font-size: var(--skd-fs-xs);
+  letter-spacing: var(--skd-track);
+  color: var(--skd-brass);
+}
+
+/* ── 成员名单（横排 · 分隔） ─────────────────────────────────────────── */
+.skd-card__members {
+  list-style: none;
+  padding: 0;
+  margin: 6px 0;
+}
+
+.skd-card__members li {
+  display: inline;
+  font-family: var(--skd-font-sans);
+  font-size: var(--skd-fs-sm);
+  color: var(--skd-ink-2);
+}
+
+.skd-card__members li + li::before {
+  content: '\00b7';
+  margin: 0 6px;
+  color: var(--skd-ink-3);
+}
+
+.skd-card__members .is-lead {
+  font-family: var(--skd-font-serif);
+  color: var(--skd-ink);
+}
+
+/* ── 横条分布（label / fill / 值） ───────────────────────────────────── */
+.skd-bars {
+  display: grid;
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.skd-bar {
+  display: grid;
+  grid-template-columns: 3.2em 1fr 2em;
+  align-items: center;
+  gap: 6px;
+}
+
+.skd-bar__label {
+  font-size: var(--skd-fs-xs);
+  color: var(--skd-ink-3);
+}
+
+.skd-bar__fill {
+  width: var(--skd-w, 0%);
+  height: 3px;
+  border-radius: 999px;
+  background: var(--skd-c);
+  box-shadow: 0 0 6px var(--skd-c);
+}
+
+.skd-bar b {
+  font-family: var(--skd-font-mono);
+  font-size: var(--skd-fs-xs);
+  font-weight: 500;
+  text-align: right;
+  color: var(--skd-ink-2);
+}
+
+/* ── 弧段跨度（a0/a1 由 JS 写成百分比） ─────────────────────────────── */
+.skd-span {
+  margin-top: 8px;
+}
+
+.skd-span__track {
+  display: block;
+  position: relative;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--skd-hair);
+}
+
+.skd-span__fill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: var(--skd-a0);
+  right: calc(100% - var(--skd-a1));
+  border-radius: inherit;
+  background: var(--skd-c, var(--skd-brass));
+  box-shadow: 0 0 10px var(--skd-c, var(--skd-brass));
+}
+
+.skd-span__txt {
+  display: block;
+  margin-top: 5px;
+  font-family: var(--skd-font-mono);
+  font-size: var(--skd-fs-xs);
+  color: var(--skd-ink-2);
+}
+
+.skd-span__txt b {
+  color: var(--skd-brass-hot);
+}
+
+/* ── 关联角色筹码 ────────────────────────────────────────────────────── */
+.skd-cast {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  margin-top: 8px;
+}
+
+.skd-cast__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--skd-fs-xs);
+  color: var(--skd-ink-2);
+}
+
+.skd-cast__chip .skd-dot {
+  width: 5px;
+  height: 5px;
+  box-shadow: 0 0 6px var(--skd-c, var(--skd-brass));
+}
+
+.skd-cast__more {
+  font-size: var(--skd-fs-xs);
+  color: var(--skd-ink-3);
+}
+
+/* ── 台词（左侧黄铜细边） ───────────────────────────────────────────── */
+.skd-card__quotes {
+  margin: 6px 0 0;
+  padding-left: 1em;
+  list-style: none;
+}
+
+.skd-card__quotes li {
+  padding-left: 6px;
+  border-left: 1px solid var(--skd-hair-brass);
+  font-family: var(--skd-font-serif);
+  font-size: var(--skd-fs-sm);
+  font-style: italic;
+  color: var(--skd-ink-2);
+}
+
+/* ── 降级路径一：减弱动效（1 帧内到终态，不留中间态） ───────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .sky-card,
+  .skc-card {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ── 降级路径二：低端档（静态 + 去掉逐帧 backdrop 采样） ───────────── */
+[data-tier='low'] .sky-card,
+[data-tier='low'] .skc-card {
+  animation: none;
+  opacity: 1;
+  transform: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+/* 迷你条：填充条是块级、从左起，数字不压条 */
+.skd-bar__fill{display:block;justify-self:start;max-width:100%;min-width:2px}
+.skd-bar b{text-align:right}

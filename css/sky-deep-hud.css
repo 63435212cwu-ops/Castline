@@ -1,0 +1,357 @@
+/*@role css-token
+ * @owns css/sky-deep-hud.css
+ * @budget n/a
+ * @contract deep-sky/1
+ *
+ * 深空观星台 · 界面换肤层（深空玻璃 / 发丝线 / 黄铜点睛）
+ * 加载于 css/sky.css 之后，以同名选择器覆盖观感。
+ * 只改表面：背景、边框、阴影、圆角、字体、颜色、字距、过渡；不动任何布局几何。
+ * 颜色/间距/时长/缓动全部取自 css/sky-deep-tokens.css 的 --skd-* 令牌，本文件不定义裸值。
+ * 无循环动画（故无 ≥20s 周期约束）；所有过渡在 prefers-reduced-motion: reduce 下降为终态。
+ */
+
+/* ---------- 顶栏玻璃 + 底边黄铜发丝 ---------- */
+/* 星空交互共用黄铜焦点，压过旧壳注入的全局薄荷圈。 */
+body.sky-shell .sky-hud button:focus-visible,
+body.sky-shell .skd-deck button:focus-visible,
+body.sky-shell .skg-deck button:focus-visible,
+body.sky-shell .skd-view:focus-visible {
+  outline: 1px solid var(--skd-hair-brass) !important;
+  outline-offset: 2px !important;
+  box-shadow: var(--skd-glow-brass) !important;
+}
+
+.sky-top {
+  background: linear-gradient(180deg, var(--skd-glass), var(--skd-glass-soft));
+  -webkit-backdrop-filter: blur(var(--skd-blur)) saturate(1.25);
+  backdrop-filter: blur(var(--skd-blur)) saturate(1.25);
+  border: 1px solid var(--skd-hair);
+  border-top-color: var(--skd-hair-2);
+  border-radius: var(--skd-radius);
+  box-shadow: var(--skd-shadow-panel);
+}
+
+.sky-top::after {
+  content: '';
+  position: absolute;
+  left: 10%;
+  right: 10%;
+  bottom: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--skd-hair-brass), transparent);
+  pointer-events: none;
+}
+
+/* ---------- 品牌区字面 ---------- */
+.sky-word {
+  font-family: var(--skd-font-mono);
+  letter-spacing: var(--skd-track-wide);
+  color: var(--skd-brass);
+  text-shadow: var(--skd-glow-brass);
+}
+
+.sky-title {
+  font-family: var(--skd-font-serif);
+  color: var(--skd-ink);
+  text-shadow: var(--skd-glow-ink);
+}
+
+.sky-sub {
+  font-family: var(--skd-font-mono);
+  color: var(--skd-ink-3);
+}
+
+.sky-sigil {
+  color: var(--skd-brass);
+  background: var(--skd-brass);
+  box-shadow: var(--skd-glow-brass);
+}
+
+.sky-sigil svg {
+  stroke: var(--skd-void-0);
+}
+
+/* ---------- 分组切换（radio 组） ---------- */
+.sky-group {
+  background: transparent;
+  border: 1px solid var(--skd-hair);
+  border-radius: var(--skd-radius-pill, var(--skd-radius));
+}
+
+.sky-group button {
+  color: var(--skd-ink-3);
+  transition: color var(--skd-dur-flick) var(--skd-ease-out),
+    background-color var(--skd-dur-flick) var(--skd-ease-out);
+}
+
+.sky-group button:hover {
+  color: var(--skd-ink);
+}
+
+.sky-group button[aria-checked="true"] {
+  color: var(--skd-brass-hot);
+  background: color-mix(in oklch, var(--skd-brass) 18%, transparent);
+  box-shadow: inset 0 0 0 1px var(--skd-hair-brass);
+  text-shadow: var(--skd-glow-brass);
+}
+
+/* ---------- 幽灵 pill：图标 / 绘线 / 速度 ---------- */
+.sky-icon,
+.sky-plot,
+.sky-speed {
+  color: var(--skd-ink-2);
+  background: transparent;
+  border: 1px solid var(--skd-hair-2);
+  border-radius: var(--skd-radius-pill, var(--skd-radius));
+  transition: color var(--skd-dur-flick) var(--skd-ease-out),
+    background-color var(--skd-dur-flick) var(--skd-ease-out),
+    border-color var(--skd-dur-flick) var(--skd-ease-out),
+    box-shadow var(--skd-dur-flick) var(--skd-ease-out);
+}
+
+.sky-icon:hover,
+.sky-icon:focus-visible,
+.sky-plot:hover,
+.sky-plot:focus-visible,
+.sky-speed:hover,
+.sky-speed:focus-visible {
+  color: var(--skd-ink);
+  border-color: var(--skd-hair-brass);
+  box-shadow: 0 0 0 1px var(--skd-hair-brass), var(--skd-glow-brass);
+}
+
+.sky-plot[aria-pressed="true"] {
+  color: var(--skd-void-0);
+  background: linear-gradient(180deg, var(--skd-brass-hot), var(--skd-brass));
+  border-color: var(--skd-brass);
+  box-shadow: var(--skd-glow-brass);
+}
+
+/* ---------- 搜索：下划线随焦点转黄铜 ---------- */
+.sky-search {
+  border-bottom-color: var(--skd-hair-2);
+  transition: border-color var(--skd-dur-flick) var(--skd-ease-out);
+}
+
+.sky-search input {
+  color: var(--skd-ink);
+  background: transparent;
+  border-bottom-color: var(--skd-hair-2);
+  transition: color var(--skd-dur-flick) var(--skd-ease-out),
+    border-color var(--skd-dur-flick) var(--skd-ease-out);
+}
+
+.sky-search input:focus {
+  border-bottom-color: var(--skd-brass);
+}
+
+.sky-search input::placeholder {
+  color: var(--skd-ink-3);
+}
+
+/* ---------- 面包屑：同款玻璃，pill ---------- */
+.sky-crumb {
+  background: linear-gradient(180deg, var(--skd-glass), var(--skd-glass-soft));
+  -webkit-backdrop-filter: blur(var(--skd-blur)) saturate(1.25);
+  backdrop-filter: blur(var(--skd-blur)) saturate(1.25);
+  border: 1px solid var(--skd-hair);
+  border-radius: var(--skd-radius-pill, var(--skd-radius));
+  box-shadow: var(--skd-shadow-panel);
+}
+
+.sky-crumb b {
+  font-family: var(--skd-font-serif);
+  font-size: var(--skd-fs-lg);
+  color: var(--skd-ink);
+  text-shadow: var(--skd-glow-ink);
+}
+
+.sky-crumb-kind {
+  font-family: var(--skd-font-mono);
+  letter-spacing: var(--skd-track-wide);
+  color: var(--skd-brass);
+}
+
+.sky-crumb-meta {
+  color: var(--skd-ink-3);
+}
+
+/* ---------- 图例 ---------- */
+.sky-legend .lg {
+  color: var(--skd-ink-3);
+  letter-spacing: var(--skd-track);
+}
+
+.lg b {
+  font-family: var(--skd-font-mono);
+  color: var(--skd-ink-2);
+}
+
+/* ---------- 播放条：玻璃 pill ---------- */
+.sky-player {
+  background: linear-gradient(180deg, var(--skd-glass), var(--skd-glass-soft));
+  -webkit-backdrop-filter: blur(var(--skd-blur)) saturate(1.25);
+  backdrop-filter: blur(var(--skd-blur)) saturate(1.25);
+  border: 1px solid var(--skd-hair);
+  border-radius: var(--skd-radius-pill, var(--skd-radius));
+  box-shadow: var(--skd-shadow-panel);
+}
+
+.sky-caption {
+  color: var(--skd-ink-2);
+}
+
+.sky-caption b {
+  font-family: var(--skd-font-mono);
+  color: var(--skd-brass-hot);
+}
+
+/* ---------- 时间标尺：canvas 画刻度，range 只留黄铜菱形拇指 ---------- */
+.skd-scale {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 30px;
+}
+
+.skd-scale__canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.skd-scale input[type="range"] {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  background: transparent;
+  -webkit-appearance: none;
+  appearance: none;
+  cursor: pointer;
+}
+
+.skd-scale input[type="range"]::-webkit-slider-runnable-track {
+  background: transparent;
+  border: 0;
+}
+
+.skd-scale input[type="range"]::-moz-range-track {
+  background: transparent;
+  border: 0;
+}
+
+.skd-scale input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  border: 0;
+  border-radius: 0;
+  transform: rotate(45deg);
+  background: var(--skd-brass-hot);
+  box-shadow: var(--skd-glow-brass);
+}
+
+.skd-scale input[type="range"]::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border: 0;
+  border-radius: 0;
+  background: var(--skd-brass-hot);
+  box-shadow: var(--skd-glow-brass);
+}
+
+.skd-scale input[type="range"]:focus-visible::-webkit-slider-thumb {
+  box-shadow: 0 0 0 1px var(--skd-hair-brass), var(--skd-glow-brass);
+}
+
+.skd-scale input[type="range"]:focus-visible::-moz-range-thumb {
+  box-shadow: 0 0 0 1px var(--skd-hair-brass), var(--skd-glow-brass);
+}
+
+/* ---------- 视角预设：玻璃竖排工具条 ---------- */
+.skd-views {
+  background: linear-gradient(180deg, var(--skd-glass), var(--skd-glass-soft));
+  -webkit-backdrop-filter: blur(var(--skd-blur)) saturate(1.25);
+  backdrop-filter: blur(var(--skd-blur)) saturate(1.25);
+  border: 1px solid var(--skd-hair);
+  border-radius: var(--skd-radius);
+  box-shadow: var(--skd-shadow-panel);
+}
+
+.skd-view {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  color: var(--skd-ink-2);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--skd-radius-pill, var(--skd-radius));
+  transition: color var(--skd-dur-flick) var(--skd-ease-out),
+    border-color var(--skd-dur-flick) var(--skd-ease-out),
+    box-shadow var(--skd-dur-flick) var(--skd-ease-out);
+}
+
+.skd-view:hover,
+.skd-view:focus-visible {
+  color: var(--skd-ink);
+  border-color: var(--skd-hair-brass);
+}
+
+.skd-view[aria-pressed="true"] {
+  color: var(--skd-brass-hot);
+  box-shadow: inset 0 0 0 1px var(--skd-hair-brass), var(--skd-glow-brass);
+}
+
+.skd-view svg {
+  width: 18px;
+  height: 18px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.3;
+}
+
+.skd-view span {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+/* ---------- 减弱动效：全部过渡直达终态 ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .sky-top,
+  .sky-group,
+  .sky-group button,
+  .sky-icon,
+  .sky-plot,
+  .sky-speed,
+  .sky-search,
+  .sky-search input,
+  .sky-crumb,
+  .sky-player,
+  .skd-scale input[type="range"],
+  .skd-views,
+  .skd-view {
+    transition: none;
+  }
+}
+
+/* 视角工具条的位置（主控定）：右侧居中竖排，不压顶栏与底栏 */
+.skd-views{position:absolute;right:20px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:2px;padding:4px;pointer-events:auto;z-index:var(--z-hud)}
+.skd-views[hidden],.sky-home-on .skd-views{display:none}
+
+/* 面包屑在罗盘态横跨整宽（右缘让给实验室栏）：整条不上玻璃，只给返回钮一枚玻璃 pill，名字靠字重与辉光 */
+.sky-crumb{background:none;border:none;box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none}
+.sky-crumb::after{content:none}
+.sky-crumb > button{background:linear-gradient(180deg,var(--skd-glass),var(--skd-glass-soft));border:1px solid var(--skd-hair-2);border-radius:var(--skd-radius-pill);-webkit-backdrop-filter:blur(var(--skd-blur));backdrop-filter:blur(var(--skd-blur));color:var(--skd-ink-2)}
+.sky-crumb > button:hover,.sky-crumb > button:focus-visible{border-color:var(--skd-hair-brass);color:var(--skd-ink);box-shadow:var(--skd-glow-brass)}
+
+/* 图例新条目：星云（势力范围）与主线空档点线 */
+.sky-legend.is-chrome[data-neb]::before{content:'星云 = ' attr(data-neb) '势力范围';display:inline-flex;align-items:center;gap:6px;margin-right:14px;color:var(--skd-ink-3);letter-spacing:var(--skd-track);padding-left:20px;background:radial-gradient(closest-side,color-mix(in oklch,var(--skd-brass) 60%,transparent),transparent) left center / 14px 8px no-repeat}
+.sky-legend .lg-dorm i{display:inline-block;width:16px;height:0;margin-right:6px;vertical-align:middle;border-top:1px dotted var(--skd-ink-3)}

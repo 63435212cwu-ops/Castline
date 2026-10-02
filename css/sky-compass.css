@@ -1,0 +1,190 @@
+/* 罗盘：只写罗盘态覆盖，作用域 body.sky-compass-on / .sky-compass / .skc-note。
+   字三级：轴名（衬线、宽字距）> 关系对象名（无衬线）> 数字 / 元信息（等宽）。只引 --abyss-* / --cl-atlas-* / 本模块 --sky-kc-* 令牌。 */
+
+/* 模块令牌：珠色只两级；关系线型色与 CLDomainsModel.REL_CLASSES（星座图例）一一对应 */
+.sky-compass,.skc-note{
+  --sky-kc-bead:color-mix(in oklab,var(--abyss-camp-neutral) 48%,var(--abyss-ink-3));
+  --sky-kc-key:var(--abyss-gold);
+  --sky-kc-ring:color-mix(in oklab,var(--abyss-violet-bright) 20%,transparent);
+  --sky-kc-rule:color-mix(in oklab,var(--abyss-ink-3) 55%,transparent);
+  --sky-kc-halo:var(--abyss-obsidian-deep)}
+
+/* ── 轴签（场景渲染的 #labels .cl-lab.attr / .meta）：只留两级「中文名 + 分值」，左列右对齐、右列左对齐；
+      英文码与「#排名 / 总数」收进签下，悬停才显（绝对定位，不改签的排版尺寸）；去掉竖线与暗底牌，只留深空光晕描边 ── */
+body.sky-compass-on #labels .cl-lab.gem-slot{flex-direction:row;align-items:baseline;gap:7px;padding:0;
+  text-shadow:0 0 2px var(--abyss-obsidian-deep),0 0 6px var(--abyss-obsidian-deep),0 0 12px var(--abyss-obsidian-deep)}
+body.sky-compass-on #labels .cl-lab.gem-slot.lf{justify-content:flex-end;align-items:baseline;text-align:right}
+body.sky-compass-on #labels .cl-lab.gem-slot::before{content:none}
+body.sky-compass-on #labels .cl-lab.gem-slot .ln{font:var(--abyss-fs-md)/1.25 var(--abyss-font-serif);letter-spacing:.16em;color:var(--abyss-ink);
+  background:none;padding:0;margin:0;text-shadow:inherit}
+body.sky-compass-on #labels .cl-lab.gem-slot .ls{font:600 var(--abyss-fs-sm)/1.25 var(--abyss-font-mono);letter-spacing:.04em;color:var(--abyss-mint-bright);opacity:1}
+body.sky-compass-on #labels .cl-lab.meta.gem-slot .ls{color:var(--abyss-violet-bright)}
+body.sky-compass-on #labels .cl-lab.gem-slot .ls .lv{font:inherit;letter-spacing:inherit}
+/* 悬停细节写在签的外侧同一行（左列往左、右列往右，两小行叠放）：不压上下相邻的签 */
+body.sky-compass-on #labels .cl-lab.gem-slot .ls .le,
+body.sky-compass-on #labels .cl-lab.gem-slot .lx,
+body.sky-compass-on #labels .cl-lab.gem-slot[data-known="false"] .ls{display:block;position:absolute;left:calc(100% + 10px);right:auto;margin:0;white-space:nowrap;text-align:left;
+  font:400 var(--abyss-fs-xs)/1.1 var(--abyss-font-mono);letter-spacing:.12em;color:var(--abyss-ink-3);opacity:0;pointer-events:none;
+  transition:opacity var(--cl-atlas-dur-1) var(--cl-atlas-ease)}
+body.sky-compass-on #labels .cl-lab.gem-slot .ls .le{top:-2px}
+body.sky-compass-on #labels .cl-lab.gem-slot .lx{top:10px}
+body.sky-compass-on #labels .cl-lab.gem-slot[data-known="false"] .ls{top:4px}
+body.sky-compass-on #labels .cl-lab.gem-slot.lf .ls .le,
+body.sky-compass-on #labels .cl-lab.gem-slot.lf .lx,
+body.sky-compass-on #labels .cl-lab.gem-slot.lf[data-known="false"] .ls{left:auto;right:calc(100% + 10px);text-align:right}
+body.sky-compass-on #labels .cl-lab.gem-slot:hover .ls .le,
+body.sky-compass-on #labels .cl-lab.gem-slot:hover .lx,
+body.sky-compass-on #labels .cl-lab.gem-slot[data-known="false"]:hover .ls{opacity:1}
+body.sky-compass-on #labels .cl-lab.gem-slot:hover .ln{color:var(--abyss-ink-bright)}
+/* 未建档轴：一行「名 待建档」（缺档 = 未知，不写成 0）；英文码随悬停出现 */
+body.sky-compass-on #labels .cl-lab.gem-slot[data-known="false"] .ln{color:var(--abyss-ink-3)}
+body.sky-compass-on #labels .cl-lab.gem-slot.gem-sw0{animation:skc-sw0 .36s var(--cl-atlas-ease)}
+body.sky-compass-on #labels .cl-lab.gem-slot.gem-sw1{animation:skc-sw1 .36s var(--cl-atlas-ease)}
+@keyframes skc-sw0{from{filter:opacity(0)}}
+@keyframes skc-sw1{from{filter:opacity(0)}}
+body.sky-compass-on #labels .cl-lab.gem-slot[data-known="false"]::after{content:"待建档";font:var(--abyss-fs-xs)/1.25 var(--abyss-font-sans);letter-spacing:.14em;color:var(--abyss-ink-3)}
+/* 场景的「点线 = 未建档参考轮廓」图例并入底部小注（同一枚），这里只隐身、不改其几何 */
+body.sky-compass-on .cl-gem-legend{visibility:hidden}
+
+/* ── 面包屑：一行；一句话简介单行省略，悬停（title）看全文；位置跟随顶栏实际底边（JS 写 --skc-crumb-top） ── */
+body.sky-compass-on .sky-crumb{top:var(--skc-crumb-top,70px);right:calc(20px + var(--skc-crumb-r,0px));min-width:0;flex-wrap:nowrap;white-space:nowrap;pointer-events:none}
+body.sky-compass-on .sky-crumb>*{flex:none;pointer-events:auto}
+body.sky-compass-on .sky-crumb .sky-crumb-meta{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;cursor:default}
+@media (max-width:900px){body.sky-compass-on .sky-crumb{left:12px;right:calc(12px + var(--skc-crumb-r,0px))}}
+@media (max-width:560px){body.sky-compass-on .sky-crumb{left:10px;right:10px}}
+
+/* ── 关系对象：小星 + 名（无衬线）+ 关系词（等宽，类型色）两行，字级低于轴签 ── */
+.skc-ring{fill:none;stroke:var(--sky-kc-ring);stroke-width:.8;stroke-dasharray:1 4}
+.skc-sat-name{font:var(--abyss-fs-sm) var(--abyss-font-sans);fill:var(--abyss-ink);letter-spacing:.08em;
+  paint-order:stroke;stroke:var(--sky-kc-halo);stroke-width:3px;stroke-linejoin:round}
+.skc-sat-kind{font:var(--abyss-fs-xs) var(--abyss-font-mono);fill:color-mix(in oklab,var(--skc-c) 72%,var(--abyss-ink-3));letter-spacing:.06em;
+  paint-order:stroke;stroke:var(--sky-kc-halo);stroke-width:3px;stroke-linejoin:round}
+.skc-sat-star{fill:var(--skc-c);stroke:var(--sky-kc-halo);stroke-width:1}
+.skc-sat:hover .skc-sat-name,.skc-sat.is-lit .skc-sat-name{fill:var(--abyss-ink-bright)}
+.skc-sat:focus-visible .skc-sat-name{fill:var(--abyss-gold)}
+/* 线型 = 星座图例（domains-read.css .cl-dom-legend）：合作 / 对立 / 其他 实线 · 亲缘 点划 · 情感 / 同场 细点 · 暗线 虚线 */
+.skc-link.r-other,.skc-sat.r-other{--skc-c:var(--abyss-camp-none)}
+.skc-link.r-cooccur,.skc-sat.r-cooccur{--skc-c:var(--abyss-camp-none)}
+.skc-link{fill:none;stroke:var(--skc-c,var(--abyss-ink-3));stroke-width:1.2;stroke-dasharray:none;stroke-linecap:butt;opacity:.5;
+  transition:opacity var(--cl-atlas-dur-1) var(--cl-atlas-ease)}
+.skc-link.r-dark{stroke-dasharray:4 3}
+.skc-link.r-kin{stroke-dasharray:7 2.5 .1 2.5;stroke-linecap:round}
+.skc-link.r-bond,.skc-link.r-cooccur,.skc-link.is-derived{stroke-dasharray:.1 3.4;stroke-width:2.2;stroke-linecap:round}
+.skc-link.is-lit{opacity:1}
+.sky-compass.skc-emph .skc-link:not(.is-lit){opacity:.12}
+.skc-mask-show{fill:var(--abyss-ink-bright)}
+.skc-mask-hole rect{fill:var(--abyss-obsidian-deep)}
+
+/* ── 因果事件链：珠色两级（关键 = 金 · 其余 = 淡紫灰），珠面积 ∝ 该回事件数 ── */
+.skc-chain-line{fill:none;stroke:color-mix(in oklab,var(--abyss-ink-3) 42%,transparent);stroke-width:1}
+.skc-step{fill:none;stroke:var(--abyss-ink-3);stroke-width:1;opacity:.7}
+.skc-arrow{fill:none;stroke:var(--abyss-ink-3);stroke-width:1.2;stroke-linecap:round;stroke-linejoin:round}
+.skc-ev{fill:var(--sky-kc-bead);stroke:var(--sky-kc-halo);stroke-width:1}
+.skc-ev.is-key{fill:var(--sky-kc-key)}
+.skc-ev.is-on{stroke:var(--abyss-ink-bright);stroke-width:1.6}
+.sky-compass.skc-emph .skc-ev:not(.is-on){opacity:.28}
+.skc-ev-label{font:var(--abyss-fs-2xs) var(--abyss-font-sans);fill:var(--abyss-ink-2);text-anchor:middle;letter-spacing:.06em;pointer-events:none;
+  paint-order:stroke;stroke:var(--sky-kc-halo);stroke-width:3px;stroke-linejoin:round;transition:opacity var(--cl-atlas-dur-1) var(--cl-atlas-ease)}
+.skc-ev-label.is-on{fill:var(--abyss-gold)}
+.sky-compass.skc-emph .skc-ev-label:not(.is-on){opacity:.3}
+.skc-ch{font:var(--abyss-fs-xs) var(--abyss-font-mono);fill:var(--abyss-ink-3);letter-spacing:.06em}
+.skc-ch.is-start{text-anchor:end}
+.skc-ch.is-end{text-anchor:start}
+.skc-ch.is-start.is-below{text-anchor:start}
+.skc-ch.is-end.is-below{text-anchor:end}
+.skc-chain-title{font:var(--abyss-fs-xs) var(--abyss-font-mono);fill:var(--abyss-ink-2);text-anchor:middle;letter-spacing:.22em}
+.skc-rule{fill:none;stroke:var(--sky-kc-rule);stroke-width:.8}
+/* 光流：四粒暖光沿链（时间向前）缓行，24 s 走完全程（无限循环周期 ≥ 20 s）；宽而淡的一层做辉光。
+   走 steps(240)：一步约 0.1 s、约 4.4 px——这粒光走得慢，台阶看不出来，但整层 SVG 的逐帧重绘降到 10 Hz
+   （stroke-dashoffset 只能在主线程 / 光栅上推进，罗盘一开着就让 1440 整屏每帧重绘一次；原生 4K 时这一笔最贵） */
+.skc-flow{fill:none;stroke:var(--sky-kc-key);stroke-width:2;stroke-linecap:round;stroke-dasharray:.016 .234;opacity:.62;pointer-events:none;
+  animation:skc-flow 24s steps(240) infinite}
+.skc-flow.is-glow{stroke-width:7;opacity:.14}
+.sky-compass.skc-emph .skc-flow{opacity:.1}
+@keyframes skc-flow{from{stroke-dashoffset:0}to{stroke-dashoffset:-1}}
+body.skylab-still .skc-flow,body.skylab-still #labels .cl-lab.gem-sw0,body.skylab-still #labels .cl-lab.gem-sw1{animation:none}
+
+/* ── 底部小注：与星空图例（.sky-legend）同风格——线型样本 + 名 + 数；列出 + 未列 = 全部联系 ── */
+.skc-note{position:fixed;left:0;right:var(--skc-inset-r,0px);bottom:18px;z-index:var(--z-hud);padding:0 20px;pointer-events:none}
+.skc-note[hidden]{display:none}
+.skc-note .lg b{font:var(--abyss-fs-xs) var(--abyss-font-mono);font-weight:400;color:var(--abyss-ink-2);margin-left:2px}
+.skc-note .skc-lg-sum{color:var(--abyss-ink-3)}
+.skc-sw{width:24px;height:6px;overflow:visible;flex:none}
+.skc-note .skc-link{opacity:1;transition:none}
+.skc-sw-ref{fill:none;stroke:var(--abyss-violet-bright);stroke-width:2;stroke-dasharray:.1 3;stroke-linecap:round;opacity:.85}
+@media (max-width:560px){.skc-note{padding:0 10px;gap:4px 12px}.skc-sw{width:18px}}
+
+@media (prefers-reduced-motion: reduce){
+  body.sky-compass-on #labels .cl-lab.gem-slot .ls .le,body.sky-compass-on #labels .cl-lab.gem-slot .lx,body.sky-compass-on #labels .cl-lab.gem-slot[data-known="false"] .ls,
+  .skc-link,.skc-ev-label{transition:none!important}
+  .skc-flow,body.sky-compass-on #labels .cl-lab.gem-slot.gem-sw0,body.sky-compass-on #labels .cl-lab.gem-slot.gem-sw1{animation:none}
+}
+
+/* ── 密度带（大书主角几百回：一回一颗珠排不开，改按回序铺成带；sky-compass-band 算几何）──
+   外带 = 该段事件密度（与珠同色），金芯 = 其中的关键事件；悬停关系对象时同场的回另画一层；带上悬停 = 沿时间扫过每一回 */
+.skc-band{fill:color-mix(in oklab,var(--sky-kc-bead) 78%,transparent);stroke:none;pointer-events:none}
+.skc-band.is-key{fill:color-mix(in oklab,var(--sky-kc-key) 88%,transparent)}
+.skc-band.is-sel{fill:var(--abyss-ink-bright);opacity:.92}
+.skc-band-hit{fill:none;stroke:transparent;stroke-width:20px;stroke-linecap:round;pointer-events:none}
+.sky-compass.skc-banded .skc-band-hit{pointer-events:stroke;cursor:crosshair}
+.skc-band-cur{fill:var(--abyss-ink-bright);stroke:var(--sky-kc-halo);stroke-width:1.2;pointer-events:none}
+.sky-compass.skc-emph .skc-band:not(.is-sel){opacity:.34}
+.sky-compass.skc-banded .skc-flow{opacity:.34}
+
+/* ── 关系星拖拽（sky-compass-drag）：按住拖出 = 张力线（JS 只写 0..1 的 --skc-k 与伸长比 --skc-rho）· 辉光 · 晶体心靶环 · 吸入脉冲 ── */
+.sky-compass{-webkit-user-select:none;user-select:none}
+.sky-compass .skc-sat{touch-action:none}
+.sky-compass.skc-dragging,.sky-compass.skc-dragging .skc-sat{cursor:grabbing}
+/* 缩放原点常驻（不随 is-grab 摘掉而跳回 0 0）：抓起放大、回位后缩回都走同一段 flick */
+.sky-compass .skc-sat-star{transform-box:fill-box;transform-origin:center;transition:transform var(--skd-dur-flick) var(--skd-ease-out)}
+.sky-compass .skc-sat.is-grab .skc-sat-star{transform:scale(var(--skc-lift,1))}
+.sky-compass.skc-dragging .skc-link.is-taut{opacity:calc(.62 + .38 * var(--skc-k,0));stroke-width:calc(1.2px + .8px * var(--skc-k,0));stroke-dasharray:none;animation:none;transition:none;
+  stroke:color-mix(in oklab,var(--skc-c) calc(100% - 62% * var(--skc-k,0)),var(--skd-brass-hot))}
+.sky-compass.skc-dragging .skc-link.r-dark.is-taut{stroke-dasharray:calc(4px * var(--skc-rho,1)) calc(3px * var(--skc-rho,1))}
+.sky-compass.skc-dragging .skc-link.r-kin.is-taut{stroke-dasharray:calc(7px * var(--skc-rho,1)) calc(2.5px * var(--skc-rho,1)) .1px calc(2.5px * var(--skc-rho,1))}
+.sky-compass.skc-dragging .skc-link.r-bond.is-taut,.sky-compass.skc-dragging .skc-link.r-cooccur.is-taut,.sky-compass.skc-dragging .skc-link.is-derived.is-taut{stroke-dasharray:.1px calc(3.4px * var(--skc-rho,1))}
+.sky-compass.skc-armed .skc-link.is-taut{stroke:var(--skd-brass-hot);opacity:1}
+.skc-drag .r-ally{--skc-c:var(--abyss-gold)}.skc-drag .r-kin{--skc-c:var(--abyss-signal)}.skc-drag .r-bond{--skc-c:var(--abyss-signal-bright)}
+.skc-drag .r-oppose{--skc-c:var(--abyss-camp-oppose)}.skc-drag .r-dark{--skc-c:var(--abyss-violet)}.skc-drag .r-other,.skc-drag .r-cooccur{--skc-c:var(--abyss-camp-none)}
+.skc-drag-halo{fill:none;stroke:color-mix(in oklab,var(--skc-c,var(--skd-brass)) 50%,var(--skd-brass-hot));stroke-linecap:round;pointer-events:none;
+  stroke-width:calc(2.5px + 5px * var(--skc-k,0));opacity:calc(.05 + .16 * var(--skc-k,0))}
+.skc-drag-ring{fill:none;stroke:var(--skd-brass-hot);stroke-width:.8;stroke-dasharray:1 4;r:30px;opacity:0;pointer-events:none;
+  transition:opacity var(--skd-dur-soft) var(--skd-ease-out),r var(--skd-dur-soft) var(--skd-ease-out)}
+.sky-compass.skc-dragging .skc-drag-ring{opacity:.4}
+.sky-compass.skc-armed .skc-drag-ring{opacity:1;r:18px;stroke-dasharray:none;stroke-width:1.1}
+.sky-compass .skc-sat.is-sucked .skc-sat-name,.sky-compass .skc-sat.is-sucked .skc-sat-kind{opacity:0;transition:opacity var(--skd-dur-flick) linear}
+.skc-drag-pulse{fill:none;stroke:color-mix(in oklab,var(--skc-c,var(--skd-brass)) 40%,var(--skd-brass-hot));stroke-width:1.2;pointer-events:none;
+  animation:skc-drag-pulse var(--skd-dur-focus) var(--skd-ease-out) both}
+@keyframes skc-drag-pulse{from{r:4px;opacity:.95}to{r:70px;opacity:0}}
+
+/* ── 事件扇出（sky-compass-fan）：该回全部事件短名沿发丝引线扇形展开；收起时节点透明留在原地，下次展开重建 ── */
+.skc-fan{pointer-events:none}
+.skc-fan-rib{fill:none;stroke:color-mix(in oklab,var(--skd-ink-3) 72%,transparent);stroke-width:.7;stroke-linecap:round;stroke-dasharray:1 1}
+.skc-fan-i.is-key .skc-fan-rib{stroke:color-mix(in oklab,var(--skd-brass) 80%,transparent)}
+.skc-fan-t,.skc-fan-more{paint-order:stroke;stroke:var(--skd-void-0);stroke-width:3px;stroke-linejoin:round}
+.skc-fan-t{font:var(--abyss-fs-2xs) var(--abyss-font-sans);fill:var(--skd-ink-2);letter-spacing:.06em}
+.skc-fan-i.is-key .skc-fan-t{fill:var(--skd-brass-hot)}
+.skc-fan-more{font:var(--abyss-fs-xs) var(--abyss-font-mono);fill:var(--skd-ink-3);letter-spacing:.04em}
+.skc-fan.is-in .skc-fan-rib{animation:skc-fan-draw var(--skd-dur-soft) var(--skd-ease-out) both;animation-delay:calc(var(--i,0) * 26ms)}
+.skc-fan.is-in .skc-fan-t,.skc-fan.is-in .skc-fan-more{animation:skc-fan-rise var(--skd-dur-soft) var(--skd-ease-out) both;animation-delay:calc(var(--i,0) * 26ms + 70ms)}
+.skc-fan.is-in.is-quick .skc-fan-rib,.skc-fan.is-in.is-quick .skc-fan-t,.skc-fan.is-in.is-quick .skc-fan-more{animation-duration:var(--skd-dur-flick);animation-delay:0s}
+.skc-fan.is-set .skc-fan-rib,.skc-fan.is-set .skc-fan-t,.skc-fan.is-set .skc-fan-more{animation:none}   /* 重排挪了扇面：落到新位，不重放入场 */
+.skc-fan.is-out .skc-fan-i{animation:skc-fan-away var(--skd-dur-flick) ease-in both}
+@keyframes skc-fan-draw{from{stroke-dashoffset:1}}
+@keyframes skc-fan-rise{from{opacity:0;transform:translate(var(--fx,0px),var(--fy,0px))}}
+@keyframes skc-fan-away{to{opacity:0}}
+.sky-compass.skc-fanning .skc-chain-labels .skc-ev-label{opacity:0}
+.sky-compass .skc-ev:focus,.sky-compass .skc-band-hit:focus{outline:none}
+.sky-compass .skc-chain .skc-ev:focus-visible{stroke:var(--skd-brass-hot);stroke-width:2px}
+.sky-compass .skc-chain .skc-band-hit:focus-visible+.skc-band-cur{stroke:var(--skd-brass-hot);stroke-width:2px}
+
+@media (prefers-reduced-motion: reduce){
+  /* 全局减弱动效给所有元素留了 .12s 过渡（app-shell.css）：拖拽 / 回位 / 扇出 / 悬停卡片落点在这里一帧到位 */
+  .skc-drag-ring,.skc-drag-halo,.sky-compass .skc-sat,.sky-compass .skc-sat *,.sky-compass .skc-link,.skc-fan *,.skc-card{transition:none!important}
+  .skc-drag-pulse{display:none}
+  .skc-fan.is-in .skc-fan-rib,.skc-fan.is-in .skc-fan-t,.skc-fan.is-in .skc-fan-more{animation:none}
+  .skc-fan.is-out .skc-fan-i{animation:none;opacity:0}
+}
+body.skylab-still .skc-drag-pulse{display:none}
+body.skylab-still .skc-fan.is-in .skc-fan-rib,body.skylab-still .skc-fan.is-in .skc-fan-t,body.skylab-still .skc-fan.is-in .skc-fan-more{animation:none}
+body.skylab-still .skc-fan.is-out .skc-fan-i{animation:none;opacity:0}

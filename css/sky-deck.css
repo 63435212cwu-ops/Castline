@@ -1,0 +1,242 @@
+/* ============================================================
+ * @role css-token
+ * @owns css/sky-deck.css
+ * @budget drawcalls=0 points=0 vertices=0 rtpx=0 passes=0
+ * @contract deep-sky/2
+ * ------------------------------------------------------------
+ * 剧情卡片叠（星盘态左侧）：一叠深空星图卡，后一张压住前一张、只露标题条；
+ * 主线卡 = 金色衬线 + 发光脊线，支线卡 = 缩进挂在主线下的细线卡，细支卡 = 虚线淡卡。
+ * 只引用 --skd-* / --z-* 令牌；JS 只写 --x --y --h --i --c --s0 --s1 --cur 与四个版位变量。
+ * 状态 / 展开体 / 入场 / 窄屏 / 降级在 css/sky-deck-states.css（降级：prefers-reduced-motion · body.skylab-still · [data-tier='low']）
+ * ============================================================ */
+
+/* ---- 容器 ---- */
+.skd-deck {
+  position: fixed;
+  left: var(--skd-deck-left, 20px);
+  top: var(--skd-deck-top, 96px);
+  bottom: var(--skd-deck-bottom, 118px);
+  width: var(--skd-deck-w, 320px);
+  z-index: var(--z-panel);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 12px 8px 14px;
+  box-sizing: border-box;
+  color: var(--skd-ink-2);
+  font-family: var(--skd-font-sans);
+  font-size: var(--skd-fs-sm);
+  background:
+    radial-gradient(1px 1px at 18% 9%, var(--skd-star), transparent 70%),
+    radial-gradient(1px 1px at 83% 22%, color-mix(in oklch, var(--skd-cool) 70%, transparent), transparent 70%),
+    radial-gradient(1px 1px at 61% 71%, color-mix(in oklch, var(--skd-star) 60%, transparent), transparent 70%),
+    radial-gradient(1px 1px at 9% 88%, color-mix(in oklch, var(--skd-cool) 50%, transparent), transparent 70%),
+    radial-gradient(130% 55% at 0% 0%, color-mix(in oklch, var(--skd-violet) 12%, transparent), transparent 62%),
+    radial-gradient(90% 40% at 100% 100%, color-mix(in oklch, var(--skd-brass) 6%, transparent), transparent 70%),
+    linear-gradient(180deg, color-mix(in oklch, var(--skd-void-1) 84%, transparent), color-mix(in oklch, var(--skd-void-0) 72%, transparent));
+  border: 1px solid var(--skd-hair);
+  border-radius: var(--skd-radius);
+  box-shadow: var(--skd-shadow-panel);
+  opacity: 0;
+  transform: translate3d(-14px, 0, 0);
+  transition: opacity var(--skd-dur-soft) var(--skd-ease-out), transform var(--skd-dur-focus) var(--skd-ease-out);
+  pointer-events: none;
+  contain: layout paint;
+}
+.skd-deck.is-on { opacity: 1; transform: none; pointer-events: auto; }
+.skd-deck[hidden] { display: none; }
+
+/* ---- 头部：标题 + 计数一行，筛选一行 ---- */
+.skd-deck__head {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: baseline;
+  column-gap: 10px;
+  row-gap: 9px;
+  flex: 0 0 auto;
+}
+.skd-deck__title {
+  font-family: var(--skd-font-serif);
+  font-size: var(--skd-fs-md);
+  color: var(--skd-brass);
+  letter-spacing: var(--skd-track);
+  white-space: nowrap;
+}
+.skd-deck__title::before {
+  content: '✦';
+  margin-right: 0.45em;
+  color: var(--skd-brass-hot);
+  text-shadow: var(--skd-glow-brass);
+}
+.skd-deck__count {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-family: var(--skd-font-mono);
+  font-size: var(--skd-fs-xs);
+  color: var(--skd-ink-3);
+  font-variant-numeric: tabular-nums;
+}
+.skd-deck__filter { grid-column: 1 / -1; display: flex; gap: 6px; }
+.skd-deck__filter button {
+  flex: 1 1 0;
+  min-width: 0;
+  white-space: nowrap;
+  font: inherit;
+  font-size: var(--skd-fs-xs);
+  letter-spacing: var(--skd-track);
+  color: var(--skd-ink-3);
+  background: var(--skd-glass-soft);
+  border: 1px solid var(--skd-hair);
+  border-radius: var(--skd-radius-pill);
+  padding: 4px 8px;
+  cursor: pointer;
+  transition: color var(--skd-dur-flick) var(--skd-ease-out), border-color var(--skd-dur-flick) var(--skd-ease-out), background var(--skd-dur-flick) var(--skd-ease-out);
+}
+.skd-deck__filter button:hover { color: var(--skd-ink-2); border-color: var(--skd-hair-2); }
+.skd-deck__filter button[aria-pressed='true'] {
+  color: var(--skd-brass-hot);
+  border-color: var(--skd-hair-brass);
+  background: color-mix(in oklch, var(--skd-brass) 12%, transparent);
+}
+
+/* ---- 滚动区：上下沿渐隐进星空 ---- */
+.skd-deck__viewport {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  margin-right: -6px;
+  padding-right: 6px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--skd-hair-brass) transparent;
+  outline: none;
+  -webkit-mask-image: linear-gradient(to bottom, transparent, black 14px, black calc(100% - 30px), transparent);
+  mask-image: linear-gradient(to bottom, transparent, black 14px, black calc(100% - 30px), transparent);
+}
+.skd-deck__spacer { position: relative; height: var(--h, 0px); }
+
+/* ---- 卡：后一张压住前一张，只露标题条；顶沿一道本色亮线，向上投影落在上一张卡身上 ---- */
+.skd-deck .skd-card {
+  --c: var(--skd-ink-3);
+  position: absolute;
+  left: 0;
+  right: 0;
+  box-sizing: border-box;
+  min-height: calc(var(--bar, 34px) + 40px);
+  transform: translate3d(var(--x, 0px), var(--y, 0px), 0);
+  border: 1px solid color-mix(in oklch, var(--c) 20%, var(--skd-hair));
+  border-bottom-color: transparent;
+  border-radius: var(--skd-radius-s) var(--skd-radius-s) 0 0;
+  background:
+    radial-gradient(1px 1px at 14% 34%, color-mix(in oklch, var(--skd-star) 42%, transparent), transparent 70%),
+    radial-gradient(1px 1px at 66% 22%, color-mix(in oklch, var(--skd-star) 26%, transparent), transparent 70%),
+    radial-gradient(1px 1px at 88% 64%, color-mix(in oklch, var(--skd-cool) 30%, transparent), transparent 70%),
+    radial-gradient(150% 100% at 0% 0%, color-mix(in oklch, var(--c) 15%, transparent), transparent 60%),
+    linear-gradient(180deg, var(--skd-void-2), var(--skd-void-1) 80%);
+  box-shadow:
+    0 -9px 16px -11px color-mix(in oklch, var(--skd-void-0) 96%, transparent),
+    inset 0 1px 0 color-mix(in oklch, var(--c) 40%, transparent);
+  color: var(--skd-ink-2);
+  overflow: hidden;
+  transition: border-color var(--skd-dur-soft) var(--skd-ease-out), filter var(--skd-dur-soft) var(--skd-ease-out);
+}
+.skd-deck .skd-card__bar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: var(--bar, 34px);
+  padding: 0 10px 0 12px;
+  cursor: pointer;
+  user-select: none;
+  transition: background var(--skd-dur-flick) var(--skd-ease-out), box-shadow var(--skd-dur-flick) var(--skd-ease-out);
+}
+.skd-deck .skd-card__sigil {
+  flex: 0 0 auto;
+  width: 1em;
+  text-align: center;
+  font-style: normal;
+  font-size: var(--skd-fs-sm);
+  color: var(--c);
+}
+.skd-deck .skd-card__sigil::before { content: '◇'; }
+.skd-deck .skd-card__name {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: var(--skd-fs-sm);
+  color: var(--skd-ink);
+}
+.skd-deck .skd-card__span {
+  flex: 0 0 auto;
+  font-family: var(--skd-font-mono);
+  font-size: var(--skd-fs-xs);
+  color: var(--skd-ink-3);
+  font-variant-numeric: tabular-nums;
+}
+
+/* 主线：金色衬线标题、左侧一道本色发光脊线 */
+.skd-deck .skd-card.is-main { --bar: 42px; }
+.skd-deck .skd-card.is-main::after {
+  content: '';
+  position: absolute;
+  left: -1px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(180deg, var(--c), color-mix(in oklch, var(--c) 30%, transparent) 60%, transparent);
+  box-shadow: 0 0 10px color-mix(in oklch, var(--c) 70%, transparent);
+  pointer-events: none;
+}
+.skd-deck .skd-card.is-main .skd-card__sigil { color: var(--skd-brass-hot); text-shadow: var(--skd-glow-brass); }
+.skd-deck .skd-card.is-main .skd-card__sigil::before { content: '◈'; }
+.skd-deck .skd-card.is-main .skd-card__name {
+  font-family: var(--skd-font-serif);
+  font-size: var(--skd-fs-md);
+  color: var(--skd-brass-hot);
+  letter-spacing: var(--skd-track);
+  text-shadow: 0 0 12px color-mix(in oklch, var(--skd-brass) 30%, transparent);
+}
+.skd-deck .skd-card.is-main .skd-card__span { color: var(--skd-brass-dim); }
+
+/* 支线：缩进、挂在主线下（左侧一根细线把同一段的支线串起来，标题条中点一颗小结点） */
+.skd-deck .skd-card.is-branch { --bar: 34px; left: 16px; overflow: visible; }
+.skd-deck .skd-card.is-branch::after,
+.skd-deck .skd-card.is-twig::after {
+  content: '';
+  position: absolute;
+  left: -9px;
+  top: -6px;
+  bottom: 0;
+  width: 1px;
+  background: linear-gradient(180deg, var(--skd-hair-2), var(--skd-hair));
+  pointer-events: none;
+}
+.skd-deck .skd-card.is-branch .skd-card__bar::before {
+  content: '';
+  position: absolute;
+  left: -12px;
+  top: calc(50% - 3px);
+  width: 6px;
+  height: 6px;
+  border-radius: var(--skd-radius-pill);
+  background: color-mix(in oklch, var(--c) 80%, var(--skd-void-1));
+  box-shadow: 0 0 8px color-mix(in oklch, var(--c) 60%, transparent);
+}
+
+/* 细支：虚线淡卡 */
+.skd-deck .skd-card.is-twig {
+  --bar: 30px;
+  left: 16px;
+  overflow: visible;
+  border-style: dashed;
+  background: linear-gradient(180deg, color-mix(in oklch, var(--skd-void-2) 70%, transparent), var(--skd-void-1) 80%);
+}
+.skd-deck .skd-card.is-twig .skd-card__sigil { color: var(--skd-ink-3); }
+.skd-deck .skd-card.is-twig .skd-card__sigil::before { content: '⋯'; }
+.skd-deck .skd-card.is-twig .skd-card__name { font-size: var(--skd-fs-xs); color: var(--skd-ink-3); letter-spacing: var(--skd-track); }

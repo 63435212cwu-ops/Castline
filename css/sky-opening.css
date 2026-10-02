@@ -1,0 +1,347 @@
+/* @role css-token
+   @owns css/sky-opening.css
+   @contract deep-sky/3
+   @budget drawcalls=0 points=0 vertices=0 rtpx=0 passes=0
+
+   开篇语汇（参考开篇视频）：字符数据流 · 逐字打出 · 金属掠光 · 四角微字与发丝准星 · 真实五步清单 · 启动日志 · 倾斜椭圆彗星轨。
+   只引用令牌（--skd-* / --abyss-fs-* / --z-*）；动画全是一次性（仪式层）或 ≥ 20 s 的氛围循环，走 transform / opacity 合成层。
+   低成本路径：@media (prefers-reduced-motion) · body.skylab-still · [data-tier="low"]（JS 另行不下雨、不打字）。 */
+
+@layer skl-opening;
+
+@layer skl-opening {
+  /* ---------- 逐字打出（CLSkyUtil.type） ---------- */
+  .skd-type { position: relative; white-space: pre-wrap; }
+  .skd-type__c {
+    display: inline-block;
+    white-space: pre;
+    opacity: 0;
+    animation: skd-type-in 240ms var(--skd-ease-out) calc(var(--type-d0, 0s) + var(--i, 0) * var(--type-dt, 80ms)) 1 both;
+  }
+  /* 块光标：打完这一行才出现，闪 6 次后常亮（一次性，不落 0.3–20 s 禁止带） */
+  .skd-type.has-caret::after,
+  .is-typed.has-caret::after {
+    content: "";
+    display: inline-block;
+    width: .56em;
+    height: 1.05em;
+    margin-left: .18em;
+    vertical-align: -.16em;
+    background: var(--skd-mint);
+    box-shadow: 0 0 8px color-mix(in oklch, var(--skd-mint) 55%, transparent);
+    animation: skd-caret 1060ms steps(1, end) var(--type-tt, 0s) 6 both;
+  }
+
+  /* ---------- 字符数据流（CLSkyRain） ---------- */
+  .skd-rain {
+    position: absolute;
+    inset: 0;
+    z-index: var(--z-chart);
+    overflow: hidden;
+    pointer-events: none;
+    contain: strict;
+  }
+  .skd-rain.is-overlay { position: fixed; z-index: var(--z-panel); }
+  .skd-rain__col {
+    position: absolute;
+    top: 0;
+    left: var(--x, 0);
+    margin: 0;
+    white-space: pre;
+    font-family: var(--skd-font-mono);
+    line-height: 1.18;
+    text-align: center;
+    color: transparent;
+    background: linear-gradient(180deg, transparent 0%, color-mix(in oklch, var(--skd-cool) 22%, transparent) 46%, color-mix(in oklch, var(--skd-cool) 80%, transparent) 88%, var(--skd-star) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    transform: translate3d(0, -100%, 0);
+    will-change: transform;
+  }
+  .skd-rain__col.is-near { font-size: var(--skd-fs-md); opacity: .34; filter: drop-shadow(0 0 4px color-mix(in oklch, var(--skd-cool) 40%, transparent)); }
+  .skd-rain__col.is-far { font-size: var(--skd-fs-xs); opacity: .16; }
+  .skd-rain__col.is-brass { background-image: linear-gradient(180deg, transparent 0%, color-mix(in oklch, var(--skd-brass) 24%, transparent) 50%, color-mix(in oklch, var(--skd-brass) 85%, transparent) 90%, var(--skd-brass-hot) 100%); }
+  .skd-rain__flow {
+    position: absolute;
+    left: var(--x, 50%);
+    top: var(--y, 50%);
+    white-space: nowrap;
+    font-family: var(--skd-font-serif);
+    font-size: var(--skd-fs-sm);
+    letter-spacing: var(--skd-track);
+    color: var(--skd-ink-2);
+    text-shadow: 0 0 10px color-mix(in oklch, var(--skd-cool) 55%, transparent);
+    transform-origin: 0 50%;
+    opacity: 0;
+    will-change: transform, opacity;
+  }
+  .skd-rain__flow.is-brass { color: var(--skd-brass-hot); text-shadow: var(--skd-glow-brass); }
+
+  /* ---------- 读取幕 · 开篇版式（is-cine：宽屏盘居中放大、文字组靠左、清单上左角、四角微字） ---------- */
+  /* 盘体不再做位移入场：有变换的祖先会变成文字组的定位容器（建图长任务卡住 is-on 时文字组会叠在盘心） */
+  .skd-loader.is-cine .skd-loader__body { position: static; transform: none; }
+  .skd-loader.is-cine .skd-loader__dial { opacity: 0; transform: scale(.96); transition: opacity var(--skd-dur-focus) var(--skd-ease-out), transform var(--skd-dur-focus) var(--skd-ease-out); }
+  .skd-loader.is-cine.is-on .skd-loader__dial { opacity: 1; transform: none; }
+  /* 进度弧不做过渡：主线程被建图占住时过渡不走，弧会停在旧值；直接落到真实进度 */
+  .skd-loader.is-cine .skd-loader__arc circle { transition: none; }
+  .skd-loader.is-cine .skd-loader__dial {
+    position: relative;
+    z-index: var(--z-hud);
+    width: min(52vmin, 460px);
+    height: min(52vmin, 460px);
+  }
+  .skd-loader.is-cine .skd-loader__ring.is-inner { inset: 12.86%; }
+  .skd-loader.is-cine .skd-loader__text {
+    position: absolute;
+    z-index: var(--z-hud);
+    left: max(6vw, 48px);
+    top: 50%;
+    max-width: min(34vw, 460px);
+    padding: 0;
+    justify-items: start;
+    text-align: left;
+    opacity: 0;
+    transform: translate(-12px, -50%);
+    transition: opacity var(--skd-dur-focus) var(--skd-ease-out), transform var(--skd-dur-focus) var(--skd-ease-out);
+  }
+  .skd-loader.is-cine.is-on .skd-loader__text { opacity: 1; transform: translate(0, -50%); }
+  /* 文字组身后一层深空暗晕（投影画在内容之下）：字符雨从这里经过时压暗，书名与日志始终读得清 */
+  .skd-loader.is-cine .skd-loader__text {
+    border-radius: var(--skd-radius);
+    background: color-mix(in oklch, var(--skd-void-0) 38%, transparent);
+    box-shadow: 0 0 80px 56px color-mix(in oklch, var(--skd-void-0) 38%, transparent);
+  }
+  .skd-loader.is-cine .skd-loader__title {
+    position: relative;
+    overflow: hidden;
+    padding: .06em .12em .1em 0;
+    font-size: calc(var(--abyss-fs-2xl) * 1.9);
+    line-height: 1.1;
+    letter-spacing: .14em;
+    text-shadow: none;
+  }
+  /* 金属字：每个字自带竖向渐变（星白 → 高热黄铜 → 暗铜 → 黄铜）；掠光是叠在上面的一层斜向亮带，同样裁进字形，打完逐字扫过 */
+  .skd-loader.is-cine .skd-loader__title .skd-type__c,
+  .skd-loader.is-cine .skd-loader__title.is-typed {
+    color: transparent;
+    background-image: linear-gradient(100deg, transparent 38%, color-mix(in oklch, var(--skd-star) 92%, transparent) 50%, transparent 62%), linear-gradient(180deg, var(--skd-star) 0%, var(--skd-brass-hot) 44%, var(--skd-brass-dim) 56%, var(--skd-brass) 100%);
+    background-size: 320% 100%, 100% 100%;
+    background-position: 160% 0, 0 0;
+    background-repeat: no-repeat;
+    -webkit-background-clip: text;
+    background-clip: text;
+    filter: drop-shadow(0 0 14px color-mix(in oklch, var(--skd-brass) 28%, transparent));
+  }
+  .skd-loader.is-cine .skd-loader__title.is-glint .skd-type__c {
+    animation: skd-type-in 240ms var(--skd-ease-out) calc(var(--type-d0, 0s) + var(--i, 0) * var(--type-dt, 80ms)) 1 both,
+      skd-sheen 900ms var(--skd-ease-inout) calc(var(--type-tt, 0s) + 60ms + var(--i, 0) * 70ms) 1 both;
+  }
+  .skd-loader.is-cine .skd-loader__sub:empty { display: none; }
+  .skd-loader.is-cine .skd-loader__stage { margin-top: 14px; font-size: var(--skd-fs-sm); letter-spacing: var(--skd-track-wide); }
+  .skd-loader.is-cine .skd-loader__detail { min-height: 0; }
+
+  /* 斜杠副题 */
+  .skd-open__kicker { display: flex; align-items: center; gap: .9em; margin-top: 4px; }
+  .skd-open__slash { font-family: var(--skd-font-mono); font-size: var(--skd-fs-xs); letter-spacing: .12em; color: color-mix(in oklch, var(--skd-mint) 62%, transparent); }
+  .skd-open__kick-zh { font-family: var(--skd-font-serif); font-size: var(--skd-fs-md); letter-spacing: .5em; color: var(--skd-ink); }
+  .skd-open__kick-en { font-family: var(--skd-font-mono); font-size: var(--skd-fs-xs); letter-spacing: .5em; color: var(--skd-ink-3); white-space: pre; }
+
+  /* 启动日志：真实计数逐行打出 */
+  .skd-open__log {
+    display: grid;
+    row-gap: 2px;
+    margin: 16px 0 0;
+    padding: 0;
+    list-style: none;
+    font-family: var(--skd-font-mono);
+    font-size: var(--skd-fs-xs);
+    line-height: 1.7;
+    color: color-mix(in oklch, var(--skd-mint) 55%, var(--skd-ink-3));
+  }
+  .skd-open__line { display: flex; gap: .7em; min-height: 1.7em; }
+  .skd-open__line:last-child { color: var(--skd-mint); }
+  .skd-open__gt { color: color-mix(in oklch, var(--skd-mint) 70%, transparent); }
+
+  /* 清单：挪到左上角、竖排；英文码在后；进度发丝跟 --p */
+  .skd-loader.is-cine .skd-loader__steps {
+    position: absolute;
+    z-index: var(--z-hud);
+    left: max(6vw, 48px);
+    top: 96px;
+    display: grid;
+    justify-content: start;
+    row-gap: 6px;
+    padding-bottom: 14px;
+  }
+  .skd-loader.is-cine .skd-loader__step::after {
+    content: attr(data-en);
+    margin-left: 4px;
+    font-size: var(--skd-fs-xs);
+    letter-spacing: .24em;
+    color: color-mix(in oklch, var(--skd-ink-3) 70%, transparent);
+  }
+  .skd-loader.is-cine .skd-loader__step.is-now::after { color: var(--skd-mint); }
+  .skd-loader.is-cine .skd-loader__steps::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 168px;
+    height: 1px;
+    background: linear-gradient(90deg, var(--skd-mint) 0 calc(var(--p, 0) * 100%), var(--skd-hair) calc(var(--p, 0) * 100%) 100%);
+    box-shadow: 0 0 6px color-mix(in oklch, var(--skd-mint) 35%, transparent);
+  }
+
+  /* 四角微字与发丝准星 */
+  .skd-open__corner {
+    position: absolute;
+    z-index: var(--z-hud);
+    display: grid;
+    row-gap: 5px;
+    pointer-events: none;
+    transition: opacity var(--skd-dur-focus) var(--skd-ease-out);
+  }
+  .skd-open__corner.is-tl { top: 30px; left: max(6vw, 48px); }
+  .skd-open__corner.is-tr { top: 30px; right: 40px; justify-items: end; text-align: right; }
+  .skd-open__corner.is-bl { bottom: 30px; left: max(6vw, 48px); }
+  .skd-open__corner.is-br { bottom: 30px; right: 40px; justify-items: end; }
+  .skd-open__brand { display: flex; align-items: center; gap: 10px; }
+  .skd-open__brand b { font-family: var(--skd-font-mono); font-size: var(--skd-fs-xs); font-weight: 400; letter-spacing: .36em; color: var(--skd-ink-2); }
+  .skd-open__rule { display: block; width: 180px; height: 1px; background: linear-gradient(90deg, var(--skd-hair-2), transparent); }
+  .skd-open__rule.is-short { width: 96px; background: linear-gradient(270deg, var(--skd-hair-2), transparent); }
+  .skd-open__corner.is-bl .skd-open__rule { background: linear-gradient(90deg, var(--skd-hair-2), transparent); }
+  .skd-open__cross { font-family: var(--skd-font-mono); font-size: var(--skd-fs-sm); color: var(--skd-brass-dim); }
+  .skd-open__micro { font-family: var(--skd-font-mono); font-size: var(--skd-fs-xs); letter-spacing: .24em; color: var(--skd-ink-3); }
+  .skd-open__micro.is-title { font-family: var(--skd-font-serif); letter-spacing: .32em; color: var(--skd-ink-2); }
+  .skd-open__micro.is-en { color: color-mix(in oklch, var(--skd-ink-3) 70%, transparent); }
+  .skd-open__pct { font-family: var(--skd-font-mono); font-size: var(--skd-fs-sm); letter-spacing: .2em; color: var(--skd-brass); font-variant-numeric: tabular-nums; }
+
+  /* 彗星轨：外框定倾角与扁率；转子是一圈锥形渐变细环（尾暗头亮），头上一颗亮点 */
+  .skd-open__orbit {
+    position: absolute;
+    inset: -20%;
+    pointer-events: none;
+    transform: rotate(-16deg) scaleY(.34);
+  }
+  .skd-open__track {
+    position: absolute;
+    inset: 0;
+    border: 1px solid color-mix(in oklch, var(--skd-cool) 14%, transparent);
+    border-radius: var(--skd-radius-pill);
+  }
+  .skd-open__rotor {
+    position: absolute;
+    inset: 0;
+    border-radius: var(--skd-radius-pill);
+    opacity: 0;
+    background: conic-gradient(from 0deg, transparent 0 70%, color-mix(in oklch, var(--skd-cool) 40%, transparent) 92%, var(--skd-star) 100%);
+    -webkit-mask: radial-gradient(closest-side, transparent calc(100% - 3px), black calc(100% - 2px), black 100%, transparent 100%);
+    mask: radial-gradient(closest-side, transparent calc(100% - 3px), black calc(100% - 2px), black 100%, transparent 100%);
+    will-change: transform, opacity;
+  }
+  .skd-open__head {
+    position: absolute;
+    top: -4px;
+    left: 50%;
+    width: 8px;
+    height: 8px;
+    margin-left: -4px;
+    border-radius: var(--skd-radius-pill);
+    background: var(--skd-star);
+    box-shadow: 0 0 12px 4px color-mix(in oklch, var(--skd-cool) 60%, transparent);
+  }
+
+  /* 离场：文字组向左退、四角淡出（盘由 is-leaving 整体放大淡出） */
+  .skd-loader.is-cine.is-leaving .skd-loader__text { opacity: 0; transform: translate(-28px, -50%); }
+  .skd-loader.is-cine.is-leaving .skd-open__corner,
+  .skd-loader.is-cine.is-leaving .skd-loader__steps { opacity: 0; }
+
+  /* 窄屏：回到竖排（盘在上、文字在下），清单横排，四角只留左侧 */
+  @media (max-width: 1099px) {
+    .skd-loader.is-cine .skd-loader__body { position: relative; }
+    .skd-loader.is-cine .skd-loader__dial { width: min(46vmin, 300px); height: min(46vmin, 300px); }
+    .skd-loader.is-cine .skd-loader__text,
+    .skd-loader.is-cine.is-on .skd-loader__text { position: static; max-width: 34em; padding: 0 24px; justify-items: center; text-align: center; transform: none; }
+    .skd-loader.is-cine .skd-loader__title { font-size: calc(var(--abyss-fs-2xl) * 1.3); }
+    .skd-loader.is-cine .skd-loader__steps { left: 50%; top: auto; bottom: 84px; display: flex; justify-content: center; padding-bottom: 0; transform: translateX(-50%); white-space: nowrap; }
+    .skd-loader.is-cine .skd-loader__steps::after,
+    .skd-loader.is-cine .skd-loader__step::after,
+    .skd-open__corner.is-tr,
+    .skd-open__corner.is-br { display: none; }
+    .skd-open__kicker { justify-content: center; }
+    .skd-open__log { justify-items: center; }
+    .skd-loader.is-cine.is-leaving .skd-loader__text { transform: translateY(12px); }
+  }
+  @media (max-width: 560px) {
+    .skd-open__rule { width: 72px; }
+    .skd-open__corner.is-bl { display: none; }
+    .skd-open__log { display: none; }
+  }
+}
+
+@keyframes skd-type-in {
+  from { opacity: 0; transform: translate3d(0, .32em, 0); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes skd-caret {
+  0%, 50% { opacity: 0; }
+  51%, 100% { opacity: 1; }
+}
+@keyframes skd-sheen {
+  from { background-position: 160% 0, 0 0; }
+  to { background-position: -60% 0, 0 0; }
+}
+
+/* ---------- 降级：减弱动效（系统偏好 / skylab-still 镜像） ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .skd-type__c { animation: none; opacity: 1; }
+  .skd-type.has-caret::after, .is-typed.has-caret::after { animation: none; opacity: 1; }
+  .skd-open__rotor { display: none; }
+  .skd-loader.is-cine .skd-loader__text, .skd-open__corner { transition: none; }
+}
+body.skylab-still .skd-type__c { animation: none; opacity: 1; }
+body.skylab-still .skd-type.has-caret::after, body.skylab-still .is-typed.has-caret::after { animation: none; opacity: 1; }
+body.skylab-still .skd-open__rotor { display: none; }
+
+/* ---------- 降级：low 档（静态替代：不下雨、无彗星、无掠光与投影） ---------- */
+.skd-loader[data-tier="low"] .skd-rain,
+.skd-loader[data-tier="low"] .skd-open__rotor { display: none; }
+.skd-loader[data-tier="low"] .skd-loader__title .skd-type__c { filter: none; }
+
+/* ---------- 环节融合 A（Q8.3）：刻度数字打出 + 卡片标题逐字 / 掠光 / 卡边描出 ----------
+   环线描出与彗头沿主环归光层 sky-rings（uReveal / uFront），不在这张表里。 */
+/* 刻度数字：逐个打出（沿用 .skd-type 的 --i 节拍） */
+.sky-disc .sd-num.is-typing {
+  animation: skd-type-in 240ms var(--skd-ease-out) calc(var(--i, 0) * 70ms) 1 both;
+}
+/* 卡片：卡边按周长描出一圈 + 标题顶缘掠光 */
+.skd-card.is-fused { position: relative; }
+.skd-card.is-fused::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  border: 1px solid var(--skd-brass-dim);
+  clip-path: inset(0 0 100% 0);
+  animation: skd-card-edge var(--skd-dur-focus) var(--skd-ease-out) both;
+}
+@keyframes skd-card-edge {
+  from { clip-path: inset(0 0 100% 0); opacity: .9; }
+  to { clip-path: inset(0 0 0 0); opacity: .45; }
+}
+.skd-card.is-fused .skd-card__title.is-glint .skd-type__c {
+  animation: skd-type-in 240ms var(--skd-ease-out) calc(var(--i, 0) * 26ms) 1 both,
+    skd-sheen 900ms var(--skd-ease-inout) calc(120ms + var(--i, 0) * 22ms) 1 both;
+}
+
+/* 降级：减弱动效 / skylab-still / low 档一律直接是终态 */
+@media (prefers-reduced-motion: reduce) {
+  .sky-disc .sd-num.is-typing, .skd-card.is-fused::after,
+  .skd-card.is-fused .skd-card__title.is-glint .skd-type__c { animation: none; }
+  .skd-card.is-fused::after { clip-path: inset(0 0 0 0); opacity: .45; }
+}
+body.skylab-still .sky-disc .sd-num.is-typing,
+body.skylab-still .skd-card.is-fused::after { animation: none; }
+body.skylab-still .skd-card.is-fused::after { clip-path: inset(0 0 0 0); opacity: .45; }
+body[data-tier="low"] .skd-card.is-fused::after { animation: none; clip-path: inset(0 0 0 0); opacity: .45; }

@@ -1,0 +1,88 @@
+/*
+ * @role css-token
+ * @owns css/sky-deep-tokens.css
+ * @budget n/a
+ * @contract deep-sky/1
+ *
+ * 深空观星台 · 光层 CSS 令牌。只声明 :root 令牌 + 两个覆盖块（reduced-motion / 低端档），
+ * 不含任何选择器样式。所有色值只用 oklch()，禁十六进制字面量与 rgb 系列函数。
+ * 字阶必须直接引用 var(--abyss-fs-…)，不得内联 px。JS 侧同源令牌见 js/sky/sky-tokens.js。
+ */
+
+/* 底色：视口底噪三层（深空背景 / 场景底 / 面板底），由远及近 */
+:root{
+  --skd-void-0:oklch(8% .02 280); --skd-void-1:oklch(12% .03 280); --skd-void-2:oklch(16% .035 282);
+}
+
+/* 玻璃面：三层透明度，用于 HUD/卡片/浮层的底（soft 弱、strong 强、默认居中） */
+:root{
+  --skd-glass:oklch(11% .03 282 / .62); --skd-glass-strong:oklch(9% .03 282 / .86); --skd-glass-soft:oklch(14% .03 282 / .42);
+}
+
+/* 发丝线：分隔与网格细线（普通 14%、强 26%、黄铜高亮 42%） */
+:root{
+  --skd-hair:oklch(82% .05 285 / .14); --skd-hair-2:oklch(86% .06 285 / .26); --skd-hair-brass:oklch(83% .1 80 / .42);
+}
+
+/* 墨色：正文三阶（正文 / 次要 / 提示与标注） */
+:root{
+  --skd-ink:oklch(95% .012 85); --skd-ink-2:oklch(80% .02 290); --skd-ink-3:oklch(64% .03 290);
+}
+
+/* 黄铜：界面主强调与状态（本体 / 高热 / 熄灭） */
+:root{
+  --skd-brass:oklch(83% .1 80); --skd-brass-hot:oklch(90% .11 85); --skd-brass-dim:oklch(62% .08 75);
+}
+
+/* 星色：星体与语义四色（星白 / 冷蓝 / 对立红 / 紫线 / 薄荷），对应 JS CLSkyTokens.C 同源 */
+:root{
+  --skd-star:oklch(97% .02 85); --skd-cool:oklch(90% .04 250); --skd-oppose:oklch(70% .17 15); --skd-violet:oklch(72% .15 290); --skd-mint:oklch(86% .12 170);
+}
+
+/* 辉光：仅用于星点/黄铜焦点/白星的文字与边缘投影，禁区大片溢出 */
+:root{
+  --skd-glow-ink:0 0 10px oklch(80% .08 285 / .35); --skd-glow-brass:0 0 14px oklch(83% .1 80 / .45); --skd-glow-star:0 0 18px oklch(97% .02 85 / .5);
+}
+
+/* 阴影：浮层下投影 + 顶内高光，固定双层避免面板"糊边" */
+:root{
+  --skd-shadow-panel:0 18px 60px oklch(3% .02 280 / .6), inset 0 1px 0 oklch(90% .05 285 / .06);
+}
+
+/* 模糊与圆角：背景虚化半径、面板圆角、小圆角、胶囊（须与 BLUR.backdrop=7px 同族） */
+:root{
+  --skd-blur:14px; --skd-radius:10px; --skd-radius-s:6px; --skd-radius-pill:999px;
+}
+
+/* 字体栈：衬线用于标题与引文，无衬线用于界面正文，等宽用于编号与坐标刻度 */
+:root{
+  --skd-font-serif:"Songti SC","STSong","Noto Serif SC","Source Han Serif SC",serif;
+  --skd-font-sans:"PingFang SC","Hiragino Sans GB","Noto Sans SC",system-ui,sans-serif;
+  --skd-font-mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,monospace;
+}
+
+/* 字阶：直接别名到项目基线字阶，禁止在光层内联字号 */
+:root{
+  --skd-fs-xs:var(--abyss-fs-xs); --skd-fs-sm:var(--abyss-fs-sm); --skd-fs-base:var(--abyss-fs-base); --skd-fs-md:var(--abyss-fs-md); --skd-fs-lg:var(--abyss-fs-lg); --skd-fs-xl:var(--abyss-fs-xl);
+}
+
+/* 字距：标题/标签宽字距，正文常规字距 */
+:root{
+  --skd-track-wide:.32em; --skd-track:.08em;
+}
+
+/* 时长：与 JS CLSkyTokens.DUR 同毫秒对应（flick 140 / soft 360 / focus 900 / fly 1200 / unfurl 2200） */
+:root{
+  --skd-dur-flick:140ms; --skd-dur-soft:360ms; --skd-dur-focus:900ms; --skd-dur-fly:1200ms; --skd-dur-unfurl:2200ms;
+}
+
+/* 缓动：出快入慢 out / 对称 inout / 镜头感 lens（JS EASE 同形，CSS 侧不做回弹以免与 R8 冲突） */
+:root{
+  --skd-ease-out:cubic-bezier(.16,1,.3,1); --skd-ease-inout:cubic-bezier(.65,0,.35,1); --skd-ease-lens:cubic-bezier(.33,0,.1,1);
+}
+
+/* 降级一：减弱动效——所有过渡压到 1ms，直达终态，循环动画由 CLSkyMotion 冻结 */
+@media (prefers-reduced-motion: reduce){:root{--skd-dur-flick:1ms;--skd-dur-soft:1ms;--skd-dur-focus:1ms;--skd-dur-fly:1ms;--skd-dur-unfurl:1ms}}
+
+/* 降级二：低端档——背景虚化整体关闭（low 档改用纯色叠层），不靠"少一点"蒙混 */
+[data-tier="low"]{--skd-blur:0px}

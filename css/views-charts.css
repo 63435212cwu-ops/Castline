@@ -1,0 +1,465 @@
+/* Castline · 视觉系统 —— views-charts.css (S1 五域拆解) */
+/* ================================================================
+   v17.2 · 3D 属性雷达
+   The radar remains SVG for deterministic rendering and keyboard access,
+   while these layers provide a restrained, premium holographic depth.
+   ================================================================ */
+.radar-wrap{
+  position:relative;
+  isolation:isolate;
+  perspective:960px;
+  border-radius:14px;
+  background:
+    radial-gradient(ellipse at 50% 47%,rgba(120,80,200,.14),rgba(8,6,16,0) 58%),
+    linear-gradient(180deg,rgba(255,180,92,.035),rgba(8,6,16,0) 76%);
+}
+/* 视图控制已并入镜头自动逻辑，保留 DOM 兼容旧快捷键但不再占用画面。 */
+#viewbar{display:none !important}
+.radar-wrap::before{
+  content:"";position:absolute;inset:12% 9%;z-index:-1;border-radius:50%;
+  background:radial-gradient(ellipse,rgba(160,120,255,.11),rgba(60,40,120,.035) 45%,transparent 72%);
+  filter:blur(16px);opacity:.8;pointer-events:none;
+  animation:rdAmbient 24s ease-in-out infinite alternate;  /* G4 降格入氛围：原 7s */
+}
+.radar-wrap::after{
+  content:"";position:absolute;left:12%;right:12%;bottom:5%;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(255,180,92,.26),transparent);
+  box-shadow:0 0 16px rgba(255,180,92,.2);pointer-events:none;
+}
+@keyframes rdAmbient{from{transform:scale(.92);opacity:.36}to{transform:scale(1.06);opacity:.675} /* G4 降亮：整块 ×0.75（总纲表 4-3 氛围层统一降亮 15–30%） */
+}
+.radar.radar-3d{
+  display:block;overflow:visible;
+  shape-rendering:geometricPrecision;
+  filter:drop-shadow(0 14px 20px rgba(4,0,16,.48));
+  transform-style:preserve-3d;backface-visibility:hidden;
+  /* G5：animation:rdHover 9s 被下方 .radar.radar-3d{animation:none} 同特异性覆盖，死声明与 @keyframes rdHover 一并物理删除 */
+}
+.radar-3d .rd-scene{isolation:isolate}
+.radar-3d .rd-scene>*{pointer-events:none}
+.radar-3d .rd-lab{pointer-events:all;cursor:pointer;outline:none}
+.radar-3d .rd-lab:focus-visible .rd-chip{stroke:#fff6e8;stroke-width:1.5;stroke-dasharray:3 2}
+.radar-3d .rd-halo{opacity:.95;mix-blend-mode:screen}
+.radar-3d .rd-floor-shadow{fill:rgba(4,0,14,.72);filter:blur(4px);opacity:.8}
+
+/* Floating orbital guides.  The dots rotate with the guides and softly pulse. */
+/* 钟表式表圈：宽底带 + 细刻 / 分刻（pathLength 归一化 dasharray）+ 内外沿亮线 + 八个轴向主标 */
+.radar-3d .rd-bezel{pointer-events:none}
+.radar-3d .rd-bezel-band{fill:none;stroke:rgba(120,96,200,.16);stroke-width:7.5}
+.radar-3d .rd-bezel-fine{fill:none;stroke:rgba(200,185,240,.55);stroke-width:2.2;stroke-dasharray:.16 .84}
+.radar-3d .rd-bezel-min{fill:none;stroke:rgba(255,241,218,.78);stroke-width:4.2;stroke-dasharray:.10 .90}
+.radar-3d .rd-bezel-edge{fill:none;stroke:rgba(201,184,255,.55);stroke-width:.9;vector-effect:non-scaling-stroke;filter:drop-shadow(0 0 3px rgba(166,136,255,.55))}
+.radar-3d .rd-bezel-edge.inner{stroke:rgba(255,214,150,.42);stroke-width:.7;filter:none}
+/* 走针：秒针 30 s 跳 60 格（SMIL discrete）· 分针匀速 · 时针指向最高维 */
+.radar-3d .rd-hands{pointer-events:none}
+.radar-3d .rd-hand-shadow{stroke:rgba(4,0,14,.55);stroke-linecap:round;filter:blur(1.2px)}
+.radar-3d .rd-hand-line{stroke-linecap:round}
+.radar-3d .rd-hand.hour .rd-hand-line{stroke:var(--abyss-signal);filter:drop-shadow(0 0 4px rgba(255,180,92,.8))}
+.radar-3d .rd-hand.hour .rd-hand-tip{fill:#fff1da;filter:drop-shadow(0 0 5px rgba(255,180,92,.95))}
+.radar-3d .rd-hand.minute .rd-hand-line{stroke:rgba(201,184,255,.9);filter:drop-shadow(0 0 3px rgba(166,136,255,.7))}
+.radar-3d .rd-hand.minute .rd-hand-tip{fill:#efe6ff}
+.radar-3d .rd-hand.second .rd-hand-line{stroke:rgba(154,245,210,.95);filter:drop-shadow(0 0 3px rgba(122,240,200,.85))}
+.radar-3d .rd-hand.second .rd-hand-tip{fill:#fff6e8;filter:drop-shadow(0 0 6px rgba(255,214,150,1))}
+
+/* Platform / extrusion. */
+.radar-3d .rd-platform{transform-origin:50% 50%}
+.radar-3d .rd-platform-depth{fill:#1c1440;fill-opacity:.88;stroke:rgba(168,150,232,.27);stroke-width:1;stroke-linejoin:round;vector-effect:non-scaling-stroke}
+.radar-3d .rd-platform-top{fill:rgba(30,20,60,.18);stroke:rgba(200,180,255,.36);stroke-width:1.15;stroke-linejoin:round;vector-effect:non-scaling-stroke}
+.radar-3d .rd-grid{fill:none;stroke:rgba(170,150,232,.17);stroke-width:.9;vector-effect:non-scaling-stroke;transition:stroke .35s ease}
+.radar-3d .rd-grid-depth{fill:none;stroke:rgba(150,132,220,.13);stroke-width:.8;stroke-dasharray:1 5;vector-effect:non-scaling-stroke}
+.radar-3d .rd-grid-outer{stroke:rgba(122,240,200,.54);stroke-width:1.2;stroke-dasharray:4 5;animation:rdGridDash 21s linear infinite}  /* G4 降格入氛围 */
+@keyframes rdGridDash{to{stroke-dashoffset:-90}}
+.radar-3d .rd-axis{stroke:rgba(170,150,232,.25);stroke-width:.8;vector-effect:non-scaling-stroke}
+.radar-3d .rd-axis-depth{stroke:rgba(140,120,210,.25);stroke-width:.75;stroke-dasharray:2 5;vector-effect:non-scaling-stroke}
+.radar-3d .rd-axis-node{fill:var(--abyss-mint-bright);opacity:.45;filter:drop-shadow(0 0 3px rgba(255,180,92,.8));animation:rdNodeBlink 26s ease-in-out infinite}  /* G4 降格入氛围 */
+@keyframes rdNodeBlink{0%,100%{opacity:.195}50%{opacity:.615} /* G4 降亮：整块 ×0.75（总纲表 4-3 氛围层统一降亮 15–30%） */
+}
+.radar-3d .rd-tick{fill:rgba(200,190,230,.62);font:var(--abyss-fs-xs) var(--mono);letter-spacing:.08em}  /* T5 刻度豁免 */
+
+/* Radar scan sweep. */
+.radar-3d .rd-scan-ring{fill:none;stroke:rgba(255,180,92,.34);stroke-width:1.4;stroke-dasharray:.18 .82}
+
+/* Data body: a translucent face, jewel-like side facets and a glass highlight. */
+.radar-3d .rd-data{transform-origin:50% 50%;animation:rdDataIn 1.15s var(--e-out, cubic-bezier(.16,1,.3,1)) both}
+.radar-3d .rd-fill-depth{fill:rgba(52,36,110,.72);stroke:rgba(122,240,200,.34);stroke-width:1;stroke-linejoin:round;vector-effect:non-scaling-stroke}
+.radar-3d .rd-facet{stroke:rgba(122,240,200,.4);stroke-width:.75;stroke-linejoin:round;vector-effect:non-scaling-stroke;opacity:.72}
+.radar-3d .rd-fill{fill-opacity:.78;stroke:none;animation:rdFillIn 1.05s var(--e-out, cubic-bezier(.16,1,.3,1)) both;transform-origin:50% 50%}
+.radar-3d .rd-gloss{fill:rgba(255,245,228,.1);stroke:rgba(255,245,228,.22);stroke-width:.65;stroke-linejoin:round;vector-effect:non-scaling-stroke;mix-blend-mode:screen;animation:rdGloss 22s ease-in-out .8s infinite alternate}  /* G4 降格入氛围 */
+.radar-3d .rd-shape-aura{fill:none;stroke:rgba(122,240,200,.58);stroke-width:7;stroke-linejoin:round;stroke-dasharray:5 12;filter:blur(5px);opacity:.52;vector-effect:non-scaling-stroke;animation:rdAura 25s linear infinite}  /* G4 降格入氛围 */
+.radar-3d .rd-shape{fill:none;stroke-width:1.9;stroke-linejoin:round;stroke-linecap:round;stroke-dasharray:1200;stroke-dashoffset:1200;animation:rdDraw 1.55s .14s var(--e-out, cubic-bezier(.16,1,.3,1)) forwards;vector-effect:non-scaling-stroke}
+@keyframes rdDataIn{from{opacity:0;transform:scale(.18) translateY(13px)}to{opacity:1;transform:none}}
+@keyframes rdFillIn{from{opacity:0;transform:scale(.24)}to{opacity:1;transform:none}}
+@keyframes rdGloss{from{opacity:.12;transform:translate(-3px,-2px)}to{opacity:.465;transform:translate(3px,2px)} /* G4 降亮：整块 ×0.75（总纲表 4-3 氛围层统一降亮 15–30%） */
+}
+@keyframes rdAura{to{stroke-dashoffset:-140}}
+
+/* Vertices and labels have a deliberate stagger, then a very subtle idle glow. */
+.radar-3d .rd-vert{opacity:0;animation:rdPop3d .62s var(--e-back, cubic-bezier(.34,1.32,.64,1)) forwards;transform-box:fill-box}
+.radar-3d .rd-pulse{fill:none;stroke:rgba(122,240,200,.6);stroke-width:1;opacity:0;vector-effect:non-scaling-stroke;animation:rdPulse 27s ease-out infinite}  /* G4 降格入氛围 */
+.radar-3d .rd-ring{fill:rgba(16,11,32,.2);stroke:rgba(190,255,230,.78);stroke-width:1.1;vector-effect:non-scaling-stroke}
+.radar-3d .rd-dot{fill:#fff6e8;filter:drop-shadow(0 0 4px rgba(255,180,92,.95))}
+.radar-3d .rd-vert.low .rd-pulse{stroke:rgba(150,140,180,.34)}
+.radar-3d .rd-vert.low .rd-ring{stroke:rgba(150,140,180,.48);stroke-dasharray:2 2}
+.radar-3d .rd-vert.low .rd-dot{fill:#a39cb8;filter:none}
+@keyframes rdPop3d{from{opacity:0;transform:scale(.25) translateY(5px)}to{opacity:1;transform:none}}
+@keyframes rdPulse{0%{opacity:0;transform:scale(.65)}18%{opacity:.51}72%,100%{opacity:0;transform:scale(1.8)} /* G4 降亮：整块 ×0.75（总纲表 4-3 氛围层统一降亮 15–30%） */
+}
+.radar-3d .rd-vert:hover .rd-ring,.radar-3d .rd-vert:focus .rd-ring{stroke:var(--abyss-ink-bright);stroke-width:1.8}
+.radar-3d .rd-vert:hover .rd-dot,.radar-3d .rd-vert:focus .rd-dot{fill:var(--abyss-ink-bright);filter:drop-shadow(0 0 8px rgba(255,230,180,1))}
+
+/* Label chips keep the data plane legible against the animated background. */
+.radar-3d .rd-leader{stroke:rgba(122,240,200,.58);stroke-width:.7;stroke-dasharray:2 3;vector-effect:non-scaling-stroke}
+.radar-3d .rd-leader.low{stroke:rgba(140,130,170,.45)}
+.radar-3d .rd-chip{fill:rgba(16,11,32,.7);stroke:rgba(170,150,232,.34);stroke-width:.7;vector-effect:non-scaling-stroke;transition:fill .2s ease,stroke .2s ease,filter .2s ease}
+.radar-3d .rd-chip-line{fill:rgba(255,180,92,.66);filter:drop-shadow(0 0 3px rgba(255,180,92,.55));transition:width .45s var(--e-out, ease-out)}
+.radar-3d .rd-name{fill:var(--ink);font-size:var(--abyss-fs-base);font-family:var(--sans);font-weight:600;letter-spacing:.08em;paint-order:stroke;stroke:rgba(8,6,16,.75);stroke-width:2px;transition:fill .2s ease}
+.radar-3d .rd-val{fill:var(--ink-3);font-size:var(--abyss-fs-2xs);font-family:var(--mono);letter-spacing:.1em;paint-order:stroke;stroke:rgba(8,6,16,.72);stroke-width:1.5px}
+.radar-3d .rd-val{font-variant-numeric:tabular-nums}
+.radar-3d .rd-num{fill:var(--ink);font-size:var(--abyss-fs-xs)}  /* T5 刻度豁免 */
+.radar-3d .rd-low{fill:var(--warm)}
+.radar-3d .rd-lab:hover .rd-chip,.radar-3d .rd-lab.on .rd-chip{fill:rgba(70,44,28,.88);stroke:rgba(255,220,160,.9);filter:drop-shadow(0 0 7px rgba(255,180,92,.45))}
+.radar-3d .rd-lab:hover .rd-name,.radar-3d .rd-lab.on .rd-name{fill:#fff6e8}
+.radar-3d .rd-lab.low .rd-chip{stroke:rgba(130,120,160,.32);fill:rgba(18,12,34,.64)}
+.radar-3d .rd-lab.low .rd-name{fill:var(--ink-3)}
+
+/* Centre HUD. */
+.radar-3d .rd-core{animation:rdCoreIn .8s .55s var(--e-out, ease-out) both;transform-box:fill-box}
+.radar-3d .rd-core-shadow{fill:rgba(4,0,14,.54);stroke:rgba(255,180,92,.28);stroke-width:1;filter:blur(1px);vector-effect:non-scaling-stroke}
+.radar-3d .rd-core-ring{fill:none;stroke:rgba(255,214,150,.58);vector-effect:non-scaling-stroke}
+.radar-3d .rd-core-ring-a{stroke-width:1.1;stroke-dasharray:2 5;animation:rdCoreSpin 34s linear infinite}  /* G4 降格入氛围 */
+.radar-3d .rd-core-ring-b{stroke-width:.7;stroke-dasharray:1 4;opacity:.64;animation:rdCoreSpin 23s linear reverse infinite}  /* G4 降格入氛围 */
+.radar-3d .rd-core-dot{fill:#fff6e8;filter:drop-shadow(0 0 7px rgba(255,180,92,.95));animation:rdCoreBeat 21s ease-in-out infinite}  /* G4 降格入氛围：核心跳动归呼吸层 */
+.radar-3d .rd-signature{fill:rgba(170,150,232,.32);font:var(--abyss-fs-2xs) var(--mono);letter-spacing:.2em}
+/* v18.1 · 表芯宝石轴承（走针支点）：中心不再是分值牌，低分维度得以露出 */
+.radar-3d .rd-core-jewel{fill:rgba(255,214,150,.16);stroke:rgba(255,231,190,.75);stroke-width:.8;vector-effect:non-scaling-stroke}
+/* v18.1 · 页脚均值仪表：弧长 = 综合刻度，段码 = 八维证据覆盖 */
+.radar-3d .rd-foot-rule{stroke:rgba(170,150,232,.16);stroke-width:.7;vector-effect:non-scaling-stroke}
+.radar-3d .rd-gauge-track{fill:rgba(8,6,16,.5);stroke:rgba(170,150,232,.24);stroke-width:2.4;vector-effect:non-scaling-stroke}
+.radar-3d .rd-gauge-arc{fill:none;stroke:rgba(255,196,120,.92);stroke-width:2.4;stroke-linecap:round;vector-effect:non-scaling-stroke;
+  filter:drop-shadow(0 0 4px rgba(255,180,92,.55));animation:rdGaugeIn 1.1s .35s var(--e-out, ease-out) both}
+@keyframes rdGaugeIn{from{stroke-dashoffset:100}to{stroke-dashoffset:0}}
+.radar-3d .rd-gauge-v{fill:#fff6e8;font:700 var(--abyss-fs-base) var(--mono);letter-spacing:-.02em;font-variant-numeric:tabular-nums;
+  paint-order:stroke;stroke:rgba(8,6,16,.85);stroke-width:2.5px}
+.radar-3d .rd-gauge-k{fill:rgba(200,190,230,.62);font:var(--abyss-fs-xs) var(--mono);letter-spacing:.16em}  /* T5 刻度豁免 */
+.radar-3d .rd-gauge-n{fill:rgba(200,190,230,.6);font:var(--abyss-fs-xs) var(--mono);letter-spacing:.1em}  /* T5 刻度豁免 */
+.radar-3d .rd-gauge-n .v{fill:var(--abyss-mint-bright);font-weight:700}
+.radar-3d .rd-gauge-seg{fill:rgba(122,240,200,.82);filter:drop-shadow(0 0 2px rgba(122,240,200,.45))}
+.radar-3d .rd-gauge-seg.low{fill:rgba(255,180,92,.5);filter:none}
+.radar-3d .rd-gauge-seg.pend{fill:none;stroke:rgba(170,150,232,.34);stroke-width:.7;vector-effect:non-scaling-stroke}
+@keyframes rdCoreIn{from{opacity:0;transform:scale(.5)}to{opacity:1;transform:none}}
+@keyframes rdCoreSpin{to{transform:rotate(360deg)}}
+@keyframes rdCoreBeat{0%,100%{opacity:.4125;transform:scale(.8)}50%{opacity:.75;transform:scale(1.25)} /* G4 降亮：整块 ×0.75（总纲表 4-3 氛围层统一降亮 15–30%） */
+}
+
+/* v17.7 · 雷达精修：整体悬浮、表圈刻度、全息台面、顶点信标、核心分针 */
+.radar-3d .rd-scene{animation:rdFloat 23s ease-in-out infinite alternate;will-change:transform}  /* G4 降格入氛围 */
+@keyframes rdFloat{from{transform:translateY(-2.6px)}to{transform:translateY(2.6px)}}
+.radar-3d .rd-floor-shadow{transform-box:fill-box;transform-origin:center;animation:rdShadow 23s ease-in-out infinite alternate}  /* G4 降格入氛围 */
+@keyframes rdShadow{from{transform:scale(.95);opacity:.62}to{transform:scale(1.05);opacity:.88}}
+.radar-3d .rd-platform-scan{opacity:.16;mix-blend-mode:screen;pointer-events:none;animation:rdHolo 26s ease-in-out infinite alternate}  /* G4 降格入氛围 */
+@keyframes rdHolo{from{opacity:.0525}to{opacity:.165} /* G4 降亮：整块 ×0.75（总纲表 4-3 氛围层统一降亮 15–30%） */
+}
+.radar-3d .rd-bezel line{stroke:rgba(190,175,240,.34);stroke-width:.8;vector-effect:non-scaling-stroke}
+.radar-3d .rd-bezel line.major{stroke:rgba(255,214,150,.72);stroke-width:1.1}
+.radar-3d .rd-beacon{fill:rgba(154,245,210,.62);filter:drop-shadow(0 0 3px rgba(122,240,200,.7));mix-blend-mode:screen;opacity:0;
+  transform-box:fill-box;transform-origin:50% 100%;
+  animation:rdBeacon .9s var(--e-out, ease-out) forwards,rdBeaconBreath 22s ease-in-out infinite alternate}  /* G4 降格入氛围：仅尾部呼吸落禁止带 */
+.radar-3d .rd-beacon.low{fill:rgba(160,150,190,.36);filter:none}
+@keyframes rdBeacon{from{opacity:0;transform:scaleY(.15)}to{opacity:1;transform:none}}
+@keyframes rdBeaconBreath{from{opacity:.4125}to{opacity:.75} /* G4 降亮：整块 ×0.75（总纲表 4-3 氛围层统一降亮 15–30%） */
+}
+.radar-3d .rd-core-ticks line{stroke:rgba(255,214,150,.42);stroke-width:.7;vector-effect:non-scaling-stroke}
+.radar-3d .rd-core-ticks line.major{stroke:rgba(255,241,218,.82);stroke-width:1}
+
+@media (max-width:640px){
+  .radar-wrap{perspective:none}
+  .radar-3d .rd-name{font-size:var(--abyss-fs-base)}
+  .radar-3d .rd-val{font-size:var(--abyss-fs-2xs)}
+  .radar-3d .rd-signature{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  .radar-wrap::before,.radar-3d .rd-grid-outer,.radar-3d .rd-scan-ring,
+  .radar-3d .rd-shape-aura,.radar-3d .rd-pulse,.radar-3d .rd-core-ring,.radar-3d .rd-core-dot,.radar-3d .rd-axis-node,
+  .radar-3d .rd-scene,.radar-3d .rd-floor-shadow,.radar-3d .rd-platform-scan,.radar.radar-3d{animation:none !important}
+  .radar-3d .rd-beacon{animation:none !important;opacity:.8}
+  .radar-3d .rd-data,.radar-3d .rd-fill,.radar-3d .rd-shape,.radar-3d .rd-vert,.radar-3d .rd-core{animation-duration:.01ms !important;animation-delay:0s !important}
+}
+
+
+/* ================================================================ v17.14
+   表盘走本机时钟 · 显性分值胶囊 · 星尘观景窗 · 3D 表盘读数 · 顶面分值显性化
+   ================================================================ */
+/* 观景窗背景层（静态，不随场景漂浮）：竖向黑曜石渐变 + 三团星云 + 两层星尘 + 地平线 + 角标 */
+.radar-3d .rd-bgfx{pointer-events:none}
+.radar-3d .rd-bg{stroke:rgba(172,156,230,.16);stroke-width:1;vector-effect:non-scaling-stroke}
+.radar-3d .rd-neb{mix-blend-mode:screen;transform-box:fill-box;transform-origin:center}
+.radar-3d .rd-neb.a{animation:rdNebA 29s ease-in-out infinite alternate}  /* G4 降格入氛围：原 19s 差 1s 落带 */
+.radar-3d .rd-neb.b{animation:rdNebB 23s ease-in-out infinite alternate}
+.radar-3d .rd-neb.c{animation:rdNebA 27s ease-in-out infinite alternate-reverse}
+@keyframes rdNebA{from{transform:translate(-6px,3px) scale(.96)}to{transform:translate(6px,-3px) scale(1.05)}}
+@keyframes rdNebB{from{transform:translate(5px,-2px) scale(1.04)}to{transform:translate(-5px,4px) scale(.97)}}
+.radar-3d .rd-stars{mix-blend-mode:screen}
+.radar-3d .rd-stars.near{animation:rdTwinkle 21s ease-in-out infinite alternate}  /* G4 降格入氛围 */
+.radar-3d .rd-stars.far{opacity:.55;animation:rdTwinkle 24s ease-in-out infinite alternate-reverse}  /* G4 降格入氛围 */
+@keyframes rdTwinkle{from{opacity:.4125}to{opacity:.75} /* G4 降亮：整块 ×0.75（总纲表 4-3 氛围层统一降亮 15–30%） */
+}
+.radar-3d .rd-corner{fill:none;stroke:rgba(201,184,255,.38);stroke-width:1;vector-effect:non-scaling-stroke}
+
+/* 表盘：12 时刻字 · 秒跳瞬间表圈分刻与秒针尖闪亮（svg.tick 由 JS 按本机秒相位切换）· 最高维峰标 · 秒针余晖 */
+.radar-3d .rd-bezel line.major.twelve{stroke:#fff6e8;stroke-width:1.6}
+.radar-3d .rd-bezel-min{transition:stroke .12s ease,filter .12s ease}
+.radar-3d.tick .rd-bezel-min{stroke:rgba(255,246,232,1);filter:drop-shadow(0 0 3px rgba(255,214,150,.9))}
+.radar-3d.tick .rd-hand.second .rd-hand-tip{filter:drop-shadow(0 0 9px rgba(255,246,232,1))}
+.radar-3d .rd-peak-mark{fill:var(--abyss-signal);filter:drop-shadow(0 0 4px rgba(255,180,92,.9));animation:rdPeak 21s ease-in-out infinite alternate}  /* G4 降格入氛围 */
+@keyframes rdPeak{from{opacity:.4125}to{opacity:.75} /* G4 降亮：整块 ×0.75（总纲表 4-3 氛围层统一降亮 15–30%） */
+}
+.radar-3d .rd-axis.peak{stroke:rgba(255,180,92,.45)}
+.radar-3d .rd-sweep{opacity:.62;mix-blend-mode:screen;pointer-events:none}
+.radar-3d .rd-hand{will-change:transform}
+.radar-3d .rd-hand.hour .rd-hand-line{stroke:var(--abyss-signal-bright)}
+.radar-3d .rd-hand.minute .rd-hand-line{stroke:rgba(228,220,255,.95)}
+
+/* 显性分值胶囊：名 + 大号分值（按档位着色：传说 / 一方之最 / 圈内出色 / 常人 / 低证）/ EN · 证据 / 分值条 */
+.radar-3d .rd-chip{fill:rgba(12,8,26,.86);stroke:rgba(170,150,232,.44);stroke-width:.8}
+.radar-3d .rd-chip-track{fill:rgba(170,150,232,.16)}
+.radar-3d .rd-chip-line{fill:rgba(255,180,92,.78)}
+.radar-3d .rd-name{font-size:var(--abyss-fs-base)}
+.radar-3d .rd-score{font:700 17px var(--mono);font-variant-numeric:tabular-nums;letter-spacing:-.02em;fill:var(--abyss-lad-18);paint-order:stroke;stroke:rgba(8,6,16,.85);stroke-width:2.5px;filter:drop-shadow(0 0 6px rgba(255,241,218,.25))}
+.radar-3d .rd-lab.tier-legend .rd-score{fill:#fff6e8;filter:drop-shadow(0 0 8px rgba(255,214,150,.95))}
+.radar-3d .rd-lab.tier-hi .rd-score{fill:var(--abyss-signal-bright);filter:drop-shadow(0 0 7px rgba(255,180,92,.7))}
+.radar-3d .rd-lab.tier-up .rd-score{fill:var(--abyss-mint-bright);filter:drop-shadow(0 0 6px rgba(122,240,200,.5))}
+.radar-3d .rd-lab.tier-mid .rd-score{fill:#e4dcff}
+.radar-3d .rd-lab.tier-low .rd-score,.radar-3d .rd-lab.low .rd-score{fill:#a39cb8;filter:none}
+.radar-3d .rd-lab.tier-hi .rd-chip-line,.radar-3d .rd-lab.tier-legend .rd-chip-line{fill:var(--abyss-signal-bright)}
+.radar-3d .rd-lab.tier-up .rd-chip-line{fill:rgba(122,240,200,.85)}
+.radar-3d .rd-lab.tier-mid .rd-chip-line{fill:rgba(201,184,255,.7)}
+.radar-3d .rd-lab.low .rd-chip-line{fill:rgba(140,130,170,.55)}
+.radar-3d .rd-lab.peak .rd-chip{stroke:rgba(255,180,92,.75)}
+.radar-3d .rd-val{font-size:var(--abyss-fs-2xs);fill:var(--ink-2)}
+.radar-3d .rd-val .rd-ev{fill:#cfc6ea}
+.radar-3d .rd-val .rd-peak{fill:var(--abyss-signal)}
+.radar-3d .rd-tick{fill:rgba(220,212,245,.8);font:600 var(--abyss-fs-xs) var(--mono);paint-order:stroke;stroke:rgba(8,6,16,.8);stroke-width:2px}  /* T5 刻度豁免 */
+.radar-3d .rd-tick.mid{fill:#fff1da}
+.radar-3d .rd-grid{stroke:rgba(170,150,232,.22)}
+.radar-3d .rd-grid-outer{stroke:rgba(122,240,200,.62)}
+.radar-3d .rd-fill{fill-opacity:.86}
+.radar-3d .rd-shape{stroke-width:2.2}
+.radar-3d .rd-facet{opacity:.8}
+/* 页脚：本机时钟读数（JS 每秒刷新）+ 绝对刻度图例 */
+.radar-3d .rd-foot{pointer-events:none}
+.radar-3d .rd-foot-k{fill:rgba(255,214,150,.72);font:var(--abyss-fs-2xs) var(--mono);letter-spacing:.12em}
+.radar-3d .rd-clock{fill:#fff6e8;font:600 17px var(--mono);font-variant-numeric:tabular-nums;letter-spacing:.06em;paint-order:stroke;stroke:rgba(8,6,16,.85);stroke-width:3px;filter:drop-shadow(0 0 8px rgba(255,214,150,.35))}
+.radar-3d.tick .rd-clock{fill:var(--abyss-ink-bright)}
+.radar-3d .rd-clock-sub,.radar-3d .rd-foot-sub{fill:rgba(201,184,255,.82);font:var(--abyss-fs-2xs) var(--mono);letter-spacing:.1em}
+.radar-3d .rd-legend{fill:rgba(191,184,207,.82);font:var(--abyss-fs-2xs) var(--mono);letter-spacing:.04em}
+.radar-3d .rd-legend .t-mid{fill:#e4dcff;font-weight:700}
+.radar-3d .rd-legend .t-up{fill:var(--abyss-mint-bright);font-weight:700}
+.radar-3d .rd-legend .t-hi{fill:var(--abyss-signal-bright);font-weight:700}
+.radar-3d .rd-legend .t-legend{fill:#fff6e8;font-weight:700}
+/* 条形明细：分值按档位着色、加粗 */
+.rd-bar .rb-v{font-weight:700;font-size:var(--abyss-fs-base)}
+.rd-bar.tier-hi .rb-v,.rd-bar.tier-legend .rb-v{color:var(--abyss-signal-bright)}
+.rd-bar.tier-up .rb-v{color:var(--abyss-mint-bright)}
+
+/* 3D 表盘读数：贴在标签层，锚在晶冠表盘 6 点方向外侧，随漂浮与视差投影；秒跳瞬间数字提亮 */
+.cl-dial{position:absolute;left:0;top:0;transform:translate(-999px,-999px);margin-left:-92px;margin-top:8px;width:184px;pointer-events:none;
+  display:flex;flex-direction:column;align-items:center;gap:1px;padding:7px 12px 8px;border-radius:8px;text-align:center;
+  background:linear-gradient(180deg,rgba(14,10,28,.86),rgba(9,6,18,.74));border:1px solid rgba(172,156,230,.24);
+  box-shadow:0 10px 30px rgba(4,0,16,.55),inset 0 1px 0 rgba(255,241,218,.08);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  transition:opacity .35s var(--e-out);will-change:transform,opacity;z-index:2600}
+.cl-dial::before{content:"";position:absolute;left:50%;top:-8px;width:1px;height:8px;background:linear-gradient(0deg,rgba(255,224,176,.9),rgba(255,224,176,0))}
+.cl-dial .dc-time{font-size:19px;font-weight:600;letter-spacing:.08em;color:#fff6e8;text-shadow:0 0 14px rgba(255,214,150,.45);font-variant-numeric:tabular-nums;line-height:1.1;transition:color .12s,text-shadow .12s}
+.cl-dial.tick .dc-time{color:var(--abyss-ink-bright);text-shadow:0 0 18px rgba(255,246,232,.85)}
+.cl-dial .dc-date{font-size:var(--abyss-fs-2xs);letter-spacing:.16em;color:rgba(201,184,255,.8)}
+.cl-dial .dc-story{margin-top:4px;padding-top:4px;border-top:1px dashed rgba(172,156,230,.22);width:100%;font-size:12px;color:var(--abyss-signal-bright);letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cl-dial .dc-meta{font-size:var(--abyss-fs-2xs);letter-spacing:.12em;color:var(--ink-3)}
+
+/* 顶面八维标签：第三行大号分值（按档位着色）· 副行 = EN · 全书排名 */
+.cl-lab.attr .lx .lsc{font:700 var(--abyss-fs-lg) var(--mono);line-height:14px;letter-spacing:-.02em;color:#fff6e8;text-shadow:0 0 10px rgba(255,241,218,.35);vertical-align:-2px;margin-right:1px}
+.cl-lab.attr .lx .lsc.t-legend{color:#fff6e8;text-shadow:0 0 12px rgba(255,214,150,.95)}
+.cl-lab.attr .lx .lsc.t-hi{color:var(--abyss-signal-bright);text-shadow:0 0 10px rgba(255,180,92,.7)}
+.cl-lab.attr .lx .lsc.t-up{color:var(--abyss-mint-bright);text-shadow:0 0 8px rgba(122,240,200,.5)}
+.cl-lab.attr .lx .lsc.t-mid{color:#e4dcff}
+.cl-lab.attr .lx .lsc.t-low{color:#a39cb8;text-shadow:none}
+.cl-lab.attr .lx .lsu{font-style:normal;color:var(--ink-3);font-size:var(--abyss-fs-2xs);margin-right:2px}
+.cl-lab.attr .lx .lsl{font-style:normal;color:var(--warm)}
+
+@media (prefers-reduced-motion:reduce){
+  .radar-3d .rd-neb,.radar-3d .rd-stars,.radar-3d .rd-peak-mark,.radar-3d .rd-gauge-arc{animation:none !important}
+  .cl-dial{transition:none}
+}
+
+/* Radar instrument readout introduced in v18. */
+.radar-readout{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:9px 0 2px;padding:7px 9px;border:1px solid rgba(185,170,232,.18);background:linear-gradient(90deg,rgba(7,7,15,.62),rgba(24,17,39,.52));clip-path:polygon(0 0,calc(100% - 7px) 0,100% 7px,100% 100%,0 100%)}
+.radar-readout>div{min-width:0;padding-right:6px;border-right:1px solid rgba(185,170,232,.15)}
+.radar-readout>div:last-child{border-right:0;padding-right:0}
+.radar-readout span{display:block;font:var(--abyss-fs-2xs) var(--mono);letter-spacing:.12em;color:#938ba6;white-space:nowrap}
+.radar-readout b{display:block;margin-top:3px;font:600 14px/1.1 var(--mono);letter-spacing:.01em;color:#f3e9dc;white-space:nowrap}
+.radar-readout b i{font:400 var(--abyss-fs-2xs) var(--mono);color:#938ba6;margin-left:2px}
+.radar-readout b.ok{font-size:12px;letter-spacing:.13em;color:var(--abyss-mint);padding-top:2px}
+.radar-readout b.radar-status-partial{color:#ffc477}
+.radar-readout b.radar-status-pending{color:var(--abyss-camp-sway)}
+.radar-wrap{margin:0 -9px;padding:9px 3px 5px;border:1px solid rgba(185,170,232,.18);border-radius:12px;background:
+  radial-gradient(ellipse at 50% 42%,rgba(70,45,117,.16),transparent 58%),
+  linear-gradient(180deg,rgba(3,4,12,.18),rgba(15,9,24,.30));
+  box-shadow:inset 0 1px 0 rgba(255,246,229,.045),inset 0 -18px 30px rgba(2,2,8,.18),0 10px 30px rgba(0,0,0,.16);overflow:visible}
+.radar-wrap::before{inset:11% 10%;opacity:.52;filter:blur(14px)}
+.radar-wrap::after{left:15%;right:15%;bottom:4%;opacity:.65}
+/* R5-C §2「页脚随容器高度自适应」——把整块仪表盘（含 SVG 内的均值仪表页脚）压进右坞可视高度。
+   症状：页脚贴着折线下沿被切半（CDP 实测 390×844 下 `.rd-gauge-k` 底 852.6 > #dockBody 底 843，
+   只露上半；1440×900 下 `.rd-gauge` 底 940.7 > 881）。
+   根因：SVG 是 `width:100%` + 无高度约束，元素高 = 内容宽 × viewBox 宽高比，与「坞里还剩多少高」
+   完全无关；#s-radar 小节上方还有标题/原型行/读数条约 203–222px，于是仪表盘底部必然越过折线。
+   修法：给 SVG 一个高度上限，`preserveAspectRatio` 默认 xMidYMid/meet 会让整幅图等比缩到上限内并居中
+   ——这正是「随容器高度自适应」的字面实现（宽度 100% 决定的是盒子，不是画面）。
+   上限只对「方屏/窄屏」生效：视口高 ≤950（390×844、1440×900 这两类方屏）时坞只有 483/505px 高，
+   扣掉上方内容与页脚说明行后仪表盘最多只放得下约 258px；820×1180 这类长屏坞有 723px，本来就放得下，
+   不参与收缩（避免为修方屏把长屏的盘面也做小）。
+   258 = 390 下 483 − 203(上方内容) − 21(页脚说明行) − 1；31vh 兜底短视口（如 700px 高时 217px）。 */
+@media (max-height: 950px){
+  .radar-wrap > svg.radar-3d{max-height:min(258px, 31vh)}
+}
+.radar.radar-3d{filter:drop-shadow(0 12px 17px rgba(0,0,0,.54));animation:none}
+.radar-3d .rd-scene{animation:rdFloat 29s ease-in-out infinite alternate}  /* G4 降格入氛围 */
+.radar-3d .rd-bg{stroke:rgba(205,187,242,.25)}
+.radar-3d .rd-grid{stroke:rgba(188,170,235,.24)}
+.radar-3d .rd-grid-outer{stroke:rgba(122,240,200,.55)}
+.radar-3d .rd-axis{stroke:rgba(194,178,235,.28)}
+.radar-3d .rd-reticle{fill:none;stroke:rgba(170,150,232,.16);stroke-width:.65;stroke-dasharray:2 7;vector-effect:non-scaling-stroke;pointer-events:none}
+.radar-3d .rd-reticle .inner{stroke:rgba(122,240,200,.12);stroke-dasharray:1 5}
+.radar-3d .rd-reticle .arm{stroke:rgba(255,214,150,.28);stroke-width:.7;stroke-dasharray:none}
+.radar-3d .rd-reticle .bracket{stroke:rgba(255,190,111,.34);stroke-width:.8;stroke-dasharray:none}
+.radar-3d .rd-chip{fill:rgba(8,7,18,.91);stroke:rgba(204,188,237,.48);stroke-width:.9}
+.radar-3d .rd-chip-track{fill:rgba(184,167,228,.18)}
+.radar-3d .rd-name{fill:#f8f1e8;font-size:var(--abyss-fs-base)}
+.radar-3d .rd-score{filter:drop-shadow(0 0 4px rgba(255,214,150,.20))}
+.radar-3d .rd-chip-line{filter:drop-shadow(0 0 2px rgba(255,180,92,.45))}
+.radar-3d .rd-fill{fill-opacity:.72}
+.radar-3d .rd-facet{opacity:.66}
+.radar-3d .rd-fill-depth{fill:rgba(42,29,91,.64)}
+.radar-3d .rd-shape-aura{opacity:.34;filter:blur(4px)}
+.radar-3d .rd-bezel-band{stroke:rgba(112,87,185,.20)}
+.radar-3d .rd-bezel-fine{stroke:rgba(223,211,245,.48)}
+.radar-3d .rd-bezel-min{stroke:rgba(255,225,175,.62)}
+.radar-3d .rd-core-shadow{fill:rgba(2,2,8,.68)}
+.radar-3d .rd-avg{filter:drop-shadow(0 0 4px rgba(255,214,150,.26))}
+.radar-caption{display:flex;justify-content:space-between;gap:8px;margin:0 4px 8px;padding:6px 7px 0;border-top:1px solid rgba(185,170,232,.13);font:var(--abyss-fs-2xs) var(--mono);letter-spacing:.06em;color:#8e879e;white-space:nowrap}
+.radar-caption span:first-child{color:#c6b6f0}.radar-caption span:nth-child(2){color:#8fe6c4}.radar-caption span:last-child{color:#c0a875}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   v26.0 · 神秘层：轮流呼吸灯 · 深渊之瞳 · 禁忌铭文环 · 触须
+   ──────────────────────────────────────────────────────────────────────────
+   驱动方式：radar.js 的 rAF 循环每帧只写四个自定义属性
+     --rd-lamp   逐维（0..1）：呼吸灯巡到这一维的程度，幅度大 —— 亮的维要压过其余七维
+     --rd-breath 整表（0..1）：微呼吸，用户明确要求"微弱一些"，这里只做 ±4.5% 的亮度
+     --rd-iris   整表（0..1）：深渊之瞳的开合
+     --rd-blink  整表（0..1）：稀疏的一次"眨眼"，28 s 一轮、宽度 0.4 s
+   只挑没有被 animation 占用的属性来接这些变量（stroke / filter / opacity on 专用元素），
+   免得和入场动画抢同一条 transform。
+   ══════════════════════════════════════════════════════════════════════════ */
+svg.radar-3d{--rd-lamp:0;--rd-breath:.5;--rd-iris:.5;--rd-blink:0;--rd-lampph:0}
+
+/* ---- 整表微呼吸 + 稀疏眨眼：亮度而非位移，位移已经被 rdFloat 占着了 ---- */
+.radar-3d .rd-scene{
+  filter:brightness(calc(1 + .045 * var(--rd-breath)));
+  opacity:calc(1 - .42 * var(--rd-blink));
+}
+
+/* ---- 轮流呼吸灯 · 顶点光斑：本轮的主角。幅度从"几乎看不见"到"盖住整个顶点" ---- */
+.radar-3d .rd-lamp{
+  mix-blend-mode:screen;pointer-events:none;transform-box:fill-box;transform-origin:center;
+  opacity:calc(var(--rd-lamp) * .95);
+  transform:scale(calc(.42 + var(--rd-lamp) * .92));
+}
+/* ---- 光锥：盘心射向当前维的一片扇光，告诉眼睛"现在读的是这一维" ---- */
+.radar-3d .rd-lamp-cone{
+  mix-blend-mode:screen;pointer-events:none;
+  opacity:calc(var(--rd-lamp) * 1);
+}
+/* ---- 被点到的维：轴线、顶点环、胶囊一起抬起来 ---- */
+.radar-3d .rd-axis[data-lamp-i]{
+  stroke-opacity:calc(.25 + .70 * var(--rd-lamp));
+  stroke-width:calc(.8px + .9px * var(--rd-lamp));
+}
+.radar-3d .rd-vert[data-lamp-i] .rd-ring{
+  stroke:rgba(190,255,230,calc(.62 + .38 * var(--rd-lamp)));
+  stroke-width:calc(1.1px + 1.5px * var(--rd-lamp));
+}
+.radar-3d .rd-beacon[data-lamp-i]{
+  filter:drop-shadow(0 0 3px rgba(122,240,200,.7)) brightness(calc(1 + 1.7 * var(--rd-lamp)));
+}
+.radar-3d .rd-lab[data-lamp-i] .rd-chip{
+  stroke:rgba(170,150,232,calc(.34 + .58 * var(--rd-lamp)));
+  filter:drop-shadow(0 0 calc(9px * var(--rd-lamp)) rgba(122,240,200,calc(.55 * var(--rd-lamp))));
+}
+.radar-3d .rd-lab[data-lamp-i] .rd-name{
+  fill:color-mix(in srgb, var(--ink) calc(100% - var(--rd-lamp) * 55%), #eafff6);
+}
+
+/* ---- 深渊之瞳：比数据层暗一个数量级，永远在最后面。它负责"有个庞大的东西在看着你" ---- */
+.radar-3d .rd-abyss{pointer-events:none;mix-blend-mode:screen}
+.radar-3d .rd-iris{
+  transform-box:fill-box;transform-origin:center;
+  opacity:calc(.30 + .34 * var(--rd-iris));
+  transform:scale(calc(.86 + .17 * var(--rd-iris)));
+}
+.radar-3d .rd-pupil{
+  mix-blend-mode:multiply;transform-box:fill-box;transform-origin:center;
+  opacity:calc(.55 + .30 * (1 - var(--rd-iris)));
+  transform:scale(calc(.72 + .46 * (1 - var(--rd-iris))));
+}
+/* 眼睑：眨眼那 0.4 s 里从上下压过来的一道暗 */
+.radar-3d .rd-lid{
+  fill:none;stroke:rgba(6,3,14,.9);vector-effect:non-scaling-stroke;
+  stroke-width:calc(var(--rd-blink) * 46px);
+  opacity:calc(var(--rd-blink) * .95);
+}
+/* ---- 触须：自画布外的暗处伸进来，随呼吸缓慢收放，永不触到数据面 ---- */
+.radar-3d .rd-tendril{
+  fill:none;stroke:rgba(160,108,255,.30);
+  stroke-width:calc(.9px + .7px * var(--rd-breath));
+  stroke-linecap:round;vector-effect:non-scaling-stroke;
+  stroke-dasharray:3 7;
+  opacity:calc(.22 + .30 * var(--rd-breath));
+  animation:rdTendril 24s linear infinite;animation-delay:calc(var(--i) * -3.6s);
+}
+@keyframes rdTendril{to{stroke-dashoffset:-120}}
+
+/* ---- 禁忌铭文环：24 枚无名文字，逆着表盘巡回点亮，同时有两三枚在读 ---- */
+.radar-3d .rd-runes{pointer-events:none}
+.radar-3d .rd-rune path{
+  fill:none;stroke:rgba(206,190,255,calc(.24 + .76 * var(--rd-lamp)));
+  stroke-width:calc(.75px + .95px * var(--rd-lamp));
+  stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke;
+}
+.radar-3d .rd-rune{
+  filter:drop-shadow(0 0 calc(6px * var(--rd-lamp)) rgba(166,136,255,calc(.85 * var(--rd-lamp))));
+}
+
+@media (prefers-reduced-motion:reduce){
+  .radar-3d .rd-scene{filter:none;opacity:1}
+  .radar-3d .rd-tendril{animation:none}
+}
+
+/* R6-E: missing axes are unknown, never a faint zero-valued score. */
+.radar-3d .rd-lab[data-confidence="pending"]{opacity:.4}
+.radar-3d .rd-lab[data-confidence="pending"] .rd-chip{stroke-dasharray:3 3}
+.radar-3d .rd-lab[data-confidence="pending"]:hover,
+.radar-3d .rd-lab[data-confidence="pending"]:focus-visible{opacity:1}
+.radar-3d .rd-score-plate{fill:var(--cl-atlas-gen-0);stroke:none}
+.radar-3d .rd-lab .rd-val,.radar-3d .rd-lab .rd-val tspan{font-size:var(--cl-atlas-fs-4);letter-spacing:.02em}
+/* Exact deltas remain in the evidence card; labels on the grid collide with ticks. */
+.radar-3d .rd-diff-delta{display:none}
+.radar-3d .rd-lab[data-score] .rd-score{
+  fill:var(--abyss-obsidian-deep);stroke:none;filter:none;font-size:var(--abyss-fs-lg);
+}
+.rd-missing-note{color:var(--abyss-ink-2);font-size:var(--cl-atlas-fs-2);margin:var(--cl-atlas-space-2) 0}
+
+/* 虹膜内缘（limbus）：给"瞳"一条硬边，没有这条边它只是一团紫雾，读不出是眼睛 */
+.radar-3d .rd-limbus{
+  fill:none;stroke:rgba(214,110,255,.44);stroke-width:1.4px;stroke-dasharray:9 5;vector-effect:non-scaling-stroke;
+  transform-box:fill-box;transform-origin:center;
+  opacity:calc(.30 + .52 * var(--rd-iris));
+  transform:scale(calc(.80 + .30 * var(--rd-iris)));
+  filter:drop-shadow(0 0 6px rgba(200,90,255,.45));
+}

@@ -1,0 +1,86 @@
+/* Temporary relationship constellation: a quiet instrument at the edge of the sky. */
+.scp-panel {
+  --scp-ink: var(--abyss-ink-bright);
+  --scp-dim: var(--abyss-ink-muted);
+  --scp-line: color-mix(in oklab, var(--abyss-violet-bright) 40%, transparent);
+  position: fixed;
+  z-index: var(--z-hud, 20);
+  top: 50%;
+  right: clamp(14px, 2.8vw, 42px);
+  width: min(360px, calc(100vw - 30px));
+  box-sizing: border-box;
+  padding: 13px 14px 11px;
+  color: var(--scp-ink);
+  border: 1px solid var(--scp-line);
+  border-radius: 18px 5px 18px 5px;
+  background:
+    radial-gradient(120% 80% at 50% 20%, color-mix(in oklab, var(--abyss-violet) 16%, transparent), transparent 64%),
+    linear-gradient(145deg, var(--abyss-obsidian-glass-heavy), var(--abyss-obsidian-glass-heavy));
+  box-shadow: 0 22px 70px color-mix(in oklab, var(--abyss-obsidian-deep) 54%, transparent), inset 0 1px 0 color-mix(in oklab, var(--abyss-ink-bright) 11%, transparent), 0 0 0 1px color-mix(in oklab, var(--abyss-violet) 9%, transparent);
+  opacity: 0;
+  transform: translate3d(30px, -50%, 0) scale(.92);
+  transform-origin: right center;
+  pointer-events: none;
+  overflow: hidden;
+  transition: opacity .42s cubic-bezier(.16, 1, .3, 1), transform .62s cubic-bezier(.16, 1, .3, 1);
+}
+.scp-panel[hidden] { display: none; }
+.scp-panel::before,
+.scp-panel::after {
+  position: absolute;
+  content: '';
+  pointer-events: none;
+}
+.scp-panel::before {
+  inset: 0;
+  background: repeating-linear-gradient(0deg, transparent 0 18px, color-mix(in oklab, var(--abyss-ink-bright) 3%, transparent) 19px, transparent 20px);
+  mix-blend-mode: screen;
+}
+.scp-panel::after {
+  top: 0;
+  left: 16%;
+  width: 68%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, color-mix(in oklab, var(--abyss-ink-bright) 76%, transparent), transparent);
+  opacity: .6;
+}
+.scp-panel.is-dragging { opacity: .76; transform: translate3d(0, -50%, 0) scale(.985); }
+.scp-panel.is-open { opacity: .98; transform: translate3d(0, -50%, 0) scale(1); }
+.scp-panel.is-closing { opacity: 0; transform: translate3d(25px, -50%, 0) scale(.94); }
+.scp-head { position: relative; z-index: var(--z-chart, 10); display: grid; gap: 3px; padding: 1px 2px 0; }
+.scp-eyebrow { color: color-mix(in oklab, var(--abyss-violet-bright) 64%, transparent); font: var(--abyss-fs-2xs)/1.2 var(--abyss-font-mono, ui-monospace, monospace); letter-spacing: .16em; }
+.scp-title { min-height: 19px; color: var(--scp-ink); font: 600 var(--abyss-fs-md)/1.35 var(--abyss-font-sans, system-ui, sans-serif); letter-spacing: .08em; }
+.scp-meta { color: var(--scp-dim); font: var(--abyss-fs-sm)/1.45 var(--abyss-font-mono, ui-monospace, monospace); letter-spacing: .04em; }
+.scp-figure { position: relative; z-index: var(--z-chart, 10); margin: 5px -4px -2px; height: 342px; opacity: calc(.25 + var(--scp-progress, 0) * .75); transform: translateY(calc((1 - var(--scp-progress, 0)) * 8px)); transition: opacity .4s ease, transform .6s cubic-bezier(.16, 1, .3, 1); }
+.scp-figure svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.scp-grid circle { fill: none; stroke: color-mix(in oklab, var(--abyss-violet-bright) 11%, transparent); stroke-width: .7; stroke-dasharray: 1 7; vector-effect: non-scaling-stroke; }
+.scp-grid::after { content: ''; }
+.scp-links { fill: none; }
+.scp-link { stroke-width: calc(0.7px + var(--scp-strength, .5) * .8px); stroke-opacity: calc(.2 + var(--scp-strength, .5) * .52); stroke-dasharray: 2 6; stroke-linecap: round; vector-effect: non-scaling-stroke; animation: scpLinkFlow 24s linear infinite; animation-delay: var(--scp-delay, 0s); }
+.scp-stars { filter: drop-shadow(0 0 5px color-mix(in oklab, var(--abyss-violet-bright) 25%, transparent)); }
+.scp-node { opacity: 0; transform-box: fill-box; transform-origin: center; animation: scpStarIn .72s cubic-bezier(.16, 1, .3, 1) forwards; animation-delay: calc(.12s + var(--scp-delay, 0s)); }
+.scp-node-main { opacity: 1; animation: scpCoreBreath 24s ease-in-out infinite; }
+.scp-dot { stroke: color-mix(in oklab, var(--abyss-ink-bright) 80%, transparent); stroke-width: .8; vector-effect: non-scaling-stroke; }
+.scp-halo { fill: var(--scp-color, color-mix(in oklab, var(--abyss-violet) 28%, transparent)); opacity: .26; filter: blur(1.2px); }
+.scp-node-main .scp-halo { fill: url(#scpCoreGrad); opacity: .75; }
+.scp-core { stroke: color-mix(in oklab, var(--abyss-gold) 90%, transparent); stroke-width: .8; }
+.scp-label { fill: color-mix(in oklab, var(--abyss-ink-bright) 84%, transparent); font: var(--abyss-fs-2xs)/1 var(--abyss-font-sans, system-ui, sans-serif); letter-spacing: .06em; paint-order: stroke; stroke: color-mix(in oklab, var(--abyss-obsidian-deep) 76%, transparent); stroke-width: 2.4px; stroke-linejoin: round; }
+.scp-label-main { fill: var(--abyss-gold); font-size: var(--abyss-fs-base); font-weight: 600; letter-spacing: .12em; }
+.scp-sub { fill: color-mix(in oklab, var(--abyss-ink-muted) 56%, transparent); font: var(--abyss-fs-2xs)/1 var(--abyss-font-mono, ui-monospace, monospace); letter-spacing: .04em; paint-order: stroke; stroke: color-mix(in oklab, var(--abyss-obsidian-deep) 68%, transparent); stroke-width: 1.8px; }
+.scp-hint { position: relative; z-index: var(--z-chart, 10); display: flex; align-items: center; gap: 7px; min-height: 20px; color: color-mix(in oklab, var(--abyss-ink-bright) 78%, transparent); font: var(--abyss-fs-2xs)/1.3 var(--abyss-font-mono, ui-monospace, monospace); letter-spacing: .08em; }
+.scp-hint::before { width: 5px; height: 5px; border-radius: 50%; background: var(--abyss-violet-bright); box-shadow: 0 0 12px var(--abyss-violet-bright); content: ''; animation: scpHintPulse 21s ease-in-out infinite; }
+.scp-foot { position: relative; z-index: var(--z-chart, 10); margin-top: 6px; padding-top: 7px; border-top: 1px solid color-mix(in oklab, var(--abyss-violet-bright) 13%, transparent); color: var(--abyss-ink-muted); font: var(--abyss-fs-2xs)/1.3 var(--abyss-font-mono, ui-monospace, monospace); letter-spacing: .04em; }
+@keyframes scpStarIn { from { opacity: 0; transform: scale(.4) translateY(8px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+@keyframes scpCoreBreath { 0%, 100% { opacity: .92; } 50% { opacity: 1; } }
+@keyframes scpLinkFlow { to { stroke-dashoffset: -32; } }
+@keyframes scpHintPulse { 0%, 100% { opacity: .45; transform: scale(.8); } 50% { opacity: 1; transform: scale(1.35); } }
+@media (max-width: 680px) {
+  .scp-panel { top: auto; right: 10px; bottom: 12px; width: min(330px, calc(100vw - 20px)); transform: translate3d(0, 24px, 0) scale(.94); }
+  .scp-panel.is-dragging, .scp-panel.is-open { transform: translate3d(0, 0, 0) scale(1); }
+  .scp-panel.is-closing { transform: translate3d(0, 20px, 0) scale(.94); }
+  .scp-figure { height: 300px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .scp-panel, .scp-figure { transition: none; }
+  .scp-link, .scp-node, .scp-node-main, .scp-hint::before { animation: none; }
+}

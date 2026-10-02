@@ -1,0 +1,90 @@
+/* Castline · css/peer.css — 星位盘 PEER FIELD（第二种属性读法 · S5 token收编版）
+ *
+ * 纪律：只写这一层。所有选择器的主体都是本层自己的 .pf / .pf-* 类，
+ * 一条规则也不以既有选择器（.panel / #dock / .hud 内部 …）为主体。
+ * 面板外壳（玻璃底 / 切角 / 角括号）**照 app.css .panel 的做法自写一份**，前缀 pf-，
+ * 绝不复用也绝不覆盖 .panel。
+ * 颜色全部取自深渊全局令牌（金 var(--abyss-signal) / 紫罗兰 var(--abyss-violet) / 薄荷 var(--abyss-mint) / 绯红 var(--abyss-hot)）。
+ * 动效：只有入场淡入 + 聚焦星的极慢呼吸，全部 CSS；prefers-reduced-motion 下全部关停。
+ */
+
+/* ---------------------------------------------------------------- 外壳与位置 */
+.pf{
+  right:var(--gap);top:calc(var(--gap) + 54px);width:300px;
+  opacity:0;transform:translateY(8px);pointer-events:none;
+  transition:opacity .45s var(--e-out),transform .45s var(--e-out),right .55s var(--e-out);
+}
+.pf.on{opacity:1;transform:none}
+.pf.on>*{pointer-events:auto}
+body.focus .pf{right:calc(var(--dock-w) + var(--gap) * 2)}
+
+/* 面板外壳：照 .panel 的做法（切角 + 角括号），但类名/伪元素全部是自己的 */
+.pf-panel{
+  position:relative;display:flex;flex-direction:column;
+  padding:9px 13px 8px;
+  background:
+    linear-gradient(145deg,rgba(22,16,37,.92),rgba(6,6,14,.87) 62%,rgba(10,7,18,.92)),
+    rgba(11,8,20,.70);
+  border:1px solid rgba(183,168,226,.22);
+  box-shadow:0 18px 54px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,246,229,.065),inset 0 -1px 0 rgba(115,88,190,.10);
+  backdrop-filter:blur(20px) saturate(1.08);
+  -webkit-backdrop-filter:blur(20px) saturate(1.08);
+  clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,14px 100%,0 calc(100% - 14px));
+  animation:pfIn var(--abyss-dur-slow, .8s) var(--e-out) both;
+}
+.pf-panel::before,.pf-panel::after{content:"";position:absolute;width:26px;height:26px;pointer-events:none}
+.pf-panel::before{left:-1px;top:-1px;border-left:1px solid rgba(var(--abyss-rgb-signal, 255,180,92),.58);border-top:1px solid rgba(var(--abyss-rgb-signal, 255,180,92),.58)}
+.pf-panel::after{right:-1px;bottom:-1px;border-right:1px solid rgba(var(--abyss-rgb-signal, 255,180,92),.58);border-bottom:1px solid rgba(var(--abyss-rgb-signal, 255,180,92),.58)}
+@keyframes pfIn{from{opacity:0;transform:translateY(9px);filter:blur(5px)}}
+
+/* 折叠态：面板收掉，留一枚小脊作唯一入口 */
+.pf.off .pf-panel,.pf:not(.on) .pf-panel{display:none}
+.pf .pf-rail{display:none}
+.pf:not(.on) .pf-rail{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;cursor:pointer;
+  background:linear-gradient(145deg,rgba(22,16,37,.92),rgba(6,6,14,.87));border:1px solid rgba(183,168,226,.22);
+  color:var(--ink-3);font-size:var(--abyss-fs-2xs, 11px);letter-spacing:.2em}
+.pf:not(.on) .pf-rail:hover{color:var(--ink);border-color:rgba(var(--abyss-rgb-signal, 255,180,92),.5)}
+.pf .pf-rail i{width:5px;height:5px;border-radius:50%;background:var(--abyss-signal);box-shadow:0 0 8px rgba(var(--abyss-rgb-signal, 255,180,92),.8)}
+
+/* ---------------------------------------------------------------- 头部 */
+.pf-head{display:flex;align-items:center;gap:8px;padding-bottom:6px;border-bottom:1px solid var(--line)}
+.pf-head .eyebrow{white-space:nowrap}
+.pf-pend{margin-left:auto;font-size:var(--abyss-fs-2xs, 11px);letter-spacing:.1em;color:var(--abyss-signal);white-space:nowrap}
+.pf-x{width:22px;height:22px;padding:0;background:none;border:0;cursor:pointer;
+  color:var(--ink-3);font-size:var(--abyss-fs-md, 14.5px);line-height:20px;text-align:center}
+.pf-x:hover{color:var(--ink)}
+
+/* ---------------------------------------------------------------- 星图（SVG 内部） */
+.pf-svg{display:block;margin:2px auto 0;font-family:var(--sans)}
+.pf-ring{fill:none;stroke:rgba(170,150,232,.16);stroke-width:1}
+.pf-ring-outer{fill:none;stroke:rgba(170,150,232,.30);stroke-width:1}
+.pf-spoke{stroke:rgba(170,150,232,.16);stroke-width:1}
+.pf-core{fill:rgba(201,184,255,.55)}
+.pf-p95{fill:var(--ink-3);font-family:var(--mono);font-size:var(--abyss-fs-xs, 10px);letter-spacing:.14em}  /* T5 刻度豁免 */
+.pf-zh{fill:var(--ink-2);font-size:var(--abyss-fs-2xs, 11px);letter-spacing:.08em}
+.pf-en{fill:var(--ink-3);font-family:var(--mono);font-size:var(--abyss-fs-2xs, 11px);letter-spacing:.16em}
+.pf-dot{transition:r .2s}
+.pf-dot.pf-clip{stroke:rgba(var(--abyss-rgb-signal, 255,180,92),.75);stroke-width:.8}
+.pf-kin{stroke:var(--abyss-mint);stroke-width:.7;stroke-opacity:.62}
+.pf-anti{stroke:var(--abyss-hot);stroke-width:.7;stroke-opacity:.66}
+.pf-klabel,.pf-alabel{font-size:var(--abyss-fs-2xs, 11px);letter-spacing:.06em;paint-order:stroke;stroke:rgba(5,5,11,.85);stroke-width:2px}
+.pf-klabel{fill:var(--abyss-mint)}
+.pf-alabel{fill:var(--abyss-hot)}
+.pf-me{filter:drop-shadow(0 0 4px rgba(var(--abyss-rgb-signal, 255,180,92),.85))}
+.pf-diff{stroke:rgba(var(--abyss-rgb-signal, 255,180,92),.6);stroke-width:.6;fill:none;animation:pfBreath 21s ease-in-out infinite;
+  transform-box:fill-box;transform-origin:center}
+.pf-diff circle{fill:none}
+@keyframes pfBreath{0%,100%{opacity:.7125;transform:scale(1)}50%{opacity:.2625;transform:scale(1.075)}}
+.pf-focus,.pf-labels{transform-origin:136px 118px}
+
+/* ---------------------------------------------------------------- 文字行 */
+.pf-tip,.pf-foot{font-size:var(--abyss-fs-2xs, 11px);letter-spacing:.05em;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pf-tip{margin-top:5px;padding-top:5px;border-top:1px solid var(--line);min-height:14px;color:var(--ink-2)}
+.pf-foot{margin-top:2px;min-height:13px}
+.pf-foot:empty,.pf-tip:empty{visibility:hidden}
+
+/* ---------------------------------------------------------------- 降级 */
+@media (prefers-reduced-motion: reduce){
+  .pf-panel,.pf-diff{animation:none}
+  .pf{transition:none}
+}

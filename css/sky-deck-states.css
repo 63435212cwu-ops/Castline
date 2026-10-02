@@ -1,0 +1,189 @@
+/* ============================================================
+ * @role css-token
+ * @owns css/sky-deck-states.css
+ * @budget drawcalls=0 points=0 vertices=0 rtpx=0 passes=0
+ * @contract deep-sky/2
+ * ------------------------------------------------------------
+ * 剧情卡片叠 · 状态与展开体（接在 css/sky-deck.css 之后）：悬停 / 此刻 / 展开 / 键盘焦点、展开体（时间轨 · 参与者 · 事件 · 动作）、
+ * 入场动画、窄屏抽屉、低成本档与减弱动效。只引用 --skd-* / --z-* 令牌。
+ * ============================================================ */
+
+/* ---- 状态 ---- */
+.skd-deck .skd-card.is-hot { border-color: color-mix(in oklch, var(--c) 60%, transparent); }
+.skd-deck .skd-card.is-hot .skd-card__bar {
+  background: linear-gradient(90deg, color-mix(in oklch, var(--c) 22%, transparent), transparent 85%);
+  box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--c) 40%, transparent), 0 0 22px color-mix(in oklch, var(--c) 22%, transparent);
+}
+.skd-deck .skd-card.is-now .skd-card__sigil {
+  color: var(--skd-brass-hot);
+  text-shadow: var(--skd-glow-star);
+  animation: skd-deck-flare var(--skd-dur-focus) var(--skd-ease-out) 1;
+}
+.skd-deck .skd-card.is-now .skd-card__span { color: var(--skd-brass); }
+.skd-deck .skd-card.is-open {
+  border-color: color-mix(in oklch, var(--c) 48%, transparent);
+  border-bottom-color: color-mix(in oklch, var(--c) 30%, transparent);
+  border-radius: var(--skd-radius-s);
+  box-shadow: var(--skd-shadow-panel), 0 0 30px color-mix(in oklch, var(--c) 14%, transparent), inset 0 1px 0 color-mix(in oklch, var(--c) 45%, transparent);
+}
+.skd-deck .skd-card.is-open::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(100deg, transparent 30%, color-mix(in oklch, var(--skd-star) 16%, transparent) 50%, transparent 70%);
+  background-size: 250% 100%;
+  background-position: 130% 0;
+  animation: skd-deck-shimmer 1.4s var(--skd-ease-out) 1;
+}
+.skd-deck .skd-card.is-focus .skd-card__bar { box-shadow: inset 0 0 0 1px var(--skd-hair-brass); }
+
+/* ---- 展开体 ---- */
+.skd-deck .skd-card__body { display: none; padding: 4px 14px 14px 14px; }
+.skd-deck .skd-card.is-open .skd-card__body { display: block; }
+.skd-deck .skd-card__kind {
+  font-family: var(--skd-font-mono);
+  font-size: var(--skd-fs-xs);
+  color: var(--skd-ink-3);
+  letter-spacing: var(--skd-track);
+}
+.skd-deck .skd-card__theme { margin: 0 0 8px; font-size: var(--skd-fs-sm); line-height: 1.6; color: var(--skd-ink-2); }
+.skd-deck .skd-card__time {
+  position: relative;
+  height: 4px;
+  margin: 10px 0 7px;
+  border-radius: var(--skd-radius-pill);
+  background:
+    repeating-linear-gradient(90deg, var(--skd-hair) 0 1px, transparent 1px 10%),
+    color-mix(in oklch, var(--skd-hair) 60%, transparent);
+}
+.skd-deck .skd-card__seg {
+  position: absolute;
+  top: 0;
+  left: calc(var(--s0, 0) * 100%);
+  width: max(3px, calc((var(--s1, 0) - var(--s0, 0)) * 100%));
+  height: 100%;
+  border-radius: var(--skd-radius-pill);
+  background: linear-gradient(90deg, color-mix(in oklch, var(--c) 70%, transparent), var(--c));
+  box-shadow: 0 0 10px color-mix(in oklch, var(--c) 55%, transparent);
+}
+.skd-deck .skd-card__cur {
+  position: absolute;
+  top: -3px;
+  left: calc(var(--cur, 0) * 100%);
+  width: 2px;
+  height: 10px;
+  background: var(--skd-brass-hot);
+  box-shadow: var(--skd-glow-brass);
+}
+.skd-deck .skd-card__stat {
+  font-family: var(--skd-font-mono);
+  font-size: var(--skd-fs-xs);
+  color: var(--skd-ink-2);
+  font-variant-numeric: tabular-nums;
+}
+.skd-deck .skd-card__cast { display: flex; flex-wrap: wrap; gap: 5px 10px; margin: 9px 0 4px; }
+.skd-deck .skd-chip {
+  --c: var(--skd-ink-3);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: var(--skd-fs-xs);
+  color: var(--skd-ink-2);
+}
+.skd-deck .skd-chip::before {
+  content: '';
+  width: 5px;
+  height: 5px;
+  border-radius: var(--skd-radius-pill);
+  background: var(--c);
+  box-shadow: 0 0 6px color-mix(in oklch, var(--c) 70%, transparent);
+}
+.skd-deck .skd-chip.is-more { color: var(--skd-ink-3); }
+.skd-deck .skd-chip.is-more::before { display: none; }
+.skd-deck .skd-card__events {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 8px 0 0;
+  border-top: 1px solid var(--skd-hair);
+  font-size: var(--skd-fs-xs);
+  line-height: 1.75;
+  color: var(--skd-ink-3);
+}
+.skd-deck .skd-card__events li { display: flex; gap: 8px; min-width: 0; }
+.skd-deck .skd-card__events b {
+  flex: 0 0 auto;
+  font-family: var(--skd-font-mono);
+  font-weight: 400;
+  color: var(--skd-brass-dim);
+  font-variant-numeric: tabular-nums;
+}
+.skd-deck .skd-card__events li.is-key { color: var(--skd-ink-2); }
+.skd-deck .skd-card__events li.is-key b { color: var(--skd-brass-hot); }
+.skd-deck .skd-card__acts { display: flex; gap: 6px; margin-top: 11px; }
+.skd-deck .skd-card__acts button {
+  font: inherit;
+  font-size: var(--skd-fs-xs);
+  color: var(--skd-ink-2);
+  background: color-mix(in oklch, var(--skd-void-0) 40%, transparent);
+  border: 1px solid var(--skd-hair-brass);
+  border-radius: var(--skd-radius-pill);
+  padding: 4px 11px;
+  cursor: pointer;
+  transition: color var(--skd-dur-flick) var(--skd-ease-out), border-color var(--skd-dur-flick) var(--skd-ease-out), box-shadow var(--skd-dur-flick) var(--skd-ease-out);
+}
+.skd-deck .skd-card__acts button:hover,
+.skd-deck .skd-card__acts button:focus-visible { color: var(--skd-brass-hot); border-color: var(--skd-brass); box-shadow: var(--skd-glow-brass); outline: none; }
+
+/* ---- 入场：一张张从左侧滑进叠里（只在显示后的一小段时间；之后滚动进窗的卡不再重播） ---- */
+.skd-deck.is-entering .skd-card {
+  animation: skd-deck-in var(--skd-dur-focus) var(--skd-ease-out) both;
+  animation-delay: calc(min(var(--i, 0), 18) * 26ms);
+}
+@keyframes skd-deck-in {
+  from { opacity: 0; transform: translate3d(-22px, var(--y, 0px), 0); }
+  to { opacity: 1; transform: translate3d(var(--x, 0px), var(--y, 0px), 0); }
+}
+@keyframes skd-deck-flare {
+  0% { transform: scale(0.6); opacity: 0.3; }
+  45% { transform: scale(1.35); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes skd-deck-shimmer {
+  from { background-position: 130% 0; }
+  to { background-position: -30% 0; }
+}
+
+/* ---- 窄屏：星盘底下的抽屉 ---- */
+@media (max-width: 900px) {
+  .skd-deck { left: 12px; right: 12px; width: auto; top: auto; bottom: 112px; height: 38vh; }
+}
+
+/* ---- 低成本档：只留终态与层叠 ---- */
+[data-tier='low'] .skd-deck.is-entering .skd-card { animation: none; opacity: 1; }
+[data-tier='low'] .skd-card.is-open::before,
+[data-tier='low'] .skd-card.is-now .skd-card__sigil { animation: none; }
+[data-tier='low'] .skd-card.is-hot .skd-card__bar { box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--c) 40%, transparent); }
+[data-tier='low'] .skd-card__seg,
+[data-tier='low'] .skd-card__cur,
+[data-tier='low'] .skd-card.is-main::after { box-shadow: none; }
+
+/* ---- 减弱动效：偏好设置 + JS 注入的 body.skylab-still 双通道 ---- */
+@media (prefers-reduced-motion: reduce) {
+  .skd-deck,
+  .skd-deck .skd-card,
+  .skd-deck .skd-card__bar,
+  .skd-deck__filter button,
+  .skd-deck .skd-card__acts button { transition: none; }
+  .skd-deck.is-entering .skd-card,
+  .skd-deck .skd-card.is-now .skd-card__sigil,
+  .skd-deck .skd-card.is-open::before { animation: none; opacity: 1; }
+}
+body.skylab-still .skd-deck,
+body.skylab-still .skd-card,
+body.skylab-still .skd-card__bar,
+body.skylab-still .skd-deck__filter button,
+body.skylab-still .skd-card__acts button { transition: none; }
+body.skylab-still .skd-deck.is-entering .skd-card,
+body.skylab-still .skd-card.is-now .skd-card__sigil,
+body.skylab-still .skd-card.is-open::before { animation: none; opacity: 1; }

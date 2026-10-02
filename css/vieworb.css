@@ -1,0 +1,196 @@
+/**
+ * Castline · css/vieworb.css — v71 W4·U10 悬浮快捷珠（ViewOrb）样式层
+ * @role hud-style · @owns css/vieworb.css · @budget 1 个固定定位子树 · @contract v71
+ *
+ * 只服务 js/hud/vieworb.js 自建的 #clViewOrb 子树；不改任何既有选择器。
+ * 零裸色：全部颜色引用 abyss-tokens.css 既有令牌；字号只走 var(--abyss-fs-*)；
+ * z-index 走 A5 音阶变量 --z-panel（浮层档，盖过 --z-hud 的左列索引面板）。
+ *
+ * 位置与碰撞：珠钉在视口左缘垂直正中（left:8px，半骑 #index 玻璃面板的左边线，
+ * 像一枚「面板耳」）；展开列向珠的右侧浮出，玻璃底盖在索引面板之上（z 200>100），
+ * 不推移任何既有布局。窄屏（≤1100px）#index 本就隐藏，珠仍在左缘；≤820px 珠缩小。
+ * 纯净模式（body.cl-immersive，M 键）整珠隐藏。
+ */
+
+.cl-vieworb{
+  position:fixed;
+  left:8px;
+  top:50%;
+  transform:translateY(-50%);
+  z-index:var(--z-panel);
+  display:flex;
+  align-items:center;
+}
+
+/* ── 珠体：细描边小圆 + 呼吸微光（21s，与全局心跳同拍） ─────────────────── */
+.cl-vieworb-bead{
+  position:relative;
+  width:26px;
+  height:26px;
+  padding:0;
+  border-radius:50%;
+  border:var(--abyss-border-subtle);
+  background:var(--abyss-obsidian-glass);
+  backdrop-filter:blur(var(--abyss-glass-blur));
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:border-color var(--abyss-dur-micro) var(--abyss-ease-smooth),
+             box-shadow var(--abyss-dur-fast) var(--abyss-ease-smooth);
+}
+.cl-vieworb-core{
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  background:var(--abyss-signal,#ffb45c);
+  box-shadow:var(--abyss-glow-signal);
+  animation:clViewOrbBreath 21s ease-in-out infinite;  /* G4 降格入氛围：与全局 21s 心跳同拍 */
+}
+.cl-vieworb-bead:hover,
+.cl-vieworb.on .cl-vieworb-bead{
+  border-color:var(--abyss-line-2);
+  box-shadow:var(--abyss-glow-signal);
+}
+@keyframes clViewOrbBreath{
+  0%,100%{ opacity:.55; transform:scale(.82); }
+  50%{ opacity:1; transform:scale(1); }
+}
+
+/* ── 展开列：珠右侧浮出的一列玻璃胶囊 ──────────────────────────────────── */
+.cl-vieworb-panel{
+  position:absolute;
+  left:calc(100% + 10px);
+  top:50%;
+  transform:translateY(-50%);
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  padding:8px;
+  border-radius:14px;
+  border:var(--abyss-border-subtle);
+  background:var(--abyss-obsidian-glass);
+  backdrop-filter:blur(var(--abyss-glass-blur));
+  box-shadow:var(--abyss-glow-card);
+  opacity:0;
+  pointer-events:none;
+  transition:opacity var(--abyss-dur-fast) var(--abyss-ease-smooth);
+}
+.cl-vieworb.on .cl-vieworb-panel{
+  opacity:1;
+  pointer-events:auto;
+}
+
+/* 每行胶囊：错峰浮出（30ms 一级，反馈层 ≤300ms 内完成） */
+.cl-vieworb-item{
+  display:flex;
+  align-items:center;
+  gap:4px;
+  white-space:nowrap;
+  font-family:var(--abyss-font-sans);
+  font-size:var(--abyss-fs-2xs);
+  letter-spacing:.06em;
+  color:var(--abyss-ink-2);
+  opacity:0;
+  transform:translateX(-6px);
+  transition:opacity var(--abyss-dur-fast) var(--abyss-ease-out),
+             transform var(--abyss-dur-fast) var(--abyss-ease-out);
+}
+.cl-vieworb.on .cl-vieworb-item{ opacity:1; transform:none; }
+.cl-vieworb.on .cl-vieworb-item:nth-child(1){ transition-delay:0ms; }
+.cl-vieworb.on .cl-vieworb-item:nth-child(2){ transition-delay:30ms; }
+.cl-vieworb.on .cl-vieworb-item:nth-child(3){ transition-delay:60ms; }
+.cl-vieworb.on .cl-vieworb-item:nth-child(4){ transition-delay:90ms; }
+.cl-vieworb.on .cl-vieworb-item:nth-child(5){ transition-delay:120ms; }
+
+/* 胶囊内按钮 */
+.cl-vieworb-item button{
+  font-family:var(--abyss-font-mono);
+  font-size:var(--abyss-fs-2xs);
+  letter-spacing:.08em;
+  color:var(--abyss-ink-3);
+  background:var(--abyss-obsidian-glass-subtle);
+  border:var(--abyss-border-subtle);
+  border-radius:8px;
+  padding:3px 8px;
+  cursor:pointer;
+  transition:color var(--abyss-dur-micro) var(--abyss-ease-smooth),
+             border-color var(--abyss-dur-micro) var(--abyss-ease-smooth),
+             background var(--abyss-dur-micro) var(--abyss-ease-smooth);
+}
+.cl-vieworb-item button:hover{
+  color:var(--abyss-ink);
+  border-color:var(--abyss-line-2);
+}
+.cl-vieworb-item button.on{
+  color:var(--abyss-obsidian-deep);
+  background:var(--abyss-signal,#ffb45c);
+  border-color:var(--abyss-signal,#ffb45c);
+}
+
+/* 整行即钮的胶囊（标签循环 / 长尾开关） */
+button.cl-vieworb-item{
+  font-family:var(--abyss-font-mono);
+  font-size:var(--abyss-fs-2xs);
+  letter-spacing:.08em;
+  color:var(--abyss-ink-2);
+  background:var(--abyss-obsidian-glass-subtle);
+  border:var(--abyss-border-subtle);
+  border-radius:8px;
+  padding:4px 10px;
+  cursor:pointer;
+  text-align:left;
+  transition:opacity var(--abyss-dur-fast) var(--abyss-ease-out),
+             transform var(--abyss-dur-fast) var(--abyss-ease-out),
+             color var(--abyss-dur-micro) var(--abyss-ease-smooth),
+             border-color var(--abyss-dur-micro) var(--abyss-ease-smooth);
+}
+button.cl-vieworb-item:hover{
+  color:var(--abyss-ink);
+  border-color:var(--abyss-line-2);
+}
+button.cl-vieworb-item.on{
+  color:var(--abyss-signal,#ffb45c);
+  border-color:var(--abyss-line-2);
+}
+
+/* 门槛行：−/＋ 夹一枚读数 */
+.cl-vieworb-thv{
+  min-width:44px;
+  text-align:center;
+  font-family:var(--abyss-font-mono);
+  font-size:var(--abyss-fs-2xs);
+  color:var(--abyss-ink-2);
+}
+
+/* 钉住计数（只读）：有钉住时点亮 */
+.cl-vieworb-pins{
+  padding:4px 10px;
+  border-radius:8px;
+  border:1px solid transparent;
+  font-family:var(--abyss-font-mono);
+  color:var(--abyss-ink-3);
+}
+.cl-vieworb-pins.on{
+  color:var(--abyss-mint,#7af0c8);
+  border-color:var(--abyss-line-mint);
+}
+
+/* ── 纯净模式（M 键）：整珠隐去 ────────────────────────────────────────── */
+body.cl-immersive .cl-vieworb{ display:none; }
+
+/* ── 窄屏：更小的珠 ───────────────────────────────────────────────────── */
+@media (max-width:820px){
+  .cl-vieworb{ left:5px; }
+  .cl-vieworb-bead{ width:20px; height:20px; }
+  .cl-vieworb-core{ width:6px; height:6px; }
+  .cl-vieworb-panel{ left:calc(100% + 7px); padding:6px; gap:4px; }
+}
+
+/* ── reduced-motion：取消呼吸与错峰，直接出现 ─────────────────────────── */
+@media (prefers-reduced-motion: reduce){
+  .cl-vieworb-core{ animation:none; }
+  .cl-vieworb-panel,
+  .cl-vieworb-item,
+  .cl-vieworb.on .cl-vieworb-item{ transition:none; transition-delay:0ms; }
+}

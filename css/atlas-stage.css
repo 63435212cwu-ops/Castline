@@ -1,0 +1,130 @@
+/* Castline · css/atlas-stage.css
+ * @owns css/atlas-stage.css
+ * @contract v70
+ * U04 展卷控制器：全屏阅读层 #atlasStage + 共享锚点动画覆盖层 .cl-atlas-anchor。
+ * 颜色/字号/间距只取 css/abyss-tokens.css 与（一旦 U10 落地）css/atlas-tokens.css 的令牌；
+ * 时长令牌 --cl-atlas-dur-2/3 未就位前用 CSS 自带 fallback 值，令牌落地后自动接管，不需要改这份文件。
+ */
+
+.cl-atlas-stage {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modal, 500);
+  display: flex;
+  align-items: stretch;
+  justify-content: stretch;
+}
+.cl-atlas-stage[hidden] { display: none; }
+
+.cl-atlas-stage .atlas-stage-bg {
+  position: absolute;
+  inset: 0;
+  background: var(--cl-panel-bg, rgba(7, 6, 13, .86));
+}
+
+.cl-atlas-stage .atlas-stage-panel {
+  position: relative;
+  margin: auto;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--cl-panel-bg-heavy, rgba(10, 8, 20, .92));
+  color: var(--cl-text-primary, #f7f2e9);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  overflow: hidden;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .cl-atlas-stage.on .atlas-stage-panel {
+    animation: clAtlasStageIn var(--cl-atlas-dur-2, 220ms) var(--cl-atlas-ease, cubic-bezier(.16, .84, .44, 1)) both;
+  }
+}
+@keyframes clAtlasStageIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.cl-atlas-stage .atlas-stage-head {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--cl-border, rgba(172, 156, 230, .28));
+}
+
+.cl-atlas-stage .atlas-stage-title {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  min-width: 0;
+  flex: 0 1 auto;
+}
+.cl-atlas-stage .atlas-stage-name {
+  font-size: var(--cl-atlas-fs-2, var(--abyss-fs-lg));
+  color: var(--cl-text-primary, #f7f2e9);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 34vw;
+}
+.cl-atlas-stage .atlas-stage-meta {
+  /* 字距/等宽走既有 .mono 类（见 atlas-stage.js 的模板），这里只管字号 */
+  font-size: var(--cl-atlas-fs-4, var(--abyss-fs-sm));
+  color: var(--cl-text-tertiary, rgba(241, 236, 255, .58));
+  white-space: nowrap;
+}
+
+.cl-atlas-stage .atlas-stage-search { flex: 1 1 auto; min-width: 0; }
+.cl-atlas-stage .atlas-stage-q {
+  width: 100%;
+  max-width: 360px;
+  background: var(--cl-panel-bg-subtle, rgba(255, 255, 255, .06));
+  border: 1px solid var(--cl-border-subtle, rgba(172, 156, 230, .18));
+  border-radius: 4px;
+  color: var(--cl-text-primary, #f7f2e9);
+  padding: 6px 10px;
+  font-size: var(--abyss-fs-base);
+}
+.cl-atlas-stage .atlas-stage-q:focus { outline: 1px solid var(--cl-border-gold, #ffb45c); }
+
+.cl-atlas-stage .atlas-stage-close { flex: 0 0 auto; }
+
+.cl-atlas-stage .atlas-stage-host {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  position: relative;
+}
+
+.cl-atlas-stage .atlas-stage-missing {
+  margin: auto;
+  padding: 40px 20px;
+  text-align: center;
+  color: var(--cl-text-tertiary, rgba(241, 236, 255, .58));
+  font-size: var(--abyss-fs-md);
+}
+
+/* 共享锚点动画：独立于 #atlasStage 的可见性，close() 期间要能从谱位飞回环位。 */
+.cl-atlas-anchor {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-ritual, 600); /* 顶级过渡：必须盖过 --z-modal 的展卷面板才能画出「飞行中」的锚点 */
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.cl-atlas-anchor[hidden] { display: none; }
+
+/* 白名单：#plotTextPanel / .cp-wrap / #clPlot 的显隐在各自文件里是靠 .on 类切换 display，
+ * 具体选择器的特异度会盖过浏览器给原生 hidden 属性的默认样式；这里补一条 !important
+ * 规则保证「设 hidden 就一定看不见」，做法与 css/views-hud.css 对 #clLegendTip 的白名单一致。
+ * R7-G ③：补上 #clPlot（旧剧情 HUD 根，css/plot.css 的 .cl-plot{display:flex} 类规则特异度
+ * 与 UA 的 [hidden] 相同且为作者层、恒胜 UA，不加这条 hidden=true 根本藏不住）。 */
+.plot-text-panel[hidden],
+.cp-wrap[hidden],
+#clPlot[hidden] {
+  display: none !important;
+}

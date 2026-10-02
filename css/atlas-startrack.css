@@ -1,0 +1,52 @@
+/* v90 F5 章节星轨（js/atlas/atlas-startrack.js 绘制）。只引 --abyss-* / --cl-atlas-* / --cl-ann-* 令牌。
+   原生 #aphCursor range 覆盖在星轨上（opacity:0）承担拖动 / 点击 / 键盘 / 无障碍；视觉全由 SVG 画。
+   滑块宽 16px ↔ JS 的 PAD=8：range 的值→位置映射 = PAD + v/max·(W-2·PAD)，两边必须同改。 */
+.aph-track{position:relative;flex:1 1 auto;min-width:80px;height:44px;pointer-events:auto;border-radius:var(--abyss-radius-sm)}
+.aph-track .aph-startrack{position:absolute;left:0;top:0;width:100%;height:100%;overflow:visible;pointer-events:none;display:block}
+.aph-track input[type=range]{-webkit-appearance:none;appearance:none;position:absolute;inset:0;width:100%;height:100%;margin:0;padding:0;opacity:0;background:transparent;cursor:pointer;touch-action:none}
+.aph-track input[type=range]::-webkit-slider-runnable-track{height:100%;background:transparent;border:0}
+.aph-track input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:16px;height:44px;border:0;background:transparent}
+.aph-track input[type=range]::-moz-range-thumb{width:16px;height:44px;border:0;background:transparent}
+.aph-track:has(input:focus-visible){box-shadow:0 0 0 1px color-mix(in oklab,var(--abyss-gold) 38%,transparent)}
+
+/* 基线 / 进度 / 章刻度 / 章号 */
+.aph-startrack .st-base{stroke:color-mix(in oklab,var(--abyss-violet-bright) 30%,transparent);stroke-width:1}
+.aph-startrack .st-progress{stroke:color-mix(in oklab,var(--abyss-gold) 55%,transparent);stroke-width:1;opacity:0;transition:opacity var(--cl-atlas-dur-1) var(--cl-atlas-ease)}
+.aph-startrack.has-cursor .st-progress{opacity:1}
+.aph-startrack .st-tick{stroke:var(--abyss-ink-3);stroke-width:1;opacity:.7;shape-rendering:crispEdges}
+.aph-startrack .st-chap{fill:var(--abyss-ink-3);font:var(--abyss-fs-xs)/1 var(--abyss-font-mono);text-anchor:middle;letter-spacing:.02em}
+
+/* 主线代次带：与年轮外环同一组 --cl-ann-gen-N（css/annulus-tokens.css → --cl-atlas-gen-N） */
+.aph-startrack .st-gen{opacity:.92}
+.aph-startrack .st-gen-0{fill:var(--cl-ann-gen-0)}
+.aph-startrack .st-gen-1{fill:var(--cl-ann-gen-1)}
+.aph-startrack .st-gen-2{fill:var(--cl-ann-gen-2)}
+.aph-startrack .st-gen-3{fill:var(--cl-ann-gen-3)}
+.aph-startrack .st-gen-4{fill:var(--cl-ann-gen-4)}
+.aph-startrack .st-gen-5{fill:var(--cl-ann-gen-5)}
+.aph-startrack .st-handoff{fill:none;stroke:var(--abyss-ink-2);stroke-width:1;opacity:.75;shape-rendering:crispEdges}
+
+/* 事件星点：紫 = 时间；关键 kind 提亮；三档半径由 JS 写 r */
+.aph-startrack .st-star{fill:var(--abyss-violet-bright);opacity:.46}
+.aph-startrack .st-star.t2{opacity:.58}
+.aph-startrack .st-star.t3{opacity:.7}
+.aph-startrack .st-star.is-key{fill:var(--abyss-ink-bright);opacity:.92}
+
+/* 游标：金色亮星 + 竖发丝线；悬停幽灵线 */
+.aph-startrack .st-cur{opacity:0;transition:opacity var(--cl-atlas-dur-1) var(--cl-atlas-ease)}
+.aph-startrack.has-cursor .st-cur{opacity:1}
+.aph-startrack .st-cur-line{stroke:color-mix(in oklab,var(--abyss-gold) 72%,transparent);stroke-width:1}
+.aph-startrack .st-cur-halo{fill:color-mix(in oklab,var(--abyss-gold) 26%,transparent);stroke:color-mix(in oklab,var(--abyss-gold) 60%,transparent);stroke-width:.8}
+.aph-startrack .st-cur-star{fill:var(--abyss-gold);stroke:var(--abyss-signal-bright);stroke-width:.6;filter:drop-shadow(0 0 4px color-mix(in oklab,var(--abyss-gold) 70%,transparent))}
+.aph-startrack .st-ghost{stroke:color-mix(in oklab,var(--abyss-ink-bright) 45%,transparent);stroke-width:1;opacity:0;transition:opacity var(--cl-atlas-dur-1) var(--cl-atlas-ease)}
+.aph-startrack.is-hover .st-ghost{opacity:1}
+
+/* 空书：空态字形，不报错 */
+.aph-startrack .st-base-empty{stroke:var(--abyss-ink-3);stroke-dasharray:2 5;opacity:.6}
+.aph-startrack .st-empty-star{fill:none;stroke:var(--abyss-ink-3);stroke-width:1}
+.aph-startrack .st-empty-text{fill:var(--abyss-ink-3);font:var(--abyss-fs-2xs)/1 var(--abyss-font-sans);letter-spacing:.08em}
+
+@media(prefers-reduced-motion:reduce){.aph-startrack *{transition:none!important}}
+body[data-tier=low] .aph-startrack *{transition:none!important}
+.aph-startrack .st-ridge{fill:color-mix(in oklab,var(--abyss-violet-bright) 8%,transparent);stroke:none}
+.aph-startrack.is-dense .st-tick{opacity:.2}

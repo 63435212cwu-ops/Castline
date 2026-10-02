@@ -1,0 +1,342 @@
+/* Castline · css/plot.css — 剧情流 HUD（第二条信息流 · v30.0）
+ *
+ * 纪律：只写这一层。所有选择器的主体都是本层自己的 .cl-plot / .cp-* 类，
+ * 一条规则也不以既有选择器（.panel / .tgl / .vb-row / #peek / #viewbar …）为主体 ——
+ * app.css 由主会话在改，覆盖它就是给对方留一颗定时炸弹。
+ * 面板外壳（玻璃底 / 切角 / 四角括号）直接复用 app.css 的 .panel，这里只补内部排版。
+ * 颜色全部取自既有变量与剧情类型色（与 .tag.kind-* 同色），不自造色系。
+ */
+
+/* ---------------------------------------------------------------- 外壳与位置
+   为什么落在「左列右侧 + 底部提示上方」这一块：
+   左列是 #brand / #index / #overview（右缘 268px），底部中央是 #hint（bottom = gap + tl-h + 12）。
+   于是 left 取 268+gap、bottom 取 hint 再往上 24px，两边都留出空气 —— 不靠 z-index 压人，靠不去占人的位置。 */
+.cl-plot{
+  left:calc(var(--gap) * 2 + 250px);
+  right:var(--gap);
+  bottom:calc(var(--gap) + var(--tl-h) + 36px);
+  height:min(56vh,520px);
+  display:flex;flex-direction:column;
+  opacity:0;transform:translateY(10px);pointer-events:none;
+  transition:opacity .45s var(--e-out),transform .45s var(--e-out),right .55s var(--e-out);
+}
+.cl-plot.on,.cl-plot.ridge{opacity:1;transform:none}
+.cl-plot.on>*,.cl-plot.ridge>*{pointer-events:auto}
+/* 折叠态：面板收掉，只留一条 28px 的脊 —— 契约 §5.6 的边缘脊，同时是这条信息流唯一看得见的入口 */
+.cl-plot.ridge{height:28px}
+.cl-plot.ridge .cp-panel{display:none}
+.cl-plot.on .cp-ridge{display:none}
+.cl-plot.nodata,.cl-plot.on.nodata,.cl-plot.ridge.nodata{opacity:0;pointer-events:none}
+/* 右坞展开（聚焦某角色）时整块左移，与 #viewbar.docked 同一套位移语言 */
+body.focus .cl-plot{right:calc(var(--dock-w) + var(--gap) * 2)}
+body.noview .cl-plot{opacity:0;pointer-events:none}
+
+.cp-panel{flex:1;display:flex;flex-direction:column;min-height:0;padding:9px 14px 6px}
+.cp-empty{display:none;margin:auto;font-size:var(--abyss-fs-xs, 12px);color:var(--ink-3);letter-spacing:.06em}
+
+/* ---------------------------------------------------------------- 头部 */
+.cp-head{display:flex;align-items:center;gap:16px;padding-bottom:7px;border-bottom:1px solid var(--line)}
+.cp-head .eyebrow{white-space:nowrap}
+.cp-reads{display:flex;align-items:baseline;gap:16px;margin-left:auto;overflow:hidden}
+.cp-r{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:56px}
+.cp-r b{
+  font:600 var(--abyss-fs-lg, 16px)/1 var(--mono);letter-spacing:.02em;color:var(--abyss-lad-18);font-feature-settings:"tnum" 1;
+  text-shadow:0 0 16px rgba(var(--abyss-rgb-signal, 255,180,92),.26);
+}
+.cp-r s{text-decoration:none;font:var(--abyss-fs-2xs, 11px)/1.2 var(--mono);letter-spacing:.14em;color:var(--ink-3);white-space:nowrap}
+.cp-r:nth-child(odd) b{color:var(--abyss-tier-legend)}
+.cp-btn{
+  flex:none;width:22px;height:20px;padding:0;color:var(--ink-3);
+  font:var(--abyss-fs-xs, 12px)/18px var(--mono);text-align:center;border:1px solid transparent;transition:.16s;
+}
+.cp-btn:hover{color:var(--abyss-ink-bright);border-color:var(--line-2);background:rgba(var(--abyss-rgb-signal, 255,180,92),.08)}
+
+/* ---------------------------------------------------------------- 主体：线谱 + 线卡 */
+.cp-body{flex:1;display:grid;grid-template-columns:1fr 262px;gap:10px;min-height:0;padding-top:6px}
+/* flex + margin:auto 而不是 align-items:center：线条块比容器高时（大图谱几十条线）
+   align-items 会把溢出的顶部剪掉且滚不回去，margin:auto 不会。 */
+.cp-staff{overflow:auto;min-height:0;display:flex}
+.cp-grid{position:relative;flex:none;margin:auto}
+
+/* 章节轴：贴在线谱顶部，随横向滚动一起走（它就是横轴本身，不该固定） */
+.cp-ax{position:absolute;left:0;right:0;top:0;height:14px;border-bottom:1px solid var(--line)}
+.cp-ax-t{position:absolute;top:8px;width:1px;height:5px;background:rgba(170,150,232,.28)}
+.cp-ax-t.lab{height:7px;top:6px;background:var(--line-2)}
+.cp-ax-t u{
+  position:absolute;left:0;top:-9px;transform:translateX(-50%);text-decoration:none;white-space:nowrap;
+  font:var(--abyss-fs-xs, 10px)/1 var(--mono);letter-spacing:.06em;color:var(--abyss-violet-bright);opacity:.8; /* T5 刻度豁免：章节轴刻度号 */
+}
+
+/* 连丝层：支线左端 → 主干分叉点 · 交汇横连 */
+.cp-wires{position:absolute;left:0;top:0;overflow:visible;pointer-events:none}
+.cp-wire{fill:none;stroke-width:.9;opacity:.34;stroke-linecap:round;stroke-dasharray:2 2.6;transition:opacity .25s}
+.cp-wire.twig{stroke-dasharray:1 3;opacity:.24}
+.cp-wire.on{opacity:1;stroke-width:1.4;stroke-dasharray:none;filter:drop-shadow(0 0 4px currentColor)}
+.cp-fork{fill:var(--abyss-tier-legend);opacity:.5}
+.cp-jx{stroke:rgba(201,168,255,.42);stroke-width:.8;stroke-dasharray:1.5 2.5}
+.cp-jxm{stroke:rgba(232,214,255,.8);stroke-width:1;fill:none}
+
+/* 泳道 */
+.cp-lane{position:absolute;left:0;right:0;top:0;height:0;transition:opacity .25s,filter .25s}
+.cp-grid.foc .cp-lane{opacity:.26;filter:saturate(.35)}
+.cp-grid.foc .cp-lane.on{opacity:1;filter:none}
+.cp-rail{
+  position:absolute;height:2px;border-radius:1px;opacity:.62;
+  box-shadow:0 0 6px currentColor;
+}
+.cp-lane.twig .cp-rail{height:1px;opacity:.46}
+/* 悬置线的右端渐隐：不是「画完了」，是「作者没收」—— 用蒙版把线尾吃掉，比虚线更像断气 */
+.cp-rail.susp{
+  opacity:.5;
+  -webkit-mask-image:linear-gradient(90deg,var(--abyss-obsidian-deep, #030206) 0,var(--abyss-obsidian-deep, #030206) 58%,transparent 100%);
+  mask-image:linear-gradient(90deg,var(--abyss-obsidian-deep, #030206) 0,var(--abyss-obsidian-deep, #030206) 58%,transparent 100%);
+}
+.cp-grid.foc .cp-lane.on .cp-rail{opacity:1;height:3px}
+/* 右端收尾标：收束 = 实心亮结 · 悬置 = 三根散开的渐隐丝 · 未定 = 空心 */
+.cp-end{position:absolute;text-decoration:none;transform:translate(-50%,-50%);width:7px;height:7px}
+.cp-end.knot{border-radius:50%;background:currentColor;box-shadow:0 0 8px currentColor}
+.cp-end.open{border-radius:50%;border:1px solid currentColor;opacity:.6}
+.cp-end.fray{
+  width:14px;height:9px;transform:translate(-2px,-50%);opacity:.7;
+  background:
+    linear-gradient(80deg,transparent 46%,currentColor 47%,transparent 53%),
+    linear-gradient(100deg,transparent 46%,currentColor 47%,transparent 53%),
+    linear-gradient(90deg,transparent 46%,currentColor 47%,transparent 53%);
+  -webkit-mask-image:linear-gradient(90deg,var(--abyss-obsidian-deep, #030206),transparent);mask-image:linear-gradient(90deg,var(--abyss-obsidian-deep, #030206),transparent);
+}
+/* 线名：贴在泳道起点上方，右端起头的改为右对齐，免得冲出滚动区 */
+.cp-nm,.cp-sl{
+  position:absolute;text-decoration:none;white-space:nowrap;transform:translate(0,-100%);
+  font-size:var(--abyss-fs-2xs, 11px);letter-spacing:.04em;color:var(--ink-2);
+  padding:0 4px 0 2px;background:linear-gradient(90deg,rgba(8,6,16,.72),rgba(8,6,16,0));
+  text-shadow:0 0 6px rgba(6,2,16,.9);pointer-events:none;
+}
+.cp-nm.rt,.cp-sl.rt{transform:translate(-100%,-100%);background:linear-gradient(270deg,rgba(8,6,16,.72),rgba(8,6,16,0))}
+.cp-sl{font:600 var(--abyss-fs-2xs, 11px)/1.2 var(--mono);letter-spacing:.1em}
+
+/* 主干：正中最粗的一条，按 trunk.segments 分段换色 */
+.cp-seg{
+  position:absolute;height:4px;border-radius:2px;opacity:.92;
+  box-shadow:0 0 10px rgba(255,180,92,.28),inset 0 1px 0 rgba(255,255,255,.16);
+}
+.cp-seg{transition:opacity .25s,filter .25s}
+.cp-grid.foc .cp-seg{opacity:.24;filter:saturate(.3)}
+.cp-grid.foc .cp-seg.on{opacity:1;filter:none;height:5px;box-shadow:0 0 16px rgba(255,214,150,.5)}
+.cp-gap{position:absolute;width:12px;height:2px;transform:translate(-50%,0);background:rgba(8,5,15,.92);
+  box-shadow:0 0 0 1px rgba(120,104,160,.32)}
+/* 换手标：一个可点的菱形 + handoff.kind —— 「主线中途换了手、往后接上」的证据，必须一眼可见 */
+.cp-ho{position:absolute;text-decoration:none;transform:translate(-50%,-50%);width:26px;height:26px;cursor:pointer;z-index:3}
+.cp-ho i{
+  position:absolute;left:50%;top:50%;width:9px;height:9px;margin:-4.5px 0 0 -4.5px;
+  transform:rotate(45deg);background:var(--abyss-tier-legend);border:1px solid var(--abyss-signal-bright);
+  box-shadow:0 0 10px rgba(255,214,150,.85);transition:.18s;
+}
+.cp-ho s{
+  position:absolute;left:50%;top:13px;transform:translateX(-50%);text-decoration:none;white-space:nowrap;
+  font:var(--abyss-fs-2xs, 11px)/1.4 var(--mono);letter-spacing:.12em;color:var(--abyss-tier-legend);
+  padding:0 4px;background:rgba(10,7,20,.82);border:1px solid rgba(255,180,92,.4);
+}
+.cp-ho:hover i,.cp-ho:focus i{transform:rotate(45deg) scale(1.35);background:var(--abyss-ink-bright)}
+.cp-ho:hover s,.cp-ho:focus s{color:var(--abyss-ink-bright);border-color:var(--cyan)}
+
+/* 刻点：kind 决定颜色，w 决定大小 */
+.cp-tk{
+  position:absolute;transform:translate(-50%,-50%);border-radius:50%;cursor:pointer;
+  box-shadow:0 0 5px currentColor;transition:transform .14s var(--e-out),box-shadow .14s;
+}
+.cp-tk:hover{transform:translate(-50%,-50%) scale(1.9);box-shadow:0 0 12px var(--abyss-ink-bright)}
+.cp-tk.orph{opacity:.34;border-radius:0;transform:translate(-50%,-50%) rotate(45deg)}
+/* 角色联动：点亮该角色在所有泳道上的刻点，其余压暗 —— 一个人的行迹于是横穿整张谱 */
+.cp-grid.lit .cp-tk{opacity:.16}
+.cp-grid.lit .cp-tk.lit{opacity:1;box-shadow:0 0 0 1.5px var(--abyss-tier-legend),0 0 12px currentColor}
+
+/* ---------------------------------------------------------------- 线卡列表 */
+.cp-cards{overflow:auto;min-height:0;display:flex;flex-direction:column;gap:6px;padding-right:3px}
+.cp-card{
+  position:relative;padding:8px 10px 7px 11px;border:1px solid var(--line);cursor:pointer;outline:none;
+  background:linear-gradient(135deg,rgba(255,180,92,.05),rgba(8,6,16,0) 62%);
+  transition:border-color .18s,background .18s,transform .18s var(--e-out),opacity .25s;
+}
+.cp-card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--lc,var(--cyan))}
+.cp-card:hover,.cp-card:focus{border-color:var(--line-2);background:rgba(255,180,92,.08);transform:translateX(2px)}
+.cp-cards.foc .cp-card{opacity:.4}
+.cp-cards.foc .cp-card.on{opacity:1;border-color:var(--line-2);background:rgba(255,180,92,.12)}
+.cp-ch{display:flex;align-items:center;gap:7px}
+.cp-cdot{width:6px;height:6px;flex:none;border-radius:50%;background:var(--lc,var(--cyan));box-shadow:0 0 7px var(--lc,var(--cyan))}
+.cp-ch b{font-size:13px;font-weight:600;letter-spacing:.03em;color:var(--ink);
+  overflow-wrap:anywhere;word-break:break-word}
+.cp-ch em{font:11px var(--mono);font-style:normal;letter-spacing:.1em;color:var(--ink-3)}
+.cp-ch s{margin-left:auto;flex:none;text-decoration:none;font:11px var(--mono);letter-spacing:.1em;
+  color:var(--ink-3);border:1px solid var(--line);padding:1px 4px}
+.cp-cl{display:flex;align-items:baseline;gap:6px;margin-top:4px;font-size:12px;color:var(--ink-2)}
+.cp-cl b{color:var(--cyan);font-weight:500}
+.cp-cl b.dim{color:var(--ink-3)}
+.cp-cl span{margin-left:auto;font-size:11px;letter-spacing:.12em;color:var(--ink-3)}
+.cp-cbar{height:3px;margin-top:5px;background:rgba(170,150,232,.14);position:relative}
+.cp-cbar i{position:absolute;left:0;top:-1px;height:5px;box-shadow:0 0 7px currentColor;
+  transform-origin:left;animation:cpGrow .8s var(--e-out) both}
+@keyframes cpGrow{from{transform:scaleX(0)}}
+.cp-cm{margin-top:5px;font-size:11px;letter-spacing:.06em;color:var(--ink-3)}
+.cp-cm b{color:var(--ink-2);font-weight:500}
+.cp-cast-all{margin-top:5px;color:var(--ink-3);font-size:var(--abyss-fs-2xs)}
+.cp-cast-all summary{cursor:pointer;min-height:24px;line-height:24px}
+.cp-cast-all>div{display:flex;flex-wrap:wrap;gap:4px;max-height:92px;overflow:auto;padding-top:3px}
+.cp-agg{position:absolute;right:4px;top:-11px;z-index:var(--z-chart);min-height:24px;padding:1px 5px;color:var(--ink-2);background:var(--glass);border:1px solid var(--line);font:var(--abyss-fs-2xs) var(--mono);cursor:pointer}
+.cp-read-line{margin-top:6px;min-height:30px;color:var(--ink-2);background:transparent;border:1px solid var(--line);font:var(--abyss-fs-2xs) var(--mono);cursor:pointer}
+.cp-reader{grid-column:1/-1;min-height:0;max-height:100%;overflow:auto;padding:10px;background:var(--glass);border:1px solid var(--line)}
+.cp-reader[hidden]{display:none}
+.cp-reader h3{margin:0;color:var(--ink);overflow-wrap:anywhere}
+.cp-reader-event,.cp-reader-back,.cp-person{display:block;min-height:32px;margin:4px 0;padding:4px 8px;color:var(--ink-2);background:transparent;border:1px solid var(--line);font:var(--abyss-fs-xs) var(--mono);text-align:left;cursor:pointer}
+.cp-reader-ho{padding:4px 0;color:var(--ink-3);font-size:var(--abyss-fs-2xs)}
+.cp-search{min-width:150px;max-width:220px;padding:5px;color:var(--ink-2);background:var(--glass);border:1px solid var(--line);font:var(--abyss-fs-2xs) var(--mono)}
+.cp-read-orphans{position:absolute;top:0;left:6px;min-height:24px;color:var(--ink-2);background:var(--glass);border:1px solid var(--line);font:var(--abyss-fs-2xs) var(--mono)}
+.cp-reading .cp-staff,.cp-reading .cp-cards{display:none}
+/* kindMix 微柱：七种类型固定占位，没有的那一格留一根 6% 的底 —— 空缺本身也是信息 */
+.cp-cmix{display:flex;align-items:flex-end;gap:2px;height:16px;margin-top:6px}
+.cp-cmix u{flex:1;text-decoration:none;min-height:1px;opacity:.85;border-radius:1px 1px 0 0;
+  animation:cpUp .5s var(--e-out) both}
+.cp-cmix u.z{opacity:.16}
+@keyframes cpUp{from{transform:scaleY(0);transform-origin:bottom}}
+.cp-ccast{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.cp-chip,.cp-ov{
+  font-size:var(--abyss-fs-xs, 12px);letter-spacing:.02em;color:var(--ink-2);border:1px solid var(--line);
+  padding:1px 6px;cursor:pointer;outline:none;transition:.15s;
+}
+.cp-chip:hover,.cp-chip:focus{color:var(--abyss-ink-bright);border-color:var(--line-2);background:rgba(var(--abyss-rgb-signal, 255,180,92),.1)}
+.cp-chip.me{color:var(--abyss-lad-04);background:var(--cyan);border-color:var(--cyan);font-weight:600}
+.cp-ov{cursor:default;color:var(--ink-3)}
+.cp-card q{
+  display:block;quotes:none;margin:6px 0 1px;padding:4px 8px;
+  border-left:2px solid rgba(var(--abyss-rgb-signal, 255,180,92),.5);background:rgba(var(--abyss-rgb-signal, 255,180,92),.05);
+  font:var(--abyss-fs-xs, 12px)/1.6 var(--abyss-font-serif);color:var(--abyss-lad-18);
+  max-height:3.3em;overflow:hidden;
+}
+.cp-card q::before{content:"「"}
+.cp-card q::after{content:"」"}
+.cp-card p{margin:6px 0 1px;font-size:var(--abyss-fs-xs, 12px);line-height:1.6;color:var(--ink-3)}
+
+/* ---------------------------------------------------------------- T5 · 圣物匣
+   线卡是可达性入口，不是首屏的第二张信息表：默认只留 36px 竖条与首字徽记。
+   hover / focus-within 展开原卡内容；JS 仍只操作既有 .cp-card 与 tabindex。 */
+@media (min-width:1201px){
+  .cp-body{grid-template-columns:minmax(0,1fr) minmax(232px,262px)}
+  .cp-cards{
+    width:auto;overflow:auto;gap:5px;padding-right:0;
+    position:relative;z-index:4;transition:width .2s var(--e-out);
+  }
+  .cp-cards:hover,.cp-cards:focus-within{width:auto}
+  .cp-card{width:auto;box-sizing:border-box;padding:8px 10px 7px;overflow:hidden;transition:
+    width .2s var(--e-out),border-color .18s,background .18s,transform .18s var(--e-out),opacity .25s}
+  .cp-cards:hover .cp-card,.cp-cards:focus-within .cp-card{width:auto}
+  .cp-ch{gap:6px}
+  .cp-ch b{display:block;flex:1;width:auto;overflow-wrap:anywhere;word-break:break-word}
+  .cp-cards:hover .cp-ch b,.cp-cards:focus-within .cp-ch b{flex:1;width:auto}
+  .cp-ch em,.cp-ch s,.cp-cl,.cp-cbar,.cp-cm,.cp-cmix,.cp-ccast{display:block}
+  .cp-cards:hover .cp-ch em,.cp-cards:hover .cp-ch s,
+  .cp-cards:focus-within .cp-ch em,.cp-cards:focus-within .cp-ch s{display:block}
+  .cp-cards:hover .cp-cl,.cp-cards:hover .cp-cbar,.cp-cards:hover .cp-cm,
+  .cp-cards:hover .cp-cmix,.cp-cards:hover .cp-ccast,
+  .cp-cards:focus-within .cp-cl,.cp-cards:focus-within .cp-cbar,
+  .cp-cards:focus-within .cp-cm,.cp-cards:focus-within .cp-cmix,
+  .cp-cards:focus-within .cp-ccast{display:flex}
+  .cp-cards:hover .cp-cbar,.cp-cards:focus-within .cp-cbar{display:block}
+  .cp-cards:hover .cp-card q,.cp-cards:hover .cp-card p,
+  .cp-cards:focus-within .cp-card q,.cp-cards:focus-within .cp-card p{display:block}
+}
+
+/* T5 · 默认只留主线 / 焦点线刻点；悬停该泳道仍可取回完整证据。 */
+.cp-lane:not(.main):not(.on) .cp-tk{opacity:0;pointer-events:none}
+.cp-lane:not(.main):not(.on):hover .cp-tk{opacity:.82;pointer-events:auto}
+.cp-lane:not(.main):not(.on) .cp-tk.lit{opacity:1;pointer-events:auto}
+.cp-lane.orphs .cp-tk{opacity:.75;pointer-events:auto}
+.cp-search-clear,.cp-read-orphans{min-height:28px;padding:3px 8px;color:var(--ink-2);background:transparent;border:1px solid var(--line);cursor:pointer}
+.cp-search-count{color:var(--ink-3);font:var(--abyss-fs-2xs) var(--mono)}
+.cp-wire{opacity:.22}
+.cp-wire.twig{opacity:.1}
+
+/* ---------------------------------------------------------------- 零 token 自证行 */
+.cp-foot{
+  flex:none;margin-top:5px;padding-top:5px;border-top:1px solid var(--line);
+  font-size:var(--abyss-fs-2xs, 11px);letter-spacing:.1em;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+
+/* ---------------------------------------------------------------- 折叠脊 */
+.cp-ridge{
+  display:flex;align-items:center;gap:12px;width:100%;height:28px;padding:0 14px;
+  background:var(--glass);border:1px solid var(--line);color:var(--ink-2);
+  clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px));
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);transition:.2s;
+}
+.cp-ridge:hover{border-color:var(--line-2);background:rgba(20,14,38,.86);color:var(--abyss-ink-bright)}
+.cp-ridge i{width:5px;height:5px;flex:none;border-radius:50%;background:var(--cyan);box-shadow:0 0 8px var(--cyan)}
+.cp-ridge span{font:var(--abyss-fs-2xs, 11px) var(--mono);letter-spacing:.16em}
+.cp-ridge em{font:var(--abyss-fs-2xs, 11px) var(--mono);font-style:normal;letter-spacing:.1em;color:var(--ink-3);margin-left:auto}
+
+/* ---------------------------------------------------------------- 悬停速览
+   长得像 #peek，但是自己的元素：#peek 由 app.js 驱动，两边同时写同一个节点必然打架。 */
+.cp-peek{
+  position:fixed;left:0;top:0;z-index:32;pointer-events:none;display:none;
+  min-width:200px;max-width:320px;padding:9px 13px;
+  background:linear-gradient(150deg,rgba(28,18,48,.96),rgba(10,7,20,.96));
+  border:1px solid rgba(var(--abyss-rgb-signal, 255,180,92),.48);
+  box-shadow:0 18px 50px rgba(0,0,0,.42),0 0 26px rgba(123,92,255,.14);
+  clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px));
+  font-size:var(--abyss-fs-xs, 12px);line-height:1.6;color:var(--ink-2);
+}
+.cp-peek.on{display:block;animation:cpPeek .2s var(--e-out) both}
+@keyframes cpPeek{from{opacity:0;filter:blur(3px)}}
+.cp-peek .t{color:var(--abyss-lad-18);font-size:var(--abyss-fs-base, 13px);font-weight:600;letter-spacing:.04em}
+.cp-peek .m{font-family:var(--mono);font-size:var(--abyss-fs-2xs, 11px);color:var(--ink-3);letter-spacing:.08em;margin-top:3px}
+.cp-peek .m b{color:var(--ink-2);font-weight:500}
+.cp-peek .m em.k{color:var(--kc,var(--ink-2));font-style:normal}
+.cp-peek .m em{font-style:normal;font-size:var(--abyss-fs-2xs, 11px);letter-spacing:.12em}
+.cp-peek .b{margin-top:5px;font-size:var(--abyss-fs-xs, 12px);line-height:1.65;color:var(--abyss-lad-15);max-height:5.2em;overflow:hidden}
+.cp-peek .cst{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.cp-peek .cst span{font:var(--abyss-fs-2xs, 11px) var(--mono);letter-spacing:.04em;color:var(--ink-2);padding:0 5px;border:1px solid var(--line)}
+.cp-peek .cst span.me{color:var(--cyan);border-color:rgba(var(--abyss-rgb-signal, 255,180,92),.45)}
+.cp-peek .cst span.ov{color:var(--ink-3)}
+.cp-peek q{
+  display:block;quotes:none;margin:6px 0 0;padding:4px 8px;
+  border-left:2px solid rgba(var(--abyss-rgb-signal, 255,180,92),.55);background:rgba(var(--abyss-rgb-signal, 255,180,92),.06);
+  font:var(--abyss-fs-xs, 12px)/1.6 var(--abyss-font-serif);color:var(--abyss-lad-18);
+}
+.cp-peek q::before{content:"「"}
+.cp-peek q::after{content:"」"}
+
+/* ---------------------------------------------------------------- 置灰的入口开关
+   用自己的类做置灰，绝不去动 .tgl 的既有样式（那是 app.css 的东西）。 */
+.cp-vb-off{opacity:.4;cursor:default}
+
+/* ---------------------------------------------------------------- 响应式
+   < 1200px：线卡收到线谱下方、改为一行横向可滚；线谱本身靠 .cp-grid 的 px 宽度天然横向滚。 */
+/* left 不在窄屏下改回 var(--gap)：#overview 在任何宽度都占着左列 250px，回到 gap 就是压上去。
+   窄屏要省的是「线谱与线卡挤在同一行」，横向可滚由 .cp-grid 的 px 宽度天然提供。 */
+@media (max-width:1200px){
+  .cl-plot{height:min(56vh,460px)}
+  .cp-body{grid-template-columns:1fr;grid-template-rows:1fr auto}
+  .cp-cards{flex-direction:row;max-height:104px;overflow:auto hidden;padding-bottom:3px}
+  .cp-card{flex:0 0 208px}
+  .cp-reads{gap:11px}
+  .cp-r{min-width:44px}
+  .cp-r b{font-size:13px}
+}
+@media (min-width:901px) and (max-width:1500px){
+  .cp-body{grid-template-columns:1fr 232px}
+}
+@media (max-width:900px){
+  .cl-plot,body.focus .cl-plot{left:var(--gap);right:var(--gap);bottom:var(--gap);height:min(72vh,620px)}
+  .cp-head{flex-wrap:wrap;align-items:flex-start}
+  .cp-reads{order:3;width:100%;max-width:100%;margin-left:0;overflow:auto}
+  .cp-body{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr);min-width:0}
+  .cp-staff,.cp-cards,.cp-reader{min-width:0;width:100%;max-width:100%}
+  .cp-reader{grid-column:1;box-sizing:border-box}
+}
+@media (max-height:760px){
+  .cl-plot{height:min(56vh,380px)}
+  .cp-cmix{height:12px}
+  .cp-card q{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  .cp-cbar i,.cp-cmix u{animation:none}
+  .cp-peek.on{animation:none}
+}

@@ -1,0 +1,391 @@
+/* Castline · dock-polish.css — R3-C 右坞收口（v70 第三轮）
+ * @contract v70 · R3-C 独占文件 · 只用 css/abyss-tokens.css 与 css/atlas-tokens.css 令牌，
+ * 不新造颜色/字号/间距字面量；不改 index.html / app.js / css/app-shell.css / css/views-hud.css /
+ * css/atlas-footprint.css（U06 独占），本文件只用更具体的选择器在其之后追加覆盖。
+ *
+ * 收口清单（对应 mystic-refactor-plan/grand-atlas-plan/units/R3-C.md 必做①④）：
+ * ① `#dRole`（右坞头部「主角 · IMPORTANCE 96 · 昭阳 一系 / 主角方 · 最高维 情感 90」）在
+ *    1440/390 断词换行，「最高维」与「情感 90」被拆成两行。
+ *    根因：`#dRole` 是 app.js `renderDock()` 用 `.textContent` 拼出的一整段纯文本，标签与
+ *    数值之间只是普通空格；CJK 默认逐字可断，纯 CSS 在“真实空格”处无法单独禁止换行
+ *    （`word-break:keep-all` 只管相邻汉字之间，不管空格——已用 CDP 实测验证，见
+ *    reports/v70/R3-C-report.md）。完整方案 = 本文件的 `word-break:keep-all`（防止退化到在
+ *    「最高」「维」这种相邻汉字中间断行）+ `js/charts/radar-reading.js` 的
+ *    `glueDRoleSegments()`（把每个「 · 」分段内部的空格换成不断空格 U+00A0，段与段之间的
+ *    「 · 」空格仍可断）—— 两者缺一都验证过会退化回旧断点，实测组合见 report。
+ *    `#dRole` 本身不在本单元文件所有权内（app.js 宿主文件生成其内容），正规改法（在
+ *    app.js 源头就写不断空格，行为等价、少一次运行时文本替换）已写入
+ *    reports/v70/R3-C-host.patch.md，供主控选择是否收编。
+ * ④ 右坞「剧情线」足迹面板（`#atlasFootprintHost .atlas-footprint`，U06 独占
+ *    css/atlas-footprint.css）与「八维」（`#s-radar`）两节间距不统一：`.atlas-footprint`
+ *    自带 `padding: 8px 0`，叠在 `.sec` 本身的 `padding:16px 0 6px`/`18px 0 9px` 之上，
+ *    比其余小节的 h4→内容起始距离多出 8px（CDP 实测：`#s-radar` 内容紧接 h4
+ *    `margin-bottom:12px` 起排，`#s-line` 却要再等 `.atlas-footprint` 自己的 8px 顶部内边距，
+ *    见 report 里的 getBoundingClientRect 对照表）。这里不改 atlas-footprint.css（U06 独占），
+ *    用更具体的 `#dockBody #atlasFootprintHost .atlas-footprint` 选择器清零这层重复内边距，
+ *    让两节的「标题→内容」间距对齐到同一个由 `.sec` 提供的节奏。
+ */
+
+/* ① 头部「标签 + 数值」不拆词：整行仍可换行（不加 white-space:nowrap 到整个元素），
+ * 只把 CJK 相邻字符间的默认断点关掉，逼换行只能发生在真实空格（段与段的「 · 」）处；
+ * 段内部的空格由 glueDRoleSegments() 换成不断空格，两者配合才成立，见上方说明。 */
+#dockHead #dRole {
+  word-break: keep-all;
+  overflow-wrap: normal;
+}
+
+/* ④ 剧情线足迹面板与八维两节的「标题 → 内容」间距对齐：清零 U06 自带的重复顶部/底部
+ * 内边距，改由外层 .sec 统一提供节奏（与 radar-readout / archRow 等其余小节一致）。 */
+#dockBody #atlasFootprintHost .atlas-footprint {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+/* v80: the same selected character has a reading view and an unobstructed
+   3D preview. Keep the return control in the native, keyboardable nav row. */
+#dockPreview {
+  min-height: 44px;
+  padding-inline: 12px;
+  color: var(--abyss-mint-bright);
+  border-color: var(--abyss-mint);
+  white-space: nowrap;
+}
+/* The generic HUD entrance also animates transform. On a closed bottom
+   drawer that can leave an invisible full-screen pointer barrier. */
+#dock.enter { animation: none; }
+#dock:not(.on) { visibility: hidden; }
+#dock.is-preview {
+  bottom: auto;
+  height: auto;
+}
+#dock.is-preview #dockBody,
+#dock.is-preview #dockToc,
+#dock.is-preview .dk-stats,
+#dock.is-preview #dRole { display: none; }
+#dock.is-preview #dockHead { border-bottom: 0; }
+#dock.is-preview #dockPreview { color: var(--abyss-signal-bright); }
+@media (max-width: 820px) {
+  #dock.is-preview { top: auto; bottom: var(--shell-bottom); }
+}
+@media (max-width: 480px) {
+  #dock.is-preview { bottom: 0; }
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+ * Frontier surface pass · v91
+ * 这一层只编排材质与反馈，不改变任何图谱几何或数据；所有颜色、字阶与
+ * z-level 都回收到现有 Abyss / Atlas 令牌，方便在低端档与减弱动效下退场。
+ * ──────────────────────────────────────────────────────────────────────── */
+:root {
+  --frontier-ease: cubic-bezier(.16, 1, .3, 1);
+  --frontier-spring: cubic-bezier(.2, .9, .18, 1.16);
+  --frontier-haze: color-mix(in oklab, var(--abyss-violet) 11%, transparent);
+  --frontier-haze-hot: color-mix(in oklab, var(--abyss-gold) 10%, transparent);
+}
+
+/* 深空底材：两层低对比星云 + 细网格，给 WebGL 留出呼吸空间。 */
+#stage {
+  background:
+    radial-gradient(72% 62% at 51% 45%, var(--frontier-haze), transparent 72%),
+    radial-gradient(45% 42% at 80% 17%, var(--frontier-haze-hot), transparent 74%),
+    var(--cosmic-stage-base);
+}
+#stage::before {
+  background:
+    radial-gradient(1px 1px at 12% 19%, color-mix(in oklab, var(--abyss-ink-bright) 42%, transparent), transparent 70%),
+    radial-gradient(1px 1px at 74% 31%, color-mix(in oklab, var(--abyss-gold) 36%, transparent), transparent 70%),
+    radial-gradient(1px 1px at 36% 78%, color-mix(in oklab, var(--abyss-violet-bright) 34%, transparent), transparent 70%),
+    var(--cosmic-stage-haze), var(--cosmic-stage-grid);
+  background-size: 260px 260px, 340px 340px, 420px 420px, auto, 72px 72px;
+  animation: frontierStarDrift 96s linear infinite;
+  opacity: .78;
+}
+#stage::after {
+  background:
+    radial-gradient(70% 76% at 50% 48%, transparent 46%, color-mix(in oklab, var(--abyss-obsidian-deep) 62%, transparent) 100%),
+    var(--cosmic-stage-vignette);
+  opacity: .88;
+}
+#gl { filter: saturate(1.12) contrast(1.06) brightness(.96); }
+
+/* HUD 材质：玻璃有“前后层”，鼠标经过时只抬起 2px，避免抢走图谱焦点。 */
+.panel {
+  background:
+    linear-gradient(135deg, color-mix(in oklab, var(--abyss-ink-bright) 4%, transparent), transparent 38%),
+    var(--cosmic-panel-bg);
+  box-shadow: var(--cosmic-panel-shadow), inset 0 1px 0 color-mix(in oklab, var(--abyss-ink-bright) 8%, transparent);
+  transition: border-color var(--cl-atlas-dur-1) var(--frontier-ease), box-shadow var(--cl-atlas-dur-1) var(--frontier-ease), transform var(--cl-atlas-dur-1) var(--frontier-spring);
+}
+#brand .panel:hover, #index .panel:hover, #overview .panel:hover { transform: translateY(-2px); }
+.btn {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  background: linear-gradient(120deg, color-mix(in oklab, var(--abyss-ink-bright) 4%, transparent), transparent 60%), var(--cosmic-control-bg);
+}
+.btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(112deg, transparent 24%, color-mix(in oklab, var(--abyss-ink-bright) 15%, transparent) 48%, transparent 70%);
+  transform: translateX(-125%);
+  transition: transform 520ms var(--frontier-ease);
+}
+.btn:hover::after, .btn:focus-visible::after { transform: translateX(125%); }
+.btn:focus-visible, .panel :is(button, input, select):focus-visible { outline: 1px solid var(--abyss-gold); outline-offset: 3px; }
+
+/* 三图舞台：入场时有一拍“聚焦”，停留时保留极慢的光学呼吸。 */
+.cl-ann-layer, .cl-atlas-stage, .cl-domains-lamps, #gemHost, .cl-o3-layer, #clOrbit {
+  filter: drop-shadow(0 0 18px color-mix(in oklab, var(--abyss-violet) 9%, transparent));
+}
+.cl-ann-layer { transform-origin: 50% 50%; }
+body.is-ann .cl-ann-layer { animation: frontierMapSettle var(--cl-atlas-dur-3) var(--frontier-ease) both; }
+.cl-ann-arc.is-hit:hover, .cl-ann-head.is-hit:hover, .cl-ann-bead.is-hit:hover {
+  filter: drop-shadow(0 0 8px color-mix(in oklab, var(--abyss-gold) 52%, transparent));
+}
+.cl-ann-core__star { transform-box: fill-box; transform-origin: center; animation: frontierStarBreathe 28s ease-in-out infinite alternate; }
+.cl-ann-card {
+  border-radius: var(--abyss-radius-sm);
+  background: linear-gradient(135deg, color-mix(in oklab, var(--abyss-ink-bright) 5%, transparent), transparent 48%), var(--cosmic-panel-bg-strong);
+  box-shadow: var(--cosmic-panel-shadow-float), inset 0 1px 0 color-mix(in oklab, var(--abyss-ink-bright) 9%, transparent);
+  backdrop-filter: blur(var(--abyss-glass-blur)) saturate(1.2);
+}
+
+.cl-gem-host { perspective: 1200px; }
+.cl-gem {
+  transform-style: preserve-3d;
+  filter: drop-shadow(0 16px 28px color-mix(in oklab, var(--abyss-violet) 20%, transparent));
+  animation: frontierGemFloat 24s ease-in-out infinite alternate;
+}
+.cl-gem-poly, .cl-gem-fill, .cl-gem-ghost, .cl-gem-peer { transition: opacity var(--cl-atlas-dur-1) var(--frontier-ease), filter var(--cl-atlas-dur-1) var(--frontier-ease), stroke-width var(--cl-atlas-dur-1) var(--frontier-ease); }
+.cl-gem-vertex.is-hit:hover, .cl-gem-badge.is-hit:hover { filter: drop-shadow(0 0 9px color-mix(in oklab, var(--abyss-gold) 72%, transparent)); }
+.cl-gem-arc { filter: drop-shadow(0 0 5px color-mix(in oklab, var(--abyss-mint) 15%, transparent)); }
+
+.cl-domains-lamp {
+  background: linear-gradient(110deg, color-mix(in oklab, var(--abyss-ink-bright) 6%, transparent), transparent 60%), color-mix(in srgb, var(--cl-dom-bg) 74%, transparent);
+  box-shadow: inset 0 1px 0 color-mix(in oklab, var(--abyss-ink-bright) 8%, transparent), 0 10px 28px color-mix(in oklab, var(--abyss-obsidian-deep) 44%, transparent);
+  /* transform is written by domains-lamps.js every frame; never transition it or labels trail their anchors. */
+  transition: opacity var(--cl-dom-dur) var(--frontier-ease), border-color var(--cl-dom-dur) var(--frontier-ease), box-shadow var(--cl-dom-dur) var(--frontier-ease);
+}
+.cl-domains-lamp:hover, .cl-domains-lamp:focus-visible { border-color: color-mix(in oklab, currentColor 72%, transparent); box-shadow: 0 0 0 1px color-mix(in oklab, currentColor 28%, transparent), 0 12px 30px color-mix(in oklab, currentColor 16%, transparent); }
+.cl-domains-lamp__dot { box-shadow: 0 0 10px currentColor; }
+
+/* 预演控制台与展卷：增加仪器感，但不扩大命中区。 */
+.atlas-preview-hud.on .aph-shell { animation: frontierHudRise var(--cl-atlas-dur-2) var(--frontier-ease) both; }
+.aph-controls, .aph-timeline, .atlas-stage-panel {
+  box-shadow: 0 18px 50px color-mix(in oklab, var(--abyss-obsidian-deep) 48%, transparent), inset 0 1px 0 color-mix(in oklab, var(--abyss-ink-bright) 7%, transparent);
+  backdrop-filter: blur(var(--abyss-glass-blur)) saturate(1.18);
+}
+.aph-badge, .aph-gbtn { transition: color var(--cl-atlas-dur-1) var(--frontier-ease), box-shadow var(--cl-atlas-dur-1) var(--frontier-ease), transform var(--cl-atlas-dur-1) var(--frontier-spring); }
+.aph-badge:hover, .aph-gbtn:hover { transform: translateY(-1px); }
+.aph-badge[aria-pressed=true] .aph-badge-g { animation: frontierSigilBreathe 24s ease-in-out infinite alternate; }
+.atlas-stage-panel { border-color: color-mix(in oklab, var(--abyss-violet-bright) 26%, transparent); }
+
+/* 星空壳首页与数据态共用同一条深空呼吸。 */
+.sky-home, body.sky-shell #stage { background-image: radial-gradient(72% 58% at 50% 40%, var(--frontier-haze), transparent 74%), radial-gradient(40% 40% at 82% 18%, var(--frontier-haze-hot), transparent 76%); }
+.sky-home .sh-center { filter: drop-shadow(0 16px 34px color-mix(in oklab, var(--abyss-violet) 20%, transparent)); }
+.sky-home .sh-btn, .sky-tools-menu, .sky-top, .sky-bottom { box-shadow: 0 16px 46px color-mix(in oklab, var(--abyss-obsidian-deep) 46%, transparent), inset 0 1px 0 color-mix(in oklab, var(--abyss-ink-bright) 7%, transparent); }
+
+@keyframes frontierStarDrift { from { background-position: 0 0, 0 0, 0 0, 0 0, 0 0; } to { background-position: 260px 34px, -340px 52px, 420px -44px, 0 0, 72px 0; } }
+@keyframes frontierMapSettle { from { opacity: 0; transform: scale(.985); } to { opacity: 1; transform: none; } }
+@keyframes frontierStarBreathe { from { opacity: .72; } to { opacity: 1; } }
+@keyframes frontierGemFloat { from { transform: translateY(0); } to { transform: translateY(-3px); } }
+@keyframes frontierHudRise { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+@keyframes frontierSigilBreathe { from { opacity: .78; } to { opacity: 1; } }
+
+@media (hover: none) {
+  #brand .panel:hover, #index .panel:hover, #overview .panel:hover, .aph-badge:hover, .aph-gbtn:hover { transform: none; }
+  .btn:active, .aph-badge:active, .aph-gbtn:active { transform: scale(.97); }
+}
+@media (prefers-reduced-motion: reduce) {
+  #stage::before, .cl-ann-layer, .cl-ann-core__star, .cl-gem, .aph-badge[aria-pressed=true], .atlas-preview-hud.on .aph-shell { animation: none; }
+  .panel, .btn, .aph-badge, .aph-gbtn, .cl-domains-lamp { transition: none; }
+}
+[data-tier="low"] #stage::before, body.skylab-still #stage::before { animation: none; }
+
+/* ──────────────────────────────────────────────────────────────────────────
+ * Cinematic frontier surface · v92
+ *
+ * 最后一层只做视觉编排：让三图在同一片深空里各自拥有明确的「材质重心」
+ * 和可感知的动作回路。几何、命中区、数据绑定继续由各模块掌管；本层
+ * 只使用全局令牌，故可以在低端档 / 静止模式下安全退场。
+ * ──────────────────────────────────────────────────────────────────────── */
+:root {
+  --frontier-surface-ease: var(--abyss-ease-sacred);
+  --frontier-surface-spring: var(--abyss-ease-spring);
+  --frontier-surface-hair: color-mix(in oklab, var(--abyss-ink-bright) 11%, transparent);
+  --frontier-surface-hair-hot: color-mix(in oklab, var(--abyss-gold) 42%, transparent);
+  --frontier-surface-halo: color-mix(in oklab, var(--abyss-violet-bright) 16%, transparent);
+}
+
+/* 深空底材：三层不同速度的星尘，让镜头移动时有纵深参照；网格仍保持极低对比。 */
+#stage::before {
+  background:
+    radial-gradient(1px 1px at 11% 22%, color-mix(in oklab, var(--abyss-ink-bright) 36%, transparent), transparent 70%),
+    radial-gradient(1px 1px at 76% 13%, color-mix(in oklab, var(--abyss-gold) 30%, transparent), transparent 70%),
+    radial-gradient(1px 1px at 44% 86%, color-mix(in oklab, var(--abyss-violet-bright) 30%, transparent), transparent 70%),
+    radial-gradient(1px 1px at 92% 68%, color-mix(in oklab, var(--abyss-mint-bright) 22%, transparent), transparent 70%),
+    var(--cosmic-stage-haze), var(--cosmic-stage-grid);
+  background-size: 220px 220px, 310px 310px, 390px 390px, 470px 470px, auto, 72px 72px;
+  animation: frontierStarDrift 118s linear infinite;
+}
+#stage::after {
+  background:
+    radial-gradient(58% 48% at 50% 46%, transparent 38%, var(--cosmic-stage-base) 110%),
+    conic-gradient(from 210deg at 50% 48%, transparent 0deg 118deg, var(--frontier-surface-halo) 158deg, transparent 208deg 360deg),
+    var(--cosmic-stage-vignette);
+  opacity: .9;
+}
+#gl { filter: saturate(1.16) contrast(1.08) brightness(.94); }
+
+/* HUD 的「液态玻璃」：顶部亮边和底部暗边会随 hover 产生轻微浮起。 */
+.panel,
+.aph-controls,
+.aph-timeline,
+.atlas-stage-panel,
+.cl-o3-legend,
+.cl-orbit__card,
+.skd-deck,
+.skg-deck {
+  border-color: color-mix(in oklab, var(--cosmic-panel-border) 82%, var(--frontier-surface-hair));
+  box-shadow:
+    var(--cosmic-panel-shadow),
+    inset 0 1px 0 var(--frontier-surface-hair),
+    inset 0 -1px 0 color-mix(in oklab, var(--abyss-obsidian-deep) 62%, transparent);
+}
+.panel::before {
+  border-color: var(--frontier-surface-hair-hot);
+  filter: drop-shadow(0 0 6px color-mix(in oklab, var(--abyss-gold) 22%, transparent));
+}
+.panel::after {
+  border-color: color-mix(in oklab, var(--abyss-violet-bright) 34%, transparent);
+}
+.btn,
+.seg button,
+.ix-sort button,
+.lb-sort button,
+.ia-view-switch button,
+.aph-gbtn,
+.aph-badge {
+  transition:
+    color var(--abyss-dur-micro) var(--frontier-surface-ease),
+    background-color var(--abyss-dur-micro) var(--frontier-surface-ease),
+    border-color var(--abyss-dur-micro) var(--frontier-surface-ease),
+    box-shadow var(--abyss-dur-micro) var(--frontier-surface-ease),
+    transform var(--abyss-dur-micro) var(--frontier-surface-spring);
+}
+.btn:active,
+.aph-gbtn:active,
+.aph-badge:active,
+.seg button:active,
+.ix-sort button:active,
+.lb-sort button:active,
+.ia-view-switch button:active { transform: translateY(1px) scale(.985); }
+
+/* 年轮：线层由冷紫托起，主线/选中线获得真正的「热路径」光晕。 */
+.cl-ann-layer {
+  filter:
+    drop-shadow(0 0 22px color-mix(in oklab, var(--abyss-violet-bright) 13%, transparent))
+    drop-shadow(0 20px 42px color-mix(in oklab, var(--abyss-obsidian-deep) 52%, transparent));
+}
+.cl-ann-arc.is-main { filter: drop-shadow(0 0 5px color-mix(in oklab, var(--abyss-gold) 30%, transparent)); }
+.cl-ann-arc.is-focus,
+.cl-ann-arc.is-hover { filter: drop-shadow(0 0 8px color-mix(in oklab, var(--abyss-gold) 68%, transparent)); }
+.cl-ann-head.is-active { filter: drop-shadow(0 0 9px color-mix(in oklab, var(--abyss-mint-bright) 52%, transparent)); }
+.cl-ann-bead.is-lead circle { filter: drop-shadow(0 0 7px color-mix(in oklab, var(--abyss-gold) 68%, transparent)); }
+.cl-ann-card {
+  border-radius: var(--abyss-radius-sm);
+  backdrop-filter: blur(calc(var(--abyss-glass-blur) + 4px)) saturate(1.28);
+  -webkit-backdrop-filter: blur(calc(var(--abyss-glass-blur) + 4px)) saturate(1.28);
+}
+
+/* 双晶：晶面有半透明体积感，轴线和顶点按交互状态形成可读的光学层级。 */
+.cl-gem-host {
+  position: relative;
+  isolation: isolate;
+}
+.cl-gem-host::before {
+  content: '';
+  position: absolute;
+  inset: 12% 14%;
+  z-index: var(--z-abyss);
+  pointer-events: none;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, var(--frontier-surface-halo), transparent 72%);
+  filter: blur(18px);
+  opacity: .66;
+}
+.cl-gem { position: relative; z-index: var(--z-chart); }
+.cl-gem-poly[data-face="attr"] { filter: drop-shadow(0 0 6px color-mix(in oklab, var(--cl-gem-attr-bright) 30%, transparent)); }
+.cl-gem-poly[data-face="meta"] { filter: drop-shadow(0 0 6px color-mix(in oklab, var(--cl-gem-meta-bright) 24%, transparent)); }
+.cl-gem-vertex.is-hot,
+.cl-gem-vertex:focus-visible { filter: drop-shadow(0 0 11px color-mix(in oklab, var(--abyss-gold) 78%, transparent)); }
+.cl-gem-arc__line.is-lead { filter: drop-shadow(0 0 6px color-mix(in oklab, var(--abyss-mint-bright) 42%, transparent)); }
+
+/* 星域：灯牌、关系 hull 与 WebGL 层使用同一条发光边缘，移动时仍不拖拽锚点。 */
+.cl-domains-lamp {
+  border-color: color-mix(in oklab, currentColor 30%, var(--cosmic-panel-border-soft));
+  background:
+    linear-gradient(110deg, color-mix(in oklab, var(--abyss-ink-bright) 8%, transparent), transparent 62%),
+    color-mix(in srgb, var(--cl-dom-bg) 76%, transparent);
+  box-shadow:
+    inset 0 1px 0 var(--frontier-surface-hair),
+    0 14px 32px color-mix(in oklab, var(--abyss-obsidian-deep) 50%, transparent),
+    0 0 18px color-mix(in oklab, currentColor 11%, transparent);
+}
+.cl-domains-lamp:hover,
+.cl-domains-lamp:focus-visible,
+.cl-domains-lamp.is-hot {
+  transform: translate(-50%, -50%) translate(var(--cl-dom-x), var(--cl-dom-y)) scale(1.035);
+  border-color: color-mix(in oklab, currentColor 66%, transparent);
+  box-shadow: 0 0 0 1px color-mix(in oklab, currentColor 28%, transparent), 0 16px 36px color-mix(in oklab, currentColor 19%, transparent);
+}
+.cl-domains-lamp__dot { filter: drop-shadow(0 0 5px currentColor); }
+
+/* 3D 轨道 / 剧情树 / 预演面板：在视图切换和拖拽时保持同一层次。 */
+.cl-o3-labels,
+.cl-o3-legend,
+.cl-orbit__card,
+.cl-plot-deck,
+.atlas-stage-panel,
+.atlas-preview-hud .aph-shell {
+  backdrop-filter: blur(var(--abyss-glass-blur)) saturate(1.24);
+  -webkit-backdrop-filter: blur(var(--abyss-glass-blur)) saturate(1.24);
+}
+.cl-o3-legend li,
+.cl-plot-deck .pl-row,
+.skd-deck .skd-card,
+.skg-deck .skg-card { transition: filter var(--abyss-dur-micro) var(--frontier-surface-ease), transform var(--abyss-dur-micro) var(--frontier-surface-spring), border-color var(--abyss-dur-micro) var(--frontier-surface-ease); }
+.cl-o3-legend li:hover,
+.cl-plot-deck .pl-row:hover,
+.skd-deck .skd-card:hover,
+.skg-deck .skg-card:hover { filter: brightness(1.1) saturate(1.08); }
+.cl-atlas-stage .atlas-stage-bg { background: radial-gradient(70% 62% at 50% 42%, var(--frontier-surface-halo), transparent 74%), var(--cosmic-stage-vignette); }
+
+/* 移动端把光学层收紧，保留触控反馈；静止模式彻底关闭所有装饰性层。 */
+@media (max-width: 820px) {
+  #stage::before { opacity: .66; }
+  .panel { box-shadow: var(--cosmic-mobile-panel-shadow), inset 0 1px 0 var(--frontier-surface-hair); }
+  .cl-gem-host::before { opacity: .45; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #stage::before,
+  .cl-gem,
+  .cl-ann-layer,
+  .cl-ann-core__star,
+  .aph-badge[aria-pressed='true'] { animation: none !important; }
+  .panel,
+  .btn,
+  .aph-gbtn,
+  .aph-badge,
+  .cl-domains-lamp,
+  .cl-o3-legend li,
+  .cl-plot-deck .pl-row,
+  .skd-deck .skd-card,
+  .skg-deck .skg-card { transition: none !important; }
+}
+[data-tier='low'] #stage::before,
+[data-tier='low'] .cl-gem-host::before,
+body.skylab-still #stage::before,
+body.skylab-still .cl-gem-host::before { animation: none !important; opacity: .34; }

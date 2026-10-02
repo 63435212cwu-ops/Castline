@@ -1,0 +1,413 @@
+/*
+ * Castline · module-refinement.css
+ *
+ * 精修层：辅助模块的材质、排版和状态细节。这里不重画图谱几何，专门处理
+ * 读数面与图谱之间的“仪器”关系：蚀刻网格、光学边缘、可见的层级和有来源的
+ * 状态色。所有色相都从 abyss / atlas / sky 令牌派生，低档和静止态在文件末尾
+ * 保留同一组最终状态。
+ */
+
+:root {
+  --refine-edge: color-mix(in oklab, var(--module-lens, var(--abyss-violet-bright)) 30%, var(--abyss-line));
+  --refine-edge-hi: color-mix(in oklab, var(--module-hot, var(--abyss-signal)) 55%, transparent);
+  --refine-grid: color-mix(in oklab, var(--module-lens, var(--abyss-violet-bright)) 11%, transparent);
+  --refine-ink: color-mix(in oklab, var(--abyss-ink-bright) 90%, var(--abyss-ink));
+  --refine-shadow: 0 22px 64px color-mix(in oklab, var(--abyss-obsidian-deep) 74%, transparent);
+  --refine-ease: cubic-bezier(.16, .84, .32, 1);
+  --refine-spring: cubic-bezier(.18, .92, .28, 1.12);
+}
+
+/* ── Shared material: two scales of grid plus a bevel.  This is intentionally
+ * geometry instead of another blur/glow, so the surfaces remain legible on a
+ * dark stage and at high zoom. */
+:is(.radar-wrap, .plot-text-panel, .info-arch .ia-shell, .cl-o3-deck,
+    .cl-o3-legend, .cl-orbit__card, .atlas-stage-panel, .cl-ann-ledger,
+    .gem-shell, .domains-panel, .cl-score-root, .atlas-footprint) {
+  border-color: var(--refine-edge);
+  background-image:
+    linear-gradient(135deg, color-mix(in oklab, var(--module-lens, var(--abyss-violet-bright)) 7%, transparent), transparent 32%),
+    linear-gradient(315deg, color-mix(in oklab, var(--module-hot, var(--abyss-signal)) 4%, transparent), transparent 34%);
+}
+
+:is(.radar-wrap, .plot-text-panel, .info-arch .ia-shell, .cl-o3-deck,
+    .cl-o3-legend, .cl-orbit__card, .atlas-stage-panel, .cl-ann-ledger,
+    .gem-shell, .domains-panel, .cl-score-root, .atlas-footprint)::after {
+  pointer-events: none;
+}
+
+/* ── Radar observatory ──────────────────────────────────────────────── */
+.radar-wrap {
+  min-height: 300px;
+  overflow: hidden;
+  border-radius: var(--abyss-radius-md);
+  background:
+    radial-gradient(70% 64% at 50% 44%, color-mix(in oklab, var(--module-lens, var(--abyss-violet-bright)) 13%, transparent), transparent 74%),
+    repeating-linear-gradient(90deg, transparent 0 39px, color-mix(in oklab, var(--module-lens, var(--abyss-violet-bright)) 5%, transparent) 40px, transparent 41px),
+    repeating-linear-gradient(0deg, transparent 0 39px, color-mix(in oklab, var(--module-lens, var(--abyss-violet-bright)) 4%, transparent) 40px, transparent 41px),
+    var(--module-panel, var(--abyss-obsidian-glass-heavy));
+  box-shadow: var(--refine-shadow), inset 0 1px 0 color-mix(in oklab, var(--abyss-ink-bright) 14%, transparent), inset 0 -26px 48px color-mix(in oklab, var(--abyss-obsidian-deep) 30%, transparent);
+}
+.radar-wrap::before {
+  z-index: var(--z-abyss);
+  opacity: .52;
+  background:
+    radial-gradient(circle at 14% 22%, color-mix(in oklab, var(--module-hot, var(--abyss-signal)) 50%, transparent) 0 .7px, transparent 1.5px),
+    radial-gradient(circle at 76% 68%, color-mix(in oklab, var(--module-cool, var(--abyss-mint-bright)) 42%, transparent) 0 .6px, transparent 1.35px),
+    repeating-linear-gradient(0deg, transparent 0 23px, var(--refine-grid) 24px, transparent 25px),
+    repeating-linear-gradient(90deg, transparent 0 23px, var(--refine-grid) 24px, transparent 25px);
+  background-size: 137px 173px, 191px 227px, 100% 100%, 100% 100%;
+  mix-blend-mode: screen;
+}
+.radar-wrap::after {
+  inset: 7%;
+  border: 1px solid color-mix(in oklab, var(--module-lens, var(--abyss-violet-bright)) 18%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--module-hot, var(--abyss-signal)) 9%, transparent), 0 0 0 12px color-mix(in oklab, var(--module-lens, var(--abyss-violet-bright)) 3%, transparent);
+  opacity: .72;
+  animation: refineRadarScan var(--abyss-dur-orbit-slow, 26s) linear infinite;
+}
+.radar-wrap .radar-3d,
+.radar-wrap .radar-svg { z-index: var(--z-chart); transform-origin: 50% 50%; }
+.radar-3d .rd-grid { stroke: color-mix(in oklab, var(--module-lens, var(--abyss-violet-bright)) 36%, transparent); stroke-width: .75; stroke-dasharray: .7 4.5; }
+.radar-3d .rd-grid-outer { stroke: color-mix(in oklab, var(--module-hot, var(--abyss-signal)) 58%, transparent); stroke-width: 1.1; stroke-dasharray: 8 4 1 4; }
+.radar-3d .rd-axis { stroke: color-mix(in oklab, var(--module-lens, var(--abyss-violet-bright)) 32%, transparent); stroke-width: .8; }
+.radar-3d .rd-shape { stroke-linejoin: round; stroke-linecap: round; filter: drop-shadow(0 0 7px color-mix(in oklab, var(--module-hot, var(--abyss-signal)) 24%, transparent)); }
+.radar-3d .rd-vert { stroke-width: 1.1; }
+.radar-3d .rd-dot,
+.radar-3d .rd-lamp { vector-effect: non-scaling-stroke; }
+.radar-caption {
+  position: relative;
+  z-index: var(--z-hud);
+  padding-top: 10px;
+  border-top-style: solid;
+  border-top-color: color-mix(in oklab, var(--module-lens, var(--abyss-violet-bright)) 22%, transparent);
+  background: linear-gradient(90deg, transparent, color-mix(in oklab, var(--module-lens, var(--abyss-violet-bright)) 10%, transparent) 18% 82%, transparent);
+}
+@keyframes refineRadarScan { to { transform: rotate(360deg); } }
+
+/* ── Text plot / narrative tree ─────────────────────────────────────── */
+.plot-text-panel {
+  border-radius: var(--abyss-radius-md);
+  box-shadow: -24px 30px 80px color-mix(in oklab, var(--abyss-obsidian-deep) 74%, transparent), inset 0 1px 0 color-mix(in oklab, var(--abyss-ink-bright) 13%, transparent), inset 0 0 0 1px color-mix(in oklab, var(--module-lens, var(--abyss-violet-bright)) 6%, transparent);
+}
+.plot-text-panel::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 72px;
+  z-index: var(--z-abyss);
+  background: linear-gradient(180deg, transparent, color-mix(in oklab, var(--abyss-obsidian-deep) 48%, transparent));
+}
+.plot-text-panel > * { position: relative; z-index: var(--z-chart); }
+.pt-head { position: relative; overflow: hidden; }
+.pt-head::after {
+  content: "";
+  position: absolute;
+  right: 12px;
+  bottom: -10px;
+  width: 104px;
+  height: 104px;
+  border: 1px solid color-mix(in oklab, var(--module-hot, var(--abyss-signal)) 24%, transparent);
+  border-radius: 50%;
+  opacity: .55;
+  box-shadow: 0 0 0 7px color-mix(in oklab, var(--module-hot, var(--abyss-signal)) 4%, transparent), 0 0 0 18px color-mix(in oklab, var(--module-lens, var(--abyss-violet-bright)) 4%, transparent);
+}
+.pt-meta { padding-block: 8px; border-bottom-style: solid; }
+.pt-list { position: relative; padding-left: 5px; }
+.pt-list::before {
+  content: "";
+  position: absolute;
+  top: 4px;
+  bottom: 12px;
+  left: 13px;
+  width: 1px;
+  background: linear-gradient(180deg, color-mix(in oklab, var(--module-hot, var(--abyss-signal)) 45%, transparent), color-mix(in oklab, var(--module-lens, var(--abyss-violet-bright)) 14%, transparent) 75%, transparent);
+}
+.pt-item {
+  position: relative;
+  isolation: isolate;
+  min-height: 62px;
+  padding: 10px 12px 10px 26px;
+  border-radius: 3px 10px 10px 3px;
+  background:
+    linear-gradient(90deg, color-mix(in oklab, var(--module-lens, var(--abyss-violet-bright)) 8%, transparent), transparent 38%),
+    repeating-linear-gradient(0deg, transparent 0 17px, color-mix(in oklab, var(--abyss-ink-bright) 3%, transparent) 18px, transparent 19px),
+    color-mix(in oklab, var(--module-panel, var(--abyss-obsidian-glass-heavy)) 84%, transparent);
+  box-shadow: inset 0 1px 0 color-mix(in oklab, var(--abyss-ink-bright) 10%, transparent), 0 10px 26px color-mix(in oklab, var(--abyss-obsidian-deep) 34%, transparent);
+}
+.pt-item::before {
+  left: 8px;
+  top: 21px;
+  z-index: var(--z-hud);
+  width: 9px;
+  height: 9px;
+  border: 1px solid var(--module-hot, var(--abyss-signal));
+  background: var(--module-panel, var(--abyss-obsidian-glass-heavy));
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--module-hot, var(--abyss-signal)) 10%, transparent);
+  transform: rotate(45deg);
+}
+.pt-item.active::before { background: var(--module-cool, var(--abyss-mint-bright)); border-color: var(--module-cool, var(--abyss-mint-bright)); box-shadow: 0 0 0 4px color-mix(in oklab, var(--module-cool, var(--abyss-mint-bright)) 12%, transparent); }
+.pt-item:hover { transform: translate3d(6px, -2px, 0); }
+.pt-item .pt-title,
+.pt-item .pt-kicker,
+.pt-item .pt-excerpt { position: relative; z-index: var(--z-chart); }
+
+/* ── Circular story orbit and subtitle deck ──────────────────────────── */
+.cl-orbit__arc { vector-effect: non-scaling-stroke; stroke-linecap: round; stroke-linejoin: round; }
+.cl-orbit__arc.is-hover,
+.cl-orbit__arc.is-active { stroke-width: calc(var(--cl-orbit-ring-w) + 1.4px); filter: drop-shadow(0 0 5px color-mix(in oklab, currentColor 45%, transparent)); }
+.cl-orbit__ring--time { stroke-dasharray: 1 11; stroke-linecap: round; opacity: .72; }
+.cl-orbit__tick[data-major="1"] { stroke-width: 1.6px; }
+.cl-orbit__node { stroke-width: 1px; }
+.cl-orbit__node.is-active { r: calc(var(--cl-orbit-node-r-hot) + .8px); stroke-width: 1.4px; filter: drop-shadow(0 0 7px color-mix(in oklab, var(--module-hot, var(--abyss-signal)) 62%, transparent)); }
+.cl-orbit__card {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  padding: calc(var(--cl-orbit-card-pad) + 2px);
+  border-radius: 3px 11px 11px 3px;
+  background:
+    linear-gradient(135deg, color-mix(in oklab, var(--module-lens, var(--abyss-violet-bright)) 11%, transparent), transparent 46%),
+    repeating-linear-gradient(0deg, transparent 0 21px, color-mix(in oklab, var(--abyss-ink-bright) 3%, transparent) 22px, transparent 23px),
+    var(--module-panel, var(--abyss-obsidian-glass-heavy));
+  box-shadow: var(--refine-shadow), inset 0 1px 0 color-mix(in oklab, var(--abyss-ink-bright) 14%, transparent), inset 4px 0 0 color-mix(in oklab, var(--module-hot, var(--abyss-signal)) 20%, transparent);
+}
+.cl-orbit__card::before {
+  content: "";
+  position: absolute;
+  inset: 7px;
+  z-index: var(--z-abyss);
+  border: 1px solid color-mix(in oklab, var(--module-lens, var(--abyss-violet-bright)) 12%, transparent);
+  pointer-events: none;
+}
+.cl-orbit__card::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 34px;
+  height: 34px;
+  border-top: 1px solid var(--module-hot, var(--abyss-signal));
+  border-right: 1px solid var(--module-hot, var(--abyss-signal));
+  opacity: .48;
+  pointer-events: none;
+}
+.cl-orbit__card > * { position: relative; z-index: var(--z-chart); }
+.cl-orbit__card-kicker { letter-spacing: .12em; }
+.cl-orbit__card-title { color: var(--refine-ink); letter-spacing: .025em; }
+.cl-orbit__heat { height: 3px; margin-top: .55rem; border-radius: 999px; background: repeating-linear-gradient(90deg, color-mix(in oklab, var(--abyss-ink-bright) 8%, transparent) 0 1px, transparent 1px 5px); }
+.cl-orbit__heat i { box-shadow: 0 0 7px currentColor; }
+.cl-o3-deck {
+  overflow: hidden;
+  padding: .8rem 1.2rem .7rem;
+  border-radius: 4px 16px 4px 16px;
+  background:
+    linear-gradient(180deg, color-mix(in oklab, var(--module-lens, var(--abyss-violet-bright)) 9%, transparent), transparent 45%),
+    linear-gradient(to top, var(--glass-2), var(--glass) 70%, transparent);
+  box-shadow: var(--refine-shadow), inset 0 1px 0 color-mix(in oklab, var(--abyss-ink-bright) 15%, transparent);
+}
+.cl-o3-deck::before {
+  content: "";
+  position: absolute;
+  left: 15%;
+  right: 15%;
+  top: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--module-hot, var(--abyss-signal)), transparent);
+  opacity: .74;
+}
+.cl-o3-deck__title { color: var(--refine-ink); letter-spacing: .08em; text-shadow: 0 1px 18px color-mix(in oklab, var(--module-lens, var(--abyss-violet-bright)) 26%, transparent); }
+.cl-o3-deck__reading,
+.cl-o3-deck__events,
+.cl-o3-deck__participants { border-top-color: color-mix(in oklab, var(--module-lens, var(--abyss-violet-bright)) 20%, transparent); }
+.cl-o3-legend { border-radius: 3px 10px 10px 3px; background: linear-gradient(135deg, color-mix(in oklab, var(--module-lens, var(--abyss-violet-bright)) 8%, transparent), var(--glass)); }
+.cl-o3-legend li { position: relative; padding-block: .42rem; border-bottom-color: color-mix(in oklab, var(--module-lens, var(--abyss-violet-bright)) 12%, transparent); }
+.cl-o3-legend li::after { content: ""; position: absolute; left: .4rem; right: .4rem; bottom: -1px; height: 1px; background: linear-gradient(90deg, transparent, color-mix(in oklab, currentColor 26%, transparent), transparent); opacity: .5; }
+
+/* ── Reference index / cards ────────────────────────────────────────── */
+.info-arch .ia-shell {
+  background:
+    radial-gradient(70% 40% at 12% 0%, color-mix(in oklab, var(--ia-violet, var(--abyss-violet-bright)) 10%, transparent), transparent 74%),
+    repeating-linear-gradient(0deg, transparent 0 31px, color-mix(in oklab, var(--abyss-ink-bright) 2%, transparent) 32px, transparent 33px),
+    var(--ia-panel-hi, var(--abyss-obsidian-glass-heavy));
+  box-shadow: var(--refine-shadow), inset 0 1px 0 color-mix(in oklab, var(--abyss-ink-bright) 15%, transparent);
+}
+.info-arch .ia-kpi {
+  min-height: 104px;
+  overflow: hidden;
+  border-radius: 2px 10px 2px 10px;
+  background:
+    linear-gradient(140deg, color-mix(in oklab, var(--tone, var(--ia-violet)) 12%, transparent), transparent 55%),
+    repeating-linear-gradient(90deg, transparent 0 22px, color-mix(in oklab, var(--abyss-ink-bright) 3%, transparent) 23px, transparent 24px),
+    var(--cosmic-tile-bg);
+  box-shadow: inset 0 1px 0 color-mix(in oklab, var(--abyss-ink-bright) 13%, transparent), 0 10px 30px color-mix(in oklab, var(--abyss-obsidian-deep) 26%, transparent);
+}
+.info-arch .ia-kpi::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(180deg, var(--tone, var(--ia-violet)), transparent);
+  box-shadow: 0 0 14px color-mix(in oklab, var(--tone, var(--ia-violet)) 40%, transparent);
+}
+.info-arch .ia-kpi::after { border-color: color-mix(in oklab, var(--tone, var(--ia-violet)) 28%, transparent); box-shadow: 0 0 0 8px color-mix(in oklab, var(--tone, var(--ia-violet)) 4%, transparent); }
+.info-arch .ia-kpi-value { letter-spacing: .04em; text-shadow: 0 0 18px color-mix(in oklab, currentColor 24%, transparent); }
+.info-arch .ia-card { border-radius: 3px 12px 3px 12px; background: linear-gradient(145deg, color-mix(in oklab, var(--module-lens, var(--abyss-violet-bright)) 7%, transparent), var(--cosmic-tile-bg)); box-shadow: var(--refine-shadow), inset 0 1px 0 color-mix(in oklab, var(--abyss-ink-bright) 12%, transparent); }
+.info-arch .ia-card-head { padding-block: 16px 13px; background: linear-gradient(90deg, color-mix(in oklab, var(--tone, var(--ia-violet)) 7%, transparent), transparent 74%); }
+.info-arch .ia-card h3 { letter-spacing: .06em; }
+.info-arch .ia-cast-row,
+.info-arch .ia-thread,
+.info-arch .ia-rel,
+.info-arch .ia-attr { position: relative; transition: background var(--abyss-dur-fast) var(--refine-ease), transform var(--abyss-dur-fast) var(--refine-spring); }
+.info-arch .ia-cast-row::before,
+.info-arch .ia-thread::before,
+.info-arch .ia-rel::before,
+.info-arch .ia-attr::before { transition: transform var(--abyss-dur-fast) var(--refine-spring), box-shadow var(--abyss-dur-fast) var(--refine-ease); }
+.info-arch .ia-cast-row:hover,
+.info-arch .ia-thread:hover,
+.info-arch .ia-rel:hover,
+.info-arch .ia-attr:hover { transform: translateX(3px); background: color-mix(in oklab, var(--module-lens, var(--abyss-violet-bright)) 8%, transparent); }
+.info-arch .ia-cast-bar,
+.info-arch .ia-thread-meter,
+.info-arch .ia-rel-meter,
+.info-arch .ia-attr-main i { height: 4px; overflow: hidden; background: repeating-linear-gradient(90deg, color-mix(in oklab, var(--ia-line) 70%, transparent) 0 1px, transparent 1px 6px); }
+.info-arch .ia-cast-bar i,
+.info-arch .ia-thread-meter i,
+.info-arch .ia-rel-meter i,
+.info-arch .ia-attr-main i::after { box-shadow: 0 0 8px color-mix(in oklab, currentColor 36%, transparent); }
+
+/* ── Relationship legend / small 3D lamps ───────────────────────────── */
+.cl-dom-legend {
+  overflow: hidden;
+  padding: var(--abyss-space-md) var(--abyss-space-lg);
+  border-radius: 3px 13px 3px 13px;
+  background:
+    linear-gradient(145deg, color-mix(in oklab, var(--module-lens, var(--abyss-violet-bright)) 10%, transparent), transparent 68%),
+    repeating-linear-gradient(0deg, transparent 0 17px, color-mix(in oklab, var(--abyss-ink-bright) 3%, transparent) 18px, transparent 19px),
+    var(--module-panel, var(--abyss-obsidian-glass-heavy));
+  box-shadow: var(--refine-shadow), inset 0 1px 0 color-mix(in oklab, var(--abyss-ink-bright) 12%, transparent);
+}
+.cl-dom-legend__row { min-height: 26px; padding-inline: 4px; border-bottom: 1px solid color-mix(in oklab, currentColor 9%, transparent); }
+.cl-dom-legend__row:hover { background: color-mix(in oklab, currentColor 9%, transparent); transform: translateX(4px); }
+.cl-dom-legend__swatch line { stroke-width: 2; filter: drop-shadow(0 0 3px currentColor); }
+.cl-dom-legend__n { font-variant-numeric: tabular-nums; }
+.cl-domains-lamp { border-radius: 4px 12px 4px 12px; box-shadow: inset 0 1px 0 color-mix(in oklab, var(--abyss-ink-bright) 15%, transparent), inset 0 -12px 22px color-mix(in oklab, var(--abyss-obsidian-deep) 24%, transparent), 0 20px 42px color-mix(in oklab, var(--abyss-obsidian-deep) 44%, transparent); }
+.cl-domains-lamp__dot { box-shadow: 0 0 0 3px color-mix(in oklab, currentColor 11%, transparent), 0 0 12px currentColor, 0 0 26px color-mix(in oklab, currentColor 28%, transparent); }
+
+/* Press states use the individual `scale` property, preserving the projection
+ * transforms written by the orbit and card engines. */
+:is(.ia-kpi, .ia-card, .cl-o3-legend li, .cl-orbit__card, .cl-ann-ledger__row,
+    .atlas-footprint .af-linebtn, .cl-score-genhead, .cl-score-rowhead,
+    .skd-deck .skd-card__bar, .skg-deck .skg-bar):active {
+  scale: .985;
+  filter: brightness(1.16) saturate(1.08);
+}
+
+/* ── Preview console / evidence ─────────────────────────────────────── */
+.atlas-preview-hud .aph-shell {
+  border-radius: 4px 18px 4px 18px;
+  overflow: hidden;
+  background:
+    linear-gradient(135deg, color-mix(in oklab, var(--module-lens, var(--abyss-violet-bright)) 11%, transparent), transparent 48%),
+    repeating-linear-gradient(90deg, transparent 0 37px, color-mix(in oklab, var(--abyss-ink-bright) 3%, transparent) 38px, transparent 39px),
+    var(--module-panel, var(--abyss-obsidian-glass-heavy));
+  box-shadow: var(--refine-shadow), inset 0 1px 0 color-mix(in oklab, var(--abyss-ink-bright) 15%, transparent);
+}
+.aph-head { position: relative; background: linear-gradient(90deg, color-mix(in oklab, var(--module-hot, var(--abyss-signal)) 9%, transparent), transparent 55%); }
+.aph-head::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 1px; background: linear-gradient(90deg, var(--module-hot, var(--abyss-signal)), color-mix(in oklab, var(--module-lens, var(--abyss-violet-bright)) 42%, transparent), transparent); }
+.aph-badge { min-width: 68px; min-height: 50px; border-radius: 3px 10px 3px 10px; background: linear-gradient(145deg, color-mix(in oklab, var(--module-lens, var(--abyss-violet-bright)) 8%, transparent), transparent); }
+.aph-badge[aria-pressed="true"] { background: linear-gradient(145deg, color-mix(in oklab, var(--module-lens, var(--abyss-violet-bright)) 18%, transparent), transparent); box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--module-lens, var(--abyss-violet-bright)) 50%, transparent), 0 8px 24px color-mix(in oklab, var(--module-lens, var(--abyss-violet-bright)) 14%, transparent); }
+.aph-track { height: 12px; }
+.aph-track::before { height: 2px; background: linear-gradient(90deg, transparent, var(--module-hot, var(--abyss-signal)) 15% 85%, transparent); box-shadow: 0 0 10px color-mix(in oklab, var(--module-hot, var(--abyss-signal)) 36%, transparent); }
+.aph-cursor { font-variant-numeric: tabular-nums; letter-spacing: .08em; }
+.aph-evidence { border-radius: 3px 14px 3px 14px; background: linear-gradient(145deg, color-mix(in oklab, var(--module-hot, var(--abyss-signal)) 9%, transparent), var(--module-panel, var(--abyss-obsidian-glass-heavy))); box-shadow: var(--refine-shadow), inset 0 1px 0 color-mix(in oklab, var(--abyss-ink-bright) 14%, transparent); }
+
+/* ── Sky card stacks: depth comes from bevel, parallax and material grain ── */
+.skd-deck,
+.skg-deck { border-radius: 4px 16px 4px 16px; background-image: repeating-linear-gradient(0deg, transparent 0 26px, color-mix(in oklab, var(--skd-star) 3%, transparent) 27px, transparent 28px), radial-gradient(120% 60% at 0% 0%, color-mix(in oklab, var(--skd-violet) 15%, transparent), transparent 70%); }
+.skd-deck .skd-card,
+.skg-deck .skg-card {
+  border-radius: 3px 11px 3px 11px;
+  background:
+    linear-gradient(135deg, color-mix(in oklab, var(--c, var(--skd-cool)) 14%, transparent), transparent 44%),
+    repeating-linear-gradient(0deg, transparent 0 19px, color-mix(in oklab, var(--skd-star) 3%, transparent) 20px, transparent 21px),
+    linear-gradient(180deg, var(--skd-void-2), var(--skd-void-1) 80%);
+  box-shadow: 0 -10px 20px -13px color-mix(in oklab, var(--skd-void-0) 98%, transparent), inset 0 1px 0 color-mix(in oklab, var(--c, var(--skd-cool)) 50%, transparent), inset -8px 0 18px color-mix(in oklab, var(--skd-void-0) 24%, transparent);
+}
+.skd-deck .skd-card::before,
+.skg-deck .skg-card::before { background: linear-gradient(180deg, color-mix(in oklab, var(--skd-star) 22%, transparent), transparent 22%), linear-gradient(90deg, transparent 0 72%, color-mix(in oklab, var(--c, var(--skd-cool)) 8%, transparent) 100%); mix-blend-mode: screen; }
+.skd-deck .skd-card__bar,
+.skg-deck .skg-bar { min-height: var(--bar, 34px); border-bottom: 1px solid color-mix(in oklab, var(--c, var(--skd-cool)) 20%, transparent); }
+.skd-deck .skd-card.is-hot,
+.skg-deck .skg-card.is-hot { transform-style: preserve-3d; }
+.skd-deck .skd-card.is-hot .skd-card__bar,
+.skg-deck .skg-card.is-hot .skg-bar { background: linear-gradient(90deg, color-mix(in oklab, var(--c, var(--skd-cool)) 26%, transparent), transparent 78%); }
+
+/* ── Ledger, score and footprint are dense data surfaces: improve the scanline
+ * rhythm and preserve color only for meaning/state. ─────────────────── */
+.cl-ann-ledger {
+  border-radius: 3px 14px 3px 14px;
+  background:
+    linear-gradient(135deg, color-mix(in oklab, var(--cl-ann-chord, var(--abyss-violet-bright)) 9%, transparent), transparent 55%),
+    repeating-linear-gradient(0deg, transparent 0 23px, color-mix(in oklab, var(--cl-ann-ink) 3%, transparent) 24px, transparent 25px),
+    var(--cl-ann-bg);
+  box-shadow: var(--refine-shadow), inset 0 1px 0 color-mix(in oklab, var(--cl-ann-ink) 13%, transparent);
+}
+.cl-ann-ledger__head { background: linear-gradient(90deg, color-mix(in oklab, var(--cl-ann-signal) 11%, transparent), var(--cl-ann-bg) 70%); box-shadow: inset 0 -1px 0 color-mix(in oklab, var(--cl-ann-signal) 18%, transparent); }
+.cl-ann-ledger__row { position: relative; border-bottom-color: color-mix(in oklab, var(--cl-ann-line) 80%, transparent); background: linear-gradient(90deg, color-mix(in oklab, currentColor 4%, transparent), transparent 60%); }
+.cl-ann-ledger__row::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background: currentColor; opacity: .62; }
+.cl-ann-ledger__row.is-hover { transform: translateX(-2px); background: color-mix(in oklab, currentColor 10%, transparent); }
+.cl-ann-ledger__row.is-focus { box-shadow: inset 0 0 0 1px currentColor, inset 3px 0 0 currentColor; }
+.cl-ann-ledger__gantt { height: calc(var(--cl-ann-gantt-h) + 1px); background: repeating-linear-gradient(90deg, color-mix(in oklab, var(--cl-ann-ink) 9%, transparent) 0 1px, transparent 1px 8px); }
+.cl-score-root { border-radius: 3px 13px 3px 13px; overflow: hidden; background: linear-gradient(145deg, color-mix(in oklab, var(--module-lens, var(--abyss-violet-bright)) 7%, transparent), var(--module-panel, var(--abyss-obsidian-glass-heavy))); }
+.cl-score-axis { background: linear-gradient(90deg, color-mix(in oklab, var(--module-lens, var(--abyss-violet-bright)) 8%, transparent), var(--cl-panel-bg, var(--abyss-obsidian-glass))); box-shadow: inset 0 1px 0 color-mix(in oklab, var(--abyss-ink-bright) 12%, transparent), 0 8px 18px color-mix(in oklab, var(--abyss-obsidian-deep) 32%, transparent); }
+.cl-score-row { background: repeating-linear-gradient(0deg, transparent 0 28px, color-mix(in oklab, var(--abyss-ink-bright) 2%, transparent) 29px, transparent 30px); }
+.atlas-footprint { border-radius: 3px 12px 3px 12px; padding-inline: var(--cl-atlas-space-2, 8px); background: linear-gradient(145deg, color-mix(in oklab, var(--module-lens, var(--abyss-violet-bright)) 8%, transparent), transparent 64%); }
+.atlas-footprint .af-line { min-height: calc(var(--cl-atlas-row-h, 32px) + 4px); background: linear-gradient(90deg, color-mix(in oklab, var(--af-gen-color, var(--abyss-ink-3)) 4%, transparent), transparent 68%); }
+.atlas-footprint .af-line:hover { transform: translateX(3px); background: color-mix(in oklab, var(--af-gen-color, var(--abyss-ink-3)) 10%, transparent); }
+.atlas-footprint .af-strip-bg { opacity: .42; }
+
+/* ── 展卷 / gem / domain host frame ─────────────────────────────────── */
+.cl-atlas-stage .atlas-stage-panel {
+  background:
+    radial-gradient(50% 40% at 50% 0%, color-mix(in oklab, var(--module-lens, var(--abyss-violet-bright)) 11%, transparent), transparent 78%),
+    repeating-linear-gradient(90deg, transparent 0 55px, color-mix(in oklab, var(--abyss-ink-bright) 2%, transparent) 56px, transparent 57px),
+    var(--cl-panel-bg-heavy, var(--abyss-obsidian-glass-heavy));
+  box-shadow: var(--refine-shadow), inset 0 1px 0 color-mix(in oklab, var(--abyss-ink-bright) 14%, transparent);
+}
+.cl-atlas-stage .atlas-stage-head { min-height: 68px; background: linear-gradient(90deg, color-mix(in oklab, var(--module-hot, var(--abyss-signal)) 10%, transparent), transparent 60%); border-bottom-color: color-mix(in oklab, var(--module-lens, var(--abyss-violet-bright)) 24%, transparent); }
+.cl-atlas-stage .atlas-stage-q { border-radius: 3px 9px 3px 9px; background: repeating-linear-gradient(90deg, transparent 0 24px, color-mix(in oklab, var(--abyss-ink-bright) 3%, transparent) 25px, transparent 26px), var(--cl-panel-bg-subtle, var(--abyss-obsidian-glass-subtle)); }
+.gem-shell,
+.domains-panel { border-radius: 4px 15px 4px 15px; background-image: linear-gradient(145deg, color-mix(in oklab, var(--module-lens, var(--abyss-violet-bright)) 10%, transparent), transparent 55%); box-shadow: var(--refine-shadow), inset 0 1px 0 color-mix(in oklab, var(--abyss-ink-bright) 13%, transparent); }
+
+/* Reduced motion still keeps the finished material and focus hierarchy. */
+@media (prefers-reduced-motion: reduce) {
+  .radar-wrap::after,
+  .plot-text-panel.on,
+  .aph-evidence { animation: none !important; }
+  .radar-wrap:hover,
+  .pt-item:hover,
+  .info-arch .ia-cast-row:hover,
+  .info-arch .ia-thread:hover,
+  .info-arch .ia-rel:hover,
+  .info-arch .ia-attr:hover,
+  .cl-dom-legend__row:hover,
+  .cl-ann-ledger__row.is-hover,
+  .atlas-footprint .af-line:hover { transform: none; }
+}
+
+:is(body.skylab-still, [data-tier="low"]) .radar-wrap::after { animation: none !important; }
+:is(body.skylab-still, [data-tier="low"]) :is(.radar-wrap, .plot-text-panel, .info-arch .ia-card, .cl-o3-deck, .cl-o3-legend, .cl-orbit__card, .cl-dom-legend, .cl-ann-ledger, .cl-score-root, .atlas-footprint, .skd-deck .skd-card, .skg-deck .skg-card) * { animation: none !important; }
+:is(body.skylab-still, [data-tier="low"]) :is(.info-arch .ia-cast-row:hover, .info-arch .ia-thread:hover, .info-arch .ia-rel:hover, .info-arch .ia-attr:hover, .cl-dom-legend__row:hover, .cl-ann-ledger__row.is-hover, .atlas-footprint .af-line:hover) { transform: none !important; }
+
+@media (max-width: 720px) {
+  .radar-wrap { min-height: 260px; }
+  .cl-o3-deck { width: min(92vw, var(--cl-o3v-deck-w, 52vw)); padding-inline: .82rem; }
+  .cl-orbit__card { padding: .6rem; }
+  .info-arch .ia-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .cl-dom-legend { padding: var(--abyss-space-sm) var(--abyss-space-md); }
+  .cl-ann-ledger { border-radius: 3px 10px 3px 10px; }
+}

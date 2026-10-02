@@ -1,0 +1,160 @@
+/* ============================================================
+ * @role css-token
+ * @owns css/sky-cards-3d.css
+ * @budget drawcalls=0 points=0 vertices=0 rtpx=0 passes=0
+ * @contract deep-sky/3
+ * ------------------------------------------------------------
+ * 卡片叠的 3D 观感（剧情卡 .skd-deck 与分组卡 .skg-deck 共用一套）：
+ *  ① 透视堆叠 —— 分组叠里越靠前（越往上）的卡越远（--d = 距末卡的张数，JS 写），与剧情叠「后一张压住前一张」同一次序：
+ *     下面的卡更近、压住上面那张的底座，向上的投影落在上一张卡身上；卡真的在不同的 Z，不是画上去的阴影；
+ *  ② 层间视差 —— 指针在叠上移动时整叠绕 X / Y 轻转（JS 用弹簧写 --skc3-tx / --skc3-ty 两个角度），
+ *     远处的卡因为 Z 更深、屏幕位移更小，层与层自然错开；悬停 / 展开的卡弹簧式抬起（--abyss-ease-spring）；
+ *     剧情叠是虚拟滚动长表、卡与卡大段交叠：卡都贴在叠面上（Z 0），只有悬停的一张抬起，并裁到它露出的标题条，
+ *     免得抬起的下半截盖住下一张的标题；
+ *  ③ 玻璃边 —— 上沿一道高光、下沿一道暗边，卡面像一块有厚度的玻璃而不是一张纸；
+ *  ④ 发丝刻度 —— 左沿一列 1px 刻线（repeating-linear-gradient，不建节点），给卡一个仪器感的基准边。
+ * 展开的那张卡回到正面朝人（读字优先于炫技）。
+ * 静止即读字：上面所有 Z / 仰角 / 抬起都乘纵深系数 --skc3-z（JS 弹簧写，默认 0）——指针在叠上移动时展开纵深，
+ * 停下或离开就收回平面：透视下 Z ≠ 0 即非整数缩放、文字重采样发糊，平面时卡片全是恒等变换，按像素栅格清晰。
+ * 只引用 --skd-* 令牌；JS 只写 --skc3-tx / --skc3-ty / --skc3-z / --skc3-oy。
+ * 降级：prefers-reduced-motion · body.skylab-still · [data-tier='low'] 三条都退回纯平面（无透视、无倾斜）。
+ * ============================================================ */
+
+/* ---- 透视容器：两叠的滚动视口 ---- */
+.skd-deck .skd-deck__viewport,
+.skg-deck .skg-viewport {
+  perspective: var(--skc3-persp, 1100px);
+  perspective-origin: 30% 38%;
+}
+
+/* ---- 叠：指针倾斜挂在列表上，卡片各自的 Z 在下面 ---- */
+.skd-deck .skd-deck__spacer,
+.skg-deck .skg-list {
+  transform-style: preserve-3d;
+  transform: rotateX(var(--skc3-ty, 0deg)) rotateY(var(--skc3-tx, 0deg));
+  will-change: transform;   /* 角度由 JS 弹簧逐帧写，不再叠 CSS 过渡 */
+}
+/* 剧情卡叠是虚拟滚动长表（spacer 高 = 全表）：转轴放在当前可见段中间，不然离轴几千像素的卡会被甩出很远的 Z */
+.skd-deck .skd-deck__spacer { transform-origin: 50% var(--skc3-oy, 50%); }
+
+/* ---- 分组卡：越往上越远 + 微仰。--d 由 sky-groups.js 写（= 末卡序号 − 本卡序号），封顶 12 层 ---- */
+.skg-deck .skg-card {
+  transform-style: preserve-3d;
+  transform:
+    translate3d(0, 0, calc(min(var(--d, 0), 12) * var(--skc3-step, -4px) * var(--skc3-z, 0)))
+    rotateX(calc(var(--skc3-lean, 1.1deg) * var(--skc3-z, 0)));
+  transform-origin: 50% 0%;
+  transition:
+    transform var(--abyss-dur-medium) var(--abyss-ease-spring),
+    border-color var(--skd-dur-soft) var(--skd-ease-out),
+    filter var(--skd-dur-soft) var(--skd-ease-out);
+}
+/* 剧情卡：位置由 sky-deck.css 的 translate3d(--x, --y, 0) 定（虚拟滚动的槽位），这里必须原样带上，只在 Z 上做文章；
+   卡与卡交叠一大截（卡高 = 标题条 + 40px，下一张从标题条下沿开始），所以静止时全贴在叠面上 */
+.skd-deck .skd-card {
+  transform-style: preserve-3d;
+  transform: translate3d(var(--x, 0px), var(--y, 0px), 0);
+  transition:
+    transform var(--skd-dur-soft) var(--skd-ease-out),
+    border-color var(--skd-dur-soft) var(--skd-ease-out),
+    filter var(--skd-dur-soft) var(--skd-ease-out);
+}
+/* 悬停的那张抬起：裁到它露出来的标题条（+ 2px 缝），抬起的下半截不会盖住下一张的标题；平面时（纵深 0）不抬也不裁 */
+.skd-deck .skd-card.is-hot:not(.is-open) {
+  transform: translate3d(var(--x, 0px), var(--y, 0px), calc(var(--skc3-hover, 10px) * var(--skc3-z, 0)));
+  clip-path: inset(-1px -1px calc((100% - var(--bar, 34px) - 3px) * min(1, var(--skc3-z, 0) * 8)) -1px round var(--skd-radius-s) var(--skd-radius-s) 0 0);
+}
+/* 展开的那张：版面已给它让出整张卡的高度，整张抬到最前，正面朝人 */
+.skd-deck .skd-card.is-open {
+  transform: translate3d(var(--x, 0px), var(--y, 0px), calc(var(--skc3-lift, 16px) * var(--skc3-z, 0)));
+}
+.skg-deck .skg-card.is-open,
+.skg-deck .skg-card.is-hot {
+  transform: translate3d(0, 0, calc(var(--skc3-lift, 16px) * var(--skc3-z, 0))) rotateX(0deg);
+}
+
+/* ---- 玻璃边：上沿高光 + 下沿暗边；不建节点，全在卡自己的伪元素上 ---- */
+.skd-deck .skd-card::before,
+.skg-deck .skg-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, color-mix(in oklch, var(--skd-star) 16%, transparent), transparent 22%),
+    linear-gradient(0deg, color-mix(in oklch, var(--skd-void-0) 40%, transparent), transparent 18%);
+  mix-blend-mode: screen;
+}
+
+/* ---- 发丝刻度：左沿一列 1px 刻线，每 6px 一道，中段最亮两端淡出 ---- */
+.skd-deck .skd-card::after,
+.skg-deck .skg-card::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 6px;
+  bottom: 6px;
+  width: 3px;
+  border-radius: inherit;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    180deg,
+    color-mix(in oklch, var(--c, var(--skd-ink-3)) 55%, transparent) 0 1px,
+    transparent 1px 6px);
+  -webkit-mask-image: linear-gradient(180deg, transparent, black 30%, black 70%, transparent);
+  mask-image: linear-gradient(180deg, transparent, black 30%, black 70%, transparent);
+}
+
+/* 剧情卡的主线卡已经用 ::after 画发光脊线（sky-deck.css:185）——那条优先，这里让位 */
+.skd-deck .skd-card.is-main::after {
+  background: none;
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+
+/* ---- 降级：三条路径都退回纯平面 ---- */
+@media (prefers-reduced-motion: reduce) {
+  .skd-deck .skd-deck__viewport, .skg-deck .skg-viewport { perspective: none; }
+  .skd-deck .skd-deck__spacer, .skg-deck .skg-list { transform: none; transition: none; will-change: auto; }
+  .skg-deck .skg-card, .skg-deck .skg-card.is-open, .skg-deck .skg-card.is-hot { transform: none; transition: none; }
+  .skd-deck .skd-card, .skd-deck .skd-card.is-open, .skd-deck .skd-card.is-hot:not(.is-open) { transform: translate3d(var(--x, 0px), var(--y, 0px), 0); transition: none; }
+}
+body.skylab-still .skd-deck .skd-deck__viewport, body.skylab-still .skg-deck .skg-viewport { perspective: none; }
+body.skylab-still .skd-deck .skd-deck__spacer, body.skylab-still .skg-deck .skg-list { transform: none; transition: none; will-change: auto; }
+body.skylab-still .skg-deck .skg-card, body.skylab-still .skg-deck .skg-card.is-open, body.skylab-still .skg-deck .skg-card.is-hot { transform: none; transition: none; }
+body.skylab-still .skd-deck .skd-card, body.skylab-still .skd-deck .skd-card.is-open, body.skylab-still .skd-deck .skd-card.is-hot:not(.is-open) { transform: translate3d(var(--x, 0px), var(--y, 0px), 0); transition: none; }
+/* 真实场景低档由 sky-cards-3d 同步；只影响两叠卡片，不设置全局 data-tier。 */
+body.sky-cards-low .skd-deck .skd-deck__viewport, body.sky-cards-low .skg-deck .skg-viewport,
+[data-tier='low'] .skd-deck .skd-deck__viewport, [data-tier='low'] .skg-deck .skg-viewport { perspective: none; }
+body.sky-cards-low .skd-deck .skd-deck__spacer, body.sky-cards-low .skg-deck .skg-list,
+[data-tier='low'] .skd-deck .skd-deck__spacer, [data-tier='low'] .skg-deck .skg-list { transform: none; will-change: auto; }
+body.sky-cards-low .skg-deck .skg-card, body.sky-cards-low .skg-deck .skg-card.is-open, body.sky-cards-low .skg-deck .skg-card.is-hot,
+[data-tier='low'] .skg-deck .skg-card, [data-tier='low'] .skg-deck .skg-card.is-open, [data-tier='low'] .skg-deck .skg-card.is-hot { transform: none; }
+body.sky-cards-low .skd-deck .skd-card, body.sky-cards-low .skd-deck .skd-card.is-open, body.sky-cards-low .skd-deck .skd-card.is-hot:not(.is-open),
+[data-tier='low'] .skd-deck .skd-card, [data-tier='low'] .skd-deck .skd-card.is-open, [data-tier='low'] .skd-deck .skd-card.is-hot:not(.is-open) { transform: translate3d(var(--x, 0px), var(--y, 0px), 0); }
+body.sky-cards-low .skd-deck .skd-card::before, body.sky-cards-low .skg-deck .skg-card::before,
+[data-tier='low'] .skd-deck .skd-card::before, [data-tier='low'] .skg-deck .skg-card::before { background: none; }
+
+/* ---- 窄屏抽屉：横向空间不够，透视会把卡压扁，直接关掉 ---- */
+@media (max-width: 480px) {
+  .skd-deck .skd-deck__viewport, .skg-deck .skg-viewport { perspective: none; }
+  .skd-deck .skd-deck__spacer, .skg-deck .skg-list { transform: none; }
+  .skg-deck .skg-card, .skg-deck .skg-card.is-open, .skg-deck .skg-card.is-hot { transform: none; }
+  .skd-deck .skd-card, .skd-deck .skd-card.is-open, .skd-deck .skd-card.is-hot:not(.is-open) { transform: translate3d(var(--x, 0px), var(--y, 0px), 0); }
+}
+
+/* ---- 成员星位微缩图（分组卡展开体内；canvas 由 sky-groups-body.js 画） ---- */
+.skg-card__map {
+  margin: 9px 0 4px;
+  display: flex;
+  justify-content: center;
+  border-radius: var(--skd-radius-s);
+  border: 1px solid color-mix(in oklch, var(--c, var(--skd-ink-3)) 18%, var(--skd-hair));
+  background:
+    radial-gradient(120% 90% at 50% 18%, color-mix(in oklch, var(--c, var(--skd-ink-3)) 10%, transparent), transparent 70%),
+    linear-gradient(180deg, var(--skd-void-1), var(--skd-void-0));
+  box-shadow: inset 0 1px 0 color-mix(in oklch, var(--skd-star) 10%, transparent);
+  overflow: hidden;
+}
+.skg-card__map-cv { display: block; width: 100%; max-width: 272px; height: auto; }

@@ -1,0 +1,107 @@
+/* v90 F4 星域去字 —— 主控预接线空壳（briefs/v90/PLAN.md）。只引 --abyss-* / --cl-atlas-* 令牌。
+   1) 星名常显只留「希腊字母 + 名」：副行（.ls 角色 · N 剧情点 · M 关系 / .lx 阵营 立场）
+      只在 悬停 .hover / 钉住 .pin / 键盘焦点 .is-kfocus / 选中或搜索命中 .is-hit 时出现。
+      .cl-lab 的 opacity 由 scene 逐帧 inline 写，这里只切子元素 display，不碰 opacity。
+   2) 关系类型图例（scene-camp-halo.js 生成）：左下、时间轴之上，短线样 + 类名 + 数量；
+      ≤480 折成一枚可展开字形。线样的色与虚实编码与纤维补丁、CLDomainsModel.REL_CLASSES 同一张表。 */
+
+/* ---------- 1 · 星名副行 ---------- */
+body[data-atlas-view="domains"] #labels .cl-lab.char .ls,
+body[data-atlas-view="domains"] #labels .cl-lab.char .lx { display: none; }
+body[data-atlas-view="domains"] #labels .cl-lab.char:is(.hover, .pin, .is-kfocus, .is-hit) .ls,
+body[data-atlas-view="domains"] #labels .cl-lab.char:is(.hover, .pin, .is-kfocus, .is-hit) .lx { display: block; }
+body[data-atlas-view="domains"] #labels .cl-lab.char:focus { outline: none; }
+/* 星域里悬停的细节就是星名自己的两行副行；旧的浮动文字卡（#peek：重要度 · 剧情点 · 交集 · 关系类型清单）
+   在这里是第三遍重复同一组数字，把星图重新变回名单——星域内不再弹出，完整档案点星进入双晶。 */
+body[data-atlas-view="domains"] #peek { display: none; }
+body[data-atlas-view="domains"] #labels .cl-lab.char:focus-visible .ln {
+  outline: 1px solid var(--abyss-signal);
+  outline-offset: 2px;
+}
+
+/* ---------- 2 · 关系类型图例 ---------- */
+.cl-dom-legend {
+  position: fixed;
+  left: var(--cl-dom-legend-l, 24px);
+  bottom: var(--cl-dom-legend-b, 104px);
+  z-index: var(--z-hud);
+  pointer-events: auto;
+  color: var(--abyss-ink-2);
+  font: var(--abyss-fs-xs) var(--abyss-font-mono);
+  letter-spacing: .08em;
+  text-shadow: 0 0 8px var(--abyss-lad-00);
+}
+.cl-dom-legend[hidden] { display: none; }
+.cl-dom-legend__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--abyss-space-2xs);
+}
+.cl-dom-legend__row {
+  display: grid;
+  grid-template-columns: 28px auto auto;
+  align-items: center;
+  column-gap: var(--abyss-space-sm);
+  line-height: 1.35;
+}
+.cl-dom-legend__swatch { width: 28px; height: 6px; overflow: visible; }
+.cl-dom-legend__swatch line,
+.cl-dom-legend__glyph line { stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; fill: none; }
+.cl-dom-legend__name { color: var(--abyss-ink); }
+.cl-dom-legend__n { color: var(--abyss-ink-3); text-align: right; min-width: 2ch; }
+/* v90 F7：大关系网全景上限说明（数量守恒） */
+.cl-dom-legend__note { color: var(--abyss-ink-3); margin-top: var(--abyss-space-2xs); line-height: 1.4; }
+.cl-dom-legend__note span { display: block; white-space: nowrap; }
+/* 类别 → 色（与 CLDomainsModel.REL_CLASSES[].token 一一对应）与线型（dash 0 实 / 1 虚 / 2 点 / 3 点划） */
+.cl-dom-legend [data-rel="ally"] { --cl-dom-rel: var(--abyss-gold); }
+.cl-dom-legend [data-rel="kin"] { --cl-dom-rel: var(--abyss-signal); }
+.cl-dom-legend [data-rel="bond"] { --cl-dom-rel: var(--abyss-signal-bright); }
+.cl-dom-legend [data-rel="oppose"] { --cl-dom-rel: var(--abyss-camp-oppose); }
+.cl-dom-legend [data-rel="dark"] { --cl-dom-rel: var(--abyss-violet); }
+.cl-dom-legend [data-rel="other"] { --cl-dom-rel: var(--abyss-camp-none); }
+.cl-dom-legend__row .cl-dom-legend__swatch,
+.cl-dom-legend__glyph line { color: var(--cl-dom-rel, var(--abyss-ink-2)); }
+.cl-dom-legend [data-rel="dark"] line { stroke-dasharray: 4 3; stroke-linecap: butt; }
+.cl-dom-legend [data-rel="bond"] line { stroke-dasharray: .1 3.4; stroke-width: 2.2; }
+.cl-dom-legend [data-rel="kin"] line { stroke-dasharray: 7 2.5 .1 2.5; }
+.cl-dom-legend [data-rel="cooccur"] { --cl-dom-rel: var(--abyss-camp-none); }
+.cl-dom-legend [data-rel="cooccur"] line { stroke-dasharray: .1 3.4; stroke-width: 2.2; }
+
+/* 折叠字形：只在 ≤480 出现，点开展成与桌面同一张列表 */
+.cl-dom-legend__tog {
+  display: none;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  background: none;
+  color: var(--abyss-ink-2);
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+}
+.cl-dom-legend__tog:focus-visible { outline: 1px solid var(--abyss-signal); outline-offset: 2px; }
+.cl-dom-legend__glyph { width: 18px; height: 18px; display: block; margin: auto; overflow: visible; }
+.cl-dom-legend.is-fold .cl-dom-legend__tog { display: block; }
+.cl-dom-legend.is-fold .cl-dom-legend__list { display: none; }
+.cl-dom-legend__row { white-space: nowrap; }
+.cl-dom-legend.is-fold.is-open .cl-dom-legend__list {
+  display: grid;
+  width: max-content;
+  position: absolute;
+  left: 0;
+  bottom: calc(100% + var(--abyss-space-xs));
+  padding: var(--abyss-space-sm) var(--abyss-space-md);
+  background: var(--abyss-obsidian-glass-subtle);
+  border-radius: var(--abyss-radius-sm);
+}
+@media (max-width: 480px) {
+  .cl-dom-legend__tog { display: block; }
+  .cl-dom-legend:not(.is-open) .cl-dom-legend__list { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cl-dom-legend, .cl-dom-legend * { transition: none; }
+}

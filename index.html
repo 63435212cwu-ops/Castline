@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="sky-shell-boot">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Cache-Control" content="no-store">
+<title>Castline · 角色神经图谱</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='6' fill='%23ffb45c'/%3E%3Ccircle cx='16' cy='16' r='13' fill='none' stroke='%23a688ff' stroke-width='1.5' opacity='.6'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="css/app.css?v=31940a36">
+<link rel="stylesheet" href="css/abyss-tokens.css?v=ec4860ba">
+<link rel="stylesheet" href="css/atlas-tokens.css?v=bb88f3e4">
+<link rel="stylesheet" href="css/arcana.css?v=4b3a1492">
+<link rel="stylesheet" href="css/oracle.css?v=4685fcef">
+<link rel="stylesheet" href="css/plot.css?v=98f5893e">
+<link rel="stylesheet" href="css/peer.css?v=016b2be1">
+<link rel="stylesheet" href="css/radar-theme.css?v=36c22f25">
+<link rel="stylesheet" href="css/plot-orbit.css?v=22020b88">
+<link rel="stylesheet" href="css/orbit3d.css?v=cf7e20b1">
+<link rel="stylesheet" href="css/radar-reading.css?v=432f7da6">
+<link rel="stylesheet" href="css/radar-meta.css?v=9ef2fcd2">
+<link rel="stylesheet" href="css/constellation-reading.css?v=8bf03bcf">
+<link rel="stylesheet" href="css/atlas-score.css?v=5280ff48">
+<link rel="stylesheet" href="css/atlas-stage.css?v=b9b1be3e">
+<link rel="stylesheet" href="css/atlas-footprint.css?v=dd50ed5d">
+<link rel="stylesheet" href="css/scene-camp-halo.css?v=208f3f22">
+<link rel="stylesheet" href="css/responsive-shell.css?v=02478947">
+<link rel="stylesheet" href="css/vieworb.css?v=5680805d">
+<link rel="stylesheet" href="css/annulus-tokens.css?v=d0f3c866">
+<link rel="stylesheet" href="css/annulus.css?v=280bd8ee">
+<link rel="stylesheet" href="css/annulus-ledger.css?v=a62f141a">
+<link rel="stylesheet" href="css/annulus-core.css?v=e31c140c">
+<link rel="stylesheet" href="css/gem-tokens.css?v=5af91293">
+<link rel="stylesheet" href="css/gem.css?v=beec3138">
+<link rel="stylesheet" href="css/domains-tokens.css?v=1d775d5c">
+<link rel="stylesheet" href="css/domains.css?v=6a602dfb">
+<link rel="stylesheet" href="css/domains-read.css?v=cf8cb7ef">
+<link rel="stylesheet" href="css/information-architecture.css?v=e4cd04a0">
+<link rel="stylesheet" href="css/cosmic-visual.css?v=9b1a6c5c">
+<link rel="stylesheet" href="css/atlas-workspace.css?v=e49ebd88">
+<link rel="stylesheet" href="css/atlas-startrack.css?v=d0bdbe6b">
+<link rel="stylesheet" href="css/atlas-lab.css?v=de76010d">
+<link rel="stylesheet" href="css/sky.css?v=4c15385c">
+<link rel="stylesheet" href="css/sky-lab.css?v=dc75ea83">
+<link rel="stylesheet" href="css/sky-field.css?v=b2d63261">
+<link rel="stylesheet" href="css/sky-compass.css?v=f14e1de4">
+<link rel="stylesheet" href="css/sky-chrome.css?v=28bad58d">
+<link rel="stylesheet" href="css/sky-deep-tokens.css?v=c2572524">
+<link rel="stylesheet" href="css/sky-deep-hud.css?v=4cfece04">
+<link rel="stylesheet" href="css/sky-deep-cards.css?v=23418a2f">
+<link rel="stylesheet" href="css/sky-deep-layers.css?v=495fb418">
+<link rel="stylesheet" href="css/sky-tug.css?v=c978f870">
+<link rel="stylesheet" href="css/sky-dial.css?v=14ce817f">
+<link rel="stylesheet" href="css/sky-deck.css?v=ae0b5e13">
+<link rel="stylesheet" href="css/sky-deck-states.css?v=85019e83">
+<link rel="stylesheet" href="css/sky-groups.css?v=bc85861f">
+<link rel="stylesheet" href="css/sky-groups-body.css?v=5ddb3417">
+<link rel="stylesheet" href="css/sky-cards-3d.css?v=e436a632">
+<link rel="stylesheet" href="css/sky-loader.css?v=5fd51a1a">
+<link rel="stylesheet" href="css/sky-opening.css?v=bf273dde">
+<link rel="stylesheet" href="css/atlas-fallback.css?v=3aa6c8f2">
+<link rel="stylesheet" href="css/atlas-motion-polish.css?v=fc6156dc">
+<link rel="stylesheet" href="css/sky-atmosphere-polish.css?v=b97494ca">
+</head>
+<body>
+
+<div id="stage"><canvas id="gl"></canvas><div id="labels"></div></div>
+
+<!-- 主视觉的角色区标尺：角色以星座呈现，章节与叙事枢是外围轨道 -->
+<div class="hud" id="constellationMark" aria-hidden="true">
+  <div class="cm-kicker"><i></i>角色星座场 <b>ROLE CONSTELLATION</b></div>
+  <div class="cm-rule"><span>阵营 · 立场 · 星等 · 关系</span><em id="cmCount">—</em><span>STELLAR FIELD</span></div>
+</div>
+
+<!-- 品牌 -->
+<div class="hud" id="brand">
+  <div class="panel">
+    <div class="eyebrow"><span class="dot"></span>Castline · 角色神经图谱</div>
+    <h1 id="title">—<small id="titleSub">CHARACTER CONNECTOME</small></h1>
+    <p id="synopsis"></p>
+    <div id="stat">神经元 <b id="stChar">0</b><span class="sep">·</span>章节 <b id="stChap">0</b><span class="sep">·</span>突触 <b id="stFib">0</b><span class="sep">·</span>剧情点 <b id="stEv">0</b><span class="sep">·</span>剧情线 <b id="stTh" title="主线段数 / 支线数 · 按 T 展开剧情树">0</b></div>
+    <div id="provenance" class="mono"></div>
+  </div>
+</div>
+
+<!-- 操作 -->
+<div class="hud" id="ops">
+  <button class="btn" id="btnLib" title="作品库（H）">作品库</button>
+  <button class="btn" id="btnApi" title="API 接入">API</button>
+  <button class="btn" id="btnRe" title="重新分析这部作品">重新分析</button>
+  <button class="btn" id="btnDistill" title="蒸馏这部作品的文风 · 语感 · 作者思维 · 声纹，产出可直接使用的巨型提示词（点开只看方案，不会自动开跑）">蒸馏文风</button>
+  <button class="btn" id="btnStage" title="星盘剧情树：主线与支线时间推进图谱（快捷键 T 开关）">星盘剧情树</button>
+  <button class="btn" id="btnAtlas" title="展卷：把剧情星盘展开为全书剧情线谱（快捷键 N / U 开关）" aria-pressed="false">展卷</button>
+  <button class="btn" id="btnPreview" title="三图预演：在真实星空舞台中切换年轮、双晶、星域并播放章节游标">三图预演</button>
+  <button class="btn dual-trigger" id="btnDual" title="双页观测台：罗盘与星核共振场同时运行（快捷键 Shift+D）">双页观测台</button>
+  <button class="btn ia-trigger" id="btnInfo" title="辅助资料索引：检索记录与引文；星空阅读仍由三大图谱承担">资料索引</button>
+  <button class="btn" id="btnOpen">更换材料</button>
+  <button class="btn" id="btnFull" title="全屏">全屏</button>
+</div>
+
+<!--
+  辅助资料索引：仅供检索与取证，不是三大图谱的主界面或图谱预演。
+  保留现有 ID 和交互兼容；真实图谱预演按三图重构计划另行实现。
+-->
+<section id="infoArchitecture" class="info-arch" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="iaTitle">
+  <div class="ia-shell">
+    <header class="ia-head">
+      <div class="ia-head-copy">
+        <div class="ia-overline"><span class="ia-pulse"></span>REFERENCE INDEX · 辅助资料索引</div>
+        <h2 id="iaTitle">—</h2>
+        <p id="iaSynopsis">按需查阅当前图谱的记录与引文；图形化阅读请回到年轮、双晶或星域。</p>
+      </div>
+      <div class="ia-head-actions">
+        <div class="ia-view-switch" role="group" aria-label="阅读焦点">
+          <button class="active" type="button" data-ia-view="atlas" aria-pressed="true">全书</button>
+          <button type="button" data-ia-view="plot" aria-pressed="false">主支线</button>
+          <button type="button" data-ia-view="cast" aria-pressed="false">角色</button>
+        </div>
+        <button class="ia-close" id="iaClose" type="button" aria-label="关闭资料索引并返回图谱">×</button>
+      </div>
+    </header>
+
+    <div class="ia-toolbar">
+      <div class="ia-trail"><span class="ia-trail-mark">01</span><span id="iaTrailText">全书结构 · 时间轴 / 阵容 / 关系 / 属性</span></div>
+      <label class="ia-search"><span aria-hidden="true">⌕</span><input id="iaSearch" type="search" aria-label="检索当前作品信息" placeholder="检索人物、剧情线、章节…" autocomplete="off"></label>
+      <div class="ia-toolbar-meta" id="iaToolbarMeta">数据来自当前图谱 · 证据优先</div>
+    </div>
+
+    <div class="ia-kpis" id="iaKpis"></div>
+
+    <div class="ia-grid" id="iaGrid">
+      <article class="ia-card ia-spine" data-ia-card="spine">
+        <div class="ia-card-head"><div><span class="ia-index">A</span><h3>叙事骨架</h3><p>按事件顺序抽样 · 非情绪或因果曲线</p></div><span class="ia-card-stat" id="iaSpineStat">—</span></div>
+        <div class="ia-spine-canvas" id="iaSpine"></div>
+        <div class="ia-legend" id="iaKindLegend"></div>
+      </article>
+
+      <article class="ia-card ia-cast-card" data-ia-card="cast">
+        <div class="ia-card-head"><div><span class="ia-index">B</span><h3>角色星群</h3><p>重要度、出场与阵营的三重排序</p></div><span class="ia-card-stat" id="iaCastStat">—</span></div>
+        <div class="ia-cast-list" id="iaCast"></div>
+        <button class="ia-more" type="button" data-ia-more="cast">加载更多角色</button>
+      </article>
+
+      <article class="ia-card ia-threads" data-ia-card="threads">
+        <div class="ia-card-head"><div><span class="ia-index">C</span><h3>主线 / 支线</h3><p>类型、跨度与状态 · 点击查看归属及事件</p></div><span class="ia-card-stat" id="iaThreadStat">—</span></div>
+        <div class="ia-thread-list" id="iaThreads"></div>
+        <button class="ia-more" type="button" data-ia-more="threads">加载更多剧情线</button>
+      </article>
+
+      <article class="ia-card ia-rel-card" data-ia-card="relations">
+        <div class="ia-card-head"><div><span class="ia-index">D</span><h3>关系场</h3><p>明线是路径，暗线是潜流</p></div><span class="ia-card-stat" id="iaRelStat">—</span></div>
+        <div class="ia-rel-summary" id="iaRelSummary"></div>
+        <div class="ia-rel-list" id="iaRelations"></div>
+        <button class="ia-more" type="button" data-ia-more="relations">加载更多关系</button>
+      </article>
+
+      <article class="ia-card ia-attr-card" data-ia-card="attrs">
+        <div class="ia-card-head"><div><span class="ia-index">E</span><h3>属性坐标</h3><p>八维榜首与证据覆盖，不以默认值冒充结论</p></div><span class="ia-card-stat" id="iaAttrStat">—</span></div>
+        <div class="ia-attr-list" id="iaAttrs"></div>
+      </article>
+
+      <article class="ia-card ia-chapter-card" data-ia-card="chapters">
+        <div class="ia-card-head"><div><span class="ia-index">F</span><h3>章节密度</h3><p>高度 = 抽取事件数 · 颜色 = 最多事件类型</p></div><span class="ia-card-stat" id="iaChapterStat">—</span></div>
+        <div class="ia-chapter-grid" id="iaChapters"></div>
+        <div class="ia-chapter-axis" id="iaChapterAxis"></div>
+      </article>
+    </div>
+
+    <aside id="iaDetail" class="ia-card" aria-labelledby="iaDetailTitle" hidden>
+      <div class="ia-card-head"><div><h3 id="iaDetailTitle" tabindex="-1">信息详情</h3></div><button id="iaDetailClose" class="ia-close" type="button" aria-label="收起信息详情">×</button></div>
+      <div id="iaDetailBody" class="ia-detail-body"></div>
+    </aside>
+
+    <footer class="ia-foot">
+      <div class="ia-foot-note"><span class="ia-foot-dot"></span><b>辅助资料</b> 此处仅用于检索与取证，不是图谱预演。星空阅读由三大图谱承担。评分覆盖不等于原文证据覆盖；未提供的信息不会补造。</div>
+      <div class="ia-foot-source" id="iaSource">—</div>
+    </footer>
+  </div>
+</section>
+
+<!-- 三图真实预演控制：只占舞台边缘，主体始终由 Annulus / Gem / Domains 图谱承担。 -->
+<div id="atlasPreviewHUD" class="atlas-preview-hud" aria-hidden="true">
+  <div class="aph-shell">
+    <!-- v90 F5 星图控制台：铭牌（head）· 星徽刻度带（controls，内含副控件与搜索）· 章节星轨（timeline）。
+         字形全部是内联 SVG（currentColor 发丝描边），文字只作短名；≤480 只留字形，全名在 aria-label / title。 -->
+    <div class="aph-head">
+      <span class="aph-sigil" aria-hidden="true"></span>
+      <span class="aph-kicker" id="aphTitle">CASTLINE · 三图星典</span>
+      <span class="aph-state" id="aphState">年轮 · 全书</span>
+      <button id="aphPreview" class="aph-gbtn" type="button" aria-pressed="false" title="预演：用真实三图演示，退出即恢复原状"><svg class="aph-g" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><circle class="g-line" cx="10" cy="10" r="6.6"/><path class="g-line g-lit" d="M8.5 7.3L12.9 10L8.5 12.7Z"/></svg><span class="aph-nm">预演</span></button>
+      <button id="aphTools" class="aph-gbtn" type="button" aria-expanded="false" title="工具：载入、分析与设置"><svg class="aph-g" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path class="g-line" d="M3.5 6H16.5M3.5 10H16.5M3.5 14H16.5"/><circle class="g-knob" cx="7" cy="6" r="1.6"/><circle class="g-knob" cx="12.6" cy="10" r="1.6"/><circle class="g-knob" cx="9" cy="14" r="1.6"/></svg><span class="aph-nm">工具</span></button>
+      <button class="aph-close aph-gbtn" id="aphClose" type="button" aria-label="退出三图预演" title="退出三图预演"><svg class="aph-g" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path class="g-line" d="M5.8 5.8L14.2 14.2M14.2 5.8L5.8 14.2"/></svg></button>
+    </div>
+    <div class="aph-controls">
+      <div class="aph-modes" role="group" aria-label="三大图谱">
+        <button type="button" class="aph-badge" data-preview-atlas="annulus" aria-pressed="true" title="年轮 · 剧情结构"><svg class="aph-badge-g" viewBox="0 0 32 32" aria-hidden="true" focusable="false"><circle class="g-halo" cx="16" cy="16" r="15"/><g transform="rotate(-16 16 16)"><ellipse class="g-line" cx="16" cy="16" rx="12" ry="5.6"/><ellipse class="g-line g-faint" cx="16" cy="16" rx="7.4" ry="3.3"/><path class="g-line g-lit" d="M4.72 17.92A12 5.6 0 0 0 20.1 21.26"/><circle class="g-bead" cx="20.1" cy="21.26" r="1.7"/></g></svg><span class="aph-nm">年轮</span></button>
+        <button type="button" class="aph-badge" data-preview-atlas="gem" aria-pressed="false" title="双晶 · 属性与叙事"><svg class="aph-badge-g" viewBox="0 0 32 32" aria-hidden="true" focusable="false"><circle class="g-halo" cx="16" cy="16" r="15"/><path class="g-line" d="M11.2 7.4H20.8L26.4 12.3H5.6Z"/><path class="g-line" d="M5.6 13.9H26.4L16 26.6Z"/><path class="g-line g-faint" d="M11.2 7.4L13.4 12.3L16 7.4L18.6 12.3L20.8 7.4M12.3 13.9L16 26.6L19.7 13.9"/><path class="g-line g-lit" d="M5.6 12.3H26.4M5.6 13.9H26.4"/></svg><span class="aph-nm">双晶</span></button>
+        <button type="button" class="aph-badge" data-preview-atlas="domains" aria-pressed="false" title="星域 · 关系与世界"><svg class="aph-badge-g" viewBox="0 0 32 32" aria-hidden="true" focusable="false"><circle class="g-halo" cx="16" cy="16" r="15"/><path class="g-line g-faint" d="M7.3 21.6C4.7 16.5 8.1 8.7 14.5 8.2C21.6 7.7 27.6 12.5 26.6 19.3C25.8 24.7 19.8 26.5 14.6 25.9C11 25.5 8.5 23.9 7.3 21.6Z"/><path class="g-line" d="M10.6 19.6L14.3 12.5L20.8 14.4L22.5 21.3"/><circle class="g-star" cx="10.6" cy="19.6" r="1.25"/><circle class="g-star" cx="14.3" cy="12.5" r="1.1"/><circle class="g-bead" cx="20.8" cy="14.4" r="1.9"/><circle class="g-star" cx="22.5" cy="21.3" r="1.15"/></svg><span class="aph-nm">星域</span></button>
+      </div>
+      <div class="aph-subcontrols">
+        <button id="aphBack" class="aph-gbtn" type="button" disabled aria-label="返回" title="返回上一步"><svg class="aph-g" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path class="g-line" d="M7.6 5.2L3.8 9L7.6 12.8M4 9H12A4.2 4.2 0 0 1 12 17.4H9.4"/></svg><span class="aph-nm">返回</span></button>
+        <button id="aphExpand" class="aph-gbtn" type="button" aria-label="展开星簇" title="展开星簇：查看参与者星群"><svg class="aph-g" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path class="g-line g-faint" d="M10 10L4.3 6.2M10 10L15.6 5.2M10 10L16 14.6M10 10L5.4 15.6"/><circle class="g-bead" cx="10" cy="10" r="1.9"/><circle class="g-star" cx="4.3" cy="6.2" r="1.25"/><circle class="g-star" cx="15.6" cy="5.2" r="1.1"/><circle class="g-star" cx="16" cy="14.6" r="1.3"/><circle class="g-star" cx="5.4" cy="15.6" r="1.1"/></svg><span class="aph-nm">展开星簇</span></button>
+        <button id="aphEvidence" class="aph-gbtn" type="button" aria-label="原文" title="原文：查看证据与引句"><svg class="aph-g" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path class="g-line" d="M5.2 3.6H12L15 6.6V16.4H5.2ZM12 3.6V6.6H15"/><path class="g-line g-faint" d="M7.6 9.6H12.6M7.6 12H12.6M7.6 14.2H10.6"/></svg><span class="aph-nm">原文</span></button>
+        <button id="aphUnfold" class="aph-gbtn" type="button" aria-pressed="false" aria-label="展平年轮" title="展平年轮：展开为线谱（U）"><svg class="aph-g" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><ellipse class="g-line g-faint" cx="10" cy="6.6" rx="6.8" ry="2.5"/><path class="g-line" d="M10 9.6V12M8.4 10.8L10 12.4L11.6 10.8"/><path class="g-line g-lit" d="M3.2 14.8H16.8"/><path class="g-line" d="M3.2 13.4V16.2M16.8 13.4V16.2"/></svg><span class="aph-nm">展平年轮</span></button>
+        <span class="aph-pill aph-pill-lens"><svg class="aph-g" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><circle class="g-line" cx="10" cy="10" r="6.4"/><circle class="g-star" cx="8" cy="8.4" r="1.15"/><circle class="g-star" cx="12.5" cy="9" r="1.15"/><circle class="g-bead" cx="9.8" cy="12.6" r="1.3"/></svg><select id="aphLens" aria-label="星域镜头" title="星域镜头"><option value="camps">阵营</option><option value="story">剧情参与</option><option value="locations">地点</option><option value="items">物品</option><option value="worldRules">规则</option><option value="clues">伏笔</option><option value="causeEdges">因果</option></select></span>
+        <span class="aph-pill aph-pill-peer"><svg class="aph-g" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path class="g-line" d="M7.4 4.8L11 10L7.4 15.2L3.8 10Z"/><path class="g-line g-lit" d="M12.6 4.8L16.2 10L12.6 15.2L9 10Z"/></svg><select id="aphPeer" aria-label="双晶对比人物" title="双晶对比人物"><option value="">无对比</option></select></span>
+        <button id="aphFace" class="aph-gbtn" type="button" aria-label="翻面" title="翻面：晶冠 / 下锥（B）"><svg class="aph-g" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path class="g-line" d="M10 5.2L13.4 10L10 14.8L6.6 10Z"/><path class="g-line g-faint" d="M3.6 8.2A6.8 6.8 0 0 1 15.2 5.2M16.4 11.8A6.8 6.8 0 0 1 4.8 14.8"/><path class="g-line" d="M15.2 5.2L15.5 2.9M15.2 5.2L12.9 4.9M4.8 14.8L4.5 17.1M4.8 14.8L7.1 15.1"/></svg><span class="aph-nm">翻面</span></button>
+      </div>
+      <label class="aph-search"><input id="aphSearch" type="search" placeholder="寻找角色 / 剧情线 / 事件" aria-label="搜索星空实体"><button id="aphSearchGo" type="button" aria-label="定位下一个匹配实体" title="搜索"><svg class="aph-g" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><circle class="g-line" cx="8.6" cy="8.6" r="4.9"/><path class="g-line" d="M12.2 12.2L16.2 16.2"/></svg></button></label>
+    </div>
+    <div class="aph-timeline">
+      <button class="aph-play aph-gbtn" id="aphPlay" type="button" aria-pressed="false" aria-label="播放章节游标" title="播放章节游标（空格）"><svg class="aph-g" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path class="g-line g-play" d="M7.2 5.2L14.8 10L7.2 14.8Z"/><path class="g-line g-pause" d="M7.6 5.6V14.4M12.4 5.6V14.4"/></svg></button>
+      <div class="aph-track" id="aphTrack"><input id="aphCursor" type="range" min="0" max="0" value="0" step="1" aria-label="章节事件游标"></div>
+      <span class="aph-cursor" id="aphCursorText">—</span>
+      <button class="aph-reduced aph-gbtn" id="aphReduced" type="button" aria-pressed="false" aria-label="静止" title="静止：停住全部动效"><svg class="aph-g" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path class="g-line" d="M12.6 4.1A6.3 6.3 0 1 0 16.1 13.3A5.1 5.1 0 0 1 12.6 4.1Z"/><path class="g-line g-faint" d="M3 17.2H17"/></svg><span class="aph-nm">静止</span></button>
+    </div>
+    <div class="aph-caption" id="aphCaption">同一事实模型 · 选择、章节与镜头保持一致</div>
+    <div id="aphEvidenceCard" class="aph-evidence" hidden><button id="aphEvidenceClose" type="button" aria-label="关闭证据">×</button><h3 id="aphEvidenceTitle"></h3><p id="aphEvidenceMeta"></p><div id="aphEvidenceBody"></div></div>
+  </div>
+</div>
+
+<button id="atlasAggregate" class="atlas-aggregate" type="button" hidden aria-label="展开聚合剧情星簇"><span id="atlasAggregateCount"></span><small>剧情星簇</small></button>
+
+<!-- 双页观测台：罗盘与星核共振场是两套独立动画系统，共享事实模型但各自拥有镜头与时间轴。 -->
+<section id="dualStage" class="dual-stage" aria-hidden="true" aria-labelledby="dualTitle">
+  <div class="dual-shell">
+    <header class="dual-topbar">
+      <div class="dual-brand">
+        <span class="dual-sigil" aria-hidden="true"><i></i><b></b><em></em></span>
+        <div><span class="dual-overline">CASTLINE / DUAL SPECTRUM</span><h2 id="dualTitle">双页观测台 <small>DUAL INDEPENDENT MOTION SYSTEMS</small></h2></div>
+      </div>
+      <div class="dual-live"><span class="dual-live-dot"></span><span id="dualLiveText">LIVE / MODEL LINKED</span><b id="dualClock">00:00:00</b></div>
+      <div class="dual-actions">
+        <button class="dual-icon-btn" id="dualPause" type="button" aria-pressed="false" title="暂停两套动画">Ⅱ</button>
+        <button class="dual-icon-btn" id="dualClose" type="button" aria-label="关闭双页观测台" title="返回主图谱">×</button>
+      </div>
+    </header>
+
+    <div class="dual-telemetry">
+      <div class="dual-telemetry-cell"><span>ACTIVE SUBJECT</span><b id="dualSubject">—</b><em id="dualSubjectMeta">等待图谱同步</em></div>
+      <div class="dual-telemetry-cell"><span>EVENT STREAM</span><b id="dualEventCount">00</b><em id="dualEventName">无事件</em></div>
+      <div class="dual-telemetry-cell"><span>MODEL CONFIDENCE</span><b id="dualConfidence">—</b><em>evidence weighted</em></div>
+      <div class="dual-telemetry-cell dual-telemetry-signal"><span>SIGNAL</span><b><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></b><em id="dualSignalText">NOMINAL</em></div>
+    </div>
+
+    <main class="dual-grid">
+      <article class="dual-panel dual-panel-compass" data-system="compass">
+        <header class="dual-panel-head">
+          <div><span class="dual-index">01</span><div><span class="dual-kicker">NAVIGATION / ORIENTATION</span><h3>星际罗盘 <small>VECTOR COMPASS</small></h3></div></div>
+          <span class="dual-panel-state"><i></i>ACTIVE / ORBITAL</span>
+        </header>
+        <div class="dual-panel-main dual-compass-main">
+          <div class="dual-compass-visual" id="dualCompassVisual">
+            <div class="dual-scanline"></div>
+            <svg class="dual-compass-svg" viewBox="0 0 600 510" role="img" aria-label="星际罗盘动画">
+              <defs>
+                <radialGradient id="dualCompassGlow" cx="50%" cy="50%"><stop offset="0" stop-color="#b7ffe7" stop-opacity=".9"/><stop offset=".22" stop-color="#62e8d0" stop-opacity=".33"/><stop offset="1" stop-color="#62e8d0" stop-opacity="0"/></radialGradient>
+                <linearGradient id="dualNeedle" x1="0" x2="1"><stop offset="0" stop-color="#ffb45c" stop-opacity="0"/><stop offset=".5" stop-color="#fff3cc"/><stop offset="1" stop-color="#79ffe2"/></linearGradient>
+                <filter id="dualSoftGlow"><feGaussianBlur stdDeviation="5" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+              </defs>
+              <g class="compass-backdrop"><circle cx="300" cy="255" r="205"/><circle cx="300" cy="255" r="172"/><circle cx="300" cy="255" r="136"/><circle cx="300" cy="255" r="76"/></g>
+              <g class="compass-radials"><path d="M300 38V472M83 255H517M146 101L454 409M454 101L146 409"/><path d="M300 49L371 452M300 49L229 452M88 255L489 326M88 255L489 184"/></g>
+              <g class="compass-ticks" id="dualCompassTicks"></g>
+              <g class="compass-sweep" id="dualCompassSweep"><path d="M300 255L300 50A205 205 0 0 1 460 126Z"/></g>
+              <g class="compass-orbits"><ellipse cx="300" cy="255" rx="201" ry="86"/><ellipse cx="300" cy="255" rx="146" ry="57"/><ellipse cx="300" cy="255" rx="92" ry="33"/></g>
+              <g class="compass-nodes" id="dualCompassNodes"></g>
+              <g class="compass-needle" id="dualCompassNeedle"><line x1="300" y1="255" x2="300" y2="75"/><path d="M300 54L292 78H308Z"/><circle cx="300" cy="255" r="8"/></g>
+              <circle class="compass-core-glow" cx="300" cy="255" r="64" fill="url(#dualCompassGlow)"/>
+              <g class="compass-core"><circle cx="300" cy="255" r="29"/><circle cx="300" cy="255" r="7"/><text x="300" y="247" text-anchor="middle">NEXUS</text><text x="300" y="268" text-anchor="middle" class="compass-core-value" id="dualCompassValue">084°</text></g>
+              <g class="compass-cardinals"><text x="300" y="29" text-anchor="middle">N</text><text x="529" y="260">E</text><text x="300" y="492" text-anchor="middle">S</text><text x="68" y="260" text-anchor="end">W</text></g>
+            </svg>
+            <div class="compass-float compass-float-a"><span>VECTOR</span><b id="dualVector">+084.2°</b><em>course lock</em></div>
+            <div class="compass-float compass-float-b"><span>DRIFT</span><b id="dualDrift">+12.6</b><em>orbital deviation</em></div>
+            <div class="compass-float compass-float-c"><span>PHASE</span><b id="dualPhase">03 / 08</b><em>convergence window</em></div>
+          </div>
+          <div class="dual-data-rail dual-compass-rail">
+            <div class="dual-rail-head"><span>ORIENTATION MATRIX</span><b>SYNC 98.4%</b></div>
+            <div class="dual-bars" id="dualCompassBars"></div>
+          </div>
+        </div>
+        <footer class="dual-panel-foot"><span>ORBITAL INDEX / 7 NODES</span><span class="dual-foot-rule"></span><span id="dualCompassFoot">NORTH-EAST · LOW GRAVITY</span></footer>
+      </article>
+
+      <article class="dual-panel dual-panel-resonance" data-system="resonance">
+        <header class="dual-panel-head">
+          <div><span class="dual-index">02</span><div><span class="dual-kicker">INNER FIELD / RELATIONAL ENERGY</span><h3>星核共振场 <small>RESONANCE CHAMBER</small></h3></div></div>
+          <span class="dual-panel-state dual-panel-state-hot"><i></i><span id="dualResState">RESONANCE RISING</span></span>
+        </header>
+        <div class="dual-panel-main dual-resonance-main">
+          <div class="dual-resonance-visual" id="dualResonanceVisual">
+            <div class="resonance-noise"></div>
+            <div class="resonance-axis"></div>
+            <div class="resonance-orbit resonance-orbit-a"></div><div class="resonance-orbit resonance-orbit-b"></div><div class="resonance-orbit resonance-orbit-c"></div>
+            <div class="resonance-beam"><i></i><i></i><i></i></div>
+            <div class="resonance-crystal resonance-crystal-top"><span></span><i></i><b></b></div>
+            <div class="resonance-crystal resonance-crystal-bottom"><span></span><i></i><b></b></div>
+            <div class="resonance-particle p1"></div><div class="resonance-particle p2"></div><div class="resonance-particle p3"></div><div class="resonance-particle p4"></div><div class="resonance-particle p5"></div><div class="resonance-particle p6"></div>
+            <div class="resonance-label resonance-label-top"><span>EXTERNAL PERSONA</span><b>外显人格</b><em id="dualPersonaValue">86</em></div>
+            <div class="resonance-label resonance-label-bottom"><span>SUBCONSCIOUS FIELD</span><b>潜意识 / 暗面</b><em id="dualShadowValue">74</em></div>
+            <div class="resonance-label resonance-label-mid"><span>LIVE LINK</span><b id="dualResonanceValue">82%</b><em>coupling index</em></div>
+          </div>
+          <div class="dual-data-rail dual-resonance-rail">
+            <div class="dual-rail-head"><span>RESONANCE VECTOR</span><b id="dualTensionText">TENSION 64</b></div>
+            <div class="dual-bars" id="dualResBars"></div>
+          </div>
+        </div>
+        <footer class="dual-panel-foot"><span>CORE / OUTER · TWO STATES</span><span class="dual-foot-rule"></span><span id="dualResFoot">PARTICLE EXCHANGE STABLE</span></footer>
+      </article>
+    </main>
+
+    <section class="dual-bottom">
+      <div class="dual-timeline-block">
+        <div class="dual-timeline-head"><span>EVENT TIME AXIS</span><b id="dualTimelineLabel">CH. 01 / ORIGIN SIGNAL</b><span id="dualTimelinePct">12%</span></div>
+        <div class="dual-range-wrap"><span>01</span><input id="dualTimeline" type="range" min="0" max="100" value="12" step="1" aria-label="双页事件时间轴"><span id="dualTimelineEnd">08</span></div>
+        <div class="dual-timeline-marks"><span>ORIGIN</span><span>AWAKENING</span><span>CONTACT</span><span>FRACTURE</span><span>CONVERGENCE</span></div>
+      </div>
+      <div class="dual-event-log" id="dualEventLog"><div class="dual-log-head"><span>EVENT BUFFER</span><b>STREAM / 05</b></div><div class="dual-log-row is-active"><i></i><span>ORIGIN SIGNAL</span><b>+0.82</b><em>now</em></div><div class="dual-log-row"><i></i><span>MEMORY ECHO</span><b>+0.14</b><em>−04:12</em></div><div class="dual-log-row"><i></i><span>VECTOR SHIFT</span><b>−0.08</b><em>−08:46</em></div></div>
+    </section>
+
+    <footer class="dual-statusbar"><span><i></i> TWO CANVASES / ONE FACT MODEL</span><span>FPS <b id="dualFps">60</b></span><span>LATENCY <b>18ms</b></span><span>PRESS <kbd>SHIFT+D</kbd> TO TOGGLE · <kbd>ESC</kbd> TO CLOSE</span></footer>
+  </div>
+</section>
+
+<!-- 视图控制 · 标签 LOD -->
+<div class="hud" id="viewbar">
+  <div class="panel">
+    <div class="vb-row">
+      <span class="vb-k">标签</span>
+      <div class="seg" id="vbLabel">
+        <button data-m="auto" title="随缩放自动放出名字：拉远只留主角，推近逐级显示">自动</button>
+        <button data-m="few" title="只显示最核心的十余个">精简</button>
+        <button data-m="std" title="固定中等数量">标准</button>
+        <button data-m="all" title="尽可能多（仍会避让，不重叠）">全部</button>
+        <button data-m="off" title="只保留选中/悬停/搜索命中">关闭</button>
+      </div>
+    </div>
+    <div class="vb-threshold" title="镜头推近到这里才开始放出普通角色姓名；核心、锁定、搜索仍走强制通道">
+      <span class="vb-k">门槛</span>
+      <input id="vbThreshold" type="range" min="0" max="90" step="5" value="34" aria-label="姓名显示缩放门槛">
+      <b id="vbThresholdVal">近 34%</b>
+    </div>
+    <div class="vb-row">
+      <span class="vb-k">长尾</span>
+      <button class="tgl" id="vbTail" title="零剧情点、无关系的功能性角色：默认折叠为群像层微点，不占标签预算">群像层 <b>折叠</b></button>
+      <span class="vb-meter" id="vbMeter">—</span>
+    </div>
+    <div class="vb-row">
+      <span class="vb-k">镜头</span>
+      <div class="seg vb-layer" id="vbLayer" aria-label="信息镜头层级">
+        <button data-layer="overview" class="on" title="强调结构、章节和角色分布">概览</button>
+        <button data-layer="evidence" title="强调证据、原文和剧情节点">证据</button>
+        <button data-layer="relations" title="强调关系强度和交集">关系</button>
+        <button data-layer="arc" title="强调角色弧线和时间轨迹">轨迹</button>
+        <button data-layer="story" title="强调剧情线归属：每条线的参与者与共演">剧情线</button>
+      </div>
+    </div>
+    <div class="vb-row vb-foot">
+      <button class="tgl pins is-hidden" id="vbPins" title="点此清空所有钉住">钉住 <b>0</b></button>
+      <span class="vb-fps" id="vbFps" title="渲染帧率"></span>
+      <span class="vb-hint mono" id="vbHint">滚轮缩放 · 推近自动放出更多姓名</span>
+    </div>
+  </div>
+</div>
+
+<!-- 在跑作业提示条 -->
+<div class="hud" id="attach"><div class="panel"><span class="dot"></span><span id="attachText"></span><button class="btn" id="attachGo">附着查看</button><button class="x" id="attachHide" title="忽略">×</button></div></div>
+
+<!-- 面包屑（聚焦态） -->
+<div class="hud" id="crumb"><button class="btn" id="crumbBack"><span>←</span> 返回全景 <b id="crumbName"></b></button><button class="btn face" id="faceBtn" title="切换观察面：顶面 = 人物内在八维 · 底面 = 叙事位置八维（B）">翻到底面</button></div>
+
+<!-- 角色索引 -->
+<div class="hud" id="index">
+  <div class="panel">
+    <div class="ix-head">
+      <div class="eyebrow">CAST INDEX · <b id="idxCount">0</b></div>
+      <div class="ix-sort" id="idxSort">
+        <button data-s="importance" class="on" title="按重要度">重</button>
+        <button data-s="appearances" title="按出场数">场</button>
+        <button data-s="relations" title="按关系数">系</button>
+        <button data-s="attr" title="按最高维分值">维</button>
+      </div>
+    </div>
+    <div class="ix-filter" id="idxRoles"></div>
+    <div class="ix-filter ix-camps" id="idxCamps" aria-label="按星座（阵营）筛选"></div>
+    <input id="idxSearch" placeholder="搜索角色 / 别名（↑↓ 选择 · Enter 聚焦）">
+    <div id="idxList"></div>
+  </div>
+</div>
+
+<!-- 提示 -->
+<div class="hud" id="hint">悬停角色 = 点亮突触 · 点击 = 聚焦 · 点星座名 = 只看该阵营 · 拖动旋转 · <kbd>B</kbd> 翻面 · <kbd>H</kbd> 作品库 · Shift+点击 钉住姓名 · <kbd>L</kbd> 标签档位 · <kbd>/</kbd> 搜索 · <kbd>Esc</kbd> 返回</div>
+
+<!-- 悬浮速览 -->
+<div id="toast"></div>
+<div id="peek"><div class="t"></div><div class="m"></div><div class="mini" id="peekMini"></div><div class="b"></div></div>
+
+<!-- 扩散式跳转全息 HUD -->
+<div id="clJumpHUD" class="cl-jump-hud" aria-live="polite">
+  <div class="jh-card">
+    <div class="jh-corner tl"></div><div class="jh-corner tr"></div>
+    <div class="jh-corner bl"></div><div class="jh-corner br"></div>
+    <div class="jh-scanline"></div>
+    <div class="jh-head">
+      <div class="jh-pulse-indicator"><span class="jh-pulse-dot"></span><span class="jh-pulse-ring"></span></div>
+      <span class="jh-title">NEURAL JUMP // 扩散式跳转</span>
+      <span class="jh-sub mono">QUANTUM CONNECTOME TRANSIT</span>
+    </div>
+    <div class="jh-track">
+      <div class="jh-node origin">
+        <span class="jh-n-tag">源点 ORIGIN</span>
+        <span class="jh-n-name" id="jhFrom">—</span>
+      </div>
+      <div class="jh-conduit">
+        <div class="jh-wave-pulses">
+          <span class="jh-wp p1"></span><span class="jh-wp p2"></span><span class="jh-wp p3"></span>
+        </div>
+        <div class="jh-flow-arrow">➔</div>
+        <div class="jh-label-badge" id="jhType">空间扩散</div>
+      </div>
+      <div class="jh-node target">
+        <span class="jh-n-tag">目标 TARGET</span>
+        <span class="jh-n-name" id="jhTo">—</span>
+      </div>
+    </div>
+    <div class="jh-meta" id="jhMeta">
+      <span class="jh-rel-badge" id="jhRelBadge">直连羁绊</span>
+      <span class="jh-rel-desc" id="jhRelDesc"></span>
+      <span class="jh-events-count" id="jhEvCount"></span>
+    </div>
+  </div>
+</div>
+
+<!-- v21：底部时间轴已取消（章节信息由左列章节轨道与右坞承担） -->
+
+<!-- 右坞 -->
+<div class="hud" id="dock">
+  <div class="panel">
+    <div id="dockHead">
+      <div class="role" id="dRole">—</div>
+      <h2 id="dName">—<small id="dAlias"></small></h2>
+      <div class="idn" id="dIdentity"></div>
+      <div class="dk-nav">
+        <button id="dPrev" title="上一位角色">↑</button>
+        <span id="dPos" class="mono"></span>
+        <button id="dNext" title="下一位角色">↓</button>
+        <button id="dockPreview" type="button" aria-expanded="true" aria-controls="dockToc dockBody" title="暂收信息面板，观看当前角色的 3D 晶冠">3D 预览</button>
+        <button id="dLink" title="复制该角色的深链">链接</button>
+      </div>
+      <button id="dockClose" title="关闭">×</button>
+    </div>
+    <div id="dockToc"></div>
+    <div id="dockBody"></div>
+  </div>
+</div>
+
+<!-- 作品库 -->
+<div id="library">
+  <div class="panel" id="libBox">
+    <div class="lb-head">
+      <div class="eyebrow"><span class="dot"></span>作品库 · <b>LIBRARY</b> · <span id="libCount">0</span></div>
+      <div class="lb-tools">
+        <input id="libSearch" placeholder="搜索作品 / 角色 / 梗概">
+        <div class="lb-sort" id="libSort">
+          <button data-s="recent" class="on">最近</button>
+          <button data-s="opens">常看</button>
+          <button data-s="chars">字数</button>
+          <button data-s="cast">角色数</button>
+        </div>
+        <button class="btn" id="libSweep" title="清理无主的缓存文件">清理缓存</button>
+        <button class="x" id="libClose">×</button>
+      </div>
+    </div>
+    <div class="lb-body"><div id="libList"></div><div id="libEmpty" class="empty">还没有分析过的作品。回到「更换材料」拖入第一批材料。</div></div>
+  </div>
+</div>
+
+<!-- API 接入面板 -->
+<div id="apiPanel">
+  <div class="panel" id="apiBox">
+    <div class="ap-head">
+      <div><div class="eyebrow"><span class="dot"></span>API 接入 · <b>MODEL PROFILES</b></div><div class="ap-sub mono" id="apiSub">档案 · 历史 · 模型调整</div></div>
+      <div class="ap-head-r"><span class="ap-cur mono" id="apiCur"></span><button class="x" id="apiClose" title="关闭">×</button></div>
+    </div>
+    <div class="ap-onboard" id="apiOnboard">
+      <div class="ob-title">第一次使用 · 先接入一个模型 API</div>
+      <div class="ob-steps"><span class="s1">① 选预设或填地址</span><span class="s2">② 填密钥 · 拉取模型</span><span class="s3">③ 测试连通</span><span class="s4">④ 保存并使用</span></div>
+      <div class="ob-note">接入后分析、重新分析、换模型都从这里走。想先看效果可以<button type="button" class="asbtn" id="apiDemoSkip">直接看示例作品</button>，之后随时从「MODEL」入口回来接入。</div>
+    </div>
+    <div class="ap-body">
+      <div class="ap-list-wrap">
+        <div class="eyebrow ap-col-h">档案 · <span id="apiCount">0</span></div>
+        <div class="ap-list" id="apiList"></div>
+        <div class="eyebrow ap-col-h ap-hist-h">接入历史 · <span id="apiHistCount">0</span><button type="button" class="asbtn" id="apiHistClear">清空</button></div>
+        <div class="ap-hist" id="apiHist"></div>
+      </div>
+      <form class="ap-form" id="apiForm" autocomplete="off">
+        <div class="ap-form-head"><div class="eyebrow" id="apiFormTitle">新建档案</div><button type="button" class="asbtn eyebrow" id="apiNew">＋ 新建</button></div>
+        <label>预设<select name="preset" id="apiPreset"><option value="">自定义…</option></select></label>
+        <label>名称<input name="name" placeholder="如 opencode · mimo"></label>
+        <label>协议<select name="kind"><option value="openai">OpenAI 兼容（/chat/completions）</option><option value="anthropic">Anthropic（/v1/messages）</option></select></label>
+        <label>接入地址<input name="base_url" placeholder="https://api.example.com/v1" spellcheck="false"></label>
+        <label>密钥<input name="api_key" type="password" placeholder="sk-…" spellcheck="false"></label>
+        <label>模型<div class="ap-model-row"><input name="model" list="apiModels" placeholder="模型名 · 或点右侧拉取" spellcheck="false"><button type="button" class="btn small" id="apiModels_btn">拉取模型</button></div></label>
+        <datalist id="apiModels"></datalist>
+        <div class="ap-model-area" id="apiModelArea">
+          <div class="ap-model-toolbar is-hidden" id="apiModelToolbar">
+            <div class="ap-model-stats mono" id="apiModelStats">共 0 个模型</div>
+            <div class="ap-model-filter-box">
+              <input type="text" id="apiModelFilter" class="ap-model-filter mono" placeholder="过滤模型…" autocomplete="off" spellcheck="false">
+              <div class="ap-model-tabs" id="apiModelTabs">
+                <button type="button" class="tab-btn active" data-filter="all">全部</button>
+                <button type="button" class="tab-btn" data-filter="reasoning">推理</button>
+                <button type="button" class="tab-btn" data-filter="flash">快速</button>
+                <button type="button" class="tab-btn" data-filter="standard">通用</button>
+              </div>
+            </div>
+          </div>
+          <div class="ap-chips mono" id="apiModelChips"></div>
+        </div>
+        <details class="ap-tune" id="apiTune">
+          <summary class="eyebrow">模型调整 · <b>TUNING</b> <span class="mono" id="apiTuneHint">自动</span></summary>
+          <div class="ap-tune-grid">
+            <label>快速调用推理强度<select name="effort_fast"><option value="">自动（low）</option><option value="low">low</option><option value="medium">medium</option><option value="high">high</option><option value="none">不发送</option></select></label>
+            <label>深度调用推理强度<select name="effort_deep"><option value="">自动（medium）</option><option value="low">low</option><option value="medium">medium</option><option value="high">high</option><option value="none">不发送</option></select></label>
+            <label>并行路数<select name="parallel"><option value="">自动</option><option>2</option><option>4</option><option>6</option><option>8</option><option>10</option><option>12</option><option>16</option></select></label>
+            <label>每块字数<select name="chunk_chars"><option value="">自动（按输出上限）</option><option value="12000">1.2 万</option><option value="20000">2.0 万</option><option value="30000">3.0 万</option><option value="40000">4.0 万</option></select></label>
+            <label>温度<select name="temperature"><option value="">自动（0.3）</option><option value="0">0</option><option value="0.2">0.2</option><option value="0.5">0.5</option><option value="0.7">0.7</option></select></label>
+          </div>
+          <div class="ap-tune-note mono">快速调用 = 抽取 / 归并 / 关系；深度调用 = 建档 / 校准 / 单次通读。推理型模型建议 low / medium；flash 类模型会自动忽略不支持的字段。</div>
+        </details>
+        <input type="hidden" name="id">
+        <div class="ap-actions">
+          <button type="button" class="btn" id="apiTest">测试连通 · 探测能力</button>
+          <button type="submit" class="btn primary" id="apiSave">保存并使用</button>
+        </div>
+        <div class="ap-msg mono" id="apiMsg"></div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- 文风蒸馏面板（点「蒸馏文风」才出现；打开只探针，不会自动开跑） -->
+<div id="dsPanel">
+  <div class="panel" id="dsBox">
+    <div class="ds-head">
+      <div>
+        <div class="eyebrow"><span class="dot"></span>文风蒸馏 · <b>STYLE DISTILLATION</b></div>
+        <div class="ds-sub mono" id="dsSub">样本浸泡 · 文风 / 语感 / 作者思维 / 声纹</div>
+      </div>
+      <div class="ds-head-r">
+        <span class="ds-cur mono" id="dsCur"></span>
+        <button class="x" id="dsClose" title="关闭">×</button>
+      </div>
+    </div>
+
+    <!-- 方案（未开跑） -->
+    <div class="ds-body" id="dsPlanView">
+      <div class="ds-intro">
+        <h3>把这部作品的<b>写法</b>蒸馏成一份可以直接用的提示词。</h3>
+        <p>蒸馏读的是原文本身：程序先算出这部书的硬性度量（句长分布、对白占比、对话标签偏好、四字短句率、感官配比、高频词），
+          再按场景类型从全书取样，让模型逐段做<b>样本浸泡式拆解</b>——不是概括情节，是拆「这一段是怎么被写出来的」。
+          产出两份文档：一份巨型提示词，一份原著样本浸泡文档。</p>
+        <div class="ds-pipe">
+          <div class="dp"><i>1</i><b>硬性度量</b><span>程序统计全文，模型不得改写</span></div>
+          <div class="dp"><i>2</i><b>场景取样</b><span>按位置分带 + 类型覆盖取真实原文</span></div>
+          <div class="dp"><i>3</i><b>样本浸泡</b><span>逐段拆做法 / 句法 / 用词 / 感官 / 反例</span></div>
+          <div class="dp"><i>4</i><b>文风法典</b><span>句法 · 语感 · 视角 · 场景 · 对白</span></div>
+          <div class="dp"><i>5</i><b>作者思维</b><span>世界观 · 因果 · 结构 · 喜好 · 禁忌</span></div>
+          <div class="dp"><i>6</i><b>声纹</b><span>叙述者 + 每个角色的台词指纹</span></div>
+          <div class="dp"><i>7</i><b>AI 病灶</b><span>预判通用模型会怎么写歪 + 改法</span></div>
+        </div>
+      </div>
+      <div class="ds-plan" id="dsPlan"></div>
+      <div class="ds-warn is-hidden" id="dsWarn"></div>
+      <div class="ds-actions">
+        <div class="ds-note mono" id="dsNote">点开这个面板不会调用模型。只有按下右侧按钮才开始。</div>
+        <div class="ds-btns">
+          <button class="btn is-hidden" id="dsOpenCached">打开已有结果</button>
+          <button class="btn primary" id="dsStart">开始蒸馏</button>
+          <button class="btn danger is-hidden" id="dsForce" title="忽略已有结果重新蒸馏">重新蒸馏</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 进度 -->
+    <div class="ds-body is-hidden" id="dsRunView">
+      <div class="ds-run-head">
+        <svg class="ds-ring" viewBox="0 0 44 44"><circle class="bg" cx="22" cy="22" r="18"/><circle class="fg" id="dsArc" cx="22" cy="22" r="18"/></svg>
+        <div>
+          <div class="ds-stage" id="dsStage">准备…</div>
+          <div class="ds-stage-m mono" id="dsStageM"></div>
+        </div>
+        <button class="btn danger" id="dsCancel">取消</button>
+      </div>
+      <ul class="ds-steps" id="dsSteps">
+        <li data-p="measure"><i></i>硬性度量<span class="d"></span></li>
+        <li data-p="sample"><i></i>场景取样<span class="d"></span></li>
+        <li data-p="soak"><i></i>样本浸泡<span class="d"></span></li>
+        <li data-p="codex"><i></i>文风法典<span class="d"></span></li>
+        <li data-p="mind"><i></i>作者思维<span class="d"></span></li>
+        <li data-p="voice"><i></i>声纹提取<span class="d"></span></li>
+        <li data-p="guard"><i></i>AI 病灶对照<span class="d"></span></li>
+        <li data-p="assemble"><i></i>拼装文档<span class="d"></span></li>
+      </ul>
+      <div class="ds-meter" id="dsMeter"></div>
+      <div class="ds-log" id="dsLog"></div>
+      <div class="ds-err" id="dsErr"></div>
+    </div>
+
+    <!-- 结果 -->
+    <div class="ds-body ds-result is-hidden" id="dsResultView">
+      <div class="ds-tabs" id="dsTabs">
+        <button data-t="prompt" class="on">蒸馏提示词 · 完整</button>
+        <button data-t="core" title="切掉三个附录，只留可执行规则；上下文吃紧时用">精简版</button>
+        <button data-t="soak">样本浸泡文档</button>
+        <button data-t="arch" title="程序算出的结构硬指标 + 据此蒸出的可执行构思法">构思引擎</button>
+        <button data-t="fid" title="有提示词 vs 无提示词的对照回测：这份提示词到底起没起作用">保真回测</button>
+        <button data-t="metrics">硬性度量</button>
+        <button data-t="voice">声纹表</button>
+      </div>
+      <div class="ds-stats mono" id="dsStats"></div>
+      <div class="ds-view" id="dsView"></div>
+      <div class="ds-actions">
+        <div class="ds-note mono" id="dsResNote"></div>
+        <div class="ds-btns">
+          <button class="btn" id="dsBack">← 方案</button>
+          <button class="btn" id="dsCopy">复制当前文档</button>
+          <button class="btn primary" id="dsDown">下载三份 .md</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- 星盘文字剧情树面板（开图谱时在右边空白处显示，与星盘视觉同步联动） -->
+<div id="plotTextPanel" class="plot-text-panel">
+  <div class="pt-head">
+    <div>
+      <div class="eyebrow"><span class="dot"></span>星盘剧情树 · <b>STORY TREE</b></div>
+      <div class="pt-sub mono" id="plotTextSub">主线成干 · 支线成枝 · 时间推进</div>
+    </div>
+    <div class="pt-head-r">
+      <div class="pt-view-tabs" id="plotViewTabs">
+        <button type="button" class="tab-btn active" data-view="timeline" title="按时间推进从上到下排列">时间流</button>
+        <button type="button" class="tab-btn" data-view="grouped" title="按主线与支线分组显示">主支线</button>
+      </div>
+      <button class="x" id="plotTextClose" title="收起剧情树">×</button>
+    </div>
+  </div>
+  <div class="pt-meta mono" id="plotTextMeta">
+    <span class="pt-stat-pill" id="plotStatTrunk">主干 —</span>
+    <span class="pt-stat-pill" id="plotStatBranches">支线 —</span>
+    <span class="pt-stat-pill" id="plotStatEvents">剧情点 —</span>
+  </div>
+  <div class="pt-search-bar">
+    <input type="text" id="plotTextSearch" class="mono" placeholder="搜索剧情标题、角色、章节…" autocomplete="off" spellcheck="false">
+  </div>
+  <div class="pt-list" id="plotTextList">
+    <!-- 动态渲染时间推进的主线与支线剧情树列表 -->
+  </div>
+</div>
+
+<!-- 确认框 / 选项框 -->
+<div id="confirm"><div class="panel cf-box"><div class="eyebrow" id="cfEyebrow">确认</div><h3 id="cfTitle"></h3><div id="cfBody"></div><div class="cf-opts" id="cfOpts"></div><div class="cf-actions"><button class="btn" id="cfNo">取消</button><button class="btn primary" id="cfYes">确认</button></div></div></div>
+
+<!-- 运行中 HUD（常驻右下角，分析或蒸馏时均显示） -->
+<div class="hud" id="runbar">
+  <div class="panel">
+    <div class="rb-ring-wrap">
+      <svg class="rb-ring" viewBox="0 0 44 44">
+        <defs>
+          <linearGradient id="rbGradAnalysis" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#7af0c8" />
+            <stop offset="100%" stop-color="#ffb45c" />
+          </linearGradient>
+          <linearGradient id="rbGradDistill" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#c9a0ff" />
+            <stop offset="100%" stop-color="#ff8ad8" />
+          </linearGradient>
+        </defs>
+        <circle class="bg" cx="22" cy="22" r="18" />
+        <circle class="scan" cx="22" cy="22" r="18" />
+        <circle class="fg" id="rbArc" cx="22" cy="22" r="18" />
+      </svg>
+      <span class="rb-pct mono" id="rbPct">0%</span>
+    </div>
+    <div class="rb-txt">
+      <div class="rb-t-row">
+        <span class="rb-badge mono" id="rbBadge">分析</span>
+        <div class="rb-t" id="rbStage">准备中…</div>
+      </div>
+      <div class="rb-m mono" id="rbMeta">已用 0s</div>
+    </div>
+    <div class="rb-acts">
+      <button class="btn" id="rbOpen" title="展开完整进度">展开</button>
+      <button class="btn danger" id="rbCancel" title="取消当前任务">取消</button>
+    </div>
+  </div>
+</div>
+
+<!-- 作品总览（全景态） -->
+<div class="hud" id="overview"><div class="panel"><div class="ov-head"><div class="eyebrow"><span class="dot"></span>作品总览 · <b>OVERVIEW</b></div><button class="ov-fold" id="ovFold" title="收起/展开">—</button></div><div id="ovBody"></div></div></div>
+
+<!-- 加载框 -->
+<div id="loader">
+  <div class="panel" id="lc">
+    <div class="lc-top">
+      <div>
+        <div class="eyebrow"><span class="dot"></span>Castline · 小说角色神经图谱</div>
+        <h1>把一部小说，拆成角色的神经网。<small>DROP · STAGE · ANALYZE · CONNECTOME LIGHTS UP</small></h1>
+      </div>
+      <button class="btn is-hidden" id="btnCancel">返回图谱</button>
+    </div>
+    <p class="sub">把作品材料分批拖进托盘：大纲、细纲、正文、人物设定、未完稿，任意组合。托盘里可以增删、改类型，随时查看分析方案；<b>只有点「开始分析」才会开始</b>。</p>
+    <div class="lc-grid">
+      <div class="lc-left">
+        <div id="zone">
+          <div class="plus">+</div>
+          <div class="big">拖入文件夹或文件 · 或点击选择</div>
+          <div class="small">支持 .md .txt .docx .json · 子文件夹递归 · 可分多批加入</div>
+          <input type="file" id="folderInput" webkitdirectory multiple class="is-hidden">
+          <input type="file" id="fileInput" multiple accept=".md,.txt,.markdown,.text,.json,.docx" class="is-hidden">
+          <div class="zone-alt"><button type="button" id="pickFiles">选单个文件</button></div>
+        </div>
+        <div id="tray">
+          <div class="tr-head"><div class="eyebrow">材料托盘 · <b id="trCount">0</b> 文件 · <span id="trChars">0</span> 字<span id="trBatches"></span></div><div class="tr-ops"><button id="trKindAll" title="把全部文件设为自动判定类型">重置类型</button><button id="trClear">清空托盘</button></div></div>
+          <div id="trList"></div>
+          <div id="trEmpty" class="empty">托盘为空。拖入第一批材料。</div>
+        </div>
+        <div id="planCard" class="is-hidden"></div>
+        <div id="prog">
+          <div id="progBar"><div id="progFill"></div></div>
+          <ul id="steps">
+            <li data-s="read"><i></i>读取材料<span class="d"></span></li>
+            <li data-s="send"><i></i>上传 · 切块<span class="d"></span></li>
+            <li data-s="extract"><i></i>识别角色 · 剧情点<span class="d"></span></li>
+            <li data-s="merge"><i></i>归并别名 · 八维评分 · 明暗线<span class="d"></span></li>
+            <li data-s="storylines"><i></i>剧情线归纳 · 主线换手 · 支线挂点<span class="d"></span></li>
+            <li data-s="build"><i></i>生成神经图谱<span class="d"></span></li>
+          </ul>
+          <div id="progMeter">
+            <div class="pm"><span>阶段</span><b id="pmPhase">—</b></div>
+            <div class="pm"><span>进度</span><b id="pmUnit">—</b></div>
+            <div class="pm"><span>在途请求</span><b id="pmFlight">—</b></div>
+            <div class="pm"><span>模型吐字</span><b id="pmChars">—</b></div>
+            <div class="pm"><span>已用</span><b id="pmElapsed">0s</b></div>
+            <div class="pm"><span>预计剩余</span><b id="pmEta">—</b></div>
+          </div>
+          <div id="progNote"></div>
+          <div id="progLog"></div>
+          <div id="lcFails" class="is-hidden"></div>
+        </div>
+        <div id="lcErr"></div>
+      </div>
+      <div class="lc-right">
+        <div id="history">
+          <div class="hs-head"><div class="eyebrow">记忆 · <b>RECENT WORKS</b> · <span id="histCount">0</span></div><button class="asbtn eyebrow" id="histAll">全部 ▸</button></div>
+          <div id="histList"></div>
+          <div id="histEmpty" class="empty">还没有分析过的作品。</div>
+        </div>
+      </div>
+    </div>
+    <div id="lcFoot">
+      <button class="eyebrow asbtn" id="lcStatus" title="API 接入">MODEL · <b id="lcModel">—</b> ▸</button>
+      <label class="analysis-depth">解析范围 <select id="analysisMode" aria-label="解析范围"><option value="summary">关键剧情摘要</option><option value="deep">深度全信息 · 分章小块</option></select><small>深度模式可能增加调用量；先查看方案，点击开始才运行。</small></label>
+      <div class="lc-actions">
+        <button class="btn primary" id="btnStart" disabled>开始分析</button>
+        <button class="btn danger is-hidden" id="btnStop">取消分析</button>
+        <button class="btn primary is-hidden" id="btnRetry">重试 · 续跑</button>
+        <button class="btn" id="btnDemo">载入示例</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- [I5 组一：首屏必需与核心基建] (≤ 40 件 · 实测 33 件) -->
+<!-- Vendor 三方库基础设施 -->
+<script src="js/vendor/three.min.js?v=9274bbce"></script>
+<script src="js/vendor/OrbitControls.js?v=02bb4ade"></script>
+<script src="js/vendor/EffectComposer.js?v=4fc320fa"></script>
+<script src="js/vendor/RenderPass.js?v=57a549b2"></script>
+<script src="js/vendor/ShaderPass.js?v=2e64890b"></script>
+<script src="js/vendor/CopyShader.js?v=6b5da4fe"></script>
+<script src="js/vendor/LuminosityHighPassShader.js?v=00ed0682"></script>
+<script src="js/vendor/UnrealBloomPass.js?v=1ed342b2"></script>
+<script src="js/vendor/mammoth.browser.min.js?v=2a0c24d4"></script>
+<!-- v34 · 色板唯一真相。必须排在所有 js 之前：ingest/tray 等模块在解析期就可能查它。 -->
+<script src="js/palette.js?v=e331a9a7"></script>
+<!-- Abyss 深渊星典基础层 -->
+<script src="js/abyss/abyss-governance.js?v=30fc7026"></script>
+<script src="js/abyss/abyss-breath.js?v=8d68da33"></script>
+<script src="js/abyss/abyss-ring.js?v=b1594410"></script>
+<script src="js/abyss/abyss-tex.js?v=e798d17c"></script>
+<script src="js/abyss/abyss-lod.js?v=94bc80d5"></script>
+<!-- 材料输入与分析层 -->
+<script src="js/ingest.js?v=dbd75b9f"></script>
+<script src="js/tray.js?v=a105411c"></script>
+<script src="js/analyze.js?v=b6b29690"></script>
+<script src="js/distill.js?v=de272aaf"></script>
+<!-- HUD 显示件与管理器 (HUD 家族) -->
+<!-- D2 · 属性数据单一真相源 (attr-source.js) -->
+<script src="js/hud/attr-source.js?v=e59f9326"></script>
+<!-- D3 / D4 · 面板管理器与全局统一 Tooltip -->
+<script src="js/hud/panel-manager.js?v=f5906fa8"></script>
+<script src="js/hud/tooltip.js?v=3d5002c5"></script>
+<!-- D5 · 空态/加载态/断态三态体系 -->
+<script src="js/hud/status-states.js?v=e7012c4f"></script>
+<!-- ============================================================ -->
+<!-- [I5 组二：图谱按需与多维视图层] (78 件：Radar / Tree / Orbit3D) -->
+<!-- Charts 图表家族 (雷达 / 星座 / 星位盘) -->
+<script src="js/charts/radar-visual-fx.js?v=81f9f154"></script>
+<script src="js/charts/radar-holo-frame.js?v=8f6f00ae"></script>
+<script src="js/charts/radar-benchmark.js?v=4f8aa941"></script>
+<script src="js/charts/radar-archetype.js?v=e97c193f"></script>
+<script src="js/charts/radar-evidence-card.js?v=16ebddf4"></script>
+<script src="js/charts/radar-motion.js?v=dd8b69eb"></script>
+<script src="js/charts/radar-bars-enhanced.js?v=f0ab68bf"></script>
+<script src="js/charts/radar.js?v=16c3857d"></script>
+<script src="js/charts/radar-ritual.js?v=684fc2db"></script>
+<script src="js/charts/constellation.js?v=258929f5"></script>
+<script src="js/hud/arcana.js?v=6bb11e1b"></script>
+<script src="js/hud/oracle.js?v=d78e7b86"></script>
+<!-- Tree 剧情流层（v30）：解析引擎 → 3D 剧情树 → 加重星云 → 线谱 HUD。 -->
+<script src="js/tree/storylines.js?v=3733ef55"></script>
+<script src="js/tree/plot-tree.js?v=11d70cd5"></script>
+<script src="js/tree/nebula.js?v=a1dc8b88"></script>
+<script src="js/hud/plot-hud.js?v=aa0d205d"></script>
+<script src="js/tree/tree-quality.js?v=c6ac8a83"></script>
+<script src="js/tree/tree-sway.js?v=f9b5a03c"></script>
+<script src="js/tree/tree-shape.config.js?v=413ec19a"></script>
+<script src="js/tree/tree-shape.js?v=48976521"></script>
+<script src="js/tree/tree-leaf.js?v=a645a9dc"></script>
+<script src="js/tree/tree-anchor.js?v=b30cd82d"></script>
+<script src="js/tree/tree-pose.js?v=42cef453"></script>
+<script src="js/tree/tree-ghost.js?v=a4d17d06"></script>
+<script src="js/tree/tree-veil.js?v=a7938d25"></script>
+<script src="js/tree/tree-gate.js?v=c464ac7a"></script>
+<script src="js/tree/star-migrate.js?v=415f1450"></script>
+<script src="js/tree/cast-clones.js?v=235cb548"></script>
+<script src="js/tree/tree-read.js?v=221d1ca5"></script>
+<script src="js/tree/tree-stage.js?v=6b4d9217"></script>
+<script src="js/tree/tree-legend.js?v=58e02abd"></script>
+<script src="js/tree/tree-tau-persist.js?v=39fd156c"></script>
+<script src="js/tree/tree-twig-phase.js?v=9338ecf0"></script>
+<script src="js/tree/tree-tips.js?v=7bcb8d09"></script>
+<script src="js/tree/tree-marks.js?v=a4dcca38"></script>
+<script src="js/tree/tree-focus.js?v=3432e934"></script>
+<script src="js/tree/tree-events.js?v=03f17dee"></script>
+<script src="js/tree/tree-timeline.js?v=0d86b5f2"></script>
+<script src="js/tree/tree-event-card.js?v=ba8c37e4"></script>
+<script src="js/tree/tree-twig-pick.js?v=79c58085"></script>
+<script src="js/tree/star-converge.js?v=d81a7419"></script>
+<script src="js/tree/event-index-bridge.js?v=c1714f1e"></script>
+<script src="js/tree/star-ghost.js?v=34b78ce0"></script>
+<!-- [I5 组三：测试隔离与诊断探针层] (1 件 · ?probe=1 / 自动化压测挂载) -->
+<script src="js/tree/perf-probe.js?v=58cbf791"></script>
+<link rel="stylesheet" href="css/tree-narrate.css?v=587d67c6">
+<link rel="stylesheet" href="css/shell-chrome.css?v=1720a9ee">
+<link rel="stylesheet" href="css/dock-polish.css?v=003a0f22">
+<link rel="stylesheet" href="css/frontier-graph.css?v=c6530626">
+<link rel="stylesheet" href="css/module-frontier-upgrade.css?v=eb0c2032">
+<link rel="stylesheet" href="css/module-refinement.css?v=8f77993f">
+<link rel="stylesheet" href="css/precision-materials.css?v=49b2662f">
+<link rel="stylesheet" href="css/cinema-depth.css?v=97360d70">
+<link rel="stylesheet" href="css/mystic-ritual.css?v=06414316">
+<link rel="stylesheet" href="css/sky-constellation-preview.css?v=0445967d">
+<script src="js/tree/tree-narrate.js?v=397759ff"></script>
+<script src="js/tree/tree-narrate-ui.js?v=5e173a91"></script>
+<script src="js/tree/tree-follow.js?v=6ffe448d"></script>
+<script src="js/tree/tree-jump.js?v=8e632717"></script>
+<script src="js/tree/plot-promote.js?v=c1689dac"></script>
+<script src="js/tree/plot-fork.js?v=920d394c"></script>
+<script src="js/tree/plot-cast.js?v=f609da3b"></script>
+<script src="js/tree/plot-stage.js?v=ebb998d1"></script>
+<!-- Charts 衍生件 -->
+<script src="js/charts/peerchart.js?v=8ee0f447"></script>
+<!-- Core 核心场景层 (3D Stage / Mats / LOD / Core) -->
+<script src="js/core/scene-lead-fx.js?v=4611759b"></script>
+<script src="js/core/scene-crown-motion.js?v=0fbab33f"></script>
+<script src="js/core/scene-synergy-beam.js?v=63587bb7"></script>
+<script src="js/core/scene-mats.js?v=4d4545d3"></script>
+<script src="js/core/scene-lod-labels.js?v=2a838ca4"></script>
+<script src="js/core/scene-stage.js?v=6b043040"></script>
+<script src="js/core/scene-core.js?v=63f0287b"></script>
+<script src="js/scene.js?v=27a4620b"></script>
+<!-- Orbit3D 家族 -->
+<script src="js/orbit3d/plot-orbit.js?v=c384080b"></script>
+<script src="js/orbit3d/plot-orbit-lanes.js?v=a9437d9d"></script>
+<script src="js/orbit3d/plot-orbit-view.js?v=dd634037"></script>
+<script src="js/orbit3d/plot-orbit-interact.js?v=cb928c30"></script>
+<script src="js/orbit3d/plot-orbit-converge.js?v=1ef7d034"></script>
+<script src="js/orbit3d/plot-orbit-solo.js?v=98729dde"></script>
+<script src="js/orbit3d/orbit3d-tokens.js?v=998a5bf6"></script>
+<script src="js/orbit3d/orbit3d-tier.js?v=de480d46"></script>
+<script src="js/orbit3d/orbit3d-geom.js?v=4c8207c2"></script>
+<script src="js/orbit3d/orbit3d-motion.js?v=455cbdff"></script>
+<script src="js/orbit3d/orbit3d-layer.js?v=645a06fe"></script>
+<script src="js/orbit3d/orbit3d-fit.js?v=394955ad"></script>
+<script src="js/orbit3d/orbit3d-pick.js?v=6d0b7852"></script>
+<script src="js/orbit3d/orbit3d-labels.js?v=28ad6b58"></script>
+<script src="js/orbit3d/orbit3d-view.js?v=5b1b2646"></script>
+<script src="js/orbit3d/orbit3d-shaders.js?v=c6b19418"></script>
+<script src="js/orbit3d/orbit3d-grade.js?v=077ab336"></script>
+<script src="js/orbit3d/orbit3d-cinema.js?v=d5332abc"></script>
+<script src="js/orbit3d/orbit3d-ruler.js?v=47e87d31"></script>
+<script src="js/orbit3d/orbit3d-footprint.js?v=6987adf6"></script>
+<script src="js/orbit3d/orbit3d-castlink.js?v=65cceedc"></script>
+<script src="js/orbit3d/orbit3d-spectral.js?v=cb615665"></script>
+<script src="js/orbit3d/orbit3d-bezel.js?v=a24af652"></script>
+<script src="js/orbit3d/orbit3d-needle.js?v=44f12df7"></script>
+<script src="js/hud/plot-deck.js?v=be1b7e8f"></script>
+<script src="js/hud/plot-deck-badge.js?v=146eb902"></script>
+<script src="js/hud/shell-compact.js?v=6c294e79"></script>
+<script src="js/charts/radar-reading-adapter.js?v=703ffe63"></script>
+<script src="js/charts/radar-reading.js?v=de3e3e51"></script>
+<script src="js/charts/metabars.js?v=ed5e69bb"></script>
+<script src="js/charts/constellation-reading-adapter.js?v=1b2a63a8"></script>
+<script src="js/charts/constellation-reading.js?v=17100987"></script>
+<script src="js/atlas/atlas-glyphs.js?v=646b3349"></script>
+<script src="js/atlas/atlas-model.js?v=181e7562"></script>
+<script src="js/atlas/atlas-score.js?v=fb11e760"></script>
+<script src="js/atlas/atlas-footprint.js?v=12fb28e1"></script>
+<script src="js/atlas/atlas-stage.js?v=94991753"></script>
+<script src="js/annulus/annulus-model.js?v=d4e6a1ad"></script>
+<script src="js/annulus/annulus-svg.js?v=74ad33b8"></script>
+<script src="js/annulus/annulus-labels.js?v=219bacb5"></script>
+<script src="js/annulus/annulus-marks.js?v=d0b5b5ca"></script>
+<script src="js/annulus/annulus-interact.js?v=4a01cb76"></script>
+<script src="js/annulus/annulus-ledger.js?v=c95127ec"></script>
+<script src="js/annulus/annulus-core.js?v=04969771"></script>
+<script src="js/gem/gem-model.js?v=6cb58044"></script>
+<script src="js/gem/gem-morph.js?v=c9293647"></script>
+<script src="js/gem/gem-svg.js?v=2917b1f2"></script>
+<script src="js/gem/gem-arc.js?v=0f612a91"></script>
+<script src="js/gem/gem-compare.js?v=f84e439d"></script>
+<script src="js/gem/gem-mount.js?v=30e62d45"></script>
+<script src="js/domains/domains-model.js?v=13cb8143"></script>
+<script src="js/domains/domains-hull.js?v=5cd2d69e"></script>
+<script src="js/domains/domains-lamps.js?v=a45247e2"></script>
+<script src="js/domains/domains-interact.js?v=af914bc7"></script>
+<script src="js/core/scene-camp-halo.js?v=0c03c5ad"></script>
+<script src="js/keys.js?v=6e65374a"></script>
+<script src="js/atlas/atlas-source.js?v=a9a03023"></script>
+<script src="js/atlas/atlas-state.js?v=48d48b73"></script>
+<script src="js/atlas/atlas-fallback.js?v=19576e78"></script>
+<script src="js/sky/sky-model.js?v=6e6fb942"></script>
+<script src="js/app.js?v=2fd07367"></script>
+<script src="js/hud/vieworb.js?v=a8d83b07"></script>
+<script src="js/information-architecture.js?v=49015ff6"></script>
+<script src="js/atlas/atlas-local-graph.js?v=e1207bae"></script>
+<script src="js/atlas/atlas-world.js?v=b9e494a8"></script>
+<script src="js/atlas/atlas-startrack.js?v=27b4c8ea"></script>
+<script src="js/atlas/atlas-preview-session.js?v=da2852a6"></script>
+<script src="js/atlas/atlas-lab.js?v=b9f08727"></script>
+<script src="js/sky/sky-tokens.js?v=2b1b4c96"></script>
+<script src="js/sky/sky-util.js?v=0878d018"></script>
+<script src="js/sky/sky-disc-gl.js?v=a6e0a77b"></script>
+<script src="js/sky/sky-disc-project.js?v=178e5da3"></script>
+<script src="js/sky/sky-disc-geom.js?v=5f598218"></script>
+<script src="js/sky/sky-disc-tracks.js?v=4c94e4ec"></script>
+<script src="js/sky/sky-disc-labels.js?v=7c6ed63d"></script>
+<script src="js/sky/sky-disc-layout.js?v=03eb114b"></script>
+<script src="js/sky/sky-disc-threads.js?v=26f0538f"></script>
+<script src="js/sky/sky-disc.js?v=1f3dbef3"></script>
+<script src="js/sky/sky-field.js?v=eb9be3dd"></script>
+<script src="js/sky/sky-field-avoid.js?v=47fef8bd"></script>
+<script src="js/sky/sky-compass-band.js?v=6021c474"></script>
+<script src="js/sky/sky-compass.js?v=df3a7d30"></script>
+<script src="js/sky/sky-compass-drag.js?v=9bdbfdd1"></script>
+<script src="js/sky/sky-compass-fan.js?v=f7e2ce7d"></script>
+<script src="js/sky/sky-motion.js?v=1d80e348"></script>
+<script src="js/sky/sky-post.js?v=0e9b1d88"></script>
+<script src="js/sky/sky-cosmos-stars.js?v=3d35075a"></script>
+<script src="js/sky/sky-cosmos-bake.js?v=345d14f6"></script>
+<script src="js/sky/sky-cosmos-glsl.js?v=3d54f9c9"></script>
+<script src="js/sky/sky-cosmos.js?v=62bd1998"></script>
+<script src="js/sky/sky-meteor-glsl.js?v=fcf6a9e5"></script>
+<script src="js/sky/sky-meteor.js?v=9b5f700a"></script>
+<script src="js/sky/sky-stars.js?v=62f908ab"></script>
+<script src="js/sky/sky-trails.js?v=ecd50fb7"></script>
+<script src="js/sky/sky-cloud-noise.js?v=2e4fed12"></script>
+<script src="js/sky/sky-nebula-glsl.js?v=66adbf71"></script>
+<script src="js/sky/sky-nebula.js?v=99fc1afe"></script>
+<script src="js/sky/sky-bundles-glsl.js?v=051b2d77"></script>
+<script src="js/sky/sky-bundles.js?v=7e82e52f"></script>
+<script src="js/sky/sky-beads.js?v=c9c9f9d3"></script>
+<script src="js/sky/sky-tug.js?v=ff0aee85"></script>
+<script src="js/sky/sky-tug-fx-glsl.js?v=d66551a4"></script>
+<script src="js/sky/sky-tug-fx.js?v=8f6e0ff5"></script>
+<script src="js/sky/sky-constellation-preview.js?v=4d34e546"></script>
+<script src="js/sky/sky-labels.js?v=0c77d731"></script>
+<script src="js/sky/sky-dial-geom.js?v=23a29629"></script>
+<script src="js/sky/sky-dial.js?v=7144e074"></script>
+<script src="js/sky/sky-dial-fx.js?v=b0827fcf"></script>
+<script src="js/sky/sky-openfuse.js?v=adc4c4e3"></script>
+<script src="js/sky/sky-rings-glsl.js?v=75b4b5a6"></script>
+<script src="js/sky/sky-rings.js?v=ebe9fa0e"></script>
+<script src="js/sky/sky-rings-fx.js?v=cf60be76"></script>
+<script src="js/sky/sky-orrery-glsl.js?v=5aa4419f"></script>
+<script src="js/sky/sky-orrery.js?v=d5d8efbf"></script>
+<script src="js/sky/sky-orrery-sats.js?v=e85623fa"></script>
+<script src="js/sky/sky-view.js?v=b8bb8166"></script>
+<script src="js/sky/sky-cards.js?v=3722154c"></script>
+<script src="js/sky/sky-scale.js?v=9c73a1a4"></script>
+<script src="js/sky/sky-deck-model.js?v=48bc1afe"></script>
+<script src="js/sky/sky-deck-body.js?v=ef0538fb"></script>
+<script src="js/sky/sky-deck.js?v=40ea7c53"></script>
+<script src="js/sky/sky-rain.js?v=db868f87"></script>
+<script src="js/sky/sky-loader-fx.js?v=ed9dbd6a"></script>
+<script src="js/sky/sky-loader.js?v=1a2dc049"></script>
+<script src="js/sky/sky-reveal-glsl.js?v=ee8f8341"></script>
+<script src="js/sky/sky-reveal.js?v=feb9123b"></script>
+<script src="js/sky/sky-field-gl.js?v=27064f3e"></script>
+<script src="js/sky/sky-deep-cards.js?v=3ceec0b4"></script>
+<script src="js/sky/sky-deep-views.js?v=6a8417e4"></script>
+<script src="js/sky/sky-deep.js?v=c9871bfc"></script>
+<script src="js/sky/sky-shell-camera.js?v=0dc15c5b"></script>
+<script src="js/sky/sky-shell-hud.js?v=1b9fee49"></script>
+<script src="js/sky/sky-shell-cards.js?v=3bb7f5ed"></script>
+<script src="js/sky/sky-shell-player.js?v=b67f8206"></script>
+<script src="js/sky/sky-shell-deck.js?v=512f4e0f"></script>
+<script src="js/sky/sky-shell-load.js?v=7f0f7234"></script>
+<script src="js/sky/sky-shell.js?v=be76c75b"></script>
+<script src="js/sky/sky-groups-model.js?v=8060e28d"></script>
+<script src="js/sky/sky-groups-body.js?v=99b3dff5"></script>
+<script src="js/sky/sky-groups.js?v=95522492"></script>
+<script src="js/sky/sky-groups-shell.js?v=9ea1deb3"></script>
+<script src="js/sky/sky-cards-3d.js?v=5c2c1ed0"></script>
+<script src="js/sky/sky-lab.js?v=55779243"></script>
+<script src="js/sky/sky-chrome.js?v=de706998"></script>
+<script src="js/atlas/atlas-motion-polish.js?v=fbd685dc"></script>
+<script src="js/atlas/precision-materials.js?v=ddb9d6a3"></script>
+<script src="js/sky/sky-atmosphere.js?v=37740f7e"></script>
+<script src="js/atlas/atlas-cinema.js?v=9a97c3aa"></script>
+<script src="js/atlas/mystic-ritual.js?v=20dd3708"></script>
+</body>
+</html>

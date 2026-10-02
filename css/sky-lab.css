@@ -1,0 +1,145 @@
+/* 星空预演实验室—— 右缘观测刻度栏（可收成竖签）· ≤560 底部抽屉 · 读图模式。
+   与 sky.css 同家族：黑曜玻璃 + 发丝线；只引 --abyss-* / --cl-atlas-* / --z-* 令牌。
+   纪律：不改别人元素的 inline 状态（.cl-lab 的 opacity 逐帧由 JS 写）；读图模式全部挂在 body.skylab-* 上，关闭实验室即由 JS 移除。 */
+
+/* ── 入口：顶栏「工具」旁的字形钮（按钮本体复用 .sky-icon） ─────────────────── */
+.sky-lab-btn[aria-pressed=true]{color:var(--abyss-gold);border-color:color-mix(in oklab,var(--abyss-gold) 72%,transparent);background:color-mix(in oklab,var(--abyss-gold) 9%,transparent)}
+
+/* ── 根 ─────────────────────────────────────────────────────────────── */
+.sky-lab{--skl-tone:var(--abyss-gold);position:fixed;right:0;top:var(--skl-top,72px);z-index:var(--z-panel);pointer-events:none;color:var(--abyss-ink-2);font:var(--abyss-fs-2xs)/1.45 var(--abyss-font-sans);letter-spacing:.04em}
+.sky-lab[hidden],.sky-lab [hidden]{display:none!important}
+:where(.sky-lab) :where(button){font:inherit;color:inherit;letter-spacing:inherit;background:none;border:0;padding:0;margin:0;cursor:pointer;pointer-events:auto;text-align:inherit}
+.sky-lab button:focus-visible{outline:1px solid var(--abyss-gold);outline-offset:2px}
+.sky-lab button[aria-disabled=true]{opacity:.36;cursor:not-allowed}
+
+/* ── 收起：一枚竖排字形签 ────────────────────────────────────────────── */
+.skl-tag{position:absolute;right:0;top:0;display:flex;align-items:center;gap:8px;box-sizing:border-box;width:26px;padding:12px 0 10px;
+  border:1px solid color-mix(in oklab,var(--abyss-violet-bright) 22%,transparent);border-right:0;border-radius:var(--abyss-radius-md) 0 0 var(--abyss-radius-md);
+  background:color-mix(in oklab,var(--abyss-obsidian-deep) 86%,transparent);writing-mode:vertical-rl;white-space:nowrap;letter-spacing:.24em;color:var(--abyss-ink-3);
+  transition:color var(--cl-atlas-dur-1) var(--cl-atlas-ease),border-color var(--cl-atlas-dur-1) var(--cl-atlas-ease)}
+.skl-tag:hover{color:var(--abyss-ink);border-color:color-mix(in oklab,var(--abyss-gold) 60%,transparent)}
+.skl-tag-frame{font:var(--abyss-fs-2xs)/1 var(--abyss-font-mono);letter-spacing:.04em;text-combine-upright:all;color:var(--abyss-gold);font-weight:400}
+.skl-tag-brief{color:var(--abyss-ink-2);letter-spacing:.2em}
+.skl-tag-brief:empty{display:none}
+.sky-lab[data-open=true] .skl-tag{display:none}
+.sky-lab[data-open=false] .skl-panel{display:none}
+
+/* ── 展开：发丝线刻度栏（叠在星空之上，底色取悬停卡同档的深黑曜，避免字压字） ─── */
+.skl-panel{position:absolute;right:20px;top:0;box-sizing:border-box;width:200px;max-height:calc(100vh - var(--skl-top,72px) - var(--skl-bottom,96px));overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;
+  padding:10px 12px 11px;border:1px solid color-mix(in oklab,var(--abyss-violet-bright) 22%,transparent);border-radius:var(--abyss-radius-md);
+  background:color-mix(in oklab,var(--abyss-obsidian-deep) 86%,transparent);box-shadow:var(--abyss-shadow-flat);pointer-events:auto;
+  animation:sklIn var(--cl-atlas-dur-2) var(--cl-atlas-ease) both}
+@keyframes sklIn{from{opacity:0;transform:translateX(6px)}to{opacity:1;transform:none}}
+.skl-head{display:flex;align-items:center;gap:7px;padding-bottom:8px;margin-bottom:8px;border-bottom:1px solid var(--abyss-line)}
+.skl-sigil{width:6px;height:6px;border:1px solid var(--abyss-gold);transform:rotate(45deg);flex:none}
+.skl-kicker{font:var(--cl-atlas-fs-2)/1 var(--abyss-font-serif);letter-spacing:.2em;color:var(--abyss-ink-bright)}
+.skl-en{margin-right:auto;font:var(--abyss-fs-2xs)/1 var(--abyss-font-mono);letter-spacing:.26em;color:var(--abyss-ink-3)}
+.skl-fold{position:relative;width:24px;height:24px;border-radius:var(--abyss-radius-full);border:1px solid transparent;color:var(--abyss-ink-3);transition:color var(--cl-atlas-dur-1) var(--cl-atlas-ease),border-color var(--cl-atlas-dur-1) var(--cl-atlas-ease)}
+.skl-fold i{position:absolute;left:50%;top:50%;width:6px;height:6px;margin:-3px 0 0 -5px;border-top:1px solid currentColor;border-right:1px solid currentColor;transform:rotate(45deg)}
+.skl-fold:hover{color:var(--abyss-gold);border-color:var(--abyss-line)}
+
+/* 样例页常驻：回到原作品 */
+.skl-return{display:flex;align-items:center;gap:6px;width:100%;box-sizing:border-box;min-height:26px;margin:-2px 0 8px;padding:0 8px 0 5px;border:1px solid var(--abyss-line-2);border-radius:var(--abyss-radius-sm);color:var(--abyss-ink)}
+.skl-return:hover{color:var(--abyss-gold)}
+
+/* 故事板：三组竖向刻度（星座 · 星盘 · 罗盘），组名竖排在左沟 */
+.skl-board{display:flex;flex-direction:column;gap:6px}
+.skl-group{display:grid;grid-template-columns:16px 1fr;align-items:stretch}
+.skl-group[data-g=C]{--skl-tone:var(--abyss-gold)}
+.skl-group[data-g=P]{--skl-tone:var(--abyss-violet-bright)}
+.skl-group[data-g=K]{--skl-tone:var(--abyss-mint-bright)}
+.skl-glabel{writing-mode:vertical-rl;letter-spacing:.34em;color:var(--abyss-ink-3);align-self:start;padding-top:4px}
+.skl-ticks{display:flex;flex-direction:column;border-left:1px solid var(--abyss-line)}
+.skl-tick{position:relative;display:flex;align-items:baseline;gap:8px;width:100%;min-height:22px;padding:2px 0 2px 16px;color:var(--abyss-ink-3);transition:color var(--cl-atlas-dur-1) var(--cl-atlas-ease)}
+.skl-tick::before{content:'';position:absolute;left:0;top:50%;width:7px;height:1px;background:var(--abyss-ink-3);opacity:.7;transition:width var(--cl-atlas-dur-1) var(--cl-atlas-ease),background var(--cl-atlas-dur-1) var(--cl-atlas-ease)}
+.skl-tick:hover{color:var(--abyss-ink)}
+.skl-tick:hover::before{width:10px}
+.skl-tick[aria-pressed=true]{color:var(--abyss-ink-bright)}
+.skl-tick[aria-pressed=true]::before{width:12px;background:var(--skl-tone);opacity:1}
+.skl-tick.is-running::before{background:repeating-linear-gradient(90deg,var(--skl-tone) 0 2px,transparent 2px 4px)}
+.skl-fid{font:var(--abyss-fs-2xs)/1 var(--abyss-font-mono);letter-spacing:.06em;min-width:18px}
+.skl-tick[aria-pressed=true] .skl-fid{color:var(--skl-tone)}
+.skl-fname{font-size:var(--cl-atlas-fs-2);line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* 这一帧回答什么 + 实际读数 */
+.skl-card{margin-top:10px;padding-top:8px;border-top:1px solid var(--abyss-line)}
+.skl-card-id{display:block;font:var(--cl-atlas-fs-2)/1.3 var(--abyss-font-sans);font-weight:400;color:var(--abyss-gold);letter-spacing:.08em}
+.sky-lab[data-card=disabled] .skl-card-id,.sky-lab[data-card=idle] .skl-card-id,.sky-lab[data-card=free] .skl-card-id{color:var(--abyss-ink-3)}
+.skl-q{margin:3px 0 0;color:var(--abyss-ink-3)}
+.skl-a{margin:5px 0 0;min-height:1.45em;font-size:var(--cl-atlas-fs-2);line-height:1.45;color:var(--abyss-ink)}
+.skl-a:empty{display:none}
+.skl-seg{white-space:nowrap}
+.skl-seg:not(:last-child)::after{content:'·';margin-left:.4em;color:var(--abyss-ink-3)}
+.sky-lab[data-card=disabled] .skl-a,.sky-lab[data-card=running] .skl-a{color:var(--abyss-ink-3)}
+
+/* 读图模式四开关 · 深链 · 样例 */
+.skl-tools{display:flex;flex-direction:column;gap:5px;margin-top:10px}
+.skl-modes{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
+.skl-share{display:grid;grid-template-columns:1fr 1fr;gap:4px}
+.skl-mode,.skl-copy,.skl-disclose{min-height:26px;border:1px solid var(--abyss-line);border-radius:var(--abyss-radius-sm);color:var(--abyss-ink-2);text-align:center;transition:color var(--cl-atlas-dur-1) var(--cl-atlas-ease),border-color var(--cl-atlas-dur-1) var(--cl-atlas-ease)}
+.skl-mode:hover,.skl-copy:hover,.skl-disclose:hover{color:var(--abyss-ink);border-color:color-mix(in oklab,var(--abyss-violet-bright) 40%,transparent)}
+.skl-mode[aria-pressed=true]{color:var(--abyss-gold);border-color:var(--abyss-line-2);background:var(--abyss-signal-subtle)}
+.skl-disclose::after{content:' ▸';color:var(--abyss-ink-3)}
+.skl-disclose[aria-expanded=true]::after{content:' ▾'}
+.skl-url{box-sizing:border-box;width:100%;margin-top:5px;padding:4px 5px;border:1px solid var(--abyss-line-2);border-radius:var(--abyss-radius-sm);background:var(--abyss-obsidian-glass);color:var(--abyss-ink);font:var(--abyss-fs-2xs)/1.3 var(--abyss-font-mono);pointer-events:auto}
+.skl-slist{list-style:none;margin:6px 0 0;padding:0;display:flex;flex-direction:column;gap:2px}
+.skl-srow{display:flex;align-items:baseline;gap:6px;min-height:22px}
+.skl-srow.is-current{padding:2px 0 4px;margin-bottom:2px;border-bottom:1px solid var(--abyss-line)}
+.skl-sample{display:flex;align-items:baseline;gap:6px;width:100%;min-height:22px;color:var(--abyss-ink-2)}
+.skl-sample:hover{color:var(--abyss-ink)}
+.skl-sample small{margin-left:auto;font:var(--abyss-fs-2xs)/1 var(--abyss-font-mono);color:var(--abyss-ink-3)}
+.skl-sname{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.skl-stag{flex:none;padding:0 4px;border:1px solid var(--abyss-line-2);border-radius:var(--abyss-radius-xs);color:var(--abyss-gold);font-size:var(--abyss-fs-2xs);line-height:1.35;letter-spacing:.08em}
+.skl-stag.is-work{border-color:var(--abyss-line);color:var(--abyss-ink-2)}
+.skl-sreason{color:var(--abyss-ink-3);padding-top:2px}
+.skl-cover{margin:8px 0 0;padding-left:7px;border-left:1px solid var(--abyss-gold);color:var(--abyss-ink-2)}
+.skl-note{margin:8px 0 0;color:var(--abyss-ink-3)}
+.skl-note:empty{display:none}
+
+@media (max-width:900px){.skl-panel{right:10px}}
+
+/* ── ≤560：底部抽屉（一行九帧 · 一段读数 · 一行开关），不遮主体过多 ─────────── */
+.sky-lab[data-layout=drawer]{top:auto;left:0;bottom:0}
+.sky-lab[data-layout=drawer] .skl-tag{position:fixed;top:auto;right:10px;bottom:var(--skl-bottom,96px);width:auto;max-width:calc(100vw - 20px);height:30px;padding:0 12px;writing-mode:horizontal-tb;letter-spacing:.14em;overflow:hidden;
+  border-right:1px solid color-mix(in oklab,var(--abyss-violet-bright) 22%,transparent);border-radius:var(--abyss-radius-full)}
+.sky-lab[data-layout=drawer] .skl-tag-frame{text-combine-upright:none;flex:none}
+.sky-lab[data-layout=drawer] .skl-tag-name{flex:none}
+.sky-lab[data-layout=drawer] .skl-tag-brief{min-width:0;overflow:hidden;text-overflow:ellipsis;letter-spacing:.06em}
+.sky-lab[data-layout=drawer] .skl-tag::after{content:'';flex:none;width:5px;height:5px;margin-left:2px;border-top:1px solid currentColor;border-left:1px solid currentColor;transform:translateY(2px) rotate(45deg)}
+.sky-lab[data-layout=drawer] .skl-panel{position:fixed;left:8px;right:8px;top:auto;bottom:8px;width:auto;max-height:40vh;padding:7px 10px 9px;background:var(--abyss-obsidian-glass-heavy);animation-name:sklUp}
+@keyframes sklUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.sky-lab[data-layout=drawer] .skl-head{padding-bottom:5px;margin-bottom:6px}
+.sky-lab[data-layout=drawer] .skl-fold i{margin:-5px 0 0 -3px;transform:rotate(135deg)}
+.sky-lab[data-layout=drawer] .skl-board{display:grid;grid-template-columns:2fr 4fr 3fr;gap:6px}
+.sky-lab[data-layout=drawer] .skl-group{display:flex;flex-direction:column;gap:3px}
+.sky-lab[data-layout=drawer] .skl-glabel{writing-mode:horizontal-tb;letter-spacing:.2em;padding:0}
+.sky-lab[data-layout=drawer] .skl-ticks{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:3px;border-left:0}
+.sky-lab[data-layout=drawer] .skl-tick{justify-content:center;align-items:center;min-height:32px;padding:0;border:1px solid var(--abyss-line);border-radius:var(--abyss-radius-sm)}
+.sky-lab[data-layout=drawer] .skl-tick::before{display:none}
+.sky-lab[data-layout=drawer] .skl-tick[aria-pressed=true]{border-color:var(--skl-tone)}
+.sky-lab[data-layout=drawer] .skl-fid{min-width:0}
+.sky-lab[data-layout=drawer] .skl-fname{display:none}
+.sky-lab[data-layout=drawer] .skl-card{margin-top:7px;padding-top:6px}
+.sky-lab[data-layout=drawer] .skl-q{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sky-lab[data-layout=drawer] .skl-a{margin-top:3px}
+.sky-lab[data-layout=drawer] .skl-tools{display:grid;grid-template-columns:4fr 2fr;gap:4px;margin-top:7px}
+.sky-lab[data-layout=drawer] .skl-mode,.sky-lab[data-layout=drawer] .skl-copy,.sky-lab[data-layout=drawer] .skl-disclose{min-height:32px}
+
+/* ── 读图模式（body 类；关闭实验室即由 JS 全部移除） ───────────────────────── */
+/* 收字：支线弧名、悬停卡、图例提示、星名 / 团名副行、本栏问句；保留团名、主线段名、回数、实体名、属性轴名与分值 */
+body.skylab-notext .sky-disc .sd-label:not(.is-main){visibility:hidden}
+body.skylab-notext .sky-card,body.skylab-notext .skc-card,body.skylab-notext .sky-legend .lg-hint,body.skylab-notext .cl-dom-legend__note,body.skylab-notext .skl-q{display:none!important}
+body.skylab-notext #labels .cl-lab.char .ls,body.skylab-notext #labels .cl-lab.char .lx,body.skylab-notext #labels .cl-lab.camp .ls,body.skylab-notext #labels .cl-lab.camp .lx,body.skylab-notext #labels .cl-lab.hub .ls,body.skylab-notext #labels .cl-lab.hub .lx,body.skylab-notext #labels .cl-lab.chap .ls,body.skylab-notext #labels .cl-lab.chap .lx{display:none!important}
+/* 关光：WebGL 泛光由 scene.setGlow(0) 关；这里去掉文字辉光与徽记光晕（实体仍靠描边存在） */
+body.skylab-noglow #labels .cl-lab,body.skylab-noglow #labels .cl-lab *,body.skylab-noglow .cl-camp-halo-labels *,body.skylab-noglow .sky-hud *{text-shadow:none!important}
+body.skylab-noglow .cl-camp-halo__badge{box-shadow:none!important}
+/* 灰阶：舞台与各 SVG / 标签图层逐个去色（本栏保持原色，作读数对照） */
+body.skylab-gray #stage,body.skylab-gray .sky-compass,body.skylab-gray .skc-card,body.skylab-gray .cl-camp-halo-labels,body.skylab-gray .cl-dom-legend,body.skylab-gray .cl-o3-bz-layer,body.skylab-gray .cl-domains-lamps,body.skylab-gray .sky-hud>*{filter:grayscale(1)}
+/* 静止：星盘与罗盘层的过渡直接落终态 */
+body.skylab-still .sky-disc,body.skylab-still .sky-disc *,body.skylab-still .sky-compass,body.skylab-still .sky-compass *{transition:none!important;animation:none!important}
+
+/* ── 降级：低动效 / 低档直接落终态 ─────────────────────────────────────── */
+@media (prefers-reduced-motion:reduce){.sky-lab *,.sky-lab-btn{animation:none!important;transition:none!important}}
+body[data-tier=low] .sky-lab *{animation:none!important;transition:none!important}
+/* 底部抽屉展开时宿主的停靠卡会叠在抽屉下；抽屉本身已写出同一份读数 */
+body:has(.sky-lab[data-layout=drawer][data-open=true]) .sky-card.is-dock{display:none}

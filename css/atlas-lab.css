@@ -1,0 +1,127 @@
+/* v90 F6 预演实验室 —— 右缘观测刻度（≤480 变底部抽屉）+ 读图模式。只引 --abyss-* / --cl-atlas-* 令牌。
+   纪律：不给 .panel 加伪元素；不改 .cl-lab 的 opacity（逐帧 inline）；灰阶只加在自身不含 fixed 子层的图层上。 */
+
+/* ── 根：只在预演中出现（JS 切 hidden） ─────────────────────────────────────── */
+.atlas-lab{--alab-shift:0px;position:fixed;right:0;top:calc(var(--alab-top,180px) + var(--alab-shift));z-index:var(--z-panel);pointer-events:none;color:var(--abyss-ink-2);font:var(--abyss-fs-2xs)/1.45 var(--abyss-font-sans)}
+.atlas-lab[data-sample=true]{--alab-shift:38px}
+.atlas-lab[hidden],.atlas-lab-return[hidden],.atlas-lab [hidden]{display:none!important}
+:where(.atlas-lab) :where(button){font:inherit;color:inherit;background:none;border:0;padding:0;margin:0;cursor:pointer;pointer-events:auto}
+.atlas-lab button:focus-visible,.atlas-lab-return:focus-visible{outline:1px solid var(--abyss-gold);outline-offset:2px}
+.atlas-lab button[aria-disabled=true]{opacity:.38;cursor:not-allowed}
+
+/* ── 收起态：一枚竖排字形签 ───────────────────────────────────────────────── */
+.alab-tag{position:absolute;right:0;top:0;display:block;box-sizing:border-box;width:24px;padding:12px 0 10px;border:1px solid var(--abyss-line);border-right:0;background:var(--abyss-obsidian-glass-subtle);writing-mode:vertical-rl;text-orientation:mixed;white-space:nowrap;letter-spacing:.24em;line-height:22px;color:var(--abyss-ink-3);transition:color var(--cl-atlas-dur-1) var(--cl-atlas-ease),border-color var(--cl-atlas-dur-1) var(--cl-atlas-ease)}
+.alab-tag:hover{color:var(--abyss-ink);border-color:var(--abyss-line-2)}
+.alab-tag-name{display:inline}
+.alab-tag-frame{display:inline-block;margin-inline-start:8px;font:var(--abyss-fs-2xs)/1 var(--abyss-font-mono);letter-spacing:0;text-combine-upright:all;color:var(--abyss-gold);font-weight:400}
+.atlas-lab[data-open=true] .alab-tag{display:none}
+.atlas-lab[data-open=false] .alab-panel{display:none}
+
+/* ── 展开态：发丝线刻度栏 ─────────────────────────────────────────────────── */
+.alab-panel{position:absolute;right:12px;top:0;box-sizing:border-box;width:184px;max-height:calc(100vh - var(--alab-top,180px) - var(--alab-shift) - var(--alab-bottom,120px));overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;padding:10px 10px 10px 12px;border-left:1px solid var(--abyss-line);background:var(--abyss-obsidian-glass);pointer-events:auto;animation:alabIn var(--cl-atlas-dur-2) var(--cl-atlas-ease) both}
+@keyframes alabIn{from{opacity:0;transform:translateX(6px)}to{opacity:1;transform:none}}
+.alab-head{display:flex;align-items:center;gap:6px;padding-bottom:8px;margin-bottom:8px;border-bottom:1px solid var(--abyss-line)}
+.alab-sigil{width:5px;height:5px;border:1px solid var(--abyss-gold);transform:rotate(45deg);flex:none}
+.alab-kicker{color:var(--abyss-ink);letter-spacing:.14em}
+.alab-kicker-en{margin-right:auto;font-family:var(--abyss-font-mono);letter-spacing:.2em;color:var(--abyss-ink-3)}
+.alab-fold{width:24px;height:24px;display:grid;place-items:center;color:var(--abyss-ink-3);border:1px solid transparent}
+.alab-fold:hover{color:var(--abyss-gold);border-color:var(--abyss-line)}
+
+/* 故事板：三组竖向刻度，组名竖排在左沟 */
+.alab-board{display:flex;flex-direction:column;gap:6px}
+.alab-group{display:grid;grid-template-columns:18px 1fr;align-items:stretch;--alab-tone:var(--abyss-gold)}
+.alab-group[data-atlas=annulus]{--alab-tone:var(--abyss-violet-bright)}
+.alab-group[data-atlas=gem]{--alab-tone:var(--abyss-mint-bright)}
+.alab-glabel{writing-mode:vertical-rl;letter-spacing:.3em;color:var(--abyss-ink-3);opacity:.8;align-self:start;justify-self:start;padding-top:3px}
+.alab-ticks{display:flex;flex-direction:column;border-left:1px solid var(--abyss-line)}
+.alab-tick{position:relative;display:flex;align-items:baseline;gap:7px;width:100%;min-height:22px;padding:2px 0 2px 16px;text-align:left;color:var(--abyss-ink-3);transition:color var(--cl-atlas-dur-1) var(--cl-atlas-ease)}
+.alab-tick::before{content:'';position:absolute;left:0;top:50%;width:7px;height:1px;background:var(--abyss-ink-3);opacity:.7;transition:width var(--cl-atlas-dur-1) var(--cl-atlas-ease),background var(--cl-atlas-dur-1) var(--cl-atlas-ease)}
+.alab-tick:hover{color:var(--abyss-ink)}
+.alab-tick:hover::before{width:10px}
+.alab-tick[aria-pressed=true]{color:var(--abyss-ink-bright)}
+.alab-tick[aria-pressed=true]::before{width:12px;background:var(--alab-tone);opacity:1}
+.alab-tick.is-running::before{background:repeating-linear-gradient(90deg,var(--alab-tone) 0 2px,transparent 2px 4px)}
+.alab-fid{font:var(--abyss-fs-2xs)/1 var(--abyss-font-mono);letter-spacing:.06em;min-width:18px}
+.alab-tick[aria-pressed=true] .alab-fid{color:var(--alab-tone)}
+.alab-fname{font-size:var(--cl-atlas-fs-2);line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* 本帧回答什么 */
+.alab-card{margin-top:10px;padding-top:8px;border-top:1px solid var(--abyss-line)}
+.alab-card-id{display:block;font-weight:400;font-size:var(--cl-atlas-fs-2);color:var(--abyss-gold);letter-spacing:.06em}
+.atlas-lab[data-card=disabled] .alab-card-id{color:var(--abyss-ink-3)}
+.alab-q{margin:3px 0 0;color:var(--abyss-ink-3)}
+.alab-a{margin:4px 0 0;min-height:1.45em;font-size:var(--cl-atlas-fs-2);line-height:1.4;color:var(--abyss-ink)}
+.atlas-lab[data-card=disabled] .alab-a{color:var(--abyss-ink-3)}
+
+/* 读图模式四开关 */
+.alab-modes{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:10px}
+.alab-mode{min-height:26px;border:1px solid var(--abyss-line);color:var(--abyss-ink-2);transition:color var(--cl-atlas-dur-1) var(--cl-atlas-ease),border-color var(--cl-atlas-dur-1) var(--cl-atlas-ease)}
+.alab-mode:hover{color:var(--abyss-ink)}
+.alab-mode[aria-pressed=true]{color:var(--abyss-gold);border-color:var(--abyss-line-2);background:var(--abyss-signal-subtle)}
+
+/* 深链与样例 */
+.alab-share{display:flex;gap:4px;margin-top:6px}
+.alab-copy,.alab-disclose{flex:1;min-height:26px;border:1px solid var(--abyss-line);color:var(--abyss-ink-2)}
+.alab-copy:hover,.alab-disclose:hover{color:var(--abyss-ink)}
+.alab-disclose::after{content:' ▸';color:var(--abyss-ink-3)}
+.alab-disclose[aria-expanded=true]::after{content:' ▾'}
+.alab-url{box-sizing:border-box;width:100%;margin-top:5px;padding:4px 5px;border:1px solid var(--abyss-line-2);background:var(--abyss-obsidian-glass);color:var(--abyss-ink);font:var(--abyss-fs-2xs)/1.3 var(--abyss-font-mono);pointer-events:auto}
+.alab-slist{list-style:none;margin:6px 0 0;padding:0;display:flex;flex-direction:column;gap:2px}
+.alab-srow{display:flex;align-items:baseline;gap:6px;min-height:22px}
+.alab-srow.is-current{padding:2px 0 4px;border-bottom:1px solid var(--abyss-line);margin-bottom:2px}
+.alab-sample{display:flex;align-items:baseline;gap:6px;width:100%;min-height:22px;text-align:left;color:var(--abyss-ink-2)}
+.alab-sample:hover{color:var(--abyss-ink)}
+.alab-sample small{margin-left:auto;font:var(--abyss-fs-2xs)/1 var(--abyss-font-mono);color:var(--abyss-ink-3)}
+.alab-sname{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.alab-stag{flex:none;padding:0 4px;border:1px solid var(--abyss-line-2);color:var(--abyss-gold);font-size:var(--abyss-fs-2xs);line-height:1.35;letter-spacing:.08em}
+.alab-stag.is-work{border-color:var(--abyss-line);color:var(--abyss-ink-2)}
+.alab-sreason{color:var(--abyss-ink-3);padding-top:2px}
+.alab-note{margin:8px 0 0;color:var(--abyss-ink-3);min-height:0}
+.alab-note:empty{display:none}
+
+/* 样例页常驻：回到原作品（预演外也在） */
+.atlas-lab-return{position:fixed;right:12px;top:var(--alab-top,180px);z-index:var(--z-panel);display:flex;align-items:center;gap:6px;min-height:28px;padding:0 10px 0 6px;border:1px solid var(--abyss-line-2);background:var(--abyss-obsidian-glass);color:var(--abyss-ink);font:var(--abyss-fs-2xs)/1.3 var(--abyss-font-sans);cursor:pointer}
+.atlas-lab-return:hover{color:var(--abyss-gold)}
+
+/* ── 窄屏（≤480）：底部抽屉 ───────────────────────────────────────────────── */
+@media (max-width:480px){
+  .atlas-lab{top:auto;left:0;bottom:0}
+  .alab-tag{position:fixed;top:auto;right:12px;bottom:var(--alab-bottom,120px);display:flex;align-items:center;gap:6px;width:auto;height:30px;padding:0 10px;border-right:1px solid var(--abyss-line);writing-mode:horizontal-tb;letter-spacing:.14em;line-height:1}
+  .alab-tag-frame{margin:0;text-combine-upright:none}
+  .alab-tag::after{content:'▴';color:var(--abyss-ink-3)}
+  .atlas-lab.is-evidence .alab-tag{display:none}
+  .alab-panel{position:fixed;left:0;right:0;top:auto;bottom:0;width:auto;max-height:62vh;padding:8px 12px 12px;border-left:0;border-top:1px solid var(--abyss-line);background:var(--abyss-obsidian-glass-heavy);animation-name:alabUp}
+  @keyframes alabUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .alab-fold{transform:rotate(90deg)}
+  .alab-board{gap:4px}
+  .alab-group{grid-template-columns:34px 1fr;align-items:center}
+  .alab-glabel{writing-mode:horizontal-tb;letter-spacing:.08em}
+  .alab-ticks{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;border-left:0}
+  .alab-tick{flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:42px;padding:3px 2px;border:1px solid var(--abyss-line);text-align:center}
+  .alab-tick::before{display:none}
+  .alab-tick[aria-pressed=true]{border-color:var(--alab-tone)}
+  .alab-fname{font-size:var(--abyss-fs-2xs);max-width:100%}
+  .alab-card{margin-top:8px;padding-top:6px}
+  .alab-q{display:none}
+  .alab-modes{margin-top:8px}
+  .alab-mode,.alab-copy,.alab-disclose{min-height:40px}
+  .atlas-lab-return{top:auto;right:auto;left:12px;bottom:var(--alab-bottom,120px);min-height:30px}
+}
+
+/* ── 读图模式（body 类；退出预演即由 JS 全部移除） ─────────────────────────── */
+/* 收起文字：证据层、说明字幕、账本、星名副行、局部星簇注记、本栏问句。保留图谱/镜头名、章号、实体名、轴名、状态词、+N、图例。 */
+body.lab-notext #aphEvidenceCard,body.lab-notext #aphCaption,body.lab-notext .cl-o3-ruler,body.lab-notext .cl-ann-ledger,body.lab-notext .cl-ann-card,body.lab-notext #atlasLocalGraph .atlas-local-hint,body.lab-notext .alab-q{display:none!important}
+body.lab-notext #labels .cl-lab.char .ls,body.lab-notext #labels .cl-lab.char .lx,body.lab-notext #labels .cl-lab.camp .ls,body.lab-notext #labels .cl-lab.camp .lx,body.lab-notext #labels .cl-lab.chap .ls,body.lab-notext #labels .cl-lab.chap .lx,body.lab-notext #labels .cl-lab.hub .ls,body.lab-notext #labels .cl-lab.hub .lx,body.lab-notext #labels .cl-lab.attr .lx,body.lab-notext #labels .cl-lab.meta .lx{display:none!important}
+
+/* 关光：文字辉光、光晕徽记与发光阴影归零；1px 内描边环（按下/选中态）是状态编码，保留。实体仍靠描边存在。
+   WebGL 泛光没有公开开关，不在此伪装关闭（见 reports/v90/F6-host.patch.md）。 */
+body.lab-noglow #labels .cl-lab,body.lab-noglow #labels .cl-lab *,body.lab-noglow .cl-ann-layer *,body.lab-noglow .cl-camp-halo-labels *,body.lab-noglow .cl-domains-lamps *,body.lab-noglow .cl-domains-hulls *,body.lab-noglow .cl-o3-bz-layer *,body.lab-noglow #clOrbit *,body.lab-noglow #atlasLocalGraph *,body.lab-noglow #atlasStage *,body.lab-noglow .atlas-preview-hud *{text-shadow:none!important}
+body.lab-noglow .aph-sigil,body.lab-noglow .atlas-aggregate,body.lab-noglow .aph-evidence{box-shadow:none!important}
+body.lab-noglow .cl-gem-vertex,body.lab-noglow .cl-gem-vertex.is-hot{filter:none!important}
+
+/* 灰阶：舞台与各图层去色（逐个加在不含 fixed 子层的元素上，避免改变定位上下文）。 */
+body.lab-gray>:not(.atlas-lab):not(.atlas-lab-return):not(.atlas-preview-hud):not(script):not(style),body.lab-gray .aph-shell>*{filter:grayscale(1)}
+
+/* ── 降级：低动效 / 低档直接落终态 ────────────────────────────────────────── */
+@media (prefers-reduced-motion:reduce){.atlas-lab *,.atlas-lab-return{animation:none!important;transition:none!important}}
+body[data-tier=low] .atlas-lab *,body[data-tier=low] .atlas-lab-return{animation:none!important;transition:none!important}

@@ -1,0 +1,1046 @@
+/* ============================================================================
+   Castline · orbit3d 模块 — 所属层 CORE/MODULE/THEME
+   G5 合并结果：原 orbit3d.css(v47) + orbit3d-v48/v49/v50/v51 + orbit3d-ruler
+   五版补丁合并为单文件三层结构，废除裸版本号命名。
+   合并裁决：
+   - 被后版覆盖的规则物理删除（不注释）。v51 R5 已彻底退场 .cl-o3-co-layer
+     唇边字幕与 .cl-o3-bz__lead 领衔名 → v49/v50 对应规则整组移除，仅留归档注释。
+   - 字号 token 统一上探：--cl-o3v-fs-mono 9.5px → 11px（G3 T4 阶梯）。
+   ============================================================================ */
+
+/* ============================ CORE ============================ */
+/* 令牌层：标签 / 图例（本区唯一来源，正文只引变量；不写裸 hex） */
+.cl-o3-labels,
+.cl-o3-legend {
+  --cl-o3-z: var(--z-chart, 10);
+  --cl-o3-dur: var(--abyss-dur-fast, .26s);
+  --cl-o3-dur-slow: var(--abyss-dur-medium, .5s);
+  --cl-o3-ease: var(--abyss-ease-sacred, cubic-bezier(.16, 1, .3, 1));
+  --cl-o3-lab-fs: var(--abyss-fs-xs, .72rem);
+  --cl-o3-legend-w: 14rem;
+  --cl-o3-pad: var(--abyss-space-sm, .6rem);
+}
+
+/* 标签层容器（v48 顶栏避让遮罩并入：y<118 起隐 / 152 全显） */
+.cl-o3-labels {
+  position: fixed;
+  inset: 0;
+  z-index: var(--cl-o3-z);
+  pointer-events: none;
+  font-family: var(--mono);
+  font-size: var(--cl-o3-lab-fs);
+  line-height: 1.2;
+  letter-spacing: .045em;
+  color: var(--ink-2);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  contain: layout style;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, transparent var(--cl-o3x-mask-a), black var(--cl-o3x-mask-b));
+  mask-image: linear-gradient(to bottom, transparent 0, transparent var(--cl-o3x-mask-a), black var(--cl-o3x-mask-b));
+}
+
+/* 线名标签 */
+.cl-o3-lab {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform: translate(-50%, -100%);
+  max-width: 10rem;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--ink-2);
+  text-shadow: 0 1px 6px var(--glass-2);
+  opacity: 0;
+  transition: opacity var(--cl-o3-dur) var(--cl-o3-ease), color var(--cl-o3-dur) var(--cl-o3-ease); /* v47 主控：transform 不做过渡，标签逐帧跟盘 */
+  will-change: transform, opacity;
+}
+
+/* 主线：常显 */
+.cl-o3-lab[data-kind="main"] {
+  opacity: 1;
+  color: var(--ink);
+}
+
+/* 支线：默认隐，hover / 选中才现 */
+.cl-o3-lab[data-kind="branch"] {
+  opacity: 0;
+}
+
+.cl-o3-lab[data-kind="branch"].is-on,
+.cl-o3-lab[data-kind="branch"].is-hover {
+  opacity: 1;
+}
+
+/* 待校对线：低亮 + 待校对后缀 */
+.cl-o3-lab[data-valid="0"] {
+  color: var(--ink-3);
+}
+
+.cl-o3-lab[data-valid="0"] i {
+  margin-left: calc(var(--cl-o3-pad) * .5);
+  font-style: normal;
+  font-size: .9em;
+  color: var(--warm);
+}
+
+/* 接棒人名副行 */
+.cl-o3-lab .cl-o3-lead {
+  display: block;
+  margin-top: .12em;
+  font-size: .9em;
+  color: var(--ink-3);
+}
+
+/* 剧情线索引小件 */
+.cl-o3-legend {
+  position: fixed;
+  right: var(--cl-o3-pad);
+  bottom: var(--cl-o3-pad);
+  z-index: var(--cl-o3-z);
+  width: var(--cl-o3-legend-w);
+  max-height: 42vh;
+  overflow-y: auto;
+  padding: var(--cl-o3-pad);
+  background: var(--glass);
+  border: 1px solid var(--line);
+  border-radius: .4rem;
+  font-family: var(--sans);
+  color: var(--ink-3);
+  opacity: 0;
+  pointer-events: auto;
+  transition: opacity var(--cl-o3-dur-slow) var(--cl-o3-ease);
+}
+
+body.cl-orbit-on .cl-o3-legend {
+  opacity: 1;
+}
+
+.cl-o3-legend ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cl-o3-legend li {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--cl-o3-pad) * .7);
+  padding: calc(var(--cl-o3-pad) * .5);
+  border: 1px solid transparent;
+  border-radius: .25rem;
+  cursor: pointer;
+  transition: color var(--cl-o3-dur) var(--cl-o3-ease),
+              background-color var(--cl-o3-dur) var(--cl-o3-ease);
+}
+
+.cl-o3-legend li:hover {
+  background: var(--glass-2);
+}
+
+.cl-o3-legend li.is-active {
+  color: var(--ink);
+}
+
+.cl-o3-legend li[data-valid="0"] {
+  border-style: dashed;
+  border-color: var(--line-2);
+}
+
+.cl-o3-sw {
+  flex: 0 0 auto;
+  width: .65em;
+  height: .65em;
+  border-radius: 50%;
+}
+
+.cl-o3-legend .cl-o3-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.cl-o3-legend .cl-o3-count {
+  flex: 0 0 auto;
+  font-family: var(--mono);
+  font-size: .92em;
+}
+
+/* 主控补丁 v47：legend 结构对齐（li 承载视觉态，button 承载可达性） */
+.cl-o3-legend .cl-o3-legend-hd {
+  font: 500 var(--cl-o3-lab-fs) var(--mono);
+  letter-spacing: .12em;
+  color: var(--ink-3);
+  padding: 0 0 var(--cl-o3-pad) 0;
+}
+.cl-o3-legend li > button {
+  all: unset;
+  display: flex;
+  align-items: center;
+  gap: var(--cl-o3-pad);
+  width: 100%;
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
+}
+.cl-o3-legend li > button:focus-visible { outline: var(--cl-o3-hair, 1px) solid var(--signal); outline-offset: 2px; }
+.cl-o3-legend .cl-o3-legend-pending { color: var(--warm); font-style: normal; margin-left: auto; }
+
+/* v48 图例行微反馈：动效只走 transform（覆盖 li 的 transition 声明） */
+.cl-o3-legend li {
+  transition: transform var(--cl-o3x-dur-fast) var(--cl-o3x-ease), background-color var(--cl-o3x-dur-fast) var(--cl-o3x-ease);
+}
+.cl-o3-legend li:hover {
+  transform: translateX(2px);
+}
+.cl-o3-legend li.is-active .cl-o3-sw {
+  box-shadow: 0 0 0 2px var(--glass-2), 0 0 8px currentColor;
+}
+
+/* v49 图例甘特条（.cl-o3-lx*，结构由 js/orbit3d-legend.js 建） */
+.cl-o3-legend,
+.cl-orbit__card {
+  --cl-o3i-lx-h: 2px;
+  --cl-o3i-fs-sub: .58rem;
+}
+.cl-o3-legend li.cl-o3-legend-item {
+  position: relative;
+  padding-bottom: calc(var(--cl-o3i-lx-h) + .35rem);
+}
+.cl-o3-lx {
+  position: absolute;
+  left: 0;
+  bottom: .2rem;
+  height: var(--cl-o3i-lx-h);
+  border-radius: 1px;
+  opacity: .85;
+  pointer-events: none;
+}
+.cl-o3-lx-lead {
+  flex: 0 0 auto;
+  margin-left: auto;
+  padding-right: .4rem;
+  font-family: var(--mono);
+  font-size: var(--cl-o3i-fs-sub);
+  color: var(--ink-3);
+  white-space: nowrap;
+}
+.cl-o3-legend li[data-status="suspended"] .cl-o3-name::after {
+  content: " \25D0";
+  color: var(--ink-3);
+}
+.cl-o3-legend li[data-status="resolved"] .cl-o3-name::after {
+  content: " \25CF";
+  color: var(--ink-3);
+  font-size: .7em;
+}
+
+/* v51 R6 图例充裕排版：min-width 250px，单行文本不截断，主线段置顶 */
+.cl-o3-legend {
+  min-width: var(--cl-o3n-legend-min-w, 250px);
+  width: var(--cl-o3n-legend-w, 17rem);
+}
+.cl-o3-legend .cl-o3-name {
+  overflow: visible;
+  text-overflow: clip;
+  white-space: nowrap;
+}
+.cl-o3-legend li[data-main="1"] .cl-o3-name {
+  color: var(--ink);
+  font-weight: 600;
+  text-shadow: 0 0 8px rgba(255, 180, 92, 0.35);
+}
+.cl-o3-legend li[data-main="1"] + li:not([data-main="1"]) {
+  margin-top: .5rem;
+  border-top: 1px solid var(--line);
+  padding-top: .55rem;
+}
+
+/* ============================ MODULE · cardx ============================ */
+/* 事件卡质感 / 上下文行（盘面本体与卡片布局在 css/plot-orbit.css） */
+
+/* 令牌：遮罩距离 / 时长 / 缓动 / 位移 / 字号 / 间距 */
+.cl-o3-labels,
+.cl-orbit__card,
+.cl-o3-legend {
+  /* 遮罩：顶栏区 y<132，起隐 118px 全显 152px */
+  --cl-o3x-mask-a: 118px;
+  --cl-o3x-mask-b: 152px;
+  /* 时长 */
+  --cl-o3x-dur: var(--abyss-dur-medium, .5s);
+  --cl-o3x-dur-fast: var(--abyss-dur-fast, .2s);
+  /* 缓动 */
+  --cl-o3x-ease: var(--abyss-ease-sacred, var(--e-out, cubic-bezier(0.16, 1, 0.3, 1)));
+  /* 入场位移 */
+  --cl-o3x-rise: 6px;
+  /* 字号（缺省回落契约字阶）。回落值随 G3 字号阶梯上探：
+   * .62rem≈9.92px 已被废除，T4=11px 是图谱内最小标签；.8rem≈12.8px 归位 T2=13px。 */
+  --cl-o3x-fs-xs: var(--cl-orbit-font-xs, 11px);
+  --cl-o3x-fs-md: var(--cl-orbit-font-md, 13px);
+  /* 间距 */
+  --cl-o3x-gap: .5rem;
+}
+
+.cl-orbit__card {
+  border-top: 1px solid var(--line-2);
+  transition: opacity var(--cl-o3x-dur) var(--cl-o3x-ease), transform var(--cl-o3x-dur) var(--cl-o3x-ease);
+}
+@starting-style {
+  .cl-orbit__card:not([hidden]) {
+    opacity: 0;
+    transform: translateY(var(--cl-o3x-rise));
+  }
+}
+.cl-orbit__card-title {
+  font-size: var(--cl-o3x-fs-md);
+  letter-spacing: .02em;
+  color: var(--ink);
+  margin-top: .25rem;
+}
+.cl-orbit__card-kicker {
+  letter-spacing: .1em;
+}
+.cl-orbit__card-meta {
+  color: var(--ink-2);
+}
+
+/* 上下文行 .cl-o3-ctx（div > button.is-prev + span.__pos + button.is-next） */
+.cl-o3-ctx {
+  display: flex;
+  align-items: center;
+  gap: var(--cl-o3x-gap);
+  margin-top: .6rem;
+  padding-top: .5rem;
+  border-top: 1px solid var(--line);
+  font-family: var(--mono);
+  font-size: var(--cl-o3x-fs-xs);
+  letter-spacing: .05em;
+  color: var(--ink-3);
+}
+.cl-o3-ctx__nav {
+  all: unset;
+  flex: 0 1 34%;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  cursor: pointer;
+  color: var(--ink-2);
+  transition: color var(--cl-o3x-dur-fast) var(--cl-o3x-ease), transform var(--cl-o3x-dur-fast) var(--cl-o3x-ease);
+}
+.cl-o3-ctx__nav.is-next {
+  text-align: right;
+}
+.cl-o3-ctx__nav:hover {
+  color: var(--ink);
+}
+.cl-o3-ctx__nav.is-prev:hover {
+  transform: translateX(-2px);
+}
+.cl-o3-ctx__nav.is-next:hover {
+  transform: translateX(2px);
+}
+.cl-o3-ctx__nav:focus-visible {
+  outline: 1px solid var(--signal);
+  outline-offset: 2px;
+  color: var(--ink);
+}
+.cl-o3-ctx__nav[disabled] {
+  opacity: .35;
+  cursor: default;
+  transform: none;
+}
+.cl-o3-ctx__pos {
+  flex: 1 1 auto;
+  text-align: center;
+  white-space: nowrap;
+  color: var(--ink-3);
+}
+
+/* v49 芯片计数（.cl-orbit__cast / cast-chip 悬停显 ink） */
+.cl-o3-cnt {
+  font-family: var(--mono);
+  font-size: .7em;
+  margin-left: .25em;
+  color: var(--ink-3);
+  vertical-align: super;
+  line-height: 0;
+}
+.cl-orbit__cast:hover .cl-o3-cnt,
+.cl-orbit__cast-chip:hover .cl-o3-cnt { color: var(--ink); }
+
+/* ============================ MODULE · ruler ============================ */
+/* 章回卷轴尺（结构由 js/orbit3d-ruler.js 建；本文件只出样式，选择器 .cl-o3-ruler*） */
+
+/* 令牌：位置与尺寸 / 时长与缓动 / 字阶与内距 */
+.cl-o3-ruler {
+  /* 位置与尺寸 */
+  --cl-o3r-w: 190px;
+  --cl-o3r-left: 18px;
+  --cl-o3r-top: 330px;
+  --cl-o3r-z: var(--z-chart, 10);
+  /* 时长与缓动 */
+  --cl-o3r-dur: var(--abyss-dur-medium, .5s);
+  --cl-o3r-ease: var(--abyss-ease-sacred, var(--e-out, cubic-bezier(0.16, 1, 0.3, 1)));
+  /* 字阶与内距 */
+  --cl-o3r-fs: .62rem;
+  --cl-o3r-pad: .35rem;
+
+  position: fixed;
+  left: var(--cl-o3r-left);
+  top: var(--cl-o3r-top);
+  width: var(--cl-o3r-w);
+  z-index: var(--cl-o3r-z);
+  font-family: var(--mono);
+  font-size: var(--cl-o3r-fs);
+  letter-spacing: .06em;
+  color: var(--ink-3);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-6px);
+  transition: opacity var(--cl-o3r-dur) var(--cl-o3r-ease),
+    transform var(--cl-o3r-dur) var(--cl-o3r-ease);
+  contain: layout style;
+}
+
+/* 剧情态显形（星座态保持 hidden，selector 与 interact 的 body class 对齐） */
+body.cl-orbit-on .cl-o3-ruler {
+  opacity: 1;
+  pointer-events: auto;
+  transform: none;
+}
+
+/* 表头：左侧 2px 竖标承接 signal 色 */
+.cl-o3-ruler__hd {
+  padding: 0 0 var(--cl-o3r-pad) var(--cl-o3r-pad);
+  color: var(--ink-3);
+  text-transform: none;
+  border-left: 2px solid var(--signal);
+  padding-left: .5rem;
+}
+
+/* 画布：右侧渐隐玻璃底，指针交互区 */
+.cl-o3-ruler__cv {
+  display: block;
+  width: var(--cl-o3r-w);
+  cursor: pointer;
+  background: linear-gradient(to right, var(--glass), transparent 80%);
+  border-radius: .25rem;
+}
+
+/* 悬停提示：贴右缘的窄条，单行省略 */
+.cl-o3-ruler__tip {
+  position: absolute;
+  left: calc(var(--cl-o3r-w) + .6rem);
+  max-width: 22rem;
+  padding: .3rem .5rem;
+  background: var(--glass-2);
+  border: 1px solid var(--line);
+  border-radius: .3rem;
+  color: var(--ink-2);
+  font-family: var(--sans);
+  font-size: var(--cl-o3r-fs);
+  line-height: 1.45;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+}
+.cl-o3-ruler__tip[hidden] {
+  display: none;
+}
+
+/* v90 F2 · 章回矩阵左缘竖签（三图工作区 body.atlas-workspace；JS 给根加 .is-dock）
+   复用年轮账本 ≤900 竖签形态：44×160（--cl-ann-ledger-tab-w/h）、玻璃底、竖排签名；
+   不做矩形大按钮——贴左缘、无左边框、只一条琥珀内缘线。展开态竖签就地变成矩阵表头行。
+   top / max-height 由 JS 按 HUD 与时间轴安全带写坐标；宽度 = 画布逻辑宽（遮盘 ≤ 1/4）。 */
+.cl-o3-ruler__tab { display: none; }
+body.atlas-workspace .cl-o3-ruler.is-dock {
+  display: flex;            /* 覆盖 ≤1100px / 矮屏的 display:none：竖签态所有宽度都在 */
+  flex-direction: column;
+  left: 0;
+  width: auto;
+  max-width: calc(100vw - 16px);
+  overflow: hidden;
+  letter-spacing: normal;
+  box-sizing: border-box;
+  z-index: var(--z-dock);   /* 年轮 SVG 层在 --z-tooltip：竖签与展开面板必须压在星弧之上才可点、可读 */
+}
+body.atlas-workspace:not(.cl-orbit-on) .cl-o3-ruler.is-dock,
+body.atlas-workspace.ia-open .cl-o3-ruler.is-dock,
+body.atlas-workspace.atlas-local-open .cl-o3-ruler.is-dock,
+body.atlas-workspace:has(#atlasStage.on) .cl-o3-ruler.is-dock { visibility: hidden; }
+.cl-o3-ruler.is-dock .cl-o3-ruler__hd { display: none; }
+.cl-o3-ruler.is-dock .cl-o3-ruler__panel[hidden] { display: none; }
+.cl-o3-ruler.is-dock .cl-o3-ruler__tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  box-sizing: border-box;
+  width: var(--cl-ann-ledger-tab-w);
+  height: var(--cl-ann-ledger-tab-h);
+  margin: 0;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--cl-ann-ink) 12%, transparent);
+  border-left: 0;
+  border-radius: 0 10px 10px 0;
+  background: color-mix(in srgb, var(--cl-ann-bg) 58%, transparent);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  box-shadow: inset 2px 0 0 color-mix(in srgb, var(--cl-ann-signal) 65%, transparent);
+  color: var(--cl-ann-ink-2);
+  font-family: var(--cl-ann-font);
+  font-size: var(--cl-ann-fs-row);
+  line-height: 1;
+  cursor: pointer;
+  pointer-events: auto;
+  transition: color var(--cl-atlas-dur-1) var(--cl-atlas-ease),
+    background-color var(--cl-atlas-dur-1) var(--cl-atlas-ease);
+}
+.cl-o3-ruler.is-dock .cl-o3-ruler__tab:hover { color: var(--cl-ann-signal); background-color: color-mix(in srgb, var(--cl-ann-bg) 76%, transparent); }
+.cl-o3-ruler.is-dock .cl-o3-ruler__tab:focus-visible { outline: 1px solid var(--cl-ann-signal); outline-offset: -3px; color: var(--cl-ann-signal); }
+.cl-o3-ruler__tab-t { writing-mode: vertical-rl; letter-spacing: .32em; white-space: nowrap; }
+.cl-o3-ruler__tab-n { display: none; }
+/* 小字形：三道长短不一的横刻 = 章×线矩阵的缩影（currentColor，随悬停转琥珀） */
+.cl-o3-ruler__tab-g {
+  flex: none;
+  width: 12px;
+  height: 9px;
+  background:
+    linear-gradient(currentColor, currentColor) 0 0 / 100% 1px no-repeat,
+    linear-gradient(currentColor, currentColor) 0 4px / 64% 1px no-repeat,
+    linear-gradient(currentColor, currentColor) 0 8px / 84% 1px no-repeat;
+  opacity: .85;
+}
+/* 展开态：根变玻璃面板，竖签就地横成表头行（同一按钮，焦点不丢） */
+.cl-o3-ruler.is-dock.is-open {
+  padding: 0 6px 6px 4px;
+  overflow: auto;
+  border: 1px solid color-mix(in srgb, var(--cl-ann-ink) 14%, transparent);
+  border-left: 0;
+  border-radius: 0 10px 10px 0;
+  background: color-mix(in srgb, var(--cl-ann-bg) 76%, transparent);
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
+  backdrop-filter: blur(14px) saturate(1.2);
+  box-shadow: inset 2px 0 0 color-mix(in srgb, var(--cl-ann-signal) 65%, transparent);
+  scrollbar-width: thin;
+}
+.cl-o3-ruler.is-dock.is-open .cl-o3-ruler__tab {
+  flex-direction: row;
+  justify-content: flex-start;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+  height: var(--cl-ann-row-h);
+  padding: 0 2px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  box-shadow: none;
+  color: var(--cl-ann-ink);
+}
+.cl-o3-ruler.is-dock.is-open .cl-o3-ruler__tab-t { writing-mode: horizontal-tb; letter-spacing: .08em; }
+.cl-o3-ruler.is-dock.is-open .cl-o3-ruler__tab-n {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--cl-ann-font-num);
+  font-size: var(--cl-ann-fs-handoff);
+  color: var(--cl-ann-ink-3);
+}
+.cl-o3-ruler.is-dock.is-open .cl-o3-ruler__panel {
+  animation: clO3rDockIn var(--cl-atlas-dur-2) var(--cl-atlas-ease) both;
+}
+@keyframes clO3rDockIn {
+  from { opacity: 0; transform: translateX(-10px); }
+  to { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cl-o3-ruler.is-dock .cl-o3-ruler__tab { transition: none; }
+  .cl-o3-ruler.is-dock.is-open .cl-o3-ruler__panel { animation: none; }
+}
+[data-tier="low"] .cl-o3-ruler.is-dock .cl-o3-ruler__tab,
+[data-o3tier="low"] .cl-o3-ruler.is-dock .cl-o3-ruler__tab { transition: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
+[data-tier="low"] .cl-o3-ruler.is-dock.is-open .cl-o3-ruler__panel,
+[data-o3tier="low"] .cl-o3-ruler.is-dock.is-open .cl-o3-ruler__panel { animation: none; }
+
+/* ============================ MODULE · spectral ============================ */
+/* 刻度环标签 .cl-o3-bz* / 字幕机 .cl-o3-deck* / 环上线名 .cl-o3-nm*
+   归档：v49 唇边字幕 .cl-o3-co* 与 v50 领衔名 .cl-o3-bz__lead 已被 v51 R5
+   彻底退场（display:none），对应规则整组删除，此处不再保留。 */
+
+/* 令牌 v50：刻度环 / 字幕机 */
+.cl-o3-bz-layer,
+.cl-o3-deck {
+  --cl-o3v-z: var(--z-chart, 10);
+  --cl-o3v-dur: var(--abyss-dur-micro, .18s);
+  --cl-o3v-dur-slow: var(--abyss-dur-medium, .5s);
+  --cl-o3v-ease: var(--abyss-ease-sacred, var(--e-out, cubic-bezier(0.16, 1, 0.3, 1)));
+  --cl-o3v-fs-title: 18px;
+  --cl-o3v-fs: 13px;
+  --cl-o3v-fs-mono: 11px; /* G3 T4：9.5px 上探 */
+  --cl-o3v-track: .08em;
+  --cl-o3v-mask-a: 118px;
+  --cl-o3v-mask-b: 152px;
+  --cl-o3v-deck-bottom: 46px;
+  --cl-o3v-deck-w: 52vw;
+  --cl-o3v-rise: 6px;
+}
+
+/* 刻度环标签层 */
+.cl-o3-bz-layer {
+  position: fixed;
+  inset: 0;
+  z-index: var(--cl-o3v-z);
+  pointer-events: none;
+  font-family: var(--sans);
+  opacity: 0;
+  transition: opacity var(--cl-o3v-dur-slow) var(--cl-o3v-ease);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, transparent var(--cl-o3v-mask-a), black var(--cl-o3v-mask-b));
+  mask-image: linear-gradient(to bottom, transparent 0, transparent var(--cl-o3v-mask-a), black var(--cl-o3v-mask-b));
+}
+body.cl-orbit-on .cl-o3-bz-layer { opacity: 1; }
+
+.cl-o3-bz__ep {
+  position: absolute;
+  left: 0;
+  top: 0;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity var(--cl-o3v-dur) var(--cl-o3v-ease);
+  will-change: transform, opacity;
+  font-size: var(--cl-o3v-fs);
+  letter-spacing: var(--cl-o3v-track);
+  color: var(--ink);
+  text-shadow: 0 1px 8px var(--bg);
+}
+.cl-o3-bz__ep.is-on { opacity: 1; }
+.cl-o3-bz__ep[data-w="400"] { font-weight: 400; color: var(--ink-2); }
+.cl-o3-bz__ep[data-w="500"] { font-weight: 500; }
+.cl-o3-bz__ep[data-w="600"] { font-weight: 600; }
+
+/* 字幕机 */
+.cl-o3-deck {
+  position: fixed;
+  left: 50%;
+  bottom: var(--cl-o3v-deck-bottom);
+  width: var(--cl-o3v-deck-w);
+  max-width: 760px;
+  transform: translateX(-50%);
+  z-index: var(--cl-o3v-z);
+  display: grid;
+  grid-template-rows: auto auto auto auto;
+  row-gap: .28rem;
+  padding: .6rem 1rem .5rem;
+  background: linear-gradient(to top, var(--glass-2), var(--glass) 70%, transparent);
+  border-top: 1px solid var(--line);
+  font-family: var(--sans);
+  color: var(--ink-2);
+  text-align: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--cl-o3v-dur-slow) var(--cl-o3v-ease);
+}
+body.cl-orbit-on .cl-o3-deck { opacity: 1; pointer-events: auto; }
+
+.cl-o3-deck__top {
+  font-family: var(--mono);
+  font-size: var(--cl-o3v-fs-mono);
+  letter-spacing: .14em;
+  color: var(--ink-3);
+  font-variant-numeric: tabular-nums;
+}
+
+.cl-o3-deck__title {
+  font-size: var(--cl-o3v-fs-title);
+  letter-spacing: .04em;
+  color: var(--ink);
+  line-height: 1.3;
+}
+.cl-o3-deck__title[data-w="400"] { font-weight: 400; }
+.cl-o3-deck__title[data-w="500"] { font-weight: 500; }
+.cl-o3-deck__title[data-w="600"] { font-weight: 600; }
+
+.cl-o3-deck__meta {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: .6rem;
+  font-size: var(--cl-o3v-fs-mono);
+  font-family: var(--mono);
+  letter-spacing: .06em;
+  color: var(--ink-3);
+}
+.cl-o3-deck__dot {
+  width: .5em;
+  height: .5em;
+  border-radius: 50%;
+  display: inline-block;
+}
+.cl-o3-deck__name {
+  all: unset;
+  cursor: pointer;
+  color: var(--ink-2);
+  padding: 0 .15em;
+  transition: color var(--cl-o3v-dur) var(--cl-o3v-ease);
+}
+.cl-o3-deck__name:hover,
+.cl-o3-deck__name:focus-visible {
+  color: var(--ink);
+  outline: none;
+  text-decoration: underline;
+  text-underline-offset: .2em;
+}
+.cl-o3-deck__name.is-active { color: var(--signal); }
+
+.cl-o3-deck__nav {
+  display: none;
+  justify-content: space-between;
+  font-family: var(--mono);
+  font-size: var(--cl-o3v-fs-mono);
+}
+.cl-o3-deck[data-mode="event"] .cl-o3-deck__nav { display: flex; }
+.cl-o3-deck__prev,
+.cl-o3-deck__next {
+  all: unset;
+  cursor: pointer;
+  color: var(--ink-3);
+  max-width: 45%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.cl-o3-deck__prev:hover,
+.cl-o3-deck__next:hover { color: var(--ink); }
+.cl-o3-deck__prev[disabled],
+.cl-o3-deck__next[disabled] { opacity: .35; cursor: default; }
+
+/* 线级阅读：默认只留一行摘要，详情由原生 details/summary 按需展开。 */
+.cl-o3-deck__thread { display: none; min-width: 0; text-align: left; color: var(--ink-2); }
+.cl-o3-deck[data-mode="thread"] .cl-o3-deck__thread { display: block; }
+.cl-o3-deck__thread-lede { margin-top: .12rem; color: var(--ink-3); font-family: var(--mono); letter-spacing: .04em; text-align: center; overflow-wrap: anywhere; }
+.cl-o3-deck__reading { margin-top: .35rem; border-top: 1px solid var(--line); padding-top: .3rem; }
+.cl-o3-deck__reading > summary,
+.cl-o3-deck__participant > summary { cursor: pointer; color: var(--ink-2); list-style-position: outside; padding: .18rem .2rem; overflow-wrap: anywhere; }
+.cl-o3-deck__reading > summary:hover,
+.cl-o3-deck__participant > summary:hover { color: var(--ink); }
+.cl-o3-deck__reading > summary:focus-visible,
+.cl-o3-deck__participant > summary:focus-visible { outline: 1px solid var(--signal); outline-offset: 2px; }
+.cl-o3-deck__events,
+.cl-o3-deck__participants { border-top: 1px solid var(--line); margin-top: .35rem; padding-top: .35rem; }
+.cl-o3-deck__subhead { margin-bottom: .25rem; color: var(--ink-3); font-family: var(--mono); font-size: var(--abyss-fs-xs); letter-spacing: .08em; }
+.cl-o3-deck__event { display: block; width: 100%; border: 0; border-bottom: 1px solid var(--line); background: transparent; color: var(--ink-2); cursor: pointer; font: inherit; padding: .28rem .2rem; text-align: left; overflow-wrap: anywhere; }
+.cl-o3-deck__event:hover { color: var(--ink); }
+.cl-o3-deck__event:focus-visible { outline: 1px solid var(--signal); outline-offset: -1px; }
+.cl-o3-deck__participant { border-bottom: 1px solid var(--line); }
+.cl-o3-deck__participant-body { align-items: baseline; display: flex; flex-wrap: wrap; gap: .2rem; padding: .1rem .2rem .35rem 1rem; overflow-wrap: anywhere; }
+.cl-o3-deck__participant-body .cl-o3-deck__name { min-width: 0; overflow-wrap: anywhere; }
+.cl-o3-deck__muted { color: var(--ink-3); }
+.cl-o3-deck__reading[open] { max-height: min(42vh, 25rem); overflow-y: auto; overscroll-behavior: contain; }
+
+/* 换词动效 */
+.cl-o3-deck__title,
+.cl-o3-deck__top {
+  animation: cl-o3v-rise var(--cl-o3v-dur) var(--cl-o3v-ease);
+}
+.cl-o3-deck[data-tick="1"] .cl-o3-deck__title,
+.cl-o3-deck[data-tick="1"] .cl-o3-deck__top {
+  animation-name: cl-o3v-rise2;
+}
+@keyframes cl-o3v-rise {
+  from { opacity: 0; transform: translateY(var(--cl-o3v-rise)); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes cl-o3v-rise2 {
+  from { opacity: 0; transform: translateY(var(--cl-o3v-rise)); }
+  to { opacity: 1; transform: none; }
+}
+
+/* 令牌 v51：环上线名 / 字幕机身份徽记 / 图例充裕宽度 */
+.cl-o3-nm-layer,
+.cl-o3-deck,
+.cl-o3-legend {
+  --cl-o3n-z: var(--z-chart, 10);
+  --cl-o3n-dur: var(--abyss-dur-micro, .18s);
+  --cl-o3n-ease: var(--abyss-ease-sacred, var(--e-out, cubic-bezier(0.16, 1, 0.3, 1)));
+  --cl-o3n-fs-main: 12.5px;
+  --cl-o3n-fs-br: 10.5px;
+  --cl-o3n-track: .08em;
+  --cl-o3n-mask-a: 118px;
+  --cl-o3n-mask-b: 152px;
+  --cl-o3n-legend-w: 17rem;
+  --cl-o3n-legend-min-w: 250px;
+  --cl-o3n-glass-bg: rgba(11, 8, 20, 0.72);
+  --cl-o3n-glass-blur: 8px;
+  --cl-o3n-glow-main: var(--abyss-glow-signal, rgba(255, 180, 92, 0.35));
+  --cl-o3n-glow-br: var(--abyss-glow-violet, rgba(166, 136, 255, 0.30));
+}
+
+/* 环上线名层 */
+.cl-o3-nm-layer {
+  position: fixed;
+  inset: 0;
+  z-index: var(--cl-o3n-z);
+  pointer-events: none;
+  font-family: var(--mono);
+  opacity: 0;
+  transition: opacity .5s var(--cl-o3n-ease);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, transparent var(--cl-o3n-mask-a), black var(--cl-o3n-mask-b));
+  mask-image: linear-gradient(to bottom, transparent 0, transparent var(--cl-o3n-mask-a), black var(--cl-o3n-mask-b));
+}
+body.cl-orbit-on .cl-o3-nm-layer {
+  opacity: 1;
+}
+
+/* 基础线名节点：等宽字体、玻璃质感切角、半透明发光、悬停高亮 */
+.cl-o3-nm__main,
+.cl-o3-nm__br {
+  position: absolute;
+  left: 0;
+  top: 0;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  cursor: pointer;
+  font-family: var(--mono);
+  transition: opacity var(--cl-o3n-dur) var(--cl-o3n-ease),
+              color var(--cl-o3n-dur) var(--cl-o3n-ease),
+              background var(--cl-o3n-dur) var(--cl-o3n-ease),
+              border-color var(--cl-o3n-dur) var(--cl-o3n-ease),
+              box-shadow var(--cl-o3n-dur) var(--cl-o3n-ease);
+  will-change: transform, opacity;
+  -webkit-backdrop-filter: blur(var(--cl-o3n-glass-blur));
+  backdrop-filter: blur(var(--cl-o3n-glass-blur));
+}
+.cl-o3-nm__main.is-on,
+.cl-o3-nm__br.is-on {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* 主线段名：等宽 mono、高贵琥珀切角玻璃牌、琥珀接棒金标、半透明发光、悬停耀目 */
+.cl-o3-nm__main {
+  font-size: var(--cl-o3n-fs-main);
+  font-weight: 600;
+  letter-spacing: var(--cl-o3n-track);
+  color: var(--ink);
+  padding: .08em .42em;
+  background: var(--cl-o3n-glass-bg);
+  border: 1px solid rgba(255, 180, 92, 0.40);
+  border-left: 2.5px solid var(--signal);
+  clip-path: polygon(0 0, calc(100% - 5px) 0, 100% 5px, 100% 100%, 5px 100%, 0 calc(100% - 5px));
+  box-shadow: 0 0 10px var(--cl-o3n-glow-main), inset 0 0 6px rgba(255, 180, 92, 0.12);
+  text-shadow: 0 1px 6px var(--bg), 0 0 8px rgba(255, 180, 92, 0.45);
+}
+.cl-o3-nm__main:hover {
+  color: var(--abyss-ink-bright, #ffffff);
+  background: rgba(22, 16, 38, 0.88);
+  border-color: var(--signal);
+  border-left-color: var(--abyss-signal-bright, #ffd9a0);
+  box-shadow: 0 0 16px rgba(255, 180, 92, 0.65), inset 0 0 10px rgba(255, 180, 92, 0.25);
+}
+
+/* 支线段名：等宽 mono、秘紫切角深色半透底板、高对比度文字阴影、精细发光圆点 */
+.cl-o3-nm__br {
+  font-size: var(--cl-o3n-fs-br);
+  font-weight: 500;
+  letter-spacing: .06em;
+  color: var(--abyss-tier-mid);
+  padding: .07em .40em;
+  background: rgba(10, 14, 26, 0.88);
+  border: 1px solid rgba(166, 136, 255, 0.42);
+  clip-path: polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px));
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.65), 0 0 8px var(--cl-o3n-glow-br);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.95), 0 0 6px rgba(166, 136, 255, 0.35);
+}
+.cl-o3-nm__br::before {
+  content: "";
+  display: inline-block;
+  width: .48em;
+  height: .48em;
+  margin-right: .38em;
+  border-radius: 50%;
+  background: var(--violet);
+  box-shadow: 0 0 8px var(--violet);
+  opacity: .95;
+  vertical-align: middle;
+}
+.cl-o3-nm__br:hover {
+  color: var(--abyss-ink-bright, #ffffff);
+  background: rgba(16, 18, 36, 0.95);
+  border-color: var(--violet);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.8), 0 0 14px rgba(166, 136, 255, 0.60);
+}
+.cl-o3-nm__br:hover::before {
+  opacity: 1;
+  background: var(--abyss-ink-bright, #ffffff);
+  box-shadow: 0 0 10px var(--violet);
+}
+
+/* 字幕机身份徽记（契约 R3：主线琥珀金辉 / 支线秘紫荧光） */
+.cl-o3-deck__badge {
+  display: flex;
+  justify-content: center;
+  margin-bottom: .25rem;
+}
+.cl-o3-deck__badge b {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--mono);
+  font-size: var(--abyss-fs-2xs, 11px);
+  letter-spacing: .14em;
+  font-weight: 600;
+  padding: .2em .8em;
+  border-radius: 3px;
+  text-transform: uppercase;
+  transition: background var(--cl-o3n-dur) var(--cl-o3n-ease),
+              box-shadow var(--cl-o3n-dur) var(--cl-o3n-ease),
+              border-color var(--cl-o3n-dur) var(--cl-o3n-ease),
+              color var(--cl-o3n-dur) var(--cl-o3n-ease);
+}
+
+/* 主线态：高贵琥珀 / 金白光辉 */
+.cl-o3-deck__badge[data-kind="main"] b {
+  color: var(--abyss-obsidian);
+  background: linear-gradient(135deg, var(--abyss-tier-hi, #ffd9a0) 0%, var(--signal) 100%);
+  border: 1px solid rgba(255, 240, 214, 0.85);
+  box-shadow: 0 0 12px rgba(255, 180, 92, 0.65), 0 0 24px rgba(255, 217, 160, 0.35);
+  text-shadow: 0 0 2px rgba(255, 255, 255, 0.4);
+}
+
+/* 支线态：优雅紫蓝荧光 */
+.cl-o3-deck__badge[data-kind="branch"] b {
+  color: var(--abyss-ink-bright, #ffffff);
+  background: linear-gradient(135deg, rgba(166, 136, 255, 0.95) 0%, rgba(106, 79, 214, 0.95) 100%);
+  border: 1px solid rgba(203, 184, 255, 0.80);
+  box-shadow: 0 0 12px rgba(166, 136, 255, 0.60), 0 0 22px rgba(123, 92, 255, 0.35);
+  text-shadow: 0 0 4px rgba(0, 0, 0, 0.5);
+}
+
+/* 空态隐藏 */
+.cl-o3-deck__badge[data-kind="none"] {
+  display: none;
+}
+
+/* ============================ THEME ============================ */
+/* 剧情态减法（v50：只在剧情态收拢常驻件，留白给环上信息） */
+body.cl-orbit-on .cl-o3-epoch-badge,
+body.cl-orbit-on .cl-o3-genesis-badge,
+body.cl-orbit-on .cl-o3-lab[data-kind="main"] {
+  display: none;
+}
+
+body.cl-orbit-on #clOrbit .cl-orbit__card {
+  opacity: 0;
+  pointer-events: none;
+}
+
+body.cl-orbit-on #hint {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--cl-o3v-dur-slow) var(--cl-o3v-ease);
+}
+
+/* 降级 · 减少动效（prefers-reduced-motion） */
+@media (prefers-reduced-motion: reduce) {
+  .cl-o3-lab,
+  .cl-o3-legend,
+  .cl-o3-legend li {
+    transition: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cl-orbit__card,
+  .cl-o3-ctx__nav,
+  .cl-o3-legend li {
+    transition: none;
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cl-o3-ruler {
+    transition: none;
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cl-o3-deck,
+  .cl-o3-deck *,
+  .cl-o3-bz-layer,
+  .cl-o3-bz__ep {
+    transition: none;
+    animation: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cl-o3-nm-layer,
+  .cl-o3-nm__main,
+  .cl-o3-nm__br,
+  .cl-o3-deck__badge b {
+    transition: none;
+    animation: none;
+  }
+}
+
+/* 降级 · 低端档（去掩膜 / 减合成开销） */
+[data-tier="low"] .cl-o3, [data-o3tier="low"] .cl-o3-lab {
+  text-shadow: none;
+}
+
+[data-tier="low"] .cl-o3, [data-o3tier="low"] .cl-o3-legend {
+  background: var(--glass-2);
+}
+
+[data-tier="low"] .cl-o3-labels,
+[data-o3tier="low"] .cl-o3-labels {
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+
+[data-tier="low"] .cl-o3-ruler__cv,
+[data-o3tier="low"] .cl-o3-ruler__cv {
+  background: var(--glass-2);
+}
+
+[data-tier="low"] .cl-o3-bz-layer,
+[data-o3tier="low"] .cl-o3-bz-layer {
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+
+[data-tier="low"] .cl-o3-nm-layer,
+[data-o3tier="low"] .cl-o3-nm-layer {
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+
+/* 响应式 · 窄/矮屏让位避让 */
+@media (max-width: 900px) {
+  .cl-o3-legend {
+    display: none;
+  }
+}
+
+@media (max-width: 1100px), (max-height: 720px) {
+  .cl-o3-ruler {
+    display: none;
+  }
+}
+
+@media (max-width: 1100px) {
+  .cl-o3-deck { width: 92vw; }
+}
+
+@media (max-width: 1100px) {
+  .cl-o3-nm-layer {
+    display: none;
+  }
+}

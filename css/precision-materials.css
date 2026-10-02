@@ -1,0 +1,107 @@
+/* Castline · precision-materials.css
+ * A material pass for the three atlas lenses. It adds bevel, micro-grain,
+ * chromatic depth and a restrained optical sweep without changing graph data
+ * or adding a render pass. Filters are supplied by precision-materials.js.
+ */
+
+:root {
+  --precision-edge: color-mix(in oklab, var(--abyss-ink-bright) 20%, transparent);
+  --precision-spec: color-mix(in oklab, var(--abyss-ink-bright) 72%, transparent);
+  --precision-gold: color-mix(in oklab, var(--abyss-gold) 76%, transparent);
+  --precision-cyan: color-mix(in oklab, var(--abyss-mint-bright) 70%, transparent);
+  --precision-violet: color-mix(in oklab, var(--abyss-violet-bright) 72%, transparent);
+}
+
+/* Annulus: turn the single SVG stroke into a filament with a lit shoulder.
+ * The filter is deliberately on the paths rather than the entire SVG so text
+ * stays crisp and the cartographic lines retain their exact hit areas. */
+.cl-ann-layer .cl-ann-arc,
+.cl-ann-layer .cl-ann-head,
+.cl-ann-layer .cl-ann-handoff,
+.cl-ann-layer .cl-ann-chord {
+  filter: url(#cl-precision-annulus);
+  vector-effect: non-scaling-stroke;
+}
+.cl-ann-layer .cl-ann-arc.is-main,
+.cl-ann-layer .cl-ann-head.is-active,
+.cl-ann-layer .cl-ann-arc.is-focus,
+.cl-ann-layer .cl-ann-arc.is-hover {
+  filter: url(#cl-precision-annulus-hot);
+}
+.cl-ann-layer .cl-ann-arc.is-main { stroke-linecap: round; }
+.cl-ann-layer .cl-ann-arc.is-main::selection { background: transparent; }
+.cl-ann-layer .cl-ann-bead circle {
+  filter: url(#cl-precision-bead);
+  paint-order: stroke fill;
+}
+.cl-ann-layer .cl-ann-bead.is-lead circle {
+  stroke-width: calc(var(--cl-ann-w-tick) + .8px);
+}
+.cl-ann-layer .cl-ann-tick,
+.cl-ann-layer .cl-ann-turn {
+  stroke-dasharray: 1 5;
+  animation: precision-tick-drift 24s linear infinite;
+}
+
+/* Gem: the face is now a translucent mineral rather than a flat polygon. */
+.cl-gem {
+  filter: url(#cl-precision-gem);
+  transform-style: preserve-3d;
+  isolation: isolate;
+}
+.cl-gem-fill[data-face="attr"] { fill: url(#cl-gem-surface-attr); }
+.cl-gem-fill[data-face="meta"] { fill: url(#cl-gem-surface-meta); }
+.cl-gem-fill {
+  stroke: var(--precision-spec);
+  stroke-width: .65px;
+  stroke-linejoin: bevel;
+  paint-order: stroke fill;
+}
+.cl-gem-poly { filter: url(#cl-precision-gem-edge); stroke-linecap: round; }
+.cl-gem-grid.is-outer {
+  stroke-dasharray: 1 4;
+  animation: precision-gem-grid 24s linear infinite;
+}
+.cl-gem-vertex { filter: url(#cl-precision-bead); }
+.cl-gem-face[data-face="attr"] .cl-gem-vertex.is-hot,
+.cl-gem-face[data-face="meta"] .cl-gem-vertex.is-hot { filter: url(#cl-precision-bead-hot); }
+.cl-gem-badge__v { text-shadow: 0 0 10px color-mix(in oklab, currentColor 38%, transparent); }
+
+/* Domains: labels get a glass capsule with an actual highlight ridge. */
+.cl-domains-lamp {
+  background:
+    linear-gradient(112deg, color-mix(in oklab, currentColor 15%, transparent), transparent 32% 68%, color-mix(in oklab, currentColor 8%, transparent)),
+    color-mix(in srgb, var(--cl-dom-bg) 74%, transparent);
+  border-color: color-mix(in oklab, currentColor 25%, transparent);
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklab, var(--abyss-ink-bright) 22%, transparent),
+    inset 0 -1px 0 color-mix(in oklab, var(--abyss-obsidian-deep) 64%, transparent),
+    0 8px 28px color-mix(in oklab, var(--abyss-obsidian-deep) 52%, transparent);
+  backdrop-filter: blur(12px) saturate(1.42);
+}
+.cl-domains-lamp::before {
+  content: "";
+  position: absolute;
+  inset: 1px 10% auto;
+  height: 1px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent, color-mix(in oklab, currentColor 62%, transparent), transparent);
+  opacity: .72;
+  pointer-events: none;
+}
+.cl-domains-lamp__dot {
+  box-shadow: 0 0 0 2px color-mix(in oklab, currentColor 13%, transparent), 0 0 7px currentColor, 0 0 18px color-mix(in oklab, currentColor 55%, transparent);
+}
+.cl-domains-lamp.is-hot { box-shadow: inset 0 1px 0 color-mix(in oklab, var(--abyss-ink-bright) 28%, transparent), 0 0 0 1px color-mix(in oklab, currentColor 58%, transparent), 0 0 30px color-mix(in oklab, currentColor 31%, transparent); }
+
+@keyframes precision-tick-drift { to { stroke-dashoffset: -96; } }
+@keyframes precision-gem-grid { to { stroke-dashoffset: -84; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .cl-ann-layer .cl-ann-tick,
+  .cl-ann-layer .cl-ann-turn,
+  .cl-gem-grid.is-outer { animation: none; }
+}
+[data-tier="low"] .cl-ann-layer .cl-ann-tick,
+[data-tier="low"] .cl-ann-layer .cl-ann-turn,
+[data-tier="low"] .cl-gem-grid.is-outer { animation: none; }

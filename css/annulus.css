@@ -1,0 +1,291 @@
+/* @role css-token @owns css/annulus.css @budget n/a @contract v80 */
+/* Annulus W1 盘上层样式 · 只引 --cl-ann-* 令牌 · BEM · 不用 @layer（主控：避免层内规则被未分层规则压过） */
+
+.cl-ann-layer {
+  position: fixed;
+  inset: 0;
+  z-index: var(--cl-ann-z);
+  pointer-events: none;
+}
+.cl-ann-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.cl-ann-layer .is-hit { pointer-events: auto; cursor: pointer; }
+
+.cl-ann-arc {
+  fill: none;
+  stroke-linecap: round;
+  opacity: var(--cl-ann-a-idle);
+  transition: opacity var(--cl-ann-dur-fast) var(--cl-ann-ease),
+              stroke-width var(--cl-ann-dur-fast) var(--cl-ann-ease);
+}
+.cl-ann-arc.is-main { stroke-width: var(--cl-ann-w-main); }
+.cl-ann-arc.is-branch { stroke-width: var(--cl-ann-w-branch); }
+.cl-ann-arc.is-twig { stroke-width: var(--cl-ann-w-twig); }
+.cl-ann-arc.is-focus,
+.cl-ann-arc.is-hover { stroke-width: var(--cl-ann-w-focus); opacity: 1; }
+.cl-ann-arc.is-dim { opacity: var(--cl-ann-a-dim); }
+.cl-ann-arc.is-suspended { stroke-dasharray: 6 5; }
+.cl-ann-arc.is-open { opacity: .5; }
+.cl-ann-arc.is-unknown { stroke: var(--cl-ann-unknown); }
+
+.cl-ann-head {
+  fill: none;
+  stroke-width: var(--cl-ann-w-chord);
+  opacity: var(--cl-ann-a-idle);
+  transition: opacity var(--cl-ann-dur-fast) var(--cl-ann-ease);
+}
+.cl-ann-head.is-active { /* W5：呼吸由 annulus-svg 随 CLAbyssBreath 逐帧写 opacity（同拍），不再用 CSS 自转动画 */ }
+
+.cl-ann-chord {
+  stroke: var(--cl-ann-chord);
+  stroke-width: var(--cl-ann-w-chord);
+  fill: none;
+  /* v90 F2 清线：共鸣辐条是径向直线，默认全书态会横穿多条星弧；改为按需——只在所连两线之一被悬停/选中（is-hot）时出现 */
+  opacity: 0;
+  transition: opacity var(--cl-ann-dur-fast) var(--cl-ann-ease);
+}
+.cl-ann-chord.is-hot { opacity: var(--cl-ann-a-chord-hot); }
+
+.cl-ann-tick {
+  stroke: var(--cl-ann-tick);
+  stroke-width: var(--cl-ann-w-tick);
+  opacity: var(--cl-ann-a-tick);
+}
+.cl-ann-turn {
+  stroke: var(--cl-ann-turn);
+  stroke-width: var(--cl-ann-w-tick);
+  fill: none;
+  opacity: var(--cl-ann-a-tick);
+}
+.cl-ann-knot {
+  fill: var(--cl-ann-handoff);
+  opacity: var(--cl-ann-a-idle);
+}
+.cl-ann-spoke {
+  stroke: var(--cl-ann-line);
+  stroke-width: var(--cl-ann-w-chord);
+  opacity: var(--cl-ann-a-chord);
+}
+.cl-ann-orphan {
+  fill: none;
+  stroke: var(--cl-ann-unknown);
+  stroke-width: var(--cl-ann-w-twig);
+  stroke-dasharray: 2 4;
+  opacity: var(--cl-ann-a-dim);
+}
+
+.cl-ann-bead circle {
+  fill: var(--cl-ann-bg);
+  stroke: var(--cl-ann-signal);
+  stroke-width: var(--cl-ann-w-tick);
+}
+.cl-ann-bead text {
+  fill: var(--cl-ann-ink);
+  font: var(--cl-ann-fs-label) var(--cl-ann-font);
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+.cl-ann-bead.is-dim { opacity: var(--cl-ann-a-dim); }
+
+.cl-ann-label {
+  fill: var(--cl-ann-ink);
+  font-size: var(--cl-ann-fs-label);
+  font-family: var(--cl-ann-font);
+  letter-spacing: .04em;
+  paint-order: stroke;
+  stroke: var(--cl-ann-bg);
+  stroke-width: 3px;
+}
+.cl-ann-label.is-dim { opacity: var(--cl-ann-a-dim); }
+.cl-ann-label-handoff {
+  fill: var(--cl-ann-handoff);
+  font-size: var(--cl-ann-fs-handoff);
+  opacity: var(--cl-ann-a-idle);
+}
+.cl-ann-label-chapter {
+  fill: var(--cl-ann-ink-3);
+  font-size: var(--cl-ann-fs-chapter);
+  font-family: var(--cl-ann-font-num);
+  opacity: var(--cl-ann-a-chapter);
+  letter-spacing: .04em;
+  paint-order: stroke;
+  stroke: var(--cl-ann-bg);
+  stroke-width: 3px;
+}
+
+.cl-ann-card {
+  position: absolute;
+  pointer-events: none;
+  background: var(--cl-ann-bg);
+  border: 1px solid var(--cl-ann-line);
+  color: var(--cl-ann-ink);
+  padding: 8px 10px;
+  font: var(--cl-ann-fs-row) var(--cl-ann-font);
+  line-height: 1.4;
+  max-width: 240px;
+  will-change: transform;
+}
+.cl-ann-card.is-left { transform: translate(-100%, 0); }
+.cl-ann-card.is-right { transform: translate(0, 0); }
+.cl-ann-card.is-up { transform: translate(0, -100%); }
+.cl-ann-card__title {
+  color: var(--cl-ann-ink);
+  font-weight: 600;
+}
+.cl-ann-card__meta {
+  color: var(--cl-ann-ink-2);
+  font-size: var(--cl-ann-fs-handoff);
+}
+.cl-ann-card.is-dim { opacity: var(--cl-ann-a-dim); }
+
+.cl-ann-gen-0 { stroke: var(--cl-ann-gen-0); }
+.cl-ann-gen-1 { stroke: var(--cl-ann-gen-1); }
+.cl-ann-gen-2 { stroke: var(--cl-ann-gen-2); }
+.cl-ann-gen-3 { stroke: var(--cl-ann-gen-3); }
+.cl-ann-gen-4 { stroke: var(--cl-ann-gen-4); }
+.cl-ann-gen-5 { stroke: var(--cl-ann-gen-5); }
+.cl-ann-gen-0-dim { stroke: var(--cl-ann-gen-0-dim); }
+.cl-ann-gen-1-dim { stroke: var(--cl-ann-gen-1-dim); }
+.cl-ann-gen-2-dim { stroke: var(--cl-ann-gen-2-dim); }
+.cl-ann-gen-3-dim { stroke: var(--cl-ann-gen-3-dim); }
+.cl-ann-gen-4-dim { stroke: var(--cl-ann-gen-4-dim); }
+.cl-ann-gen-5-dim { stroke: var(--cl-ann-gen-5-dim); }
+
+body.is-ann .o3a-layer,
+body.is-ann .cl-o3-nm-layer,
+body.is-ann .cl-o3-legend,
+body.is-ann .cl-o3-lx,
+body.is-ann .o3r-layer,
+body.is-ann .cl-o3-symkey,
+body.is-ann .cl-lab.hub,
+body.is-ann .cl-plc { display: none !important; }   /* 主控：旧符号释义芯片与星场事件类枢标签让位给账本 */
+
+@media (prefers-reduced-motion: reduce) {
+  .cl-ann-head.is-active { animation: none; }
+  .cl-ann-arc, .cl-ann-head, .cl-ann-chord { transition: none; }
+}
+[data-tier="low"] .cl-ann-chord, [data-o3tier="low"] .cl-ann-chord { transition: none; }
+
+/* ── v90 W4 · 年轮的连续火线 ──
+ * 细扫光只在盘面外围做极低亮度的长周期旋转；选中的剧情弧才承载
+ * 可读的行进高光。所有循环均属氛围层（≥20s），不会成为反馈噪声。 */
+.cl-ann-layer::before {
+  content: '';
+  position: absolute;
+  inset: 3%;
+  border-radius: 50%;
+  pointer-events: none;
+  background: conic-gradient(from 0deg,
+    transparent 0 10%,
+    color-mix(in srgb, var(--cl-ann-signal) 16%, transparent) 14%,
+    transparent 19% 47%,
+    color-mix(in srgb, var(--cl-ann-chord) 13%, transparent) 51%,
+    transparent 57% 100%);
+  -webkit-mask: radial-gradient(ellipse at center,
+    transparent 0 48%, var(--abyss-ink-bright) 53% 56%, transparent 64%);
+  mask: radial-gradient(ellipse at center,
+    transparent 0 48%, var(--abyss-ink-bright) 53% 56%, transparent 64%);
+  opacity: .17;
+  mix-blend-mode: screen;
+  transform-origin: center;
+  animation: cl-ann-ambient-sweep 32s linear infinite;
+}
+.cl-ann-layer .cl-ann-svg { position: absolute; }
+.cl-ann-layer .cl-ann-arc.is-focus,
+.cl-ann-layer .cl-ann-arc.is-hover {
+  stroke-dasharray: 4 18;
+  animation: cl-ann-arc-flow 24s linear infinite;
+}
+.cl-ann-layer .cl-ann-head.is-active,
+.cl-ann-layer .cl-ann-head.is-open {
+  stroke-dasharray: 3 8;
+  animation: cl-ann-head-flow 22s linear infinite;
+}
+
+@keyframes cl-ann-ambient-sweep {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+@keyframes cl-ann-arc-flow {
+  from { stroke-dashoffset: 0; }
+  to { stroke-dashoffset: -176px; }
+}
+@keyframes cl-ann-head-flow {
+  from { stroke-dashoffset: 0; }
+  to { stroke-dashoffset: -44px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cl-ann-layer::before,
+  .cl-ann-layer .cl-ann-arc.is-focus,
+  .cl-ann-layer .cl-ann-arc.is-hover,
+  .cl-ann-layer .cl-ann-head.is-active,
+  .cl-ann-layer .cl-ann-head.is-open { animation: none; }
+}
+[data-tier="low"] .cl-ann-layer::before,
+[data-tier="low"] .cl-ann-layer .cl-ann-arc.is-focus,
+[data-tier="low"] .cl-ann-layer .cl-ann-arc.is-hover,
+[data-tier="low"] .cl-ann-layer .cl-ann-head.is-active,
+[data-tier="low"] .cl-ann-layer .cl-ann-head.is-open { animation: none; }
+
+/* ── 主控补丁 v80-W1：珠着色 / 静默珠 / 卡片显隐 / 标签路径 ── */
+.cl-ann-label-path { fill: none; stroke: none; pointer-events: none; }
+.cl-ann-label-tether { fill: none; stroke: var(--cl-ann-ink-3); stroke-width: var(--cl-ann-w-tick); opacity: var(--cl-ann-a-tick); pointer-events: none; }
+.cl-ann-bead.is-quiet { display: none; }
+.cl-ann-bead.is-lead circle { fill: var(--cl-ann-signal); stroke: var(--cl-ann-bg); stroke-width: 1.5px; }
+.cl-ann-bead.is-lead text { fill: var(--cl-ann-bg); font-weight: 600; }
+.cl-ann-bead[data-gen="0"].is-lead circle { fill: var(--cl-ann-gen-0); }
+.cl-ann-bead[data-gen="1"].is-lead circle { fill: var(--cl-ann-gen-1); }
+.cl-ann-bead[data-gen="2"].is-lead circle { fill: var(--cl-ann-gen-2); }
+.cl-ann-bead[data-gen="3"].is-lead circle { fill: var(--cl-ann-gen-3); }
+.cl-ann-bead[data-gen="4"].is-lead circle { fill: var(--cl-ann-gen-4); }
+.cl-ann-bead[data-gen="5"].is-lead circle { fill: var(--cl-ann-gen-5); }
+.cl-ann-bead.is-core circle, .cl-ann-bead.is-more circle { fill: var(--cl-ann-bg); stroke: var(--cl-ann-ink-3); }
+.cl-ann-bead.is-core text, .cl-ann-bead.is-more text { fill: var(--cl-ann-ink-2); font-size: var(--cl-ann-fs-handoff); }
+.cl-ann-bead text { pointer-events: none; }
+.cl-ann-bead-tether { fill: none; stroke-width: var(--cl-ann-w-tick); opacity: var(--cl-ann-a-tick); pointer-events: none; }
+.cl-ann-card { display: none; }
+.cl-ann-card.is-on { display: block; }
+.cl-ann-card.is-reduced { transition: none; }
+.cl-ann-card__cast { color: var(--cl-ann-ink-2); font-size: var(--cl-ann-fs-handoff); margin-top: 4px; }
+.cl-ann-handoff-label { fill: var(--cl-ann-ink-2); font-size: var(--cl-ann-fs-handoff); letter-spacing: .06em; paint-order: stroke; stroke: var(--cl-ann-bg); stroke-width: 3px; }
+/* v90 F2：出画折叠的线名/更替标签在弧端或更替点留一枚「…」（全名在 <title>），只作索引，不承担交互 */
+.cl-ann-label-more { fill: var(--cl-ann-ink-2); font-size: var(--cl-ann-fs-label); font-family: var(--cl-ann-font); letter-spacing: .08em; paint-order: stroke; stroke: var(--cl-ann-bg); stroke-width: 3px; pointer-events: none; }
+.cl-ann-label-more[hidden] { display: none; }
+.cl-ann-chapter-tick { stroke: var(--cl-ann-ink-3); stroke-width: var(--cl-ann-w-tick); opacity: var(--cl-ann-a-chapter); }
+.cl-ann-chapter-num { fill: var(--cl-ann-ink-3); font-size: var(--cl-ann-fs-chapter); font-family: var(--cl-ann-font-num); opacity: var(--cl-ann-a-chapter); }
+
+/* ── W1.5 · 支线三档明度 · 主线带 · 背景静默 ── */
+.cl-ann-arc.is-branch[data-gen="0"], .cl-ann-arc.is-twig[data-gen="0"] { --cl-ann-c: var(--cl-ann-gen-0-dim); }
+.cl-ann-arc.is-branch[data-gen="1"], .cl-ann-arc.is-twig[data-gen="1"] { --cl-ann-c: var(--cl-ann-gen-1-dim); }
+.cl-ann-arc.is-branch[data-gen="2"], .cl-ann-arc.is-twig[data-gen="2"] { --cl-ann-c: var(--cl-ann-gen-2-dim); }
+.cl-ann-arc.is-branch[data-gen="3"], .cl-ann-arc.is-twig[data-gen="3"] { --cl-ann-c: var(--cl-ann-gen-3-dim); }
+.cl-ann-arc.is-branch[data-gen="4"], .cl-ann-arc.is-twig[data-gen="4"] { --cl-ann-c: var(--cl-ann-gen-4-dim); }
+.cl-ann-arc.is-branch[data-gen="5"], .cl-ann-arc.is-twig[data-gen="5"] { --cl-ann-c: var(--cl-ann-gen-5-dim); }
+.cl-ann-arc.is-branch[data-shade="0"], .cl-ann-arc.is-twig[data-shade="0"] { stroke: var(--cl-ann-c); }
+.cl-ann-arc.is-branch[data-shade="1"], .cl-ann-arc.is-twig[data-shade="1"] { stroke: oklch(from var(--cl-ann-c) calc(l + var(--cl-ann-shade-1)) calc(c * var(--cl-ann-shade-c)) h); }
+.cl-ann-arc.is-branch[data-shade="2"], .cl-ann-arc.is-twig[data-shade="2"] { stroke: oklch(from var(--cl-ann-c) calc(l + var(--cl-ann-shade-2)) calc(c * var(--cl-ann-shade-c)) h); }
+.cl-ann-arc.is-branch { stroke-width: 2.25px; }
+.cl-ann-arc.is-main { opacity: .92; }
+.cl-ann-head.is-main { stroke-width: var(--cl-ann-w-main); }
+
+/* 剧情态背景静默：纪元徽章/星名/章回尺退到极淡，盘上只剩年轮在说话 */
+body.is-ann .cl-o3-labels,
+body.is-ann .cl-o3-bz__ep { display: none !important; }   /* 纪元徽章两处来源：orbit3d-labels 与 bezel 表圈文字 */
+body.is-ann .cl-lab:not(.hub):not(.hover):not(.sel):not(.pin) { filter: opacity(.28); }
+body.is-ann .cl-o3-ruler { filter: opacity(.45); }
+body.is-ann .cl-o3-ruler:hover { filter: none; }
+body.is-ann .cl-o3-ruler.is-dock { filter: none; }   /* v90：工作区竖签自身已是低调玻璃签，不再二次压暗（否则签名不可读） */
+
+.cl-ann-core { fill: none; stroke: var(--cl-ann-ink-3); stroke-width: var(--cl-ann-w-tick); opacity: .16; }
+
+@media (max-width: 480px) {
+  /* 手机：支线名全部折进账本，只留主线名；珠缩一号；更替标签只留前 4 */
+  body.is-ann .cl-ann-label[data-kind="branch"]:not(.is-active), body.is-ann .cl-ann-label[data-kind="twig"]:not(.is-active) { display: none; }   /* v90：选中/悬停的支线名例外 */
+  :root { --cl-ann-bead-r: 6px; --cl-ann-bead-r-br: 5px; --cl-ann-bead-r-sm: 4px; --cl-ann-head-len: 16px; }
+}

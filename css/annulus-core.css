@@ -1,0 +1,177 @@
+/* @role css-token @owns css/annulus-core.css @budget n/a @contract v90 */
+/* v90 F1 年轮星核 —— 只引 --abyss-* / --cl-atlas-* / --cl-ann-* 令牌；星核模块令牌 --cl-ann-core-* 定义于此。
+ * 色：金/琥珀 = 人物（星核、光晕、焦点），薄荷 = 特质（属性星芒），三级灰 = 未知（空心点）；阵营色由 JS 取自星域同源色板写入属性。
+ * 注意：星核圆点 fill、阵营弧 stroke、阵营名 fill、光晕 opacity 由 JS 写属性，这里不得再声明同名属性（CSS 会压过属性）。 */
+:root {
+  --cl-ann-core-gold: var(--abyss-gold);
+  --cl-ann-core-mint: var(--abyss-mint);
+  --cl-ann-core-ink: var(--abyss-ink);
+  --cl-ann-core-ink-2: var(--abyss-ink-2);
+  --cl-ann-core-ink-3: var(--abyss-ink-3);
+  --cl-ann-core-bg: var(--cl-ann-bg);
+  --cl-ann-core-line: var(--cl-ann-line);
+  --cl-ann-core-fs: var(--cl-ann-fs-label);          /* JS 读数用；CSS 字号直接引年轮字阶别名（css_lint 认 *-tokens.css 别名） */
+  --cl-ann-core-fs-hi: var(--cl-ann-fs-handoff);
+  --cl-ann-core-fs-tip: var(--cl-ann-fs-handoff);
+  --cl-ann-core-a-off: .22;
+  --cl-ann-core-a-ray: .86;
+  --cl-ann-core-a-arc: .38;
+  --cl-ann-core-a-cool: .5;
+  --cl-ann-core-w-main-on: 6px;
+  --cl-ann-core-w-branch-on: 3.25px;
+  --cl-ann-core-w-twig-on: 2.25px;
+  --cl-ann-core-halo: 3px;
+  --cl-ann-core-stagger: calc(var(--cl-atlas-dur-2) - var(--cl-atlas-dur-1));
+}
+
+.cl-ann-g-core { pointer-events: none; }
+.cl-ann-g-core.is-off { display: none; }
+
+/* ── 星 ── */
+.cl-ann-layer .cl-ann-core__star {
+  pointer-events: auto;
+  cursor: pointer;
+  outline: none;
+  transition: filter var(--cl-atlas-dur-1) var(--cl-atlas-ease);
+  animation: cl-ann-core-in var(--cl-atlas-dur-1) var(--cl-atlas-ease) both;
+}
+.cl-ann-core__star[data-stagger="1"] { animation-delay: calc(var(--cl-ann-core-stagger) * 1 / 7); }
+.cl-ann-core__star[data-stagger="2"] { animation-delay: calc(var(--cl-ann-core-stagger) * 2 / 7); }
+.cl-ann-core__star[data-stagger="3"] { animation-delay: calc(var(--cl-ann-core-stagger) * 3 / 7); }
+.cl-ann-core__star[data-stagger="4"] { animation-delay: calc(var(--cl-ann-core-stagger) * 4 / 7); }
+.cl-ann-core__star[data-stagger="5"] { animation-delay: calc(var(--cl-ann-core-stagger) * 5 / 7); }
+.cl-ann-core__star[data-stagger="6"] { animation-delay: calc(var(--cl-ann-core-stagger) * 6 / 7); }
+.cl-ann-core__star[data-stagger="7"] { animation-delay: var(--cl-ann-core-stagger); }
+.cl-ann-core__fade { animation: cl-ann-core-in var(--cl-atlas-dur-2) var(--cl-atlas-ease) both; }
+
+.cl-ann-core__glow {
+  fill: url(#cl-ann-core-glow);
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: transform var(--cl-atlas-dur-1) var(--cl-atlas-ease);
+}
+.cl-ann-core__star.is-more .cl-ann-core__glow,
+.cl-ann-g-core.is-low .cl-ann-core__glow { fill: transparent; }
+.cl-ann-core__gs0 { stop-color: var(--cl-ann-core-gold); stop-opacity: .42; }
+.cl-ann-core__gs1 { stop-color: var(--cl-ann-core-gold); stop-opacity: 0; }
+
+.cl-ann-core__rays {
+  fill: none;
+  stroke: var(--cl-ann-core-mint);
+  stroke-width: 1px;
+  stroke-linecap: butt;
+  opacity: var(--cl-ann-core-a-ray);
+  pointer-events: none;
+}
+.cl-ann-core__unk {
+  fill: none;
+  stroke: var(--cl-ann-core-ink-3);
+  stroke-width: 1px;
+  pointer-events: none;
+}
+.cl-ann-core__dot { stroke: var(--cl-ann-core-bg); stroke-width: 1px; }
+.cl-ann-core__name {
+  fill: var(--cl-ann-core-ink-2);
+  font-size: var(--cl-ann-fs-label);
+  font-family: var(--cl-ann-font);
+  letter-spacing: .04em;
+  paint-order: stroke;
+  stroke: var(--cl-ann-core-bg);
+  stroke-width: var(--cl-ann-core-halo);
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+.cl-ann-core__name.is-hi { fill: var(--cl-ann-core-ink); font-size: var(--cl-ann-fs-handoff); }
+.cl-ann-core__name.is-quiet { visibility: hidden; }
+.cl-ann-core__star.is-more .cl-ann-core__name { fill: var(--cl-ann-core-ink-3); }
+.cl-ann-core__glyph, .cl-ann-core__glyph-fb { color: var(--cl-ann-core-ink-2); fill: none; stroke: currentColor; }
+.cl-ann-core__hub .cl-ann-core__glyph, .cl-ann-core__hub .cl-ann-core__glyph-fb { color: var(--cl-ann-core-gold); }
+
+/* 悬停 / 键盘焦点 */
+.cl-ann-core__star.is-hot .cl-ann-core__glow { transform: scale(1.35); }
+.cl-ann-core__star.is-hot .cl-ann-core__name,
+.cl-ann-core__star:focus-visible .cl-ann-core__name { fill: var(--cl-ann-core-gold); }
+.cl-ann-core__star:focus-visible .cl-ann-core__dot { stroke: var(--cl-ann-core-gold); stroke-width: 2px; }
+.cl-ann-core__star.is-more:focus-visible .cl-ann-core__glyph { color: var(--cl-ann-core-gold); }
+.cl-ann-g-core.is-hovering .cl-ann-core__star:not(.is-hot) { filter: opacity(var(--cl-ann-core-a-cool)); }
+
+/* ── 阵营扇区弧与弧名 ── */
+.cl-ann-core__arc { fill: none; stroke-width: 1px; stroke-linecap: round; opacity: var(--cl-ann-core-a-arc); pointer-events: none; }
+.cl-ann-core__camp {
+  font-size: var(--cl-ann-fs-label);
+  font-family: var(--cl-ann-font);
+  letter-spacing: .12em;
+  opacity: .9;
+  paint-order: stroke;
+  stroke: var(--cl-ann-core-bg);
+  stroke-width: var(--cl-ann-core-halo);
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+
+/* ── 计数星徽 ── */
+.cl-ann-core__ring { fill: none; stroke: none; }
+.cl-ann-core__count {
+  fill: var(--cl-ann-core-ink-3);
+  font-size: var(--cl-ann-fs-label);
+  font-family: var(--cl-ann-font-num);
+  letter-spacing: .06em;
+  paint-order: stroke;
+  stroke: var(--cl-ann-core-bg);
+  stroke-width: var(--cl-ann-core-halo);
+  pointer-events: none;
+}
+.cl-ann-core__count.is-quiet, .cl-ann-core__camp.is-quiet { display: none; }
+
+/* ── 世界字形环 ── */
+.cl-ann-core__wshape { fill: none; stroke: var(--cl-ann-core-ink-2); stroke-width: 1px; stroke-linejoin: round; }
+.cl-ann-core__wi.is-partial .cl-ann-core__wshape { stroke-dasharray: 2 1.6; }
+.cl-ann-core__wn { fill: var(--cl-ann-core-ink-2); font-size: var(--cl-ann-fs-label); font-family: var(--cl-ann-font-num); }
+
+/* ── 悬停短签 ── */
+.cl-ann-g-core-tip { pointer-events: none; opacity: 0; transition: opacity var(--cl-atlas-dur-1) var(--cl-atlas-ease); }
+.cl-ann-g-core-tip.is-on { opacity: 1; }
+.cl-ann-core__tipbg { fill: var(--cl-ann-core-bg); stroke: var(--cl-ann-core-line); stroke-width: 1px; opacity: .94; }
+.cl-ann-core__tiptx { fill: var(--cl-ann-core-ink); font-size: var(--cl-ann-fs-handoff); font-family: var(--cl-ann-font); letter-spacing: .03em; }
+
+/* ── M1 联动：悬停星 → 外环他参与的弧亮、其余退暗（只在 core-hover 期间生效，与 is-focus/is-dim 并存） ── */
+.cl-ann-layer .cl-ann-arc,
+.cl-ann-layer .cl-ann-head {
+  transition: opacity var(--cl-ann-dur-fast) var(--cl-ann-ease),
+              stroke-width var(--cl-ann-dur-fast) var(--cl-ann-ease),
+              filter var(--cl-atlas-dur-1) var(--cl-atlas-ease);
+}
+.cl-ann-layer .cl-ann-label { transition: filter var(--cl-atlas-dur-1) var(--cl-atlas-ease); }
+.cl-ann-layer.core-hover .cl-ann-arc.is-core-off,
+.cl-ann-layer.core-hover .cl-ann-head.is-core-off,
+.cl-ann-layer.core-hover .cl-ann-label.is-core-off { filter: opacity(var(--cl-ann-core-a-off)); }
+.cl-ann-layer.core-hover .cl-ann-arc.is-core-on,
+.cl-ann-layer.core-hover .cl-ann-head.is-core-on { opacity: 1; }
+.cl-ann-layer.core-hover .cl-ann-arc.is-core-on.is-main { stroke-width: var(--cl-ann-core-w-main-on); }
+.cl-ann-layer.core-hover .cl-ann-arc.is-core-on.is-branch { stroke-width: var(--cl-ann-core-w-branch-on); }
+.cl-ann-layer.core-hover .cl-ann-arc.is-core-on.is-twig { stroke-width: var(--cl-ann-core-w-twig-on); }
+
+/* ── 降级：减少动态 / 静止 / 低档 → 直接终态 ── */
+.cl-ann-g-core.is-still .cl-ann-core__star,
+.cl-ann-g-core.is-still .cl-ann-core__fade { animation: none; }
+.cl-ann-g-core.is-still .cl-ann-core__star,
+.cl-ann-g-core.is-still .cl-ann-core__glow { transition: none; }
+.cl-ann-layer.core-still .cl-ann-arc,
+.cl-ann-layer.core-still .cl-ann-head,
+.cl-ann-layer.core-still .cl-ann-label,
+.cl-ann-layer.core-still .cl-ann-g-core-tip { transition: none; }
+@media (prefers-reduced-motion: reduce) {
+  .cl-ann-layer .cl-ann-core__star,
+  .cl-ann-layer .cl-ann-core__fade { animation: none; }
+  .cl-ann-layer .cl-ann-core__star,
+  .cl-ann-layer .cl-ann-core__glow,
+  .cl-ann-layer .cl-ann-arc,
+  .cl-ann-layer .cl-ann-head,
+  .cl-ann-layer .cl-ann-label,
+  .cl-ann-layer .cl-ann-g-core-tip { transition: none; }
+}
+
+@keyframes cl-ann-core-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}

@@ -1,0 +1,213 @@
+/* Castline · three atlas interaction polish
+ * Geometry and camera stay in their graph modules. This layer adds a
+ * pointer-following optical parallax and short feedback pulses only.
+ */
+:root {
+  --amp-lens: color-mix(in oklab, var(--abyss-violet-bright) 16%, transparent);
+  --amp-lens-hot: color-mix(in oklab, var(--abyss-gold) 28%, transparent);
+  --amp-flow: color-mix(in oklab, var(--abyss-gold) 62%, transparent);
+  --amp-feedback: 260ms;
+}
+
+.atlas-motion-lens { --amp-pointer-px: 50%; --amp-pointer-py: 50%; }
+.atlas-motion-lens:is(.cl-ann-layer,.cl-domains-lamps,.cl-atlas-stage,.afb-stage,.afb-gem,.cl-gem-host__svg)::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: var(--z-abyss, 0);
+  background: radial-gradient(240px 180px at var(--amp-pointer-px) var(--amp-pointer-py), var(--amp-lens), transparent 72%);
+  opacity: .45;
+  mix-blend-mode: screen;
+  transition: opacity 420ms var(--abyss-ease-out, ease-out);
+}
+.atlas-motion-lens:is(.cl-ann-layer,.cl-domains-lamps,.cl-atlas-stage,.afb-stage,.afb-gem,.cl-gem-host__svg).atlas-motion-hover::before { opacity: .46; background: radial-gradient(220px 160px at var(--amp-pointer-px) var(--amp-pointer-py), var(--amp-lens-hot), var(--amp-lens) 35%, transparent 74%); }
+.atlas-motion-lens.atlas-motion-pressed::before { opacity: .62; }
+
+/* The SVG wrapper is free to tilt; the SVG itself keeps its intrinsic viewBox. */
+.atlas-motion-tilt > .cl-gem-host__svg,
+.atlas-motion-tilt > .cl-gem,
+.atlas-motion-tilt > .afb-gem,
+.atlas-motion-tilt .cl-gem-host__svg {
+  transform: perspective(1100px) rotateX(var(--amp-tilt-y, 0deg)) rotateY(var(--amp-tilt-x, 0deg)) translateZ(0);
+  transform-origin: 50% 50%;
+  transition: transform 540ms cubic-bezier(.16,.84,.32,1);
+  will-change: transform;
+}
+.atlas-motion-tilt.atlas-motion-hover > .cl-gem-host__svg,
+.atlas-motion-tilt.atlas-motion-hover .cl-gem-host__svg { transition-duration: 120ms; }
+
+/* Annulus paths get a one-shot sweep when a line is discovered. */
+.cl-ann-layer .cl-ann-arc.atlas-motion-hot,
+.cl-ann-layer .cl-ann-head.atlas-motion-hot {
+  filter: drop-shadow(0 0 7px var(--amp-flow));
+  stroke-dasharray: .2 9;
+  animation: amp-arc-sweep 900ms cubic-bezier(.16,.84,.32,1) 1 both;
+}
+.cl-ann-layer .cl-ann-bead.atlas-motion-hot circle { filter: drop-shadow(0 0 8px var(--amp-flow)); }
+.cl-ann-layer .cl-ann-arc.atlas-motion-press,
+.cl-ann-layer .cl-ann-head.atlas-motion-press,
+.cl-ann-layer .cl-ann-bead.atlas-motion-press { animation: amp-graph-press var(--amp-feedback) cubic-bezier(.2,.9,.3,1) 1 both; }
+
+/* Gem face and axis feedback. */
+.cl-gem-face.atlas-motion-face-hot .cl-gem-grid.is-outer { stroke: var(--amp-flow); filter: drop-shadow(0 0 4px var(--amp-flow)); }
+.cl-gem-vertex.atlas-motion-hot,
+.cl-gem-badge.atlas-motion-hot,
+.cl-gem-arc__line.atlas-motion-hot,
+.cl-gem-arc__hit.atlas-motion-hot { filter: drop-shadow(0 0 8px var(--amp-flow)); }
+.cl-gem-vertex.atlas-motion-press,
+.cl-gem-badge.atlas-motion-press,
+.cl-gem-arc__line.atlas-motion-press { animation: amp-graph-press var(--amp-feedback) cubic-bezier(.2,.9,.3,1) 1 both; }
+.cl-gem-vertex.atlas-motion-commit { animation: amp-graph-confirm 520ms cubic-bezier(.16,.84,.32,1) 1 both; }
+
+/* Domains lamps are laid out by a frame hook, so the optical response lives in
+ * a pseudo-element/filter and never competes with their inline transform. */
+.cl-domains-lamp.atlas-motion-hot { border-color: color-mix(in oklab, currentColor 78%, transparent); filter: drop-shadow(0 0 10px color-mix(in oklab, currentColor 38%, transparent)); }
+.cl-domains-lamp.atlas-motion-press { animation: amp-graph-press var(--amp-feedback) cubic-bezier(.2,.9,.3,1) 1 both; }
+.cl-domains-lamp.atlas-motion-commit { box-shadow: 0 0 0 2px color-mix(in oklab, currentColor 38%, transparent), 0 0 22px color-mix(in oklab, currentColor 20%, transparent); }
+
+@keyframes amp-arc-sweep { from { stroke-dashoffset: 32; } to { stroke-dashoffset: 0; } }
+@keyframes amp-graph-press { 0% { filter: brightness(1); } 42% { filter: brightness(1.45) drop-shadow(0 0 10px var(--amp-flow)); } 100% { filter: brightness(1); } }
+@keyframes amp-graph-confirm { 0% { filter: drop-shadow(0 0 0 transparent); } 40% { filter: drop-shadow(0 0 14px var(--amp-flow)); } 100% { filter: drop-shadow(0 0 0 transparent); } }
+
+@media (hover: none) {
+  .atlas-motion-lens:is(.cl-ann-layer,.cl-domains-lamps,.cl-atlas-stage,.afb-stage,.afb-gem,.cl-gem-host__svg)::before { opacity: .28; }
+  .atlas-motion-tilt > .cl-gem-host__svg,
+  .atlas-motion-tilt .cl-gem-host__svg { transition-duration: 720ms; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .atlas-motion-lens:is(.cl-ann-layer,.cl-domains-lamps,.cl-atlas-stage,.afb-stage,.afb-gem,.cl-gem-host__svg)::before { opacity: 0; transition: none; }
+  .atlas-motion-tilt > .cl-gem-host__svg,
+  .atlas-motion-tilt > .cl-gem,
+  .atlas-motion-tilt > .afb-gem,
+  .atlas-motion-tilt .cl-gem-host__svg { transform: none; transition: none; }
+  .cl-ann-layer .cl-ann-arc.atlas-motion-hot,
+  .cl-ann-layer .cl-ann-head.atlas-motion-hot,
+  .cl-ann-layer .cl-ann-bead.atlas-motion-hot,
+  .cl-gem-vertex.atlas-motion-press,
+  .cl-gem-badge.atlas-motion-press,
+  .cl-domains-lamp.atlas-motion-press { animation: none; }
+}
+[data-tier="low"] .atlas-motion-lens:is(.cl-ann-layer,.cl-domains-lamps,.cl-atlas-stage,.afb-stage,.afb-gem,.cl-gem-host__svg)::before { opacity: .2; }
+[data-tier="low"] .atlas-motion-tilt > .cl-gem-host__svg,
+[data-tier="low"] .atlas-motion-tilt .cl-gem-host__svg { transform: none; transition: none; }
+[data-tier="low"] .cl-ann-layer .cl-ann-arc.atlas-motion-hot,
+[data-tier="low"] .cl-ann-layer .cl-ann-head.atlas-motion-hot { animation: none; }
+.atlas-motion-lens:is(#gemHost,.cl-gem-host,.cl-gem-host__svg,.afb-stage,.afb-gem) { position: relative; }
+
+/* ──────────────────────────────────────────────────────────────────────────
+ * v2 interaction field · delegated gestures / optical camera follow
+ * The canvas owns the gesture; this layer only paints a finite after-image.
+ * --amp-drift-x/y are shared with the nebula pass and never mutate layout.
+ */
+:root {
+  --amp-world-x: 0;
+  --amp-world-y: -.16;
+  --amp-drift-x: 0px;
+  --amp-drift-y: 0px;
+  --amp-energy: 0;
+  --amp-transit-ease: cubic-bezier(.16, 1, .3, 1);
+}
+.atlas-motion-fx {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: var(--z-ritual, 600);
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
+.atlas-motion-fx[hidden] { display: none; }
+.atlas-motion-lens { --amp-pointer-px: 50%; --amp-pointer-py: 50%; }
+.atlas-motion-lens::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(240px 180px at var(--amp-pointer-px, 50%) var(--amp-pointer-py, 50%), var(--amp-lens), transparent 72%);
+  opacity: .32;
+  mix-blend-mode: screen;
+  transition: opacity var(--amp-feedback) var(--abyss-ease-out, ease-out);
+}
+.atlas-motion-lens.atlas-motion-hover::before { opacity: .46; }
+.atlas-motion-lens.atlas-motion-pressed::before { opacity: .62; }
+.atlas-motion-tilt > .cl-gem-host__svg,
+.atlas-motion-tilt .cl-gem-host__svg,
+.atlas-motion-tilt > .cl-gem,
+.atlas-motion-tilt > .afb-gem {
+  transform: perspective(1100px) rotateX(var(--amp-tilt-y, 0deg)) rotateY(var(--amp-tilt-x, 0deg)) translateZ(0);
+  transform-origin: 50% 50%;
+  transition: transform 540ms var(--amp-transit-ease);
+  will-change: transform;
+}
+.atlas-motion-tilt.atlas-motion-hover > .cl-gem-host__svg,
+.atlas-motion-tilt.atlas-motion-hover .cl-gem-host__svg { transition-duration: 120ms; }
+.atlas-motion-dragging #stage,
+.atlas-motion-dragging .cl-ann-layer,
+.atlas-motion-dragging #gemHost,
+.atlas-motion-dragging .cl-domains-lamps,
+.atlas-motion-dragging .afb-stage { --amp-lens: var(--amp-lens-hot); }
+.atlas-motion-dragging #stage::after,
+.atlas-motion-dragging .atlas-motion-lens::before { opacity: .52; }
+.atlas-motion-transit #stage,
+.atlas-motion-transit .cl-ann-layer,
+.atlas-motion-transit #gemHost,
+.atlas-motion-transit .cl-domains-lamps,
+.atlas-motion-transit .afb-stage,
+.atlas-motion-transit .atlas-preview-hud .aph-shell {
+  animation: amp-lens-transition 960ms var(--amp-transit-ease) both;
+  transform-origin: 50% 50%;
+}
+.atlas-motion-transit #stage::after { opacity: calc(.7 + var(--amp-energy) * .3); }
+.atlas-motion-hot { filter: drop-shadow(0 0 8px var(--amp-flow)); }
+.atlas-motion-press { animation: amp-touch-press var(--amp-feedback) cubic-bezier(.2, .9, .3, 1) 1 both; }
+.atlas-motion-commit { animation: amp-graph-confirm 620ms var(--amp-transit-ease) 1 both; }
+.cl-ann-layer .cl-ann-bead.atlas-motion-hot circle { filter: drop-shadow(0 0 8px var(--amp-flow)); }
+.cl-gem-face.atlas-motion-face-hot .cl-gem-grid.is-outer { stroke: var(--amp-flow); filter: drop-shadow(0 0 4px var(--amp-flow)); }
+.cl-domains-lamp.atlas-motion-hot { border-color: color-mix(in oklab, currentColor 78%, transparent); filter: drop-shadow(0 0 10px color-mix(in oklab, currentColor 38%, transparent)); }
+
+@keyframes amp-lens-transition {
+  0% { opacity: .18; filter: blur(3px) saturate(.72); transform: scale(.982) translateZ(0); }
+  42% { opacity: 1; filter: blur(0) saturate(1.2); transform: scale(1.008) translateZ(0); }
+  100% { opacity: 1; filter: none; transform: none; }
+}
+@keyframes amp-touch-press {
+  0% { filter: brightness(1); transform: translateZ(0) scale(1); }
+  42% { filter: brightness(1.45) drop-shadow(0 0 10px var(--amp-flow)); transform: translateZ(0) scale(.97); }
+  100% { filter: brightness(1); transform: translateZ(0) scale(1); }
+}
+@keyframes amp-graph-press {
+  0% { filter: brightness(1); transform: translateZ(0) scale(1); }
+  42% { filter: brightness(1.45) drop-shadow(0 0 10px var(--amp-flow)); transform: translateZ(0) scale(.97); }
+  100% { filter: brightness(1); transform: translateZ(0) scale(1); }
+}
+@keyframes amp-graph-confirm {
+  0% { filter: drop-shadow(0 0 0 transparent); }
+  40% { filter: drop-shadow(0 0 14px var(--amp-flow)); }
+  100% { filter: drop-shadow(0 0 0 transparent); }
+}
+@media (pointer: coarse) {
+  .atlas-motion-lens::before { opacity: .22; }
+  .atlas-motion-tilt > .cl-gem-host__svg,
+  .atlas-motion-tilt .cl-gem-host__svg { transition-duration: 720ms; }
+  .atlas-motion-touch .atlas-motion-hot { filter: drop-shadow(0 0 11px var(--amp-flow)); }
+  .atlas-motion-touch .atlas-motion-pressed { --amp-feedback: 180ms; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .atlas-motion-fx { display: none !important; }
+  .atlas-motion-lens::before,
+  .atlas-motion-tilt > .cl-gem-host__svg,
+  .atlas-motion-tilt .cl-gem-host__svg { transition: none !important; transform: none !important; opacity: 0 !important; }
+  .atlas-motion-transit #stage,
+  .atlas-motion-transit .cl-ann-layer,
+  .atlas-motion-transit #gemHost,
+  .atlas-motion-transit .cl-domains-lamps,
+  .atlas-motion-transit .afb-stage { animation: none !important; }
+  .atlas-motion-press,
+  .atlas-motion-commit { animation: none !important; }
+}
+[data-tier="low"] .atlas-motion-fx,
+[data-tier="low"] .atlas-motion-transit,
+[data-tier="low"] .atlas-motion-lens::before { display: none !important; }
+[data-tier="low"] .atlas-motion-tilt > .cl-gem-host__svg,
+[data-tier="low"] .atlas-motion-tilt .cl-gem-host__svg { transition: none; transform: none; }

@@ -1,0 +1,248 @@
+/* @role css-token
+   @owns css/sky-loader.css
+   @contract deep-sky/2
+   @budget drawcalls=0 points=0 vertices=0 rtpx=0 passes=0
+
+   读取幕样式。只引用令牌变量（--skd-* / --z-*），无 #hex / rgb()。
+   字号只用 var(--skd-fs-*)；infinite 动画仅 60s / 90s 两个。
+   低成本路径：@media (prefers-reduced-motion) · body.skylab-still · [data-tier="low"] */
+
+@layer skl-loader;
+
+@layer skl-loader {
+  /* ---------- 幕 ---------- */
+  .skd-loader {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-ritual);
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    opacity: 0;
+    color: var(--skd-ink-2);
+    font-family: var(--skd-font-sans);
+    background: radial-gradient(120% 90% at 50% 45%, var(--skd-void-1), var(--skd-void-0) 70%);
+    transition: opacity var(--skd-dur-focus) var(--skd-ease-out);
+  }
+  .skd-loader.is-on { opacity: 1; }
+  .skd-loader.is-instant { opacity: 1; transition: none; }
+  .skd-loader__body { opacity: 0; transform: translate3d(0, 10px, 0); transition: opacity var(--skd-dur-focus) var(--skd-ease-out), transform var(--skd-dur-focus) var(--skd-ease-out); }
+  .skd-loader.is-on .skd-loader__body { opacity: 1; transform: none; }
+  .skd-loader.is-leaving {
+    opacity: 0;
+    transform: scale(1.06);
+    transition: opacity var(--skd-dur-fly) var(--skd-ease-out),
+                transform var(--skd-dur-fly) var(--skd-ease-out);
+  }
+  .skd-loader[hidden] { display: none; }
+
+  /* ---------- 底：极淡星点 + 椭圆星云 ---------- */
+  .skd-loader__sky {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-image:
+      radial-gradient(58% 40% at 24% 33%, color-mix(in oklch, var(--skd-violet) 10%, transparent), transparent 72%),
+      radial-gradient(46% 34% at 76% 67%, color-mix(in oklch, var(--skd-mint) 6%, transparent), transparent 74%),
+      radial-gradient(1px 1px at 6% 12%, color-mix(in oklch, var(--skd-star) 34%, transparent), transparent),
+      radial-gradient(1px 1px at 17% 41%, color-mix(in oklch, var(--skd-star) 22%, transparent), transparent),
+      radial-gradient(1px 1px at 23% 78%, color-mix(in oklch, var(--skd-star) 28%, transparent), transparent),
+      radial-gradient(1px 1px at 34% 9%, color-mix(in oklch, var(--skd-star) 18%, transparent), transparent),
+      radial-gradient(1px 1px at 41% 63%, color-mix(in oklch, var(--skd-star) 30%, transparent), transparent),
+      radial-gradient(1px 1px at 49% 26%, color-mix(in oklch, var(--skd-star) 20%, transparent), transparent),
+      radial-gradient(1px 1px at 57% 88%, color-mix(in oklch, var(--skd-star) 26%, transparent), transparent),
+      radial-gradient(1px 1px at 63% 47%, color-mix(in oklch, var(--skd-star) 16%, transparent), transparent),
+      radial-gradient(1px 1px at 71% 15%, color-mix(in oklch, var(--skd-star) 32%, transparent), transparent),
+      radial-gradient(1px 1px at 78% 72%, color-mix(in oklch, var(--skd-star) 24%, transparent), transparent),
+      radial-gradient(1px 1px at 86% 33%, color-mix(in oklch, var(--skd-star) 19%, transparent), transparent),
+      radial-gradient(1px 1px at 92% 58%, color-mix(in oklch, var(--skd-star) 27%, transparent), transparent),
+      radial-gradient(1px 1px at 12% 92%, color-mix(in oklch, var(--skd-star) 21%, transparent), transparent),
+      radial-gradient(1px 1px at 88% 90%, color-mix(in oklch, var(--skd-star) 25%, transparent), transparent),
+      radial-gradient(1px 1px at 30% 34%, color-mix(in oklch, var(--skd-cool) 20%, transparent), transparent),
+      radial-gradient(1px 1px at 68% 27%, color-mix(in oklch, var(--skd-cool) 18%, transparent), transparent);
+  }
+
+  /* ---------- 主体 ---------- */
+  .skd-loader__body {
+    position: relative;
+    z-index: var(--z-hud);
+    display: grid;
+    justify-items: center;
+    row-gap: 28px;
+    text-align: center;
+  }
+  .skd-loader__text {
+    display: grid;
+    justify-items: center;
+    row-gap: 10px;
+    max-width: 34em;
+    padding: 0 24px;
+  }
+
+  /* ---------- 盘 ---------- */
+  .skd-loader__dial {
+    position: relative;
+    width: 280px;
+    height: 280px;
+  }
+  .skd-loader__ring,
+  .skd-loader__arc {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+  .skd-loader__ring circle,
+  .skd-loader__ring path { fill: none; stroke: var(--skd-hair-brass); stroke-width: 1px; }
+  .skd-loader__ring circle { stroke-dasharray: 2 7; }
+  .skd-loader__tick { stroke: var(--skd-hair-brass); }
+  .skd-loader__tick.is-long { stroke: var(--skd-brass-dim); }
+  .skd-loader__ring.is-outer {
+    will-change: transform;
+    animation: skd-loader-spin 60s linear infinite;
+  }
+  .skd-loader__ring.is-inner {
+    inset: 36px;
+    will-change: transform;
+    animation: skd-loader-spin 90s linear infinite reverse;
+  }
+  .skd-loader__arc circle {
+    fill: none;
+    stroke: var(--skd-brass);
+    stroke-width: 1.6px;
+    stroke-linecap: round;
+    filter: drop-shadow(0 0 6px color-mix(in oklch, var(--skd-brass) 60%, transparent));
+    transition: stroke-dashoffset var(--skd-dur-soft) var(--skd-ease-out);
+  }
+  .skd-loader__core {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 10px;
+    height: 10px;
+    margin: -5px 0 0 -5px;
+    border-radius: var(--skd-radius-pill);
+    background: var(--skd-brass-hot);
+    box-shadow: 0 0 24px 6px color-mix(in oklch, var(--skd-brass) 35%, transparent);
+    animation: skd-loader-ignite var(--skd-dur-unfurl) var(--skd-ease-out) 1 both;
+  }
+
+  /* ---------- 文本 ---------- */
+  .skd-loader__stage {
+    font-family: var(--skd-font-serif);
+    font-size: var(--skd-fs-md);
+    color: var(--skd-brass);
+    letter-spacing: var(--skd-track);
+  }
+  .skd-loader__title {
+    font-family: var(--skd-font-serif);
+    font-size: var(--skd-fs-xl);
+    color: var(--skd-ink);
+    letter-spacing: var(--skd-track-wide);
+    text-shadow: 0 0 18px color-mix(in oklch, var(--skd-ink) 22%, transparent);
+  }
+  .skd-loader__sub,
+  .skd-loader__detail {
+    font-family: var(--skd-font-mono);
+    font-size: var(--skd-fs-xs);
+    color: var(--skd-ink-3);
+  }
+  .skd-loader__detail { min-height: 1.4em; }
+
+  /* ---------- 步骤 ---------- */
+  .skd-loader__steps {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 18px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .skd-loader__step {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--skd-font-mono);
+    font-size: var(--skd-fs-xs);
+    color: var(--skd-ink-3);
+  }
+  .skd-loader__step::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: var(--skd-radius-pill);
+    background: var(--skd-hair-2);
+  }
+  .skd-loader__step.is-done::before { background: var(--skd-brass-dim); }
+  .skd-loader__step.is-now { color: var(--skd-brass-hot); }
+  .skd-loader__step.is-now::before {
+    background: var(--skd-brass-hot);
+    box-shadow: 0 0 10px 2px color-mix(in oklch, var(--skd-brass-hot) 45%, transparent);
+  }
+
+  /* ---------- 跳过 ---------- */
+  .skd-loader__skip {
+    position: absolute;
+    left: 50%;
+    bottom: 48px;
+    transform: translateX(-50%);
+    padding: 0;
+    border: 0;
+    background: none;
+    font-family: var(--skd-font-mono);
+    font-size: var(--skd-fs-xs);
+    color: var(--skd-ink-3);
+    opacity: 0;
+    cursor: pointer;
+    transition: opacity var(--skd-dur-soft) var(--skd-ease-out);
+  }
+  .skd-loader__skip.is-on { opacity: .8; }
+  .skd-loader__skip:hover { color: var(--skd-ink-2); }
+  .skd-loader__skip:focus-visible {
+    outline: 1px solid var(--skd-brass-dim);
+    outline-offset: 6px;
+  }
+}
+
+@keyframes skd-loader-spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes skd-loader-ignite {
+  from { transform: scale(.2); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+/* ---------- 降级：减弱动效（系统偏好） ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .skd-loader__body,
+  .skd-loader,
+  .skd-loader__arc circle,
+  .skd-loader__skip { transition: none; }
+  .skd-loader__ring,
+  .skd-loader__core { animation: none; }
+  .skd-loader__core { opacity: 1; }
+}
+
+/* ---------- 降级：减弱动效（CLSkyTokens.reduced() 镜像开关） ---------- */
+body.skylab-still .skd-loader__body,
+body.skylab-still .skd-loader,
+body.skylab-still .skd-loader__arc circle,
+body.skylab-still .skd-loader__skip { transition: none; }
+body.skylab-still .skd-loader__ring,
+body.skylab-still .skd-loader__core { animation: none; }
+body.skylab-still .skd-loader__core { opacity: 1; }
+
+/* ---------- 降级：low 档（静态替代，不只是少一点） ---------- */
+.skd-loader[data-tier="low"],
+.skd-loader[data-tier="low"] .skd-loader__arc circle,
+.skd-loader[data-tier="low"] .skd-loader__skip { transition: none; }
+.skd-loader[data-tier="low"] .skd-loader__ring,
+.skd-loader[data-tier="low"] .skd-loader__core { animation: none; }
+.skd-loader[data-tier="low"] .skd-loader__core { opacity: 1; }
+.skd-loader[data-tier="low"] .skd-loader__arc circle { filter: none; }
+.skd-loader[data-tier="low"] .skd-loader__sky { background-image: none; }
+.skd-loader[data-tier="low"] .skd-loader__step:not(.is-done, .is-now) { opacity: .5; }

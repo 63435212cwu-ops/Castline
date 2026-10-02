@@ -1,0 +1,683 @@
+/*!
+ * @role css-token
+ * @owns css/plot-orbit.css
+ * @budget n/a
+ * @contract v47（卡片/交互层；盘面本体在 css/orbit3d.css）
+ *
+ * DOM 契约摘要（元素由 view + js/plot-orbit-interact.js 创建，本文件只负责样式，不改结构）：
+ *   #clOrbit.cl-orbit[data-mode=constellation|plot][data-focus=0|1][data-hover=0|1]
+ *     [data-thread=<id>|''][data-empty=0|1][aria-hidden]
+ *     div.cl-orbit__labels 标签层 -> .cl-orbit__card（v47 唯一的文字件）
+ *       .cl-orbit__card[data-ev][data-thread][data-pending][aria-live=polite]
+ *         .cl-orbit__card-kicker  > i.cl-orbit__dot + b.cl-orbit__card-kind + span
+ *         .cl-orbit__card-title
+ *         .cl-orbit__card-meta    > i.cl-orbit__card-chap（章名唯一出口）+ span
+ *         .cl-orbit__card-cast    > i.cl-orbit__card-lab「参与」+ button.cl-orbit__cast[data-name]
+ *         .cl-orbit__card-lines   > i.cl-orbit__card-lab「在线」+ button.cl-orbit__chip[data-line-id]
+ *         .cl-orbit__card-note[.is-pending|.is-handoff] · .cl-orbit__heat > i
+ *   色值只有两处行内来源：.cl-orbit__dot 的 background 与 .cl-orbit__card-kind 的 color
+ *   （CLPalette.hex(kind) / thread.color），以及 .cl-orbit__heat i 的 width（= heat 百分比）。
+ *   v46.1 的 SVG 几何类（dial/eventsvg/arc/node/…）保留在下方，供旧视图在场时继续生效。
+ *   星座态 root display:none（不占一个像素）；剧情态 fixed inset:0 pointer-events:none。
+ */
+
+@layer components {
+  /* 低端档：撤动效、不画光晕（契约 §2 降级） */
+  [data-tier="low"], [data-o3tier="low"] .cl-orbit,
+  [data-tier="low"], [data-o3tier="low"] .cl-orbit * { animation: none; transition: none; }
+  [data-tier="low"], [data-o3tier="low"] .cl-orbit__halo { display: none; }
+
+
+  .cl-orbit {
+    /* ── 组一 时长（时长令牌，JS 只读不写） ── */
+    --cl-orbit-dur-fast: .12s;
+    --cl-orbit-dur: .26s;
+    --cl-orbit-dur-slow: .5s;
+
+    /* ── 组二 缓动（过渡曲线令牌） ── */
+    --cl-orbit-ease: cubic-bezier(.22, .61, .36, 1);
+
+    /* ── 组三 线宽 / 半径（几何描边令牌） ── */
+    --cl-orbit-ring-w: 1px;
+    --cl-orbit-hair-w: .75px;
+    --cl-orbit-node-r: 3.2px;
+    --cl-orbit-node-r-hot: 4.6px;
+    --cl-orbit-tick-l: 6px;
+    --cl-orbit-tick-l-major: 11px;
+
+    /* ── 组四 间距（卡片 / 留白 / 拾取令牌） ── */
+    --cl-orbit-card-w: 18rem;
+    --cl-orbit-card-pad: .75rem;
+    --cl-orbit-row-gap: .34rem;
+    --cl-orbit-chip-gap: .4rem;
+    --cl-orbit-lab-w: 2.1rem;
+    --cl-orbit-dot: .42rem;
+    --cl-orbit-heat-h: 2px;
+    --cl-orbit-margin: 12px;
+    --cl-orbit-blur: 6px;
+
+    /* ── 组五 层级 / 透明度（叠层与淡化令牌） ── */
+    --cl-orbit-z: 30;
+    --cl-orbit-dim-arc: .22;
+    --cl-orbit-dim-node: .35;
+
+    /* ── 组六 本层派生（圆角 / 字阶，仅供本文件引用；颜色一律取自 app.css 令牌） ── */
+    --cl-orbit-radius: .5rem;
+    /* G3 八级字号阶梯：xs=T4 图谱内最小 mono 标签 · sm=T3 HUD 正文 · md=T2 正文/标题行 */
+    --cl-orbit-font-xs: 11px;
+    --cl-orbit-font-sm: 12px;
+    --cl-orbit-font-md: 13px;
+
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: var(--cl-orbit-z);
+    color: var(--ink-2);
+    font-family: var(--sans);
+  }
+
+  /* 星座态：整盘隐身，不占交互 */
+  .cl-orbit[data-mode="constellation"] { display: none; }
+
+  .cl-orbit__dial,
+  .cl-orbit__eventsvg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    pointer-events: none;
+  }
+
+  .cl-orbit__eventsvg { z-index: 1; }
+
+  .cl-orbit__labels {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  /* ── 时间环 / 章刻 / 章名 ── */
+  .cl-orbit__ring--time {
+    fill: none;
+    stroke: var(--violet-2);
+    stroke-width: var(--cl-orbit-ring-w);
+    vector-effect: non-scaling-stroke;
+  }
+
+  .cl-orbit__tick {
+    stroke: var(--line-2);
+    stroke-width: var(--cl-orbit-ring-w);
+    stroke-linecap: round;
+    pointer-events: none;
+  }
+
+  .cl-orbit__tick[data-major="1"] {
+    stroke: var(--ink-3);
+    stroke-width: var(--cl-orbit-ring-w);
+  }
+
+  .cl-orbit__chap {
+    fill: var(--ink-3);
+    font-family: var(--mono);
+    font-size: var(--cl-orbit-font-xs);
+    letter-spacing: .04em;
+    text-anchor: middle;
+    pointer-events: none;
+  }
+
+  /* ── 弧 / 分叉 / 弦 ── */
+  .cl-orbit__arc {
+    fill: none;
+    stroke: var(--violet);
+    stroke-width: var(--cl-orbit-ring-w);
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    pointer-events: auto;
+    cursor: pointer;
+    transition: stroke var(--cl-orbit-dur) var(--cl-orbit-ease),
+                opacity var(--cl-orbit-dur) var(--cl-orbit-ease);
+  }
+
+  .cl-orbit__arc[data-kind="main"] { stroke: var(--cyan); }
+  .cl-orbit__arc[data-kind="branch"] { stroke: var(--violet); }
+
+  .cl-orbit__arc[data-valid="0"] {
+    stroke: var(--ink-3);
+    stroke-dasharray: var(--cl-orbit-tick-l) var(--cl-orbit-tick-l);
+  }
+
+  .cl-orbit__arc.is-active { stroke: var(--ink); }
+
+  .cl-orbit__fork {
+    fill: none;
+    stroke: var(--line);
+    stroke-width: var(--cl-orbit-hair-w);
+    stroke-dasharray: var(--cl-orbit-hair-w) var(--cl-orbit-hair-w);
+    pointer-events: none;
+  }
+
+  .cl-orbit__link {
+    fill: none;
+    stroke: var(--line-2);
+    stroke-width: var(--cl-orbit-hair-w);
+    pointer-events: none;
+    transition: opacity var(--cl-orbit-dur) var(--cl-orbit-ease);
+  }
+
+  /* ── 节点 / 光晕 / 参与弦 ── */
+  .cl-orbit__halo {
+    fill: none;
+    stroke: var(--signal);
+    stroke-width: var(--cl-orbit-hair-w);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--cl-orbit-dur) var(--cl-orbit-ease);
+  }
+
+  .cl-orbit__node.is-active ~ .cl-orbit__halo,
+  .cl-orbit__halo.is-active { opacity: 1; }
+
+  .cl-orbit__node {
+    fill: var(--ink-2);
+    stroke: var(--glass-2);
+    stroke-width: var(--cl-orbit-hair-w);
+    r: var(--cl-orbit-node-r);
+    pointer-events: auto;
+    cursor: pointer;
+    transition: r var(--cl-orbit-dur) var(--cl-orbit-ease),
+                fill var(--cl-orbit-dur) var(--cl-orbit-ease),
+                opacity var(--cl-orbit-dur) var(--cl-orbit-ease);
+  }
+
+  .cl-orbit__node[data-kind="高燃"] { fill: var(--hot); }
+  .cl-orbit__node[data-kind="转折"] { fill: var(--warm); }
+  .cl-orbit__node[data-kind="抉择"] { fill: var(--signal); }
+  .cl-orbit__node[data-kind="冲突"] { fill: var(--signal-2); }
+  .cl-orbit__node[data-kind="关系"] { fill: var(--mint); }
+  .cl-orbit__node[data-kind="领悟"] { fill: var(--cyan-2); }
+  .cl-orbit__node[data-kind="日常"] { fill: var(--cold); }
+
+  .cl-orbit__node[data-pending="1"] {
+    stroke: var(--warm);
+    stroke-dasharray: var(--cl-orbit-hair-w) var(--cl-orbit-hair-w);
+  }
+
+  .cl-orbit__node.is-active {
+    r: var(--cl-orbit-node-r-hot);
+    stroke: var(--ink);
+  }
+
+  .cl-orbit__node.is-on { stroke: var(--ink-2); }
+
+  .cl-orbit__node:focus-visible {
+    outline: none;
+    stroke: var(--signal);
+    stroke-width: var(--cl-orbit-ring-w);
+  }
+
+  .cl-orbit__spur {
+    fill: none;
+    stroke: var(--signal-2);
+    stroke-width: var(--cl-orbit-hair-w);
+    pointer-events: none;
+    transition: opacity var(--cl-orbit-dur) var(--cl-orbit-ease);
+  }
+
+  /* ── 线名 ── */
+  .cl-orbit__linelabel {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    padding: 0 var(--cl-orbit-card-pad);
+    font-family: var(--mono);
+    font-size: var(--cl-orbit-font-xs);
+    letter-spacing: .04em;
+    color: var(--ink-2);
+    white-space: nowrap;
+    pointer-events: auto;
+    cursor: pointer;
+    transition: opacity var(--cl-orbit-dur) var(--cl-orbit-ease),
+                color var(--cl-orbit-dur) var(--cl-orbit-ease);
+  }
+
+  .cl-orbit__linelabel[data-valid="0"] { color: var(--ink-3); }
+  /* 支线名只在悬停/选中时出现：17 条常显会糊在星座中间（v46.1 实拍结论） */
+  .cl-orbit__linelabel[data-kind="branch"]:not(.is-active):not(.is-hover) { opacity: 0; pointer-events: none; }
+  .cl-orbit__arc.is-hover { stroke: var(--ink); opacity: 1; }
+  .cl-orbit__linelabel.is-active { color: var(--ink); }
+
+  .cl-orbit__linelabel i {
+    margin-left: var(--cl-orbit-hair-w);
+    font-style: normal;
+    color: var(--warm);
+  }
+
+  /* ── 卡片（v47：kicker 色点 + 参与 / 在线 两行 chip + 注脚 + 热度条） ── */
+  .cl-orbit__card {
+    position: absolute;
+    box-sizing: border-box;
+    width: clamp(340px, 24vw, 420px);
+    padding: 16px 18px;
+    background: rgba(10, 14, 26, 0.92);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 12px;
+    color: var(--ink-2);
+    font-family: var(--sans);
+    font-size: var(--cl-orbit-font-sm);
+    line-height: 1.5;
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    pointer-events: auto;
+    z-index: 3;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.7), 0 0 24px rgba(122, 240, 200, 0.08);
+    transition: opacity var(--cl-orbit-dur) var(--cl-orbit-ease), transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .cl-orbit__card[hidden] { display: none; }
+
+  /* 待校对：卡顶一道暖线。数据没错，是来源结构对不上 —— 所以是提示不是报错色 */
+  .cl-orbit__card[data-pending="1"] {
+    border-top: var(--cl-orbit-ring-w) solid var(--warm);
+  }
+
+  .cl-orbit__card-kicker {
+    display: flex;
+    align-items: center;
+    gap: var(--cl-orbit-chip-gap);
+    font-family: var(--mono);
+    font-size: var(--cl-orbit-font-xs);
+    letter-spacing: .06em;
+    color: var(--ink-3);
+  }
+
+  /* kind 名的颜色由 JS 按 CLPalette.hex(kind) 行内给，这里只定字重 */
+  .cl-orbit__card-kind { font-weight: 500; }
+
+  /* 色点：唯一的颜色载体，背景色由 JS 行内写入（事件 kind 色 / thread.color） */
+  .cl-orbit__dot {
+    flex: none;
+    width: var(--cl-orbit-dot);
+    height: var(--cl-orbit-dot);
+    border-radius: 50%;
+    background: var(--ink-3);
+  }
+
+  .cl-orbit__card-title {
+    margin: var(--cl-orbit-row-gap) 0 var(--cl-orbit-chip-gap);
+    font-size: var(--cl-orbit-font-md);
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--ink);
+  }
+
+  .cl-orbit__card-meta { color: var(--ink-2); }
+
+  /* 章名：盘上一律不画，只在这里作次要信息露一次（契约 §0 的唯一出口） */
+  .cl-orbit__card-chap {
+    margin-right: var(--cl-orbit-chip-gap);
+    font-family: var(--mono);
+    font-size: var(--cl-orbit-font-xs);
+    font-style: normal;
+    letter-spacing: .04em;
+    color: var(--ink-3);
+  }
+
+  /* 参与 / 在线：左侧 mono 小标 + 可点 chip；两行同构 */
+  .cl-orbit__card-cast,
+  .cl-orbit__card-lines {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--cl-orbit-chip-gap) var(--cl-orbit-row-gap);
+    margin-top: var(--cl-orbit-row-gap);
+    pointer-events: auto;
+  }
+
+  .cl-orbit__card-cast {
+    margin-top: var(--cl-orbit-card-pad);
+    padding-top: var(--cl-orbit-card-pad);
+    border-top: var(--cl-orbit-hair-w) solid var(--line);
+  }
+
+  .cl-orbit__card-lab {
+    flex: none;
+    width: var(--cl-orbit-lab-w);
+    font-family: var(--mono);
+    font-size: var(--cl-orbit-font-xs);
+    font-style: normal;
+    letter-spacing: .04em;
+    color: var(--ink-3);
+  }
+
+  .cl-orbit__cast,
+  .cl-orbit__chip {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--cl-orbit-chip-gap);
+    padding: 0;
+    border: 0;
+    background: none;
+    font-family: var(--sans);
+    font-size: var(--cl-orbit-font-sm);
+    line-height: 1.3;
+    color: var(--ink-2);
+    cursor: pointer;
+    pointer-events: auto;
+    transition: color var(--cl-orbit-dur-fast) var(--cl-orbit-ease);
+  }
+
+  .cl-orbit__cast:hover,
+  .cl-orbit__chip:hover { color: var(--ink); }
+
+  .cl-orbit__cast.is-on,
+  .cl-orbit__chip.is-on { color: var(--ink); }
+
+  .cl-orbit__cast:focus-visible,
+  .cl-orbit__chip:focus-visible {
+    outline: none;
+    color: var(--signal);
+  }
+
+  /* 注脚：共有事件 / 换手 / 待校对 —— 一句话的来源说明，永远排在最后 */
+  .cl-orbit__card-note {
+    margin-top: var(--cl-orbit-row-gap);
+    font-size: var(--cl-orbit-font-xs);
+    line-height: 1.4;
+    color: var(--ink-3);
+  }
+
+  .cl-orbit__card-note.is-pending { color: var(--warm); }
+  .cl-orbit__card-note.is-handoff { color: var(--ink-2); }
+
+  /* 热度条：宽度就是 heat 的百分比（JS 行内写 width），是数据不是装饰 */
+  .cl-orbit__heat {
+    margin-top: var(--cl-orbit-card-pad);
+    height: var(--cl-orbit-heat-h);
+    border-radius: var(--cl-orbit-heat-h);
+    background: var(--line);
+    overflow: hidden;
+  }
+
+  .cl-orbit__heat i {
+    display: block;
+    height: 100%;
+    border-radius: var(--cl-orbit-heat-h);
+    background: var(--signal);
+  }
+
+  /* ── 聚焦 / 聚焦线 的淡化规则 ── */
+  .cl-orbit[data-focus="1"] .cl-orbit__arc:not(.is-active),
+  .cl-orbit[data-thread]:not([data-thread=""]) .cl-orbit__arc:not(.is-active) {
+    opacity: var(--cl-orbit-dim-arc);
+  }
+
+  .cl-orbit[data-focus="1"] .cl-orbit__node:not(.is-active),
+  .cl-orbit[data-thread]:not([data-thread=""]) .cl-orbit__node:not(.is-on) {
+    opacity: var(--cl-orbit-dim-node);
+  }
+
+  .cl-orbit[data-thread]:not([data-thread=""]) .cl-orbit__arc.is-active {
+    stroke: var(--ink);
+  }
+
+  /* ── 空态：只留时间环与节点 ── */
+  .cl-orbit[data-empty="1"] .cl-orbit__arc,
+  .cl-orbit[data-empty="1"] .cl-orbit__fork,
+  .cl-orbit[data-empty="1"] .cl-orbit__linelabel { display: none; }
+
+  /* ── 全局：剧情态让星座标签更淡 ── */
+  /* CRITIQUE-1：剧情态星座姓名标签比数据还亮（0.27 vs 带裙 0.03–0.13），压到 .16；钉住/选中/悬停例外 */
+  body.cl-orbit-on .cl-lab { opacity: .16; }
+  body.cl-orbit-on .cl-lab.pin, body.cl-orbit-on .cl-lab.sel, body.cl-orbit-on .cl-lab.hover { opacity: .9; }
+
+  /* ── 低端档降级：过渡瞬时、不画光晕 ── */
+  body[data-tier="low"], [data-o3tier="low"] .cl-orbit {
+    --cl-orbit-dur-fast: 0s;
+    --cl-orbit-dur: 0s;
+    --cl-orbit-dur-slow: 0s;
+  }
+
+  body[data-tier="low"], [data-o3tier="low"] .cl-orbit__halo { display: none; }
+
+  /* ── 减弱动态：所有过渡与动画瞬时 ── */
+  @media (prefers-reduced-motion: reduce) {
+    .cl-orbit,
+    .cl-orbit *,
+    .cl-orbit *::before,
+    .cl-orbit *::after {
+      transition: none;
+      animation: none;
+    }
+  }
+
+  /* ── 电影级剧情 HUD 组件样式 ── */
+  .cl-orbit__badge {
+    display: inline-block;
+    padding: 2px 8px;
+    font-family: var(--mono);
+    font-size: var(--abyss-fs-2xs, 11px);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--warm);
+    border: 1px solid rgba(255, 180, 92, 0.25);
+  }
+
+  .cl-orbit__card-scale {
+    margin: 12px 0 8px;
+    padding: 8px 10px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+  }
+  .cl-orbit__scale-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: var(--abyss-fs-2xs, 11px);
+    font-family: var(--mono);
+    margin-bottom: 5px;
+    color: var(--ink-3);
+  }
+  .cl-orbit__scale-val {
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .cl-orbit__scale-track {
+    width: 100%;
+    height: 6px;
+    border-radius: 3px;
+    background: rgba(255, 255, 255, 0.08);
+    overflow: hidden;
+  }
+  .cl-orbit__scale-fill {
+    height: 100%;
+    border-radius: 3px;
+    background: linear-gradient(90deg, var(--violet), var(--warm));
+    box-shadow: 0 0 8px rgba(255, 180, 92, 0.4);
+    transition: width 0.4s ease-out;
+  }
+
+  .cl-orbit__card-origin {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    margin: 8px 0;
+    padding: 6px 10px;
+    background: rgba(122, 240, 200, 0.05);
+    border-left: 2px solid var(--violet);
+    border-radius: 4px;
+    font-size: var(--abyss-fs-xs, 12px);
+    line-height: 1.4;
+    color: var(--ink-2);
+  }
+  .cl-orbit__origin-icon {
+    font-style: normal;
+    color: var(--violet);
+    font-weight: bold;
+  }
+
+  .cl-orbit__card-synopsis {
+    margin: 10px 0;
+    padding: 8px 10px;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 6px;
+    border: 1px dashed rgba(255, 255, 255, 0.1);
+  }
+  .cl-orbit__syn-badge {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: var(--abyss-fs-2xs, 11px);
+    font-weight: 600;
+    color: var(--violet-2);
+    margin-bottom: 4px;
+  }
+  .cl-orbit__card-synopsis p {
+    margin: 0;
+    font-size: var(--abyss-fs-xs, 12px);
+    line-height: 1.5;
+    color: var(--ink);
+  }
+
+  .cl-orbit__card-cast-matrix {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  .cl-orbit__matrix-title {
+    font-family: var(--mono);
+    font-size: var(--abyss-fs-2xs, 11px);
+    letter-spacing: 0.05em;
+    color: var(--ink-3);
+    margin-bottom: 6px;
+  }
+  .cl-orbit__matrix-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .cl-orbit__cast-chip {
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: var(--abyss-fs-xs, 12px);
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: var(--ink);
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .cl-orbit__cast-chip:hover, .cl-orbit__cast-chip.is-active {
+    background: rgba(255, 180, 92, 0.2);
+    border-color: var(--warm);
+    color: var(--warm);
+    box-shadow: 0 0 10px rgba(255, 180, 92, 0.3);
+  }
+  .cl-orbit__matrix-more {
+    font-family: var(--mono);
+    font-size: var(--abyss-fs-2xs, 11px);
+    align-self: center;
+    color: var(--ink-3);
+  }
+
+  /* ── 戏剧张力波形 ── */
+  .cl-orbit__card-waveform {
+    margin-top: 10px;
+    padding: 8px 10px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+  }
+  .cl-orbit__waveform-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: var(--abyss-fs-2xs, 11px);
+    font-family: var(--mono);
+    margin-bottom: 6px;
+    color: var(--ink-3);
+  }
+  .cl-orbit__waveform-label {
+    color: var(--ink-2);
+    letter-spacing: 0.04em;
+  }
+  .cl-orbit__waveform-peak {
+    color: var(--warm);
+    font-weight: 600;
+  }
+  .cl-orbit__waveform-bars {
+    display: flex;
+    align-items: flex-end;
+    gap: 3px;
+    height: 28px;
+    padding: 2px 0;
+  }
+  .cl-orbit__wave-bar {
+    flex: 1;
+    min-width: 3px;
+    border-radius: 2px 2px 0 0;
+    background: linear-gradient(180deg, var(--violet) 0%, rgba(122, 240, 200, 0.3) 100%);
+    cursor: pointer;
+    transition: transform 0.15s ease, background 0.15s ease;
+  }
+  .cl-orbit__wave-bar:hover {
+    transform: scaleY(1.18);
+    background: linear-gradient(180deg, var(--hot) 0%, var(--warm) 100%);
+  }
+  .cl-orbit__wave-bar.is-peak {
+    background: linear-gradient(180deg, var(--warm) 0%, var(--hot) 100%);
+    box-shadow: 0 0 6px rgba(255, 180, 92, 0.6);
+  }
+
+  /* ── 高潮事件直达 ── */
+  .cl-orbit__card-climax {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+    padding: 6px 10px;
+    background: rgba(255, 180, 92, 0.08);
+    border: 1px solid rgba(255, 180, 92, 0.25);
+    border-radius: 6px;
+    font-size: var(--abyss-fs-xs, 12px);
+  }
+  .cl-orbit__climax-badge {
+    font-family: var(--mono);
+    font-size: var(--abyss-fs-2xs, 11px);
+    font-weight: bold;
+    color: var(--warm);
+    white-space: nowrap;
+  }
+  .cl-orbit__climax-title {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--ink);
+    font-weight: 500;
+  }
+  .cl-orbit__climax-btn {
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: var(--abyss-fs-2xs, 11px);
+    font-family: var(--mono);
+    background: rgba(255, 180, 92, 0.22);
+    border: 1px solid var(--warm);
+    color: var(--warm);
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .cl-orbit__climax-btn:hover {
+    background: var(--warm);
+    color: rgba(10, 14, 26, 0.95);
+    box-shadow: 0 0 8px rgba(255, 180, 92, 0.6);
+  }
+
+  /* ── 窄屏：卡片收窄、章名隐藏 ── */
+  @media (max-width: 900px) {
+    .cl-orbit__card {
+      width: min(var(--cl-orbit-card-w), 80vw);
+    }
+
+    .cl-orbit__chap { display: none; }
+  }
+}

@@ -1,0 +1,531 @@
+/**
+ * Castline · radar-theme.css — 前卫黑曜石霓虹雷达主题样式表（R2 合并版）
+ * ============================================================================
+ * 模块：U07 · 雷达设计令牌与前卫样式表 (Swarm 20260912-2248-radar, R2 20260915)
+ * 契约：
+ *   - R2 令牌宪法：--rd-* 与 --hud-* 合并为 --abyss-* 单套；色彩统一链向
+ *     app.css 的 G1 生成块（--sem-* / --grey-*），杜绝双源漂移
+ *   - 兼容别名层：R2 收尾已把本文件全部消费端直连 --abyss-*，旧名 --rd-* 仅剩
+ *     js/ 运行时注入样式仍引用的 30 条残余；待 js/ 迁移后整块删除，禁止新增
+ *   - R6 动效自适应：继承现有语义令牌，全量支持 prefers-reduced-motion 降级
+ *   - R7 独占产物：独占样式文件，严禁污染其它主干样式
+ * 包含体系：
+ *   A. 深渊令牌 --abyss-*（唯一真相）—— P0/S1 起整块迁至 css/abyss-tokens.css
+ *   1. 幽灵基准多边形层 (.rd-ghost-poly, .rd-ghost-group, .rd-ghost-vert, .rd-ghost-delta)
+ *   2. 全息刻盘 HUD 外框 (.rd-holo-frame, .rd-star-ring, .rd-meridian, .rd-corner-bracket)
+ *   3. 原型徽记与极差分析卡 (.rd-archetype-badge, .rd-archetype-tag, .rd-balance-bar)
+ *   4. 全息证据情报卡 (.rd-intel-card, .rd-intel-head, .rd-intel-quote, .rd-intel-rank)
+ *   5. 增强属性条明细 (.rd-bars-enhanced, .rd-bar-enhanced, .rd-bar-benchmark, .rd-bar-delta)
+ *   6. 完善的无障碍与 prefers-reduced-motion: reduce 降级保障
+ * ============================================================================
+ */
+
+/* ────────────────────────────────────────────────────────────────────────────
+   A. 深渊令牌 --abyss-* —— 已升格为全局层（P0 / S1，2026-09-16）
+   原 :root 块整块迁至 css/abyss-tokens.css（三图共有）。本文件只消费，不再定义。
+   迁移理由与 19 级明度阶梯的构造见该文件头部注释与
+   reports/mystic-refactor-batch4.md。
+   回退：abyss-tokens.css 未加载时，下方各 var() 的第二参数仍生效，不炸版。
+   ──────────────────────────────────────────────────────────────────────────── */
+
+/* ────────────────────────────────────────────────────────────────────────────
+   1. 幽灵基准多边形样式 (.rd-ghost-poly)
+   ──────────────────────────────────────────────────────────────────────────── */
+/* 发光青虚线轮廓，全书均值/中位数基准对照层，带微妙呼吸节奏 */
+.rd-ghost-poly{fill:rgba(122,240,200,.042);stroke:var(--abyss-mint,#7af0c8);stroke-width:1.25px;
+  stroke-dasharray:4.5 3.5;stroke-linejoin:round;stroke-linecap:round;vector-effect:non-scaling-stroke;
+  filter:drop-shadow(0 0 5px rgba(122,240,200,.44));opacity:.78;
+  animation:rdGhostBreath var(--abyss-dur-breath,21s) ease-in-out infinite alternate;  /* G4 降格入氛围 */
+  pointer-events:stroke;cursor:pointer;transform-origin:center;
+  transition:opacity var(--abyss-dur-fast,.28s) var(--abyss-ease-out),stroke-width var(--abyss-dur-fast,.28s) var(--abyss-ease-out),
+    filter var(--abyss-dur-fast,.28s) var(--abyss-ease-out),fill var(--abyss-dur-fast,.28s) var(--abyss-ease-out)}
+
+.rd-ghost-poly:hover,
+.rd-ghost-poly.is-active,
+.radar-wrap:hover .rd-ghost-poly{opacity:.96;stroke-width:1.65px;
+  filter:drop-shadow(0 0 8px rgba(122,240,200,.72));fill:rgba(122,240,200,.08)}
+
+/* 幽灵层容器与结构 */
+.rd-ghost-group{pointer-events:none;isolation:isolate}
+.rd-ghost-group > *{pointer-events:auto}
+
+/* 幽灵基准顶点 */
+.rd-ghost-vert{fill:var(--abyss-obsidian,#05050b);stroke:var(--abyss-mint,#7af0c8);stroke-width:1.2px;
+  vector-effect:non-scaling-stroke;filter:drop-shadow(0 0 3px rgba(122,240,200,.5));
+  transition:transform var(--abyss-dur-fast,.28s) var(--abyss-ease-back)}
+
+.rd-ghost-vert:hover{transform:scale(1.4);stroke:var(--abyss-ink-bright);fill:var(--abyss-mint,#7af0c8);
+  filter:drop-shadow(0 0 6px rgba(122,240,200,.85))}
+
+.rd-ghost-dot{fill:var(--abyss-mint-bright,#9af5d2);r:2.2px}
+
+/* 基准分值浮标微标 */
+.rd-ghost-label{font-family:var(--abyss-font-mono);font-size:var(--abyss-fs-2xs,11px);
+  fill:var(--abyss-mint,#7af0c8);letter-spacing:.08em;opacity:.82;paint-order:stroke;
+  stroke:var(--abyss-obsidian-deep,#030206);stroke-width:2px;pointer-events:none}
+
+/* 差值连线与指示带 (.rd-ghost-delta) */
+.rd-ghost-delta-line{fill:none;stroke:rgba(122,240,200,.28);stroke-width:1px;
+  stroke-dasharray:1.5 2.5;vector-effect:non-scaling-stroke}
+.rd-ghost-delta-line.positive{stroke:rgba(255,180,92,.55)}
+.rd-ghost-delta-line.negative{stroke:rgba(122,240,200,.55)}
+
+/* 幽灵呼吸动画 */
+@keyframes rdGhostBreath{
+  0%{opacity:.62;stroke-opacity:.70;filter:drop-shadow(0 0 3px rgba(122,240,200,.32))}
+  50%{opacity:.90;stroke-opacity:.96;filter:drop-shadow(0 0 7px rgba(122,240,200,.62))}
+  100%{opacity:.62;stroke-opacity:.70;filter:drop-shadow(0 0 3px rgba(122,240,200,.32))}}
+
+/* ────────────────────────────────────────────────────────────────────────────
+   2. 全息刻盘样式 (.rd-holo-frame, .rd-star-ring, .rd-meridian, .rd-corner-bracket)
+   ──────────────────────────────────────────────────────────────────────────── */
+/* 全息外框容器 (.rd-holo-frame) */
+.rd-holo-frame{position:relative;border-radius:12px;background:
+  radial-gradient(ellipse at 50% 50%,rgba(166,136,255,.08) 0%,transparent 68%),
+  linear-gradient(180deg,rgba(14,10,26,.92) 0%,rgba(7,6,13,.96) 100%);
+  border:1px solid rgba(172,156,230,.20);box-shadow:
+  0 24px 64px rgba(0,0,0,.65),inset 0 1px 0 rgba(255,255,255,.06),inset 0 0 24px rgba(122,240,200,.035);
+  backdrop-filter:blur(20px) saturate(1.15);-webkit-backdrop-filter:blur(20px) saturate(1.15);
+  overflow:visible;transition:border-color var(--abyss-dur-normal,.45s) var(--abyss-ease-out),
+    box-shadow var(--abyss-dur-normal,.45s) var(--abyss-ease-out)}
+
+.rd-holo-frame:hover{border-color:rgba(122,240,200,.35);box-shadow:
+  0 28px 72px rgba(0,0,0,.75),inset 0 1px 0 rgba(255,255,255,.08),0 0 28px rgba(122,240,200,.08)}
+
+/* 全息光栅微扫描线（非侵入背景） */
+.rd-holo-frame::before{content:"";position:absolute;inset:0;border-radius:inherit;background:
+  repeating-linear-gradient(180deg,rgba(122,240,200,0) 0px,rgba(122,240,200,0) 3px,rgba(122,240,200,.02) 4px);
+  pointer-events:none;opacity:.6}
+
+/* 赛博直角/折角装饰卡扣 (.rd-corner-bracket) */
+.rd-corner-bracket{position:absolute;width:14px;height:14px;border-color:rgba(122,240,200,.75);
+  border-style:solid;pointer-events:none;z-index:3;
+  transition:border-color var(--abyss-dur-fast,.28s),transform var(--abyss-dur-fast,.28s);
+  filter:drop-shadow(0 0 3px rgba(122,240,200,.4))}
+.rd-corner-bracket.tl{top:4px;left:4px;border-width:2px 0 0 2px}
+.rd-corner-bracket.tr{top:4px;right:4px;border-width:2px 2px 0 0}
+.rd-corner-bracket.bl{bottom:4px;left:4px;border-width:0 0 2px 2px}
+.rd-corner-bracket.br{bottom:4px;right:4px;border-width:0 2px 2px 0}
+.rd-holo-frame:hover .rd-corner-bracket{border-color:var(--abyss-signal,#ffb45c);
+  filter:drop-shadow(0 0 5px rgba(255,180,92,.7))}
+.rd-holo-frame:hover .rd-corner-bracket.tl{transform:translate(-1px,-1px)}
+.rd-holo-frame:hover .rd-corner-bracket.tr{transform:translate(1px,-1px)}
+.rd-holo-frame:hover .rd-corner-bracket.bl{transform:translate(-1px,1px)}
+.rd-holo-frame:hover .rd-corner-bracket.br{transform:translate(1px,1px)}
+
+/* 星象刻盘与同心轨道环 (.rd-star-ring) */
+.rd-star-ring{fill:none;stroke:rgba(166,136,255,.24);stroke-width:1px;
+  vector-effect:non-scaling-stroke;pointer-events:none}
+.rd-star-ring.orbital{stroke-dasharray:2 6;stroke-width:.9px;transform-origin:center;
+  animation:rdStarOrbit var(--abyss-dur-orbit-slow,72s) linear infinite}
+.rd-star-ring.orbital-reverse{stroke:rgba(122,240,200,.28);stroke-dasharray:1 8;stroke-width:1.2px;
+  transform-origin:center;animation:rdStarOrbitRev var(--abyss-dur-orbit-fast,32s) linear infinite}
+.rd-star-ring.inner-bezel{stroke:rgba(255,180,92,.35);stroke-width:1.4px;stroke-dasharray:12 4}
+.rd-star-ring.tick-dense{stroke:rgba(172,156,230,.30);stroke-width:3.5px;
+  stroke-dasharray:0.08 0.92;pathLength:100}
+
+/* 子午线与基准轴向引导 (.rd-meridian) */
+.rd-meridian{fill:none;stroke:rgba(172,156,230,.16);stroke-width:1px;
+  vector-effect:non-scaling-stroke;pointer-events:none}
+.rd-meridian.major{stroke:rgba(122,240,200,.32);stroke-width:1.1px;stroke-dasharray:4 4}
+.rd-meridian.cardinal{stroke:rgba(255,180,92,.36);stroke-width:1.2px}
+.rd-meridian-node{fill:var(--abyss-mint,#7af0c8);stroke:var(--abyss-obsidian,#05050b);
+  stroke-width:1px;r:2px;filter:drop-shadow(0 0 3px rgba(122,240,200,.6))}
+.rd-meridian-tick{stroke:rgba(172,156,230,.40);stroke-width:1px}
+
+/* 刻盘星象旋转关键帧 */
+@keyframes rdStarOrbit{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+@keyframes rdStarOrbitRev{from{transform:rotate(360deg)}to{transform:rotate(0deg)}}
+
+/* ────────────────────────────────────────────────────────────────────────────
+   3. 原型徽记卡与极差谱系 (.rd-archetype-badge, .rd-archetype-tag, .rd-balance-bar)
+   ──────────────────────────────────────────────────────────────────────────── */
+.rd-archetype-badge{display:inline-flex;align-items:center;gap:var(--abyss-space-sm,8px);
+  padding:6px 14px;background:linear-gradient(135deg,rgba(22,16,42,.94) 0%,rgba(10,8,20,.92) 100%);
+  border:1px solid rgba(122,240,200,.40);border-radius:4px;clip-path:var(--abyss-clip-corner-sm);
+  box-shadow:0 8px 24px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.10),0 0 16px rgba(122,240,200,.12);
+  transition:all var(--abyss-dur-fast,.28s) var(--abyss-ease-out)}
+
+.rd-archetype-badge:hover{border-color:var(--abyss-signal,#ffb45c);
+  box-shadow:0 12px 32px rgba(0,0,0,.55),0 0 20px rgba(255,180,92,.25);transform:translateY(-1px)}
+
+.rd-archetype-icon{display:flex;align-items:center;justify-content:center;width:22px;height:22px;
+  border-radius:3px;background:rgba(122,240,200,.12);color:var(--abyss-mint,#7af0c8);
+  font-family:var(--abyss-font-mono);font-size:var(--abyss-fs-xs,10px); /* T5 刻度豁免：22×22 图例徽记单字形 */
+  font-weight:700;
+  border:1px solid rgba(122,240,200,.32)}
+
+.rd-archetype-name{font-family:var(--abyss-font-sans);font-size:var(--abyss-fs-base,13px);
+  font-weight:600;letter-spacing:.06em;color:var(--abyss-ink-bright);text-shadow:0 0 10px rgba(122,240,200,.4)}
+
+.rd-archetype-en{font-family:var(--abyss-font-mono);font-size:var(--abyss-fs-2xs,11px);
+  letter-spacing:.16em;color:var(--abyss-ink-2,#c7c0d1);text-transform:uppercase}
+
+/* 原型特征标签 (.rd-archetype-tag) */
+.rd-archetype-tag{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;
+  font-family:var(--abyss-font-mono);font-size:var(--abyss-fs-2xs,11px);letter-spacing:.08em;
+  border-radius:3px;background:rgba(255,255,255,.04);border:1px solid var(--abyss-line);
+  color:var(--abyss-ink-2,#c7c0d1);transition:all var(--abyss-dur-micro,.16s) ease}
+
+.rd-archetype-tag::before{content:"";display:inline-block;width:4px;height:4px;
+  border-radius:50%;background:currentColor}
+
+/* 标签谱系变体 */
+.rd-archetype-tag.tag-mint,
+.rd-archetype-tag[data-type="balanced"],
+.rd-archetype-tag[data-type="wisdom"]{color:var(--abyss-mint,#7af0c8);
+  border-color:rgba(122,240,200,.35);background:rgba(122,240,200,.08)}
+
+.rd-archetype-tag.tag-signal,
+.rd-archetype-tag[data-type="warlord"],
+.rd-archetype-tag[data-type="peak"]{color:var(--abyss-signal,#ffb45c);
+  border-color:rgba(255,180,92,.35);background:rgba(255,180,92,.08)}
+
+.rd-archetype-tag.tag-violet,
+.rd-archetype-tag[data-type="mystic"],
+.rd-archetype-tag[data-type="power"]{color:var(--abyss-violet,#a688ff);
+  border-color:rgba(166,136,255,.35);background:rgba(166,136,255,.08)}
+
+.rd-archetype-tag.tag-hot,
+.rd-archetype-tag[data-type="extreme"],
+.rd-archetype-tag[data-type="risk"]{color:var(--abyss-hot,#ff5d73);
+  border-color:rgba(255,92,124,.40);background:rgba(255,92,124,.08);
+  text-shadow:0 0 6px rgba(255,92,124,.35)}
+
+/* 均衡度与极差谱系条 (.rd-balance-bar) */
+.rd-balance-bar{display:flex;flex-direction:column;gap:5px;padding:8px 12px;
+  background:rgba(14,10,28,.65);border:1px solid var(--abyss-line);border-radius:4px}
+
+.rd-balance-head{display:flex;align-items:center;justify-content:space-between;
+  font-family:var(--abyss-font-mono);font-size:var(--abyss-fs-2xs,11px);
+  color:var(--abyss-ink-3,#88819d);letter-spacing:.12em}
+
+.rd-balance-score{font-weight:700;color:var(--abyss-signal,#ffb45c);font-variant-numeric:tabular-nums}
+
+.rd-balance-track{position:relative;width:100%;height:5px;background:rgba(255,255,255,.06);
+  border-radius:3px;overflow:hidden}
+
+.rd-balance-fill{height:100%;background:linear-gradient(90deg,var(--abyss-mint,#7af0c8) 0%,
+  var(--abyss-signal,#ffb45c) 65%,var(--abyss-hot,#ff5d73) 100%);
+  border-radius:inherit;box-shadow:0 0 8px rgba(122,240,200,.4);
+  transition:width var(--abyss-dur-normal,.45s) var(--abyss-ease-out)}
+
+/* ────────────────────────────────────────────────────────────────────────────
+   4. 全息情报卡 (.rd-intel-card, .rd-intel-head, .rd-intel-quote, .rd-intel-rank)
+   ──────────────────────────────────────────────────────────────────────────── */
+.rd-intel-card{position:relative;min-width:320px;max-width:420px;padding:16px 18px 14px;background:
+  linear-gradient(145deg,rgba(18,14,36,.97) 0%,rgba(8,6,16,.98) 100%);
+  border:1px solid rgba(122,240,200,.48);border-radius:4px;clip-path:var(--abyss-clip-corner);
+  box-shadow:var(--abyss-glow-card);
+  backdrop-filter:blur(28px) saturate(180%);-webkit-backdrop-filter:blur(28px) saturate(180%);
+  color:var(--abyss-ink,#f7f2e9);z-index:100;
+  animation:rdIntelIn var(--abyss-dur-fast,.28s) var(--abyss-ease-out) both}
+
+.rd-intel-card::before,
+.rd-intel-card::after{content:"";position:absolute;width:8px;height:8px;
+  border-color:var(--abyss-mint,#7af0c8);border-style:solid;pointer-events:none}
+.rd-intel-card::before{top:3px;left:3px;border-width:1.5px 0 0 1.5px}
+.rd-intel-card::after{bottom:3px;right:3px;border-width:0 1.5px 1.5px 0}
+
+/* 情报卡头部 (.rd-intel-head) */
+.rd-intel-head{display:flex;align-items:center;justify-content:space-between;
+  gap:var(--abyss-space-md,12px);padding-bottom:8px;
+  border-bottom:1px solid rgba(122,240,200,.18);margin-bottom:10px}
+
+.rd-intel-title-wrap{display:flex;align-items:baseline;gap:8px}
+
+.rd-intel-title{font-family:var(--abyss-font-sans);font-size:var(--abyss-fs-lg,16px);
+  font-weight:700;letter-spacing:.06em;color:var(--abyss-lad-18);text-shadow:0 0 12px rgba(122,240,200,.5)}
+
+.rd-intel-code{font-family:var(--abyss-font-mono);font-size:var(--abyss-fs-2xs,11px);
+  font-weight:600;letter-spacing:.18em;color:var(--abyss-mint,#7af0c8);padding:1px 6px;
+  background:rgba(122,240,200,.10);border:1px solid rgba(122,240,200,.28);border-radius:2px}
+
+/* 情报卡分值胶囊 */
+.rd-intel-score-box{display:flex;align-items:baseline;gap:3px;font-family:var(--abyss-font-mono)}
+.rd-intel-score-val{font-size:var(--abyss-fs-xl,20px);font-weight:700;color:var(--abyss-signal,#ffb45c);
+  text-shadow:0 0 12px rgba(255,180,92,.5);font-variant-numeric:tabular-nums}
+.rd-intel-score-max{font-size:var(--abyss-fs-2xs,11px);color:var(--abyss-ink-3,#88819d)}
+
+/* 原文证据典雅引句 (.rd-intel-quote) */
+.rd-intel-quote,
+.rd-intel-card blockquote{display:block;quotes:none;margin:10px 0 8px;padding:8px 14px;
+  border-left:2.5px solid var(--abyss-signal,#ffb45c);background:linear-gradient(90deg,
+  rgba(255,180,92,.10) 0%,rgba(255,180,92,.02) 100%);
+  border-radius:0 4px 4px 0;font-family:var(--abyss-font-serif);font-style:italic;
+  font-size:var(--abyss-fs-sm,11.5px);line-height:1.7;color:var(--abyss-lad-18);
+  text-shadow:0 1px 6px rgba(0,0,0,.6);position:relative}
+
+.rd-intel-quote::before{content:"“";font-family:var(--abyss-font-serif);
+  color:var(--abyss-signal,#ffb45c);margin-right:2px;font-size:1.2em}
+.rd-intel-quote::after{content:"”";font-family:var(--abyss-font-serif);
+  color:var(--abyss-signal,#ffb45c);margin-left:2px;font-size:1.2em}
+
+/* 全书排位与分布刻度 (.rd-intel-rank) */
+.rd-intel-rank{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:8px 0;
+  padding:6px 10px;background:rgba(0,0,0,.32);border-radius:3px;
+  border-left:2px solid var(--abyss-mint,#7af0c8);
+  font-family:var(--abyss-font-mono);font-size:var(--abyss-fs-2xs,11px);letter-spacing:.06em}
+.rd-intel-rank-label{color:var(--abyss-ink-2,#c7c0d1)}
+.rd-intel-rank-pos{color:var(--abyss-mint,#7af0c8);font-weight:700}
+.rd-intel-rank-percent{color:var(--abyss-signal,#ffb45c);font-weight:600}
+
+/* 推理链与论证依据 (.rd-intel-chain, .rd-intel-basis) */
+.rd-intel-basis{margin-top:8px;padding:8px 10px;background:rgba(122,240,200,.04);
+  border:1px solid rgba(122,240,200,.16);border-radius:3px;
+  font-size:var(--abyss-fs-sm,11.5px);line-height:1.65;color:var(--abyss-lad-16)}
+
+.rd-intel-eyebrow{display:flex;align-items:center;gap:6px;font-family:var(--abyss-font-mono);
+  font-size:var(--abyss-fs-2xs,11px);font-weight:700;letter-spacing:.16em;
+  color:var(--abyss-mint,#7af0c8);text-transform:uppercase;margin-bottom:4px}
+
+/* 置信度微标 (.rd-conf-badge) */
+.rd-conf-badge{display:inline-flex;align-items:center;gap:4px;padding:1px 6px;border-radius:2px;
+  font-family:var(--abyss-font-mono);font-size:var(--abyss-fs-2xs,11px);font-weight:600;
+  letter-spacing:.1em}
+.rd-conf-badge.conf-high{background:rgba(122,240,200,.12);border:1px solid rgba(122,240,200,.36);
+  color:var(--abyss-mint,#7af0c8)}
+.rd-conf-badge.conf-mid{background:rgba(255,180,92,.12);border:1px solid rgba(255,180,92,.36);
+  color:var(--abyss-signal,#ffb45c)}
+.rd-conf-badge.conf-low{background:rgba(166,136,255,.12);border:1px solid rgba(166,136,255,.36);
+  color:var(--abyss-violet,#a688ff)}
+
+@keyframes rdIntelIn{from{opacity:0;transform:translateY(8px) scale(.96)}
+  to{opacity:1;transform:translateY(0) scale(1)}}
+
+/* ────────────────────────────────────────────────────────────────────────────
+   5. 增强属性条明细 (.rd-bars-enhanced, .rd-bar-enhanced)
+   ──────────────────────────────────────────────────────────────────────────── */
+.rd-bars-enhanced{display:flex;flex-direction:column;gap:8px;margin:8px 0}
+
+.rd-bar-enhanced{display:grid;grid-template-columns:78px 1fr 42px;grid-template-areas:"k t v" "b b b";
+  column-gap:12px;align-items:center;padding:6px 10px;background:rgba(14,10,26,.40);
+  border-left:2px solid transparent;border-radius:2px;cursor:pointer;
+  transition:all var(--abyss-dur-micro,.16s) var(--abyss-ease-out)}
+
+.rd-bar-enhanced:hover,
+.rd-bar-enhanced.on{background:rgba(255,180,92,.08);border-left-color:var(--abyss-signal,#ffb45c)}
+
+.rd-bar-enhanced .rb-k{grid-area:k;display:flex;align-items:baseline;gap:5px;
+  font-size:var(--abyss-fs-base,13px);font-weight:600;color:var(--abyss-ink,#f7f2e9)}
+.rd-bar-enhanced .rb-k i{font-family:var(--abyss-font-mono);font-size:var(--abyss-fs-2xs,11px);
+  font-style:normal;color:var(--abyss-ink-3,#88819d)}
+
+.rd-bar-enhanced .rb-t{grid-area:t;position:relative;height:6px;background:rgba(255,255,255,.08);
+  border-radius:3px;overflow:visible}
+.rd-bar-enhanced .rb-t i{display:block;height:100%;border-radius:inherit;
+  background:linear-gradient(90deg,var(--abyss-mint,#7af0c8),var(--abyss-signal,#ffb45c));
+  box-shadow:0 0 6px rgba(255,180,92,.5);transition:width var(--abyss-dur-normal,.45s) var(--abyss-ease-out)}
+
+/* 基准对齐刻度幽灵标 (.rd-bar-benchmark) */
+.rd-bar-benchmark{position:absolute;top:-2px;width:2px;height:10px;
+  background:var(--abyss-mint,#7af0c8);box-shadow:0 0 4px rgba(122,240,200,.8);
+  transform:translateX(-50%);pointer-events:none}
+
+.rd-bar-enhanced .rb-v{grid-area:v;font-family:var(--abyss-font-mono);font-size:var(--abyss-fs-base,13px);
+  font-weight:700;color:var(--abyss-ink,#f7f2e9);text-align:right;font-variant-numeric:tabular-nums}
+
+/* 相对基准差值胶囊 (.rd-bar-delta) */
+.rd-bar-delta{font-family:var(--abyss-font-mono);font-size:var(--abyss-fs-2xs,11px);
+  padding:1px 4px;border-radius:2px;margin-left:4px}
+.rd-bar-delta.positive{color:var(--abyss-signal,#ffb45c);background:rgba(255,180,92,.12)}
+.rd-bar-delta.negative{color:var(--abyss-mint,#7af0c8);background:rgba(122,240,200,.12)}
+
+/* ────────────────────────────────────────────────────────────────────────────
+   6. 动效无障碍与降级保护 (@media (prefers-reduced-motion: reduce))
+   ──────────────────────────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce){
+  .rd-ghost-poly,
+  .rd-star-ring.orbital,
+  .rd-star-ring.orbital-reverse,
+  .rd-holo-frame,
+  .rd-intel-card,
+  .rd-archetype-badge,
+  .rd-corner-bracket{animation:none;transition:none}
+
+  /* 保持幽灵多边形清晰静止可见 */
+  .rd-ghost-poly{opacity:.82;stroke-dasharray:4 4;
+    filter:drop-shadow(0 0 2px rgba(122,240,200,.4))}
+
+  /* 移除入场位移动效，改为即时静态呈现 */
+  .rd-intel-card{transform:none;opacity:1}
+
+  /* 进度条保持即时定格，无补间漂移 */
+  .rd-bar-enhanced .rb-t i,
+  .rd-balance-fill{transition-duration:.001ms}
+}
+
+/* ────────────────────────────────────────────────────────────────────────────
+   7. 响应式与高对比度适配 (Responsive & Contrast)
+   ──────────────────────────────────────────────────────────────────────────── */
+@media (max-width:640px){
+  .rd-intel-card{min-width:260px;padding:12px 14px}
+  .rd-archetype-badge{padding:4px 10px}
+  .rd-bar-enhanced{grid-template-columns:66px 1fr 34px;column-gap:8px}
+}
+
+@media (forced-colors: active){
+  .rd-ghost-poly{stroke:CanvasText;fill:transparent}
+  .rd-intel-card,
+  .rd-archetype-badge{border:1px solid CanvasText}
+}
+
+/* ────────────────────────────────────────────────────────────────────────────
+   8. P2 · 深渊雷达神秘美学大重构组件样式 (R1 / R3 / R5)
+   ──────────────────────────────────────────────────────────────────────────── */
+/* R1: 深渊之瞳活化与多层视差 */
+.rd-sclera-depth{fill:none;stroke:rgba(14,10,28,.65);stroke-width:1.5}
+.rd-iris-rays{pointer-events:none}
+.rd-iris-ray{stroke:rgba(166,136,255,.32);stroke-width:.9;stroke-linecap:round;vector-effect:non-scaling-stroke}
+.rd-pupil-core{fill:rgba(3,2,6,.96);opacity:.95}
+.rd-iris-specular{fill:rgba(255,255,255,.45);filter:drop-shadow(0 0 4px rgba(255,255,255,.6))}
+
+/* R3: 8 层立体网格与扫描波 */
+.rd-grid-sub{fill:none;stroke:rgba(170,150,232,.09);stroke-width:.6;stroke-dasharray:2 4;vector-effect:non-scaling-stroke}
+.rd-grid-scan{fill:none;stroke:rgba(122,240,200,.35);stroke-width:1.2;stroke-dasharray:4 6;opacity:calc(.2 + .5 * var(--rd-lamp,.5));vector-effect:non-scaling-stroke}
+
+/* R5: 数据形 3D 晶体材质与光晶簇 */
+.rd-crystal-ridge{stroke:rgba(255,255,255,.28);stroke-width:.8;stroke-dasharray:2 4;vector-effect:non-scaling-stroke}
+.rd-crystal-cluster{pointer-events:none}
+.rd-cluster-petal{fill:rgba(122,240,200,.18);stroke:rgba(122,240,200,.65);stroke-width:.8;vector-effect:non-scaling-stroke;filter:drop-shadow(0 0 6px rgba(122,240,200,.5))}
+.rd-chip-shadow{fill:rgba(0,0,0,.42)}
+.rd-chip-highlight{fill:none;stroke:rgba(255,255,255,.14);stroke-width:.8}
+
+/* ────────────────────────────────────────────────────────────────────────────
+   9. P3 · 深渊雷达二期组件样式 (R2 / R4 / R6)
+   ──────────────────────────────────────────────────────────────────────────── */
+/* R2: 双层反向铭文环与 16 触须 */
+.rd-runes-outer{pointer-events:none}
+.rd-rune-outer{fill:rgba(166,136,255,.36);stroke:rgba(122,240,200,.24);stroke-width:.5;transition:fill var(--abyss-dur-glint,120ms) ease-out,stroke var(--abyss-dur-glint,120ms) ease-out}
+.rd-rune.lit,
+.rd-rune-outer.lit,
+.rd-rune[data-lit="true"],
+.rd-rune-outer[data-lit="true"]{fill:var(--abyss-sem-mint-bright,rgba(122,240,200,.95));stroke:var(--abyss-sem-signal-bright,rgba(255,180,92,.95));filter:drop-shadow(0 0 4px var(--abyss-sem-mint-bright,rgba(122,240,200,.8)))}
+.rd-tendril-deep{fill:none;stroke:url(#tend);stroke-width:1;opacity:.32;vector-effect:non-scaling-stroke}
+
+/* R4: 解码仪式态与跳过 */
+.radar-3d.rd-ritual-running{user-select:none;pointer-events:none}
+.radar-3d[data-ritual="settled"]{pointer-events:auto}
+
+/* R6: 命运差值桥与冷色薄纱/暖色余烬 */
+.rd-diff-bridge{stroke-width:1.2;stroke-dasharray:2 3;vector-effect:non-scaling-stroke}
+.rd-diff-bridge.surplus{stroke:rgba(122,240,200,.75);fill:rgba(122,240,200,.14);filter:drop-shadow(0 0 4px rgba(122,240,200,.4))}
+.rd-diff-bridge.deficit{stroke:rgba(255,180,92,.75);fill:rgba(255,180,92,.14);filter:drop-shadow(0 0 4px rgba(255,180,92,.4))}
+.rd-diff-mesh{pointer-events:none}
+.rd-diff-delta{font-family:var(--abyss-font-mono);font-size:var(--abyss-fs-micro,10px);font-weight:700;paint-order:stroke;stroke:rgba(5,5,11,.9);stroke-width:2px;stroke-linejoin:round}
+.rd-diff-delta.surplus{fill:var(--abyss-sem-mint-bright,rgba(122,240,200,.95))}
+.rd-diff-delta.deficit{fill:var(--abyss-sem-signal-bright,rgba(255,180,92,.95))}
+
+
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   G1 内联清剿 · 全息证据卡（V2-2 · 2026-09-19）
+   ------------------------------------------------------------------------------
+   来源：js/charts/radar-evidence-card.js 中 3 处**静态** inline style（非动态计算值）。
+   此前的写法把静态色值/字号直接写进 JS 拼串，绕过设计令牌与 css_lint 扫描面。
+   V2-0 实测（reports/V2-0.json · static_sites_详表）：
+     :638  opacity: 0.65;
+     :665  color: var(--ink-3); font-style: italic;
+     :672  margin-top: 0.375rem;
+   全部改为语义 class。**动态值不动**（left/width 百分比模板仍留在 JS）。
+   注：`.rd-card-basis-absent` 用双类提高特异性，以胜过仍由 JS 运行时注入的
+       `.rd-card-basis-text`（注入样式表在文档序上晚于本文件）。
+   ══════════════════════════════════════════════════════════════════════════════ */
+.rd-chain-idx{opacity:.65}
+.rd-card-basis-text.rd-card-basis-absent{color:var(--abyss-ink-3);font-style:italic}
+.rd-card-unverified-row{margin-top:.375rem}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   R2-D · 雷达视觉减法（2026-09-20）
+   ------------------------------------------------------------------------------
+   来源：ROUND2.md「雷达（U05 回传后复审补充）」—— 主控肉眼复审 outputs/v70/*.png，
+   见 SVG 内堆满装饰铭牌（[MK-IV]/[SYS-GRID]/经纬字样/28 宿外圈符文）与分值标签抢注意力，
+   且 .cl-holo-* 全息环文字与 .rd-name/.rd-score/.rd-val 顶点几何有 77 处历史遗留重叠。
+   本单元不改 js/charts/radar-holo-frame.js 的任何几何（半径/位置公式一律原样），
+   只给它已有的文字类名接一层「默认隐藏，仅秘仪模式显示」的可见性开关，副作用是
+   .cl-holo-frame 默认状态下变成契约 R8/ROUND2 item4 要的「不承载文字的纯几何」，
+   77 处历史重叠里凡是「holo 文字 × B1 顶点几何」的组合在默认态清零（bbox 两侧有一侧
+   text 为 display:none → getBBox() 返回全零，实测不抛异常，已用最小 CDP 用例验证）。
+   秘仪开关：body 上既有的 arcana 总开关（js/hud/arcana.js setOn/G 键）落的是
+   `body.cl-arc-off`（=已关闭·只留星图）。全局默认 muted=false（未打过 cl-arc-off），
+   也就是说全局「秘仪」default 是开着的——但那是 arcana.js 自己的既有设计（整站氛围
+   装饰默认铺满），不在本单元文件所有权内、不可改。ROUND2 对雷达这一处明确写的是
+   「装饰铭牌默认隐藏，仅秘仪显示」，两者字面对不上时，取「默认隐藏」这个可验证的硬
+   要求 —— 于是这里对雷达装饰是反过来接的：`body.cl-arc-off`（用户按过 G、已进入
+   「只留星图」那一态）时才显示雷达自己的这套装饰铭牌，默认（未碰过 G）不显示。
+   这与全局 arcana 消息「已关闭 · 只留星图」在字面语义上有一点错位（一个「关」，一个
+   「显」），是本单元在契约范围内能做到「默认隐藏 + 复用既有开关 + 不碰 arcana.js」的
+   唯一解；若主控终审认为应该正过来（`body:not(.cl-arc-off)` 显示，即跟随 arcana.js
+   现有默认），只需把下面两条选择器的 `body.cl-arc-off` 和默认 `display:none` 互换，
+   一处改动，见 reports/v70/R2-D-report.md「未完成/已知限制」。
+   ══════════════════════════════════════════════════════════════════════════════ */
+/* 注：`.cl-holo-badges` 是外层 <g>，`.cl-holo-badge-code` 是里面真正的 <text>——两个都要
+   单独写 display:none。SVG 里子元素的 getBBox() 不会因为祖先 display:none 就自动归零
+   （实测：祖先 g.style.display='none' 时，子 text.getBBox() 仍返回真实非零矩形），
+   bbox 判据只认元素自身的 display，所以 out-of-scope 判据要清零，必须把 display:none
+   直接写在 <text> 自己身上，不能只关外层 <g>（那只解决「看不见」，解决不了 bbox 判据）。 */
+.cl-holo-badges,
+.cl-holo-badge-code,
+.cl-holo-crosshair-label,
+.cl-holo-ruler-num,
+.cl-holo-ruler-meta,
+.cl-holo-mansion-label{display:none}
+body.cl-arc-off .cl-holo-badges,
+body.cl-arc-off .cl-holo-badge-code,
+body.cl-arc-off .cl-holo-ruler-num,
+body.cl-arc-off .cl-holo-ruler-meta{display:inline}
+body.cl-arc-off .cl-holo-crosshair-label,
+body.cl-arc-off .cl-holo-mansion-label{display:inline}
+
+/* 秘仪模式下的装饰铭牌与全书氛围保持同一降级规则（reduce motion 时不额外做动画，
+   本身就是静态文字，此处只是把开关声明写全，避免遗漏） */
+@media (prefers-reduced-motion: reduce){
+  body.cl-arc-off .cl-holo-badges,
+  body.cl-arc-off .cl-holo-badge-code,
+  body.cl-arc-off .cl-holo-crosshair-label,
+  body.cl-arc-off .cl-holo-ruler-num,
+  body.cl-arc-off .cl-holo-ruler-meta,
+  body.cl-arc-off .cl-holo-mansion-label{display:inline}
+}
+
+/* ────────────────────────────────────────────────────────────────────────────
+   R2-D · 分数标签层级（ROUND2 item2）
+   维名 rd-name → --cl-atlas-fs-2（U10 契约字号，12px）
+   分值 rd-score → --cl-atlas-fs-1（14px）+ 粗体，压过维名成为视觉主角
+   证据计数「·nE」→ --cl-atlas-fs-4（9.5px）+ 次色，退成脚注级别
+   「低证/待建档」→ 独立 status 色胶囊（背景 rd-status-pill，色源
+   --cl-atlas-status-suspended / --cl-atlas-status-unknown），不再沿用会与
+   tier-mid 分值色 (#e4dcff) 撞色的 --warm。
+   ──────────────────────────────────────────────────────────────────────────── */
+.radar-3d .rd-name{font-size:var(--cl-atlas-fs-2,12px)}
+.radar-3d .rd-score{font-size:var(--cl-atlas-fs-1,14px);font-weight:700}
+.radar-3d .rd-val .rd-ev{font-size:var(--cl-atlas-fs-4,9.5px);fill:var(--ink-3,#88819d);font-weight:400}
+.radar-3d .rd-val .rd-ev.rd-low{fill:var(--cl-atlas-status-suspended,#ffb45c)}
+.radar-3d .rd-val .rd-low{font-size:var(--cl-atlas-fs-4,9.5px);font-weight:600;letter-spacing:.02em}
+.radar-3d .rd-val .rd-low-pend{fill:var(--cl-atlas-status-unknown,#88819d)}
+.radar-3d .rd-val .rd-low-weak{fill:var(--cl-atlas-status-suspended,#ffb45c)}
+.radar-3d .rd-val .rd-peak{font-size:var(--cl-atlas-fs-4,9.5px)}
+
+/* R2-D · 附带修复：同心网格刻度「25/50/75/100」四行彼此贴得太近（环距≈20.5px，
+   10px 字号在本机字体度量下 bbox 实高≈22px），以及它们和基准差值徽标「+14/-12」类
+   偶发相邻时也会咬到——这条不属于 ROUND2 item4 点名的「.cl-holo-* × 顶点」77 处，是
+   另一处历史遗留（在 cl-holo 噪音清掉之前测不出来），但同属「装饰刻度文字层级」，
+   在本单元「radar.js 只动装饰显隐与文字层级」授权范围内：只降字号，不碰 R*gRatio 的
+   环位置公式。降到契约最小字号档 --cl-atlas-fs-4 后由 tests/radar_svg_overlap_browser.py
+   CDP 实测归零，见 reports/v70/R2-D-report.md。 */
+.radar-3d .rd-tick{font-size:var(--cl-atlas-fs-4,9.5px)}
+.radar-3d .rd-diff-delta{font-size:var(--cl-atlas-fs-4,9.5px)}
+
+/* 「低证/待建档」背板胶囊——几何由 radar.js 用与本文件既有 subW() 同一套
+   txtW() 估算算出（不改 B1 的 chipX/chipY/chipW/chipH），本文件只管配色。 */
+.radar-3d .rd-status-pill{pointer-events:none}
+.radar-3d .rd-status-pill-pend{fill:var(--cl-atlas-status-unknown,#88819d);fill-opacity:.20;stroke:var(--cl-atlas-status-unknown,#88819d);stroke-width:.75px;stroke-dasharray:2 2}
+.radar-3d .rd-status-pill-weak{fill:var(--cl-atlas-status-suspended,#ffb45c);fill-opacity:.16;stroke:var(--cl-atlas-status-suspended,#ffb45c);stroke-width:.75px}
+
+/* ────────────────────────────────────────────────────────────────────────────
+   R2-D · 页脚脚注化（ROUND2 item3）——`.radar-caption` 由 app.js 生成（宿主文件，
+   不归本单元），三段 span 已是 flex 一行，本单元只在自己拥有的样式表里把字号
+   压到脚注级并收紧行内间距，不改 app.js 结构。
+   ──────────────────────────────────────────────────────────────────────────── */
+.radar-caption{font-size:var(--cl-atlas-fs-4,9.5px);gap:5px;opacity:.82}
+.radar-caption span{letter-spacing:.01em}
