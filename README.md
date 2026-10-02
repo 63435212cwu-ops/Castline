@@ -10,7 +10,9 @@ python3 -s serve.py 8000
 open http://127.0.0.1:8000
 ```
 
-第一次打开会要求接入 API（右上「工具 → API」）：档案 = 名称 / 协议（OpenAI 兼容 `/chat/completions` 或 Anthropic `/v1/messages`）/ 接入地址 / 模型 / 密钥，可增删改、切换、测试连通；保存在 `data/llm-config.json`。也会自动导入 `~/.nest-drama/api-config.json` 与环境变量 `LLM_BASE_URL / LLM_MODEL_NAME / LLM_API_KEY`、`ANTHROPIC_API_KEY`。
+仓库自带三部已分析完成的作品（西游记 / 三国演义 / 大奉打更人，图谱数据在 `data/cache/`）：克隆后按上面命令启动，首页「最近作品」里就有这三部，点开卡片直接看图，**无需配置 API、无需重新分析**。首开出现的「接入 API」弹窗点「直接看示例作品」即可跳过。
+
+第一次打开会要求接入 API（右上「工具 → API」）：档案 = 名称 / 协议（OpenAI 兼容 `/chat/completions` 或 Anthropic `/v1/messages`）/ 接入地址 / 模型 / 密钥，可增删改、切换、测试连通；保存在 `data/llm-config.json`。也会自动导入 `~/.nest-drama/api-config.json` 与环境变量 `LLM_BASE_URL / LLM_MODEL_NAME / LLM_API_KEY`、`ANTHROPIC_API_KEY`。只有想分析自己的新书时才需要配置密钥。
 
 ## 一片星空，三种图谱
 
