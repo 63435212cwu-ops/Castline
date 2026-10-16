@@ -1,0 +1,481 @@
+{
+  "task": "verify:dafeng:L3:0003",
+  "agent": "w-verify-0",
+  "status": "done",
+  "book": "dafeng",
+  "lane": 3,
+  "unitIndex": 3,
+  "verdict": "partial",
+  "verdictReason": "内容层近乎零缺陷：全量 161 个 quote 对象机器复算 text[start:end]==quote 失败 0、find(quote)==start 失败 0、inSegmentOccurrences 不符 0、越界 0、sourceHash 不符 0；三项哈希（docs 文件 / 全长文本 / 切片）与任务声明逐字相符；无原文没有的人物（段内出现的全部人名实体都被用到，未引入魏渊/监正/临安等段外人物）、无越权结局、无把「结束」当成功（显式写了 notSuccess 与「演示尚未发生」）、semanticReview 如实记为 not_done。因此**不判 fail**——不存在凭空编造的人物、事件或结局。但有 3 条必须修正/降级的缺陷，且都能拿原文逐字引证：(1) N9 把「这是何解？」的**提问人误植为许七安**，原文该问句出自陈府尹本人「陈府尹满意的点头，附和：“这是何解？”」；(2) C6 的因果**方向与文本顺序相反**（「果」@12009 早于「因」@12119）；(3) S1.after 写「由府尹承诺按他纸上所写备料」，而段内「承诺/答应/应允/准许/照办/吩咐」出现 0 次，原文只给到「陈府尹挥了挥手，示意自便。」=准许写字；真正的「备料」发生在段外第五章开头。三条均属「高估/误植」而非编造新事实，且候选自身在 N9 的 note 里已给出纠偏警告，属可定点修复。按纪律给出 partial：其余 4 个任务、8 条状态、7 条因果边、2 条待回收铺设、10 条叙述事实、5 条人物主张、6 条视角内心可继续使用；上述 3 条须修后使用。",
+  "method": "按 VERIFIER.md 的顺序执行，未跳步：①先独立读 docs[0].text[9908,12417) 全片 2509 codepoint / 145 行，自行逐句标注偏移与说话人，读完才打开候选；②抽取项逐条回原文核对；③反向扫描——把段内 78 个句子的补集与候选 161 条引文求差，逐条反查是否真的漏抽；④误杀检查（词表/正则是否挡掉合法边）；⑤幻觉/越权检查（段内人名实体清单 vs 候选实际使用的人名）；⑥随机抽 5 条 quote 用 find 复核；⑦另做全量 161 条复算与三项哈希独立复算、引文覆盖区间并集复算。",
+  "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+  "candidateSha256": "1967deccf73c3927bd743a9b7879a666aab6344b08cc1c635c947348bb117f4c",
+  "docsTextSha256": "bc8b75ee120009f4bf6a8e235a7ff133b8ac727a8612067496a0440eaf3fc612",
+  "sliceSha256": "9dcbc4b137f1b4f8197a76f738f53f6e10c97488384268bc6effb1e8903370a6",
+  "coverageIndependent": {
+    "method": "候选全部 quote 区间取并集后与 [9908,12417) 求交",
+    "distinctQuoteIntervals": 83,
+    "mergedIntervals": 80,
+    "coveredCodepoints": 1729,
+    "segmentCodepoints": 2509,
+    "ratio": 0.6891,
+    "note": "与前一轮 q-verify 记录的 68.9% 独立复现一致。"
+  },
+  "counterExamples": [
+    {
+      "claim": "N9.fact：「中年男人说出时间矛盾后，许七安追问「这是何解？」时，陈府尹是「满意的点头」并附和着问的。」——把「这是何解？」的提问人写成许七安。",
+      "quote": "陈府尹满意的点头，附和：“这是何解？”",
+      "why": "该句的提问人就是**陈府尹本人**，原文没有许七安在此处追问。原文为「陈府尹满意的点头，附和：“这是何解？”」（[11954,11973)），说话人标签与引号同属一句，不存在第二个提问者；段内「这是何解」只出现 1 次。更严重的是候选**自相矛盾**：同一条 N9 的 evidence 里就并列着 [11954,11966)「陈府尹满意的点头，附和：」与 [11967,11972)「这是何解？」两句紧邻原文，仍写成许七安追问。许七安在本段确实没有这句台词（逐句枚举段内 41 处引号台词可验）。注意：N9 想记的**事实**（陈府尹对时间矛盾给出正面即时反应）本身是原文有的，「满意」也在原文里——所以**不要整条删除**，应改写为「陈府尹满意的点头并追问『这是何解？』」，说话人归陈府尹。",
+      "evidence": "python3 -c \"import json;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];print(repr(t[11954:11973]));print(t[9908:12417].count('这是何解'))\"",
+      "severity": "speaker misattribution（把原文属于 A 的台词记成 B 的动作，且 basis=explicit）",
+      "start": 11954,
+      "end": 11973,
+      "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+      "offsetUnit": "codepoint",
+      "inSegmentOccurrences": 1,
+      "inSourceRange": true
+    },
+    {
+      "claim": "C6：from=「陈府尹以卷宗里在场百姓『白花花的银子滚入水中』的供述反问『这也有假？』」，to=「许七安改口否认所押之物是银子，并索取纸笔要求按纸上之物备料」，basis=derived，未加 orderingNote。",
+      "quote": "因为押送的根本不是银子。",
+      "why": "**因果方向与文本顺序相反**。按原文顺序：许七安说「因为押送的根本不是银子。」@12009 → 陈府尹「“荒谬！”…」@12036 → 陈府尹引百姓供述 @12049 → 「他抖了抖手里的卷宗：『这也有假？』」@12108-12125 → 许七安「眼见不一定为实…借纸笔一用。」@12132。即候选写作「因」的质疑（@12119）比它写作「果」的否认（@12009）**晚 110 个 codepoint**，而候选没有加 orderingNote 说明这是「事后追述式」归因。同项目先例（verify_dafeng_L2_0006 对 CE2 的判定）已把同类「果早于因且未加 orderingNote」认定为方向逆写。建议：**不要删除**这条边（陈府尹的质疑确实是许七安改口的语境压力，删掉会误杀一条真实关系），而是降级为 inferred 并补 orderingNote。",
+      "evidence": "python3 -c \"import json;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];[print(t.find(s),s) for s in ['因为押送的根本不是银子。','“荒谬！”陈府尹反驳道：','他抖了抖手里的卷宗：','这也有假？']]\"",
+      "severity": "causal-edge direction inversion（未标 orderingNote）",
+      "start": 12009,
+      "end": 12021,
+      "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+      "offsetUnit": "codepoint",
+      "inSegmentOccurrences": 1,
+      "inSourceRange": true
+    },
+    {
+      "claim": "S1（许七安 身份/处境）.after：「仍是拖着镣铐的囚犯，但已可在内堂桌边研墨写字、并由府尹承诺按他纸上所写备料。」",
+      "quote": "陈府尹挥了挥手，示意自便。",
+      "why": "「**承诺**按他纸上所写备料」在原文里没有对应文字。段内「承诺」「答应」「应允」「准许」「照办」「吩咐」各出现 **0** 次；原文只给到「陈府尹挥了挥手，示意自便。」（@12180-12193）= 准许他写字，以及「大人，请按照草民的要求，准备纸上之物。」（@12238-12257）= 许七安**单方面提出要求**，紧接着「陈府尹接过宣纸扫了一眼，一头雾水。」——府尹看完是看不懂，本段没有写他答应备料。真正的「备料」发生在**段外**第五章开头：「一刻钟后，两名衙役把东西带了进来，摆在堂内。」@12431、「陈府尹沉声道：“你要的东西都在这里，务必给本官满意的答复。”」@12485。即：这条把「准许写字」升格成「承诺备料」，并且把段外事件的已知结果倒灌回段内状态的后值。建议改为「已可在内堂桌边研墨写字、并把写好的宣纸递给府尹；府尹阅后仍一头雾水」，「备料」只写进 F1 的段外待回收说明。",
+      "evidence": "python3 -c \"import json;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];s=t[9908:12417];print({w:s.count(w) for w in ['承诺','答应','应允','准许','照办','吩咐']});print(t.find('一刻钟后，两名衙役把东西带了进来，摆在堂内。'))\"",
+      "severity": "state over-claim（把段外已知结果写成段内承诺，basis=explicit 高估）",
+      "start": 12180,
+      "end": 12193,
+      "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+      "offsetUnit": "codepoint",
+      "inSegmentOccurrences": 1,
+      "inSourceRange": true
+    },
+    {
+      "claim": "T4（黄裙少女）.obstacle=null，obstacleNote：「本段未写她受什么阻碍（她可以直接发问，也确实问了），留 null。」",
+      "quote": "可是税银确实是在辰时运送到广南街，当时目睹匹马冲入河中的百姓有不少，不可能是假的。",
+      "why": "留 null 本身符合「缺项不补」纪律，故**只作存疑记录、不据此判 fail**。但需指出：她在段内的处境并非无阻碍——她是席上唯一被叙述写明「郁闷」的追问者，两次发问后仍没弄懂，最后「一头雾水」。若下游要建「知识差」图，T4 缺 obstacle 会让她看起来像全程无阻力，更准确的处理是在 knowledgeGap 里把她标成 knows=[] 的未解者（S5 已部分做到）。",
+      "evidence": "python3 -c \"import json;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];print(t[11897:11938])\"",
+      "severity": "存疑（不作为 fail 依据）",
+      "start": 11897,
+      "end": 11938,
+      "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+      "offsetUnit": "codepoint",
+      "inSegmentOccurrences": 1,
+      "inSourceRange": true
+    }
+  ],
+  "reverseChecks": [
+    {
+      "found": "陈府尹的态度转折点被漏记：他此前一直在打压（拍桌、下令杖责两百、威胁骨肉分离），此处第一次**急迫**主动追问破绽——这是本段府尹由「不信」转向「想听」的唯一动作锚点，候选 T2.action 只写「追问『什么破绽』」，丢掉了「急迫」这个叙述副词。",
+      "quote": "陈府尹急迫追问：“什么破绽。”",
+      "start": 10990,
+      "end": 11005,
+      "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+      "offsetUnit": "codepoint",
+      "inSegmentOccurrences": 1,
+      "inSourceRange": true
+    },
+    {
+      "found": "「三人被吸引」是一组排比，候选只收了少女那一句（黄裙少女咬着蜜饯没嚼），漏掉中年男人的对应动作——两人是同一拍的两半，缺一条会让「三人开始认真听」的场面证据不完整。",
+      "quote": "中年男人摆出了倾听姿态。",
+      "start": 11011,
+      "end": 11023,
+      "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+      "offsetUnit": "codepoint",
+      "inSegmentOccurrences": 1,
+      "inSourceRange": true
+    },
+    {
+      "found": "许七安三问中的第一问与第三问的**完整原句**未被收录（T1.action 只概括为「用可核算的量」，C4 只收了第二问「从城门口到广南街，路程多少？」与「驽马脚程如何？」）。第一问含「敢问几位大人」的当庭敬语与「十五万两」量级，是「重新排列已知量」手法的起点；第三问是让中年男人起身的那一问的前置。",
+      "quote": "我二叔押送税银十五万两，敢问几位大人，十五万两白银，重几斤？",
+      "start": 11110,
+      "end": 11140,
+      "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+      "offsetUnit": "codepoint",
+      "inSegmentOccurrences": 1,
+      "inSourceRange": true
+    },
+    {
+      "found": "开场对陈府尹的场面调度（坐姿 + 面无表情 + 「审问犯人的腔调颇具威严」）未收录。它与后文他被顶到「头皮有点麻」「心里平衡了不少」构成同段内的反差，是 S2 状态变化的视觉锚点，候选 S2 只用了「压住…念头」与「狗急跳墙」两条。",
+      "quote": "陈府尹高坐大椅，面无表情，审问犯人的腔调颇具威严：",
+      "start": 10082,
+      "end": 10107,
+      "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+      "offsetUnit": "codepoint",
+      "inSegmentOccurrences": 1,
+      "inSourceRange": true
+    },
+    {
+      "found": "叙述对说话方式的两处评价（「掷地有声」「嗓音如银铃般清脆」）未收录。在本任务「不许把人物说的话当成叙述事实」的红线下，这两处恰恰是区分「谁的话被叙述赋予了分量」的可用证据，漏收会削弱 characterClaims 的判据。",
+      "quote": "许七安掷地有声。",
+      "start": 12022,
+      "end": 12030,
+      "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+      "offsetUnit": "codepoint",
+      "inSegmentOccurrences": 1,
+      "inSourceRange": true
+    },
+    {
+      "found": "陈府尹的第一次追问（早于「从卷宗里」那一问）未收录。这是他对线索来源的初次追问，属「心理施压 → 具体问线索」的过渡拍，候选 N3/C8 只从第二次追问起记。",
+      "quote": "“这和你说的线索，有何关联？”",
+      "start": 10312,
+      "end": 10327,
+      "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+      "offsetUnit": "codepoint",
+      "inSegmentOccurrences": 1,
+      "inSourceRange": true
+    },
+    {
+      "found": "许七安「点头确认」的应答动作未收录。它是「我已经破案了。」之后的即时身体语言，为 T1.action 的「迅速低头做谦卑姿态」提供了段内的第二个体态锚点。",
+      "quote": "许七安点点头，表示就是如此。",
+      "start": 10424,
+      "end": 10438,
+      "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+      "offsetUnit": "codepoint",
+      "inSegmentOccurrences": 1,
+      "inSourceRange": true
+    },
+    {
+      "found": "陈府尹「不悦」的语气未收录（N7 只摘了「有话就说，别卖关子。」）。「不悦」支撑 T2.obstacle 里「他自己听不懂、又被卖关子」的处境。",
+      "quote": "陈府尹不悦道：“有话就说，别卖关子。”",
+      "start": 11180,
+      "end": 11199,
+      "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+      "offsetUnit": "codepoint",
+      "inSegmentOccurrences": 1,
+      "inSourceRange": true
+    },
+    {
+      "found": "中年男人在黄裙少女抛出反证后的**第一步反应**是「愣住了…下意识的看向许七安」——候选收了这一条（T3.result），但漏了紧接着由**陈府尹**补上的「这是何解？」这一追问：它才是把解释权交回许七安的那一拍。候选 N9 收到了这句，却把提问人记成了许七安（见 counterExamples 第 1 条）。",
+      "quote": "陈府尹满意的点头，附和：“这是何解？”",
+      "start": 11954,
+      "end": 11973,
+      "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+      "offsetUnit": "codepoint",
+      "inSegmentOccurrences": 1,
+      "inSourceRange": true
+    },
+    {
+      "found": "段内唯一一次「叙述明确背书某个人物结论」的地方是质量换算（「按照这个世界的质量换算公式…」），候选 characterClaims 已正确标注；但**反向**看，段内其余全部数字（卯时二刻/辰时一刻/三十里/四个闹市）都没有叙述核对，这一「唯一 vs 其余」的对比候选只在 unknowns 里以单条列出，未与 characterClaims 的 narration_backed 标记形成对照说明。",
+      "quote": "按照这个世界的质量换算公式，一斤十六两，十五万两白银是九千三百七十五斤。",
+      "start": 11297,
+      "end": 11333,
+      "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+      "offsetUnit": "codepoint",
+      "inSegmentOccurrences": 1,
+      "inSourceRange": true
+    }
+  ],
+  "falseKillCheck": [
+    {
+      "item": "notForeshadows 拒收「卷宗」的理由是「段内只承担推理依据功能，没有指向未来的反转或回收点」",
+      "finding": "在**本段口径内合法**，不构成误杀。补充事实（段外）：全书「卷宗」出现 122 次，段后确有回收——第九章「我就是想知道，大哥是怎么从卷宗里勘破案子的。」@24805、「那天许七安问他要了卷宗后，立刻破案了。」@24888。",
+      "verdict": "候选口径自洽（只出现一次/无段内回收即不立伏笔），无需修改；但若下游做跨章伏笔，应把「卷宗」重新登记为跨章铺设。",
+      "quote": "我就是想知道，大哥是怎么从卷宗里勘破案子的。",
+      "outOfSegment": true,
+      "start": 24805,
+      "end": 24827,
+      "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+      "offsetUnit": "codepoint",
+      "inSegmentOccurrences": 0,
+      "inSourceRange": false
+    },
+    {
+      "item": "notForeshadows 拒收「镣铐」：「只在许七安走到桌边时出现一次」",
+      "finding": "核对为真：段内「镣铐」出现 1 次（@12204），确为单次出现。但全书「镣铐」出现 13 次，说明它是跨章反复使用的处境符号。",
+      "verdict": "段内口径合法，不构成误杀。"
+    },
+    {
+      "item": "C6 这条边本身是否该整条删除",
+      "finding": "**不该**。陈府尹以百姓供述反问，确实是许七安转向「质疑所见之物本身」的直接语境压力；问题只在方向写反与 basis 高估。若按「果早于因」一刀切删除，会误杀一条真实存在的语境因果——这正是计划100「整词判定把合法因果挡掉」的同类风险。",
+      "verdict": "应降级为 inferred + 补 orderingNote，而非删除。",
+      "quote": "他抖了抖手里的卷宗：",
+      "start": 12108,
+      "end": 12118,
+      "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+      "offsetUnit": "codepoint",
+      "inSegmentOccurrences": 1,
+      "inSourceRange": true
+    },
+    {
+      "item": "N9 是否该整条删除",
+      "finding": "**不该**。「陈府尹满意的点头」是原文明确写出的事实（@11954-11966），且候选在 N9.note 里正确地警告了「不能读成他采信了许七安的『人为』结论——他紧接着就抖卷宗反问『这也有假？』」这一纠偏判断是对的。错的只是说话人归属。",
+      "verdict": "应改写说话人，保留事实与那条 note。",
+      "quote": "陈府尹满意的点头，附和：“这是何解？”",
+      "start": 11954,
+      "end": 11973,
+      "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+      "offsetUnit": "codepoint",
+      "inSegmentOccurrences": 1,
+      "inSourceRange": true
+    },
+    {
+      "item": "候选是否因「不许把人物说的话当成叙述事实」而误挡了合法内容",
+      "finding": "未发现误挡。候选把许七安的两条核心主张（人为、押送的不是银子）完整保留在 characterClaims（status=character_assertion_not_narration），只在因果边里作为「他说了什么」这一事件使用——处理正确，没有因为红线而丢弃内容。",
+      "verdict": "红线执行到位。"
+    }
+  ],
+  "hallucinationCheck": {
+    "result": "pass",
+    "segmentNameEntities": [
+      "许七安",
+      "陈府尹",
+      "中年男人",
+      "李玉春",
+      "黄裙少女",
+      "许新年",
+      "许家二郎",
+      "许平志",
+      "二叔",
+      "衙役"
+    ],
+    "namesUsedByCandidate": "候选实际使用的人名全部落在上表内；段内 0 次出现的段外人物（魏渊/监正/元景帝/临安/怀庆/褚采薇/婶婶/许玲月/许铃音）在候选里出现次数亦为 0。",
+    "endingNotAsserted": "候选显式写了 notSuccess 与「演示尚未开始（纸刚递出）」，未把「没被拖走/播放结束」当成功。",
+    "semanticReviewHonest": "semanticReview=not_done，未声称语义已核验。",
+    "foreshadowHonesty": "2 条铺设均标 payoff=null / status=unresolved，未把未回收写成已回收。"
+  },
+  "quoteVerification": {
+    "total": 161,
+    "textSliceEqualsQuote_fail": 0,
+    "findEqualsStart_fail": 0,
+    "inSegmentOccurrences_mismatch": 0,
+    "outOfRange": 0,
+    "sourceHash_mismatch": 0,
+    "randomSample": {
+      "seed": 20261008,
+      "n": 5,
+      "allVerbatim": true,
+      "items": [
+        {
+          "path": "/causeEdges/5/evidence/0",
+          "quote": "他抖了抖手里的卷宗：",
+          "start": 12108,
+          "end": 12118,
+          "find": 12108,
+          "ok": true,
+          "inSegmentOccurrences": 1,
+          "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+          "offsetUnit": "codepoint",
+          "inSourceRange": true
+        },
+        {
+          "path": "/tasks/0/action/evidence/5",
+          "quote": "因为押送的根本不是银子。",
+          "start": 12009,
+          "end": 12021,
+          "find": 12009,
+          "ok": true,
+          "inSegmentOccurrences": 1,
+          "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+          "offsetUnit": "codepoint",
+          "inSourceRange": true
+        },
+        {
+          "path": "/narrativeFacts/2/evidence/0",
+          "quote": "草民便是从卷宗里推理出了案件的真相....",
+          "start": 10340,
+          "end": 10361,
+          "find": 10340,
+          "ok": true,
+          "inSegmentOccurrences": 1,
+          "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+          "offsetUnit": "codepoint",
+          "inSourceRange": true
+        },
+        {
+          "path": "/causeEdges/1/evidence/3",
+          "quote": "胡说八道，来人，拖下去，杖责两百。",
+          "start": 10568,
+          "end": 10585,
+          "find": 10568,
+          "ok": true,
+          "inSegmentOccurrences": 1,
+          "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+          "offsetUnit": "codepoint",
+          "inSourceRange": true
+        },
+        {
+          "path": "/tasks/2/action/evidence/2",
+          "quote": "三十里。",
+          "start": 11455,
+          "end": 11459,
+          "find": 11455,
+          "ok": true,
+          "inSegmentOccurrences": 1,
+          "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+          "offsetUnit": "codepoint",
+          "inSourceRange": true
+        }
+      ]
+    },
+    "hashes": {
+      "docsFile": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+      "docsText": "bc8b75ee120009f4bf6a8e235a7ff133b8ac727a8612067496a0440eaf3fc612",
+      "slice": "9dcbc4b137f1b4f8197a76f738f53f6e10c97488384268bc6effb1e8903370a6",
+      "candidate": "1967deccf73c3927bd743a9b7879a666aab6344b08cc1c635c947348bb117f4c"
+    },
+    "candidateReproduceCommandsReRun": "候选自带的 4 条 reproduce 命令全部重跑通过（quotes 161 bad 0；三项哈希相符；len=2509）。"
+  },
+  "usableItems": {
+    "usableAsIs": [
+      "tasks[0..3] 的任务五元组（T2/T3/T4 的 cost=null 处理正确）",
+      "states[0..4]（仅 S1.after 需删「承诺…备料」一处）",
+      "causeEdges 除 C6 外的 7 条",
+      "narrativeFacts N1-N10（N9 需改说话人）",
+      "characterClaims 全部 5 条（narration_backed 标记正确）",
+      "viewpointInternals 全部 6 条",
+      "notForeshadows 3 条",
+      "deliberatelyNotAsserted 4 条",
+      "unknowns 9 条"
+    ],
+    "mustRepair": [
+      "N9.fact 的说话人：许七安追问 → 陈府尹追问",
+      "C6：补 orderingNote 并把 basis derived 降为 inferred",
+      "S1.after：删「并由府尹承诺按他纸上所写备料」，改为「把写好的宣纸递给府尹；府尹阅后仍一头雾水」"
+    ],
+    "mustDowngradeToUnknown": [
+      "T4.obstacle 建议不要留 null 而是记为「未写」并挂到 knowledgeGap（存疑项，非硬错）"
+    ]
+  },
+  "notes": "总体判断：这是一份**质量很高但有三处定点缺陷**的抽取，判 partial 而非 pass，也明确不判 fail。\n先自己读原文（2509 codepoint）再打开候选，读到的是：狱囚许七安被带进内堂，面对陈府尹的施压，自陈从卷宗破案；用「十五万两=九千三百七十五斤 / 三十里 / 四个闹市 / 驽马脚程」四问逼出中年男人自己的时间矛盾；被黄裙少女以目击证词顶回后，改口「押送的根本不是银子」，索纸笔写下所需之物，段末宣纸递出、无人看懂。\n支持判 pass 的一面：161/161 引文逐字且 find==start，三项哈希全中，覆盖率 68.91% 独立复现一致；没有原文没有的人物（段内人名实体与候选使用集合完全吻合）；没有越权结局；**主动拒绝把「结束」当成功**（notSuccess、deliberatelyNotAsserted『许七安是否破案成功』）；semanticReview 如实写 not_done；人物主张与叙述事实分离得很干净（characterClaims 的 status 分级、viewpointInternals 的 whyNotNarration 都做得比一般候选细）。\n支持判 partial 的一面（三条，均有逐字引证）：N9 的说话人误植最严重——它把陈府尹本人的台词「附和：“这是何解？”」记成「许七安追问」，而这条 N9 自己引的两句原文就是紧邻的，属可自查而未查；C6 方向逆写且未标 orderingNote（同一项目已有先例把它判为缺陷）；S1.after 出现段内 0 次命中的「承诺…备料」，实际是把段外第五章的结果倒灌回段内——这三条都属「声称强于验证」，正是本项目反复出现的失败形态，所以不能放行，但它们的共同点是**候选自己就给出了纠正所需的原文**，定点修复即可，因此不该判 fail 把 161 条已核验引文一并作废。\n反向验证（我最看重的一步）发现 10 条候选未覆盖而原文明确存在的事实，其中值得一提的是「陈府尹急迫追问」把府尹由打压转向主动求知的唯一动作锚点漏掉了，以及「中年男人摆出了倾听姿态」使得「三人开始认真听」的排比只剩一半。这些漏项不影响已有结论的正确性，但会让下游少掉几处状态转折的证据。\n对我自己的反向验证的自我修正：我最初把「陈府尹高坐大椅…颇具威严」判为「漏抽」，但核对后确认候选 S2 的 before 已用「压住喊人把这小子送回大牢的念头」「狗急跳墙的狂悖之言」两条引文承载了同一状态，故这条降级为「可补而非缺失」。同样，我最初怀疑「卷宗」被误杀，核对候选口径（段内单次/无段内回收不立伏笔）后认为该拒绝合法，已如实写进 falseKillCheck。\n不确定处：①「备料」是否可以算作段内已隐含发生，我按「段内无对应文字」处理，并把段外第五章开头的两处偏移一并列出以便申诉；②「中年男人李玉春是否看懂宣纸」原文确实未点明，候选写进 unknowns 是对的，我不改判；③我未做跨章伏笔审计，只用有限的段后前瞻（第九章、第五章开头）核了「卷宗」与「备料」两处，不做全书级断言。\n我未做的：未修改被复核候选（只读）；未跑 GPU/浏览器路径（本任务不涉及）；未审计图谱缓存 data/cache/9b676d7031b1bcd3b8377a18.json 里的既有结论（按任务纪律，它不算原文证据）。",
+  "summary": "独立反向复核 大奉打更人 第四章 [9908,12417)。verdict=partial：161/161 引文逐字且偏移精确、三项哈希全中、覆盖率 68.91% 独立复现、零编造人物/结局/成功判定；但 N9 说话人误植（陈府尹的「这是何解？」被记成许七安追问）、C6 因果方向逆写（果@12009 早于因@12119）、S1.after 出现段内 0 命中的「府尹承诺备料」（实为段外第五章事件）三处须定点修复；另反向发现 10 条候选未覆盖的原文事实。",
+  "evidence": [
+    {
+      "path": "loop/state/out/read_dafeng_L3_0003.candidate.json",
+      "sha256": "1967deccf73c3927bd743a9b7879a666aab6344b08cc1c635c947348bb117f4c",
+      "kind": "被复核候选（只读，未修改）"
+    },
+    {
+      "path": "data/cache/9b676d7031b1bcd3b8377a18.docs.json",
+      "sha256": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+      "kind": "原文 docs 缓存（与任务 sourceHash 一致）"
+    },
+    {
+      "path": "data/cache/9b676d7031b1bcd3b8377a18.json",
+      "sha256": "3c2fae1d399d6768719f2d5476fa0cfd88fb4fbbc12abdf080323fa4b846ebdf",
+      "kind": "图谱缓存（仅用于对照，非原文证据）"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "先自读原文再读候选：独立读出 docs[0].text[9908,12417) 共 2509 codepoint / 145 行并自行逐句标注偏移与说话人，读完后才打开候选",
+      "result": "pass",
+      "command": "python3 -c \"import json;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];s=t[9908:12417];print(len(s),len(s.split(chr(10))))\""
+    },
+    {
+      "text": "全量引文复算：161 个 quote 对象 text[start:end]==quote 失败 0、find(quote)==start 失败 0、inSegmentOccurrences 不符 0、越界 0、sourceHash 不符 0",
+      "result": "pass",
+      "command": "python3 - <<'EOF'\nimport json\nd=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'));T=d[0]['text'];seg=T[9908:12417]\nc=json.load(open('loop/state/out/read_dafeng_L3_0003.candidate.json'))\nq=[]\ndef w(n):\n    if isinstance(n,dict):\n        if isinstance(n.get('quote'),str) and 'start' in n: q.append(n)\n        [w(v) for v in n.values()]\n    elif isinstance(n,list): [w(v) for v in n]\nw(c)\nprint(len(q),sum(1 for x in q if T[x['start']:x['end']]!=x['quote']),sum(1 for x in q if T.find(x['quote'])!=x['start']),sum(1 for x in q if seg.count(x['quote'])!=x['inSegmentOccurrences']))\nEOF"
+    },
+    {
+      "text": "三项哈希独立复算与任务/candidate 声明逐字相符（docs 文件 / 全长文本 / 切片），候选自带 4 条 reproduce 命令重跑全部通过",
+      "result": "pass",
+      "command": "shasum -a 256 data/cache/9b676d7031b1bcd3b8377a18.docs.json && python3 -c \"import json,hashlib;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];print(hashlib.sha256(t.encode()).hexdigest());print(hashlib.sha256(t[9908:12417].encode()).hexdigest());print(len(t[9908:12417]))\""
+    },
+    {
+      "text": "三条 counterExample 的引证均逐字可查且落在 [9908,12417) 内（陈府尹挥了挥手/因为押送的根本不是银子/陈府尹满意的点头，附和）",
+      "result": "pass",
+      "command": "python3 -c \"import json;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];s=t[9908:12417];[print(t.find(x),s.count(x),x) for x in ['陈府尹挥了挥手，示意自便。','因为押送的根本不是银子。','陈府尹满意的点头，附和：“这是何解？”']]\"",
+      "expected": "12180 1 / 12009 1 / 11954 1"
+    },
+    {
+      "text": "N9 说话人误植的判定依据：段内「这是何解」仅出现 1 次，且其说话人标签「陈府尹满意的点头，附和：」与问句同属一句紧邻",
+      "result": "pass",
+      "command": "python3 -c \"import json;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];s=t[9908:12417];print(s.count('这是何解'));print(repr(t[11954:11973]))\""
+    },
+    {
+      "text": "S1.after 的「承诺备料」判定依据：段内 承诺/答应/应允/准许/照办/吩咐 各 0 次；「备料」实际发生在段外第五章开头 @12431/@12485",
+      "result": "pass",
+      "command": "python3 -c \"import json;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];s=t[9908:12417];print({w:s.count(w) for w in ['承诺','答应','应允','准许','照办','吩咐']});print(t.find('一刻钟后，两名衙役把东西带了进来，摆在堂内。'))\""
+    },
+    {
+      "text": "随机抽 5 条 quote（seed=20261008）全部逐字命中且 find==start",
+      "result": "pass",
+      "command": "python3 -c \"import json,random;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];c=json.load(open('loop/state/out/read_dafeng_L3_0003.candidate.json'));q=[]\ndef w(n):\n    if isinstance(n,dict):\n        if isinstance(n.get('quote'),str) and 'start' in n: q.append(n)\n        [w(v) for v in n.values()]\n    elif isinstance(n,list):[w(v) for v in n]\nw(c);random.seed(20261008);print([(x['start'],t.find(x['quote'])==x['start']) for x in random.sample(q,5)])\""
+    },
+    {
+      "text": "覆盖率独立复算：候选引文区间并集 1729/2509 = 68.91%，与前一轮记录一致",
+      "result": "pass",
+      "command": "python3 -c \"import json;c=json.load(open('loop/state/out/read_dafeng_L3_0003.candidate.json'));q=[]\ndef w(n):\n    if isinstance(n,dict):\n        if isinstance(n.get('quote'),str) and 'start' in n: q.append((n['start'],n['end']))\n        [w(v) for v in n.values()]\n    elif isinstance(n,list):[w(v) for v in n]\nw(c);m=[]\nfor s,e in sorted(set(q)):\n    if m and s<=m[-1][1]: m[-1][1]=max(m[-1][1],e)\n    else: m.append([s,e])\nprint(sum(e-s for s,e in m),2509,round(sum(e-s for s,e in m)/2509,4))\""
+    },
+    {
+      "text": "反向扫描：段内 78 句与候选 161 条引文求差，逐条反查得到 10 条未覆盖事实（已按「可补/已由别处承载」区分，未虚报为缺失）",
+      "result": "pass",
+      "command": "python3 -c \"import json,re;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];s=t[9908:12417];print(len([1 for m in re.finditer(r'[^。！？\\n]*[。！？]',s) if m.group().strip()]))\""
+    },
+    {
+      "text": "幻觉检查：段内人名实体清单与候选使用集合吻合；段外人物（魏渊/监正/临安/怀庆/褚采薇等）在候选内出现 0 次",
+      "result": "pass",
+      "command": "python3 -c \"import json;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];s=t[9908:12417];c=open('loop/state/out/read_dafeng_L3_0003.candidate.json').read();[print(n,s.count(n),c.count(n)) for n in ['许七安','李玉春','许新年','许平志','魏渊','监正','临安','怀庆','褚采薇']]\""
+    },
+    {
+      "text": "未修改被复核候选与任何受保护路径：本次只新增 loop/state/out/verify_dafeng_L3_0003.verdict.json",
+      "result": "pass",
+      "command": "shasum -a 256 loop/state/out/read_dafeng_L3_0003.candidate.json  # 期望 1967decc…（与提交时一致）"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/verify_dafeng_L3_0003.verdict.json",
+      "kind": "append-only",
+      "note": "新增复核产出；未改动候选、原文缓存与任何受保护路径"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/9b676d7031b1bcd3b8377a18.docs.json": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "loop/state/out/read_dafeng_L3_0003.candidate.json": "1967deccf73c3927bd743a9b7879a666aab6344b08cc1c635c947348bb117f4c"
+  },
+  "remaining": [
+    "三条缺陷须由后续任务定点修复后方可用于发布：N9 说话人（许七安→陈府尹）、C6 补 orderingNote 并降 basis、S1.after 删「承诺…备料」。",
+    "可补入（非硬错）：陈府尹「急迫追问」的态度转折；中年男人「摆出了倾听姿态」；许七安第一问/第三问完整原句；开场对陈府尹的场面调度；「掷地有声」「嗓音如银铃般清脆」两处说话方式评价；陈府尹第一次追问「这和你说的线索，有何关联？」；「许七安点点头，表示就是如此。」；「不悦」语气。",
+    "我未做的：未做全书级跨章伏笔审计——只用有限段后前瞻核了「卷宗」（第九章 @24805/@24888）与「备料」（第五章开头 @12431/@12485）两处，不足以对 F1/F2 的最终回收下全书级结论。",
+    "我未做的：未审计 data/cache/9b676d7031b1bcd3b8377a18.json 图谱缓存中的既有结论（按任务纪律不算原文证据）。",
+    "我未做的：未跑 GPU/浏览器路径（本任务不涉及），未修改候选文件本身（只读复核）。",
+    "存疑未判 fail 的一条：T4.obstacle=null。留 null 符合「缺项不补」纪律，故只记录建议（把她挂到 knowledgeGap），不据此判 fail。"
+  ],
+  "rollback": "删除 loop/state/out/verify_dafeng_L3_0003.verdict.json 即可完全回滚；本次未修改候选、原文缓存或任何受保护路径（候选 sha256 保持 1967decc…f4c）。",
+  "submittedAt": "2026-10-07T21:10:27Z",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-07T21:10:27Z"
+  },
+  "verifyState": "pass",
+  "reviews": [
+    {
+      "reviewer": "q-verify",
+      "at": "2026-10-07T21:36:48Z",
+      "verdict": "pass",
+      "notes": "**元复核（复核\"二级复核\"本身）**。我独立重算它所依据候选的三条同层可确证项：① 内容层引文逐字（含 `startAbs` 相对偏移约定）② 偏移与引文自洽（**已排除按设计不带偏移的 `quoteWarnings`**）③ 悬空「见 X」引用（含前缀匹配、排除自设跨区间编号）。实测：带偏移引文 **161** 条，逐字/自洽失败 **0**；悬空引用 **[]**，（其余 0 条为无偏移条目，按设计如此）。⇒ 三条**全部干净** ⇒ 它的 `partial` 裁决**不是**由这三条引起，而是由覆盖记账/动作归属一类**只能人工判读**的项引起 —— 与它自述一致。我**接受它的裁决**，并补上它未给出的\"三条机械项的实际数字\"。",
+      "counterExamples": [
+        {
+          "check": "我初版判据报出 5 处\"不自洽\"是否为真",
+          "method": "逐条打印路径与 start/end",
+          "finding": "**全部位于 /quoteWarnings[] 且 start/end 皆 None** ⇒ 该字段按设计不带偏移 ⇒ 我的判据未排除该形态，已修正"
+        },
+        {
+          "check": "悬空「见 X」是否总是缺陷",
+          "method": "精确 id + 前缀匹配，再逐个读上下文",
+          "finding": "前缀引用（见 T9 ↔ T9_yudi_dispose）与自设跨区间编号（X1）均非缺陷"
+        }
+      ],
+      "reverseChecks": [
+        {
+          "question": "这三条机械项还漏了什么形态",
+          "method": "枚举候选内所有带 quote 的条目形态并计数",
+          "finding": "共四种形态：绝对偏移 / 相对+绝对 / 无偏移（警告）/ 自设编号；判据已按四种分别处理"
+        }
+      ]
+    }
+  ]
+}

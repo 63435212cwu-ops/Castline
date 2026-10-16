@@ -1,0 +1,89 @@
+{
+ "task": "read:sanguo:L1:0067",
+ "agent": "w-dafeng-1",
+ "status": "done",
+ "summary": "精读《三国演义》第六十八回（codepoint [342369,347496)，5127 字，全文偏移口径），产出 loop/state/out/read_sanguo_L1_0067.candidate.json：tasks 23（五元组分列，每栏自带引文，同任务内五栏引文两两不相交——区间相交与字符串相等两种判据复算均为 0）、causeEdges 37、rejectedCauseEdges 5（逐条写明为何拒绝连边，含「崔琰被杖杀→立魏王」这类时间相邻但无机制的）、states 16、knowledgeGaps 11、foreshadows 8（含 1 条 unresolved、1 条 partially-resolved）、notForeshadows 7、worldSettings 33（place 14 / rule 10 / item 9，placeState、institution、itemStates 三组区分全写在字段里）、notWorldSettings 5、themeReadings 2（各带 counter 与反例引文）、speechAsClueNotFact 14、unknowns 21、selfCritique 5、textualNotes 7。全量自检：393 个引文对象全部满足 T[start:end]==quote、落在区间内、sourceHash 一致、globalOccurrences 复算一致；正文区间 [342393,347439) 汉字覆盖率 1.0（4100/4100，区间交集与逐字符布尔掩码两种独立算法复算一致）。未做语义复核（semanticReview=not-performed）。",
+ "evidence": [
+  {
+   "path": "loop/state/out/read_sanguo_L1_0067.candidate.json",
+   "sha256": "c36afac7d53274ec65a69963995180d62cdb28bff83a8ca1ce615f7f7b87b93e",
+   "what": "本任务候选（唯一写入物）"
+  },
+  {
+   "path": "data/cache/fe42d01f3826fe8096f86614.docs.json",
+   "sha256": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+   "what": "原文（docs[0].text 全文偏移基准；区间切片 sha256=04d9e20e0b37f34a7b5730bee1afe962309af4eba4ee3ba024be16ba9ebb2eec）"
+  }
+ ],
+ "assertions": [
+  {
+   "text": "偏移口径自检：docs[0].text[342369:347496] 以本单元标题「第六十八回　甘宁百骑劫魏营　左慈掷杯戏曹操」开头，切片长 5127 codepoint。",
+   "result": "pass",
+   "reproduce": "python3 -c \"import json;T=json.load(open('data/cache/fe42d01f3826fe8096f86614.docs.json'))[0]['text'];print(T[342369:342392],len(T[342369:347496]))\""
+  },
+  {
+   "text": "全部 393 个引文对象逐字命中：重新独立遍历候选的所有 {quote,start,end}（与构建脚本不同的实现），断言 T[start:end]==quote、342369<=start<end<=347496、sourceHash 一致、T.count(quote)==globalOccurrences。problems=0。",
+   "result": "pass",
+   "reproduce": "python3 -c \"import json;T=json.load(open('data/cache/fe42d01f3826fe8096f86614.docs.json'))[0]['text'];c=json.load(open('loop/state/out/read_sanguo_L1_0067.candidate.json'));A=[];\\nimport sys\\ndef w(o):\\n  (A.append(o) if isinstance(o,dict) and {'quote','start','end'}<=set(o) else None)\\n  [w(v) for v in (o.values() if isinstance(o,dict) else o)] if isinstance(o,(dict,list)) else None\\nw(c);print(len(A),sum(1 for o in A if T[o['start']:o['end']]!=o['quote'] or not(342369<=o['start']<o['end']<=347496) or o.get('sourceHash')!='8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2' or T.count(o['quote'])!=o.get('globalOccurrences')))\""
+  },
+  {
+   "text": "五栏不同源：对每个 task 的 objective/obstacle/action/result/cost 取全部引文区间，两两检查区间相交与字符串相等，problems=0（构建期该检查拦下并修正了 6 处冲突，含 T07 因 Python 重复字典键导致一条引文被静默丢弃的真实缺陷）。",
+   "result": "pass",
+   "reproduce": "见 build.py 的 Q4 判据（check_disjoint），构建时冲突即拒绝写出"
+  },
+  {
+   "text": "正文覆盖率复算：正文区间 [342393,347439)（自「却说孙权在濡须口收拾军马」至「且看下文分解。」）汉字 4100 个、被引文覆盖 4100 个（1.0）；用「区间交集」与「逐字符布尔掩码」两种独立实现复算一致，残余含汉字 run=0。同时报整个切片口径 4119/4150=0.99253，差额为回目标题与末尾电子整理页脚。",
+   "result": "pass",
+   "reproduce": "python3 -B -s $CL_ARTIFACTS/read-0067/build.py  （输出含两行「OK 覆盖率」）"
+  },
+  {
+   "text": "sourceHash 差异如实登记：任务 JSON 写 2988ce6e…，实测它对应 data/cache/f0b45e85aac6c95e584075a2.docs.json（另一份缓存），而非提示词与实测所指的 fe42d01f…。两文件 docs[0].text 长度同为 607191 且全文逐字相同，本单元切片逐字相同 ⇒ 引文证据不受影响。未修改任何校验规则或任务元数据。",
+   "result": "pass",
+   "reproduce": "python3 -c \"import hashlib,json,glob;print([p for p in glob.glob('data/cache/*.docs.json') if hashlib.sha256(open(p,'rb').read()).hexdigest().startswith('2988ce')])\""
+  },
+  {
+   "text": "受保护路径未改：本轮只写 loop/state/out/read_sanguo_L1_0067.candidate.json 一个文件；js/ css/ index.html serve.py narrative.py scripts/ tests/ docs/ data/ 均未由本轮改动（git status 里的既有改动是并行 agent 的未提交工作，未触碰、未回滚）。",
+   "result": "pass",
+   "reproduce": "git status --porcelain | grep -E 'read_sanguo_L1_0067' ; git diff --stat -- js/ css/ index.html serve.py narrative.py scripts/ tests/ docs/ data/ | tail -1"
+  },
+  {
+   "text": "语义复核未做：semanticReview 显式记为 not-performed，未声明语义已核验（按 READER 契约，引用定位正确≠语义已核验）。",
+   "result": "pass",
+   "reproduce": "python3 -c \"import json;print(json.load(open('loop/state/out/read_sanguo_L1_0067.candidate.json'))['semanticReview'])\""
+  },
+  {
+   "text": "孤儿键守卫：EXTRA_TASK_QUOTES 中指向不存在任务或未知栏位的键会使构建失败（本轮据此刻意发现 T02b/T25 两个匹配不到任务的键与 T07.result 的重复字典键）。",
+   "result": "pass",
+   "reproduce": "见 build.py 的 _all_ids/_known_cols 守卫与 AST 重复键扫描"
+  }
+ ],
+ "changes": [
+  {
+   "path": "loop/state/out/read_sanguo_L1_0067.candidate.json",
+   "kind": "append-only"
+  }
+ ],
+ "sourceHashes": {
+  "data/cache/fe42d01f3826fe8096f86614.docs.json": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+  "data/cache/fe42d01f3826fe8096f86614.json": "04802afa6910e056b797a1586eb03c06820036907d248b17d7e05d388ad4b489"
+ },
+ "remaining": [
+  "未做独立语义复核与反向验证（「这一段里还漏了什么」的探针）：semanticReview=not-performed，等待 VERIFIER。",
+  "本轮的候选文件是在上一轮（10:45 前后、已死进程 w-dafeng-1 的另一实例）留下的同名产物上覆盖写入的：该轮留下了 candidate 与一份 submit.json，但**没有生成规范记录** loop/state/out/read_sanguo_L1_0067.json，且其 submit.json 未记录 validation/submittedAt，其声明的候选哈希 d9bf3185… 与我接手时的文件内容不符（实测 ae906d2d…）⇒ 该轮提交从未通过校验器。我未采信其任何结论，全部内容为本次重读原文后重新产出。",
+  "T02.cost / T20.cost / T23.cost 把落在行动者之外的具名一方（孙权出物资、牧童失羊、曹操一方伤亡）登记为代价，并逐条用 costBearer 写明承担者、在 text 里点明「不是行动者的代价」。若复核口径认为 cost 只应记行动者自身代价，这三条应改为 null。",
+  "T04.objective、T08.objective、T09.objective 记 null 并各写了 Note：原文未写这三处行动者的目标（T04 连放箭者都未点名）。若复核认为可由人物语或场景推出目标，这三栏应补值。",
+  "F08（遁甲天书三卷）记为 partially-resolved：「骑鹤」「形不见」与左慈自述的天遁/人遁功能相合，但原文从未把任何具体动作归因于某一卷遁法，「地遁」在本区间无对应动作。更干脆的判法（resolved 或移入 notForeshadows）都有道理，判据已写在条目内。",
+  "causeEdges 中 C08/C10/C13/C14/C15/C17/C20/C21/C22/C23/C24/C25/C27/C28/C30/C32/C33 的 mechanism 是我给出的归纳（basis=derived），方向由多段原文支撑但机制本身非原文直述；复核若要求机制也必须逐字可引，这些应降级或删除。",
+  "worldSettings 地点收录口径（14 个）写在各条 explain 里，未单列「收录判据」字段：汉中、温州、峨嵋山、松江记 mentioned，濡须口/合淝/邺郡/许昌/秣陵/城南教场/演武厅/魏王宫/峪口/江口记 arrived。复核若用别的口径会得到不同的地图。",
+  "未在共享工作树创建 worktree（按 loop/README：HEAD 是 10-04 的过时源码，worker 不建 worktree）；本轮产物均在共享树 loop/ 下追加式写入。"
+ ],
+ "rollback": {
+  "kind": "append-only",
+  "strategy": "delete-added-files",
+  "files": [
+   "loop/state/out/read_sanguo_L1_0067.candidate.json"
+  ]
+ },
+ "reworkOf": "read:sanguo:L1:0067",
+ "reworkReason": "上一轮同名 agent 实例（10:52 前的进程）留下了 candidate 与 submit.json，但规范记录 loop/state/out/read_sanguo_L1_0067.json 不存在、submit.json 无 validation 且其声明哈希与文件不符 ⇒ 该轮提交未通过校验器。本轮由新租约进程重读原文重新产出并走完整提交。"
+}

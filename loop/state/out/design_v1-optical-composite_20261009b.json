@@ -1,0 +1,123 @@
+{
+  "task": "design:v1-optical-composite:20261009b",
+  "agent": "w-gpu",
+  "status": "done",
+  "summary": "换了机制（一张 DoubleSide 交错 → 先远面 BackSide / 后近面 FrontSide 两趟显式合成），补丁这次真的可用（继承那份有 PASS_SINGLE 未定义 + git apply 报 corrupt patch at line 37 两处致命缺陷），单趟逐像素不变、恢复精确、健康全 0；但按任务的验收判据「厚处遮挡后景」实测**不成立**（棋盘板透过率 87.4% → 89.3%，多透 2.2%），所以如实判 reject_no_visible_gain，不制造通过。另交真实轨道录像（两臂各 24 帧、24 个不同相机位、rendererFrame 严格递增、H.264 MP4）。",
+  "evidence": [
+    {
+      "path": "loop/state/out/design_v1-optical-composite_20261009b.artifact.json",
+      "sha256": "63ce4cec10a377e75d58e011d0a5943504c468bef670884a40bca45459720385",
+      "kind": "artifact"
+    },
+    {
+      "path": "loop/state/out/design_v1-optical-composite_20261009b.patch",
+      "sha256": "18de56926692ab870019f57af28b88060a50fdb3da97654875196197765a8341",
+      "kind": "candidate-patch"
+    },
+    {
+      "path": "/tmp/castline-shots/review-20261009b/optics-composite-v3/ab-report.json",
+      "sha256": "d399e9f3137e1233ae7103aa93e8300c9ebc7028908fa25428efb4b0eb0c3a73",
+      "kind": "real-ab"
+    },
+    {
+      "path": "/tmp/castline-shots/review-20261009b/optics-rotation-v2/rotation-report.json",
+      "sha256": "4e4de82c96131b4b6f5e62363bf49a86691788d3f309790525eefd69ee889c88",
+      "kind": "rotation-record"
+    },
+    {
+      "path": "/tmp/castline-artifacts/review-20261009b/rootcause-vH.json",
+      "sha256": "11c25c1edef7f519a1635dafb89a4a65a7ea5526aea2893be9a72176a60af472",
+      "kind": "root-cause-probe"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "继承的候选补丁不可用 D1：`grep -rn PASS_SINGLE js/` 零命中，而它写了 uPass:{value:PASS_SINGLE} ⇒ 建晶冠时必抛 ReferenceError。我改用字面量 0.5 单点默认。",
+      "result": "pass"
+    },
+    {
+      "text": "继承的候选补丁不可用 D2：对旧 patch 跑 `git apply --check` 报 `error: corrupt patch at line 37` ⇒ 合并任务根本应用不了。我这份由真实 diff 生成，`git apply --check` 实测通过。",
+      "result": "pass"
+    },
+    {
+      "text": "单变量性（默认关闭、零风险）：parity gate 在同一帧内 baseline vs uPass=0.5，`singlePassIdentical: true` ⇒ 默认路径与改动前逐像素相同。",
+      "result": "pass"
+    },
+    {
+      "text": "同相位真实 render A/B/恢复：full/oblique/dark/rotateA 四视角 sameClock+sameCamera、rendererFrame 严格递增、restore 与 restoreDetail 逐像素等于 baseline；健康门 jserr/jsrej/shaderErrors/glError 全 0。",
+      "result": "pass"
+    },
+    {
+      "text": "覆盖守恒式核对：1-(1-aFar)(1-aNear) == aProd == 1-(1-aSingle)^2，实测 max|err| < 1e-12。",
+      "result": "pass"
+    },
+    {
+      "text": "验收判据「厚处遮挡后景」= **fail**：晶体后放不透明棋盘板，棋盘对比度存活率 生产 87.4% → 候选 89.3%（多透 2.2%，方向相反）。根因是守恒式按构造保持遮挡总量不变。",
+      "result": "fail"
+    },
+    {
+      "text": "验收判据「无硬黑补丁」= pass：新增近黑像素成块(≥40px)且硬边(平均落差>28)的区域在四视角各为 0（full 9px/oblique 9px/dark 68px/rotateA 63px 散点）。",
+      "result": "pass"
+    },
+    {
+      "text": "旋转不是截图冒充：两臂各 24 帧、distinctCameras=24、rendererFrame 严格递增(14074→14764 / 115174→115864)、glErrors=[0]，用真实帧间隔编码成 H.264 MP4；并在报告里写明它是 canvas 帧序列而非 CDP screencast、且 tAnim 被钉住属相机轨道记录。",
+      "result": "pass"
+    },
+    {
+      "text": "早期 probe 用 position.y 当 vH，与着色器 `vH = aH`（CROWN_VS）不符 ⇒ 那个口径的分布结论作废；本轮 rootcause-vH.json 只读真实 aH 属性。",
+      "result": "pass"
+    },
+    {
+      "text": "受保护路径未动：js/core/scene-mats.js 与 js/scene.js 与 originals 逐字节相同（sha256 09027867… / 9c240b6f…），全部写入只落在 loop/state/out 与项目外 /tmp。",
+      "result": "pass"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/design_v1-optical-composite_20261009b.patch",
+      "kind": "append-only"
+    },
+    {
+      "path": "loop/state/out/design_v1-optical-composite_20261009b.artifact.json",
+      "kind": "append-only"
+    }
+  ],
+  "sourceHashes": {
+    "js/core/scene-mats.js": "0902786787855da799e5f54799f8413b1ed731c50a1a33189236608b2567890b",
+    "js/scene.js": "9c240b6f752e77543309a034ac34e949c29357ff826012da8638a03381e5d6ac",
+    "data/cache/ed3dc1255ca08fbdaae30bbd.json": "3005a49ae29146d3a7b78bc35767c0407bd265f459b7aed715306c51309b8eb5"
+  },
+  "remaining": [
+    "「厚处遮挡后景」未成立：守恒式按构造保持遮挡总量不变，净收益为 0（甚至 +2.2% 多透）。下一步应改「覆盖总量随真实光程单调上升」，而不是继续拆前后趟。",
+    "「薄棱透光」未获独立证据：本次 64px 量测格下薄棱样本为 0，不能与厚处分开口径。",
+    "仅西游记一个人物（孙悟空）、1920×1080，非三书、非原生 4K。",
+    "无持续性能/长时曲线、无真机、无读屏、无独立艺术审阅；本裁决是我自己的测量，独立审阅者有否决权。",
+    "下谱紫晶在掠射角的独立检查未做。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/design_v1-optical-composite_20261009b.artifact.json",
+      "loop/state/out/design_v1-optical-composite_20261009b.patch"
+    ],
+    "note": "两个 writes 路径是追加式产物；生产源码未被修改（js/core/scene-mats.js、js/scene.js 与 originals 逐字节相同），所以无需回滚任何受保护路径。"
+  },
+  "inheritedAttempt": {
+    "of": "loop/state/out/design_v1-optical-composite_20261009b.patch @ 2026-10-09T19:25 (agent rc=1)",
+    "agentExitRc": 1,
+    "causeInLog": "log loop/state/logs/w-gpu-design-v1-optical-composite-20261009b-20261009-185547.log 尾部为 `dsh: RATE_LIMIT: 云端中转未在当前网络区域提供服务` ⇒ 基础设施失败，非任务结论",
+    "defectsFound": [
+      "PASS_SINGLE undefined",
+      "patch corrupt at line 37"
+    ]
+  },
+  "submittedAt": "2026-10-09T12:04:46Z",
+  "wallClockSeconds": 2234,
+  "wallClockFrom": "lease.startedAt",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-09T12:04:46Z"
+  },
+  "verifyState": "pending"
+}

@@ -1,0 +1,210 @@
+{
+  "task": "verify:xiyou:L0:0080",
+  "verifier": "w-verify-4",
+  "role": "VERIFIER（独立反向复核者）",
+  "reviewedTask": "read:xiyou:L0:0080",
+  "reviewedCandidate": "loop/state/out/read_xiyou_L0_0080.candidate.json",
+  "reviewedCandidateSha256": "03c4dd6e85e2317372490ebc5d8aed12ae65b715434d742508c47c71f045a289",
+  "reviewedAuthor": "w-read-4",
+  "selfSign": false,
+  "source": {
+    "path": "data/cache/a065244455cfb2221bcda94a.docs.json",
+    "docIndex": 0,
+    "docName": "西游记",
+    "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+    "docsSha256Verified": true,
+    "range": [578400, 585361],
+    "codepoints": 6961,
+    "segmentSha256": "d94f20ac2d83032483e4d0933cf38307266527a3810436a4e157bd92ecd6a96d",
+    "boundaryCheck": "docs[0].text[578400:578424]=='第八十回　姹女育阳求配偶　心猿护主识妖邪\\n\\n却说'；text[585337:585361]=='兴时僧赞僧。毕竟不知怎生离寺，且听下回分解。\\n\\n'（本回末）"
+  },
+  "verdict": "partial",
+  "method": [
+    "1) 先自己读原文 [578400,585361) 全 6961 codepoint（分四段通读，未先看候选结论），按 VERIFIER.md『顺序不能换』。",
+    "2) 抽取项核对：机械遍历候选全部 173 个 quote 对象，断言 text[start:end]==quote、区间内、全文唯一；并单独查五栏是否共用同一句。",
+    "3) 反向验证：用 12-gram shingle 把候选整文件（含其元数据）与切片每一非空行求交，得到『候选完全没碰的原文行』；再对 13 处定点探针逐条 find() 确认，区分『没引』与『完全没处理』。",
+    "4) 误杀检查：逐条读 rejectedEdges(6)/rejectedForeshadows(5)，核对是否把合法的因果边或伏笔挡掉。",
+    "5) 幻觉/越权检查：扫候选全部专名（30 个 token）是否在切片存在；核对 semanticReview 声明与 resultIsSuccess 分布。",
+    "6) 引用核验：seed=800080 随机抽 5 条 quote，find() 一次并比对偏移。",
+    "7) 候选自述数字复算：machineSelfCheck 的 14 个计数、quoteMarkLegend 的引号条数、textPairingAudit 的引号配对与两处缺陷偏移，全部独立重算。",
+    "8) 复算脚本与输出：<artifact>/read-0080-verify/verify_0080.py（sha256 9e791afd…）、verify_0080.out.txt（sha256 1c36cf0f…）。可复现命令见 notes.reproduce。"
+  ],
+  "quoteAudit": {
+    "note": "这是本次复核唯一『零缺陷』的一项：结构化引文层完全干净。",
+    "quoteObjects": 173,
+    "sliceExactMatch": 173,
+    "outOfRange": 0,
+    "nonUniqueInFullText": 0,
+    "distinctQuotes": 111,
+    "duplicateQuoteAcrossTaskSlots": 0,
+    "crossTaskSharedQuotes": 0,
+    "randomFiveFind": [
+      {
+        "path": "tasks[0].action.quotes[0]",
+        "quote": "好妖精，不动绳索，把几声善言善语，用一阵顺风，嘤嘤的吹在唐僧耳内。",
+        "start": 581531,
+        "end": 581564,
+        "result": "逐字命中，find()==581531 == 声明 start，全文唯一"
+      },
+      {
+        "path": "knowledgeDiffs[2].evidence[0]",
+        "quote": "你不认得。那三个丑的",
+        "start": 584979,
+        "end": 584989,
+        "result": "逐字命中，find()==584979 == 声明 start，全文唯一"
+      },
+      {
+        "path": "tasks[5].result.quotes[1]",
+        "quote": "化斋还是小事，且去看我师父去。",
+        "start": 580936,
+        "end": 580951,
+        "result": "逐字命中，find()==580936 == 声明 start，全文唯一"
+      },
+      {
+        "path": "themeReadings[1].support[1]",
+        "quote": "三藏拽步前走，沙僧挑担",
+        "start": 582942,
+        "end": 582953,
+        "result": "逐字命中，find()==582942 == 声明 start，全文唯一"
+      },
+      {
+        "path": "foreshadows[0].evidence[0]",
+        "quote": "今被他一篇散言碎语带去",
+        "start": 581494,
+        "end": 581505,
+        "result": "逐字命中，find()==581494 == 声明 start，全文唯一"
+      }
+    ]
+  },
+  "counterExamples": [
+    {
+      "id": "CE1",
+      "claim": "causeEdges[5]（C6）的 from/direction 写作『三藏以师父身份下令“不要管他，我们去罢”』，但该条给的三条 evidence 里，没有任何一条包含『不要管他，我们去罢』这七个字；最接近的一条只引到『也罢，也罢。八戒啊』（581291-581300）就在被下令的内容之前切断。以引文层论，这条因果边的『因』在半数证据上是悬空的——命令的原话没有被引出来。",
+      "quote": "也罢，也罢。八戒啊，你师兄常时也看得不差。既这等说，不要管他，我们去罢。",
+      "quoteStart": 581291,
+      "quoteEnd": 581327,
+      "why": "被引的三条：581291-581300『也罢，也罢。八戒啊』、581364-581378『四人果一路前进，把那怪撇了。』、581335-581346『好了！师父是有命的了！』——逐一在原文核对，前一条止于『八戒啊』，命令的宾语（不要管他，我们去罢，全文绝对偏移 581317-581326）落在引文之外；后两条是结果与旁证。方向本身与原文相符（三藏确实说了这句），因此这不是编造，而是**证据不完整**：候选在 provenance 里自称已把这类『引文止于从句开头』的缺陷修掉（D2 明写此形态），此处漏修一条。可复现：text.find('不要管他，我们去罢')==581317，且该串不被任何候选 quote 跨度覆盖。"
+    },
+    {
+      "id": "CE2",
+      "claim": "tasks[3]（T4）result.quotes[0] 与 rejectedEdges[2]（X3）evidence[1] 都引『那道人引定唐僧』（583916-583923），并在正文里把它当作『后院齐整/与外面甚是不同』的依据；但这七个字里没有『齐整』也没有『甚是不同』——那句话的谓语在引文之外。相比之下 rejectedEdges[2].why_rejected 里用「」（作者措辞）转述了『比外边甚是不同』，恰恰说明撰写时看到了那半句却没把它纳入引文。",
+      "quote": "直至三层门里看处，比外边甚是不同",
+      "quoteStart": 583924,
+      "quoteEnd": 583940,
+      "why": "原文 583916 起的完整句是『那道人引定唐僧，直至三层门里看处，比外边甚是不同，但见那：青砖砌就彩云墙，绿瓦盖成琉璃殿……』。候选抽了主语就停，后续 190 字的叙述句（叙述层对前后院差异的**唯一**直接描写，583924-584106）在候选整份文件里一次都没出现（12-gram 交集为空）。这条不构成编造——引文本身逐字可查——但『引文撑不起该栏结论』这一形态，正是候选自己在 provenance.defectsFoundAndFixed 里列为 D2/D3/D4/D5 并声称已修的四条同型缺陷，此处又出现两次（T4.result 与 X3.evidence）。"
+    }
+  ],
+  "reverseChecks": [
+    {
+      "found": "候选整份文件（含全部元数据）与原文切片做 12-gram 求交后，有 6 行、共 694 字（占切片 10.0%）**没有任何一个字被候选碰过**。它们不是零散字词，而是三处完整的成段内容：①三藏的思乡诗与师徒关于『西天路还在那里』的整段对话（578789-579139）；②三藏警戒松林、引出那篇黑松林赋的整段（579168-579255）；③道人引三藏入三层门后那段 190 字的寺貌赋（583916-584106）。候选对『三藏思乡』『黑松林赋』『后院齐整』三件事在结论层只字未提。",
+      "quote": "老师父缓观山景，忽闻啼鸟之声，又起思乡之念",
+      "quoteStart": 578885,
+      "quoteEnd": 578906,
+      "why": "这一条只说明**覆盖有洞**，不说明候选写错。10% 里包含大量韵文（赋、诗），而 READER 契约并未要求逐句覆盖；但其中『直至三层门里看处，比外边甚是不同』是叙述句而非韵文，且正是 CE2 那条结论的落点，属实质遗漏。可复现：脚本 [3] 段输出 6 行未覆盖区间。"
+    },
+    {
+      "found": "行者那段 159 字的独白（579761 起）里，他自述了**此行目标**与**身份自认**两层内容，候选全部没有碰：既没进 states（S3 只记了他『不以为意→详察不定』的警觉变化），也没进 worldSettings，更没进任何 task。原文里这是行者在整回中唯一一次交代动机。",
+      "quote": "若我老孙，方五百年前大闹天宫之时，云游海角，放荡天涯，聚群精自称齐天大圣，降龙伏虎，消了死籍",
+      "quoteStart": 579845,
+      "quoteEnd": 579891,
+      "why": "接下去还有『手下有四万七千群怪，都称我做大圣爷爷』（579922-579940）与『想师父头顶上有祥云瑞霭罩定，径回东土，必定有些好处，老孙也必定得个正果』（579965-580000）。候选的 S3 把这段独白只当成『夸师父祥瑞』的过渡，丢掉了『他为什么跟着走』的动机句。这不是编造，是**遗漏**：一个 task（T6）的 actor 是行者、目标却是『化斋』，而行者自己说的目标（得正果）没有被登记。"
+    },
+    {
+      "found": "三藏进破寺时的**情绪**被候选整个跳过：叙述两次直写他落泪，候选没有任何条目引用。T4 把这一节处理成纯行动链（借宿→硬着胆进门→被钟声唬跌），cost 只记身体受惊（唬跌两回），漏掉原文用两句话写出的哀伤反应。",
+      "quote": "推开看时，忍不住心中凄惨",
+      "quoteStart": 583132,
+      "quoteEnd": 583144,
+      "why": "紧接着 583181 还有一句叙述：『长老忽然吊下泪来』（583181-583189）。这两句与 T4.cost 里『被唬跌两回』是同一节里的两种反应，性质不同（前者是触景伤情，后者是被声音惊吓）。候选的 cost 只取后者，且 basis 标 explicit——这没有违反契约（cost 未必要穷尽），但反过来说明 T4 的 state 层不完整：S2 只覆盖了他对女子的态度变化，没有覆盖他在寺中的情绪波动。"
+    },
+    {
+      "found": "候选把三藏对寺的**疑问**当成 T4 的结果（引『道人，你这前边十分狼狈』584120-584131），但道人给出的回答里，有一句是候选完全没有处理的**世界观陈述**：道人用『清混各一，这是西方的事情』把前狼狈/后齐整解释成一种本地常态。候选的 W2.caveat 只说『成因只有道人一面之词』，没有登记这句对『西方』的整体判断。",
+      "quote": "清混各一，这是西方的事情。",
+      "quoteStart": 584249,
+      "quoteEnd": 584262,
+      "why": "这是本回里唯一一句对『西方』（即取经目的地一带）作整体描述的句子，性质接近 worldSettings 的 rule；候选现有 12 条 worldSettings 里没有它。它与候选 W11（本地日落后闭门的惯例）是同一说话人、同一场景下给出的两条『本地怎么运作』的说明，只收了一条。属遗漏而非编造。"
+    },
+    {
+      "found": "候选 W8（断砖）把 quote 的 factStatus/kind 写成 narrated/utterance，同一对象内两个字段互相矛盾；脚本对全部 173 条引文做的 factStatus vs kind 一致性检查里，这是**唯一**一处不一致。它在语义上应判 narrated（『他听见人语，扒起来，拾一块断砖，照钟上打将去。』是叙述句，不在任何引号跨度内——脚本已核该引文不落在原文任何 “…” 跨度中）。",
+      "quote": "他听见人语，扒起来，拾一块断砖，照钟上打将去。",
+      "quoteStart": 583589,
+      "quoteEnd": 583612,
+      "why": "这是本次复核发现的**唯一一处字段级自相矛盾**。它只污染 kind 字段，不污染 factStatus：复算 factStatus 分布 = 98 utterance / 75 narrated，与候选 machineSelfCheck.factStatusDistribution 自报值**完全一致**（该声明成立）；而 kind 分布复算 = 99 utterance / 74 narrated，唯一差异就是这个对象。该条的 explain 与 name 都按 narrated 在写，且 W8 不在任何 task 五栏里，不改变任何结论。属可修正的字段错填，不构成编造。"
+    },
+    {
+      "found": "候选 quoteMarkLegend 与其 machineSelfCheck 的引号计数与机械复算不符（三处，均为自述数字错，不影响结论层）：①legend 称「」』现存 135 条』，机械栈式配对复算 **147** 条；②legend 与 inlineQuoteMarksNote 称『…』直引 275 条，复算 **290** 条；③legend 称含省略号的「」共 8 条，复算 **7** 条。此外 legend 称「」中能在本区间 find() 命中的『只有 1 条（小事）』，复算实为 **2 条**：除『小事』(580940) 外，causeEdges[11].note 的「所以」也在切片内命中（绝对偏移 579835，原文『……十世修行的好人，所以有此祥瑞罩头』）。",
+      "quote": "十世修行的好人，所以有此祥瑞罩头",
+      "quoteStart": 579827,
+      "quoteEnd": 579843,
+      "why": "第三点与 legend 自己的定义直接冲突：legend 声明「」= 作者措辞、不是原文引用，而『所以』是原文实有的连词，落在「」里会被读成作者措辞。候选 provenance D7 记的正是『把原文近似词写成「」会被误读为引文』这一类修，此处漏修一条。三处都是计数/标记层问题，不动摇任何 task/causeEdge/foreshadow 结论，故只记为缺陷、不作为判 fail 的依据。"
+    }
+  ],
+  "counterCheck": {
+    "note": "反向验证的自我否定（VERIFIER.md 允许判自己错）。我最初把『T6.result 称三藏腹中饥了没有任何后文照应』列为疑似错误，理由是 581350 有行者『出松林外，有人家化斋你吃』、585317 有寺里『收拾办斋管待』。逐字核对后**撤回**这条反对意见：581350 是行者的提议（尚未发生），585317 的办斋是寺方待客、不是把斋饭送到三藏手里以了结他 579628 那句『腹中饥了』。候选该句表述在原文范围内成立，不作为 counterExample。",
+    "withdrawn": ["T6.result.text 关于『腹中饥了没有后文照应』的指控"]
+  },
+  "misfireCheck": {
+    "note": "误杀检查结果：未发现误杀。候选 rejectedEdges(6)/rejectedForeshadows(5) 共 11 条，全部引证逐字命中；逐条读其 why_rejected 与原文对照，判据都成立。",
+    "reviewed": [
+      "X1 否认『黑气→害唐僧』连边：原文黑气只由行者看见并作判断，叙述层确未交代它是什么，且从未把它与女子对应。判据成立。",
+      "X2 否认『王法条律→三藏放弃带人』：582351 三藏当场驳回并加码（『带了他去，凡有事，都在我身上』），方向确实相反，真正的转折在 582561『如何处置』。判据成立。",
+      "X4 否认『女子立刻捉走唐僧』：她的『随手捉将去』（581468）是内心反问，实际是 582060『那怪跌跌鞋，束束裙』。判据成立。",
+      "Y4 否认『金箍棒是伏笔』：给的两条引文分别是 578678 与 583096。原文切片里『金箍棒』另有一处 579911（行者独白『手执着金箍棒』），该条未提及——但这条遗漏反而支持其结论（独白是自述而非回收），不构成误杀。",
+      "Y5 否认『山景赋是伏笔』：所引『就是托塔天王来到此，纵会降妖也失魂！』(579505-579524) 落在原文 579215 起的『…你看：』引号跨度内，是**三藏话语的一部分**而非叙述者韵文；候选把其 speaker 标为『三藏』（正确），why_rejected 却称『它是韵文铺陈』并称『本区间也没有任何人物引用它』。该表述与事实不符（引它的正是三藏），但它服务的是『不算伏笔』这一结论，而结论本身正确。记入 notes 作为表述瑕疵，不判 fail。"
+    ]
+  },
+  "hallucinationCheck": {
+    "note": "未发现幻觉或越权。",
+    "findings": [
+      "专名扫描：30 个 token（唐僧/三藏/行者/八戒/沙僧/姹女/太乙金仙/贫婆国/镇海禅林寺/喇嘛僧/道人/比丘国/黑松大林/金箍棒/铁棒/钵盂/断砖/铜钟/齐天大圣/如来/观音/文殊/金刚/伽蓝/土地/托塔天王等）中，**没有一个**是『候选里有、切片里没有』。",
+      "结局：候选未预告下一回。F2/F3/F4/F5 全部 resolved=false、payoffScope=beyond-unit；T2/T3.resultIsSuccess 均 False 且理由写明『本区间未兑现』。与 U12 一致。",
+      "结束≠成功：T4/T5 判 True 均限定为『进入寺内/请人进门』这一步，并在 resultIsSuccessNote 里显式排除后续；未把回末『收拾办斋管待』当成功。",
+      "semanticReview 保持 'not-performed'，未越权声明语义已核。",
+      "把说法当事实的检查：K1/K2/K3/K4/K5 五条知识差全部把『谁知道』与『叙述层说了什么』分开写；S5/W2/C11 对道人所述的寺史一律标 unverified 并写 caveat。"
+    ]
+  },
+  "selfReportAudit": {
+    "note": "候选自报数字复算：machineSelfCheck 的 14 个计数**全部一致**（这是罕见的干净项）；textPairingAudit 的引号配对与两处缺陷偏移**全部一致**；引号标记条数与 legend 不符（见 reverseChecks 第 6 条）。",
+    "countersAllMatch": true,
+    "pairingAuditMatches": true,
+    "pairingDetail": "切片开引号 108 / 闭引号 106，与自述一致；D1 abs=584267、D2 abs=585199 两个未闭合开启引号逐字核对无误；R1 补于 584273（'。'）、R2 补于 585209（'！'）位置合理。",
+    "legendMismatches": [
+      "「」条数：自述 135，复算 147",
+      "『…』直引条数：自述 275，复算 290",
+      "含省略号的「」：自述 8，复算 7",
+      "「」中可在切片 find() 命中：自述 1，复算 2（『小事』580940、『所以』579835）"
+    ]
+  },
+  "usable": {
+    "keep": [
+      "全部 173 条结构化引文（逐字、区间内、全文唯一、sourceHash 一致）",
+      "tasks[6] 的五栏分工与 null 标注（T1.cost / T6.cost 均为 null 且 costNote 充分，未用『待验证』或『法律禁止』冒充代价）",
+      "五栏零共用同一句（任务明令禁止项，复算 0 例）",
+      "knowledgeDiffs[5]（K1-K5）——把『谁知/谁不知』与叙述层判断分开",
+      "unknowns[12]（U1-U12）——覆盖了她是什么、黑气是什么、钟响与伤势、担保是否算数等真实空缺",
+      "states[5]、foreshadows[5]（含 F1 in-unit 已回收与 F2-F5 显式 unresolved）",
+      "rejectedEdges[6]/rejectedForeshadows[5] 的 11 条拒绝（未发现误杀）",
+      "themeReadings[2]——两条都带 counter，且 counter 是实质反证而非套话",
+      "selfCritique[3]——三条都指向自己最脆弱的判断，并给出『若复核者认为…应改为什么』的可执行退路"
+    ],
+    "discard_or_downgrade": [
+      "causeEdges[5]（C6）的证据：应把 from/direction 所依赖的命令原话补进 evidence（581291-581327 整句），否则该条『因』的一端不被引文覆盖。",
+      "tasks[3].result.quotes[0] 与 rejectedEdges[2].evidence[1] 对『那道人引定唐僧』的使用：应扩到 583924-583940（『直至三层门里看处，比外边甚是不同』）才撑得起『后院齐整』的结论。",
+      "worldSettings[7].quote.kind：应改为 'narrated'（与同对象 factStatus 一致）。",
+      "quoteMarkLegend 与其 machineSelfCheck.inlineQuoteMarksNote 的三处条数：应按复算值改写，或说明计数口径（若口径是『去重』或『排除元数据区』，应写进口径而不是写绝对数）。",
+      "causeEdges[11].note 里的「所以」：按 legend 定义应改标为 【】或直接写『因果连词』，避免与原文实有词重合被读成引文。",
+      "rejectedForeshadows[4]（Y5）的 why_rejected 表述：『本区间也没有任何人物引用它』与事实不符（三藏的话正引用了它）；结论保留，理由需改写。"
+    ],
+    "not_affected": "上述降级项全部落在证据完整性、字段一致性与自述计数三处，**没有一项触及**：编造、把说法当事实、结束当真成功、时间相邻当因果、一次出现当伏笔。因此不判 fail。"
+  },
+  "notes": "总体判断：判 partial，不判 fail——依 VERIFIER.md『判 fail 必须有 counterExample，且 quote 逐字可查』。我拿到的两条 counterExample（CE1/CE2）都是**引文截断**（引文本身逐字可查，只是没把结论所依赖的那半句包进来），性质是证据不完整，不是编造；而按 READER 硬红线里最重的四类（编造、说法当事实、结束当成功、相邻当因果）逐类查过，**一条都没有**。这是本单元与近批多数候选的实质差别：`read:xiyou:L0:0080` 的引文层是干净的（173/173 逐字命中、越界 0、全文非唯一 0、五栏共用 0），知识差与 unknowns 的克制程度明显高于同批平均，rejectedEdges/rejectedForeshadows 的 11 条拒绝没有误杀，semanticReview 老实写 not-performed。\n\n扣分集中在三处：①**引文截断**两条（CE1/CE2），且与候选自己在 provenance 里声称已修的 D2/D3/D4/D5 是同一形态——说明那轮『修完 8 类缺陷』的自检没有覆盖到全部同型实例；②**覆盖有洞**：与候选 12-gram 零交集的原文有 694 字（10.0%），其中三藏思乡诗与对话、黑松林赋属韵文可解释，但『直至三层门里看处，比外边甚是不同』(583924) 是叙述句且正是 CE2 的落点，行者自述动机那句『老孙也必定得个正果』(579991) 是本回行者唯一的动机交代，这两处属实质遗漏；③**自述计数**三处与机械复算不符（135/147、275/290、8/7），以及「所以」被落在作者措辞标记内——这类数字错在本项目里反复出现（见 loop/state/out 下多份 AUDIT-* 与 P13-UNLOCATED-QUOTES-VERDICT.md），建议后续把 legend 的条数改成由脚本在提交时写入，而不是手写。\n\n不确定处（记为存疑、不据此判 fail）：(a) 我无法判定『那怪/妖精』作为 speaker 字样是否算引文——它出现在 worldSettings[2]/[11].quote.speaker 字段，是说话人标签而非断言引证，结构上不算 quote 对象，但按“…”标记会被读成引用；候选的 legend 已声明说话人标签不适用引文规则，我倾向接受，仅记录。(b) Y5 的 why_rejected 与事实不符这一点，我判为表述瑕疵而非 fail 依据：其结论（山景赋不算伏笔）我独立复核后同意。(c) 行者独白与三藏落泪是否『应当』进 states/worldSettings，取决于 READER 契约对覆盖度的要求，契约未量化；我按『叙述句且承载动机』的标准认为该进，但这属判断而非事实错误。\n\n复核者自陈：本次我未修改被复核文件的任何字节（候选 sha256 03c4dd6e… 与提交记录一致），未写入任何受保护路径，只写了任务 writes 指定的 verdict 文件。",
+  "reproduce": [
+    "cd /Users/carmen/Desktop/星系",
+    "python3 -B '/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261011-195516-813640-53101/测试产物/read-0080-verify/verify_0080.py' | tee '/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261011-195516-813640-53101/测试产物/read-0080-verify/verify_0080.out.txt'",
+    "sha256(verify_0080.py)=9e791afda552b751e2aad1cd61de4e35c001271eecf5c004f4025f9c670d3f8e",
+    "sha256(verify_0080.out.txt)=1c36cf0f1afd485e2ed7d788c1e27a2eaffc02da463e01eb20b02ffa9e31b96a",
+    "sha256(data/cache/a065244455cfb2221bcda94a.docs.json)=c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+    "sha256(loop/state/out/read_xiyou_L0_0080.candidate.json)=03c4dd6e85e2317372490ebc5d8aed12ae65b715434d742508c47c71f045a289",
+    "单点复现 CE1：python3 -c \"import json;t=json.load(open('data/cache/a065244455cfb2221bcda94a.docs.json'))[0]['text'];print(t.find('不要管他，我们去罢'))\" → 581317",
+    "单点复现 CE2：同上 t.find('直至三层门里看处，比外边甚是不同') → 583924"
+  ]
+}

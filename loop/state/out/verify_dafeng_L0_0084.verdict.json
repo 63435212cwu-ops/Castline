@@ -1,0 +1,232 @@
+{
+ "task": "verify:dafeng:L0:0084",
+ "reviewer": "w-verify-0",
+ "roleFile": "loop/ROLES/VERIFIER.md",
+ "candidateUnderReview": "loop/state/out/read_dafeng_L0_0084.candidate.json",
+ "candidateAgent": "w-xiyou-0",
+ "candidateSha256": "e045ca4196eeb685652c91face7acfc3f2ebd5137868ba8b00349b1e45e553ed",
+ "source": {
+  "path": "data/cache/1063b17ca65ec1b76f30e460.docs.json",
+  "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+  "range": [
+   267530,
+   270916
+  ],
+  "sliceSha256": "1e1a30aba0de667aba8ab4a9cc60d99d0161a232e9f27e27d7a33eb79d283499",
+  "boundaryCheck": "复核者独立复算：text[267530:267542]=='第八十五章 卑职有事禀告'、text[270916:270931]=='第八十六章 一个成熟的双面间谍'（切片哈希与候选一致）"
+ },
+ "method": "先不通读候选，先把 [267530,270916) 原文整片读完并手写要点，再打开候选逐条比对。机器侧：148 条 quote 对象（74 条去重）逐条 text[s:e]==quote / len==end-start / find()==start / 独占性复算；inRange/chapterAtOffset/occurrencesInFullText/occurrencesInUnit/sourceHash 逐字段复算；任务五栏做「区间求交」而非只做相等判定；随机种子 20261009 抽 5 条 quote 独立 find 一次；8 条区间外引文按 第[一二三四五六七八九十百千零两]+章 正则重定位；对候选散文里每一处「offset N」数字逐个回原文切片核对；另做反向验证（原文可证但候选未覆盖的事实）与误杀检查。审计脚本：/tmp/verify-0084/audit.py（不 import 任何构建脚本）。",
+ "verdict": "partial",
+ "verdictRationale": "引用层几乎无懈可击：148/148 条引文逐字命中、偏移与长度全对、sourceHash 全对、inRange 与 occurrencesInUnit 复算一致、8 条区间外引文只有 1 条章节归属错误。无编造人物/事件/结局，无「结束当成功」（T3 的 result 明确停在「请求出口」、cost=null 且带理由），semanticReview 如实保持 not-performed。但有两处必须修的缺陷，且都属于「下游照抄就会引入错误事实」那一类，因此不能判 pass：(1) F2 回收点的章节归属错了 61 章（把第两百六十章 技高一筹写成第一百九十九章 浮香的小故事），根因是候选的章节索引正则不含「两」字头章号，导致 99 个「第两百X章」标题全部无法解析、回退到最后一个可解析章号；(2) 候选自报 verification.taskColumnsShareNoQuote=true，但 T2 的 objective 与 action 引文实际是包含关系（T2 是唯一有共用的任务，任务规则明确禁止同句充当多栏依据）。两处缺陷都局部、可定点修复，且不动摇 tasks/causeEdges/states/unknowns 的主体，故判 partial 而非 fail；也无任何一条 counterExample 属于主观否决，故不判 fail。",
+ "counterExamples": [
+  {
+   "claim": "foreshadows[F2].payoff.quote.chapterAtOffset = '第一百九十九章 浮香的小故事'（payoff.chapter 与 payoffNote 同写「第一百九十九章」），status=resolved-out-of-range。",
+   "quote": {
+    "quote": "第两百六十章 技高一筹",
+    "start": 2507355,
+    "end": 2507366,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "inRange": false,
+    "findHits": 1,
+    "verbatim": true
+   },
+   "why": "回收点引文「这些狐尾来自万妖国公主，九尾天狐。」的 start=2507409，其最近的前置章节标题是 offset 2507355 的「第两百六十章 技高一筹」，不是第一百九十九章。真实的「第一百九十九章 浮香的小故事」标题在 offset 2097874，距该引文 409535 个 codepoint。章节归属错了 61 章。根因可复现：用不含「两」的正则 `第[一二三四五六七八九十百千零]+章\\s` 建索引时，全文 932 个章节标题只有 808 个能解析，99 个「第两百X章」标题被整体跳过，于是 offset 2507409 回退到最后一个可解析章号「第一百九十九章」；再按章号取标题时命中最后一个同名标题（2097874 的「浮香的小故事」）。同一根因不影响本区间：本区间的 140 条 in-range 引文全在第八十五章，该章可用不含「两」的正则解析，所以 in-range 的 chapterAtOffset 全对——这解释了为什么缺陷只在这 1 条上显形。修法：章节索引正则加入「两」，或对章节标题改用章号升序去重取首个匹配。",
+   "counterQuote": {
+    "quote": "这些狐尾来自万妖国公主，九尾天狐。",
+    "start": 2507409,
+    "end": 2507426,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "inRange": false,
+    "findHits": 1,
+    "verbatim": true
+   }
+  },
+  {
+   "claim": "verification.taskColumnsShareNoQuote = true、taskColumnSharedQuotes = []，且在 selfCritique[1] 里自述「修完后 taskColumnsShareNoQuote=true」，把「五栏零共用」当成已核验的事实。",
+   "quote": {
+    "quote": "宽敞的褂子遮挡住了魁梧的身躯，用汗巾裹住大光头，混入早起的房客里",
+    "start": 269081,
+    "end": 269113,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "inRange": true,
+    "findHits": 1,
+    "verbatim": true
+   },
+   "why": "T2 的 objective 引文是 [269062,269122)「第二天清晨，六号又换了一身寻常的长褂，宽敞的褂子遮挡住了魁梧的身躯，用汗巾裹住大光头，混入早起的房客里，默默离开了客栈。」，action 引文是 [269081,269113)「宽敞的褂子遮挡住了魁梧的身躯，用汗巾裹住大光头，混入早起的房客里」——后者是前者的真子串，两栏区间相交。任务提示词禁止「把同一句话同时当作多栏的依据」，并对 T1/T3 的 4 处相等型共用做了删除，但 T2 这一处是**包含型**共用，相等判定（x==y）抓不到，所以被自检放过了。T2 是三个任务里唯一仍有共用的（T1、T3 复算为 0 处）。这不是措辞问题：同一句既当「他想要什么」又当「他做了什么」，正是该规则要防的那种「一栏没有独立依据」。修法：objective 只保留「默默离开了客栈」这一移动分句（或改用 [269357,269397) 的返回住处句作为唯一 objective 依据），把改装细节完整让给 action。",
+   "counterQuote": {
+    "quote": "第二天清晨，六号又换了一身寻常的长褂，宽敞的褂子遮挡住了魁梧的身躯，用汗巾裹住大光头，混入早起的房客里，默默离开了客栈。",
+    "start": 269062,
+    "end": 269122,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "inRange": true,
+    "findHits": 1,
+    "verbatim": true
+   }
+  }
+ ],
+ "reverseChecks": [
+  {
+   "found": "朝堂反应的执行面被整段漏掉：元景帝对京城五卫指挥使与打更人指挥使魏渊的当面斥责，候选全文 0 次「元景帝」、0 次「斥责」，只有宋廷风转述的「不知道朝堂诸公会怎么对付魏公」这一未然句。",
+   "quote": {
+    "quote": "元景帝狠狠的斥责了京城五卫的指挥使，以及打更人指挥使魏渊。",
+    "start": 270018,
+    "end": 270047,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "inRange": true,
+    "findHits": 1,
+    "verbatim": true
+   },
+   "why": "候选把本区间的朝堂线收成 characterClaims CC8（宋廷风的推测）与 C8（derived 的处境前提），但漏了叙事层已经**执行**的那一步：皇帝已经骂到人。它使「魏渊处境」从传闻升级为叙述事实，也是 T3「博取信任」最硬的前置。缺它会让 C8 看起来比实际更弱（候选自己把 C8 标成「本文件里最弱的一条边」）。"
+  },
+  {
+   "found": "对魏渊的**制度性**攻击被漏掉：都察院御史上书弹劾魏渊。候选 0 次「都察院」、0 次「弹劾」。",
+   "quote": {
+    "quote": "与勋贵向来不合的文官集团也很重视此案，都察院御史上书弹劾魏渊。",
+    "start": 269981,
+    "end": 270012,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "inRange": true,
+    "findHits": 1,
+    "verbatim": true
+   },
+   "why": "这是本区间唯一一条「已立案的攻击动作」，且它解释了为什么魏渊需要许七安这类体制外情报（下文的胆大操作）。候选只用宋廷风一句「他们等这个机会很久了」代表整条朝堂线，导致 worldSettings 的 rule 分区里没有「弹劾/斥责」这一级事件，读者无法从候选看出魏渊面对的是正式弹劾而非舆论。"
+  },
+  {
+   "found": "天地会开场的一次**主动试探**被漏掉：二号问三号「你问万妖国的情报做什么」。候选仅在该句所在的 rejectedForeshadows 条目里以「二号为何试探三号」五字一笔带过，未作为 tasks/states/knowledgeDiffs/causeEdges 的任何一项。",
+   "quote": {
+    "quote": "这时，二号试探道：【三号，你问万妖国的情报做什么。】",
+    "start": 268311,
+    "end": 268337,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "inRange": true,
+    "findHits": 1,
+    "verbatim": true
+   },
+   "why": "这是本区间唯一一处「有人主动质疑许七安的提问动机」，且许七安以「没有回答他」的方式回避——即 T1 的「藏拙」不止对五号（佛陀），也对同伴（动机）。同段叙述还插了「儒家与万妖国并无交集」来给这次试探作制度性理由（候选引了这句，却没用它的功能面）。候选的 knowledgeDiffs[K3] 只覆盖「他藏起自己不确定佛陀存在」，漏了「他藏起自己为何要问万妖国」。"
+  },
+  {
+   "found": "「四号与女子国师有交情」这一身份线索被漏掉，且候选把四号降级成无身份标签的插话者（states[S6] 只写「四号插问『一品？』」）。",
+   "quote": {
+    "quote": "与女子国师有交情的四号问道：【一品？】",
+    "start": 267791,
+    "end": 267810,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "inRange": true,
+    "findHits": 1,
+    "verbatim": true
+   },
+   "why": "原文在这句里同时给出了四号的关系与他的提问内容，关系那半句在后文（第135章一带）是四号身份线的铺设。候选未收进 characterClaims 也未进 foreshadows/unknowns，属于把改写过的概括当成了原文（「四号插问」丢掉了「与女子国师有交情」）。"
+  },
+  {
+   "found": "六号自己也被「捡银子」话题波及：他想起三号那位朋友后心想「贫僧也想天天出门捡银子啊」。候选只在 worldSettings[5].explain 里以「他听见三号『朋友捡银子』时想『贫僧也想天天出门捡银子啊』的处境」一提，未给 offset，也未进 states/knowledgeDiffs。",
+   "quote": {
+    "quote": "贫僧也想天天出门捡银子啊。",
+    "start": 269756,
+    "end": 269769,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "inRange": true,
+    "findHits": 1,
+    "verbatim": true
+   },
+   "why": "这是本区间唯一一处**跨线呼应**（天地会对话线 → 养生堂线），说明许七安的提问在故事内被另一个角色接收并转喻。它也直接解释了六号随后对老吏员「贫僧会解决银子问题」那句话的动机底色，候选的 T2 只把该承诺当成 cost，没接上这层呼应。"
+  }
+ ],
+ "falseKillCheck": [
+  {
+   "item": "rejectedForeshadows 里的「平远伯私底下养了牙子」被判「本区间无回收」而只登记为 characterClaim。",
+   "quote": {
+    "quote": "根据衙门调查，平远伯确实养着牙子组织，但那个六号真的是为了所谓的师弟，没有别的目的？",
+    "start": 272447,
+    "end": 272489,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "inRange": false,
+    "findHits": 1,
+    "verbatim": true
+   },
+   "verdict": "存疑（不足以判 fail）",
+   "why": "候选的理由是「后文第86章才由许七安正式向魏渊陈述」——但候选自己在 F9 里承认回收点可以在紧邻的下一章（F9 的回收点同样落在第八十六章）。同一把尺子下，牙子这条有明确铺设（宋廷风转述的内幕）与明确回收（魏渊当面确认「衙门调查，平远伯确实养着牙子组织」），却被拒；口径不一致。之所以只记「存疑」而不据此判 fail：候选已声明未通读全书、且把该事实登记在 characterClaims 与 rejectedCauseEdges 里没有丢失信息，是否算伏笔取决于伏笔的粒度口径（候选可能按「同一物件出现两次」的严格定义排除）。"
+  },
+  {
+   "item": "rejectedCauseEdges R-02 以「态度消极是许七安的观察句，不是叙述层的定论」为由拒边。",
+   "quote": {
+    "quote": "许七安发现，打更人衙门对待此案的态度极为消极。",
+    "start": 270053,
+    "end": 270076,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "inRange": true,
+    "findHits": 1,
+    "verbatim": true
+   },
+   "verdict": "自相矛盾（已由候选自己的 CC12 覆盖）",
+   "why": "候选的 characterClaims[CC12] 把**同一句**标成 claimStatus=narrator-report、narratorConfirmed=true；R-02 却说它「不是叙述层的定论」。两处对同一句的证据等级判定相反。这不是误杀合法因果（拒边本身有另一条独立理由：消极的原因是宋廷风的人物说法），但同一文件内证据等级自相矛盾，下游若按 R-02 理解会把 CC12 的 narratorConfirmed 当无效。"
+  }
+ ],
+ "quotationAudit": {
+  "quoteObjectsTotal": 148,
+  "uniqueIntervals": 74,
+  "inUnitObjects": 140,
+  "outOfUnitObjects": 8,
+  "verbatimSliceMismatch": 0,
+  "lengthMismatch": 0,
+  "findFirstHitMismatch": 0,
+  "metadataProblems": 1,
+  "metadataProblemDetail": "仅 F2 的 payoff.quote.chapterAtOffset（见 counterExamples 第 1 条）；inRange / occurrencesInFullText / occurrencesInUnit / sourceHash / offsetUnit 全部复算一致。",
+  "randomSpotCheck": {
+   "seed": 20261009,
+   "drawn": 5,
+   "verbatimHits": 5,
+   "offsetAgreement": 5,
+   "picks": [
+    "[267743,267785) 【五：反正我的长辈们是这么说的…】",
+    "[270652,270672) “有是有，不过不在丁号库房。”吏员回答。",
+    "[268600,268673) 【九：功德加身，便意味着福星高照…】",
+    "[612839,612853) 我是在寻找师弟恒慧时救下他的（区间外·第170章）",
+    "[269648,269701) 六号刚踏入院子，便有一位老吏员迎上来…"
+   ]
+  },
+  "proseOffsetAudit": "候选散文里出现的 9 处「offset N」数字全部回原文切片核对，全部指向其声称的内容（262475/461993/538946/547683/612815/612839/296708/297267/31108/2507415 皆命中），无孤立的假偏移。"
+ },
+ "outOfRangeChapterAudit": {
+  "checked": 8,
+  "correct": 7,
+  "wrong": 1,
+  "detail": "第86章(270937)、第93章(296708)、第151章(538935)、第153章(547667)、第170章(612839)、第135章(1696822/1696852) 全部正确；仅 [2507409,2507426) 应为「第两百六十章 技高一筹」，候选写「第一百九十九章 浮香的小故事」。",
+  "rootCauseReproduced": "正则 `第[一二三四五六七八九十百千零]+章\\s`（缺「两」）在全文只解析出 808/932 个标题；加「两」后 offset 2507409 的前置标题正确解析为 offset 2507355 的「第两百六十章 技高一筹」。"
+ },
+ "fabricationCheck": {
+  "personsNotInSource": 0,
+  "eventsOrEndingsNotInSource": 0,
+  "note": "候选出现的全部人名（许七安/六号/恒远/五号/九号/金莲道长/四号/二号/三号/宋廷风/朱广孝/魏渊/南宫倩柔/杨砚/许二郎/店小二/吏员）在本区间原文均可找到。区间外引用的人名（丽娜/恒慧/天蛊婆婆等）都依附于带正确 offset 的区间外引文，不是无源植入。散文里成对「」出现的 101 个短语不是引文而是候选自造的术语标签（如「佛陀是否存在」「功德≠捡银子」「提及≠到达」），属元语言、不构成编造；我逐条核对了其中所有形如逐字引文的（含「…」省略号的），未发现声称逐字而实际不存在者。",
+  "endAsSuccess": "未发现。T3.result 明确写「区间在他说完这句后即结束」并给 cost=null+costNote；T2.result 不写「成功脱罪」；S7.after 写「请求已出口，结果未知」。"
+ },
+ "selfCorrection": [
+  "我自己的第一版审计脚本把「同一引文在全文出现 27 次」报成候选缺陷（九尾天狐。），核对后是候选**正确**登记了 occurrencesInFullText=27、occurrencesInUnit=1，是我的检查器预设了「引文唯一」这一错误前提。已更正，未据此写入 counterExamples。",
+  "我的第一版边界自检用了固定 13 字符切片，得到 unitHeadCheck=False 的假阳性；改用 len(heading) 切片后 text[267530:267542] 与 text[270916:270931] 均逐字命中，与候选一致。",
+  "我最初的章节正则同样不含「两」，因此一度把 F2 的标注算成「不可复现」；补上「两」后才定位到真正根因（候选索引缺「两」）。这一步同时说明该缺陷很容易被复核者自己复制——两个独立实现踩同一个坑，正是它值得写成 counterExample 的理由。"
+ ],
+ "usableAsIs": [
+  "tasks[T1] 五元组（objective/obstacle/action/result/cost）",
+  "tasks[T3] 五元组（含 cost=null + costNote 的「结束≠成功」处理）",
+  "causeEdges C1–C5（explicit，机制句在原文可查）",
+  "states S1–S7（含 S1 如实写「未变化」）",
+  "knowledgeDiffs K1–K5",
+  "worldSettings 14 条（三态字段齐备：placeState/institution/itemStates 均按契约填写）",
+  "themeReadings TH1/TH2（各自带 counter，且 counter 自承解释力边界）",
+  "characterClaims CC1–CC12（narratorConfirmed 标注克制）",
+  "sourceAnomalies 4 条（只登记不判定；offset 采用行首口径且与候选自述一致——见 bookkeepingNits）",
+  "unknowns 15 条"
+ ],
+ "mustFixOrDowngrade": [
+  "必修：F2 的 payoff 章节归属改为「第两百六十章 技高一筹」（offset 2507355 的标题），并把 payoffNote 里「第一百九十九章」一并改正；同时修掉产生它的章节索引正则（缺「两」），否则同类错误会在任何跨过第两百章的区间复发。",
+  "必修：T2 的 objective/action 引文包含关系。objective 收窄为不覆盖 action 的区间，或把 action 的改装句删除改为「六号混在人流里，走向内城。」+「作为佛门弟子…煞气」；随后把 verification.taskColumnsShareNoQuote 的自检从「相等判定」升级为「区间求交」，并在 selfCritique 中更正「已归零」的表述。",
+  "建议修：F5 的 payoffNote 只写「拨款另有原因」，但本区间之外的原文其实明写了归因——第147章许七安自陈「我把六号的信息透露给魏公，他没动六号，而是补交了善款。」既如此，unknowns[7] 里「原文在那里并未归因于六号或许七安」的表述与第147章冲突；即使按区间纪律不写因果，unknowns 的理由句也应改掉，否则是一条会被下游继承的错误事实。",
+  "建议修：R-02 与 CC12 对同一句的证据等级判定相反（narrator-report/narratorConfirmed=true vs「不是叙述层的定论」），二者取一。",
+  "降级建议：C8（derived）与 R-02 的口径冲突、以及「牙子」伏笔的口径不一致，建议由 READER 统一伏笔粒度定义后一次性处理，不必在本次复核里各自打补丁。"
+ ],
+ "bookkeepingNits": [
+  "sourceAnomalies 的 offset 采用「所在行行首」口径（267875/268000/270674 均等于行首，且 char_at_offset 是空格），而全文所有 quote 对象用子串口径。两套口径共存于一份文件，虽与候选自述的登记方式自洽（我按行首口径复算四条全部命中），但下游若按 quote 口径读会取到空格。建议在 sourceAnomalies 条目里显式写 offsetBase。",
+  "candidate.generatedAt 为 null 而 verification 自述已跑完整套复算，时间戳缺失会让「与租约先后」类审计（如受保护路径 mtime 比对）失去锚点。",
+  "candidate 未自带 sha256 字段（哈希写在提交记录与 verification 里），复核者需自行复算；候选 SHA 为 e045ca4196eeb685652c91face7acfc3f2ebd5137868ba8b00349b1e45e553ed，与提交记录一致。"
+ ],
+ "notes": "判定 partial。总体：这是引用层质量很高的一份候选——148/148 逐字命中、偏移/长度/哈希/独占计数全对、无编造、无越权、无「结束=成功」，任务要求的四条区分（placeState、itemStates 四态、institution 三态、多栏依据）大部分真实执行（place 的南疆显式 mentioned、item 四态分开写、null 必带 Note 都做到了）。判 partial 而非 pass 的理由是两条原文可证的错误：F2 回收点章节归属错 61 章（根因是章节索引缺「两」，99 个「第两百X章」标题失解析），以及候选自报「五栏零共用」而 T2 的 objective/action 实为包含关系——后者尤其要紧，因为它是候选在 selfCritique 里明确宣称「已真删掉 4 处共用而不是辩解」之后仍然残留的那一处，属于自检尺子（相等判定）量不到的形状（包含）。判 partial 而非 fail 的理由：两条缺陷都局部、可定点修复，不动摇 tasks/causeEdges/states/unknowns 的主体，且没有任何一条反对意见是拿不出原文引证的。我对自己反向验证的保留：reverseChecks 第 4、5 条（四号身份、六号也想捡银子）严格说属于「候选提到了但没给 offset/没进分区」，是否算「漏」取决于口径，我按各自条目里的措辞如实降级表述，未据此加判。另需说明我做了三次自我更正（见 selfCorrection），其中「章节正则缺两」我自己第一版也踩了——两个独立实现踩同一个坑，正是它值得写成 counterExample 而非琐事的原因。semanticReview 保持在 not-performed：本复核只证明引文定位与元数据，未对解释层做语义认证。"
+}

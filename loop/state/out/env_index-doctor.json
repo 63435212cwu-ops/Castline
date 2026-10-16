@@ -1,0 +1,78 @@
+{
+  "task": "env:index-doctor",
+  "agent": "w-ops",
+  "status": "done",
+  "summary": "索引自检完成（只报告，未改索引生成器）。四项结论：① 题面的 785/46/14 是**旧口径**（eventsLiteral 整串字面）；现行 index 口径 events>0 = 910/101/120=1131，而 14 只出现在旧版三国图谱（events=434 的 152e2a6e 等），当前三国图谱字面口径是 22。② `events>0`≠已精读：实测 read 记录 status=done 且过校验 = 大奉103/西游46/三国30，合计 179（events>0 是 1131）。③ 大奉重号章：265 个唯一章号里 232 个重复（118 个号出现 5 次，对应 5 卷各一次）；例『第一百五十五章』在 i=155/384/787 三个单元各记 22 条事件 ⇒ Σ units.events=12235 而图谱只有 2990（多算 9245），故大奉的每单元 events **不可用作覆盖/漏段指标**；西游(Σ 差 0)/三国(差 −2) 不受影响。用 2241/2990 条已验证偏移（text[start:end]==quote，100% 逐字）做位置真值，拆出 A 类（重号致索引必然多算，大奉 92 条）与 B 类（图谱标签自身与位置不符，大奉1/西游2/三国6）。④ Python 3.13 vs 3.14：**未复现**影响 chapter_spans 的差异 —— 99200 例差分模糊两版本输出 sha256 相同，三书 span sha256 逐字节相同，narrative.py 12 个模块级正则无一可空匹配；题面这条怀疑不成立。（3.14 确有 `\\B` 现在匹配空串的变更，实测 3.13 split(r'\\B','')=[''] vs 3.14 ['','']，但仓库内 `\\B` 零命中。）另发现：章节数 912/101/120 与 chapter_spans 逐字节一致、闸门 0 丢弃；补发章 241–243 被正确接受；3 处真实图谱标签缺口（大奉『番外三』按位置有 2 条事件但标签写『未分章』⇒index.events=0；三国『未分章』『第七十五-七十六回』）；build_plan.py:140『大奉真实 912/912』是陈旧注释（实测 910=909编号章+番外一）。",
+  "evidence": [
+    {
+      "path": "loop/state/out/env_index-doctor.artifact.json",
+      "sha256": "77a33f23b3184d878dffa5c4c5d13bf8813af7db9697e924d443b705acb2f94d",
+      "kind": "本任务产出：四问差异清单 + 口径说明 + 位置真值 + A/B 类拆分 + 复现命令 + 结论 C1–C7 + remaining"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "逐单元重算 index 的 events/eventsLiteral 与图谱缓存一致：三书 0 处不一致；三本 graphSha256/docsSha256 与 data/cache/ 实测逐字节相同。",
+      "result": "pass"
+    },
+    {
+      "text": "位置真值可信：2241/2241(大奉)、678/678(西游)、1170/1170(三国) 条事件的 text[quoteRef.start:end] 与 quote 逐字相符，0 处不符。",
+      "result": "pass"
+    },
+    {
+      "text": "大奉过度归属可复现：Σ units.events=12235 vs 图谱 2990；第一百五十五章 三个单元各 22 条。",
+      "result": "pass"
+    },
+    {
+      "text": "Python 3.13/3.14 差异不成立：99200 例 re.split+finditer 差分模糊两版本 blob sha256 均为 9e851df4…；chapter_spans 三书 sha256 均为 f7f65c25…/20d5a53c…/e7e2e793…。",
+      "result": "pass"
+    },
+    {
+      "text": "章节数无误：_HEAD_RE+_SPECIAL_RE 命中 909+3/100+1/120+0 = 912/101/120，与 index.chapterUnits 的 head/start 逐条比对 0 差异，闸门 0 丢弃。",
+      "result": "pass"
+    },
+    {
+      "text": "未修改任何受保护路径与索引生成器：本轮唯一写入 = loop/state/out/env_index-doctor.artifact.json（任务 writes 指定的路径）。",
+      "result": "pass"
+    },
+    {
+      "text": "未跑 GPU/浏览器测试（任务未声明需要）。",
+      "result": "pass"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/env_index-doctor.artifact.json",
+      "kind": "append-only"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/3af17a8d68df3bfbec7cd3b1.json": "5fc416f6f790ff4176df30cf214a0cb003c226652e8f13cde3b44e8ef0f90695",
+    "data/cache/3af17a8d68df3bfbec7cd3b1.docs.json": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "data/cache/a065244455cfb2221bcda94a.json": "37f7f9028c3509a9520f6e695d1adff4dbebcc73e06c82a964f75a51e4f805f9",
+    "data/cache/a065244455cfb2221bcda94a.docs.json": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+    "data/cache/fe42d01f3826fe8096f86614.json": "04802afa6910e056b797a1586eb03c06820036907d248b17d7e05d388ad4b489",
+    "data/cache/fe42d01f3826fe8096f86614.docs.json": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+  },
+  "remaining": [
+    "只报告未修改：loop/bin/build_plan.py 与 narrative.py 一行未动（任务明令）。",
+    "build_plan.py:140『大奉真实 912/912』是陈旧注释，本轮只登记未改（受保护路径，须合并任务）。",
+    "3 处图谱标签缺口（大奉番外三『未分章』×2、三国『未分章』/『第七十五-七十六回』）只做了定位，未提补标签方案（需图谱侧写入）。",
+    "未逐版本追溯三国旧图谱（events=434）何时被 fe42d01f 取代 —— 属发布台账范畴。",
+    "未穷举 3.13/3.14 在 re 模块其它语义的差异；结论只覆盖 re.split/finditer/chapter_spans 这条路径。",
+    "对账固定在 index 快照 c41f7bae… 上：本任务运行期间 index.json 被并发重写（dafeng graphKey cb21b33e→3af17a8d），两次快照的 units/unitsWithEvents/events 完全一致。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/env_index-doctor.artifact.json"
+    ]
+  },
+  "submittedAt": "2026-10-08T19:28:35Z",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-08T19:28:35Z"
+  },
+  "verifyState": "pending"
+}

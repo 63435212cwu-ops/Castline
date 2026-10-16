@@ -1,0 +1,224 @@
+{
+  "schema": "loop-verifier-verdict/1",
+  "task": "verify:dafeng:L2:0018",
+  "reviewedTask": "read:dafeng:L2:0018",
+  "reviewedArtifact": "loop/state/out/read_dafeng_L2_0018.candidate.json",
+  "reviewer": "w-dafeng-3",
+  "book": "dafeng",
+  "lane": 2,
+  "unitIndex": 18,
+  "unitHead": "第十九章 送行诗",
+  "sourceRange": [55440, 58189],
+  "verdict": "partial",
+  "verdictReason": "引用层几乎无懈可击（494/494 quote 字典逐字命中、偏移零误差、三项哈希全中、零编造人物/事件/结局、三条红线均有执行痕迹），但存在 3 处字段级事实错（同一错误的 4 处复制）、1 处把无署名的台词硬派给具体人物并标 explicit、以及 3 处自述元数据自相矛盾。按本项目既有判例（verify_dafeng_L1_0005 / L2_0006 同因字段级事实错判 partial 而非 pass），裁 partial。不判 fail：没有任何一条抽取项在原文里找不到对应文字，无编造。",
+
+  "counterExamples": [
+    {
+      "id": "CE-1",
+      "severity": "field-fact-error",
+      "claim": "T2.result（T2.who=杨恭）写「他两次发问后『半晌无人』」；同一错误复制到 T1.result「他再问时『半晌无人』」、S3.anchorEvent「紫阳居士再问『还有谁愿意赋诗』之后半晌无人」、S4.anchorEvent「紫阳居士再问赋诗、半晌无人」。",
+      "quote": "紫阳居士叹息一声，“罢了，不提这些。诸位学子，还有谁愿意赋诗？”",
+      "quoteStart": 58010,
+      "quoteEnd": 58042,
+      "why": "区间内杨恭只发问过一次（上引 @58010-58042，全文出现 1 次）。本区间第一次邀诗是张慎说的，不属杨恭——原文 @57205-57240「后者扭头，望向亭外的学子们：“有没有人愿意赋诗一首，送一送紫阳居士？”」，其中「后者」的先行词是「李慕白和张慎相视一笑」里的张慎；候选自己的 T3.who=张慎、T3.objective 也正确引了这一句。因此 T2 的「他两次发问」是把张慎的发问并入了杨恭名下，属字段级事实错；T1/S3/S4 的「再问」「再」同因此不成立。证据（可复现）：python3 -c \"import json;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];print(t.count('还有谁愿意赋诗'),t.count('有没有人愿意赋诗'),t.find('后者扭头'))\" → 1 1 57205。"
+    },
+    {
+      "id": "CE-2",
+      "severity": "attribution-overreach",
+      "claim": "CE11.from.value 写作「张慎：“国子监出身的那帮人，不会看着我们云鹿书院翻身的。”」且 from.basis=\"explicit\"；同一归属复制到 T1.obstacle「（张慎的判断）」与 F4.setup「张慎说“国子监出身的那帮人，不会看着我们云鹿书院翻身的”」。",
+      "quote": "“这不是你的问题，国子监出身的那帮人，不会看着我们云鹿书院翻身的。”",
+      "quoteStart": 56772,
+      "quoteEnd": 56806,
+      "why": "该句在原文里**没有任何说话人标记**。它紧跟在杨恭的台词之后——原文 @56740-56766「闻言，紫阳居士喟叹道：“终究还是被人排挤出官场了。”」——随后两段 @56772-56806 与 @56812-56852 都是无署名的光引号台词，直到 @56696-56734 才有上一个明确标记「“这话不对，”兵法大家张慎失笑饮茶：“杨兄野心勃勃，是在为‘立命’境铺路。”」。把无标记台词派给张慎是**可得但未被文本证成**的推断（回应的确是杨恭的感叹，但同席的李慕白同样可能），标 basis=explicit 并把「张慎：」直接写在引文前面，等于把推断当直述。对照：候选自己在 charactersInRange[3]（张慎）里并未把该句计入其 quotes。建议降级 basis=inferred 并加 speakerUnknown 说明，或在 CE11.from.value 去掉「张慎：」前缀。证据（可复现）：python3 -c \"import json;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];i=t.find('“这不是你的问题');print(repr(t[i-30:i]))\" → '，紫阳居士喟叹道：“终究还是被人排挤出官场了。”\\n\\n    '（前置为杨恭的标记句结尾，本句前无任何说话人标记）。"
+    },
+    {
+      "id": "CE-3",
+      "severity": "temporal-order-error",
+      "claim": "CE5.from.value 写「张慎扭头问亭外学子“有没有人愿意赋诗一首，送一送紫阳居士？”（**此前**紫阳居士刚设下彩头）」；CE5.direction 同样写「张慎公开邀诗（**承接刚宣布的彩头**）」。",
+      "quote": "“吟诗就得有彩头，不然没意思。”紫阳居士摘下腰间一枚紫玉：“博头筹者，可得玉佩。”",
+      "quoteStart": 57246,
+      "quoteEnd": 57287,
+      "why": "时间顺序与候选所述相反：张慎邀诗在前（@57205-57240），彩头在后（@57246-57287），两者相差 6 个 codepoint、分属相邻两段。原文顺序是先有人应和邀诗的话头，杨恭才追加彩头——这一点也是候选自己在 T1.action 里写对的（「设紫玉为彩头……请学子赋诗并追问」，但同样把先后的因果说反了）。「承接刚宣布的彩头」是可被原文否证的先后关系陈述。证据（可复现）：python3 -c \"import json;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];print(t.find('后者扭头'),t.find('“吟诗就得有彩头'))\" → 57205 57246。（注意：应检索含前引号的完整片段 '“吟诗就得有彩头' 得 57246；只检索 '吟诗就得有彩头' 会命中引号内的 57247。）"
+    }
+  ],
+
+  "reverseChecks": [
+    {
+      "id": "RC-1",
+      "found": "两位大儒（李慕白、张慎）同属云鹿书院、声望不输杨恭这一前提，五个抽取类目里一条断言都没有涵盖。",
+      "quote": "另外两位的身份同样不低，不说在云鹿书院里的地位，单是在外的名声，就不输紫阳居士。",
+      "quoteStart": 55901,
+      "quoteEnd": 55941,
+      "why": "该句是本章「书院 vs 国子监」整条叙事框架的人物前提：它把李慕白、张慎与杨恭绑成同一个书院集体，后面的 CE6/CE7/F4（国子监取代云鹿书院、打压书院出身者）才有承载者。候选把它只放在 notCategorizedFacts（自述「不构成独立断言」的对账台账）里，tasks/causeEdges/states/knowledgeGaps/foreshadows/openThreads 六处皆无「不说在云鹿书院里的地位」「不输紫阳居士」字样（机器核验：全文检索候选 JSON，命中路径仅 /notCategorizedFacts/items[2]/quotes[3]/quote 与 /quoteRegistry/Q13）。"
+    },
+    {
+      "id": "RC-2",
+      "found": "本章对国子监最激烈的一段定性台词，五个抽取类目里完全缺席；同时它是「无署名台词」这一现象的第二例，直接削弱 CE-2 的 explicit 标注。",
+      "quote": "“哼，一群只知道欺上媚下，玩弄权谋的小人，两百年不到，就把天下祸害成这般模样。”",
+      "quoteStart": 56812,
+      "quoteEnd": 56852,
+      "why": "该句只登记在 readParagraphRegistry/Q33——候选自己在 readParagraphRegistryNote 里声明这批是「备查用阅读底账……**不作为证据**」，且 Q33 在 quoteUsageById 里引用次数为 0。它与 CE-2 的 Q32（@56772-56806）构成**连续两段无署名台词**，两段之间没有任何说话人标记，下一段即叙述层的「此事涉及到一桩很有意思的历史。」（@56858-56873）转入回溯。因此「张慎说的」这一归属在区间内没有文本支撑，且候选对第二段完全未处理。"
+    },
+    {
+      "id": "RC-3",
+      "found": "两百年正统之争的**起点命题**（白鹿书院自诩儒家正统 + 叙述层认可）被跳过，CE6 直接从「但在两百年前」起算。",
+      "quote": "儒家起源于圣人，白鹿书院作为圣人大弟子开创的学院，自诩儒家正统。事实也是如此。",
+      "quoteStart": 56879,
+      "quoteEnd": 56918,
+      "why": "候选的 CE6.from.value 起始引文是「但在两百年前，因为争国本事件，彻底被当时的皇帝所厌弃。」（@56924），把「谁在争、争的是什么名分」这一前提留在了外面。该前提句在核心类目里只以 unknowns[0]（白鹿/云鹿 是否同一书院）的附带引文形式出现，而**叙述层的认可语「事实也是如此。」（@56911-56918）在候选全文中零命中**——机器核验：「事实也是如此」在候选 JSON 任意位置均不出现。缺少这一句，「正统之争」在抽取结果里只剩单方说辞，无法解释 CE6/CE7 的力量对比。"
+    },
+    {
+      "id": "RC-4",
+      "found": "魏渊在本区间被用作**两位**老者的共同标尺，候选只覆盖了其中一半（李慕白的三局皆败），张慎的那一半未进任何断言。",
+      "quote": "是大奉唯一一位可以与魏渊相提并论的兵法大家。",
+      "quoteStart": 56057,
+      "quoteEnd": 56079,
+      "why": "本区间魏渊出现 2 次，构成一组对照：李慕白「五年前与魏渊魏公手谈三局，皆败，怒摔棋盘，从此再不下棋。」（@55976-56004，候选已用于 OT1/U06）与张慎「是大奉唯一一位可以与魏渊相提并论的兵法大家。」（@56057-56079）。后者在核心类目里零命中（仅出现在 charactersInRange[6]/statesOmitted[1]/notCategorizedFacts 三处台账），而它是本章给张慎定分位的唯一机制——与前半句合起来才说明「亭内三位老者」的相对分量。"
+    },
+    {
+      "id": "RC-5",
+      "found": "李慕白在区间内共 5 次出现、其中有明确台词的两次（叹杨恭不玲珑、痛陈国子监集注之弊），但候选的 tasks[] 六条里没有一条以李慕白为主语。",
+      "quote": "“这话不对，”兵法大家张慎失笑饮茶：“杨兄野心勃勃，是在为‘立命’境铺路。”",
+      "quoteStart": 56696,
+      "quoteEnd": 56734,
+      "why": "候选 tasks[] 的 who 集合为 {杨恭×2, 张慎, 朱退之, 许新年, 永叔}，无李慕白；但李慕白有本区间结构最完整的一段长台词（@57699-57789，国子监集注→学子拘泥→文章无灵性），并是 CE7 的 from 端主体。CE7 的机制被记为「李慕白感慨道」，可他没有自己的任务条目，导致「谁在推动什么」在 tasks 层缺一角。此条为**覆盖建议**，不构成事实错（CE7 本身引文正确）。"
+    }
+  ],
+
+  "misKillCheck": [
+    {
+      "item": "「狗尾续貂」",
+      "candidateTreatment": "singleAppearanceNotForeshadow 条目 7，理由：「对场面的比喻，单次出现，没有回收端。」",
+      "verdict": "理由不成立，但结论可保留",
+      "why": "候选给的理由是事实错的——回收端就在下一段：@57643-57676「但好的开端，未必有好的结尾，接下来的场面大概可以用狗尾续貂来形容。」之后紧接 @57682-57697「后边的诗词差强人意，勉强合格。」，预测与兑现相邻。所以它并非「没有回收端」，而是铺设与回收同在区间内。结论仍可保留（把叙述者自己的场面评语立为伏笔会过度），但理由须改写为「回收端在同段/邻段，不构成跨段伏笔」。这是本次复核发现的**唯一误杀**；NC1–NC8 的八条相邻因果拒绝全部成立，未发现词表/正则造成的合法边误杀。"
+    }
+  ],
+
+  "hallucinationCheck": {
+    "result": "pass",
+    "detail": "charactersInRange 声明的 8 个人物在区间内逐一可查（杨恭 1、许新年 6、李慕白 5、张慎 4、朱退之 4、永叔 4、魏渊 2、许七安 1），无一人为原文所无。许七安、魏渊虽被提及但明确标注「本人不在场、无台词」。未发现原文没有的结局：T1/T2/T4/T5 的 result 均带 notSuccess=true + whyNotSuccess，T3/T6 因目标非成败型写 notSuccess=null；玉佩归属在本区间显式写为未定。区间外 25 条引文（X01–X25）全部标 inSourceRange=false 且带 outsideChapter，抽查 25/25 的 chapter 归属与 index.json 的 chapterUnits 一致（0 处错挂）。"
+  },
+
+  "citationCheck": {
+    "method": "以 random.seed(20261008) 从 121 个 quoteId 中随机抽 5 条，逐条做 text[start:end]==quote、text.find(quote)==start、text.count(quote)==occurrencesInSource 三项比对。",
+    "sampled": ["Q32", "Q05", "Q51", "Q25", "Q14"],
+    "result": "5/5 三项全中，偏移逐字一致",
+    "detail": [
+      {"quoteId": "Q32", "claimed": [56772, 56806], "find": 56772, "count": 1, "directSlice": true},
+      {"quoteId": "Q05", "claimed": [55565, 55589], "find": 55565, "count": 1, "directSlice": true},
+      {"quoteId": "Q51", "claimed": [57555, 57594], "find": 57555, "count": 1, "directSlice": true},
+      {"quoteId": "Q25", "claimed": [56471, 56528], "find": 56471, "count": 1, "directSlice": true},
+      {"quoteId": "Q14", "claimed": [55947, 56004], "find": 55947, "count": 1, "directSlice": true}
+    ],
+    "fullAudit": "非抽样、对候选 JSON 内**全部 494 个 quote 字典**（121 个 quoteId）做同一三项比对：exact 不一致 0、find 失败 0、occurrencesInSource 不符 0、sourceHash 不符 0、inSourceRange 标志与偏移不符 0。"
+  },
+
+  "quoteLayerAudit": {
+    "quoteDictsInFile": {"claimed": 494, "actual": 494, "ok": true},
+    "quoteCount": {"claimed": 371, "sumQuoteUsageById": 371, "ok": true, "note": "断言区 372 个 quote 字典 = 371 条断言引用 + 1 条 boundaryCheck 的 X13（非断言，不计入 quoteCount），自洽。"},
+    "docsTextSha256": {"claimed": "bc8b75ee120009f4bf6a8e235a7ff133b8ac727a8612067496a0440eaf3fc612", "actual": "bc8b75ee120009f4bf6a8e235a7ff133b8ac727a8612067496a0440eaf3fc612", "ok": true},
+    "sliceSha256": {"claimed": "a45468d666cb3062030cf03f04eef2d5673052651f4b5c19aa162464827e7882", "actual": "a45468d666cb3062030cf03f04eef2d5673052651f4b5c19aa162464827e7882", "ok": true},
+    "sourceHash": {"claimed": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839", "actual": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839", "ok": true},
+    "boundary": {"headIsUnitTitle": true, "headOccurrences": 1, "nextChapterHeadAt": 58189, "note": "docs[0].text[55440:55448]=='第十九章 送行诗'，全文仅 1 次；区间末 @58175-58187 为分隔线，@58189 起为第二十章标题。与 index.json chapterUnits i=18 的 start/end 完全一致。"},
+    "characterNameCounts": "候选 charactersInRange 自述的 14 项称名次数（杨恭1/紫阳居士13/紫阳先生1/许新年6/辞旧1/许二郎1/堂哥1/李慕白5/大国手2/张慎4/朱退之4/永叔4/魏渊2/许七安1）经独立复算 14/14 全部相符。"
+  },
+
+  "metaDefects": [
+    {
+      "id": "MD-1",
+      "what": "redLines.noDefaultFilling 引用了不存在的状态条目「S6」",
+      "detail": "该字段写「……S4.before、**S6.before/after**、F1–F4.inRangePayoff」，但 states[] 只有 S1–S5（机器核验：states ids = ['S1','S2','S3','S4','S5']）。全文检索候选 JSON，「S6」仅此一处出现。属悬空引用。"
+    },
+    {
+      "id": "MD-2",
+      "what": "coverageNote.coverageRatio 的实际算法与同字段的办法说明互相矛盾",
+      "detail": "readParagraphRegistryNote 声明这批整段引文「未被任何断言引用 ⇒ **不计入 coverageRatio**、不作为证据」；但 coverageRatio=0.8549 **只有把 readParagraphRegistry 计入并集才能得到**：只算 quoteRegistry 时独立复算为 0.8025。机器核验：cov(quoteRegistry)=0.8025，cov(quoteRegistry ∪ readParagraphRegistry)=0.8549，声明值 0.8549。二者必有一改。"
+    },
+    {
+      "id": "MD-3",
+      "what": "singleAppearanceNotForeshadow 条目 11 的标题「五位同窗中的无名者」含原文没有的数目",
+      "detail": "区间内「五位」出现 0 次（全文 33 次，均不在本区间）。候选自己在 U04 写明「其余无名；人数也未写（只写『一群送行的学子』）」，与该条目标题自相矛盾。条目正文（不给无名者建人物）本身正确，仅标题须去掉「五位」。"
+    }
+  ],
+
+  "usableVsDiscard": {
+    "usable": [
+      "全部 121 条 quoteId / 494 个 quote 字典：逐字命中、偏移精确、哈希一致，可直接作为定位证据使用。",
+      "CE1、CE3、CE4、CE6、CE7、CE8、CE9、CE10、CE11（机制部分）：引文与机制成立。CE7 的「话说出口」这一事实成立，其 epistemic 已自带 character-speech 限制，可用。",
+      "CE2、F1、F2、F3、F4：铺设端引文全部正确，不予丢弃。",
+      "NC1–NC8：八条相邻因果拒绝理由充分，建议保留。",
+      "T3/T4/T5/T6 的 obstacle/action/cost 与全部 null 缺项处理：符合「不补一个听起来合理的值」的纪律。",
+      "S1/S2/S5 的状态前后值与锚点。",
+      "F1–F4 的 inRangePayoff=null + why：本区间确实未回收，写法正确。"
+    ],
+    "mustFix": [
+      "T2.result 删去「他两次发问」，改为「张慎首次邀诗后他设彩头，其后他再问一次『还有谁愿意赋诗』而半晌无人」；T1.result 的「他再问时」同改。",
+      "S3.anchorEvent、S4.anchorEvent 的「再问」改为「设彩头后发问」或直接写「杨恭问『还有谁愿意赋诗』之后」。",
+      "CE5.from.value 去掉「（此前紫阳居士刚设下彩头）」、CE5.direction 去掉「承接刚宣布的彩头」，改为「张慎邀诗 → 杨恭随即设彩头 → 朱退之应诗」的先后。",
+      "CE11.from.value 删去「张慎：」前缀并加 speakerUnknown；CE11.from.basis explicit→inferred。T1.obstacle 的「（张慎的判断）」与 F4.setup 的「张慎说」同步降级或改写为「一位大儒（原文未署名）说」。",
+      "MD-1/MD-2/MD-3 三处自述元数据自相矛盾须修正。"
+    ],
+    "downgradeToUnknowns": [
+      "「这不是你的问题，国子监出身的那帮人，不会看着我们云鹿书院翻身的。」（@56772-56806）与「哼，一群只知道欺上媚下，玩弄权谋的小人，两百年不到，就把天下祸害成这般模样。」（@56812-56852）的说话人——应作为一条 knowledgeGaps/unknowns 登记：两句均无署名，区间内不可判定归属。"
+    ]
+  },
+
+  "notes": "总体判断：**这是引用层质量很高、字段层有实质缺陷的一份候选**，裁 partial。\n\n方法论说明（我按 VERIFIER.md 的顺序执行）：先只读 docs[0].text 的 [55440,58189) 切片并逐段标注偏移（68 个非空段 / 2749 codepoint），读完才打开候选；因此下面的反向发现不是「检查他写得对不对」得来的，而是「这一段里他还漏了什么」。\n\n做对了的部分（机器可复算，不是印象）：① 494/494 quote 字典逐字命中，偏移零误差，五项标志（match/occurrencesInSource/inSourceRange/sourceHash/offsetUnit）全自洽；② 三项哈希（文件 / docs[0].text / 切片）全部与声明一致；③ 零编造——没有原文没有的人物、事件、结局，8 个在场/被提及人物逐一可查；④ 三条硬红线都有可见的执行痕迹：台词与内心话分别标 character-speech / character-inner-thought（NC4 把两种「得罪」传闻显式拒绝为真相、U05 存疑）；result 不把「读到章末」当成功（T1/T2/T4/T5 带 notSuccess + whyNotSuccess）；单次出现项单列 12 组不立伏笔；⑤ 主动列出 NC1–NC8 八条「不作为因果边」并给出机制性理由，这是本项目反复缺失的自律；⑥ 区间外 25 条引文全部标 inSourceRange=false，章属 25/25 正确。\n\n判 partial 的三条硬理由：CE-1 把张慎的邀诗并进杨恭名下（「两次发问」），并复制到 4 处字段；CE-2 把无署名的台词硬派给张慎且标 explicit；CE-3 把彩头与邀诗的先后写反。三者都是**可被原文直接否证的字段级事实错**，不是取舍分歧。另有 MD-1/2/3 三处自述元数据自相矛盾（悬空 S6、coverageRatio 算法与其说明矛盾、标题里的「五位」）。\n\n我的反向验证本身也可能有误，如实记录两处不确定：\n(a) RC-4 我判「张慎那一半未进断言」，但候选确实把它放进了 charactersInRange[6]、statesOmitted[1]、notCategorizedFacts 三处台账。若发布桥只取 tasks/causeEdges/states/foreshadows，则它确实缺席（我的判据）；若桥也扫 charactersInRange，则该条只是「未升格为断言」而非「漏掉」。我把判据写进 RC-4 的 why 里，供发布侧核对。\n(b) charactersInRange[5] 把「好友」列为永叔的区间内称名。原文「『这不是功利……』好友说」这一句是**无署名**的第三位学子，与「叫永叔的学子」并非同一句。永叔=最初发问的同窗是文本直证的（许新年答话直呼「永叔」），但「好友」是否即永叔，区间内不能证成。此点我**不判为 counterExample**（拿不出文本反证，按纪律只记存疑），建议候选把「好友」从永叔的 asWrittenInRange 里移出或标注不确定。\n\n我未做的（不编）：未做跨章语义回收检索（仅就候选自己给出的 X01–X25 核对定位与章属）；未跑 GPU / 浏览器路径；未复核发布桥 no_two_distinct_events 的实际丢弃结果（只核对了候选自述的三个 eventId 与图谱缓存一致）。\n\n**环境缺陷（与候选无关，须上报）**：本复核任务的租约 `loop/state/leases/verify:dafeng:L2:0018.d/lease.json` 记录的 agent 是 `w-dafeng-3`，而被复核记录 `loop/state/out/read_dafeng_L2_0018.json` 的 agent 也是 `w-dafeng-3`——即派单器把复核任务发给了原提交者。`loop.py verify` 的防自签检查（loop.py:578 `if rec.get(\"agent\") == args.agent`）会据此拒绝本次提交；而 `pick()`（loop.py:350-380）只检查 requires/done/租约冲突，**从未读取 independentOf**（全仓 grep：independentOf 仅出现在 build_plan.py:197 的生成侧，消费侧零引用）。这正是「机制存在、有代码、有产出，但不产生信息」的又一例：任务定义里写了 independentOf，调度器不执行它。",
+  "selfSignConflict": {
+    "detected": true,
+    "verifyLeaseAgent": "w-dafeng-3",
+    "reviewedRecordAgent": "w-dafeng-3",
+    "candidateAgentField": "w-dafeng-3",
+    "independentOf": "read:dafeng:L2:0018",
+    "independentOfConsumedBy": "无（仅 build_plan.py:197 生成侧写入；loop.py pick()/claim()/verify() 均未读取）",
+    "consequence": "python3 loop/bin/loop.py verify --task read:dafeng:L2:0018 --file <本文件> --agent w-dafeng-3 会被 loop.py:578 判为自签并返回 rc=2。本判决由同一 worker 的会话产出，独立性弱于跨 worker 复核；建议由 w-verify-0 / w-verify-1 / w-sanguo-1 复核者重签或加签。"
+  },
+
+  "evidence": [
+    {"path": "loop/state/out/read_dafeng_L2_0018.candidate.json", "sha256": "7fe728b14647b8a58ccb51f620ecb6aab8182a3d4ccf0fa1651412fd9353d050", "kind": "被复核候选（只读，未修改）"},
+    {"path": "data/cache/9b676d7031b1bcd3b8377a18.docs.json", "sha256": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839", "kind": "原文缓存（唯一证据来源；与任务 sourceHash 逐字一致）"},
+    {"path": "data/cache/9b676d7031b1bcd3b8377a18.json", "sha256": "3c2fae1d399d6768719f2d5476fa0cfd88fb4fbbc12abdf080323fa4b846ebdf", "kind": "图谱缓存（仅用于核对 eventId 与人物表，摘要不作原文证据）"},
+    {"path": "loop/state/out/read_dafeng_L2_0018.json", "sha256": "0b977cd2bd3cef7a829a16e1dd969c3b09cfc578e795dd51bd6cf1356d6f5518", "kind": "被复核记录（用于自签冲突核验）"},
+    {"path": "loop/state/leases/verify:dafeng:L2:0018.d/lease.json", "kind": "本任务租约（用于自签冲突核验，未修改）"},
+    {"path": "loop/state/out/verify_dafeng_L2_0018.verdict.json", "kind": "本复核产出（唯一新增文件）"}
+  ],
+
+  "assertions": [
+    {"text": "先自读原文再读候选：独立读出 [55440,58189) 共 2749 codepoint / 68 个非空段，读完才打开候选", "result": "pass", "command": "python3 -c \"import json;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];print(len(t[55440:58189]),len([x for x in t[55440:58189].split(chr(10)) if x.strip()]))\""},
+    {"text": "源文件哈希与任务 sourceHash 一致", "result": "pass", "command": "python3 -c \"import hashlib;print(hashlib.sha256(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json','rb').read()).hexdigest())\"  # fdde55...9839"},
+    {"text": "全部 494 个 quote 字典逐字命中、偏移零误差、哈希零不符（非抽样）", "result": "pass", "command": "python3 - <<'PY' … 遍历候选全部 quote 字典做 text[start:end]==quote / find / count 三项比对 … PY  # EXACT MISMATCH 0, FIND 0, HASH 0, RANGE-FLAG 0"},
+    {"text": "随机抽 5 条 quote 复核（Q32/Q05/Q51/Q25/Q14）", "result": "pass", "command": "python3 - <<'PY' random.seed(20261008); random.sample(sorted(quoteIds),5) … PY  # 5/5 三项全中"},
+    {"text": "CE-1：杨恭在区间内只发问一次，第一次邀诗出自张慎", "result": "fail", "command": "python3 -c \"import json;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];print(t.count('还有谁愿意赋诗'),t.count('有没有人愿意赋诗'),t.find('后者扭头'))\"  # 1 1 57205"},
+    {"text": "CE-2：Q32 前置无说话人标记，其上一处标记属于杨恭", "result": "fail", "command": "python3 -c \"import json;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];i=t.find('“这不是你的问题');print(repr(t[i-30:i]))\""},
+    {"text": "CE-3：张慎邀诗(57205) 早于 杨恭设彩头(57246)，候选所述先后相反", "result": "fail", "command": "python3 -c \"import json;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];print(t.find('后者扭头'),t.find('“吟诗就得有彩头'))\"  # 57205 57246"},
+    {"text": "MD-1：redLines 引用的 S6 不存在，states 只有 S1–S5", "result": "fail", "command": "python3 -c \"import json;d=json.load(open('loop/state/out/read_dafeng_L2_0018.candidate.json'));print([s['id'] for s in d['states']])\""},
+    {"text": "MD-2：coverageRatio 0.8549 必须计入 readParagraphRegistry 才能复现（只算 quoteRegistry 为 0.8025），与其字段说明矛盾", "result": "fail", "command": "python3 - <<'PY' 对 quoteRegistry 与 quoteRegistry∪readParagraphRegistry 分别求并集覆盖率 PY"},
+    {"text": "MD-3：「五位」在区间内出现 0 次", "result": "fail", "command": "python3 -c \"import json;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];print(t.count('五位'),t[55440:58189].count('五位'))\"  # 33 0"},
+    {"text": "反向验证：核心六类目里 RC-1/RC-2/RC-3/RC-4 的引文均零命中（只在台账类字段出现或完全不出现）", "result": "fail", "command": "python3 - <<'PY' 对 tasks/causeEdges/states/knowledgeGaps/foreshadows/openThreads 做关键词路径检索 PY"},
+    {"text": "自签冲突：verify 租约 agent 与被复核记录 agent 同为 w-dafeng-3", "result": "fail", "command": "python3 -c \"import json;print(json.load(open('loop/state/leases/verify:dafeng:L2:0018.d/lease.json'))['agent'],json.load(open('loop/state/out/read_dafeng_L2_0018.json'))['agent'])\""},
+    {"text": "independentOf 在消费侧无任何引用", "result": "fail", "command": "grep -rn independentOf loop/bin/ loop/ROLES/  # 仅 build_plan.py:197（生成侧）+ 两个 .pyc，消费侧 0"},
+    {"text": "区间外 25 条引文的章属与 index.json chapterUnits 一致", "result": "pass", "command": "python3 - <<'PY' 对 25 个 out-of-range quote 的 start 反查 chapterUnits 得章名，与 outsideChapter 比对 PY  # MISATTRIBUTED 0"}
+  ],
+
+  "changes": [
+    {"path": "loop/state/out/verify_dafeng_L2_0018.verdict.json", "kind": "append-only", "note": "新增复核产出；未修改候选、原文缓存或任何受保护路径"}
+  ],
+
+  "sourceHashes": {
+    "data/cache/9b676d7031b1bcd3b8377a18.docs.json": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "loop/state/out/read_dafeng_L2_0018.candidate.json": "7fe728b14647b8a58ccb51f620ecb6aab8182a3d4ccf0fa1651412fd9353d050",
+    "data/cache/9b676d7031b1bcd3b8377a18.json": "3c2fae1d399d6768719f2d5476fa0cfd88fb4fbbc12abdf080323fa4b846ebdf"
+  },
+
+  "remaining": [
+    "【提交被拒，判决未入库】python3 loop/bin/loop.py verify --task read:dafeng:L2:0018 --file loop/state/out/verify_dafeng_L2_0018.verdict.json --agent w-dafeng-3 → rc=2，stderr『拒绝自签：w-dafeng-3 是原提交者』（loop.py:578）。已实测确认，不是推测。因此 read_dafeng_L2_0018.json 的 verifyState 仍为 pending、reviews 仍为 null，本判决尚未进入发布链。拒绝发生在写盘之前：该记录 sha256 仍为 0b977cd2bd3cef7a829a16e1dd969c3b09cfc578e795dd51bd6cf1356d6f5518，未被本次尝试修改。",
+    "【须由独立复核者重签】本判决内容（partial + 3 条 counterExample + 5 条反向发现）可直接复用，只需换一位非 w-dafeng-3 的复核者执行 verify 即可入库；建议 w-verify-0 / w-verify-1 / w-sanguo-1。我没有伪造 agent 名绕过防自签检查——那会使「独立复核」这一机制整体失效。",
+    "【环境缺陷须修】派单器把复核任务发给了原提交者：pick()（loop.py:350-380）只检查 requires/done/租约冲突，从未读取 independentOf（全仓 grep：independentOf 仅出现在 build_plan.py:197 生成侧，消费侧零引用）。建议在 pick() 里加一条：跳过 independentOf 已由该 agent 提交的任务。本批另有 verify:dafeng:L2:0022（reviewer=w-dafeng-2 / author=w-dafeng-3）等任务可作对照。已用 runlog 记录本事件（loop/state/runs/20261008.jsonl，event=self-sign-rejected）。",
+    "未做跨章语义回收检索（仅核对候选自带的 X01–X25 定位与章属）。",
+    "未跑 GPU / 浏览器测试（任务未要求，且 GPU 全局串行）。",
+    "未复核发布桥 no_two_distinct_events 的实际丢弃结果；只核对候选自述的三个 eventId（ev_d1d1b6f402ec0308@55544、ev_a61fbac9633ce9a6@57396、ev_3cdbac0c081cfc66@57555）与图谱缓存逐字一致。",
+    "存疑未判 fail：(a) charactersInRange[5] 把无署名的「好友」列为永叔的区间内称名，区间内不可证成；(b) 「白鹿书院 / 云鹿书院」两名并用（候选已登记 U01 存疑，处理得当）。"
+  ],
+
+  "rollback": "仅新增 loop/state/out/verify_dafeng_L2_0018.verdict.json，另在 loop/state/runs/20261008.jsonl 追加一行运行日志。回滚 = 删除该 verdict 文件并移除该 runlog 行。因防自签拒绝（rc=2）发生于写盘之前，read_dafeng_L2_0018.json **未被修改**（sha256 仍为 0b977cd2bd3cef7a829a16e1dd969c3b09cfc578e795dd51bd6cf1356d6f5518，verifyState=pending，reviews=null），无需回滚该记录。未触碰候选文件、原文缓存或任何受保护路径。"
+}

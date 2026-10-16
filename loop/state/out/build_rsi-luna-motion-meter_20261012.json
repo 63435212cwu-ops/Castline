@@ -1,0 +1,158 @@
+{
+  "task": "build:rsi-luna-motion-meter:20261012",
+  "agent": "rsi-luna-motion-meter-20261012",
+  "status": "done",
+  "summary": "修复4K采样器首段重复累计；保留并校验逐段原始rAF间隔/画质状态，修正ms/帧单位，并在分辨率/动画失败时先原子保存全样本再失败。CPU自检通过，共享源码未改。",
+  "evidence": [
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-191149-552651-91332/测试产物/candidate/tests/scene_native4k_perf_browser.py",
+      "sha256": "7fcc0839307c415b8fcb15390354014aecec1e4503ad7b950a1fb0ca20253b04"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-191149-552651-91332/测试产物/scene_native4k_perf_browser.diff",
+      "sha256": "f20408076dcbe70c350a38257aa87ac3fc3f04f63f4408d0fc93300f6b3b2471"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-191149-552651-91332/测试产物/motion-meter-build-report.json",
+      "sha256": "fd99b590300d073ef2f8cd3a08cf74c70928dc9a5d1182cfcabec8ce939ab7db"
+    },
+    {
+      "path": "loop/state/out/build_rsi-luna-motion-meter_20261012.pointer.json",
+      "sha256": "a98bee6088f943796b20a9c8ff1fdf3414a4276b256731278070269949556a76"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "异质自检得90帧/2000ms/45fps/2s；逐帧间隔数与帧数一致，间隔和为2000ms，P95约33.333ms；单段30帧只计一次。",
+      "result": "pass"
+    },
+    {
+      "text": "后段降档、canvas改变、calm、GL错误或动画进度不足均使native4k判失败并保留失败段及原始间隔。",
+      "result": "pass"
+    },
+    {
+      "text": "通过AST解析与现有脚本CPU --self-test；没有运行浏览器或GPU。",
+      "result": "pass"
+    },
+    {
+      "text": "共享测试源码SHA前后相同，候选、diff、报告、提交包全部在外置CL_ARTIFACTS。",
+      "result": "pass"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/build_rsi-luna-motion-meter_20261012.pointer.json",
+      "kind": "append-only"
+    }
+  ],
+  "sourceHashes": {
+    "tests/scene_native4k_perf_browser.py": "c041d4b8577a728b3a36ef9387214aa25a0a77c60db495729ddbe5ea7bd95153",
+    "external/candidate/tests/scene_native4k_perf_browser.py": "7fcc0839307c415b8fcb15390354014aecec1e4503ad7b950a1fb0ca20253b04",
+    "external/candidate.diff": "f20408076dcbe70c350a38257aa87ac3fc3f04f63f4408d0fc93300f6b3b2471"
+  },
+  "remaining": [
+    "需root独立审查并经唯一merge任务合入，再运行真实GPU连续原生4K基线；本构建不声称实际FPS改善/达标。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "remove-added-pointer-only; external candidate/diff/report remain archived",
+    "files": [
+      "loop/state/out/build_rsi-luna-motion-meter_20261012.pointer.json"
+    ]
+  },
+  "submittedAt": "2026-10-12T11:11:49Z",
+  "wallClockNote": "租约里没有 startedAt（任务可能由非 loop 路径提交，或租约已被回收）—— 留空而不估算",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-12T11:11:49Z"
+  },
+  "verifyState": "pass",
+  "reviews": [
+    {
+      "reviewer": "motion-e1-merge-20261010T162850Z",
+      "at": "2026-10-12T11:32:07Z",
+      "verdict": "pass",
+      "notes": "Root independently reviewed diff/hash, ran CPU self-test and later-segment mutations. Scope is sampler integrity only, no GPU/FPS success claim. Segment gaps remain outside sampled duration.",
+      "counterExamples": [
+        {
+          "change": {
+            "animationSeconds": 0.1
+          },
+          "failure": [
+            {
+              "index": 2,
+              "problems": [
+                "animation progress is below 80% of real segment duration"
+              ]
+            }
+          ]
+        },
+        {
+          "change": {
+            "canvas": [
+              1920,
+              1080
+            ]
+          },
+          "failure": [
+            {
+              "index": 2,
+              "problems": [
+                "drawing buffer is not native 3840x2160"
+              ]
+            }
+          ]
+        },
+        {
+          "change": {
+            "quality": {
+              "drawW": 3840,
+              "drawH": 2160,
+              "degrade": 1
+            }
+          },
+          "failure": [
+            {
+              "index": 2,
+              "problems": [
+                "quality degrade tier is not zero"
+              ]
+            }
+          ]
+        },
+        {
+          "change": {
+            "calm": true
+          },
+          "failure": [
+            {
+              "index": 2,
+              "problems": [
+                "calm/reduced-motion is active or unreported"
+              ]
+            }
+          ]
+        },
+        {
+          "change": {
+            "glError": 1282
+          },
+          "failure": [
+            {
+              "index": 2,
+              "problems": [
+                "WebGL error is nonzero or unreported"
+              ]
+            }
+          ]
+        }
+      ],
+      "reverseChecks": [
+        "one segment counted once",
+        "later tier/canvas/calm/GL and animation regressions reject",
+        "raw interval count/time preserved",
+        "failure report persists before assertion"
+      ]
+    }
+  ]
+}

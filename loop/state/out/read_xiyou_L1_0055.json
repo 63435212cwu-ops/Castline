@@ -1,0 +1,296 @@
+{
+  "task": "read:xiyou:L1:0055",
+  "agent": "w-read-3",
+  "status": "done",
+  "summary": "精读《西游记》第五十五回「色邪淫戏唐三藏　性正修持不坏身」（docs[0].text codepoint [396815,404385)，7570 字，38 个自然段全部读过）。产出 138 个引文节点，全部由 build.py 以 (head, tail) 片段在该区间内**切出**并回填全文绝对偏移（逐字性是构造性质，不是事后检查），再由独立的 verify.py 从盘上重读候选与原文做七项机械复核（A 源哈希 / B 区间口径 / C 逐字 / D 唯一性与首次出现 / E 同任务五栏跨度不相交 / F 分区与枚举值 / G quote 字段可追溯与主题三件齐备），全过 exit 0。tasks 12 条五元分列：objective/obstacle/action/result 每栏自带引文，cost 有 10 条为 null 并逐条写明 costNote 理由（本区间未写代价），T11/T12 的 obstacle 亦为 null 并写明 obstacleNote；同一条任务内五栏引文跨度两两不相交由 verify.py 的 E 项机械核验，不靠我自己声称。causeEdges 20 条（每条带 direction/trigger/mechanism/evidence），rejectedEdges 7 条（时间相邻、韵文、衣着、状态好转等不当因果的显式反例），states 13 条、knowledgeDiffs 7 条、foreshadows 9 条（其中 7 条 recovered/resolved、2 条显式 not-recovered/unresolved）、worldSettings 20 条（rule 2 / place 9 / item 9；place 的 arrived 与 mentioned 分开写，item 的四态多选分开写，rule 的 institution 只用 executed）、worldSettingsExcluded 7 条（明确不写的理由，含回目语汇与「如来也怕我」这类人物夸大）、themeReadings 2 条（各带 perspective/support/counter 三件，支持 3 条、反面 3 条）、unknowns 13 条、selfCritique 6 条。semanticReview.performed=false —— 本轮**没有**做语义核验。",
+  "evidence": [
+    {
+      "path": "loop/state/out/read_xiyou_L1_0055.candidate.json",
+      "sha256": "0ab7523615360d6e201270076d16b2a6478e42065f17cf9aebdc6c6176a20784",
+      "kind": "candidate",
+      "note": "本轮产出（writes 指定的唯一写入物）：138 个引文节点，逐字/区间/哈希/唯一性/五栏跨度不相交/分区与 null 理由/枚举值/quote 可追溯八项机械复核全通过"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/cl0055-xiyou/build.py",
+      "sha256": "f26a2885cf1c0d70637b8d186946988170b8a4427f41694fdd9c89bd736da51d",
+      "kind": "probe",
+      "note": "候选构造脚本。开工前 assert 整个 docs.json 的 sha256 == c282cf39…，不符即拒绝运行；引文一律以 (head, tail) 在区间内切片生成，head 与 tail 各须恰好命中一次（本轮先以 AST 静态预检 141 个锚点，修掉 7 处重复锚点后才跑）。自带六项自检（源哈希/区间口径/逐字/唯一性/同任务五栏跨度不相交/null 栏必须有 Note/枚举值），任一不过即拒绝写盘。"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/cl0055-xiyou/verify.py",
+      "sha256": "88854412caeed84ca4cace6020593e7d6c758f560e9fa44cc4a9db1d860fe6b1",
+      "kind": "independent-verifier",
+      "note": "独立复核脚本：只从盘上重读候选与原文，不 import build.py、不引用其任何内存状态。七项全过才 exit 0；本轮实测 exit 0。它同时打印「本脚本只核定位与结构，不核语义」，防止把定位核验读成语义核验。"
+    },
+    {
+      "path": "data/cache/a065244455cfb2221bcda94a.docs.json",
+      "sha256": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+      "kind": "source",
+      "note": "原文（只读，未改动）。sha256 与 task.sourceHash 一致。"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "源哈希：`shasum -a 256 data/cache/a065244455cfb2221bcda94a.docs.json` = c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2，与 task.sourceHash、候选 source.sourceHash、以及全部 138 个引文节点各自的 sourceHash 逐一一致（verify.py 的 A 项逐节点比对）。build.py 在开工前 assert 整个 docs.json 的 sha256，不符即拒绝运行。",
+      "result": "pass"
+    },
+    {
+      "text": "区间口径自检（可复现）：`python3 -c \"import json;t=json.load(open('data/cache/a065244455cfb2221bcda94a.docs.json'))[0]['text'];print(repr(t[396815:396855]))\"` 输出 '第五十五回\\u3000色邪淫戏唐三藏\\u3000性正修持不坏身\\n\\n却说孙大圣与猪八戒正要使法定那些妇女' —— 切片以本单元回目逐字开头；len(t[396815:404385]) == 7570，与任务声明字数一致；每条引文都满足 396815 <= start < end <= 404385。verify.py 的 B 项复算通过。",
+      "result": "pass"
+    },
+    {
+      "text": "逐字性：138 个节点全部满足 `docs[0].text[start:end] == quote`。此项由构造保证（引文以 head/tail 片段在区间内 find 后切片，且 head 与 tail 各须恰好命中一次，否则 build.py 直接拒绝写盘），并由 verify.py 的 C 项**独立重读原文**复算，异常数 0。",
+      "result": "pass"
+    },
+    {
+      "text": "唯一性与首次出现：每个节点的 wholeTextOccurrences / firstOccurrenceAt / inRange 都由 verify.py 的 D 项独立复算（text.count(quote) 与 text.find(quote)），与本节点位置逐一相符，异常数 0。构造阶段另有一道更严的检查：build.py 要求 head 在**本区间内**恰好命中一次——本轮先用 AST 静态预检 141 个 q() 锚点，查出并修掉 7 处重复锚点（毒敌山琵琶洞／不敢破荤／今日又好吃邓沙馅／水高船去急／现了本相／收了御弟／身未沾床 各出现两次），修完复检 0 处冲突后才允许写盘。",
+      "result": "pass"
+    },
+    {
+      "text": "同任务五栏跨度不相交（本轮提示词点名的硬要求：禁止把同一句话同时当作多栏依据）：verify.py 的 E 项对 12 条任务的 objective/obstacle/action/result/cost 逐对比较 [min(start),max(end)) 区间，凡非 null 的两栏必须满足 a.end <= b.start 或 b.end <= a.start。实测 0 处相交。null 栏另有两条硬检查：必须带同名 note（12 条任务的 10 处 cost null 与 2 处 obstacle null 全部带 Note），且 basis 必须是 unverified、claimStatus 必须是 none、quotes 必须为空数组——不允许「写 null 却暗含结论」。",
+      "result": "pass"
+    },
+    {
+      "text": "分区与枚举值：verify.py 的 F 项确认 tasks/causeEdges/states/foreshadows/worldSettings/themeReadings 六个分区都存在（与 loop.py 的 required_sections() 从提示词抽出的分区名一致）；kind ∈ {rule,place,item}；placeState ∈ {arrived,mentioned}；itemStates ⊆ {hold,transfer,use,lose} 且非空；rule 的 institution ∈ {declared,executed,misunderstood}（本轮两条 rule 都是 executed，因为两次扎伤与两次叫的反应都由叙述层写出）；伏笔口径：status=resolved 必须 payoffState=recovered，unresolved 不得是 recovered，且未回收者必须带 payoff.note。全部通过。",
+      "result": "pass"
+    },
+    {
+      "text": "quote 字段可追溯（本轮新加的检查）：20 条 worldSettings 每一栏的 `quote` 字段都不是孤立字符串，而必须能在该条自己的 `quotes[]` 里逐字找到（相等或为其子串）。第一版有 11 条不满足（如 W1 的 quote 取自菩萨整段话里的一个分句，而那条当时的 quotes 里没有该分句），已通过为这些字段补上真实的定位节点修掉；复算 20/20 通过。这把「设定条目引的到底是哪句话」从读者猜测变成机器可查。",
+      "result": "pass"
+    },
+    {
+      "text": "主题解读三件齐备：verify.py 的 G 项确认两条 themeReadings 都带 perspective（从哪个角度读）、support（支撑场景，各 3 条且每条带引文）、counter（反面证据，各 3 条且每条带引文）。两条都没有使用事件密度/剧情点数量/死亡人数/篇幅中点来定义高潮，也没有套三幕或英雄旅程；各自写明了「解释层不是事实层」。",
+      "result": "pass"
+    },
+    {
+      "text": "受保护路径未被本轮改动：`git status --porcelain -- loop/state/out/read_xiyou_L1_0055.candidate.json` 只报 `?? loop/state/out/read_xiyou_L1_0055.candidate.json`（未跟踪的新文件）。本轮的写入物只有 writes 指定的这一个候选文件；探针与复核脚本写在 /Volumes/资源库/我的资源/回滚点/项目/cl0055-xiyou/（仓库外），未在共享树里碰 js/css/index.html/serve.py/narrative.py/scripts/tests/docs/data。",
+      "result": "pass"
+    },
+    {
+      "text": "未做语义核验：semanticReview.performed=false 已写进候选。本轮做的是**引文定位核验**（逐字/区间/哈希/唯一性/同任务五栏跨度不相交/分区与 null 理由/枚举值/quote 可追溯）与逐条人工比对原文；「这句话在该语境里是否真的支持该断言」仍需独立复核者按 VERIFIER 契约读原文后判。不写 semanticReview 完成。",
+      "result": "pass"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/read_xiyou_L1_0055.candidate.json",
+      "kind": "append-only"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/a065244455cfb2221bcda94a.docs.json": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2"
+  },
+  "leaseNote": "任务 read:xiyou:L1:0055 由 w-read-3 持有（loop/state/leases/read:xiyou:L1:0055.d/lease.json），writes 只声明 loop/state/out/read_xiyou_L1_0055.candidate.json；本轮未越界写入。",
+  "remaining": [
+    "语义核验未做：本轮只核了引文定位与结构，全部 138 个节点的「这句话在该语境里是否真的支持该断言」仍需独立复核者判。",
+    "T4 与 T5 是同夜同一事件的两面（女怪逼婚／唐僧守身），我按 objective 主体不同拆成两条；若复核者按更严的「同一事件不得拆条」口径，应合并。已写进 selfCritique 第 1 条。",
+    "T9 的 obstacle 标为 inferred（引妖出洞才动手）：原文没有一句说这是必须的，是我从叙述顺序读出来的条件；若复核者不认，该栏应记为 null 并补 obstacleNote。已写进 selfCritique 第 4 条。",
+    "W1「倒马毒」与 W2「公鸡鸣叫克蝎子」我记为 kind=rule；原文并未把它们命名为法则，是我从两次扎伤都奏效、两次叫对两种反应归纳的。若按「没有依据就不扩出术语装饰层」，这两条应删或降级。已写进 selfCritique 第 2 条。",
+    "W8「西梁国」记 placeState=arrived 是口径判断（判据：本区间写出了到达动作「直至西梁国」）；若要求写出入境或见王才算到达，结论相反。判据已写进 explain 与 selfCritique 第 3 条。",
+    "T2/T11 的部分引文跨度内含人物台词（报菜名、丫环自陈），claimStatus 已标 mixed 并在 note 写明哪部分是台词；若要求引文只含叙述层，这两栏需重划。已写进 selfCritique 第 5 条。",
+    "F1 标 resolved，但回收只到「身份」一层：她如何认得行者、为什么说如来也怕她，本区间未收束，已写进 payoff 与 unknowns。",
+    "本区间原文的空白（女怪如何得知子母河之事、绳最后怎么解、星官回旨与否、「邓沙馅」何指等）已写进 unknowns 13 条与 openThreads 7 条，未替原文补结局。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/read_xiyou_L1_0055.candidate.json"
+    ]
+  },
+  "submittedAt": "2026-10-12T06:30:19Z",
+  "wallClockSeconds": 2493,
+  "wallClockFrom": "lease.startedAt",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-12T06:30:19Z"
+  },
+  "verifyState": "partial",
+  "reviews": [
+    {
+      "reviewer": "w-verify-2",
+      "at": "2026-10-12T06:59:19Z",
+      "verdict": "partial",
+      "notes": "① 判定理由：候选的**核心可交付物（引文定位）是 100% 干净的**——330 个带偏移节点逐字命中、区间内、唯一、哈希一致，固定种子抽 5 条全对；零编造（全部人名地名物名都在区间内逐字可查）、零原文外结局、不把回末当成功、semanticReview 诚实保持 not-performed。按 VERIFIER 纪律，这不能判 fail。但确有 5 条**逐字可查**的反例，性质是「证据指针绑定错误 + 一处顺序陈述反了 + 一处自我评估不实」，与 read:xiyou:L1:0053 的复核结论同族，故判 partial。\n② 哪些条目可以用：全部 330 个带偏移引文节点；tasks 12 条、causeEdges 20 条、rejectedEdges 7 条、states 13 条、knowledgeDiffs 7 条、foreshadows 9 条、worldSettings 20 条、worldSettingsExcluded 7 条、themeReadings 2 条、unknowns 13 条、openThreads 7 条 的**主体内容与 claimStatus 标注**（含大量诚实的 null 栏与 costNote、以及把「如来也还怕我哩」当自夸排除、把韵文当评论层排除）均可沿用；尤其值得肯定的是：CE12 关于「菩萨不请自来」的结论、F5/F9 显式 unresolved、K5 的双向信息差、W8 自陈口径并写进 selfCritique，这些都是主动暴露不确定性的正确做法。\n③ 哪些必须修（修完即可整体采信）：(a) CE12 的 mechanism 删掉「先写…再写…」的顺序句，改为「原文写三人在难处时老妈妈挑菜而来，沙僧随后才提议问信；菩萨是不请自来」；(b) S12 的 anchorRefs 补 401035、401045 两条（并把 after 的「听见蜜蜂叫」改为原文口径「行者钉在他头上叫师父、唐僧认得声音」，原文没有写他「听见蜜蜂叫」）；(c) F4 的 setup.refs 补 402284；(d) CE6 的 from 节点补 398976 并把它标为 dialogue（行者的自述），同时在 caveat 里承认叙述层写的是「不分胜负」；(e) selfCritique[0] 的「两两不相交」改为「T4.result 与 T5.cost 复用同一句，其余不相交」。\n④ 无需降级为 unknowns：本次反例中没有发现「把 unknowns 写成事实」的情形，候选的 unknowns/openThreads 划分与原文一致。\n⑤ 误杀检查结论：**未发现误杀**。我逐条验了它的排除项——worldSettingsExcluded[4] 排除回目／回末诗（正文确无「色邪」「性正」二词，二词只出现在回目 396821/396829），Excluded[1] 排除「如来也怕我哩」（确无旁证，但仍留在 K2 与 unknowns），Excluded[5] 排除「邓沙馅」（原文确未解释），RE2/RE6 以评论层为由否决两条韵文因果边（与 0053 复核接受的同一口径一致），Excluded[0] 排除膏药（原文确只出现「我去西梁国讨个膏药你贴贴」与行者当场回绝）。这些排除都合法。\n⑥ 我自己的错，如实记录：我第一版自动绑定扫描把 20 余条 CE 的 mechanism 内联引文报成「不在自己的 evidence 里」，这是**我的假阳性**，两个原因——(i) 候选的内联「」引文会剥掉原文的内层引号（如把 “孽畜无礼！” 写成 孽畜无礼），我的比较没有做引号归一化；(ii) 我的节点收集函数在 worldSettings 上被标量 quote 字段提前 return，漏掉了同条目的 quotes[]。加引号归一化后，351 条内联「」引文中 303 条逐字可查，剩余 48 条经逐条人工确认为**释义性转述**（如「到结尾就算成功」「没有依据就不扩出术语装饰层」）或**拆开的相邻句**（如 RE4 把 401786 与 401804 两句合成一句）——其中 RE4 的改写与 RE7 的省略号引文属引文体例问题，不构成编造，已在 CE 里只保留真正有原文反证的那 5 条。\n⑦ 未做／做不到：我无法运行候选的 build.py／verify.py 复现其自检（两者在仓库外的 /Volumes/资源库/我的资源/回滚点/项目/cl0055-xiyou/，且 build.py 118KB，超出本轮必要范围）——我改用从产物与原文独立重算的方式覆盖了它声称的全部机械项。另外，本次没有对 themeReadings 的 2 条解读做独立审美判断（那不是 VERIFIER 契约的职责），只说它们的 support/counter 引文均可查、且未使用事件密度／死亡人数等被禁口径。",
+      "counterExamples": [
+        {
+          "id": "CE_A_CE12_order_inverted",
+          "claim": "causeEdges[12]（CE12_nanchun_guanyin）的 mechanism 断言原文的叙述顺序是「原文先写三人的困境与沙僧『等我问他个信儿』的动议，再写老妈妈挑菜而来」——即把沙僧的动议算在菩萨现身之前。原文顺序与此相反。",
+          "quote": {
+            "quote": "三人正然难处，只见一个老妈妈儿，左手提着一个青竹篮儿，自南山路上挑菜而来",
+            "start": 401980,
+            "end": 402016,
+            "occurrences": 1
+          },
+          "counterQuote": {
+            "quote": "等我问他个信儿，看这个是甚妖精，是甚兵器，这般伤人",
+            "start": 402033,
+            "end": 402058,
+            "occurrences": 1
+          },
+          "why": "原文顺序是：三人正然难处（401980）→ 老妈妈挑菜而来（401987）→ 沙僧提议问信（402033）。候选把 402033 的事说成发生在 401987 之前，是一句与原文相反的顺序陈述。**该条的结论（『菩萨是不请自来』）本身成立，而且正是被真实顺序支持的**——错的是它给出的理由。这条错误能存活，是因为候选自己的 evidence 数组就是按论点而非原文顺序排的（starts=[402033, 401987, 402085]），而它自报的机械检查里没有一项核对 evidence 的先后顺序。"
+        },
+        {
+          "id": "CE_B_S12_after_unbound",
+          "claim": "states[11]（S12_tangseng_zhidao_tudi_lai）的 after 写「听见蜜蜂叫便认出是行者（「唐僧认得声音」），开口就说「悟空来了？快救我命」」——被引的两句就是断言的落点。但该状态的三条 anchorRefs（397896-397923、401157-401166、401124-401150）都不覆盖这两句。",
+          "quote": {
+            "quote": "唐僧认得声音",
+            "start": 401035,
+            "end": 401041,
+            "occurrences": 1
+          },
+          "counterQuote": {
+            "quote": "悟空来了？快救我命",
+            "start": 401045,
+            "end": 401054,
+            "occurrences": 1
+          },
+          "why": "两句都在原文里逐字可查（401035、401045，各唯一命中），断言方向也成立；错的是**证据指针**：refs 给的是 (a) 前值「我三个徒弟，不知我困陷在于这里」、(b) 401157「你千万救我取经去也」、(c) 401124「他把我缠了半夜…」——全是后文或旁证，没有一条指向本条 after 所依赖的「认得声音／快救我命」。核验者按 refs 去查，查到的不是本状态变化的那句话。note 里另写「他自思『我三个徒弟，不知我困陷在于这里』」的 before 是有 refs 支撑的，缺的只是 after 这一半。"
+        },
+        {
+          "id": "CE_C_F4_setup_missing_decisive_ref",
+          "claim": "foreshadows[3]（F4_sangugangcha_shiqianjiao）的 name 逐字取自菩萨台词「他那三股叉是生成的两只钳脚」，setup.text 也复述这一点（「菩萨说明她的兵器其实就是她的身体部件」）。但 setup.refs 只有两条：398244（她拿三股钢叉跳出亭门）与 402317（本身是个蝎子精），**不含 402284 这句**。",
+          "quote": {
+            "quote": "他那三股叉是生成的两只钳脚",
+            "start": 402284,
+            "end": 402297,
+            "occurrences": 1
+          },
+          "counterQuote": {
+            "quote": "他却拿一柄三股钢叉，跳出亭门",
+            "start": 398244,
+            "end": 398258,
+            "occurrences": 1
+          },
+          "why": "这条伏笔的名字与解释都建立在 402284 上——它是「兵器即身体部件」这一预告的唯一文本来源。refs 却只给了「她拿过叉」与「她是蝎子精」，两句都不含「钳脚」之说。按 refs 复核，无法推出该条 setup.text 的断言；该句只出现在 name 字段里，而 name 不是引证节点。"
+        },
+        {
+          "id": "CE_D_CE6_from_node_unsupported_and_contradicted",
+          "claim": "causeEdges[5]（CE6_daomadu_shangtou）把 from 节点写成「行者破了女怪的叉势」，当作事件的起点。但叙述层对这一段交手写的是「三个斗罢多时，不分胜负」；「破了叉势」只见于行者事后对八戒的自述。而 CE6 的两条 evidence（398769 倒马毒桩扎头、398791 负痛败阵）都不覆盖 398976 那句自述。",
+          "quote": {
+            "quote": "三个斗罢多时，不分胜负",
+            "start": 398749,
+            "end": 398760,
+            "occurrences": 1
+          },
+          "counterQuote": {
+            "quote": "我与他正然打处，他见我破了他的叉势",
+            "start": 398976,
+            "end": 398993,
+            "occurrences": 1
+          },
+          "why": "from 节点既没有引证支撑（398976 未进 evidence），又与叙述层明确的「不分胜负」相反。候选的 caveat 只交待了「不知是件甚么兵器」是行者当时的认知（台词），**没有交待「破了叉势」同样只是行者的自述**，claimStatus 也只标到 mixed。这正是计划100 记录过的形态：把人物的一面之词当成事件层的起点。"
+        },
+        {
+          "id": "CE_E_selfCritique_cross_task_disjoint_false",
+          "claim": "selfCritique[0] 为「T4 与 T5 拆成两条」辩护时声称「且两条的五栏引文跨度两两不相交」。实际 T4.result 与 T5.cost 共用同一引文节点。",
+          "quote": {
+            "quote": "可怜将一个心爱的人儿，一条绳，捆的象个猱狮模样，又教拖在房廊下去",
+            "start": 400499,
+            "end": 400531,
+            "occurrences": 1
+          },
+          "counterQuote": {
+            "quote": "把那怪弄得恼了，叫：“小的们，拿绳来",
+            "start": 400479,
+            "end": 400497,
+            "occurrences": 1
+          },
+          "why": "400499-400531 这一句同时充当 T4 的 result（她逼婚失败转为捆缚）与 T5 的 cost（唐僧付出的代价）。候选在同一份文件的 assertions[4] 里只声称「**同任务**五栏跨度不相交」——那一条实测为真（我把 12 条任务的五栏两两比对，0 处相交）；错的只是 selfCritique 里这句跨任务的加强说法。属自我评估不实，不影响抽取内容本身。"
+        }
+      ],
+      "reverseChecks": [
+        {
+          "found": "女怪知道师徒在西梁国宴席上没吃东西——这是她端出荤素两盘馍馍「压惊」的由头，也是一条独立的知识事实（与子母河那条不同）。候选的 K1／W7 只覆盖「子母河边吃水高」，「赴宴不曾进得饮食」没有任何栏目承载。",
+          "quote": {
+            "quote": "我知你在女国中赴宴之时，不曾进得饮食",
+            "start": 397798,
+            "end": 397816,
+            "occurrences": 1
+          }
+        },
+        {
+          "found": "「脑门痈 → 肿嘴瘟」是区间内一条完整的铺设／回收对子：八戒先取笑行者「弄了个脑门痈」，次晨行者原样奉还「昨日咒我是脑门痈，今日却也弄做个肿嘴瘟了」。候选有 9 条 foreshadows，却漏了这条最典型的回内应答。",
+          "quote": {
+            "quote": "昨日咒我是脑门痈，今日却也弄做个肿嘴瘟了",
+            "start": 401934,
+            "end": 401954,
+            "occurrences": 1
+          }
+        },
+        {
+          "found": "行者的受伤史自述：大闹天宫被押赴斗牛宫处处斩、雷打火烧、老子安于八卦炉锻炼四十九日「俱未伤损」。这段正是这场戏的分量所在——旧伤皆不能损，尾钩一扎才显利害。候选 S3／CE6 只记扎伤与败退，整段未收。",
+          "quote": {
+            "quote": "及老子把我安于八卦炉，锻炼四十九日，俱未伤损",
+            "start": 399151,
+            "end": 399173,
+            "occurrences": 1
+          }
+        },
+        {
+          "found": "女怪的近身神通：鼻中出火、口内生烟，以及「也不知有几只手」的乱打。CE5 只收了「口喷一道烟光，把花亭子罩住」，这两处阵上手段无人承载（I1 只引到「三股叉飞舞冲迎」）。",
+          "quote": {
+            "quote": "那怪见八戒来，他又使个手段，呼了一声，鼻中出火，口内生烟，把身子抖了一抖，三股叉飞舞冲迎",
+            "start": 398403,
+            "end": 398447,
+            "occurrences": 1
+          }
+        },
+        {
+          "found": "女怪「不知有几只手」的形容（紧接着同一场交手），候选全篇无此语。",
+          "quote": {
+            "quote": "那女怪也不知有几只手，没头没脸的滚将来",
+            "start": 398448,
+            "end": 398467,
+            "occurrences": 1
+          }
+        },
+        {
+          "found": "八戒隔着石屏向行者打趣探问战果「那话儿成了否？」——这是行者二次侦察回来后的第一句对话，候选的 CE10／T6 只收了行者的回报与八戒「还是个真和尚」，中间的问答未收。",
+          "quote": {
+            "quote": "那话儿成了否？",
+            "start": 401289,
+            "end": 401296,
+            "occurrences": 1
+          }
+        },
+        {
+          "found": "西梁国君臣的退场收束：女王自觉惭愧、多官一齐回国。候选 W8 把西梁国记为 arrived（依据是结尾「直至西梁国」），但本区间开头这条退场没有任何栏目承载，S 系列 13 条状态里也没有西梁国一侧的变化。",
+          "quote": {
+            "quote": "女王自觉惭愧，多官都一齐回国不题",
+            "start": 397100,
+            "end": 397116,
+            "occurrences": 1
+          }
+        },
+        {
+          "found": "沙僧对行者「先侦察后行事」的赞语，紧接行者劝住八戒筑门之后；候选的 CE3／T2 收了行者的顾虑与变身，没有收沙僧这句当场评价。",
+          "quote": {
+            "quote": "好！好！好！正是粗中有细，果然急处从宽。",
+            "start": 397367,
+            "end": 397387,
+            "occurrences": 1
+          }
+        },
+        {
+          "found": "三人对昴日星官的谢辞「有累有累！改日赴宫拜酬」——星官降妖后即聚金光而去，这是本区间唯一的人情往来与唯一的酬谢许诺，与 F5（星官许诺回旨未兑现）同段收束，候选未收。",
+          "quote": {
+            "quote": "行者与八戒沙僧朝天拱谢道：“有累有累！改日赴宫拜酬。”",
+            "start": 404028,
+            "end": 404055,
+            "occurrences": 1
+          }
+        },
+        {
+          "found": "八戒向星官讨止疼药饵的插话（对应 T10 的治病段），候选只引了行者打趣「不须用药」一句，八戒主动讨药这一句未收。",
+          "quote": {
+            "quote": "八戒侮着嘴哼道：“哥啊！就问星官讨些止疼的药饵来！”",
+            "start": 402561,
+            "end": 402587,
+            "occurrences": 1
+          }
+        }
+      ]
+    }
+  ]
+}

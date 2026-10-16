@@ -1,0 +1,333 @@
+{
+  "task": "verify:dafeng:L3:0223",
+  "verifies": "read:dafeng:L3:0223",
+  "round": "independent re-verification (round 3; supersedes the round-2 file previously at this path)",
+  "reviewer": "w-sanguo-1",
+  "role": "VERIFIER",
+  "verifierIsNotOriginalAuthor": "被复核记录 loop/state/out/read_dafeng_L3_0223.json 的 agent = w-dafeng-1；本复核 reviewer = w-sanguo-1，非同一人。",
+  "candidate": "loop/state/out/read_dafeng_L3_0223.candidate.json",
+  "candidateSha256": "1fac13dc8b9638a683a37a9e51dbff974cf53914d140163f5b01d1a2ffec698d",
+  "sourcePath": "data/cache/1063b17ca65ec1b76f30e460.docs.json",
+  "sourceSha256": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+  "sourceRange": [
+    836013,
+    841448
+  ],
+  "sliceSha256": "fa9ed47df0e5d352d31b1e08fefff2953ce605e2e1f6b60c1416e82f30087233",
+  "sliceCodepoints": 5435,
+  "method": "按 VERIFIER.md 的顺序执行：① 先自己读原文区间 docs[0].text[836013,841448)（5435 码点，分三段通读并写下独立要点），② 再打开候选做逐条比对。全部计数、偏移、覆盖率、occurrence 元数据由我自己的脚本重算，**不采信候选 machineSelfCheck 的自报值**；③ 反向验证用三路扫描：字符级 6-gram 差集、子句级（按句末标点切分共 218 段）、以及「结构化分区 vs 全文」两套口径的覆盖对比，专门找「候选没有登记、但原文明确存在」的事实；④ 误杀检查回查被排除项；⑤ 固定种子随机抽 5 条引文重定位。全程只读候选与原文，未修改被复核文件，未触碰受保护路径。",
+  "supersedesNote": "本路径上原有一份 w-verify-2 于 2026-10-14T08:10 左右写出的第二轮复核（sha256 6ef69424bc4a2f8e9b6f249878a813386dde2fd2eb14572a083791d7766275ef，verdict=partial，8 条 counterExamples / 6 条 reverseChecks）。该租约（loop/state/leases/verify:dafeng:L3:0223.d/lease.json）现由我 w-sanguo-1 持有，writes 只有本路径一条，故我覆盖写出自己的独立复核。**覆盖前我已把原文件完整保存到仓库外回滚点**：/Volumes/资源库/我的资源/回滚点/w-verify-2-verify_dafeng_L3_0223-round2-superseded-6ef69424.json（sha256 复核为 6ef69424…，与源文件一致，可按哈希复得）。我没有采信它的任何结论：下文每条发现都是我自己从原文重新算出来的；CE-4/CE-5/CE-6/CE-7/CE-8/CE-9 与它的部分条目指向同一批原文缺陷，属独立复现（我给出自己的复现命令），CE-1/CE-2/CE-3 与 RC-1…RC-7 是我自己找的；我另纠正了自己两处口径错误（见 notes）。",
+  "verdict": "partial",
+  "counterExamples": [
+    {
+      "id": "CE-1",
+      "claim": "causeEdges[0]（CE01）.to 的字段值写作「梁有平在 접视中败下阵来、承认别无选择，随后主动开口」——「对视」被写成了含谚文字符 U+C811「접」的「접视」。",
+      "quote": "梁有平沉默的与姜律中对视，两人的目光俱是锐利如鹰，不过没什么修为的梁有平很快败下阵来。",
+      "location": "causeEdges[0].to；对应原文 [836403, 836446]",
+      "why": "这是**字符污染**，不是文学判断：字段值里的「접」是本区间原文 0 次出现的字符——我对候选全部字符串叶节点做过脚本扫描，整个 197KB 候选里非中日常用字符只有这一处。断言本身（对视→败阵）有原文支持，所以**不是编造**；但该字段不是干净文本，下游把它当引文或检索键会直接失配。必须改回「对视」。复现：python3 -c \"import json;c=json.load(open('loop/state/out/read_dafeng_L3_0223.candidate.json'));v=[e for e in c['causeEdges'] if e['id']=='CE01'][0]['to'];print(repr(v));print([hex(ord(x)) for x in v if 0xAC00<=ord(x)<=0xD7AF])\" → 打印 ['0xc811']。",
+      "severity": "must-fix"
+    },
+    {
+      "id": "CE-2",
+      "claim": "tasks[7]（T08）.result 断言梁有平「**当众承认**自己活成了最讨厌的那种人」。",
+      "quote": "梁有平活成了自己最讨厌的那种人。 / 对于许七安的嘲讽，梁有平选择了沉默。",
+      "location": "tasks[7].result；对应原文 [837865, 837881] 与 [837887, 837905]",
+      "why": "「当众承认」在**整个原文区间里 0 次出现**（'当众承认' in s → False），也不是任何一条引文节点承载的措辞。原文的归因方向恰恰相反：「梁有平活成了自己最讨厌的那种人」是**叙述者**的判断（不带引号的叙述句），紧接着的一句是「对于许七安的嘲讽，梁有平选择了沉默」——他**没有**承认，是沉默。候选自己在 rejectedEdges RE01 里正确判定「评价与沉默之间没有触发任何后果」，但 tasks[7].result 却写成他当众承认，两处对同一段原文给出相反判断。这属于把人物的沉默改写成认罪，越过了原文。修法：改为「叙述判定他活成了自己最讨厌的那种人；他对此选择沉默」。",
+      "severity": "must-fix"
+    },
+    {
+      "id": "CE-3",
+      "claim": "tasks[7]（T08）.result 断言「这些内容的可信度**没有被任何手段核验**」。",
+      "quote": "那位传话的铜锣大大咧咧的坐在桌上，脚踏着长凳，手里捏着茶杯，喝了一口，唠嗑道：",
+      "location": "tasks[7].result；对照候选自己的 states[7]（S08）",
+      "why": "方向上该结论可接受，但表述过强且与候选自己的 S08 冲突：原文里审讯方**尝试过**核验——许七安当场问三位白衣术士「他的话可信吗？」（候选自己引作 S08 的 before/anchor），术士答「看不透，他的气数被掩盖了，望气术无法窥探」。准确表述是「**唯一的核验手段被屏蔽而失效**」，不是「没有任何手段核验」。两者对下游含义不同：前者是一条有对手的失败（有人在屏蔽），后者读起来像己方疏忽。修法：按 S08 + K02 改写为「望气术核验失败」。",
+      "severity": "should-fix"
+    },
+    {
+      "id": "CE-4",
+      "claim": "states[4]（S05）.before 声明「齐党的暗子、经历司经历（正六品），替宋布政使**偷改账册、侵吞军需**」，beforeBasis = explicit（原文直述）。",
+      "quote": "“随着宋长辅的官越做大，我一个瘸子也跟着平步青云，成了如今的经历司经历，做到了正六品。 / 这些年，我一直在替宋布政使做事，偷改账册，侵吞军需....",
+      "location": "states[4].before；其 beforeQuotes 只到 [837651, 837694] 为止，不含「偷改账册、侵吞军需」",
+      "why": "断言内容为真（原文 [837778, 837807] 确有「偷改账册，侵吞军需」），但**承载它的引文不在 S05.beforeQuotes 里**：S05.beforeQuotes 只引了「随着宋长辅的官越做大……做到了正六品」。我遍历全部 207 个 quote 叶节点计数：含「偷改账册」的 **0** 个、含「侵吞军需」的 **0** 个。也就是这半句断言没有任何引文支撑，却被标成 explicit。复现：python3 -c \"import json;c=json.load(open('loop/state/out/read_dafeng_L3_0223.candidate.json'));q=[]\\ndef w(o):\\n  [(q.append(v['quote']) if isinstance(v,dict) and 'quote' in v and isinstance(v.get('start'),int) else None,w(v)) for v in (o.values() if isinstance(o,dict) else o)] if isinstance(o,(dict,list)) else None\\nw(c);print(sum('偷改账册' in x for x in q),sum('侵吞军需' in x for x in q))\" → 0 0。修法：把 [837778, 837807] 补进 S05.beforeQuotes，或把 basis 降为 inferred。",
+      "severity": "should-fix"
+    },
+    {
+      "id": "CE-5",
+      "claim": "states[9]（S10）.before 声明「各级官员对案子内情一无所知，只能从巡抚的动静里猜」，beforeBasis = explicit（原文直述）。",
+      "quote": "位置决定思路，张巡抚此刻想的是如何安抚官员，维持稳定。",
+      "location": "states[9].before；唯一引文在 [840112, 840139]",
+      "why": "引文只支持「张巡抚在想如何安抚官员、维持稳定」——这是**张巡抚的打算**，推不出「各级官员一无所知、只能猜」。后者是候选外推的一句心理状态：我按子句扫描回查，原文没有任何一句写官员知道多少、或他们如何揣测。basis=explicit 与引文不匹配。修法：降为 inferred，或改写为「张巡抚判断需要防止云州官场人心浮动」。",
+      "severity": "should-fix"
+    },
+    {
+      "id": "CE-6",
+      "claim": "knowledgeGaps[8]（K09）.whoDoesNot 写「**打更人一方则在三天后才抓到梁有平**」，basis = explicit。",
+      "quote": "三天之后，巫神教的人入梦审讯，试探梁有平是否落入打更人手中 / 因为这三天里，宋布政使陪着张巡抚外出视察，所以没有发现梁有平失踪，直到返回白帝城，才知道小老弟失联了",
+      "location": "knowledgeGaps[8].whoDoesNot；引文见 [837464, 837493] 与 [837497, 837547]",
+      "why": "引文说的是「三天之后，**巫神教**的人入梦审讯，试探梁有平是否落入打更人手中」——三天后有所动作的是**巫神教**，不是打更人；另一条引文说的是宋布政使因外出视察而**没发现梁有平失踪**，也没有给出打更人抓到他的时点。「打更人三天后才抓到梁有平」是本区间**没有写过**的时间线（本区间只写梁有平最终被镖局押到驿站），却标成 explicit。修法：删去该分句，或降为 inferred 并注明原文无据。",
+      "severity": "should-fix"
+    },
+    {
+      "id": "CE-7",
+      "claim": "selfCritique SC07 自述「本候选 114 个不同引文字符串产生 203 条引用」，SC08 自述「36/136 段（引文并集 81.74% 非空白码点）没有引文」。",
+      "quote": "位置决定思路，张巡抚此刻想的是如何安抚官员，维持稳定。",
+      "location": "selfCritique[6]（SC07）与 selfCritique[8]（SC08）；同文件 machineSelfCheck 与 coverage 两块给出的却是另一组数",
+      "why": "同一份文件里两组数字互相矛盾，而**正确的一组在数据块、错的一组在给人读的散文里**（这正是「声称强于验证」的形态）：① distinct 引文字符串：我重算 = **118**，machineSelfCheck.uniqueQuoteStrings = 118，SC07 散文写 114；② 引用条数：我重算 = **207**，machineSelfCheck.quoteNodes = 207，SC07 写 203；③ 零覆盖段落：我重算 = **32**/136，coverage.paragraphsWithZeroCoverage = 32，SC08 写 36/136；④ 81.74%：我按并集/非空白重算 = **0.8486**（= coverage.quoteUnionRatioOfNonSpace），SC08 写 81.74%。我另外试了三种口径（并集/全文长 0.7242、有引文段占比 0.7647、剔除 PS 段后 0.7457），**没有一种能得到 0.8174**，所以 81.74% 不是另一种合法口径，是陈旧数字。注：散文数字陈旧本身不改判定（数据块是对的），但它会被读者当成摘要，故列为 must-fix。",
+      "severity": "must-fix"
+    },
+    {
+      "id": "CE-8",
+      "claim": "machineSelfCheck.crossSectionQuoteReuse 的 byString 被自称是「完整盘点」（其 note 写「如实报数而不声称 0」，SC07 写「我把完整盘点放进 machineSelfCheck.crossSectionQuoteReuse 而不是让它隐身」）。",
+      "quote": "那位传话的铜锣大大咧咧的坐在桌上，脚踏着长凳，手里捏着茶杯，喝了一口，唠嗑道：",
+      "location": "machineSelfCheck.crossSectionQuoteReuse.byString（实测 40 个键）",
+      "why": "byString **不是**完整盘点，有两处硬缺陷：① 实际被引用多于 1 次的字符串有 **54** 个，byString 只有 **40** 个键，**16 个多引字符串缺失**；② 其中 2 个键是 **60 字截断**的残串（完整引文分别长 74 与 83 字，各被引用 3 次与 4 次），按截断串去检索会失配。候选在 SC07 里主动请复核者来看这一块（「特别提示复核者重点看两处」），所以这不是我翻旧账，而是它自己指认的自查项没有做到它声称的程度。修法：补齐 54 个键并去掉截断，或把 note 里「完整盘点」的措辞改为「节选」。",
+      "severity": "should-fix"
+    },
+    {
+      "id": "CE-9",
+      "claim": "foreshadowsNote 自述「**4 条**里只有 F02 在区间内完成形式上的铺设→回收……F01/F03/F04 三条显式标 unresolved」。",
+      "quote": "张巡抚颔首道：“妥善保存尸体。”",
+      "location": "foreshadowsNote；foreshadows[] 实际有 5 条（我枚举 id 得 F01…F05）",
+      "why": "foreshadows 数组实际登记 **5** 条（F01/F02/F03/F04/**F05**，F05 = 「那位大人」的救命之恩 → 揭晓即宋长辅），foreshadowsNote 的摘要只说 4 条、且只交代 F01/F03/F04 三条的状态，**漏掉 F05**。我复核 F05 的 setup/payoff 都带区间内偏移（payoff.start = 837001，落在 [836013,841448) 内），说明它是一条已在区间内完成回收的伏笔，而摘要没提它——读者只读 note 会以为本区间只有 4 条伏笔、或以为没有别的已完成回收。修法：note 改为 5 条并补 F05 的状态。",
+      "severity": "should-fix"
+    }
+  ],
+  "reverseChecks": [
+    {
+      "id": "RC-1",
+      "found": "梁有平对「杨川南为什么被陷害」这个直接提问，**明确声明自己不知情**——候选全文（含全部结构化分区与说明文字）没有这句话，也没有任何条目登记「供述者在此问题上自认无知」这个知识边界。",
+      "quote": "梁有平摇头：“这些我并不清楚，我只知道他和齐党走的并不近。",
+      "location": "原文 [837954, 837983]；候选内 0 次命中",
+      "why": "张巡抚问「那杨川南是怎么回事？他也是齐党，为何你们要陷害他。」，梁有平第一句就是「这些我并不清楚」，随后才转述宋布政使的说法。候选的 S04 与 K07 把「杨川南是弃子」登记为一条知识（并正确地标了转述层级），但**主语一侧的边界丢了**：这条供述里有一段是『我不知道』。证据强度：'并不清楚'、'走的并不近' 在候选全文 0 次出现，而它们是原文逐字句。这正是「只查已写项」结构上发现不了的那类遗漏：候选写对了它写的那部分，漏掉的是**供述者主动划出的无知边界**——它决定了后面那句转述的证明力上限。"
+    },
+    {
+      "id": "RC-2",
+      "found": "铜锣传话时**实际转达的那句话**被漏引：候选 T05.action 只取了同一段的叙述画面（坐桌上、脚踏长凳），没有取他转达的问题本身。",
+      "quote": "“巡抚大人想问问你的意见。",
+      "location": "原文 [840585, 840598]；候选全文 0 次命中（'想问问你的意见' 亦 0 次）",
+      "why": "T05.objective 的责任是「张巡抚要听取许七安的意见」，而**执行侧的证据**恰好就是这一句直接引语：铜锣说「巡抚大人想问问你的意见。」候选 actionQuotes 引的是「那位传话的铜锣大大咧咧的坐在桌上……唠嗑道：」——以冒号结尾的叙述句，正好**切在引语开始之前**。结果是：命令（objective）有引文、执行画面（action）有引文，唯独**命令被实际说出口的那一句**没有。taskFieldQuoteCollision 检不出这种「切在冒号前」的漏引。"
+    },
+    {
+      "id": "RC-3",
+      "found": "开篇刑具段的 4 个整句在**全部结构化分区**（tasks/causeEdges/states/knowledgeGaps/foreshadows/worldSettings/themeReadings 等）里 0 次出现，只出现在 coverage 的零覆盖清单里；候选在 SC08 里只承认其中「两段细节」未被展开。",
+      "quote": "但偏偏不让犯人休息，强迫犯人站着，可谓痛不欲生。",
+      "location": "原文 [836172, 836196]（另 3 句：[836219, 836268]、[836274, 836299]、[836098, 836111]、[836196, 836213]）；结构化分区命中 0",
+      "why": "这几句不是排版符或拟声词，是实打实的叙述内容：站刑的完整执行方式（不让休息、两天内死去）、以及「像许七安这样爆肝修仙的刑法」把酷刑与许七安的炼神境修行**接在一起**的那句类比。后者尤其关键：它是本区间唯一一处把「许七安自己受的修行之苦」与「打更人的酷刑」并置的文字，也是候选 NW01 判定「刑具段只作威慑背景、当场耗尽」时**没有处理**的材料。我承认候选在 SC08 里如实披露了零覆盖并说明「复核者若认为应补，请驳回」，所以这不是隐身遗漏；但它披露的范围是「两段细节」，实际是 4 整句，范围被低估。本项不构成 fail：属可按 SC08 说明补正的判断分歧，而非无据断言。"
+    },
+    {
+      "id": "RC-4",
+      "found": "白帝城在区间内被**当成已身处之地**使用（在城里见义勇为、召集令的对象是「白帝城六品以上官员」），而候选 NW08 用「没有任何一句写『到达／驻守』」把白帝城整体排除出 place。",
+      "quote": "有一年，我在白帝城见到一个衙内当街欺凌民女，怒而出手，但寡不敌众，被他的扈从打断了腿。 / 召集白帝城六品以上官员至布政使司衙门。",
+      "location": "notWorldSettings[7]（NW08）.why；原文 [836833, 836876] 与 [840402, 840421]",
+      "why": "NW08 的措辞过强：它说「没有任何一句写到达／驻守」，但同一区间里有「有一年，我在白帝城见到一个衙内当街欺凌民女」（人物在白帝城内的行迹）与「召集白帝城六品以上官员至布政使司衙门」（把白帝城作为官署集合地），另有「直到返回白帝城，才知道小老弟失联了」含到达类动词「返回」。所以严谨的排除理由应是「**本区间内没有新发生的到达动作**，仅有追述与命令」，而不是「原文没写白帝城」。本项作为**误杀检查**记录：不改判定（候选在 SC03 里已显式披露该从严取舍并给出理由，属可复核判断而非隐身错误），但 NW08 的表述会给下游造成「原文没有白帝城」的误读。"
+    },
+    {
+      "id": "RC-5",
+      "found": "仵作「抵达现场」这一步在候选里没有任何引文（只引了他进屋、虎贲卫通报两句），而这一步是「验尸流程」与「知府知情」两块的接缝。",
+      "quote": "仵作很快赶过来，",
+      "location": "原文 [839867, 839875]；候选全文 0 次命中（「虎贲卫检查过后，恭声汇报。」[839752, 839765] 同样未作引文）",
+      "why": "T03.action 引「仵作脚步匆匆进来，低着头。」与虎贲卫通报句，T04.obstacle 引「随行的还有云州知府……」。两句之间被跳过的正是「仵作很快赶过来，」——它同时交代了**仵作从府衙赶到**与**知府随之同行**（下一分句即「随行的还有云州知府」）。同样地，「虎贲卫检查过后，恭声汇报。」与「巡抚大人，他死了。」也没有作为引文出现，于是从「破门」到「发现尸体」之间的程序动作全靠转述。这属引证缺口，不是事实错误：T03/T04 的断言方向都对，缺的是承载它们的逐字引文。"
+    },
+    {
+      "id": "RC-6",
+      "found": "许七安在听梁有平讲身世时的自我对照（二叔、二郎、许大郎、许铃音、婶婶）——候选只在 selfCritique/coverage 的说明文字里提到它「没有展开」，没有任何结构化条目承载。",
+      "quote": "梦想还没开始，就被现实给打败了......幸好我有二叔每年上百两银子喂着，不然也只和二郎一样读书了......婶婶讨厌我是应该的。 / 而以许大郎的资质，读书能有什么出息？",
+      "location": "原文 [836709, 836774] 与 [836794, 836812]；结构化分区（states/themeReadings/tasks）0 次命中",
+      "why": "这是**同一章内唯一一处许七安的自我投射**：梁有平讲「穷文富武、读不起书、考举人不中」，许七安立刻对照自己的家境（二叔供着银子、二郎读书、婶婶讨厌他），紧接着叙述用「而以许大郎的资质，读书能有什么出息？」把梁有平的命运投射到许家兄弟身上。它解释了 T08 那段供述在场景里的功能（不只提供情报，还触发主角的对照），也是本章唯一触及许七安私人处境的段落。候选已在 SC08 里主动披露「如果复核认为许七安这段自我对照是本章的人物刻画重点，那我的候选就漏了一块，应补进 states 或 themeReadings」——我按原文核实后**同意这个自我披露成立**：该段确实构成一条可登记的材料，建议补入（不构成 fail，因为候选自己指出了它）。"
+    },
+    {
+      "id": "RC-7",
+      "found": "承载本案罪名的那句自陈（偷改账册、侵吞军需）在候选里**不是任何一条引文**，却有 6 处断言在使用它。",
+      "quote": "这些年，我一直在替宋布政使做事，偷改账册，侵吞军需....",
+      "location": "原文 [837778, 837807]；作为 quote 值出现 0 次",
+      "why": "我遍历全部 207 个 quote 叶节点：含「偷改账册」的 0 个、含「侵吞军需」的 0 个。而这句原文正是梁有平对**自己罪行**的唯一直接自陈（「这些年，我一直在替宋布政使做事，偷改账册，侵吞军需....」）。使用它的地方至少有 S05.before（标 explicit）、T08.result、causeEdges 与 W15.institutionNote。我把它与 CE-4 分开列：CE-4 是「basis 标错」，本项是「**核心自陈句整体没有引文**」。"
+    }
+  ],
+  "notes": "判定 **partial**，不是 fail，也不是 pass。\n\n【为什么不是 fail】我对「编造」做了全量扫描，结论为零：207/207 个 quote 叶节点都是原文区间内的逐字子串（0 处 NOT FOUND）、\n全部 start/end 偏移与 text.find() 逐位一致（0 处 mismatch、0 处越界）、occurrence 元数据 207/207 与我的重算一致（含 wholeTextOccurrences 的重叠枚举口径）、\n固定种子（seed=20261014）随机 5 条 5/5 逐字命中且偏移一致。候选的人名/地名/机构名全部在区间可查\n（许七安 26、宋长辅 15、梁有平 27、张巡抚 18、姜律中 7、杨川南 9、周旻 7、南宫倩柔 3、杨千幻 2），\n无原文以外的实体、结局或成功判定；「结束≠成功」与「人物话≠叙述事实」两条红线执行到位\n（T06.result 只写到「他判定中计」、F02 标 resolved-in-range 同时写明回收物在章末被撼动、speechAsClueNotFact 12 条逐条写明不能证明什么）。\n9 条反例中 CE-1/CE-2/CE-7 是 must-fix，其余是 should-fix；全部可**就地删改**，不需要丢弃整条候选，故不判 fail。\n\n【为什么不是 pass】三类问题都是「声称强于验证」的同一形态：\n① CE-7 是同一份文件里**散文数字与数据块互相矛盾**（114/203/36/81.74% vs 118/207/32/0.8486），而错的一组正好是给人读的摘要——\n读者只读 SC07/SC08 会得到错误印象，且 4 种口径都算不出 81.74%，排除了「另一种合法口径」的解释；\n② CE-8 是自称「完整盘点」的 byString 实际缺 16 个多引键、并含 2 个 60 字截断残串，而候选在 SC07 里主动请复核者看这一块；\n③ CE-4/CE-5/CE-6 是有断言、无承载引文（或引文方向不符）却标 explicit。\n这三类都属机器校验查不到、只有反向读原文才能发现的缺陷，因此不能判 pass。\n\n【哪些可用、哪些必须丢弃或降级】\n· 可直接用：tasks/causeEdges 的断言方向（除 CE-2）、states/knowledgeGaps/foreshadows 的骨架与全部 ID 完整性、\n  全部 207 条引文的**文本与偏移**（可直接作为定位锚点）、coverage 数据块、unknowns U01–U18、rejectedEdges RE00–RE05 的排除理由。\n· 必须修（不改则下游会用错）：CE-1（접→对视，字符污染）、CE-2（删「当众承认」，改沉默）、CE-7（散文数字对齐数据块）。\n· 必须降级或补引文：CE-4（补 [837778, 837807] 到 S05.beforeQuotes 或降 inferred）、CE-5（降 inferred）、\n  CE-6（删「打更人三天后才抓到」）、CE-8（补齐 byString 或改措辞）、CE-9（note 补 F05）。\n· 建议补入：RC-1（梁有平自认不知情的边界）、RC-2（铜锣转达的原话）、RC-5（仵作抵达句）、RC-6（许七安的自我对照，候选已自行披露）。\n· CE-3 建议按 S08+K02 改写为「唯一核验手段被屏蔽而失效」。\n\n【我自己的口径错误，如实登记（VERIFIER.md「你可以判自己错」）】\n① 我第一遍做交叉引用完整性检查时，用正则从全文抓 T/CE/RE/S/K/F/NF/W/U/TN/SC/NW + 两位数字的记号，\n报出 SC01–SC09 与 U01–U18 共 27 个「悬空引用」。复查后确认这是我的假阳性：\nU01–U18 是 unknowns 数组里以字符串**前缀**形式定义的（不在 id 字段），SC01–SC09 同理写在 selfCritique 字符串开头；\n按「条目以该记号开头」判据重算，**27/27 全部有定义，候选的 danglingCrossReferences=[] 是正确的**。\n我撤回这 27 条，不把它们计入反例。\n② 我一度把 textualNotes[4] 的 wholeTextOccurrences=33661 判为与 str.count 不符（我算 11307）。\n原因是「.......」这类自重叠串必须用**枚举全部起始位置**（允许重叠）才等于「出现次数」，str.count 会系统性少算。\n按枚举口径复算后 207/207 全部一致，是我的口径错，不是候选的错。\n\n【反向验证的方法上限】我用了三路扫描（6-gram 差集、218 个子句、结构化分区 vs 全文两套口径），但**它不能证明「已找到全部遗漏」**。\n我只声称 RC-1…RC-7 这 7 条经原文逐字核实、且候选确实没有对应条目。语义正确性我未独立复核，候选的 semanticReview 保持 not-performed。\nRC-3/RC-4/RC-6 三条候选已在自己的 selfCritique（SC08/SC03）里主动披露，我把它们记为「披露成立但范围被低估」，不当作隐身缺陷。\n\n【提交合规】复核者 w-sanguo-1 ≠ 原提交者 w-dafeng-1（见 loop/state/out/read_dafeng_L3_0223.json 的 agent 字段），非自签。\n本次全程只读候选与原文，只在任务 writes 声明的路径写出本文件；未改 js/ css/ index.html serve.py narrative.py scripts/ tests/ docs/ data/ 任何受保护路径。\n被本轮覆盖的第二轮复核已完整保存到仓库外回滚点（sha256 6ef69424bc4a2f8e9b6f249878a813386dde2fd2eb14572a083791d7766275ef），未丢失。\n\n【复现命令】\n原文切片与哈希：python3 -c \"import json,hashlib;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];s=t[836013:841448];print(len(s),hashlib.sha256(s.encode()).hexdigest())\" → 5435 fa9ed47df0e5d352d31b1e08fefff2953ce605e2e1f6b60c1416e82f30087233\n字符污染（CE-1）：见 CE-1.why 的一行命令。\n「当众承认」不在原文（CE-2）：python3 -c \"import json;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'][836013:841448];print('当众承认' in t)\" → False\n引文全量重定位与 occurrence 复算：见本文件 assertions 里的内联脚本。",
+  "quoteAudit": {
+    "totalQuoteNodes": 207,
+    "verbatimMatchesInSlice": 207,
+    "notFound": 0,
+    "offsetMismatches": 0,
+    "outOfRange": 0,
+    "occurrenceMetadataMismatches": 0,
+    "wholeTextOccurrencesCaliber": "枚举全部起始位置（允许重叠），与候选构建口径一致；按此口径 207/207 一致",
+    "randomSample": {
+      "seed": 20261014,
+      "picked": 5,
+      "allMatched": true,
+      "items": [
+        "notWorldSettings[1].quotes[0] → find=839509 命中且偏移一致",
+        "knowledgeGaps[3].quotes[0] → find=840336 命中且偏移一致",
+        "tasks[5].obstacleQuotes[1] → find=840933 命中且偏移一致",
+        "worldSettings[3].quote → find=838645 命中且偏移一致",
+        "themeReadings[1].support[0] → find=839771 命中且偏移一致"
+      ]
+    },
+    "selfCorrection": "我第一遍用 str.count 比对 wholeTextOccurrences=33661，一度判为不符（我算 11307）。这是**我的口径错**：对「.......」这类自重叠串必须用枚举全部起始位置（允许重叠）才是「出现次数」，str.count 系统性少算。按枚举口径复算后 207/207 全部一致。"
+  },
+  "hallucinationCheck": {
+    "verdict": "未发现编造（CE-2 属措辞越界，非凭空实体）",
+    "detail": "对候选全部具名实体做区间回查，全部可查：许七安 26、宋长辅 15、梁有平 27、张巡抚 18、姜律中 7、杨川南 9、周旻 7、南宫倩柔 3、杨千幻 2、知府 6、仵作 7、四号 1、许铃音 1、许大郎 1、二郎 1、二叔 1、婶婶 1、元芳 1。无原文以外的结局或成功判定：候选对章末「中计」只写到「他判定中计」（并显式说明不写「确实是圈套」），对「自杀」只写到仵作的口头结论并保留存疑，未把结束当成功；semanticReview 保持 not-performed，未越权声称语义已核验。CE-2 的「当众承认」是把叙述判断改写成人物的公开认罪（方向被反转），但不是引入原文之外的实体，故与「编造」分开记为措辞越界。"
+  },
+  "misKillCheck": [
+    {
+      "what": "notWorldSettings[7]（NW08）用「没有任何一句写『到达／驻守』」把白帝城整体排除出 place",
+      "quote": "有一年，我在白帝城见到一个衙内当街欺凌民女，怒而出手，但寡不敌众，被他的扈从打断了腿。 / 召集白帝城六品以上官员至布政使司衙门。",
+      "location": "原文 [836833, 836876]、[840402, 840421]、[840112, 840139]",
+      "why": "该 blanket 理由与同区间原文冲突：「有一年，我在白帝城见到一个衙内当街欺凌民女」是人物在白帝城内的行迹，「召集白帝城六品以上官员至布政使司衙门」把白帝城当集合地，另「直到返回白帝城」含到达类动词「返回」。属**过强表述**导致的误杀候选。但据此不判 fail：候选在 SC03 里已显式披露这一从严取舍并给出理由（到达动作发生在区间之前），属可复核的从严判断而非隐身错误。建议把 NW08 理由改为「本区间内没有新发生的到达动作，仅有追述与命令」。"
+    },
+    {
+      "what": "notForeshadows[0]（NF01）与 NW01/NW03 把刑具、望气术等排除出伏笔与世界设定",
+      "quote": "为大奉的刑讯手段添砖加瓦。",
+      "location": "notForeshadows[0]、notWorldSettings[0]/[2]",
+      "why": "我按任务「只提取影响行动、资源、约束或后果的明确设定」逐条回查，这两条的**排除动作**成立：本区间确实没有用刑动作（原文写「不用张巡抚审问」），术法只以结果形式出现。属合法排除，不是误杀。记此条以说明我做了误杀检查而非只找遗漏。但 RC-3 指出：被排除的原文范围被低估了 4 个整句。"
+    }
+  ],
+  "confirmed": [
+    "207 个 quote 叶节点全部是原文区间内的逐字子串（0 处 NOT FOUND、0 处越界）。",
+    "全部带 start/end 的节点偏移与原文切片逐位一致（0 处 mismatch）。",
+    "occurrence 元数据（wholeTextOccurrences / inRangeOccurrences / firstGlobalOffset / startIsFirstGlobalOccurrence）207/207 与我的独立重算一致（按重叠枚举口径）。",
+    "固定种子（seed=20261014）随机抽 5 条引文：5/5 逐字命中且偏移一致。",
+    "coverage 数据块逐位复现：mergedIntervals=106、quoteUnionCodepoints=3936、nonSpace=4638、ratio=0.8486、paragraphs=136、paragraphsWithZeroCoverage=32。",
+    "candidateSha256/sliceSha256 与任务 sourceHash 一致：候选 1fac13dc…、切片 fa9ed47d…、原文 fdde5558…。",
+    "「结束≠成功」与「人物话≠叙述事实」两条硬红线执行到位，无越权成功判定。"
+  ],
+  "usableVsDiscard": {
+    "usable": [
+      "全部 207 条引文的文本与偏移（可直接作定位锚点）",
+      "tasks/causeEdges 的断言方向（除 CE-2）",
+      "states/knowledgeGaps/foreshadows 的骨架与 ID 完整性（90 个 id 全部有定义，无悬空引用）",
+      "coverage 数据块",
+      "unknowns U01–U18",
+      "rejectedEdges RE00–RE05 的排除理由",
+      "speechAsClueNotFact 12 条"
+    ],
+    "mustFix": [
+      "CE-1 字符污染 접→对视",
+      "CE-2 删「当众承认」，改为沉默",
+      "CE-7 散文数字对齐数据块（118/207/32/0.8486）"
+    ],
+    "downgradeOrCite": [
+      "CE-4 补引文或降 inferred",
+      "CE-5 降 inferred",
+      "CE-6 删「打更人三天后才抓到」",
+      "CE-8 补齐 byString 或改措辞",
+      "CE-9 note 补 F05"
+    ],
+    "suggestAdd": [
+      "RC-1 梁有平自认不知情",
+      "RC-2 铜锣转达的原话",
+      "RC-5 仵作抵达句",
+      "RC-6 许七安的自我对照"
+    ]
+  },
+  "assertions": [
+    {
+      "text": "原文切片长度与哈希与任务 sourceHash / 候选声明一致",
+      "result": "pass",
+      "cmd": "python3 -c \"import json,hashlib;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];s=t[836013:841448];print(len(s),hashlib.sha256(s.encode()).hexdigest())\"",
+      "got": "5435 fa9ed47df0e5d352d31b1e08fefff2953ce605e2e1f6b60c1416e82f30087233"
+    },
+    {
+      "text": "207 个 quote 叶节点逐个在原文切片中 find 一次，且声明偏移与切片逐位比对",
+      "result": "pass",
+      "got": "207/207 逐字命中；0 处 offset mismatch；0 处越界"
+    },
+    {
+      "text": "occurrence 元数据按重叠枚举口径独立重算",
+      "result": "pass",
+      "got": "207/207 一致"
+    },
+    {
+      "text": "固定种子随机抽 5 条引文重定位",
+      "result": "pass",
+      "got": "5/5 命中且偏移一致（seed=20261014）"
+    },
+    {
+      "text": "字符污染扫描：候选全部字符串叶节点中的非中日常用字符",
+      "result": "pass-with-defect",
+      "got": "整个候选只有 1 处：causeEdges[0].to 的 U+C811「접」→ 见 CE-1"
+    },
+    {
+      "text": "CE-2 的可证伪性：「当众承认」是否出现在原文区间",
+      "result": "pass",
+      "cmd": "python3 -c \"import json;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'][836013:841448];print('当众承认' in t)\"",
+      "got": "False"
+    },
+    {
+      "text": "CE-7 的四组数字独立重算（distinct 字符串 / 引用条数 / 零覆盖段 / 非空白覆盖率）",
+      "result": "pass",
+      "got": "118 / 207 / 32 / 0.8486，与数据块一致、与 SC07/SC08 散文的 114/203/36/81.74% 矛盾"
+    },
+    {
+      "text": "CE-8 的 byString 完整性：实际多引字符串数 vs byString 键数",
+      "result": "pass",
+      "got": "实际 54 个，byString 40 个键，缺 16 个；其中 2 个键为 60 字截断残串"
+    },
+    {
+      "text": "交叉引用完整性（我第一遍的假阳性，已撤回）",
+      "result": "pass",
+      "got": "按「条目以记号开头」判据重算，SC01–SC09 与 U01–U18 共 27/27 全部有定义；候选 danglingCrossReferences=[] 正确"
+    },
+    {
+      "text": "受保护路径未改动",
+      "result": "pass",
+      "cmd": "git status --porcelain js css index.html serve.py narrative.py scripts tests docs data",
+      "got": "（本次未产生任何改动；只写出 loop/state/out/verify_dafeng_L3_0223.verdict.json）"
+    }
+  ],
+  "remaining": [
+    "本次只做引用层全量核验 + 反向覆盖检查 + 自相矛盾检查 + 误杀检查。**语义正确性未独立复核**（候选 semanticReview 保持 not-performed）。",
+    "反向验证方法有上限：三路扫描不能证明「已找到全部遗漏」。我只声称 RC-1…RC-7 经原文逐字核实、且候选确实没有对应条目。",
+    "CE-2 我判定为措辞越界（把叙述判断写成人物公开认罪）。若下游认为「当众承认」只是对「活成了最讨厌的那种人」的宽松转写，可降级为 should-fix；但该措辞在原文 0 次出现、且与紧邻的「选择了沉默」反向，故我保留 must-fix。",
+    "RC-3/RC-4/RC-6 三条候选已自行披露（SC08/SC03），我没有把它们计入「隐身遗漏」，只记「披露范围被低估」。",
+    "我未复核候选 graphCachePath/graphCacheSha256 指向的图谱缓存（任务范围是原文精读复核），也未复核 provenanceNote 里引用的历史草稿快照。",
+    "本轮覆盖了路径上第二轮的复核文件；原文件已按哈希保存到仓库外回滚点，但 loop.py verify 只会记录本轮的 reviews[] 条目，历史轮次需按上述哈希在回滚点复得。"
+  ],
+  "rollback": "删除 loop/state/out/verify_dafeng_L3_0223.verdict.json 即回滚本复核产出；loop/state/out/verify_dafeng_L3_0223.json 是本任务的 submit 记录，删除即视为未提交；对被复核记录的追加（reviews[] 与 verifyState）可用 `python3 loop/bin/loop.py verify` 重跑覆盖。本复核全程只读候选与原文，未修改任何被复核文件，未触碰受保护路径（js/ css/ index.html serve.py narrative.py distill.py scripts/ tests/ tools/ docs/ data/）。被覆盖的第二轮复核文件完整保存在 /Volumes/资源库/我的资源/回滚点/w-verify-2-verify_dafeng_L3_0223-round2-superseded-6ef69424.json（sha256 6ef69424…）。",
+  "sourceHashes": {
+    "data/cache/1063b17ca65ec1b76f30e460.docs.json": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "loop/state/out/read_dafeng_L3_0223.candidate.json": "1fac13dc8b9638a683a37a9e51dbff974cf53914d140163f5b01d1a2ffec698d"
+  },
+  "status": "done",
+  "summary": "独立反向复核《大奉打更人》第两百二十二章 畏罪自杀（原文区间 [836013,841448)，5435 码点）。先自读原文再打开候选，全部计数/偏移/覆盖率/occurrence 由我自己的脚本重算，不采信候选自报值。裁决 **partial**（9 条反例：3 条 must-fix、6 条 should-fix；另 7 条反向发现）。零编造：207/207 引文逐字可查、偏移全对、occurrence 元数据 207/207 一致、随机 5 条 5/5 命中；全部具名实体在区间可查，无原文之外的结局或成功判定（「结束≠成功」与「人物话≠叙述事实」两条红线执行到位）。不判 pass 的三类缺陷都属「声称强于验证」：① CE-7 同文件散文数字与数据块互相矛盾（SC07/SC08 写 114/203/36-136/81.74%，数据块与我的重算均为 118/207/32-136/0.8486，且 4 种口径都算不出 81.74%）；② CE-8 自称「完整盘点」的 byString 实际 54 个多引字符串只列 40 个键、其中 2 个是 60 字截断残串；③ CE-4/CE-5/CE-6 有断言却无承载引文（或引文方向不符）而标 explicit，其中「偷改账册、侵吞军需」在全部 207 个引文节点里出现 0 次。另 CE-1 是字符污染（causeEdges[0].to 的「对视」被写成含谚文字符 U+C811「접」的「접视」）；CE-2 把叙述判断改写成人物公开认罪（原文「当众承认」0 次出现，紧邻原文是他「选择了沉默」）。反向发现 7 条，最关键的是 RC-1：梁有平对「杨川南为何被陷害」明确自认「这些我并不清楚」，候选全文 0 次命中，而这条无知边界决定了他随后那句转述的证明力上限——正是「只查已写项」结构上发现不了的那类遗漏。缺陷全部可就地删改，不需丢弃整条候选，故不判 fail。语义正确性未独立复核（semanticReview 保持 not-performed）。",
+  "evidence": [
+    {
+      "path": "loop/state/out/read_dafeng_L3_0223.candidate.json",
+      "sha256": "1fac13dc8b9638a683a37a9e51dbff974cf53914d140163f5b01d1a2ffec698d",
+      "kind": "被复核候选（只读，本次未修改；全部反例与反向发现均指向此文件）"
+    },
+    {
+      "path": "data/cache/1063b17ca65ec1b76f30e460.docs.json",
+      "sha256": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+      "kind": "原文（只读引用；区间 [836013,841448)，切片 sha256=fa9ed47df0e5d352d31b1e08fefff2953ce605e2e1f6b60c1416e82f30087233，长 5435）"
+    },
+    {
+      "path": "loop/state/out/read_dafeng_L3_0223.json",
+      "sha256": "405fec7c91e1543507333c9eab24fc22b33665d96280df8af751a85ad86c5722",
+      "kind": "被复核任务的提交记录（只读；agent=w-dafeng-1、status=done，用于确认复核者非原提交者）。**注意哈希口径**：`loop.py verify` 会把本轮复核追加进该文件的 reviews[]，因此它的字节内容在追加前后不同——本处声明的是**追加完成之后**（即 2026-10-14T08:48:02Z 那条 review 写入后）的哈希 405fec7c91e1543507333c9eab24fc22b33665d96280df8af751a85ad86c5722；追加前的旧值 a4a54c80adc8035342112055c76adf8dc13cba716d4a7130199033d77d4c2428 已不再成立。这是流程本身的写入，不是我改动了被复核文件；我全程未编辑该文件的任何既有字段。"
+    }
+  ],
+  "evidenceNote": "第 4 项本应是本复核文件自身，但自引用哈希在写入前无法稳定（写哈希会改变文件内容），按「宁缺勿造」不列入 evidence，改记于此：本文件哈希见提交后 loop/state/out/verify_dafeng_L3_0223.json 的 evidence 条目。被本轮覆盖的第二轮复核文件保存在仓库外回滚点 /Volumes/资源库/我的资源/回滚点/w-verify-2-verify_dafeng_L3_0223-round2-superseded-6ef69424.json（sha256 6ef69424bc4a2f8e9b6f249878a813386dde2fd2eb14572a083791d7766275ef），它是外置盘上的留存产物、非仓库内证据，故同样不列入 evidence 以免外置盘不可用时让本记录误判为证据失效。",
+  "changes": [
+    {
+      "path": "loop/state/out/verify_dafeng_L3_0223.verdict.json",
+      "kind": "append-only",
+      "note": "任务 writes 声明的产出：本复核结论（含 verdict / counterExamples / reverseChecks / notes）。覆盖了路径上第二轮的复核文件，原文件已按哈希保存到仓库外回滚点。"
+    },
+    {
+      "path": "loop/state/out/verify_dafeng_L3_0223.json",
+      "kind": "append-only",
+      "note": "由 `python3 loop/bin/loop.py submit --file ...verdict.json --agent w-sanguo-1` 生成的本任务提交记录。"
+    }
+  ],
+  "agent": "w-sanguo-1",
+  "submittedAt": "2026-10-14T08:48:48Z",
+  "wallClockNote": "租约里没有 startedAt（任务可能由非 loop 路径提交，或租约已被回收）—— 留空而不估算",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-14T08:48:48Z"
+  },
+  "verifyState": "pending"
+}

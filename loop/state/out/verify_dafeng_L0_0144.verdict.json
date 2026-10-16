@@ -1,0 +1,368 @@
+{
+ "task": "verify:dafeng:L0:0144",
+ "reviewer": "w-verify-2",
+ "role": "VERIFIER",
+ "verdict": "partial",
+ "unitHead": "第一百四十四章 杨千幻（为盟主“高山洋子”加更）",
+ "sourceRange": [
+  506640,
+  511088
+ ],
+ "reviewedTask": "read:dafeng:L0:0144",
+ "reviewedCandidate": "loop/state/out/read_dafeng_L0_0144.candidate.json",
+ "reviewedCandidateSha256": "53ce20b7324f26a7c3b0272704bfa6fb7ee2afa0dcd6ee8ec6d00b57088b1f68",
+ "reviewedAuthor": "w-xiyou-0",
+ "source": {
+  "docs": "data/cache/1063b17ca65ec1b76f30e460.docs.json",
+  "docsSha256": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+  "segmentSha256": "9cc8f357120f076f88a9b445b6e1def71402b53b83d4152aa0ecfc994d5d0317",
+  "offsetUnit": "codepoint",
+  "paragraphs": 120,
+  "method": "先自己把 [506640,511088) 全段读完并建 P00..P119 段落表，才打开候选结论（顺序见 ROLES/VERIFIER.md 第 9 行）。"
+ },
+ "counterExamples": [
+  {
+   "id": "CE1",
+   "claim": "remainingForVerifier[6]：「本候选 9 条 causeEdges 中有 5 条 basis=derived」",
+   "quote": "本候选 9 条 causeEdges 中有 5 条 basis=derived：如果其中任何一条被判定为「时间相邻当因果」，请直接判 fail 并指出编号。",
+   "why": "同一文件内三处互斥：散文写 5，metrics.causeEdgesByBasis 写 derived=7，独立复算亦为 derived=7 / explicit=2（共 9）。待办清单指向一个不存在的数字，会让复核者按「5 条」去找，找不到对应条目。",
+   "reproduce": "python3 -c \"import json;from collections import Counter;c=json.load(open('loop/state/out/read_dafeng_L0_0144.candidate.json'));print(Counter(x['basis'] for x in c['causeEdges']), c['metrics']['causeEdgesByBasis'], c['remainingForVerifier'][6])\"",
+   "actual": {
+    "derived": 7,
+    "explicit": 2
+   }
+  },
+  {
+   "id": "CE2",
+   "claim": "reverseCheck.whatItFound[7] 与 auditRound2.fixed[D11].evidence 两处把 P55 的偏移写成 [508835,508862)",
+   "quote": "③ P55「她说的是真话，因为…」（[508835,508862)）——叙述唯一一处对妖女话语的背书",
+   "why": "docs[0].text[508835:508862] 实测为『她说的是真话，因为许七安看见她的出现生理反应。\\n\\n  』（尾部多出换行空白），并非逐字回切；正确右端为 508858。候选 quoteNodeConvention 自称「偏移不手写」，这两处恰是手写偏移。**节点层 167/167 无此问题**，缺陷只在自述层，所以不据此判 fail。",
+   "reproduce": "python3 -c \"import json;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];print(repr(t[508835:508862]));print(repr(t[508835:508858]))\""
+  },
+  {
+   "id": "CE3",
+   "claim": "remainingForVerifier[4]：「S3 引文的 speech 标 narration+dialogue 不准确（应为 narration+thought）……未擅自改写引文节点」",
+   "quote": "S3 引文的 speech 标 narration+dialogue 不准确（应为 narration+thought）：已在 S3.note 与 selfCritique 里自陈，未擅自改写引文节点。",
+   "why": "当前文件 states[2].quotes[1]（P29）的 speech 实测已是 narration+thought；S3.note 写「第二轮已改为 narration+thought」，auditRound2.fixed[D2] 也记录了同一修复。这条待办指向当前文件里**已不存在**的状态，与同文件另三处互相矛盾——正是本项目「机制在、产出在，但指针不指向当前文件」的形态。",
+   "reproduce": "python3 -c \"import json;c=json.load(open('loop/state/out/read_dafeng_L0_0144.candidate.json'));print([(q['paragraph'],q['speech']) for q in c['states'][2]['quotes']]);print(c['remainingForVerifier'][4])\""
+  }
+ ],
+ "reverseChecks": [
+  {
+   "id": "RC1",
+   "found": "P70 许七安喊「留活口」——本单元唯一一次他对处置结果的干预，且后果明写（她未被灭杀，随后被阵法束缚并受审）。无任何引文节点，T3/T6 行动栏也不含此动作。",
+   "quote": "“留活口。”许七安生怕这位逼格满满的高人出手灭杀妖女。",
+   "start": 509367,
+   "end": 509394,
+   "why": "候选 coverage.reasons.P70 自己承认「结果写出来了：她没有被灭杀，随后被束缚受审」，却只把该段写进排除理由，未按 P3.10 建提取项。"
+  },
+  {
+   "id": "RC2",
+   "found": "P90 与 P92 是妖女对「桑泊案是你们干的？」「恒慧也是你们的人？」的两次确认「是。」——案情链的关键肯定回答，两者均无引文节点；causeEdges C8 的中间一步只能靠段落号指路。",
+   "quote": "“是。”",
+   "start": 510062,
+   "end": 510070,
+   "why": "候选 coverage.reasons.P90 自述因「是。」在全文出现 214 次而不建节点。但节点判据是 (start,end) 回切逐字，消歧由 start/end 承担；这是自设规则造成的排除过宽（见 misKillCheck MK1）。第二处同形：P92 [510089,510097)。"
+  },
+  {
+   "id": "RC3",
+   "found": "P75 杨千幻自述关系网（「采薇师妹」「宋卿那个偏执狂」）＋ P76 许七安据此推断他是「监正的某位弟子」——本单元唯一给出杨千幻身份/归属线索的两段。",
+   "quote": "“都有，都有....”许七安猜测对方是监正的某位弟子。",
+   "start": 509568,
+   "end": 509595,
+   "why": "states[5].knowledgeGap 对杨千幻只写「他知道有妖族」，未登记这条新增身份推断；P75/P76 均属未引用段，unknowns 也未收。属知识状态的一条实质遗漏。"
+  },
+  {
+   "id": "RC4",
+   "found": "P21 明砚唤「荷儿」（507532）——候选 auditRound2.fixed[D6] 自称这是「本区间唯一一处给这个妖女的称呼」。",
+   "quote": "银牙一咬，轻声道：“荷儿，我来服侍许公子。”",
+   "start": 507518,
+   "end": 507544,
+   "why": "同文件 coverage.reasons.P21 只写「明砚的决定——同一动作的延续」，与 D6 的描述互相矛盾；且「荷儿」全文件仅以散文形式出现（无引文节点），复核者无法按候选自己的口径回切验证。"
+  }
+ ],
+ "misKillCheck": [
+  {
+   "id": "MK1",
+   "target": "P90/P92「是。」",
+   "verdict": "误杀（规则过宽）",
+   "why": "候选自设「引文子串必须全文唯一」的硬规则，把两条真实、可逐字回切的供词确认挡在节点层外，并使 C8 中间一步失去载体。任务 prompt 只要求 quote+start/end+sourceHash。",
+   "reproduce": "python3 -c \"import json;print(json.load(open('loop/state/out/read_dafeng_L0_0144.candidate.json'))['coverage']['reasons']['P90'])\""
+  },
+  {
+   "id": "MK2",
+   "target": "NF3 黑金长刀（P24→P46）",
+   "verdict": "排除成立，非误杀",
+   "why": "两处同夜同场景、间隔 22 段，P24 未写明是哪一把刀（候选自标 inferred），按「铺设+回收」口径缺铺设确定性。"
+  },
+  {
+   "id": "MK3",
+   "target": "NW1 P06「武夫…暴力狂」",
+   "verdict": "排除成立，非误杀",
+   "why": "真正的约束在同段 P05（动手则气机震荡、在场者死），已用作 T2 目标栏引文；P06 是不新增可执行约束的泛化形容。"
+  }
+ ],
+ "hallucinationCheck": {
+  "灰姬（图谱命名）在本区间出现次数": 0,
+  "荷儿 在本区间出现次数": 1,
+  "采薇 / 宋卿 / 监正 在本区间出现次数": [
+   1,
+   1,
+   1
+  ],
+  "编造人物": "无。候选未引入原文没有的人物；图谱用的「灰姬」区间内 0 次，候选显式拒用（NW3）。",
+  "编造结局": "无。未写「桑泊案告破」；N4 以「抓到人 ≠ 查清案」显式排除，末段止于许七安回影梅小阁睡觉。",
+  "编造伏笔": "无。F1–F4 各有铺设段与回收/未回收说明；F1 自标反讽式回收并给出改判路径。",
+  "结束=成功": "守住。T3.result 直写「实际得到的是失败」；T5.result 是杨千幻收益，非许七安成功。",
+  "说法当事实": "守住。妖女全部供词标 dialogue+speaker，U7 单列可信度缺口；WR2/WR3 带 taxonomyCaveat。",
+  "语义越权": "守住。semanticReview.performed=False；auditRound2/3 均声明未做 semanticReview。"
+ },
+ "quoteSpotCheck": {
+  "method": "随机抽 5 条引文节点（random.seed(144)，可复现），逐条 docs[0].text[start:end]==quote 且 find(quote)==start。",
+  "items": [
+   {
+    "paragraph": "P08",
+    "start": 507042,
+    "end": 507088,
+    "speaker": "许七安",
+    "quoteHead": "“明砚姑娘盛情难却，那，我今夜便歇在这里了。几位娘子先回去吧，改日本官逐",
+    "sliceEqualsQuote": true,
+    "findEqualsStart": true
+   },
+   {
+    "paragraph": "P13",
+    "start": 507250,
+    "end": 507273,
+    "speaker": null,
+    "quoteHead": "浮香深深看他一眼，嘤嘤嘤的掩面而泣，跑了出去。",
+    "sliceEqualsQuote": true,
+    "findEqualsStart": true
+   },
+   {
+    "paragraph": "P115",
+    "start": 510947,
+    "end": 510984,
+    "speaker": null,
+    "quoteHead": "许七安拖着疲惫的身子进了影梅小阁，被引着进了主卧，看见眼睛哭成桃子的浮香",
+    "sliceEqualsQuote": true,
+    "findEqualsStart": true
+   },
+   {
+    "paragraph": "P52",
+    "start": 508716,
+    "end": 508759,
+    "speaker": null,
+    "quoteHead": "“咻...”湿漉漉的舌头舔在脸上，许七安一寸寸的回过头，看见侍女不知何时",
+    "sliceEqualsQuote": true,
+    "findEqualsStart": true
+   },
+   {
+    "paragraph": "P84",
+    "start": 509879,
+    "end": 509888,
+    "speaker": null,
+    "quoteHead": "妖女冷笑着不说话。",
+    "sliceEqualsQuote": true,
+    "findEqualsStart": true
+   }
+  ],
+  "result": "5/5 逐字命中、偏移一致。"
+ },
+ "mechanicalRecheck": {
+  "checks": [
+   {
+    "name": "A1 docs.json sha256 == 任务声明 sourceHash",
+    "ok": true,
+    "detail": ""
+   },
+   {
+    "name": "A2 切片 sha256 == 候选声明 segmentSha256",
+    "ok": true,
+    "detail": ""
+   },
+   {
+    "name": "A3 切片以章节标题开头",
+    "ok": true,
+    "detail": "'第一百四十四章 杨千幻（为盟主“高山洋子”加更）'"
+   },
+   {
+    "name": "A4 len(slice) == 4448",
+    "ok": true,
+    "detail": "4448"
+   },
+   {
+    "name": "A5 511088 恰为下一章「第一百四十五章」起点",
+    "ok": true,
+    "detail": "'第一百四十五章'"
+   },
+   {
+    "name": "A6 候选自身声明的 sourceHash 正确",
+    "ok": true,
+    "detail": ""
+   },
+   {
+    "name": "A7 段落数 120（P00..P119）",
+    "ok": true,
+    "detail": "120"
+   },
+   {
+    "name": "A8 P00=章节标题 / P119=paratext 分隔线",
+    "ok": true,
+    "detail": ""
+   },
+   {
+    "name": "B1 引文节点 167 个，逐字回切 167/167",
+    "ok": true,
+    "detail": "167"
+   },
+   {
+    "name": "B2 find(quote) == start 全部成立",
+    "ok": true,
+    "detail": ""
+   },
+   {
+    "name": "B3 occurrencesInFullText 全对",
+    "ok": true,
+    "detail": ""
+   },
+   {
+    "name": "B4 sourceHash 全对",
+    "ok": true,
+    "detail": ""
+   },
+   {
+    "name": "B5 paragraph / paragraphRange / paragraphIndex0 全对",
+    "ok": true,
+    "detail": ""
+   },
+   {
+    "name": "B6 引文在全文唯一（uniqueViolations 为空）",
+    "ok": true,
+    "detail": ""
+   },
+   {
+    "name": "B7 speech 取值合法且与引号事实一致（除已自陈 1 例外）",
+    "ok": true,
+    "detail": ""
+   },
+   {
+    "name": "B8 对话类节点均带 speaker",
+    "ok": true,
+    "detail": ""
+   },
+   {
+    "name": "C1 coverage.uncitedParagraphs == 独立复算集合（42）",
+    "ok": true,
+    "detail": "42"
+   },
+   {
+    "name": "C2 coverage.reasons 键 == uncitedParagraphs",
+    "ok": true,
+    "detail": ""
+   },
+   {
+    "name": "C3 coverage/metrics 计数器自洽且与实际相等",
+    "ok": true,
+    "detail": ""
+   },
+   {
+    "name": "C4 metrics 分区条数 == 实际长度",
+    "ok": true,
+    "detail": ""
+   },
+   {
+    "name": "C5 metrics.speechMix == 实际直方图",
+    "ok": true,
+    "detail": ""
+   },
+   {
+    "name": "C6 metrics.causeEdgesByBasis == 实际直方图",
+    "ok": true,
+    "detail": ""
+   },
+   {
+    "name": "C7 metrics.taskColumnQuotes == 实际五栏引文数",
+    "ok": true,
+    "detail": ""
+   },
+   {
+    "name": "C8 每任务各自给出五栏（null 栏带 Note）",
+    "ok": true,
+    "detail": ""
+   },
+   {
+    "name": "C9 同一任务内五栏不共用同一句引文",
+    "ok": true,
+    "detail": ""
+   },
+   {
+    "name": "C10 同一任务内五栏不共用同一段落",
+    "ok": true,
+    "detail": ""
+   },
+   {
+    "name": "C11 paratext [511074,511086) 零引文节点",
+    "ok": true,
+    "detail": ""
+   },
+   {
+    "name": "D1 随机 5 条 quote 逐字命中且偏移一致",
+    "ok": true,
+    "detail": ""
+   },
+   {
+    "name": "CE2 成立（[508835,508862) 不逐字 / [508835,508858) 逐字）",
+    "ok": true,
+    "detail": ""
+   },
+   {
+    "name": "F1 反向发现引文均可在原文逐字 find",
+    "ok": true,
+    "detail": ""
+   },
+   {
+    "name": "H1 无幻觉人物：候选全文未使用「灰姬」而原文区间亦无此名",
+    "ok": true,
+    "detail": ""
+   },
+   {
+    "name": "H2 未声称 semanticReview 已完成",
+    "ok": true,
+    "detail": ""
+   }
+  ],
+  "passed": 32,
+  "total": 32,
+  "allPass": true,
+  "note": "本脚本不 import 候选/被复核方任何脚本，全部现算。A5 的下一章起点需取 7 个codepoint（'第一百四十五章' 为 6 字），本脚本首轮曾因切片长度写成 6 而误报 FAIL，已修正——如实记录这次我自己仪器的错。"
+ },
+ "usable": [
+  "tasks[] 6 条任务五元组：objective/obstacle/action/result/cost 全部有原文依据，null 栏（T1.cost、T5.cost）都带 Note 说明为什么没有；",
+  "causeEdges[] 9 条：C1–C9 每条都有方向与触发机制，7 条自标 derived 并在 note 里写清哪一步是推导；",
+  "states[] 6 条：前值/后值/锚点齐备，S6 带 knowledgeGap（谁知/不知）；",
+  "foreshadows[] 4 条 + notForeshadows[] 3 条；F2/F3/F4 显式标 unresolved 并给 unresolvedReason；",
+  "worldSettings[] 14 条（place 7 / item 4 / rule 3）：placeState、itemStates 四态、institution 三取值全部写进字段，WR1/WR2 带 taxonomyCaveat；",
+  "unknowns[] 12 条、selfCritique、coverage 42 段逐条理由、reproduce 命令、crossRef 图谱对照（4 条事件 quoteRef 独立回切全部成立）；",
+  "167/167 引文节点逐字回切成立、find==start、sourceHash 全对、段落号与偏移自洽。"
+ ],
+ "mustDiscardOrDowngrade": [
+  "remainingForVerifier[6] 的「5 条 basis=derived」必须改成 7（CE1），否则待办无法执行；",
+  "reverseCheck.whatItFound[7] 与 auditRound2.fixed[D11].evidence 的 [508835,508862) 必须改成 [508835,508858)（CE2）；",
+  "remainingForVerifier[4] 必须删除或改写——它所描述的状态在当前文件里已不存在（CE3）；",
+  "RC1（P70 留活口）、RC2（P90/P92 供词确认）需补引文节点或改写排除理由；RC3（P75/P76 身份线索）需补进 knowledgeGap 或 unknowns；RC4（P21 荷儿）需把 coverage.reasons 与 D6 的两种说法统一，并考虑给该称呼建节点。"
+ ],
+ "notes": "总判 **partial**。\n\n【为什么不能判 fail】三条 counterExample 没有一条是「抽取内容与原文矛盾」：CE1 是散文计数与自身 metrics 互相矛盾（7 写成 5），CE2 是自述层手写偏移多算了尾部空白，CE3 是待办指向已被第二轮修好的旧状态。三者都在**自述/指针层**，不动摇任何一条抽取物的原文依据。节点层 167/167 逐字回切成立、find==start 成立、sourceHash 全对、段落号与偏移自洽；我另外全量复算了此前未被外部复核的六项元数据（occurrencesInFullText / occurrencesInUnit / inUnit / firstOccurrenceInFullText / paragraphRange / paragraphIndex0）与 metrics/coverage/五栏互斥，零失配。人物、结局、伏笔无幻觉；「结束≠成功」（T3.result 直写失败、N4 显式排除「抓人=破案」）、「不把人物之言当事实」（口供一律 dialogue+speaker，U7 单列可信度）、「不声称语义已核验」（semanticReview.performed=False）三条红线都守住。\n\n【为什么不能判 pass】CE1/CE3 正是本项目反复出现的失败形态：字段在、数字在、待办也在，但数字与待办**不指向当前文件**——复核者按它去找会落空。这正是「机制存在、有产出，但不产生信息」的同形问题，只是这次发生在自述层而非抽取层。\n\n【我自己的错，如实记下】① 反向验证的第一版仪器里，A5 把下一章起点切片写成 6 个 codepoint（『第一百四十五章』是 6 字，切片需 7 才含全），造成一次假 FAIL；② 第一版 C7（五栏互斥）我按跨任务聚合判，误报了一次——五栏互斥的粒度是**同一任务内**，跨任务复用同段（实测只有 P108 被 T4/T5/T6 共用）是候选 crossTaskQuoteReuseNote 明确允许的。两处都是我仪器的问题，不是候选的缺陷，已在mechanicalRecheck 与脚本里改正。\n\n【存疑，不据此判 fail】① P07「九阴真经／前世的女神们养备胎」是本区间唯一一处身份/穿越线索，候选以「不含可提取项」排除；按「不外扩术语装饰层」纪律该排除站得住，仅记为存疑；② auditRound2 声称「438 处散文 Pnn」「69 处「引文」（Pnn）」，我按不同口径复算得 375–588 与 70，无法在候选未声明计数口径的前提下判定哪一个数字错——**拿不出原文/口径引证的反对只能记存疑**，故不列为 counterExample；③ F1 是否算伏笔回收、WI3 的替身读法、WR1/WR2 的 institution 取值，候选都在条目内自陈并给了改判路径，我未发现原文反证，保留其判断。\n\n【未做】未做跨区间取证（妖女供词真假、下令者是谁、桑泊底下是什么、宋廷风遇到什么麻烦，均只在本区间内判断，未读第一百四十三章/第一百四十五章正文）；未跑 GPU/浏览器测试（本任务不要求）；未修改候选（writes 不含该路径）。",
+ "evidence": {
+  "verifyScript": "/Volumes/资源库/我的资源/回滚点/星系/20261013-0144-verify-dafeng-L0-w-verify-2/verify_dafeng_L0_0144.py",
+  "verifyScriptSha256": "8299d20422d5b48cb5b606199af4b817bd641067179880acb9160bfe007939c3",
+  "rawOutput": "/Volumes/资源库/我的资源/回滚点/星系/20261013-0144-verify-dafeng-L0-w-verify-2/verify_dafeng_L0_0144.out.json",
+  "rawOutputSha256": "ddd47caccdfc5cb339cadb4e401b5c0d37acde6a8d17282f17cb25096968c5f9",
+  "checkSummary": "/Volumes/资源库/我的资源/回滚点/星系/20261013-0144-verify-dafeng-L0-w-verify-2/verify_dafeng_L0_0144.summary.txt",
+  "checkSummarySha256": "40c6472d4dcbd833241fcdb6f0b9db7a3da989466b6f82611535469f6fd91411",
+  "rollback": "/Volumes/资源库/我的资源/回滚点/星系/20261013-0144-verify-dafeng-L0-w-verify-2/verdict.prior-w-dafeng-2.json",
+  "rollbackSha256": "4cefe3ad7039e2edd5675f8aacc11b89feb73b9be51c0c402081a3033329d4df",
+  "rollbackNote": "上一轮复核者 w-dafeng-2 的 verdict（sha256 4cefe3ad…）完整副本，可逐字节回滚；内容与本轮不同（上一轮判 partial，4 counterExamples）。",
+  "reproduce": "cd /Users/carmen/Desktop/星系 && python3 -B /Volumes/资源库/我的资源/回滚点/星系/20261013-0144-verify-dafeng-L0-w-verify-2/verify_dafeng_L0_0144.py"
+ },
+ "notesOnPriorReview": "上一轮复核者 w-dafeng-2（2026-10-13T11:25:54Z，sha256 4cefe3ad…）判 partial、4 条 counterExamples。本轮独立重做，未沿用其结论；其文件已完整备份（见 evidence.rollback）。"
+}

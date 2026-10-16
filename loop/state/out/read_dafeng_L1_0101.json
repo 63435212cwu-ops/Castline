@@ -1,0 +1,274 @@
+{
+  "task": "read:dafeng:L1:0101",
+  "agent": "w-xiyou-1",
+  "role": "READER",
+  "status": "done",
+  "summary": "精读《大奉打更人》第一百零二章 高于生命的东西（原文区间 [328572,332680)，4108 字，124 个非空段），产出候选 loop/state/out/read_dafeng_L1_0101.candidate.json（sha256 91cc4126…）。分区：tasks 8 条（五元组分列，每栏各自带逐字引文，同一条任务内五栏零共用——构建期按**区间是否重叠**机械断言）、causeEdges 11 条（其中 2 条标 inferred：CE6 出鞘触发、CE10「鬼使神差」后退）、rejectedEdges 5 条（含把「抬出魏公名头→朱银锣退让」主动否弃，原文写「他不怕」）、states 9 条（前值/后值＋事件锚点）、knowledgeDiffs 7 条、foreshadows 5 条（4 条区间外回收＋1 条显式标 unresolved-in-range 的金锣父亲线）、worldSettings 15 条（地点 4 / 物件 3 / 规则 8，placeState、itemStates、institution 三套区分全部写进字段，itemStates 按 hold/transfer/use/lose 分列不合成物品链）、themeReadings 2 条（各带 support 与 counter 两向引文）、unknowns 16 条、selfCritique 3 条。共 210 条证据引文（区间内 202 / 区间外 8），另有 selfCheck 派生的复用索引 54 条（不计入证据）。未声称 semanticReview 完成。",
+  "evidence": [
+    {
+      "path": "loop/state/out/read_dafeng_L1_0101.candidate.json",
+      "sha256": "91cc41264710d4e016858194d35901dd67097b20000be0b0a3d861215ee46dcd",
+      "kind": "candidate",
+      "note": "任务 writes 指定的唯一产物。"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "区间与标题自检（直接读源文件，不用摘要）：docs[0].text[328572:332680] 长度 4108，以『第一百零二章 高于生命的东西』开头；右边界 docs[0].text[332680:332689] == '第一百零三章 腰斩'。复现：python3 -c \"import json;T=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];print(len(T[328572:332680]),T[328572:328586],T[332680:332689])\" → 4108 第一百零二章 高于生命的东西 第一百零三章 腰斩",
+      "result": "pass"
+    },
+    {
+      "text": "sourceHash 口径：构建脚本开跑即重算**整个 docs.json** 的 sha256 并断言等于任务声明的 fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839，不等则整体失败、不写文件。实测 shasum -a 256 data/cache/1063b17ca65ec1b76f30e460.docs.json 命中该值。切片自身哈希另记 sliceSha256=e3934e76f8bd7b9b74163b3c81f2e9e39556b519c9b785da9414a1318408ae31，两个口径不互相冒充。",
+      "result": "pass"
+    },
+    {
+      "text": "引文逐字与偏移口径：我用一个**不 import 构建脚本**的独立审计程序遍历最终产物全部 210 条证据引文，断言 TEXT[start:end]==quote 逐字成立、sourceHash 命中、inRange 标志与「是否落在 [328572,332680)」一致、区间内引文的 chapterAtOffset 均为本单元标题。该审计脚本放在系统临时目录（不进仓库，符合 AGENTS.md「不把一次性探针放回项目」），因此这里给一条等价的内联复现命令，任何人都能跑：python3 -c \"import json;T=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];c=json.load(open('loop/state/out/read_dafeng_L1_0101.candidate.json'));S,E,H=328572,332680,'fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839';refs=[]\\nw=lambda o:[refs.append(o) if isinstance(o,dict) and 'quote' in o and 'start' in o and 'end' in o else ([w(v) for v in o.values()] if isinstance(o,dict) else ([w(v) for v in o] if isinstance(o,list) else None))]\\nw({k:v for k,v in c.items() if k!='selfCheck'})\\nprint(len(refs),sum(1 for r in refs if T[r['start']:r['end']]!=r['quote'] or r.get('sourceHash')!=H),sum(1 for r in refs if bool(r.get('inRange'))!=(S<=r['start'] and r['end']<=E)))\" → 输出 210 0 0（引文 210 条、切片不符 0 条、inRange 标志不符 0 条）。",
+      "result": "pass"
+    },
+    {
+      "text": "五栏共用专项（提示词点名的旧图谱缺陷 714/1664）：对 tasks[] 每条任务的 objective/obstacle/action/result/cost 收集带偏移引文，按**区间是否重叠**判同任务内跨栏共用（比字符串相等更严：相邻但不重叠算合格）。判据在构建期以 assert 执行，violations=[]；另跑独立审计复算，0 条。8 条任务中 5 条各有一个 null 栏，全部带 <栏位>Note 写明理由（T1/T3/T5/T7 的 cost、T2 的 result），无一处未标注的未知。",
+      "result": "pass"
+    },
+    {
+      "text": "项目自带契约测试口径自查：直接调用 tests/p3_task_five_fields_contract.py 的函数对候选复算——① 字段间共用同一条引句：8 条任务 duplicated 全为 0；② 空栏必须写理由：未写理由 0 条；③ cost 文本含待验证词 0 条；④ result 文本含法条词 0 条。（该测试全库 FAIL 的 3 项来自 read_dafeng_L0_0032/L0_0036/L2_0026 等**其它**候选及历史图谱 aee4c998，与本单元无关；产物 /tmp/castline-artifacts/p3-five-fields/task-five-fields.json 中不含 '0101'。）",
+      "result": "pass"
+    },
+    {
+      "text": "反向覆盖检查（计划100 的「还漏了什么」）：把切片切成 124 个非空段，逐段检查是否被任一条 inRange 引文触及（区间相交即算）。首轮 51 段未覆盖，据此补了 26 条新引文并挂进对应分区，最终降到 13 段；13 段**逐条**写明理由（标题行 1、分隔符 2、作者附言 8、说话人标记 1、拟声词 1），unclassifiedCount=0。判据与逐条理由都在产物的 coverageGaps 里，复核者可按 start/end 直接回查。首轮暴露的真实遗漏已补：朱广孝主张「就凭这个伤你就可以去告他」被宋廷风否掉（T2 obstacle）、宋廷风的伤情追问与「用气机了？」（ST1/KD7）、旁观同僚从围观到起哄（ST6b）、许七安怒到顶点却按住不动（ST6c）、朱银锣自我正当化的三条自辩（KD6）。",
+      "result": "pass"
+    },
+    {
+      "text": "自检计数必须来自最终产物：第一版 selfCheck 用构建期登记表计数，产物里另有 crossFieldReuse 索引条目与 extraQuotes，导致 allQuoteRefs 少报（182 vs 实际 250），被独立审计抓出。已改为写盘前遍历**将要写盘的那个对象**（排除 selfCheck 自身，因该索引是从真实条目派生的、不是新增证据）回填计数，并对每条重算切片/哈希/标志。现 selfCheck.allQuoteRefs=210、inRangeRefs=202、outOfRangeRefs=8，与独立审计逐一相符；三项失败清单均为空。",
+      "result": "pass"
+    },
+    {
+      "text": "未越界未自证：候选未改任何受保护路径（changes 只含 writes 指定的候选文件）；semanticReview 保持 null 并写明「引用定位正确 ≠ 语义已核验，语义核验由 read-verify 流的独立复核者完成」；伏笔 F5（金锣父亲）显式标 unresolved-in-range 而非假装回收；T6 的 result 只写「僵住/裂开/喷血/倒下」不写「杀死」，T8 不写「脱身成功」——结束≠成功。",
+      "result": "pass"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/read_dafeng_L1_0101.candidate.json",
+      "kind": "append-only"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/1063b17ca65ec1b76f30e460.docs.json": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+  },
+  "remaining": [
+    "本候选只做到「引文逐字可核 + 结构自洽」。**语义未核验**：我没有、也无权声称 semanticReview 完成；每条引文的语义是否支撑它所在的那一栏，需 read-verify 流的独立复核者判定。",
+    "CE6（出鞘一寸 → 朱银锣暴起抢先劈来）标 inferred 而非 explicit：原文「他早就准备着了」的主语在本区间无法确定（可能是朱银锣可能早就备好，也可能指许七安）。若复核者按「时间相邻当因果」判，应删掉这条边；其余结论不受影响。该歧义已登记为 unknowns 第 2 条。",
+    "CE7（许七安的动作 → 朱银锣胸口刀伤）标 derived：原文刻意写成看不清（「那柄略显笔直的刀，依旧在鞘中」「仿佛是幻听」），机制没有直写。本候选只断言「伤由这一刀造成」，不断言这一刀如何做到。",
+    "CE10（「松开！」的语气/表情 → 宋廷风后退一步）标 inferred：原文用「鬼使神差」自承机制说不清。",
+    "F3（向魏渊告状的威胁 → 区间外魏渊裁断）标 derived 而非 explicit：真正把事情送到魏渊面前的是宋廷风与李玉春的奔走，不是许七安本人去告状。严格口径下可降为 unresolved。",
+    "F2 的次要回收（第一百零四章李玉春做同构的「摘下腰牌和佩刀」动作）是我的平行读法；若复核者认为它不属同一条线，删掉该条 payoffQuote 即可，主回收（第一百零七章许七安本人取回）不受影响。",
+    "cost 栏的归属边界：T2 的 cost 主要是他**带着进入**这条任务的伤（手臂通红肿胀）而非该决定新付出的代价；我在 costNote 里写明是「既有代价」，但复核者若按严格口径认为应写 null，这是可争的一处。T1/T3/T5/T7 的 cost 写 null 并写明理由，不是漏填。",
+    "unknowns 16 条里，有几条是本区间**结构性读不出来**的，不会因为再读一遍而消失：朱银锣是否真的用了气机（只有宋廷风的问句＋一条通则）、朱银锣是否活下来（只到「没死」与「打算送回救治」）、那名少女与程府家眷的后续、许七安是否真的去告了状。",
+    "原文用字未代改：「接过被朱银锣一脚踢了回来」的「接过」（原文如此，疑为「结果」之误）、银锣朱成铸胸口的器物被写作「铜锣」、以及「练气境/炼神境」并置——均照原文引并登记进 unknowns，未代为改字或推断制度。",
+    "本区间尾部 8 段为作者附言（PS、成绩汇报、求月票与更新说明），已判定为非叙事、不从中提取任何故事事实；它们仍计入 coverageGaps 的未触及清单并逐条写明理由，没有被静默丢弃。",
+    "我没有跑 GPU/浏览器测试（任务未声明需要），没有改受保护路径，没有动其它 agent 的产物或租约。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/read_dafeng_L1_0101.candidate.json"
+    ]
+  },
+  "submittedAt": "2026-10-09T05:36:30Z",
+  "wallClockSeconds": 1948,
+  "wallClockFrom": "lease.startedAt",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-09T05:36:30Z"
+  },
+  "verifyState": "partial",
+  "reviews": [
+    {
+      "reviewer": "w-verify-0",
+      "at": "2026-10-09T06:28:30Z",
+      "verdict": "partial",
+      "notes": "【总判 partial】这份候选的**引用层与内容层是干净的**：210 条引文实例（117 条去重）逐字命中、偏移零误差、occurrencesInFullText 与 inRange 标志全对、3 个哈希相符、8 条区间外引文全部位于伏笔回收/主题反例位且章名正确、固定种子抽样 5/5 命中；8 条任务 / 11 条因果 / 9 条状态 / 7 条知识差 / 5 条伏笔 / 15 条世界设定 / 2 条主题读法 / 5 条拒绝边，**没有一条在原文里找不到对应文字**，也没有原文外的人物、结局或伏笔，没有把区间末尾当成功。按角色契约，判 fail 需要以 counterExample 证明内容层失实或存在编造 —— 我找不到这样的一条，所以不判 fail。\n\n【判 partial 的依据】5 处可机器复算证伪的自述/元数据缺陷（CE1–CE5），全部集中在计数、措辞与说明字段：coverage 13→19（漏列 6 段：3 段完全未被承载、3 段只在说明文字里以缩写出现）、states[1].after 的「拔刀」既反原文又反候选自己的声明、worldSettings[12] 的 declared 半边没有 quote 字段、crossFieldReuse 一条 count 口径不一致、tasks[2].actionNote 数错一条。这些都必须修正后才好把候选当作可发布底稿，但没有任何一条会让下游取到原文不支持的人物/事件/结局。\n\n【反向验证（本轮主增量）】候选对『已写项』的正确率很高，问题在『漏了什么』：按它自己声明的判据复算，未被任何区间内引文触及的是 19 段而不是它自报的 13 段。我从中筛出 5 条原文明确存在且有信息量的漏项（RC1–RC5），其中 RC1（仆人们昨日才得知问罪、府里正要走关系）与 RC2（抄家没有打砸声、反而小心翼翼）是结构性遗漏：前者解释了为什么府内施暴可以在多间房同时发生而无人制止，后者是『抄家能捞钱 → 事后搜身规则 → 同僚怨气』这条链的缺失环节。RC3（当场下令句）同时是 CE1 漏算段与 CE3 的证据缺口，补一条 quote 可同时修好两处。\n\n【误杀检查】5 条 rejectedEdges 的拒绝理由我逐条回原文复核，全部成立，未发现被词表/正则误挡的合法边；我另外主动找了三条可能被漏掉的边并逐条判定（见 misKillCheck.additionalSearch），结论是拒绝正确。\n\n【口径边界，不据此判 fail】候选的五栏共用判据是『区间是否重叠』，我按提示词字面的句子级判据复算得 4 处（T1/T4/T8×2）。每处两个区间承载不同信息、且候选已自曝判据，故记为口径边界而非反例；建议发布方统一为句子级后重算。\n\n【我自己的错】见 selfCorrection，共 5 条，全部已撤回或收窄：(1) 把字段级与条目级路径混比，误报 54 处 usedIn mismatch（实为 0 处，候选按它写明的分区范围算出的 54 完全正确）；(2) CE3 索引写成 worldSettings[11]，导致反例被扩大化（更正为 [12] 后收窄）；(3) auditScript 章头正则写坏，报了 9 处 chapterAtOffset 假 mismatch（独立复算实为 0/8）；(4) 多命中引文漏报 1 条（实为 2 条）；(5) CE1 的『5 段叙述句』未区分『完全未承载』与『仅说明文字缩写』。本复核的 5 条反例与 5 条反向发现经上述修正后全部仍成立，但我第一版的严重性与计数确实偏高。\n\n【存疑，不据此判 fail】graphCacheCrossCheck 转录的缓存摘要含『自缚请罪』（本区间各 0 次）——候选明确标注了那是缓存不是证据、且自身从未采用，但发布时不应把该字符串当作本区间事实带入。T2.action / T5.result / T7.result 三处槽位归属偏松，属建议降级项。",
+      "counterExamples": [
+        {
+          "id": "CE1",
+          "field": "coverageGaps.untouchedCount / coverageGaps.items",
+          "claim": "coverageGaps.method 自述「引文区间与该段相交即算触及」，untouchedCount=13 并列出 13 条。",
+          "quote": {
+            "quote": "    他们昨日才知道老爷问罪入狱，府里正要走关系呢，谁想今天就来了这么一群气势汹汹的狠人。",
+            "start": 328942,
+            "end": 328988,
+            "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+            "offsetUnit": "codepoint",
+            "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+            "match": "exact",
+            "occurrencesInFullText": 1,
+            "inRange": true,
+            "sliceSha256": "e3934e76f8bd7b9b74163b3c81f2e9e39556b519c9b785da9414a1318408ae31"
+          },
+          "why": "按它自己声明的判据复算，未被任何 inRange 引文触及的非空行是 **19** 段，不是 13。我另换三种判据交叉验证（含 selfCheck 内引文 / 含 inRange=false 引文 / 原始文件子串）都得不到 13，因此这不是口径差异。候选漏列的 6 段，性质分两类：\n（a）**完全未被任何字段承载**（3 段）：328942 仆人们昨日才得知问罪入狱、府里正要走关系；329620 抄家没有乒乒乓乓的打砸声、白役和铜锣反而小心翼翼；331517 第一声「锵！」。\n（b）**只在说明性文字里以缩写/转述出现、没有 quote 字段**（3 段）：328858「握刀的手一挥：『抄家！』」（只在 worldSettings[12].explain 里）、329419「可见那个姓朱的是何等的心胸狭隘。」（只在 KD7 的 who_does_not_know 与 note 里）、331261「总要付出点什么的。」（只在 KD6 的 who_knows 与 note 里）。\n所以缺陷的确切性质是：**coverage 的计数与清单算错（13 vs 19）**，其中 (a) 三条是真实的引文层空缺，(b) 三条是内容层已覆盖、但按候选自己的 quotingConvention 不可逐字核验。复算命令见 auditScript：`untouched 复算 19 ；候选自报 13` 与随后的漏列清单。"
+        },
+        {
+          "id": "CE2",
+          "field": "states[1].after（ST2_xu_from_silence_to_blade）与 worldSettings[4].explain",
+          "claim": "states[1].after 写「在后院拔刀，一刀斩伤银锣——从忍让转为对上级动刀。」；同一候选的 worldSettings[4].explain 却写「原文的动词是『顶起…护手，让它出鞘了一寸』，本候选照原文写，**不改写成现代汉语的『拔刀攻击』**」。",
+          "quote": {
+            "quote": "那柄略显笔直的刀，依旧在鞘中，刚才铿锵有力的声响仿佛是幻听。",
+            "start": 331700,
+            "end": 331730,
+            "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+            "offsetUnit": "codepoint",
+            "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+            "match": "exact",
+            "occurrencesInFullText": 1,
+            "inRange": true,
+            "sliceSha256": "e3934e76f8bd7b9b74163b3c81f2e9e39556b519c9b785da9414a1318408ae31"
+          },
+          "why": "本条引文是叙述层对那一刀之后的直写：刀依旧在鞘中。区间内「拔刀」出现 **0** 次（全文 59 次都不在本区间），「在鞘中」在本区间恰 1 次就是这句。因此 states[1].after 的「拔刀」既与原文冲突，也与候选自己在 worldSettings[4] 的声明自相矛盾。这不是叙事内容层面的编造（刀伤的因果、气机抽干、交出腰牌等全部有原文），但下游若直接引用 states[1].after 会取到一个原文刻意否定的动作，须按 CE2 修正措辞或把 states[1].after 降级为 unknowns（候选已在 unknowns 里登记了同一处矛盾，只是没有回头改措辞）。"
+        },
+        {
+          "id": "CE3",
+          "field": "worldSettings[12]（抄家令 executed）",
+          "claim": "explain 写「executed：命令本身是『握刀的手一挥：“抄家！”』（declared），紧接着就有执行动作『一脚踹开中门，蜂拥而入』，因此本条按 executed 登记」。该条目的 quote 字段承载的是 **executed 半边**（『铜锣和白役们一脚踹开中门，蜂拥而入。』@328880-328898）。",
+          "quote": {
+            "quote": "    握刀的手一挥：“抄家！”",
+            "start": 328858,
+            "end": 328874,
+            "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+            "offsetUnit": "codepoint",
+            "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+            "match": "exact",
+            "occurrencesInFullText": 1,
+            "inRange": true,
+            "sliceAtOffset": true,
+            "sliceSha256": "e3934e76f8bd7b9b74163b3c81f2e9e39556b519c9b785da9414a1318408ae31"
+          },
+          "why": "该规则自称分两半：executed 半边有 quote 字段（@328880-328898），**declared 半边只有说明性缩写** —— 候选全文件里『握刀的手一挥』只出现 1 次，就在这段 explain 字符串里，没有任何 quote 字段承载它。于是这一行同时也是 CE1 漏算的 6 段之一。按候选自己的 quotingConvention（『只有 quote 字段才是引文，逐字可核』），这条规则标为 executed 是**正确**的，但它括号里那个「declared」在本文件里不可逐字核验。修法很轻：补一个 quote 字段（本引文 328858-328874），或把 explain 里的括号去掉。注意：我第一版把索引写成 worldSettings[11]（那是『书房花瓶与小案几』），并据此跑出一个假的『无 quote 字段』结论 —— 索引更正后该假结论撤回，本条缺陷收窄为上面这一条。"
+        },
+        {
+          "id": "CE4",
+          "field": "selfCheck.crossFieldReuse.items（330524 那条）的 count 与 states[3]",
+          "claim": "crossFieldReuse 表头写「列出被 2 个以上**不同条目**引用的句子」，该条 usedIn=[knowledgeDiffs[3]|notKnowsQuote, states[3]|afterQuotes, states[3]|anchorQuote, tasks[3]|resultQuotes]，count=4。",
+          "quote": {
+            "quote": "听到这句话，少女眼里迸发出强烈的光芒，宛如溺水的人抓住了救命的稻草。",
+            "start": 330524,
+            "end": 330558,
+            "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+            "offsetUnit": "codepoint",
+            "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+            "match": "exact",
+            "occurrencesInFullText": 1,
+            "inRange": true,
+            "sliceSha256": "e3934e76f8bd7b9b74163b3c81f2e9e39556b519c9b785da9414a1318408ae31"
+          },
+          "why": "同一引文被 states[3] 引了两次（anchorQuote 与 afterQuotes 是同一句），所以**不同条目**只有 3 个，count 却记 4 —— 计数单位在条目级与字段级之间不一致。我按条目级复算全表：区间内 7 个分区共 54 条跨条目复用、usedIn 逐条与复算一致（54/54），所以这只是这一条的 count 口径瑕疵，不影响 54 这个总数。附带：states[3] 用同一句同时充当锚点与后值，属结构性重复，建议 afterQuotes 换用另一句或置 null 并说明。"
+        },
+        {
+          "id": "CE5",
+          "field": "tasks[2].actionNote（T3_xu_stops_common_tongluo）",
+          "claim": "actionNote 写「三条依次是：骂断、奔向并踹开房门、抬出魏渊的名字震慑。三条区间互不重叠。」",
+          "quote": {
+            "quote": "“砰！”",
+            "start": 329978,
+            "end": 329982,
+            "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+            "offsetUnit": "codepoint",
+            "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+            "match": "exact",
+            "occurrencesInFullText": 19,
+            "inRange": true,
+            "sliceSha256": "e3934e76f8bd7b9b74163b3c81f2e9e39556b519c9b785da9414a1318408ae31"
+          },
+          "why": "该栏实际有 **4** 条引文（t3_act1/t3_act2/t3_act3/t3_peng），本条引文就是第 4 条。我逐对复算区间：4 条互不重叠（t3_peng 329978-329982 与 t3_act2 329988-330023 相邻但不相交），所以「互不重叠」这句成立、只有「三条」这个数写错。同栏其余同类自述（T5 四条 / T6 八条 / T8 三条 / T7 两条 / T2 cost 三项）我逐条数过，均正确。"
+        }
+      ],
+      "reverseChecks": [
+        {
+          "id": "RC1",
+          "found": "仆人们的时间线与处境：抄家来得毫无预兆，府里昨日才得知问罪、还在走关系 —— 全区间没有任何条目或引文触及这一段",
+          "quote": {
+            "quote": "    他们昨日才知道老爷问罪入狱，府里正要走关系呢，谁想今天就来了这么一群气势汹汹的狠人。",
+            "start": 328942,
+            "end": 328988,
+            "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+            "offsetUnit": "codepoint",
+            "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+            "match": "exact",
+            "occurrencesInFullText": 1,
+            "inRange": true,
+            "sliceSha256": "e3934e76f8bd7b9b74163b3c81f2e9e39556b519c9b785da9414a1318408ae31"
+          },
+          "why": "它解释了为什么府内无人组织、施暴可以在后院多间房同时发生而无人制止；候选的 worldSettings[9]（仆人们的容身处）只登记了空间分布，没有登记这一时间线。"
+        },
+        {
+          "id": "RC2",
+          "found": "抄家的实际执行形态：与许七安的想象不同，没有打砸声，白役和铜锣反而小心翼翼",
+          "quote": {
+            "quote": "    所谓抄家，与许七安想象中的不同，没有乒乒乓乓的打砸声。相反，白役和铜锣们显得小心翼翼。",
+            "start": 329620,
+            "end": 329667,
+            "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+            "offsetUnit": "codepoint",
+            "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+            "match": "exact",
+            "occurrencesInFullText": 1,
+            "inRange": true,
+            "sliceSha256": "e3934e76f8bd7b9b74163b3c81f2e9e39556b519c9b785da9414a1318408ae31"
+          },
+          "why": "它是候选 worldSettings[10]（书房花瓶/案几的估价）与 worldSettings[9]（搜身规则）之间的缺失环节：正因为小心清点、财物可捞，才有『结束后搜身、中饱私囊依律处罚』这条规矩，也才解释得了同僚对许七安『断人财路』的怨气。候选三条都写了，但唯独没登记『抄家不打砸』这条执行形态本身。"
+        },
+        {
+          "id": "RC3",
+          "found": "当场下令句「握刀的手一挥：『抄家！』」在候选里只以说明性缩写存在、从未成为 quote 字段",
+          "quote": {
+            "quote": "    握刀的手一挥：“抄家！”",
+            "start": 328858,
+            "end": 328874,
+            "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+            "offsetUnit": "codepoint",
+            "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+            "match": "exact",
+            "occurrencesInFullText": 1,
+            "inRange": true,
+            "sliceSha256": "e3934e76f8bd7b9b74163b3c81f2e9e39556b519c9b785da9414a1318408ae31"
+          },
+          "why": "候选 worldSettings[11] 把这条规则的 declared 半边挂在这句话上（见 CE3），但它同时是 CE1 漏算的 6 段之一 —— 说明这条规则的『declared』在本文件里没有可逐字核验的引文支撑。补一条 quote 即可同时修好这两处。"
+        },
+        {
+          "id": "RC4",
+          "found": "第一声「锵！」（护手出鞘一寸之后）没有任何引文；候选只登记了第二声，并用第二声去覆盖第一声",
+          "quote": {
+            "quote": "    “锵！”",
+            "start": 331517,
+            "end": 331525,
+            "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+            "offsetUnit": "codepoint",
+            "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+            "match": "exact",
+            "occurrencesInFullText": 7,
+            "inRange": true,
+            "sliceSha256": "e3934e76f8bd7b9b74163b3c81f2e9e39556b519c9b785da9414a1318408ae31"
+          },
+          "why": "候选 coverageGaps 为 331633 的第二声写了理由「同一事件（第二声出鞘）已由引文『又一声出鞘声。』覆盖」——这个理由对第二声成立，但它同时把 331517 的第一声**结构性地**留空了：第一声是许七安主动出鞘一寸的声响，第二声是那一刀之后的声响，两者是不同事件（原文用『又一声』明确区分）。第一声在本区间无任何引文。"
+        },
+        {
+          "id": "RC5",
+          "found": "叙述层对朱银锣动机的评价句，候选只以缩写出现在说明文字里，没有独立引文",
+          "quote": {
+            "quote": "    可见那个姓朱的是何等的心胸狭隘。",
+            "start": 329419,
+            "end": 329439,
+            "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+            "offsetUnit": "codepoint",
+            "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+            "match": "exact",
+            "occurrencesInFullText": 1,
+            "inRange": true,
+            "sliceSha256": "e3934e76f8bd7b9b74163b3c81f2e9e39556b519c9b785da9414a1318408ae31"
+          },
+          "why": "它紧接在『寻常上司殴打下属…绝不会暗渡气机』之后，是叙述层替宋廷风的判断给出的旁证（呼应候选 KD7：气机是否真的用了在本区间未被确认）。候选在 KD7.who_does_not_know 与 note 里把它缩写成『何等的心胸狭隘』，但按它自己的 quotingConvention，缩写不是引文，因此这条评价句在可核引文层面是缺的。"
+        }
+      ]
+    }
+  ]
+}

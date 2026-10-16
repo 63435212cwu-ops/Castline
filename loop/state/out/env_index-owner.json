@@ -1,0 +1,134 @@
+{
+  "task": "env:index-owner",
+  "agent": "w-sentinel-index-owner",
+  "status": "done",
+  "round": 4,
+  "summary": "原文单元切分口径审计（**只读**，未改任何代码/受保护路径）。① **loop/state/index.json 的唯一写入者 = loop/bin/build_plan.py:545**（守卫 :543 `if args.index or not idx_path.exists()`）；全仓「行内含 index.json 且有写动作」扫描只另有 2 处，且写的都不是这个文件（tests/error_recovery_contract.py:106 = 测试自建临时 cache_dir；tools/plan100/build_task_state_machines.py:925 = artifacts 下的 P03-build-index.json）⇒ 「同一文件只设一个写入负责人」在索引本体上**成立**。另有 7 处只读消费（worker.py:418/426、to_candidate.py:158/167/390/481/736/803、selftest.py:383/1669、tests/loop_bridge_contract.py:65/82/165、tests/p2_coverage_layers.py:98）。② 「一个原文单元是什么」有 **7 处实现**，但真正产出**不同单元集合**的只有两套：**A**=`narrative.chapter_spans`（narrative.py:1301，唯一产出索引单元）与 **B**=`narrative.context_chapter_spans`（narrative.py:515，产出 enrich 投喂窗口的章域）。B **不复用** A 的收行规则、各自一套正则，且在**真实生产链路**上：ContextIndex(:594) → ranges()/groups → narrative.plan(:943/:975/:1161) → serve.py:5241 enrichment_plan → 路由 **POST /api/enrich/plan**（serve.py:7001）。③ 差异样例可逐字复现：B 多收『章号与标题无分隔符紧排』（大奉 @3703622/@3708831/@3717366/@3722221，A 的 _HEAD_RE 要求 `(?=[ \\t　\\r\\n：:])` 前瞻故不收）与『缺量词』（@3822387『第一百零二 万事俱备否？』，B 靠 _MISSING_UNIT_HEAD:483 + 邻章一致性 :569-574 恢复）；A 多收『番外』（大奉 @4743502/@4748800/@4754516 —— B 的 _CHAPTER_HEAD 只认 第N[章节回幕卷部集]/Chapter N/附录，**实测 B 中含『番外』字样的 span = 0**）与『附　录』（西游 @53085，A 的 _SPECIAL_RE 容许『附[ 　]*录』全角空格，B 不容）。三书实测 A/B：dafeng 912/914、xiyou 101/100、**sanguo 120/120 完全一致**。④ 后果**范围要说准**：大奉 3 个单元被并成 1 章读 2–3 章（i=714 [3699187,3713570) 14383 字含 3 章、i=715 12594 字含 3 章、i=734 12946 字含 2 章，均在该书 99–100 百分位，中位仅 4980），三条绑定任务 read:dafeng:L2:0714 / L3:0715 / L2:0734 **产物均未提交**；西游附录的 **5 个事件**（ev_3fa571bc/ev_3bd97c2d/ev_b7754dad/ev_931c0439/ev_e36a1654）因 B 无该章域，narrative.py:672-674 使 scopes 退化成 `[(source,{start:0,end:722176})]` —— **整份原文**，而 locate 返回的方法名仍写 `unique_verbatim_fragment_in_chapter`。**没有**大面积失效。⑤ 统一方向：**以 A 为准、由 narrative.py 的写入负责人执行**（A 是索引与队列的唯一来源，1133/1133 条 read 任务的 sourceRange 逐字节等于 A 的 chapterUnits；A 是唯一被契约测试钉住的口径 tests/p3_unit_ledger_contract.py:24/:130/:190；A 覆盖更宽）。**不得**靠放宽 A 的 _HEAD_RE 吸收 B 的形态。⑥ 负面结论（用于区分『没发现问题』与『没检查』）：三套中文数字实现（js/atlas/atlas-source.js:755-766 用 node 实跑、build_plan.py:102-120、narrative.py:1265-1281）在 **286 种真实章头数字串**上分歧 **0**；`build_index()` 连跑两次逐字节相同且 chapterUnits 与磁盘**逐单元相同（3/3）**；队列**没有**第三条自切单元的路径；artifacts/plan100/source-index/*.json 的边界 == A（3/3 True），是忠实派生而非独立口径。⑦ 另发现索引**陈旧**（非第二套口径）：现场重建的西游 graphKey=ee3430ef（tasks 282）vs 磁盘 ed3dc125（tasks 198），两键 docs.json sha256 相同故单元数不变，根因是 _default_books():64 取作品库历史首条而索引自 2026-10-10 00:31 未刷新；**该状态已被 selftest 第 15 条登记为 FAIL**（留痕 loop/state/out/storage_external_20261011.json：『FAIL 15 …不一致：{xiyou: (ed3dc125…, ee3430ef…)}』），本轮未运行 selftest，故只引用留痕、不冒充实测。⑧ 顺带独立复算确认既有的 sanguo 队列 sourceHash 过期（队列 2988ce6e… vs 磁盘 8ab7298a…）**至今仍成立**，登记处 loop/state/runs/submit-verify_sanguo_L1_0031.json:31。",
+  "evidence": [
+    {
+      "path": "loop/state/out/env_index-owner.artifact.json",
+      "sha256": "0e8630f56c49fbcbe4d4b794de50d330642a62c7575c6684f3aa204665b74a5d",
+      "bytes": 63635,
+      "what": "审计产物：q1 读/写者普查（含全仓写动作扫描的原始命中）、q2 七处口径表（位置+正则+量词字符类）、A/B 三书逐边界对账与最小可击穿样例、q3 影响量化（被并单元/受影响事件/队列绑定/负面结论）、q4 索引陈旧度、q5 统一方向与理由、checksPerformed(8)、notDone_remaining(7)、rollback。**内嵌完整只读审计脚本与其 stdout，各自带 sha256**，本轮已实测可从产物内提取并逐字节复现（source 15981884… / stdout ceaff4e0…，重跑 rc=0、stderr 为空）。 另含 leaseOwnershipNote：如实登记『本文件所在租约由 w-ops(pid 43559) 持有且该进程在提交时仍存活』这一写入竞争事实。"
+    },
+    {
+      "path": "loop/state/index.json",
+      "sha256": "9d951bc4c81766789b55daf0e8cff2716c0ae26da3ac385561640a4817aeb66f",
+      "bytes": 275199,
+      "what": "被审计的索引本体：1133 单元 / 1131 有事件 / 5074 事件 / 6089630 字；三书 graphKey=dafeng 215f4b88、xiyou ed3dc125、sanguo b1687d12。",
+      "sha256Note": "属 loop/ 演进路径（loop.py:314 EVOLVING_PREFIXES）⇒ 哈希漂移不判本记录失效。"
+    },
+    {
+      "path": "loop/bin/build_plan.py",
+      "sha256": "2178745505b1109efd0e8d310419d583cc37f6374901c729467b511bc8bfc9a0",
+      "bytes": 38231,
+      "what": "唯一写入者所在文件：:545 写索引、:543 守卫、:132 调 A 产出 chapterUnits、:144-150 的归属键口径 F、:296-299 把区间写进队列任务、:64 从作品库历史取键（第 ⑦ 条的根因）。",
+      "sha256Note": "属 loop/ 演进路径 ⇒ 漂移不判失效。"
+    },
+    {
+      "path": "loop/queue/read.jsonl",
+      "sha256": "e0ede3d973c8e778ff0ea38efc49f150197b509c48d58fb48d110aed65150675",
+      "bytes": 8787662,
+      "what": "1133 条 read 任务；用于证明队列 sourceRange 逐字节等于索引 chapterUnits（0 不一致 / 0 孤儿 / 0 未覆盖），并量化受影响任务与 sanguo sourceHash 过期。",
+      "sha256Note": "属 loop/ 演进路径 ⇒ 漂移不判失效。"
+    }
+  ],
+  "sourceHashes": {
+    "loop/state/index.json": "9d951bc4c81766789b55daf0e8cff2716c0ae26da3ac385561640a4817aeb66f",
+    "narrative.py": "ac10f98e4f4eef2789d6098bc234de456c521ad47abe6bdb58b299ec2dd679c6",
+    "loop/bin/build_plan.py": "2178745505b1109efd0e8d310419d583cc37f6374901c729467b511bc8bfc9a0",
+    "loop/bin/to_candidate.py": "df5f168d4c82310b7c9776f0dca448397f2aa7dbded5683de9077f2b0686d5c8",
+    "loop/bin/worker.py": "e29de6aefa47361cad5864899f5b297da4daec1b1c7b1c1674bd3972daba52cc",
+    "loop/queue/read.jsonl": "e0ede3d973c8e778ff0ea38efc49f150197b509c48d58fb48d110aed65150675",
+    "data/cache/index.json": "bada90948fc7cc4ee9c78f96507d51955711c3cdc514213a420be48e8f872b6f",
+    "data/cache/215f4b88fb087a7d735a6fae.docs.json": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "data/cache/ed3dc1255ca08fbdaae30bbd.docs.json": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+    "data/cache/b1687d1214f4d6c8bcd06c6f.docs.json": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+    "_note": "动手前后源文件哈希。**本任务只读**：这些值在审计开始与写产物后各取一次，两轮相同。**不把 serve.py / narrative.py 之外的受保护路径当证据固化** —— 尤其不固化 serve.py（上一轮正是固化它才失效：round 3 记录 ff62b895…，现为 e5d6fd6a…，mtime 2026-10-12T14:09:24，被 evidence_stale() 判 hash-changed）。"
+  },
+  "assertions": [
+    {
+      "text": "loop/state/index.json 的唯一写入点是 loop/bin/build_plan.py:545，守卫在 :543；全仓写动作扫描的另外 2 处写的都不是这个文件",
+      "result": "pass",
+      "evidence": "grep -rn 'index\\.json' --include=*.py --include=*.sh loop/ tests/ tools/ serve.py | grep -E 'write_text|json\\.dump|\\.write\\(|open\\([^)]*[\"\\']w|replace\\(|rename\\(' → 仅 tests/error_recovery_contract.py:106 与 tools/plan100/build_task_state_machines.py:925，前者 target 是测试自有 cache_dir，后者是 artifacts 下的 P03-build-index.json"
+    },
+    {
+      "text": "存在第二套口径 B（narrative.context_chapter_spans），且它在真实生产链路上（POST /api/enrich/plan）",
+      "result": "pass",
+      "evidence": "narrative.py:515 定义 → :594 装入 ContextIndex.sources[].chapterSpans → :813 ranges()/:848 context_groups_for() → :943/:975/:1161 narrative.plan → serve.py:5241 enrichment_plan → serve.py:7001 路由 '/api/enrich/plan'；实测 A/B 三书 dafeng 912/914、xiyou 101/100、sanguo 120/120"
+    },
+    {
+      "text": "A 与 B 的差异有可逐字复现的最小样例（B 多收无分隔符紧排与缺量词；A 多收番外与带全角空格的附录）",
+      "result": "pass",
+      "evidence": "artifact.caliberDiverge_AvsB.minimalFalsifiableSamples；实测 B 中含『番外』字样的 span = 0，A 有 3 个（@4743502/@4748800/@4754516）；B 的『附录』章域数 = 0 而 A 有 1 个（@53085）"
+    },
+    {
+      "text": "口径不一致造成可观测后果，但范围有限：大奉 3 个单元被并章；西游附录 5 个事件的搜索域退化为整份原文",
+      "result": "pass",
+      "evidence": "单元 i=714/715/734 分别含 3/3/2 个 B 边界、长度 14383/12594/12946（该书 99–100 百分位）且三条绑定任务产物均未提交；西游 5 事件 locate 返回 method=unique_verbatim_fragment_in_chapter 而 narrative.py:672-674 的 scopes 已退化为 [0,722176)；sanguo A/B 完全一致 ⇒ 不是大面积失效"
+    },
+    {
+      "text": "负面结论：三套中文数字实现等价（286 种真实章头、分歧 0）；索引 build_index() 幂等且 chapterUnits 与磁盘逐单元相同；队列没有第三条自切单元路径",
+      "result": "pass",
+      "evidence": "JS cnNumLocal 用 node 实跑（非阅读推断）与 build_plan._cn_num、narrative.cn_int 三方比值为 0 分歧；build_index() 连跑两次 JSON 逐字节相同（len=175595）；chapterUnits 逐单元相同 3/3；1133/1133 条 read 任务 sourceRange 相符、0 孤儿"
+    },
+    {
+      "text": "全程只读：未修改任何代码，未触碰受保护路径，未运行 selftest/reap 等会改共享状态的命令",
+      "result": "pass",
+      "evidence": "本任务 writes 仅 loop/state/out/env_index-owner.artifact.json，实际也只写了该文件；审计脚本写在 /tmp（契约外）；未改 js/ css/ index.html serve.py narrative.py scripts/ tests/ docs/ data/；ps -Ao command= 实测 loop.py 相关 18 进程（未用 BSD 不存在的 pgrep -c）"
+    },
+    {
+      "text": "索引陈旧问题已被项目自己的 selftest 第 15 条登记为 FAIL，本轮只引用该留痕而不冒充实测",
+      "result": "pass",
+      "evidence": "loop/state/out/storage_external_20261011.json 含『FAIL 15 索引的图谱键必须等于页面默认打开的那一版 · 不一致：{xiyou: (ed3dc1255ca08fbdaae30bbd, ee3430ef493546bbcd2e700b)}』；本轮未运行 selftest 已如实写入 notDone_remaining"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/env_index-owner.artifact.json",
+      "kind": "overwrite",
+      "note": "本任务 writes 指定的唯一产物；覆盖上一轮（round 3）的同名 artifact —— 该轮记录已因固化 serve.py 哈希而 evidence_stale，本轮重取证并如实标注 supersede 关系。"
+    }
+  ],
+  "remaining": [
+    "未运行 loop/bin/selftest.py：它会写 loop/state/*（GUARD-REPORT 等）并拉起子进程，超出本任务 writes 范围；故第 15 条的 FAIL 引用既有留痕而非本轮实测。",
+    "未运行 loop/bin/loop.py reap：leases/ 下有 18 个活跃租约（ps 实测），reap 会改共享状态，且回收死租约不在本任务责任内。",
+    "未实施 A/B 统一（任务明令只审计）：只给出方向与理由。",
+    "未量化 B 的窗口差异对 enrich 语义产出的影响（需真实模型调用/GPU，本轮不估不编）。",
+    "未构造『第N幕/卷/部』反例语料验证 F/G 宽量词集合的未来风险（三书当前无此类单元，属设计取舍而非现有缺陷）。",
+    "未构造 pinned>0 时 build_plan 取首条 与 /api/history 排序语义分歧的实测（当刻 pinned=0，仅登记为潜在不一致）。",
+    "未修 sanguo 队列 sourceHash 过期：属队列生成层，修复会改 loop/queue；本轮只复算确认其仍成立并标注既有登记处。"
+  ],
+  "rollback": {
+    "needed": false,
+    "why": "只读审计 + 只写 1 个契约内产物。撤销 = 删除 loop/state/out/env_index-owner.artifact.json 与 loop/state/out/env_index-owner.json；不影响其他任何文件。",
+    "protectedPathsUntouched": [
+      "js/",
+      "css/",
+      "index.html",
+      "serve.py",
+      "narrative.py",
+      "scripts/",
+      "tests/",
+      "docs/",
+      "data/"
+    ]
+  },
+  "verificationHints": {
+    "primary": "cd /Users/carmen/Desktop/星系 && python3 -B -s /tmp/cl_idxowner_probe.py  （脚本内嵌于 artifact.auditScript.source，sha256=15981884aebc59ee7b106cd5c51f062117bb759d857e4ec44412cbfd62a040a4；stdout 应逐字节等于 artifact.auditScript.stdout，sha256=ceaff4e089e3b7a30aa7941c2b409d69ca14a87fabb879f125a4bb9c0fe599e0）",
+    "independentChecks": [
+      "grep -n 'chapter_spans' tests/p3_unit_ledger_contract.py tests/narrative_context_contract.py   # 两个契约各测各的，无交叉钉死",
+      "grep -n \"route == '/api/enrich/plan'\" serve.py   # B 的生产可达性",
+      "python3 -c \"import json;a=json.load(open('loop/state/out/env_index-owner.artifact.json'));import hashlib;print(hashlib.sha256(a['auditScript']['source'].encode()).hexdigest()==a['auditScript']['sha256'])\""
+    ],
+    "falsification": "若复核者能证明 ①除 build_plan.py:545 之外还有第三处真写 loop/state/index.json，或 ②B 在某条链路里其实复用了 A 的 span（我实测 narrative.py:534 只复用 A 的 offset 用于收 scrapy 导航前的标题，不是复用整条收行规则），或 ③西游那 5 个事件其实没退化成全文扫描 —— 则本审计结论被击穿，请判 fail。"
+  },
+  "submittedAt": "2026-10-12T06:30:55Z",
+  "wallClockSeconds": 1081,
+  "wallClockFrom": "lease.startedAt",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-12T06:30:55Z"
+  },
+  "verifyState": "pending"
+}

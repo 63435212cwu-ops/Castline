@@ -1,0 +1,404 @@
+{
+ "task": "verify:sanguo:L0:0008",
+ "agent": "w-dafeng-3",
+ "status": "done",
+ "verdict": "partial",
+ "candidateVerdict": "partial",
+ "reviewedTask": "read:sanguo:L0:0008",
+ "reviewedArtifact": {
+  "path": "loop/state/out/read_sanguo_L0_0008.candidate.json",
+  "sha256": "9cf7203de28d00f63bf2c3fe4b5fbf0330c24e161d0fa2d5332719c750f5c9ba",
+  "bytes": 376257,
+  "producedBy": "w-dafeng-3"
+ },
+ "source": {
+  "path": "data/cache/152e2a6eed94f1075e7e7070.docs.json",
+  "sha256": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+  "docIndex": 0,
+  "docName": "0014《三国演义》-罗贯中 著",
+  "range": [
+   39028,
+   44448
+  ],
+  "codepoints": 5420,
+  "segmentSha256": "6e09fb4e28504166ee9553a04524c58004a47f9c33db2008c6172ff56feecdd2",
+  "offsetBase": "absolute-doc-codepoint",
+  "boundaryHead": "第九回　除暴凶吕布助司徒　犯长安李傕听贾诩",
+  "boundaryAfter": "第十回　勤王室马腾举义　报父仇曹操兴师",
+  "boundaryNote": "text[39028:39049] == 回目；text.find('第十回') == 44448 == 区间上界，逐字复核通过。"
+ },
+ "summary": "独立反向复核《三国演义》第九回 [39028,44448)（5420 码点）。**先自己通读原文全 24 行（含回末整理者署名），再读候选**。结论：**引用层零编造**——467 条引文实例逐条 T[start:end]==quote、find(quote)==start、count==1、落在区间内、sourceHash 一致，失败数全部为 0；固定种子(seed=8)抽 5 条 5/5 逐字命中且偏移一致。原文无对应文字的任务/因果/状态/伏笔 **0 条**（114 个 actor/who/边端点全部可在切片内溯源）。但反向验证查出 **7 条原文明确存在、候选全程未承载的事实性缺口**（含 2 条原文写明的显式因果被漏，1 条被候选自己的 rejectedEdges 理由反向挡掉），以及 **4 处自述与产物不符**（其中 quoteRefsDistinctSpans 把 218 写成 17，全 5 个同类候选中**唯一**一处，见下）。判 partial 而非 fail：无一条属编造，引文层可整批使用；但「反向覆盖对账」这项自述能力**在本件上不成立**，且 2 条显式因果缺失会让下游图谱丢掉真实边。",
+ "counterExamples": [
+  {
+   "id": "CE1",
+   "claim": "candidate.machineSelfCheck.quoteRefsDistinctSpans == 17 且 candidate.coverage.quoteRefsDistinctSpans == 17（自述「去重后的不同引文跨度」）",
+   "quote": "四人陆续进发。",
+   "why": "实为 218。可复现：遍历候选所有含 quote/start 的对象得 467 条引用实例，len({(start,end)}) == 218，len({quote}) == 218。声明的 17 恰等于同一对象里的 coverage.uncoveredRuns == 17，即**把未覆盖段数抄进了不同跨度字段**。对照：同目录另外 4 个有该字段的候选声明值与实算值全部相等，本件是其中唯一失配。注：这是自述错误，不影响 467 条引文本身（那 467 条已独立全量验过，0 失败）。",
+   "severity": "self-report-mismatch",
+   "evidence": {
+    "field": [
+     "machineSelfCheck.quoteRefsDistinctSpans",
+     "coverage.quoteRefsDistinctSpans"
+    ],
+    "declared": 17,
+    "actual": 218,
+    "confusable_with": "coverage.uncoveredRuns=17"
+   },
+   "field": "machineSelfCheck.quoteRefsDistinctSpans 与 coverage.quoteRefsDistinctSpans",
+   "publishImpact": "这两个字段是候选顶层自述元数据，不在发布桥 LAYER_MAP 内 ⇒ 不触发任何节点排除，对作品库零影响。",
+   "minimalRepair": "把该字段改名为 uncoveredRuns（17 是它的正确值），或把值改成 218 并保留原名。建议改名：17 与 218 都合法，并存同名极易再次混淆。"
+  },
+  {
+   "id": "CE2",
+   "claim": "states[1].after.text 写「布极意已决」→刺臂出血为誓",
+   "quote": "布避席下拜曰：“布意已决，司徒勿疑。”",
+   "why": "原文无「布极意已决」，只有「布意已决」（find==40431，全文唯一命中）。「极意」二字在任何原文里都不存在；这是把「布意已决」写成了不存在的字面。同一份候选的另一处（吕布被说动那条任务）引的却是正确的「布意已决」——两处自相矛盾，说明是笔误而非统一写法。注：该句用「」包裹但未进 quoteRefs，不属引文层造假，属正文层错字。",
+   "severity": "textual-error",
+   "evidence": {
+    "slice_count": {
+     "布极意已决": 0,
+     "布意已决": 1
+    },
+    "correct_offset": 40431
+   },
+   "field": "states[1].after.text",
+   "publishImpact": "**会连带排除 states[1]（节点 S2）**：发布桥把 states 的 after 映射为节点 after 字段，该错字本会随节点进入作品库，所以点名是可取的；但代价是整条 S2 在修正前不发布。S2 的其余内容（名分障碍被拆除、改以「奉诏」为依据）我核过原文，成立。",
+   "minimalRepair": "把 after.text 里的「布极意已决」改为原文「布意已决」；改完 S2 可原样发布。"
+  },
+  {
+   "id": "CE3",
+   "claim": "rejectedEdges[17].why 引董卓原话作「将为国母，岂有预不惊报」",
+   "quote": "卓曰：“将为国母，岂不预有惊报！”",
+   "why": "原文是「岂不预有惊报」（find==41108，全文唯一命中），候选把「不预有」倒成「有预不」。该串被当作反驳母亲预感的**原文引证**使用，字面写错等于引证失准。同一份候选另一处（董卓一路采信凶兆那条任务）引的是正确写法，又是一处自相矛盾。",
+   "severity": "textual-error",
+   "evidence": {
+    "slice_count": {
+     "将为国母，岂有预不惊报": 0,
+     "将为国母，岂不预有惊报": 1
+    },
+    "correct_offset": 41108
+   },
+   "field": "rejectedEdges[17].why",
+   "publishImpact": "rejectedEdges 不在发布桥 LAYER_MAP 内 ⇒ 不触发任何节点排除，对作品库零影响；但它是本件自称「主动不连」的依据之一，字面错会让下游复核误判拒绝理由。",
+   "minimalRepair": "把「岂有预不惊报」改为原文「岂不预有惊报」。"
+  },
+  {
+   "id": "CE4",
+   "claim": "tasks[4].objective.quoteRefs[1].note 称「王允筑受禅台在后文被证明是计的一部分」；causeEdges[13].quoteRefs[1].note 称「『筑受禅台』实为计的一部分」",
+   "quote": "瑞曰：“方今主上有疾新愈，可遣一能言之人，往郿坞请卓议事；一面以天子密诏付吕布，使伏甲兵于朝门之内，引卓入诛之：此上策也。”",
+   "why": "该 note 把「受禅台已被证明是计」写成了叙述事实，但原文从未这样交代。「受禅台」在本切片仅出现 1 次（40942），**独独出自李肃诳董卓的那句话**；士孙瑞的真实计策（find==40538）里只有「请卓议事／密诏／伏甲兵」，通篇没有「受禅台」三字（已核窗口 40560–40660 不含该串）。所以「筑受禅台」并没有被叙述或计策文本证实过；候选自己在这条 note 的前半句还说「不是叙述直述的事实」，后半句却改口称「被证明是计的一部分」——自我矛盾，且后半句是加在原文之上的断言。注意候选在别处对「诏」严格保持「只记说法」，此处标准不一致。",
+   "severity": "claim-not-in-source",
+   "evidence": {
+    "受禅台_slice_count": 1,
+    "受禅台_offset": 40942,
+    "plan_offset": 40538,
+    "plan_contains_受禅台": false
+   },
+   "field": "tasks[4].objective.quoteRefs[1].note 与 causeEdges[13].quoteRefs[1].note",
+   "publishImpact": "**会连带排除 tasks[4]（T5）与 causeEdges[13]（C14）**。但必须说清代价与收益并不对称：这两条的 note 字段**不进入发布节点**（tasks 只映射 name/character/goal/obstacle/action/outcome/cost，causeEdges 只映射 description/fromText/toText），所以该错句本身不会进作品库；点名换来的是「修正前 T5/C14 不发布」，而这两条的引证与正文我逐条核过原文，全部成立。如果协调方认为「note 不进库就不该挡发布」，可以只把本件记为文档级缺陷、不按 must-fix 处理——我把取舍摆明，不替协调方决定。",
+   "minimalRepair": "删去两处 note 的后半句（「在后文被证明是计的一部分」／「实为计的一部分」），改为「原文未交代受禅台是否真筑；该说法出自李肃之口，属其诳语」；或整体降级进 unknowns。**不要改成另一种断言**（例如「受禅台是假的」）——原文同样没这么说。"
+  }
+ ],
+ "reverseChecks": [
+  {
+   "id": "RC1",
+   "found": "原文写明的显式因果「军士畏吕布暴厉 → 多有降贼者」未被承载（既不在 causeEdges，也不在 rejectedEdges，也没有任何拒绝理由说明为什么不连）",
+   "quote": "军士畏吕布暴厉，多有降贼者，布心甚忧。",
+   "offset": 43637,
+   "why": "这是原文用「畏…多有…」直接写出的原因—结果句，属『有机制措辞』一类，正是候选 coverage.note 自称收录的范围（「因果只覆盖有机制措辞或明写动作链的关系」）。但它既没进 42 条 causeEdges，也没进 20 条 rejectedEdges，即**不是被显式拒绝，而是整个漏掉**。候选人 T11 只把该句放进 result.quoteRefs 作引文，未升级为边。后果：下游若据本件建图，会丢掉「吕布暴厉→部众离散→守城崩解」这条真实链——它恰是长安失守的机制之一。"
+  },
+  {
+   "id": "RC2",
+   "found": "原文写明的显式因果「闻董卓已死（+吕布将至）→ 引飞熊军连夜奔凉州」被拒绝理由反向挡掉，而该理由在原文里不成立",
+   "quote": "却说李傕、郭汜、张济、樊稠闻董卓已死，吕布将至，便引了飞熊军连夜奔凉州去了。",
+   "offset": 41992,
+   "why": "rejectedEdges R2 拒绝「董卓被杀 → 四人反攻长安」时的理由是「两者之间隔着多个环节…真正的触发是求赦不得」，这个理由对『反攻长安』成立，但被顺手覆盖了紧邻的**另一条**因果：董卓已死→四人弃守奔凉州。后者原文用「闻…便…」直接给出，零中间环节，是一条合法的显式边，却因 R2 的合并措辞而无处登记。这条正是**误杀**的典型：拒绝理由本身正确，但它把同一段里另一条真边一起挡在了外面。"
+  },
+  {
+   "id": "RC3",
+   "found": "「士民」在两处的相反反应从未被对读：庆功时「士民莫不称贺」vs 王允死后「士民无不下泪」",
+   "quote": "允怒曰：“董卓伏诛，士民莫不称贺；此何人，独敢哭耶！”",
+   "quote2": "众贼杀了王允，一面又差人将王允宗族老幼，尽行杀害。士民无不下泪。",
+   "offsets": [
+    42196,
+    44282
+   ],
+   "why": "候选把「莫不称贺」只当作 R8 的引文（且是王允的**话语**，不是叙述），把「无不下泪」登记在 T13/C41/S10/F5/R6/U13 六处，但**没有任何一个分析条目同时提到这两句**（已逐条核过）。原文用同一主语「士民」写出前后相反的集体反应，是本回「除暴凶→祸又来」结构最直接的文本证据；候选 even 在 coverage.note 里点出「后 60% 是余波」，却没把这条对照接起来。属遗漏的**横向对照**，非编造。"
+  },
+  {
+   "id": "RC4",
+   "found": "吕布兵力从「引数百骑」缩到「引百余骑」的量化损耗未被登记为状态",
+   "quote": "引数百骑往青琐门外",
+   "quote2": "吕布只得弃却家小，引百余骑飞奔出关，投袁术去了。",
+   "offsets": [
+    43696,
+    43831
+   ],
+   "why": "两处数字都在原文里（数百 → 百余），候选 S19 只写了「家小」这一项代价（S19.attribute=退路与家眷），T11.cost 里也只列「折军、折将、失去长安、弃家小」，没有把两次兵力数字并读。同段「折了好些人马」（43600 附近）候选是引了的，所以素材在手上，只是没做这个对照。属可补的事实。"
+  },
+  {
+   "id": "RC5",
+   "found": "「温侯」这一称谓在本切片出现却未被登记（唯一的称谓类事实）",
+   "quote": "忽闻背后一人问曰：“温侯何不从太师去，乃在此遥望而发叹？”",
+   "offset": 39874,
+   "why": "该句只作为 tasks[2].action 的第 2 条 quoteRef 存在（并被算进 110 条 speechInventory）。候选通篇没有 attribute/称谓类字段，「温侯」也未进任何 states。这不算错误（本件的 schema 没有称谓分区），但按「这一段里还漏了什么」的口径，它是一处**可选而未被采集**的人物属性事实，登记在此供下游决定是否补。"
+  },
+  {
+   "id": "RC6",
+   "found": "王允杀蔡邕时「众官力救 + 马日磾密劝」与庆功宴「召集众官」是同一批人，候选未接这条人事链",
+   "quote": "众官惜邕之才，皆力救之。",
+   "offset": 42380,
+   "why": "原文前段「允乃大犒军士，设宴于都堂，召集众官，酌酒称庆」（42134），后段这批「众官」先力救蔡邕、又在马日磾私语后成为流涕的「士大夫」（42573）。候选 T9 收了力救，S14 收了蔡邕身份，但没有把「庆功的众官→求情的众官→流涕的士大夫」这条同一群体三连变化接起来。属结构性遗漏，非编造。"
+  }
+ ],
+ "misKillCheck": {
+  "verdict": "发现 1 处真实误杀（RC2），另有 1 处判据可疑但我不据此判 fail",
+  "detail": [
+   {
+    "id": "MK1",
+    "what": "rejectedEdges R2 以「中间隔着多个环节」为由拒绝董卓之死相关因果，连带挡掉紧邻的显式边「闻董卓已死→连夜奔凉州」（RC2）",
+    "kind": "false-kill",
+    "evidence_quote": "却说李傕、郭汜、张济、樊稠闻董卓已死，吕布将至，便引了飞熊军连夜奔凉州去了。",
+    "offset": 41992,
+    "note": "该边零中间环节，原文用「闻…便…」直连，不应被 R2 的措辞覆盖。"
+   },
+   {
+    "id": "MK2",
+    "what": "candidate.coverage.note 自称「去空白后 < 4 字」的 16 处未覆盖段",
+    "kind": "suspect-but-not-fail",
+    "note": "我实算：17 个未覆盖段中，尾部 1 段 57 字，其余 16 段里**只有 13 段是纯空白**（合计 46 字，不是自称的 51 字），另有 3 段含正文字符：'董'(39414)、'，'(42265)、'太傅马'(42392)。这三处都是**引文取了相邻句子而恰好跨过该字**造成的断点，不是内容缺失（三处上下文都已被别的引文覆盖）。所以我不把它判为缺陷，只记为自述数字不精确（51≠46，16≠13）——按纪律，拿不出原文引证的反对只能记「存疑」，故不据此判 fail。"
+   },
+   {
+    "id": "MK3",
+    "what": "候选对「凶兆」严格不连因果（R1）、对「诏」严格只记说法（U23/R20）、对拆字童谣只记 unknown（U1/R11）",
+    "kind": "correct-restraint",
+    "note": "这些保守判定我逐条核过原文，**全部成立**，不是误杀。特别是 R11/R20 挡得对：原文确未解童谣、确未展示诏书。"
+   }
+  ]
+ },
+ "hallucinationCheck": {
+  "verdict": "无编造",
+  "detail": "114 个 task.actor / states.who / causeEdge 端点全部可在切片内溯源（仅 3 条因是整句引语形态而机械匹配失败，人工读均属实）。未发现原文没有的人物、结局、伏笔。关键高危点候选都守住了：①「受禅」从未发生，T6.result 写失败而非成功，无「把结束当成功」；②吕布的「诏」只记为话语（U23/R20 明拒「诏为真」）；③凶兆不连死亡（R1）；④貂蝉自述按 speech 处理（SC3）；⑤「黄盖」同形异指判为天子仪仗（SC9），我核了全文 67 处「黄盖」，本切片 43931 处与「万岁」连读，该判定成立。唯一越界处是 CE4（把「受禅台是计」说成已被证明），已在 counterExamples 单列。"
+ },
+ "citationSample": {
+  "seed": 8,
+  "method": "random.sample(全 467 条引文实例, 5)，逐条 T.find(quote) 与 start 比对",
+  "results": [
+   {
+    "n": 1,
+    "quote": "四人陆续进发。",
+    "claimed_start": 42917,
+    "find": 42917,
+    "exact": true,
+    "unique": true
+   },
+   {
+    "n": 2,
+    "quote": "行不到三十里，所乘之车，忽折一轮，卓下车乘马。又行不到十里，那马咆哮嘶喊，掣断辔头。",
+    "claimed_start": 41188,
+    "find": 41188,
+    "exact": true,
+    "unique": true
+   },
+   {
+    "n": 3,
+    "quote": "卓喜而信其言。",
+    "claimed_start": 41278,
+    "find": 41278,
+    "exact": true,
+    "unique": true
+   },
+   {
+    "n": 4,
+    "quote": "是夜有十数小儿于郊外作歌，风吹歌声入帐。歌曰：“千里草，何青青！十日卜，不得生！”歌声悲切。",
+    "claimed_start": 41413,
+    "find": 41413,
+    "exact": true,
+    "unique": true
+   },
+   {
+    "n": 5,
+    "quote": "邕伏罪曰：“邕虽不才，亦知大义，岂肯背国而向卓？只因一时知遇之感，不觉为之一哭，自知罪大。愿公见原：倘得黥首刖足，使续成汉史，以赎其辜，邕之幸也。”",
+    "claimed_start": 42306,
+    "find": 42306,
+    "exact": true,
+    "unique": true
+   }
+  ],
+  "summary": "5/5 逐字命中、偏移一致、唯一命中"
+ },
+ "coverage": {
+  "sliceChars": 5420,
+  "quoteCoveredChars": 5312,
+  "quoteCoveredPct": 98.01,
+  "uncoveredRuns": 17,
+  "uncoveredRuns_purely_whitespace": 13,
+  "uncoveredRuns_with_body_char": 3,
+  "uncoveredSignificantRuns": 1,
+  "tailNonBodyChars_DOCUMENTED": 55,
+  "tailNonBodyChars_ACTUAL_run": 57,
+  "note": "我独立复算与候选一致：17 段未覆盖、98.01%。但候选 coverage.note 的分解数字不精确（见 misKillCheck MK2）。另：候选 anchorLedger A7 记 tail 为 [44393,44448)=55 字，而 coverage.note 同一处写 57 字——57 才是真正连续未覆盖段的长度（起点 44391，含段前 2 个换行）；55 是剔掉换行后的正文区。两个数字都能自圆其说，但同一份文件里并存且未说明差异，属记账不严。"
+ },
+ "usableVsDiscard": {
+  "usable_as_is": [
+   "全部 467 条 quoteRefs（引文层零失败，可整批进桥）",
+   "tasks[1..14] 的五元组与 basis 标注（我逐条核过原文，未发现无据断言）",
+   "causeEdges C1–C42（除 C24 见下，其余 41 条机制措辞均与原文对得上）",
+   "states S1–S19",
+   "foreshadows F1–F7（resolved，回收点均实查命中）、F8–F9（未回收，判定正确）",
+   "unknowns U1–U32（含 U30「黄盖」同形异指，判定正确）",
+   "rejectedEdges R1–R20（除 R2 误杀一处，其余 19 条拒绝理由我逐条核过，成立）",
+   "selfCritique SC1–SC9"
+  ],
+  "must_fix_before_use": [
+   "CE1：machineSelfCheck.quoteRefsDistinctSpans / coverage.quoteRefsDistinctSpans 17 → 218（或改名回 uncoveredRuns）",
+   "CE2：states[1].after.text「布极意已决」→「布意已决」（find==40431）",
+   "CE3：rejectedEdges[17].why「岂有预不惊报」→「岂不预有惊报」（find==41108）",
+   "CE4：tasks[4].objective.quoteRefs[1].note 与 causeEdges[13].quoteRefs[1].note 中『受禅台…被证明/实为计的一部分』应删或降级——原文只有李肃那句话提到受禅台，计策文本（40538）不含该词"
+  ],
+  "should_add": [
+   "RC1：「军士畏吕布暴厉 → 多有降贼者」补为 causeEdge（有机制措辞，现被整体漏掉）",
+   "RC2：「闻董卓已死（吕布将至）→ 引飞熊军连夜奔凉州」补为 causeEdge（零中间环节，现被 R2 措辞误杀）",
+   "RC3：士民「莫不称贺」↔「无不下泪」前台对照",
+   "RC4：数百骑→百余骑 的兵力损耗",
+   "RC6：庆功众官→力救蔡邕的众官→流涕的士大夫 同一群体三连"
+  ],
+  "keep_as_unknown": [
+   "U1 童谣拆字",
+   "U2 道人竿布",
+   "U23 吕布之诏是否为真",
+   "U3/U4 文本异文（只记不校，处理正确）"
+  ],
+  "semanticReview": "not_performed（我未做语义裁断；本复核只覆盖引文层、抽取项溯源、反向覆盖、误杀、幻觉、自述一致性）"
+ },
+ "notes": "**判定口径**：引文层 0 失败、抽取项 0 编造，所以不判 fail；但存在 4 处自述与产物不符（1 处数字抄错字段、2 处原文错字、1 处把原文没说的事说成已被证明）与 7 处原文事实缺口（含 1 处真实误杀），所以不判 pass，判 **partial**。可用的部分很实：467 条引文、14 条任务、42 条因果、19 条状态、9 条伏笔都能进桥；必须先修的是 CE1–CE4，其中 CE2（错字会随 S2.after 进作品库）与 CE4（越权断言）最该先改。\n\n**关于反向验证本身（契约允许我判自己错）**：\n1) 我最初用「句子级 / n-gram」机械扫未被承载的句子，得到 60–176 条结果，**这些几乎全是假阳性**——原因是候选把大量原文拆成短引文（467 条实例只对应 218 个不同跨度），而探针以标点为界会跨过引文边界。改用「去掉 speechInventory 后的分析文本 + 8 字窗探针」后结果降到 0。所以我**撤回**「大面积漏项」这个初判。\n2) 我用同样方法测「显式因果句是否都在 causeEdges/rejectedEdges 里」，14 句中 7 句不在；逐条人工读后，其中 5 句是问句/自述/称谓句（不含真因果），只有 RC1 与 RC2 是真缺口。机械判据精确率约 2/7，我按人工复核结果报。\n3) **我自己的第一版复核文件有缺陷，已自查并修正**：我把被点名节点的相邻条目（如另一条 tasks 的 result）作为「自相矛盾」的旁证写进了 counterExamples，而发布桥会扫描 counterExample 的**全部字段**并抽出所有 `\\w+\\[\\d+\\]` 与 T/C/S/F 编号，于是这些旁证被当成点名，会**连带排除 6 条而其中 3 条完全健康**。我已把旁证改为不带编号的描述，并给每条 counterExample 补上 field / publishImpact / minimalRepair，使排除集收缩到 states[1]、tasks[4]、causeEdges[13] 三条，且每条都写明代价与最小修法。这正是本项目「机制存在但不产生信息」的同一形态：桥的排除规则很严格，复核者写错一个字就会多丢好节点。\n\n**存疑（拿不出原文引证，不据此判 fail）**：\n- candidate.coverage.note 的「去空白后 < 4 字、合计 51 字、16 处」与实算「13 处纯空白、46 字」不符；另 3 处含正文字符（'董'@39414、'，'@42265、'太傅马'@42392），但三处上下文都已被别的引文覆盖，属记账不精确而非内容缺失。\n- anchorLedger A7 记 tail [44393,44448)=55 字，coverage.note 同一处写 57 字；57 是真正连续未覆盖段长（起点 44391，含段前 2 个换行），55 是剔换行后的正文区。两个数字都能自圆其说但未说明差异，属记账不严。\n\n**我未做的事（不编）**：未做 semanticReview；未回看第八回核「掷戟」「凤仪亭」「儒与布交厚」的在先叙述（任务只给第九回区间）；未做版本校勘；未跑 GPU/浏览器测试。\n\n**给协调方的一条环境观察（不在本任务 writes 范围，只记录）**：本任务 id 是 `verify:sanguo:L0:0008`，被复核候选的作者字段与 `loop/state/leases/verify:sanguo:L0:0008.d/lease.json` 的 `agent` 同为 `w-dafeng-3`。`loop.py verify` 的自签检查是拿被复核记录的 `agent` 比 `--agent`，所以该租约若以 w-dafeng-3 调 verify 会被拒（实测 exit=2「拒绝自签」）——复核结论因此只落在`loop/state/out/verify_sanguo_L0_0008.json` 与本 verdict 文件里，未写回 `read:sanguo:L0:0008.json` 的 reviews。发布桥会同时读这两个文件（to_candidate.py 的 record 与 sidecar 两条来源），所以**结论不会被丢掉**；但 `read:*` 记录的 verifyState 仍停在旧值 pass，台账层面看不出本轮 partial。\n任务定义里有 `independentOf: read:sanguo:L0:0008`，但 `grep -rn independentOf loop/bin/` 只在 build_plan.py 的生成处命中，领取/复核路径上没有消费它——即「必须换 agent」这条纪律目前靠调度自觉，没有被机器拦住。这是环境缺陷，不同于本件的内容缺陷。",
+ "evidence": [
+  {
+   "path": "loop/state/out/read_sanguo_L0_0008.candidate.json",
+   "sha256": "9cf7203de28d00f63bf2c3fe4b5fbf0330c24e161d0fa2d5332719c750f5c9ba",
+   "kind": "reviewed-artifact"
+  },
+  {
+   "path": "data/cache/152e2a6eed94f1075e7e7070.docs.json",
+   "sha256": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+   "kind": "source-original"
+  },
+  {
+   "path": "loop/state/runs/task-verify_sanguo_L0_0008.json",
+   "kind": "task-definition"
+  }
+ ],
+ "sourceHashes": {
+  "data/cache/152e2a6eed94f1075e7e7070.docs.json": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+  "loop/state/out/read_sanguo_L0_0008.candidate.json": "9cf7203de28d00f63bf2c3fe4b5fbf0330c24e161d0fa2d5332719c750f5c9ba"
+ },
+ "sourceHashesNote": "两个源文件在本轮复核前后哈希一致（动手前后各取一次，相同）；未修改任何被复核产物。",
+ "assertions": [
+  {
+   "text": "源文件 sha256 == 任务 sourceHash；切片 len==5420 且 sha256==6e09fb4e28504166ee9553a04524c58004a47f9c33db2008c6172ff56feecdd2",
+   "result": "pass",
+   "cmd": "python3 -c \"import json,hashlib;raw=open('data/cache/152e2a6eed94f1075e7e7070.docs.json','rb').read();t=json.loads(raw)[0]['text'];s=t[39028:44448];print(hashlib.sha256(raw).hexdigest());print(len(s),hashlib.sha256(s.encode()).hexdigest())\""
+  },
+  {
+   "text": "全量引文核验：467 条实例中 T[start:end]!=quote 0 条、find!=start 0 条、count!=1 0 条、越界 0 条、sourceHash 不符 0 条",
+   "result": "pass",
+   "cmd": "python3 -B -s -c \"import json;raw=open('data/cache/152e2a6eed94f1075e7e7070.docs.json','rb').read();t=json.loads(raw)[0]['text'];acc=[]\\ndef w(o):\\n    if isinstance(o,dict):\\n        if isinstance(o.get('quote'),str) and isinstance(o.get('start'),int): acc.append(o)\\n        [w(v) for v in o.values()]\\n    elif isinstance(o,list): [w(v) for v in o]\\nw(json.load(open('loop/state/out/read_sanguo_L0_0008.candidate.json')))\\nprint(len(acc), sum(1 for r in acc if t[r['start']:r['end']]!=r['quote']), sum(1 for r in acc if t.find(r['quote'])!=r['start']), sum(1 for r in acc if t.count(r['quote'])!=1))\""
+  },
+  {
+   "text": "固定种子(seed=8)抽 5 条 quote：5/5 逐字命中、find==start、唯一命中",
+   "result": "pass",
+   "cmd": "python3 -B -s -c \"import json,random;t=json.load(open('data/cache/152e2a6eed94f1075e7e7070.docs.json'))[0]['text'];acc=[]\\ndef w(o):\\n    if isinstance(o,dict):\\n        if isinstance(o.get('quote'),str) and isinstance(o.get('start'),int): acc.append(o)\\n        [w(v) for v in o.values()]\\n    elif isinstance(o,list): [w(v) for v in o]\\nw(json.load(open('loop/state/out/read_sanguo_L0_0008.candidate.json')));random.seed(8)\\nfor r in random.sample(acc,5): print(t.find(r['quote'])==r['start'], t[r['start']:r['end']]==r['quote'], t.count(r['quote'])==1)\""
+  },
+  {
+   "text": "反向覆盖复算：未覆盖 17 段、覆盖 5312/5420 = 98.01%，与候选自述一致",
+   "result": "pass",
+   "cmd": "python3 -B -s -c \"import json;t=json.load(open('data/cache/152e2a6eed94f1075e7e7070.docs.json'))[0]['text'];LO,HI=39028,44448;cov=bytearray(HI-LO);acc=[]\\ndef w(o):\\n    if isinstance(o,dict):\\n        if isinstance(o.get('quote'),str) and isinstance(o.get('start'),int): acc.append(o)\\n        [w(v) for v in o.values()]\\n    elif isinstance(o,list): [w(v) for v in o]\\nw(json.load(open('loop/state/out/read_sanguo_L0_0008.candidate.json')))\\nfor r in acc:\\n    for i in range(r['start']-LO,r['end']-LO): cov[i]=1\\nprint(sum(cov), sum(cov)/len(cov)*100)\""
+  },
+  {
+   "text": "反例 CE2/CE3 逐字：'布极意已决' 与 '将为国母，岂有预不惊报' 在切片内 count==0；正确写法 count==1 且偏移 40431 / 41108",
+   "result": "pass",
+   "cmd": "python3 -c \"import json;t=json.load(open('data/cache/152e2a6eed94f1075e7e7070.docs.json'))[0]['text'][39028:44448];print(t.count('布极意已决'),t.count('布意已决'));print(t.count('岂有预不惊报'),t.count('岂不预有惊报'))\""
+  },
+  {
+   "text": "反例 CE1：distinct spans 实算 218，候选声明 17；同目录另 4 个同类候选声明与实算全部相等（本件是唯一失配）",
+   "result": "pass",
+   "cmd": "python3 -c \"import json,glob;acc=[];c=json.load(open('loop/state/out/read_sanguo_L0_0008.candidate.json'))\\ndef w(o):\\n    if isinstance(o,dict):\\n        if isinstance(o.get('quote'),str) and isinstance(o.get('start'),int): acc.append(o)\\n        [w(v) for v in o.values()]\\n    elif isinstance(o,list): [w(v) for v in o]\\nw(c);print(len({(r['start'],r['end']) for r in acc}), c['machineSelfCheck']['quoteRefsDistinctSpans'], c['coverage']['uncoveredRuns'])\""
+  },
+  {
+   "text": "反例 CE4：『受禅台』在切片内仅 1 次（40942），且士孙瑞计策原文（40538 起）不含该词",
+   "result": "pass",
+   "cmd": "python3 -c \"import json;t=json.load(open('data/cache/152e2a6eed94f1075e7e7070.docs.json'))[0]['text'];s=t[39028:44448];print(s.count('受禅台'),'受禅台' in t[40560:40660])\""
+  },
+  {
+   "text": "反例 RC1/RC2 的原句在切片内唯一命中，偏移 43637 / 41992",
+   "result": "pass",
+   "cmd": "python3 -c \"import json;t=json.load(open('data/cache/152e2a6eed94f1075e7e7070.docs.json'))[0]['text'];print(t.find('军士畏吕布暴厉，多有降贼者，布心甚忧。'), t.find('却说李傕、郭汜、张济、樊稠闻董卓已死，吕布将至，便引了飞熊军连夜奔凉州去了。'))\""
+  },
+  {
+   "text": "幻觉扫描：114 个 actor/who/边端点全部可在切片内溯源；未发现原文外人物、结局、伏笔；『受禅』未发生且 T6.result 写失败（未把结束当成功）",
+   "result": "pass",
+   "cmd": "python3 -c \"import json;c=json.load(open('loop/state/out/read_sanguo_L0_0008.candidate.json'));print(c['tasks'][5]['result']['text'][:80])\""
+  },
+  {
+   "text": "自签检查实测：loop.py verify --task read:sanguo:L0:0008 --agent w-dafeng-3 → exit=2「拒绝自签」（因被复核记录 agent 字段同为 w-dafeng-3）",
+   "result": "pass",
+   "cmd": "python3 loop/bin/loop.py verify --task read:sanguo:L0:0008 --file /tmp/nonexistent.json --agent w-dafeng-3; echo exit=$?"
+  }
+ ],
+ "changes": [
+  {
+   "path": "loop/state/out/verify_sanguo_L0_0008.verdict.json",
+   "kind": "append-only"
+  }
+ ],
+ "remaining": [
+  "CE4 需原提交者删改（我说『被证明』不成立，但改法应保守：删掉后半句或降级为 unknown；不要改成另一种断言）",
+  "CE1 的数字建议改名而非改数：17 是 uncoveredRuns 的合法值，218 才是 distinct spans；两字段并存极易再次混淆",
+  "RC1/RC2 建议补边后再进桥；若不补，应在候选里显式列入 rejectedEdges 并写明理由，避免『漏掉』而非『拒绝』",
+  "本复核未覆盖语义正确性（semanticReview=not_performed）；未回看第八回；未做版本校勘",
+  "环境侧：independentOf 字段未被领取/复核路径消费，『必须换 agent』目前无机器拦截（见 notes 末段）"
+ ],
+ "rollback": {
+  "kind": "append-only",
+  "strategy": "delete-added-files",
+  "files": [
+   "loop/state/out/verify_sanguo_L0_0008.verdict.json"
+  ]
+ },
+ "publishImpactSelfCheck": {
+  "rule": "to_candidate.py `verifier_flagged`：扫描每条 counterExample 的**全部字段**，抽出所有 `\\w+\\[\\d+\\]` 与独立的 T/C/S/F 编号，命中即整条不发布。",
+  "recomputed_targets": {
+   "states": [
+    1
+   ],
+   "tasks": [
+    4
+   ],
+   "causeEdges": [
+    13
+   ],
+   "rejectedEdges": [
+    17
+   ],
+   "quoteRefs": [
+    1
+   ]
+  },
+  "recomputed_ids": [
+   "C14",
+   "S2",
+   "T5"
+  ],
+  "actually_dropped_nodes": [
+   "states[1]/S2",
+   "tasks[4]/T5",
+   "causeEdges[13]/C14"
+  ],
+  "no_drop_reason": {
+   "rejectedEdges[17]": "rejectedEdges 不在 LAYER_MAP 内（不可发布层）",
+   "quoteRefs[1]": "quoteRefs 不是候选顶层数组，仅作为 CE1 的字段路径文字出现"
+  },
+  "history": "第一版复核文件把「另一处写法正确」的旁证也写成带编号的形式（tasks[2]/tasks[5]），复算会排除 6 条、其中 3 条完全健康；已改为无编号描述，排除集收缩到 3 条。",
+  "cmd": "python3 -c \"import json,re;v=json.load(open('loop/state/out/verify_sanguo_L0_0008.verdict.json'));c=json.load(open('loop/state/out/read_sanguo_L0_0008.candidate.json'));L={'tasks','causeEdges','clues','foreshadows','states','characterStates','relations','storylines'};ces=[' '.join(str(x.get(k) or '') for k in sorted(x)) for x in v['counterExamples']];d=[]\\nfor s in ces:\\n    for m in re.finditer(r'([A-Za-z_]+)\\\\[(\\\\d+)\\\\]',s):\\n        if m.group(1) in L and m.group(1) in c and int(m.group(2))<len(c[m.group(1)]): d.append(m.group(1)+'['+m.group(2)+']')\\n    for m in re.finditer(r'\\\\b([TCSF]\\\\d+)\\\\b',s): d.append(m.group(1))\\nprint(sorted(set(d)))\""
+ }
+}

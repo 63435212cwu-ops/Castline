@@ -1,0 +1,633 @@
+{
+  "task": "adopt:P12-W05",
+  "agent": "w-ops",
+  "status": "done",
+  "generatedAt": "2026-10-09T03:12:00Z",
+  "kind": "plan100-open-item-adjudication",
+  "title": "P12-W05（blocked）如实处置：缺口今天仍在，但台账写的原因与归属都错；且上一轮指定的 GPU 承接者并不执行 A/B",
+  "supersedes": {
+    "record": "loop/state/out/adopt_P12-W05.json",
+    "why": "上一版记录被机器判为 evidence stale（loop.py stats 的 staleEvidence 含 adopt:P12-W05）",
+    "rootCause": "它把 loop/state/out/ops_accept-full.artifact.json 作为哈希锚定证据，而该文件在 2026-10-09T02:33:53Z 被其它任务重写（735325fd… → 2e0ed9f1…）。loop/state/ 下的共享可变状态不在 EVOLVING_PREFIXES 里 ⇒ 引用它的记录结构性必然转 stale。",
+    "whatIsNotWrong": "上一版的**结论**未被推翻，本轮独立重测后仍然成立；失效的是证据哈希，不是判断。"
+  },
+  "summary": "七条结论，全部在本会话现场重测（命令与原始输出见 commands[]，37 条）。①**映射**：loop P12-W05 ↔ 规格 P12-005（112/112 键名-标题逐字命中；firstLine=44886 逐字即该标题行）。②**缺口今天仍在**：规格要求的产出形态零存在 —— 20261007/P12-005 与 20261008/P12-005、20261009/P12-005 全 ABSENT（后两个日期目录整个都不存在），仓库+两个外部归档 find 'P12-005*' 零命中；P12-W05 目录只有 3 个文件，无 source-manifest.json、无 baseline/candidate/reports。对照 P06-W05 有 209 个条目 ⇒ 该形态可考。③**台账的原因错**：P12-005 自己的运行基线是 `python3 -B tests/narrative_provenance_regression.js`，离线、不含 ATLAS_BASE/CL_GPU；需要 CL_GPU=1 的是**同阶段的 P12-006**（sky_deep.py）。且按阶段纯度检验，『产物=候选补丁与A/B截图』在 P12 的 15 个实例里 100% 同值，基线也阶段纯 ⇒ 不能据『同名标题』把 P12 的槽位当成 P05/P06 的通用项。④**台账的归属错**：P05-005 产物=契约测试日志、P06-005=GPU trace与帧时摘要 ⇒ P05/P06 的 W05 槽位不交付 A/B 截图；该交付物属 P04-005 与 P12-005。⑤**『同相位』这半边今天不成立**：今天的门禁 tests/material_layer_ab_analysis.py 把全部归档采集判 fail（ab-fixed 1 / ab-gpu 67 / ab-gpu2 67 problems，八门全 false，首条即 'legacy captures are not valid evidence'）；artifacts/ 与 CL_ARTIFACTS 下不存在任何 schema=castline/material-ab/2 的采集；nine-view 12 个变体 12/12 有相机溯源、0/12 有时间相位溯源。⑥**两处修正上一轮**：(a) 规格里 **从未**提到 tests/material_layer_ab.py（grep 零命中）—— 采样器是仓库自带的判据工具，不是 P12-005 规格点名的命令；(b) 说『仓库不记录相位』不准确：P06-W05 的探针**确实**记录数值 tAnim，但那 4 条探针各臂极差 0.14–0.22s，是**跨相位**比较，正是规格禁止据以写成改善的那种。⑦**承接者的真实缺口比『漏一行登记』更严重**：CARRIED 表给 P06/P07-W05 指的 perf:baseline-matrix **不跑 A/B 采样器、也无权写 artifacts/**；全队列 2347 条任务里 writes 触及 artifacts/ 的 **0** 条 ⇒ 缺的不是一个未知的流，而是一条**真正会产出 A/B 采集的任务**。",
+  "whatIchecked": {
+    "method": "只读核对 + 门禁实跑：台账 / 规格 / 队列 / 判据 / 承接者表逐项现场复算。所有命令与原始输出见 commands[]（37 条，可逐条重跑）。**未跑 GPU/浏览器采样**（任务未声明要跑，且按角色契约 GPU 全局串行），故本产物**不含**任何新的渲染实测。",
+    "specSource": "docs/plan-100-score-execution.md 已从工作树移出（AGENTS.md 明令不恢复）。现存副本在外部归档 /Users/carmen/Desktop/星系-audit-archive-20261007/docs/plan-100-score-execution.md，sha256=c0192e21f02650614efe7aed57182917c783277898c03a8f29dd502c72dc6f4b、13580691 bytes，与 artifacts/plan100/plan-ledger.json 的 planSha256/planBytes 逐字节一致 ⇒ 该副本即台账引用的那一份。P12-005 定义在 44886–44916 行。",
+    "notChecked": [
+      "未跑任何 CL_GPU=1 命令、未起浏览器、未出图、未与并行 worker 争 GPU 槽位",
+      "未验证『显式 --out 到规格路径后采样器能否产出合格采集』（需要 GPU）",
+      "未逐条重跑上一版记录的 27 条证据（只重跑了支撑结论的部分）",
+      "未判定 P06-W05 的视觉结论本身对错（属 P06/P13 范围）",
+      "未判定 nine-view 各变体在**像素上**是否同相位（只能证明其 index.json 不记录相位字段）",
+      "未复核 P12 其余槽位与 P12-W04 的处置（超出本任务范围）",
+      "未改规格里那条 python3-on-.js 笔误（docs/ 与外部归档非本任务 writes）",
+      "门禁失败项 [35] 的『被谁改的』无进程血缘证据（只有 mtime 与写入清单）"
+    ]
+  },
+  "commands": [
+    {
+      "label": "A1 台账今日状态（未被改动）",
+      "cmd": "python3 -c \"import json;d=json.load(open('artifacts/plan100/20261007/P12-W05/ledger.json'));print(d['status'],d['reviewer'],d['decision'],d['owner'],d['evidence'],d['assertions'],d['inputHashes'])\"",
+      "exit": 0,
+      "out": "blocked None blocked p12-agent [] [] []"
+    },
+    {
+      "label": "A2 台账/决定/回滚 三文件哈希（动手前后各一次）",
+      "cmd": "shasum -a 256 artifacts/plan100/20261007/P12-W05/{ledger.json,decision.md,rollback.patch}",
+      "exit": 0,
+      "out": "42499824cd2c337d8ed3df5c2bc103bb83967344e527e34ea225fbfee1f737a4  ledger.json\nbc94c77f99c93da5e1ad72f6e183b6358c5239d5706d5b0a1c464916fe735b31  decision.md\nb6f2b3713affd9d0ff3e2ef309f4fbe9ffde8b58ec2775285a65e055dd47ad42  rollback.patch\nmtime 三个都是 2026-10-07T12:18:50Z ⇒ 本轮未触碰"
+    },
+    {
+      "label": "B1 ★ 映射：112 个 W## → 规格 Pdd-0NN 标题逐字比对",
+      "cmd": "python3 - <<'EOF' 读 plan-ledger.json 的 phases[].taskTitles[].key + firstLine，与规格 ### Pdd-0NN 标题逐字比对 EOF",
+      "exit": 0,
+      "out": "W## -> spec Pdd-0NN via exact title match: ok=112 bad=0\nP12-W05 firstLine=44886\nspec line 44886 = ### P12-005 · 制作固定相机、相同时间、相同画布的候选A/B，禁止把不同相位像素差写成改善。"
+    },
+    {
+      "label": "B2 ★ 阶段纯度：同名标题 210 条里按阶段取「产物」与「运行基线」",
+      "cmd": "python3 - <<'EOF' 对规格中标题逐字命中的 210 个 block，按阶段聚合『产物』与『运行基线命令』 EOF",
+      "exit": 0,
+      "out": "phases with this title: 14 | instances: 210\nP04 产物=['候选补丁与A/B截图'] | P05=['契约测试日志'] | P06=['GPU trace与帧时摘要'] | P07=['人工盲审表'] | P12=['候选补丁与A/B截图']\nbaseline: P04='python3 -B tests/narrative_provenance_regression.js' | P12 同值（离线）\n          P05/P13='ATLAS_BASE=… CL_GPU=1 python3 -s tests/sky_deep.py'（GPU）\n⇒ 每阶段 15 条实例，产物与基线**阶段纯**；不能据『同名』把 P12 的槽位当成 P05/P06 的通用项"
+    },
+    {
+      "label": "B3 ★ 规格从未提到 A/B 采样器（修正上一轮的一处措辞）",
+      "cmd": "grep -n 'material_layer_ab' \"$HOME/Desktop/星系-audit-archive-20261007/docs/plan-100-score-execution.md\"",
+      "exit": 1,
+      "out": "零命中（grep -c = 0）⇒ 规格里没有任何一条命令模板调用 tests/material_layer_ab.py。\n该采样器是仓库里**独立存在**的判据工具（tests/ 侧），不是 P12-005 规格点名的执行命令。\nP12-005 规格点名的基线只有 narrative_provenance_regression.js（离线）。"
+    },
+    {
+      "label": "B4 前置 P12-004 今天仍未闭",
+      "cmd": "python3 -c \"import json;d=json.load(open('artifacts/plan100/20261007/P12-W04/ledger.json'));print(d['status'],d['decision'],d['reviewer'])\"",
+      "exit": 0,
+      "out": "blocked blocked None"
+    },
+    {
+      "label": "C1 ★ 规格笔误：把 .js 交给 python3",
+      "cmd": "python3 -B tests/narrative_provenance_regression.js; echo exit=$?",
+      "exit": 1,
+      "out": "File \"…/tests/narrative_provenance_regression.js\", line 3\n    /* Behavioral regression for producer/consumer cause IDs and source trust.\n    ^\nSyntaxError: invalid syntax\nexit=1"
+    },
+    {
+      "label": "C2 同一命令的正确跑法（node）",
+      "cmd": "node tests/narrative_provenance_regression.js; echo exit=$?",
+      "exit": 0,
+      "out": "… 11 narrative provenance regression checks passed\nexit=0\n（末行即 '11 narrative provenance regression checks passed'）"
+    },
+    {
+      "label": "C3 该基线挂在产品门禁里，且本轮实跑 PASS",
+      "cmd": "grep -n narrative_provenance scripts/accept.sh; sh scripts/accept.sh",
+      "exit": 0,
+      "out": "scripts/accept.sh:104:run \"$ATLAS_NODE\" tests/narrative_provenance_regression.js\n门禁输出：\n[23] …/node tests/narrative_provenance_regression.js → PASS · 1s\nACCEPT: 131/132 passed\nFAILED CHECKS: 35  1  python3 -B -s tests/p2_library_version_choice.py --ratchet\nATLAS REFACTOR CONTRACTS PASSED (not a full-novel/real-device/art-direction sign-off)"
+    },
+    {
+      "label": "C4 规格笔误的规模",
+      "cmd": "grep -c 'python3 -B tests/narrative_provenance_regression.js' \"$SPEC\"; grep -oE 'python3 -[A-Za-z]+ tests/[A-Za-z0-9_]+\\.js' \"$SPEC\" | sort | uniq -c",
+      "exit": 0,
+      "out": "420\n    420 python3 -B tests/narrative_provenance_regression.js\n⇒ 这是规格里**唯一**一条 python3-on-.js（门禁侧用 node/$ATLAS_NODE）"
+    },
+    {
+      "label": "C5 规格命令模板第 2 步（version_stamp --check）本轮实跑",
+      "cmd": "python3 -s tests/version_stamp.py --check; echo exit=$?",
+      "exit": 0,
+      "out": "VERSION STAMP OK · 336 · 全部引用 100% 匹配 8 位内容哈希\nexit=0"
+    },
+    {
+      "label": "D1 ★ 缺口今天仍在：规格要求的产出目录不存在",
+      "cmd": "for d in artifacts/plan100/20261007/P12-005 artifacts/plan100/20261008/P12-005 artifacts/plan100/20261009/P12-005; do [ -d \"$d\" ] && echo PRESENT $d || echo ABSENT $d; done; ls -d artifacts/plan100/*/ ; find . \"$HOME/Desktop/星系-audit-archive-20261007\" \"$HOME/Desktop/星系-audit-archive-20261008\" -maxdepth 7 -name 'P12-005*' 2>/dev/null",
+      "exit": 0,
+      "out": "ABSENT artifacts/plan100/20261007/P12-005\nABSENT artifacts/plan100/20261008/P12-005\nABSENT artifacts/plan100/20261009/P12-005\n⇒ 只有 artifacts/plan100/20261007/ 这一个日期目录存在；20261008 与 20261009 整个目录都不存在\nfind 'P12-005*' → 零命中（仓库 + 两个外部归档）"
+    },
+    {
+      "label": "D2 P12-W05 目录里没有 source-manifest.json",
+      "cmd": "find artifacts/plan100/20261007/P12-W05 -mindepth 1 | sort",
+      "exit": 0,
+      "out": "artifacts/plan100/20261007/P12-W05/decision.md\nartifacts/plan100/20261007/P12-W05/ledger.json\nartifacts/plan100/20261007/P12-W05/rollback.patch\n⇒ 规格执行步骤第 1 步要求的 source-manifest.json 不存在；也无 baseline/ candidate/ reports/ 任一子目录"
+    },
+    {
+      "label": "D3 对照：同批次 P06-W05 确实交付了 candidate 形态",
+      "cmd": "for d in P04-W05 P06-W05 P07-W05 P12-W05; do printf '%-10s ' $d; [ -d artifacts/plan100/20261007/$d ] && echo \"PRESENT $(find artifacts/plan100/20261007/$d -mindepth 1 | wc -l) entries\" || echo ABSENT; done",
+      "exit": 0,
+      "out": "P04-W05    ABSENT\nP06-W05    PRESENT: 209 entries\nP07-W05    PRESENT: 4 entries\nP12-W05    PRESENT: 3 entries\n⇒ P12-005 形态的产出目录在本仓库是**可考的**（P06-W05 交付了 reports/ 与两份 PNG），不是无法达成的形状"
+    },
+    {
+      "label": "E1 ★ 今天的 A/B 判据把仓库里全部归档采集判 fail（本轮重跑）",
+      "cmd": "for d in ab-fixed ab-gpu ab-gpu2; do python3 -B -s tests/material_layer_ab_analysis.py --dir artifacts/plan100/material/$d --out /tmp/p12w05r/$d.json; echo \"$d exit=$?\"; done",
+      "exit": 1,
+      "out": "ab-fixed exit=1 gate=fail problems=1（首条：required capture evidence missing or invalid: … ab-fixed/report.json 不存在）\nab-gpu   exit=1 gate=fail problems=67\nab-gpu2  exit=1 gate=fail problems=67\n八门全 false：G0_completeHealthyCapture / G1_sameFrame / G1b_realPixelSignal / G2_brightnessWithin2Pct / G3_structureRetained / G4_additiveNeverBrightens / G5_finalRollback / G6_localAndGlobalBaseline\n首条 problem = 'missing rendered-triplet capture schema (legacy captures are not valid evidence)'"
+    },
+    {
+      "label": "E2 归档采集自身 ok=false、无 schema",
+      "cmd": "python3 -c \"import json,glob;[print(p, json.load(open(p)).get('ok'), json.load(open(p)).get('schema'), json.load(open(p)).get('rollbackIdenticalPng')) for p in sorted(glob.glob('artifacts/plan100/material/*/report.json'))]\"",
+      "exit": 0,
+      "out": "artifacts/plan100/material/ab-gpu/report.json  ok=False schema=None rollbackIdenticalPng=False\nartifacts/plan100/material/ab-gpu2/report.json ok=False schema=None rollbackIdenticalPng=False"
+    },
+    {
+      "label": "E3 仓库内不存在任何 schema=castline/material-ab/2 的采集",
+      "cmd": "grep -rl 'castline/material-ab/2' artifacts/ /tmp/castline-artifacts/",
+      "exit": 1,
+      "out": "零命中 ⇒ artifacts/ 与 CL_ARTIFACTS 下**0** 个采集带该 schema（该字符串只出现在 tests/material_layer_ab*.py 的实现里）"
+    },
+    {
+      "label": "E4 采样器今天仍强制串行 GPU 槽位",
+      "cmd": "grep -n 'CL_GPU' tests/material_layer_ab.py",
+      "exit": 0,
+      "out": "29:  CL_GPU=1 python3 -s tests/material_layer_ab.py …\n321:    if os.environ.get('CL_GPU') != '1':\n322:        print('BLOCKED: CL_GPU=1 required (serial GPU slot; plan forbids concurrent GPU use)', …)"
+    },
+    {
+      "label": "E5 ★ 采样器的默认输出路径**不是**规格要求的 P12-005 目录（新发现）",
+      "cmd": "python3 -c \"import importlib.util;s=importlib.util.spec_from_file_location('ev','tools/plan100/evidence.py');m=importlib.util.module_from_spec(s);s.loader.exec_module(m);print(m.artifact_path('plan100/material/layer-ab'))\"",
+      "exit": 0,
+      "out": "/private/var/folders/…/T/castline-artifacts/plan100/material/layer-ab\n（tools/plan100/evidence.py:39 artifact_path：CL_ARTIFACTS 未设时落到系统临时目录）\n规格命令模板要求的是 artifacts/plan100/$(date +%Y%m%d)/P12-005/{baseline,candidate,reports}\n⇒ 即使跑通采样器，默认落点也不在规格要求的目录；要落到规格路径必须显式 --out。该目录今天不存在。"
+    },
+    {
+      "label": "E6 采样器 CPU-only 自检（不碰浏览器/GPU）",
+      "cmd": "python3 -B -s tests/material_layer_ab.py --self-test; echo exit=$?",
+      "exit": 0,
+      "out": "MATERIAL SAMPLER SELFTEST OK · actual baseline→render→off→render→rollback→render; 11 counterexamples blocked\nexit=0"
+    },
+    {
+      "label": "F1 ★ nine-view 变体：12/12 有相机溯源、0/12 有时间相位溯源（本轮重算）",
+      "cmd": "python3 - <<'EOF' 遍历 artifacts/plan100/visual/nine-view 的 12 个变体 index.json，分别检相机字段与时间相位字段 EOF",
+      "exit": 0,
+      "out": "baseline-dna-off … fix-on 共 12 个变体，每个 cameraFields=True / timeFields=False\nvariants: 12 | with camera provenance: 12 | with time-phase provenance: 0"
+    },
+    {
+      "label": "F2 fix-on 单条明细：key 并集里没有任何相位字段",
+      "cmd": "python3 - <<'EOF' 解析 fix-on/index.json（JSONL，3 行=三书）并打印 shots/pose 的 key 并集与 tAnim 等字样检测 EOF",
+      "exit": 0,
+      "out": "shots 键并集 = ['draw','native4k','path','pitch','pose','rebased','scale','view','yaw']；pose 键并集 = ['cam','r']\ntAnim/clockFrozen/frozenAnim/tAcc/uTime/sameAnimationPhase 在文件中出现: False（全 False）\n⇒「同相机」可证、「同时间」不可证（只能证明**字段未记录**，不能证明像素实际不同相位）"
+    },
+    {
+      "label": "F3 唯一自称同相位的文件：phase 只在 label 里，且无产出者",
+      "cmd": "grep -n phase artifacts/plan100/visual-metrics/p06-dna-ab-same-phase.json; grep -rn 'p06-dna-ab-same-phase' tools/ tests/ scripts/ js/",
+      "exit": 1,
+      "out": "2:  \"label\": \"p06-dna-ab-same-phase\",\ntop-level keys = ['label','book','note','comparisons'] ⇒ 无任何数值相位字段\n第二条 grep 零命中 ⇒ 该文件今天在 tools/ tests/ scripts/ js/ 里没有产出者，其所称「同书同相位 A/B」不可复现"
+    },
+    {
+      "label": "F4 ★ 反向验证：P06-W05 的探针**确实**记录了数值 tAnim，但四条全是跨相位（修正「仓库完全不记录相位」的说法）",
+      "cmd": "python3 - <<'EOF' 逐个读 artifacts/plan100/20261007/P06-W05/reports/probe*/result.json，取各臂 tAnim 的 min/max/极差 EOF",
+      "exit": 0,
+      "out": "probe10  arms=7 tAnim 8.2647..8.4825 spread=0.2178 samePhase=False\nprobe11  arms=7 tAnim 8.2983..8.5115 spread=0.2132 samePhase=False\nprobe7   arms=3 tAnim 8.3826..8.5939 spread=0.2113 samePhase=False\nprobe8   arms=7 tAnim 8.3240..8.4593 spread=0.1353 samePhase=False\n⇒ 记录相位的路径**存在**（tAnim 是数值字段），但这 4 条探针里各臂相位互不相等（极差 0.14–0.22s），\n   即它们是**跨相位**比较，正是规格明令禁止据以写成改善的那种差异。\n   P06-W05 decision.md:96 把 nine-view 的 fix-off/fix-on 称作「同相位 A/B」，而 fix-on/index.json 不记录任何相位字段（F2）⇒ 该「同相位」自称不可核。"
+    },
+    {
+      "label": "G1 ★ loop 内没有任何任务能产出该交付物",
+      "cmd": "python3 - <<'EOF' 遍历 loop/queue/*.jsonl 的全部 writes，统计顶层前缀并筛出触及 js/ css/ artifacts/ tests/ tools/ scripts/ data/ index.html docs/ 的 EOF",
+      "exit": 0,
+      "out": "total tasks: 2347\nwrites 触及受保护/交付路径（js/ css/ artifacts/ tests/ tools/ scripts/ data/ index.html docs/）的任务：7 条，全部来自新增的 reform-20261009.jsonl（merge:reform-quality:20261009，写 docs/QUALITY.md 与 6 个 tests/*）\n★ 触及 artifacts/ 的任务：**0** 条 ⇒ loop 里没有任务能产出 P12-005 形态的 A/B 采集\n★ 提到 material_layer_ab / ab-same-phase / sameAnimationPhase / P12-005 的任务：**0** 条"
+    },
+    {
+      "label": "G2 loop 接入表已把 P12-W05 记为无承接者",
+      "cmd": "python3 -c \"import json;d=json.load(open('loop/state/PLAN100-ADOPTION.json'));nc={(x['phase'],x['key']) for x in d['noCarrier']};print(d['specSlots'],d['slotsWithCarrier'],d['slotsWithoutCarrier'],('P12','P12-W05') in nc,d['openLedgers'])\"",
+      "exit": 0,
+      "out": "112 68 44 True\nopenLedgers = ['P06-W05','P06-W06','P09-W05','P09-W06','P12-W04','P12-W05']"
+    },
+    {
+      "label": "G3 ★ 承接者映射的精确缺口：CARRIED 表漏登记 (P12,W04)/(P12,W05)",
+      "cmd": "python3 - <<'EOF' 解析 loop/bin/adopt_plan100.py 的 CARRIED 字面量，打印 P12 全部条目与 P06/P07-W05 的对照 EOF",
+      "exit": 0,
+      "out": "CARRIED entries: 68\nall P12 CARRIED: [W01,W02,W03,W06,W07,W08]（值均为 ops:quality-sync）\n(P12,W04) present = False；(P12,W05) present = False\nmissing from CARRIED P12: ['W04','W05']\n对照：(\"P06\",\"W05\") -> \"perf:baseline-matrix（A/B 需 GPU，串行）\"；(\"P07\",\"W05\") -> \"perf:baseline-matrix（材质 A/B 需 GPU）\""
+    },
+    {
+      "label": "G4 ★ 但被点名的承接者**并不执行** A/B 采样（关键修正）",
+      "cmd": "python3 - <<'EOF' 打印 perf:baseline-matrix / xgraph:transfer-audit / a11y:real-device 的 prompt，并检测其中的 A/B 关键词 EOF",
+      "exit": 0,
+      "out": "perf:baseline-matrix prompt 检测：material_layer_ab=False / A/B=False / ab-=False / sameAnimationPhase=False / 相位=False\n它的实际内容是 docs/QUALITY.md Q6 的帧时矩阵（首帧/可交互/稳态/转场/质量切换/返回/30 分钟），\nwrites 只有 loop/state/out/perf_baseline-matrix.artifact.json，**不写 artifacts/ 下任何路径**。\n⇒ CARRIED 表把 P06-W05/P07-W05『A/B 需 GPU』指给 perf:baseline-matrix，但该任务既不跑 A/B 采样器、\n   也无权写 A/B 交付目录 ⇒ 这是**指错了承接者**，不是『只差一行登记』。"
+    },
+    {
+      "label": "G5 loop 内 gpu=true 的任务全貌",
+      "cmd": "python3 - <<'EOF' 遍历 loop/queue/*.jsonl 打印 gpu 为真的任务 EOF",
+      "exit": 0,
+      "out": "reform-20261009.jsonl  merge:reform-quality:20261009  gpu=True  writes=[docs/QUALITY.md + 6 个 tests/*]\nenv.jsonl   xgraph:transfer-audit   gpu=True  writes=['loop/state/out/xgraph_transfer-audit.artifact.json']\nenv.jsonl   perf:baseline-matrix    gpu=True  writes=['loop/state/out/perf_baseline-matrix.artifact.json']\nenv.jsonl   a11y:real-device        gpu=True  writes=['loop/state/out/a11y_real-device.artifact.json']\n⇒ 4 条 GPU 任务，无一产出 P12-005 形态的 A/B 采集"
+    },
+    {
+      "label": "H1 GPU 实测占用（BSD pgrep 无 -c，故用 wc -l）",
+      "cmd": "pgrep -fl 'Google Chrome.app/Contents/MacOS/Google Chrome --headless' | wc -l; pgrep -fl 'loop/bin/worker.py' | wc -l",
+      "exit": 0,
+      "out": "3\n12\n（3 个 headless Chrome + 12 个常驻 worker；**本会话未起浏览器、未杀任何进程、未借 GPU**）"
+    },
+    {
+      "label": "H2 本任务 lease 自述 gpu=false",
+      "cmd": "python3 -c \"import json;d=json.load(open('loop/state/leases/adopt:P12-W05.d/lease.json'));print(d['gpu'], d['writes'], d['agent'])\"",
+      "exit": 0,
+      "out": "False ['loop/state/out/adopt_P12-W05.artifact.json'] w-ops"
+    },
+    {
+      "label": "I1 ★ 本轮被重做的原因：上一版记录的证据被并行写入者改坏（不是内容错）",
+      "cmd": "python3 -B -s loop/bin/loop.py stats | python3 -c \"import json,sys;d=json.load(sys.stdin);print(d['staleEvidenceCount'], d['staleEvidence'])\"",
+      "exit": 0,
+      "out": "8 ['adopt:P12-W05','env:index-doctor','env:index-owner','expert:review-3','publish:dafeng:B000','read:xiyou:L0:0022','verify:dafeng:L2:0022','verify:dafeng:L2:0058']\n（上一轮 stats 是 4 条；本会话期间涨到 8 条 ⇒ 这是**活的结构性漂移**，不是本任务内容失真）"
+    },
+    {
+      "label": "I2 漂移的具体归因：被引用的**别人家的**产物在事后被重写",
+      "cmd": "python3 -B -s - <<'EOF' 枚举全部 canonical 记录，逐条跑 loop.evidence_stale，再按被指路径聚合 EOF",
+      "exit": 0,
+      "out": "stale (task, why, path) pairs: 11\ntasks affected: 8\n按被指路径聚合：\n  4  loop/state/index.json                                  [evolving=False]\n  2  loop/state/candidates/BATCH-publish-dafeng-B000.candidate.json  [evolving=False]\n  2  loop/state/PUBLISH-LEDGER.json                          [evolving=False]\n  1  loop/state/out/ops_accept-full.artifact.json            [evolving=False]  ← 本任务上一版就是这条\n  1  loop/state/PUBLISHED-WITH-KNOWN-DEFECTS.json            [evolving=False]\n  1  loop/state/out/read_xiyou_L0_0022.candidate.json        [evolving=False]\n★ 全部 11 条都指向 loop/ 下的**共享可变状态**，而 EVOLVING_PREFIXES 只覆盖 loop/bin/、ROLES/、queue/、policy.json\n  ⇒ loop/state/ 下的共享状态被设计为会被其它任务重写，却不在『允许演进』名单里 ⇒ 凡引用它们的记录**结构性必然**转 stale"
+    },
+    {
+      "label": "I3 上一版记录与今天哈希的对照（证明是漂移不是伪造）",
+      "cmd": "python3 -c \"import json;r=json.load(open('loop/state/out/adopt_P12-W05.json'));print([e['sha256'] for e in r['evidence'] if 'ops_accept-full' in e['path']])\"; shasum -a 256 loop/state/out/ops_accept-full.artifact.json",
+      "exit": 0,
+      "out": "上一版声明: 735325fd8eea0f28274ee4746f2723211c2ef36cf7c602a29b3066bafe4784c0\n今天实际值:   2e0ed9f1fceff9101d1cb73557ac0bf7dd7a3fd09338408275013bb65e65cfd3\n该文件 mtime 2026-10-09T02:33:53Z（晚于上一版提交时刻 2026-10-08T09:55:03Z）⇒ 是它被重写，不是本任务写错"
+    },
+    {
+      "label": "J1 ★ 产品门禁本轮实跑：131/132（唯一失败项与 P12-005 无关）",
+      "cmd": "sh scripts/accept.sh; echo exit=$?",
+      "exit": 1,
+      "out": "[23] …/node tests/narrative_provenance_regression.js → PASS · 1s\nACCEPT: 131/132 passed\nFAILED CHECKS:\n35  1  python3 -B -s tests/p2_library_version_choice.py --ratchet\n⇒ 唯一失败项是 P2.8「书签/续读按稳定 ID 迁移」棘轮，属 P2 计划项，与 P12-005 的 A/B 交付物无关"
+    },
+    {
+      "label": "J2 失败项归因：棘轮基线在本轮门禁之后被改写（不是本任务造成）",
+      "cmd": "stat -f '%N %Sm' -t '%Y-%m-%dT%H:%M:%SZ' /tmp/p12w05r/accept.log tests/p2_library_version_baseline.json data/cache/index.json",
+      "exit": 0,
+      "out": "accept.log                        2026-10-09T03:02:13Z   ← 门禁跑完\n数据输入 data/cache/index.json     2026-10-09T03:03:20Z   ← 之后被改\n棘轮基线 tests/p2_library_version_baseline.json  2026-10-09T03:03:41Z  ← 之后被重写\n门禁当时读到 baseline.maxTieGroup=61、实测 62 ⇒ 判「恶化」；现在基线已写成 1、实测 1 ⇒ 重跑 exit=0\n二者都是 untracked/modified 的并行写入者文件（git status: ?? 与 M），**不是本任务写入**"
+    },
+    {
+      "label": "K1 受保护路径写入检查（本任务足迹）",
+      "cmd": "git status --porcelain | wc -l; shasum -a 256 artifacts/plan100/20261007/P12-W05/ledger.json",
+      "exit": 0,
+      "out": "376（全树既有未提交改动，本环境长期状态）\n42499824cd2c337d8ed3df5c2bc103bb83967344e527e34ea225fbfee1f737a4  ledger.json（与动手前一致）\n本任务唯一写入 = loop/state/out/adopt_P12-W05.artifact.json；未跑 git checkout/reset/stash"
+    }
+  ],
+  "keyFindings": {
+    "K1_gapStillExistsToday": {
+      "verdict": "仍然存在",
+      "deliverable": "artifacts/plan100/<date>/P12-005/{baseline,candidate,reports} + source-manifest.json + 同相位 A/B 截图",
+      "evidence": "20261007/P12-005 ABSENT；20261008/P12-005 ABSENT；20261009/P12-005 ABSENT；artifacts/plan100 下只有 20261007 一个日期目录；find 'P12-005*' 零命中（仓库+2 个外部归档）；P12-W05 目录仅 decision.md/ledger.json/rollback.patch",
+      "contrast": "P06-W05 交付了 209 个条目（含 reports/ 与两份 PNG）⇒ 该形态可考"
+    },
+    "K2_recordedReasonIsMisattributed": {
+      "claim": "knownGaps[0]『固定相位 A/B 需要浏览器与 GPU 串行槽位』描述的不是 P12-005 的基线",
+      "P12_005_baseline": "python3 -B tests/narrative_provenance_regression.js（离线；node 跑 11/11 exit 0；门禁 [23] PASS）",
+      "gpu_neighbour": "同阶段 P12-006 = ATLAS_BASE=… CL_GPU=1 python3 -s tests/sky_deep.py",
+      "phasePurity": "同名标题 210 条（14 阶段 × 15 实例），但『产物』与『运行基线』都阶段纯（P12 15/15 同值）"
+    },
+    "K3_recordedOwnerIsWrong": {
+      "claim": "knownGaps[1]『A/B 归 P05/P06』在交付物层面不成立",
+      "perSpec": "P04-005=候选补丁与A/B截图；P12-005=候选补丁与A/B截图；P05-005=契约测试日志；P06-005=GPU trace与帧时摘要；P07-005=人工盲审表",
+      "so": "P05/P06 的 W05 槽位根本不交付 A/B 截图"
+    },
+    "K4_samePhaseHalfIsNotSatisfiableToday": {
+      "gateVerdict": "tests/material_layer_ab_analysis.py 判 ab-fixed 1 / ab-gpu 67 / ab-gpu2 67 条 problems，gate=fail，八门全 false",
+      "noValidCapture": "仓库与 CL_ARTIFACTS 下 0 个 schema=castline/material-ab/2 的采集",
+      "noPhaseProvenance": "nine-view 12/12 有相机溯源、0/12 有时间相位溯源",
+      "selfLabelledUnreproducible": "p06-dna-ab-same-phase.json 的 phase 只在 label 里、无数值字段、零产出者",
+      "samplerNeedsGpu": "tests/material_layer_ab.py:321 仍强制 CL_GPU=1",
+      "samplerOutputMismatch": "采样器默认落点是 CL_ARTIFACTS/plan100/material/layer-ab（tmp），不是规格要求的 artifacts/plan100/<date>/P12-005/ ⇒ 即使跑通也要显式 --out 才落到规格路径"
+    },
+    "K5_correctionsToPriorRound": {
+      "specNeverNamesTheSampler": "grep -c material_layer_ab 规格 = 0 ⇒ 上一版把该采样器说成 A/B 证据的『真正产源』时，未声明它并不在 P12-005 规格里",
+      "repoDoesRecordPhase": "P06-W05/reports/probe{7,8,10,11}/result.json 有数值 tAnim；但 4/4 全是跨相位（极差 0.14–0.22s）",
+      "so": "『相位字段未记录』只对 nine-view 成立；对整个仓库不成立。上一版该处措辞过宽。"
+    },
+    "K6_theCarrierHoleIsWorseThanAMissingLine": {
+      "carriedTable": "loop/bin/adopt_plan100.py 的 68 条 CARRIED 里 P12 只有 W01/W02/W03/W06/W07/W08（值均为 ops:quality-sync）；缺 (P12,W04)/(P12,W05)",
+      "namedCarrierDoesNotDoAB": "perf:baseline-matrix 的 prompt 不含 material_layer_ab/A/B/相位任何字样；它做的是 QUALITY Q6 帧时矩阵，writes 只有 loop/state/out/perf_baseline-matrix.artifact.json",
+      "noTaskCanDeliver": "全队列 2347 条任务里 writes 触及 artifacts/ 的 = 0 条；提到 material_layer_ab / P12-005 的 = 0 条",
+      "conclusion": "补一行映射并不能闭合该缺口 —— 需要一条**有权写 artifacts/ 且真的跑 A/B 采样器**的任务"
+    }
+  },
+  "disposition": {
+    "ledgerStatusChanged": false,
+    "ledgerStatus": "blocked（保持原状：任务明令禁止为让门禁变绿而改台账状态）",
+    "reviewer": "仍为 None（未签收、未自签；owner=p12-agent ≠ 本 agent w-ops）",
+    "gapExistsToday": true,
+    "ownerStream": {
+      "primary": "plan100 P12（部署、监控、版本、回滚与商业交付）—— 该槽位属 P12 自己，不是 P05/P06（K3）",
+      "theGpuHalf": {
+        "whatItNeeds": "一条会跑 tests/material_layer_ab.py（CL_GPU=1，schema castline/material-ab/2）并把成对采集写到 artifacts/plan100/<date>/P12-005/candidate/ 的任务，再用 tests/material_layer_ab_analysis.py 自检 gate=pass 且 G1_sameFrame=true",
+        "carrierToday": "loop 内 gpu=true 的任务共 4 条（reform merge、xgraph:transfer-audit、perf:baseline-matrix、a11y:real-device），**没有一条**能做这件事（K6）",
+        "carriedTableClaim": "adopt_plan100.py 已把 P06-W05/P07-W05 指给 perf:baseline-matrix，但该指认不成立（K6）⇒ 沿用它会复制同一个错误",
+        "blockedBy": "A/B 半边需要 GPU 串行槽位（实测仍有 3 个 headless Chrome + 12 个 worker）；且『同相位』需要一条**记录并固定相位**的采集路径 —— 现有 nine-view 不记录相位，P06 的探针记录了但都是跨相位"
+      },
+      "theOfflineHalf": {
+        "carrierInLoop": "ops:accept-full（本轮实跑覆盖：门禁 [23] 即该离线基线 PASS）",
+        "stillMissing": "P12-005 目录形态（baseline/candidate/reports）与 source-manifest.json —— 这两样**离线即可产出**，不需要 GPU"
+      }
+    },
+    "whyNotMerged": "①无独立复核者（reviewer 仍 None），规格『缺任一签收字段不得标记 merged』；②交付物本身今天不存在（K1）；③本产物是**判定**，不是签收 —— 签收需要真的产出 A/B 与 source-manifest。"
+  },
+  "assertions": [
+    {
+      "text": "**映射先钉死**：loop P12-W05 → 规格 P12-005。112 个 taskTitles 键名换算 Pdd-0NN 后与规格 `### Pdd-0NN · 标题` 逐字比对 ok=112/bad=0；firstLine=44886 那一行逐字即该标题（commands[B1]）。",
+      "result": "pass"
+    },
+    {
+      "text": "**缺口今天仍然存在**：20261007/P12-005、20261008/P12-005、20261009/P12-005 全 ABSENT（artifacts/plan100 下只存在 20261007 一个日期目录）；仓库+2 外部归档 find 'P12-005*' 零命中；P12-W05 目录只有 3 个文件、无 source-manifest.json（commands[D1][D2]）。对照 P06-W05 有 209 条目 ⇒ 形态可考（commands[D3]）。",
+      "result": "pass"
+    },
+    {
+      "text": "**台账的原因错**：P12-005 规格基线是离线的 narrative_provenance_regression.js（node 11/11 exit 0）；CL_GPU=1 的基线属同阶段 P12-006。阶段纯度检验显示该标题的 210 条实例里『产物』与『基线』都按阶段替换（P12 15/15 同值）（commands[B2][C2][C3]）。",
+      "result": "pass"
+    },
+    {
+      "text": "**台账的归属错**：按规格『产物』字段，P05-005=契约测试日志、P06-005=GPU trace与帧时摘要、P07-005=人工盲审表，而 P04-005 与 P12-005=候选补丁与A/B截图 ⇒ P05/P06 的 W05 槽位不交付 A/B 截图（commands[B2]）。",
+      "result": "pass"
+    },
+    {
+      "text": "**A/B 半边今天不成立**：今天的判据对 ab-fixed/ab-gpu/ab-gpu2 判 1/67/67 条 problems、gate=fail、八门全 false（含 G1_sameFrame）；两份 report.json ok=false 且无 schema；仓库与 CL_ARTIFACTS 下 0 个 schema=castline/material-ab/2 采集（commands[E1][E2][E3]）。",
+      "result": "pass"
+    },
+    {
+      "text": "**『同相位』今天不可证**：nine-view 12 个变体 12/12 有相机溯源、0/12 有时间相位溯源；唯一自称同相位的 p06-dna-ab-same-phase.json 无数值相位字段且零产出者（commands[F1][F2][F3]）。**限度**：我只能证明『相位字段未记录』，不能证明其像素实际不同相位。",
+      "result": "pass"
+    },
+    {
+      "text": "**反向验证（修正上一轮的过宽措辞）**：P06-W05 的 probe7/8/10/11 **确实**记录数值 tAnim，但四条探针各臂极差 0.1353–0.2178s ⇒ 全是**跨相位**比较；且规格里 `material_layer_ab` 零命中 ⇒ 该采样器不在 P12-005 规格内（commands[F4][B3]）。",
+      "result": "pass"
+    },
+    {
+      "text": "**承接缺口比『漏一行』更严重**：CARRIED 表漏 (P12,W04)/(P12,W05)；而被指给 P06/P07-W05 的 perf:baseline-matrix 不跑 A/B 采样器、也无权写 artifacts/；全队列 2347 条任务 writes 触及 artifacts/ 的 = 0 条（commands[G1][G3][G4][G5]）。",
+      "result": "pass"
+    },
+    {
+      "text": "**规格笔误**：规格把 .js 交给 python3（实跑 SyntaxError exit 1），正确解释器是 node（11/11 exit 0）；全规格 420 行载有这条命令，且是规格里唯一一条 python3-on-.js；门禁 scripts/accept.sh:104 用的正是 \"$ATLAS_NODE\"（commands[C1][C2][C4]）。",
+      "result": "pass"
+    },
+    {
+      "text": "**未改台账、未自签**：P12-W05/ledger.json sha256 动手前后均为 42499824…，status 仍 blocked、reviewer 仍 None、decision 仍 blocked，mtime 保持 2026-10-07T12:18:50Z；owner=p12-agent 非本 agent（commands[A1][A2][K1]）。",
+      "result": "pass"
+    },
+    {
+      "text": "**未跑 GPU/浏览器、未动受保护路径、未执行 git checkout/reset/stash**：lease 自述 gpu=false；本会话对 js/ css/ index.html serve.py narrative.py scripts/ tests/ tools/ docs/ data/ 的写入为 0（全部只读取证，临时产物写仓库外 /tmp/p12w05r/）；实测仍有 3 个 headless Chrome + 12 个 worker，未杀、未接管、未借其 GPU（commands[H1][H2][K1]）。",
+      "result": "pass"
+    },
+    {
+      "text": "**本轮被重做的原因已查清（不是内容错）**：上一版记录把 loop/state/out/ops_accept-full.artifact.json 作哈希锚定，该文件于 2026-10-09T02:33:53Z 被其它任务重写（735325fd… → 2e0ed9f1…）；全库 8 条 stale 记录的 11 条被指路径**全部**是 loop/ 下共享可变状态，而 EVOLVING_PREFIXES 不含 loop/state/ ⇒ 结构性必然（commands[I1][I2][I3]）。",
+      "result": "pass"
+    },
+    {
+      "text": "**产品门禁本轮实跑**：sh scripts/accept.sh → ACCEPT: 131/132 passed；门禁 [23]（P12-005 的离线基线）PASS；唯一失败项 [35] p2_library_version_choice --ratchet 属 P2.8，其基线文件在门禁跑完后 88s 被并行写入者重写（mtime 03:03:41Z > 门禁 03:02:13Z），重跑 exit=0（commands[J1][J2]）。",
+      "result": "pass"
+    }
+  ],
+  "evidence": [
+    {
+      "path": "artifacts/plan100/20261007/P12-W05/ledger.json",
+      "sha256": "42499824cd2c337d8ed3df5c2bc103bb83967344e527e34ea225fbfee1f737a4",
+      "kind": "被处置的未结项台账（只读，未改）。status=blocked / reviewer=null / decision=blocked / evidence[] 与 assertions[] 仍为空"
+    },
+    {
+      "path": "artifacts/plan100/20261007/P12-W05/decision.md",
+      "sha256": "bc94c77f99c93da5e1ad72f6e183b6358c5239d5706d5b0a1c464916fe735b31",
+      "kind": "原阻塞决策全文（只读）。其『下一步』第 2 条要求产出 candidate/ab-same-phase.json + 两张 PNG"
+    },
+    {
+      "path": "artifacts/plan100/20261007/P12-W05/rollback.patch",
+      "sha256": "b6f2b3713affd9d0ff3e2ef309f4fbe9ffde8b58ec2775285a65e055dd47ad42",
+      "kind": "原回滚说明（只读，158 bytes）"
+    },
+    {
+      "path": "artifacts/plan100/plan-ledger.json",
+      "sha256": "e74bb8804e7717c5c89a8b4cee2626c8054a7580e8d8b8ebfc0b8dde803a2f3c",
+      "kind": "★ 映射依据：112 个 taskTitles（键名+firstLine+标题）；P12-W05 firstLine=44886"
+    },
+    {
+      "path": "loop/bin/adopt_plan100.py",
+      "sha256": "589e09005e24f2d6e5f817e8e053272a946a4c98c70dfb1c8d5bd2902232e860",
+      "kind": "★ 承接者映射的漏洞所在（只读）:68 条 CARRIED，P12 缺 (W04,W05)；且给 P06/P07-W05 指的 perf:baseline-matrix 并不跑 A/B（见 G4）。EVOLVING 路径"
+    },
+    {
+      "path": "tests/material_layer_ab.py",
+      "sha256": "3bfc2775307180008ff14fb143c15ec37ddef120a6b52f256d342ef81c22a9d6",
+      "kind": "★ A/B 采样器：:321 强制 CL_GPU=1；:167 产 sameAnimationPhase；--self-test CPU 自检 11 例通过（E6）。EVOLVING 路径"
+    },
+    {
+      "path": "tests/material_layer_ab_analysis.py",
+      "sha256": "ee30da21873c937d252b803068fa323169eb38e0dec9daf9fca2f4b60ab88c1c",
+      "kind": "★ 今天的 A/B 判据：:18 注释即 G1 禁止把不同相位像素差写成改善；对全部归档采集判 fail。EVOLVING 路径"
+    },
+    {
+      "path": "tests/narrative_provenance_regression.js",
+      "sha256": "96654c944b8750e7ba2babed6d2228e41963b0bb4c0eacc0d0070fc50e76d502",
+      "kind": "★ P12-005 规格基线本体（只读）：node 11/11 exit 0；规格误写 python3 则 SyntaxError exit 1"
+    },
+    {
+      "path": "artifacts/plan100/material/ab-gpu2/report.json",
+      "sha256": "3c42207f2d5a6e0fda345bb3333723461b900c03f8023d53fd9448a8772ebf29",
+      "kind": "归档 A/B 采集：ok=false、schema 缺失；被今天门禁判 67 problems / 八门全 false"
+    },
+    {
+      "path": "artifacts/plan100/material/ab-gpu/report.json",
+      "sha256": "e4d88e36bd03cfdebc390265e1a61cbdfa9fa71221b8f387107747a908f07108",
+      "kind": "同上第二份归档采集：ok=false、schema 缺失（67 problems）"
+    },
+    {
+      "path": "artifacts/plan100/visual-metrics/p06-dna-ab-same-phase.json",
+      "sha256": "e7e165bbef03ee1d0e3c373670f057b78f96d1af3d60544f18698344a21c9706",
+      "kind": "★ 唯一自称「同书同相位」：top-level keys 只有 label/book/note/comparisons，无数值相位字段，且零产出者"
+    },
+    {
+      "path": "artifacts/plan100/visual/nine-view/fix-on/index.json",
+      "sha256": "2835167bf96e4058297258ebfd7251144e6484dbdba5d6f85e4cbbb76f9add8a",
+      "kind": "九视图变体：key 并集无任何相位字段（F2）⇒「同相机」可证、「同时间」不可证"
+    },
+    {
+      "path": "artifacts/plan100/visual/nine-view/default-now/index.json",
+      "sha256": "ff421530f42d10b5b2ee13c269eee376afb74b1451d5c64e1837878ae0333644",
+      "kind": "九视图代表样本（同上形态，12/12 一致）"
+    },
+    {
+      "path": "artifacts/plan100/20261007/P06-W05/ledger.json",
+      "sha256": "e54ccab71d568e5962848be167deb5b1ca677d671d1dc1cf52457482b4f8d763",
+      "kind": "对照：台账所指『A/B 归 P06』的实况：status=rejected / reviewer=p13-wave3-verifier"
+    },
+    {
+      "path": "artifacts/plan100/20261007/P06-W05/reports/probe7/result.json",
+      "sha256": "e7718ec5b5943e46fb26ee3129838a26e5f3e1a34d3655c72b7ff0bf3b801e2c",
+      "kind": "★ 反向验证：P06 探针**记录了数值 tAnim**，但 3 臂极差 0.2113s ⇒ 跨相位（F4）"
+    },
+    {
+      "path": "artifacts/plan100/20261007/P06-W05/reports/probe8/result.json",
+      "sha256": "c78016aa3eb9dd7eeea5579d7aab300c3bfd025d416bc83f60282172dc54f2ef",
+      "kind": "★ 同上第二条：7 臂 tAnim 极差 0.1353s ⇒ 跨相位"
+    },
+    {
+      "path": "artifacts/plan100/20261007/P07-W05/ledger.json",
+      "sha256": "539c84fca8f7664a747f1fd5c7cce12c1d1f928b495023a0482c9d48c8557549",
+      "kind": "对照：台账所指『A/B 归 P07』的实况：status=cpu-verified / reviewer=None"
+    },
+    {
+      "path": "artifacts/plan100/20261007/P12-W04/ledger.json",
+      "sha256": "0da73acaee6f98c57c39350315d953f11fb4019c42580c56e0a4f6ac75c54dcd",
+      "kind": "P12-005 的规格前置 P12-004 实况：status=blocked / reviewer=None ⇒ 前置自身也未闭"
+    },
+    {
+      "path": "loop/state/PLAN100-ADOPTION.json",
+      "sha256": "2e350fa27c1494649e73a05eddf920d1d17cf042767db36f677be4e5a845f153",
+      "kind": "loop 接入表：specSlots=112 / withCarrier=68 / withoutCarrier=44；noCarrier 含 (P12,P12-W05)"
+    }
+  ],
+  "sourceHashes": {
+    "_note": "本次处置为**只读判定**；下列文件在本会话中**均未被本任务写入**（唯一写入是本产物自身，见 changes）。哈希为读取时刻值，用于识别并行写入者。",
+    "_repoWritesByThisTask": [
+      "loop/state/out/adopt_P12-W05.artifact.json"
+    ],
+    "_evidenceSelectionPolicy": "★ 本轮刻意**不**把两类路径列为哈希锚定证据：①**别的任务的产物/共享可变状态**（loop/state/index.json、loop/state/PUBLISH-LEDGER.json、loop/state/out/ops_accept-full.artifact.json 等）——它们会被设计内地重写，而 loop/state/ 不在 EVOLVING_PREFIXES 里，锚定它们等于保证本记录下次必然转 stale（这正是上一版被重做的原因，见 I2）；②**仓库外 /tmp 的会话日志** —— macOS 会定期清理，同样会转 stale（内容已逐字进 commands[].out，见 sessionLogs）。因此只锚定：被处置的台账（只读，mtime 停在 10-07）、规格侧冻结产出（plan-ledger、20261007 归档采集）、以及 EVOLVING 的 tests/tools（漂移自动豁免）。",
+    "artifacts/plan100/20261007/P12-W05/ledger.json": {
+      "today": "42499824cd2c337d8ed3df5c2bc103bb83967344e527e34ea225fbfee1f737a4",
+      "before": "42499824cd2c337d8ed3df5c2bc103bb83967344e527e34ea225fbfee1f737a4",
+      "verdict": "动手前后一致 ⇒ 本任务未改台账",
+      "status": "blocked",
+      "reviewer": null,
+      "decision": "blocked",
+      "mtimeUTC": "2026-10-07T12:18:50Z",
+      "sizeBytes": 1210
+    },
+    "artifacts/plan100/20261007/P12-W05/decision.md": {
+      "today": "bc94c77f99c93da5e1ad72f6e183b6358c5239d5706d5b0a1c464916fe735b31",
+      "mtimeUTC": "2026-10-07T12:18:50Z",
+      "sizeBytes": 1745
+    },
+    "artifacts/plan100/20261007/P12-W05/rollback.patch": {
+      "today": "b6f2b3713affd9d0ff3e2ef309f4fbe9ffde8b58ec2775285a65e055dd47ad42",
+      "mtimeUTC": "2026-10-07T12:18:50Z",
+      "sizeBytes": 158
+    },
+    "artifacts/plan100/plan-ledger.json": {
+      "today": "e74bb8804e7717c5c89a8b4cee2626c8054a7580e8d8b8ebfc0b8dde803a2f3c",
+      "sizeBytes": 77335,
+      "role": "映射依据（112 个键名 + firstLine + 标题）"
+    },
+    "loop/bin/adopt_plan100.py": {
+      "today": "589e09005e24f2d6e5f817e8e053272a946a4c98c70dfb1c8d5bd2902232e860",
+      "role": "CARRIED 映射表所在（EVOLVING 路径，允许继续演进）"
+    },
+    "tests/material_layer_ab.py": {
+      "today": "3bfc2775307180008ff14fb143c15ec37ddef120a6b52f256d342ef81c22a9d6",
+      "sizeBytes": 27746,
+      "role": "A/B 采样器；:321 强制 CL_GPU=1；EVOLVING"
+    },
+    "tests/material_layer_ab_analysis.py": {
+      "today": "ee30da21873c937d252b803068fa323169eb38e0dec9daf9fca2f4b60ab88c1c",
+      "sizeBytes": 15778,
+      "role": "今天的 A/B 判据（八门）；EVOLVING"
+    },
+    "tests/narrative_provenance_regression.js": {
+      "today": "96654c944b8750e7ba2babed6d2228e41963b0bb4c0eacc0d0070fc50e76d502",
+      "sizeBytes": 8594,
+      "role": "P12-005 规格基线本体；node 11/11 exit 0"
+    },
+    "artifacts/plan100/material/ab-gpu2/report.json": {
+      "today": "3c42207f2d5a6e0fda345bb3333723461b900c03f8023d53fd9448a8772ebf29",
+      "ok": false,
+      "schema": null,
+      "gateOnTodayJudge": "fail（67 problems，八门全 false）"
+    },
+    "artifacts/plan100/material/ab-gpu/report.json": {
+      "today": "e4d88e36bd03cfdebc390265e1a61cbdfa9fa71221b8f387107747a908f07108",
+      "ok": false,
+      "schema": null,
+      "gateOnTodayJudge": "fail（67 problems）"
+    },
+    "artifacts/plan100/visual-metrics/p06-dna-ab-same-phase.json": {
+      "today": "e7e165bbef03ee1d0e3c373670f057b78f96d1af3d60544f18698344a21c9706",
+      "sizeBytes": 975,
+      "role": "唯一自称同相位者；无数值相位字段、零产出者"
+    },
+    "artifacts/plan100/visual/nine-view/fix-on/index.json": {
+      "today": "2835167bf96e4058297258ebfd7251144e6484dbdba5d6f85e4cbbb76f9add8a",
+      "role": "九视图变体：有相机溯源、无时间相位溯源"
+    },
+    "artifacts/plan100/visual/nine-view/default-now/index.json": {
+      "today": "ff421530f42d10b5b2ee13c269eee376afb74b1451d5c64e1837878ae0333644",
+      "sizeBytes": 6824,
+      "role": "同上（12/12 一致）"
+    },
+    "artifacts/plan100/20261007/P06-W05/ledger.json": {
+      "today": "e54ccab71d568e5962848be167deb5b1ca677d671d1dc1cf52457482b4f8d763",
+      "role": "『A/B 归 P06』的实况：status=rejected / reviewer=p13-wave3-verifier"
+    },
+    "artifacts/plan100/20261007/P07-W05/ledger.json": {
+      "today": "539c84fca8f7664a747f1fd5c7cce12c1d1f928b495023a0482c9d48c8557549",
+      "role": "『A/B 归 P07』的实况：status=cpu-verified / reviewer=None"
+    },
+    "artifacts/plan100/20261007/P12-W04/ledger.json": {
+      "today": "0da73acaee6f98c57c39350315d953f11fb4019c42580c56e0a4f6ac75c54dcd",
+      "role": "规格前置 P12-004：status=blocked / reviewer=None"
+    },
+    "artifacts/plan100/20261007/P06-W05/reports/probe7/result.json": {
+      "today": "e7718ec5b5943e46fb26ee3129838a26e5f3e1a34d3655c72b7ff0bf3b801e2c",
+      "role": "★ 反向验证：有数值 tAnim，3 臂极差 0.2113s ⇒ 跨相位"
+    },
+    "artifacts/plan100/20261007/P06-W05/reports/probe8/result.json": {
+      "today": "c78016aa3eb9dd7eeea5579d7aab300c3bfd025d416bc83f60282172dc54f2ef",
+      "role": "★ 第二条：7 臂极差 0.1353s ⇒ 跨相位"
+    },
+    "loop/state/PLAN100-ADOPTION.json": {
+      "today": "2e350fa27c1494649e73a05eddf920d1d17cf042767db36f677be4e5a845f153",
+      "role": "接入表：112/68/44；noCarrier 含 (P12,P12-W05)"
+    },
+    "_deliberatelyNotPinned": [
+      "loop/state/index.json",
+      "loop/state/PUBLISH-LEDGER.json",
+      "loop/state/candidates/BATCH-publish-dafeng-B000.candidate.json",
+      "loop/state/out/ops_accept-full.artifact.json",
+      "loop/state/PUBLISHED-WITH-KNOWN-DEFECTS.json"
+    ]
+  },
+  "changes": [
+    {
+      "path": "loop/state/out/adopt_P12-W05.artifact.json",
+      "kind": "append-only"
+    }
+  ],
+  "verificationEnvironment": {
+    "session": "w-ops 常驻 worker 的本轮 agent（PID 20150 的 dsh 子进程；worker PID 18993）",
+    "gpu": "未使用。实测锚定路径仍有 3 个 headless Chrome + 12 个 worker（未杀、未接管）",
+    "browser": "未启动任何浏览器",
+    "protectedPathsWritten": [],
+    "tempDir": "/tmp/p12w05r/（仓库外）"
+  },
+  "remaining": [
+    "**残留的时效风险（如实登记）**：本产物 evidence[] 全部锚定仓库内文件；其中 artifacts/plan100/20261007/** 与 plan-ledger.json 是 10-06/10-07 的冻结产出（mtime 未动），tests/** 与 loop/bin/** 属 EVOLVING（漂移自动豁免）。唯一半稳定项是 loop/state/PLAN100-ADOPTION.json（可由 adopt_plan100.py 重新生成）。本会话的原始日志（门禁/node/python 输出）刻意**不**入 evidence[]，见 sessionLogs 的说明。",
+    "**我没有判定『同相位 A/B 在当前架构下能否做到』** —— 只证明了现有材料不满足。tests/material_layer_ab.py 的判据（clockFrozen + tAnim/tAcc/coreFrame 全等）看起来是可满足的形状，但没有在真 GPU 上验证过；这需要一条有权写 artifacts/ 的 GPU 任务。",
+    "**采样器默认落点与规格不符**已实证（K4），但我**没有**去跑它验证『显式 --out 到规格路径』是否真能产出合格采集 —— 那需要 GPU 串行槽位，本任务未声明要跑。",
+    "**上一轮的结论我做了两处收窄**（K5），但**未逐条重跑它全部 27 条证据**；我重跑的是其中支撑结论的部分（映射/缺口/门禁/相位/承接者）。若独立复核要逐条比对我没意见，但请按本产物的 commands 重跑，不要按上一版。",
+    "**P06-W05 的『同相位』自称不可核**：其 decision.md:96 把 nine-view fix-off/fix-on 称作同相位 A/B，而该 index.json 不记录任何相位字段；其 probe 记录 tAnim 但是跨相位。我**没有**去判定 P06-W05 的视觉结论本身对错（那是 P06/P13 的范围，且 P06-W05 已被 p13-wave3-verifier 判 rejected）。",
+    "**门禁唯一失败项 [35] 的归属是推断**：基线文件 mtime（03:03:41Z）晚于门禁结束（03:02:13Z）是硬事实，但『是谁改的』我没有进程血缘证据（按 SENTINEL.md 判据：mtime + 进程血缘 + 写入清单；我只做到 mtime + 不在本任务写入清单）。",
+    "**P12-005 的规格第 3 步要求记录 DPR/浏览器版本/GPU/reduced-motion/时间相位，第 6 步要求动画连续帧** —— 这些在一个『离线基线 + A/B 截图』的形态里怎么落，规格本身没写清（它的命令模板只跑离线基线）。这是我读法的**潜在反驳点**，已标给独立复核。",
+    "**未复核 P12 其余槽位（W01/W02/W03/W06/W07/W08）与 P12-W04 的处置** —— 超出本任务 writes 与范围；P12-W04 的处置在 loop/state/out/adopt_P12-W04.artifact.json。",
+    "**未修改规格里那条 python3-on-.js 笔误**（420 行）：docs/ 与外部归档均非本任务 writes 路径。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/adopt_P12-W05.artifact.json"
+    ]
+  },
+  "sessionLogs": {
+    "_why": "这些是本会话的原始输出日志，位于仓库外临时目录。**刻意不列入 evidence[] 做哈希锚定** —— macOS 会定期清理 /tmp，锚定它们会让本记录重演上一版的 stale（见 commands[I2] 的结构性分析）。其内容已逐字摘录在 commands[].out 里，且每条都可用 commands[].cmd 原样重跑复现。",
+    "dir": "/tmp/p12w05r/",
+    "files": {
+      "accept.log": {
+        "sha256": "7f2ba71df94e799cf7886b014adc67703e5a7261c0cebaa9f485d75618996f0d",
+        "note": "本会话产品门禁原始输出：ACCEPT: 131/132 passed；[23] narrative_provenance PASS；唯一失败项 [35] p2_library_version_choice --ratchet。仓库外临时路径（可原样重跑复现）"
+      },
+      "node.log": {
+        "sha256": "91c2e43c2a21fe800516cb0b49eb9e7810c92db7af1b23f6a6a6ba3b71ca849e",
+        "note": "P12-005 规格基线的正确跑法（node）：11 narrative provenance regression checks passed, exit 0"
+      },
+      "py.log": {
+        "sha256": "5d02ac60287c8087ef4e122d8a3fb9ee9b3cd3d8aa27323886aa3356d67bbd85",
+        "note": "规格原文那条 python3-on-.js：SyntaxError, exit 1"
+      },
+      "ab-selftest.log": {
+        "sha256": "0dce9f0cdf79cbf9403b24c716eda9792aaae717bfd41c03cd2865b96147982d",
+        "note": "A/B 采样器 CPU-only 自检：11 counterexamples blocked, 无浏览器/GPU"
+      },
+      "vstamp.log": {
+        "sha256": "29de073030fc7da43eda6c814ea42c5247f1459d6d953685671a2ade79c72f77",
+        "note": "规格命令模板第 2 步：VERSION STAMP OK · 336 · 100% 匹配"
+      }
+    }
+  },
+  "submittedAt": "2026-10-08T19:13:50Z",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-08T19:13:50Z"
+  },
+  "verifyState": "pending"
+}

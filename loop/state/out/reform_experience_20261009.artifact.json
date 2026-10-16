@@ -1,0 +1,255 @@
+{
+  "task": "reform:experience:20261009",
+  "agent": "reform-experience",
+  "createdAt": "2026-10-08T17:00:13.844393+00:00",
+  "verdict": "no-current-score-certification",
+  "scope": "只读源码、现有图片与一个无浏览器 Node 反例回放；没有开启 GPU、没有编辑受保护文件。",
+  "sourceHashes": {
+    "js/sky/sky-channel-registry.js": "72e6d4230a89c8704e6069b51de34945aa110cc6b9ae9b2734ea4cac9df16f0a",
+    "js/sky/sky-selection-model.js": "91a92bb20c7afaed53af115cf977c60f8ab73b156ccb0d223fc8054fdf38b314",
+    "js/sky/sky-view-contract.js": "daa3cc94031c986fca2c8c1c1e016c25fb65617959cc41706e9fb73bb46191f5",
+    "js/sky/sky-disclosure.js": "ff650dc113e1bfbe0dd7c21c4de644c75fc9569a57d0db2ecd7f98179eeef08d",
+    "js/sky/sky-chrome.js": "18fb10e40eee5049d45c3290a592852e71dfe9a4e3025e51f0cb501dc7fb7615",
+    "js/sky/sky-shell-player.js": "9b1111f17852d17682c29d1e9a0c577bc4c2a98a9c5a7cc3c9508d7f69fc2948",
+    "js/sky/sky-deconstruction.js": "01482c2007c1000ae0a5a2e40ee55f2d3f4e9d8f3dec1790915290d05aabd455",
+    "js/sky/sky-model.js": "e254e1fe637b226028d55d1ef78474a3fc5fff4a4691311d42d644a981b8570e",
+    "js/app.js": "ea4c17f890cb9dab0b173a119696299144d508b9625fdffa4bb33f072ce95f45",
+    "css/atlas-motion-polish.css": "adc70781390a1f479265dac3a06c9b720a4632eb151f2260e4a627c77974444f",
+    "css/sky-atmosphere-polish.css": "f09a9b9a7cdaffa67ecdd115a9571b3447e9858e7361245589d0a15abce21421",
+    "tests/p4_channel_registry_render_probe.py": "fc771d6ebba6eef92f76c470b68d39be8270258f1aaeb8d4be1f997cb7e8a6d1",
+    "docs/QUALITY.md": "834150aa1dcf8b11ff6e01495691c3288881ae4f2338addd68506bbb3fc57060",
+    "loop/PROJECT-STATE.md": "235a5b6cca0d10c358d65069a94d701f8ef331f8874876b0d408cc7ff2eeb71b"
+  },
+  "currentScore": null,
+  "scoreReason": "2026-10-08 QUALITY 的 61/100 明确为冻结的修复前快照；本审计所见截图为 10月7日旧缓存，不能给 10月9日当前代码、17705 事件作品重新打分，更不能宣称 100。",
+  "confirmedFindings": [
+    {
+      "id": "E-CONSUMER",
+      "severity": "high",
+      "fact": "CLSkySelectionModel 和 CLSkyChannelRegistry 在生产 js 中只有定义，没有外部调用；新增纯函数合同不能视为跨图状态或编码已经改好。",
+      "evidence": [
+        "rg -n CLSkySelectionModel js：仅 js/sky/sky-selection-model.js 定义/注释",
+        "rg -n CLSkyChannelRegistry js：仅 js/sky/sky-channel-registry.js 定义/注释"
+      ],
+      "action": "将有效规则接入既有 sky-shell / deconstruction / graph 渲染入口；没被消费的 API 不能算完成，若既有入口已满足就合并责任并删冗余模块。"
+    },
+    {
+      "id": "E-PARITY",
+      "severity": "high",
+      "fact": "tests/p4_channel_registry_render_probe.py 的第⑤项声称图例与 map 一致，实际上 other 与 grel.other 都来自 .sky-legend .lg-rel 中的同一 line；GRAY 只是加灰阶再读计算样式。没有读图谱连线，也没有测关光/静止像素。",
+      "where": "tests/p4_channel_registry_render_probe.py:36–68, 126–129",
+      "action": "改现有责任测试：同一关系 ID 的 renderer 几何/material 编码与 legend 共源；真实灰阶截图人工读图作为独立艺术证据，不再声称计算样式等于观感。"
+    },
+    {
+      "id": "E-STATIC",
+      "severity": "medium",
+      "fact": "ChannelRegistry.survivesDegradation 把 motion 算成静止可区分通道；只有运动的一条登记也返回 hasNonColorChannel=true。",
+      "command": "node -e \"const C=require('./js/sky/sky-channel-registry.js');console.log(C.survivesDegradation([{view:'v',channel:'motion',value:'pulse',meaning:'category'}]));\"",
+      "actual": "hasNonColorChannel=true",
+      "action": "静止必须由形状/线型/符号/文字保留类别；运动只提供时序，不得成为静态证明。"
+    },
+    {
+      "id": "E-REGISTRY",
+      "severity": "medium",
+      "fact": "ViewContract.tally([]) 给 completeViews=4 与 legacy.ok=true；其 legacyIsolation 检查硬编码 compatNote，app.js 只往旧入口 title/data-legacy-entry 追加说明，尚不能证明入口已从主流程移走。",
+      "where": "js/sky/sky-view-contract.js:144–171; js/app.js:2300–2343",
+      "action": "将视图导航和兼容入口真实改版、以首次使用路径验收，登记表只保留声明责任。"
+    },
+    {
+      "id": "E-DISCLOSURE",
+      "severity": "medium",
+      "fact": "sky-chrome.js 将 retained 直接设置为 grandTotal 再向 Disclosure.of/badge 传入，从而生成可恢复文案；此调用只证明自述数量，不证明被折叠边存在可操作恢复入口。",
+      "where": "js/sky/sky-chrome.js:536–546",
+      "action": "恢复数读取图谱真实保留集合；对一条被折叠关系从概览进入局部、阅读再返回才签收。"
+    },
+    {
+      "id": "E-REAL-ADVANCE",
+      "severity": "information",
+      "fact": "sky-shell-player 已实现按真实 eventIds 生成停点、字段归属与来源 hash/offset 校验、旅程结束不等于成功；不能继续把固定八站当作当前代码事实。",
+      "where": "js/sky/sky-shell-player.js:90–183",
+      "action": "保留这条进展，下一步只验证真实旅程的镜头、节奏、反拖与全部页面消费；不重建相同合同模块。"
+    }
+  ],
+  "suspectedFindings": [
+    {
+      "id": "E-REDUCED",
+      "fact": "reduced-motion 规则对实际 .cl-gem-host__svg 设置 opacity:0!important，可能把图形一起隐藏；低档对 .atlas-motion-transit 设置 display:none!important 也需核对类挂载对象。",
+      "where": "css/atlas-motion-polish.css:200–217",
+      "status": "源码风险，未运行真实页面，不声称已观察到用户缺陷。",
+      "action": "在已有 reduced-motion/lifecycle 责任用例上检查几何可见、数值/关系/命中保留；仅将 lens/fx 装饰归零。"
+    }
+  ],
+  "historicalVisualEvidence": {
+    "date": "2026-10-07",
+    "validity": "只能作为缺陷靶点与历史比较，不作当前版本评分。index.json 实为 JSONL。",
+    "graphKeys": {
+      "dafeng": "2ef47b2ecaa99a67352091d5",
+      "sanguo": "a935953b2678a80b352091d5",
+      "xiyou": "d16db79a529a1727352091d5"
+    },
+    "shots": [
+      {
+        "path": "/tmp/castline-shots/rotation-review-2026-10-07/dafeng-rot-overview-p0.png",
+        "sha256": "af61f04476065c0e0a3dc26db2264542219309837f27e34310fd4ee51f6a2450"
+      },
+      {
+        "path": "/tmp/castline-shots/rotation-review-2026-10-07/sanguo-rot-plot.png",
+        "sha256": "b4ded988b99a2600b5f7ae60b9a8cf3a181b48ad68213c3e4353094433c4776b"
+      },
+      {
+        "path": "/tmp/castline-shots/rotation-review-2026-10-07/probe-plot-ab-sanguo-A-close.png",
+        "sha256": "e54deefdf01109649aa982a93e12a886547a0b5b60b27ca17d9e9dad85da201c"
+      }
+    ],
+    "observations": [
+      "大奉总览：主体盘内大片近黑，关系丝线与标签很小，外部蓝云比关系结构突出；神秘氛围有基础，阅读层次不足。",
+      "三国剧情旧图：一个截图主体缩成画面中心小环；近景样本盘体过斜、侧面瘦长，环形边缘主导，难凭画面读出目标与支线。可能涉及取景/过渡时刻，不据此断言当前仍有相同错误。",
+      "移动端 domain-alignment/initial-390x844.png：顶部控制层显拥挤，主体姓名局部叠压；该截图版本未在本审计建立，所以只用于构图靶点。"
+    ]
+  },
+  "artDirection": {
+    "concept": "深空标本馆：让小说结构成为发光的天体标本，空间与光学提供神秘感，精确排版和可读路径提供高级感。",
+    "composition": [
+      "建立背景、结构、焦点、阅读四层。背景星尘与云仅构成远近和方向，结构层可在无 bloom 静态读清，焦点只给当前对象与相关关系，阅读层稳定在屏幕平面。",
+      "总览保留大块安静区域与一条明确视觉入口；作品主结构在安全区内占有效短边约 55–75%（作为首轮构图候选，按截图审阅修订）。主角/主要目标至少有一处明确可定位标识，不能靠寻找亮星。",
+      "局部展示保留全局位置标识和面包屑。旋转不得让主体不可读地退成边缘细线；美术模式可自由旋转，阅读模式相机为标签与结构留安全角。",
+      "书籍差异由真实结构生成：阵营分裂、任务交接、人物视野、时间跨度决定形状与节奏；作品色调只作辅助，三本书不能只换背景色。"
+    ],
+    "palette": [
+      "把深墨背景、暖纸文字、冷矿物结构、有限金色焦点分工；语义色相集中在有意义类别，星云可使用低饱和连续光谱。",
+      "焦点、已选中、键盘 focus、播放 current 各有形状/外框/标记，光晕仅辅助。所有证据状态同时有短文字和符号，不以暗淡惩罚未知资料。",
+      "每个图例取 renderer 实际使用的 token，不保留平行硬编码颜色表；浅亮与高饱和面积受焦点预算约束。"
+    ],
+    "material": [
+      "先完成主体大形、剪影、暗部结构，再做晶体微细节；晶体应有随观察角变化的厚度、折射、边缘反射和内部层次，不以多层加法发光冒充体积。",
+      "云体要有自遮挡、明暗颗粒尺度差、空洞与边缘纤维；与主图的深度分层需在静止图也成立。",
+      "文字、边线与背景分开合成；文字不跟随主体高频抖动、不加模糊色散。4K细节只在原尺寸观看有益时计入。",
+      "每项机制最多两轮有效 A/B；若只改变亮度或面积、无法说明体积/可读性收益，则撤回并换机制。"
+    ],
+    "typeAndDensity": [
+      "正文 16–18 CSS px，说明 12–14；视口变小先收敛结构和工具，不缩小正文。",
+      "总览只保留主群、焦点与定位需要的标记；选中局部才展开姓名与全文标签。被折叠数量、入口和返回位置都明确。",
+      "长中文名、双语、别名与长任务名使用完整详情出口，图上截断不等于数据删减；字号、线宽和触控面积以屏幕单位预算。"
+    ],
+    "motion": [
+      "微反馈 120–180ms、面板 180–280ms、局部镜头约 350–650ms；这是初始候选节拍，需以真实读者任务调优，不按动画数量评分。",
+      "所有运动只有一个目的：建立对象对应、指示因果方向、显示状态变化、帮助空间定向。持续漂浮与呼吸不驱动阅读信息。",
+      "语义播放先给可读的静态场面，再揭示本事件相关事实；结果和代价的揭示严格依据事件归属，回拖同步撤销后续可见信息。",
+      "暂停冻结叙事流动，手动拖动/滚轮当场接管镜头；关闭恢复进入前选择与阅读位置，不能恢复到任意默认中心。",
+      "减弱动态提供即时跳转、清楚状态差和逐项文本；省去镜头飞行后语义与路径完全保留。声音可选、默认尊重用户设置，任何事实不依赖听见音效。"
+    ]
+  },
+  "deliverySlices": [
+    {
+      "id": "S1",
+      "name": "选定人物，理解一条真实关系并回到原文",
+      "entry": "作品库 → 星座概览 → 角色 → 一条关系 → 本阶段证据 → 原文 → 返回",
+      "visibleOutput": "主体构图、局部展开、关系方向/时效/依据与可逆选择同时成立。",
+      "owners": [
+        "js/sky/sky-shell.js",
+        "js/sky/sky-field.js",
+        "js/sky/sky-deconstruction.js",
+        "js/sky/sky-chrome.js",
+        "js/atlas/atlas-source.js"
+      ],
+      "acceptance": [
+        "鼠标/键盘/触控指向同 graphKey+entityId；hover/focus/selection/current 互不混写",
+        "无锚点旧关系显示待核并可解释来源；折叠边可恢复",
+        "返回保留相机、选择、列表位置；换书同名不继承选择"
+      ],
+      "stopRule": "实际路径未成立前不再增加关系徽章/登记模块。"
+    },
+    {
+      "id": "S2",
+      "name": "看完一条有原文支持的目标旅程",
+      "entry": "任务列表 → 目标/障碍 → 逐事件播放 → 暂停读原文 → 反拖 → 结果与代价 → 回全书",
+      "visibleOutput": "一段可看的完整叙事动画，而非播放器控制条展示。",
+      "owners": [
+        "js/sky/sky-shell-player.js",
+        "js/sky/sky-shell-camera.js",
+        "js/sky/sky-disc.js",
+        "js/sky/sky-deconstruction.js",
+        "css/sky-deep-cards.css"
+      ],
+      "acceptance": [
+        "选择一条跨事件的真实目标链，完整录屏覆盖全部停点而非只开头",
+        "字段缺失时留白有因，不把时间顺序当因果",
+        "静态/减弱动态/低档有相同信息；当前17705事件作品运行没有失真或长冻结"
+      ],
+      "stopRule": "两轮仍只有合同通过、没有可读影片，则停止局部特效并修交接与镜头。"
+    },
+    {
+      "id": "S3",
+      "name": "用三种完全不同的小说结构证明视觉语法",
+      "entry": "三书当前冻结版本各一条完整路径，加一个新导入的短篇/未完稿样本",
+      "visibleOutput": "并排全景、局部、原文、播放画面能看出结构差异和统一产品语言。",
+      "owners": [
+        "js/sky/sky-dna.js",
+        "js/sky/sky-nebula-glsl.js",
+        "js/sky/sky-nebula.js",
+        "js/core/scene-stage.js",
+        "css/sky-chrome.css"
+      ],
+      "acceptance": [
+        "作品辨识来自结构，不来自更换色调",
+        "密集/稀疏/无关系资料保持可用；没有剧情资料就不伪造主线",
+        "同相位全幅、近景、斜视、暗部与原尺寸4K均审阅；A/B真实render并恢复"
+      ],
+      "stopRule": "轮次上限按机制执行，不让无收益 uniform 微调无限延长。"
+    },
+    {
+      "id": "S4",
+      "name": "新导入小说从来源到可解释图谱",
+      "entry": "正文/设定/大纲混合输入 → 范围确认 → 分段抽取 → 独立复核 → 新键发布 → 同对象多图 → 原文",
+      "visibleOutput": "通用适配成立，无作品名硬编码补丁、无默认假数据。",
+      "owners": [
+        "serve.py",
+        "narrative.py",
+        "js/atlas/atlas-source.js",
+        "js/sky/sky-model.js",
+        "js/sky/sky-deconstruction.js"
+      ],
+      "acceptance": [
+        "源版本、卷章、人物 ID、断言 ID 与引用坐标贯穿所有阶段",
+        "必需夹具失败明确；抽取为空、没有发生、没有材料和待审四类可区分",
+        "新键保留原文与父版；两个分支同对象不同解释显式对账"
+      ]
+    }
+  ],
+  "genericNovelRequirements": [
+    "身份由作品/来源版本与稳定实体 ID 确定；同名不同人、别名、一名多身、群体称谓、跨卷重名分别处理，名称只作展示。",
+    "至少区分原文顺序、故事时间、叙述视角、知情范围；倒叙、插叙、平行叙述、不可靠叙述、梦境和转述不压成错误单时间线。",
+    "断言最小对象独立带主体、谓词/变化、时间范围、来源、置信性质和复核结论；位置 exact 与语义成立不能复用同一个 verified。",
+    "目标旅程允许未完成、失败、中止、转向、冲突与多结果；结果与代价各自取证，缺字段不生造动画站点。",
+    "因果须区分条件、促因、直接后果、人物主张、读者推断；同场与随后只有事件关联资格。反证、叙述冲突与撤回保留出处。",
+    "伏笔允许埋设、强化、误导、兑现、悬置与开放；角色知情与读者知情不互相泄漏，章节/进度模式可限制剧透。",
+    "人物状态、关系、阵营、世界规则和物件持有均有有效范围；一次事件的敌对不能污染全书，一句自称不能变成全知事实。",
+    "世界设定必须解释能力/限制/行为条件，主题与张力明确为分析视角；死亡数、节点密度不自动构成高潮或主题。",
+    "概览→局部→证据逐级披露保留完整数据；任何裁剪、采样、虚拟列表有数量披露和恢复入口，不能以隐藏复杂度换漂亮截图。",
+    "评估包含现代现实、悬疑/不可靠叙述、群像历史、奇幻规则、无章短篇、未完稿/多版本材料；三部现有作品不足以单独证明任意小说通用。"
+  ],
+  "hundredPointGates": {
+    "visual": "当前版三书与新导入样本均有清楚焦点、可读暗部、可辨作品结构；独立艺术审阅针对构图/空间/材质/排版逐项签署，无重大画面缺陷。",
+    "rendering": "真实A/B可归因并能回基线；原生4K细节、当前大数据稳态/转场/长时性能、低档结构等价在同版测得。",
+    "animation": "完整真实目标旅程有理解收益、无字段猜测/剧透，暂停反拖与镜头接管可逆，减弱动态信息等价。",
+    "interaction": "首次用户能通过核心路径完成查找/解释/比较/回原文/返回；鼠标键盘触控同对象，错误/取消/异步/换书恢复可靠。",
+    "readability": "三层披露与全部文字全文可达；高密度、空资料、长名、灰阶、低档、窄屏状态下仍可分清结构与证据性质。",
+    "narrative": "全书真实分母已处置；独立分层金标准精度/召回达到约定，主要目标链及跨章支线无已知关键遗漏；合理歧义显式保留。",
+    "evidence": "明确身份与逐字引用逐项可复核；语义支持另审；来源hash/偏移/有效范围/版本祖先与分支合并可追溯。",
+    "delivery": "冻结同版的启动、导入、原文、故障、发布恢复、真实设备与读屏路径齐全；当前无能力验证的项目保持未测，不以模拟器或自动合同替代。"
+  },
+  "shouldStop": [
+    "停止把新纯函数模块、注册表与源码字符串测试当成产品完成。",
+    "停止用测试通过数、节点总数、JSON大小或工作时长加审美/内容分。",
+    "停止继续复制每个计划小节一份合同一份浏览器脚本；先扩既有路径责任与公共harness。",
+    "停止以旧缓存和早期截图为当前4K/审美签收。",
+    "停止在未解决构图、暗部、可读关系与完整旅程前增加更多无明确阅读收益的光效。"
+  ],
+  "planReform": "按四条用户路径排队，内容、显示、动画、性能共用一个被冻结的记录。每包必须交可见成品与一条有效反例，再独立审阅。合同只作必要门禁，不作目标；艺术与语义证据不允许被自述台账代替。",
+  "confidence": "high on source findings; medium on art direction; current rendered behavior unverified",
+  "remaining": [
+    "没有当前版真实页面/连续录像/真机/读屏证据；本任务禁止GPU，因此不作当前评分。",
+    "疑似CSS reduced-motion隐藏几何需在合并任务由GPU唯一持有者复现。",
+    "艺术方向需用户观看具体成品候选后反馈；主观审美100不得伪装为客观永久无缺陷。"
+  ]
+}

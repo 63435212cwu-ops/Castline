@@ -1,0 +1,84 @@
+{
+  "task": "read:sanguo:L0:0082",
+  "agent": "w-xiyou-1",
+  "status": "done",
+  "summary": "精读《三国演义》第八十三回 [411792,417635)（5843 字）。本会话对磁盘上既有同名候选（上一会话 19:38 写入）做独立复核并更正：递归复算 296/296 条引文逐字命中且区间/哈希/全文出现次数全部一致，20 条任务五栏零共用（按 (start,end) 去重），17 处 null 栏均带理由，六个必需分区齐备；同时查出并更正上一会话三处与磁盘不符的自述（正文段 15→12、空行 4→5、任务 19→20）、一处计数错误（规则 8→9，executed 4→5）、以及三处引用不存在脚本（build0082.py / lib0082.py / L.assert_task_columns_disjoint）的不可复算断言，改动全部写入 remediation 与 sessionSelfCheck。semanticReview 仍为 not-performed。",
+  "evidence": [
+    {
+      "path": "loop/state/out/read_sanguo_L0_0082.candidate.json",
+      "sha256": "97feadacbd1e1f31d1bf79f3152814580b55cbfa2e3f5df115b4036b79aa203a",
+      "note": "本轮候选（本会话复核并更正后的落盘版本）"
+    },
+    {
+      "path": "data/cache/fe42d01f3826fe8096f86614.docs.json",
+      "sha256": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+      "note": "原文来源；哈希与任务 prompt 指定值一致（任务 JSON 的 sourceHash 字段是另一个值，见 candidate.unknowns U01）"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "切片口径：docs[0].text[411792:417635] 以本单元标题「第八十三回　战猇亭先主得仇人　守江口书生拜大将」开头，长度 5843，切片 sha256=9242692c8717491adf363ac1ba94d9540cf065b84085f482feac5e0ca668302c",
+      "result": "pass"
+    },
+    {
+      "text": "引文逐字：递归收集候选内所有带 start/end 的 quote 对象共 296 条，逐条断言 TEXT[start:end]==quote、[start,end)⊆[411792,417635)、sourceHash==文件 sha256、globalOccurrences==TEXT.count(quote)；失败 0 条",
+      "result": "pass"
+    },
+    {
+      "text": "任务内五栏不共用：对 20 条任务按 (start,end) 去重检查 objective/obstacle/action/result/cost 的 quotes[]，违反 0 处（该结论由本会话独立脚本复算，未使用上一会话声称的构建期断言）",
+      "result": "pass"
+    },
+    {
+      "text": "null 必须带理由：20 条任务共 17 处 null 栏（全部为 cost），17 处均存在同名 <栏位>Note 写明原因，缺失 0 处",
+      "result": "pass"
+    },
+    {
+      "text": "必需分区齐备：tasks/causeEdges/states/foreshadows/worldSettings/themeReadings 六个键均存在；worldSettings 三条区分已字段化（place 9=arrived 6/mentioned 3、item 5 用 itemStates 多选、rule 9=declared 3/executed 5/misunderstood 1）",
+      "result": "pass"
+    },
+    {
+      "text": "无编造人物：把候选内出现的全部人物名回查原文切片，逐一命中（玄诚/道长等示例词在全书 0 命中，未被写入候选）",
+      "result": "pass"
+    },
+    {
+      "text": "更正可复现：stat 该候选 birth=2026-10-13 19:38:52 / mtime=19:43:39，而本会话租约 startedAt=2026-10-13T11:48:53Z（本地 19:48:53）⇒ 文件先于本会话租约存在，上一会话 provenance 的「此前没有落盘的候选文件」不成立；find 全仓库与回滚点对 build0082.py / lib0082.py 命中 0 次",
+      "result": "pass"
+    },
+    {
+      "text": "更正后文件仍为合法 JSON 且 296 条引文全部复算通过（回归检查）",
+      "result": "pass"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/read_sanguo_L0_0082.candidate.json",
+      "kind": "append-only",
+      "note": "任务 writes 指定路径；本会话在其上做复核更正（改写 readMethod/provenance/worldSettingsNote/columnRule/quoteReuse[].note，新增 readMethodNote/remediation/sessionSelfCheck，追加 2 条 selfCritique）。未新增/删除任何任务、引文或语义判断。"
+    },
+    {
+      "path": "loop/state/out/read_sanguo_L0_0082.submit.json",
+      "kind": "append-only",
+      "note": "本提交记录"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/fe42d01f3826fe8096f86614.docs.json": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+    "loop/state/runs/task-read_sanguo_L0_0082.json": "b24f59396c70c1970327d98644243190c2fc9a8dc24cefa072ea0245bf3d2967"
+  },
+  "remaining": [
+    "semanticReview=not-performed：本会话只做了引用定位、五栏各自取证、五栏不共用、分区产出与三条区分字段化的复算；语义、任务边界、因果方向与主题判断未被独立核验，留给 verify:sanguo:L0:0082。",
+    "上一会话声称的读法（lib0082.span()/ref() 的 347 个句读单元切分、build0082.py 构建、L.assert_task_columns_disjoint() 断言）在本机无法复现——脚本不存在。我只更正了自述与计数，未重跑其切分，也未推翻其引文（引文本身 296/296 可复算通过）。",
+    "F03（黄忠遗言 vs 先主「今先灭吴，次灭魏」）标为 unresolved 且 basis=inferred，是上一会话自陈最没把握的一条；本会话复核后认为其两端引文属实、但「伏笔」定性仍属解释，保留原状交由复核者裁定。",
+    "T06.action 的主体是关公显圣（非关兴），上一会话已在 basisNote 写明；本会话认为写法诚实但主体归属仍可能被复核者判为不合五元组惯例（同一信息另有 CE04 承载）。",
+    "任务 JSON 的 sourceHash 字段（2988ce6e…，实测对应另两个 docs.json）与 prompt 指定值（8ab7298a…）不一致，属环境侧问题，未在本次可写路径内修复，登记在 U01。",
+    "未跑 GPU/浏览器测试（任务未声明需要）。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/read_sanguo_L0_0082.submit.json"
+    ],
+    "note": "candidate 文件在本会话前已存在（上一会话写入），本会话为就地更正而非新建，故不能整体删除；如需回退本轮更正，只能按 remediation 逐条反向改写。"
+  }
+}

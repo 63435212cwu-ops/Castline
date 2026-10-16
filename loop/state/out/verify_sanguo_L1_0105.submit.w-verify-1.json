@@ -1,0 +1,140 @@
+{
+  "schema": "loop.submit/verify/v1",
+  "task": "verify:sanguo:L1:0105",
+  "agent": "w-verify-1",
+  "role": "VERIFIER（独立反向复核者）",
+  "roleFile": "loop/ROLES/VERIFIER.md",
+  "status": "done",
+  "book": "sanguo",
+  "bookTitle": "三国演义",
+  "lane": 1,
+  "unitIndex": 105,
+  "unitHead": "第一百六回　公孙渊兵败死襄平　司马懿诈病赚曹爽",
+  "sourceRange": [537888, 543089],
+  "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+  "segmentSha256": "9a51ca54db6c593cfd9d02d3ff0a997339d90994e8748f96847d33feb8da0842",
+  "reviewedTask": "read:sanguo:L1:0105",
+  "reviewedArtifact": "loop/state/out/read_sanguo_L1_0105.candidate.json",
+  "reviewedArtifactSha256": "031201f9e0aef4355ae088562c98cca1393d24af196ff91ba29ac06243278118",
+  "reviewedAuthor": "w-read-4",
+  "selfSign": false,
+  "verifierIsNotAuthor": true,
+  "verdict": "partial",
+  "verdictFile": "loop/state/out/verify_sanguo_L1_0105.verdict.json",
+  "verdictSha256": "554a345e2a588fb223f9d83d501ef6165be0f7c48d3dd6aa83f21b7ed249a8a7",
+  "verdictScope": "本复核只覆盖 read:sanguo:L1:0105 的候选产物（三国演义第一百六回，原文区间 [537888,543089)）。不对相邻单元、不对全书结论、不对发布结果作判定。",
+  "summary": "独立反向复核《三国演义》第一百六回 [537888,543089)（5201 码点）。按 VERIFIER.md 的顺序执行：先自己读完整个原文切片并自建探针，之后才打开候选结论，未复用候选的构建脚本。结论 **partial**。定位层全量复算零缺陷：548 条引文实例满足 T[start:end]==quote、end-start==len(quote)、全部落在区间内、globalOccurrences 与全文 count 逐条相符（四项各 0 失败，由我的独立脚本复算，非采信候选自述）；随机抽 5 条（seed=20261015）find 全部命中且偏移一致；15 个自报计数字段逐项复算全部相符，含最易造假的 quoteReuseReport（274 distinct / 548 total / 125 reused / max 8）；15 个任务的五栏无完全同句复用；交叉引用编号无悬空；无编造人物或事件（12/12 说话人皆在原文），未把回末套语当结果（T15 明确拒写 result），星象→死亡、暗喜→脱逃、拒罢兵→获胜三条最诱人的伪因果全部拒为 causeEdge 并各留合法半边。判 partial 的依据是四类有逐字反证的实质缺陷：(1) **worldSettings 出现原文没有的物件** —— item「公孙渊之印…」与 item「旄节…」，而原文区间内「印」「玺」「旄节」三词计数实测 0/0/0（原文只有「自号为燕王，改元绍汉元年」与「急令使持节诏司马懿还朝」），引文本身逐字成立但引文不含其命名所指之物，违反提示词 4b「没有依据就不扩出物品链」且与候选自己在 notWorldSettings 里对「一块肉」「守御之策」所持标准不自洽；(2) **候选自审脚本的反向覆盖判据静默缩小分母** —— verify_candidate.py:147 以 `len(b)<6` 跳过短句，被排除的 13 个片段中有 4 条在候选全文出现 0 次（「睿从之。」@540780、「睿然其言。」@540804、「舅问其故。」@542182、以及被标题前缀连带丢弃的「却说公孙渊乃辽东公孙度之孙，公孙康之子也。」@537914），因此「250 句 0 未覆盖」只在缩小后的分母上成立，而 assertions 与 AUDIT-REPORT 把它当无条件通过项呈现，下游会读成「已做反向覆盖且零遗漏」；(3) **cost 栏以子串方式复用同栏依据句** —— T03.cost/T04.cost/T05.cost/T08.cost 各自的唯一引文都是同任务另一栏引文的子串（@539203⊂539198、539458⊂539446、539428⊂539421、540470⊂540464），而脚本 :92 只查完全相等 ⇒ Q5「0 复用」为假口径；候选自己在 4 处 costNote 已诚实写明「按严格口径本区间对此项没有依据」，说明作者知道边界而机器判据没跟上；(4) **交叉引用指错** —— T06.result 与 R03.why 指向 C09，但 C09 实为刘放孙经保奏曹爽事，与辽东补给线无关，且全 14 条 causeEdges 中**没有任何一条**覆盖「拒罢兵→运粮→前线维持」（实测扫描命中为空）。反向验证独立产出 8 条原文明确存在而候选未覆盖的事实，其中 1 条为整句零覆盖（公孙渊家世），7 条为「引了半句」形态（动作/场景半边被丢弃，含「二人自城上系下」的缒城动作、「懿坐于衙上」的升衙受告、「舅问其故」的引发问答、「懿在马上顾诸将曰」的当众自证场合、「魏主曹睿设朝」的朝议场合）。误杀检查：8 条 rejectedCauseEdges 的前提句逐条 find 全部逐字可查，拒绝理由均为应验/相邻/人物语/倒推，**未发现因词表或正则误杀合法因果边**。自证错误登记：我第一版 verdict 有 3 条 quoteOffsets 写错（引文本身逐字可查、but 我手填的 end 偏移有 1–3 字误差），我在提交前对自己写的 verdict 跑了一遍与我对候选施加的同一判据 T[a:b]==quote，3 条全部报 False，已逐条重算并改正；此事与我判候选 CE3 同源（只查引文不校偏移＝判据不足），已如实写入 notes。",
+  "evidence": [
+    {
+      "path": "loop/state/out/verify_sanguo_L1_0105.verdict.json",
+      "sha256": "554a345e2a588fb223f9d83d501ef6165be0f7c48d3dd6aa83f21b7ed249a8a7",
+      "kind": "本任务 writes 指定的唯一产物：复核结论（verdict=partial / counterExamples 5 条逐条带原文引证 / reverseChecks 8 条 / misKillCheck 8 项 / notes / used / remaining / evidence 内嵌 CMD1-CMD7 可复现命令与哈希）。本文件不嵌自身哈希（自指哈希会失效），其哈希由本记录声明并由机器校验。"
+    },
+    {
+      "path": "loop/state/out/read_sanguo_L1_0105.candidate.json",
+      "sha256": "031201f9e0aef4355ae088562c98cca1393d24af196ff91ba29ac06243278118",
+      "kind": "被复核候选（297402 字节，作者 w-read-4）。我整个复核过程未改动它；声明其哈希以便核验我核的是哪一版。注意它位于 loop/state/out/ 之下 ⇒ is_evolving=false ⇒ 若此后被重写，本记录会被判证据失效，这是期望行为。"
+    },
+    {
+      "path": "data/cache/fe42d01f3826fe8096f86614.docs.json",
+      "sha256": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+      "kind": "原文来源（sha256 为整个 docs.json 文件）。切片 bytes sha256 = 9a51ca54db6c593cfd9d02d3ff0a997339d90994e8748f96847d33feb8da0842（docs[0].text[537888:543089)，5201 码点）。我只读未改。"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "先自读原文全切片（5201 码点，分三段读完）再打开候选结论；未先读候选、未复用候选的构建脚本 verify_candidate.py 做判定（只在最后单独复现它本身以核验其可复现性，不采信其结论）",
+      "result": "pass"
+    },
+    {
+      "text": "548 条引文全量机器断言：T[start:end]==quote ∧ 全部落在 [537888,543089) ∧ globalOccurrences==T.count(quote) ∧ start 是区间内那一次命中",
+      "result": "pass",
+      "detail": "refs=548 roundtrip/range_fail=0 occ_fail=0。命令见 evidence 内嵌 CMD1。此判据由我独立编写，与候选自审同口径但独立复算。"
+    },
+    {
+      "text": "随机抽 5 条 quote（seed=20261015）在原文 find 一次，报告逐字命中与偏移是否一致",
+      "result": "pass",
+      "detail": "5/5 命中、偏移一致、长度相符、全局出现次数与声明相符。抽样明细见 verdict.quoteSpotCheck。"
+    },
+    {
+      "text": "候选自报 15 个计数字段逐项独立复算（含 quoteReuseReport 的 4 个数字与 worldSettings 的三组枚举分布）",
+      "result": "pass",
+      "detail": "全部相符：tasks 15 / causeEdges 14 / rejectedCauseEdges 7 / states 13 / knowledgeGaps 10 / foreshadows 8(6+2) / notForeshadows 5 / worldSettings 29(place8+item11+rule10) / notWorldSettings 6 / themeReadings 2 / speechAsClueNotFact 15 / unknowns 12 / selfCritique 5 / textualNotes 6；placeState arrived7+mentioned1；itemStates transfer7+use7+lose2+hold0；institution declared3+executed4+misunderstood3；distinctQuotes 274 / total 548 / reused>1 125 / max 8。"
+    },
+    {
+      "text": "候选自审脚本可复现性",
+      "result": "pass",
+      "detail": "python3 -B -s loop/state/out/read_sanguo_L1_0105.w-read-4.audit/verify_candidate.py → exit 0 / RESULT: PASS / 548 / 250 / 0。脚本可复现；其判据漏洞见 counterExamples CE2/CE5（漏洞在判据，不在可复现性）。"
+    },
+    {
+      "text": "反向验证（计划100 教训）：逐码点覆盖掩码 + 逐句零覆盖扫描，独立找出候选引文完全未覆盖的原文事实",
+      "result": "pass",
+      "detail": "独立切分 266 句；零覆盖 1 句（公孙渊家世 @537914）；部分覆盖 97 句；最长未覆盖字符段 24 字。另用「引半个动作」的语义单位复核出 7 条未覆盖事实。挑 8 条入 reverseChecks。"
+    },
+    {
+      "text": "误杀检查：8 条 rejectedCauseEdges 的前提句逐条 find，并复核拒绝理由是否为「词表/正则误挡」",
+      "result": "pass",
+      "detail": "前提句全部逐字可查；拒绝理由均为应验/相邻/人物语/情绪/后文倒推。特别重查 R01（星象→死亡）：确认区间内与星象相关三句主语皆司马懿、「神机」主语为众将、且「应矣」属事后追认 ⇒ 拒绝正确，且候选保留了 C07 这一合法半边，未犯计划100 的「整词判定误杀」形态。未发现误杀。"
+    },
+    {
+      "text": "幻觉/越权检查：说话人抽取比对 + 全部「」引语逐字回查 + 结局/成功判定复核",
+      "result": "fail",
+      "detail": "说话人 12/12 皆在原文，无编造人物/事件/结局，未把结束当成功。但 worldSettings 两条 item 的**命名**超出其引文所指（「公孙渊之印」「旄节」），原文「印」「玺」「旄节」计数 0/0/0 ⇒ 判 fail 并记入 counterExamples CE1。"
+    },
+    {
+      "text": "交叉引用完整性：全篇编号引用与已定义 id 集合比对，并逐条核验指针目标是否含所称内容",
+      "result": "fail",
+      "detail": "编号悬空 0；但 T06.result 与 R03.why 指向 C09 而 C09 内容不符，且所暗示的「补给线」因果边在 14 条 causeEdges 中并不存在（扫描命中为空）⇒ 判 fail 并记入 counterExamples CE4。"
+    },
+    {
+      "text": "五栏独立依据：同任务内完全同句复用 + 子串复用两口径分别检查",
+      "result": "fail",
+      "detail": "完全同句复用 0 处（与候选自报一致）；但**子串复用 4 处**（T03/T04/T05/T08 的 cost 栏），候选脚本只查完全相等故全部漏过 ⇒ 判 fail 并记入 counterExamples CE3。"
+    },
+    {
+      "text": "自证错误登记：我自己的 verdict 在提交前对全部 13 条引文跑 T[a:b]==quote 自检",
+      "result": "pass",
+      "detail": "第一版报 3 条 False（RC5/RC7/RC8 的 end 偏移有 1–3 字误差，引文本身逐字可查），已逐条重算并改正；改正后 13/13 全部通过。已如实写入 verdict.notes。"
+    },
+    {
+      "text": "受保护路径未被改动：本任务 writes 只允许 loop/state/out/verify_sanguo_L1_0105.verdict.json",
+      "result": "pass",
+      "detail": "changes 只列本次实际写入的两个文件（均为 loop/ 下 append-only，非 guarded）；js/ css/ index.html serve.py narrative.py scripts/ tests/ docs/ data/ 一律未改。loop.py verify 向 read_sanguo_L1_0105.json 追加 reviews[] 属工具行为。"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/verify_sanguo_L1_0105.verdict.json",
+      "kind": "append-only",
+      "note": "本任务 writes 指定的唯一产物路径（38046 字节）。写入前该路径不存在；本轮为新建。"
+    },
+    {
+      "path": "loop/state/out/verify_sanguo_L1_0105.submit.w-verify-1.json",
+      "kind": "append-only",
+      "note": "本提交记录自身（worker 按 loop.py submit 的格式要求写的提交文件，与既有 verify 提交同命名约定 verify_<book>_L<lane>_<unit>.submit.<agent>.json）。它不参与 done 判定（record_files 只认恰好等于 output_name(task) 的规范记录）。"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/fe42d01f3826fe8096f86614.docs.json": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+    "loop/state/out/read_sanguo_L1_0105.candidate.json": "031201f9e0aef4355ae088562c98cca1393d24af196ff91ba29ac06243278118",
+    "loop/state/out/verify_sanguo_L1_0105.verdict.json": "554a345e2a588fb223f9d83d501ef6165be0f7c48d3dd6aa83f21b7ed249a8a7"
+  },
+  "sourceHashesMeaning": "动手前后同一口径复算：被复核候选在我整个复核过程中未被改动（031201f9… 复核开始与提交时相同）；原文 docs.json 未变（8ab7298a…）；verdict 是本轮唯一新建产物。**未列入** sourceHashes 的：loop/state/out/read_sanguo_L1_0105.json —— 它会被 `loop.py verify` 追加 reviews[]，而 is_evolving(loop/state/out/…) 为 False ⇒ 一旦把它固化成证据或哈希，本记录会立刻自判失效并永久卡在 done 之外（这是 w-read-4 / w-xiyou-1 记录过的形态）。我按纪律只读它、不改它、不声明它的哈希。",
+  "remaining": [
+    "未修候选本体：CE1（worldSettings 的两条无据 item）、CE3（4 条 cost 栏子串复用）、CE4（T06/R03 的 C09 误指）以及 8 条 reverseChecks 均未回写 —— loop/state/out/read_sanguo_L1_0105.candidate.json 不在本任务 writes 内（我只有 verdict 的写权），需由返工任务或原作者处理。",
+    "未做语义层复核：候选自述 semanticReview=not_performed；本轮做的是定位层全量复算 + 结构层 + 反向覆盖 + 幻觉/误杀检查，**不声称语义已核验**，也不评价其义理判读是否得当。",
+    "reverseChecks 采用字符级覆盖掩码，会把「引了半句」计为部分覆盖而非零覆盖：本区间零覆盖 1 句、部分覆盖 97 句。若改以「动作/场景」为语义单位，遗漏数会高于我报的 8 条（这是我方法的已知保守偏置，已写入 notes）。",
+    "存疑未决（按纪律不据此判 fail）：F01 记 resolved 我倾向降级为 unresolved 或改写为主题层观察（三件怪事在区间内再无出现、卜者占辞无人再引，属主题性呼应而非情节回收）；F04 的字面条件是「畋猎」而实际是「谒高陵」，字面未严格兑现。两条候选均已用 SC02/SC04 主动披露，属已标注的口径分歧而非隐瞒，最终口径应由发布环节或作者决定。",
+    "未独立复核候选 U12 关于本回时间跨度的结论（区间内明确纪年仅建安十二年、太和二年、魏景初三年三处，无外部锚点可复算）。",
+    "环境观察（非候选缺陷，按纪律只记录不改校验）：本任务在 loop/state/out/ 下没有 canonical 记录 verify_sanguo_L1_0105.json，`done_ids()` 对该 verify 任务是否可达 done 取决于本轮 submit 是否通过；若因 verdict 被后续轮次整文件覆盖而导致证据漂移，该任务会被重新派发。我已尽力保证单轮内自洽。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/verify_sanguo_L1_0105.verdict.json",
+      "loop/state/out/verify_sanguo_L1_0105.submit.w-verify-1.json"
+    ],
+    "note": "本任务只新增两个追加式产物，未删除、未搬迁、未覆盖任何既有文件。若要回到开工前状态，删除上面两个文件即可；loop/state/out/read_sanguo_L1_0105.json 上由 `loop.py verify` 追加的 reviews[] 一条需单独处理（我未手工编辑它）。"
+  }
+}

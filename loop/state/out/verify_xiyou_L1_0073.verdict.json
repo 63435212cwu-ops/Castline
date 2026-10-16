@@ -1,0 +1,181 @@
+{
+ "task": "verify:xiyou:L1:0073",
+ "reviewer": "w-dafeng-3",
+ "role": "VERIFIER",
+ "verdict": "partial",
+ "reviewedTask": "read:xiyou:L1:0073",
+ "reviewedCandidate": "loop/state/out/read_xiyou_L1_0073.candidate.json",
+ "reviewedCandidateSha256": "a3e50dd0a8c7886bc127197b0e2c14606a9861932c969d14e3e2fdeb60fff1e8",
+ "reviewedAuthor": "w-read-4",
+ "book": "xiyou",
+ "lane": 1,
+ "unitIndex": 73,
+ "unitHead": "第七十三回　情因旧恨生灾毒　心主遭魔幸破光",
+ "sourceRange": [
+  525773,
+  533821
+ ],
+ "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+ "segmentSha256": "8ac7ebdbcbec59d0c1f45573c3c8a7ae0aaef73e93f0ad337e2af2846534e783",
+ "method": "先自读 docs[0].text[525773:533821) 全文 8048 码点（未先看候选），再打开候选做机械复算与反向扫描。",
+ "counterExamples": [
+  {
+   "claim": "T9.cost.text 写「随后失声叫出「师父啊」那一段自伤的话（韵文，登记在 verseExcluded）」，把该韵文指为已登记；coverage 亦自报 verseExcludedCount=10。",
+   "quote": "当年秉教出山中，共往西来苦用工。大海洪波无恐惧，阳沟之内却遭风！",
+   "quoteStart": 530802,
+   "quoteEnd": 530834,
+   "why": "该四句韵文在候选 verseExcluded[0..9] 里**完全不存在**（逐条比对 10 条 where：回目/门前景致/道士打扮/道士赞语/毒药配方/金光/穿山甲/千花洞外景/毗蓝婆模样/回末收束，无一为它）。它只出现在 reverseVerification.uncoveredSegments[23] 的 run 原文里，没有任何结构化登记。这是**悬空交叉引用**：下游按「登记在 verseExcluded」去找会找不到目标（与 loop/state/out/DANGLING-REF-DEFECT.md 记的 defect 同形）。修法：把该韵文补进 verseExcluded（作第 11 条），或删掉「登记在 verseExcluded」这半句。"
+  },
+  {
+   "claim": "uncoveredSegments[0] 对 run [525794,525873) 的 disposition 写「整段未覆盖：该自然段没有任何引文节点」，uncoveredSegments[40] 对 run [533066,533114) 也写同一句。",
+   "quote": "毗蓝扯住道：“大圣莫打，且看你师父去。”",
+   "quoteStart": 533094,
+   "quoteEnd": 533114,
+   "why": "两处判定与事实相反（可机械复算，见 reproduce）。run [533066,533114) 所在的自然段是 [533068,533152)，段内**有 2 个**候选引文节点（533038–533066 与 533114–533140）；run [525794,525873) 所在自然段 [525796,526101) 段内**有 3 个**（525873/526025/526052）。「该自然段没有任何引文节点」为假。更实质的是：被这句模板判为「不承载新命题」的 [533068,533114) 里含一个**真实的行动节拍**——行者对已失能的道士「耳朵里取出棒来就打」，被毗蓝婆扯住并给了理由（先看师父）。它在候选的 tasks/causeEdges/states 里**没有任何登记**（claim 字段全库检索「毗蓝扯住/莫打/且看你师父去」命中 0），CE21 记的是后一段「毗蓝止住八戒」的另一件事，不能替代。"
+  },
+  {
+   "claim": "uncoveredSegments[20] 对 run [530052,530190) 的 disposition 套用模板「本段内容属于「场景与人物形貌的铺陈」或「未用于断言的对话与韵文」，已分别登记在 verseExcluded 或未进入任何分区」。",
+   "quote": "妖精轮宝剑，大圣举金箍。都为唐朝三藏，先教七女呜呼。",
+   "quoteStart": 530074,
+   "quoteEnd": 530100,
+   "why": "这段「好杀」韵文（另含尾联「杀得风响沙飞狼虎怕，天昏地暗斗星无。」530172–530190）**既未进 verseExcluded，也未进任何分区**，模板里「已分别登记在 verseExcluded」的后半不成立。它与候选自己登记的「毒药配方」「金光」「穿山甲」（verseExcluded[4][5][6]）属同一体裁、同一处理层级，被漏登说明 verseExcluded 的收录不是全量扫描而是逐段手挑，模板句因此会对读者产生**假的已审计印象**。"
+  },
+  {
+   "claim": "quoteNodeConvention.claimStatusRule 声明该字段「不是手写的」——「写盘前由构造脚本按切片里的引号区间（栈式配对，本区间 125 对）对每条引文机械复算……独立审计脚本 claimcheck.py 用同一判据复算，实测 MISMATCH=0」。",
+   "quote": "土地叩头道：“那妖精到此，住不上十年。小神自三年前检点之后，方见他的本相，乃是七个蜘蛛精。他吐那些丝绳，乃是蛛丝。”",
+   "quoteStart": 529554,
+   "quoteEnd": 529612,
+   "why": "我用它自己写明的同一判据（“ ”栈式配对，落在引号内=人物话，全内=dialogue、全外=narration、跨界=mixed）独立复算**全部 100 个带 claimStatus 且带引文的容器**，得到 **4 处 MISMATCH**，且**全部集中在 themeReadings**：/themeReadings/0/support/2 声明 dialogue 实为 mixed（本条引文即其中跨界的一条：529554–529612 含「土地叩头道：」在引号外）；/themeReadings/0/support/3 声明 dialogue 实为 mixed；/themeReadings/0/counter/0 声明 mixed 实为 narration（3 条 refs 全在引号外）；/themeReadings/1/support/1 声明 narration 实为 mixed。tasks 58/58、causeEdges 21/21、states 8/8、knowledgeDiffs 6/6、rejectedEdges 8/8 全部通过。故「MISMATCH=0」只对其余五区成立，对 themeReadings 不成立——该区的 claimStatus 实为手写。修法：把这 4 条的 claimStatus 按判据改正为 mixed/narration，或把声明收窄为「tasks/causeEdges/states/knowledgeDiffs/rejectedEdges 五区机械复算，themeReadings 手工标注」。"
+  }
+ ],
+ "reverseChecks": [
+  {
+   "found": "毗蓝婆对行者出手的拦阻（行者欲打已失能的道士，毗蓝以「先看你师父」为由制止）——候选零登记。",
+   "quote": "行者骂道：“你这泼怪装瞎子哩！”耳朵里取出棒来就打。毗蓝扯住道：“大圣莫打，且看你师父去。”",
+   "quoteStart": 533068,
+   "quoteEnd": 533114,
+   "why": "本回少见的一处「救人优先于清算」的实际行动：毗蓝婆不仅挡了八戒（CE21），先在殿外就挡了行者。T12.action 只写抛针与收针，行者此时的举动与其被制止均未进任何分区。"
+  },
+  {
+   "found": "行者自己对师父生死的判断：他当着黎山老姆的面说「我师父丧身」（把师父当已死），而老姆随后说「免他一死」、结局三人得救——这是一条可核伪的**人物信念**，候选没有登记。",
+   "quote": "我师父丧身，更无一物相酬",
+   "quoteStart": 531446,
+   "quoteEnd": 531458,
+   "why": "候选把这段行者长述整块归入 run [531266,531521)，disposition 判「不承载新的行动/资源/约束命题」。但「行者此刻认为唐僧已死」是**知识状态**：它解释了他当场「自怨生悲」的哭、也解释了他对老姆的请求为何只求报仇不求解救，而 S2 只记了三人被救活，knowledgeDiffs 六条无一条记这个（错误的）信念与其被推翻。"
+  },
+  {
+   "found": "女怪与道士之间的**眼色暗号信道**：女怪指令仙童「对你师父丢个眼色」，叙述者回执「小童丢个眼色，那道士就欠身」——这是把道士从客位叫进方丈、从而听信并下毒的实际触发链。",
+   "quote": "茶罢收锺，小童丢个眼色，那道士就欠身道：“列位请坐。”",
+   "quoteStart": 526770,
+   "quoteEnd": 526797,
+   "why": "CE2 只覆盖了后半段「众女子招呼他来道：这里有现成好茶」（茶从哪来），却漏了前半段「眼色」（道士为什么离席）。候选对含此句的 run [526554,526904) 判「整段未覆盖」。没有这一步，女怪的控诉与道士的下毒决定就见不了面；这是本回因果链上的一环，而它恰好是**非语言信号**，容易被「按台词抽因果」的做法整段漏掉。"
+  },
+  {
+   "found": "同一场打斗在**叙述者**与**行者追述**里是两套数字/动作：叙述者写「战经五六十合」「把行者盖在底下」，行者对老姆说「斗经六十回合」「将我捆住」。候选只登记了叙述者那套。",
+   "quote": "斗经六十回合，他败了阵，随脱了衣裳，两胁下放出千只眼，有万道金光，把我罩定。",
+   "quoteStart": 531355,
+   "quoteEnd": 531393,
+   "why": "这是候选自己最在意的那条分层（人物的话 vs 叙述事实）的**正面实例**：同一事件的合数（五六十合/六十回合）与受制方式（天篷盖住/捆住）两个来源不一致。候选在 K3、CE7 等处都强调分层，却没把这对可对照的差异登进 knowledgeDiffs 或 unknowns——按它的口径这本该是一等一的材料。"
+  },
+  {
+   "found": "八戒自己的妖精判断（与行者先前的同类判断镜像），以及行者对道士当下状态的判断「装瞎子」。",
+   "quote": "八戒发狠道：“这厮既与蜘蛛为姊妹，定是妖精！”行者指道：“他在那殿外立定装瞎子哩。”",
+   "quoteStart": 533398,
+   "quoteEnd": 533440,
+   "why": "CE6 登记了行者「必定也是妖精」的推断，八戒在得救后独立作出同型推断却无对应条目；「装瞎子」这一判断也解释了行者为何举棒要打（见上一条 reverseCheck）。整段被 run [533384,533440)「同段连接叙述」模板吞掉。"
+  },
+  {
+   "found": "老姆那句「免他一死」：她在报信时把「免死」说成自己假做孝妇的**目的**——候选虽引了这句（T10.objective），却未记它与「行者已认定师父丧身」构成的时间差信息（老姆知道还没死，行者以为已死）。",
+   "quote": "我才自龙华会上回来，见你师父有难，假做孝妇，借夫丧之名，免他一死。",
+   "quoteStart": 531976,
+   "quoteEnd": 532009,
+   "why": "属知识差的一处**不对称**：报信者知道唐僧尚可救，当事人却已放弃。候选 K1–K6 六条知识差没有一条覆盖这个不对称，而它正是 F5（老姆「恐不能救」→ 实际救活）之外的另一半张力。",
+   "caveat": "此条基于 531971–532034 与 531446–531458 的对读，属我的判读（derived），非原文直述，按契约只作反向发现登记，不据此判 fail。"
+  }
+ ],
+ "quoteVerification": {
+  "scope": "候选全库 305 个含 quote+start/end 的对象 + 19 个改用 quotes[] 的 worldSettings 节点内的 124 条子引文，合计 429 条。",
+  "exact": 429,
+  "offsetMismatch": 0,
+  "notFound": 0,
+  "outOfRange": 0,
+  "multiOccurrenceInWholeDoc": 0,
+  "note": "逐条断言 docs[0].text[start:end]==quote 且 525773<=start<end<=533821；全部成立。start 与 text.find(quote) 的位置差 shift=0，无一处漂移。",
+  "randomFive": [
+   {
+    "n": 1,
+    "quote": "“你可曾在盘丝洞化斋么？你可曾在濯垢泉洗澡么？”",
+    "start": 528927,
+    "end": 528951,
+    "find": 528927,
+    "shift": 0,
+    "occ": 1
+   },
+   {
+    "n": 2,
+    "quote": "即上前用手一指，那道士扑的倒在尘埃，现了原身，乃是一条七尺长短的大蜈蚣精。毗蓝使小指头挑起，驾祥云径转千花洞去。",
+    "start": 533521,
+    "end": 533577,
+    "find": 533521,
+    "shift": 0,
+    "occ": 1
+   },
+   {
+    "n": 3,
+    "quote": "行者却同按下云头，走入观里，只见那道士合了眼，不能举步。",
+    "start": 533038,
+    "end": 533066,
+    "find": 533038,
+    "shift": 0,
+    "occ": 1
+   },
+   {
+    "n": 4,
+    "quote": "却拿了十二个红枣儿，将枣掐破些儿，揌上一厘，分在四个茶锺内；又将两个黑枣儿做一个茶锺，着一个托盘安了",
+    "start": 527921,
+    "end": 527971,
+    "find": 527921,
+    "shift": 0,
+    "occ": 1
+   },
+   {
+    "n": 5,
+    "quote": "那怪厉声高叫道：“师兄，还他唐僧，救我命也！”",
+    "start": 529867,
+    "end": 529890,
+    "find": 529867,
+    "shift": 0,
+    "occ": 1
+   }
+  ],
+  "seed": "random.seed(20261013)，从 305 个带偏移的对象里 sample(5)"
+ },
+ "independentRecomputation": {
+  "segmentSha256": "8ac7ebdbcbec59d0c1f45573c3c8a7ae0aaef73e93f0ad337e2af2846534e783（＝sha256(docs[0].text[525773:533821])，与候选 source.segmentSha256 一致）",
+  "fileSha256": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2（＝整个 docs.json 的 sha256，与任务 sourceHash 一致；data/cache/a065244455cfb2221bcda94a.docs.json 与 df959d743e53206f56db2f92.docs.json 字节相同，是同一内容两份副本）",
+  "citedChars": 5038,
+  "citedRatio": 0.626,
+  "uncoveredRuns12plus": 43,
+  "uncoveredChars": 2871,
+  "note": "四项与候选 coverage 自报逐一相同（我用同一口径独立复算：引文区间并集去重后计字符；未覆盖片段按连续 run 且长度≥12 计）。claimStatusDist 在「按全部引文对象含重复计数」的口径下也复算得 dialogue=58/mixed=108/narration=120 = 自报值。tasks 五栏引文两两不相交（含真包含）实测 0 处违反；null 栏 17 个全部带同名 Note，0 缺失。coverage 的 15 个计数逐项与文档实际长度一致。"
+ },
+ "redlineChecks": {
+  "fabricatedEntities": 0,
+  "note": "候选出现的全部专名（昴日星官/百眼魔君/多目怪/毗蓝婆/黎山老姆/黄花观/紫云山/千花洞/盘丝洞/濯垢泉/龙华会/盂兰会/大雷音寺/蜈蚣精/蜘蛛精/穿山甲/鲮鲤鳞）均在原文出现，无原文没有的人物、地点或事件。",
+  "endingAsSuccess": 0,
+  "successNote": "T5.result 写「没有救出师父师弟」、T7.result 写「师父师弟没有换回来」、T8.result 写「只是困住、没有拿下或杀死」、T14.result 写「没有被打死，是被收去看守门户」、T15.result 明确写不写「取经成功」。结束≠成功守得住。",
+  "dialogueAsFact": 0,
+  "dialogueNote": "女怪的整段控诉、道士的剂量与忌讳、土地的来历、老姆的自陈、行者的「鸡降蜈蚣」一律登记为 dialogue/mixed 或进 unknowns；未见把人物的话写成叙述事实。",
+  "mentionAsArrival": 0,
+  "placeNote": "盘丝洞/濯垢泉/龙华会/盂兰会/西天大雷音寺 5 处记 mentioned，仅黄花观与紫云山千花洞记 arrived，均与原文到达动作相符。"
+ },
+ "falseKillCheck": {
+  "found": 0,
+  "candidates": [
+   "RE7（拒绝「破了金光 → 道士合了眼，不能举步」连边）：候选以「没有机制句」为由不连边，并在 selfCritique[1] 与 unknowns[2] 自曝。原文「原来这道士剥了衣裳，把手一齐抬起，只见那两胁下有一千只眼，眼中迸放金光」＋破光后「合了眼，不能举步」＋随后「用手一指」即倒，读者可据以推断眼为神通所系。是否构成误杀**存疑**——候选已如实标注，且契约禁止「时间相邻当因果」，我不据此判 fail，也不认定它误杀。",
+   "cost 口径：15 个任务里 7 个 cost=null。口径偏窄且候选在 selfCritique[2] 自曝 T4/T8 宽严不一（碎锺记代价、脱皂袍不记）。原文对「代价」确实多无直述，此属口径选择而非误杀。"
+  ],
+  "note": "没有找到候选把**合法**条目错误排除且能举出原文反证的实例。"
+ },
+ "notes": "总体判断：**引用层与抽取层近乎无可挑剔，缺陷集中在声明层与覆盖完整性，故判 partial；不构成 fail。**\n\n【判 partial 而非 fail 的理由】按 VERIFIER.md「判 fail 必须有 counterExample，且 quote 逐字可查」——我的 4 条 counterExample 的 quote 全部逐字可查，但它们指向的都是**声明不实/悬空引用/模板误标**，而不是编造：429 条引文零缺陷、无幻觉人物、无区间外文字冒充区间内、无「结束当成功」、无「人物的话当叙述事实」、无「提及当到达」。这正是 verify_dafeng_L0_0072/0076 两条同形复核判 partial 的形态（引用全对、语义/声明层有实质待修，不足以判 fail）。\n\n【可以直接用】\n- 全部 429 条引文及其 start/end/sourceHash/inRange/match/wholeTextOccurrences：零缺陷，可直接复用为下游锚点。\n- tasks 15 条的五栏结构、null 栏 17 个全部带 Note、五栏引文两两不相交：机械复算全通过。\n- states 8 / knowledgeDiffs 6 / rejectedEdges 8 / foreshadows 5（含 F4 显式 unresolved） / worldSettings 19（place 7+item 8+rule 4，三态字段齐全） / themeReadings 2（各带 counter）：抽取值本身可用。\n- 边界与哈希：切片 8048 码点、segmentSha256、文件 sha256、重复源文件等价——全部独立复算成立。\n\n【必须修或必须降级的】\n1. 丢 / 改 T9.cost.text 里「（韵文，登记在 verseExcluded）」这半句 —— 该韵文未登记（counterExample 1）。\n2. 修正 uncoveredSegments[0] 与 [40] 的「整段未覆盖…没有任何引文节点」判定（counterExample 2）；这两个自然段实有引文节点。\n3. 把「好杀」韵文补进 verseExcluded，或删掉 disposition 模板里「已分别登记在 verseExcluded」的全称承诺（counterExample 3）。\n4. themeReadings 的 4 条 claimStatus 按判据改正（mixed/narration），或把 claimStatusRule 的作用域收窄到其余五区（counterExample 4）。\n5. reverseChecks 的 6 条为**遗漏**（不是错误）：毗蓝拦行者、行者误信师父已死、眼色暗号链、叙述者与追述的合数/受制差异、八戒的独立判断、老姆「免他一死」与行者认知的不对称。这些建议补进 states/knowledgeDiffs/unknowns，其中第 2、4 两条最接近「一等材料」的门槛。\n\n【不确定处 / 我可能错的地方】\n- 反向复算的第 6 条（老姆「免他一死」的知识不对称）是我在两条引文之间的对读，属 derived 判读而非原文直述；若复核者认为这层不算独立事实，可只保留前 5 条。\n- 我把「整段未覆盖」判为误标，用的是候选自己的措辞「该自然段没有任何引文节点」。若它本意是「该 run 内没有任何引文节点」（run 内确实没有），则措辞与事实一致、只是表述含糊；但同一句里「已分别登记在 verseExcluded」对好杀韵文与自伤诗仍不成立，counterExample 1/3 不受影响。\n- RE7 是否误杀我判**存疑**：候选已自曝并把机制写进 unknowns，我拿不出「原文有机制句」的反证，按契约不据此判 fail。\n- 我未运行候选 reproduce 里引用的 build_candidate.py / selfcheck.py / claimcheck.py / prosecheck.py（它们在 CL_ARTIFACTS 测试产物目录，不属本任务 writes）；上述所有复算都是我自己重写的，不依赖它们的输出。"
+}

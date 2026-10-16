@@ -1,0 +1,87 @@
+{
+ "task": "read:dafeng:L3:0027",
+ "agent": "w-xiyou-0",
+ "status": "done",
+ "summary": "精读《大奉打更人》第二十八章 拍死我这只蝼蚁（第二更），原文区间 docs[0].text[82180,84968)（2788 字）。产出：12 名人物（含 4 条把『衣着/称呼』绑定到姓名的显式推导）；9 条任务五元组（T3/T7/T8 的 obstacle、T6/T8/T9 的 result、T2–T9 共 8 条的 cost 均按原文缺项写 null 并附 nullNote，不补默认值）；8 条带方向与触发机制的 causeEdge（CE3 标 derived、CE8 标 inferred，其余 explicit，每条 mechanism 非空）；6 条明确排除的 nonEdge；11 条人物状态变化（前值/后值 + 事件锚点，含 1 条 inferred 前值并写明反推依据）；8 条知识差（谁知晓/谁不知晓）；6 条伏笔判定（FS1 回收在区间内、铺设句在区间外 [81025,81056) 并单列 docSha256 不进证据；FS2/FS5/FS6 显式 unresolved 且限定在本单元区间；FS3/FS4 半回收）；4 条明确排除的『不算伏笔』；7 条原文瑕疵（含区间末尾分隔符、称呼混用、『不漏痕迹』『潜意思』等用字）；15 条 unknowns；5 条 selfCritique；12 条段外检索记录（说明每条段外信息为什么不能作为本单元证据）；4 条显式声明的推导；7 条刻意不建因果的说明性/场面段落。引文共 296 条：277 条区间内引文由脚本在切片上 str.find 定位后 start=82180+命中下标，并回切校验 docs[0].text[start:end]==quote，0 处不符；19 条段外引用单独标记 docSha256、带 inUnitRange=false，且只出现在 FS1.setup 与 outOfRangeNotes[].quoteRefs，不进入任何 evidence 数组。未声明语义复核完成（readingStatus.semanticReview = stats.semanticReview = not_done）；未把人物台词、内心猜测、诈问当作叙述事实。",
+ "evidence": [
+  {
+   "path": "loop/state/out/read_dafeng_L3_0027.candidate.json",
+   "sha256": "8d79047dfdd8972d37e836b84900c09f4be46ce23619f7b852c95b286ee3ecbc",
+   "kind": "candidate"
+  }
+ ],
+ "assertions": [
+  {
+   "text": "原文来源哈希与任务声明一致：sha256(data/cache/9b676d7031b1bcd3b8377a18.docs.json) == fdde5558…39839。",
+   "result": "pass",
+   "command": "shasum -a 256 data/cache/9b676d7031b1bcd3b8377a18.docs.json",
+   "observed": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+  },
+  {
+   "text": "偏移口径自检（任务明确警告过的坑）：切片以本单元标题开头，且长度与任务声明的 2788 字一致；start/end 是相对 docs[0].text 全文的 codepoint 偏移，不是相对切片。",
+   "result": "pass",
+   "command": "python3 -c \"import json;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];s=t[82180:84968];print(len(s),s.startswith('第二十八章 拍死我这只蝼蚁（第二更）'))\"",
+   "observed": "2788 True"
+  },
+  {
+   "text": "全部引文逐字可复现：对候选 JSON 做全树递归遍历，凡含 quote/start/end 的节点一律断言 docs[0].text[start:end]==quote；区间内节点另断言 82180<=start 且 end<=84968。结果 277 条区间内引文 + 19 条段外引用，0 处回切不符、0 条区间内引文越界。取证脚本（可原样复制运行，只读，不写任何文件）：",
+   "result": "pass",
+   "command": "python3 - <<'PY'\nimport json,hashlib,re\nR='/Users/carmen/Desktop/星系/'\nP=R+'loop/state/out/read_dafeng_L3_0027.candidate.json'\nD='fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839'\nS,E=82180,84968\nraw=open(P,'rb').read();c=json.loads(raw.decode())\nT=json.load(open(R+'data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text']\nn=nout=0;bad=[];oob=[]\ndef w(o):\n global n,nout\n if isinstance(o,dict):\n  if 'quote' in o and 'start' in o and 'end' in o:\n   if T[o['start']:o['end']]!=o['quote']:bad.append(o['quote'][:20])\n   if 'docSha256' in o:nout+=1\n   else:\n    n+=1\n    if not(S<=o['start'] and o['end']<=E):oob.append(o['start'])\n  for v in o.values():w(v)\n elif isinstance(o,list):\n  for v in o:w(v)\nw(c)\nprint('in_unit=%d oor=%d roundtrip_fail=%d oor_evidence=%d'%(n,nout,len(bad),len(oob)))\nprint('docs_sha_ok=%s slice_ok=%s len=%d'%(hashlib.sha256(open(R+'data/cache/9b676d7031b1bcd3b8377a18.docs.json','rb').read()).hexdigest()==D,T[S:E].startswith('第二十八章 拍死我这只蝼蚁（第二更）'),E-S))\nprint('edges_no_mechanism=%d nulls=%s'%(len([e for e in c['causeEdges'] if not e.get('mechanism')]),{k:v for k,v in c['stats'].items() if 'Null' in k}))\nprint('semanticReview=%s graphCache=%s cand_sha=%s'%(c['readingStatus']['semanticReview'],c['readingStatus']['graphCacheUsedAsEvidence'],hashlib.sha256(raw).hexdigest()))\nprint('VERDICT','PASS' if not bad and not oob and n>0 else 'FAIL')\nPY",
+   "observed": "in_unit=277 oor=19 roundtrip_fail=0 oor_evidence=0 / docs_sha_ok=True slice_ok=True len=2788 / VERDICT PASS"
+  },
+  {
+   "text": "段外引用不污染证据数组：19 条区间外引用全部带 docSha256、带 inUnitRange=false，只出现在 foreshadows[FS1].setup 与 outOfRangeNotes[*].quoteRefs；候选里没有任何一条 evidence 引文落在 [82180,84968) 之外（oor_evidence=0）。",
+   "result": "pass",
+   "command": "python3 /tmp/cl0027/audit.py  # oor_refs_locations 行",
+   "observed": "oor_refs_locations = ['foreshadows[0]', 'outOfRangeNotes[0..11]']；in_unit_evidence_out_of_range 0"
+  },
+  {
+   "text": "缺项写 null 而不是补默认值：8 条 causeEdge 全部有 mechanism；null 分布为 tasksWithNullObstacle=3（T3/T7/T8）、tasksWithNullResult=3（T6/T8/T9）、tasksWithNullCost=8（T2–T9），每条 null 都配 nullNote 指出原文缺在哪一句。",
+   "result": "pass",
+   "command": "python3 -c \"import json;c=json.load(open('loop/state/out/read_dafeng_L3_0027.candidate.json'));print([t['id'] for t in c['tasks'] if t.get('obstacle') is None],[t['id'] for t in c['tasks'] if t.get('result') is None],[t['id'] for t in c['tasks'] if t.get('cost') is None]);print([e['id'] for e in c['causeEdges'] if not e.get('mechanism')])\"",
+   "observed": "['T3','T7','T8'] ['T6','T8','T9'] ['T2','T3','T4','T5','T6','T7','T8','T9']  /  edges_no_mechanism=0"
+  },
+  {
+   "text": "未声明语义复核完成：readingStatus.semanticReview 与 stats.semanticReview 都是 not_done，并在 semanticReviewNote 里写明本单元的具体语义难点（引号内自称、内心话、问句三类都不算叙述确认）。",
+   "result": "pass",
+   "command": "python3 -c \"import json;c=json.load(open('loop/state/out/read_dafeng_L3_0027.candidate.json'));print(c['readingStatus']['semanticReview'],c['stats']['semanticReview'])\"",
+   "observed": "not_done not_done"
+  },
+  {
+   "text": "未把图谱缓存当证据：data/cache/9b676d7031b1bcd3b8377a18.json 未被打开或引用（graphCacheUsedAsEvidence=false）；候选里对它的唯一一次提及是 graphCacheNote 里写明『未打开作为证据』；source 字段声明的唯一来源是 .docs.json。",
+   "result": "pass",
+   "command": "python3 -c \"import json,re;raw=open('loop/state/out/read_dafeng_L3_0027.candidate.json',encoding='utf-8').read();c=json.loads(raw);print(c['readingStatus']['graphCacheUsedAsEvidence'],len(re.findall('9b676d7031b1bcd3b8377a18[.]json',raw)),sorted(v for v in c['source'].values() if isinstance(v,str) and v.endswith('.json')))\"",
+   "observed": "False 1 ['data/cache/9b676d7031b1bcd3b8377a18.docs.json']"
+  },
+  {
+   "text": "写入范围自控：本轮只新建 loop/state/out/ 下的候选与提交文件（loop/ 属追加式路径），未修改 js/ css/ index.html serve.py narrative.py scripts/ tests/ docs/ data/。共享树里这些受保护路径上存在大量与本 agent 无关的既有未提交改动，本 agent 未 touch、未 checkout、未 reset、未 stash。",
+   "result": "pass",
+   "command": "git status --porcelain -- js css index.html serve.py narrative.py scripts tests docs data | wc -l  # 这些改动非本 agent 产生；本 agent 只写 loop/state/out/",
+   "observed": "本 agent 新增文件：loop/state/out/read_dafeng_L3_0027.candidate.json、read_dafeng_L3_0027.submit.json（工作目录外的审计脚本放 /tmp，不入库）"
+  }
+ ],
+ "changes": [
+  {
+   "path": "loop/state/out/read_dafeng_L3_0027.candidate.json",
+   "kind": "append-only"
+  }
+ ],
+ "sourceHashes": {
+  "data/cache/9b676d7031b1bcd3b8377a18.docs.json": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+ },
+ "remaining": [
+  "semanticReview 未做：本候选只保证引文定位逐字正确，不声明语义已核验（『定位正确 ≠ 语义已核验』）。",
+  "本单元的核心语义分歧全部留作未决，未给结论：许七安『我是监正新收的弟子』的真伪（unknowns/U1、FS2）、司天监到场的真实理由（U2、FS3；两条猜测都是他的内心话且第一条带问号）、周立的伤情（U3，原文只写到倒地流血）。这些应交由 read-verify 通道对抗式复核。",
+  "FS1 的铺设句在区间外（[81025,81056)，清瘦老者夸口『一只蝼蚁而已，老奴一巴掌就能拍死』）。我按纪律只单列其坐标（带 docSha256、inUnitRange=false）而不放进证据数组；跨章伏笔的完整判定需要覆盖相邻单元的复核者。同样的段外依赖还有 12 条 outOfRangeNotes（黄郎中、李慕白/张慎衣着绑定、宋卿职衔、马匹死因、放人命令、许新年求援等）。",
+  "段外检索只做了关键词命中（辞旧/监正/采薇/周立/陈叔/税银案/山海关/李慕白/张慎/许新年/孙尚书/黄郎中/青袍/蝼蚁/王捕头）加相邻段落阅读，未逐字通读全库；outOfRangeNotes 列表可能不完备。",
+  "本单元末尾 [84954,84966) 是作者分隔线『------------』、区间起点是自带『（第二更）』的章节标题，两者都不是正文；紧随其后的第二十九章标题未被用来判定任何回收（不做跨章结论）。",
+  "同一人两种称呼（『周公子』/『周立』，只有 84323 一句写『周立』）已写成 DV1 推导与 TD3 文本瑕疵；若复核者不认这条推导，characters 里该人物条目需要拆分重写。"
+ ],
+ "rollback": {
+  "kind": "append-only",
+  "strategy": "delete-added-files",
+  "files": [
+   "loop/state/out/read_dafeng_L3_0027.candidate.json"
+  ]
+ }
+}

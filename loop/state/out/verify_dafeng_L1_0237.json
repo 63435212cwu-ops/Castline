@@ -1,0 +1,121 @@
+{
+  "task": "verify:dafeng:L1:0237",
+  "agent": "w-verify-4",
+  "status": "done",
+  "summary": "独立反向复核《大奉打更人》第八章 案发现场，原文区间 [943450,948891)（5441 码点）。先自己读原文切片（未先看候选结论），再逐条核对。**引用层零编造**：全量 396 条引文实例（133 条去重）经 t[start:end]==quote / find(quote) / 区间内 / sourceHash 四项核验，失败数全部为 0；303 条带偏移的 quote **303/303** 逐字命中；固定种子(237) 抽 5 条 5/5 命中且偏移一致。无原文外人物、无原文外结局、无「结束当成功」。**判 partial**：查出 5 处有原文/文件证据的缺陷（CE1 h4 与 h3 共用同一条引文，h4 真正依据的 948285–948315 从未被引；CE2 u25 标题写「两三丈」而原文是「六七米」；CE3 unknownsNote 写 20 条而实际 26 条、分类表静默漏掉 u21–u26，worldSettingsNote 写 6 条而实际 8 条，根因是构建脚本第 846/920 行硬编码常量；CE4 u26 的主题词「清清白白」原句 945814–945844 在 quote 字段零命中；CE5 x5/u17 贴错引文）。反向验证另出 7 条（RC1–RC7），含一条误杀：临安与怀庆的姐妹关系被「主观品评」那一桶连带排除。5 处缺陷均不在发布层（LAYER_MAP 只含 tasks/causeEdges/states/foreshadows，本候选只产出这 4 层），故判 partial 而非 fail。本记录为**第二版**：同日 07:57 的第一版有两处未复算即写下的数字（CE4 偏移把段落起点945810 当成引文起点、RC6 规模 5 条应为 2 条），已在 selfCorrections 与本文件里如实更正并重新执行 verify。",
+  "evidence": [
+    {
+      "path": "loop/state/out/verify_dafeng_L1_0237.verdict.json",
+      "sha256": "bc103a9a6c75a25889f80a287d38ddb4b903e8286200234d4f53a6a1534a9958",
+      "kind": "本复核结论（任务 writes 声明的产出，本文件的主副本）"
+    },
+    {
+      "path": "loop/state/out/read_dafeng_L1_0237.candidate.json",
+      "sha256": "11673da18c2e3a1432314b2124982b31f3dbec3387de0bcd85a4effd9597d670",
+      "kind": "被复核候选（只读，未修改）"
+    },
+    {
+      "path": "data/cache/1063b17ca65ec1b76f30e460.docs.json",
+      "sha256": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+      "kind": "原文（只读引用，未修改）"
+    },
+    {
+      "path": "loop/state/out/read_dafeng_L1_0237.json",
+      "sha256": "0abf82b4c364de9f1ca30ba525f42fbdc41f34d77c43c98fe5d35475d27c865a",
+      "kind": "被复核任务的提交记录（verify 机制向其 reviews[] 追加本复核；写入由 loop.py verify 完成）"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "源文件 sha256 与任务 sourceHash 一致；切片 len==5441 且 sha256==86cb72b2…",
+      "result": "pass",
+      "cmd": "python3 -c \"import json,hashlib;raw=open('data/cache/1063b17ca65ec1b76f30e460.docs.json','rb').read();t=json.loads(raw)[0]['text'];s=t[943450:948891];print(hashlib.sha256(raw).hexdigest());print(len(s),hashlib.sha256(s.encode()).hexdigest())\""
+    },
+    {
+      "text": "全量引文核验：303 条带偏移 quote 中 t[start:end]!=quote 为 0；93 条无偏移 quote 中 find 失败 0、越界 0、非唯一命中 0",
+      "result": "pass",
+      "cmd": "python3 -c \"import json;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];c=json.load(open('loop/state/out/read_dafeng_L1_0237.candidate.json'));qs=[];w=lambda o:([qs.append(o) if isinstance(o,dict) and isinstance(o.get('quote'),str) else None,[w(v) for v in o.values()]] if isinstance(o,dict) else [w(v) for v in o] if isinstance(o,list) else None);w(c);off=[o for o in qs if isinstance(o.get('start'),int)];print(len(qs),len(off),sum(1 for o in off if t[o['start']:o['end']]!=o['quote']))\""
+    },
+    {
+      "text": "CE1：h3 与 h4 的 quotes 跨度完全相同（均 [948245,948285)），与 h4 依据句 [948285,948315) 相交的 quote 数 = 0",
+      "result": "pass",
+      "cmd": "python3 -c \"import json;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];print(t[948245:948285]);print(t[948285:948315])\""
+    },
+    {
+      "text": "CE2：'两三丈' 在切片内不存在（False）；切片内 '丈' 仅 1 处且位于 945377「光辉万丈」",
+      "result": "pass",
+      "cmd": "python3 -c \"import json;s=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'][943450:948891];print('两三丈' in s,[943450+i for i,ch in enumerate(s) if ch=='丈'])\""
+    },
+    {
+      "text": "CE3：len(unknowns)=26、len(excludedSettings)=8，而 notes 分别写 20 与 6；根因在 content_core.py:846 与 :920 的硬编码常量",
+      "result": "pass",
+      "cmd": "python3 -c \"import json;c=json.load(open('loop/state/out/read_dafeng_L1_0237.candidate.json'));print(len(c['unknowns']),len(c['excludedSettings']))\" ; grep -n 'excludedSettings（6 条' loop/state/out/read_dafeng_L1_0237.w-sanguo-0.build/content_core.py"
+    },
+    {
+      "text": "CE4：引文真实跨度为 945814–945844（T[945814:945844]==quote 为 True）；该串在候选 quote 字段零命中",
+      "result": "pass",
+      "cmd": "python3 -c \"import json;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];q='长公主，不是你想的那样，我和临安清清白白的，我还是你的牛马。';i=t.find(q);print(i,i+len(q),t[i:i+len(q)]==q)\""
+    },
+    {
+      "text": "覆盖数字独立复算：零引用段落 45、被引段落 106，与候选自报的 45/106 完全一致（双向差集为空，45 条 start 全部对位）",
+      "result": "pass",
+      "cmd": "python3 -c \"import json;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'][943450:948891];c=json.load(open('loop/state/out/read_dafeng_L1_0237.candidate.json'));print(c['coverage']['zeroCoverageParagraphs'],c['coverage']['paragraphsTouchedByQuotes'])\""
+    },
+    {
+      "text": "任务五元组：9 条任务栏栏有各自引文；11 个 null 全部带同名 <栏位>Note；同一任务内五栏共用同一引文 0 处",
+      "result": "pass",
+      "cmd": "python3 -c \"import json;c=json.load(open('loop/state/out/read_dafeng_L1_0237.candidate.json'));print(sum(1 for t in c['tasks'] for f in ('objective','obstacle','action','result','cost') if t.get(f) is None))\""
+    },
+    {
+      "text": "幻觉检查：23 个专名在切片内的出现次数比对，无原文外人物/地名/机构；semanticReview.status=not_performed（未冒称语义评审完成）",
+      "result": "pass",
+      "cmd": "python3 -c \"import json;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'][943450:948891];c=json.load(open('loop/state/out/read_dafeng_L1_0237.candidate.json'));print(c['semanticReview']['status']);print(all(t.count(n)>0 for n in ['许七安','临安','怀庆','太子','福妃','许二郎','许铃音','婶婶','魏渊','元景帝','三法司','清风殿']))\""
+    },
+    {
+      "text": "判 partial 的依据可核：5 条 counterExample 的 quote 全部 T[s:e]==quote 逐字成立且落在 [943450,948891) 内；7 条 reverseCheck 的引文同样逐字可查",
+      "result": "pass",
+      "cmd": "python3 -c \"import json;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];v=json.load(open('loop/state/out/verify_dafeng_L1_0237.verdict.json'));bad=0;n=0\\nfor ce in v['counterExamples']+v['reverseChecks']:\\n    q=ce.get('quote');s=ce.get('quoteStart');e=ce.get('quoteEnd')\\n    if isinstance(s,int):\\n        n+=1;bad+= (t[s:e]!=q)\\nprint('checked',n,'bad',bad)\""
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/verify_dafeng_L1_0237.verdict.json",
+      "kind": "append-only",
+      "note": "任务 writes 声明的唯一产出：本复核结论（本文件的主副本）。第一版于 07:57 落盘，第二版（本版）更正了 CE4 偏移与 RC6 规模，两版并存于文件历史之外、以本版为准。"
+    },
+    {
+      "path": "loop/state/out/read_dafeng_L1_0237.json",
+      "kind": "append-only",
+      "note": "由 `python3 loop/bin/loop.py verify --task read:dafeng:L1:0237 --file …/verify_dafeng_L1_0237.verdict.json --agent w-verify-4` **追加**一条 reviews[] 条目并把 verifyState 置为 partial —— 这是 verify 机制自身的写入，不是我手工改写被复核内容。按追加式纪律，我没有就地覆盖 07:57 那条旧条目（那会变成覆盖而非追加），而是以更正后的结论再追加一条；两条同为我 w-verify-4 的 partial，取更严者仍为 partial。"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/1063b17ca65ec1b76f30e460.docs.json": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "loop/state/out/read_dafeng_L1_0237.candidate.json": "11673da18c2e3a1432314b2124982b31f3dbec3387de0bcd85a4effd9597d670",
+    "loop/state/out/read_dafeng_L1_0237.json": "0abf82b4c364de9f1ca30ba525f42fbdc41f34d77c43c98fe5d35475d27c865a",
+    "loop/queue/read.jsonl": "d54b8852a9014d80ec18a063ee946f6b6098abdb4d43856420c1b6604c25f22b"
+  },
+  "remaining": [
+    "语义正确性未独立判定到底：本次做了引用逐字核验、覆盖复算、反向覆盖与误杀检查，但没有代替作者做语义评审；候选 semanticReview 仍为 not_performed，我不为它背书。",
+    "RC6（临安与怀庆的姐妹关系被「主观品评」一类连带排除）需要一条提取口径才能定论：本任务的必填产出里没有 relations[] 层，所以这是口径问题而非漏读，我按角色契约记为需定口径的缺口，未据此判 fail。",
+    "RC7（三司 vs 三法司是否同一机构、以及「父皇」与「元景帝」是否同一人）在本区间内无法判定，需跨区间核对前章/后章。",
+    "复核只覆盖 [943450,948891)；区间外内容（上一章 @943450 之前、下一章 @948891 之后）只在核实来源时检索，未作为本区间证据写入任何断言。",
+    "我没有修改候选文件（writes 只有 verdict 一个路径）；5 处缺陷的修法只是建议，实际改动应由 read 流的写入负责人执行。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/verify_dafeng_L1_0237.verdict.json"
+    ],
+    "note": "删除 loop/state/out/verify_dafeng_L1_0237.verdict.json 与 loop/state/out/verify_dafeng_L1_0237.json 即回滚本复核的产出；read_dafeng_L1_0237.json 的 reviews[] 追加条目可用 loop.py verify 覆盖。本复核全程只读候选与原文，未修改任何被复核文件。"
+  },
+  "submittedAt": "2026-10-15T00:42:44Z",
+  "wallClockSeconds": 2436,
+  "wallClockFrom": "lease.startedAt",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-15T00:42:44Z"
+  },
+  "verifyState": "pending"
+}

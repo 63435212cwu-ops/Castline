@@ -1,0 +1,273 @@
+{
+ "task": "verify:sanguo:L1:0087",
+ "agent": "w-dafeng-3",
+ "role": "loop/ROLES/VERIFIER.md",
+ "status": "done",
+ "verdict": "partial",
+ "verdictReason": "引文定位层**零编造**：284/284 条 quoteRef 四条判据全通过（逐字回切成立、find==start 偏移一致、全篇唯一、区间内含、sourceHash 全对），未发现原文没有的人物/事件/结局/伏笔，也未把结束当成功（候选自己把「孔明放走孟获→倾心归降」作为 R04 显式拒绝）。但内容层有 5 处**可逐字证伪的缺陷**：CE1 一条反对理由里的「原文引证」是错字（「必乃天败」全文 0 次）；CE2 T09.objective 把第二次纵放场景的孔明邀请句当作第三次被擒那一节的依据（与 T12 撞同一场对话，相距 1752 码点），而第三次真正的邀请句443339 从未被引用；CE3 候选自己的 quotationConvention 要求「人物语一律带 voice 或登记进 speechAsClueNotFact」，实测 58 个非空栏位中 27 个缺 voice，其中 4 个含人物语且不在那 14 条清单里；CE4 T06.result 标 basis=explicit，但所挂引文只支持「药酒放倒」，「把营寨腾空」在原文 0 次、属反推；CE5 worldSettings 声称「原文用『献与／进贡』这类文言说法」，本区间「献与」0 次。按契约「判 fail 必须有 counterExample 且 quote 逐字可查」——我的反证全部逐字可查，但无一条是编造原文没有的人物/结局/伏笔，故不判 fail；又因存在机器可核对的假引证与错场景归属，不能判 pass。**修正 CE1/CE2 并补齐 CE3 的 voice、把 CE4 降为 inferred 后可采信其余全部条目。**",
+ "reviewOrder": "按 VERIFIER.md：①先把 docs[0].text[439167,444148) 整段读完（4981 码点 / 11 段，转存 /tmp/cl0087/slice.txt 逐行读），②再打开候选，③反向验证（自建覆盖率脚本按标点切子句找「他没覆盖的事实」，并逐条断言候选全文未出现），④误杀检查（逐条复核 4 条 rejectedCauseEdges 的后件是否真的不存在），⑤幻觉/越权检查，⑥随机 5 条 quote 复核（seed=20261014）。全部机械核验由我自己的脚本重算，**未采信候选自报数字**。",
+ "reviewedCandidate": {
+  "path": "loop/state/out/read_sanguo_L1_0087.candidate.json",
+  "sha256": "b79f4fc847a4ad25f7893066da169eaa76abb0634637d9c02e79364275e3e669",
+  "bytes": 194003,
+  "authorAgent": "w-xiyou-1",
+  "verifier": "w-dafeng-3",
+  "selfSign": false,
+  "selfSignNote": "复核者 w-dafeng-3 ≠ 候选作者 w-xiyou-1（候选 JSON agent 字段与 read:sanguo:L1:0087 记录 agent 一致）"
+ },
+ "source": {
+  "path": "data/cache/fe42d01f3826fe8096f86614.docs.json",
+  "sha256": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+  "range": [
+   439167,
+   444148
+  ],
+  "rangeCodepoints": 4981,
+  "segmentSha256": "3099c08220b177a4f65586f14707ba172b860c3e61a794fd9a01e66bb185ab65",
+  "declaredInTaskJson": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+  "selfCheck": "docs[0].text[439167:444148] 以回目「第八十八回　渡泸水再缚番王　识诈降三擒孟获」开头，长度 4981 == 任务声明的 4981 字"
+ },
+ "counterExamples": [
+  {
+   "id": "CE1",
+   "claim": "rejectedCauseEdges/R04.why 用「必乃天败」作为孟获原话的逐字引证，用来证明「孔明放走孟获 → 孟获倾心归降」这条边不成立。",
+   "quote": "此乃天败，非吾之不能也，如何肯服！",
+   "quoteStart": 443292,
+   "why": "「必乃天败」在整份 docs.json 里出现 **0** 次（复现：t.count('必乃天败')→0），原文作「此乃天败」（443292）。候选自己引用该句的另外 5 处**全部**写作「此乃天败」，只有 R04 这一处错。R04 的**结论**（该因果边是「叙述推进到回末」的错觉）不受影响、我复核后认为正确；错的是它把非原文的四个字放进「」当作原文引证——这正是本任务要抓的假引证形态。",
+   "severity": "high",
+   "fix": "把 R04.why 的「必乃天败」改成「此乃天败」"
+  },
+  {
+   "id": "CE2",
+   "claim": "T09（标题「孟获第三次被擒仍不服，以『天败』自解，再获释放」）的 objective 第一条引文「孔明曰：『吾今再放汝去，若何？』」被当作本条任务的原文依据。",
+   "quote": "孔明曰：“吾今再放汝去，若何？”",
+   "quoteStart": 441584,
+   "why": "该句位于 **[441583,441605)**，属**第二次**纵放场景（该场对话 441523–441938）；而 T09.objective 的第二条引文在 443352、其余四栏在 443210/443250/443440/443935，全部属**第三次**被擒场景（443210–443468）。两条 objective 引文相距 **1752 码点**、跨两个场景。更直接的是：**T12 就是同一场对话**（441605「吾虽蛮人，颇知兵法…」+ 441636「若丞相这番再擒得我…」，正是 441583 那句邀请的回答），即同一组对话被拆给了两个任务。第三次纵放真正的邀请句是 **[443339,443346)「吾再放汝回去。」**（原文「孟获低头无语。孔明笑曰：『吾再放汝回去。』」），实测它**从未出现在候选的任何 quote 对象里**。T09.objective 的 text 也因此写成「孔明问他『吾今再放汝去，若何』，他立刻接下了这个提议」——描述的是第二次的场景，挂在第三次的任务上。",
+   "severity": "high",
+   "fix": "T09.objective 删去 441584 那条引文并改引 [443339,443346)「吾再放汝回去。」；441583–441662 整场留给 T12"
+  },
+  {
+   "id": "CE3",
+   "claim": "候选自述的 quotationConvention：「人物语一律带 voice=character 或登记进 speechAsClueNotFact。」",
+   "quote": "孔明看毕，抚掌大笑曰：“擒孟获之计，吾已差派下也。汝之所见，正与吾同。”",
+   "quoteStart": 442301,
+   "why": "T11.result 的这条引文含人物语（孔明曰），该栏**没有 voice 字段**，该句也**不在** speechAsClueNotFact 的 14 条里。同型还有 T01.action（孔明曰「吾欲先断其粮道」）、T06.action（「优再拜于帐下曰」）、T10.result（「众将拜伏曰…」+「孔明曰…」）。全表 13 任务 × 5 栏，非空栏位 58 个，其中 **27 个缺 voice**。revisionHistory 自称 R1 的「3 处人物语引文缺 voice 标记」已在 R2 修掉，实际仍剩 4 处含人物语的栏位。注意：这 4 处多数在 note 里**用文字说明了**是人物语，所以是**约定未落实**而非隐瞒。",
+   "severity": "medium",
+   "fix": "给这 4 个栏位补 voice=character（或 mixed），或把这 4 句补进 speechAsClueNotFact"
+  },
+  {
+   "id": "CE4",
+   "claim": "T06.result 标 basis=explicit，text 称「实际执行的是两条：把孟优一行用杂剧与药酒放倒，再把营寨腾空」。",
+   "quote": "前至寨门，获率众将骤马而入，乃是空寨，并不见一人。",
+   "quoteStart": 442809,
+   "why": "挂在该栏的唯一引文是 [442859,442907)（「…令乐人搬做杂剧，殷勤劝酒，酒内下药，尽皆昏倒，浑如醉死之人。」），它只支持「药酒放倒」这一条。「营寨腾空」在原文里**没有对应的动作句**：全区间「腾空」出现 **0** 次，唯一依据是孟获撞进去时所见的「乃是空寨，并不见一人」（442809）——那是**结果**，不是「蜀军把寨腾空」的**执行动作**。T06.costNote 进一步把「营寨是被主动腾空、事后仍在自己手里」写成既成事实。「孔明有意设空寨」是合理反推，但按候选自己的 basisLegend 应记 inferred，或把引文换成 442809。",
+   "severity": "medium",
+   "fix": "T06.result 的 basis 改 inferred，或补引 [442809,442834)；costNote 里「主动腾空」同样降级措辞"
+  },
+  {
+   "id": "CE5",
+   "claim": "worldSettings/11（金珠、宝贝、象牙、犀角）explain 称：「原文用『献与／进贡』这类文言说法，本条照录其语境不改写动词。」",
+   "quote": "家兄孟获，感丞相活命之恩，无可奉献，辄具金珠宝贝若干，权为赏军之资。续后别有进贡天子礼物。",
+   "quoteStart": 442417,
+   "why": "本区间（[439167,444148)）「献与」出现 **0** 次（复现：T[439167:444148].count('献与')→0；全篇 20 次都在区间外），「进贡」在本区间 1 次（即孟优这句「续后别有进贡天子礼物」）。区间内实际用的是「献」（「去献丞相」441375）与「奉献」（442433）。把「献与」说成「原文用」的文言说法，是对用词的错误归因；不影响该条 item 的四态判定。",
+   "severity": "low",
+   "fix": "改为「原文用『奉献』『进贡』」或直接引用原句"
+  }
+ ],
+ "reverseChecks": [
+  {
+   "id": "RC1",
+   "found": "「规模更大的下一战已经完成集结并归孟获调用」这一句被跳过——F07/S02/C08 的引文全部止于 443998「克日齐备」，恰好漏掉紧接的这句，而它才是「回末钩子已上膛」的实证。",
+   "quote": "各队人马，云推雾拥，俱听孟获调用。",
+   "ref": {
+    "quote": "各队人马，云推雾拥，俱听孟获调用。",
+    "start": 443999,
+    "end": 444016,
+    "textSliceEq": true,
+    "globalOccurrences": 1,
+    "inRange": true
+   },
+   "note": "实测该串在候选全文出现 0 次。F07.whyItCounts 说的是「已经完成动员的、规模更大的下一战」，结论正确但缺少这句直接证据。"
+  },
+  {
+   "id": "RC2",
+   "found": "「战报触发遣将」这条与 C06 同型的因果边整条缺失——原文先写战报（忽报蜀兵…绝断了夹山粮道），孟获当场笑「量此小辈」并遣忙牙长；候选只在 T03.objective 里连引这两句，既没有登记为 causeEdge，也没有放进 rejectedCauseEdges。对照 C06 登记了「二人回报 → 孟获点兵夜袭」的同型边。",
+   "quote": "获笑曰：“量此小辈，何足道哉！”即遣副将忙牙长，引三千兵投夹山峪来。",
+   "ref": {
+    "quote": "获笑曰：“量此小辈，何足道哉！”即遣副将忙牙长，引三千兵投夹山峪来。",
+    "start": 440742,
+    "end": 440776,
+    "textSliceEq": true,
+    "globalOccurrences": 1,
+    "inRange": true
+   },
+   "note": "R01 只否掉了「忙牙长被斩 → 董荼那接任」（否得对），但没有回答「那到底是什么触发了遣将」。"
+  },
+  {
+   "id": "RC3",
+   "found": "孟获与败残蛮兵**重聚**这一幕整段未被引用——候选 S02.before 的引文从 439380「众皆大喜，拥孟获渡了泸水…」起，跳过了它前面 439275–439325 的「行至泸水／败残蛮兵皆来寻探／且惊且喜，拜问『大王如何能勾回来』」。而 U01（两个脱身版本并存）与 TN01 正是挂在这段对话上的。",
+   "quote": "当日孟获行至泸水，正遇手下败残的蛮兵，皆来寻探。",
+   "ref": {
+    "quote": "当日孟获行至泸水，正遇手下败残的蛮兵，皆来寻探。",
+    "start": 439275,
+    "end": 439299,
+    "textSliceEq": true,
+    "globalOccurrences": 1,
+    "inRange": true
+   },
+   "note": "实测该串与「且惊且喜，拜问曰：」在候选全文均出现 0 次。缺的不是结论（U01 已把矛盾登记得很清楚），而是**触发那段自述的场景**。"
+  },
+  {
+   "id": "RC4",
+   "found": "「二人已在洞中」这一先决状态句未被引用——F03/S04 直接引 439437「孟获使人去请，二人惧怕，只得也引洞兵来」，跳过了前一句说明董荼那、阿会喃此刻**已在洞中**（即他们此前已被放回、人在孟获的地盘上）。",
+   "quote": "此时董荼那、阿会喃已在洞中。",
+   "ref": {
+    "quote": "此时董荼那、阿会喃已在洞中。",
+    "start": 439423,
+    "end": 439437,
+    "textSliceEq": true,
+    "globalOccurrences": 1,
+    "inRange": true
+   },
+   "note": "这一句关系到 S04「被迫来助」的处境判断：他们不是被从别处召来，而是本来就在洞中、召之即来。"
+  },
+  {
+   "id": "RC5",
+   "found": "孔明交底的**收束句**（把话说白、要求诸将用心）未被引用——T10.action 的引文止于 443819「…不欲灭其类也。」，漏掉紧接的这句，而 T10 的标题正是「向诸将交底」。",
+   "quote": "吾今明告汝等，勿得辞劳，可用心报国。",
+   "ref": {
+    "quote": "吾今明告汝等，勿得辞劳，可用心报国。",
+    "start": 443841,
+    "end": 443859,
+    "textSliceEq": true,
+    "globalOccurrences": 1,
+    "inRange": true
+   },
+   "note": "实测该串在候选全文出现 0 次。"
+  },
+  {
+   "id": "RC6",
+   "found": "孟优一行被药倒后的**可动性**细节未被引用——T07.action 的引文止于 442859「…浑如醉死之人。」，跳过孟获入帐追问时「内有醒者，但指口而已」（有人醒着却说不出话）这一句。",
+   "quote": "孟获入帐问之，内有醒者，但指口而已。",
+   "ref": {
+    "quote": "孟获入帐问之，内有醒者，但指口而已。",
+    "start": 442907,
+    "end": 442925,
+    "textSliceEq": true,
+    "globalOccurrences": 1,
+    "inRange": true
+   },
+   "note": "实测该串在候选全文出现 0 次。它是「药酒使人失能」的直接证据，也解释了孟获为何当场问不出情报。"
+  }
+ ],
+ "falseKillChecks": [
+  {
+   "id": "FK1",
+   "target": "R01「忙牙长被斩 → 董荼那接任出战」",
+   "verdict": "不构成误杀",
+   "why": "我实读原文：孟获是「唤诸将问曰：谁敢去敌马岱」，董荼那当场自请「某愿往」。两个任命之间没有任何连接句，R01 的判据（只是时间相邻）成立。"
+  },
+  {
+   "id": "FK2",
+   "target": "R02「蒋琬指出地势 → 孔明更改营寨布置」",
+   "verdict": "不构成误杀",
+   "why": "我按词逐一实查区间内「移寨/改寨/换寨/拔寨/移营/再筑/别立/改屯」全部 0 次；「公勿多疑，吾自有妙算」之后紧接「忽报蜀中差马岱解暑药并粮米到」，没有任何改营叙述。后件确实不存在。"
+  },
+  {
+   "id": "FK3",
+   "target": "R03「土人告知夜渡之法 → 孟获兵败被擒」",
+   "verdict": "不构成误杀",
+   "why": "从渡河到三擒之间隔着断粮、倒戈、诈降、空寨、三路夹攻等各有独立触发条件的步骤；写成一条边等于用结论当机制。"
+  },
+  {
+   "id": "FK4",
+   "target": "R04「孔明放走孟获 → 孟获倾心归降」",
+   "verdict": "结论不构成误杀，但引证文字有错（见 CE1）",
+   "why": "后件在本区间确实没有发生：孟获三次被擒三次不服（443250/443310 段），区间末反而借兵数十万。**R04 拒得对，我采纳它的结论**；问题只在「必乃天败」这四个字。"
+  },
+  {
+   "id": "FK5",
+   "target": "候选是否因词表/正则误杀合法因果",
+   "verdict": "未发现",
+   "why": "我反向查的是「有没有被挡掉的合法边」，做法是把原文按标点切成子句、筛出候选完全未引用的 12 条，再看其中是否有被丢弃的因果关系。结果：未引用的 12 条多为状态/收束/过场句（见 reverseChecks 与 remaining），**没有发现候选把一条合法的强因果边当噪音丢掉**。"
+  }
+ ],
+ "citationCheck": {
+  "method": "以 seed=20261014 从 284 条 quoteRef 中随机抽 5 条（walker 口径：递归取全部带 quote+start 的对象），逐条做 text.find(quote) 与 text[start:end]==quote 双判据",
+  "sampled": 5,
+  "verbatimHit": 5,
+  "offsetConsistent": 5,
+  "sliceEqual": 5,
+  "hashCorrect": 5,
+  "picked": [
+   "tasks[9].result.quotes[1]（T12）",
+   "tasks[12].result.quotes[0]（T11）",
+   "notWorldSettings[1].quotes[0]（NW02）",
+   "themeReadings[1].supportQuotes[3]（TH2）",
+   "textualNotes[0].quotes[0]（TN01）"
+  ],
+  "exhaustive": {
+   "quoteRefs": 284,
+   "verbatimHit": 284,
+   "offsetConsistent": 284,
+   "globalUnique": 284,
+   "inRange": 284,
+   "hashCorrect": 284,
+   "errors": 0,
+   "distinctSpans": 157,
+   "coveredCodepoints": 4555,
+   "coveragePct": 91.4,
+   "unquotedClauses": 12
+  }
+ },
+ "hallucinationCheck": {
+  "result": "pass",
+  "detail": "逐名核对出场人物（孔明/孟获/马岱/董荼那/阿会喃/孟优/忙牙长/马谡/吕凯/蒋琬/费祎/赵云/魏延/王平/马忠/关索/张嶷/张翼），全部在区间正文中可找到，**未发现原文没有的人物**；未发现原文没有的结局或伏笔；R04/F04/F07 显式把未兑现与未回收标为 unresolved，**没有把结束当成功**。唯一一处越权是 CE4「把营寨腾空」被写成 explicit 的执行动作。"
+ },
+ "selfCheckOfThisVerdict": {
+  "method": "本 verdict 里每一条 quote 都由脚本在写出前断言：text.find(quote)>=0、text[start:end]==quote、并记录 globalOccurrences 与 inRange",
+  "quotesAsserted": 12,
+  "failed": 0,
+  "myOwnErrors": [
+   "① 我第一遍用数组下标读 tasks（以为 [9] 是 T09、[10] 是 T12），实际 tasks 数组顺序是 T01..T09,T12,T13,T10,T11 —— 下标与 id 不一致。首轮差点得出「T12 跨场景」的错误结论。已改为按 id 取用后重跑，CE2 的场景归属结论随之改写。",
+   "② 我第一版 RC3 写的是「马岱连夜回告未被引用」——**复核时发现不成立**：该串确实出现在候选 S10.before 的散文里（只是没登记成 quoteRef）。我把它当作「遗漏事实」是错的，已整条换成 439275–439325 的重聚场景（实测该串在候选全文 0 次）。这正是契约里说的「你可以判自己错」。"
+  ],
+  "note": "两处都是我自己发现并改正的；记在这里而不是悄悄删掉。"
+ },
+ "notes": "总体判断：这是一份**引文纪律极强、内容层有局部硬伤**的候选。证据层 284/284 条引文四条判据全通过、91.4% 的区间码点被逐字引用、157 个互异 span、0 编造、0 幻觉、0 悬空内部引用、fieldCounts 21 项自报数字我复算**全部一致**（含 worldSettingsByKind 9/8/6、basisDistribution 132/5/7/2、nullFields 7 项逐项吻合），四栏互斥（同任务内同一句话零跨栏复用）实测 0 违规。它的 unknowns（U01 两个脱身版本/U04 蜀兵怎么过的河/U06 三千·五六百·二千三数并置/U09 本寨与银坑洞是否同一处）和 rejectedCauseEdges 的处理方式，正是本任务要的「拿不出证据就写 unknowns」。所以我的判定是 partial 而非 fail：**可用的部分是绝大多数**，但 CE1、CE2 必须先修（一条假引证、一条错场景归属），CE3 的 voice 缺口要补齐或把 4 句登记进清单，CE4 的 basis 要降级；CE5 属措辞。 存疑（不据此判 fail，仅记录）：① C01 把「酋长警告→不设兵→蜀兵暗渡」连成一条边，其跨度接近我判为过宽的 R03，但 C01 有「补派晚于失守」（440894 遣阿会喃在 440707 失守之后）的时序证据支撑，我保留意见；② C02 把「中毒而死」当作「改问土人」的原因，原文只写「马岱大惊，连夜回告孔明。孔明随唤向导土人问之」——时序成立，但「这就是原因」是候选的归纳（它标了 explicit，我倾向 inferred）；③ CE2 之外我未逐条复核 T09/T12 的全部槽位语义，这两条任务在修 CE2 时建议一并重排。 环境侧另有一条**非候选责任**的发现：本任务 JSON 声明的 sourceHash=2988ce6e… 与提示词正文/实测文件 8ab7298a… 不一致；我实测 2988ce6e… 正是 data/cache/152e2a6eed94f1075e7e7070.docs.json 与 data/cache/f0b45e85aac6c95e584075a2.docs.json 的 sha256，而这两份文件的 docs[0].text 与 fe42d01f… **逐字全同**（607191 码点、切片相同），故不影响本单元任何结论。候选在自己的 sourceHashDiscrepancy 里已如实登记，处理方式正确（用实测哈希、未改校验规则）。 未做：未跑 GPU/浏览器测试（任务未声明）；未改任何受保护路径；未改被复核候选一个字节；未读第八十九回及以后原文，故对 F04/F05/F07 的区间外回收不作判断。",
+ "evidenceRefs": [
+  {
+   "path": "loop/state/out/read_sanguo_L1_0087.candidate.json",
+   "sha256": "b79f4fc847a4ad25f7893066da169eaa76abb0634637d9c02e79364275e3e669",
+   "kind": "被复核候选（只读，未改一字节）"
+  },
+  {
+   "path": "data/cache/fe42d01f3826fe8096f86614.docs.json",
+   "sha256": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+   "kind": "原文 docs.json（只读，未改；哈希＝提示词正文与实测值）"
+  },
+  {
+   "path": "data/cache/152e2a6eed94f1075e7e7070.docs.json",
+   "sha256": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+   "kind": "任务 JSON sourceHash 指向的文件（只读；其 docs[0].text 与原文逐字全同）"
+  },
+  {
+   "path": "data/cache/f0b45e85aac6c95e584075a2.docs.json",
+   "sha256": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+   "kind": "同上（与 152e2a6e… 同哈希）"
+  },
+  {
+   "path": "loop/state/out/read_sanguo_L1_0087.json",
+   "sha256": null,
+   "kind": "被复核候选的提交记录（只读）。**不记哈希**：本复核的 reviews[] 会被 cmd_verify 追加进这个文件，任何在此固化的哈希都会在追加后立刻漂移——那是自造的假失效。"
+  }
+ ],
+ "reproduce": [
+  "python3 -c \"import json,hashlib;p='data/cache/fe42d01f3826fe8096f86614.docs.json';r=open(p,'rb').read();print(hashlib.sha256(r).hexdigest());t=json.loads(r)[0]['text'];print(len(t[439167:444148]),hashlib.sha256(t[439167:444148].encode()).hexdigest())\"",
+  "python3 -c \"import json;t=json.load(open('data/cache/fe42d01f3826fe8096f86614.docs.json'))[0]['text'];print(t.count('必乃天败'),t.count('此乃天败'));i=t.find('此乃天败');print(i,repr(t[i-20:i+40]))\"",
+  "python3 -c \"import json;t=json.load(open('data/cache/fe42d01f3826fe8096f86614.docs.json'))[0]['text'];print(repr(t[441583:441605]));print(repr(t[443339:443346]));print(repr(t[443352:443392]))\"",
+  "python3 -c \"import json;t=json.load(open('data/cache/fe42d01f3826fe8096f86614.docs.json'))[0]['text'];b=t[439167:444148];print('腾空',b.count('腾空'),'献与',b.count('献与'));print(repr(t[442809:442834]))\"",
+  "python3 -c \"import json;c=json.load(open('loop/state/out/read_sanguo_L1_0087.candidate.json'));print([t['id'] for t in c['tasks']]);print('voice缺失',sum(1 for t in c['tasks'] for k in ('objective','obstacle','action','result','cost') if isinstance(t.get(k),dict) and 'voice' not in t[k]))\"",
+  "python3 -c \"import json;r=open('loop/state/out/read_sanguo_L1_0087.candidate.json').read();print('各队人马' in r,'勿得辞劳' in r,'已在洞中' in r,'但指口而已' in r,'当日孟获行至泸水' in r)\""
+ ]
+}

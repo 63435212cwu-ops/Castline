@@ -1,0 +1,56 @@
+{
+  "task": "verify:dafeng:L2:0178",
+  "agent": "w-dafeng-3",
+  "role": "VERIFIER（独立反向复核者）",
+  "status": "done",
+  "verdict": "partial",
+  "reviewedTask": "read:dafeng:L2:0178",
+  "reviewedCandidate": "loop/state/out/read_dafeng_L2_0178.candidate.json",
+  "summary": "独立反向复核《大奉打更人》第一百七十八章「离京」（原文区间 codepoint [643574,647624)，4050 字、210 行 / 104 个非空段）。按 VERIFIER 契约**先自读原文再看候选**（把切片落到外部暂存区通读，未先看结论），随后自写独立脚本 verify_0178.py（**不 import 候选的 build_candidate.py / verify_candidate.*.py**，全部判据从 docs.json 与候选文件重新算）。结论 **partial**：引文层与机器可复算声明**满分**——255/255 条 quoteRef 逐字命中且 text[start:end]==quote、全部落在区间内、区间内唯一，occurrence 计数（wholeTextOccurrences / occurrencesInRange / firstOccurrenceAt）逐条重算 0 处不符；段级覆盖率（104 段 / 100 段被触及 / charCoverageRatio 0.8086）、segmentSha256、para 字段全部独立复算一致；6 条任务五栏**零共用**，进一步按句单元复算仍为 0 处跨栏共用（提示词点名的历史高发项）；0 条编造人物/事件，semanticReview 未越权（自报 not-performed）。缺陷集中在**解释层**，两条有逐字引证的反例：**CE1**（high）worldSettings[11].explain 既有一处散文字段误引（写作「大呼大叫」，全书 0 次，原文为「大呼小叫」[647306:647323)），又有一处无原文依据的效果断言（「就能让甲板安静」——区间内「安静」只出现 1 次且就是那道命令本身；候选自己的 tasks[5].result 明写「区间内没有再写甲板是否安静下来」，**同一份产出对同一事实给出相反判断**，与红线「结束≠成功」同形）；**CE2**（low）unknowns[4]（U5）写「全书这一处出现」，实测「破gua」全书出现 2 次（644134 与 1138594），削弱理由但不改结论。反向验证另查出 3 条候选未覆盖的原文事实：RC1「他的确去了教坊司，还和浮香来了一场离别前的交流。」（24 字**整句零覆盖**，导致 V10 把叙述层两件事读成一件，也错过 C3/K1 知识差的直接支撑）、RC2「就拿你曾经在太康县接手过的硝石矿举例……他们无力承担。」（64 字**整句零覆盖**，含 C5 缺失的**需求端**前置因果，且「太康县」在候选全文 0 次）、RC3「被这群武夫给吵醒，心里甚是不悦。」（16 字**分句零覆盖**，其所属句单元覆盖率 0.63，句级二元判据抓不到）。RC5 是对统计口径本身的反向发现：段级 96.15% 覆盖率会把「同段内一句被引、另一句从未被引」系统性放过，句级真相只有 170/178 = 95.51%，建议 coverageDeclaration 增加句级与分句级口径。**我自己的计数也错过一次并已按脚本实测改正**（第一版把 RC3 当独立零覆盖整句，实为分句形态；详见 selfCorrection.onMyOwnCountingError）。判 partial 而非 fail：缺陷局部、定点、可修正，抽取项主体（tasks/causeEdges/states/foreshadows/unknowns）无编造无越权；判 partial 而非 pass：CE1 的效果断言在原文里找不到对应文字且与自身字段矛盾。修正 CE1 两处与 U5 一处后，本候选具备 pass 条件。",
+  "evidence": [
+    {
+      "path": "loop/state/out/verify_dafeng_L2_0178.verdict.json",
+      "sha256": "e99883557f068c94d5326daef4d304432e75b3e10301617627d98b8f9e01fbe9",
+      "kind": "verdict（任务 writes 指定的唯一写入路径；本轮最终产物：verdict=partial、2 条 counterExamples、5 条 reverseChecks、notes；两条 counterExample 与五条 reverseCheck 的 quote 均逐字可 find、偏移一致）"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/verify-dafeng-L2-0178/verify_0178.py",
+      "sha256": "09b9655dfbb8839ea85f6a4175180c4e1a8d2bf491f42d15f33ca40344ead5a3",
+      "kind": "independent-verifier-script（**不复用候选脚本**：源/切片哈希、255 条引文逐字+区间+唯一+occurrence 计数、段级与句级双层覆盖率、分句覆盖率、五栏跨栏独立性、CE1/CE2 证据、RC1–RC4 覆盖证据、人名幻觉检查，共 37 条判据；退出码 0 = 全部与 verdict 一致）"
+    }
+  ],
+  "assertions": [
+    {"text": "源哈希：shasum -a 256 data/cache/1063b17ca65ec1b76f30e460.docs.json = fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839，与 task.sourceHash 及候选 source.sourceHash 三方逐字一致 ⇒ pass", "result": "pass"},
+    {"text": "切片口径：len(docs[0].text[643574:647624)) == 4050，以「第一百七十八章 离京」开头，sha256 == 7623869b15bf338d79e70446e905171d78ffb45f481ea184a379a3f8db9f0132（与候选自报 segmentSha256 一致）⇒ pass", "result": "pass"},
+    {"text": "引文逐字性：遍历候选全树取 255 条含 quote+start+end 的对象，断言 text[start:end]==quote 且 quote 是 docs[0].text 子串 ⇒ **255/255 通过，0 处失败**", "result": "pass"},
+    {"text": "引文区间与唯一性：255 条全部满足 643574 <= start < end <= 647624，且 quote 在区间内出现次数 == 1 ⇒ 0 处越界、0 处歧义", "result": "pass"},
+    {"text": "occurrence 声明复算：逐条重算 wholeTextOccurrences / occurrencesInRange / firstOccurrenceAt 与候选声明比对 ⇒ 0 处不符（例：S5 的「许七安沉默了。」声明的 wholeTextOccurrences=4、区间内 1、firstOccurrenceAt=447324，全部正确）", "result": "pass"},
+    {"text": "覆盖率复算：独立按单 \\n 切分得 104 个非空段，段被至少一条引文触及者 100 段，字符覆盖率 0.8086 ⇒ 与候选 coverageDeclaration 三项全部一致", "result": "pass"},
+    {"text": "para 字段一致性：255 条 quoteRef 的 para 字段全部与其 start 所在段号一致 ⇒ 0 处错", "result": "pass"},
+    {"text": "任务五栏独立性：6 条任务的 objective/obstacle/action/result/cost 之间，无任何一条引文被两栏共用；进一步按 178 个句单元复算跨栏覆盖 ⇒ **0 处共用**（本项是该任务提示词点名的历史高发项，旧图谱实测 714/1664）", "result": "pass"},
+    {"text": "CE1 证据：sl.count('大呼小叫')==1 且 t.count('大呼大叫')==0 ⇒ 候选 worldSettings[11].explain 里的「大呼大叫」是误引；同条 explain 的「就能让甲板安静」与 sl.count('安静')==1（唯一一次即命令本身）冲突，且候选 tasks[5].result 自称「区间内没有再写甲板是否安静下来」⇒ 效果断言无依据且自相矛盾，counterExample 成立", "result": "pass"},
+    {"text": "CE2 证据：re.finditer('破gua', docs[0].text) ⇒ [644134, 1138594] 共 2 次，而候选 unknowns[4].why 写「全书这一处出现」⇒ counterExample 成立（低严重度：不改 U5 结论）", "result": "pass"},
+    {"text": "RC1/RC2/RC3 覆盖证据：合并全部引文 span 后按字符复算，「他的确去了教坊司，还和浮香来了一场离别前的交流。」[645397:645425) 与「就拿你曾经在太康县接手过的硝石矿举例……他们无力承担。」[646674:646737) 覆盖率均为 0.00（整句零覆盖）；「被这群武夫给吵醒，心里甚是不悦。」[647187:647203) 覆盖率 0.00 而其所属句单元 [647153:647203) 按内容口径覆盖 0.63 ⇒ 分句零覆盖成立", "result": "pass"},
+    {"text": "误杀检查：候选未把「老司机的笑容」「白嫖」「插旗」「这男人改道还好，顶多穿肠过肚」等现代/调侃语汇过滤掉，均保留在 sceneBeats / notForeshadows 中，只在断言强度上降级 ⇒ 未发现词表/正则造成的合法项误杀", "result": "pass"},
+    {"text": "幻觉/越权检查：候选出现的全部人名与称谓（临安公主、裱裱、许七安、许宁宴、姜律中、宋廷风、魏渊、魏公、元景帝、浮香、巡抚、大青衣等）在原文区间内均有对应文字；255 条正式引文无一条编造；semanticReview == 'not-performed' 且 note 明确「引文定位正确 ≠ 语义已核验」⇒ 未越权", "result": "pass"},
+    {"text": "引用核验（随机 5 条）：以固定种子抽取 sceneBeats[10].quotes[1] / themeReadings[1].support[2].quotes[1] / causeEdges[3].quotes[0] / sceneBeats[5].quotes[0] / sceneBeats[14].quotes[3]，逐条 find() ⇒ **5/5 逐字命中、偏移与声明一致、区间内唯一**", "result": "pass"},
+    {"text": "独立脚本 verify_0178.py 重跑：37 条判据全部 PASS、退出码 0 ⇒ verdict=partial 的每条机器判据可被第三方用一条命令复现", "result": "pass"},
+    {"text": "自我纠错：第一版 RC5 把 RC3 当独立零覆盖整句，脚本实测显示它所属句单元覆盖 0.63（分句形态），已按实测改正 verdict 的 RC3/RC5/notes 措辞，并在 selfCorrection.onMyOwnCountingError 如实登记该错误", "result": "pass"}
+  ],
+  "changes": [
+    {"path": "loop/state/out/verify_dafeng_L2_0178.verdict.json", "kind": "append-only"},
+    {"path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/verify-dafeng-L2-0178/verify_0178.py", "kind": "artifact-only"}
+  ],
+  "sourceHashes": {
+    "data/cache/1063b17ca65ec1b76f30e460.docs.json": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "loop/state/out/read_dafeng_L2_0178.candidate.json": "85e2380314a13555ad18cf84d4cd5b67576704e07c5a3e1f1e399286c7efb315"
+  },
+  "remaining": [
+    "CE1 的两处修正（删掉 worldSettings[11].explain 的效果断言、把「大呼大叫」改回逐字的「大呼小叫」）与 CE2 的一处（U5 改为「全书出现 2 次」）属**被复核候选**的写入，不在本任务 writes 内，我未代改；需由持有该路径的下一个精读/合并任务执行。",
+    "RC1/RC2/RC3 三条未覆盖原文是否补入候选，以及 RC4（「前世」句的语义处理）与 RC5（coverageDeclaration 增加句级/分句级口径）的建议，均属下游发布/合并环节决策，本轮只记录不实施。",
+    "F2（元景帝小金库）回收端为 null，严格按「有铺设与回收才算伏笔」应只算未回收线；我未要求降级，仅提示下游勿与 U3 双计数。",
+    "W3（运河 placeState=arrived）我复核后认为可保留（已标 derived，且 W2 已单独登记官船 arrived），但它是候选自陈最接近「提及≠到达」的一处，下游若严格口径可降为 mentioned。",
+    "本轮**未做**跨单元上下文核验（如 173–179 章的连续前情），故 RC2 的「太康县前情」只按本区间内文字判为未覆盖，不主张其在全书中的重要性；也未运行 GPU/浏览器测试（任务未要求）。"
+  ],
+  "rollback": "本任务只追加写 loop/state/out/verify_dafeng_L2_0178.verdict.json（append-only，不覆盖任何既有文件），并在外部回滚点目录写一个独立复核脚本；未改受保护路径、未动他人产物。回滚方式：删除这两个新增文件即可，无副作用。"
+}

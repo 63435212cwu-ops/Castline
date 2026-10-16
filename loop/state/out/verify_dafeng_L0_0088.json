@@ -1,0 +1,123 @@
+{
+  "task": "verify:dafeng:L0:0088",
+  "agent": "w-dafeng-3",
+  "status": "done",
+  "summary": "独立反向复核 read:dafeng:L0:0088（《大奉打更人》第八十九章 此时无声胜有声，原文区间 [280782,284144)，3362 字）。按 VERIFIER.md 顺序执行：先不通读候选、先把原文整片读完并手写要点，再打开候选逐条比对。裁决 **partial**。机器复核（审计脚本独立从磁盘复算，不 import 候选任何构建脚本）：136 条 quote 对象全部 text[start:end]==quote、end-start==len(quote)、sourceHash 一致、inRange 与 occurrencesInFullText/occurrencesInUnit 全对；chapterAtOffset 用「含两」与「不含两」两套章节正则各算一遍结果相同（本单元章标题不含「两」字头，不存在 0084 的归属漂移）；sliceSha256=94aa3ba8e9852d576b657519a6c8929b70c2ed1ccaeab05a906e7b87789d12c7 与候选一致；任务五栏做「逐字相等 + 互为子串 + 区间求交」三重共用判定 = 0 处共用，即候选自报的 taskColumnsShareNoQuote=true 经独立复算为**真**（这正是 0084 被判缺陷的同一检查项，本单元确实按 0084 复核意见改用了包含判定）；随机种子 20261009 抽 5 条 in-range 引文独立 find，5/5 逐字命中且偏移一致；另用「两套章节正则 + 逐条区间求交」复算全部元数据。反向验证：把原文切成 91 个自然段，标出候选引文未覆盖的 22 段，逐段判是否有可登记事实，给出 6 条候选未覆盖、但原文明确存在的事实。无编造（无原文外人物/结局/伏笔），无「结束当成功」。5 条 counterExample 均附逐字可查引文与可复现命令。semanticReview 保持 not-performed。",
+  "evidence": [
+    {
+      "path": "loop/state/out/verify_dafeng_L0_0088.verdict.json",
+      "sha256": "595d72a6691815319be33d4a726e38f665a9dd7eefb022a7683176a29e4024bd",
+      "kind": "verifier-verdict（本轮产物）"
+    },
+    {
+      "path": "loop/state/out/read_dafeng_L0_0088.candidate.json",
+      "sha256": "f67ee47eaf9a325022f2ae0f69f983b6249fcb5c9aff2a93e583a8c1d0ee9164",
+      "kind": "被复核候选（只读，未修改）"
+    },
+    {
+      "path": "data/cache/215f4b88fb087a7d735a6fae.docs.json",
+      "sha256": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+      "kind": "source-text（只读引用，未修改）"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "复核者独立性：本轮复核者 w-dafeng-3 ≠ 被复核候选的 agent w-xiyou-0（租约 loop/state/leases/verify:dafeng:L0_0088.d/lease.json 的 agent 字段即 w-dafeng-3）；verify 子命令未拒自签，rc=0，输出「复核已记录：read:dafeng:L0:0088 → partial」",
+      "result": "pass",
+      "cmd": "python3 loop/bin/loop.py verify --task read:dafeng:L0:0088 --file loop/state/out/verify_dafeng_L0_0088.verdict.json --agent w-dafeng-3"
+    },
+    {
+      "text": "源文件哈希与任务 sourceHash 一致；切片哈希独立复算与候选一致；候选 docsJson 键名（1063b17c…）与任务 graphKey（215f4b88…）不同但两份文件 sha256 相同，故不构成缺陷",
+      "result": "pass",
+      "cmd": "shasum -a 256 data/cache/215f4b88fb087a7d735a6fae.docs.json data/cache/1063b17ca65ec1b76f30e460.docs.json; python3 -c \"import json,hashlib;t=json.load(open('data/cache/215f4b88fb087a7d735a6fae.docs.json'))[0]['text'];print(hashlib.sha256(t[280782:284144].encode()).hexdigest())\""
+    },
+    {
+      "text": "边界独立复算：text[280782:284144] 长 3362、以「第八十九章 此时无声胜有声」开头、以 12 个连字符结尾；text[284144:284157]=='第九十章 许公子开堂讲课'",
+      "result": "pass",
+      "cmd": "python3 -c \"import json;t=json.load(open('data/cache/215f4b88fb087a7d735a6fae.docs.json'))[0]['text'];print(len(t[280782:284144]),repr(t[280782:280795]),repr(t[284144:284157]))\""
+    },
+    {
+      "text": "全量引文复算：136 条 quote 对象逐条 slice 相等、长度相等、sourceHash/inRange/occurrencesInFullText/occurrencesInUnit/chapterAtOffset 全对；两套章节正则（含「两」/不含「两」）结果相同。我的第一版检查器用 find()==start 断言唯一性，对 '.....'（全文 16075 次）与 '------------'（1031 次）报了 2 个假阳性——已确认是**我的断言过强**，候选对这两条正确声明了出现次数，故不计为候选缺陷",
+      "result": "pass",
+      "cmd": "python3 -c \"import json;t=json.load(open('data/cache/215f4b88fb087a7d735a6fae.docs.json'))[0]['text'];print(t.count('.....'),t.count('------------'))\"  # -> 16075 1031（与候选声明一致）"
+    },
+    {
+      "text": "任务五栏共用判定（0084 复核抓到的同一检查项）：30 个栏位×引文做「相等 + 互为子串 + 区间求交」三重判定，共用 0 处 —— 候选自报 taskColumnsShareNoQuote=true 为真",
+      "result": "pass",
+      "cmd": "见 loop/state/out/verify_dafeng_L0_0088.verdict.json 的 method 字段（脚本按三重判定复算全部 5 个任务）"
+    },
+    {
+      "text": "随机抽 5 条 in-range quote 独立 find（种子 20261009），5/5 逐字命中且 find()==start：@281778、@281798、@283165、@283326、@282136",
+      "result": "pass",
+      "cmd": "python3 -c \"import json;t=json.load(open('data/cache/215f4b88fb087a7d735a6fae.docs.json'))[0]['text'];print([ (o,t.find(t[o:o+14])) for o in (281778,281798,283165,283326,282136)])\""
+    },
+    {
+      "text": "counterExample 1（who 栏用区间外职务）：'指挥使' 与 '百户' 在本区间内各 0 次，全书 207 / 101 次",
+      "result": "pass",
+      "cmd": "python3 -c \"import json;t=json.load(open('data/cache/215f4b88fb087a7d735a6fae.docs.json'))[0]['text'];u=t[280782:284144];print({k:(u.count(k),t.count(k)) for k in ['指挥使','百户','金锣','银锣','铜锣']})\""
+    },
+    {
+      "text": "counterExample 2（F2 payoff 与第91章叙述相反）：第91章明写两位义子「显然没有把许公子和许七安联系在一起」，认出发生在 @289192 靠眼看而非魏渊复述",
+      "result": "pass",
+      "cmd": "python3 -c \"import json;t=json.load(open('data/cache/215f4b88fb087a7d735a6fae.docs.json'))[0]['text'];print(t[288020:288060]);print(t[289185:289215])\""
+    },
+    {
+      "text": "counterExample 3（'恒慧' 不在第93章）：第93章区间内 '恒慧' 0 次 / '恒远' 4 次；'恒慧' 全书首现 @428182",
+      "result": "pass",
+      "cmd": "python3 -c \"import json;t=json.load(open('data/cache/215f4b88fb087a7d735a6fae.docs.json'))[0]['text'];print(t[294547:301126].count('恒慧'),t[294547:301126].count('恒远'),t.find('恒慧'))\""
+    },
+    {
+      "text": "counterExample 4（F1 note 章号差 1 章）：offset 295448 落在第93章（标题 @294547），下一章标题 @297902",
+      "result": "pass",
+      "cmd": "python3 -c \"import json;t=json.load(open('data/cache/215f4b88fb087a7d735a6fae.docs.json'))[0]['text'];print(t.find('明后两天要值夜'),t.find('第九十三章 三号不愧是读书人'),t.find('第九十四章 凶杀案'))\""
+    },
+    {
+      "text": "counterExample 5（unknowns[3] 断言被原文反驳）：萍儿自荐 @282499 与「审视杨的姿色」@282567 之间存在许七安的内心回绝句 @282543",
+      "result": "pass",
+      "cmd": "python3 -c \"import json;t=json.load(open('data/cache/215f4b88fb087a7d735a6fae.docs.json'))[0]['text'];print(t[282499:282610])\""
+    },
+    {
+      "text": "误杀检查：'牌子' 全书 7 处仅 1 处在区间内（其余 6 处 @1344153/2127709/2127719/2127754/2127778/2127797 与影梅小阁无关），故 RF-2 拒立正确；唯一站不住的是 RF-1 的「也没有任何回收」（实际 @2514560 有浮香妖族暗子的回收），已按契约记为存疑而非 fail 依据",
+      "result": "pass",
+      "cmd": "python3 -c \"import json;t=json.load(open('data/cache/215f4b88fb087a7d735a6fae.docs.json'))[0]['text'];print(len([1 for _ in __import__('re').finditer('牌子',t)]),t.find('浮香是妖族暗子'))\""
+    },
+    {
+      "text": "产物自校验：verdict 文件内 20 条内嵌引文逐条复算 text[start:end]==quote 全部成立；verify 结果已落进 loop/state/out/read_dafeng_L0_0088.json 的 reviews[] 与 verifyState=partial",
+      "result": "pass",
+      "cmd": "python3 -c \"import json;d=json.load(open('loop/state/out/read_dafeng_L0_0088.json'));print(d['verifyState'],d['reviews'][-1]['reviewer'],len(d['reviews'][-1]['counterExamples']),len(d['reviews'][-1]['reverseChecks']))\""
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/verify_dafeng_L0_0088.verdict.json",
+      "kind": "append-only"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/215f4b88fb087a7d735a6fae.docs.json": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+  },
+  "remaining": [
+    "语义未认证：本复核只复算「引文定位 + 元数据 + 章节归属 + 分区口径」，不认证解释层。semanticReview 保持 not-performed。",
+    "必修项未由我执行（按 VERIFIER 契约只裁断不改他人产物）：5 条 counterExample 的定点修复需 READER 侧执行——who 栏去掉「指挥使/百户」并修 excludedSettings 那句「本区间有」，F2 payoff 按第91章叙述改写，F3 括号收窄为「恒远/六号一线」并删「恒慧」，F1 note 的「第94-95章」改「第93章」，unknowns[3] 补引 @282543 并收窄为「有没有出声答复」。",
+    "未核 F2/F3 的 payoff 是否为最贴切的回收点：候选 F3 自己声明是关键词检索而非通读；我只核了引文逐字存在与所在章，未通读第93→95章确认没有更贴切的回收点。",
+    "未量化「区间外章节归属」类错误的全局影响面：本单元只发现 1 处（F1 note 差 1 章），未跨任务扫描历史候选是否继承同一口径。",
+    "存疑未判：T2.obstacle.note 指向 outOfRangeContext 里的「杨砚不放人」，但该节 3 条里没有这一条（原文 @280641 确在第88章末）。指针落空是事实，但 outOfRangeContext[0]（@280715 同属第88章末）部分覆盖该区域，无法断定是笔误还是泛指，故只记存疑。",
+    "RF-1 的口径不一致我只作建议：伏笔粒度（一句感官描写算不算「铺设」）的定义权在 READER/计划侧，我拿不出禁止它的原文条款，按契约不得据此判 fail。",
+    "反向验证的 6 条发现我只核到「候选确未覆盖 + 原文逐字存在」，未逐条评估它们是否都应升级为独立条目（例如人物外貌是否属于本角色的登记范围，判据在 READER 侧）。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/verify_dafeng_L0_0088.verdict.json"
+    ]
+  },
+  "submittedAt": "2026-10-09T10:27:45Z",
+  "wallClockSeconds": 1070,
+  "wallClockFrom": "lease.startedAt",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-09T10:27:45Z"
+  },
+  "verifyState": "pending"
+}

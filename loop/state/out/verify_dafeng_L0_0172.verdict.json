@@ -1,0 +1,239 @@
+{
+  "task": "verify:dafeng:L0:0172",
+  "agent": "w-dafeng-3",
+  "role": "VERIFIER",
+  "status": "done",
+  "verdict": "partial",
+  "reviewedTask": "read:dafeng:L0:0172",
+  "reviewedArtifact": {
+    "path": "loop/state/out/read_dafeng_L0_0172.candidate.json",
+    "sha256": "c13880a6eb9ddc665dba517fee881c5347c13a1c7710d9d06909515c4b44e5b0",
+    "bytes": 215262,
+    "producedBy": "w-read-2"
+  },
+  "source": {
+    "path": "data/cache/1063b17ca65ec1b76f30e460.docs.json",
+    "sha256": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "range": [619496, 623899],
+    "codepoints": 4403,
+    "segmentSha256": "a074f93e6e7a8f0b3fa57ec8dbfe9a37e5caace64404de22257ee4c66855b2de",
+    "hashMatchesTaskSourceHash": true,
+    "offsetUnit": "codepoint",
+    "offsetBase": "docs[0].text 全文（0-based，左闭右开）"
+  },
+  "summary": "引文层与机械自述**全部成立**（188/188 实例逐字回切、find、出现次数、段落归属、哈希、speech 规则、同任务跨栏复用 0、段落覆盖 100/118 与声明逐元素相同、basis 直方图 42/3/5 重算一致），未发现任何**编造条目**：8 条任务、10 条因果边、8 条状态、4 条伏笔、17 条 worldSettings、6 条知识差逐条能在原文找到对应文字，没有原文之外的人物、结局、成功判定。判 partial 的唯一理由是**句级覆盖表与它自己的声明不符**：候选在 sentenceLevelGapsNote 里承诺「已引段落内逐句覆盖率低于 50% 的句子**全部**列出」，我用它自己的切句口径精确复现了那 33 条（33/33 精确重合，口径可复现），但同一口径下**另有 5 条**同样 <50% 的句子没进表、也没进任何理由表；其中 3 条（`井里有头？`、`毕竟他将来要娶媳妇。`、`许七安忽然被一声尖叫惊醒，`）是**零覆盖且候选全文出现 0 次**，偏偏分别落在 T7.label/T7.obstacle、CE3.mechanism、T7.label 的断言正下方——即「断言用到了这句话，但那句话本身从未被取证」。这是遗漏，不是编造；所以判 partial 而非 fail，抽取内容可用，须补这 5 条或改写承诺。",
+  "procedureNote": "按 ROLES/VERIFIER.md 的顺序执行，未跳步：① 先把 docs[0].text[619496,623899) 全 4403 字 / 118 个非空段落自己逐段读完（在打开候选之前），② 再读候选，③ 抽取项逐条回原文核对，④ 反向问「这一段里他还漏了什么」（先算最大零覆盖岛，再按候选自己的切句口径复算句级覆盖），⑤ 误杀检查，⑥ 幻觉/越权检查，⑦ 固定种子 20261014 抽 5 条 find 核验。引文层与覆盖层全部由我自己的脚本重算（`audit_0172.py`），不 import 候选自带的 build/audit 脚本；候选自报的复现命令指向 /Volumes/资源库/… 回滚点，我一律用仓库内原文自行复算。**我自己的仪器出过三次错，已逐条改正后才给结论**（详见 notes）：把包含关系重叠的引文 span 直接相加导致覆盖率虚高（改成合并区间）、把「引文在全文中的首次出现」误当成「本区间应有的偏移」（Q101 假失配）、用裸 substring 计数把候选**主动拒绝**的措辞判成幻觉（3 个假阳性，改为看否定语境）。",
+  "mechanicalVerification": {
+    "quotesTotal": 188,
+    "quotesUnique": 120,
+    "sliceEqualsQuote": "188/188 通过（t[start:end]==quote，0 失配）",
+    "findEqualsStart": "188/188 通过（t.find(quote, START)==start，0 失配）",
+    "firstOccurrenceInFullText": "188/188 通过（声明的 firstOccurrenceInFullText == t.find(quote)，0 失配）",
+    "occurrencesInFullTextAndUnit": "188/188 通过（我重算全文与区间出现次数，与声明逐一相符）",
+    "insideUnitRange": "188/188 在 [619496,623899) 内，0 条越界",
+    "sourceHashField": "188/188 等于 task.sourceHash",
+    "paragraphIndexAndRange": "188/188 的 paragraph / paragraphIndex0 / paragraphRange[start,end) 与我按「单个 \\n 切分、跳过空白行」重算的 118 段完全一致，0 失配",
+    "qidQuoteBijection": "120 个 qid ↔ 120 个互异引文字符串，双向一一对应，0 歧义",
+    "speechLabelMechanical": "188/188 与「引文含 “ ⇔ dialogue」的机械规则一致，0 违反",
+    "speakerAllNull": "188/188 speaker 均为 null（与 speakerAttribution.policy 一致）",
+    "taskColumnReuse": "任务五栏之间同句复用 = 0（我按 span 重算）",
+    "paragraphCoverage": "我按 span 相交重算 cited=100/118，uncited 集合与 metrics.paragraphsUncited 逐元素相同（差集为空）",
+    "basisHistogram": "我按「已填任务栏 + states + causeEdges」重算 = {explicit:42, inferred:3, derived:5}，与 metrics 声明一致",
+    "taskColumnCounts": "filled=32 / null=8，与 metrics 声明一致",
+    "sourceBlock": "codepoints 4403、segmentSha256 与切片 utf-8 字节哈希一致、段落数 118，全部自述成立",
+    "themeTriples": "TH1/TH2 均含 perspective + support + counter 三件，0 缺件",
+    "requiredSections": "提示词要求的 6 个分区（tasks/causeEdges/states/foreshadows/worldSettings/themeReadings）全部存在",
+    "failures": [],
+    "failureCount": 0
+  },
+  "quoteSpotCheck": {
+    "method": "random.seed(20261014)，从 120 个互异 qid 中抽 5 条，逐条 t.find(quote, START) 并与声明 start 比对，同时回切 t[start:end]",
+    "samples": [
+      {"qid": "Q094", "quote": "许七安握紧了黑金长刀", "find": 622993, "declaredStart": 622993, "hit": true},
+      {"qid": "Q070", "quote": "抽空去浩气楼和魏渊交流感情", "find": 622295, "declaredStart": 622295, "hit": true},
+      {"qid": "Q023", "quote": "一些零碎的东西，婶婶打算在内城购买，正好借这个机会换新。", "find": 620640, "declaredStart": 620640, "hit": true},
+      {"qid": "Q087", "quote": "“怎么了？”婶婶皱着眉头。", "find": 622795, "declaredStart": 622795, "hit": true},
+      {"qid": "Q099", "quote": "许七安大步走过去，绕到井的后方，果然看见小豆丁坐在井边，睡眼惺忪的模样。", "find": 623088, "declaredStart": 623088, "hit": true}
+    ],
+    "result": "5/5 逐字命中，偏移与声明一致"
+  },
+  "extractionAudit": {
+    "verdict": "未发现编造。候选 8 条任务、10 条因果边（CE1–CE10）、9 条不连边（NC1–NC9）、8 条状态、6 条知识差、4 条伏笔、6 条不构成伏笔、17 条 worldSettings、7 条排除、2 条主题，逐条在原文找到对应文字（引文层已有 188/188 机械证明）。逐条抽读的结果：T3 的「不把许玲月的分房口角算成搬家的障碍」、T6 的「结束≠成功（她的目标没实现）」、T7 的「P099 是人物推断不是叙述确认」、T8 的「本章在她问完就结束，不写答应也不写拒绝」、NC7 的「把怨灵当尖叫原因是与原文相反」、NA1–NA10 的十条拒绝断言——方向都与原文一致，且多数是**保守**的（宁可判 null / unresolved）。",
+    "fabrications": [],
+    "notes": "候选的 null 判定（8 个栏位）我逐条核过：T1/T2/T3/T5/T7/T8 的 cost 与 T1/T2/T3 的 obstacle 都确实没有对应原文动作，判 null 是对的；尤其是 T6.cost 判 null 而 T4.cost 判 inferred，两处用了**不同**口径并写明理由（「罕见」这个标记），这是可检验的克制，不是凑栏位。"
+  },
+  "counterExamples": [
+    {
+      "id": "CE-1",
+      "claim": "T7.label 写作「夜半被**尖叫**惊醒后查明「井里有头」是怎么回事」，T7.obstacle 也写「『井里有头』这个说法与他掌握的情况直接冲突」；但「井里有头？」与「许七安忽然被一声尖叫惊醒，」这两句在候选全文里出现 **0 次**，覆盖率 **0.00**，且**不在**它自己声明的 33 条句级交底表里，也不在 sentenceLevelGapReasons / uncitedReasons 里的任何一条。断言引用了这两句话，但那两句话本身从未被取证。",
+      "quote": "井里有头？",
+      "quoteRef": {"quote": "井里有头？", "start": 622988, "end": 622993, "occurrencesInUnit": 1, "occurrencesInFullText": 1, "match": "t[start:end]==quote 逐字回切"},
+      "why": "这两句是同一段 P092 的**前半**：「井里有头？许七安握紧了黑金长刀，压了压手，示意妹子和婶婶莫慌，他缓步靠近井口。」候选只引了后半的 Q094「许七安握紧了黑金长刀」与 Q095「他缓步靠近井口」，恰好跳过中间那半句；而 T7 的**条目名**正是从这句话取的。配套的「尖叫」出处句同样零覆盖：全文件「一声尖叫」出现 0 次，只有 label 里的「尖叫惊醒」与被 P085「被惊醒出门」那一处旁述。判据可复算：该分句 cov=0.00、候选全文 grep 0 次。",
+      "severity": "遗漏（claim 的证据链缺口），非编造"
+    },
+    {
+      "id": "CE-2",
+      "claim": "候选 coverage.sentenceLevelGapsNote 明写：「在上述『已引段落』内部，逐句算引文覆盖率，低于 50% 的句子**全部**列出……每条都在 sentenceLevelGapReasons 里给不单立引文节点的理由。」这句话**与它自己的产物不符**：我用它自己的切句口径（只在 。！？ 断句）精确复现出它声明的全部 33 条（33/33 精确重合），同一口径下**另有 5 条**同样 <50% 的句子既不在表里、也不在任何理由表里。",
+      "quote": "“怎么了？”",
+      "quoteRef": {"quote": "“怎么了？”", "start": 622795, "end": 622801, "occurrencesInUnit": 1, "occurrencesInFullText": 1, "match": "t[start:end]==quote 逐字回切"},
+      "why": "5 条未登记句逐条可复算（全在**已引段落**内、cov<50%、不在 sentenceLevelGaps、不在 sentenceLevelGapReasons、不在 uncitedReasons）：① P010 [619974,619979)『“去去去。』cov=0.00；② P016 [620240,620246)『”褚采薇说。』cov=0.00；③ P075 [622389,622396)『”婶婶回答说。』cov=0.00；④ P092 [622988,622993)『井里有头？』cov=0.00；⑤ P110 [623631,623636)『“怎么了？”』cov=0.00。其中「“怎么了？”」最刺眼：同段后半句「许七安没有开门，深更半夜的，当哥哥的不能给妹妹开门，于礼不合」被 Q114 完整引了（也是 T8.obstacle 的依据），但**问句本身**——即他为什么需要理由去拒绝的那个问句——零覆盖。另外 gapReasons 里有 **2 条**理由是占位符「未给理由（见 sentenceLevelGapsNote）」，而 note 声称「每条都给理由」，两处互相打脸。判据：它与我的 177 条精确比对，差集即上列 5 条。",
+      "severity": "自述与产物不符（可复算），是本次判 partial 的直接依据"
+    },
+    {
+      "id": "CE-3",
+      "claim": "CE3 的机制把这条边写成两步，第②环是「婶婶本已把西厢排给许七安（P030），而许玲月不退让」；但 P030 原文给的理由——**「毕竟他将来要娶媳妇。」**——零覆盖、候选全文出现 **0 次**。被引用的是 Q027「按照婶婶的意思，西厢房联排的房间是许七安的」，止于逗号。",
+      "quote": "毕竟他将来要娶媳妇。",
+      "quoteRef": {"quote": "毕竟他将来要娶媳妇。", "start": 620818, "end": 620828, "occurrencesInUnit": 1, "occurrencesInFullText": 1, "match": "t[start:end]==quote 逐字回切"},
+      "why": "缺这半句，CE3 的第②环就只剩「婶婶排了」而丢掉了「为什么这么排」。这不是措辞问题：婶婶是按**婚配预期**预留西厢的，而 T4.result 正引了「等他以后有了媳妇，再让玲月和二郎般到北屋去住」（Q032）——两处是**同一套逻辑的两端**（儿子娶媳妇 ⇒ 住处要重排），丢了前半，T4 那条附带条件就失去了它回应的对象。可复算：该分句 cov=0.00、候选 grep「娶媳妇」= 0 次；外层句 cov=0.58（>0.5），所以它对候选自设的句级网**不可见**——这正是 CE-2 里那个承诺的漏洞造成的连带后果。",
+      "severity": "遗漏（因果边依据缺口），非编造"
+    }
+  ],
+  "reverseChecks": [
+    {
+      "id": "RC-1",
+      "found": "「井里有头？」——许七安把丫鬟的证词在心里接住的那一拍，整句零覆盖、候选全文 0 次；同时穿过候选自设的两道网（句级 <50% 未登记 + 「一声尖叫」同段也零覆盖）。",
+      "quote": "井里有头？",
+      "quoteRef": {"quote": "井里有头？", "start": 622988, "end": 622993, "occurrencesInUnit": 1, "occurrencesInFullText": 1, "match": "t[start:end]==quote 逐字回切"},
+      "evidence": "P092 逐字为「井里有头？许七安握紧了黑金长刀，压了压手，示意妹子和婶婶莫慌，他缓步靠近井口。」候选从该段只引 Q094「许七安握紧了黑金长刀」与 Q095「他缓步靠近井口」，两段之间恰好跳过「井里有头？」。我复算 [622988,622993) 覆盖率=0.00；候选全文 grep「井里有头？」= 0。它不在 sentenceLevelGaps（P092 未列入该表任何条目），也不在 sentenceLevelGapReasons / uncitedReasons。",
+      "why": "这是本章悬疑的**转折拍**：丫鬟报「井里有一颗头」（Q089）之后，必须先有许七安在心里把它接住（「井里有头？」），才有后面的「难道是….」与绕井查看。候选的 T7.obstacle 正是用「『井里有头』这个说法与他掌握的情况直接冲突」来解释困难——却在文件里没有任何一处引到这句话本身。困难被描述了，触发它的那句话没有被取证。"
+    },
+    {
+      "id": "RC-2",
+      "found": "许平志「宁宴会写的」这条安排，候选把它登记成 F2 的 payoff 并正确标注「是打算，不是回收」；但**婶婶为什么急**这一层被漏掉：同一段对话里她给出的理由是「回头去了外城，找不到我们了」（Q066，已引），而**许平志安排由许七安来写的真正根据**——他自己也不识字（P069「你大字不识几个。」「同样不怎么识字的许平志说道」）——只在 sentenceLevelGapReasons 里被当作「说话人标签」打发，理由是「本区间没有把它用于任何结论」。",
+      "quote": "同样不怎么识字的许平志说道：",
+      "quoteRef": {"quote": "同样不怎么识字的许平志说道：", "start": 622225, "end": 622239, "occurrencesInUnit": 1, "occurrencesInFullText": 1, "match": "t[start:end]==quote 逐字回切"},
+      "evidence": "P069 逐字为「“这事儿用不着你操心，你大字不识几个。”同样不怎么识字的许平志说道：」。候选在 sentenceLevelGapReasons 里对这句的理由是「说话人标签。它包含一处人物特征（许平志不怎么识字），本区间没有把它用于任何结论，故不单立节点——避免把『人物侧写』硬拔成设定」。但 K2 的 difference 写着「没有人把『写信』这件事真的交给许七安」，而 F2.payoff 引的正是 Q067「这事儿用不着你操心，你大字不识几个。」与 Q068「宁宴会写的。」——**这两句在同一次发言里，被拆开引了**。",
+      "why": "候选自己引了「你大字不识几个」来支撑「由许七安来写」这条安排，却把**同一句话的下半截**（旁白确认许平志也不识字）判为「没有用于任何结论」。这是一个自相矛盾：那句旁白恰恰解释了这条安排**为什么成立**（两个长辈都不能写 ⇒ 只能靠侄儿），也正是 TH2 主题说的「依赖侄儿的读写能力，是她名分不足的另一面」的**直接出处**。不是硬拔设定——TH2 已经在用这个事实了，只是没有把它落在引文层。",
+      "note": "这条与 RC-1/CE-3 不同：它**不是零覆盖**（Q067 已引同段前半），我的反对意见落在「理由与用法自相矛盾」，证据是候选自己的 TH2 与 F2.payoff 文本。"
+    },
+    {
+      "id": "RC-3",
+      "found": "铃音到区间结束仍相信鬼藏在井里——她的**错误信念**从未被登记为知识差，而它在原文里是明写的、并且是本章喜剧的落点。",
+      "quote": "它可真能藏，小孩子到家门口都不出来的。",
+      "quoteRef": {"quote": "它可真能藏，小孩子到家门口都不出来的。", "start": 623230, "end": 623249, "occurrencesInUnit": 1, "occurrencesInFullText": 1, "match": "t[start:end]==quote 逐字回切"},
+      "evidence": "P098 逐字为「“我肚子饿了，我出来找吃的。”小豆丁看着井口，一脸服气的样子：“它可真能藏，小孩子到家门口都不出来的。”」候选只引了同段前半 Q104「我肚子饿了，我出来找吃的。」；后半只出现在 coverage.sentenceLevelGapReasons 里作为「不单立节点」的理由。我核对 K1–K6 的 difference/aspect 文本均不含此句（grep『它可真能藏』in knowledgeDiffs = False）。铃音在 knowledgeDiffs 里确实出现过（K5 提到「许七安估摸着…是许铃音趴在井口张望」），但那是**别人对她的推断**，不是**她自己的信念**。",
+      "why": "同一条事实在别处是被登记的：K1 登记「婶婶知道鬼已驱散、下人不知道」，S2 登记「宅中众人对『这宅子有没有鬼』的判断」。铃音是**唯一一个既不知道真相、又正因此继续在井边蹲守**的人——她「一脸服气」地佩服鬼能藏，正是她**不知道**那口井已经净化（P093）的直接证据。K1 的边界写的是「主家 vs 下人」，把铃音归进哪一边都不对：她属于主家却不知情、且她的错误信念**驱动了她自己的行动**（第二天还会继续蹲）。这是一处结构性的知识差缺口，不是措辞问题。候选在 SC7 里其实点了这条（「例如…『它可真能藏…』本应立为独立引文」），把它留给复核者——我照实记：它确实该立。"
+    },
+    {
+      "id": "RC-4",
+      "found": "「难道是....」——许七安在走向井口前的最后一拍犹疑，只在 selfCritique(SC3) 的散文里被提到一次，**未作为引文节点**，覆盖率 0.00；而它所在的 P094 是 T7.result 的核心证据段。",
+      "quote": "难道是....",
+      "quoteRef": {"quote": "难道是....", "start": 623081, "end": 623088, "occurrencesInUnit": 1, "occurrencesInFullText": 3, "match": "t[start:end]==quote 逐字回切"},
+      "evidence": "P094 逐字为「难道是....许七安大步走过去，绕到井的后方，果然看见小豆丁坐在井边，睡眼惺忪的模样。」候选从该段引了 Q099「许七安大步走过去，绕到井的后方，果然看见小豆丁坐在井边，睡眼惺忪的模样。」与 Q100「果然看见小豆丁坐在井边，睡眼惺忪的模样。」——都是**后半**的动作与发现，前半的犹疑未引。候选全文 grep「难道是」= 1 次，位置在 selfCritique.SC3 的说明文字里（不是在引文节点里）。",
+      "why": "CE5 的机制写的是「两个事实互相矛盾**逼出核查**」——「难道是….」正是这个「逼出」在原文里的**唯一文字标记**（他心里起疑、然后才迈步）。把它只放进 selfCritique 的散文，等于把这条因果边的中间环放在了引文层之外。这一条比 RC-1/CE-3 弱（同段的动作与发现已取证），所以记为**存疑偏遗漏**，不单独据此加判。"
+    },
+    {
+      "id": "RC-5",
+      "found": "候选在计 118 段覆盖时把**标题段 P000 与两个分隔符段**算进了分母（uncited 18 段里有 P000/P018/P057/P071/P116/P117 共 6 段为非叙事段），所以「已引 100/118 = 85%」这个比率**低估了实际叙事段覆盖**；反过来，它把「P000 是标题」写在 uncitedReasons 里，却没有把这个事实反映到 metrics 的分母口径上。",
+      "quote": "第一百七十二章 宅子闹鬼 （为盟主“熿裘”加更）",
+      "quoteRef": {"quote": "第一百七十二章 宅子闹鬼 （为盟主“熿裘”加更）", "start": 619496, "end": 619520, "occurrencesInUnit": 1, "occurrencesInFullText": 1, "match": "t[start:end]==quote 逐字回切"},
+      "evidence": "我复算 uncited 18 段 = {P000,P018,P020–P024,P040,P042,P045,P047,P057,P071,P103,P104,P105,P116,P117}，与候选 metrics.paragraphsUncited 逐元素相同（差集为空）。其中 P000（章节标题，已由 unitHeadCheck.headQuote 单独核对）、P018/P057/P071（『....』『.....』分隔符）、P116（作者 PS）、P117（排版分隔线）共 6 段不承载叙事内容。",
+      "why": "这一条**不是缺陷指控**，是口径提醒：分母含 6 段非叙事段，所以「85%」不该被读成「漏了 18 段剧情」。候选已在 coverage.uncitedReasons 逐条说明，方向是对的；我把它记下来是为了让下游（发布桥/看板）不要把这个比率当成质量分。**候选在这条上做得比自述更细**——它给了逐段理由，我没有发现任何一段是「被静默丢掉」的。"
+    }
+  ],
+  "misKillCheck": {
+    "verdict": "未发现误杀。",
+    "checked": [
+      "候选的**排除**分区（notCauseEdges 9 条 / notForeshadows 6 条 / worldSettingsExcluded 7 条 / deliberatelyNotAsserted 10 条 / unknowns 11 条）我逐条核了方向，没有发现把合法事实挡掉的情况。",
+      "特别复核了计划100 那类「整词/正则误杀」：候选的排除理由是**语义**的（『只出现一次』『没有机制相连』『时间相邻当因果』『把沉默读成抗争失败』），不是词表匹配；而且它在 NC9 里**主动把一条读反了的边写出来**（『这条边在原文里正相反』），这与误杀是相反的操作。",
+      "NC4（二郎房间安排 ⇏ 二郎不知道搬家）与 NC8（住得近 ⇏ 深夜来敲门）是最可能被误判为「过度排除」的两条；我回原文核过：两处确实没有任何句子把两者连起来，候选的理由（『同一个人被提到两次』『理由里没有一句提到住处远近，且婶婶住东屋也同样被惊醒』）与原文一致。",
+      "WX4 把「衙门」排除在 place 之外（只有『向衙门请了假』一处指向）是**保守正确**的；WX7 把「工部尚书倒台」从 rule 移到 causeEdges(CE8) 避免了同一件事在两个分区重复包装，方向正确。",
+      "F1 我同意候选自陈(SC5)是**最可争议**的一条：『白天说要在井边骗鬼』→『夜里她在井边被当成一颗头』也可以读成同一个场景元素的喜剧回环而非严格伏笔。但候选已把分歧写进 SC5，且它标的是 resolved（回收点确实改变了别人的处境：全家受惊、丫鬟报信），**不是**把结束当成功。这一条我不判误杀，记为存疑。"
+    ]
+  },
+  "hallucinationCheck": {
+    "verdict": "未发现幻觉，也未发现越权。",
+    "endingsAndSuccess": "逐条核过『结束≠成功』的纪律执行情况：T1 只写到「看见」。→ 没写吃到（U1/NA1）；T2 只写「承诺」。→ 不写研制成功（NA2）；T3 写「东西搬完了」但引的是原文动作节点，并明说「原文没写『搬家顺利完成』这种总结句」；T6 明写 objective 未实现（鬼没骗到）；T8 明写请求**没得到答复**、本章在她问完就结束（NA3）；F2/F3/F4 三条伏笔显式标 unresolved 并写明「打算≠回收」。**没有一处把结束当成功。**",
+    "characters": "候选出现的全部人物（宋卿/褚采薇/许七安/许宁宴/许玲月/许铃音/小豆丁/婶婶/二叔/许平志/二郎/绿娥/魏渊/白衣/丫鬟）均可在区间内逐字找到；我按名单在区间内计数，**没有原文之外的人物**。特别核了『许新年』（全书别处出现、本区间 0 次）——候选里也出现 0 次，没有被误引入。",
+    "nonExistentEndings": "没有「井里真的有鬼」「铃音骗到了鬼」「信写了」「二郎收到了」「许七安答应了」「许铃音被惩罚」「许七安反对分房」这类原文没有的结局；这些恰恰都被候选写进 deliberatelyNotAsserted(NA1–NA8) 显式拒绝。",
+    "foreshadowOverreach": "F1 标 resolved 有原文支撑（P094 发现她本人 + P099 推断），且候选同时写明「回收的是误会的成因，不是鬼」，没有把伏笔指向超自然事件；F2/F3/F4 均 unresolved，未越权预测后续章节。",
+    "falsePositiveNote": "我第一版脚本用裸 substring 计数，把『研制成功』『答应了』『信已经写了』『二郎收到了』判成幻觉（原文 0 次、候选 1–2 次）；逐条回上下文后发现它们**全部**出现在候选的拒绝断言里（「我不写『研制成功』」「本栏不写他答应了」），是**主动否认**而非断言。已修正判据（看否定语境）并撤销这 3 个假阳性——记在这里以免后人重犯同一个仪器错误。"
+  },
+  "usable": [
+    "引文层全部 188 个节点（含 120 个互异 qid）：逐字回切/find/偏移/出现次数/段落归属/哈希/说话人规则全部成立，可直接被发布桥按 offset 取用。",
+    "tasks T1–T8 的 actor/label/objective/action 与已填的 32 个栏位：逐条在原文可查，方向正确，未发现编造。8 个 null 栏位（T1/T2/T3/T5/T7/T8 的 cost 与 T1/T2/T3 的 obstacle）判得**保守且正确**。",
+    "causeEdges CE1/CE2/CE6/CE7/CE8（basis=explicit）与 CE4/CE5/CE9/CE10（derived）：机制链每一环都有原文，方向与原文一致，可用。",
+    "notCauseEdges NC1–NC9、notForeshadows NF1–NF6、worldSettingsExcluded WX1–WX7、deliberatelyNotAsserted NA1–NA10、unknowns U1–U11：全部保留——这些是这份候选最有价值的部分（拒绝断言比断言更难写，且它们都可被原文检验）。",
+    "states S1–S8 与 knowledgeDiffs K1–K6：before/after 与 difference 均可在原文找到对应文字，可用（但 K1 的边界问题见 mustFix）。",
+    "worldSettings WP1–WP8 / WI1–WI3 / WR1–WR6：四态与 institution 取值有原文依据，place 的 arrived/mentioned 判据（在场动作 vs 只在话里）写得清楚，可用。",
+    "themeReadings TH1/TH2：三件套齐全，perspective/support/counter 都有引文支撑，属**读法**而非事实断言，可用。"
+  ],
+  "mustFix": [
+    "① 补 RC-1/CE-1 的两句：`井里有头？`（622988–622993）与 `许七安忽然被一声尖叫惊醒，`（622609–622622）——它们是 T7.label 与 T7.obstacle 的直接出处，当前零覆盖零出现。",
+    "② 补 CE-3 的 `毕竟他将来要娶媳妇。`（620818–620828）——它是 CE3 第②环与 T4.result 附带条件共同依赖的理由。",
+    "③ 让 coverage.sentenceLevelGapsNote 与产物一致：要么把 CE-2 里那 5 条未登记句补进表（或补进理由表），要么把「全部列出」改成如实的能力边界。当前 5 条中有 3 条是实质句（『“去去去。”』『“怎么了？”』『井里有头？』）。",
+    "④ 补上 gapReasons 里那 2 条占位符「未给理由」的理由（『比如断肢重生....嗯，这是三品武夫独有的能力。』与『“许宁宴说过，生物炼金术应该是更细微的东西...』），否则 note 的「每条都给理由」不成立。",
+    "⑤ 修 RC-3：把铃音**到区间结束仍相信鬼在井里**登记为一条知识差（她是唯一既不知情、又因此继续在井边蹲守的人）；K1 的「主家 vs 下人」边界覆盖不到她。",
+    "⑥ 消解 RC-2 的自相矛盾：`同样不怎么识字的许平志说道：`（622225–622239）已被 TH2 与 F2.payoff 用作依据，就不该在 gapReasons 里写成「本区间没有把它用于任何结论」。",
+    "⑦ 把 T7.cost.nullReason 里那句自我指涉改掉：它写「P099 的『满肚子槽吐不出来的憋屈感』是情绪反应，**我放在 result 栏**」，但 T7.result 的正文与 5 条引文里**都没有**这句（grep『憋屈』in T7.result = False）。要么把它移进 result，要么改掉这句自述。"
+  ],
+  "mustDrop": [],
+  "downgradeToUnknowns": [
+    "F1（井边骗鬼 → 夜半井口的头）：建议从 resolved 降为 **存疑**/或按候选自陈(SC5)保留两种读法。判据是她**从未骗到鬼**、井中怨灵也确实已消除（P093），所以「回收」的只是一个误会成因；把喜剧回环读成伏笔与读成 notForeshadow 同样站得住。候选已自陈，我不据此判 fail。",
+    "T4.cost（许玲月与母亲的口角 = 她付出的关系代价）：候选自己标了 inferred 并写进 U3，建议保留 inferred 但下游不要把它当事实用——原文只给「罕见」这一个标记，没有写她付出任何东西。",
+    "T3.cost（不情愿 + 主屋让与 = 代价）：同样标 inferred，且候选自己写了「原文只陈述安排、没有写『他为此付出』」。建议下游按**读法**而非事实使用。",
+    "S2「宅中众人 对『这宅子有没有鬼』的判断」：这是一个**集合**状态，把婶婶的知情（P091）与丫鬟的恐惧（P088）混在一个 who 里；建议拆开或降级——它在 K1 已有更精确的对应条目。"
+  ],
+  "notes": "总体判断：这是一份**引文层几乎无懈可击、散文层诚实度高于平均**的候选，但它有一处**结构性的自我承诺没兑现**，所以我判 partial 而不是 pass。\n\n判 partial（而非 fail 或 pass）的完整理由：它**没有编造**——8 条任务/10 条因果边/8 条状态/4 条伏笔/17 条 worldSettings/6 条知识差逐条有原文，188 个引文节点逐字成立，10 条拒绝断言（NA1–NA10）方向全对，没有原文之外的人物、结局、成功判定。按 ROLES/VERIFIER.md 的纪律，「拿不出原文引证的反对意见只能记为存疑，不能据此判 fail」；而我的反对意见虽都拿得出原文引证，但**性质是遗漏而非伪造**，且遗漏集中在「句子是否被取证」这一层，不影响已抽取条目的正确性。另一方面它也不能 pass：coverage.sentenceLevelGapsNote 用**加粗**承诺「低于 50% 的句子全部列出」，还专门说明这是为了「主动披露而非等复核来问」——这是把「已自查过」写成了保证。我按它自己的口径精确复现了那 33 条（33/33 重合，证明口径可复现、不是我在用另一把尺子），同一把尺子下另有 5 条漏网，其中 3 条零覆盖且全文 0 次。**这正好是它自己在 SC7 里承认的「最可能仍有遗漏的地方」**——它把风险识别对了，只是没有把风险清干净。加上 gapReasons 里 2 条占位符与 note 的「每条都给理由」冲突、以及 T7.cost 里一句自我指涉不成立（说放在 result 栏但 result 里没有），三处合起来构成「自述强于产物」的形态。\n\n可用性结论：**抽取内容可用，句级交底表必须补或降级**。发布桥按 offset 取引文不受影响（188 条全部有效）；受影响的只是「这份候选声称自己做了句级自查」这个元断言，以及 CE-1/CE-3/RC-2/RC-3/RC-4 这几处证据链缺口。\n\n我自己的仪器错误（如实记下，按 ROLES/VERIFIER.md「你可以判自己错」）：\n① **覆盖率虚高**：我第一版把 188 个引文 span 直接相加算覆盖，而 120 个互异 span 里有包含关系（如 Q099 与 Q100 是同一段的前后半），重复计数使若干句的 cov>1.0。改成合并区间后，候选声明的 33 条覆盖率全部 <0.5（33/33），即**候选的 33 条声明在这一点上是干净的**，我第一版若照此判 fail 就是误杀。\n② **Q101 假失配**：我用 t.find(quote) 的**全文首次出现**去比候选声明的 start，得到 1 条「失配」。回看发现候选字段写的是 firstOccurrenceInFullText=110061 与区间内 start=623130 **两者都对**，是我的比对口径错了。修正后 find 层 188/188 全通过。\n③ **幻觉假阳性**：裸 substring 计数把候选**主动拒绝**的措辞（『研制成功』『答应了』『信已经写了』『二郎收到了』）判成幻觉。改为看否定语境后全部撤销。\n（我最初还写错过一次覆盖脚本的坐标系——用段内相对偏移去比全文绝对偏移，导致把整本第一章都算成了「未覆盖」；那次错得离谱到一眼可见，已改。）\n\n未做的事（不编）：没有做语义裁决（semanticReview 保持 not-performed）——「这样读对不对」只有独立 agent 能判，我只做了定位与覆盖的机械复算加反向覆盖检查。没有阅读区间外的章节（除为核『许新年』『桂月楼』是否被误引而在全文 grep 过这两个词）。没有核验候选自报的两条复现命令（它们指向 /Volumes/资源库/… 回滚点，我用仓库内原文自行复算，不依赖那些脚本）。",
+  "publishBridgeImpact": {
+    "offsetUsable": "188/188 引文可被发布桥按 start/end 直接取用（逐字回切成立）",
+    "filteredByVerdict": "本 verdict=partial：按 E11 的机制，发布桥应读本文件的 counterExamples 并按字段路径排除被点名条目。我点名的**引文节点**只有两个（『井里有头？』与『许七安忽然被一声尖叫惊醒，』未在候选中出现，故无可排除的 span）；其余 counterExamples 指向的是 coverage 元数据与 CE3/T7 的机制文本，**不指向任何可发布的引文 span**。所以：**T1–T8 / CE1–CE10 / S1–S8 / K1–K6 / F1–F4 / WP–WR 的引文条目本身全部可发布**，不因本 partial 而被剔除；需要下游处理的是『这份候选的句级自查不完整』这一元事实，以及 mustFix 里的 7 条。",
+    "recommendation": "若本批（publish:dafeng:B008）在 mustFix 落地前要发布，建议照发引文与条目，并在批记录里带一句「verify:dafeng:L0:0172 = partial：句级交底表漏 5 条（3 条实质），已在 verdict 里逐条给出 offset」。"
+  },
+  "evidence": [
+    {
+      "path": "loop/state/out/verify_dafeng_L0_0172.verdict.json",
+      "note": "本复核结论（任务 writes 指定的唯一在树产物）。**该字段故意不写 sha256**：本文件在 verify 执行后仍会被机制读取，而自指哈希会立刻陈旧；按 E32 的纪律，不能复核的哈希不如不写。"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/verify-dafeng-L0-0172/audit_0172.py",
+      "sha256": "4b7d1a14e4f1ac679f1cde9c16f8cedd7ed78921260959ecf139024059fa7dfa",
+      "note": "我自己的独立复核脚本（不 import 候选自带的 build/audit）。重算引文层 188 实例的 slice/find/哈希/出现次数/段落归属、固定种子抽样、句级覆盖（用与候选一致的切句口径）、内部自述对齐。四条命令：`python3 -B -s audit_0172.py`（全部）/ `... quotes` / `... gaps` / `... claims`。"
+    },
+    {
+      "path": "loop/state/out/read_dafeng_L0_0172.candidate.json",
+      "sha256": "c13880a6eb9ddc665dba517fee881c5347c13a1c7710d9d06909515c4b44e5b0",
+      "note": "被复核的候选。188 引文节点、10 因果边、8 状态、4 伏笔、17 worldSettings。本文件哈希与我复核开始时一致（我未改动它）。"
+    },
+    {
+      "path": "data/cache/1063b17ca65ec1b76f30e460.docs.json",
+      "sha256": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+      "note": "唯一原文来源，与 task.sourceHash 一致。切片 [619496,623899) = 4403 codepoint，sha256=a074f93e6e7a8f0b3fa57ec8dbfe9a37e5caace64404de22257ee4c66855b2de，与候选 source.segmentSha256 一致。全部偏移核验以此为准。"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/verify-dafeng-L0-0172/prev-verdict-w-verify-2.json",
+      "sha256": "d5f366fa580e1fe09d0f91760c358d6c148653971f2c3760145ddc33f4f6c50a",
+      "note": "**接手现场如实记录**：任务 writes 指定的路径上原有一份由 w-verify-2 写于 2026-10-14T14:14Z 的 verdict（verdict=partial，17918 B）。它在我要写的路径上，故先原样备份到回滚点（此条目）再覆盖写入我自己的结论。我**没有采信也没有引用**它的结论（只读了文件头 5 行以确认占用者身份与 verdict 值，用于判断是否需要保留现场）。"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/1063b17ca65ec1b76f30e460.docs.json": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "loop/state/out/read_dafeng_L0_0172.candidate.json": "c13880a6eb9ddc665dba517fee881c5347c13a1c7710d9d06909515c4b44e5b0",
+    "loop/queue/read.jsonl": "d54b8852a9014d80ec18a063ee946f6b6098abdb4d43856420c1b6604c25f22b"
+  },
+  "sourceHashesNote": "上表三项均由 `shasum -a 256` 实测。**我故意没有把 `loop/state/out/read_dafeng_L0_0172.json`（read 任务的提交记录）写进来**：`loop.py verify` 会在提交时向它追加 reviews[] 并改写 verifyState，它的哈希**在 verify 执行的那一刻必然变化**——写一个当场就会失效的哈希正是 E32 要禁止的「不可复核的证据」。若接手者需要，提交后可直接对该文件重算。",
+  "assertions": [
+    {"text": "源文件与切片哈希：docs.json sha256 == task.sourceHash；切片长度 4403 且 sha256 == 候选声明的 segmentSha256", "result": "pass", "cmd": "shasum -a 256 data/cache/1063b17ca65ec1b76f30e460.docs.json; python3 -c \"import json,hashlib;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];s=t[619496:623899];print(len(s),hashlib.sha256(s.encode()).hexdigest())\""},
+    {"text": "引文层全量：188 实例中 t[start:end]!=quote 0 条、find(quote,START)!=start 0 条、firstOccurrenceInFullText 失配 0 条、越界 0 条、sourceHash 不符 0 条、出现次数不符 0 条、段落/段落区间失配 0 条、speech 规则违反 0 条", "result": "pass", "cmd": "python3 -B -s \"$AGENT_ARTIFACTS/verify-dafeng-L0-0172/audit_0172.py\" quotes"},
+    {"text": "固定种子 20261014 抽 5 条 quote：5/5 逐字命中、偏移与声明一致", "result": "pass", "cmd": "python3 -B -s \"$AGENT_ARTIFACTS/verify-dafeng-L0-0172/audit_0172.py\" quotes"},
+    {"text": "候选自述对齐：codepoints 4403、段落数 118、任务五栏 32/8、basis 直方图 {explicit:42,inferred:3,derived:5}、未引段落集合 18 段与声明逐元素相同 —— 全部成立", "result": "pass", "cmd": "python3 -B -s \"$AGENT_ARTIFACTS/verify-dafeng-L0-0172/audit_0172.py\" claims"},
+    {"text": "句级覆盖：用候选自己的切句口径（只在 。！？ 断句）可精确复现它声明的全部 33 条（33/33 重合）；同一口径下另有 5 条 <50% 的句子未进表也未进理由表（P010/P016/P075/P092/P110）——**这是 counterExample CE-2 的可复现判据**", "result": "fail", "cmd": "python3 -B -s \"$AGENT_ARTIFACTS/verify-dafeng-L0-0172/audit_0172.py\" gaps"},
+    {"text": "反向验证：『井里有头？』[622988,622993) cov=0.00 且候选全文出现 0 次；『毕竟他将来要娶媳妇。』[620818,620828) cov=0.00 且 0 次；『许七安忽然被一声尖叫惊醒，』[622609,622622) cov=0.00 且 0 次 —— 三条均未登记在任何交底表里", "result": "fail", "cmd": "python3 -B -s \"$AGENT_ARTIFACTS/verify-dafeng-L0-0172/audit_0172.py\" gaps"},
+    {"text": "幻觉检查（修正判据后）：原文 0 次而候选出现的 5 个串（桂花楼/研制成功/答应了/信已经写了/二郎收到了）**全部**落在候选的否定语境里（主动拒绝该断言或自陈已修正的旧错）⇒ 非幻觉；候选未出现原文之外的人物", "result": "pass", "cmd": "python3 -B -s \"$AGENT_ARTIFACTS/verify-dafeng-L0-0172/audit_0172.py\" claims"},
+    {"text": "writes 边界：本复核只写了 loop/state/out/verify_dafeng_L0_0172.verdict.json（任务 writes 声明的唯一路径）＋ 回滚点下的 audit 脚本与备份；未触碰 js/ css/ index.html serve.py narrative.py scripts/ tests/ docs/ data/", "result": "pass", "cmd": "git status --porcelain | grep -E '^(.M|M |\\?\\?) (js/|css/|index.html|serve.py|narrative.py|scripts/|tests/|docs/|data/)' ; echo \"exit=$? (1=无匹配，即未触碰受保护路径)\""}
+  ],
+  "changes": [
+    {"path": "loop/state/out/verify_dafeng_L0_0172.verdict.json", "kind": "append-only", "note": "任务 writes 声明的产出：本复核结论。**覆盖写入**：该路径上原有 w-verify-2 于 14:14Z 写的一份 verdict（17918 B），我未采信其结论、先原样备份到回滚点（见 evidence 第 5 条，sha256=d5f366fa…）再写入本文件。"},
+    {"path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/verify-dafeng-L0-0172/audit_0172.py", "kind": "artifact-only", "note": "我自己的独立复核脚本（不 import 候选脚本）。被 evidence 引用，含可复现的四条命令。"},
+    {"path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/verify-dafeng-L0-0172/prev-verdict-w-verify-2.json", "kind": "artifact-only", "note": "被我覆盖前那份 verdict 的原样备份（sha256=d5f366fa…），供接手者核对现场。"}
+  ],
+  "remaining": [
+    "语义正确性未独立裁决：本次只做引文定位全量核验 + 反向覆盖检查 + 自述对齐；semanticReview 保持 not-performed。「这样读对不对」按 ROLES/VERIFIER.md 不能由机器复算证明。",
+    "F1（resolved）与 T3.cost/T4.cost（inferred）三处读法分歧我保留为存疑，未据此加减判定：候选已在 SC5/U3 自陈，我在 downgradeToUnknowns 里记了建议，但**没有**把它判成误杀或错误。",
+    "我只读了区间 [619496,623899)，未读上一章（宅子闹鬼的来龙去脉）与下一章。因此『铃音的错误信念是否在下一章被纠正』『二郎何时收到信』『婶婶的担忧如何发展』三件**区间外**的事我无法判断，也没有据此写任何断言——候选把它们标 unresolved 是正确处置。",
+    "候选自报的两条复现命令（build_candidate.py / audit_candidate.py，指向 /Volumes/资源库/… 回滚点）**我没有执行、也没有核验**：我用仓库内原文自行复算，不依赖那些脚本。若接手者要核这条，需先确认该回滚点路径下这两个脚本仍存在且哈希未变——我不声称它们成立。",
+    "『一声尖叫』这句我判定为实质性遗漏（T7.label 直接用了它），但**没有**据此加判 fail：它的信息（当夜被尖叫惊醒）在同段后半的动作已由 Q080/Q094 部分覆盖，属证据链缺口而非事实错误。若复核方认为条目名可以脱开引文层存在，这一条应记为存疑——我如实标出这个分歧。",
+    "本轮我**没有**把 verdict 写进 read 记录的 reviews[]（那要由 `loop.py verify` 执行，且需要复核者不是原提交者——原提交者是 w-read-2，我是 w-dafeng-3，不构成自签）。若接手者发现 read_dafeng_L0_0172.json 的 verifyState 仍是 pending，说明 verify 那一步还没跑。"
+  ],
+  "rollback": "本复核只覆盖一个在树文件（`loop/state/out/verify_dafeng_L0_0172.verdict.json`）并新增两个回滚点产物。回滚方式：① 若需恢复被覆盖的上一份 verdict，从 `/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/verify-dafeng-L0-0172/prev-verdict-w-verify-2.json` 复制回去（sha256=d5f366fa…）；② 本文件本身是追加式产出，删除它不影响其他任务的产物（但会使 verify:dafeng:L0:0172 退回未复核）；③ `loop.py verify` 会向 `loop/state/out/read_dafeng_L0_0172.json` 追加一条 reviews[] 条目并改写 verifyState —— 这是机制自身的写入，不是我的手工改写。**不要用 `git checkout -- .` / `git reset --hard` / `git stash` 回滚**：并行 agent 有大量未提交工作。"
+}

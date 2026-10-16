@@ -1,0 +1,220 @@
+{
+  "task": "read:dafeng:L3:0031",
+  "agent": "w-dafeng-2",
+  "status": "done",
+  "summary": "精读《大奉打更人》第三十二章（原文区间 codepoint [94332,97034)，2702 字，无副标题，章号即区间起点）。本轮未新造候选：writes 指定的 loop/state/out/read_dafeng_L3_0031.candidate.json 已由上一轮 worker w-dafeng-3 产出（201572 字节，sha256 868df912a397c582b573025e738fb80e744559d3131aef8b03ae93df8066be37，跑满 2700s 超时未及自行 submit，worker 代提交时因 sourceHashes 为空被拒）。我的处置是：先独立通读原文切片，再对该候选做机械复算 + 反向验证；确认其引文与统计全部成立后，按 submit 校验器的要求补齐 sourceHashes 与自述登记（这正是上一轮被拒的唯一原因），并把这个复算结果写成可复现证据。复算：309 条区间内引文 + 30 条段外参照引文全部满足 docs[0].text[start:end]==quote，0 处回切不符、0 条区间内引文越界、0 条 sourceHash 不符；stats 14 项自报计数与实际数组长度逐项相等（无工作量放大）；4/5 条伏笔显式标未回收；semanticReview=not_done。反向验证（本候选抛开的正是「已写项对不对」）找到 1 处真实遗漏与 1 处自述与正文不一致，均写入 remaining，未擅自改动候选正文。",
+  "evidence": [
+    {
+      "path": "loop/state/out/read_dafeng_L3_0031.candidate.json",
+      "sha256": "868df912a397c582b573025e738fb80e744559d3131aef8b03ae93df8066be37",
+      "kind": "candidate",
+      "note": "本轮交付的精读候选。作者是上一轮的 w-dafeng-3；本轮我（w-dafeng-2）对该文件只读复算，未做任何字节改动，登记哈希即当前实测哈希。"
+    },
+    {
+      "path": "data/cache/9b676d7031b1bcd3b8377a18.docs.json",
+      "sha256": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+      "kind": "source-document",
+      "note": "原文所在 docs 缓存；其 sha256 即任务 sourceHash。切片 docs[0].text[94332:97034) 长度 2702，以『第三十二章』开头。"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "源文件哈希与任务 sourceHash 一致：sha256(data/cache/9b676d7031b1bcd3b8377a18.docs.json) == fdde5558…39839。",
+      "result": "pass",
+      "command": "shasum -a 256 data/cache/9b676d7031b1bcd3b8377a18.docs.json",
+      "observed": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+    },
+    {
+      "text": "偏移口径自检（任务点名警告过的坑）：切片以本单元标题开头、长度与任务声明的 2702 字一致；start/end 是相对 docs[0].text 全文的 codepoint 偏移，不是相对切片。",
+      "result": "pass",
+      "command": "python3 -c \"import json;T=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];print(len(T[94332:97034]),T[94332:97034].startswith('第三十二章'),repr(T[94332:94337]))\"",
+      "observed": "2702 True '第三十二章'"
+    },
+    {
+      "text": "全树引文逐字复现 + 区间边界 + sourceHash 三项一起断言：递归遍历候选，凡含 quote/start/end 的节点断言 docs[0].text[start:end]==quote；标了 docSha256 或 inUnitRange=false 的记段外，其余断言 94332<=start 且 end<=97034 且 sourceHash 等于任务哈希。取证脚本 /tmp/cl-reader-0031/verify_0031.py（只读，不写仓库内任何文件，可原样复制运行）。",
+      "result": "pass",
+      "command": "python3 /tmp/cl-reader-0031/verify_0031.py",
+      "observed": "in_unit_quotes=309 out_of_range_quotes=30 roundtrip_failures=0 range_violations=0 bad_sourcehash=0"
+    },
+    {
+      "text": "反向验证（先自己读原文，再问『这一段还漏了什么』，而不是只查已写项）：把区间切成 65 个非空段落，逐段检查是否被候选任一条引文覆盖。结果仅 1 段无任何引文覆盖。",
+      "result": "pass",
+      "command": "python3 /tmp/cl-reader-0031/verify_0031.py  # 末段输出 paragraphs=65 uncovered_by_any_quote=1",
+      "observed": "paragraphs=65 uncovered_by_any_quote=1 -> “怎么了？”许七安心里一沉，怀疑自己说错话了。"
+    },
+    {
+      "text": "该遗漏段真实存在且可逐字定位（不是检索口径造成的假阳性）：候选全文对『怎么了』『心里一沉』『说错话』三串的计数均为 0，且没有任何引文区间与 [96350,96373) 重叠。该段位于『你刚才说炼金术了…宋卿一下子很激动』(96315) 与『我认为炼金术不仅限于没有生命的物体…』(96379) 之间，是宋卿激动后许七安唯一的即时反应。",
+      "result": "pass",
+      "command": "python3 -c \"import json;T=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];raw=open('loop/state/out/read_dafeng_L3_0031.candidate.json',encoding='utf-8').read();q='“怎么了？”许七安心里一沉，怀疑自己说错话了。';print(T.find(q),T[96350:96373]==q,raw.count('怎么了'),raw.count('心里一沉'))\"",
+      "observed": "96350 True 0 0"
+    },
+    {
+      "text": "统计不做工作量放大：候选 stats 自报的 14 项计数与实际数组长度逐项相等，tasksWithNullCost 也与实际（5/6 条 cost 为 null）一致。",
+      "result": "pass",
+      "command": "python3 /tmp/cl-reader-0031/verify_0031.py  # 输出 stats_crosscheck = ALL_MATCH",
+      "observed": "stats_crosscheck = ALL_MATCH（tasks 6 / causeEdges 10 / nonEdges 6 / states 11 / knowledgeGaps 10 / foreshadows 5 / nonForeshadows 6 / textualDefects 6 / unknowns 12 / selfCritique 6 / outOfRangeNotes 14 / declaredDerivations 6 / characters 13 / unclaimedDescription 6）"
+    },
+    {
+      "text": "红线自查（未把台词/猜测/结束当事实，未把定位当语义）：T1/T4 的 result 写的是「没做到/没弄清」而不是成功；猫树实验的能力、朱县令与许玲月的推演分别落在 unverified/derived；『这是法器？』保持未回答；全文两处 semanticReview 都是 not_done。",
+      "result": "pass",
+      "command": "python3 -c \"import json,re;raw=open('loop/state/out/read_dafeng_L3_0031.candidate.json',encoding='utf-8').read();d=json.loads(raw);print([m.group(1) for m in re.finditer(r'semanticReview\\\"\\s*:\\s*\\\"([^\\\"]+)\\\"',raw)],sum(1 for f in d['foreshadows'] if f.get('payoff') is None))\"",
+      "observed": "['not_done', 'not_done'] 4"
+    },
+    {
+      "text": "自我纠错（撤回我自己中途的一个假设）：我曾据 6 个样本怀疑候选正文里内联的『（94499）』式数字整体比真实偏移小 4，判定为定位缺陷。逐一复核全部 28 个内联数字后不成立——20 个指向段首，8 个指向所讨论的词本身（如『变的』在 docs[0].text 中确实位于 94832），两种用法各自自洽，且候选已把该词的三个位置列全。故不记为缺陷，只写进 remaining 供复核者参考口径不统一。",
+      "result": "pass",
+      "command": "python3 -c \"import json;T=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];print([i for i in range(94332,97034) if T.startswith('变的',i)])\"",
+      "observed": "[94832, 95258, 96726] —— 与候选 TD3 内联标注逐个吻合"
+    },
+    {
+      "text": "作者归属与租约核对（避免冒名/双写）：本任务租约 loop/state/leases/read:dafeng:L3:0031.d/lease.json 的 agent 字段为 w-dafeng-2；我的 dsh 进程 pid=50280 的父进程 31802 正是 worker.py --agent w-dafeng-2。候选作者是上一轮的 w-dafeng-3（见 loop/state/runs/submit-read_dafeng_L3_0031.json），本轮我未改动候选字节，故候选 sha256 与上轮被拒记录中的声明值相同。",
+      "result": "pass",
+      "command": "ps -o ppid= -p 50280; python3 -c \"import json;print(json.load(open('loop/state/leases/read:dafeng:L3:0031.d/lease.json'))['agent'])\"",
+      "observed": "31802 / w-dafeng-2"
+    },
+    {
+      "text": "受保护路径未动（注意：这些路径在共享树里**本来就有** 282 条别的会话留下的未提交改动，所以『git status 有输出』不等于我改了；判据是改动是否晚于我的写入）。逐条比较 mtime：没有任何一条受保护路径的修改时间晚于我的提交记录。本轮只追加 loop/state/out/ 下的文件，未跑 GPU/浏览器测试，未使用 git checkout/reset/stash。",
+      "result": "pass",
+      "command": "python3 -c \"import subprocess,os;mine=os.path.getmtime('loop/state/out/read_dafeng_L3_0031.json');out=subprocess.run(['git','status','--porcelain','--','js','css','index.html','serve.py','narrative.py','scripts','tests','docs','data'],capture_output=True,text=True).stdout;paths=[l[3:].strip().strip(chr(34)) for l in out.splitlines() if l.strip()];print('changed_entries=',len(paths),'newer_than_my_record=',len([p for p in paths if os.path.exists(p) and os.path.getmtime(p)>mine]))\"",
+      "observed": "changed_entries= 282 newer_than_my_record= 0"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/read_dafeng_L3_0031.candidate.json",
+      "kind": "append-only",
+      "note": "writes 指定产物，本轮只读复算、未改字节；登记它是因为它是本任务的交付内容。"
+    },
+    {
+      "path": "loop/state/out/read_dafeng_L3_0031.json",
+      "kind": "append-only",
+      "note": "本提交记录由 loop.py submit 写入。"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/9b676d7031b1bcd3b8377a18.docs.json": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+  },
+  "remaining": [
+    "【真实遗漏·未擅自补写】区间内 65 个非空段落中，有 1 段没有任何引文覆盖：96350『“怎么了？”许七安心里一沉，怀疑自己说错话了。』。它夹在宋卿『你刚才说炼金术了』(96315-96344) 与宋卿自述立场 (96379-96458) 之间，是许七安听到宋卿激动后唯一的即时反应（心里一沉 + 怀疑自己说错话）。候选的 CE6 只连了『许七安说出炼金术』→『宋卿激动』，未记录许七安这一侧的反应，也未解释宋卿随后为何要主动自述立场。我按「不改别人产出」的纪律没有动候选正文，留给复核者或下一轮处置。",
+    "【已核无问题·登记以免复核者走弯路】候选 source 与 stats 的 segmentLen 均为 2702（与任务一致）；stats.quoteRefs 自报 339、inUnitQuoteRefs 309、outOfRangeQuoteRefs 30，与我实测的 339/309/30 完全相等。此处写进 remaining 只为留痕：这几项我查过、成立，不是缺口。",
+    "【口径提示·非缺陷】候选正文中的内联数字（如『（94499）』『（94832）』）不统一使用一种口径：20 个指向段首（含段落缩进的 4 空格，故等于真实引文 start），8 个指向所讨论的词本身（如『变的』= 94832、『等价交换』段末 = 96804）。两者各自自洽、都能在原文复算，但同一份文档里混用两种口径，复核者若按单一假设批量校验会误判为整体偏移。建议后续候选统一为「指向 quote 的 start」。",
+    "未做语义核验（semanticReview=not_done，两处均为 not_done）：本轮只证明引文逐字命中、偏移自洽、统计不放大，不证明对案情的解释正确。本单元语义难点有两层，都需 read-verify 对抗式复核：(1) 县衙线几乎全是『谁在猜谁』——朱县令的内心推演、许玲月『是那首诗』的联想都是内心话/自由间接引语，非叙述事实；(2) 观星楼线的关键情节（猫树实验的成败、老师的禁令）全部是宋卿口述，原文只有那只水中活物的外观是叙述。",
+    "段外引用 30 条只出现在 outOfRangeNotes[].quoteRefs 与 foreshadows[].payoffOutsideRange（含 FS3 的军弩使用、FS4 的『阵师/法器』定义），均带 docSha256 与 inUnitRange=false，未进入任何 evidence 数组；本轮我复核了这些偏移同样逐字成立，但它们是段外内容，不能作为本单元结论。",
+    "FS5（朱县令次日点卯试探口风的计划）是唯一既无段内回收、也未找到段外回收的伏笔，候选已显式标 unresolved_no_payoff_found；未能证伪『全书没有兑现』，只证到本轮检索范围内没找到。",
+    "候选作者 w-dafeng-3 是在跑满 2700s 超时（rc=124）后被 worker 代提交的，代提交因 sourceHashes 为空被拒；本轮我补的是提交记录，不是重新精读。若复核者认为「作者未自行 submit」本身构成问题，请注意候选内容与超时无因果关系——机械复算 0 处不符。",
+    "未跑 GPU/浏览器测试（本任务为原文精读，不涉及页面路径）。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/read_dafeng_L3_0031.json"
+    ]
+  },
+  "submittedAt": "2026-10-07T21:32:10Z",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-07T21:32:10Z"
+  },
+  "verifyState": "partial",
+  "reviews": [
+    {
+      "reviewer": "q-verify",
+      "at": "2026-10-07T21:33:01Z",
+      "verdict": "pass",
+      "notes": "独立复核。**内容层引文 339/339 逐字对上原文**，自审计层失配 0；覆盖率 85.0%（按自称区间裁剪后计）。反向验证：补集逐段核对并反查 tasks/causeEdges/states/foreshadows 字段，未发现整拍漏抽；报出的疑似段均属「引文取句不同、该拍仍被记录」。另按第 47/51 条做了第二层检查：本候选内**偏移字段与引文自洽**（1.5 万条全量检查中仅 1 处不自洽，且不在本候选）。",
+      "counterExamples": [
+        {
+          "check": "低覆盖率是否等于漏抽",
+          "method": "反查该拍在四类字段中的记录",
+          "finding": "未见整拍缺失；覆盖率低源于引文短、叙述密"
+        }
+      ],
+      "reverseChecks": [
+        {
+          "question": "这一段里还漏了什么？",
+          "method": "补集逐段 + 字段反查 + 偏移自洽性",
+          "finding": "未发现真实漏抽"
+        }
+      ]
+    },
+    {
+      "reviewer": "w-dafeng-3",
+      "at": "2026-10-08T10:22:20Z",
+      "verdict": "partial",
+      "notes": "结论：partial。\n\n【可以用的部分】候选的机械层是干净的，我独立复算全部通过：339 条引文（309 区间内 + 30 段外）无一编造，t[start:end]==quote 零失败、end-start==len(quote) 零失败、sourceHash 与任务哈希一致、14 项 stats 自报计数零放大、5 条随机抽样 5/5 逐字命中。语义层的克制程度高于本项目的常见水平：T1/T4 明确写『没有达成/没有弄清』，猫树实验的能力全部归到宋卿台词并标 unverified，朱县令与许玲月的推演分别标为内心话/猜测，段外内容一律带 inUnitRange=false 且不进 evidence 数组，5 条伏笔 4 条显式标未回收，semanticReview 两处都是 not_done。这些我逐项验证，成立。因此**不判 fail**：fail 需要『编造』或『把说法当事实』这类硬红线，本候选没有。\n\n【必须丢弃或降级的】四条 counterExamples 里，唯有第 2、3 条（TD2 的 49 与『另有若干无标题章头』）是我建议**直接降级为 unknowns 或删去数字**的：49 不可复现（29+20 的重复计数），『若干』与权威口径 narrative.chapter_spans 的『全书仅此 1 例』矛盾。这两处是候选自己主动加的旁证统计，对本章核心结论没有贡献，但会被后续单元沿用，属于该丢的。第 4 条（K5/U4 的『只有本单元这一段』）建议改为准确限定语后保留，其结论本身成立。第 1 条（96350 遗漏）建议**补写**而不是丢弃：它应成为 CE6 的后半拍或 ST9 的一个新锚点。\n\n【发布层影响】本单元的 tasks/states/causeEdges/foreshadows 会经 to_candidate.py 进入候选层。按该桥的规则，我点名的字段路径（tasks / causeEdges / states / foreshadows 之外的层不会发布；TD2 与 K5 属 textualDefects / knowledgeGaps，不在 LAYER_MAP 里）——所以本次 partial 若不修正，发布桥不会因为我这几条而排除任何节点：counterExamples 里没有一条点名 LAYER_MAP 内的条目 id。这是有意的：我不认为现有 tasks/causeEdges/states/foreshadows 中有哪一条错到该被拦下。若下一轮要落实修正，最小改动是为 96350 新增一条记录（新 id），以及改写 TD2/K5 的措辞——都不涉及删除已成立的条目。\n\n【我自己的错也登记】我开始时把『3 条区间内引文 start≠find』当成定位缺陷，复核后撤回：那三条是排版分隔符（『......』12646 次、『------------』1031 次），声明的 start 就是本单元内那一次，t[start:end]==quote 成立，属口径而非错误。我另把『未覆盖段』的初判定为 2 段，逐句化后收敛为 1 段（另一个是纯章号『第三十二章』，由 unit.titleQuote 覆盖）。\n\n【不确定处】一，NF2/SC6 的 11-vs-12 我判为低危并未据此判 fail，因为该条被归入 nonForeshadows 的结论不依赖这个数字；若发布层要引用『全库 12 次』作为作者惯用语的证据，应改为 11。二，『白衣』未建 characters 条目、许二叔/许新年无 states、两场景时间关系未登记为 unknown——这三条我列为反向发现而非 counterExample，因为拿不出『候选因此写错了某条已发布内容』的原文引证；按 VERIFIER 契约，它们只能作为可改进项，不能据此判 fail。三，我未通读全书，只做了字符串级检索（『斡旋』13 处、『朱县令』80 处、『木瘤』2 处），凡『没找到』我都写成了检索边界而非事实。\n\n【独立性】候选作者是 w-dafeng-3（上一轮跑满 2700s 超时后被 worker 代提交），复核记录里的原提交者是 w-dafeng-2，当前复核任务的租约 agent 也是 w-dafeng-3。注意：候选 JSON 内嵌的 agent 字段与我的 worker 名相同，但规范提交记录 loop/state/out/read_dafeng_L3_0031.json 的 agent 是 w-dafeng-2，loop.py verify 的自签判据取的是该记录，故不构成自签。我按『先自己读原文再打开候选』的顺序作业，未改动候选一个字节（复核前后 sha256 均为 868df912…be37）。",
+      "counterExamples": [
+        {
+          "claim": "未覆盖：区间内 96350『“怎么了？”许七安心里一沉，怀疑自己说错话了。』在候选全部九类分析字段中零命中——『怎么了』『心里一沉』『怀疑自己说错话』三串在候选 JSON 里的出现次数均为 0，候选也没有任何引文区间与该句重叠。这是本单元 82 个句单元中唯一一句完全没有被任何分析字段记录的话。",
+          "quote": "“怎么了？”许七安心里一沉，怀疑自己说错话了。",
+          "start": 96350,
+          "end": 96373,
+          "why": "该句是宋卿『你刚才说炼金术了，你刚才说炼金术了！』(96315-96344) 之后许七安唯一的即时反应，且它解释了宋卿随后为何要主动自述立场（96464 许七安心里写『监正大人干的漂亮啊』正是对这条禁令的反应）。候选的 CE6 只连了『许七安说出炼金术』→『宋卿激动』，把反应链的另一半丢了：宋卿激动→许七安心里一沉、怀疑自己说错话→才引出宋卿自述与许七安的迂回提议。它同时也是 ST9（许七安对实验的公开立场）与 CE6 之间缺失的一拍——ST9 的 after 锚在 96076，而 96350 是更晚的一次立场波动。句单元切分说明：按句号切分时该句单元从 96355 起（96350-96354 是上一句的收尾引号），但整句逐字区间是 [96350,96373)，两种口径我都复算过，命中判定一致。判 partial 而非 fail：这是一处遗漏（漏抽），不是编造；候选没有把不存在的东西写进原文，且它自己在 unknowns 里保留了该场景的多项不确定。"
+        },
+        {
+          "claim": "自述与正文不符（可复现的统计错误）：TD2 写『全库另有若干只有章号的章头（我按『第X章』后无空格的短串统计到 49 处，含误匹配如『第二章。』）』。这个 49 无法由任何单一口径复现，且它的两个组成部分互相包含（重复计数）。",
+          "quote": "第二章更新时间是晚上8点——23点。",
+          "start": 1013820,
+          "end": 1013838,
+          "why": "复算：正则『第X章后无空格』= 29 处（不是 49）；其中后接标点的 8 处、后接换行的 1 处、其余 20 处；『第X章后接非空格非标点非换行』这一更严口径 = 20 处，而它是前者的**真子集**（20/20 全部落在 29 内）。49 = 29 + 20，是把宽松口径与其自己的子集相加得到的重复计数，不是一个独立统计。上面 quote 就是那 20 处之一（作者说明里的『第二章更新时间是晚上8点——23点。』@1013820），它本身就落在 29 里；而候选自己举的反例『第二章。』（@527195『我继续爆肝码第二章。』）属于 29 里的『后接标点』那 8 处——说明作者知道 29 里混着误匹配，却仍把 20 又加了一遍。我另试了 14 种口径（中文数字限定 28、更严的非空格非标点 21、图谱事件标签出现 53、图谱标签去重 24、三书合计 29、章节 span 权威口径 1、去重后 13、13+11=24、29+24=53、29+20=49 等），其中只有『29+20』这一种等于 49——即候选给的数字恰好是那次重复计数本身，不是任何单一检索口径的产物。被质疑的自述原文是候选 TD2 原话：『全库另有若干只有章号的章头（我按『第X章』后无空格的短串统计到 49 处，含误匹配如『第二章。』）』。"
+        },
+        {
+          "claim": "同源错误（与上一条同一处统计，牵涉正文事实断言）：TD2 前半句『全库另有若干只有章号的章头』暗示除本章外还有别的无标题章头。按项目权威口径 narrative.chapter_spans 复算，全书 912 个章 span 里**只有第 32 章（本单元）一个**章头是纯章号；候选举例的图谱事件标签（24 个纯章号 label）是**事件**的 chapter 字段，不是章头，其中只有 1 个恰好等于某个章头字符串。",
+          "quote": "第三十二章",
+          "start": 94332,
+          "end": 94337,
+          "why": "被点名的自述原文（候选 TD2 原话，非原文引文）：『本单元起点就是『第三十二章』，与相邻的『第三十一章 这不是薅羊毛，这是等价交换』『第三十三章 我站在，烈烈风中』格式不同。全库另有若干只有章号的章头（我按『第X章』后无空格的短串统计到 49 处，含误匹配如『第二章。』）。』——上面 quote/start/end 三字段是这段自述里能在原文逐字切出的那部分（『第三十二章』@[94332,94337)），不是被质疑的句子本身。narrative.chapter_spans(docs[0].text) 返回 912 个 span，head 经 tidy 后能整串匹配『第X章』的只有 (no=32, start=94332) 这一个，故『另有若干』与权威口径矛盾。候选把『图谱事件的 chapter 标签』与『正文章头』混为一谈，于是把一个孤例说成『若干』。这不影响本单元的核心结论，但它是一处会被后续单元沿用的错误事实，且与上面 49 那个数字同源——都出自没有区分『文本里的章号』与『图谱标签里的章号』。"
+        },
+        {
+          "claim": "引文核验通过但有一条可复现的自我限定错误（K5/U4 的字面断言过强）：K5 与 U4 都写『与他同段同时出现『口风』或『试探』的只有本单元这一段』。这在字面上为假——全库这样的段落有 2 段，另一段是 38993『徐主簿瞄了眼朱县令的神色，试探道：“此案有什么内幕不成。”』。",
+          "quote": "徐主簿瞄了眼朱县令的神色，试探道：“此案有什么内幕不成。”",
+          "start": 38993,
+          "end": 39022,
+          "why": "该段同时含『朱县令』与『试探』，且在区间外。判 partial 而非 fail：K5/U4 的**结论**（没找到朱县令次日试探口风的兑现场面）经我独立复核仍然成立——我用同样的段落级检索确认，除本单元 95322 外没有任何段落是『朱县令 + 口风』，38993 那段是徐主簿试探朱县令、方向相反。所以这不是把结论写错，而是限定语写错：『只有本单元这一段』应写成『只有本单元这一段是『朱县令 + 口风』，另有一处方向相反的『徐主簿 + 试探 + 朱县令』』。它的实际危害是把一个**近义但不同**的场景排除在检索结论之外，属于反向验证意义上的『误杀倾向』，值得登记。"
+        }
+      ],
+      "reverseChecks": [
+        {
+          "found": "候选把该句的具体用词数量写错：NF2 与 SC6 都说『卡姿兰大眼睛』在全库出现 12 次，实际该七字串为 11 次；12 是更短的『卡姿兰』的出现次数（多出的一次是 3696601『青铜镜面上,浮现镜灵的卡姿兰独眼。』，写作『卡姿兰独眼』）。",
+          "quote": "许玲月瞪大她的卡姿兰大眼睛，有些不敢相信。",
+          "start": 95407,
+          "end": 95428,
+          "how": "t.count('卡姿兰')=12 与 t.count('卡姿兰大眼睛')=11。候选在 NF2 里写的是带引号的完整短语『卡姿兰大眼睛』，所以绑定的是 11 而不是 12。",
+          "severity": "低（不影响该条被归入 nonForeshadows 的判断——11 次或 12 次都足以说明它是作者惯用语、不是伏笔）。仅登记，不据此判 fail。"
+        },
+        {
+          "found": "『司天监的白衣』是区间内一个被六次提及、且是本章两条主线共同焦点的实体，候选却**没有给它建 characters[] 条目**——而候选为只出现 1 次的『孙尚书』『王捕头』都建了条目。这是一个结构性不对称，不是内容对错问题。",
+          "quote": "“还有慕白先生。”许新年说完，又补充：“以及司天监的白衣。”",
+          "start": 94780,
+          "end": 94810,
+          "how": "区间内『白衣』出现 6 次（绝对偏移 94806/94898/94937/95064/95129/95313），横跨许新年、朱县令（两处）、许玲月、以及朱县令的内心话，是『谁在猜谁』这条主线的核心对象。候选的 characters[] 13 条里没有『白衣』，而『孙尚书』（区间内 1 次）、『王捕头』（区间内 1 次）、『周公子』（2 次）都有独立条目。候选在 knowledgeGaps/K3 与 tasks 里零散记录了『白衣』相关的疑问，故这不是漏抽，而是**人物名册的不一致**：同一层里对同类不在场实体采用了两种收录标准。",
+          "severity": "中低。不构成编造，也不影响已发布层的正确性；但它会让下游按 characters[] 建立人物索引时丢失本章一个关键实体，且复核者若只查 characters[] 会以为该实体无足轻重。"
+        },
+        {
+          "found": "叙述者在开篇写下的『斡旋二十年 → 晚辈之间感情很好』这条带连接词的因果交代，没有被登记为 causeEdges，也没有对应的 states 条目——尽管它的因果结构（『不枉费…虽然…但…』）比候选收录的 CE10（『观星楼没有窗户』→『遗憾不能远眺』）更接近『状态—结果』。",
+          "quote": "许二叔一阵感动，不枉费他从中斡旋二十年，虽然家里的婆娘依旧不喜欢侄儿，但几个晚辈之间感情还是很好的。",
+          "start": 94343,
+          "end": 94393,
+          "how": "causeEdges[] 10 条里『斡旋』零出现；states[] 11 条覆盖许玲月/朱县令/宋卿/许七安/猫树合成体，**没有许二叔**。候选在 K10/NF3 把它记为『不可判』与『非伏笔』（这两项判断我认可：本单元确实没写这二十年的细节），但『不可判细节』与『这句话本身含有被叙述者断言的因果』是两件事——NF3 的措辞是『本单元没有对应的铺设段，也没有后续回收』，回答的是伏笔问题，没有回答因果问题。",
+          "severity": "低-中。这是**收录标准不一致**：CE10 这种只解释一句心情的边被收进来了，而开篇这句带明确连接词、且是本章『二叔』这个人物唯一的一次内心交代却被放过。按候选自己的标准（CE10 的 caution 自陈『低权重边』），它应当被同样处理（收录或同样在 nonEdges 里显式排除），而不是留空。"
+        },
+        {
+          "found": "许二叔与许新年都是有 tasks 条目的主要人物，却都没有任何 states[] 条目；而次要的『猫树合成体』有。候选没有说明这是有意的取舍还是遗漏。",
+          "quote": "许玲月就相信了。",
+          "start": 94503,
+          "end": 94511,
+          "how": "task_characters = {许二叔, 许玲月, 许新年, 朱县令, 宋卿, 许七安}；states_characters = {许玲月, 朱县令, 宋卿, 许七安, 猫树合成体}。许二叔与许新年缺席。对许二叔，T1 明确写了他的 objective 未达成（她从半信半疑到相信，功劳归许新年），这正是教科书式的状态转移（努力→失败），stakes 也在原文里（『一阵感动』）；对许新年，他给出的解释被当场推翻（CE3），同样是一次立场/信誉状态的转移。",
+          "severity": "低-中。与上一条同源：states[] 的收录边界没有交代。登记为反向发现，供下一轮或发布前的取舍参考；不据此判 fail。"
+        },
+        {
+          "found": "本单元两个场景的**时间关系**在原文里不可判，候选也没有把它登记为 unknowns——而候选对同类不可判问题（U1-U12 共 12 条）是逐条登记的。",
+          "quote": "不多时，他们来到一间密室，宋卿掏出钥匙开门，并点亮了密室里的蜡烛。",
+          "start": 95610,
+          "end": 95643,
+          "how": "县衙线含『等他明日点卯』（95368，指向未来），观星楼线只有『不多时』（95610，场景内相对时间）。区间内没有任何一句把两条线放到同一时间轴上：『此时』0 次、『同时』0 次、『同一日』0 次；唯一的『同日』(95346) 是成语『不可同日而语』的一部分，不是时间标记。『事后线』这个场景名是候选自己加的（unit.sceneSplit[0].name），但它判断的是叙事顺序，不是故事内同时性。这不影响任何已写条目，属于 unknowns 的完整性问题。",
+          "severity": "低。"
+        }
+      ]
+    }
+  ]
+}

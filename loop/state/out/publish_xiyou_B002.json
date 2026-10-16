@@ -1,0 +1,465 @@
+{
+  "task": "publish:xiyou:B002",
+  "agent": "w-publish",
+  "status": "done",
+  "decision": "NOT_PUBLISHED__TWO_INDEPENDENT_BLOCKERS",
+  "publishedThisRound": false,
+  "publishKey": null,
+  "parentKey": "ee3430ef493546bbcd2e700b",
+  "parentKeySource": "loop/state/candidates/BATCH-publish-xiyou-B002.candidate.json 的 sourceKey（桥的 graph_target()：data/cache/index.json 里西游记标题的第一条 = 页面默认版本）",
+  "summary": "**本批未发布，publishKey=null。** 我完成了可达的全部前置步骤（格式桥 + 合同 dry-run 全过），但在写盘前撞上两个各自独立、都足以阻止发布的阻断：①**GATE.lock 被活跃任务持有**（merge:rsi-motion-response:20261012，pid 20615，心跳持续刷新），本任务是 gateLock=true 的追加式写回，未持锁写 data/ 会重演 ops_ungated_publish_incident_20260909；②**桥的点名过滤存在真实缺陷**（详见 defect 段）：复核者用带语义后缀的候选 id 点名时，桥的正则抽不到 ⇒ 7 个单元 16 条被点名条目绕过过滤，其中 **3 条已经进入批次候选**；照现状 --write 就是「把复核失败的条目偷偷放进去」，违反 PUBLISHER 红线 2。故我**拒绝**在不修桥的情况下发布，并如实登记。桥与 dry-run 的产物、回执、父版本哈希全部留存可复算。",
+  "whyNotPublished": [
+    {
+      "blocker": "gate_lock_held",
+      "detail": "GATE.lock 持有者 merge:rsi-motion-response:20261012（pid 20615）存活且心跳持续（16:02:59Z 仍在刷），loop.py gate 返回 rc=1 被占用；不接管、不强删。",
+      "receipt": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/cl-pub-b002/gate_refusal.json",
+      "sha256": "d05b5b9700c57175dbe04c2ec67abdd2bee026e13cef326cf1142cca9e460c3e"
+    },
+    {
+      "blocker": "bridge_flagged_id_filter_bypass",
+      "detail": "to_candidate.py 用 r'\\b([TCSF]\\d+)\\b' 抽点名 id；READER 的 id 形如 T8_bajie_sanhuo，'\\b' 在 '8' 与 '_' 之间不成立 ⇒ 抽不到 ⇒ 被点名条目未被排除。本批 7 单元 16 条绕过，3 条已进入候选。",
+      "receipt": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/cl-pub-b002/bridge_id_filter_bypass.json",
+      "sha256": "89a03dcf1afabae5a9473ac7049aa4d2d1cff706801ca07e2cb1d623088eb961"
+    }
+  ],
+  "defect": {
+    "id": "BRIDGE-FLAGGED-ID-FILTER-BYPASS",
+    "severity": "high",
+    "component": "loop/bin/to_candidate.py",
+    "componentSha256": "df5f168d4c82310b7c9776f0dca448397f2aa7dbded5683de9077f2b0686d5c8",
+    "componentUnmodifiedByMe": true,
+    "mechanics": "must_fix 文本里 r'\\b([TCSF]\\d+)\\b' 匹配带后缀的候选 id 失败；索引式 'tasks[3]' 不受影响（本批 128/161 命中那一路仍工作）。",
+    "reproduce": "python3 -c \"import re;print(re.findall(r'\\\\b([TCSF]\\\\d+)\\\\b','T8_bajie_sanhuo 人物方向颠倒'))\" → []",
+    "confirmedWouldBePublished": [
+      {
+        "unit": "read:xiyou:L1:0041",
+        "rawId": "T2_xingzhe_jielong",
+        "layer": "tasks",
+        "nodeId": "task_review_1827795c09c49f432b28",
+        "label": "借东洋龙兵的水泼灭妖火，救出唐僧"
+      },
+      {
+        "unit": "read:xiyou:L1:0043",
+        "rawId": "T3_zuolong_qin_seng_qingke",
+        "layer": "tasks",
+        "nodeId": "task_review_048c6351b5b8b2323779",
+        "label": "摄走唐僧八戒，要蒸熟了请二舅爷暖寿"
+      },
+      {
+        "unit": "read:xiyou:L1:0057",
+        "rawId": "T6_qu_shui",
+        "layer": "tasks",
+        "nodeId": "task_review_e96504ff2d047c6d9813",
+        "label": "取水解渴"
+      }
+    ],
+    "confirmedCount": 3,
+    "bypassingItems": 16,
+    "unitsAffected": 7,
+    "fixSuggestion": "id 抽取需同时支持『前缀+下划线』形态（rid==f or rid.startswith(f+'_')）；这不是我这轮能改的 —— to_candidate.py 不在本任务 writes 内。"
+  },
+  "bridgeRun": {
+    "batch": "publish:xiyou:B002",
+    "units": 20,
+    "unitsWithNodes": 19,
+    "kept": 151,
+    "dropped": 625,
+    "digest": "1a760f46d56a",
+    "skippedWhole": [
+      "read:xiyou:L1:0047（复核 verdict=fail，整单元不发布）"
+    ],
+    "keptByLayer": {
+      "tasks": 71,
+      "clues": 34,
+      "causeEdges": 37,
+      "characterStates": 9
+    },
+    "droppedByReason": {
+      "no_resolvable_character": 86,
+      "verifier_flagged": 48,
+      "no_two_distinct_events": 248,
+      "no_anchored_event": 118,
+      "no_verbatim_quote": 117,
+      "unit_has_no_anchorable_event": 8
+    },
+    "reconcile": "kept 151 + 逐条 dropped 625 = 776 = 19 个进桥单元的原始条目；另 1 个单元（L1:0047）整单元跳过，未逐条记账。"
+  },
+  "dryRun": {
+    "ok": true,
+    "write": false,
+    "parentKey": "ee3430ef493546bbcd2e700b",
+    "referencePrecision": {
+      "valid": 2151,
+      "declared": 2151,
+      "percent": 100.0
+    },
+    "claimedVerifiedAnchorPrecision": {
+      "valid": 2947,
+      "claimed": 2947,
+      "percent": 100.0
+    },
+    "contractProblems": [],
+    "cannotJudge": [
+      "semantic_entailment_and_completeness"
+    ],
+    "note": "合同层全过（引文 2151/2151、锚点 2947/2947、contractProblems=[]）——**合同通过 ≠ 语义已核验**，也**不等于可以发布**：本合同看不见复核者点名。"
+  },
+  "coverage": {
+    "sourceRangeRequired": [
+      284148,
+      432703
+    ],
+    "rangeAuthority": "loop/state/index.json books.xiyou.chapterUnits[40:60]（与任务 sourceRange 逐字一致）",
+    "unitsRequired": 20,
+    "unitsBridged": 19,
+    "unitsWithKeptNodes": 19,
+    "unitAreaCodepoints": 148555,
+    "bookCodepoints": 722176,
+    "coverageOfWholeBook": {
+      "codepointsOfThisBatch": "148555/722176 = 20.5701%",
+      "units": "20/101 = 19.8020%",
+      "publishedThisRound": "**0** —— 本批未发布，作品库无新增内容",
+      "explicit": "**远非全书完成**；本批只覆盖 [284148,432703)，且这一段**尚未进入作品库**。"
+    },
+    "perUnit": [
+      {
+        "unit": "read:xiyou:L0:0040",
+        "head": "第四十回　婴儿戏化禅心乱　猿马刀归木母空",
+        "start": 284148,
+        "end": 291750,
+        "kept": 6,
+        "dropped": 46,
+        "verdict": "partial"
+      },
+      {
+        "unit": "read:xiyou:L1:0041",
+        "head": "第四十一回　心猿遭火败　木母被魔擒",
+        "start": 291750,
+        "end": 299607,
+        "kept": 8,
+        "dropped": 25,
+        "verdict": "partial"
+      },
+      {
+        "unit": "read:xiyou:L0:0042",
+        "head": "第四十二回　大圣殷勤拜南海　观音慈善缚红孩",
+        "start": 299607,
+        "end": 307813,
+        "kept": 0,
+        "dropped": 61,
+        "verdict": "partial"
+      },
+      {
+        "unit": "read:xiyou:L1:0043",
+        "head": "第四十三回　黑河妖孽擒僧去　西洋龙子捉鼍回",
+        "start": 307813,
+        "end": 315752,
+        "kept": 6,
+        "dropped": 26,
+        "verdict": "partial"
+      },
+      {
+        "unit": "read:xiyou:L0:0044",
+        "head": "第四十四回　法身元运逢车力　心正妖邪度脊关",
+        "start": 315752,
+        "end": 323712,
+        "kept": 9,
+        "dropped": 56,
+        "verdict": "partial"
+      },
+      {
+        "unit": "read:xiyou:L1:0045",
+        "head": "第四十五回　三清观大圣留名　车迟国猴王显法",
+        "start": 323712,
+        "end": 330871,
+        "kept": 4,
+        "dropped": 27,
+        "verdict": "partial"
+      },
+      {
+        "unit": "read:xiyou:L0:0046",
+        "head": "第四十六回　外道弄强欺正法　心猿显圣灭诸邪",
+        "start": 330871,
+        "end": 338749,
+        "kept": 13,
+        "dropped": 36,
+        "verdict": "partial"
+      },
+      {
+        "unit": "read:xiyou:L1:0047",
+        "head": "第四十七回　圣僧夜阻通天水　金木垂慈救小童",
+        "start": 338749,
+        "end": 346551,
+        "kept": null,
+        "dropped": null,
+        "verdict": "fail(整单元跳过)"
+      },
+      {
+        "unit": "read:xiyou:L0:0048",
+        "head": "第四十八回　魔弄寒风飘大雪　僧思拜佛履层冰",
+        "start": 346551,
+        "end": 353049,
+        "kept": 11,
+        "dropped": 16,
+        "verdict": "partial"
+      },
+      {
+        "unit": "read:xiyou:L1:0049",
+        "head": "第四十九回　三藏有灾沉水宅　观音救难现鱼篮",
+        "start": 353049,
+        "end": 360687,
+        "kept": 11,
+        "dropped": 38,
+        "verdict": "partial"
+      },
+      {
+        "unit": "read:xiyou:L0:0050",
+        "head": "第五十回　情乱性从因爱欲　神昏心动遇魔头",
+        "start": 360687,
+        "end": 367295,
+        "kept": 6,
+        "dropped": 26,
+        "verdict": "partial"
+      },
+      {
+        "unit": "read:xiyou:L1:0051",
+        "head": "第五十一回　心猿空用千般计　水火无功难炼魔",
+        "start": 367295,
+        "end": 374269,
+        "kept": 2,
+        "dropped": 27,
+        "verdict": "partial"
+      },
+      {
+        "unit": "read:xiyou:L0:0052",
+        "head": "第五十二回 悟空大闹金山兜洞 如来暗示主人公",
+        "start": 374269,
+        "end": 381872,
+        "kept": 7,
+        "dropped": 26,
+        "verdict": "partial"
+      },
+      {
+        "unit": "read:xiyou:L1:0053",
+        "head": "第五十三回　禅主吞餐怀鬼孕　黄婆运水解邪胎",
+        "start": 381872,
+        "end": 389731,
+        "kept": 12,
+        "dropped": 32,
+        "verdict": "partial"
+      },
+      {
+        "unit": "read:xiyou:L0:0054",
+        "head": "第五十四回　法性西来逢女国　心猿定计脱烟花",
+        "start": 389731,
+        "end": 396815,
+        "kept": 8,
+        "dropped": 21,
+        "verdict": "partial"
+      },
+      {
+        "unit": "read:xiyou:L1:0055",
+        "head": "第五十五回　色邪淫戏唐三藏　性正修持不坏身",
+        "start": 396815,
+        "end": 404385,
+        "kept": 11,
+        "dropped": 43,
+        "verdict": "partial"
+      },
+      {
+        "unit": "read:xiyou:L0:0056",
+        "head": "第五十六回　神狂诛草寇　道昧放心猿",
+        "start": 404385,
+        "end": 412021,
+        "kept": 6,
+        "dropped": 26,
+        "verdict": "partial"
+      },
+      {
+        "unit": "read:xiyou:L1:0057",
+        "head": "第五十七回　真行者落伽山诉苦　假猴王水帘洞誊文",
+        "start": 412021,
+        "end": 418724,
+        "kept": 7,
+        "dropped": 38,
+        "verdict": "partial"
+      },
+      {
+        "unit": "read:xiyou:L0:0058",
+        "head": "第五十八回　二心搅乱大乾坤　一体难修真寂灭",
+        "start": 418724,
+        "end": 425240,
+        "kept": 15,
+        "dropped": 22,
+        "verdict": "partial"
+      },
+      {
+        "unit": "read:xiyou:L1:0059",
+        "head": "第五十九回　唐三藏路阻火焰山　孙行者一调芭蕉扇",
+        "start": 425240,
+        "end": 432703,
+        "kept": 9,
+        "dropped": 33,
+        "verdict": "partial"
+      }
+    ]
+  },
+  "honestyMarkers": {
+    "claimVerified": false,
+    "semanticStatus": "assistant-reviewed-source",
+    "semanticReview": "not_performed",
+    "modelCalls": 0,
+    "automaticModelCalls": 0,
+    "note": "若将来在修好桥之后发布，这些标记一个都不能少：引用与身份合同通过 ≠ 语义已核验。"
+  },
+  "verdictsInBatch": {
+    "pass": 0,
+    "fail": 1,
+    "partial": 19,
+    "detail": "20 个单元：L1:0047 verdict=fail（整单元不发布）；其余 19 个全部 partial（0 pass / 0 fail）。sidecar(.verdict.json) 20/20 都有裁决；record 有 9 条无 verdict 字段。按任务要求：fail 丢弃、partial 排除被点名条目 —— 而后者正是被桥缺陷破坏的那一步。"
+  },
+  "changes": [],
+  "notTouched": [
+    "data/cache/（未写任何新键）",
+    "data/cache/index.json",
+    "loop/state/PUBLISH-LEDGER.json",
+    "js/ css/ index.html serve.py narrative.py scripts/ tests/ docs/"
+  ],
+  "remaining": [
+    "**本批未发布** —— publishKey=null；[284148,432703) 尚未进入作品库，读者看不到。",
+    "必须先修 loop/bin/to_candidate.py 的点名过滤（需另开任务，它不在本任务 writes 内），再重跑桥 → dry-run → --write。",
+    "修复后仍需持有 GATE.lock 才能写 data/（本批目标任务 merge:rsi-motion-response:20261012 当时在跑）。",
+    "16 条被点名条目中 3 条已进入候选（L1:0041 T2_xingzhe_jielong、L1:0043 T3_zuolong_qin_seng_qingke、L1:0057 T6_qu_shui）——重发时必须排除。",
+    "13 条其余被点名条目因其它过滤（no_verbatim_quote / no_anchored_event / no_resolvable_character）恰好未进候选，属**偶然**，不能当作过滤生效的证据。",
+    "复核 verdict 全为 partial ⇒ 全部条目语义仍为未核验；本批未覆盖 [0,284148) 与 [432703,722176)。"
+  ],
+  "rollback": {
+    "kind": "none",
+    "strategy": "nothing-written",
+    "note": "本轮**未写任何受保护路径**：无新版本键、无 index.json 改动、无台账改动。父版本 ee3430ef493546bbcd2e700b 与 data/cache/index.json 的 sha256 前后一致。只有追加式产物：loop/state/candidates/ 下 20 个单元候选 + 1 个批次候选、loop/state/out/publish_xiyou_B002.artifact.json、以及外置盘回执。"
+  },
+  "sourceHashes": {
+    "data/cache/ee3430ef493546bbcd2e700b.json": "9747b08a09c9cb6442ab2a91f06925942fb73505edce26de28d4c8f7d967eab9",
+    "data/cache/ee3430ef493546bbcd2e700b.docs.json": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+    "data/cache/index.json": "d7a96994b2c766a51bf56fa914ae88ba8c146dc981f427e5d816ad00471867ef",
+    "loop/state/index.json": "89e0329b4c89a01e95c8c7bae43853d00ecc709d13aaf73f5615d0fa02581a09",
+    "loop/state/PUBLISH-LEDGER.json": "e95ad74c6cdb4254a412ec73d4f3fd806400659791520d21b97460d799379405"
+  },
+  "evidence": [
+    {
+      "path": "loop/state/candidates/BATCH-publish-xiyou-B002.candidate.json",
+      "sha256": "9d743652eef2688a8db65532d33f4bde12174a94c26a17804873fc320d32db0f",
+      "kind": "bridge-output（批次候选；151 节点 + 625 条丢弃记账）"
+    },
+    {
+      "path": "loop/bin/to_candidate.py",
+      "sha256": "df5f168d4c82310b7c9776f0dca448397f2aa7dbded5683de9077f2b0686d5c8",
+      "kind": "bridge-tool（本轮未改动；缺陷所在，记录版本以便复算）"
+    },
+    {
+      "path": "tools/publish_reviewed.py",
+      "sha256": "a1827ebdb6d89ea04e1addb8807fa79ca95d1f6251edcddf6886ae3f357af561",
+      "kind": "publish-tool（本轮未改动）"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/cl-pub-b002/dryrun_report.json",
+      "sha256": "9b1b63f1f61ac942360459ae27e17631e3585039f891bc3fd8e32fb962a7a8db",
+      "kind": "dry-run-receipt（合同全过：contractProblems=[]）"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/cl-pub-b002/dryrun_stdout.json",
+      "sha256": "72b20f8506cef60eee7a1707b66fbc068966422208b653e4820891a6bf050b25",
+      "kind": "dry-run-stdout"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/cl-pub-b002/bridge_report.json",
+      "sha256": "a457168520c4ee847ae466ef366d2bb00d7bdd061f1dc5cc8e660e4b4175e9dc",
+      "kind": "bridge-receipt（to_candidate.py --batch 原始 stdout）"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/cl-pub-b002/bridge_id_filter_bypass.json",
+      "sha256": "89a03dcf1afabae5a9473ac7049aa4d2d1cff706801ca07e2cb1d623088eb961",
+      "kind": "defect-evidence（点名过滤绕过：16 条绕过、3 条确认已进候选）"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/cl-pub-b002/gate_refusal.json",
+      "sha256": "d05b5b9700c57175dbe04c2ec67abdd2bee026e13cef326cf1142cca9e460c3e",
+      "kind": "gate-refusal-receipt（loop.py gate rc=1 被占用）"
+    },
+    {
+      "path": "data/cache/ee3430ef493546bbcd2e700b.json",
+      "sha256": "9747b08a09c9cb6442ab2a91f06925942fb73505edce26de28d4c8f7d967eab9",
+      "kind": "parent-graph（发布前后同哈希；本轮未发布故未变）"
+    },
+    {
+      "path": "data/cache/ee3430ef493546bbcd2e700b.docs.json",
+      "sha256": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+      "kind": "parent-docs（原文未变）"
+    },
+    {
+      "path": "data/cache/index.json",
+      "sha256": "d7a96994b2c766a51bf56fa914ae88ba8c146dc981f427e5d816ad00471867ef",
+      "kind": "library-index（未改动）"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "父版本 .json 未被改动（本轮未发布）",
+      "result": "pass",
+      "evidence": "发布前 9747b08a09c9cb6442ab2a91f06925942fb73505edce26de28d4c8f7d967eab9 == 事后同值；shasum -a 256 data/cache/ee3430ef493546bbcd2e700b.json"
+    },
+    {
+      "text": "父版本 .docs.json（原文）未被改动",
+      "result": "pass",
+      "evidence": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2 前后同值"
+    },
+    {
+      "text": "data/cache/index.json 未被改动（作品库无新增、默认版本未变）",
+      "result": "pass",
+      "evidence": "d7a96994b2c766a51bf56fa914ae88ba8c146dc981f427e5d816ad00471867ef 前后同值"
+    },
+    {
+      "text": "未写受保护路径（js/css/index.html/serve.py/narrative.py/scripts/tests/docs/data）",
+      "result": "pass",
+      "evidence": "changes=[]；本轮写操作仅 loop/state/candidates/（追加式新建）与 loop/state/out/ 本 artifact 及外置盘回执"
+    },
+    {
+      "text": "合同层确实全过（不是拿合同当挡箭牌）",
+      "result": "pass",
+      "evidence": "--dry-run 回执 ok=true、write=false、contractProblems=[]、referencePrecision 2151/2151=100%、claimedVerifiedAnchorPrecision 2947/2947=100%"
+    },
+    {
+      "text": "桥的点名过滤缺陷可机器复现",
+      "result": "pass",
+      "evidence": "python3 -c \"import re;print(re.findall(r'\\\\b([TCSF]\\\\d+)\\\\b','T8_bajie_sanhuo 人物方向颠倒'))\" → []；而索引式 tasks[3] 仍可抽到"
+    },
+    {
+      "text": "被点名条目确有 3 条进入批次候选（不是推测）",
+      "result": "pass",
+      "evidence": "按桥自身的 stable_node_id 复算，T2_xingzhe_jielong/T3_zuolong_qin_seng_qingke/T6_qu_shui 三条的节点 id 均出现在批次候选 layers 中；见 bridge_id_filter_bypass.json"
+    },
+    {
+      "text": "未持 GATE.lock，故未写 data/（守住未加锁发布红线）",
+      "result": "pass",
+      "evidence": "loop.py gate --agent w-publish 返回 rc=1『被占用』（holder=motion-e1-merge-20261010T162850Z pid 20615，心跳持续）；见 gate_refusal.json"
+    },
+    {
+      "text": "未使用 git checkout -- . / reset --hard / stash",
+      "result": "pass",
+      "evidence": "本轮未执行任何 git 写操作"
+    },
+    {
+      "text": "没有声称全书完成，也没有声称本批已发布",
+      "result": "pass",
+      "evidence": "publishedThisRound=false、publishKey=null、coverage.explicit 写明本批 0 已发布、远非全书完成"
+    }
+  ],
+  "submittedAt": "2026-10-12T16:04:30Z",
+  "wallClockSeconds": 2328,
+  "wallClockFrom": "lease.startedAt",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-12T16:04:30Z"
+  },
+  "verifyState": "pending"
+}

@@ -1,0 +1,108 @@
+{
+ "task": "read:xiyou:L0:0022",
+ "agent": "w-xiyou-1",
+ "role": "READER",
+ "status": "done",
+ "reworkOf": "loop/state/out/read_xiyou_L0_0022.json（原提交 agent=w-sanguo-1，submittedAt=2026-10-08T01:22:25Z，证据哈希 7432633c…）",
+ "reworkReason": "重做，且**不是**我造成的证据失效。原记录已过校验（validation.problems=[]），但它引用的候选文件哈希随后不再成立；loop/state/EVIDENCE-VERIFY.json 在 2026-10-08T20:56:42Z 就已把本任务列入 pendingRedo（reason=「证据失效或未过校验，已退回待重做」），比我本轮写入候选早 7.9 小时。因此本任务不在 done_ids() 里，worker 的 pick() 合法地把它派给我（我的租约 2026-10-09T04:33:39Z 建立）。重做后新的规范记录会覆盖 read_xiyou_L0_0022.json，原有信息我未静默丢弃：原 agent 的提交副本 loop/state/out/read_xiyou_L0_0022.submit.json 我**没有触碰**（见 remaining）。",
+ "summary": "重做精读《西游记》第二十二回（原文区间 [150074,156853)，6779 字，42 段），产出候选：tasks 4 条（五元组分列，每栏各自带逐字引文，同一条任务内五栏 0 处共用同一句）、causeEdges 8 条（含 2 条 partial 并写明机制哪一环是口述）、rejectedEdges 2 条（时间相邻但无机制的边主动否弃）、states 4 条（前值/后值+事件锚点）、knowledgeDiffs 3 条（谁知/不知，含把「想是」标为推测的 KD2）、foreshadows 5 条（3 条原文直述的铺设—回收 + 2 条标 inferred、其中 1 条 strength=weak）+ rejectedForeshadows 3 条、crossUnitEchoes 2 条（单元外，chapter 留空不猜）、worldSettings 8 条（地点 2 / 物件 2 / 规则 4，placeState、itemStates、institution 三套区分全部写进字段）、themeReadings 2 条（各带 counter 反证）、unknowns 7 条、selfCritique 4 条、reverseCheck（含 8 条有意不收的原文事实）。全部 112 条带偏移引文在构建期断言通过（逐字、全文唯一、区间内、哈希一致），另对 262 处自由文本「」片段做逐条命中审计。未声称 semanticReview 完成。",
+ "evidence": [
+  {
+   "path": "loop/state/out/read_xiyou_L0_0022.candidate.json",
+   "sha256": "a97fa52c9a0b4fc97a241fe5c48f76ef22dbcb9730f47f17009b4c62f842d952",
+   "kind": "candidate",
+   "note": "任务 writes 指定的唯一产物。"
+  }
+ ],
+ "assertions": [
+  {
+   "text": "区间与标题自检（直接读源文件，非摘要）：docs[0].text[150074:156853] 长度 6779，以『第二十二回　八戒大战流沙河　木叉奉法收悟净』开头；TEXT.find('第二十二回')==150074==start；TEXT.find('第二十三回')==156853==end。复现：python3 -c \"import json;T=json.load(open('data/cache/a065244455cfb2221bcda94a.docs.json'))[0]['text'];print(T.find('第二十二回'),T.find('第二十三回'),len(T[150074:156853]))\" → 150074 156853 6779。",
+   "result": "pass"
+  },
+  {
+   "text": "sourceHash 口径：构建脚本开跑即重算**整个 docs.json** 的 sha256 并断言等于任务声明的 c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2，不等则整体失败、不产出文件。实测 shasum -a 256 data/cache/a065244455cfb2221bcda94a.docs.json == 该值。切片自身哈希另记 segmentSha256=8942ad438962e7c14a857b3442d747887fdc3d7b41711a1e02a4004fde956c07，并断言二者不相等，避免两种口径互相冒充。另：data/cache/df959d743e53206f56db2f92.docs.json 与所用文件**逐字节相同**（同一 sha256），已作为 sourcePathTwin 写进候选，避免复核者按另一个文件名找不到证据。",
+   "result": "pass"
+  },
+  {
+   "text": "引文逐字与定位：遍历候选全部 112 条带 start/end 的引文，断言 TEXT[start:end]==quote、TEXT.count(quote)==1（全文 722176 字内唯一）、150074<=start<end<=156853、sourceHash 一致。复现：对候选递归 walk 后比对 T[s:e]!=q 计数 → 0。89 个不同文本跨度；跨分区复用 17 处逐条登记在 quoteReuseAudit.crossSectionReuse（不隐藏）。",
+   "result": "pass"
+  },
+  {
+   "text": "红线「五栏共用一句」专项：对 4 条任务逐条比较 objective/obstacle/action/result/cost 的引文集合，断言行内无一句话被两个栏位同时引用 → 0 处共用。这是针对任务提示词点名的旧图谱缺陷（714/1664 条任务五栏共用一句）设的机器断言，构建期不通过即不产出文件。",
+   "result": "pass"
+  },
+  {
+   "text": "null 必须带理由：4 条任务里为 null 的栏位只有 T2.cost 与 T3.cost，两处都有同名 costNote 写明原文为什么读不出（T2：南海之行无代价描写，且菩萨未索要任何东西；T3：该妖怪本次冲突未付代价、其「卸冠脱甲摘官衔」属被贬前史，故不借来充数）。断言：任何 null 栏位若无同名 Note 即构建失败。两处均未用 0/0.5/「未提及」占位。",
+   "result": "pass"
+  },
+  {
+   "text": "自由文本引文审计（本通道已知的逃逸口）：带 start/end 的 quote 有断言兜底，但 note/explain/mechanism 里的「」不被断言覆盖。故另做一次全量审计：262 处「」片段逐条判是否逐字命中原文，命中 188 处；未命中的 74 处逐条给出 classifiedAs（节引/自述标签/元话语），分类结论写进候选 inlineQuoteAudit。该审计抓出并已修掉 3 处真错：「称不起」（原文作「怎称得起」）、菩萨原话漏一「他」字（应为「把他那九个骷髅穿在一处」）、「哄到高处、阻住河边」（压缩版，原文作「哄他到了高处，你却阻住河边」）。",
+   "result": "pass"
+  },
+  {
+   "text": "内容分区核对：用 loop/bin/loop.py 的 required_sections() 解析本任务 prompt 得 tasks/causeEdges/states/foreshadows/worldSettings/themeReadings 六个顶层分区；validate_sections() 复跑 problems=[]，六区在候选里全部存在（worldSettings 8 条、themeReadings 2 条均非空，不是拿空数组凑键）。",
+   "result": "pass"
+  },
+  {
+   "text": "反向盲扫（「这一段里还漏了什么」）：对本候选跑「原文关键短语是否出现在候选里」的盲扫，抓出两条真遗漏——菩萨那句『又逞自满，不肯说出保唐僧的话来』（本回对「三战为何白打」的唯一解释）与唐僧提议向化斋人家问路、被悟空以距离与水性否决这一段，原先不在任何分区。已补为 CE7、CE8，并把「第一遍通读结构性偏向打斗主线、会漏掉对话里的方案否决与责任归属」如实记进 selfCritique 第四处。另有 8 条原文事实经判定后有意不收，逐条附理由写在 reverseCheck.deliberatelyExcluded（如宝杖来历长诗、水族伤亡铺陈、黄风岭「行过了」）。",
+   "result": "pass"
+  },
+  {
+   "text": "红线自检（逐条对合同）：①未把人物话当叙述事实——每条引文带 factStatus（utterance/narrated/mixed），规则类条目 W5/W7/W8 另写 institutionNote 说明「说这话的是人物、规则未被叙述者确认」，CE7 另带 utteranceCaveat；KD2 把原文用「想是」的推测显式标为 inferred。②结束≠成功——T3 妖怪目标（得食/拒敌）明确写为失败（未吃到、被收编）；T1 渡河成功只限于本单元目标，并保留原文结尾「毕竟不知几时才得正果求经」。③相邻≠因果——RE1（唐僧流泪→悟空去南海）、RE2（旧识→木叉前来）写成 rejectedEdges 并给出否决理由。④一次出现≠伏笔——正式 5 条伏笔均给出铺设+回收两处引文；RF1–RF3 是否弃式登记。⑤定位≠语义——候选 semanticReview.performed=false，明确写「本文件不声称语义已核验，复核走 read-verify 流」。",
+   "result": "pass"
+  },
+  {
+   "text": "写路径与禁令：本轮在共享树只写两处——任务 writes 指定的 loop/state/out/read_xiyou_L0_0022.candidate.json，以及本提交记录 loop/state/out/read_xiyou_L0_0022.w-xiyou-1.submit.json。**未触碰** js/ css/ index.html serve.py narrative.py scripts/ tests/ docs/ data/ 任何受保护路径；未运行 GPU/浏览器测试（任务未声明要跑）；未执行 git checkout -- . / git reset --hard / git stash；构建脚本放在 /tmp（不入库）。特别声明：原 agent 的提交副本 loop/state/out/read_xiyou_L0_0022.submit.json 与拒绝区文件均未被我改写。",
+   "result": "pass"
+  },
+  {
+   "text": "与既有结论对照【定位与语义分开标注】：用图谱缓存 data/cache/a065244455cfb2221bcda94a.json 只做对照、不作原文证据。我未引用其中任何摘要来支撑本候选的任何断言——本文件全部 112 条引文均直接取自 docs[0].text 并逐条断言。该缓存与原文的关系本身我**没有核验**（不在本任务范围），故不对其正确性作任何声明。",
+   "result": "pass"
+  },
+  {
+   "text": "交付后自查仓库既有契约测试并修掉一处措辞缺陷：python3 -B -s tests/p3_task_five_fields_contract.py 的判据③（「待验证」不得被当成已确定的代价）曾把本文件 T1 的 cost 判为可疑——原因是我的原文里出现了「待验证」三个字（写在「都不是『待验证/规定』」这个否定句里）。判据是关键词命中，语义上它并没有把待验证当代价，但**既然机器口径会被这三个字绊倒，就该由我改措辞而不是改判据**。已改写 T1.cost 文本为「既非悬而未决的条目，也非律令条文」，并给该栏加 note 声明代价的举证责任由三条引文承担。复跑判据③：可疑 0 条（PASS）。同时直接调用该测试的 quotes_of_field 复算本文件在判据①（五栏不得共用同条引句）下的表现：T1 5栏/16句、T2 4栏/9句、T3 4栏/8句、T4 5栏/8句，duplicated 全为 0、allOnOneShortQuote 全为 False；判据②两条空 cost 均带 note。",
+   "result": "pass"
+  },
+  {
+   "text": "候选文件在本轮内被我自己修改过一次（即上一条的措辞修正），本记录的 evidence.sha256 已同步更新为修改后的 a97fa52c…；提交前已对最终文件重新复算全部 112 条引文的逐字/唯一/区间/哈希断言，problems=0，该改动没有破坏任何引文。",
+   "result": "pass"
+  },
+  {
+   "text": "受保护路径复核（对 12:33 本轮开始后被动过的文件做归属核对）：find js css index.html serve.py narrative.py scripts tests docs data -newermt 后列出 5 个文件，逐个核对确认**均非本轮所写**——tests/p3_task_five_fields_contract.py 是 w-xiyou-0 于 12:58 新建（其提交记录 read_dafeng_L3_0139.submit.json 明确引用了该文件），js/app.js 与 scripts/accept.sh 的 mtime 为 05:00，早于本轮租约 12:33；tests/p1_2_order_semantics_contract.py 为 05:49。本轮在共享树只写 loop/ 下两个文件。",
+   "result": "pass"
+  }
+ ],
+ "changes": [
+  {
+   "path": "loop/state/out/read_xiyou_L0_0022.candidate.json",
+   "kind": "append-only",
+   "note": "任务 writes 指定产物，本轮重做生成。"
+  },
+  {
+   "path": "loop/state/out/read_xiyou_L0_0022.w-xiyou-1.submit.json",
+   "kind": "append-only",
+   "note": "本提交记录。刻意用带 agent 名的文件名，以免覆盖原 agent w-sanguo-1 的 read_xiyou_L0_0022.submit.json。"
+  }
+ ],
+ "sourceHashes": {
+  "data/cache/a065244455cfb2221bcda94a.docs.json": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+  "data/cache/df959d743e53206f56db2f92.docs.json": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2"
+ },
+ "remaining": [
+  "语义未核验：本文件只保证引用定位（逐字/唯一/偏移可反查/哈希一致），不保证语义读对。semanticReview.performed=false，须由 read-verify 流的**另一个** agent 独立复核（含反向验证）。",
+  "原提交记录会被覆盖：loop.py submit 按设计把新记录写到规范路径 loop/state/out/read_xiyou_L0_0022.json，因此 w-sanguo-1 那份 15KB 记录（含 351 个引文节点、repairLog 7 条）将被替换。我**没有**为它建备份副本——任务 writes 只授权了候选文件，我没有权限在 loop/ 下另写归档件。若需保留，应由持 GATE.lock 的合并/运营任务处理。原 agent 的 .submit.json 副本我未触碰，其内容仍可在原路径读到。",
+  "原候选为何在我接手前8小时就已失效，我没有查清（EVIDENCE-VERIFY.json 只记录 pendingRedo 状态，不记录失效原因）。可能是缺失，也可能是被重写；我复现不了当时状态，故不猜测、不归因。",
+  "7 条 unknowns 未解决：九骷髅来源（U1）、玉玻璃事件经过（U2）、八戒与木叉旧识的时地（U3）、惠岸是否即木叉（U4）、滞留时长与回合计法（U5）、五七千里的时间尺度（U6）、菩萨反问是否构成定论（U7）。均为原文确实读不出或自身有矛盾处，未用推测填补。",
+  "两条 cost 栏为 null（T2/T3）：这是「本区间读不出代价」，不等于「已确认无代价」的完备证明。",
+  "口径可争之处：黄风岭虽在原文出现「行过了」，因其对后续行动无影响而未收进 worldSettings 地点层（已记入 reverseCheck.deliberatelyExcluded）；若复核者认为「行过」即应记 placeState=arrived，这是可争的一处从严口径。",
+  "未做真机/浏览器验证：本任务为纯原文精读，任务未声明要跑，且 GPU/浏览器测试需全局串行租约，故不产出页面证据。"
+ ],
+ "rollback": {
+  "kind": "append-only",
+  "strategy": "delete-added-files",
+  "files": [
+   "loop/state/out/read_xiyou_L0_0022.candidate.json",
+   "loop/state/out/read_xiyou_L0_0022.w-xiyou-1.submit.json"
+  ]
+ }
+}

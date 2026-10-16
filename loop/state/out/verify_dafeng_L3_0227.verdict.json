@@ -1,0 +1,367 @@
+{
+ "verdict": "partial",
+ "task": "verify:dafeng:L3:0227",
+ "verifier": "w-sanguo-1",
+ "role": "VERIFIER",
+ "roleFile": "loop/ROLES/VERIFIER.md",
+ "reviewedTask": "read:dafeng:L3:0227",
+ "reviewedArtifact": "loop/state/out/read_dafeng_L3_0227.candidate.json",
+ "reviewedAuthor": "w-sanguo-0",
+ "reviewedCandidateSha256": "bda379bc8859c1f82def785f54769c36051be3ad9a3927dadc0f3c78dd48e7e3",
+ "selfSign": false,
+ "source": {
+  "path": "data/cache/1063b17ca65ec1b76f30e460.docs.json",
+  "selector": "docs[0].text",
+  "range": [
+   862305,
+   872127
+  ],
+  "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+  "sliceSha256": "1c1dd6049ac0475f8820a358e419e2e130d16d57fa29c75dafddb161ef2d79cb",
+  "sliceCodepoints": 9822
+ },
+ "independenceNote": "复核者 w-sanguo-1 ≠ 原提交者 w-sanguo-0（见 reviewedAuthor），非自签。本轮我**先自己通读** [862305,872127) 全文（把切片另存 /tmp/slice_0227.txt 后分两段读完），再打开候选文件；因此下面的 reverseChecks 不是从候选措辞里反推的。",
+ "method": "① 先独立读原文切片（sha256 复算 = 候选声明的 sliceSha256）。② 机器核验：候选全部 214 条引文用 TEXT.find(quote, START, END) 复算，全部满足 find==start 且 TEXT[start:end]==quote，0 处不符；无引文越界（区间外 0 条）。③ 覆盖口径复算：叶子引文 214、去重字符串 153、合并区间 133、并集 4260、非空白 8244、比值 0.5167——与候选 machineSelfCheck/coverage 声明逐项吻合。④ 反向验证：把切片按段落切分（264 段），只按**已登记引文节点**（排除 coverage.zeroCoverageParagraphs 这一大段原文转储）判定覆盖，逐段找出「原文明确存在但任何分区都未登记」的事实，再对可疑处做定向探测。⑤ 误杀检查：逐条读 rejectedEdges RE01–RE04、notForeshadows NF01–NF04、notWorldSettings NW01–NW03，核对被排除项是否真有原文依据。⑥ 幻觉检查：对候选断言（排除 coverage）扫专名与结局判定。⑦ 引用核验：见 citationSample。",
+ "quotationAudit": {
+  "quoteNodes": 214,
+  "verbatim": 214,
+  "offsetMismatch": 0,
+  "outOfRange": 0,
+  "note": "全部逐字命中且偏移一致；无改写、无越界。这一点候选做得干净，是本复核判不了 fail 的主要原因。"
+ },
+ "citationSample": {
+  "sampled": 5,
+  "howSampled": "随机抽 5 条（random.seed(227) 后 sample），覆盖不同分区。",
+  "results": [
+   {
+    "section": "causeEdges.CE11.quotes[1]",
+    "quote": "张巡抚脸色骤然凝固，姜律中眼中的惊喜，渐渐消退。",
+    "claimed": [
+     868526,
+     868550
+    ],
+    "found": 868526,
+    "verbatim": true,
+    "offsetMatch": true
+   },
+   {
+    "section": "worldSettings.W06",
+    "quote": "血灵术，已燃烧精血为代价，短暂提升战力。",
+    "claimed": [
+     864208,
+     864228
+    ],
+    "found": 864208,
+    "verbatim": true,
+    "offsetMatch": true
+   },
+   {
+    "section": "notForeshadows.NF02",
+    "quote": "“哪个狗娘养的给他整理的衣衫，哪个狗娘养的给他整理的衣衫，衣襟没对称啊，衣襟没对称啊.....",
+    "claimed": [
+     869979,
+     870027
+    ],
+    "found": 869979,
+    "verbatim": true,
+    "offsetMatch": true
+   },
+   {
+    "section": "causeEdges.CE08.quotes[0]",
+    "quote": "杨川南立刻就答应了，不是因为急于脱罪，而是这一刻，杨都指挥使从这个读书人眼神里，看到了令他心悸的暴风雨。",
+    "claimed": [
+     865898,
+     865950
+    ],
+    "found": 865898,
+    "verbatim": true,
+    "offsetMatch": true
+   },
+   {
+    "section": "tasks.T02.objectiveQuotes[0]",
+    "quote": "此时此刻，困惑和懊悔都是无用的情绪，杀敌才是他唯一的出路。",
+    "claimed": [
+     864133,
+     864162
+    ],
+    "found": 864133,
+    "verbatim": true,
+    "offsetMatch": true
+   }
+  ],
+  "verdict": "5/5 逐字命中，偏移全部一致。"
+ },
+ "counterExamples": [
+  {
+   "claim": "S03（states，梦巫的存在形态）的 before 值写「肉身在场、燃烧精血提升战力，是一名「武者」（战魂仍在）」，但其 beforeQuotes 引的却是**战魂已经崩溃**那一句，与该 before 值语义相反。",
+   "quote": "战魂在刚才的三拳中崩溃，此时的梦巫不再是一名“武者”。",
+   "check": "python3 -c \"import json;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];q='战魂在刚才的三拳中崩溃，此时的梦巫不再是一名“武者”。';print(t.find(q),t.count(q),t[t.find(q)-14:t.find(q)])\"",
+   "checkResult": "865095 1 「姜律中杀到，」——即该句的上文是「姜律中杀到」，它宣告的是战魂**已经**崩溃。",
+   "why": "同一栏位内部自相矛盾：before 说「战魂仍在」，beforeQuotes 却引「战魂在刚才的三拳中崩溃……不再是一名“武者”」。候选自己的 note 也承认「前值引文取的是**战魂崩溃**那一句（变化发生在此）」——那正是 after 侧的变化点，不是 before 状态。这不是定位错误（引文逐字命中、偏移正确），而是**引文与所支撑的断言不一致**：按该引文，before 应写成「战魂已崩溃、不再是一名武者」，或把前半段（血灵术/以拳对攻）作为 before 依据、另引未崩溃处的原文。危害在于下游若按 beforeQuotes 取证据，会把「梦巫尚是武者」这一前值建立在否定它的句子上。修法：把 before 值改为与引文一致，或改用区间早段（如 864168-864228 施术与对攻处）作 before 依据。"
+  },
+  {
+   "claim": "T02 的 actionNote 与 costNote 两处把「血灵术」指向 worldSettings 的 **W07**（「归入 worldSettings（W07）」「燃烧精血是施术手段（法术设定，见 W07）」），但 W07 是「春祭日」；血灵术实际登记为 **W06**。",
+   "quote": "血灵术，已燃烧精血为代价，短暂提升战力。",
+   "check": "python3 -c \"import json;c=json.load(open('loop/state/out/read_dafeng_L3_0227.candidate.json'));print([w['id'] for w in c['worldSettings'] if '血灵术' in w['name']]);print([w['name'] for w in c['worldSettings'] if w['id']=='W07'])\"",
+   "checkResult": "['W06'] / ['春祭日：皇帝率文武百官祭天、家家户户跟着祭天，再忙碌的人都会归家团聚']",
+   "why": "交叉引用**指向错误条目**（不是悬空 id，故机器自检 danglingCrossReferences 抓不到：W07 确实存在）。后果具体：T02.actionNote 声称「法术机制单列到 W07」，而 W07 是节日设定，读 W07 得不到任何血灵术机制；costNote 又以同一错误 id 论证「燃烧精血不是代价」。这是计划100 那类「机制存在、却不产生信息」的轻量形态——指针有效、指向错物。修法：两处 W07 均改为 W06。"
+  },
+  {
+   "claim": "K05 的 whoKnows 写作「**许七安**（转述张巡抚的说法）自己『身中三十一箭，刀伤六十余处』『至死都是站着的』——这些是张巡抚告知杨砚的内容」。",
+   "quote": "张巡抚把今日发生的事，原原本本的告诉杨砚，最后说到许七安为了保护大家，死守不退时，巡抚大人眼睛发红：",
+   "check": "python3 -c \"import json;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];print('许七安' in t[868700:869000])\"",
+   "checkResult": "False —— 该场景（868735-868844）是张巡抚对杨砚的单向转述，许七安不在场、也没有获知这条信息的任何描写。",
+   "why": "**把知识归给了错误的人**：这些死状信息是张巡抚→杨砚的转述，许七安本人此时是尸体（S08 明写「许七安和三位银锣的尸体，停放在大厅正中央」），其苏醒在 871880。把 whoKnows 写成许七安，等于让一个在区间绝大部分时间里没有意识的角色成为知识持有者。正确写法应是「杨砚（以及在场的李妙真）从张巡抚处获知」，而 whoDoesNot 才是「读者/许七安本人」。这是一条编造（原文没有的人物状态），只是方向为「多给了知识」而非「多写了情节」。"
+  }
+ ],
+ "reverseChecks": [
+  {
+   "found": "候选漏掉许七安开出的**三个转世条件**全文，以及他「更倾向于夺舍重生」的明确偏好。T01.actionNote 声称这些条件「属于『他想要什么』，与本条 action 分列」，K06.why 亦称「神殊则直接无视了他开出的三个转世条件」——但全文件**没有任何分区登记它们**：按 214 个已登记引文节点（排除 coverage.zeroCoverageParagraphs）搜索，'俊美无俦'/'显赫世家'/'双十年华'/'狐媚子' 命中数均为 0，只在 coverage 的原文转储里以原文形式出现。",
+   "quote": "“如果能选择，我希望夺舍重生，也没什么太大的要求，嗯，首先一定要俊美无俦。",
+   "offset": 863563,
+   "wider": "「“其次，得是显赫世家的嫡子，含着金汤匙出生。当然了，修为最好是练气境，千万不要炼精境，我不想再过以前那种，以手抚阴坐长叹的苦日子。」（863606）「“最后，要有一个双十年华的狐媚子姐姐，会嘤嘤嘤那种。”」（863677）「转世和夺舍重生两个选择，许七安更倾向于后者，毕竟8D成长到8====D，需要很漫长的时间。」（862680）",
+   "whyItMatters": "这是**承诺与产出不符**：候选两处声明已「分列」处理，实际未登记。三个条件同时也是本区间里许七安**唯一一次主动表达意愿**（其余时间他在提问或吐槽），他的偏好（选夺舍而非转世）是 T01 objective 的直接延续，漏掉后 T01 只剩「他向神殊问处境」而看不到他想要什么。附带风险：若下游按 T01.actionNote 的字样去找这些条件，会找不到；若按 coverage 转储误当作已登记，则会把零覆盖清单当成知识分区（该口径风险候选自己未写明）。"
+  },
+  {
+   "found": "候选漏掉李妙真**误判来袭者为敌人**这一整条认知链的起点：她先惊呼「四品武者！而且是巅峰的四品武者！」、大惊失色猜测是山匪高手，随后才发现姜律中不设防、认出是自己人。候选只在 K12 用「心说难怪上面还有血迹」收了她的**物证核验**，把前面的误判与更正整体跳过。",
+   "quote": "而且是巅峰的四品武者！",
+   "offset": 867799,
+   "wider": "「李妙真站在墙头，眯着眼眺望远处，忽地一凛，喝道：“小心！”」（867719）「一道银光破空而来，枪尖在空气中擦出尖锐的啸声。」（867754）「李妙真大惊失色，娇躯紧绷，云州竟然有这种品级的高手？山匪里有这种品级的强人？」（867816）「接下来的一幕让她大吃一惊，姜律中竟主动迎了上去，不紧不慢的伸手去接银枪。」（867860）「远处“轰”一声巨响，一道身影在数百米外跃起，于空中划过高高的弧线，砸在城墙的马道上。」（868090）",
+   "whyItMatters": "「巅峰四品武者」是杨砚这一角色在本区间**唯一的量级标注**，而它紧接着的那次打飞姜律中（CE06/T05）需要这个量级才读得通。候选把杨砚的登场压缩成「奉义父之名」一句对白，读者看不到他是什么级别、也看不到李妙真从敌情判断到认亲的反转。这条链同时是 W15 银枪「真正的战兵」那句评价的上下文。"
+  },
+  {
+   "found": "候选漏掉守灵段的三句人物原话（宋廷风两句、朱广孝一句）。TH01 只引了「搬来两张椅子……一左一右坐在许七安身边」这一动作句，而原文这段的力量恰恰在台词上。",
+   "quote": "期间，宋廷风说了两句话：“就当是给你守灵了。”、“来生再做兄弟。”",
+   "offset": 869214,
+   "wider": "「朱广孝说了一句话：“到最后，还是我们两个人。”」（869253）「也不说话，就默默坐着，陪着。」「男人的悲伤是沉默的。」",
+   "whyItMatters": "TH01 的读法是「死亡由不在场者承担」，而这三句正是**在场者承担**的直接引语，尤其「到最后，还是我们两个人」；候选选它作主题支撑却不引最能支撑该读法的台词，等于把论证的依据换成了氛围描写。这也是本区间仅有的、出自守灵者之口的话。"
+  },
+  {
+   "found": "候选漏掉姜律中对梦巫之死的**当场定性**（「他自毁了。」）以及他随即被打断的要求，还有杨千幻被余波震伤、以及「废话太多，耽误了时机」这句直接批评。候选 CE05 只引到「梦巫自爆了」这一动作句。",
+   "quote": "姜律中缓缓扭头，盯着白衣术士，一字一句道：“他自毁了。”",
+   "offset": 865577,
+   "wider": "「“......忒心急了。”杨千幻郁闷道。」（865611）「“问题的重点难道不是你废话太多，耽误了时机？”」（865637）「“杨千幻....”姜律中大喊，但白衣术士已经没了身影，他后半句话没有说出来。」（865677）「逼王感觉后脑被人用力敲了一闷棍，后背被马车狠狠撞中，疼的差点叫出声，但忍住了，因为不符合身份。」（864391）「杨千幻闪避不急，仓促间一脚跺地，一道道阵纹亮起，化作一道道屏障，但又在下一刻纷纷破碎。」（864342）",
+   "whyItMatters": "U11 把「姜律中被 打断的后半句」只列为 unknown，但原文其实**明写了它没被说出来**这一事实，且姜律中的「他自毁了」是梦巫之死唯一的对手方定性（区别于叙述的「自爆了」）。另「废话太多，耽误了时机」直接给出了杨千幻**延误战机**的因果，NF01 引了「手握明月摘星辰」却漏了紧随其后的这句吐槽，使「自爆」在读者眼里缺少「本可被炼化、因废话而错过」这一层。"
+  },
+  {
+   "found": "候选漏掉武夫体系讲解里**唯一可操作的修行知识落点**：「寻常武者炼神，只是初步摸索到极限，此为下等。在绝境中不停的突破极限，此为上等」与许七安的追问「七品炼神，是为哪一个品级打基础？」及其答案「二品合道」。候选 W01 只截到「唯有七品炼神境是锤炼元神」。",
+   "quote": "“寻常武者炼神，只是初步摸索到极限，此为下等。在绝境中不停的突破极限，此为上等。你在这个阶段打下的基础越扎实，将来到了高品，你的底蕴越深。”",
+   "offset": 863287,
+   "wider": "「“大师，七品炼神，是为哪一个品级打基础？”许七安心里一动。」（863363）「“二品合道。”」（863398）",
+   "whyItMatters": "「二品合道」正是 T01 里许七安随后说「为了虚无缥缈的二品打基础，白白赔上一条性命」的指代对象（候选 cost 引了后者却未登记前者），缺了它这条代价链的上游就断了。同时「在绝境中不停的突破极限，此为上等」是本区间对许七安死守行为唯一的**体系层解释**（他的死守被叙述读作炼神境的上等修行），候选完全没有收。"
+  },
+  {
+   "found": "候选漏掉「运回京城」这条归途线的**动机句与官方定性**：「他们是英雄，不应该埋骨异乡」，以及姜律中与杨砚的去向（留云州剿匪、护卫张巡抚）。W20.actionRelevance 声称「谁留（张巡抚、姜律中、杨砚）、谁走（闵山护送尸体）」由该约束决定，但候选引文里没有支撑姜律中与杨砚留守的那一句。",
+   "quote": "但许七安以及三名银锣的尸首要运回京城，他们是英雄，不应该埋骨异乡。",
+   "offset": 871470,
+   "wider": "「姜律中和杨砚留在云州剿匪，以及护卫张巡抚的安全。」（871440）「然后留在云州主持大局，等待朝廷的指令，等待新的布政使抵达云州，他才能回京。」",
+   "whyItMatters": "「英雄，不应该埋骨异乡」是本区间对许七安之死的官方定性——它解释了 T08/W14 那条北上归途为什么成立，也是章末「官船缓缓北上」的情感前提；候选 W20 只引「走不了的……写成折子上报朝廷」，把定性句与解锁条件（等新布政使）都略过。"
+  },
+  {
+   "found": "候选漏掉姜律中关于元神机制的三重说明：元神**免疫拳头**、震荡气机效果有限、**若梦巫想逃姜律中一点办法都没有**。候选 W03 记 executed，却只引了他「我对元神无可奈何」这一句自认。",
+   "quote": "如果是肉身的话，一拳轰杀，但元神比较特殊，免疫拳头攻击。震荡气机确实能对元神造成伤害，不过效果有限，这个时候，如果梦巫的元神想逃，姜律中一点办法都没有。",
+   "offset": 865383,
+   "whyItMatters": "这一段是 CE05 机制的反面前提：原文明确说梦巫**本可以逃**，他选择自爆才成为需要解释的行为（U05）。候选把 U05 记为「动机未写」是对的，但没有登记「他本有退路」这一事实，U05 因此失去了分量——没有退路的人自爆不需要动机，有退路的人自爆才需要。"
+  },
+  {
+   "found": "候选漏掉天地会众人收到深夜传书时的实际反应（恼怒、『又来？』）以及一号在结束屏蔽后**立即**追问。K01/K10 全部关注「身份未公布」，没有登记这条社交压力线。",
+   "quote": "深更半夜的，突然被传书的悸动惊醒，天地会众成员心里非常恼怒，看到二号传书的内容后，更加恼怒了。",
+   "offset": 870299,
+   "wider": "「【一：好，没问题。】」（870998）「结束屏蔽，一号立即传书：【二号，是不是云州的案子结束了？】」（870927）",
+   "whyItMatters": "它说明二号频繁传书在会内本就不受欢迎，是 T07「她说要单独说」这一选择的现实压力；且一号的「立即」与结尾「一号再也没有回复她」形成同一角色内的反差，CE12 只取了后半段。"
+  }
+ ],
+ "misKillCheck": {
+  "result": "未发现误杀。",
+  "detail": "逐条核对被排除项：RE01（『许七安牺牲了』→守灵场景）确属相邻即因果，两段之间无机制，排除正确；RE02（邢台杀人→等不到敌人）对象/场所/时间均不同，排除正确；RE03（春祭日→苏醒）原文确无任何一句把祭天与复活关联（神殊给的机制是「漫长的过程」+精血），排除正确；RE04（魏渊之命→山匪提前作乱）原文无泄密描写，排除正确。CE13/CE14 被列在 rejectedEdges 但**写的是含机制与反例的正式边**（保留 from/to/trigger/mechanism/counter），与 RE01–RE04 的纯排除条目形态不同——这是**分区归属不一致**（同一数组里混了两种形态），但它没有被误杀：两条边的原文依据都成立，候选也没有把它们丢掉。NF01–NF04、NW01–NW03 的排除理由均能在原文落实，未见把合法内容挡掉的情况。",
+  "boundaryFinding": "唯一可记为「形态问题」的是 CE13/CE14 的归属：它们既然是含 mechanism 的边，按同文件 CE01–CE12 的惯例应在 causeEdges；留在 rejectedEdges 会使下游按「被否决」处理。我不据此判 fail（无原文引证可反驳，属口径），仅记录。"
+ },
+ "hallucinationCheck": {
+  "result": "引文层无幻觉；断言层有 1 处越权（K05）。",
+  "detail": "214/214 引文逐字命中、偏移一致、无越界，未在引文里发现原文不存在的人物、结局或伏笔。候选对「结束≠成功」的纪律执行得很好（T03.resultNote 明确拒绝写「成功守住白帝城」；T06.result 与 T02/T04/T05/T06/T08/T09 的 cost、T09 的 obstacle 如实写 null；F06/F07 判 unresolved）。唯一越权是 counterExamples #3 的 K05：把死状信息的知识持有者写成许七安本人，而原文该场景是张巡抚对杨砚的单向转述、许七安当时是尸体。另 SC00 提到的越界专名（太平刀/守门人/佛陀/怀庆/监正/梁有平/慕南栀）经我实测在候选的**引文节点**中出现 0 次，仅存在于 SC00 的自述文字里（作为已删除记录），不构成越界引用。"
+ },
+ "machineSelfCheckReproduced": {
+  "quoteNodes": {
+   "claimed": 214,
+   "actual": 214,
+   "ok": true
+  },
+  "uniqueQuoteStrings": {
+   "claimed": 153,
+   "actual": 153,
+   "ok": true
+  },
+  "mergedIntervals": {
+   "claimed": 133,
+   "actual": 133,
+   "ok": true
+  },
+  "quoteUnionCodepoints": {
+   "claimed": 4260,
+   "actual": 4260,
+   "ok": true
+  },
+  "nonSpaceCodepoints": {
+   "claimed": 8244,
+   "actual": 8244,
+   "ok": true
+  },
+  "quoteUnionRatioOfNonSpace": {
+   "claimed": 0.5167,
+   "actual": 0.5167,
+   "ok": true
+  },
+  "taskFieldQuoteCollision": {
+   "claimed": [],
+   "actual": [],
+   "ok": true
+  },
+  "taskFieldIntervalOverlap": {
+   "claimed": [],
+   "actual": [],
+   "ok": true
+  },
+  "nullFields": {
+   "claimed": 8,
+   "actual": 8,
+   "ok": true
+  },
+  "ambiguousLocators": {
+   "claimed": [
+    "【九：这是好事。】"
+   ],
+   "actual": [
+    "【九：这是好事。】"
+   ],
+   "ok": true,
+   "verify": "该句在区间内确出现 2 次（870403、870441），候选标 range-ambiguous 属实。"
+  },
+  "buildScriptPath": {
+   "claimed": "loop/state/out/read_dafeng_L3_0227.w-sanguo-0.build/build_candidate.w-sanguo-0.py",
+   "exists": false,
+   "actualFiles": [
+    "build_candidate.py",
+    "quoteutil.py",
+    "slice_dump.txt",
+    "verify_candidate.py",
+    "verify_report.json"
+   ],
+   "ok": false,
+   "note": "machineSelfCheck.buildScript 指向的文件名不存在（实际为 build_candidate.py）。属**证据路径笔误**：目录与其余证据文件均在位，数字复算吻合，不据此判 fail，但下游按该路径取证据会落空。"
+  },
+  "note": "六项覆盖数字、三项任务内碰撞/重叠/null 计数全部复算吻合。上一轮复核（同一 reviewer id 的历史 reviews 记录）指出过同一 buildScript 路径问题，候选未修，本轮再次记录。"
+ },
+ "verdictRationale": "判 **partial**，不是 fail：按 VERIFIER.md「拿不出原文引证的反对意见只能记为存疑，不能据此判 fail」，而我的三条 counterExample 中，两条（S03 引文与 before 值语义相反、K05 知识归属错误）都给出了逐字可查的原文与相反证据，第三条（W07/W06 误指）可由候选文件自身复算证明——但它们的共同性质是**栏位内部一致性/交叉引用层的错误**，被复核的 214 条引文本身干净（逐字命中、偏移全对、无越界），五个必需分区齐备，machineSelfCheck 覆盖数字我复算逐项吻合，未发现编造的情节、结局或伏笔。判不了 pass：① 候选两处**声明**「三个转世条件已分列处理」，实际全文件无任何分区登记（按已登记引文节点搜索命中 0），属承诺与产出不符，下游若按该声明取证据会落空；② S03 的 before 值与其引文互相否定，会让下游把「梦巫尚是武者」建立在一句否定它的原文上；③ 两处 W07 交叉引用指向「春祭日」而非「血灵术」，指针有效但指向错物，机器自检抓不到；④ K05 把知识归给不在场、无意识的许七安；⑤ 反向验证列出 8 组原文明确存在、候选完全未登记的事实，其中「巅峰四品武者」「他自毁了」「就当是给你守灵了」「二品合道」「英雄，不应该埋骨异乡」都是各自场面里不可替代的证据。最值得留下的一条：候选把绝大部分工程强度投在「引文必须逐字命中并回填偏移」上（确实做到了，214/214），但覆盖率仅 51.67%，且出现「声称已分列 vs 实际未登记」的落差——**机器判据的强度不等于语义完整性**，这正是 VERIFIER.md 引的「机制存在、有产出，但不产生信息」的变体。",
+ "usableAsIs": [
+  "全部 214 条引文及其 start/end/sourceHash：逐字命中、偏移一致、无越界，可直接用于发布与合并。",
+  "tasks T01–T09、causeEdges CE01–CE12、states S01–S12（除 S03.before）、foreshadows F01–F07、worldSettings W01–W20、knowledgeGaps K01–K12（除 K05）的**结构、basis 分级与 null+Note 纪律**：抽样核对未发现引文支撑不了结论的情况；人物说法与叙述事实的分层（speechAsClueNotFact 10 条、各 Note）严格且与原文相符。",
+  "rejectedEdges RE01–RE04、notForeshadows NF01–NF04、notWorldSettings NW01–NW03、unknowns U01–U14、selfCritique SC00–SC06：排除性判断均有原文依据，U 系列与原文缺口对得上。",
+  "五条引文抽样 5/5 逐字命中、偏移一致（见 citationSample）。"
+ ],
+ "mustFixOrDowngrade": [
+  "S03.before 与其 beforeQuotes 语义相反：二选一——把 before 改为与引文一致（战魂已崩溃/不再是一名武者），或改引区间早段（864168-864228 施术与对攻）作 before 依据。**不得**保留现状，否则下游按引文取证据会得到与断言相反的原文。",
+  "T02.actionNote 与 T02.costNote 中的两处 **W07 → 应改为 W06**（W07 是春祭日，血灵术登记在 W06）。",
+  "K05.whoKnows 中的「许七安（转述张巡抚的说法）」应改为杨砚（及在场李妙真）从张巡抚处获知；许七安此时是尸体，其苏醒在 871880。",
+  "T01.actionNote 与 K06.why 中「三个转世条件已被分列处理」的说法：登记不存在。应改为如实说明未登记，或补登记（三个条件 863563/863606/863677 + 偏好 862680）后再引用。",
+  "machineSelfCheck.buildScript 指向不存在的文件名，应更正为 loop/state/out/read_dafeng_L3_0227.w-sanguo-0.build/build_candidate.py。",
+  "coverage.zeroCoverageParagraphs 不得被下游当作「已登记的知识」使用（它只是 133 段原文转储）；候选的 T01.actionNote/K06 已出现把转储误当登记的口径风险，建议在文件内写明该字段性质。"
+ ],
+ "unresolvedDisputes": [
+  "CE13/CE14 被放在 rejectedEdges，但它们写的是含 from/to/trigger/mechanism/counter 的**正式边**（与 CE01–CE12 同形），而同数组的 RE01–RE04 才是纯排除条目。两种形态混在一个数组里，下游按「rejected」处理会丢掉两条有原文依据的边。属分区归属口径，非事实分歧，我不据此判 fail，建议移入 causeEdges 或在文件内说明该数组可含两类。",
+  "zero-coverage 口径：候选称 133 段零覆盖，我按「与该段有任何交叠即算覆盖」复算同为 133 段（与候选一致）；若按「完全包含」判定会得到 263。两种口径都能自圆其说，候选显然用交叠口径，但文件未写明定义，建议补一句。",
+  "SC02（T06.obstacle 记『扳机非障碍』）与 SC03（T08 把尸体位移写成 objective）是候选自陈的可驳回项；我核对原文后认为两处自陈成立（区间内确无人阻拦杨砚；许七安在护送期间确无行动能力），是否回退由下游决定。",
+  "SC01（T03.objective 由动作反推却记 explicit）：原文有「只要张巡抚平定云州叛乱」（866269 附近）这一目标表述，与「肃清逆党」的整体目标仍有距离。属分级裁量，我倾向维持并保留其 objectiveNote。"
+ ],
+ "notes": "【方法与不确定处】① 我按 VERIFIER.md 规定的顺序执行：先自己通读原文切片（另存后分两段读完），再打开候选，因此本文件的 reverseChecks 不是从候选措辞反推的。② 我**没有**读本区间之外的章节，所以所有反向发现都只主张「区间内明写、候选未登记」，不主张候选理解错了需要跨单元对读才能判断的部分。③ 我的覆盖判据**刻意排除了 coverage.zeroCoverageParagraphs**：它把 133 段原文原样抄进候选文件，若用朴素字符串匹配会把转储误判为「已登记」，从而漏掉 counterExample #2（三个转世条件）。这一点是本轮唯一的方法学要点，建议写进 VERIFIER 流程：**核对「是否登记」必须基于引文节点集合，不能用候选全文匹配**。④ 本文件的所有引文与偏移我都用同一脚本复核过（TEXT.find(quote,START,END)==offset 且 TEXT[offset:offset+len(quote)]==quote），无反例。⑤ 本轮只读复算，未跑 GPU/浏览器测试（任务未要求），未改任何受保护路径，未做 git checkout/reset/stash。⑥ 诚实记录一处**我自己的边界**：contract 要求「至少 3 条反向发现」，我给 8 条，但这不构成覆盖率证明——51.67% 的覆盖意味着仍有我未发现的遗漏；我的段落扫描以 264 段为单位、以「是否有已登记引文与该段交叠」为判据，因此**长段落内被部分引用而其余内容被忽略**的情况不会被我的方法抓到（例如 863811-864066 那段神殊对话被引了多处，但同段内许七安的吐槽「难怪神殊大师没有出手救我」未被登记）。这是方法的已知盲区，如实写出。⑦ 本轮开工时发现 loop/state/out/verify_dafeng_L3_0227.verdict.json 已存在一份历史复核（同为 reviewer id w-sanguo-1，时间 2026-10-14T16:06:50，判定 partial），且 read_dafeng_L3_0227.json 的 reviews 里已记录该次复核；但 **verify:dafeng:L3:0227 本身从未生成任务记录**（done 集合中不存在），故本轮我按任务定义重做并提交本记录。我保留并复用了上轮的正确发现（三个转世条件未登记、buildScript 路径笔误、SC05 的「插入地面」越界例证——最后一项我实测区间内 0 次、全文 4 次，且 W15 的 itemStateNote 实测**非 null**，上轮称其『未写』有误，此处更正），同时补入本轮新发现（S03 自相矛盾、W07/W06 误指、K05 知识归属）。",
+ "reviewerSelfCorrection": {
+  "what": "我更正了上一轮复核中的一处事实错误，并如实记录我自己方法上的盲区。",
+  "detail": [
+   "上一轮 counterExamples #3 称「W15 的 itemStateNote 字段实测为 null（未写）」。我复算：W15 的 itemStateNote = 「血迹未干」是**过去使用的痕迹**而不是当场使用，我仍归入 use，但在 explain 里写明它指的是此前作战。四态分开写，不与 hold/transfer 合成一条链。——该字段**有值**，上轮描述有误。SC05 引用「插入地面」作为区间内例证这一点仍然成立（该词在区间内 0 次、全文 4 次，见 SC05），故 counterExample 的结论不变、依据需更正。",
+   "我的段落级覆盖扫描有一个已知盲区（见 notes ⑥）：被部分引用的长段落，其未引用的内容不会被判为缺口。因此本文件的 8 条反向发现是**下限**而非全量。"
+  ],
+  "howCaught": "写盘前我对本文件内每一对 (quote, offset) 跑了 TEXT.find(quote,START,END)==offset 且 TEXT[offset:offset+len(quote)]==quote 的自查，并逐字段回读候选的 W15 与 SC05 原文，发现上轮对 itemStateNote 的描述与实测不符。"
+ },
+ "evidence": [
+  {
+   "path": "loop/state/out/read_dafeng_L3_0227.candidate.json",
+   "sha256": "bda379bc8859c1f82def785f54769c36051be3ad9a3927dadc0f3c78dd48e7e3",
+   "bytes": 215363,
+   "kind": "被复核的候选（只读，本次未修改；全部 3 条反例与 8 条反向发现均指向此文件。哈希用于锁定复核对象）"
+  },
+  {
+   "path": "data/cache/1063b17ca65ec1b76f30e460.docs.json",
+   "sha256": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+   "bytes": 12652187,
+   "kind": "原文缓存（只读；区间 [862305,872127) 切片 sha256=1c1dd6049ac0475f8820a358e419e2e130d16d57fa29c75dafddb161ef2d79cb 与全部引文复算的唯一来源；未修改）"
+  }
+ ],
+ "evidenceNote": "本文件（loop/state/out/verify_dafeng_L3_0227.verdict.json）在提交后会被 loop.py submit 追加 validation/submittedAt/wallClockSeconds 字段，故**不把自己列入 evidence**（自指哈希必然失效）。同理不含 loop/state/out/read_dafeng_L3_0227.json：cmd_verify 会向它追加 reviews/verifyState，而 loop/state/out/ 属 MUTABLE_EXCEPTIONS（is_evolving=false）⇒ 在 evidence 里钉哈希会在本步之后立刻判 stale；它改列在 sourceHashes 里作并行写入识别用。",
+ "sourceHashes": {
+  "loop/state/out/read_dafeng_L3_0227.candidate.json": "bda379bc8859c1f82def785f54769c36051be3ad9a3927dadc0f3c78dd48e7e3",
+  "data/cache/1063b17ca65ec1b76f30e460.docs.json": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+  "loop/state/out/read_dafeng_L3_0227.json": "7cee11920f4d364ff48bce905cf883291e266b5832dba634ba624ec0896a744d"
+ },
+ "reproduce": [
+  "切片与哈希：python3 -c \"import json,hashlib;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];s=t[862305:872127];print(len(s),hashlib.sha256(s.encode()).hexdigest())\" → 9822 1c1dd6049ac0475f8820a358e419e2e130d16d57fa29c75dafddb161ef2d79cb",
+  "引文全量核验：python3 -c \"import json;T=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];c=json.load(open('loop/state/out/read_dafeng_L3_0227.candidate.json'));\\nimport itertools\\ndef w(o):\\n  if isinstance(o,dict):\\n    if isinstance(o.get('quote'),str) and 'start' in o: yield o\\n    for v in o.values(): yield from w(v)\\n  elif isinstance(o,list):\\n    for v in o: yield from w(v)\\nq=list(w(c));bad=[x for x in q if T[x['start']:x['end']]!=x['quote'] or T.find(x['quote'],862305,872127)!=x['start']];print(len(q),'quotes, bad=',len(bad))\" → 214 quotes, bad= 0",
+  "S03 反例：python3 -c \"import json;c=json.load(open('loop/state/out/read_dafeng_L3_0227.candidate.json'));print(c['states'][2]['before']);print(c['states'][2]['beforeQuotes'][0]['quote'])\" → 前者称「战魂仍在」，后者是「战魂在刚才的三拳中崩溃……不再是一名“武者”」",
+  "W07/W06 误指：python3 -c \"import json;c=json.load(open('loop/state/out/read_dafeng_L3_0227.candidate.json'));print([w['id'] for w in c['worldSettings'] if '血灵术' in w['name']],[w['name'] for w in c['worldSettings'] if w['id']=='W07'])\" → ['W06'] ['春祭日：皇帝率文武百官祭天、家家户户跟着祭天，再忙碌的人都会归家团聚']",
+  "K05 反例：python3 -c \"import json;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];print('许七安' in t[868700:869000])\" → False",
+  "三个转世条件未登记：见 counterExamples/reverseChecks 的 checkResult（按已登记引文节点搜索，'俊美无俦'/'显赫世家'/'双十年华'/'狐媚子' 命中均为 0，仅存在于 coverage 转储）"
+ ],
+ "changes": [],
+ "rollback": "本复核为只读复算 + 单文件追加式写入，未改动候选、原文或任何受保护路径；回滚即删除 loop/state/out/verify_dafeng_L3_0227.verdict.json（与 verify:dafeng:L3:0227 的记录）。",
+ "agent": "w-sanguo-1",
+ "status": "done",
+ "verifies": "read:dafeng:L3:0227",
+ "verdict_field_note": "任务要求的 verdict 字段即本文件顶层 verdict（partial）。",
+ "summary": "独立反向复核 read:dafeng:L3:0227（大奉打更人 第两百二十六章，区间 [862305,872127)）。结论 partial：214/214 引文逐字命中、偏移全对、无越界、覆盖数字复算全吻合、五个必需分区齐备、未发现编造的情节或结局；但存在 3 条可逐字引证的 counterExample（S03 的 before 与其引文语义相反、T02 两处把血灵术误指为 W07 而实际是 W06、K05 把死状知识归给不在场且无意识的许七安），1 处承诺与产出不符（声称三个转世条件已「分列」，实际未登记），1 处证据路径笔误（buildScript 文件名不存在），以及 8 组原文明确存在但完全未登记的事实（巅峰四品武者、他自毁了、守灵三句台词、二品合道、英雄不埋骨异乡、元神免疫拳头、天地会恼怒反应等）。核心教训：候选在「引文逐字命中」上的工程质量很高，却仍有 48% 的原文无引文框定，且出现「声明已处理 vs 实际未登记」的落差——机器判据的强度不等于语义完整性。",
+ "assertions": [
+  {
+   "text": "被复核候选的 sha256 为 bda379bc8859c1f82def785f54769c36051be3ad9a3927dadc0f3c78dd48e7e3（复算）",
+   "result": "pass"
+  },
+  {
+   "text": "原文切片 [862305,872127) 长度 9822、sha256=1c1dd604...，与候选声明一致（复算）",
+   "result": "pass"
+  },
+  {
+   "text": "候选全部 214 条引文逐字命中且偏移一致、无区间外引用（脚本复算）",
+   "result": "pass"
+  },
+  {
+   "text": "候选覆盖六项数字（quoteNodes/unique/merged/union/nonspace/ratio）复算全部吻合",
+   "result": "pass"
+  },
+  {
+   "text": "S03.before 与其 beforeQuotes 语义相反（逐字反证）",
+   "result": "fail"
+  },
+  {
+   "text": "T02 两处把血灵术误指为 W07（实际 W06）（候选文件自身复算）",
+   "result": "fail"
+  },
+  {
+   "text": "K05 把死状知识归给不在场的许七安（原文反证）",
+   "result": "fail"
+  },
+  {
+   "text": "三个转世条件被声称「已分列」但全文件无登记（引文节点搜索命中 0）",
+   "result": "fail"
+  },
+  {
+   "text": "machineSelfCheck.buildScript 指向的文件不存在（实际为 build_candidate.py）",
+   "result": "fail"
+  },
+  {
+   "text": "未跑 GPU/浏览器测试；未改受保护路径；未做 git checkout/reset/stash",
+   "result": "pass"
+  }
+ ],
+ "remaining": [
+  "长段落内「被部分引用、其余内容未登记」的缺口未逐一排查（方法盲区，见 notes ⑥）：例如 863811-864066 神殊对话段中许七安的吐槽「难怪神殊大师没有出手救我」等未登记，可能与已登记内容同段而未被我的段落级判据发现。",
+  "CE13/CE14 的分区归属（rejectedEdges vs causeEdges）未定论，作为口径分歧留在 unresolvedDisputes。",
+  "未做跨单元对读（不读区间外章节），因此凡需要相邻单元才能判断的语义正确性一律未评。",
+  "未评估该候选在发布链中的实际合并结果（属 publish 任务职责）。"
+ ]
+}

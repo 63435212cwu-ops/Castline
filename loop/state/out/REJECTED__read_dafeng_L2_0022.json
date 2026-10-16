@@ -1,0 +1,253 @@
+{
+  "task": "read:dafeng:L2:0022",
+  "agent": "w-dafeng-3",
+  "status": "rejected",
+  "summary": "精读《大奉打更人》第二十三章 刑部缉拿人犯（docs[0].text 的 [68044,71277) 切片，3233 codepoint / 91 段）并产出候选 loop/state/out/read_dafeng_L2_0022.candidate.json：8 条任务五元组、12 条因果边（每条带 mechanism 与 notMereAdjacency）、11 条显式拒绝的伪因果、7 条人物状态（before/after + 事件锚点）、7 条知识差、5 条伏笔（逐条标 status；铺设端或回收端在区间外的一律 inSourceRange=false）、5 条未收束线、16 条 unknowns；527 个 quote 字典全部由脚本按「段落下标+段内唯一子串」定位后回切，text[start:end]==quote 逐字成立。",
+  "evidence": [
+    {
+      "path": "loop/state/out/read_dafeng_L2_0022.candidate.json",
+      "sha256": "fec39f2a98db7794cb46e89f46156ac7d98750923b743cc07430fe725410432a",
+      "kind": "reader-output",
+      "bytes": 366058
+    }
+  ],
+  "assertions": [
+    {
+      "text": "源哈希：动手前后各算一次 sha256(data/cache/9b676d7031b1bcd3b8377a18.docs.json) 均为 fdde5558…39839，与任务 sourceHash 逐字一致；图缓存 3c2fae1d…6ebdf 亦未变。命令：shasum -a 256 data/cache/9b676d7031b1bcd3b8377a18.docs.json data/cache/9b676d7031b1bcd3b8377a18.json",
+      "result": "pass"
+    },
+    {
+      "text": "偏移口径：docs[0].text[68044:68056]=='第二十三章 刑部缉拿人犯' 且在全文仅 1 次；docs[0].text.find('第二十四章 蓝皮书')==71277==rangeEnd；区间末非空白内容是分隔线 '------------'，其后只有空白与下一章标题。命令：python3 -c \"import json;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];print(t[68044:68056],t.count('第二十三章 刑部缉拿人犯'),t.find('第二十四章 蓝皮书'))\"",
+      "result": "pass"
+    },
+    {
+      "text": "逐字命中（独立复算）：/tmp/cl_l2_0022/recheck.py 不复用生成脚本代码，递归遍历候选里全部 527 个 {quote,start,end} 字典，复算 text[start:end]==quote、occurrencesInSource 与全书实算一致、inSourceRange 与真实区间一致、paragraphIndex 落在该段内、同一偏移不出现两个不同 quote、区间内引文在切片内唯一；另复算覆盖率、残余段、哈希声明与边界。25 项检查全部 pass（exit 0）。命令：python3 /tmp/cl_l2_0022/recheck.py（输出 /tmp/cl_l2_0022/recheck.json）",
+      "result": "pass"
+    },
+    {
+      "text": "反向验证：/tmp/cl_l2_0022/reverse.py 回答「还漏了什么」——A 91 个段落的非空白正文全部被已登记引文覆盖（uncoveredParagraphs 为空）；B 区间内 35 个实体（人物/机构/地点/名目）无一在候选里缺失；C 候选叙述里出现的区间外专名「黄郎中/周显平/褚采薇」都同条目附了区间外逐字引文；D 纪律机械检查（notSuccess 与理由成对、null 必带 why、causeEdges 必带 mechanism+notMereAdjacency、伏笔必带 status）无问题；E 无引文在原文里 find 不到。exit 0。命令：python3 /tmp/cl_l2_0022/reverse.py",
+      "result": "pass"
+    },
+    {
+      "text": "真实发布链打穿（不是我自评，是既有工具判的）：python3 -B -s loop/bin/to_candidate.py --task read:dafeng:L2:0022 产出 6 条、丢弃 26 条并逐条记账（输出存档 /tmp/cl_l2_0022/bridge_run.json）；再 python3 -B -s tools/publish_reviewed.py --source-key 9b676d7031b1bcd3b8377a18 --candidate <桥输出> --dry-run 返回 ok=true、contractProblems=[]、referencePrecision 32/32=100%（输出存档 /tmp/cl_l2_0022/publish_dryrun.json）。丢弃原因已逐条写进候选的 publishBridgeNotes（no_two_distinct_events / unresolvable_character / no_anchored_event），没有为通过而改写人名或编 eventId。",
+      "result": "pass"
+    },
+    {
+      "text": "发现并修掉自己的两处真实缺陷（不是改校验）：①区间内有一段非空白正文（‘许七安有些急，’@69211）没有被任何登记引文覆盖，coverageNote.residualAllWhitespace 因此为 false —— 补登记该句引文后复算为 true、覆盖率 0.8339；②我最初凭印象写的一处区间外引文（‘帝王心术放在平时…’）整段在第三十五章并不存在逐字文本，被生成脚本的「章内唯一」断言挡下，改为该章真实存在的子串。另修掉自写复核脚本里一条断言写错（C2：区间末是分隔线+两个换行，我原先按 strip 后等于分隔线判），改的是我自己的检查而不是数据。",
+      "result": "pass"
+    },
+    {
+      "text": "区间内引文零误报：对 quoteRegistry 里 95 条区间内引文复算切片内出现次数，无一条在 [68044,71277) 内出现超过 1 次（全局多次出现的只有分隔线 1031 次、'......' 12646 次等排版记号，已在 occurrencesInSource 里如实声明）。",
+      "result": "pass"
+    },
+    {
+      "text": "未声称语义核验：semanticReview='not-performed'，semanticReviewNote 明示「引用定位正确≠语义已核验」；候选不含任何 semanticReview 完成声明。三条最容易读错的地方（陈叔的话→甲士到场的伪因果、炼神境那一行的归属、京察算不算伏笔）写进 selfCritique 并各自给了「我为什么仍然这么判断」。",
+      "result": "pass"
+    },
+    {
+      "text": "只写了 writes 指定的 1 个文件：本轮对共享树的写入仅 loop/state/out/read_dafeng_L2_0022.candidate.json；未触碰 js/ css/ index.html serve.py narrative.py scripts/ tests/ docs/ data/ 任何受保护路径（源文件哈希动手前后一致即为证）。为打穿发布链，to_candidate.py 会在 loop/state/candidates/ 下另写一个桥输出（该目录不在我的 writes 内）；我把它取证到 /tmp 后已删除该文件（仅剩另一个 agent 早先产出的 L0 文件，未动），共享树回到原状。",
+      "result": "pass"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/read_dafeng_L2_0022.candidate.json",
+      "kind": "append-only"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/9b676d7031b1bcd3b8377a18.docs.json": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "data/cache/9b676d7031b1bcd3b8377a18.json": "3c2fae1d399d6768719f2d5476fa0cfd88fb4fbbc12abdf080323fa4b846ebdf"
+  },
+  "remaining": [
+    "语义未独立复核：本轮只做了引用定位的机器校验（逐字命中+偏移+唯一性+覆盖率），没有做任何语义核验。候选对 CE4（扈从离衙→托人求救）、CE5（交情→答应）、CE9（炼神境那一行的归属）、F5（京察算伏笔）都标了 caveat，需要复核者判定是否降级。",
+    "区间外引用只做了有界抽查：F1/F2/F5 的回收端、U07/U08/U13 的区间外核对，都是按关键词在全书检索到「我找到的那几处」，没有穷尽证明「全书再没有别的回收端」；U13（那笔俸禄有没有兑付）已按此标 unverified。",
+    "图谱摘要与原文不一致处我没有替它裁决：缓存事件摘要写的是「周府陈叔携刑部郎中到场，无文书缉走许七安」，本区间原文没有写谁通知的刑部、也没写有没有文书（见 U01/NC6），我只登记差异，不去改图谱。",
+    "发布桥限制（事实，不是候选缺项）：本区间图谱事件只有 3 个（ev_826b67f311c7f20a @68418、ev_802445c4dad524a7 @69638、ev_a65131566572b627 @70960），to_candidate.py 的 causeEdges 需要两端锚到两个不同事件，12 条因果边多数会被 no_two_distinct_events 丢弃；tasks 层的 T8（青袍五品官）因图谱人物表里没有这个称名会被 unresolvable_character 丢弃；states 层的 S3/S7 因锚不到本区间事件会被 no_anchored_event 丢弃。三者都已逐条写进 publishBridgeNotes。",
+    "本候选未做 GPU/浏览器测试（任务未要求，且 GPU 全局串行）；未跑 sh scripts/accept.sh（属受保护路径的验收流程，非本任务范围）。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/read_dafeng_L2_0022.candidate.json"
+    ]
+  },
+  "reproduce": {
+    "generator": "/tmp/cl_l2_0022/gen.py（sha256 008b96c8…70d7c）+ /tmp/cl_l2_0022/lib.py（962d0963…2775b）+ /tmp/cl_l2_0022/content_a.py + /tmp/cl_l2_0022/content_b.py",
+    "independentRecheck": "/tmp/cl_l2_0022/recheck.py（sha256 8838c50a…a824d）",
+    "reverseCheck": "/tmp/cl_l2_0022/reverse.py（sha256 19b688fc…9e7ab）",
+    "commands": [
+      "python3 /tmp/cl_l2_0022/gen.py",
+      "python3 /tmp/cl_l2_0022/recheck.py",
+      "python3 /tmp/cl_l2_0022/reverse.py",
+      "python3 -B -s loop/bin/to_candidate.py --task read:dafeng:L2:0022",
+      "python3 -B -s tools/publish_reviewed.py --source-key 9b676d7031b1bcd3b8377a18 --candidate loop/state/candidates/read_dafeng_L2_0022.candidate.json --dry-run"
+    ],
+    "note": "生成与复核脚本都在 /tmp（不在仓库内），因为它们是一次性证据生成器，按 AGENTS.md 不把运行产物放回 docs/ tests/。最后一条命令会在 loop/state/candidates/ 下另写一个文件（不在本任务 writes 内），取证后已删除，见 assertions 第 9 条。"
+  },
+  "submittedAt": "2026-10-09T05:18:41Z",
+  "validation": {
+    "problems": [
+      "内容分区未产出：worldSettings, themeReadings（提示词要求 6 个分区，候选只给了 4 个；缺的分区即使本区间没有内容也应写成空数组）"
+    ],
+    "at": "2026-10-09T05:18:41Z"
+  },
+  "verifyState": "fail",
+  "reviews": [
+    {
+      "reviewer": "w-dafeng-2",
+      "at": "2026-10-08T05:09:17Z",
+      "verdict": "fail",
+      "notes": "【复核独立性】本复核会话的租约 loop/state/leases/verify:dafeng:L2:0022.d/lease.json 的 agent 是 **w-dafeng-2**；被复核候选与提交记录 loop/state/out/read_dafeng_L2_0022.json 的 agent 是 **w-dafeng-3**，两者不同名，loop.py cmd_verify 的自签判据（rec['agent']==args.agent）不会拒绝。本轮**不存在** L2:0014 那样的自签命名冲突。\n\n【判 fail 的边界声明】契约规定「拿不出原文引证的反对意见只能记为存疑，不能据此判 fail」。本轮的 5 条 counterExample 每一条都给出一条**逐字可查**的区间内（或可精确定位到章边界的）引文，并且每一条都能用一条 python3 命令复算；其中 CE1/CE2/CE3 是**事实错误**（章号写错 / 0 次称名写成区间用字），CE4/CE5 是**自报数字与实测矛盾**。判 fail 的依据是这 5 条，不是「感觉」。以下事项**只作存疑、未用于判 fail**：(a) F5 是否应算伏笔（候选自己在 risk 里也存疑）；(b) 「这个老者是炼神境的高手」是否属叙述层（候选 U06 已登记存疑）；(c) T6/T8 的 notSuccess=false 是否偏宽（我核对了锚点，认为成立）；(d) 4 条 causeEdge 的 to 端起点早于 from 端起点（CE1/CE5/CE6/CE9）——CE1 是「规则段插入解释」、CE5 是「交情段插在请求与应答之间」、CE6 是「瞪大眼睛紧接上一句」、CE9 是「气机锁定与身体反应同段」，四条都是可辩护的读法，故作存疑不判缺陷，但建议发布前统一口径。\n\n【自我纠错（契约允许）】(1) 我的首版审计脚本用 `next(c for c in chs if c['start']<=p)` 取章，这返回的是**第一个** start<=p 的章而不是最后一个，于是把 19 条区间外引文全部误报为章归属失配。修正为「遍历取最后一个 start<=p」后复核为失配 0。该误报未进入任何结论。(2) 我的第一版「反向验证」用 4-6gram 覆盖率扫 91 段，报出 85/91 段「断言未覆盖」，复算发现我的散文抽取递归有 bug（没有下降到 tasks/causeEdges 等子树），修正后降到 55/91，再逐条人读确认其中多数是**合法的改写**（如原文「王捕头在怀里摸了摸，摸出一小把碎银」被断言写成「掏出那把碎银」），gram 法对改写过敏，故**放弃**该方法，改用「引文是否被用进断言」与「人工列 20 个探针词」两条口径，最终得到 R1-R5 五条。该误报也未进入任何结论。\n\n【未做的事】语义正确性未独立复核（只做引用定位全量核验 + 反向覆盖 + 误杀 + 幻觉 + 自报计数五类机器可复算检查，semanticReview 保持 not-performed）；未判断候选对人物动机/世界观的文学解读是否最优；区间外内容只用于校验候选自标的 inSourceRange/outsideChapter 标签与 5 条反向发现的跨章依赖，未把区间外内容当作本区间事实的证据；未跑任何 GPU/浏览器测试（本任务不需要）。\n\n【对发布流的建议】5 处 must-fix 都是**局部字段级**修改，不触动 527 条引文；建议定向修复后由原提交者重交、再走一次独立复核，不要在 fail 状态下直接发布。",
+      "counterExamples": [
+        {
+          "id": "CE1",
+          "kind": "cross-chapter-misattribution",
+          "claim": "foreshadows[4]（F5）.payoffOutOfRange.value 写「区间外**第二十七章**周公子一方拿“京察临近”当后遗症可控的理由」，但它自己在该字段下引的那条引文（@88425）落在**第三十章 化学课**。",
+          "candidateText": "区间外第二十七章周公子一方拿“京察临近”当后遗症可控的理由；第三十五章许七安把“京察是祖制”当成撬动户部侍郎的支点",
+          "quote": "并且，这样做的后遗症很小。虽然京察临近，但整死一个微不足道的胥吏；县衙捕快，难不成还能撼动户部侍郎，堂堂正三品？",
+          "start": 88425,
+          "end": 88481,
+          "offsetUnit": "codepoint",
+          "match": "exact",
+          "why": "该引文区间 [88425,88481) 落在 index.json 的「第三十章 化学课」[88318,91423)，不在「第二十七章 提人（第一更）」[79616,82180)。复算：第二十七章全文「京察」出现 **0** 次、「后遗症」0 次；「京察」+「后遗症」只同时出现在第三十章。候选自己的 outOfRangeContext.X_LOW_AFTEREFFECT.outsideChapter 也写的是「第三十章 化学课」——即 F5 的正文说法与它自己登记的字段互相矛盾。同句里「周公子一方拿……当理由」也不准：该段是许七安对周公子用心的**推测**（「姓周的看着只是个没啥脑子的纨绔子弟啊，装的这么像？」之后的推理），不是周公子一方说出来的话。",
+          "fix": "把「第二十七章」改为「第三十章」，并把主体从「周公子一方拿」改为「许七安推测周公子一方拿」。",
+          "severity": "must-fix（跨章引用章号错误，与自身字段矛盾）"
+        },
+        {
+          "id": "CE2",
+          "kind": "cross-chapter-misattribution",
+          "claim": "foreshadows[4]（F5）.payoffOutOfRange.note 写「（**第三十五章**才出现“户部侍郎周显平”这个名字，见 X_ZHOU_XIANPING）」，但它自己指的 X_ZHOU_XIANPING 落在**第二十九章**。",
+          "candidateText": "“老爷”指谁，本区间没有点名（第三十五章才出现“户部侍郎周显平”这个名字，见 X_ZHOU_XIANPING），故这里只写制度性的“京察”，不替原文点名。",
+          "quote": "“我听说，户部侍郎周显平是他们的靠山。”",
+          "start": 87990,
+          "end": 88010,
+          "offsetUnit": "codepoint",
+          "match": "exact",
+          "why": "「周显平」全书首次出现在 @87999，落在「第二十九章 辞旧，大哥待你不薄（为盟主李佩云加更）」[84968,88318)；该名字在第三十五章之前已出现。候选自己的 outOfRangeContext.X_ZHOU_XIANPING.outsideChapter = 「第二十九章 辞旧…」，openThreads[3]（OT4）.outOfRangeCheck.value 也写「区间外第二十九章出现“户部侍郎周显平是他们的靠山”」——同一份候选里同一事实有两个互相矛盾的章号（OT4 对、F5 错）。",
+          "fix": "F5.note 的「第三十五章」改为「第二十九章」。",
+          "severity": "must-fix（跨章引用章号错误，与自身 OT4/X_ZHOU_XIANPING 矛盾）"
+        },
+        {
+          "id": "CE3",
+          "kind": "fabricated-in-range-address",
+          "claim": "charactersInRange[5]（周公子）.asWrittenInRange 写「周公子 / 锦衣公子 / **姓周的（朱县令称）**」——「姓周的」在本区间出现 **0** 次，且原文里「姓X的」这个句式的方向恰好相反：是周公子骂朱县令「姓朱的」。",
+          "candidateText": "周公子 / 锦衣公子 / 姓周的（朱县令称）",
+          "quote": "“哎呦，这不是周公子吗，周侍郎可好？”",
+          "start": 68270,
+          "end": 68289,
+          "offsetUnit": "codepoint",
+          "match": "exact",
+          "why": "复算：区间 [68044,71277) 内「姓周的」= **0** 次、「姓朱的」= **2** 次（@68874「“姓朱的，你敢动我的人？”周公子指着朱县令的鼻子破口大骂。」、@69107「霸凌良家女子，姓朱的你上街问问」），两处都是**周公子对朱县令**的称呼。朱县令对周公子的实际称呼是「周公子」（本条引文 @68266，「这不是周公子吗」）与「这位公子」。图谱人物表里「姓周的」确是周立（ch_2a7bda8bc25d8a27）的别名、全书 14 次，但那 14 次全部落在区间外（首次 @80772，第二十七章）——把全书别名当成本区间用字，正是本项目反复出现的「把可用资料当成已见原文」。",
+          "fix": "删去「姓周的（朱县令称）」；若要保留该别名，须标 inSourceRange=false 并注明首次出现在第二十七章。",
+          "severity": "must-fix（把 0 次的称名写成区间内用字，并倒置了称呼方向）"
+        },
+        {
+          "id": "CE4",
+          "kind": "count-error",
+          "claim": "charactersInRange 的四条「N 次」自报与区间实测不符：许七安 15（实际 17）、许平志 6（实际 7）、朱县令 10（实际 15）、「这女人」2（实际 1，另一次是「这个女人」）。",
+          "candidateText": "本区间“许七安”15 次 / 本区间“许平志”6 次 / 本区间“朱县令”10 次 / “这女人”2 次是他人指称",
+          "quote": "朱县令飞起一脚踢在许七安身上，一转头，又是一脸舔狗笑容：",
+          "start": 68448,
+          "end": 68476,
+          "offsetUnit": "codepoint",
+          "match": "exact",
+          "why": "逐条复算 [68044,71277)：许七安 17、许平志 7、朱县令 15、「这女人」1、「这个女人」1。其中朱县令一条偏差最大（10 vs 15），可用本引文所在的段 @68413-68476 作定位示例。许七安/许平志/朱县令三条的偏差都出现在**对话内**的出现次数上（如 @68383「快手许七安」、@69354「而朱县令没有阻止」），说明计数漏掉了引号内与叙述从句里的出现。另有两条自报是**对的**：「许玲月」4 次、「王捕头」6 次、「陈叔」1 次、「老者」5 次、「宁宴」1 次、「二叔」2 次、「头儿」3 次、「老爷」2 次均复算一致。",
+          "recount": {
+            "许七安": {
+              "claim": 15,
+              "actual": 17
+            },
+            "许平志": {
+              "claim": 6,
+              "actual": 7
+            },
+            "朱县令": {
+              "claim": 10,
+              "actual": 15
+            },
+            "这女人": {
+              "claim": 2,
+              "actual": 1
+            },
+            "这个女人": {
+              "claim": null,
+              "actual": 1
+            }
+          },
+          "fix": "改为实测值；「这女人」改为「这女人（1 次）/ 这个女人（1 次）」。",
+          "severity": "must-fix（用字统计错误，可直接复算）"
+        },
+        {
+          "id": "CE5",
+          "kind": "self-report-count-error",
+          "claim": "redLines 两处自报条数与实际不符：noFabrication 写「本轮登记 18 条（X 引文）」，实际 outOfRangeContext 有 **19** 条；noSingleAppearanceForeshadow 写「另 10 组单次/同段出现项单列」，实际 singleAppearanceNotForeshadow 有 **11** 项。",
+          "candidateText": "区间外引文一律 inSourceRange=false 且 id 前缀为 X（本轮登记 18 条） / 另 10 组单次/同段出现项单列 singleAppearanceNotForeshadow",
+          "quote": "PS：2700字数，感觉太长了，我总是这么良心，一个不慎就会写多，得检讨一下。",
+          "start": 71223,
+          "end": 71262,
+          "offsetUnit": "codepoint",
+          "match": "exact",
+          "why": "复算：outOfRangeContext 共 19 个键（X_STREET_LINE…X_ZHOU_XIANPING），全部以 X 开头，与 quotesOutOfRangeRegistered=19 一致——即同一份候选里字段值（19）与 redLines 散文（18）自相矛盾。singleAppearanceNotForeshadow 数组长度 11，与 redLines 散文（10 组）矛盾。本引文是该数组第 [10] 项（作者 PS 行）的载体，正是被漏数的那一项。另：quoteCount=386 经复算**正确**（区间内断言引用实例、不含 unitHeadQuote，共 386）。",
+          "fix": "18 → 19；10 组 → 11 组。",
+          "severity": "must-fix（自报条数与数组长度矛盾）"
+        }
+      ],
+      "reverseChecks": [
+        {
+          "id": "R1",
+          "found": "**章题回响未登记**：全书「刑部缉拿人犯」只出现 2 次 —— 本单元章题 @68050，与区间内青袍五品官进衙时当众宣示的那句话 @70960。这是本章标题的落点（标题即由这句宣示命名），候选把该引文（XINGBU_DECLARE）用在 tasks[7]/knowledgeGaps[0]/unknowns[0] 共 4 处，却**没有任何字段把标题与宣示连起来**：候选全文检索「点题/呼应/回响/章题」命中 0/0/0/0。",
+          "quote": "“刑部缉拿人犯，闲杂人等退避，如若干涉，同罪处置。”",
+          "start": 70959,
+          "end": 70985,
+          "inRange": true,
+          "candidateOccurrences": "XINGBU_DECLARE 用于 /tasks[7].objective、/tasks[7].action、/knowledgeGaps[0].knows、/unknowns[0].knows；unitHeadQuote 只登记章题本身；无任何「标题↔宣示」的对应登记。",
+          "why": "同项目 L2:0014 的复核（loop/state/out/verify_dafeng_L2_0014.verdict.json 的 reverseChecks[1]）已把「章题与包袱的点题结构」列为同类反向发现，说明这是项目认可的检查项。本单元的这一处更强：标题是**逐字**取自区间内的台词。按契约只作反向发现，不据此判 fail。"
+        },
+        {
+          "id": "R2",
+          "found": "**刑部宣示里的威胁条款与驱散令未进任何断言**：「闲杂人等退避，如若干涉，同罪处置」这半句是缉拿行为的法律威吓（对在场所有人，包括许平志与朱县令），原文明确存在，但候选的 12 条 causeEdge / 11 条 notCauseEdge / 8 条 task / 7 条 state 的**断言散文**里都没有它：区间内「退避」「同罪处置」「如若干涉」在断言散文中命中 0。",
+          "quote": "“刑部缉拿人犯，闲杂人等退避，如若干涉，同罪处置。”",
+          "start": 70959,
+          "end": 70985,
+          "inRange": true,
+          "candidateOccurrences": "该引文只被当作「刑部到场」的标识使用（tasks[7].objective/action 的引文载体、knowledgeGaps[0]/unknowns[0] 的引文载体），没有任何断言说明这半句的作用。",
+          "why": "这一条直接影响 T5（许平志）的 obstacle 与 T4（朱县令）的 result：许平志当场质问「我侄儿何罪之有」之后被朱县令死死拉住，与「如若干涉，同罪处置」这句威吓是同一场里的对应关系，候选把「被拉住」只归因于朱县令的动作，未记录威吓条款这一层。按契约只作反向发现。"
+        },
+        {
+          "id": "R3",
+          "found": "**周公子是被「押着一群人」押进县衙的，且朱县令「早已收到消息」——两条都在断言里缺席**：叙述层用「早已收到消息的朱县令高坐桌案前，见到众衙役押着一群人进来」交代了这场冲突的**前置准备**（朱县令预先知情）与周公子的**到堂方式**（被衙役押进来，不是自行到堂）。候选把这条引文（ZHU_AT_DESK @68199）只用在 charactersInRange[4].quotes[0] 与 notCategorizedFacts.items[6] 作引文载体；断言散文里「押着」「消息」命中 0。",
+          "quote": "早已收到消息的朱县令高坐桌案前，见到众衙役押着一群人进来，看清那位满面怒火的锦衣公子。",
+          "start": 68199,
+          "end": 68242,
+          "inRange": true,
+          "candidateOccurrences": "ZHU_AT_DESK 用于 /charactersInRange[4].quotes[0]、/notCategorizedFacts/items[6].quotes[0]、/quoteRegistry；notCategorizedFacts.items[6] 只引它说明周公子「满面怒火」，未记「押着」与「早已收到消息」。",
+          "why": "「早已收到消息」是朱县令 behavior 的前置条件（他一见周公子就「老朱吓了一跳，急匆匆的起身迎来」），对 T4 的 objective（把事压下去）有解释力；「押着一群人」则关系到周公子在本场是被押来的当事人。两条都在区间内逐字可查。按契约只作反向发现。"
+        },
+        {
+          "id": "R4",
+          "found": "**许七安在缉拿现场的两个动作未登记**：区间内他除了「硬着头皮迎上去」（已登记）之外，还有 (a) 进门时对许玲月「微微颔首，给她一个镇定的眼神」，(b) 面对「刀架在脖子上」的自陈「至于后悔，没有……难道任人宰割？」。候选把 QI_AN_NOD 只列入 notCategorizedFacts.items[5]（且只写「一次性的动作细节」），NO_REGRET 只列入 items[2]；断言散文里「颔首」命中 0。",
+          "quote": "许七安微微颔首，给她一个镇定的眼神。",
+          "start": 68175,
+          "end": 68193,
+          "inRange": true,
+          "candidateOccurrences": "QI_AN_NOD -> /notCategorizedFacts/items[5]；NO_REGRET -> /notCategorizedFacts/items[2]。两条都只作「归类外事实」登记，未进入任何 task/state。",
+          "why": "这是**已登记引文但未被读成断言**的缺口（引文在、事实没被记成断言），不是编造。按契约只作反向发现。"
+        },
+        {
+          "id": "R5",
+          "found": "**「因为」这一处显式因果连词未被任何 causeEdge 使用**：区间内唯一的「因为」是「许玲月望着堂兄**因为**自己被责难，泪珠滚滚」，把她的哭与本场冲突的成因直接连起来；候选全文的 causeEdges 里没有一条以该句为端点，断言散文里「责难」出现但未作为因果端点。",
+          "quote": "人群外，许玲月望着堂兄因为自己被责难，泪珠滚滚，比寻常女子更挺更精致的琼鼻哭的通红。",
+          "start": 68530,
+          "end": 68572,
+          "inRange": true,
+          "candidateOccurrences": "LINGYUE_WATCH 用于 /states[6].before.quotes[0]、/notCategorizedFacts/items[3].quotes[1]、/quoteRegistry；不在任何 causeEdge 的 from/to 中。",
+          "why": "同项目 L2:0014 复核的 reverseChecks[0] 以「显式『于是』因果链被整条漏掉」为反向发现，判据是「显式连词比候选收录的多数边更硬」。本区间同理：区间内「因为」只此 1 处，「所以/于是/因此/故而」全部 0 次，是唯一带显式因果连词的句子，而它指向的是**许玲月的哭的成因**，属于 T3（许玲月）的 obstacle/action 一环。按契约只作反向发现。"
+        }
+      ]
+    }
+  ],
+  "wallClockSeconds": 2700,
+  "wallClockFrom": "lease.startedAt"
+}

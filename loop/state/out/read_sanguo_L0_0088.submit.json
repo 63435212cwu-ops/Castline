@@ -1,0 +1,107 @@
+{
+  "task": "read:sanguo:L0:0088",
+  "agent": "w-sanguo-0",
+  "role": "READER",
+  "status": "done",
+  "summary": "精读《三国演义》第八十九回 武乡侯四番用计 南蛮王五次遭擒（docs[0].text[444148,449690)，5542 码点）。本会话独立重读全文（257 句），对**上一会话遗留的候选**逐条复算并定点修复 16 项：331 个引文节点 text[start:end]==quote 全部成立（0 失败）；任务五栏引文区间零重叠、空栏 100% 带同名 Note；反向覆盖按声明正则独立重算（257 句 / 未覆盖 56 句，集合与声明逐条一致，且 56 条 text 全部逐字等于切片）；跨引用复用跨度由人工计数 58 改为脚本复算 60，并补 sourceHash 与统一 usedBy 指针风格；伏笔新增 F06（伏波将军马援线，铺设+回收 4 处）；selfCritique 增补 SC07/SC08/SC09 记下上一版与本次自审发现的自身缺陷；readMethod 删除无法复核的 audit_0089.py 声称，改写为可复核的两段来源。semanticReview 仍为 not-performed。",
+  "reworkOf": "loop/state/out/read_sanguo_L0_0088.candidate.json（上一个 w-sanguo-0 会话 2026-10-13 23:36 落盘、随会话终止未提交）",
+  "reworkReason": "上一会话在写完候选后随 session 终止，未提交、也未做独立复算。本会话先独立重读原文、再机械复算全部引文（331 项全通过），随后做反向覆盖审计，查出 8 类可复现缺陷（见 assertions），故在其上定点修复而非重写。",
+  "evidence": [
+    {
+      "path": "loop/state/out/read_sanguo_L0_0088.candidate.json",
+      "sha256": "ca9f7315ecc9fcafe5b738480abb4715faa139135a8c59039c8374b9c693e631",
+      "note": "本任务 writes 指定的唯一路径：本轮产出（在上一会话候选上定点修复 16 项）"
+    },
+    {
+      "path": "data/cache/fe42d01f3826fe8096f86614.docs.json",
+      "sha256": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+      "note": "原文（docs[0].text 即引文来源）；哈希与 prompt 正文指定的 sourceHash 一致"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/read-0088-audit-w-sanguo-0/repair_0088.py",
+      "sha256": "267ef072594642f95436217d07defe2f5a16a382d235f76abc11c501afa84fb9",
+      "note": "本轮审计修复脚本（非瞬态，可原样复跑；连跑 3 次 sha256 不变 = 幂等）。用法：python3 -B -s <该路径> --check|--write"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/read-0088-audit-w-sanguo-0/verify_0088.py",
+      "sha256": "97d908e4d3f4ccff1a76ac1eb8939dd5caef1fa191484558fca54b2ff32fe1b1",
+      "note": "独立复验脚本（不 import 修复脚本、不复用其函数，只用不同代码路径从磁盘重算）：退出码 0，检查项失败数 0"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/备份/read_sanguo_L0_0088.candidate.presession.json",
+      "sha256": "f4d2525e77e73ad226bdd9a32a6a6a530657cb1e52cde0fa0cdae88d5a654c66",
+      "note": "回退基线：修复前的原始候选（上一会话产物），可原样复制回 writes 路径"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "引文定位：候选内全部 331 个带 start/end 的引文节点满足 docs[0].text[start:end]==quote，且全部落在 [444148,449690) 内、sourceHash 全等于 8ab7298a…。复现：python3 -B -s <verify_0088.py>（输出 PASS 引文 text[start:end]==quote 0/331 失败；PASS 引文全在区间内；PASS 引文 sourceHash 全对）。",
+      "result": "pass"
+    },
+    {
+      "text": "偏移口径：docs[0].text[444148:449690] 以回目「第八十九回　武乡侯四番用计　南蛮王五次遭擒」开头，长度 5542，切片 sha256=422ce0b4…（与候选 source.sliceSha256 一致）。复现：python3 -B -s <verify_0088.py>（PASS 切片以回目开头 / PASS 切片长度 5542 / PASS 切片 sha256）。",
+      "result": "pass"
+    },
+    {
+      "text": "五栏独立取证：20 条任务的 objective/obstacle/action/result/cost 五栏之间，引文区间两两零重叠（不是「同一句当多栏依据」）；15 个 null 栏 100% 带同名 <栏位>Note，且每条 Note 写明「为什么没有」而非留空。复现：python3 -B -s <verify_0088.py>（PASS 同任务五栏引文区间零重叠；PASS null 栏都带同名 Note）。",
+      "result": "pass"
+    },
+    {
+      "text": "反向覆盖：按候选自己声明的 chunkingRule（re.finditer(r'[^\\n。！？]+[\\n。！？]?', text[444148:449690])）独立重算得 257 句、未覆盖 56 句，与 reverseCoverage 声明集合**逐条相等**（diff 为空）；56 条 uncoveredChunks.text 全部逐字等于 text[start:end]。复现：python3 -B -s <verify_0088.py>（PASS 未覆盖集合 == 重算集合 重算56 声明56 差=[]；PASS uncoveredChunks.text 逐字等于切片）。",
+      "result": "pass"
+    },
+    {
+      "text": "跨引用：crossSectionQuoteReuse.count=60 == len(spans)=60 == 独立重算的「同一 (start,end,quote) 出现在 >=2 个位置」的条目数；每条 span 都带 start/end/sourceHash 且可按偏移切出；全部 usedBy 指针可解析到实际存在的分区条目。复现：python3 -B -s <verify_0088.py>（PASS 复用跨度集合 == 重算；PASS 每条 span 可按 start/end 切出；PASS usedBy 指针全部可解析）。",
+      "result": "pass"
+    },
+    {
+      "text": "worldSettings 三条区分字段化：5 条 place 全带 placeState∈{arrived,mentioned}（银坑山、山阴洞记 mentioned，因原文只有图谋/提议而无到达动作）；7 条 item 全带 itemStates⊆{hold,transfer,use,lose}（WS-ITEM-05 薤叶芸香为空数组，因原文只有吩咐、无执行）；5 条 rule 全带 institution∈{declared,executed,misunderstood}。复现：python3 -B -s <verify_0088.py>（逐条 PASS）。",
+      "result": "pass"
+    },
+    {
+      "text": "未声称语义核验：候选 semanticReview='not-performed'，且 semanticReviewNote 明确写「引文可复算只证明定位成立，不证明语义已核验」。复现：python3 -B -s <verify_0088.py>（PASS semanticReview 未声称完成 'not-performed'）。",
+      "result": "pass"
+    },
+    {
+      "text": "修复幂等：repair_0088.py 对同一输入连跑 3 次，候选 sha256 恒为 ca9f7315…（第 2、3 次报告「修复项 0」）。复现：连续运行 python3 -B -s <repair_0088.py> --write 并比对 sha256。",
+      "result": "pass"
+    },
+    {
+      "text": "受保护路径未动：本会话开始（23:47）后，find data js css scripts tests docs serve.py narrative.py index.html -newermt '2026-10-13 23:47' -type f 输出为空；本会话只写了 loop/state/out/read_sanguo_L0_0088.candidate.json（writes 指定）与回滚点下的脚本/备份。",
+      "result": "pass"
+    },
+    {
+      "text": "上一版缺陷的可复现证据（本轮修复依据，逐条可独立复算）：① 6 条 uncoveredChunks.text 与 text[start:end] 不等（前导全角空格/结尾换行）；② note 自称按 [^\\n。！？]+ 切句，实测落盘是含终止符版本，两者相差 2 个边界块；③ 漏 447428-447430、448515-448517 两个真实未覆盖块，并把已被 rejectedCauseEdges[3] 引文（446478-446513）覆盖的 446498-446512 记为未覆盖；④ note 称「每一句未覆盖的正文都在 unknowns 或 notModeled 里有交代」，实测逐句可对应的仅 8/56；⑤ count=58 漏 445758-445786、446054-446092 两条，且 3 个 usedBy 指针用了不存在的 WS-PLACE-0X.extra（实际字段名 extraQuotes）；⑥ T05.cost.basisNote 把「却说孟获引数十万蛮兵」写作 444403 一带，实测 444373（444403 处为「牌獠丁，直扣前寨搦战…」）；⑦ readMethod 引用 audit_0089.py，该文件在仓库/回滚点/home 检索 0 命中；⑧ 生成器 build_0089.py 对 len(body)<6 的块直接 continue，正是 447428-447430、448515-448517 等被漏掉的机制根因。",
+      "result": "pass"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/read_sanguo_L0_0088.candidate.json",
+      "kind": "append-only",
+      "note": "任务 writes 指定的唯一写入路径。在上一会话候选（sha256 f4d2525e…，已备份至回滚点）上定点修复 16 项，非重写。"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/fe42d01f3826fe8096f86614.docs.json": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+    "data/cache/fe42d01f3826fe8096f86614.json": "04802afa6910e056b797a1586eb03c06820036907d248b17d7e05d388ad4b489",
+    "loop/state/runs/task-read_sanguo_L0_0088.json": "51e9e753bfe3d63cd731a888b21bfa630f481c3d7c45737eabf1e9abba5aea27",
+    "loop/state/out/read_sanguo_L0_0088.candidate.json": "ca9f7315ecc9fcafe5b738480abb4715faa139135a8c59039c8374b9c693e631"
+  },
+  "remaining": [
+    "semanticReview 未做：本候选只完成「引用定位 + 五栏各自取证 + 六个分区产出 + 反向覆盖复算」，语义正确性未经独立复核者核验。按契约，定位成立 ≠ 语义已核验。",
+    "任务 JSON 的 sourceHash 字段（2988ce6e…）与 prompt 正文指定的 8ab7298a… 不一致：实测 2988ce6e… 是 data/cache/f0b45e85…/152e2a6e… 两个 docs.json 的 sha256，8ab7298a… 才是本文件哈希。已登记为候选 unknowns U01，本会话不替环境改任务 JSON（runs/ 属瞬态路径，且非本任务 writes）。",
+    "F06（伏波将军线）由本会话新增，属我自己的归纳（铺设与回收关系由我判定），尚未经独立复核；其中「奉伏波将军之命」是老叟自陈的人物语，候选未据此判定神迹成立（见 U04）。",
+    "反向覆盖仍只覆盖「句子与引文是否相交」这一机械口径：未覆盖的 56 句里，转场句与人物语上下文（如「少顷，张翼解孟优至」「孔明问曰：丈者高姓？」）是否应各自建模，本会话未逐句给结论，只在 reverseCoverage.note 里分了类。",
+    "四泉的方位在两处人物语里不一致（朵思无方位版、老叟有方位版但缺哑泉），候选未为四泉画地图（U03/U10）；这属存疑而非已结论。",
+    "本候选未跑 GPU/浏览器测试，也未做真机/读屏验证 —— 本任务不声明需要，且按纪律全局串行。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "restore-from-snapshot",
+    "files": [
+      "loop/state/out/read_sanguo_L0_0088.candidate.json"
+    ],
+    "note": "本任务只写 writes 指定的一个路径，且该路径原文件（上一会话产物）已备份。回退方式：把 /Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/备份/read_sanguo_L0_0088.candidate.presession.json（sha256=f4d2525e77e73ad226bdd9a32a6a6a530657cb1e52cde0fa0cdae88d5a654c66）复制回该路径即恢复修复前状态。回滚点下的 repair_0088.py / verify_0088.py 为只读脚本，不含状态；repair_0088.py 对原文件幂等（连跑 3 次 sha256 不变），故重跑不会累积改动。"
+  }
+}

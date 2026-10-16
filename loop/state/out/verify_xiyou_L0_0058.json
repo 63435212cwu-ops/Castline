@@ -1,0 +1,714 @@
+{
+  "task": "verify:xiyou:L0:0058",
+  "reviewedTask": "read:xiyou:L0:0058",
+  "reviewedCandidate": "loop/state/out/read_xiyou_L0_0058.candidate.json",
+  "reviewedCandidateSha256": "5e18d29870d4f1c45ab0792dca0055f2324790662e847b49a7b8680f0f61c83e",
+  "reviewer": "w-dafeng-2",
+  "role": "VERIFIER",
+  "verdict": "partial",
+  "source": {
+    "path": "data/cache/a065244455cfb2221bcda94a.docs.json",
+    "docIndex": 0,
+    "sha256": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+    "sha256Kind": "整个 docs.json 文件的 sha256（非切片）",
+    "range": [
+      418724,
+      425240
+    ],
+    "codepoints": 6516,
+    "sliceSha256": "3ff54fa29d0c8b474bea7436208c3226e80e84ad34f5a3e2c9884f6db08763be",
+    "offsetUnit": "codepoint（docs[0].text 全文绝对偏移，半开区间）",
+    "taskSourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+    "taskSourceHashMatch": true,
+    "headCheck": {
+      "sliceStartsWithHead": true,
+      "sliceLength": 6516,
+      "nextChapterMarkerInSlice": false,
+      "nextChapterMarkerAt": 425240,
+      "nextChapterMarkerEqualsEnd": true,
+      "note": "任务声明的 sourceRange/sourceHash 与真实文件完全一致；候选 source.path 指向同一内容的不同缓存别名（a0652444…docs.json），该文件 sha256 亦等于 c282cf39…。源侧无问题。"
+    }
+  },
+  "method": {
+    "order": "先读原文后看候选：开工先把 T[418724:425240) 写为 /tmp/vx0058/seg.txt 并通读全 20 段三遍（read 工具），此过程未打开候选文件；全部反向发现（reverseChecks）均来自这次先读，再看候选。",
+    "commands": [
+      "源哈希 : python3 -c \"import hashlib;print(hashlib.sha256(open('data/cache/a065244455cfb2221bcda94a.docs.json','rb').read()).hexdigest())\" -> c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+      "切片端点 : python3 -c \"import json;T=json.load(open('data/cache/a065244455cfb2221bcda94a.docs.json'))[0]['text'];print(len(T[418724:425240]),T[418724:425240][:21],T.find('第五十九回'))\" -> 6516 第五十八回　二心搅乱大乾坤　一体难修真寂灭 425240",
+      "全量引文复算 : 递归收集候选全部 quote 节点（181 条），逐条断言 T[start:end]==quote、T.count(quote)==1、S<=start<end<=E、sourceHash==文件哈希 -> nodes 181 bad []",
+      "factStatus 复算 : 独立按 “…” 顺序配对求跨度（87 对、终态 depth=0），再对每条引文机械判定 narrated/utterance/mixed，与候选声明逐条比对 -> mismatches 0",
+      "段落覆盖复算 : 独立按 \\n\\n 切分非空段并统计「存在整条落在段内的引文」-> 与候选 coverage 完全一致（20 段 / 19 段有引文 / 唯一无引文段为题头 418724–418745）",
+      "栏位纪律复算 : 同一 task 五栏（objective/obstacle/action/result/cost）之间共用引文与互为子串 -> shared [] nested []；null 均带 *Note；所有非空栏均有 basis",
+      "候选自述复现 : 逐条执行候选 reproduce.commands 的 4 条命令 -> 4/4 输出与候选自述一致（c282cf39…/722176/第五十八回/425240；sliceSha256 3ff54fa2…；nodes 181 bad []；shared [] nested []）",
+      "5 条随机 find : seed=58 抽 5 条 -> 5/5 逐字命中、5/5 find() 首索引等于声明 start、5/5 全文唯一、5/5 哈希一致",
+      "误杀扫描 : 对切片内全部句子做重复计数，找出「区间内重复 >=2 次」因而被候选 count==1 硬门挡掉的合法引文 -> 见 falseKills",
+      "偏移核验 : 所有反向发现引文均用 T.find(quote) 计算 start/end，逐条断言 count 与 inUnit，见各条 quotes[].start/end"
+    ],
+    "scriptNote": "复核脚本与切片只写在 /tmp/vx0058/（不在仓库内，按纪律不写受保护路径）。每条命令都是不依赖脚本本体的等价 python3 片段。"
+  },
+  "extractionCheck": {
+    "summary": "候选的抽取项（14 tasks / 11 causeEdges / 3 rejectedEdges / 8 states / 5 knowledgeDiffs / 4 foreshadows / 21 worldSettings / 2 themeReadings）逐条在原文里找对应文字：**未发现任何一条无原文依据的编造**。",
+    "quoteNodesChecked": 181,
+    "verbatimFailures": 0,
+    "offsetFailures": 0,
+    "outOfRangeFailures": 0,
+    "uniquenessFailures": 0,
+    "sourceHashFailures": 0,
+    "entityFabrication": "未发现。候选出现的全部世界物件/地点/人物名（花果山水帘洞、南海落伽山、潮音洞、南天门、灵霄宝殿、阴山背后、森罗殿、大西天灵鹫仙山雷音宝刹、中途草舍人家、西梁国、青毡包袱、如意金箍棒、随心铁杆兵、照妖镜、生死簿、毛虫文簿、金箍、降妖宝杖、金钵盂、紧箍儿咒、四猴混世…）均可在区间内逐字检出。",
+    "endingAsSuccess": "未发现。F4（悟空求褪金箍还俗）显式 resolved=false、payoffScope=unresolved-in-unit；T11.result 明写「他要的还俗没得到」；full unit 末尾「不知三藏几时得面佛求经」未被当成取经成功。",
+    "utteranceAsFact": "未发现越界。候选自定的 factStatus 规则（utterance 不得当叙述事实）在 T14.objective（「这妖假立师名，要往西天取经」只有悟空转述）、T7.objective（玉帝旨意）、T9（谛听答话）、worldSettings「四猴混世」（institution=declared）上都被执行到位。",
+    "selfCritiqueSpotCheck": "候选 selfCritique 第 1 条自陈「大圣/那行者」归属有风险。我抽查了 419471、419728、421701 三处「那行者也如此说」、420675「这大圣呵呵冷笑，那行者也哈哈欢喜」、424448「那猕猴毛骨悚然」：候选的「这大圣=真、那行者=假」约定在这些点上与原文上下文一致，该风险未实际发生（此条是我对自己反向怀疑的否决，如实记录）。"
+  },
+  "counterExamples": [
+    {
+      "id": "CE1",
+      "candidatePath": "knowledgeDiffs[0] (K1).doesNotKnow / K1.note",
+      "claim": "K1 把「菩萨」「大众」「三藏、八戒与沙僧」列为**不知道**假行者本象（六耳猕猴）的一方，且该条目**没有时间锚点**（不同于 states[] 均有 anchor 字段）。",
+      "quote": "前日打你的，乃假行者六耳猕猴也",
+      "quotes": [
+        {
+          "quote": "前日打你的，乃假行者六耳猕猴也，幸如来知识，已被悟空打死。",
+          "start": 424886,
+          "end": 424915,
+          "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+          "offsetUnit": "codepoint",
+          "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+          "inUnit": true,
+          "count": 1
+        },
+        {
+          "quote": "大众一发上前，把钵盂揭起，果然见了本象，是一个六耳猕猴",
+          "start": 424537,
+          "end": 424564,
+          "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+          "offsetUnit": "codepoint",
+          "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+          "inUnit": true,
+          "count": 1
+        },
+        {
+          "quote": "菩萨把如来识怪之事，说了一遍。",
+          "start": 425103,
+          "end": 425118,
+          "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+          "offsetUnit": "codepoint",
+          "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+          "inUnit": true,
+          "count": 1
+        }
+      ],
+      "why": "在**同一区间内**，被 K1 列为「不知道」的三方都知道了：(1) 菩萨知道并当众说出——424886「前日打你的，乃假行者六耳猕猴也」；(2) 大众知道——424537「大众一发上前，把钵盂揭起，果然见了本象，是一个六耳猕猴」，且 424258 如来是**对着大众**说「我观假悟空乃六耳猕猴也」；(3) 三藏被菩萨当面告知（424886 前后同句），八戒被菩萨「把如来识怪之事，说了一遍」（425103）。其中 (2) 一句**候选自己在 T14.result 与 S3 里当作证据引用**，所以这不是我的外部推断，而是该文件内部自相矛盾：S3.after 写「被如来说出本象…揭起后现出六耳猕猴本象」，K1 却写大众 doesNotKnow。K1 的 5 条 doesNotKnow 里有 3 条（菩萨 / 大众 / 三藏八戒与沙僧）在区间末成立不了。K1 若想描述「揭破之前」的认知状态，必须像 states[] 那样给出 anchor；现在它没有锚点，读起来就是区间结论。",
+      "severity": "中（知识状态条目写错 + 与同文件 S3/T14 冲突），但**不涉及**任何事件、人物、结局的编造。",
+      "fix": "二者择一：(a) 给 K1 增加 anchor 字段并写明「锚定在 424258 如来点破之前」；(b) 按区间末状态改写——doesNotKnow 只保留「玉帝与众天神」「十殿阴君与管簿判官」，把菩萨/大众/三藏/八戒移入 knows 并补 424886、425103、424537 三条引文（这三条都满足候选自己的 count==1 门）。"
+    },
+    {
+      "id": "CE2",
+      "candidatePath": "knowledgeDiffs[2] (K3).knows[2]",
+      "claim": "K3.knows[2] 写「…（本区间内此句以菩萨转述形式出现，**见 C10/quotes**）」，但该句既不在 C10 的任何 evidence 里，也不存在于候选的任何引文节点中。",
+      "quote": "前日打你的，乃假行者六耳猕猴也",
+      "quotes": [
+        {
+          "quote": "前日打你的，乃假行者六耳猕猴也",
+          "start": 424886,
+          "end": 424901,
+          "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+          "offsetUnit": "codepoint",
+          "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+          "inUnit": true,
+          "count": 1
+        },
+        {
+          "quote": "你今须是收留悟空，一路上魔障未消，须得他保护你，才得到灵山，见佛取经，再休嗔怪。",
+          "start": 424915,
+          "end": 424955,
+          "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+          "offsetUnit": "codepoint",
+          "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+          "inUnit": true,
+          "count": 1,
+          "note": "C10.evidence[0]"
+        },
+        {
+          "quote": "师徒们拜谢了，菩萨回海，却都照旧合意同心，洗冤解怒",
+          "start": 425131,
+          "end": 425156,
+          "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+          "offsetUnit": "codepoint",
+          "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+          "inUnit": true,
+          "count": 1,
+          "note": "C10.evidence[1]"
+        }
+      ],
+      "why": "C10（causeEdges[9]）的两条 evidence 分别是「你今须是收留悟空…」与「师徒们拜谢了…」，不含 K3 引的那句；递归收集候选全部 181 条引文节点，也没有任何一条的 quote 含「前日打你的，乃假行者六耳猕猴也」。即该交叉引用**指向不存在的引文**（悬空引用）。宽厚读法下「见 C10/quotes」可理解为「见 C10 那一场」，但字面写的是引文指针。附带一个反向证据点：这句在原文里 count==1、落在区间内（424886–424901），完全满足候选自己声明的 count==1 硬门——它本该被建成引文节点，却只以散文形式出现在 K3 里（见 falseKills 的说明：这不是被规则挡住，是漏收）。",
+      "severity": "轻（文档级悬空引用 + 一条本可收的合法引文漏收），但它与 CE1 指向同一个缺口：**末场菩萨揭示本象这一幕，候选没有为它建任何引文节点**。",
+      "fix": "把 424886–424901 建成正式引文节点，让它同时充当 K1/K3 与 C10 的证据，并改正指针。"
+    }
+  ],
+  "falseKills": {
+    "rule": "候选 quotePolicy.rule / taskSlotUniqueness 声明：每条引文必须满足 TEXT.count(quote)==1（全文唯一），否则不予收录。",
+    "verdict": "这条硬门**确实误杀了区间内合法且关键的引文**——不是「候选挑得不好」，而是规则本身把原文的重复修辞挡在门外。被判死的句子在原文里逐字可查、且全部落在区间内。",
+    "missed": [
+      {
+        "what": "「善聆音，能察理，知前后，万物皆明」——**六耳猕猴的定义句**，如来在解释本象时说了两次",
+        "offsetsInUnit": [
+          424222,
+          424297
+        ],
+        "countTotal": 2,
+        "quotes": [
+          {
+            "quote": "第四是六耳猕猴，善聆音，能察理，知前后，万物皆明。",
+            "start": 424214,
+            "end": 424239,
+            "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+            "offsetUnit": "codepoint",
+            "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+            "inUnit": true,
+            "count": 1
+          },
+          {
+            "quote": "此猴若立一处，能知千里外之事，凡人说话，亦能知之",
+            "start": 424270,
+            "end": 424294,
+            "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+            "offsetUnit": "codepoint",
+            "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+            "inUnit": true,
+            "count": 1
+          }
+        ],
+        "why": "候选为「四猴混世，不入十类之种」（worldSettings[20]）找的替代引文是分类句「又有四猴混世，不入十类之种。」(424106) 与「周天之内有五仙…」(424055)，并把 explain 写成「它解释了诸方『不能识』的原因」。但原文给出的**机制**不是分类本身，而是六耳猕猴「善聆音…知千里外之事」这项能力——候选把机制句整段漏掉了，只留了分类外壳。这正是计划100 说的「有产出、不产生信息」。",
+        "note": "该句在**区间内重复 2 次**（424222 与 424297），全文亦仅此 2 次，故被 count==1 门挡住。任一出现都在区间内，本可直接收录。"
+      },
+      {
+        "what": "「那行者也如此说」——**假行者逐字复述真行者原话**的固定句式，区间内出现 3 次",
+        "offsetsInUnit": [
+          419471,
+          419728,
+          421701
+        ],
+        "countTotal": 3,
+        "why": "这句式是本回「同象同音」最直接的文本证据：419471 真行者说完「等老孙与此妖打上南海落伽山菩萨前辨个真假」后「那行者也如此说」；419728、421701 同构。候选在 T5/T12/K4 里用的是另一句概述「大众听他两张口一样声俱说一遍」(423867)，并且退而引用**唯一的变体**「那行者也似这般这般说了一遍」(420313) 来代表这个反复出现的模式。变体只能证明「有一次一样」，证明不了「每一次都一样」——而被规则挡掉的正是重复本身。",
+        "note": "三次出现全部落在区间内；count==3 触发硬门。"
+      },
+      {
+        "what": "「我和你见师父去！」——区间末天宫一场的连声重复（同一句连着喊两次）",
+        "offsetsInUnit": [
+          420675,
+          420683
+        ],
+        "countTotal": 2,
+        "quotes": [
+          {
+            "quote": "这大圣呵呵冷笑，那行者也哈哈欢喜，揪头抹颈，复打出天门，坠落西方路上道：“我和你见师父去！我和你见师父去！”",
+            "start": 420638,
+            "end": 420692,
+            "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+            "offsetUnit": "codepoint",
+            "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+            "inUnit": true,
+            "count": 1
+          }
+        ],
+        "why": "这是该场唯一的收束句，候选全长未收（该场只收到「玉帝亦辨不出，赶出殿外」为止）。重复是叙述者的手法，不该因为 count!=1 被排除。",
+        "note": "长引文形态（含叙述框架，419 字以内）在全文 count==1，本可合法收录——说明这不是无解的，是规则粒度太粗。"
+      }
+    ],
+    "conclusion": "误杀成立，但**不构成判 fail 的理由**：被误杀的是「本可更完整」的缺口，而不是「写错了」。判 partial 时把这三条记为必须回收的遗漏项。"
+  },
+  "reverseChecks": [
+    {
+      "found": "如来的色空偈（全区间最长的教理段）候选一字未收，也未进 themeReadings",
+      "quotes": [
+        {
+          "quote": "不有中有，不无中无。不色中色，不空中空。",
+          "start": 423344,
+          "end": 423364,
+          "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+          "offsetUnit": "codepoint",
+          "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+          "inUnit": true,
+          "count": 1
+        },
+        {
+          "quote": "知空不空，知色不色",
+          "start": 423414,
+          "end": 423423,
+          "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+          "offsetUnit": "codepoint",
+          "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+          "inUnit": true,
+          "count": 1
+        }
+      ],
+      "why": "423344–423423 一整段「不有中有，不无中无…知空不空，知色不色」是如来在二心竞斗**出场之前**的说法，紧接着才是「汝等俱是一心，且看二心竞斗而来也」。候选 TH1 用回目、如来那句「二心竞斗」和篇末诗「人有二心生祸灾」三条支撑寓意读法，唯独漏掉这段为「二心/一体」提供义理的色空偈；TH1.counter 又在讨论「寓意读法 vs 实体读法」的边界。少了这段，TH1 的 support 是不完整的。全文 count==1、区间内，本可直接收录。",
+      "uncoveredBy": "tasks / causeEdges / states / knowledgeDiffs / foreshadows / worldSettings / themeReadings 全部未覆盖（grep 候选全文无「不有中有」「知色不色」「名为照了」）"
+    },
+    {
+      "found": "六耳猕猴「善聆音、知千里外之事」的判别机制句整段缺失，导致 worldSettings[20] 的 explain 把原因挂错",
+      "quotes": [
+        {
+          "quote": "第四是六耳猕猴，善聆音，能察理，知前后，万物皆明。",
+          "start": 424214,
+          "end": 424239,
+          "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+          "offsetUnit": "codepoint",
+          "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+          "inUnit": true,
+          "count": 1
+        },
+        {
+          "quote": "此猴若立一处，能知千里外之事，凡人说话，亦能知之",
+          "start": 424270,
+          "end": 424294,
+          "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+          "offsetUnit": "codepoint",
+          "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+          "inUnit": true,
+          "count": 1
+        }
+      ],
+      "why": "这两句才是原文对「为什么照妖镜、生死簿、谛听都归无用」的正面回答（如来先说能力，再说「故此善聆音…与真悟空同象同音者，六耳猕猴也」）。候选的 worldSettings[20].explain 把这个解释力记在了「四猴不入十类之种」这条分类上。这是**因果解释的错挂**，不只是漏一句话。（与 falseKills.missed[0] 同一处文本，两处都要修。）",
+      "uncoveredBy": "worldSettings[20] 只收了 424055/424080/424106/424258 四条引文，无 424214–424294"
+    },
+    {
+      "found": "菩萨「唤名」这第二次检验整条缺失——候选只记了念咒那一次",
+      "quotes": [
+        {
+          "quote": "菩萨叫声“孙悟空”，两个一齐答应",
+          "start": 419958,
+          "end": 419974,
+          "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+          "offsetUnit": "codepoint",
+          "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+          "inUnit": true,
+          "count": 1
+        },
+        {
+          "quote": "众神恐伤真的，亦不敢下手",
+          "start": 419945,
+          "end": 419957,
+          "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+          "offsetUnit": "codepoint",
+          "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+          "inUnit": true,
+          "count": 1
+        }
+      ],
+      "why": "T6 把菩萨的检验写成一条（暗念紧箍儿咒），C3 也按「念咒失效 → 移交上界」建边。但原文在念咒失效之后还有**第二次独立检验**：菩萨叫「孙悟空」，两个一齐答应；随后令诸天木叉上前助力，众神恐伤真的亦不敢下手。I.e. 失败的不是一次检验而是两次（疼觉失败 → 唤名也失败 → 动手也不敢）。C3.trigger 只写「咒不区分真假 → 无计奈何」，把「唤名同样无法区分」「众神不敢下手」两个环节省掉了，而这两句就在 419945–419974，紧挨着候选已收的 419926–419944。",
+      "uncoveredBy": "tasks[5] / causeEdges[2] / worldSettings[16] / states 均未覆盖 419945–419974"
+    },
+    {
+      "found": "悟空本人在雷音场也要上前、被如来止住这一环缺失，而候选恰好关心该场的施动者区分",
+      "quotes": [
+        {
+          "quote": "孙大圣也要上前",
+          "start": 424421,
+          "end": 424428,
+          "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+          "offsetUnit": "codepoint",
+          "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+          "inUnit": true,
+          "count": 1
+        },
+        {
+          "quote": "悟空休动手，待我与你擒他",
+          "start": 424434,
+          "end": 424446,
+          "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+          "offsetUnit": "codepoint",
+          "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+          "inUnit": true,
+          "count": 1
+        }
+      ],
+      "why": "候选 T10 收了如来的「悟空休动手，待我与你擒他」，T14 收了猕猴逃走，C7 建的是「说破本象 → 逃跑 → 被钵盂罩住」，rejectedEdges.R3 还专门讨论「擒是如来的、打死是悟空的」这个施动者区分。但**如来这句话是在回应悟空的动作**——原文作「孙大圣也要上前，如来道：『悟空休动手…』」。缺了这一句，T10.objective 读起来像如来主动揽事，实际是被悟空的动作触发的。这正是候选自己在 R3 里主张要保留的中介环节，却在自己的 C7 里漏掉了。",
+      "uncoveredBy": "tasks[9] / tasks[13] / causeEdges[6] 均未覆盖 424421–424428"
+    },
+    {
+      "found": "回末收束诗「中道分离乱五行…六识祛降丹自成」未建任何引文节点，而候选的 TH1 正是「二心」主题读法",
+      "quotes": [
+        {
+          "quote": "中道分离乱五行，降妖聚会合元明。神归心舍禅方定，六识祛降丹自成。",
+          "start": 425182,
+          "end": 425214,
+          "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+          "offsetUnit": "codepoint",
+          "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+          "inUnit": true,
+          "count": 1
+        }
+      ],
+      "why": "这句只在候选的 **unitHeadCheck.sliceTail**（机械字段）里出现过，不在任何引文节点中——即它被当成了「切片端点校验的副产品」，没有当作证据。但这正是本回对「二心搅乱 / 一体难修」的正面收束（分离→聚会、神归心舍→六识祛降），与 TH1 的三条 support 及 counter 都在同一论点上。候选宁可让 TH1 缺一条强 support。",
+      "uncoveredBy": "全候选无以此句为 quote 的节点；F2/F3/C10 用的是「照旧合意同心，洗冤解怒」"
+    },
+    {
+      "found": "八戒打死假唐僧、假八戒这一幕未建引文节点（只在 costNote 散文里带过）",
+      "quotes": [
+        {
+          "quote": "果见一个假唐僧假八戒，都被弟子打死，原是两个猴身。",
+          "start": 425040,
+          "end": 425065,
+          "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+          "offsetUnit": "codepoint",
+          "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+          "inUnit": true,
+          "count": 1
+        }
+      ],
+      "why": "T13.costNote 的散文里出现「原是两个猴身」，但没有引文节点覆盖 425040。这一幕是沙僧 C9（打死假沙僧 → 被围 → 逃走）的**对照事件**：同一伙假冒者，八戒打死了两个还能取回包袱，沙僧打死一个却只能逃命。候选把 C9 与 T13 分开写、没把这对对照记下来，而这对照才是本回「知道洞门 / 不知道洞门」之外的第二条成败分线。属次要遗漏，一并记录。",
+      "uncoveredBy": "T13.result/cost 无 425040 引文节点"
+    }
+  ],
+  "doubts": [
+    {
+      "id": "D1",
+      "candidatePath": "tasks[7] (T8).cost",
+      "quote": {
+        "quote": "那十殿阴君送出，谢了地藏，回上翠云宫，着鬼使闭了幽冥关隘不题",
+        "start": 423114,
+        "end": 423144,
+        "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+        "offsetUnit": "codepoint",
+        "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+        "inUnit": true,
+        "count": 1
+      },
+      "doubt": "把「着鬼使闭了幽冥关隘」读成「被打进幽冥所付出的代价」，原文未给关闭的理由；且「不题」是叙述者的收束套语，通常表示「此线不再交代」。候选自己已把 basis 记 derived、并在 costNote 写明「若复核要求更强的因果，本栏应改 null」。",
+      "ruling": "**存疑，不足以据此判 fail**（原文拿不出「因为被搅扰所以关隘」的机制句）。建议降级：T8.cost 改 null 或把该引文移入 states[7]（S8 已收同一句）并删去代价解释。"
+    },
+    {
+      "id": "D2",
+      "candidatePath": "tasks[1] (T2).cost",
+      "quote": {
+        "quote": "这大圣怒发，一撒手，撇了沙和尚，掣铁棒上前骂道",
+        "start": 418983,
+        "end": 419006,
+        "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+        "offsetUnit": "codepoint",
+        "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+        "inUnit": true,
+        "count": 1
+      },
+      "doubt": "把「一撒手，撇了沙和尚」读成「失去当时唯一在场的帮手」，前提是沙僧本可助战——原文只写「沙僧在旁，不敢下手…又恐伤了真的」，随后行者自己说「沙僧，你既助不得力」。即原文更支持「沙僧本来就助不上力」，而不是「被撇下才失去助力」。",
+      "ruling": "**存疑，不足以据此判 fail**（候选已记 basis=derived 并写明「若复核认为不成因果，本栏应改 null」）。建议把因果强度再降一档：保留「撒手独自上前」这个动作事实，删去「失去助力」的因果读法。"
+    },
+    {
+      "id": "D3",
+      "candidatePath": "tasks[5] (T5).obstacle 与 tasks[4]",
+      "quote": {
+        "quote": "这两个行者只怕斗出不好来，地覆天翻，作祸在那里！",
+        "start": 421338,
+        "end": 421362,
+        "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+        "offsetUnit": "codepoint",
+        "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+        "inUnit": true,
+        "count": 1
+      },
+      "doubt": "把借宿老者的担忧当作 T5 的 obstacle（「不容拖延、必须当场了断的压力」）。原文里说话的是老者一家，三藏随后只是安抚，念咒计策是沙僧提的，二者未必构成「因为老者担心所以必须当场验」。",
+      "ruling": "**存疑**。此条与 D1/D2 不同：候选未自陈该因果强度，但也没有把「老者担忧 → 沙僧献计」写成 causeEdge（C11 只连到三藏安抚），所以影响有限，仅作记录。"
+    }
+  ],
+  "notes": "总体判断：**partial**。这份候选的「算术层」近乎无瑕，问题集中在末场与两处解释性条目。\n\n【可以用，无需改动的部分】\n- 定位层：181/181 条引文 T[start:end]==quote、全文唯一、落在区间内、sourceHash 全对；候选自述的 sliceSha256、切片起点/端点、下一回标记位置全部复现。\n- 机械层：factStatus 我独立按 “…” 配对复算（87 对，终态 depth=0）零不符；coverage 20 段/19 段有引文零出入；同一 task 五栏无共用、无互为子串；9 个 null 全带 Note；无栏缺 basis。\n- 抽取层：14 tasks / 11 causeEdges / 3 rejectedEdges / 8 states / 5 knowledgeDiffs / 4 foreshadows / 21 worldSettings / 2 themeReadings 逐条能在原文找到对应文字，**没有一条编造**（人物、地点、结局、伏笔均无凭空生成）。\n- 纪律层：F4 正确标 unresolved-in-unit 而非当成已回收；T11.result 明确「他要的还俗没得到」；utterance 引文未被当作叙述事实（T14.objective / worldSettings[20].institution=declared）。这三条是本项目最容易犯的错，候选都守住了。\n\n【必须丢弃或修正的部分】\n1. K1.doesNotKnow 需重写（CE1）：菩萨 / 大众 / 三藏八戒与沙僧在区间末已经知道本象，其中「大众」一条与候选自己的 T14.result、S3 直接冲突。要么补 anchor 声明锚在 424258 之前，要么按末场改写并补 424886、425103、424537 三条引文。\n2. K3.knows[2] 的「见 C10/quotes」是悬空引用（CE2）：C10 的两条 evidence 里没有该句，候选全部 181 条引文节点里也没有。修法是把它建成正式引文节点（424886–424901，满足候选自己的 count==1 门）。\n3. T8.cost 建议降级为 null（D1，存疑级）；T2.cost 建议只保留动作事实、去掉「失去助力」的因果（D2，存疑级）。这两条候选自己已写明改判条件，属自我披露充分。\n\n【判 partial 而不是 fail 的理由】\n判 fail 需要 counterExample。CE1/CE2 都拿得出逐字可查的原文引证，但它们**没有触及抽取层**：没有任何一个人物、事件、结局、伏笔是编的，181 条引文零错，四项机械声明全部复现。缺陷范围是一节（K1）加一条注（K3），都可在不推翻整份候选的前提下修好。按契约「partial 要说清哪些能用、哪些要丢」，我给出的处置是：**抽取层整份保留，只退回 K1、K3 与两条 derived cost 重写**。\n\n【误杀结论（任务第 3 问）】\n候选的 count==1 硬门**确实误杀了合法引文**，而且误杀的正是它自己需要的句子：六耳猕猴定义句（区间内 2 次）、「那行者也如此说」重复句式（区间内 3 次）、「我和你见师父去！」连声重复（2 次）。这三处都在区间内逐字可查，却因为「全文唯一」这条与语义无关的规则被排除，导致 worldSettings[20] 只能用分类句顶替机制句。这是**规则性遗漏**，不是候选挑得不好——修法是给重复句开一条「区间内多次出现」的收录通道，要求 start/end 逐次列全，而不是继续丢。\n\n【不确定处，如实记录】\n- 我无法判定 K1 是「按揭破前状态写、忘标锚点」还是「写错」；两种修法我都给了，取哪一种应由原提交者决定。\n- reverseChecks 第 6 条（八戒打死假唐僧假八戒）是六条里最强的一条？不是——它最弱：该事实在 T13.costNote 散文里已被提到，只是没建引文节点，影响远小于前五条。我把它列出来是为了完整，不代表它与前五条同级。\n- 反向验证自身的复核：我一开始怀疑候选的「大圣/那行者」归属约定会出错（它自己 selfCritique 第 1 条也担心这点），但抽查 419471、419728、421701、420675、424448 五处上下文后，该约定在抽样点上成立，故**不把这条列为 counterExample**，如实写进 extractionCheck.selfCritiqueSpotCheck。\n\n【我这一轮没做的事】\n- 未核验候选的语义正确性全局（semanticReview.performed=false 是候选自己的声明，我也没有把它改成 true；我只做了引文定位、机械判据与抽取项的原文对应核验）。\n- 未审候选的 graphCacheHash 用途（其自述「图谱缓存摘要未用作证据」，我确认候选正文确实没有引用图谱摘要内容，但未逐字比对图谱缓存全文）。\n- 未核验本回与第五十九回之间的跨回伏笔（超出任务给定的原文区间）。",
+  "reproduce": {
+    "env": "cd /Users/carmen/Desktop/星系 && python3 -B -s",
+    "commands": [
+      "python3 -c \"import json,hashlib;raw=open('data/cache/a065244455cfb2221bcda94a.docs.json','rb').read();T=json.loads(raw)[0]['text'];print(hashlib.sha256(raw).hexdigest());print(len(T[418724:425240]));print(T.find('第五十九回'));print(hashlib.sha256(T[418724:425240].encode()).hexdigest())\"  -> c282cf39… / 6516 / 425240 / 3ff54fa2…",
+      "python3 -c \"import json,hashlib;print(hashlib.sha256(open('loop/state/out/read_xiyou_L0_0058.candidate.json','rb').read()).hexdigest())\"  -> 5e18d29870d4f1c45ab0792dca0055f2324790662e847b49a7b8680f0f61c83e",
+      "全量引文复算（181 节点，断言 T[start:end]==quote / count==1 / 区间内 / sourceHash）-> bad []",
+      "python3 -c \"import json;T=json.load(open('data/cache/a065244455cfb2221bcda94a.docs.json'))[0]['text'];print(T.count('善聆音，能察理，知前后，万物皆明'),T.find('善聆音，能察理，知前后，万物皆明'),T.find('善聆音，能察理，知前后，万物皆明',424230))\"  -> 2 424222 424297（误杀证据）",
+      "python3 -c \"import json;T=json.load(open('data/cache/a065244455cfb2221bcda94a.docs.json'))[0]['text'];i=T.find('前日打你的，乃假行者六耳猕猴也');print(i,T.count('前日打你的，乃假行者六耳猕猴也'))\"  -> 424886 1（CE2 的漏收引文）"
+    ]
+  },
+  "misKillCheck": {
+    "rule": "候选 quotePolicy.rule / taskSlotUniqueness 声明：每条引文必须满足 TEXT.count(quote)==1（全文唯一），否则不予收录。",
+    "verdict": "这条硬门**确实误杀了区间内合法且关键的引文**——不是「候选挑得不好」，而是规则本身把原文的重复修辞挡在门外。被判死的句子在原文里逐字可查、且全部落在区间内。",
+    "missed": [
+      {
+        "what": "「善聆音，能察理，知前后，万物皆明」——**六耳猕猴的定义句**，如来在解释本象时说了两次",
+        "offsetsInUnit": [
+          424222,
+          424297
+        ],
+        "countTotal": 2,
+        "quotes": [
+          {
+            "quote": "第四是六耳猕猴，善聆音，能察理，知前后，万物皆明。",
+            "start": 424214,
+            "end": 424239,
+            "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+            "offsetUnit": "codepoint",
+            "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+            "inUnit": true,
+            "count": 1
+          },
+          {
+            "quote": "此猴若立一处，能知千里外之事，凡人说话，亦能知之",
+            "start": 424270,
+            "end": 424294,
+            "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+            "offsetUnit": "codepoint",
+            "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+            "inUnit": true,
+            "count": 1
+          }
+        ],
+        "why": "候选为「四猴混世，不入十类之种」（worldSettings[20]）找的替代引文是分类句「又有四猴混世，不入十类之种。」(424106) 与「周天之内有五仙…」(424055)，并把 explain 写成「它解释了诸方『不能识』的原因」。但原文给出的**机制**不是分类本身，而是六耳猕猴「善聆音…知千里外之事」这项能力——候选把机制句整段漏掉了，只留了分类外壳。这正是计划100 说的「有产出、不产生信息」。",
+        "note": "该句在**区间内重复 2 次**（424222 与 424297），全文亦仅此 2 次，故被 count==1 门挡住。任一出现都在区间内，本可直接收录。"
+      },
+      {
+        "what": "「那行者也如此说」——**假行者逐字复述真行者原话**的固定句式，区间内出现 3 次",
+        "offsetsInUnit": [
+          419471,
+          419728,
+          421701
+        ],
+        "countTotal": 3,
+        "why": "这句式是本回「同象同音」最直接的文本证据：419471 真行者说完「等老孙与此妖打上南海落伽山菩萨前辨个真假」后「那行者也如此说」；419728、421701 同构。候选在 T5/T12/K4 里用的是另一句概述「大众听他两张口一样声俱说一遍」(423867)，并且退而引用**唯一的变体**「那行者也似这般这般说了一遍」(420313) 来代表这个反复出现的模式。变体只能证明「有一次一样」，证明不了「每一次都一样」——而被规则挡掉的正是重复本身。",
+        "note": "三次出现全部落在区间内；count==3 触发硬门。"
+      },
+      {
+        "what": "「我和你见师父去！」——区间末天宫一场的连声重复（同一句连着喊两次）",
+        "offsetsInUnit": [
+          420675,
+          420683
+        ],
+        "countTotal": 2,
+        "quotes": [
+          {
+            "quote": "这大圣呵呵冷笑，那行者也哈哈欢喜，揪头抹颈，复打出天门，坠落西方路上道：“我和你见师父去！我和你见师父去！”",
+            "start": 420638,
+            "end": 420692,
+            "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+            "offsetUnit": "codepoint",
+            "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+            "inUnit": true,
+            "count": 1
+          }
+        ],
+        "why": "这是该场唯一的收束句，候选全长未收（该场只收到「玉帝亦辨不出，赶出殿外」为止）。重复是叙述者的手法，不该因为 count!=1 被排除。",
+        "note": "长引文形态（含叙述框架，419 字以内）在全文 count==1，本可合法收录——说明这不是无解的，是规则粒度太粗。"
+      }
+    ],
+    "conclusion": "误杀成立，但**不构成判 fail 的理由**：被误杀的是「本可更完整」的缺口，而不是「写错了」。判 partial 时把这三条记为必须回收的遗漏项。"
+  },
+  "hallucinationCheck": {
+    "fabricatedPeople": [],
+    "fabricatedEndings": [],
+    "fabricatedForeshadows": [],
+    "endingTreatedAsSuccess": [],
+    "utteranceTreatedAsFact": [],
+    "crossBoundaryOverreach": [],
+    "note": "逐条对照原文后的结论：候选没有生成原文不存在的人物、结局或伏笔，没有把「播放/取经到结尾」当成功，也没有把人物话语当叙述事实。唯一越权风险是 worldSettings[20] 把如来的当众分类（factStatus=utterance）收作世界规则——候选自己已记 institution=declared 并在 explain 里注明，属已披露的边界处理，不构成幻觉。详见 extractionCheck。",
+    "checkedSurfaces": [
+      "tasks",
+      "causeEdges",
+      "rejectedEdges",
+      "states",
+      "knowledgeDiffs",
+      "foreshadows",
+      "worldSettings",
+      "themeReadings",
+      "unknowns",
+      "selfCritique"
+    ]
+  },
+  "quoteVerification": {
+    "randomSample": {
+      "seed": 58,
+      "drawn": 5,
+      "verbatimHits": 5,
+      "offsetMatches": 5,
+      "fullTextUnique": 5,
+      "hashMatches": 5,
+      "items": [
+        {
+          "path": "/worldSettings[7]/stateQuotes/hold",
+          "quote": "却入里，方寻着包袱，当时查点，一物不少",
+          "start": 425065,
+          "end": 425084,
+          "find": 425065,
+          "sliceEqual": true,
+          "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+          "offsetUnit": "codepoint",
+          "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+          "inUnit": true,
+          "fullTextCount": 1,
+          "findFirst": 425065
+        },
+        {
+          "path": "/tasks[10]/action/quotes[0]",
+          "quote": "大圣叩头谢道",
+          "start": 424678,
+          "end": 424684,
+          "find": 424678,
+          "sliceEqual": true,
+          "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+          "offsetUnit": "codepoint",
+          "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+          "inUnit": true,
+          "fullTextCount": 1,
+          "findFirst": 424678
+        },
+        {
+          "path": "/tasks[11]/objective/quotes[0]",
+          "quote": "你今须是收留悟空，一路上魔障未消，须得他保护你，才得到灵山，见佛取经，再休嗔怪。",
+          "start": 424915,
+          "end": 424955,
+          "find": 424915,
+          "sliceEqual": true,
+          "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+          "offsetUnit": "codepoint",
+          "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+          "inUnit": true,
+          "fullTextCount": 1,
+          "findFirst": 424915
+        },
+        {
+          "path": "/worldSettings[17]/extraEvidence[0]",
+          "quote": "即唤管簿判官一一从头查勘",
+          "start": 422622,
+          "end": 422634,
+          "find": 422622,
+          "sliceEqual": true,
+          "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+          "offsetUnit": "codepoint",
+          "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+          "inUnit": true,
+          "fullTextCount": 1,
+          "findFirst": 422622
+        },
+        {
+          "path": "/tasks[10]/result/quotes[0]",
+          "quote": "我教观音送你去，不怕他不收。好生保护他去，那时功成归极乐，汝亦坐莲台。",
+          "start": 424770,
+          "end": 424805,
+          "find": 424770,
+          "sliceEqual": true,
+          "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+          "offsetUnit": "codepoint",
+          "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+          "inUnit": true,
+          "fullTextCount": 1,
+          "findFirst": 424770
+        }
+      ]
+    },
+    "exhaustive": {
+      "quoteNodes": 181,
+      "verbatimFailures": 0,
+      "offsetFailures": 0,
+      "uniquenessFailures": 0,
+      "rangeFailures": 0,
+      "hashFailures": 0
+    },
+    "selfCheck": {
+      "verdictOwnQuoteNodes": 22,
+      "verbatimFailures": 0,
+      "countFailures": 0,
+      "rangeFailures": 0,
+      "hashFailures": 0,
+      "note": "本复核文件自身的引文也逐条复算过，避免复核者自己用不可查的引文判人。"
+    }
+  },
+  "status": "done",
+  "agent": "w-dafeng-2",
+  "summary": "独立反向复核 read:xiyou:L0:0058（西游记第五十八回 二心搅乱大乾坤 一体难修真寂灭，[418724,425240)，6516 字）。先自读原文全 20 段三遍（未先看候选），再核候选：181/181 条引文逐字命中+全文唯一+区间内+sourceHash 全对；factStatus 独立复算 87 对引号零不符；coverage 20 段/19 段零出入；同 task 五栏无共用无嵌套、null 均带 Note、无栏缺 basis；候选 reproduce 的 4 条命令全部复现；随机 5 条 quote 5/5 命中且偏移与 find 一致。判 partial（非 fail）：抽取层 14 tasks/11 causeEdges/8 states/5 knowledgeDiffs/4 foreshadows/21 worldSettings/2 themeReadings 无一条编造，缺陷集中在末场——CE1：K1 把菩萨/大众/三藏八戒与沙僧列为「不知道」本象，与同文件 T14.result、S3 直接冲突，且 K1 无时间锚点；CE2：K3 的「见 C10/quotes」是悬空引用，该句在候选 181 条引文节点里不存在。另查到 3 条被 count==1 硬门误杀的合法引文（六耳猕猴定义句区间内出现 2 次、「那行者也如此说」3 次、「我和你见师父去！」2 次），6 条原文明确存在而候选零覆盖的事实。记录 3 条拿不出原文机制的存疑项（T8.cost/T2.cost/T5.obstacle），按契约不据此判 fail。",
+  "evidence": [
+    {
+      "path": "loop/state/out/read_xiyou_L0_0058.candidate.json",
+      "sha256": "5e18d29870d4f1c45ab0792dca0055f2324790662e847b49a7b8680f0f61c83e",
+      "note": "被复核的候选。sha256 与 read:xiyou:L0:0058 提交记录 evidence[0].sha256 一致。"
+    },
+    {
+      "path": "data/cache/a065244455cfb2221bcda94a.docs.json",
+      "sha256": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+      "note": "原文来源（docs[0].text）。哈希等于任务 sourceHash c282cf39… 及候选 source.sourceHash。"
+    },
+    {
+      "path": "data/cache/a065244455cfb2221bcda94a.json",
+      "sha256": "37f7f9028c3509a9520f6e695d1adff4dbebcc73e06c82a964f75a51e4f805f9",
+      "note": "图谱缓存（候选 source.graphCacheHash 声明值）。其摘要未被候选当证据使用。"
+    },
+    {
+      "path": "loop/state/out/verify_xiyou_L0_0058.verdict.json",
+      "note": "本复核文件（任务 writes 指定的唯一产物路径）。自身哈希不入 evidence（自指无意义）。"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "先读原文后看候选：开工第一步把 T[418724:425240) 写为 /tmp/vx0058/seg.txt 并通读全 20 段三遍，全程未打开候选；6 条反向发现均来自这次先读。",
+      "result": "pass"
+    },
+    {
+      "text": "全量引文复算：递归收集候选 181 条引文节点，逐条断言 T[start:end]==quote、T.count(quote)==1、418724<=start<end<=425240、sourceHash==文件哈希 → bad=[]。",
+      "result": "pass"
+    },
+    {
+      "text": "factStatus 独立复算：按 “…” 顺序配对求跨度（87 对、终态 depth=0），机械重判 narrated/utterance/mixed，与候选声明逐条比对 → 0 mismatch。",
+      "result": "pass"
+    },
+    {
+      "text": "coverage 独立复算：自行按 \\n\\n 切分非空段并统计整条落在段内的引文 → 20 段/19 段有引文/唯一无引文段为 418724–418745，与候选 coverage 完全一致。",
+      "result": "pass"
+    },
+    {
+      "text": "栏位纪律复算：同 task 五栏共用引文=[]、互为子串=[]；9 个 null 全带 *Note；非空栏全部有 basis。",
+      "result": "pass"
+    },
+    {
+      "text": "候选 reproduce.commands 逐条执行 4/4 复现：c282cf39…/722176/第五十八回/425240；sliceSha256 3ff54fa2…；nodes 181 bad []；shared [] nested []。",
+      "result": "pass"
+    },
+    {
+      "text": "随机 5 条 quote（seed=58）find 一次：5/5 逐字命中、5/5 find() 首索引等于声明 start、5/5 全文唯一、5/5 哈希一致。",
+      "result": "pass"
+    },
+    {
+      "text": "误杀扫描：对切片内全部句子做重复计数，找出「区间内重复>=2 次」被 count==1 门挡掉的合法引文 3 处，均给出 count 与全部 in-unit 偏移。",
+      "result": "pass"
+    },
+    {
+      "text": "编造/越权扫描：递归遍历候选全部字符串，逐一比对世界物件/地点/人物名是否能在区间内检出；核对 F4 的 unresolved 标记、T11.result 的「还俗没得到」、utterance 引文未被当事实。",
+      "result": "pass"
+    },
+    {
+      "text": "本复核文件自审：22 条自身引文逐条复算 T[start:end]==quote / count / 区间 / 哈希 → failures=0。",
+      "result": "pass"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/verify_xiyou_L0_0058.verdict.json",
+      "kind": "append-only"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/a065244455cfb2221bcda94a.docs.json": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+    "data/cache/a065244455cfb2221bcda94a.json": "37f7f9028c3509a9520f6e695d1adff4dbebcc73e06c82a964f75a51e4f805f9",
+    "loop/state/out/read_xiyou_L0_0058.candidate.json": "5e18d29870d4f1c45ab0792dca0055f2324790662e847b49a7b8680f0f61c83e"
+  },
+  "remaining": [
+    "K1（knowledgeDiffs[0]）需按 CE1 修正：补 anchor 锚定 424258 之前，或按区间末状态把菩萨/大众/三藏/八戒移入 knows 并补 424886/425103/424537 三条引文。",
+    "K3（knowledgeDiffs[2].knows[2]）的「见 C10/quotes」需改为指向真实引文节点，并把 424886–424901 建成正式引文节点。",
+    "T8.cost 与 T2.cost 属存疑（D1/D2）：建议降级为 null 或去掉因果读法，仅保留动作事实。原文拿不出「因被搅扰而关闭关隘」「因被撇下而失去助力」的机制句。",
+    "被 count==1 门误杀的三处引文需回收：六耳猕猴定义句（424222/424297）、「那行者也如此说」（419471/419728/421701）、「我和你见师父去！」（420675/420683）。规则需为区间内重复句开通道。",
+    "6 条反向发现（如来色空偈、六耳机制句、菩萨唤名第二次检验、悟空也要上前、篇末收束诗、八戒打死假唐僧假八戒）未在候选任何分区覆盖，需补收。",
+    "我未核验候选的语义正确性全局（semanticReview.performed=false 保持为 false，我未改动该字段）；未逐字比对图谱缓存全文（仅核哈希与「未用作证据」这一声明）；未核验跨回伏笔（超出任务给定区间）。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/verify_xiyou_L0_0058.verdict.json"
+    ]
+  },
+  "submittedAt": "2026-10-09T11:23:47Z",
+  "wallClockNote": "租约里没有 startedAt（任务可能由非 loop 路径提交，或租约已被回收）—— 留空而不估算",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-09T11:23:47Z"
+  },
+  "verifyState": "pending"
+}

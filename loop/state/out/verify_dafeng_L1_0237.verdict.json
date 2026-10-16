@@ -1,0 +1,196 @@
+{
+  "verdict": "partial",
+  "reviewer": "w-verify-4",
+  "task": "verify:dafeng:L1:0237",
+  "reviewedCandidate": "loop/state/out/read_dafeng_L1_0237.candidate.json",
+  "reviewedTask": "read:dafeng:L1:0237",
+  "candidateAgent": "w-sanguo-0",
+  "source": "data/cache/1063b17ca65ec1b76f30e460.docs.json → docs[0].text[943450:948891)",
+  "sourceHashRecalculated": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+  "candidateSha256": "11673da18c2e3a1432314b2124982b31f3dbec3387de0bcd85a4effd9597d670",
+  "sliceSha256Recalculated": "86cb72b237c8e5ba482c30c648820431a81eadb429410137af36d78af722e199",
+  "method": "先自己读原文切片（未先看候选结论），再逐条核对引用；全部核验用脚本复算，命令见 evidenceCommands。这是本复核的第二版：第一版（同日 07:57 落盘）有一处偏移写错，已在 selfCorrections 里如实更正。",
+  "selfCorrections": [
+    {
+      "what": "我第一版把 CE4 的引文偏移写成 945810–945847，并据此断言「该串只出现在 zeroCoverageList 的 excerpt 里」。**偏移是错的**：945810 是**段落起点**（含 4 个前导空格），而该引文的真实跨度是 945814–945844（T[945814:945844] 逐字等于引文）；我写的 945847 还多框进了后一句开头的「许七安」三字。",
+      "why": "我把「段落 start」（候选 coverage.zeroCoverageList 里记的字段）与「引文 start」混为一谈，没有用 text[s:e]==quote 复算这一段就写进了结论。这正是我自己在别处反复强调的「引用定位正确 ≠ 语义已核验」的镜像错误：**我引用了一个我没复算的偏移**。",
+      "impact": "CE4 的**结论不变**（u26 的主题句确实从未作为 quote 出现），但引证必须改成 945814–945844。本版已改。同一错误没有波及其他条目（CE1/CE2/CE5 与 RC1–RC6 的偏移我逐条用 text[s:e]==quote 复算过，全部为真）。"
+    },
+    {
+      "what": "我第一版 RC6 写「crossSectionQuoteReuse 有 5 条多出处引文未列入，其中 2 条是真跨分区（x7/x8 与 paragraphDisposition 共用）」。核对后：实际未列入的**恰好就是那 2 条**（临安的屁股没有怀庆大 / 怀庆有修为在身），另外 3 条是 worldSettings 的 .quote 与 .quoteRef.quote 镜像字段，属字段形态、不是跨分区复用。",
+      "why": "我第一遍把镜像字段也计成了「多出处」。把它们剔掉后，索引口径实际上是干净的：77 条里 0 条引用 /coverage，而漏掉的 2 条恰恰只与 /coverage 共用。",
+      "impact": "结论方向不变（口径与 note 措辞有一处落差：note 说「同一句原文出现在两个以上分区时逐条列出」，实际口径不含 /coverage），但规模从「5 条」更正为「2 条」。本版已改。"
+    }
+  ],
+  "evidenceCommands": [
+    "python3 -c \"import json,hashlib; d=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text']; print(hashlib.sha256(open('data/cache/1063b17ca65ec1b76f30e460.docs.json','rb').read()).hexdigest()); print(hashlib.sha256(d[943450:948891].encode()).hexdigest())\"",
+    "python3 -c \"import json; t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text']; c=json.load(open('loop/state/out/read_dafeng_L1_0237.candidate.json')); qs=[]; w=lambda o: ([qs.append(o) if isinstance(o,dict) and isinstance(o.get('quote'),str) else None, [w(v) for v in o.values()]] if isinstance(o,dict) else [w(v) for v in o] if isinstance(o,list) else None); w(c); print('n=',len(qs),'slice_mismatch=',sum(1 for o in qs if isinstance(o.get('start'),int) and t[o['start']:o['end']]!=o['quote']))\"",
+    "python3 -c \"import json; t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text']; print(t[948245:948285]); print(t[948285:948315])\"  # CE1：h4 挂的引文是 h3 的句子",
+    "python3 -c \"import json; t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text']; s=t[943450:948891]; print('两三丈' in s, [943450+i for i,ch in enumerate(s) if ch=='丈'])\"  # CE2 → False [945377]",
+    "python3 -c \"import json; c=json.load(open('loop/state/out/read_dafeng_L1_0237.candidate.json')); print(len(c['unknowns']), len(c['excludedSettings']))\"  # CE3 → 26 8"
+  ],
+  "counterExamples": [
+    {
+      "id": "CE1",
+      "where": "/hypothesizedEdges/3 (h4)",
+      "claim": "h4.from =「福妃挣脱、冲向瞭望厅呼救、沿途碰落挂画」→ h4.to =「东侧墙壁的字画脱落」",
+      "quote": "福妃不知怎么挣脱了太子的控制，冲向瞭望厅呼救，沿途碰落了挂画",
+      "quoteStart": 948285,
+      "quoteEnd": 948315,
+      "why": "h4 挂的唯一引文是 948245–948285「然后太子霸王硬上弓，拉拽着福妃到床榻，激烈颤抖中，床榻一片混乱，一角床幔被撕下。」——该句里没有「挣脱」「冲向」「挂画」「字画」任何一个词，它支撑的是 h3（床幔被撕下），不是 h4。定量核对：h3 与 h4 的 quotes 跨度**完全相同**（都是 [948245,948285)），即两条不同的假设链共用同一条引文，而 h4 自己断言的三个关键动作全部落在从未被引用的 948285–948315 上。全候选结构性核验：「挣脱」出现 2 次、「挂画」出现 2 次，**全部在 h4 自己的 from/direction 分析文字里**，作为 quote 字段一次也没有；与 [948285,948315) 相交的 quote 数 = **0**。可复现：`python3 -c \"import json;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];print(t[948245:948285]);print(t[948285:948315])\"`。这是**张冠李戴的引用**（内容在原文中确实存在，所以不是编造），修法是把 948285–948315 补进 h4 的 quotes。"
+    },
+    {
+      "id": "CE2",
+      "where": "/unknowns/24 (id=u25) 的 topic",
+      "claim": "u25.topic =「两三丈高的坠落与「谁都救不了」是否被当作死因结论」",
+      "quote": "许七安目测了一下高度，大概有个六七米，这种高度摔下来，基本看阎王爷收不收你。",
+      "quoteStart": 947159,
+      "quoteEnd": 947197,
+      "why": "原文写的是「六七米」，**「两三丈」在整段切片里不存在**（切片内「丈」只出现 1 次，在 945377「光辉万丈」，与高度无关）。u25 自己挂的引文也写「六七米」，与它自己的标题互相矛盾 —— 即标题里的度量是**候选自己造的**，不是原文。可复现：`python3 -c \"import json;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];s=t[943450:948891];print('两三丈' in s,[943450+i for i,ch in enumerate(s) if ch=='丈'])\"` → `False [945377]`。它对该条的**结论**（不要把叙述者的推断语气升级成已确认死因）不受影响，但标题里的度量必须改成原文的「六七米」或删去数字。"
+    },
+    {
+      "id": "CE3",
+      "where": "/unknownsNote 与 /worldSettingsNote",
+      "claim": "unknownsNote：「20 条 unknowns，按来源分四类：动机不明（u6、u7、u8、u10）、案情与证据不足（u1、u3、u4、u9、u13、u14、u18）、身份与物品归属（u5、u11、u12、u16）、文本层次与词形（u2、u15、u17、u19、u20）」；worldSettingsNote 末尾：「被排除项见 excludedSettings（6 条，逐条写明理由）」",
+      "quote": "20 条 unknowns，按来源分四类：动机不明（u6、u7、u8、u10）",
+      "quoteIsFromCandidate": true,
+      "why": "两处自述计数与文件实际内容不符（证据在候选文件自身，可脚本复算，非原文引证类反例）：实际 `len(unknowns)=26`，四类只覆盖 20 条，**u21/u22/u23/u24/u25/u26 在分类表里完全没有出现**（而它们正是本案现场相关的 6 条：公主有无发现、宫女宦官有无被问话、门口四名侍卫、福妃心腹、坠落高度、清清白白声明）。实际 `len(excludedSettings)=8`，note 写 6 条。可复现：`python3 -c \"import json;d=json.load(open('loop/state/out/read_dafeng_L1_0237.candidate.json'));print(len(d['unknowns']),len(d['excludedSettings']))\"` → `26 8`。**根因已定位到构建脚本**：这两处 note 是硬编码字符串常量而非生成所得 —— `loop/state/out/read_dafeng_L1_0237.w-sanguo-0.build/content_core.py:846` 把「（6 条…）」写死在 WORLD_SETTINGS_NOTE 末尾，`:920` 把「20 条 unknowns…」写死在 UNKNOWNS_NOTE 里（`grep -n` 实测行号）。这正是本项目『机制看起来完整、实际不产生信息』的形态：分类表长得像全集，却静默漏掉近四分之一条目；而候选自己声明 `countsAreGenerated: true`，实则这两处不是生成所得。"
+    },
+    {
+      "id": "CE4",
+      "where": "/unknowns/25 (id=u26)",
+      "claim": "u26.topic =「许七安与临安「清清白白」的自我声明与实际关系是否一致」",
+      "quote": "长公主，不是你想的那样，我和临安清清白白的，我还是你的牛马。",
+      "quoteStart": 945814,
+      "quoteEnd": 945844,
+      "why": "u26 的标题与被它点名要讨论的「清清白白」，靠的是 945814–945844 这句；但该句**从未作为 quote 出现**（结构性核验：该串仅出现在 `/coverage/zeroCoverageList` 第 74 段（start 945810）的 `excerpt` 截断摘要字段里，`quote` 字段零次）。u26 实际挂的两条引文是 943689–943722 与 946152–946199，都不含「清清白白」。它的 `why` 里写着「（「我还是你的牛马」也是自我定位）」——**直接引用了这句原文，却没有把它放进 quotes[]**。另注：「清白」这一主题词在本区间出现 2 次（943486 开篇「就是清清白白」、945830），两次都没被引。修法：把 945814–945844 补进 u26 的 quotes。（本条即我第一版写错偏移的那处，本版已更正为 945814–945844。）"
+    },
+    {
+      "id": "CE5",
+      "where": "/excludedSettings/4 (x5) 与 /unknowns/16 (u17)",
+      "claim": "x5.item =「花信少女」这类年龄/外貌评语；u17.topic =「花信少女」的具体年龄与它和别处设定的关系",
+      "quote": "裱裱这种花信少女，时不时表露出的信赖、亲近，都在向他传达一个信息：",
+      "quoteStart": 943689,
+      "quoteEnd": 943722,
+      "why": "两条的标题都以「花信少女」为对象，但两条共同挂的唯一引文是 943609–943631「所以她也许没意识到自己对这个小铜锣有了情愫。」，**不含「花信少女」**；「花信少女」实际在 943693（属上面这条 943689–943722）。公平地说：该句在别处被引用了（/themeReadings/0/support/2/quotes/0 与 /unknowns/25/quotes/0），所以这不是编造，而是这两条**贴错了引文**——标签所指的是另一句。可复现：两条的 quotes[0]['quote'] 均为「所以她也许没意识到…」，而 T[943689:943722] 才是含「花信少女」的那句。"
+    }
+  ],
+  "reverseChecks": [
+    {
+      "id": "RC1",
+      "found": "h4 所依赖的原句从未被引用：许七安侧写里「福妃挣脱控制 → 冲向瞭望厅 → 沿途碰落挂画」这一整步（也是全区间唯一把「挂画」与现场物证「字画」连起来的一步）只有 948285–948315 一句原文依据，而候选没有把它放进任何 quotes[]（与它相交的 quote 数 = 0）。",
+      "quote": "福妃不知怎么挣脱了太子的控制，冲向瞭望厅呼救，沿途碰落了挂画",
+      "quoteStart": 948285,
+      "quoteEnd": 948315
+    },
+    {
+      "id": "RC2",
+      "found": "候选反复用「许七安确信裱裱有情愫」立论（k2、th1、u26），但支撑这份确信的**叙述者明写的资格依据**没有被引用：两世感情经历。缺了它，「许七安会不知道？」看起来像直觉，实际原文给了理由。该句所在的第 7 段落在候选覆盖表里**不算零引用**（它被下一句「裱裱这种花信少女…」的引文覆盖），所以这是「引文切到下一句就停了」的切点遗漏，不是覆盖表漏列。",
+      "quote": "许七安不管是上辈子还是这辈子，都是感情经历丰富的男人。",
+      "quoteStart": 943662,
+      "quoteEnd": 943689
+    },
+    {
+      "id": "RC3",
+      "found": "x1 把「脱氧核糖核酸／DNA」判为「本区间没有产生任何作用」并排除，但漏掉了紧跟其后的叙述者原话——它明确交代了这套知识**为什么**用不上（时代/科技落差）。这是排除理由的直接原文依据，候选只引了「可惜验不了DNA」而与它并置的另一半没引。",
+      "quote": "还是上辈子的科技好啊",
+      "quoteStart": 948058,
+      "quoteEnd": 948068
+    },
+    {
+      "id": "RC4",
+      "found": "婶婶对铃音的实际肢体动作未被采录。t3 的引文都止于话语，而同一段里紧跟其后的动作句「婶婶用指头戳着小豆丁的脑门。」没有被任何条目引用（引用层零命中）。该段并非零引用段（被上面那句对白覆盖），所以同 RC2 属切点遗漏。",
+      "quote": "婶婶用指头戳着小豆丁的脑门。",
+      "quoteStart": 944253,
+      "quoteEnd": 944267
+    },
+    {
+      "id": "RC5",
+      "found": "临安登场时的身段动作句未被引用。narratorEvaluation/3 只引了后一句「这是刻意在许七安面前展示美貌，可能她自己没意识到」（945216–945241），而「蹦跳过来，轻盈旋身，裙裾飞扬」这个**被评价的动作本身**（前半句）没有引文；s3 的 anchor 走的是另一处（捂眼惨叫）。",
+      "quote": "裱裱蹦跳过来，轻盈旋身，裙裾飞扬。",
+      "quoteStart": 945199,
+      "quoteEnd": 945216
+    },
+    {
+      "id": "RC6",
+      "found": "临安与怀庆是亲姐妹、且怀庆是姐姐 —— 这条**事实性亲缘关系**在本区间被两处明写（「姐妹花」并称 + 许七安以「姐姐」指怀庆），但候选没有任何一层覆盖它：既无引文、也未登记为关系/状态/设定，两段都躺在 zeroCoverageList 里，被 paragraphDisposition 第 1 类「外貌与体态品评（叙述者/许七安视角的主观品评）」整块吸收。该类把「臀型/腰肢」这类主观品评与「她们是姐妹」这条客观关系**当成同一桶**排除了 —— 前者确实不产生行动/资源/约束，后者产生（它决定了同框出现、临安咬重「主仆」宣示所有权、以及许七安「脚踏两只船」的处境）。这是一处**误杀**：合法事实被归类时连带排除。候选自己在该类 handling 里也写明「若复核者认为这类文字也应留痕，那需要先定一条提取口径」，故记为需定口径的缺口，而非判 fail 的理由。",
+      "quote": "哎呀，裱裱你怎么什么都比不过姐姐？没用的东西。",
+      "quoteStart": 946538,
+      "quoteEnd": 946561,
+      "supportQuote": "许七安第一次可以这样静静欣赏姐妹花，赏着赏着，发现论臀型的丰满，似乎怀庆公主更胜一筹。",
+      "supportQuoteStart": 946609,
+      "supportQuoteEnd": 946652
+    },
+    {
+      "id": "RC7",
+      "found": "「三司」与「三法司」是两个并存的机构名（本区间内分别出现 1 次与 3 次），候选未像它处理「令牌/金牌」（u11）、「瞭望台/瞭望厅」（u12）那样为这一对建 unknown，却把「三司」写进了世界规则的名字里（w_rule4 名为「福妃案主审权已由三司转到许七安」）。即：它承认同物异名的风险并为此建了两条 unknown，唯独漏了第三条同形歧义。原文并未直说二者是同一机构，故只记为可补的严谨性缺口，不是错误。",
+      "quote": "先前主办机构是三司，怀庆插不上手，而今主审官变成了许七安，怀庆自然就来了。",
+      "quoteStart": 946031,
+      "quoteEnd": 946068,
+      "supportQuote": "三法司的人进去过",
+      "supportQuoteStart": 947416,
+      "supportQuoteEnd": 947424
+    }
+  ],
+  "randomQuoteAudit": {
+    "method": "random.seed(237) 从 303 条带偏移的 quote 中抽 5 条，逐条做 text.find(quote)==start 与 text[start:end]==quote 双重核验",
+    "results": [
+      {
+        "path": "/speechLayer/29/quoteRef",
+        "quote": "“你在闻什么？”裱裱装不下去了。",
+        "start": 947749,
+        "end": 947765,
+        "text_slice_equals_quote": true,
+        "find_equals_start": true,
+        "sourceHashOK": true
+      },
+      {
+        "path": "/states/3/after/quotes/0",
+        "quote": "也就一刻钟，穿着白色宫裙，清冷绝丽，行走间风情妙不可言的怀庆来了。",
+        "start": 945554,
+        "end": 945587,
+        "text_slice_equals_quote": true,
+        "find_equals_start": true,
+        "sourceHashOK": true
+      },
+      {
+        "path": "/foreshadows/0/payoff/quotes/0",
+        "quote": "也就一刻钟，穿着白色宫裙，清冷绝丽，行走间风情妙不可言的怀庆来了。",
+        "start": 945554,
+        "end": 945587,
+        "text_slice_equals_quote": true,
+        "find_equals_start": true,
+        "sourceHashOK": true
+      },
+      {
+        "path": "/unknowns/19/quotes/0",
+        "quote": "太子醉醺醺的登楼，福妃在桌边倒了被热茶，帮他解酒，但太子没去碰茶杯，而是碰了福妃的小手，或者其他地方，导致福妃大惊失色，撞翻了凳子。",
+        "start": 948173,
+        "end": 948239,
+        "text_slice_equals_quote": true,
+        "find_equals_start": true,
+        "sourceHashOK": true
+      },
+      {
+        "path": "/tasks/5/result/quotes/0",
+        "quote": "“脱氧核糖是什么？”怀庆主动问道。",
+        "start": 947895,
+        "end": 947912,
+        "text_slice_equals_quote": true,
+        "find_equals_start": true,
+        "sourceHashOK": true
+      }
+    ],
+    "summary": "5/5 逐字命中，5/5 偏移与 find() 一致，5/5 sourceHash 复算等于 docs.json 实测 sha256。此项按角色契约第 6 条执行。"
+  },
+  "independentReproductions": {
+    "quoteTotals": "396 条 quote 实例（133 条去重），0 条 text.find() 失败，0 条落在声明切片 [943450,948891) 之外。",
+    "offsetCaliber": "303 条声明了 start/end 的 quote，**303/303** 满足 docs[0].text[start:end]==quote（逐字，含标点）。另 93 条实例（16 条 worldSettings 的镜像 .quote 字段 + 77 条 crossSectionQuoteReuse 条目）不带偏移，均为索引/标题层，各自同样逐字可 find（not-found=0、out-of-range=0、非唯一命中=0）。",
+    "zeroCoverageList": "我独立复算的零引用段落集合与候选 zeroCoverageList **完全相等**（45 == 45，双向差集为空），且每条 start 与该段真实起点一致。复算口径：9 个抽取层 + notForeshadows + excludedSettings + speechLayer + narratorEvaluation + authorNoteLayer，得 151 段中 106 段被引、45 段零引用 —— 与候选自报的 45/106 逐一吻合（151−45=106 亦自洽）。",
+    "taskNulls": "tasks 内裸 null 实测 11 个，与 tasksNote 列举的 11 个**集合完全一致**，且每个都有同名 <栏位>Note 说明理由。硬红线「同一任务内五栏不得共用同一句」实测 **0 违反**。",
+    "sectionCounts": "states 10 change + 6 knowledge_gap；itemStates hold3/transfer2/use1/lose1；placeState arrived5/mentioned2 —— 与 statesNote / itemsNote / placesNote 自报一致。",
+    "reuseIndex": "77 条 crossSectionQuoteReuse 的 count 与 paths 长度逐条自洽；归一化 worldSettings 的 .quote/.quoteRef.quote 镜像字段后，paths 与我的独立遍历**逐条相等**（0 条不符）。索引口径实际不含 /coverage：有 2 条真跨分区复用未列入（x7/x8 与 paragraphDisposition[1] 共用，见 RC6 相关核对），与 note 措辞「两个以上分区时逐条列出」略有落差，建议把「/coverage 不计入」写进口径。",
+    "fabricatedEntities": "对 23 个专名（许七安/临安/怀庆/太子/福妃/许二郎/许新年/许铃音/婶婶/小宦官/魏渊/魏公/元景帝/裱裱/许宁宴/陛下/三法司/三司/清风殿/韶音苑/桑泊/库房 等）做区间内出现次数比对，**没有任何原文里不存在的人物、地名或机构**。"
+  },
+  "notes": "总体判断：**partial**。\n\n【判 fail 的部分不成立】没有发现编造。全候选 396 条 quote 实例逐字可查、133 条去重引文全部落在声明切片 [943450,948891) 内；没有原文里不存在的人物、事件或结局；没有把「播放到结尾」当成功。最难的语义分层这次做得相当克制且正确：许七安那段指认太子的侧写被完整隔离在 hypothesizedEdges（逐条 inferred / 未验证），causeEdges e7 只连到「他形成了一条经过」而不是「福妃是被推的」；t7.result 标 inferred 并同栏带上「有几点我要先做确认」；元景帝那句权术评价被正确判为叙述者评价（r6、narratorEvaluation/0）；r2「小宦官态度转变→许七安明白了好意」被以『与原文相反』为由拒连 —— 这几处正是本段最容易踩的红线，候选都绕开了。所以不判 fail。\n\n【判 pass 也不成立】有 5 处**拿得出证据**的实据缺陷（CE1–CE5）：1 处引文张冠李戴（h4 与 h3 共用同一条 [948245,948285) 引文，h4 真正的依据句 948285–948315 从未被引）；1 处标题写了原文没有的度量（「两三丈」vs 原文「六七米」）；1 处主题词从未作为 quote 出现（u26 的「清清白白」，原句 945814–945844 在 quote 字段零命中）；1 处标签与引文错配（x5/u17 的「花信少女」）；2 处自述计数与文件实际不符（unknowns 26 条写成 20 条且分类表静默漏掉 u21–u26；excludedSettings 8 条写成 6 条，根因是构建脚本第 846/920 行的硬编码常量）。这些都不改变任何一条已登记结论的真值方向，但都必须在合并前修掉。\n\n【哪些可以用、哪些必须丢弃或降级】\n· 可原样采信：tasks[]（含 9 条任务与 11 个带理由的 null）、causeEdges e1–e9、rejectedEdges r1–r7、states s1–s10 与 k1–k6、foreshadows f1–f3、notForeshadows nf1–nf5、worldSettings 全部 16 条（规则 institution / 地点 placeState / 物件 itemStates 四态齐备）、themeReadings th1–th2、speechLayer、narratorEvaluation、authorNoteLayer、coverage 的 45 段零引用表（经我独立复算逐条相等）、crossSectionQuoteReuse 结构。\n· 必须修后才能用：h4 补上 948285–948315（或改为引它、删掉床幔那句）；u25.topic「两三丈」改「六七米」；u26 补引 945814–945844；x5/u17 改引 943689–943722；worldSettingsNote「6 条」改 8 条；unknownsNote 改为「26 条，其中 20 条按来源分四类，u21–u26 另属案情/现场类」或补全分类。\n· 无需降级为 unknowns 的：以上 5 处都不是「读不出来」，而是「读出来了但引文/标签/计数写错」，性质是编辑缺陷而非认知缺陷。\n\n【发布层是否安全】发布层（to_candidate.py 的 LAYER_MAP：tasks / causeEdges / clues / foreshadows / states / characterStates / relations / storylines）中，本候选只产出 4 层（tasks、causeEdges、states、foreshadows）。逐条核对：这 4 层内**没有一条缺引文**（每条至少有一句可在原文唯一切出的引文），且**两条 counterExample 都不在发布层**（h4 属 hypothesizedEdges、u26 属 unknowns，均不在 LAYER_MAP 内）。因此这 5 处缺陷不构成发布安全事故，判 fail 会过重。\n\n【存疑，不作为 fail 依据】① u11（令牌与金牌是否同一件）候选自己声明是判断而非原文直述，且已在 unknowns 登记，我认为处理得当；② u12（眺望台/瞭望厅同地）同理；③ t2.obstacle 与 t3.cost 填 null 的口径，我核对了原文确实没有对应的阻力/惩罚动作（许二郎那段的「阻力」是预期反应而非实施中的阻碍），支持候选的处理；④ RC7 的「三司/三法司」我无法从本区间断定是否同一机构，故只记缺口；⑤ 发布层 causeEdges e7 的 from 栏枚举了五件物证（倾翻圆凳、冰凉茶、凌乱床榻、撕破床幔、脱落字画），而它自己只挂了「根据目前的现场细节反馈，他在脑海里勾勒出动态的图像：」一句（那五件物证的枚举实际引在 tasks t4 的 result 里，[947663,947717)）。该条边的因果机制（物证→还原）由它自己那句引文已足够成立，枚举只是明细，所以我**不建议**因它丢边，只建议把枚举引文一并挂上。\n\n【我自己的两处更正，以及本条的版本关系】**本文件是第二版**。同日 07:57 我曾就同一单元落过一版结论，并被 `loop.py verify` 记入 `read_dafeng_L1_0237.json` 的 reviews[]（reviewer=w-verify-4, at=2026-10-14T23:57:46Z, verdict=partial）。复算时发现那一版有两处我未复算就写下的数字，本版已改正：① CE4 的引文偏移写错 —— 我把**段落起点** 945810（含 4 个前导空格）当成了**引文起点**，真实跨度是 945814–945844（我原先写的 945847 还多框进了后一句开头的「许七安」三字）；② RC6 的规模写错 —— 未列入 crossSectionQuoteReuse 的真跨分区复用是 **2 条**（x7/x8 与 paragraphDisposition[1] 共用），不是 5 条（另 3 条是 worldSettings 的 .quote 与 .quoteRef.quote 镜像字段，属字段形态而非复用）。两处都不改变结论方向（verdict 仍为 partial，CE1–CE5 与 RC1–RC7 一个都没被推翻），但「引用了我没有复算的偏移」与本项目『声称强于验证』同形，故如实登记。**记录侧按追加式纪律处理**：我不手工改写已落盘的 reviews[] 条目（那会变成就地覆盖而非追加），因此以本条再次执行 `verify` 追加一条更正后的结论；两条同为我 w-verify-4 的 partial，取更严者仍是 partial，下游 `to_candidate.py` 合并两处 counterExamples 后指向的条目集合不变（CE4 仍指向 u26，只是偏移字符串更正）。以本版为准。\n\n【未做】没有做语义评审以外的文学性/审美判断（不属本角色）；没有跑任何 GPU 或浏览器测试（任务未要求，且 GPU 全局串行）；没有改写候选文件（我的 writes 只有 loop/state/out/verify_dafeng_L1_0237.verdict.json 一个路径）。"
+}

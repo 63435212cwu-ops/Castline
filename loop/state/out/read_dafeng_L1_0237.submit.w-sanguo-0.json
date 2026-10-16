@@ -1,0 +1,101 @@
+{
+  "task": "read:dafeng:L1:0237",
+  "agent": "w-sanguo-0",
+  "status": "done",
+  "summary": "精读《大奉打更人》第八章 案发现场（docs[0].text codepoint [943450,948891)，5441 码点，151 个非空段，切片 sha256=86cb72b237c8e5ba482c30c648820431a81eadb429410137af36d78af722e199）。产出 9 条任务五元组（45 个栏位，其中 9 个裸 null 全部带 <栏位>Note 写明为什么没有依据；同一任务内五栏共用同一条引文 0 处，由构建脚本断言保证）、9 条因果边（每条带 direction + trigger 机制）、7 条被拒边、5 条显式标为推断的假设链（许七安侧写，与 causeEdges 严格分离）、16 条状态（10 change 前值/后值/锚点 + 6 knowledge_gap 谁知/不知）、3 条伏笔（1 回收 + 2 显式 unresolved 带 payoffNote）、5 条 notForeshadows、16 条世界设定（rule 5 全 executed / place 7 = arrived 5 + mentioned 2 / item 4，四态分开且各态带 stateEvidence）、8 条 excludedSettings、2 条主题解读（各带 perspective + support + counter）、26 条 unknowns、3 条 selfCritique、人物话语层 42 条、叙述者评价 5 条、段落处置表 7 类。全部 303 条引文由生成脚本在原文里用 str.find 现定位后切片（偏移不手写），并由**独立于生成脚本**的审计脚本复算，负控 5 项确认复核有效。",
+  "evidence": [
+    {"path": "loop/state/out/read_dafeng_L1_0237.candidate.json", "sha256": "11673da18c2e3a1432314b2124982b31f3dbec3387de0bcd85a4effd9597d670"},
+    {"path": "loop/state/out/read_dafeng_L1_0237.w-sanguo-0.build/build_candidate.py", "sha256": "e310474a00cd6aeee784dc50644442f07e94944488f5015ae7505943104426cb"},
+    {"path": "loop/state/out/read_dafeng_L1_0237.w-sanguo-0.build/content_core.py", "sha256": "9c778097cef4bd4c91e08cf4ae5c3ca2e63d7e19e20399d70112148d2fd5fd5f"},
+    {"path": "loop/state/out/read_dafeng_L1_0237.w-sanguo-0.build/audit_candidate.py", "sha256": "6c3e7b1a015247a64c5a458291d6115c7b00864c58b02d739a0ff46c50c9878f"},
+    {"path": "loop/state/out/read_dafeng_L1_0237.w-sanguo-0.build/task-definition.snapshot.json", "sha256": "a3554e435d0acebdb2aee5671876f13fc63414106d44dec5426a97e03ecbd292"},
+    {"path": "data/cache/1063b17ca65ec1b76f30e460.docs.json", "sha256": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"}
+  ],
+  "assertions": [
+    {
+      "text": "偏移口径自检：python3 -B -c \"import json;d=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'));t=d[0]['text'];print(repr(t[943450:943450+20]));print(len(t[943450:948891]))\" → 输出 '第八章 案发现场\\n\\n    这叫什么话？男女' 与 5441 —— docs[0].text[start:end] 以本单元标题开头，区间长度与任务声明一致",
+      "result": "pass"
+    },
+    {
+      "text": "sourceHash 是整个 docs.json 的 sha256：shasum -a 256 data/cache/1063b17ca65ec1b76f30e460.docs.json = fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839，与任务声明逐字一致；切片哈希另起字段 sliceSha256，不覆盖 sourceHash",
+      "result": "pass"
+    },
+    {
+      "text": "全部 303 条引文逐字命中：python3 -B loop/state/out/read_dafeng_L1_0237.w-sanguo-0.build/audit_candidate.py → '引文对象：303 / 检查项：108，失败：0 / 全部通过。'。该脚本**不复用生成脚本的任何函数**，自己读 docs.json、自己用显式栈遍历候选，断言 text[start:end]==quote、sourceHash 相符、区间落在 [943450,948891)、且每条引文 text.find 也找得到",
+      "result": "pass"
+    },
+    {
+      "text": "负控（确认复核不是空转）：同一审计脚本内置 5 项**应当失败**的断言（偏移+1 应失败、哈希改一位应失败、不存在的引文应找不到、切片外偏移应越界、空引文不应命中），实测 5 项全部按预期失败，输出 '负控 5 项全部按预期失败（说明复核有效）；异常项 []'",
+      "result": "pass"
+    },
+    {
+      "text": "引文不是手抄的：content_core.py 里每条引文只写「第几段 + 逐字子串 + 段内第几次出现」，由 build_candidate.py 用 str.find 在第 N 段内定位后现算绝对偏移。子串若不在原文 ⇒ 构建以非零码退出且不写文件。本次运行中该断言真实触发过一次（引文表内部重复 '之所以这么说是为了让娘榨干爹的私房钱'），修掉后才通过 —— 说明这道闸门不是装饰",
+      "result": "pass"
+    },
+    {
+      "text": "同一任务五栏不得共用引文：构建脚本遍历每条任务的 objective/obstacle/action/result/cost 五栏，任何一条引文出现在两栏以上即 AssertionError；审计脚本用独立写法重算，输出 '五栏共用引文计数 = 0（应为 0）'",
+      "result": "pass"
+    },
+    {
+      "text": "null 栏必须带理由：构建脚本断言每条任务的每个 null 栏都存在同名 <栏位>Note；本次 9 个 null 栏（t1.cost、t2.obstacle、t2.cost、t3.cost、t4.cost、t5.cost、t6.obstacle、t6.cost、t7.cost）全部有理由，审计逐条复核为 PASS",
+      "result": "pass"
+    },
+    {
+      "text": "人物话语不当叙述事实：42 条对白单列进 speechLayer 并各带说明（例如 lie_words 明确标注「这句是谎话，第 44 段叙述者明写『其实许二郎是骗婶婶的』」）；另有 5 条叙述者评价单列进 narratorEvaluation（元景帝权术归因、『想必』语气、侧写产物等）",
+      "result": "pass"
+    },
+    {
+      "text": "侧写与因果严格分离：许七安脑内还原的 5 步案发链条（含推人下楼）全部放在 hypothesizedEdges 并逐条标 basis=inferred / status 未验证，**没有一条进入 causeEdges**；对应的 r4 作为被拒边登记并写明理由。t7.result 标 basis=inferred 且带上他本人『有几点我要先做确认』的原话",
+      "result": "pass"
+    },
+    {
+      "text": "semanticReview 未被声称为完成：候选里 semanticReview.status = 'not_performed'，note 写明只做了引用定位与逐字核验、语义必须由 read-verify 通道独立复核；审计脚本断言该字段值",
+      "result": "pass"
+    },
+    {
+      "text": "零引用段落已处置：coverage 列出 45/151 个零引用段落，并配 paragraphDisposition 7 类逐类写明为什么不需要引文（各带取样引文）—— 其中篇幅最大的外貌品评块是被主动排除的（见 excludedSettings x7），不是漏读",
+      "result": "pass"
+    },
+    {
+      "text": "世界设定三条区分写进字段：place 每条带 placeState（arrived 5 / mentioned 2，库房与桑泊是提及不是到达）、item 每条带 itemStates 多选且每态各带 stateEvidence（hold 3 / transfer 2 / use 1 / lose 1，未合成物品链）、rule 每条带 institution（executed 5，declared 0 与 misunderstood 0 均在 worldSettingsNote 里写明为什么是空集而不是漏查）",
+      "result": "pass"
+    },
+    {
+      "text": "写路径合规：本次只写 loop/state/out/ 下的文件（任务 writes 指定的 candidate 及其同目录构建产物），未触碰 js/ css/ index.html/ serve.py/ narrative.py/ scripts/ tests/ docs/ data/ 任何受保护路径；docs.json 只被读取未被修改，其哈希在提交时复算仍等于任务声明值",
+      "result": "pass"
+    }
+  ],
+  "changes": [
+    {"path": "loop/state/out/read_dafeng_L1_0237.candidate.json", "kind": "append-only"},
+    {"path": "loop/state/out/read_dafeng_L1_0237.w-sanguo-0.build/build_candidate.py", "kind": "append-only"},
+    {"path": "loop/state/out/read_dafeng_L1_0237.w-sanguo-0.build/content_core.py", "kind": "append-only"},
+    {"path": "loop/state/out/read_dafeng_L1_0237.w-sanguo-0.build/audit_candidate.py", "kind": "append-only"},
+    {"path": "loop/state/out/read_dafeng_L1_0237.w-sanguo-0.build/task-definition.snapshot.json", "kind": "append-only"},
+    {"path": "loop/state/out/read_dafeng_L1_0237.w-sanguo-0.build/prior_draft.w-read-2.candidate.json.bak", "kind": "append-only"}
+  ],
+  "sourceHashes": {
+    "data/cache/1063b17ca65ec1b76f30e460.docs.json": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "loop/state/runs/task-read_dafeng_L1_0237.json": "a3554e435d0acebdb2aee5671876f13fc63414106d44dec5426a97e03ecbd292"
+  },
+  "remaining": [
+    "语义未核验：本候选只做了引用定位与逐字核验，semanticReview=not_performed。每条结论是否成立必须由 read-verify 通道的独立复核者对着原文判断。",
+    "覆盖：151 个非空段里 45 段没有引文落点。已按 7 类写明处置理由（coverage.paragraphDisposition），但「按类处置」不等于「逐段已核」。复核者若认为某一类（尤其外貌品评块）应当提取，需要先定提取口径。",
+    "一处主动的空集判断可能被推翻：worldSettings 的 declared 与 misunderstood 都是 0 条。理由写在 worldSettingsNote 与 selfCritique sc3 —— 若复核者认为「元景帝的安排」应算 declared，需要先指出原文里哪一句是诏令文本（本区间我找不到）。",
+    "cost 口径：9 个 null 栏里 6 个是 cost。t2 的『大哥被娘记恨』与 t3 的『图谋落空』都像代价但都记为 null（理由见各自 costNote 与 selfCritique sc2）。若复核者认为 cost 可以记在执行者之外，这两条需改判 —— 那要先改口径。",
+    "物品同一性是我的判断不是原文直述：令牌与金牌是否同一件（u11）、瞭望台与瞭望厅是否同一处（u12）都已按「同一」处理并在 unknowns 里登记；若复核者认为应拆成两件，w_item1 与 w_place2 需拆开。",
+    "跨分区引文复用 77 条（由脚本从数据生成、逐条列出）。判据只禁止同一任务五栏共用一句，跨分区复用是允许的；但复用量偏高这件事本身请复核者判断是否恰当。",
+    "区间外关联未取证：小宦官口中的『好意』其解释场景在上一章（本区间之外），我没有跨区间取引文来补它，只登记为 unknowns u2 与 unresolved 伏笔 f2。",
+    "本区间末段的作者附言（重要通告）被整体作为非叙事层处置，未从中提取任何剧情事实；这一处置是否合口径，请复核者判断。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/read_dafeng_L1_0237.candidate.json",
+      "loop/state/out/read_dafeng_L1_0237.w-sanguo-0.build/"
+    ],
+    "note": "candidate 路径上原本存在一个**未被提交**的 w-read-2 草稿（sha256 6c0b40a71c18c5bba4204fa610ea4fb56eab964d2359560802636d45b6e02e27）。我在覆盖前把它原样备份到 build 目录下的 prior_draft.w-read-2.candidate.json.bak，其哈希与原件一致，可据此还原。未使用 git checkout/reset/stash。"
+  },
+  "reworkOf": "loop/state/out/read_dafeng_L1_0237.candidate.json",
+  "reworkReason": "该路径上的既有候选由 w-read-2 生成但**从未提交**（loop/state/out/ 下无 read_dafeng_L1_0237.json 记录，也无 REJECTED__ 记录，即任务仍未完成）。我作为本任务的领租约 worker（w-sanguo-0）按 READER 契约独立精读原文并重建候选；覆盖前已备份原件（哈希见 rollback.note）。"
+}

@@ -1,0 +1,539 @@
+{
+ "task": "verify:sanguo:L1:0017",
+ "agent": "w-verify-3",
+ "role": "VERIFIER",
+ "status": "done",
+ "verdict": "partial",
+ "candidateVerdict": null,
+ "reviewedTask": "read:sanguo:L1:0017",
+ "reviewedArtifact": {
+  "path": "loop/state/out/read_sanguo_L1_0017.candidate.json",
+  "sha256": "500b936cb604a4fd118a29e640d261984c874daf040841d341816c826158e776",
+  "bytes": 309074,
+  "producedBy": "w-xiyou-0"
+ },
+ "source": {
+  "path": "data/cache/152e2a6eed94f1075e7e7070.docs.json",
+  "sha256": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+  "docIndex": 0,
+  "docName": "三国演义",
+  "range": [
+   90177,
+   94038
+  ],
+  "codepoints": 3861,
+  "segmentSha256": "26440e87f4602a0a3ce2157ce8b30ce73b74c9a37f721efb491e061ac420de10",
+  "offsetBase": "absolute-doc-codepoint",
+  "boundaryHead": "第十八回　贾文和料敌决胜　夏侯敦拨矢啖睛",
+  "boundaryNote": "T[90177:90197] 逐字等于任务 unitHead「第十八回　贾文和料敌决胜　夏侯敦拨矢啖睛」；len(T[90177:94038])==3861 与任务「3861 字」一致；源文件 sha256 与任务 sourceHash 逐字一致。",
+  "readingOrderNote": "先自己通读 docs[0].text[90177,94038) 并整段打印，之后才打开被复核候选。RV1–RV4 全部来自这次先读，不是从候选的已写项里反推的。"
+ },
+ "summary": "独立反向复核《三国演义》第十八回 [90177,94038)，3861 codepoint。先读原文、后开候选。**引用定位层零编造，可原样采信**：递归抽出 282 条结构化 quoteRef，逐条 TEXT[start:end]==quote、落在区间内、length(quote)==end-start、occurrencesInSlice/occurrencesInWholeDoc 与实算一致、sourceHash 一致 —— 失败 0；固定种子 random.seed(20261009) 抽 5 条，5/5 逐字命中且偏移一致。**机器可复算项全部独立复现，一数不差**：① 用我自己实现的引号深度表（入口全篇深度 2、区间内左 51 右 50 净 +1、并按候选声明的 90309 补一个右引号）重算 282 条的 voice/insideQuotedSpan，**0 处不一致**；② 63 处连接词（遂/乃/于是/故/便/即/却/因/方/果）贪心重抽，偏移集合与 marker 与候选逐条相等；③ coverage.paragraphLedger 14 段、metrics 12 项、162 个 ID 唯一性、8 处 textVariants 的全书计数全部相符。判 **partial** 的唯一理由是**反向验证与自我否证**：四处断言可被原文或其自身字段逐字证伪（CE1–CE8），其中 CE1（reverseAudit 的「假缺口」结论）与 CE3（R12 的「下一单元」方位）是**候选自己另一处写对了、这一处写错了**。判 partial 而非 fail：282 条引文没有一条伪引；tasks/causeEdges/states 的语义骨架没有被任何反例推翻；「结束≠成功」执行到位（8 achieved / 4 partial / 4 not_achieved / 2 undetermined，回末三路攻寨的胜负由 R11 显式拒绝连结果）。反向验证另产出 4 条候选**任何通道都没有覆盖**的原文事实（RV1–RV4），其中最重的是简雍在全书的首次登场一句被整句漏掉。",
+ "counterExamples": [
+  {
+   "id": "CE1",
+   "claim": "reverseAudit.finalUncoveredDetail 把 [90309,90328)「绣曰：“然则奈何？”诩曰：“此易事耳。」判为「假缺口（引文边界切分）」，并写「引文本身已覆盖这段文字（见 E2 与 T1 的引用）」。",
+   "quote": "绣曰：“然则奈何？”诩曰：“此易事耳。",
+   "quoteStart": 90309,
+   "quoteEnd": 90328,
+   "why": "该判断**可机械证伪**，且证伪方式是候选自己的字段：① 全部 282 条结构化引文里，**没有任何一条**包含「然则奈何」或「此易事耳」（我对每条 quote 做子串检索，命中 0）；② 该 19 字区间**不被任何引文区间覆盖**（并集为空）；③ 候选点名的 E2 的唯一引文是 [90400,90407)「绣喜，从其计。」，与 [90309,90328) 不相交；④ 候选点名的 T1 的四条引文是 [90227,90309)、[90328,90377)、[90377,90399)、[90400,90407)，**恰好在 [90309,90328) 处留洞** —— 前一条结束于 90309，后一条起于 90328。也就是说这不是「引文边界切分造成的假缺口」，而是**真实缺口**：张绣问「然则奈何？」与贾诩答「此易事耳。」这一问一答，正是本回标题「贾文和料敌决胜」里「料敌」到「将计就计」之间的铰链句，候选的 reverseAudit 用一句「引文本身已覆盖」把它核销掉了。按角色契约这属于「把没做的事写成已做」：它让一个真实缺口在自查里消失了。",
+   "severity": "中-高（自查结论与事实相反；被核销的是回目铰链句）",
+   "fix": "把该条从 finalUncoveredDetail 移出，或把 T1 的一条引文改为覆盖 [90309,90328)（例如引「绣曰：“然则奈何？”诩曰：“此易事耳。），并把 finalUncovered 的计数改为 3（含 90318 同段）。注意 90318 那条与 90309 属同一段问答，两条应合并判读，不能各自算「假缺口」。"
+  },
+  {
+   "id": "CE2",
+   "claim": "causeEdges E29_caoxing_anshe 的 mechanism 断言「原文没有写曹性受谁指派」。",
+   "quote": "早有探马报知高顺。顺飞报吕布。布先令侯成、郝萌、曹性引二百余骑接应高顺，使离沛城三十里去迎曹军，自引大军随后接应。",
+   "quoteStart": 93528,
+   "quoteEnd": 93585,
+   "why": "该断言被**候选自己的 E28_tanma_gaosu 引文**证伪：E28 的第一条引文就是这个 [93528,93585) 区间，逐字写着「布先令侯成、郝萌、曹性引二百余骑接应高顺，使离沛城三十里去迎曹军」。即曹性不是临时上阵的散兵，而是**吕布亲自派遣**的接应部队三人之一，其位置（沛城三十里外迎曹军）就是派遣的结果。E29 把它写成「原文没有写」，与 E28 的引文直接冲突。这不影响 E29 的因果骨架（夏侯敦脱离本阵绕阵追击、暴露在侧射范围内，这个机制成立），但「原文没有写」是一句可证伪的否定式断言，必须改写为「原文未写曹性放箭是受谁的具体指令」这类准确表述。",
+   "severity": "中（否定式断言与自身引文矛盾）",
+   "fix": "把 E29 的「原文没有写曹性受谁指派」改为「原文写了曹性由吕布派遣接应（见 E28），但未写这一箭是受谁的具体指令」。"
+  },
+  {
+   "id": "CE3",
+   "claim": "rejectedEdges R12 的 whyNoEdge 写：这句「这句在下一单元（[94038,...) 之后）才出现，本区间内没有」。",
+   "quote": "正说话间，忽报袁术军取徐州。吕布闻言失惊。",
+   "quoteStart": 85637,
+   "quoteEnd": 85658,
+   "why": "**方位写反了，且候选自己在 crossUnitRefs[4] 里写对了**：「忽报袁术军取徐州」的实际偏移是 85642（T.find 唯一命中），落在**第十六回 [78957,85748)** 内，即本单元（第十八回 [90177,94038)）**之前两回**，不是「下一单元」。候选自己的 crossUnitRefs[4] 对该句的 note 写的是「该句位于本区间之前的上一单元末尾（[85748,90177) 属上一单元）」—— 这一句把话说到了一半：它承认「之前」，但把区间的偏移也写错了（[85748,90177) 是第十七回，而该句实际在第十六回；[85637,85658) 不在 [85748,90177) 内）。同一份文件里，R12 说「之后」、crossUnitRefs[4] 说「之前」，两处矛盾，且两处的偏移标注都不对。R12 的**结论**（不连这条边）仍然成立 —— 该句确实在区间外、且原文只写「报」没写战果；要求是改写方位与偏移。",
+   "severity": "中（自相矛盾 + 偏移标注错误；但拒斥结论本身成立，不主张恢复该边）",
+   "fix": "R12.whyNoEdge 改为「该句在第十六回 [85637,85658)，位于本区间之前两回」；crossUnitRefs[4].note 同步改为第十六回。"
+  },
+  {
+   "id": "CE4",
+   "claim": "unknowns U1 的 detail 声明「本单元只写「某在城上」「绕城而观」「城中」「城内」，没有一处给出城名……所以本候选全文避免替本单元补城名，只说「城」」。",
+   "quote": "操引军赶至南阳城下。绣入城，闭门不出。操围城攻打，见城壕甚阔，水势又深，急难近城。",
+   "quoteStart": 89931,
+   "quoteEnd": 89972,
+   "why": "前半段**正确且我已独立核实**：本区间 [90177,94038) 内「南阳」0 次、「宛城」0 次、「穰城」0 次，城名确实只在区间外（[89931,89972) 第十七回「操引军赶至南阳城下」）。但后半段「全文避免……只说「城」」被候选自己的字段证伪：T2_caocao_shengdong 的 objective 写「从东南角爬城攻进**南阳**」，S1_nanyang_shoucheng 的 who 写「曹操攻**南阳**的态势」。即候选在正向断言区里用了区间外的城名，与它自己写下的「全文避免」相反。这个用法本身可辩护（城名有区间外 crossUnitRefs[0] 作 not-evidence 对照，且 T2 的是目标句转述），**要改的是 U1 的那句话** —— 不能一边声明「全文避免」，一边在两条正向字段里使用。",
+   "severity": "低-中（声明与实现不一致；事实内容有区间外对照支撑）",
+   "fix": "U1.detail 改为「本区间内无城名；正向字段中 T2.objective 与 S1.who 为可读性借用了区间外的「南阳」，其唯一依据是 crossUnitRefs[0]（not-evidence）」。"
+  },
+  {
+   "id": "CE5",
+   "claim": "foreshadows F2_dawanma_jixiang 的 setup.crossUnitRefs[0] 声明该引用文本位于 [84489,84525)。",
+   "quote": "亏得那马是大宛良马，熬得痛，走得快。刚刚走到清水河边，贼兵追至，安民被砍为肉泥。",
+   "quoteStart": 84487,
+   "quoteEnd": 84527,
+   "why": "**偏移与文本错位**：声明区间 [84489,84525) 长度为 36，而其 text 字段长度为 40，两者不等；T[84489:84525] 实际是「那马是大宛良马，熬得痛，走得快。刚刚走到清水河边，贼兵追至，安民被砍为肉」，开头少了「亏得」两字、结尾被截断，**不等于**其声明的 text。正确区间是 [84487,84527)（T.find(text)==84487）。候选在顶层的 crossUnitRefs[1] 对**同一段文本**给出的正是 [84487,84527) 且逐字命中 —— 同一文件里同一条引用出现两个不同偏移，其中一个错。",
+   "severity": "低（不影响语义；F2 的 caveat 已正确声明「同一性缺证据」）",
+   "fix": "把 F2.setup.crossUnitRefs[0] 的 docStart/docEnd 改为 84487/84527，或直接引用 crossUnitRefs[1]。"
+  },
+  {
+   "id": "CE6",
+   "claim": "reverseAudit.realGapsFoundAndFixed 逐条声明每处补引落在哪个字段，例如「91760 补为 T4 的 aftermathRefs」、「93679 补入 T18 的 action 引用」、「90630 补入 T3 的 action 引用」、「93674 并入 T18 的 action 引用」。",
+   "quote": "两马相交，战有四五十合，高顺抵敌不住，败下阵来。",
+   "quoteStart": 93679,
+   "quoteEnd": 93703,
+   "why": "**字段名与实际落点不符**（逐条复算，非抽样）：① 91760 —— 候选说落在「T4 的 aftermathRefs」，但**全文件没有 aftermathRefs 这个字段**（仅有的 2 次出现都在 reverseAudit 的这段说明文字里）；T4 的键是 id/actor/layer/objective/obstacle/action/result/cost/objectiveStatus/note，且没有任何引文覆盖 91760。该句实际只被 T5.retrospectiveRefs[0]（[91762,91833)）以 2 字之差部分触及。② 93679 —— 说落在「T18 的 action」，实际落在 **T18.objective.quoteRefs[1]**；T18.action 的引文只有 [93757,...)。③ 90630 —— 说落在「T3 的 action」，实际落在 **T3.objective.quoteRefs[1]**；T3.action 的引文只有 [90716,...)。④ 93674 —— 说落在「T18 的 action」，实际落在 **T18.objective.quoteRefs[0]**。补引这个**动作本身是真实发生了的**（这些偏移确实已被某条引文覆盖，我逐条确认），所以这是台账字段名的记账错误，不是「假装补了」。但它会让下游按字段名去 T18.action / T3.action 里找这些句子时找不到。",
+   "severity": "低-中（台账字段归属错误 ×4；补引事实成立）",
+   "fix": "按实际落点改写 reverseAudit.realGapsFoundAndFixed 的四条 fixed 说明；91760 那条要么补一条真正覆盖它的引文，要么如实写成只被 T5.retrospectiveRefs 部分触及。"
+  },
+  {
+   "id": "CE7",
+   "claim": "rejectedEdges R5_zhangliao_tuibing_vs_gaoshun_huishen 的 absenceMarker 写「本单元 [90177,94038) 内「纪灵」出现 0 次（全篇 20 次，均在区间外）」。",
+   "quote": "却说袁术闻说刘备上表，欲吞其州县，乃大怒曰：“汝乃织席编屦之去，今辄占据大郡，与诸侯同列；吾正欲伐汝，汝却反欲图我！深为可恨！”乃使上将纪灵起兵十万，杀弃徐州。两军会于盱眙。玄德兵少，依山傍水下寨。那纪灵乃山东人，使一口三尖刀，重五十斤。是日引兵出阵，大骂：“刘备",
+   "quoteStart": 70117,
+   "quoteEnd": 70249,
+   "why": "**区间内的 0 次完全正确、我已独立复算**（S.count('纪灵')==0），但括号里的全书计数错了：全书「纪灵」实际出现 **36 次**，不是 20 次。这是候选里唯一一处可复算的**数字错误**（其余 8 处 textVariants 计数、22 条 unknowns 的 absentTerms、F3/F7/F8 的区间计数我逐条复算全部相符）。R5 的拒斥结论不受影响（纪灵在本区间确实 0 次，这条边确实不能连）。",
+   "severity": "低（计数错误；结论成立）",
+   "fix": "absenceMarker 的「全篇 20 次」改为 36 次（我用 T.count('纪灵') 复算）。"
+  },
+  {
+   "id": "CE8",
+   "claim": "读任务提交记录 read_sanguo_L1_0017.json 的 assertions[8] 声明「正向断言区（tasks.actor / states.who / causeEdges.from,to / foreshadows.name）里出现的人名，全部在本单元切片内至少出现 1 次」，候选 machineSelfCheck 也有一条『区间内不出现本单元 0 次的人名（机械闸门）』判 pass。",
+   "quote": "云长在城上谓之曰：“公仪表非俗，何故失身于贼？”张辽低头不语。云长知此人有忠义之气，更不以恶言相加，亦不出战。",
+   "quoteStart": 93183,
+   "quoteEnd": 93238,
+   "why": "该闸门**对 nameGate 的字面口径成立、但对语义口径不成立**，且不成立的正是它要防的那类情况：① T17_guanyu_zhangliao 的 actor 写「关羽」，而本区间内「关羽」出现 **0 次**（本区间用「云长」3 次、「关公」4 次）；② causeEdges E26_zhangliao_tuibing 的 from 同样用「关羽」；③ 候选没有 alias/canonicalName 之类的别名表把「关羽↔云长/关公」登记起来，所以「正向区人名都能在切片内找到」这句话按字面是假的。同一形态的还有 T1/T3 的 actor「贾诩（为张绣谋）」「贾诩（为张绣）」—— 带括号的写法在切片内自然 0 次（「贾诩」本身 5 次）。**我不主张这是编造**：关羽/贾诩都是本单元的真实人物，用规范名是合理的编排选择，本区间确实写了「云长」「关公」。要求的是把闸门改成「人名或它的本区间别名至少一个在切片内出现」并附别名表，否则这条闸门会在真正出现区间外人名时同样报 pass。",
+   "severity": "中（机械闸门口径不成立；不构成编造）",
+   "fix": "补一张本单元别名表（关羽↔云长/关公；贾诩 的 actor 去掉括号注记），并把该闸门改为对「任一别名在切片内出现」判定。"
+  }
+ ],
+ "reverseChecks": [
+  {
+   "id": "RV1",
+   "found": "李通出场前的连接句「操急问何人。」——把败兵的反事实推测接成曹操的追问，是李通这条线能被引出的唯一铰链，候选全篇 0 次覆盖",
+   "quote": "操急问何人。",
+   "quoteStart": 91619,
+   "quoteEnd": 91625,
+   "why": "我对「任何结构化引文都没完整包含」的句子逐条判读，这条是其中之一。语义上它是必要的：败兵说「若非山后这一路人马阻住中路，我等皆被擒矣」（这句候选引了），曹操接着问「何人」才轮到李通自报家门「乃镇威中郎将，江夏平春人，姓李，名通，字文达」。没有这一问，从「一彪军」到「李通」的转换就没有触发点，T9 的 objective（李通自陈动机）缺一个前件。我在候选全文检索「操急问何人」命中 **0 次**，在任何引文值里也命中 0 次；候选的 reverseAudit 也没有把它列入 12 处已补缺口。",
+   "severity": "中"
+  },
+  {
+   "id": "RV2",
+   "found": "简雍的完整自我介绍「视之，乃玄德同乡人，姓简，名雍，字宪和，现为玄德幕宾。」——这是简雍在全书的首次登场，整句未被任何引文覆盖",
+   "quote": "视之，乃玄德同乡人，姓简，名雍，字宪和，现为玄德幕宾。",
+   "quoteStart": 92968,
+   "quoteEnd": 92995,
+   "why": "这是本单元最实质的一处漏读。T16_xuande_gaoji 引了「孙乾曰：『可速告急于曹操。』玄德曰：『谁可去许都告急？』阶下一人出曰：『某愿往。』」——停在「某愿往」，**恰好切在自我介绍之前**，于是「简雍是谁」这一句整句丢失：我在候选里检索「宪和」（在引文值中 0 次）、「幕宾」（0 次）、「同乡」（0 次）。三个字都只在别处的散文里出现过，不是引文。为什么这条重要：全书「简雍」34 次，**首次出现就是 93001（本区间）**，即这是简雍的登场回；而候选自己在其他地方（F6、U15）都主张「一次出现的部署也要登记」「本单元最大的开口」这类覆盖原则，却在人物的**首次登场**上没有落引文。另外这一句也是刘备集团在本单元内除关张之外唯一一次新增人物，对下游的跨单元人物图谱（谁在哪一回进入叙事）是直接可用的证据。",
+   "severity": "中-高（人物首次登场整句未覆盖）"
+  },
+  {
+   "id": "RV3",
+   "found": "贾诩答张绣的「此易事耳。」这四字与本段问答（90309–90328）同属真实缺口；候选把缺口判成「引文已覆盖」而在自查里核销",
+   "quote": "绣曰：“然则奈何？”诩曰：“此易事耳。",
+   "quoteStart": 90309,
+   "quoteEnd": 90328,
+   "why": "见 CE1：这是条目化反例之外的独立反向发现。抛开「谁对谁错」，本区间的结构性事实是：**引文并集在 90227–90309、90328–90377 两段之间留了一个 19 字的洞**，而这个洞正好落在回目「料敌决胜」的铰链处 —— 贾诩讲完曹操的意图（引了），张绣问怎么办（没引），贾诩说这容易（没引），然后才是方案（引了）。整回的主题句「便欲将计就计而行」也因此只有前半被引（[90200,90219) 到「将计就计而行」为止），对答的「怎么个将计就计」在引文层是断的。",
+   "severity": "中"
+  },
+  {
+   "id": "RV4",
+   "found": "候选的 positive-assertion 区使用了区间外城名「南阳」，与它自己 U1 里「全文避免补城名」的声明相反；同时「宛城」被用作区间外对照标签",
+   "quote": "操引军赶至南阳城下。绣入城，闭门不出。操围城攻打，见城壕甚阔，水势又深，急难近城。",
+   "quoteStart": 89931,
+   "quoteEnd": 89972,
+   "why": "见 CE4。「南阳」出现在 T2.objective 与 S1.who 两处正向断言；另外 E12 的 mechanism 用「与宛城那一仗同构」作类比，R8 用「张绣刚在宛城大破曹操」作论据 —— 这两处都是区间外事实（本区间「宛城」0 次），候选都**没有**给它们挂 crossUnitRefs 标记，而 crossUnitRefs 里只登记了 6 条（不含宛城）。按候选自己为 R10（大宛马同一性）设的标准——「同一性缺证据就不连边、并给对照材料」——宛城这个类比的**同一性其实是有原文支撑的**（第十六回同一场战役），所以问题不在结论，而在**标注不一致**：有的区间外对照挂了 not-evidence，有的没挂。",
+   "severity": "低-中"
+  },
+  {
+   "id": "RV5",
+   "found": "本区间把「袁术」只留了一次提及（荀攸的最坏情况推演），而吕布在同一单元的四路部署里确实没有一路指向淮南 —— 候选 F8 这一条我独立复核为**成立**",
+   "quote": "荀攸曰：“二人新破，未敢轻动。吕布骁勇，若更结连袁术，纵横淮、泗，急难图矣。”",
+   "quoteStart": 93425,
+   "quoteEnd": 93464,
+   "why": "这一条是我**反向验证的自我核减**，如实记录：我原本怀疑 F8（吕布是否结连袁术）过度谨慎，但逐字复核后确认候选的处理是对的 —— 本区间「袁术」确实只出现 1 次（荀攸的话），吕布的四路部署（兖州、沛城、汝颍、中军）没有一路指向淮南，而候选在 F8.note 里明确写了方向相反的证据（上一单元吕布杀韩胤、绝婚袁术）并标为区间外。按角色契约第 6 条，我把它记为「反向验证不成立」而不是反例。",
+   "severity": "无（阴性发现，候选处理正确）"
+  }
+ ],
+ "citationSample": {
+  "method": "random.seed(20261009); random.sample(282 条结构化 quoteRef, 5)；每条做 TEXT[start:end]==quote 与 T.find(quote)==start 双重校验",
+  "hits": 5,
+  "misses": 0,
+  "items": [
+   {
+    "n": 1,
+    "quote": "玄德在小沛城中见高顺退去，知是曹家兵至，乃只留孙乾守城，糜竺、糜芳守家，自己却与关、张二公，提兵尽出城外，分头下寨，接应曹军。",
+    "start": 93585,
+    "end": 93648,
+    "findIndex": 93585,
+    "verbatim": true,
+    "offsetMatch": true,
+    "inUnit": true
+   },
+   {
+    "n": 2,
+    "quote": "荀彧曰：“可先使人往约刘备，待其回报，方可动兵。”操从之，一面发书与玄德",
+    "start": 92352,
+    "end": 92388,
+    "findIndex": 92352,
+    "verbatim": true,
+    "offsetMatch": true,
+    "inUnit": true
+   },
+   {
+    "n": 3,
+    "quote": "绍繁礼多仪，公体任自然，此道胜也；绍以逆动，公以顺率，此义胜也；桓、灵以来，政失于宽，绍以宽济，公以猛纠，此治胜也；绍外宽内忌，所任多亲戚，公外简内明，用人惟才，此度胜也；绍多谋少决，公得策辄行，此谋胜也；绍专收名誉，公以至诚待人，此德胜也；绍恤近忽远，公虑无不周，此仁胜也；绍听谗惑乱，公浸润不行，此明胜也；绍是非混淆，公法度严明，此文胜也；绍好为虚势，不知兵要，公以少克众，用兵如神，此武胜也。",
+    "start": 92002,
+    "end": 92201,
+    "findIndex": 92002,
+    "verbatim": true,
+    "offsetMatch": true,
+    "inUnit": true
+   },
+   {
+    "n": 4,
+    "quote": "性不及提防，早被一枪搠透面门，死于马下。",
+    "start": 93814,
+    "end": 93834,
+    "findIndex": 93814,
+    "verbatim": true,
+    "offsetMatch": true,
+    "inUnit": true
+   },
+   {
+    "n": 5,
+    "quote": "绣与表俱曰：“今已败，奈何复追？”",
+    "start": 91244,
+    "end": 91261,
+    "findIndex": 91244,
+    "verbatim": true,
+    "offsetMatch": true,
+    "inUnit": true
+   }
+  ]
+ },
+ "quoteAudit": {
+  "total": 282,
+  "failures": 0,
+  "offsetMismatch": 0,
+  "outOfRange": 0,
+  "lengthMismatch": 0,
+  "occurrenceMismatch": 0,
+  "sourceHashMismatch": 0,
+  "checks": [
+   "TEXT[start:end]==quote",
+   "90177<=start 且 end<=94038",
+   "end-start==len(quote)",
+   "occurrencesInSlice==SLICE.count(quote)",
+   "occurrencesInWholeDoc==TEXT.count(quote)",
+   "sourceHash==整文件 sha256",
+   "occurrencesInSlice 唯一性"
+  ]
+ },
+ "machineRecompute": {
+  "note": "候选声称的机械项，我用独立实现重算，不引用它的 verify.py。",
+  "items": [
+   {
+    "item": "punctuationAudit 计数与深度",
+    "claimed": "左51/右50/净+1；入口深度2；区间末深度3",
+    "mine": "左51/右50/净+1；入口深度2；区间末深度3",
+    "result": "pass"
+   },
+   {
+    "item": "voice / insideQuotedSpan 逐条复算（282 条）",
+    "claimed": "0 处不一致",
+    "mine": "用自实现深度表（含 90309 修复）重算，0 处不一致",
+    "result": "pass"
+   },
+   {
+    "item": "connectiveAudit（10 个标记贪心重抽）",
+    "claimed": 63,
+    "mine": "63 处，偏移集合与 marker 逐条相等（双向差集为空）",
+    "result": "pass"
+   },
+   {
+    "item": "coverage.paragraphLedger",
+    "claimed": "18 段",
+    "mine": "18 段 (start,end,chars) 与按 \\n 重分段完全一致",
+    "result": "pass"
+   },
+   {
+    "item": "metrics 12 项",
+    "claimed": "12 项自洽",
+    "mine": "tasks18/causeEdges32/rejectedEdges14/states14/foreshadows10(3-1-6)/notForeshadows8/speech24/unknowns22/selfCritique12/textVariants8/crossUnitRefs6/quoteRefs282-210 全部相符",
+    "result": "pass"
+   },
+   {
+    "item": "ID 唯一性",
+    "claimed": "无重复",
+    "mine": "162 个 id 全唯一",
+    "result": "pass"
+   },
+   {
+    "item": "textVariants 全书计数",
+    "claimed": "8 组",
+    "mine": "来日可今1/可令0、离顺1/高顺41、陈硅16/陈珪0、昌稀1/昌豨2、清水3/淯水0/育水2、夏侯敦115/夏侯惇0、拨出1/拔出6、臧霸、结连1 —— 全部相符",
+    "result": "pass"
+   },
+   {
+    "item": "crossUnitRefs 6 条逐字",
+    "claimed": "[89931,89972) 等 6 条",
+    "mine": "顶层 6 条全部 T[docStart:docEnd]==text；另发现 F2.setup.crossUnitRefs[0] 偏移错（见 CE5）",
+    "result": "partial"
+   },
+   {
+    "item": "objectiveStatus 台账",
+    "claimed": "8/4/4/2",
+    "mine": "achieved8、partial4、not_achieved4、undetermined2",
+    "result": "pass"
+   },
+   {
+    "item": "人名闸门（区间内 0 次人名）",
+    "claimed": "pass",
+    "mine": "T17.actor「关羽」、E26.from 在本区间 0 次（用「云长」「关公」），闸门口径不成立（见 CE8）",
+    "result": "fail"
+   }
+  ]
+ },
+ "misKillCheck": {
+  "method": "拿 14 条 rejectedEdges 与 32 条 causeEdges 回原文上下文重读，问「有没有合法因果被口径/正则挡掉」（计划100 的〈遂行〉形态），并检查连接词表是否把真实连接词漏抽。",
+  "findings": [
+   {
+    "id": "MK1",
+    "what": "R12（袁术军取徐州→吕布/徐州结果）的方位理由写错，但**结论正确**",
+    "quote": "正说话间，忽报袁术军取徐州。吕布闻言失惊。",
+    "quoteStart": 85637,
+    "verdict": "前提写错、结论可保留，不主张恢复该边",
+    "why": "该句在第十六回 85642，位于本区间之前两回（不是「下一单元」）；且原文只写「报」，没有战果。见 CE3。"
+   },
+   {
+    "id": "MK2",
+    "what": "R5（纪灵与本单元徐州战事）的全书计数写错，**结论正确**",
+    "quote": "却说袁术闻说刘备上表，欲吞其州县，乃大怒曰：“汝乃织席编屦之去，今辄占据大郡，与诸侯同列；吾正欲伐汝，汝却反欲图我！深为可恨！”乃使上将纪灵起兵十万，杀弃徐州。两军会于盱眙。玄德兵少，依山傍水下寨。那纪灵乃山东人，使一口三尖刀，重五十斤。是日引兵出阵，大骂：“刘备",
+    "quoteStart": 70117,
+    "verdict": "计数错、结论可保留",
+    "why": "本区间「纪灵」确实 0 次（我已复算），拒斥成立；错的是「全篇 20 次」（实为 36 次）。见 CE7。"
+   },
+   {
+    "id": "MK3",
+    "what": "R14/R8/R9/R11 等其余拒斥逐条回原文复查",
+    "verdict": "未发现误杀",
+    "why": "R14（关羽判张辽「自悔」→事实）核到原文确实只写「低头不语」+ 两次避战，无张辽视角，拒斥成立；R8（荀攸「二人新破」当因果前提）核到该句是战前判断、且与同单元事实有张力，拒斥成立；R9（十胜十败→战果）核到该论全是德性比较、无兵力时机地形调度，拒斥成立；R11（回末三路攻寨→结果）核到原文以「未知玄德胜负如何」收束，拒斥成立；R10（大宛马同一性）核到上一单元只写「扑地倒了」未写死，缺同一性证据，拒斥成立。"
+   },
+   {
+    "id": "MK4",
+    "what": "连接词表是否漏抽真实连接词（含〈遂行〉形态）",
+    "verdict": "未发现漏抽，但发现**未建模**",
+    "why": "我按遂/乃/于是/故/便/即/却/因/方/果 贪心重抽，63 处与候选偏移集合逐字相等、双向差集为空 ⇒ 无漏抽。但候选的 connectiveAudit 条目只有 marker/offset/context 三个键，**没有把任何一处连接词映射到 causeEdge**（无 modeledAs 之类的字段）。也就是说这份表证明了「我数过」，但没有证明「数完的每一处都被判过是因果还是非因果」——这正是计划100 说的「机制存在、有代码、有产出，但不产生信息」的形态。**我不据此判 fail**：causeEdges 自己的 trigger 字段逐条引了连接依据，语义上没有丢边；要求是给该表补一个「该处是否建模为边 / 若不建模则理由」的字段。"
+   }
+  ]
+ },
+ "hallucinationCheck": {
+  "fabricatedQuotes": 0,
+  "fabricatedPersons": [],
+  "endsTreatedAsSuccess": 0,
+  "unverifiedClaimsMarkedAsVerified": 0,
+  "notes": "① 伪引 0：282 条引文逐字命中，含候选自己标为「区间外对照」的 6 条也逐字可查（除 CE5 那条偏移错但文本本身仍在原文中）。② 无编造人物：我按 tasks.actor / states.who / causeEdges.from,to / foreshadows.name 逐字段核对，出现的人名（贾诩、张绣、曹操、刘表、李通、郭嘉、陈宫、吕布、夏侯敦、玄德、高遵、张辽、孙乾、简雍、蒯良、黄祖、侯成、郝萌、曹性、宋宪、魏续、臧霸、孙观、吴敦、尹礼、昌稀、吕虔、李典、夏侯渊、糜竺、糜芳、云长、张飞）全部是本区间真实出现的人物；区间外的（纪灵、陈登、韩胤、袁术的媒人、宛城之战）都带出界标记。③ 「结束≠成功」执行到位：回末「未知玄德胜负如何，且听下文分解」由 R11 显式拒绝连结果，T15（吕布三路攻寨）与 T10（封孙策的诏书）都标 undetermined_in_unit；T2/T3/T8/T13 标 not_achieved；8 条 achieved 的 result 都写了后续或反复。④ 未越权：semanticReview 与 claimVerification 均写 not_performed，并附说明把语义核验推给本通道 —— 这个自律是诚实的。⑤ 唯一的「名字」类问题是 CE8 的别名口径（关羽 vs 云长/关公），不构成编造，因为人物与台词在本区间真实存在。"
+ },
+ "usableVsDiscard": {
+  "usable": [
+   "282 条 quoteRef 的定位层（0 失败；偏移、区间、长度、切片内计数、全书计数、哈希全对）",
+   "voice / insideQuotedSpan 的 282 条标注（我用独立深度表复算，0 处不一致）",
+   "63 处连接词的偏移与 marker 枚举（贪心重抽逐条相等）",
+   "coverage.paragraphLedger 18 段与 metrics 12 项",
+   "8 处 textVariants 的逐字存在性与全书计数",
+   "18 条 tasks 的 objectiveStatus 台账与「结束≠成功」执行",
+   "rejectedEdges R8/R9/R10/R11/R14 的理由；R5/R12 的拒斥结论（理由需改写）",
+   "states 11 条 state_change 的前值/后值+anchor 与 3 条 knowledge_gap 的谁知/不知",
+   "foreshadows 的 6 条显式 unresolved + absenceMarker（F3/F5/F6/F7/F8/F9）与 1 条 partial（F10）"
+  ],
+  "mustDiscardOrRewrite": [
+   "reverseAudit.finalUncoveredDetail[0]（90309「假缺口」结论）→ 该处是真实缺口，见 CE1/RV3",
+   "causeEdges E29.mechanism 的「原文没有写曹性受谁指派」→ 与 E28 引文矛盾，见 CE2",
+   "rejectedEdges R12.whyNoEdge 的「下一单元（[94038,...) 之后）」→ 实为第十六回之前，见 CE3",
+   "unknowns U1.detail 的「全文避免替本单元补城名」→ 与 T2.objective/S1.who 相反，见 CE4",
+   "foreshadows F2.setup.crossUnitRefs[0] 的 [84489,84525) → 应为 [84487,84527)，见 CE5",
+   "reverseAudit.realGapsFoundAndFixed 四条 fixed 的字段名（aftermathRefs/T18.action/T3.action）→ 按实际落点改写，见 CE6",
+   "rejectedEdges R5.absenceMarker 的「全篇 20 次」→ 36 次，见 CE7",
+   "读任务 assertions[8] 与候选 machineSelfCheck 的人名闸门 → 口径不成立，需补别名表，见 CE8",
+   "connectiveAudit 缺「是否建模为边」字段 → 建议补 modeledAs/nullReason（MK4，不判 fail）"
+  ],
+  "downgradeToUnknowns": [
+   "RV1/RV2 两处原文事实（李通的连接句、简雍首次登场的自我介绍）建议补入对应条目的 quoteRefs 或 coverage",
+   "「宛城」类比（E12.mechanism、R8.whyNoEdge）与「南阳」（T2/S1）应补 not-evidence 标注，与 crossUnitRefs 的 6 条口径统一"
+  ]
+ },
+ "notes": "总判 **partial**。分三层说清。**第一层：定位层可原样采信。** 282/282 引文逐字命中、偏移一致、长度相符、切片内与全书计数相符、哈希相符；5/5 抽样逐字命中。这不是「看起来对」——是我用独立脚本对每条做 TEXT[start:end]==quote 且 T.find(quote)==start 的双重校验得出的。**第二层：机械自检诚实，但没有全部产生信息。** 我把候选声称的 12 类机械项逐项独立重算：引号计数与深度、282 条 voice/insideQuotedSpan、63 处连接词、18 段分段、12 项 metrics、162 个 ID、8 组异文计数 —— **除人名闸门（CE8）外全部相符，一数不差**。这说明候选的自检不是空转。但有两处「机制在跑却不产生信息」的形态，我如实记下而不据此判 fail：① connectiveAudit 枚举了 63 处连接词却没有任何一处映射到 causeEdge，无法据此判断「这处是因果还是非因果」；② reverseAudit 的逐句自查把一处真实缺口（90309–90328）核销成「假缺口」，即自查机制运行了、也产出了数字（finalUncovered=2），但那个数字是错的。**第三层：判 partial 的实质理由。** 8 条反例里有 4 条是**候选自己另一处写对了、这一处写错了**（CE1 对 E2/T1 引文、CE3 对 crossUnitRefs[4]、CE4 对 crossUnitRefs[0]、CE5 对 crossUnitRefs[1]）—— 这类矛盾比单纯的外部错误更值得记录，因为它说明同一事实在文件内部有两份互斥的记账，下游无法判断该信哪一份。**为什么不是 fail**：282 条引文零伪引；tasks/causeEdges/states/foreshadows 的语义骨架没有被任何一条反例推翻；「结束≠成功」「说法≠事实」「一次出现≠伏笔」三条红线都执行到位（4 条 undetermined/not_achieved 是真开放，24 条 speechAsClueNotFact 把「中吾计矣」「颇有自悔之心」「乃曹操之计也」都按人物话语处理）。按角色契约「拿不出原文引证的反对意见只能记为存疑」，我 8 条反例全部给了逐字引证，所以判 partial 而非存疑。**反向验证的产出**：RV1–RV4 是候选任何通道都没覆盖的原文事实，其中 RV2（简雍全书首次登场的自我介绍整句）是实质漏读 —— 候选的引文恰好切在「某愿往。」，把「视之，乃玄德同乡人，姓简，名雍，字宪和，现为玄德幕宾。」整句留在洞外，而全书「简雍」首见就在本区间。**我不确定的地方**（如实记录）：① 90309 那条引号修复规则我复算成立（区间内凭空 +1 的唯一解释），但它是推断而非版本证据，我按候选的处理接受，未查他本；② 8 处 textVariants 我只复算了计数，未判定何者为是；③ 候选的语义读法（如 T5 判「破绣必矣」achieved、E16 把「曹操解除戒备」当第二次追击的败因且只标 derived）我只核到「不与原文文字冲突」，未逐条重判动机与力度；④ 本单元的时间跨度（围城三日、两次追击之间的间隔）我未建模。⑤ 我自己的反向验证在第 5 条（吕布结连袁术）上**自我核减为不成立** —— 候选的 F8 处理正确，如实记录。**本轮未做的事**：未读图谱缓存代替原文；未修改候选文件；未跑 GPU/浏览器测试（任务未声明需要）；未执行 git checkout/reset/stash；只在任务 writes 指定的路径写入。",
+ "evidence": [
+  {
+   "path": "loop/state/out/read_sanguo_L1_0017.candidate.json",
+   "sha256": "500b936cb604a4fd118a29e640d261984c874daf040841d341816c826158e776",
+   "kind": "被复核候选（只读，未修改）"
+  },
+  {
+   "path": "data/cache/152e2a6eed94f1075e7e7070.docs.json",
+   "sha256": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+   "kind": "原文（只读引用，未修改）"
+  },
+  {
+   "path": "loop/state/out/read_sanguo_L1_0017.json",
+   "sha256": null,
+   "kind": "被复核任务的提交记录（只读引用，未修改）。**故意不登记 sha256**：本复核的产出之一就是把结论写回这条记录（loop.py verify 会 append reviews 并改 verifyState），该文件属可变例外，若在此钉死哈希，我自己的复核动作会在下一轮把它判成 hash-changed 证据失效。"
+  },
+  {
+   "path": "loop/state/out/verify_sanguo_L1_0017.verdict.json",
+   "sha256": null,
+   "kind": "本复核的唯一产出（任务 writes 指定）。因是本次写入的文件，无法自证哈希，故不登记。"
+  }
+ ],
+ "sourceHashes": {
+  "data/cache/152e2a6eed94f1075e7e7070.docs.json": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+  "loop/state/out/read_sanguo_L1_0017.candidate.json": "500b936cb604a4fd118a29e640d261984c874daf040841d341816c826158e776",
+  "loop/state/out/read_sanguo_L1_0017.json": "070c7f11f8c2e02c13d75928a52bd75dfcc46ffdfa58ab8f019f99219194071a"
+ },
+ "sourceHashesNote": "以上是本复核读取时刻的哈希留痕，用于识别并行写入。原文与候选的哈希是不变量（复核前后都必须相符，我已确认候选哈希与 read 任务记录里登记的 500b936c… 一致）；read_sanguo_L1_0017.json 的哈希会在本次 verify 写回 reviews/verifyState 后改变，属预期行为，不是产物被改坏。",
+ "changes": [
+  {
+   "path": "loop/state/out/verify_sanguo_L1_0017.verdict.json",
+   "kind": "append-only",
+   "note": "任务 writes 声明的唯一产出：本复核结论。"
+  }
+ ],
+ "protectedPaths": {
+  "touched": [],
+  "note": "本轮未写 js/ css/ index.html serve.py narrative.py scripts/ tests/ docs/ data/；未运行 git checkout -- . / git reset --hard / git stash；未跑 GPU/浏览器测试（任务未声明需要）。"
+ },
+ "assertions": [
+  {
+   "text": "源文件 sha256 == 任务 sourceHash：hashlib.sha256(open('data/cache/152e2a6eed94f1075e7e7070.docs.json','rb').read()).hexdigest() → 2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+   "result": "pass"
+  },
+  {
+   "text": "切片自洽：len(TEXT[90177:94038])==3861；sha256(切片)==26440e87f4602a0a3ce2157ce8b30ce73b74c9a37f721efb491e061ac420de10（与候选 source.sliceSha256 逐字相同）",
+   "result": "pass"
+  },
+  {
+   "text": "引用层零编造：递归抽出 282 条结构化 quoteRef，逐条 TEXT[start:end]==quote、90177<=start、end<=94038、end-start==len(quote)、SLICE.count(quote)==occurrencesInSlice、TEXT.count(quote)==occurrencesInWholeDoc、sourceHash 一致 → 0 失败（脚本 /tmp/ver0017.py）",
+   "result": "pass",
+   "count": 282
+  },
+  {
+   "text": "随机抽 5 条 quote（random.seed(20261009)）逐条 T.find 校验 → 5/5 逐字命中、偏移与记录一致、均在区间内（脚本 /tmp/ver0017i.py）",
+   "result": "pass",
+   "count": 5
+  },
+  {
+   "text": "voice / insideQuotedSpan 独立复算：自实现引号深度表（入口 2、区间内净 +1、按候选声明在 90309 补右引号）→ 51 个引号跨度、282 条逐条判定，0 处与候选不一致（脚本 /tmp/ver0017s.py）",
+   "result": "pass",
+   "count": 282
+  },
+  {
+   "text": "connectiveAudit 独立重抽：'遂/乃/于是/故/便/即/却/因/方/果' 最长匹配贪心扫描得 63 处，与候选 63 条偏移集合**逐字相等**（双向差集为空、marker 0 处不符）",
+   "result": "pass",
+   "count": 63
+  },
+  {
+   "text": "metrics / paragraphLedger / ID 唯一性复算：tasks18、causeEdges32、rejectedEdges14、states14、foreshadows10(3-1-6)、notForeshadows8、speechAsClueNotFact24、unknowns22、selfCritique12、textVariants8、crossUnitRefs6、quoteRefs282/unique210；162 个 id 全唯一；18 段 (start,end,chars) 与按 \\n 重分段一致",
+   "result": "pass"
+  },
+  {
+   "text": "textVariants 8 组全书计数逐条复算相符：来日可今1/可令0、离顺1/高顺41、陈硅16/陈珪0、昌稀1/昌豨2、清水3/淯水0/育水2、夏侯敦115/夏侯惇0、拨出1/拔出6、臧霸、结连1",
+   "result": "pass",
+   "count": 8
+  },
+  {
+   "text": "CE1 证伪：全部 282 条引文的 quote 字符串里，「然则奈何」与「此易事耳」命中 **0** 次；[90309,90328) 不被任何引文区间覆盖；E2 唯一引文 [90400,90407)、T1 四条引文在 90309/90328 处留洞（脚本 /tmp/ver0017m.py、/tmp/ver0017o.py）",
+   "result": "pass"
+  },
+  {
+   "text": "CE2 证伪：E28_tanma_gaosu 的第一条引文 [93528,93585) 逐字含「布先令侯成、郝萌、曹性引二百余骑接应高顺」，与 E29.mechanism 的「原文没有写曹性受谁指派」矛盾",
+   "result": "pass"
+  },
+  {
+   "text": "CE3 证伪：T.find('袁术军取徐州')==85642，落在第十六回 [78957,85748)，在本单元之前两回；候选自己的 crossUnitRefs[4].note 写「之前的上一单元」并把偏移写成 [85748,90177)（也不含 85642）",
+   "result": "pass"
+  },
+  {
+   "text": "CE4 证伪：本区间「南阳」0 次（U1 的 absentTerms 正确），但 T2.objective.text 与 S1.who 均使用「南阳」，与 U1.detail 的「全文避免替本单元补城名」相反",
+   "result": "pass"
+  },
+  {
+   "text": "CE5 证伪：F2.setup.crossUnitRefs[0] 声明 [84489,84525)（长度 36）而 text 长 40，T[84489:84525]!=text；正确区间 [84487,84527)（T.find(text)==84487），候选顶层 crossUnitRefs[1] 对同一文本给的正是该区间",
+   "result": "pass"
+  },
+  {
+   "text": "CE6 证伪：反查 reverseAudit.realGapsFoundAndFixed 的字段归属 —— 93679 落在 T18.objective（非 T18.action，后者引文只有 [93757,…)）；90630 落在 T3.objective（非 T3.action，后者只有 [90716,…)）；93674 落在 T18.objective；91760 全文件无 aftermathRefs 字段且无引文覆盖",
+   "result": "pass"
+  },
+  {
+   "text": "CE7 证伪：T.count('纪灵')==36，而 R5.absenceMarker 写「全篇 20 次」（区间内 0 次正确）",
+   "result": "pass"
+  },
+  {
+   "text": "CE8 证伪：本区间「关羽」0 次（「云长」3、「关公」4），而 T17.actor 与 E26.from 用「关羽」；候选无别名表 ⇒ 读任务 assertions[8] 与 machineSelfCheck 的人名闸门口径不成立",
+   "result": "pass"
+  },
+  {
+   "text": "反向验证 RV1：候选全文检索「操急问何人」命中 0 次，任何引文值中亦 0 次，而其上下文 [91589,91660) 是李通出场的唯一铰链",
+   "result": "pass"
+  },
+  {
+   "text": "反向验证 RV2：简雍自我介绍 [92968,92995) 未被任何引文覆盖；引文中「宪和」「幕宾」「同乡」均 0 次；全书「简雍」首见 93001 落在本区间 ⇒ 人物首次登场整句未覆盖",
+   "result": "pass"
+  },
+  {
+   "text": "未越权：本轮只写 loop/state/out/verify_sanguo_L1_0017.verdict.json；未触碰 js/ css/ index.html serve.py narrative.py scripts/ tests/ docs/ data/；未跑 GPU/浏览器测试；未执行 git checkout/reset/stash",
+   "result": "pass"
+  },
+  {
+   "text": "判定独立于候选：先通读 docs[0].text[90177,94038) 全文并打印，之后才打开候选；RV1–RV4 的产生不依赖候选的已写项",
+   "result": "pass"
+  }
+ ],
+ "remaining": [
+  "本复核是**定位层 + 机械层 + 反向覆盖 + 自我否证**的复核，不是完整语义评审：候选的语义读法（T5 判安众「破绣必矣」为 achieved、E16 把「曹操解除戒备」当第二次追击的败因且只标 derived、T4 把仪式本身当 objective、T8 以刘表原话当 objective）我只核到「不与原文文字冲突」，未逐条重判动机与力度取舍。",
+  "用字异文（来日可今/可令、离顺/高顺、陈硅/陈珪、昌稀/昌豨、清水/育水/淯水、夏侯敦/夏侯惇、拨出/拔出、臧霸后的顿号）我只复算了候选的全书计数（8 组全部相符），**未查他本**，不能判定何者为是。",
+  "90309 的引号修复规则是候选的推断（区间内凭空 +1 的唯一解释），我复算成立且未与任何引文区间相交；但本环境只有一个电子本，我无法用版本校勘证实，如实记录为接受而非证实。",
+  "跨单元事实我按 in-tree 的 loop/state/index.json 章节边界（第十六回 [78957,85748)、第十七回 [85748,90177)、第十八回 [90177,94038)、第十九回 [94038,100577)）判定，未逐句回溯区间外原文核实语义。",
+  "CE6 只抽查了 reverseAudit 12 条中的 4 条字段归属（91760/93679/90630/93674，全部不符）；其余 8 条的字段名我未逐条比对，可能有同类记账错误。",
+  "RV1–RV4 是「候选未覆盖/未标注统一」的发现，不是「候选写错」的发现；是否补入属下游编排决定，我未改动候选文件。",
+  "时间线未核算：围城「三日」、「至二更时分」、「直杀至天明」、两次追击之间的间隔，我未建模。",
+  "本轮未使用 worktree；写入在任务 writes 指定的 loop/state/out/ 下，属追加式写入。"
+ ],
+ "rollback": {
+  "kind": "append-only",
+  "strategy": "delete-added-files",
+  "files": [
+   "loop/state/out/verify_sanguo_L1_0017.verdict.json"
+  ]
+ },
+ "selfCorrections": [
+  {
+   "what": "我最初用「按 。！？ 切句后判断该句是否被任一引文完整包含」复算 reverseAudit，得到 31 句未覆盖，与候选声称的 finalUncovered=2 相差极大，一度准备直接记为计数造假。",
+   "finding": "逐条核对后确认**是我的口径错了**：切句保留了下句开头的右引号与前导全角空格（如「”绣喜，从其计。」），导致大量「引文确实覆盖了、只是我的探针字符串带了多余字符」的假阳性。把探针 strip 掉 U+3000/换行/引号后复算，真正未被覆盖的是 8 句，其中 6 句是标题与站点样板、剩下 2 句正是候选点名的 90309/90318 —— 也就是说候选的 finalUncovered=2 **在它自己的口径下是可复现的**。我据此撤回了「计数造假」的判断，只保留 CE1（那 2 句不是假缺口，而是真实缺口）。"
+  },
+  {
+   "what": "我最初把 R5 的「全篇 20 次」当成又一处区间计数错误，准备与 CE7 合并升级为「计数系统性不可信」。",
+   "finding": "复算后发现候选的**区间**计数（F3 陈硅 2、F7 张辽 5、F8 袁术 1、U1 三个 absentTerms 全 0）逐条正确，8 组 textVariants 的全书计数也全部正确 —— 错的只有 R5 这一处全书计数。所以这是**单点错误**，不是系统性失真，我据此把 CE7 的严重度降到「低」。"
+  },
+  {
+   "what": "我原以为 E29 的「原文没有写曹性受谁指派」只是措辞不严谨，不构成反例。",
+   "finding": "按角色契约「拿不出原文引证的反对意见只能记为存疑」反向自查时发现：**候选自己的 E28 就引了那句派遣**，即证伪材料来自候选内部，不需要我外部取证。这满足「逐字可查」的判 fail 门槛，故正式列为 CE2。"
+  },
+  {
+   "what": "我曾怀疑 F8（吕布是否结连袁术）是过度谨慎的凑数伏笔。",
+   "finding": "复核后确认候选处理正确：本区间「袁术」确实只 1 次（荀攸的话），吕布四路部署无一指向淮南，候选还主动写了方向相反的区间外证据（杀韩胤、绝婚）。我把这一条记为 RV5「反向验证不成立」，如实写出而不是藏起来。"
+  }
+ ],
+ "submittedAt": "2026-10-09T15:52:00Z",
+ "wallClockSeconds": null,
+ "wallClockNote": "由 worker 侧租约（loop/state/leases/verify:sanguo:L1:0017.d/lease.json startedAt=2026-10-09T15:15:16Z）到提交时刻计算；若 submit 时取不到租约则如实留空，不估算。",
+ "validation": {
+  "problems": [],
+  "at": "2026-10-09T15:52:00Z"
+ },
+ "verifyState": "pending"
+}

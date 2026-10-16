@@ -1,0 +1,82 @@
+{
+  "agent": "w-dafeng-0",
+  "defectIConfirmedIndependently": {
+    "id": "CE1 (复核者 w-dafeng-2 提出)",
+    "myOwnAuditWasTooWeak": "我的 audit 只查 note 是否非空字符串，占位符因此通过 —— 与候选自建审计同一盲点。记下这条以免把'机器全绿'当成语义没问题。",
+    "realReasonsExistAt": "loop/state/out/read_dafeng_L3_0267.w-sanguo-0.build/content_0267.py 行 193/209/230/245/269/308/345/379/401",
+    "reproduce": "python3 -B -c \"import json;c=json.load(open('loop/state/out/read_dafeng_L3_0267.candidate.json'));[print(t['id']+'.'+f,repr(t[f+'Note'])) for t in c['tasks'] for f in ('objective','obstacle','action','result','cost') if t.get(f) is None]\"",
+    "what": "9 个 null 栏的 <栏>Note 值是**字段名占位符**（'costNote'/'obstacleNote'/'actionNote'），不是理由。"
+  },
+  "hashes": {
+    "candidate": "64d35f0de6a865e8371c5b36848643f3a21bc990944b5b5fc87965aa765aa83b",
+    "docsJson": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "record(read_dafeng_L3_0267.json)": "6e9e4898e1a15ce13fe37a655c27e64296ade67d62d53f47d6bef052551c3b3f",
+    "snapshotCandidate": "64d35f0de6a865e8371c5b36848643f3a21bc990944b5b5fc87965aa765aa83b",
+    "snapshotRecord": "6603d76672a35a0a84faa13f2341427f23731ef49e39e71166632615163da258",
+    "verdict": "ba17c9fb098cec16e4b062c13c5d779afe715c3617ec6592b4b1c9d9257b4358"
+  },
+  "independentAudit": {
+    "badLiteral": 0,
+    "badRange": 0,
+    "badSourceHash": 0,
+    "deterministic": true,
+    "nullFields": 9,
+    "ok": true,
+    "quoteObjects": 298,
+    "report": "audit_dupclaim_report.json",
+    "reverseProbeFacts": 8,
+    "reverseProbeNotFound": [],
+    "script": "audit_dupclaim.py (不 import w-sanguo-0 的任何构建脚本)",
+    "taskFieldOverlaps": 0,
+    "worldSettingsKinds": {
+      "item": 4,
+      "place": 5,
+      "rule": 6
+    },
+    "zeroCoveredParagraphs": 31
+  },
+  "kind": "duplicate-claim investigation (no submit, deliberately)",
+  "outcome": "NOT SUBMITTED — submitting would have destroyed another agent's committed work",
+  "raceForensics": {
+    "deltaSeconds": 39,
+    "evidence": [
+      "loop/bin/worker.py:519 pick() → :525 claim()",
+      "loop/bin/loop.py:651 pick() 内 :653 done=done_ids() 为快照",
+      "loop/bin/loop.py:715 claim() 只判 lease_alive，不查 done"
+    ],
+    "measured": {
+      "doneTasks": 945,
+      "done_idsSeconds": [
+        43.1,
+        61.6,
+        90.9
+      ],
+      "recordFiles": 960
+    },
+    "myLeaseStartedAt": "2026-10-14T18:37:53Z",
+    "priorSubmitAt": "2026-10-14T18:37:14Z",
+    "rootCause": "pick() 与 claim() 之间存在 TOCTOU：worker.one_round 先 pick()（内含 done_ids() 与 active_leases() 的**快照**）再 claim()；claim() 只检查租约目录，**不重新检查 done**。实测 done_ids() 单次 43-91s（record_files 扫 960 个记录），窗口足够长。"
+  },
+  "remaining": [
+    "本任务**未由我提交**（如上）。若复查要求补一条我方记录，请先确认 loop.py 的 submit 是否应合并 reviews —— 直接重提交会覆盖 w-dafeng-2 的 partial 判决。",
+    "CE1/CE2/CE3/CE4 四条未被修（候选与记录属 w-sanguo-0，改它要走 GATE.lock 的合并任务，不是 READER 的追加式写入）。",
+    "竞态根因（pick→claim 不复查 done）未修：loop/bin/loop.py 属受保护路径，只能在合并任务里改。",
+    "semanticReview 仍为 not-performed；引文定位正确≠语义已核验。"
+  ],
+  "role": "READER",
+  "task": "read:dafeng:L3:0267",
+  "untouched": {
+    "gitDestructive": false,
+    "gpuOrBrowserTests": false,
+    "protectedPaths": true,
+    "sharedCandidate": true,
+    "sharedRecord": true
+  },
+  "why": [
+    "本任务在我领取前 39 秒已由 w-sanguo-0 提交并通过机器校验（submittedAt 2026-10-14T18:37:14Z；我的租约 startedAt 2026-10-14T18:37:53Z）。",
+    "随后 w-dafeng-2 于 19:16:03Z 把复核结论写进同一条记录：verifyState='partial'、reviews=[1 条]。",
+    "loop.py cmd_submit 对 OUT/output_name(tid) 是**整文件覆盖**，不合并既有 reviews；我若提交，会抹掉复核者的 partial 判决与其 5 条反向发现。",
+    "任务 writes 指定的 loop/state/out/read_dafeng_L3_0267.candidate.json 是那条已通过记录的 evidence；is_evolving() 对它返回 False，覆写会让 evidence_stale() 报 hash-changed，把任务从 done_ids() 剔除（降级为没做完）。",
+    "所以本轮的产出是**取证与独立复核**，不是第二份候选。"
+  ]
+}

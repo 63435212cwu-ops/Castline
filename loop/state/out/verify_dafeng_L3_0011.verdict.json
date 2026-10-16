@@ -1,0 +1,276 @@
+{
+ "task": "verify:dafeng:L3:0011",
+ "reviewer": "w-sanguo-1",
+ "reviewedTask": "read:dafeng:L3:0011",
+ "reviewedCandidate": "loop/state/out/read_dafeng_L3_0011.candidate.json",
+ "reviewedCandidateSha256": "29f86877e7bab18e8abf44a276a54e2a93305bdb46ceb90eba33aad24a8db64e",
+ "source": {
+  "path": "data/cache/9b676d7031b1bcd3b8377a18.docs.json",
+  "docsSha256": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+  "segmentSelector": "docs[0].text[34100:37396]",
+  "segmentLen": 3296,
+  "segmentSha256": "03f0149b5dd44b7cf6dbf1ee3e593c544d9c2b241f164843b2c9380a1169ce00"
+ },
+ "verdict": "pass",
+ "summary": "独立反向复核通过。我按契约先自读原文再核候选：271 处引文（81 条去重）逐条 str.find 回切全部逐字命中，偏移/哈希/出现次数/首次出现标注 0 处失配；候选自报的 84.98% 字符覆盖率与 significantUncoveredRuns=0 我独立复现一致。**未发现编造**：候选的每条任务/因果/状态/伏笔都能在原文找到对应文字，5 项幻觉检查（原文没有的人物、结局、伏笔、成功判定、越权）全部无命中。反向验证找到 4 条候选确实没有覆盖的原文事实，全部属**登记粒度**问题而非硬性红线违反，故不足以判 fail/partial；另记录 1 条内部一致性缺陷（15 个悬空别名引用）供发布阶段注意。",
+ "mechanicalChecks": [
+  {
+   "check": "引文逐字 + 偏移回切",
+   "method": "递归抽出候选全部带 quote/start/end 的条目，逐条断言 T[start:end]==quote",
+   "result": "pass",
+   "counts": {
+    "quotes": 271,
+    "distinct": 81,
+    "sliceMismatch": 0,
+    "outOfRange": 0
+   }
+  },
+  {
+   "check": "sourceHash 覆盖",
+   "result": "pass",
+   "counts": {
+    "hashMismatch": 0
+   }
+  },
+  {
+   "check": "inSegmentOccurrences / inWholeTextOccurrences / isFirstOccurrenceInWholeText",
+   "result": "pass",
+   "counts": {
+    "occurrenceCountMismatch": 0,
+    "firstOccurrenceWrong": 0,
+    "offsetUnitAnomalies": 0
+   }
+  },
+  {
+   "check": "候选自称覆盖率独立复现",
+   "method": "按候选全部引文在切片上打字符覆盖位图，取未覆盖极大段并按去空白标点>=4字过滤",
+   "result": "pass",
+   "counts": {
+    "coveragePct": 84.98,
+    "significantUncoveredRuns": 0
+   },
+   "agreesWithCandidate": true
+  },
+  {
+   "check": "章界与标题锚点",
+   "method": "T[34100:34112] 与全文标题计数",
+   "result": "pass",
+   "detail": "T[34100:34112]=='第十二章 一顿操作猛如虎'，全文出现 1 次；下一标题 '第十三章 审问' 正好起于 37396"
+  },
+  {
+   "check": "候选的段外断言「第十一章末『卷宗给我！』」",
+   "result": "pass",
+   "detail": "T[:34100].rfind('卷宗给我！')==34071，距本单元起点 29 字，确在第十一章范围内（该章起点 31095）"
+  },
+  {
+   "check": "候选的段外断言「朱县令的内堂发火在段外」",
+   "result": "pass",
+   "detail": "E 之后 3000 字内确有『县令老爷正在内堂发火』，候选未把段外内容当本单元证据"
+  },
+  {
+   "check": "图谱缓存交叉核对（非原文证据）",
+   "result": "pass",
+   "detail": "章标签==本单元标题的事件共 2 条，quoteRef 均落在 [34100,37396) 且回切逐字成立；两条 claimStatus 均为 unreviewed、claimVerified 均为 false，与候选所述一致"
+  }
+ ],
+ "counterExamples": [],
+ "counterExampleNote": "按判定纪律，判 fail 必须有逐字可查的 counterExample。本候选没有任何一条断言在原文中找不到对应文字，也没有把人物台词/猜测写成叙述事实，也没有把结束当成功，故 counterExamples 为空，不判 fail。",
+ "reverseChecks": [
+  {
+   "id": "RC1",
+   "found": "候选漏掉了一个夹在对话链中间的独立状态变化：王捕头在被许七安问到钝器问题之前，已经从『揶揄/愣住』转为『皱眉沉思』——他此时其实已被卷进推理。",
+   "quote": {
+    "quote": "许七安没有回答，看向皱眉沉思的王捕头，继续道：“死者是被钝器重创后脑而死，对吧。”",
+    "start": 35349,
+    "end": 35390,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "offsetUnit": "codepoint",
+    "inSegmentOccurrences": 1,
+    "inWholeTextOccurrences": 1,
+    "isFirstOccurrenceInWholeText": true
+   },
+   "whyItMatters": "候选的 states 只把王捕头的转变锚在 S4（『呼吸声粗重』35987）与 S1（结尾『绽开笑容』37202）；『皱眉沉思』(35359) 这一中间态在候选里只作为 N18/CL13 的引文出现，没有任何 prose 字段把它登记成状态变化，也没有因果边覆盖『许七安的反问 → 王捕头从愣住转为沉思』。缺它会让后续王捕头主动反驳小李 (C6) 显得跳跃。",
+   "severity": "登记粒度（未写进 states），非编造、非红线"
+  },
+  {
+   "id": "RC2",
+   "found": "同一场连续戏在本单元内用了两个不同的场所名（『偏厅』与『休息室』），候选两个都引用了却从未关联，也没有进 unknowns。",
+   "quote": {
+    "quote": "偏厅内静了静，显然，大家都意识到这个问题了。小李猜测道：“或许贼人最初并不想杀人？”",
+    "start": 35474,
+    "end": 35516,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "offsetUnit": "codepoint",
+    "inSegmentOccurrences": 1,
+    "inWholeTextOccurrences": 1,
+    "isFirstOccurrenceInWholeText": true
+   },
+   "extraQuote": {
+    "quote": "手指头点了点许七安，发出两声拖拉机般的笑声，火急火燎的奔出休息室，到后堂找县令老爷去了。",
+    "start": 37261,
+    "end": 37305,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "offsetUnit": "codepoint",
+    "inSegmentOccurrences": 1,
+    "inWholeTextOccurrences": 1,
+    "isFirstOccurrenceInWholeText": true
+   },
+   "whyItMatters": "『偏厅』@35474 与『休息室』@37290 之间没有任何场景切换或移动的叙述，整段是同一场连续对话；候选有 2 个字段提到偏厅、7 个字段提到休息室，但没有任何字段同时包含二者（我已逐一验证），也没有把『这两个名字是否指同一间屋子』列入 unknowns。下游若按场所建场景图，会把一场戏裂成两处。",
+   "severity": "登记粒度（未消歧、未进 unknowns），非编造"
+  },
+  {
+   "id": "RC3",
+   "found": "三个同指称谓（朱县令／朱大人／县令老爷）在候选里各自出现却从未被关联成同一人；『许捕快』这一称谓也完全没进 unknowns。",
+   "quote": {
+    "quote": "这些天，朱县令起床第一件事，就是询问案情进度，王捕头给不出有价值的内容，便口吐芬芳。",
+    "start": 34141,
+    "end": 34183,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "offsetUnit": "codepoint",
+    "inSegmentOccurrences": 1,
+    "inWholeTextOccurrences": 1,
+    "isFirstOccurrenceInWholeText": true
+   },
+   "extraQuotes": [
+    {
+     "quote": "“我立刻去找朱大人，你们几个准备好，随我再去一趟张宅。”王捕头那张老农般的黝黑脸庞，露出了激动难耐的神色。",
+     "start": 37202,
+     "end": 37255,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+     "offsetUnit": "codepoint",
+     "inSegmentOccurrences": 1,
+     "inWholeTextOccurrences": 1,
+     "isFirstOccurrenceInWholeText": true
+    },
+    {
+     "quote": "手指头点了点许七安，发出两声拖拉机般的笑声，火急火燎的奔出休息室，到后堂找县令老爷去了。",
+     "start": 37261,
+     "end": 37305,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+     "offsetUnit": "codepoint",
+     "inSegmentOccurrences": 1,
+     "inWholeTextOccurrences": 1,
+     "isFirstOccurrenceInWholeText": true
+    }
+   ],
+   "whyItMatters": "原文自身给了同一性信号：王捕头先说『去找朱大人』，紧接着就是『到后堂找县令老爷去了』——同一动作两个称呼。候选 unknowns 只收『宁宴』这一称呼（并且写了），却漏了『许捕快』（揶揄语），也没有任何一条说明朱大人=朱县令=县令老爷。这属于实体归并缺口，会让发布阶段的角色消歧出现重复实体。",
+   "severity": "登记粒度（实体未归并），非编造"
+  },
+  {
+   "id": "RC4",
+   "found": "候选把『便口吐芬芳』的被骂者明确写成王捕头，但原文这句的主语其实是悬空的（『王捕头给不出有价值的内容，便口吐芬芳』——按句式承前主语可读成王捕头，也可读成朱县令骂人）。候选没有把这一歧义标出来。",
+   "quote": {
+    "quote": "这些天，朱县令起床第一件事，就是询问案情进度，王捕头给不出有价值的内容，便口吐芬芳。",
+    "start": 34141,
+    "end": 34183,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "offsetUnit": "codepoint",
+    "inSegmentOccurrences": 1,
+    "inWholeTextOccurrences": 1,
+    "isFirstOccurrenceInWholeText": true
+   },
+   "whyItMatters": "候选 C1 的 to 字段写『王捕头被「口吐芬芳」』、S1 写『给不出有价值的内容而挨骂』，C1 的 from 又写『朱县令…追问…而王捕头给不出有价值的内容』——即候选明确选择了『朱县令骂王捕头』这一读法。该读法与下文『压力全由他这个捕头顶着了』『王捕头是有理由生气的』一致，是**合理**读法；但原句字面上『口吐芬芳』的主语并未显式出现，候选既未标注这是解读、也未进 unknowns。我把它记为存疑项而非反例：因为拿不出『王捕头自己骂人』的正面原文引证，按纪律不能据此判 fail。",
+   "severity": "存疑（原句主语悬空，候选的读法有下文支持，但未标注为解读）"
+  }
+ ],
+ "misKillCheck": {
+  "question": "候选把什么合法的东西排除掉了？",
+  "findings": [
+   {
+    "item": "「桃花源洞」被候选列为 notForeshadows 并进 unknowns",
+    "assessment": "合理。我独立核实该词在**全书 476 万字里只出现 1 次**、就在本单元 (34361)，确无铺设＋回收。属正确排除，非误杀。"
+   },
+   {
+    "item": "「摸鱼」被候选列为 notForeshadows（理由：本单元只作为动机背景提及一次）",
+    "assessment": "基本合理但理由不够强。该词全书出现 25 次、本单元 1 次；候选的理由是『本单元内没有铺设＋回收的成对出现』，这与候选自己采用的『伏笔须在本单元内成对』口径一致，属口径选择而非误杀。"
+   },
+   {
+    "item": "「御刀卫的士卒」「夜巡士卒」被列为 notForeshadows",
+    "assessment": "**这是我最接近误杀的一处，但仍不构成误杀。** 候选给的理由是『只在许七安讲奸夫踩点的那段话里各出现一次』——就**本单元**而言这个计数正确（我核实：『夜巡士卒』36222 一次、『御刀卫』36225 一次，均在该段内）。但『御刀卫』全书出现 103 次，是持续存在的建制词，不是一次性修辞。不过伏笔的定义要求『有铺设与回收』，而本单元内它确实只作为假设细节出现，故按候选自己的口径排除是可辩护的；我把它记为『口径偏保守、可用性下降』，不作 counterExample。"
+   }
+  ],
+  "conclusion": "未发现因词表/正则误杀合法因果边的情形；候选的排除均给出理由且我可复现其计数依据。"
+ },
+ "hallucinationChecks": [
+  {
+   "check": "原文没有的人物",
+   "result": "pass",
+   "detail": "候选提到的『徐主簿』在本单元内出现 0 次，但我核实它**不是编造**：候选是在 deliberatelyNotAsserted 里明确写『徐主簿在本单元内完全没有出现』，且该名全书出现 9 次（属段外人物），用法是『声明其缺席』而非『声称其登场』。除此之外候选提到的所有人名（王捕头/许七安/朱县令/朱大人/县令老爷/张有瑞/张杨氏/张献/小李）都能在本单元原文逐字找到。"
+  },
+  {
+   "check": "原文没有的结局",
+   "result": "pass",
+   "detail": "候选 T1.result 显式写 notSuccess，并写明「本单元没有任何叙述写凶手被确认、被拿获或案子告破」；我独立核实：本单元无『确认/证实/查明/定罪』类叙述，确实未结案。"
+  },
+  {
+   "check": "原文没有的伏笔",
+   "result": "pass",
+   "detail": "4 条伏笔（F1-F4）的 setup/payoff 引文我全部回切命中；F3/F4 显式标 unresolved，F1/F2 标 resolved_within_unit_as_inference_only 并附 caution。未把一次性物件升格为伏笔。"
+  },
+  {
+   "check": "把人物台词/猜测当成叙述事实",
+   "result": "pass",
+   "detail": "许七安的偷情杀人假设、张献供词转述、张杨氏说辞、『钝器重创后脑』死因、『墙上的脚印是故意留的』均登记为 characterClaims 或 deliberatelyNotAsserted；我抽查全部 13 条 characterClaims 的 status 均为 character_assertion_not_narration，无一条升格。"
+  },
+  {
+   "check": "结束＝成功",
+   "result": "pass",
+   "detail": "候选收束于『决定去找朱大人、准备再赴张宅』，未写拿到牌票、未写成行、未写破案。"
+  },
+  {
+   "check": "越权/受保护路径",
+   "result": "pass",
+   "detail": "候选的 writes 记录为 append-only 至 loop/state/out/ 下的候选文件；我复核期间未改动任何受保护路径。"
+  }
+ ],
+ "citationSpotCheck": {
+  "method": "random.seed(20261008); random.sample 从 271 条引文中抽 5 条，逐条 T.find(quote) 并比对 start",
+  "result": "5/5 逐字命中且 find==start，偏移一致",
+  "samples": [
+   {
+    "path": "/narrativeFacts/9/evidence/0",
+    "quote": "当许七安看到仵作的验尸报告后，又察觉出了一个疑点。",
+    "start": 34710,
+    "findIndex": 34710,
+    "exact": true
+   },
+   {
+    "path": "/tasks/1/action/evidence/2",
+    "quote": "他坐回椅子，喃喃道：“是啊，为什么是用钝器，为什么不用利器？”",
+    "start": 35590,
+    "findIndex": 35590,
+    "exact": true
+   },
+   {
+    "path": "/characterClaims/4/extraEvidence/0",
+    "quote": "许七安猜测：“是的，对了，直接去对比一下死者儿子的靴子。”",
+    "start": 37007,
+    "findIndex": 37007,
+    "exact": true
+   },
+   {
+    "path": "/foreshadows/2/setup",
+    "quote": "“还有最后一点，也是我比较在意的。”许七安看了眼卷宗：“死者家人带回县衙问审时，张杨氏因为久跪，忽然昏厥，大夫诊断后，发现她怀孕了。”",
+    "start": 35686,
+    "findIndex": 35686,
+    "exact": true
+   },
+   {
+    "path": "/causeEdges/11/evidence/0",
+    "quote": "许七安满脸佩服，一记彩虹屁拍过去：“头儿果然英明神武，一点就通。真乃大奉神捕也。”",
+    "start": 37067,
+    "findIndex": 37067,
+    "exact": true
+   }
+  ]
+ },
+ "internalConsistency": [
+  {
+   "issue": "15 个悬空别名引用",
+   "detail": "候选散文里引用了 CL1-CL5/CL11/CL13 与 Q_MOYU/Q_XIANLING/Q_PRESSURE/Q_AUTOPSY/Q_DUMBFOUND/Q_REACT1/Q_THEORY/Q_COMPARE 共 15 个标识符，但这些标识符在文件里从未被定义为任何条目的 id：characterClaims 的 13 个条目**全部没有 id 字段**，relatedClaims 里的 ['CL2','CL3','CL4'] 因此指不到任何东西；Q_* 系列更是完全不存在（Q_REACT1-3 只有字面提及）。这只影响可追溯性、不影响事实正确性——每个悬空引用旁边的引文我都回切验过是真的。",
+   "impact": "发布/桥接阶段若要按 id 解析 relatedClaims 会得到空引用；建议下游按『丢弃悬空引用』或『按引文对齐』处理，不要据此判内容错误。",
+   "severity": "内部一致性缺陷，非事实缺陷"
+  }
+ ],
+ "notes": "总体判断：**这份候选是本项目里少见的「机制真的产生了信息」的产出**，我判 pass。理由与不确定处如下。\n\n1) 我按角色契约先自读全部 3296 字原文，再打开候选；引文核验与反向覆盖都是我自己重跑脚本得到的，不是照抄候选的自审数字——我复现出的覆盖率 84.98% 与 significantUncoveredRuns=0 与候选自报**完全一致**，271 条引文 0 处切片失配。\n\n2) 本单元最大的语义陷阱是许七安当众抛出的『偷情杀人案』。候选没有把它写成真相：它单独列为 characterClaims CL1，并在 deliberatelyNotAsserted 里说明『本单元没有任何物证、口供或叙述确认奸情』，还把许七安自己那句『这未必是真相，需要去验证』作为反证一并引上。这一点我独立核对，全文确无『确认/证实/查明』类叙述。\n\n3) 反向验证（契约要求至少 3 条）我给出 4 条，全部附逐字引证，全部属于**登记粒度**问题：一个中间状态（皱眉沉思）、一处场所名歧义（偏厅/休息室）、一处实体归并缺口（朱县令=朱大人=县令老爷，以及漏登『许捕快』）、一处主语悬空未标注（便口吐芬芳）。这些都不违反本任务的红线（无编造、无幻觉、无结束当成功），因此**不构成 fail 或 partial 的依据**，但建议发布阶段在合成时补齐，否则场景图与角色表可能各裂成两份。\n\n4) 误杀检查：我重点查了候选排除的『桃花源洞』『摸鱼』『御刀卫/夜巡士卒』。『桃花源洞』我独立核实为**全书仅出现 1 次**（34361，就在本单元），排除完全正确；『御刀卫』全书 103 次属持续建制词，是本轮唯一一处『口径偏保守』的排除，但候选的理由限定在『本单元内只出现一次』这一层，站得住，我没有把它升级为 counterExample。\n\n5) 我可以判自己错的地方，如实记录：我最初的『未被任何 prose 字段解读的段落』探针因为归一化时漏了中文直角引号「」，误报了 10 段，修正后降为 8 段，且这 8 段经复核**全部**在别处（narrativeFacts/characterClaims 等）有登记，所以那条探针最终没有产出任何有效反例。我的反向发现主要靠人工逐段比对与实体/称谓计数，而不是靠覆盖率脚本——候选自己在 reverseChecksSelf.stillOpen 里也承认了同一局限，这一点它写得诚实。\n\n6) 存疑但不足以判 fail 的：RC4 的『便口吐芬芳』主语悬空。候选选定『朱县令骂王捕头』，有下文『压力全由他这个捕头顶着了』支持，我拿不出『王捕头自己骂人』的正面引证，按判定纪律只记为存疑。\n\n7) 一处需要下游注意但不影响本次判定的：候选有 15 个悬空别名引用（characterClaims 全部无 id，relatedClaims 指向不存在的 CL2/CL3/CL4，Q_* 系列完全不存在）。事实层无误，可追溯性受损。\n\n未做/做不到的（remaining）：我没有做跨版本比对（只核了当前缓存这一版）；没有核验『很研究』『附和逻辑』『三百五十度』是否排印错误（候选同样保留原样，我认同不改写）；候选的语义解读我只能对抗式抽查，不能证明其穷尽正确。"
+}

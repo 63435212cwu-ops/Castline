@@ -1,0 +1,91 @@
+{
+ "task": "merge:p1-bridge-and-p2-publish:20261009",
+ "agent": "reform-lead",
+ "at": "2026-10-08T19:06:39Z",
+ "gateLock": "本合并任务持有 loop/state/leases/GATE.lock（agent=reform-lead）",
+ "mergedFiles": {
+  "loop/bin/to_candidate.py": {
+   "sha256": "d643b9357b1573cae36e1b43de6735b2a365ee09f1d3af9913546faee3f42bac",
+   "changes": [
+    "D-A counterExample 全字段扫描",
+    "D-B text/value 兼容 + 空壳丢弃",
+    "D-C segmentSelector + 权威索引对账 + 缺区间拒绝",
+    "D-D 批次 scope 取权威索引单元边界",
+    "DEL-02 显式成败信号 + 失败优先",
+    "身份解析层 char_index/resolve_character（含注解姓名归一、多人拒绝）",
+    "发布父版本改取 index.graphKey（页面默认版本），并写明 publishTargetNote"
+   ]
+  },
+  "loop/bin/loop.py": {
+   "sha256": "56fcb57aeca329c64f3b2ec3ab2787c0ae712c8e2377f59152a141054a3662a9",
+   "changes": [
+    "validated_records() 先枚举全部通过记录再分类（DEL-05：stale 不再结构性为 0）",
+    "publish_state() 区分『任务处置完成』与『实际已发布』（DEL-01）",
+    "cmd_stats 输出 staleEvidence/staleEvidenceStillInDone/publish"
+   ]
+  },
+  "loop/bin/sentinel.py": {
+   "sha256": "ba996abbf903d4a078f1cf6995babef7a27c75a7ef4303b1d9bfcd635cebbbb8",
+   "changes": [
+    "repair_path() 剔除 PATH 中已删除的 node 目录（修 rc=127 崩溃循环的根因）",
+    "discover_dsh_home() 从运行中的 dsh web 读回带 castline profile 的 DSH_HOME",
+    "spawn_worker 拉起前自愈并把实际环境写进 daemon.log 首行"
+   ]
+  },
+  "tests/loop_bridge_contract.py": {
+   "sha256": "df5eea75aa78f9875f72832af67497bead09e36b8c36fa701aba3605c12cefc3",
+   "changes": [
+    "新增责任回归：D-A/D-B/D-C/D-D/DEL-02/身份解析/发布父版本；真实数据、项目外沙箱"
+   ]
+  },
+  "serve.py": {
+   "sha256": "ff62b895cc9f528fae71fe44a6e8217d3154177bfbd8d24b10e9fe4078e0a6bd",
+   "changes": [
+    "新增 version_at()：发布版本作品库时间取自身版本文件写入时刻，修 P2.8 并列组退化"
+   ]
+  },
+  "tests/p2_library_version_baseline.json": {
+   "sha256": "b6820773f6ef643519576b3d2120e21ced290437a396432e6026542d97620d4e",
+   "changes": [
+    "棘轮基线同步收紧 maxTieGroup 61 → 1，并如实写明仍未修的 ④c"
+   ]
+  }
+ },
+ "verification": {
+  "bridgeContract": "tests/loop_bridge_contract.py：合并后 38/38（四批各 10/11 项）",
+  "bridgeContractNegativeControl": "用合并前桥（backup/to_candidate.py.premerge）跑同测试 → 4/11，7 项失败 ⇒ 测试确实能击穿缺陷",
+  "selftest": "111/111（含新增行为检查 12q1b；12k4 保持原字面判据）",
+  "productAccept": "sh scripts/accept.sh → 132/132 passed",
+  "versionStamp": "tests/version_stamp.py --check OK（336 处引用 100% 匹配）",
+  "p2Ratchet": "tests/p2_library_version_choice.py --ratchet → OK（最大并列组 1）"
+ },
+ "realPublish": {
+  "batch": "publish:dafeng:B000",
+  "newKey": "07957550dbf5aba05076df6e",
+  "parentKey": "9b676d7031b1bcd3b8377a18",
+  "parentSha256Before": "3c2fae1d399d6768719f2d5476fa0cfd88fb4fbbc12abdf080323fa4b846ebdf",
+  "parentPreserved": true,
+  "referencePrecision": "100%",
+  "claimAnchorPrecision": "100%",
+  "contractProblems": [],
+  "layers": {
+   "tasks": 48,
+   "characterStates": 25,
+   "clues": 9
+  },
+  "scope": [
+   35,
+   61514
+  ],
+  "defaultSwitchedTo": "07957550dbf5aba05076df6e（data/cache/index.json 第 1 条 + loop/state/index.json graphKey）",
+  "ledger": "loop/state/PUBLISH-LEDGER.json 新增第 3 条，supersedes=1063b17ca65ec1b76f30e460",
+  "servedOnRealPage": "/api/history 第一条 = 07957550…；/data/cache/07957550….json → tasks 48 / states 25 / clues 9，reviewHistory scope [35,61514)，空壳 0、误标 0"
+ },
+ "messageToParallelAgents": "如果你们正在编辑 loop/bin/loop.py / sentinel.py / to_candidate.py / serve.py / tests/p2_library_version_baseline.json：这些文件已被本合并改动，改动前请重新读取（原始副本在 /tmp/castline-artifacts/r0-20261009/backup-*/）。",
+ "remaining": [
+  "P2 只发布了 B000 一批（20/912 单元）；其余批次未发布，不得声称全书完成。",
+  "P2.8 ④c（书签/续读按稳定 ID 迁移）仍未修，仍在棘轮基线内。",
+  "桥的发布目标现已指向 index.graphKey；后续批次需要在同一默认链上累积。",
+  "P3 内容主线、P4 V1 视觉母版、P5 同版八维终审尚未开始。"
+ ]
+}

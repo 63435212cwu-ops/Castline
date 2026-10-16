@@ -1,0 +1,97 @@
+{
+ "schemaVersion": "castline-verdict/1",
+ "task": "verify:dafeng:L2:0054",
+ "verifier": "w-verify-0",
+ "reviews": "read:dafeng:L2:0054",
+ "book": "dafeng",
+ "lane": 2,
+ "unitIndex": 54,
+ "unitHead": "第五十五章 计划初成",
+ "sourceRange": [
+  165570,
+  168259
+ ],
+ "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+ "candidatePath": "loop/state/out/read_dafeng_L2_0054.candidate.json",
+ "candidateSha256": "8d448bed49316d3b296f25da287223609fee22f17395960c1c06ac2f9c51bb68",
+ "sliceSha256": "5b1eccb260f84d3cf7347d2e00df96fc3e5d44f2a89ca368f7dbc82aa8afbe81",
+ "sliceChars": 2689,
+ "verdict": "partial",
+ "method": {
+  "order": "先自己读原文切片（docs[0].text[165570:168259]，2689 字，逐行读完），再打开候选结论。",
+  "reproduce": [
+   "python3 -c \"import json;T=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];print(T[165570:168259])\"",
+   "python3 /tmp/verify0054.py   # 243 条 quote 全量回切 + 偏移 + occurrencesInSource/Slice 复算",
+   "python3 -c \"import json;g=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.json'));print([(c['id'],c['name'],c['aliases']) for c in g['characters'] if '镇北王妃' in (c.get('aliases') or [])])\""
+  ],
+  "quoteAudit": {
+   "objects": 243,
+   "verbatimHits": 243,
+   "misses": 0,
+   "offsetMismatches": 0,
+   "occurrenceCountMismatches": 0,
+   "inRangeFlagErrors": 0,
+   "note": "239 条结构化 quote + registry 内 4 条 uncited 行亦逐字命中；text[start:end]==quote 全部成立。"
+  },
+  "hashAudit": {
+   "sourceHash": "match",
+   "docsTextSha256": "match",
+   "graphCacheSha256": "match",
+   "sliceSha256": "match",
+   "candidateSha256": "match recheck.json 的 candidateSha256"
+  },
+  "countAudit": {
+   "checked": 21,
+   "mismatches": 0,
+   "note": "许七安17/许大郎1/浮香7/浮香花魁1/花魁娘子4/花魁10/奴家7/人家7/周立5/周侍郎2/户部侍郎2/魏公3/魏渊1/二郎1/许新年0/许辞旧0/王捕头1/镇北王4/镇北王妃2/许玲月1/褚采薇1/威武侯7 全部与原文一致。唯一计数错误在 absentAgents[2]（见 CE2）。"
+  },
+  "outOfRangeAudit": {
+   "objects": 32,
+   "chapterLabelMismatches": 0,
+   "note": "32 条区间外引文的 chapterLabel 逐条与 narrative.chapter_spans 对照，全部正确。"
+  }
+ },
+ "counterExamples": [
+  {
+   "claim": "charactersInRange[6]（镇北王妃）note 写「图谱中未见独立节点，graphIdHint 写 null」。",
+   "quote": "镇北王妃",
+   "why": "假否定，且与该候选自己定义的口径矛盾。图谱缓存 data/cache/9b676d7031b1bcd3b8377a18.json 里节点 ch_ccee32d476eea7f2（name=慕南栀）的 aliases 明确含「镇北王妃」。候选在 charactersInRange[1]（浮香）里自述用的是「图谱人物表的 1232 个节点名/别名」这一全集，我复算该全集恰为 1232，且「镇北王妃」∈ 该全集（「浮香」∉，那条是对的）。即同一判据下镇北王妃本应命中 ch_ccee32d476eea7f2，候选却写成「未见独立节点」，属把一条真实可用的身份映射误杀。复现：python3 -c \"import json;g=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.json'));print([(c['id'],c['name']) for c in g['characters'] if '镇北王妃' in (c.get('aliases') or [])])\""
+  },
+  {
+   "claim": "absentAgents[2] howPresent 写「本区间内浮香两次称他\\\"杨公子\\\"」。",
+   "quote": "杨公子若想知道，人家便告诉你，但莫要外传才是。",
+   "why": "计数错误，且与候选自己的元数据自相矛盾。切片内「杨公子」实际只出现 1 次（绝对偏移 167451，即上面这条引文）；同一条 absentAgents[2] 自己的 quotes[0].occurrencesInSlice 写的就是 1，charactersInRange[0].asWrittenInRange 也写「被浮香称「杨公子」1 次」。三处里两处对、一处错（写成 2）。复现：python3 -c \"import json,re;T=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];print(len(re.findall('杨公子',T[165570:168259])))\" → 1"
+  },
+  {
+   "claim": "absentAgents[0] howPresent 与 charactersInRange[2] asWrittenInRange 写周立「5 次，全部出现在对话或心理话中 / 全部出现在浮香的转述或许七安的构想中」。",
+   "quote": "兜兜转转了半天，终于把话题扯到周立身上。",
+   "why": "「全部」不成立：5 次里有 1 次在叙述层而非对话/心理话。上面这条引文（绝对偏移 167264）不带引号，是叙述者对许七安推进话题的直述，不是浮香的转述、也不是他的心理话。我用引号配对法逐条判定 5 处：167550/167800 在「“”」内（浮香台词），167866/167933 为叙述层转写的构想，167264 为叙述层直述——按候选自己的口径它既不是对话也不是心理话。建议降级为「4 次在对话中、1 次在叙述层」。复现：见 /tmp/verify0054.py 的引号配对统计。"
+  }
+ ],
+ "reverseChecks": [
+  {
+   "found": "候选把「圣上（皇帝）」完全漏掉：既未登记为 charactersInRange，也未登记为 absentAgents。但他是本单元两件关键事实的行为者——十九年前把王妃赏给镇北王的人，以及周立案的裁定者。候选登记了镇北王、魏渊、周侍郎、威武侯（都只是被谈论者），却漏掉这位实际决策者；切片内「圣上」出现 4 次。",
+   "quote": "“十九年前，山海关大捷，镇北王做为第二大功臣，圣上便将那位京城第一美人赠予他。”",
+   "quote2": "“威武侯告了御状，户部侍郎上书解释，双方扯皮多日，最后圣上裁定：周侍郎教子不严，发俸一年，赔偿威武侯五千两。周立禁足三月，若有再犯，严惩不贷。”",
+   "why": "这是结构性遗漏：候选的实体表覆盖了「被谈论的人」却漏了「下判断的人」，而 T2 整条计划恰恰建立在圣上这句裁定的条件句上（CE1）。"
+  },
+  {
+   "found": "候选在 coverageNote.assertionLevelCoverage.whyNotAll 里把 9048/9050 两句判为「叙述者插话」「不指向任何人物目标、因果或状态变化」而不被任何结论引用——这是误杀：这两句是切片内唯一由叙述层直接暴露「许七安是穿越者/两世为人」的今昔对比，属于人物属性证据，不是无信息的插话。候选自己在 charactersInRange[0] 里承认「本单元大量句子是心理话，一律按有限视角处理」，却没有一处把这条穿越视角登记下来（全候选「穿越」0 次、「现代」0 次）。",
+   "quote": "还是古时候的女子优雅，你来睡她，她会说：你别急，让小女子为你弹奏一曲。",
+   "quote2": "不像后来的姑娘，你去睡她，她会说：搞快点！",
+   "why": "「没被任何结论引用」和「不产生信息」不是一回事。这两行正是本项目反复出现的失败形态（有产出、不产生信息）的反面：它有信息，只是被判为不需要。"
+  },
+  {
+   "found": "候选把「周显平」写进 charactersInRange[2].asWrittenInRange（原文写「『周侍郎』（2 次，指其父周显平）」）与 charactersInRange[10] 的实体名，但「周显平」在本切片内出现 0 次（全书 19 次，最近的一处远在第三十五章 书房议事）。字段名是 asWrittenInRange，把一个区间外才有的姓名当作「区间内写法」陈述，且未标区间外来源。",
+   "quote": "“威武侯告了御状，户部侍郎上书解释，双方扯皮多日，最后圣上裁定：周侍郎教子不严，发俸一年，赔偿威武侯五千两。周立禁足三月，若有再犯，严惩不贷。”",
+   "why": "本切片内对周立之父的称呼只有「周侍郎」与「户部侍郎」（各 2 次，即上面这条引文），没有「周显平」三字。身份映射本身大概是对的（第三十五章 书房议事作「户部侍郎周显平」），但放在 asWrittenInRange 里会让下游把区间外知识当区间内证据。应移出该字段或显式标 out-of-range。复现：python3 -c \"import json,re;T=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];print(len(re.findall('周显平',T[165570:168259])))\" → 0"
+  },
+  {
+   "found": "（存疑，不作为判据）T2.obstacle 断言「周立刚因同一名庶女挨过罚、正在禁足期」。但禁足三个月是「去年元宵节」那桩案的裁断，而本单元的当前故事时间在一个多月后的十月初五；把「去年元宵节 + 禁足三月」与「正在禁足」对齐在原文里找不到依据。",
+   "quote": "“这事得从去年元宵节说起，那周立是荒唐人，元宵灯会看中了一位姑娘，趁人多眼杂，便上前非礼，还让人打伤了女方身边的扈从。",
+   "quote2": "“十月初五，丙寅日，进内城，入教坊司。留宿影梅小阁一夜，《赠浮香》疑似许七安所作。”",
+   "why": "按角色契约，拿不出本单元内原文引证的反对意见只能记「存疑」。两处时间锚分属第五十五章与第六十一章的档案，跨章推断不足以判 fail，但「正在禁足期」这句应当降级为 inferred/存疑，或删去「刚」「正在」这类时效限定词。"
+  }
+ ],
+ "notes": "总判 partial：内容层（引文、因果、状态、unknowns）可用，三处可核验的陈述错误必须修正后重出。\n\n【查过没问题的】1) 引文完整性：243 条 quote 全部逐字命中原文，text[start:end]==quote 无一例外，occurrencesInSource/occurrencesInSlice 全部相符；in-range/out-of-range 标记 0 处错标；32 条区间外引文的 chapterLabel 逐条正确。抽 5 条（charactersInRange[4].quotes[0]、registry[10]、tasks[2].obstacle.quotes[3]、registry[60]、registry[38]）用 find() 复核，逐字命中且偏移一致。2) 哈希：sourceHash/docsTextSha256/graphCacheSha256/sliceSha256 与磁盘实算全部一致，候选 sha256 与 artifacts/read_dafeng_L2_0054/recheck.json 的 candidateSha256 一致。3) 无编造：没有原文之外的人物、事件、结局；计划只到「初稿」，候选明确拒绝把灵感当成功（红线段 noEndingAsSuccess 成立）。4) 21 项计数断言中 20 项与原文一致——包括「长夜漫漫」全书 6 次、「琴膏」「审讯技巧」「王捕头说过」各 1 次、「浮香」不在图谱 1232 名/别名全集内（这条是对的）。5) 误杀检查（NC1–NC6）：我逐一回原文核对，6 条「相邻≠因果」的拒绝都成立，没有把合法因果挡掉；CE1 的因果点原文确有「仿佛闪电劈入许七安的脑海」明写，不是把时间相邻当因果。\n\n【判 partial 的具体处置】必须丢弃/改写：charactersInRange[6] 的 note 与 graphIdHint（CE1，应改为 ch_ccee32d476eea7f2 或改为「有别名节点、name=慕南栀」，并注意该节点 brief 含终局信息，同 U15 的处理口径）；absentAgents[2] 的「两次」（CE2，改为 1 次）；absentAgents[0]/charactersInRange[2] 的「全部」（CE3，改为 4 次对话+1 次叙述层）。应补：圣上/皇帝作为被谈论的行为者登记（R1）。应降级：T2.obstacle 的「正在禁足期」→ inferred/存疑（R4）。字段卫生：周显平移出 asWrittenInRange（R3）。\n\n【对候选自评的回应】候选 coverageNote 声称 paragraphsCitedByAssertions=59/63、uncited 4 条。我用两种口径复算：按「区间重叠」口径，59 成立（未覆盖的正是 9048/9050/9104/9153 这 4 条，与候选一致）；按更严的「整行文本被断言引文完整覆盖」口径，58 行全覆盖 + 1 行部分覆盖（p9074 只覆盖了台词部分，「花魁娘子噗嗤一笑，心里欢喜，嘴上则说：」这段叙述层没被任何断言引用）。这是记账口径差异、不是编造，故不计入 counterExamples，但建议候选把 9074 一并列入 uncited 或补引全行。\n\n【我自己的反向验证是否成立】R2 有被推翻的余地：若项目口径认为「叙述者插话」本就不必登记，则 9048/9050 的排除是对的，我这条只是口径之争而非漏项——如实写出，供裁决。R4 同理，只有存疑强度。CE1/CE2/CE3 我不认为有推翻余地：三者都是可在原文/图谱缓存上用一条命令复现的硬事实。\n\n【未做】未做语义级正确性裁定（本候选 semanticReview=not-performed，我也未声称任何语义完成）；未复核区间外回收端（第五十六至一百九十七章）的引文与情节是否同样准确，只核了各条回收端引文逐字存在与 chapterLabel 正确；未跑 GPU/浏览器测试。"
+}

@@ -1,0 +1,95 @@
+{
+  "task": "read:xiyou:L1:0021",
+  "agent": "w-xiyou-1",
+  "role": "READER",
+  "status": "done",
+  "summary": "精读《西游记》第二十一回「护法设庄留大圣 须弥灵吉定风魔」（docs[0].text 全文 codepoint [143025,150074)，7049 字 / 25 个非空段落）：产出 tasks 8 条（五元组；T3/T6/T7/T8 四条 cost 原文无记载写 JSON null 且 basis.cost 同为 null，8 条全部在 resultNote 里限定『objective 在本单元内达成』并同时写出失败面/外援依赖——T1 判 false，其余 true 逐条写明达成靠的不是当事人武力，见 T2 的三环外援）、causeEdges 12 条（每条带 direction + mechanismKind + mechanismOwner + caveat，mechanism 全部写成机制而非时间相邻：信息命中克星、打断施法窗口、感官能力剥夺、威慑当战法条件、管辖权移交等）、rejectedAsCauseEdge 8 条（主动否掉的并置关系：围攻→风、天暗→眼坏、犬吠→庄院、景物→老者、药→救师、回头→消失、轻敌话→出战、回末联→妖精伏法）、states 7 条（前值/后值 + 事件锚点 + 谁知情）、knowledgeDiffs 5 条（含两条『本单元未解开』的知识差：老妖至终以为行者已死、至终以为虎先锋死于毛脸和尚）、foreshadows 6 条（5 条 resolved、FS6 显式 unresolved 且 payoff/payoffAnchor 为 null）、rejectedAsForeshadow 8 条、unknowns 14 条、gapAnchors 26 条（只登记位置、claim 与 basis 皆 null）、crossUnitReferences 5 条（第二十回区间外对照，刻意不用 quote/start 键名以免被误当引文节点）。共 364 个引文节点（承担断言的 338 + gapAnchors 26；不同引文 160/140）。构建期对每条引文断言 text.count(quote)==1 且 text[start:end]==quote 且落在区间内，任一不成立即中止不落盘；另写独立复核脚本 verify.py（不复用构建逻辑，显式路径栈遍历）从磁盘重算 A1-A12 得 problems=0。factStatus 不是手贴标签而是从原文 “ ” 配对机械判定的（166 utterance / 193 narration / 5 mixed），并由 attribution_audit.py 反向抽查。未声明 semanticReview 完成。",
+  "evidence": [
+    {
+      "path": "loop/state/out/read_xiyou_L1_0021.candidate.json",
+      "sha256": "32ead0e4ab5e774e870b7b396b38696755e6b6ffb1daf3e7c7c3e8805965309e",
+      "kind": "candidate",
+      "note": "任务 writes 指定的唯一产物。"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "区间与标题自检：TEXT.find('第二十一回')==143025==区间起点；TEXT.find('第二十二回')==150074==区间终点；len(TEXT[143025:150074])==7049，与任务 prompt 声明的字数一致；切片以原文标题开头（含 U+3000 全角空格）。命令：python3 -B -s -c \"import json;t=json.load(open('data/cache/df959d743e53206f56db2f92.docs.json'))[0]['text'];print(t.find('第二十一回'),t.find('第二十二回'),len(t[143025:150074]),repr(t[143025:143055]))\" → 143025 150074 7049 '第二十一回\\u3000护法设庄留大圣\\u3000须弥灵吉定风魔\\n\\n却说那五十个败'。注意任务 JSON 的 unitHead 字段把全角空格写成了普通空格，本候选按原文写法并在 unitHeadCheck 里记下这个差异。",
+      "result": "pass"
+    },
+    {
+      "text": "sourceHash 口径：任务声明 c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2；实测 shasum -a 256 data/cache/df959d743e53206f56db2f92.docs.json == 该值（**整文件**哈希）。切片自身哈希另记在 source.sliceSha256=153a5c0fb01f187b428444b6554ccf715b31561e55a089e4c6ce64c255286657，构建脚本断言两者是不同字段、不互相冒充。",
+      "result": "pass"
+    },
+    {
+      "text": "引文逐字校验：构建脚本对每条被引用的 quote 断言 TEXT.count(quote)==1（全文 722176 字内唯一）、完全落在 [143025,150074) 内、TEXT[start:end]==quote、sourceHash 正确、crossRange==false，任一不成立即抛异常、整体不落盘。实跑输出 'WROTE … quoteNodes(distinct)=364'。命令：python3 -B -s /tmp/rd0021/build.py。",
+      "result": "pass"
+    },
+    {
+      "text": "独立复核（不复用构建脚本逻辑，另写一套显式路径栈遍历）：/tmp/rd0021/verify.py 从磁盘读候选 JSON 与 docs.json，重算 A1 文件哈希与区间边界、A2 全部 364 个引文节点的 count/find/偏移/sourceHash/crossRange/offsetUnit、A3 全部 basis 合法性与『null 格 basis 也为 null』配对、A4 gapAnchors 不带断言（claim 与 basis 皆 null）、A5 覆盖率四栏从候选自身重算并按 0.06 容差比对声明值、A6 foreshadows 的 status/payoff/payoffAnchor 一致性、A7 causeEdges 结构（direction/mechanism/mechanismKind/mechanismOwner 齐全且 mechanism 有实质长度）、A8 rejectedAs* 必须各带 why_rejected、A9 各节 id 唯一与语义未声称完成、A10 散文 「」 逐字可命中、A11 factStatus 与原文引号机械对账、A12 散文自述计数与数据双向对账。实跑 'RESULT: PASS (problems=0)'。命令：python3 -B -s /tmp/rd0021/verify.py。",
+      "result": "pass"
+    },
+    {
+      "text": "事实归属机械对账（本轮抓得最狠的一类缺陷）：factStatus **不是**我口头贴的标签，而是构建期从原文 “ ” 配对建出 108 个对白区间后机械判定的——落在引号内 ⇒ utterance（只证明『被这样说过/写过』），引号外 ⇒ narration；U() 断言 frac>=0.9、N() 断言 frac<=0.1，不符即抛异常不落盘。改用这条判据后构建期立刻抓出两处错标：『教他不得睁开，宁心睡觉，明早就好。』我标了 utterance，原文实为叙述句中的间接引语（无引号）；『比常更有百分光明！』我标了叙述，原文实有引号（行者原话）。另有一批漏标（『你莫怪他，我们且去救师父来。』『刚才一个打令字旗的妖精，被我赶了去也。』『原来师父被他绑在定风桩上哭哩。』『此处到那黄风洞口不远。』『悟空啊，想杀我也！』『你两人怎生捉得妖精？』『恩人！恩人！……』『老猪学得个乌龟法，得缩头时且缩头。』『庄居非是俗人居……』『上复齐天大圣听……』）与一批跨引号边界的混合句（『老者用手向南指道：“这条羊肠路就是了。”』『行者闻言，低头唱喏道：“愿求些儿，点试，点试。”』『众妖道：“大王……』等），已全部改成 N(叙述引导语)+U(引号内话语) 两条或补标。修后 attribution_audit.py 从磁盘独立重算：标为 utterance 却落在引号外 = 0、标为 narration 却落在引号内 = 0。命令：python3 -B -s /tmp/rd0021/attribution_audit.py。",
+      "result": "pass"
+    },
+    {
+      "text": "散文引文卫生：我原先在散文里用 「」 同时包装原文引文与我自己的术语/转述，构建期硬断言把它们挡下 5 处（『要救师父且等再处』漏字、两处带省略号的缩引、两处 pair 字段里的截断引文），全部改为逐字完整引文或改『』；另有一处更隐蔽的：T1.objective 里我写了「且莫吃他着」并注明『此句在第二十回』，但没登记偏移——prose_audit.py 从不信任注释、只做 find，把它抓出来，已登记进 crossUnitReferences（textStart=140888）并改用『』。修后实跑 265/265 逐字命中本单元切片，'RESULT: PASS (find 不到且非省略号的片段=0)'。命令：python3 -B -s /tmp/rd0021/prose_audit.py。",
+      "result": "pass"
+    },
+    {
+      "text": "自述计数与数据对账（并做了负向对照）：nullFieldsRule 与 remaining 里我原先手写『T3/T4/T6/T7/T8 五条 cost 为 null』，从磁盘重算 tasks 的 cost/basis.cost 配对后实际是**四条**（T3/T6/T7/T8）——T4 的 cost 在原文里有依据（『用玉簪儿蘸出少许与行者点上』＋一顿斋饭、一夜铺盖），应为 explicit。已按实测改写，并做成 verify.py 的 A12 双向自动对账。**关键的一点**：A12 第一版**抓不到**注入的漂移——我用『四条→五条』与『把 T4 加进清单』两种注入跑负向对照，第一版全部放过（RESULT: PASS）；重写成双向判据后再跑同样两种注入，分别报出 2 条与 5 条 problems。这条负向对照也写进了候选 selfCritique，避免把『有校验』误当『校验有效』。",
+      "result": "pass"
+    },
+    {
+      "text": "引文唯一性自查（构建期真抓到的）：142 条候选引文里 2 条在全书非唯一——『善哉！善哉！』13 处、『毕竟不知向后如何，且听下回分解。』2 处；第二轮另有 3 条被挡下——『那老妖闻说，十分烦恼，正低头不语，默思计策』（我把原文的『老妖闻说』误写成『那老妖闻说』，n=0）、『请进，请进。』4 处、『毕竟不知向后如何，且听下回分解。』2 处。全部换成更长的唯一窗口（如末句改用『找大路向西而去。毕竟不知向后如何，且听下回分解。』），那句非唯一的『善哉！善哉！』则如实登记为 U13 的水印断句问题而不是换掉。",
+      "result": "pass"
+    },
+    {
+      "text": "红线自检：(1) **不把人物之言当叙述事实**——166 个 utterance 节点全部由原文引号机械判定，只用于『某人说了这话』；最典型的是 T5 与 KD1：『如来赐了我一颗定风丹，一柄飞龙宝杖』『我受了如来法令，在此镇押黄风怪』整条授权链只有菩萨自己的话，本单元如来未出场；T7 的 objective 因此标 inferred（他们一句话都没有，职责全靠行者转述+八戒推断）。(2) **结束≠成功**——T1 显式 resultIsSuccess=false（两次出战都没拿到行者，第二次呼风未成即被擒）；其余 true 逐条限定并写出失败面（T2 明写擒妖是菩萨的杖、他自己两次正面战斗都没赢；T5 明写定罪要到如来处、本单元未发生；T8 明写『生擒≠已伏法』）。(3) **未编造人物/事件/结局**——韵文里出现的一串名字（文殊、普贤、真武、梓橦、老君、寿星、王母、二郎、哪吒、天王、鲁班、龙王、雷公、阎王、牛头、马面、判官、盘古、观音）经 nameUsageAudit 逐处机械定位（zone=verse:<段名> 或 prose）：19 个名字**无一落在散文里**，一个都没进 tasks/states。此处我曾写错一次并已改正：原稿声称他们『全部只在黄风威力韵文的列举句里』，机械定位后发现『寿星』另在李长庚外貌韵文（『却似寿星出洞』）、『阎王』另在交战韵文（『打着的定见阎王』），准确说法是只出现在**韵文**里而非只出现在**那一首**韵文里。『黄风岭』在本切片内 0 次，我因此一律用原文的『黄风山』『黄风洞』。(4) **时间相邻不当因果**——rejectedAsCauseEdge 8 条主动否掉，保留的 12 条每条都有 mechanismKind + mechanism + mechanismOwner + caveat，CE2 自标『一般本事』四字的最小解读风险、CE5 自标『收回责怪只能从行为读出』。(5) **一次出现当伏笔**——rejectedAsForeshadow 8 条（虎皮、玛瑙药罐、二千里、三千里韵文、犬吠、定风桩/定风丹字面呼应、九头八尾骂语、风势韵文末句）；保留 6 条，其中 FS6 显式 unresolved 且 payoff/payoffAnchor 为 null。(6) **不用未知填默认值**——4 处 cost 为 null 且 basis.cost 同为 null，1 处 payoff/payoffAnchor 为 null，逐条列在 nullFieldsRule 与各条 caveat 里。(7) **定位≠语义**——semanticReview=not_performed，verify.py 的 A9 反向断言该字段必须为 not_performed。",
+      "result": "pass"
+    },
+    {
+      "text": "只写指定路径：本轮唯一写入的共享树文件是 loop/state/out/read_xiyou_L1_0021.candidate.json（任务 writes 指定路径）与提交记录 loop/state/out/read_xiyou_L1_0021.submit.json（loop/ 属追加式路径）。可复现检查：find js css index.html serve.py narrative.py scripts tests docs data -newermt '-30 minutes' -type f | wc -l → 0（未在共享树触碰任何受保护路径）。构建、复核、散文卫生、事实归属四个脚本都放在 /tmp/rd0021/，不入库、不影响并行 agent。未运行 GPU/浏览器测试（任务未声明要跑）；未执行 git checkout/reset/stash。",
+      "result": "pass"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/read_xiyou_L1_0021.candidate.json",
+      "kind": "append-only",
+      "note": "任务 writes 指定的候选文件，本轮新增。"
+    },
+    {
+      "path": "loop/state/out/read_xiyou_L1_0021.submit.json",
+      "kind": "append-only",
+      "note": "本提交记录，本轮新增。"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/df959d743e53206f56db2f92.docs.json": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+    "loop/state/out/read_xiyou_L1_0021.candidate.json": "32ead0e4ab5e774e870b7b396b38696755e6b6ffb1daf3e7c7c3e8805965309e"
+  },
+  "remaining": [
+    "语义未独立复核：本文件只保证引文逐字可定位、字段结构可由脚本重算、计数与覆盖可复现、factStatus 与原文引号对得上，不保证引文被放在正确的条目下，也不保证语义读对。semanticReview=not_performed，需 read-verify 由别的 agent 反向复核。",
+    "最可能被推翻的三处已写进 selfCritique.mostLikelyMisread：(1) CE1 把老妖出战的机制归给『损失程度升级』（败→死、烦恼→愈加烦恼）而非一次连续通报；(2) ST2/U7/KD1 用『缺失证据』判定行者不知老妖来历；(3) FS5 把『延迟揭示本相』算作伏笔。复核可优先攻击这三条。",
+    "自标较弱的条目：CE2（『一般本事』四字指什么是我据紧接着的风读出的）、CE5（行者『收回责怪』只能从行为读出）、CE8（『妖精怕她』是菩萨单方断言）、KD5（标 derived，唐僧是否知道点药靠反推）、T7.objective（标 inferred，护法神一句话都没有）。verify.py 对这五条只校验结构，不校验语义强度。",
+    "cost 口径：T1 与 T5 的 cost 标 inferred（T1 含『被擒』这一结果性描述、T5 含『宝杖是否回收原文未写』这一步推断）；T2 与 T4 的 cost 标 explicit 但都只是在原文里读到的实际支出（T2 眼睛受创与败退、T4 一小罐药里的少许 + 一顿斋饭 + 一夜铺盖），不含原文未写的损失；T3/T6/T7/T8 **四条**的 cost 为 null（原文无可读代价），basis.cost 同为 null。",
+    "FS6（飞龙宝杖的去向）严格说是『本单元未交代的物件去向』而不是叙事学意义的伏笔；RF1-RF8 八条是我主动否掉的『形似伏笔』（虎皮、药罐、二千里、三千里韵文、犬吠、定风桩/定风丹字面呼应、九头八尾骂语、风势韵文末句）。FS6 若被判不成立应移入 rejectedAsForeshadow。",
+    "unknowns 14 条多为原文自身的落差，本单元内无解：U1『张了三张』与巽地是否为术法规矩；U2 三花九子膏的『异人』；U3 老妖为何不立刻吃唐僧（理由在第二十回，区间外）；U4 两批小妖对虎先锋结局的两种说法；U5 老妖为何当众说出克星；U6 老者是否为伽蓝所化；U7 李长庚为何必须化身；U8『陈了一遍』的具体内容；U9 收尾被打死的四类兽名是原形还是动物；U10 黄风洞是否还在；U11 叙述层为何不给老妖名字；U12 伽蓝颂子是预告还是劝勉；U13 站点水印断句；U14 虎先锋之死在两方情报里的归属不一致。",
+    "5 条 mixed 引文节点：2 条承担断言（foreshadows[3].payoffAnchor frac=0.21、rejectedAsCauseEdge[3].evidence[2] frac=0.36，都在 narration 一侧）、3 条在 gapAnchors 里不承担断言。它们是『叙述句中夹一个称呼』的正常写法，未拆分；逐条记在 quoteAttributionAudit.mixedBoundaryNodes 里供复核直接核对。",
+    "gapAnchors 26 条只登记位置、claim 与 basis 都是 null，不计入任何断言；它们的用途是让复核者能按图索骥去问『这一段里还漏了什么』。覆盖率四栏分报（tasks 最窄一套 28.0% / 全部引文节点 40.2% / 加 gapAnchors 45.8% / 加整段区间 99.3%），并写明覆盖率不是分数。",
+    "crossUnitReferences 5 条（第二十回『且莫吃他着』偏移 140888、『且把他绑在后园定风桩上，待三五日』偏移 141004、『却被八戒一钯，筑得九个窟窿鲜血冒，一头脑髓尽流干。』偏移 142602、『这个功劳算你的』偏移 142857、虎先锋描述两个徒弟那整句偏移 140870）刻意不用 quote/start 键名，以免被任何遍历逻辑误当成本单元的引文节点；它们只作处境前值与归属对照，不承担断言。",
+    "未做：不跑 GPU/浏览器测试（任务未声明要跑）；不写回任何受保护路径；不做语义评审（属 read-verify 流）；不推算觔斗云的速度/里程换算（『二千里』与『三千里』两个口径我拒绝相减）；不解读《法华经》与『般若波罗』等义理句；不清理站点水印（清理会改动原文，只登记为 U13）。",
+    "图谱缓存 data/cache/df959d743e53206f56db2f92.json 未用于任何断言，也未做与本单元的差异对照（任务要求它只能用来对照已有结论）。",
+    "verify.py 的 A12 第一版抓不到注入漂移（负向对照全放过），重写后才有效；这说明本候选的 12 条自动判据里，A12 是唯一经过负向对照验证的一条，其余各条尚未逐条做注入测试——它们『跑出 PASS』不等于『有判别力』，这一点如实登记，不声称全部判据都已被证明有效。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/read_xiyou_L1_0021.candidate.json",
+      "loop/state/out/read_xiyou_L1_0021.submit.json"
+    ]
+  }
+}

@@ -1,0 +1,396 @@
+{
+ "task": "verify:dafeng:L1:0233",
+ "agent": "w-verify-2",
+ "role": "VERIFIER",
+ "status": "done",
+ "verdict": "partial",
+ "reviewedTask": "read:dafeng:L1:0233",
+ "reviewedArtifact": {
+  "path": "loop/state/out/read_dafeng_L1_0233.candidate.json",
+  "sha256": "4f3ec5376c1f618366b579032dfbf20dff0912dc2c8b4e9ab11daf925e0c0d20",
+  "producedBy": "w-read-2",
+  "role": "READER"
+ },
+ "source": {
+  "path": "data/cache/1063b17ca65ec1b76f30e460.docs.json",
+  "sha256": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+  "docIndex": 0,
+  "range": [
+   916516,
+   923035
+  ],
+  "codepoints": 6519,
+  "sliceSha256": "e5a762015753f7b4079118c6ad6826173563f0f1447837c64b47149d559ff8c2",
+  "unitHead": "第四章 请陛下赐死",
+  "recomputeCommand": "python3 -c \"import json,hashlib;d=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'));t=d[0]['text'];s=t[916516:923035];print(len(s),hashlib.sha256(s.encode()).hexdigest())\""
+ },
+ "duplicateClaimDisclosure": {
+  "what": "重复领取：本任务在我领取前 125 秒已由 w-sanguo-1 完成并提交，且**机器校验通过**（validation.problems=[]）。",
+  "priorRecord": "loop/state/out/verify_dafeng_L1_0233.json",
+  "priorRecordAgent": "w-sanguo-1",
+  "priorRecordSubmittedAt": "2026-10-14T23:40:27Z",
+  "myLeaseStartedAt": "2026-10-14T23:42:32Z（loop/state/leases/verify:dafeng:L1:0233.d/lease.json）",
+  "priorVerdictAtSubmission": "partial",
+  "whyItWasReposted": "该记录**不在** done_ids() 里。实测根因不是提交被拒，而是它把被复核任务的**记录**> `loop/state/out/read_dafeng_L1_0233.json` 当成 evidence 钉了哈希；而 cmd_verify 随后就会**写回该记录**（追加 reviews[0]、把 verifyState 由 pending 改为 partial）⇒ 哈希变化 ⇒ evidence_stale() 报 hash-changed ⇒ done_ids() 把它剔除 ⇒ worker 判定该 verify 任务仍未完成而再次派发。这是**自我失效的结构性竞态**：复核动作本身使复核记录的证据过期。",
+  "scanEvidence": "用 loop.py 自带的 evidence_stale() 全量扫描 863 条 verify 记录：35 条存在过期证据，其中 **10 条**正是过期在 `loop/state/out/<read|publish|...>_*.json` 这类**记录文件**上（verify:dafeng:L1:0233、verify:dafeng:L2:0198、verify:dafeng:L2:0210、verify:sanguo:L0:0020、verify:sanguo:L0:0022、verify:sanguo:L0:0028、verify:sanguo:L1:0091、verify:xiyou:L1:0015、verify:xiyou:L1:0031、verify:xiyou:L1:0087）。非本任务独有。",
+  "howIHandled": "① 我**没有**把 w-sanguo-1 的裁决当成自己的发现：我独立跑了引用层/顺序层/反向验证，一致处标『独立复现』，并单列了 4 条独立发现。② 我写入的是任务 writes 指定的唯一路径（该路径无法追加，只能整文件替换）。③ w-sanguo-1 的裁决**内容未丢失**：其 3 条 counterExamples（含 quote/start/end/why/severity）与 8 条 reverseChecks（含 quote/start/end/found/whyItMatters）以及 1598 字 notes 全文保存在 `loop/state/out/read_dafeng_L1_0233.json` 的 reviews[0] 中，我的覆写不触及该记录。④ **我造成的副作用如实登记**：在我覆写前，该记录的 evidence_stale 只有 1 项（read 记录，属既有竞态）；覆写后变为 2 项（多出 verdict.json 因被替换而 hash-changed）。即我的写入**未修复**该竞态，并让它多一条过期证据。",
+  "notFixed": "竞态在 loop/bin/loop.py 与任务定义里（不在本任务 writes 权限内），我只登记不修。正确修法是：verify 记录不要把会被 cmd_verify 写回的记录文件当证据，或让 evidence_stale() 对这类记录改用**追加式**判定（只比对 reviews 之前的部分）。"
+ },
+ "method": "先自己通读原文切片（6519 码点 / 180 非空段）并列出反向清单，再打开候选；对每条可机械核验的断言从原文重算，不用它的自述。① 引用层（逐字/偏移/切片内唯一/越界/sourceHash）；② 顺序层（自己实现机制先后、action≤result、锚点∈[before,after]、setup<payoff）；③ 反向验证（把引文触及的段落从原文扣除，重读剩余）；④ 误杀检查（10 条 rejectedEdges + 5 条 excludedSettings 逐条）；⑤ 幻觉检查（专名逐词 count）；⑥ 固定种子抽 5 条 quote。复现命令见 assertions。",
+ "mechanicalLayer": {
+  "quoteInstances": 207,
+  "distinctQuoteStrings": 92,
+  "verbatimFailures": 0,
+  "outOfSlice": 0,
+  "notUniqueInSlice": 0,
+  "contentPartitionInstances": 157,
+  "indexCopies": 50,
+  "note": "207 个『带 quote/start/end 的对象』逐条满足 full[start:end]==quote、切片内唯一、落在 [916516,923035)、sourceHash 为整文件 sha256。按顶层分区：内容分区 157（tasks 31 / causeEdges 35 / states 39 / foreshadows 21 / worldSettings 23 / themeReadings 8）+ 副本 50（crossSectionQuoteReuse 36 / speechLayerDisclosure 14）。与候选自述的『157 + 50 = 207』一致。",
+  "randomSample5": [
+   {
+    "quote": "陛下在灵宝观，随国师打坐，午后才回来，且等着吧。",
+    "find": 922261,
+    "declared": 922261,
+    "ok": true
+   },
+   {
+    "quote": "这有什么问题？许七安没听懂。",
+    "find": 919374,
+    "declared": 919374,
+    "ok": true
+   },
+   {
+    "quote": "南宫倩柔略显呆滞的望着他的背影",
+    "find": 917677,
+    "declared": 917677,
+    "ok": true
+   },
+   {
+    "quote": "许七安把云州的经过，巨细无遗的告诉魏渊，包括李妙真二号的身份、天宗圣女的身份。",
+    "find": 918664,
+    "declared": 918664,
+    "ok": true
+   },
+   {
+    "quote": "好好说一说云州的事。",
+    "find": 918640,
+    "declared": 918640,
+    "ok": true
+   }
+  ]
+ },
+ "orderLayer": {
+  "recomputed": true,
+  "causeEdgesMechanismVsOffset": 0,
+  "tasksActionNotAfterResult": 0,
+  "changeAnchorWithinBeforeAfter": 0,
+  "foreshadowSetupBeforePayoff": 0,
+  "note": "我独立实现顺序判据并对当前候选 14 边/8 任务/7 change/8 伏笔重算，**0 处矛盾**。buildDisclosure 声称的 4 处顺序更正我逐条与只读副本 PRIOR 对照，确认是真返工：e6 方向整条反转（PRIOR『魏渊先交底→许七安无保留』basis=derived ⇒ CUR『许七安交底→魏渊摊牌』basis=explicit，引文 @918617/@918664/@918809 偏移升序且直接支撑新方向）；f6 铺设/回收归属对调（PRIOR setup@920715>payoff@920655 ⇒ CUR setup@920654<payoff@920715）；t1.actor 删去『云州巡抚』（实测切片内『巡抚』count==0）；t3.action 移除晚于 result 的引文。"
+ },
+ "gateRegressionDiscrepancy": {
+  "claim": "buildDisclosure.gatesAddedThisRound.why 与提交记录 summary 均写『把上一版产物送进新增判据 ⇒ 报出 8 个问题』。",
+  "found": "该数字**只在合并 14a–14e 全判据时成立**；落盘的 `audit_order.result.txt` 只有 **7** 行。我复现：按 14a–14d 子集跑 PRIOR ⇒ 7 条（e4/e6/e13 引文非升序、s3/s5 锚点越界、f6 归属对调、t3 action 晚于 result）；并入 14e（身份词越界）⇒ **8** 条，正好补上『巡抚』。",
+  "verdictOnThis": "两个数**都对**，差别只在口径（7=落盘审计脚本的子集输出，8=构建脚本完整判据输出）。**不构成注水**，也不据此判 fail；但 disclosure 指向『见提交记录 assertions』而落盘产物只能看到 7 行，会让不复算的读者以为落盘证据有 8 行。记为**表述可改进**（存疑级）。"
+ },
+ "counterExamples": [
+  {
+   "claim": "tasks[5]（t6_censor_demands_punishing_zhang）的 obstacle=null 且 obstacleNote 断言『本区间没有写任何人反驳他，也没有写他遇到阻碍』。原文在紧接该请奏之后就有魏渊当朝把责任从张行英身上摘掉。",
+   "quotes": [
+    {
+     "quote": "张行英谎报案情，欺瞒陛下，请陛下治罪。",
+     "start": 921665,
+     "end": 921684,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+    },
+    {
+     "quote": "张行英误以为许七安殉职，这并不怪他。",
+     "start": 921769,
+     "end": 921787,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+    }
+   ],
+   "why": "原文段序：给事中出列请治罪 @921647-921684 → 元景帝没搭理并转问魏渊『为何如此』@921687-921697 → 魏渊答『…张行英误以为许七安殉职，这并不怪他。』@921717-921781（被引句 @921769-921781）。魏渊这句是**当朝对同一指控的公开反驳**：把『谎报』重新定性为『误以为』并明说『不怪他』，与给事中的请求直接对立，且是同一场戏内对该动议的唯一实质回应。候选把 obstacle 留 null 并写明『没有写任何人反驳他』，与原文相反。**边界**：这不改变 t6.result——『皇帝没搭理、动议落空』由 @921691 直接支撑，仍然成立；错的只是 obstacle=null 的**理由**。正确处置：obstacle 记为『魏渊当朝为张行英开脱』，或至少改写 obstacleNote 的理由。**独立复现**：上一轮复核者（w-sanguo-1）把同一处列为它的 RC2。",
+   "severity": "medium"
+  },
+  {
+   "claim": "rejectedEdges[4]（r5）用『紧接着』断言『这案子当然还是要处理的』紧随王首辅『把福妃案暂且揭过』这一动作。",
+   "quotes": [
+    {
+     "quote": "这案子当然还是要处理的",
+     "start": 921192,
+     "end": 921203,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+    },
+    {
+     "quote": "王首辅出列，轻描淡写的把福妃案暂且揭过",
+     "start": 921456,
+     "end": 921475,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+    }
+   ],
+   "why": "被引句 @921192，而它要解释的动作 @921456-921475 —— 被引句比动作**早 264 码点，中间隔着 6 段**（@921238 其余派系则思考着／@921273 想法各不同／@921332 那会是一场不啻于京察的腥风血雨／@921354 各党派需要花时间／@921379 像这种朝堂目的一致／@921441 陛下稍安勿躁）。『紧接着』声称的相邻关系与原文段序相反：该句描述的是**王首辅出列之前**群臣的普遍心态。**不推翻 r5 的结论**（福妃案此后仍要处理、并在下一场被派给许七安，方向确实与『撤案』相反，拒绝成立），错的是它给出的文本依据与顺序。这与候选在 buildDisclosure 里点名批评过的『引文全对、方向写反』同形态，出现在**未被顺序判据覆盖**的 rejectedEdges 自由文本里（判据 14 只覆盖 causeEdges/tasks/states/foreshadows）。正确处置：删去『紧接着』，改为『原文在此前的段落里已写明这案子当然还是要处理的』。",
+   "severity": "low"
+  },
+  {
+   "claim": "unknowns[18]（u19）把『能娶公主吗』这一问的主语写成元景帝。",
+   "quotes": [
+    {
+     "quote": "“能娶公主吗？”许七安小声问道。",
+     "start": 920077,
+     "end": 920093,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+    }
+   ],
+   "why": "u19.text 逐字为『元景帝问『能娶公主吗』这一问在魏渊那里得到了什么答案、意味着什么。』，而原文 @920073-920093 是『“能娶公主吗？”许七安小声问道。』——提问者是**许七安**；本切片内元景帝唯一一次以『问道』提问是 @922595『“国师何时能入一品？”元景帝问道。』。这不是措辞问题：同一条 u19.why 里候选自己**写对了**（『原文明写许七安小声问『能娶公主吗』』），text 与 why 自相矛盾。按契约属『把一个人的动作挂到另一个人名下』，更正前 u19.text 不可直接采信。**独立复现**：上一轮复核者已指出同一处。",
+   "severity": "low"
+  },
+  {
+   "claim": "speechLayerDisclosure 声称『凡引文区间与某个对白区间相交即列入』、checkedCount=14 / speechSpans=31，并保证『最容易把话当事实的两处我已在正文另行处理』。该披露的实际覆盖远小于它声明的口径。",
+   "quotes": [
+    {
+     "quote": "“他是怎么得到此药的。”",
+     "start": 921893,
+     "end": 921905,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+    },
+    {
+     "quote": "“但，监正一共只有五位亲传弟子。”",
+     "start": 919394,
+     "end": 919411,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+    },
+    {
+     "quote": "“封爵之事撤回。另，着铜锣许七安，速来见朕。”",
+     "start": 921955,
+     "end": 921978,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+    }
+   ],
+   "why": "按三条口径独立重算：① 候选自己声明的算法（深度归零才记账）确实只得到 **31** 段——切片有 **93** 个左引号、**89** 个右引号，4 处左引号不闭合（绝对偏移 @919040、@919929、@919987、@920427），深度计数器一旦 >0 就再不归零，最后停在 depth=4 ⇒ **@918942 之后 4093 码点（62.8% 切片）无一段对白被登记**。② 严格口径（引文在原文里被一对完整引号包住）：92 个不同引文串里 **25** 条是完整台词，候选只披露 **9** 条，**漏 16 条**（含本章标题动作的依据『前些日子，福妃坠阁身亡…严惩不贷。』，以及被用在多分区的『的确属实。』『孙玄机是二弟子。』『司天监的褚采薇赠予。』『据微臣所知…请陛下撤回。』等）。③ note 字面口径（与任一 “…” 区间相交）：应列入 **41** 条，候选只列 **14** 条。三条口径都指向**少列**。这**不推翻任何一条结论的引文真实性**（这 16 条逐字/偏移/哈希全对），但使『话语层风险已处理』这句保证覆盖不到大部分区间——披露机制存在、有代码、有产出，却不产生它声明要产生的信息。**独立复现**：上一轮复核者以相同根因（栈配对 vs 深度归零）列为它的第 1 条 counterExample（其 89 配对与我的 93/89 一致）；我另给出 25/9/16 与 41/14 两组口径，并把 4 处不闭合引号定位到确切偏移。",
+   "severity": "medium"
+  }
+ ],
+ "reverseChecks": [
+  {
+   "found": "魏渊在**宫门口**就把『封爵已撤回』与召见缘由预先告知许七安——这是他面圣前唯一一次获知封爵已失。候选 0 引文触及该段。",
+   "quotes": [
+    {
+     "quote": "魏渊颔首：“陛下召见你，是为福妃一案。”顿了顿，意味深长的说道：“封爵之事撤回了。”",
+     "start": 922122,
+     "end": 922164,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+    },
+    {
+     "quote": "城门内，大青衣负手而立，等待多时，身边侯立着南宫倩柔。",
+     "start": 922066,
+     "end": 922093,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+    }
+   ],
+   "whyItMatters": "这改变 e12 的时序依据：候选把『许七安得知封爵撤回』系于朝堂裁决的传召（@921956）与他事后的吐槽（@922170），而原文写明消息由魏渊当面预告（@922122-922155），他的吐槽因此是**当面听完之后的反应**。不推翻 e12 的方向，但其『落点是他听到消息后的反应』应把落点改到 @922122。",
+   "start": 922122,
+   "end": 922155
+  },
+  {
+   "found": "魏渊用**整整三段**向许七安解释爵位本身的价值（银子只是身外之物／唯有爵位才是脱离民籍成为权贵的凭证／将来娶妻必是豪门千金），直接回应许七安『只要该赏的银子不少我就成』。候选 0 引文触及这三段。",
+   "quotes": [
+    {
+     "quote": "银子只是身外之物，爵位象征的意义岂是银子可比？",
+     "start": 919930,
+     "end": 919953,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+    },
+    {
+     "quote": "唯有爵位，才是你彻底脱离民籍，成为王朝权贵的凭证。",
+     "start": 919988,
+     "end": 920013,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+    }
+   ],
+   "whyItMatters": "这是 w2/w5 两条规则之外、候选未登记的第三层爵位制度说明，也是 u19『能娶公主吗』的直接前因（魏渊刚说『将来娶妻…必是豪门千金才能与你般配』，许七安紧接着就问能不能娶公主）。候选把 u19 登为『反向复查补登的遗漏』，却没登记它的前因段。",
+   "start": 919930,
+   "end": 919968
+  },
+  {
+   "found": "朝堂戏三处实写事实未被候选任何引文触及：刑部尚书当面求宽限、大理寺卿请求告老还乡、元景帝开场**引述三法司答复原话**（引号嵌套）。",
+   "quotes": [
+    {
+     "quote": "刑部尚书惭愧道：“陛下，此案疑点颇多，迷雾重重，微臣已经竭尽全力了。请陛下再宽限几日。”",
+     "start": 920947,
+     "end": 920991,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+    },
+    {
+     "quote": "大理寺卿则说：“微臣能力不足，请求告老还乡。”",
+     "start": 920997,
+     "end": 921020,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+    },
+    {
+     "quote": "“三日之期已过，你们给朕的答复，就是一句“案情复杂疑点颇多，请求多宽限几日”吗？”",
+     "start": 920810,
+     "end": 920851,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+    }
+   ],
+   "whyItMatters": "候选 worldSettings 的 i2 只写了『折子递交 + 被砸』两态，把三位主官简化为『三法司一致消极办案』；原文实写的是**各说各话**（一个请宽限、一个请辞官），『一致』只落在折子文本上。不影响 i2 的 transfer/use 引文成立，但『一致』会掩盖两位主官的不同动作。u18 已把此点登记为 unknowns，方向正确。",
+   "start": 920947,
+   "end": 921021
+  },
+  {
+   "found": "元景帝在灵宝观当面向洛玉衡**第二次**表述对脱胎丸的芥蒂，且这次点名抱怨监正本人。候选把这份芥蒂的第二次表述完全留在 0 引文区。",
+   "quotes": [
+    {
+     "quote": "“唉，监正的心思，朕是越来越看不透了。当日朕向他索要脱胎丸，他不给，谁料今日朕得知，一个小小铜锣，都能享用此灵丹妙药。”",
+     "start": 922632,
+     "end": 922692,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+    }
+   ],
+   "whyItMatters": "f4 的 setup 只取朝堂上听到药名那一刻（@921800）与追问（@921894），payoff 只取御书房不提药（@922859）。原文在两者之间还有这次对国师的当面抱怨，是『芥蒂持续存在』的中间证据。未登记不影响 f4 的 unresolved 判定，但 f4 的证据链少一环。",
+   "start": 922632,
+   "end": 922722
+  },
+  {
+   "found": "洛玉衡的美貌与元景帝的欲念被正文正面写了两段，紧接着才是『其实只需要双修』那段规则说明。候选 0 引文触及该段。",
+   "quotes": [
+    {
+     "quote": "可以亵渎的仙子。",
+     "start": 922483,
+     "end": 922491,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+    }
+   ],
+   "whyItMatters": "w3（双修需心法配合、无法强求）与 f5 的引文都从『其实只需要双修』起，跳过了前面两段对欲念的正面描写。规则本身成立，但 f5『元景帝想以双修推进修为而不能』的动机强度在候选里被削弱了——原文先写欲念、后写做不到。",
+   "start": 922483,
+   "end": 922492
+  },
+  {
+   "found": "三法司两位主官与两侧大臣对许七安复生的当场反应被实写，候选 0 引文触及。",
+   "quotes": [
+    {
+     "quote": "那姓许的铜锣还没死？大理寺卿和刑部尚书心情复杂。",
+     "start": 921557,
+     "end": 921581,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+    },
+    {
+     "quote": "两侧的大臣们眼观鼻，鼻观心，一向喜欢和魏渊抬杠的给事中们也不说话了。",
+     "start": 921152,
+     "end": 921186,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+    }
+   ],
+   "whyItMatters": "k1 的 notKnownBy 列了『衙门里的打更人与吏员』，却没把**朝堂上的三法司主官**算进去——他们是在王首辅奏报后才知道的（@921553-921576），此前按殉职在办案。这补全 k1 的知识差名单。",
+   "start": 921557,
+   "end": 921576
+  }
+ ],
+ "misKillCheck": {
+  "rejectedEdgesReviewed": 10,
+  "excludedSettingsReviewed": 5,
+  "legalFactsWronglyExcluded": 0,
+  "detail": "逐条复核 10 条 rejectedEdges 与 5 条 excludedSettings，未发现**合法原文事实被词表/正则挡掉**。抽查：r1（死而复生→巫神教不打）被 @917313『秋收后打巫神教，计划不变』主动堵死，拒绝正确；r5 的**结论**正确（@921192 与下一场派发都证明案子仍要处理），仅其**引证顺序**写反（见 counterExamples[1]）；r9（请治张行英之罪→张行英被治罪）被 @921691『元景帝没搭理』堵死，拒绝正确。x1–x5 的排除理由（装饰性背景／能力说明／已被其他分区覆盖／术语层级／人物顾虑）与提示词『没有依据就不扩出地图、物品链或术语装饰层』一致。**唯一形态问题是 r5 的引证顺序**，属表述而非误杀。"
+ },
+ "hallucinationCheck": {
+  "fabricatedEntities": 0,
+  "endAsSuccess": 0,
+  "detail": "把候选分析文字与引文里的全部人名/地名/机构名逐词对切片 count：41 个专名（元景帝/魏渊/许七安/南宫倩柔/张开泰/张行英/王首辅/洛玉衡/监正/褚采薇/宋卿/杨千幻/孙玄机/金莲道长/太子/临安/福妃/李妙真/天宗圣女/神殊/国师/老太监/大理寺卿/刑部尚书/给事中/云鹿书院/许宁宴/巫神教/司天监/浩气楼/御书房/灵宝观/云州/许府/羽林卫/脱胎丸/长乐县子/勋贵集团/三法司/内阁/人宗道首）**全部在切片内出现**，无一条为原文所无。上一版无据的『云州巡抚』本版已删（实测『巡抚』count==0）。未发现『结束当成功』：t8.result 写明『案子有没有查清，本区间一个字都没写』，只登记回应；f3 标 unresolved 并写明『交办不等于查清』；t1.result 写『先定下爵位，随后被撤回』；t6/f7 把未执行的动议记为落空。正文层对『说法≠事实』的处理正确（k3、u7）。**唯一层次误置**：k4 把带引号的台词『“太子是临安的胞兄。”』放进名为 theNarrationContradicts（叙述与之矛盾）的字段（实测 t[920654]=='“'、t[920664]=='”'）。因 k4 已标 basis=derived 且结论由另两处引文支撑，记为**存疑/待更正**，不据此判 fail。",
+  "k4Note": "正确处置：把该句改挂到话语类证据，或注明它出自台词。"
+ },
+ "citationSample": {
+  "seed": 233,
+  "drawn": 5,
+  "verbatimHits": 5,
+  "offsetMatches": 5,
+  "sourceHashMatches": 5,
+  "items": [
+   {
+    "quote": "陛下在灵宝观，随国师打坐，午后才回来，且等着吧。",
+    "find": 922261,
+    "declared": 922261,
+    "ok": true
+   },
+   {
+    "quote": "这有什么问题？许七安没听懂。",
+    "find": 919374,
+    "declared": 919374,
+    "ok": true
+   },
+   {
+    "quote": "南宫倩柔略显呆滞的望着他的背影",
+    "find": 917677,
+    "declared": 917677,
+    "ok": true
+   },
+   {
+    "quote": "许七安把云州的经过，巨细无遗的告诉魏渊，包括李妙真二号的身份、天宗圣女的身份。",
+    "find": 918664,
+    "declared": 918664,
+    "ok": true
+   },
+   {
+    "quote": "好好说一说云州的事。",
+    "find": 918640,
+    "declared": 918640,
+    "ok": true
+   }
+  ]
+ },
+ "selfReportedCounts": {
+  "mismatches": 0,
+  "recomputed": [
+   "slice 6519 码点 / sha e5a76201…",
+   "tasks 8",
+   "causeEdges 14（13 explicit / 1 derived）",
+   "rejectedEdges 10",
+   "states 11（7 change + 4 knowledge_gap）",
+   "foreshadows 8（1 resolved / 7 unresolved）",
+   "worldSettings 13（rule 5=executed2/misunderstood2/declared1；place 6=arrived3/mentioned3；item 2）",
+   "excludedSettings 5",
+   "themeReadings 2",
+   "unknowns 20",
+   "notForeshadows 5",
+   "selfCritique 3",
+   "tasks 40 栏位 / 11 个裸 null 且全部带同名 Note",
+   "五栏引文两两不共用（我复算 0 重复）",
+   "coverage 180/77/103（零覆盖清单 40 条标 truncated，我逐条核对这 40 条确实未被任何引文触及、start/text 与原文逐字一致）",
+   "crossSectionQuoteReuse 36",
+   "speechSpans 31（按候选自己的深度归零算法确实是 31）"
+  ],
+  "note": "自述的**结构性计数**全部复算一致。**唯一与自述不符的是 speechLayerDisclosure 的覆盖口径**（见 counterExamples[3]）：31 是它那个算法的真实输出，但该算法因 4 处不闭合引号在切片中途失步，使披露覆盖率被严重高估。"
+ },
+ "independentFindings": [
+  "① 『8 个问题』这一回归数字的实际口径：合并 14a–14e 全判据 ⇒ 8 条（含 14e『巡抚』）；落盘 audit_order.result.txt 只有 7 行（只跑 14a–14d）。两个数都对，但披露指向『见提交记录 assertions』而落盘产物少一行，属表述可改进。",
+  "② e5 的更正**不属于**顺序判据抓到的那一类：PRIOR 的 e5 引文偏移 [918358, 918443] 是升序的，14a 不会 flag 它（我实测 14a 只抓 e4/e6/e13）。e5 原描述『守卫先问姓名、再听来历』与原文段序确实不符（原文：守卫迟疑 @918285 → 许七安自报来历 @918337/@918358 → 守卫**后**才问姓名 @918388 → 『许倩』@918409 → 放行 @918443），该更正**成立**；但它不是 14a 判据的产物，而是人工复读发现的。不影响产物正确性，仅影响『判据覆盖了什么』这一自述的准确度。",
+  "③ 重复领取与自我失效竞态（见 duplicateClaimDisclosure）：verify 记录把被复核任务的**记录**当证据钉哈希，而 cmd_verify 随后就会写回该记录。用 loop.py 的 evidence_stale() 全量扫描 863 条 verify 记录：35 条过期，其中 **10 条**过期在这类记录文件上。属环境缺陷，不在 writes 权限内，只登记不修。",
+  "④ 我自己的反向检查脚本曾出现一次口径错误并已修正：最初用 `sl.count(quote)!=1` 判定唯一性时把『同一引文在切片出现 2 次』与『被两个分区复用』混为一谈，一度算出 16 条『不唯一』；改按 full[start:end]==quote 且切片内 count==1 重算后为 0 条。另有一次用 `Path` 传给 `loop.py load_json` 之外的口径把 863 条记录数成 0 条，改传绝对路径后正确。记在这里提醒后续复核者：**反向检查脚本自身出错会伪造出一整批假发现**。"
+ ],
+ "usableVsDiscard": {
+  "usable": [
+   "全部 207 条引文（逐字/偏移/哈希/切片内唯一 0 失败）",
+   "tasks 8 条的五元组结构（11 个 null 全部带真实理由）——**但 t6.obstacle 的理由须按 counterExamples[0] 改写**",
+   "causeEdges 13 条 explicit（方向与偏移经独立顺序判据复算 0 矛盾；e6 的反转正确）",
+   "e12 的 derived（自陈风险属实，标注诚实）",
+   "states 7 条 change 的前值/后值/锚点（s5 已登记 narrationOrder=flashback、s3 已换锚点）",
+   "k1/k2/k3 三类知识差（k3 对『说法≠事实』的处理正确）",
+   "f8 的 resolved 与 7 条 unresolved 的判定",
+   "worldSettings 13 条的 rule/place/item 三态与 institution 取值",
+   "unknowns 20 条（u18/u19/u20 所引原文均逐字存在）",
+   "themeReadings 2 条带 counter（未用事件密度/篇幅中点定义高潮）"
+  ],
+  "mustFix": [
+   "t6.obstacleNote：『本区间没有写任何人反驳他』与原文 @921769 相反（counterExamples[0]）",
+   "rejectedEdges r5.whyRejected：删去『紧接着』（counterExamples[1]）",
+   "unknowns u19.text：提问者是许七安不是元景帝（counterExamples[2]，u19.why 已写对）",
+   "speechLayerDisclosure：披露口径与实际覆盖不符，须按完整台词口径补登 16 条或改写声明（counterExamples[3]）",
+   "k4：字段名 theNarrationContradicts 应收敛为话语类（存疑级，见 hallucinationCheck）"
+  ],
+  "downgradeToUnknowns": [
+   "k4 的 knownBy 空数组与『读者知道许七安说谎』这一判断（候选已自标 derived，我同意保持 derived）",
+   "r5 的**引证依据**（结论保留，依据改写）"
+  ],
+  "notAffected": "上述各处**均不改变**任何一条引文的真实性，也不改变任何一条可采信结论的方向（t6 的动议落空、r5 的拒绝、e12 的方向均仍成立）；无编造实体、无『结束当成功』。故判 **partial** 而非 fail：契约要求 fail 必须有 counterExample 且 quote 逐字可查——我的 counterExamples 确实逐字可查，但它们推翻的是**栏位理由与披露口径**，不是被抽取的事实本身；反向亦不成立把『引证成立但不推翻结论』升级为 fail 的理由。"
+ },
+ "notes": "独立复核 read:dafeng:L1:0233（《大奉打更人》第四章 请陛下赐死，[916516,923035)，6519 码点 / 180 非空段）→ **partial**。**引用层零缺陷**：207 条引文实例（内容分区 157 + 索引副本 50）逐条 text[start:end]==quote、切片内唯一、不越界、sourceHash 为整文件 sha256，失败 0；固定种子 233 抽 5 条 5/5 逐字命中且偏移一致；18 项自述结构性计数复算 0 不符。**四条 counterExample**：① t6.obstacle 的理由与 @921769 魏渊当朝为张行英开脱相反（最重）；② speechLayerDisclosure 口径失步导致少列（根因是 4 处不闭合引号 @919040/@919929/@919987/@920427，覆盖率被高估，严格口径漏 16 条完整台词）；③ r5 用『紧接着』引证早于动作 264 码点的句子；④ u19.text 把提问者写成元景帝。**六条反向发现**（宫门预告撤回、爵位价值三段、两主官各说各话＋引号嵌套引述原话、灵宝观第二次抱怨、可以亵渎的仙子、两主官心情复杂）全部落在候选 0 引文触及的段落且逐字可查。**未做的事（remaining）**：① 未做语义真值判断——福妃案真相在区间内本就无证据（候选标 u7 正确），我无外部依据可判；② 未读本区间之外的原文，e12/f6/f1 涉及的前后卷内容只用切片内引文判断，f1 引用的 read:dafeng:L1:0229 我未打开核对；③ 未校验构建脚本可复现性（未重跑 build_candidate.w-read-2.py，仅读其判据源码）；④ 未修 duplicateClaimDisclosure 里的结构性竞态（不在 writes 权限内）。**诚实登记**：我领到的是一个**已被另一 agent 完成且机器校验通过**的任务（前提交早于我租约 125 秒）；它之所以仍被派发，是因为其证据句柄 read_dafeng_L1_0233.json 在复核写回后哈希变化而自我失效（全量 863 条 verify 记录中 10 条同形态）。我因此没有把它的裁决当成自己的发现：一致处标『独立复现』，另列 4 条独立发现；我覆写的是任务唯一指定路径，w-sanguo-1 的 3 条 counterExamples 与 8 条 reverseChecks 全文仍完整保存在 read 记录的 reviews[0] 中。"
+}

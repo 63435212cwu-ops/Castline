@@ -1,0 +1,104 @@
+{
+  "task": "read:dafeng:L0:0096",
+  "agent": "w-read-4",
+  "status": "done",
+  "summary": "精读《大奉打更人》第九十七章「风云变色」（docs[0].text[307433,312128)，4695 字）的**第二轮修订版**候选。本轮不是重读重写，而是按独立复核 verify_dafeng_L0_0096.verdict.json（w-verify-2，partial，针对 sha256 2b207024…）逐条处置：4 条 must-fix（CE-V1..CE-V4）+ 6 条反向发现（RC-V1..RC-V6；RC-V7 是复核自己的反向发现被自己推翻，确认候选原判断正确，无改动）。CE-V1：F3.seed 的排他性断言「求救声只针对许七安一人响起」改写为「叙述只写许七安一人听见（未交代旁人是否听见）」，basis/strength 由 explicit 降为 inferred（复算：text.count('只针对许七安一人')==0；区间内『只有许七安』『一人听见』『唯独』『只有他』『旁人听不见』全 0 命中）。CE-V2：三处内联偏移订正 308047→308050、309150→309156、308186→308193（我独立复算：「玉石小镜」唯一命中 @308050、「地书碎片」唯一命中 @309156、「无据可考，可信度不高」起于 @308193）。CE-V3：CE1.mechanism 删除全书 0 命中的自造表述「不走耳朵」，收窄为「声音带给他的痛苦作用于元神而非肉体（叙述未说它不经过耳朵）」，处置说明移入独立字段 mechanismNote 而不混进断言字段。CE-V4：S5.before 补引 309473（「魏渊收回目光，望向了不远处的皇后」），**删除**无引文支持的「回想当年」，309559/309575 降为 contextQuotes（它们的语法主语是叙述者在评述皇后容貌变迁，不是魏渊的心理动作）。补入 RC-V1 恐惧起始两级（307802/307883）与冷颤收束（307949）、RC-V2「没有搭理二号」（308124）、RC-V3「擅长推理的许七安」（309085）、RC-V4 魏渊—皇后前三句、RC-V5「汗流浃背」（310125）、RC-V6 剑的猜测链（308363/308377/308391）。引文层不整体重写：旧稿 69 个引文起点**零丢失**，新增 12 个，共 119 个节点（区间内 112 / 区间外 7），全部逐字回切成立。metrics 由 102/95/7/69 重算为 119/112/7/81。",
+  "evidence": [
+    {
+      "path": "loop/state/out/read_dafeng_L0_0096.candidate.json",
+      "sha256": "fa652d76d81e6ab44673f1b5f18a40235b386cf887a4d43e113aef8eeadc14a9"
+    },
+    {
+      "path": "loop/state/out/verify_dafeng_L0_0096.verdict.json",
+      "sha256": "86020db8183439ee0f0aa7e207a7b1938693e114ed81d949a6e245a8dda354e2"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "源文件哈希：shasum -a 256 data/cache/1063b17ca65ec1b76f30e460.docs.json == task.sourceHash（fdde5558…），实测一致",
+      "result": "pass"
+    },
+    {
+      "text": "偏移口径自检：docs[0].text[307433:307443] == '第九十七章 风云变色'；下一章标题『第九十八章 不为人知的隐秘』恰在 312128（=区间终点）；切片长度 4695 与声明一致；sha256(切片 utf-8)==bd22d42a…（另起 segmentSha256 字段，未覆盖 sourceHash）",
+      "result": "pass"
+    },
+    {
+      "text": "对**已写出的候选文件**独立自检（只读最终字节，不 import 构建脚本）：python3 \"$AGENT_ARTIFACTS/probe-0096b/verify_own.py\" loop/state/out/read_dafeng_L0_0096.candidate.json → exit 0，ALL CHECKS PASS。119/119 引文节点 text[start:end]==quote 逐字回切；occurrencesInFullText 与 text.count 全部一致；区间内 112 个全部落在 [307433,312128) 且无 outOfRange 混标；区间外 7 个全部带 outOfRange=true 与 whyOutOfRange；112 个 paragraphIndex1Based 与我独立重建的段首表零不一致",
+      "result": "pass"
+    },
+    {
+      "text": "**独立重算复核的四条 must-fix 原文依据**（不复用复核脚本）：python3 \"$AGENT_ARTIFACTS/probe-0096b/check_ce.py\" → text.count('只针对许七安一人')==0 且区间内 5 处『只针对』0 命中；t[308050:308058]=='玉石小镜'、t[309156:309160]=='地书碎片'、t[308193:308197]=='无据可考'（旧写 308047/309150/308186 分别指向『取』『他』『过』字）；text.count('不走耳朵')==0；text.count('回想当年')==0。四条 CE 我都在原文中独立复现，不是照抄复核结论",
+      "result": "pass"
+    },
+    {
+      "text": "本轮 4 条 must-fix 的**结构性**回归断言（查字段与偏移，不靠整文件裸串匹配——因为『已删除 X』的处置说明里必然要写出 X）：F3.seed.text 不含『只针对许七安一人』且 seed.basis/basis/strength 三者均==inferred；S5.before.text 不含『回想当年』且 before.quotes 含 start==309473；CE1.mechanism/from/to 不含『不走耳朵』；全文署名字段中偏移 308047/309150/308186 已 0 残留、308050/309156/308193 已写入",
+      "result": "pass"
+    },
+    {
+      "text": "RC-V1..RC-V6 六条反向发现的**补入存在性**断言（按字段路径定位，不靠计数）：CE1 含 start 307802/307883/307949；S6.after.quotes 含 308124；F1.seed.quotes 含 309085；S5 含 309559/309575；T3.cost.quotes 含 310125；F2.guessChain 含 308363/308377/308391。11 项全部 OK",
+      "result": "pass"
+    },
+    {
+      "text": "**变异验证**（证明自检不是恒绿）：python3 \"$AGENT_ARTIFACTS/probe-0096b/mutate.py\" → MUTATION CHECK PASS，4/4 注入缺陷均被抓出（exit=1）：坏偏移（REBACK-FAIL）、跨栏复用（COLUMN-REUSE）、null 栏抽掉 Note（NULL-WITHOUT-NOTE）、区间外节点冒充 inUnit（OUT-OF-RANGE-BUT-inUnit）。变异体写在 CL_ARTIFACTS，运行前后被检文件哈希不变",
+      "result": "pass"
+    },
+    {
+      "text": "tasks 五栏分栏自检：构建期与自检期都用集合断言『同一 quote 不得在同一任务五栏出现两次』，4 个任务全部通过；非 null 栏位都有 quotes，null 栏位（T1.cost / T2.result / T2.cost / T4.obstacle / T4.cost）在**栏位内部**都有同名的 <栏位>Note 且非空",
+      "result": "pass"
+    },
+    {
+      "text": "不丢失已复核通过的引文层：对基线（复核针对的 2b207024 版本，副本留存于 $AGENT_ARTIFACTS/probe-0096b/base_reviewed_2b2070.json）与新稿作引文**起点**差集，**LOST = 0**（旧稿 69 个起点一个未丢），ADDED = 12 个，全部为复核 CE/RC 要求补入或订正的证据",
+      "result": "pass"
+    },
+    {
+      "text": "构建确定性：从固定基线连跑两次，输出 JSON 逐字节相同（sha256 0d8b0e3d… == 0d8b0e3d…，sort_keys=True）。构建脚本不读活的候选而读仓库外保留的基线副本——这一点是本轮实测修出来的：第一版读活候选，被自检脚本回写 metrics 污染后构建即不可重放（脚本当场 assert 中止）。命令：python3 \"$AGENT_ARTIFACTS/probe-0096b/patch_0096.py\" <out>；脚本内每条新增引文在写入前用 text.count()==1 断言唯一性并逐字回切，失败即中止不产出",
+      "result": "pass"
+    },
+    {
+      "text": "写入原子性：用 tempfile+os.replace 同目录替换，写入前后哈希 before=2b207024… / after=fa652d76…，after 与构建产物哈希一致，中途不会让读者看到半个文件。替换前的原始字节留存于 $AGENT_ARTIFACTS/probe-0096b/base_reviewed_2b2070.json（sha256 2b207024…，仓库外）",
+      "result": "pass"
+    },
+    {
+      "text": "未改任何受保护路径：本任务只写 loop/state/out/read_dafeng_L0_0096.candidate.json 一个文件（changes 只有它一条）。构建/自检/变异探针全部放在 CL_ARTIFACTS 指定的测试产物目录（仓库外）。自检脚本第一版曾把报告写进 loop/state/out/，已改为写 CL_ARTIFACTS 并删除了那个多余文件（loop/state/out/ 下现存 0 个 selfcheck 文件）",
+      "result": "pass"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/read_dafeng_L0_0096.candidate.json",
+      "kind": "append-only"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/1063b17ca65ec1b76f30e460.docs.json": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "loop/state/out/read_dafeng_L0_0096.candidate.json": "fa652d76d81e6ab44673f1b5f18a40235b386cf887a4d43e113aef8eeadc14a9",
+    "loop/state/out/verify_dafeng_L0_0096.verdict.json": "86020db8183439ee0f0aa7e207a7b1938693e114ed81d949a6e245a8dda354e2"
+  },
+  "reworkOf": "loop/state/out/read_dafeng_L0_0096.candidate.json#2b2070249c7123e735113c05fcaf18cc80d2796a54e05fcd9e3f6d5da1a88ec4",
+  "reworkReason": "独立复核 verify_dafeng_L0_0096.verdict.json（w-verify-2）总判 partial，usableVsDiscard.mustFix 列出 4 条『改一句话即可保住其余全部已核验内容』的必须修正项（CE-V1..CE-V4），shouldAdd 列出 RC-V1..RC-V6 六条建议补入。四条必须修正项已在保留原引文层（0 起点丢失）的前提下逐条处置。",
+  "verifyState": "pending",
+  "remaining": [
+    "未做语义核验：semanticReview.performed=false，本文件只完成引文定位与原文直述/推断分层。引文定位正确 ≠ 语义已核验。",
+    "本轮是**定点修订**而非重读全文后的重写：我按复核结论逐条处置，未独立复核旧稿每一条推理是否成立。",
+    "旧稿在 read 提交记录里自述『33 处内联偏移 0 处错配、12 对配对』——复核实测是 31 对、3 对真错位。我本轮只订正了复核点名的 3 处，**没有**重跑全量内联偏移核对，因此本文件也不声称已做该核对；该自述的失效部分已在 W4.note 与 revisionOf 里如实记录。",
+    "F3（求救声来源）的回收点只在偏移 4350292 核到该句逐字存在，中间约 404 万字未通读，可能另有更早的交代——若复核要求『最近回收点』，本条的回收位置可能提前。",
+    "F5（秋后算账）我只逐处看过全文另外 8 处『秋后算账』的上下文，未通读全书确认它是否在别处被兑现。",
+    "T2.result=null 与 F4=unresolved 基于『区间内 + 下一章 + 杨砚下次出场点』的检索；若存在我未检索到的执行描写（魏渊『把他带走』是否执行），这两处应改写。",
+    "区间尾部 1734 字为上架感言（偏移 310394 起），按非正文排除，未提取任何内容（见 coverage.excludedTail 与 unknowns 末条）。若复核口径认为它也需覆盖，这是我的有意排除。",
+    "CE-V4 中我**删除**了『回想当年』而不是补引让它成立，理由是该句主语是叙述者。若复核认为『可想当年是何等绝色。』是自由间接引语（魏渊视角），该处判断应改写——这是本段我最没把握的一处，已写进 selfCritiqueThisRound。",
+    "本文件在 revisionOf.priorRevision 里保留了上一轮（针对 44b20ee6→2b207024 那次复核）的修订链，未覆盖。",
+    "未跑任何 GPU/浏览器测试（本任务不需要，且 GPU 全局串行）。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "restore-previous-bytes",
+    "note": "本任务只改一个文件。替换前的原始字节完整留存于 $AGENT_ARTIFACTS/probe-0096b/base_reviewed_2b2070.json（sha256 2b2070249c7123e735113c05fcaf18cc80d2796a54e05fcd9e3f6d5da1a88ec4）；如需回退，用该文件覆盖 loop/state/out/read_dafeng_L0_0096.candidate.json 即可。未改动任何受保护路径。"
+  },
+  "submittedAt": "2026-10-11T18:28:58Z",
+  "wallClockSeconds": 598,
+  "wallClockFrom": "lease.startedAt",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-11T18:28:58Z"
+  }
+}

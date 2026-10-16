@@ -1,0 +1,112 @@
+{
+ "task": "read:xiyou:L1:0051",
+ "agent": "w-read-3",
+ "status": "done",
+ "summary": "精读《西游记》第五十一回「心猿空用千般计　水火无功难炼魔」（docs[0].text codepoint [367295,374269)，6974 字，36 个自然段全部读过）。产出 200 个引文节点，全部由 build.py 以 (head, tail) 片段在该区间内**切出**并回填全文绝对偏移（逐字性是构造性质，不是事后检查），再由独立的 verify.py 从盘上重读候选与原文做六项机械复核。tasks 7 条五元分列（T1/T3 的 cost 为 null 并各写明 costNote 理由），causeEdges 9 条（每条带 direction/trigger/mechanism）、rejectedEdges 4 条（时间相邻不当因果的显式反例），states 8 条、knowledgeDiffs 4 条、foreshadows 5 条（F2/F3/F4 显式 unresolved）、worldSettings 15 条（item 6 / place 4 / rule 5，placeState 与 itemStates 逐条落到字段）、themeReadings 2 条（各带 counter）、unknowns 10 条、selfCritique 5 条。语义复核未做，semanticReview.performed=false。",
+ "evidence": [
+  {
+   "path": "loop/state/out/read_xiyou_L1_0051.candidate.json",
+   "sha256": "9f4df68ec24fc659cdc6b658333bd9f7f38569497eb8df9a3d159a0560d3281d",
+   "kind": "candidate",
+   "note": "本轮产出（writes 指定的唯一写入物）：200 个引文节点，逐字/区间/哈希/唯一性/跨度不重叠/分区齐备六项复核全通过"
+  },
+  {
+   "path": "/Volumes/资源库/我的资源/回滚点/项目/cl0051-xiyou/build.py",
+   "sha256": "c64b6b9b44554c7e9eb5491e8135a442b549158ca10616201539d49354e2c373",
+   "kind": "probe",
+   "note": "候选构造脚本。开工前 assert 整个 docs.json 的 sha256 == c282cf39…，不符即拒绝运行；引文一律切片生成。自带四项自检（逐字/区间/哈希/唯一性 + 同任务跨栏共用句 + 分区齐备 + null 栏必须有 Note），任一不过即拒绝写盘。"
+  },
+  {
+   "path": "/Volumes/资源库/我的资源/回滚点/项目/cl0051-xiyou/verify.py",
+   "sha256": "f703c79120b0a81d6ed44f7c5eafb8b07e7a1b91fbe08f381429ec35d088f18f",
+   "kind": "independent-verifier",
+   "note": "独立复核脚本：只从盘上重读候选与原文，不引用 build.py 的任何内存状态。A 源哈希 / B 区间口径 / C 逐字 / D 唯一性与首次出现 / E 五栏跨度不重叠（比同起点更严）/ F 分区与 null 理由，六项全过才 exit 0。"
+  }
+ ],
+ "assertions": [
+  {
+   "text": "源哈希：`shasum -a 256 data/cache/a065244455cfb2221bcda94a.docs.json` = c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2，与 task.sourceHash、候选 source.sourceHash、以及全部 200 个引文节点各自的 sourceHash 逐一一致（verify.py 的 A 与 D 项逐节点比对）。build.py 在开工前 assert 整个 docs.json 的 sha256，不符即拒绝运行。",
+   "result": "pass"
+  },
+  {
+   "text": "区间口径自检（可用候选 reproduce.cmd_head 复现）：`t[367295:367316]` == '第五十一回　心猿空用千般计　水火无功难炼魔' 逐字成立（以本单元标题开头）；`len(t[367295:374269])` == 6974，与任务声明字数一致；每条引文的 start/end 都满足 367295 <= start 且 end <= 374269。verify.py 的 B、C 项复算通过。",
+   "result": "pass"
+  },
+  {
+   "text": "逐字性：200 个节点全部满足 `docs[0].text[start:end] == quote`。此项由构造保证（引文以 head/tail 片段在区间内 find 后切片），并由 verify.py 的 C 项独立重读复算，两类检查均为 0 异常。",
+   "result": "pass"
+  },
+  {
+   "text": "唯一性：每个节点另带 wholeTextOccurrences 与 firstOccurrenceAt，二者与 `text.count(quote)` / `text.find(quote)` 在**全文**（722176 字）范围内逐一相符（verify.py 的 D 项）。因此「引文在全文里唯一」与「首次出现位置」都可机械复现，不靠我目测。",
+   "result": "pass"
+  },
+  {
+   "text": "五栏不共用句：对每个 task 的 objective/obstacle/action/result/cost 收集全部引文跨度，做**两两区间重叠**检查（比只查同一起点更严）。7 条任务全部无重叠。构造期同一检查亦为 0（build.py 的「同任务跨栏共用同句」），两次独立实现结果一致。",
+   "result": "pass"
+  },
+  {
+   "text": "null 栏必须写明理由：T1 与 T3 的 cost 为 null，各带 costNote 说明为什么本区间没有代价描写（T1 上界往返无伤无损无罚；T3 雷捎未被套、二雷公无损伤）。verify.py 的 F 项检查每个 null 栏都有非空同名 Note，通过。",
+   "result": "pass"
+  },
+  {
+   "text": "内容分区齐备：直接调用 loop.py 自身的 required_sections(task.prompt) 得到 ['tasks','causeEdges','states','foreshadows','worldSettings','themeReadings']，再调用 loop.py 自身的 validate_sections(rec, task) 对候选求值，返回 []（无缺失）。",
+   "result": "pass"
+  },
+  {
+   "text": "worldSettings 三态区分落到字段：4 条 place 全部给 placeState（4 条均为 arrived，各有到达动作的原句：顷刻而到／径入南天门里／至彤华宫／径到北天门外），未把任何「提及/图谋」写成到达；6 条 item 全部给 itemStates 多选数组（WS6 雷捎只给 hold，因为原文只写「不曾放了雷捎」，没有 transfer/lose；四条独立物件各自成条，未合并成物品链）；5 条 rule 全部给 institution（WS11/WS12/WS14/WS15 = executed，WS13 = misunderstood，因为那是李天王的理解且被原文两次失败证伪）。类目计数：item 6 / place 4 / rule 5。另有 worldSettingsExcluded 5 条写明哪些泛论与装饰性设定**没有**收进来。",
+   "result": "pass"
+  },
+  {
+   "text": "引用照原文用字、未改写成现代汉语动词：object 侧照录「套将下来」「套将下去」「收为本相」「捞了去了」「抢去」「靠在东壁」「拿了铁棒」「取出」「向里一倾」「不曾放了」，未替换为「获得/丢失/持有」等现代词。",
+   "result": "pass"
+  },
+  {
+   "text": "「结束≠成功」：T1 的 result 明确写查勘**没有**拿到答案（可韩司两次回奏「并无思凡下界者」，妖精来历仍未解）；T3/T4/T5/T7 四条任务的 result 都写成失败或被破（雷捎未放、火具被套、水未入洞反淹民田、分身被收），没有因为原文推进到本回末尾就把 result 写成成功。",
+   "result": "pass"
+  },
+  {
+   "text": "未把人物台词当叙述事实：在**承载断言的容器层**逐条标了 claimStatus，并在 note 里写明哪一半是台词、哪一半是叙述。计数（脚本实算）：tasks 的 33 个分栏里 14 个带 claimStatus、9 条 causeEdges 里 6 条、8 条 states 里 5 条、4 条 knowledgeDiffs 里 2 条；分布为 dialogue 14 / mixed 9 / interior-monologue 3 / decree 1。行者的两处推断（定是天上凶星、天上将胜似老孙者少）标为 interior-monologue 且写明是**他的判断**、其中第一条已被同区间查勘结论证伪。**说明**：claimStatus 标在容器（分栏/边/状态）上而不是标在 200 个引文节点上——节点层只有 quote/start/end/sourceHash 与定位元数据，这一点在核对断言文字时已按实算更正。",
+   "result": "pass"
+  },
+  {
+   "text": "未声称语义复核：候选 semanticReview.performed = false，note 写明「本候选只做了引文定位核验与逐条人工比对；未做也不声称任何 semanticReview 完成」。定位正确不等于语义已核验。",
+   "result": "pass"
+  },
+  {
+   "text": "未出现原文没有的人物或事件：本候选提到的全部专名（孙悟空/行者/老孙/唐僧/兕怪/魔王/广目/马赵温关四大元帅/张道陵/葛仙翁/许旌阳/丘弘济/玉帝/可韩丈人真君/李天王/哪吒/邓化/张蕃/雷公/火德星君/水德星君/黄河水伯/多闻天王/庞刘苟毕四大天将）逐一在区间内 `find` 命中；「三藏」「八戒」「沙僧」「太白金星」等**未在本区间出现**的名字，我一个都没有用。全篇未写妖精的真名或来历（原文只说「不知是甚么宝贝」，见 unknowns）。",
+   "result": "pass"
+  },
+  {
+   "text": "只写任务 writes 指定的路径：`git status --porcelain` 里 loop/state/out/ 下本轮新增的只有 read_xiyou_L1_0051.candidate.json；受保护路径（js/ css/ index.html serve.py narrative.py scripts/ tests/ docs/ data/）本轮**没有**被我改动（那些路径下的未提交改动属并行 agent，与本轮无关）。未跑任何 GPU 或浏览器测试。",
+   "result": "pass"
+  }
+ ],
+ "changes": [
+  {
+   "path": "loop/state/out/read_xiyou_L1_0051.candidate.json",
+   "kind": "append-only",
+   "note": "任务 writes 指定的唯一写入物。本轮为该路径的首次写入（此前不存在），无覆盖他人产出。"
+  }
+ ],
+ "sourceHashes": {
+  "data/cache/a065244455cfb2221bcda94a.docs.json": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2"
+ },
+ "leaseNote": "本任务的租约自 2026-10-12T04:47:01Z 起由 w-read-3（pid 43547）持有，本 agent 即该 worker 启动的 READER 子进程（父链：dsh → worker.py 43547）。开工前我曾用自拟 agent 名跑 `loop.py next --claim`，它返回了另一条任务 read:xiyou:L1:0047 并建了一条**幽灵租约**（pid 指向已退出的 loop.py 进程，正是 cmd_reap 文档里记的那类事故）。我已用 `loop.py release --task read:xiyou:L1:0047 --agent reader-xiyou-51` 释放该幽灵租约（rc=0），未占用、未改动 0047 的任何产出。",
+ "remaining": [
+  "语义仍未核验：semanticReview.performed=false。本轮做的是引文定位核验（逐字/区间/哈希/唯一性/跨度不重叠）与逐条人工比对；全部 200 个引文节点的**语义正确性**仍需独立复核者按 VERIFIER 契约读原文后判。",
+  "F1「金箍棒被夺 → 主杖还归本人」的**铺设段落在第五十回**，不在本区间内。setup 栏引的是本区间内的重述句（「于今是没棒弄了」），已在 note 里写明。若复核者要求铺设与回收都落在本区间内，这条应被移除——我选择保留并显式标注，而不是隐去不说。",
+  "T7 的 cost 与 result 引的是同一句里**两个不相交的分句**（cost 取「把那三五十个毫毛变的小猴收为本相」，result 取「套入洞中，得了胜，领兵闭门，贺喜而去。」）。两个跨度不重叠、不是同一节点，但出处是同一句。已在 selfCritique 首条显式标出，请复核者判。",
+  "K3 只有一半可坐实：魔王当面认出哪吒（本区间叙述＋台词俱在）可坐实；「魔王认得行者」这一半只有行者自己的回想（『我记得他在阵上夸奖道』），原始出处是第五十回，本区间没有当场重演。已按转述处理并写明。",
+  "未核验：妖精（兕怪）的真实来历与身份（本区间查勘失败）、那件圈子的名称与来历（原文只说「不知是甚么宝贝」）、雷捎若真放出去是否无效、「渰死我师，我自有个法儿教他活来」所指的法儿、水淹民田之后的处置、「收为本相」后毫毛的最终归属。以上均已列入 unknowns。",
+  "本区间同时出现「金皘山」（本区间 5 次；全文 11 次）与一处「金嶒山」（P28「跟大圣至金嶒山」），字形不一致；本候选照原文引、未做统一，也未据此推断是两处地方。此点已列入 unknowns。",
+  "未读第五十回与第五十二回原文，因此不写任何跨单元的因果边；本候选的 causeEdges 全部只用本区间内的句子。凡涉及区间外的出处（F1 的铺设、K3 的原始夸奖）都在 note 里显式标明在区间外。"
+ ],
+ "rollback": {
+  "kind": "append-only",
+  "strategy": "delete-added-files",
+  "files": [
+   "loop/state/out/read_xiyou_L1_0051.candidate.json"
+  ],
+  "note": "本轮只新增这一个文件（该路径此前不存在），删除即完全回退。工作树内无其他改动需要还原。构造与复核脚本在 /Volumes/资源库/我的资源/回滚点/项目/cl0051-xiyou/，不在仓库内，删候选即可。"
+ }
+}

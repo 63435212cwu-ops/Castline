@@ -1,0 +1,170 @@
+{
+  "task": "read:xiyou:L1:0025",
+  "agent": "w-xiyou-1",
+  "role": "READER",
+  "status": "done",
+  "summary": "精读《西游记》第二十五回「镇元仙赶捉取经僧 孙行者大闹五庄观」（docs[0].text 全文 codepoint [171564,179138)，7574 字，单段无换行）。产出 tasks 6 条（五元组逐格 basis；T1/T2 resultIsSuccess=true、T3/T4/T5 false、T6 为 JSON null 并明写「结束≠成功」——本单元止于「一把扯住」+「且听下回分解」，师父是否下锅无原文）、causeEdges 14 条（每条给 direction + trigger + triggerBasis + mechanism + mechanismOwner；CE3/CE4/CE6/CE12/CE13 标 derived）、rejectedAsCauseEdge 10 条（主动否掉：否认→指认、锁门→出不去、树倒→即刻上报、假身→骗过唐僧、石头→生病、饶他去罢→了结、锅破→获胜、顶替→师父得救、歇息→被追上、惊呼→改主意）、states 9 条（前值/后值 + 事件锚点；ST9 是本轮反向验证后补的一条，此前整段「泪眼双垂/陪绑」未下断言）、knowledgeDiffs 8 条（KD1 的 who_does_not_know 写 JSON null 而非编一个人名；KD5 否掉「行者认出行脚全真」这一常见读法）、foreshadows 9 条（FS1-FS8 有铺设+回收，FS9 显式 unresolved 且 payoff/payoffAnchor 为 null）、rejectedAsForeshadow 5 条、unknowns 16 条、gapAnchors 35 条（claim/basis 皆 null，只登记位置）、textAnomalies 3 条（回目与正文无换行；ASCII 直引号 8 处；「两鐄/双鐄」用字）。共 730 个引文节点（去重 147 条原文子串），全部由脚本以锚串在原文上现算偏移，落盘前断言 TEXT[start:end]==quote、落在区间内、sourceHash 一致；factStatus 由 “ ” 与 ASCII \" 的配对位图机械判定，不手贴。覆盖：承担断言 0.7588 / 含 gapAnchors 0.8189（第 23 回同口径为 0.5557/0.6064）。未声明 semanticReview 完成。",
+  "evidence": [
+    {
+      "path": "loop/state/out/read_xiyou_L1_0025.candidate.json",
+      "sha256": "c45dbf941639f6ca0ae65855cd6b8565341a7b7512c4d5a655887bb2642896d5",
+      "kind": "candidate",
+      "note": "任务 writes 指定的唯一产物（547557 字节）。"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "区间与标题自检：TEXT.find('第二十五回')==171564==区间起点；TEXT.find('第二十六回')==179138==区间终点；len(TEXT[171564:179138])==7574，与任务 prompt 声明的字数一致。**该区间起点不是回目开头**：原文此处回目与正文之间没有换行（「孙行者大闹五庄观却说他兄弟三众」），已登记为 textAnomalies.TA1，不是切片错位。命令：python3 -B -s -c \"import json;t=json.load(open('data/cache/df959d743e53206f56db2f92.docs.json'))[0]['text'];print(t.find('第二十五回'),t.find('第二十六回'),len(t[171564:179138]))\" → 171564 179138 7574。",
+      "result": "pass"
+    },
+    {
+      "text": "sourceHash 口径：任务声明 c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2；实测 sha256(data/cache/df959d743e53206f56db2f92.docs.json) 等于该值（**整文件**哈希，不是切片）。切片自身哈希另记在 source.sliceSha256，两个字段不互相冒充。",
+      "result": "pass"
+    },
+    {
+      "text": "引文逐字校验：构建脚本对每条引文断言「起锚串在切片内可定位 + 止锚串其后首次出现 + 结果落在 [171564,179138) 内 + TEXT[start:end]==quote + sourceHash 正确」，任一不成立即抛异常、整体不落盘。脚本**拒绝猜位置**：起锚串在切片内多次出现时不靠人工数第几个，而是枚举每种切法、取「在全文 722176 字里恰好出现一次」的那一种；无唯一解时抛异常。这条判据在本轮真抓到了 6 处锚串歧义（「八戒道：」切片内 11 次、「行者道：」7 次、「三藏问道：怎么说？」2 次），全部改为更长的唯一锚串或显式给 nth 并在 note 里写明「本单元出现 2 次，本条取第 n 次」，没有一处靠数位置蒙过去。",
+      "result": "pass"
+    },
+    {
+      "text": "**factStatus 判据陷阱（本轮最有价值的机械发现）**：本回开头 4 组对白用的是 ASCII 直引号 \" 而不是弯引号 “ ”，且**全书 8 个 ASCII 引号全部集中在本单元 [171605,171700]**。只按弯引号配对会把「饭将熟了，叫我们怎的？」等 4 组对白机械判成 narration。另：全文在 @71994 有一个孤立右引号，若在**全文**上做栈式配对会让此后所有引号整体错位一档（实测表现为「右引号无配对」），所以配对限定在本单元切片内完成（切片自身 127 对弯引号完全配平）。最终位图 = 127 对弯引号 + 4 对直引号 = 131 对；factStatus 按引文落在引号内的字符占比 >=0.9 ⇒ utterance、<=0.1 ⇒ narration、其间 ⇒ mixed 机械判定。",
+      "result": "pass"
+    },
+    {
+      "text": "独立复核（不复用构建脚本逻辑）：/tmp/rd0025/verify.py 从磁盘重读候选与 docs.json，用**正则交替扫描**重做引号配对（与构建脚本的栈式实现算法不同）、用**显式路径栈**遍历（不递归）、重算 730 个引文节点的回切/偏移/唯一性/sourceHash/offsetUnit/crossRange、逐节点重算 factStatus 与 quoteInQuotesFrac 并与自述值双向对账、重算三类覆盖率分母、重算 null 台账格数并与自述点名双向对账、核 tasks 五元组与 basis 合法性、核 causeEdges 的 direction/trigger/mechanism、核 `tasks.character` 全部可解析到图谱 characters 表（过桥工具会因解析失败整条丢弃）、核 foreshadows 的 unresolved 不得携带 payoff、核 gapAnchors 不带断言、核 semanticReview 必须 not_performed、核散文引号双向卫生。共 37 项检查，实跑 problems=0。命令：python3 -B -s /tmp/rd0025/verify.py loop/state/out/read_xiyou_L1_0025.candidate.json → '检查项：37，其中 FAIL 0  RESULT: PASS'。",
+      "result": "pass"
+    },
+    {
+      "text": "负向对照（本轮最关键的一步）：/tmp/rd0025/negative_control.py 每次只改一处，注入 21 种已知缺陷 + 2 种**应当被放过的合法改动**，看 verify.py 是否抓得到。结果 23/23 符合预期：引文偏移 +3、引文换成他处文字、factStatus 被改、quoteInQuotesFrac 被改、sourceHash 被改、引文越界到下一回、basis 非法值、unresolved 伏笔被塞 payoff、gapAnchors 被塞断言、覆盖率被夸大、factStatus 计数被改、quoteRefs 被清空、null 格数自述被改、semanticReview 被声称完成、crossUnitReferences 用 quote 键、方括号引号里塞非原文、方括号引号里塞本单元逐字原文、tasks.character 改成图谱外的人、causeEdges 去掉机制、selfCritique 被清空、引文 unique 声明被改 —— 21/21 全部被抓到；「新增 gapAnchor + 同步合计值」「新增 unknowns + 同步合计值」2/2 被正确放过。命令：python3 -B -s /tmp/rd0025/negative_control.py → '负向对照结果：23/23 符合预期'。",
+      "result": "pass"
+    },
+    {
+      "text": "**过桥预演（用真实的下游工具函数，不是读源码猜的）**：importlib 加载真实的 loop/bin/to_candidate.py（不执行 main、不写 loop/state/candidates/），把候选喂给它的 collect_refs()/anchor_events()/stable_node_id()。结果：collect_refs() 收到 **324** 条引证（每个条目都有），过桥会保留 16 条、丢弃 22 条。丢弃原因**不是引证问题**，而是图谱在本单元区间内只有 **4 个**机检可锚定事件（推树/袖里乾坤/揽责替打/柳树变四众）：causeEdges 要求两端锚到不同事件（14 条全丢）、states 要求至少锚到 1 个事件（9 条中 8 条丢）。按桥的既有设计「锚不到就不发布，不编一个 ID」，我没有为了过桥去改事件锚定，如实记入候选的 bridgeCompatibility.measuredAgainstRealBridge。同一命令测第 23 回候选：collect_refs() 收到 **0** 条引证（它的引证在 assertionRef/citations 嵌套形态里，桥读不到）—— 这是格式差异的对照，不构成对上一回内容质量的判断。命令：python3 -B -s /tmp/rd0025/bridge_dryrun.py。",
+      "result": "pass"
+    },
+    {
+      "text": "**反向验证（问「还漏了什么」，不问「写对了吗」）**：把已覆盖位置做成掩码后枚举切片内最长的未覆盖连续段（>=12 字符，45 段 / 2025 字），再对每段回原文读。据此补进候选的真实遗漏有 4 处：(a) T4/T5 里「唐僧闻言，战战兢兢，未曾答应」——三藏在开打前的状态此前一条没写；(b) 大仙对行者的公开评语整段（「孙行者，真是一个好猴王！曾闻他大闹天宫，布地网天罗，拿他不住……怎么绑些柳树在此，冒名顶替？」）此前登记了引文却没用进任何断言；(c) 擒回后的捆绑细节整段（唐僧缚正殿檐柱、三人各绑一柱、马拴庭下给草料、行李抛廊下）；(d) 二童「止不住腮边泪落」与被问「那和尚打你来？」时答「不曾打，只是把我们人参树打倒了」——他们的损失点在树不在挨打。另补 ST9（三藏与沙僧「泪眼双垂/陪绑」的处境变化，此前整段未下断言）与 KD8（大仙由「神满再不思睡」推断有人做弄，与众小仙相反猜测对照）。覆盖因此从 0.5557→0.7588（承担断言口径）。",
+      "result": "pass"
+    },
+    {
+      "text": "红线自查（机器可判部分）：(1) 不把台词当事实——全部 126 个 utterance 节点在条目内都带 caveat 或 statusNote，点名「这是谁说的、不证明为真」；KD8 明写「神满再不思睡」只当**大仙的判据**、不当本书认定的仙家法则。(2) 结束≠成功——T6.resultIsSuccess 是 JSON null，resultNote 明写「本单元止于『一把扯住』+『且听下回分解』，师父是否下锅一个字都没有」，RCE8 专门否掉「行者回来顶替→师父得救」这条边。(3) 时间相邻当因果——10 条 rejectedAsCauseEdge 逐条给拒因与原文引证（含 RCE9「歇息→被追上」：原文自己给了速度差 120 里 vs 900 里，机制不成立）。(4) 一次出现当伏笔——5 条 rejectedAsForeshadow，含 RF2「两鐄铜锁」这种同机关设置/解除两端的伪呼应。(5) 缺字段写 null——51→75 个 null 格由脚本从磁盘逐格枚举并与自述点名双向对账，重点是 KD1.who_does_not_know（原文没有一句写某人不知道树是行者推的，填名字就是编造）。(6) 不得写 semanticReview 完成——semanticReview=not_performed，verify.py 的 A13 硬检查，负向对照里「声称完成」被抓到。",
+      "result": "pass"
+    },
+    {
+      "text": "构建期自查并改掉的自身缺陷（详见 selfCritique.defectsFoundInMyOwnWork）：① 最初把引证只写成 assertionRef/citations 嵌套形态，等于过桥时一条都收不到（第 23 回就是这样），改为两种形态并存并用真桥函数实测；② KD1 里一度残留打草稿的占位串，落盘前自查改成 JSON null；③ 引号配对三次迭代（全文配对→切片配对→ASCII 同形开闭处理）；④ 独立复核第一版把 quoteAttributionAudit.boundaryNodes 的截断引文当成真节点遍历，报了 352 条假缺陷——那是**我的复核脚本**的问题（索引节不该带 quote/start/end 键），已改为只留路径索引并在候选里写明；⑤ 复核脚本 A5.2 一度把「过桥引证 312」硬编码，加一条 unknowns 就误报——与第 23 回 A12 把「gapAnchors 22 条」硬编码同型，已改为读自述值再比对。",
+      "result": "pass"
+    },
+    {
+      "text": "受保护路径未动：本任务只写 loop/state/out/read_xiyou_L1_0025.candidate.json（任务 writes 指定路径，追加式新增）。构建脚本、复核脚本、负向对照脚本全部在 /tmp/rd0025/ 下运行，未写入 js/ css/ index.html serve.py narrative.py scripts/ tests/ docs/ data/。未跑 GPU/浏览器测试（任务未声明要跑）。",
+      "result": "pass"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/read_xiyou_L1_0025.candidate.json",
+      "kind": "append-only",
+      "note": "任务 writes 指定的候选文件，本轮新增。"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/df959d743e53206f56db2f92.docs.json": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+    "loop/state/out/read_xiyou_L1_0025.candidate.json": "c45dbf941639f6ca0ae65855cd6b8565341a7b7512c4d5a655887bb2642896d5"
+  },
+  "remaining": [
+    "语义未独立复核：本文件只保证引文逐字可定位、factStatus 由引号位图机械判定、计数与覆盖可复算、null 台账与磁盘双向对账、散文引号标记双向卫生。**不保证**引文被放在正确的条目下，也不保证语义读对。semanticReview=not_performed，需 read-verify 由别的 agent 反向复核。",
+    "最可能被推翻的三处已写进 selfCritique.mostLikelyMisread：① CE6 把大仙的「佯讶」读成「问句本身带答案」（原文没有一句写他早就认出来了）；② KD3 把「沙僧不知情」排除在外，只因他那一整段没有台词——若复核认为该写，那是加一条 unknowns 而非改本条目；③ T5.resultIsSuccess=false 依赖大仙自己那句「这泼猴枉自也拿他不住」，方向可被合理反对。复核可优先攻击这三条。",
+    "自标较弱的条目：CE3（basis=derived，「问得是实」是八戒的失言给的——原文只写叙述顺序，没写因果连词）、CE4（derived，机制写作「选项集被压缩」而非「树倒所以锁门」，是最容易被判「时间相邻当因果」的一条）、CE6（derived）、CE12/CE13（本轮从 explicit 下调为 derived：排除项与随后工具都在原文，但「正因为排除刀枪才改用这几样」是我的读法）、T2.obstacle（derived，原文没写「他不能当众消失」）、T6.objective（inferred，行者只说过「我还去救他一救」，没说怎么做）、KD4（derived，从「门被关上→当夜才用解锁法」推「他事先不知」）、KD7 的「三藏因此知道」（inferred）。verify.py 对这些只校验结构，不校验语义强度。",
+    "**过桥后的真实落差（已实测，不是推测）**：候选的 14 条 causeEdges 与 9 条 states 中，过桥会丢弃 14+8=22 条，因为图谱在本单元区间内只有 4 个机检可锚定事件，而桥要求因果边两端锚到不同事件、状态至少锚到 1 个事件。这是**单元级事件密度**与桥的设计共同造成的，不是引证问题（324 条引证全部逐字可切）。若要让本回的因果/状态进入发布层，需要一个「补事件」的任务（在 data/ 或图谱侧），那属受保护路径，须另开合并任务 + GATE.lock，本 worker 不做。",
+    "factStatus 的机械判定没有做**负向对照**：我没有注入过一条「本该是 utterance 我标成 narration」的假引文来验证这套判据真有判别力。verify.py 的 A4 只证明「声明值与重算值一致」，不证明判据本身对语义层次的刻画是正确的（尤其 282 个 mixed 节点是跨引号边界的整句，其标签只描述字符分布）。这一点如实登记。",
+    "ASCII 引号的处理是一个**本单元特有**的补丁（「栈顶是 ascii 就当闭」依赖「这 4 组之间无嵌套」这一已核事实）。若全书别处出现密集 ASCII 引号或嵌套，这套配对会失效；本候选没有做全库扫描，只在 unitHeadCheck 里记录了本单元的 8 处位置。",
+    "未做：不跑 GPU/浏览器测试（任务未声明要跑）；不写回任何受保护路径；不做语义评审（属 read-verify 流）；不引第二十四回/第二十六回原文来补本单元的悬置问题（果子数目差额、师父是否下锅），只在 crossUnitReferences 里登记两回回目的偏移；不解释「袖里乾坤」的原理，也不推算五庄观的人员编制（原文只有集合称谓，见 U11）。",
+    "图谱缓存 data/cache/df959d743e53206f56db2f92.json 只用两处，均为机械用途：取 characters 表把 tasks.character 解析到正名（过桥工具会因解析失败整条丢弃）、取 events 的引文区间做锚定试算。**未用它的摘要作任何语义断言依据**，也未做与本单元的差异对照。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/read_xiyou_L1_0025.candidate.json"
+    ]
+  },
+  "submittedAt": "2026-10-08T03:18:03Z",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-08T03:18:03Z"
+  },
+  "verifyState": "partial",
+  "reviews": [
+    {
+      "reviewer": "w-sanguo-1",
+      "at": "2026-10-09T09:43:29Z",
+      "verdict": "partial",
+      "notes": "【结论】判 partial。**候选的引文层是干净的，逐字与偏移没有一条对不上**，所以不判 fail；但有三处可复现的机械/文档缺陷，且我另找到 6 条原文明确存在、候选完全未覆盖的事实。\n\n【我实际复算了什么（命令与结果）】① 引文逐字与偏移：遍历候选全部 733 个带 quote 的节点，逐个 T.find(q) 与 T[start:end]==q 双向核对——733/733 命中，且每条 quote 在全文中唯一（3 处 textAnomalies 无 start/end，属自由文本字段，非引文节点）；随机抽 5 条（含 citations 与扁平 quoteRefs 两种形态）逐字命中、偏移一致、全文字号均为 1 次。② 源与切片：sha256(data/cache/df959d743e53206f56db2f92.docs.json)=c282cf39…a152a2，与候选 sourceHash 一致；len(TEXT)=722176、find('第二十五回')=171564、find('第二十六回')=179138、切片 7574 字、切片 sha256=ba9402fb…0b632，全部与候选声明一致。③ factStatus：按候选自述的判据（切片内引号配对位图 + 0.9/0.1 阈值）从原文重算，得 utterance 126 / narration 330 / mixed 274，与候选 declaredVsRecomputedMismatch=[] 完全一致。④ 覆盖度：coverring 口径复算 asserting=359、gapAnchors=35、总 394、distinctQuotes=143、assertingCharCoverage=0.7588、asserting+gap=0.8189，与候选一致。⑤ 过桥：用真实 loop/bin/to_candidate.py 的 collect_refs() 复算 = 336，与 bridgeCompatibility.refsCollected 逐层完全一致；但 measuredAgainstRealBridge 那组数不复现（见 counterExample 2）。⑥ 人物：图谱 characters 表 219 个名字中，切片内出现的恰为 6 个（清风/明月/沙僧/道童/猪八戒/观音菩萨），候选列全、无多无少；正名『陈玄奘』『孙悟空』『镇元子』在切片内出现 0 次，候选说对了。用真实桥的 resolve_character() 逐个验证候选 6 条 tasks 的 character 字段，全部唯一解析成功。\n\n【幻觉/越权检查：未发现】没有原文没有的人物；没有把结束当成功——T6.resultIsSuccess 显式为 JSON null，FS9.status=unresolved 且 payoff/payoffAnchor 为 null，RCE6/RCE7/RCE8 三条正是驳回「得救/获胜/了结」的；对第二十四、二十六回只列回目与偏移作对照、明说不作为证据，未越界引别区间。\n\n【误杀检查：未发现成立的误杀】重点查了计划100 式的词表/正则误杀：① 全单元 8 个 ASCII 直引号（171605~171700）正是候选专门处理的判据陷阱，我用**只按弯引号配对**的错误仪器重算，得到 12 条 factStatus 不符（全部落在开头 4 组对白），改用「栈顶是 ASCII 且同形就当闭」后不符降为 0——即这 12 条不是候选的错，是**我的仪器错**；按 VERIFIER.md 纪律这条如实登记：我的第一版反向验证本身不成立。② 候选把 CE4（树倒→定计，derived，判成立）与 RCE9（歇息→被追上，判不成立）作镜像处理，我逐个核对后认为阈值一致：CE4 有同段内的「怎么敌得过他四个？且不如去哄他一哄」作对比连词，RCE9 无对应文本连词，且原文自给了速度量（一百二十里 vs 九百余里）。③ RCE1 驳回「八戒否认→清风指认」、RCE5 驳回「石头放在心上→生病」均有原文反证，成立。\n\n【哪些条目可用、哪些须降级】可直接用：tasks 6 条、causeEdges 14 条、states 9 条、knowledgeDiffs 8 条、foreshadows 9 条（含 FS9 的 null）、rejectedAsCauseEdge 10 条、rejectedAsForeshadow 5 条、unknowns 16 条、gapAnchors 35 条——这些的引文与偏移在本单元内全部可机械复现，作为 locator 层证据可用；候选自己也声明 semanticReview=not_performed / reviewStatus=locator-only，这个自我定位是诚实的。须修正后使用：① nameUsageAudit 清风 zones（补 2 条或改 inSlice）；② bridgeCompatibility.measuredAgainstRealBridge 整节（wouldDrop 21 与 dropReasons 20 对不上，且与真实桥行为不符：真实重放为 keep 9 / drop 29，foreshadows 实为 2 保留 7 丢弃），在改正前不得引用该节任何数字；③ proseQuoteConvention.convention 的标记名（实际是「」=逐字、『』=自造，声明写反）。\n\n【存疑（按纪律不作为 fail 依据）】T1.resultIsSuccess=true：三藏的 objective 含「要赔礼」而赔礼在原文中没有执行（原文明写「二仙童问得是实，越加毁骂」），候选自己也把这个软肋写进 caveat 并邀请复核改判。我倾向认为该 objective 的字面是「问清 + 提出赔礼」，两者都做到了，判 true 可接受，故记为存疑而非 counterExample。\n\n【我没有做的事】没有读第二十四/二十六回来裁定果子数目（三个还是四个）与收束悬念——那会变成用别的区间当证据，候选对此的克制是对的。没有跑 GPU/浏览器。没有改动任何受保护路径。\n\n【本轮任务背景】本任务此前有一次尝试（w-sanguo-1，2026-10-09T09:15:02Z 起）被记为 no-output(rejected)，见 loop/state/out/REJECTED__verify_xiyou_L1_0025.json；本次为该任务重跑，租约 verify:xiyou:L1:0025.d 的 agent 仍是 w-sanguo-1。",
+      "counterExamples": [
+        {
+          "claim": "nameUsageAudit.namesInUnit「清风」条目自相矛盾：inSlice/inFullText 报 14/46（两个数我都复算过，**正确**），但同一条目的 zones 只列 12 个偏移，漏掉切片内第 13、14 处「清风」。",
+          "quote": "大仙与明月、清风纵起祥光，来赶三藏，顷刻间就有千里之遥。",
+          "quote2": "清风先回不题。",
+          "why": "复现：切片内 re.finditer('清风') 得 14 个偏移 [171683,172301,172411,172469,172805,172885,173211,174437,174508,174758,174815,175109,175166,175308]；zones 只有前 12 个，缺 175166 与 175308。zones 是机械表，读者会拿它当位置索引；缺两条即两处「清风」在本单元内不可由该表定位（其中 175308 正是「清风先回不题」——见 reverseChecks R3，两处缺陷同源）。这不是编造，是**表内截断**，与我复核第 23 回时发现的 boundaryNodes 截断同类。修法：补回两条 zone 或把 inSlice 改成 12。",
+          "quoteOffset": 175160,
+          "quote2Offset": 175308,
+          "candidateText": "\"name\":\"清风\",\"inSlice\":14,\"inFullText\":46",
+          "candidateTextNote": "引自候选文件 nameUsageAudit.namesInUnit 的「清风」条目（空白已归一）；用于指认 inSlice=14 与 zones 只有 12 条的自相矛盾。",
+          "keyNote": "quote/quote2 是**原文**逐字（即 zones 漏掉的第 13、14 处）；candidateText 引自候选文件，不是原文引证。",
+          "nameOffsetInQuote": 175166,
+          "quoteOffsetNote": "我第一版把 quoteOffset 误写成 175166（那是**名字「清风」在句内的偏移**，不是引文起点）。引文起点是 175160；名字偏移 175166 由 nameOffsetInQuote 单独给出。已修正，并登记为本次复核自身的错。"
+        },
+        {
+          "claim": "bridgeCompatibility.measuredAgainstRealBridge 自报 wouldKeep=16 / wouldDrop=21，其中 dropReasons 只解释 causeEdges×14 + states×6 = 20，**剩 1 条无归因**；且该组数字与真实桥的实际行为不符。",
+          "quote": "偷果子是我，吃果子是我，推倒树也是我，怎么不先打我，打他做甚？",
+          "why": "① 用候选自己指定的入口复现：python3 -B -s /tmp/rd0025/bridge_dryrun.py（把 candidate.json 换成当前候选，其余不动）输出「过桥后保留 16 条，丢弃 22 条」，states 丢 **8** 条（ST9/ST1/ST3/ST4/ST5/ST6/ST7/ST8），不是自报的 6 条；22 ≠ 21。② 该脚本并未真正等价于 to_candidate.py：它只对 causeEdges/states 施加锚定判据，**没有**对 foreshadows 施加（真实桥 LAYER_MAP 把 foreshadows→clues，走 `if not seed_ev: drop`，见 loop/bin/to_candidate.py:700）。按真实桥分支逻辑逐层重放（unit_events=同样那 4 个事件）得 tasks 6/0、causeEdges 0/14、states 1/8、foreshadows **2/7**，合计 keep 9 / drop 29。③ refsCollected=312 在任一口径下都不复现：LAYER_MAP 四层全量 229、各取前 12 条 214、八层全量 336、八层前 12 条 321。结论：节点**不会被编造 ID**（这一条候选说对了，锚不到就丢），但这组自报数字不能当作过桥结论使用；其中「foreshadows 9 条全保留」是脚本漏判造成的偏乐观。",
+          "quoteOffset": 176286,
+          "candidateText": "\"refsCollected\":312,\"wouldKeep\":16,\"wouldDrop\":21",
+          "candidateTextNote": "引自候选文件 bridgeCompatibility.measuredAgainstRealBridge（空白已归一）；这组数字是我复算推翻的对象。",
+          "keyNote": "quote 是**原文**逐字——它是图谱四个可锚定事件之一（ev_b43ee7670627c31f，偏移 176286-176317），用于说明锚定判据的真实输入。"
+        },
+        {
+          "claim": "proseQuoteConvention.convention 把标记写错：两个方向都用同一个『』（U+300E/U+300F）表示，声明本身无法区分「逐字」与「自造」，照此规则读会与文件实际做法相反。",
+          "quote": "三藏道：“徒弟息怒，我们是出家人，休打诳语，莫吃昧心食，果然吃了他的，陪他个礼罢，何苦这般抵赖？”",
+          "why": "实测文件的实际做法是：「」为逐字引文（全篇 423 段，除含省略号者外 **0** 段不在切片内，机械判据 SEG.count 全部命中）；『』为自造/转述（134 段中 120 段不在切片内，如『目标达成而收尾落空』『结果落空』）。即**实际做法是自洽且干净的**，坏的是那句声明的标记名。这是文档缺陷而非引文缺陷：按声明去读的人会把两类的含义对调。修法：把声明改成「「」=逐字；『』=自造/转述」，并把 normalization 里『两个方向的可疑片段都必须为空』限定到这个正确读法上。",
+          "quoteOffset": 171739,
+          "candidateText": "\"convention\":\"『』=本单元切片内逐字存在（SEG.count>=1且不含省略号）；『』=我自己的术语、转述、省略后的片段，或引自本单元之外的文字。\"",
+          "candidateTextNote": "引自候选文件 proseQuoteConvention.convention（空白已归一）；两个方向确实用了同一个标记『』。",
+          "keyNote": "quote 是**原文**逐字，用于演示「」标记下的逐字引文。"
+        }
+      ],
+      "reverseChecks": [
+        {
+          "found": "R1 八戒伐柳树是用嘴拱的——四棵树是他「一嘴一颗」拱来的，不是用钉钯或刀斧。candidate 的 T4 只写「又教八戒伐四棵柳树」，全部 733 个引文节点与 35 条 gapAnchors 都没有这句；八戒的工具/体力这一具体事实在本单元缺失。",
+          "quote": "那呆子有些夯力，走了去，一嘴一颗，就拱了四颗，一抱抱来。",
+          "offset": 177054
+        },
+        {
+          "found": "R2 第二次出逃前收拾行装的清单（解三藏、放八戒沙僧、整束褊衫、扣背马匹、廊下拿行李）以及沙僧求救与行者「悄言」的压低声音一段，整段没有任何引文节点。候选人自己在 selfCritique.whatWouldNeedToResolve 里点名「行李的处置」是它一条都没写的，而原文这里**写了**——属可补而未补。",
+          "quote": "他却解了三藏，放下八戒、沙僧，整束了褊衫，扣背了马匹，廊下拿了行李，一齐出了观门。",
+          "offset": 176967,
+          "companionQuote": "沙僧慌了道：“哥哥，也救我们一救！”行者道：“悄言！悄言！”",
+          "companionOffset": 176937
+        },
+        {
+          "found": "R3 大仙派回观安排绳索的只有清风一人，明月留在追赶队伍里——「清风先回不题」是全单元唯一交代这一分工的一句。candidate T5 写「先要童儿回去安排绳索」并把二人并称，未登记这句，也未登记「清风」的这两处 zone（与 counterExample 1 同源）。",
+          "quote": "清风先回不题。",
+          "offset": 175308
+        },
+        {
+          "found": "R4 明月说的第二句谎（「正是，正是，好歹吃了饭儿开门」）——关门时由明月出面把上锁搪塞过去。candidate 的 T3/KD3 只登记了清风那句「果子不少……还是原数」，明月的这一句在 733 个节点里没有。",
+          "quote": "明月道：“正是，正是，好歹吃了饭儿开门。”",
+          "offset": 173190
+        },
+        {
+          "found": "R5 擒回观后大仙先「叫徒弟拿绳来」，众小仙应声伺候——捆绑前的器械准备这一步；candidate 只从「你看他从袖子里，却象撮傀儡一般」起写结果，准备动作未登记。",
+          "quote": "那大仙转祥云，径落五庄观坐下，叫徒弟拿绳来。众小仙一一伺候。",
+          "offset": 175993
+        },
+        {
+          "found": "R6 摆饭一场除菜色外还写了「一壶好茶，两个茶钟」；gapAnchors G06 只登记了菜（酱瓜、酱茄……七八碟儿），茶具这一项未覆盖。属装饰性细节，登记为最低优先。",
+          "quote": "又提一壶好茶，两个茶钟，伺候左右。",
+          "offset": 173104
+        }
+      ]
+    }
+  ]
+}

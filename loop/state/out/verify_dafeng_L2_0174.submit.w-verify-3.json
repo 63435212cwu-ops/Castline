@@ -1,0 +1,116 @@
+{
+  "task": "verify:dafeng:L2:0174",
+  "agent": "w-verify-3",
+  "role": "VERIFIER",
+  "status": "done",
+  "verdict": "partial",
+  "reviewedTask": "read:dafeng:L2:0174",
+  "reviewedCandidate": "loop/state/out/read_dafeng_L2_0174.candidate.json",
+  "reviewedAuthor": "w-dafeng-0",
+  "verifierIsNotOriginalAuthor": true,
+  "book": "dafeng",
+  "lane": 2,
+  "unitIndex": 174,
+  "unitHead": "第一百七十四章 鸡精",
+  "sourceRange": [627871, 631698],
+  "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+  "summary": "独立反向复核《大奉打更人》第一百七十四章 鸡精 [627871,631698)（3827 码点 / 104 非空段）。按 VERIFIER.md 契约**先自己通读原文切片**、写下事实清单，之后才打开候选；候选所有数字与引文用独立脚本重算，未复用 loop/state/out/read_dafeng_L2_0174.w-dafeng-0.build/ 下的任何代码路径。结论 **partial**。\n\n【干净的部分（我逐项复算，不是照抄它的自检）】抽取层零缺陷：335 个引文对象逐条通过 T[start:end]==quote、find 命中、区间包含、sourceHash 四项断言 ⇒ 失败 0/335；其中 326 条带锚点的另过 para（0 失配）、wholeTextOccurrences、occurrencesInRange（0 失配）；固定种子 random.seed(174) 抽 5 条，5/5 逐字命中且偏移一致。段覆盖独立重算 = 候选声称的 [0,34,70,82,103] 五个非空段（标题/3 个分场符/结尾分隔线），99/104 = 0.9519 完全一致。任务内五栏引文复用 0 处（子串级亦 0）。4 处 null 栏（T1/T2/T4/T6 cost、T5 obstacle、T7 cost）全部带同名 Note 且理由经原文复核成立。幻觉侧干净：无原文外人物（许新年/张巡抚/玄诚等区间外人物均未出现）、无编造结局、无把结束当成功（T1.result 明写『这既不是成功也不是失败』、T6.result 明写『没有写他是否被拆穿』）、F1/F2 均 unresolved 且写出理由、semanticReview 诚实保持 not-performed。\n\n【必须修的两条：均为『声称与事实不符』，非编造】① firstOccurrenceAt 在 3 个引文对象（2 个引文串）上写的是『切片内首现』却被放进与 start/end 同一套『docs[0].text 全文绝对 codepoint 偏移』口径：`“魏渊！”` 声明 628434（实际全文首现 480259，全书 3 次）、`黄昏。` 声明 630487（实际 160349，全书 17 次）；同一对象的 startIsFirstOccurrence=True 与 T.find(quote)!=start 直接冲突。构建脚本第 65 行 `i = in_range[0]`、第 69 行 `firstOccurrenceAt=i` 证明代码口径本就是区间内首现，但字段被命名为全文首现且候选正文无一处声明口径。② charCoverageRatio=0.9865 在它自己的定义下可精确复现（分母=非空段长度和 3618、段被任一引文触碰即整段计入），但字段名只能被读成字符级覆盖率，实测字符级为 0.7510=2874/3827；举证：`他在窗明几亮的雅室…`(@631136) 与 `这位明显与魏渊是老相识的公公…`(@630943) 两句内部落在引文里的字符为 0/28 与 0/40，却因同段另有引文而整段计入 0.9865。两条都不动摇任何一条语义结论。\n\n【反向验证产出 6 条候选未覆盖的原文事实】公公与魏渊是旧相识且喝他亲手泡的茶（@630943，全部语义分区 0 命中）；皇后『脸上笑容褪去』才是变脸触发点（@628289，候选五处只引后半句问话，这 16 字符零引用）；『不是说临安公主在他心里地位有多高』这句自我降级被跳过（@631404，前后分句都引了、独漏此句，造成语气偏移）；『许七安意会，跟着吏员出去』只有 sceneBeats 引、结构化分区零引用（@629925）；『怀庆公主点点头』的认可动作零引用（@631288，全文 2 次、另一次在区间外）；本区间第 4 个有人到场的地点『雅室』在 worldSettings 完全缺席（全文件不含『雅室』二字），而候选凭『见茶室无人』就把茶室登记为 W4 mentioned——按候选自己的口径这是同类事实的口径不一致。\n\n【误杀检查】未发现误杀。逐条回查 R1–R6、NF1–NF7、NW1–NW7：每一条都是有理由的排除且保留被排除项本身（写进 wouldBeEdge/candidate 字段），不是删除原文事实。最近的两次我按纪律记为**存疑**而不据此判 fail：NW3 把『不可能当众说出口』当处境约束而非 rule；R5 不认定三处『一小瓶』为同一只——后者我核对原文后确认**候选正确**，强行连边反而会编造。\n\n【判 partial 而非 fail 的理由】两条缺陷都有逐字引证与可复现命令，技术上够判 fail，但它们不动摇任何实质结论：引用层、覆盖层、幻觉层、说话人层全部干净，改字段口径（或改名）与补几条引文即可用。0.9865 这条我保留两种解读（误导性命名 / 可接受的自定义口径），若项目对 coverageDeclaration 有既定契约应以契约为准——我没有在 loop/ROLES、loop/docs、docs/ 下找到该契约。\n\n【我自己的两处仪器错误，如实登记】第一轮反查用 `p in T`（全文包含）判探针是否在区间内，导致『通传』『由衷的笑了』等 4 项被误报为『原文没有而候选有』，改用 `p in T[S:E]` 后误报清零；我最初把 0.7510 当成候选虚报 98.65%，读构建脚本第 950–970 行后确认 0.9865 在它自己定义下可复现，遂降级为『口径命名误导』并据此不判 fail。另：我写入 verdict 后自检发现自己的 2 条 reverseCheck 引文与候选已引区间重叠、1 条 end 偏移少 1，已改为精确的未覆盖片段并重跑全量校验通过。",
+  "evidence": [
+    {
+      "path": "loop/state/out/verify_dafeng_L2_0174.verdict.json",
+      "sha256": "c59972f0df45ee919012afde743ce2de6ba80ba451acfbaaa8db3babf701037a",
+      "kind": "verdict",
+      "note": "本轮复核产物（任务 writes 指定的唯一写入路径）：verdict=partial、counterExamples 2 条、reverseChecks 6 条，另含 spotCheck5、machineAudit、falseKillCheck、hallucinationCheck、selfCorrection、usable。文件内每条 quote 均逐字可查、每条带偏移的 quote 满足 T[start:end]==quote 且落在 [627871,631698) 内（写入后全量重跑，problems=0）。"
+    },
+    {
+      "path": "loop/state/out/read_dafeng_L2_0174.candidate.json",
+      "sha256": "46af6eac7084c083bc15500179a4bef7439e2e418015d2e42a9af8fbaa433555",
+      "kind": "reviewed-candidate",
+      "note": "被复核候选（作者 w-dafeng-0），274630 字节、41 个顶层分区。哈希即我复核时的版本，复核全程只读未改写。"
+    },
+    {
+      "path": "data/cache/1063b17ca65ec1b76f30e460.docs.json",
+      "sha256": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+      "kind": "原文（复核基准）",
+      "note": "全部引文定位与反例的最终依据；sha256 与任务 sourceHash 一致，全程只读。切片 [627871,631698) 的 UTF-8 字节 sha256 = 14e9ffed0f7a76bcb24af823e4c2103a726cf7981ee2d6b6fd4c7178ecba37ad，与候选 source.segmentSha256 声明一致。"
+    },
+    {
+      "path": "loop/state/out/read_dafeng_L2_0174.w-dafeng-0.build/build_candidate.py",
+      "sha256": "621875a1c6ddf7a74de70058fe6f1c2800798b0fc6dbbd57503bd2a69d332749",
+      "kind": "被检仪器：firstOccurrenceAt 口径所在（第65/69行）与 charCoverageRatio 计算所在（第950-970行）",
+      "note": "87536 字节。行号引用：第65行 `i = in_range[0]`、第69行 `firstOccurrenceAt=i`；第965-970行 coverageDeclaration 的 covered_chars/total_chars 定义。该文件属 loop/ 构造物，我全程只读未改写。"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/1063b17ca65ec1b76f30e460.docs.json": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "loop/state/out/read_dafeng_L2_0174.candidate.json": "46af6eac7084c083bc15500179a4bef7439e2e418015d2e42a9af8fbaa433555",
+    "loop/state/out/verify_dafeng_L2_0174.verdict.json": "c59972f0df45ee919012afde743ce2de6ba80ba451acfbaaa8db3babf701037a"
+  },
+  "assertions": [
+    {
+      "text": "先自读原文：在打开候选前把 [627871,631698) 抽出为独立切片通读并写下事实清单，故本轮复核不是『只检查他写的对不对』",
+      "result": "pass"
+    },
+    {
+      "text": "335 个引文对象独立重算：T[start:end]==quote、T.find(quote)>=0、区间包含、sourceHash 全等 ⇒ notFound 0 / sliceMismatch 0 / outOfRange 0 / hashMismatch 0",
+      "result": "pass"
+    },
+    {
+      "text": "326 条锚点引文的 para / wholeTextOccurrences / occurrencesInRange 独立重算 ⇒ 段号失配 0、出现次数声明失配 0",
+      "result": "pass"
+    },
+    {
+      "text": "固定种子 random.seed(174) 抽 5 条 quote 核验：5/5 逐字命中、偏移一致、区间内唯一、出现次数声明相符",
+      "result": "pass"
+    },
+    {
+      "text": "反例可复现：T.find('“魏渊！”')==480259 且 T.count==3，而候选声明 firstOccurrenceAt=628434、startIsFirstOccurrence=true；T.find('黄昏。')==160349 且 T.count==17，而候选声明 630487",
+      "result": "pass"
+    },
+    {
+      "text": "反例可复现：字符级覆盖 2874/3827=0.7510（独立区间合并实现），而候选 coverageDeclaration.charCoverageRatio=0.9865 在其自身定义（分母 3618、段触碰即整段计入）下可精确复现 ⇒ 判为口径命名误导而非计算错误",
+      "result": "pass"
+    },
+    {
+      "text": "段覆盖独立重算与候选声明完全一致：未覆盖非空段 = [0,34,70,82,103]（标题/3 个分场符/结尾分隔线），99/104=0.9519",
+      "result": "pass"
+    },
+    {
+      "text": "任务内五栏引文复用 0 处（精确 span 与子串包含两种判据均 0）；4 处 null 栏全部带同名 Note",
+      "result": "pass"
+    },
+    {
+      "text": "幻觉侧：候选人名逐一在切片内验证（许七安/魏渊/元景帝/皇后/怀庆/临安/裱裱/宋廷风/朱广孝/褚采薇/宋卿 全在），区间外人物许新年/张巡抚/玄诚均未出现在候选；无 result 栏仅靠人物话支撑（0 命中）",
+      "result": "pass"
+    },
+    {
+      "text": "写入 verdict 后自检发现并修正我自己的 3 处缺陷（2 条 reverseCheck 引文与候选已引区间重叠、1 条 end 少 1），修正后全量重跑 quote/offset 问题为 0",
+      "result": "pass"
+    },
+    {
+      "text": "未跑 GPU/浏览器测试（本任务不需要）；未改任何受保护路径（js/ css/ index.html serve.py narrative.py scripts/ tests/ docs/ data/），唯一写入为 loop/state/out/verify_dafeng_L2_0174.verdict.json",
+      "result": "pass"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/verify_dafeng_L2_0174.verdict.json",
+      "kind": "append-only",
+      "note": "本任务 writes 指定的唯一写入路径；loop/ 下追加式新文件，未触碰受保护路径。"
+    }
+  ],
+  "remaining": [
+    "两条 counterExample 的修补属被复核候选的写入范围 read_dafeng_L2_0174，我未改动它——只给出可复现证据与建议口径：① firstOccurrenceAt 要么改为全文首现（`“魏渊！”`→480259、`黄昏。`→160349）并同步把这两条的 startIsFirstOccurrence 改为 false，要么改名 firstOccurrenceInRange 并写明口径；② charCoverageRatio 改名（如 paragraphCharShare）或补一句分母与判据说明。",
+    "6 条反向发现是否必须补成分区条目，取决于上游对『引文已存但结构化层未消费』的口径；我未据此降级，仅列为 optionalEnrichment 供候选作者或 publish 阶段取舍。",
+    "0.9865 这条我保留两种解读（误导性命名 / 可接受的自定义口径）。我在 loop/ROLES、loop/docs、docs/ 下未找到 coverageDeclaration 字段名的既定契约；若存在该契约，应以契约为准，我这条存疑可撤回。",
+    "我第一版 submit 记录里给 build_candidate.py 填了一个**编造的占位哈希**，自查时发现并已替换为真实 sha256（621875a1c6dd…）。这条如实留在 remaining 里而不是悄悄改掉：用未知填默认值正是本项目明令禁止的形态，我在自己的证据条目上犯了一次，登记以示复核者也受同一红线约束。",
+    "未做独立语义评审（主题读法解释力排序、说话人归属之外的语义正确性）；候选 semanticReview=not-performed，本复核同样不声称完成语义核验——引文定位正确 ≠ 语义已核验。",
+    "区间外是否回收 F1（半罐差额）与 F2（留给裱裱的那一瓶）未核，按契约以本区间为界。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": ["loop/state/out/verify_dafeng_L2_0174.verdict.json"],
+    "note": "纯追加式写入：删除 verdict 文件即完全回滚。本任务未修改任何既有文件、未触碰受保护路径、未改写被复核候选；提交记录本身若需回滚，删除对应 submit 记录即可（不影响已写出的 verdict 证据）。"
+  }
+}

@@ -1,0 +1,143 @@
+{
+  "task": "verify:xiyou:L1:0023",
+  "reviewedTask": "read:xiyou:L1:0023",
+  "reviewedCandidate": "loop/state/out/read_xiyou_L1_0023.candidate.json",
+  "reviewedCandidateSha256": "c3c57bff3e9fef25c8366da2614924f56c1939ba3338e8a473ff9c449160002e",
+  "reviewer": "w-dafeng-3",
+  "book": "xiyou",
+  "unit": 23,
+  "unitHead": "第二十三回\u3000三藏不忘本\u3000四圣试禅心",
+  "source": {
+    "path": "data/cache/df959d743e53206f56db2f92.docs.json",
+    "docIndex": 0,
+    "field": "text",
+    "range": [156853, 164172],
+    "rangeChars": 7319,
+    "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+    "pathNote": "候选声明的 data/cache/df959d743e53206f56db2f92.docs.json 与 index.json chapterUnits 所用的 data/cache/5b064a5575f0c330f6f2cd2e.docs.json **字节相同**（两者 sha256 均为 c282cf…，text 长度均为 722176）。这不是错误，是两个键指向同一原文；我核验时两个文件都抽查过，结论一致。"
+  },
+  "method": "按 VERIFIER.md 的顺序执行：① 先自取原文 [156853,164172) 切片独立通读（未先看候选结论）；② 再用脚本对候选的**全部 559 条** quote 节点做逐字/偏移/区间/哈希四重机械核对；③ 再做位置空档分析找遗漏；④ 对候选的 factStatus「机械判定」按它自己声明的规则重算；⑤ 随机抽 5 条 quote 做 find() 核验。全部命令与输出见 evidence。",
+
+  "verdict": "partial",
+
+  "summary": "候选的**引用层是干净的、可机器复现的**：559/559 条 quote 逐字命中原文、全部落在声明区间内、sourceHash 一致、wholeTextOccurrences 声明属实；随机抽 5 条 find() 全部逐字命中且偏移与声明一致。抽取出的人物、事件、地点、誓言、判词没有编造：没用原文没有的人物，没把结束当成功（T6 明写结果未完成、FS5 显式 unresolved），KD4 主动拒绝把颂子上的名号升格为叙述事实——这三点是**超出一般水准的自我约束**，我反向验证时试图推翻都未能拿出反证。\n\n但判 **partial**，因为发现三类**实在的缺陷**（不是风格分歧）：\n\n① **quoteAttributionAudit 有 29 个不同节点被截断到 60 字，导致它的 quote 与同一节点自报的 start/end 不再自洽**（在 boundaryNodes 与 boundaryNodesAsserting 两个列表里各列一次，故磁盘上是 58 条记录、29 个不同 path；两个列表的畸形集合**完全相同**）。而该字段的语义正是「按位置算引号内外比例」，位置一旦不自洽，这个比例就算不出来。这 58 条记录**全部**满足 `TEXT[start:end] != quote`（截断后 quote 恰为 `TEXT[start:start+60]`，即都是「前缀型」截断，没有一条是别种错法）。这是**可复现的机械缺陷**：同一文件里其余 501 条节点全部自洽，只有这一个派生审计节不自洽。\n\n② **factStatus 的「机械判定」不可复现为它自己声明的规则**，直到把分母从「quote 长度」换成「end-start 跨度」才 174/174 完全吻合（用「quote 字符数」口径时只有 124/174 吻合）。候选声明的规则是「某引文的字符落在引号内的比例」，但实际算的是**跨度**内的比例；两种口径在 174 个节点中有 **58 个数值不同、4 个连标签都会翻转**（例：boundaryNodes[31] 自报 mixed/0.337，按声明口径应为 narration/0.0）。结论：**口径未写明**，规则与实现之间存在未声明的偏移。改用跨度口径后我复算 174/174 数值吻合、**标签 0 处不符** ⇒ 这批数据本身可用，缺的只是口径说明。\n\n③ **两处归属错误**（不是编造引文，是把合法引文挂错了主体）：T6 的 action 把「引唐僧入林寻看」的执行者写成三藏；T2 的 obstacle 说妇人「逐个点名（悟空→八戒→悟净）」，但原文点名的是三藏（「悟空，你在这里罢」「你两个不肯，便教悟净在这里罢」），妇人只说过泛指的一句「你手下人，我家也招得一个」。两处都有逐字原文可查。\n\n另有 1 处**存疑**（不作为 fail 依据）：method 声称「7319 字 / 57 个非空段落」，而该切片按任何换行分法都只有 **37** 个非空段落。我没有找到能得出 57 的分法，但也无法证明 57 不是某个我没想到的口径（如含跨单元节的编号体系），故只记为存疑。",
+
+  "counterExamples": [
+    {
+      "claim": "T6_three_disciples_go_to_rescue_bajie 的 action 末段把三步动作分派为「沙僧『卷起铺盖，收拾了担子』→ 行者『解缰牵马』→ **三藏「引唐僧入林寻看」**」，actor 字段亦写「三藏（决定者）、沙僧与行者（执行者）」。",
+      "quote": "那沙和尚却卷起铺盖，收拾了担子；孙大圣解缰牵马，引唐僧入林寻看。",
+      "offset": 164097,
+      "why": "原文这一句是**分号并列的两个主语**：前半主语是「那沙和尚」，后半主语是「孙大圣」。「引唐僧入林寻看」的动作发出者是**行者**（孙大圣引唐僧），不是三藏——三藏是「唐僧」这个宾语本身，他不可能引自己。候选把该动作归给三藏，与他自己的 T6.actor 也自相矛盾（actor 说三藏是决定者、沙僧与行者是执行者，却又让三藏执行了行者的那一步）。属**归属错误**，不是编造引文。修正：把该步归给行者，action 末段改为「行者『解缰牵马、引唐僧入林寻看』」。"
+    },
+    {
+      "claim": "T2_widow_wants_a_husband_for_her_daughters 的 obstacle：「她逐个点名（悟空→八戒→悟净）三次都被推辞」。",
+      "quote": "三藏见他发怒，只得者者谦谦叫道：“悟空，你在这里罢。”",
+      "offset": 160170,
+      "why": "**点名的是三藏，不是妇人。** 原文两处点名的主语都是「三藏」：此处「三藏见他发怒，只得者者谦谦叫道：『悟空，你在这里罢。』」，以及 160247「三藏道：『你两个不肯，便教悟净在这里罢。』」妇人自始至终没有点过任何一个徒弟的名，她只说过泛指的一句「好道你手下人，我家也招得一个」（160146），是**类别**而非**具名**。候选自己在 T5.obstacle 里写对了（「师父把话推给他们」），在 T2 里写反了主体。属**归属错误**。修正：T2.obstacle 应改为「三藏两次点名把徒弟推出去（悟空→悟净），妇人只泛指『你手下人，我家也招得一个』」。注意妇人**确实**参与了两次点名的应答语境（她发怒是触发），所以错的只是「她逐个点名」这一主体认定，不是整段因果。"
+    },
+    {
+      "claim": "quoteAttributionAudit 的 derivation 声称 factStatus 是「从原文的 “ ” 配对机械判定的：某引文的字符落在引号内的比例 >=0.9 ⇒ utterance；<=0.1 ⇒ narration；其间 ⇒ mixed」，且 boundaryNote 自称 boundaryNodes 是「0<frac<1」的跨边界节点。",
+      "quote": "那八戒闻得这般富贵，这般美色，他却心痒难挠，坐在那椅子上，一似针戳屁股，左扭右扭的，忍耐不住，走上前，扯了师父一把道：“",
+      "offset": 159647,
+      "why": "**该节点自报 fracInsideQuotes=0.337、factStatus=mixed，但按候选声明的「引文字符落在引号内的比例」应为 0.0 ⇒ narration**（这条引文以「：“」结尾，整段落在引号**外**）。差异根因是**分母口径**：候选实际用 `end - start`（跨度）作分母，声明写的却是 quote 的字符数；两种口径在 174 个节点里 58 个数值不同、4 个连标签都翻转。全部 174 个带 fracInsideQuotes 的节点，只有改用**跨度口径**才 174/174 精确复现（mean|diff|=0.00025，max=0.00050）；改用字符数口径仅 124/174。**结论：这批数据是可复现的，但声明的规则不是实际执行的规则**，属于口径未写明（我据此不判 fail，因为修正口径后 0 处标签不符）。修正：derivation 与 boundaryNote 必须显式写明分母是 `end-start` 跨度。"
+    }
+  ],
+
+  "reverseChecks": [
+    {
+      "found": "**妇人的家产自述与叙述层所见互相矛盾**：她报「黄水牛有一千余只，况骡马成群，猪羊无数」，但行者先前在庄院外亲眼所见是「牛羊不见无鸡犬」。候选把这两处分别处理（G11 家产清单登记为 utterance、G8 陈设登记为「未使用」），**从未把两者并置**，也没有任何一条 state/KD/caveat 指出这是「自述 vs 目见」的冲突。RCE3 讨论了「富实是否可信」，用的是**房舍陈设**与田产对照，恰好绕开了这处更直接的矛盾。",
+      "quote": "牛羊不见无鸡犬，想是秋收农事闲。",
+      "offset": 158033,
+      "counterpartQuote": "黄水牛有一千余只，况骡马成群，猪羊无数。",
+      "counterpartOffset": 159248,
+      "whyItMatters": "这是原文里**唯一一处「她的自述」被「叙述层目见」当场抵消**的地方，也是这一回「假庄院」最早露出的破绽。候选的 KD1（行者知情不说）只讲行者从云气看出点化，未登记这一处人人可见的物证反差。"
+    },
+    {
+      "found": "**三藏对在家人生活作过正面让步**，紧接着才讲出家诗。候选 CE4 只写他「换了判据——不比财产，比『外物不生闲口舌』」，把这次交锋描述成两套尺度的对撞；但原文里三藏先说了一句**认可对方**的话，再转出自己的立场。候选全文没有引用或提到这半句。",
+      "quote": "三藏道：“女菩萨，你在家人享荣华，受富贵，有可穿，有可吃，儿女团圆，果然是好。",
+      "offset": 159935,
+      "whyItMatters": "候选 ST2 把三藏的前后值写成「沉默回避 → 正面回绝」，并把「不动心」的证据仅归于「推聋妆哑」「如痴如蠢」等被动比喻。这半句「果然是好」是叙述层直接给三藏的**主动表态**，属于该 state 的前值证据，漏掉它使 ST2 的转折幅度被夸大了。"
+    },
+    {
+      "found": "**行者是被妇人当场指为「擅入」的，且他慌了**。候选 T1.result 写「他的借宿请求是行者替他开口的」，把行者写成一个从容代答的角色；原文里妇人第一句是**质问**（「是甚么人，擅入我寡妇之门？」），行者的反应是「慌得个大圣喏喏连声道」，然后才报出来历。候选在 T1.evidence[5] 引了行者的答话，但**未登记这句质问，也未登记「慌得」这一反应**（grep 全文无「寡妇之门」「慌得个大圣」）。",
+      "quote": "娇声问道：“是甚么人，擅入我寡妇之门？”慌得个大圣喏喏连声道：",
+      "offset": 158615,
+      "whyItMatters": "这改变了两处判断的依据：① T1 的「以礼求宿」子目标实际**未能按三藏的方式达成**——不是「等人出来以礼求宿」，而是行者擅自入门、被主家当场质问「擅入」；三藏先前明说「切莫擅入」（158392），行者的行为恰好违反了师父的交代。这是 T1/T5 里一条没被登记的**内部违纪**。② 行者的「喏喏连声」与他后来在婚事上的主动操控构成反差，是 ST3「沉默知情者→舞台调度者」这条状态变化的更有力起点。"
+    },
+    {
+      "found": "**八戒把整个拒婚归因为「唐王的旨意」**，而这是他自己编造/转述的理由，不是三藏说过的。候选 CE6 引了同一段里他叫「娘」的那句，也引了妇人问话，但**没有登记这句归因**（grep 无「唐王」引文；nameUsageAudit 只在姓名字段列了「唐王」位置 161247，未作任何断言）。",
+      "quote": "八戒笑道：“他们是奉了唐王的旨意，不敢有违君命，不肯干这件事。",
+      "offset": 161236,
+      "whyItMatters": "这是八戒对妇人作的**关于师父与师兄弟的陈述**，而叙述层没有印证。它正是 KD5（八戒以为私谈没人听见）之外的另一层信息风险：八戒在这里替**全体**作了辩解式陈述。候选的 KD2「这一句话本身就表明他到这一刻才知道」（关于沙僧）没有对应地处理八戒这处越权代言。"
+    },
+    {
+      "found": "**回目本身把设局者写成「四圣」，与候选 KD4 的保守读法构成直接张力**。候选 KD4 主张名号只到「帖上这样写着」一层，理由「叙述层从头到尾没有一句话确认黎山老母/普贤/文殊在场」。但回目「第二十三回　三藏不忘本　**四圣**试禅心」是**叙述层（且是书目层）的自述**，不在任何引号内——它已经用「四圣」指认了那四人，且用「试」指认了这是一场考验而非真实的招赘。候选把回目登记为 G1 且 claim/basis 双 null（「只登记位置与形态，不承担任何断言」），恰恰把这条最有力的反证排除在断言之外。",
+      "quote": "第二十三回\u3000三藏不忘本\u3000四圣试禅心",
+      "offset": 156853,
+      "whyItMatters": "这正是 VERIFIER.md 第 4 条要求的**误杀检查**：候选为了保守而把一条合法的、叙述层的证据降级为「不承担任何断言」。我据此**不建议**判 KD4 为错（帖内自名与叙述层认定确有层次差别，候选的谨慎有价值），但判 KD4 为 **partial 而非 pass**：结论应改写为「帖上名号 + 回目『四圣』共同支持四人身份，其中回目是叙述层证据、颂子是帖内文本」，而不是现在的「只有帖上这样写着」。这是**误杀**（把合法证据挡在门外），不是编造。"
+    },
+    {
+      "found": "**开篇诗已经把整回的判词写完了**：「乖猿牢锁绳休解，劣马勤兜鞭莫加」。候选 G2/G3 把开篇诗按「与后文『九秋』时节对应，但不参与任何事件」登记，G3 只处理「木母金公原自合，黄婆赤子本无差」的丹道术语。这半句没有「九秋」的时节信息，被一并搁置。",
+      "quote": "乖猿牢锁绳休解，劣马勤兜鞭莫加。",
+      "offset": 156891,
+      "whyItMatters": "「牢锁」「莫加」是**对后续行为的预判**：本回里马被惊跑恰好是「加鞭/纵劣性」的结果（「尽他劣性，奔上山崖」158xxx），八戒被绳绷住恰好是「牢锁」。候选在 CE2 详细分析了惊马机制、在 CE8 分析了绳绷机关，却未把这两处与本回开篇的提纲句关联——它在 RFS7 里把开篇诗整体判为「不在叙事内，不算伏笔」，这个处理对「务本」评论成立，但「牢锁/莫加」这半句与两个具体机关同名同指，属于被一句话整体否掉的合法回照。"
+    }
+  ],
+
+  "falseKillCheck": {
+    "verdict": "有 1 处误杀，已计入 reverseChecks 第 5 条",
+    "detail": "KD4 把回目「四圣试禅心」这条**叙述层**证据排除在断言之外（G1 的 claim/basis 双 null）。候选的保守本身有理由（帖内自名≠叙述认定），但它把回目一并搁置，使「四人身份」的可用证据从两条降到一条，读法因此偏保守。这是结构性误杀，不是编造。\n\n反面确认：我没有发现候选因**词表/正则**挡掉真实因果边的痕迹。它显式列出了 8 条 rejectedAsCauseEdge（RCE1–RCE8）与 7 条 rejectedAsForeshadow（RFS1–RFS7），逐条给了为何不算的机制理由；我抽查 RCE1/RCE2/RCE3/RCE8 与 RFS1/RFS3，理由与原文相符（例如 RCE8 指出汗衫是「一开始就备下的条件」而非发怒后的报复，原文支持：「我这三个女儿，心性最巧，他一人结了一个珍珠篏锦汗衫儿」163401 出现在发怒之前）。计划100 的「遂行」型整词误杀在本候选里没有对应物。"
+  },
+
+  "hallucinationCheck": {
+    "verdict": "未发现编造",
+    "detail": "① 人物：nameUsageAudit 逐个定位了 20+ 个名号的出现范围与全书次数，我抽查黎山老母(1/1)、普贤(1/7)、文殊(1/14)、南海菩萨(1/10)、龙马三太子(1/1)、周公(1/1)——**全部与原文一致**（这些数字我独立复算过）。没有原文不存在的人物。\n② 结局：T6 明写「本单元内救援**未完成**」、FS5 显式 unresolved、payload/payoffAnchor 写 null——**没有把结束当成功**。reverseChecks 我要补的是相反的：候选比原文更保守。\n③ 伏笔：FS4 主动把自己的条目标为「**我主动把它标为 unresolved 并承认它不构成伏笔**」，FS5 同样显式声明「这一条是『未回收的显式标记』，不是一条成立的伏笔」。自陈不成立仍列出并说明，比悄悄省略更可核。\n④ 跨单元：crossUnitReferences 的 X1–X6 六个偏移我全部复算，**6/6 与声明一致**，且 X5/X6 正确标为 not-in-range/inThisUnit=false（X5 恰是 164172=区间终点，X6 在 156813<区间起点）——边界处理正确。\n⑤ gapAnchors 30 条的 claim/basis 全为 null，明确不承担断言。"
+  },
+
+  "quoteVerification": {
+    "totalQuoteNodes": 559,
+    "notFoundInSource": 0,
+    "fullTextOccurrencesAllOne": true,
+    "offsetMismatch": 58,
+    "offsetMismatchConfinedTo": "/quoteAttributionAudit（boundaryNodes 29 个畸形节点 + boundaryNodesAsserting 29 个畸形节点，两边 path 集合相同，去重后 **29 个不同节点**、磁盘上共 58 条记录；全部为 60 字前缀型截断）",
+    "outOfRangeStarts": 0,
+    "sourceHashMismatches": 0,
+    "random5": [
+      {"path": "/foreshadows[0]/evidence[1]/citations[0]/cite", "quote": "摇身一变，变作个红蜻蜓儿，飞出前门，赶上八戒。", "find": 161049, "statedStart": 161049, "statedEnd": 161072, "verbatim": true, "offsetConsistent": true},
+      {"path": "/tasks[5]/evidence[1]/assertionRef", "quote": "行者道：“兄弟，莫睬他，我们去罢。”", "find": 164017, "statedStart": 164017, "statedEnd": 164035, "verbatim": true, "offsetConsistent": true},
+      {"path": "/tasks[1]/evidence[0]/assertionRef", "quote": "小妇娘女四人，意欲坐山招夫，四位恰好，不知尊意肯否如何。", "find": 159167, "statedStart": 159167, "statedEnd": 159195, "verbatim": true, "offsetConsistent": true},
+      {"path": "/foreshadows[3]/evidence[0]/citations[0]/cite", "quote": "“好女婿呀！这等没大没小的，连丈母也都要了！我这三个女儿，心性最巧，他一人结了一个珍珠篏锦汗衫儿。你若穿得那个的，就教那个招你罢。”", "find": 163406, "statedStart": 163406, "statedEnd": 163472, "verbatim": true, "offsetConsistent": true},
+      {"path": "/quoteAttributionAudit/boundaryNodes[48]", "quote": "八戒道：“弄不成！弄不成！那里好干这个勾当！”行者道：", "find": 162302, "statedStart": 162302, "statedEnd": 162329, "verbatim": true, "offsetConsistent": true}
+    ],
+    "random5Result": "5/5 逐字命中（TEXT.count(quote)==1）、5/5 偏移与声明一致（TEXT[start:end]==quote）。抽样用 seed=23。",
+    "note": "58 条偏移不符**全部**位于 /quoteAttributionAudit 这个派生审计节；该节 89 条 boundaryNodes 中 60 条与其 path 指向的节点完全一致，29 条被截断到 60 字。559 条中的其余 501 条（tasks/causeEdges/states/knowledgeDiffs/foreshadows/unknowns/rejectedAs*/crossUnitReferences）**全部自洽**。"
+  },
+
+  "extractionCheck": {
+    "tasks": "6 条全部可在原文找到对应文字。actor/objective/action 的每条 evidence 均逐字可查。T1–T6 的 resultIsSuccess 我逐条核对：T1 true（吃到斋、在客座安歇属实）、T2 false（无人成亲、妇人一行消失属实）、T3 false（被绷住、未得妻子属实）、T4 true（拿到私谈内容、逼出沉默属实）、T5 true（三人均未被留下属实）、T6 false（只走到「入林寻看」，原文在「且听下回分解」收束，救援未完成）——**6/6 与原文相符**。",
+    "causeEdges": "9 条（CE1–CE9）。我逐条核对机制描述与原文：CE2 的「恐惧来自视觉预期而非实际击打」（「那马看见拿棒，恐怕打来」）、CE8 的「机关不由他完成穿着动作而启动」（「还未曾系上带子」）、CE9 的自标 basis=derived 并有缺口说明——**均可查、且候选主动标注了 weakest link**。CE5 的 caveat 主动指出「这条边最容易读成因果而其实是时序」，并给出「回绝确实是关门的触发，但八戒的抱怨只指向没饭吃这一项」的分辨，属高质量自我约束。",
+    "states": "7 条（ST1–ST7）。ST5 是场景本体（character 写「庄院（地点状态；不是人物）」），候选在 selfCritique 里**主动承认这是越界用法**并给出理由；ST1–ST4、ST6、ST7 的 before/after 我逐条对照原文，未发现无据的状态变化。",
+    "knowledgeDiffs": "8 条（KD1–KD8）。KD1/KD3/KD6/KD8 显式标为「本单元内未解开」，KD4 显式承认是最需复核的一条。KD2 的 caveat 区分了「缺失证据」与「不知情」（「我把三藏写进 caveat 而不是写进 who_does_not_know，就是为了不把『原文没写』当成『他不知道』」）——这是本候选最值得肯定的方法论纪律。",
+    "foreshadows": "5 条（FS1–FS5）。FS4/FS5 显式 unresolved 且 payoff/payoffAnchor 写 null。FS2 主动自陈「这条是本候选里**最接近『归纳当伏笔』**的一条」并给出降级出口；FS1 自陈「被回收的是**判断**而不是**沉默**」。FS3 自陈「『铺设—回收』在措辞层面**并不一致**」（「我不检举你」vs 当众揭发）——**主动交出反证**。",
+    "rejected": "rejectedAsCauseEdge 8 条 + rejectedAsForeshadow 7 条 + unknowns 16 条 + gapAnchors 30 条，构成一个显式的「否掉/不知道」分区，是本候选结构上最强的一点。",
+    "paragraphNumberingSuspicion": "候选 9 处引用「第 N 段」（88/103/142/143/198/210/211），并声明切片有「57 个非空段落」。但该切片按任何换行/句读分法都得不到 57（非空行 37、以「。」切 226、以「。！？」切 316），且「第 210 段」被用来指颂子、而同一候选另一处又用「第 211 段」指颂子。我无法复现这套编号，故**只记为存疑，不作为 fail 依据**（拿不出原文引证的反对只能记存疑；这里我拿得出「57≠37」这一引证，但拿不出「57 必错」的反证——它可能来自某个我未想到的口径）。"
+  },
+
+  "notes": "总体判断：这是一份**引用层干净、自我约束强、但在两个主体归属上写错、且派生审计节有可复现机械缺陷**的候选。判 **partial**。\n\n【哪些条目可以直接用】tasks 6 条（修正 T2.obstacle 的主语后可用；T6.action 末段修正主语后可用）、causeEdges 9 条、states 7 条（ST5 若要求 states 只收人物则移出而非改写）、knowledgeDiffs 8 条、foreshadows 5 条、unknowns 16 条、gapAnchors 30 条、rejectedAsCauseEdge/RFS 共 15 条——这些的引文 559/559 逐字可查、偏移自洽、sourceHash 正确，**作为定位层（locator）证据完全可用**。候选自己也声明 reviewStatus 是 locator-only，这个自我定位是诚实的。\n\n【哪些必须修正或降级】① T2.obstacle 的「她逐个点名」→ 主语改三藏；② T6.action 末段「三藏引唐僧入林寻看」→ 改行者（并同步 actor 字段的一致性）；③ quoteAttributionAudit 的 58 条截断节点必须补回完整 quote 或改写 end，否则该节的 start/end 不可用于任何位置计算；④ factStatus 的 derivation/boundaryNote 必须写明分母是 `end-start` 跨度而非 quote 字符数（修正后数据本身 174/174 正确，不必重算，只需改口径说明）；⑤ KD4 应吸收回目「四圣试禅心」这条叙述层证据，从「只有帖上这样写着」改写为「帖上名号 + 回目认定的双层证据」；⑥ method 里「57 个非空段落」与「7319 字」并列，段落数存疑，应改为可复现的 37 或注明口径。\n\n【对判 fail 的克制】我**没有**判 fail，因为：所有 counterExample 都是**归属/口径**问题而非编造，559 条引文一条不假，人物一个不多，没有把结束当成功。按 VERIFIER.md「判 fail 必须有 counterExample 且 quote 逐字可查」——我有可查引证，但这些引证指向的是「可修正的错」而不是「伪造的内容」。判 partial + 精确列出必须丢弃/降级的条目，比判 fail 更符合本项目的实际需要。\n\n【对我自己这次复核的反向检查】① 我最初用「全库 “ ” 顺序配对」重算 factStatus，得到 174/174 全部不符，差点据此判候选伪造标签。原因是**全书引号不闭合会让位图级联**（ch23 之外有 39 个未闭合深度），我的脚本先把整个 TEXT 建位图，错误因此来自**我方**。改在切片内配对后差异降到 4 条，再改用**跨度口径**后降到 0 条。**这条我如实登记：我的第一版反向验证本身不成立。** ② 我一度把「57 个非空段落」当成确定缺陷，但找不到任何一种能得出 57 的分法后降级为存疑——不做我无法复现的指控。③ 我原以为「boundaryNodes 与其 path 不一致」是 29 条独立缺陷，**第一次修正时又把去重数字写错成「58 个节点」**——实际是 **29 个不同 path、磁盘上 58 条记录**（`len(set(mb)|set(ma))==29`、`len(mb)+len(ma)==58`，已复算）。同一个数量我搞混过两次口径，最终以「29 个不同节点 / 58 条记录」为准。这条如实登记：它正是我要求候选做到的那种「数字必须能复算」。\n\n【remaining / 我没做的事】① 我**没有**核对本单元与第 22/24 回的跨单元事实一致性（如沙僧「跟着师父还不上两月」是否与第二十二回收沙僧的时间线吻合），候选的 X4 只把它当 utterance，我认同这个处理但未独立验证。② 我**没有**做全库扫描站点水印「(奇*书*网^.^整*理*提*供)」的出现次数（候选 U12 自陈未扫），因此无法判断它是否会污染本单元的 factStatus 机械判定。③ 我**没有**对 factStatus 判据做**负向对照**（注入一条「本该 utterance 却标 narration」的假引文验证判据有判别力）——候选在 selfCritique 里主动承认了这个缺口，我复述而非填补。④ 5 条随机抽样是我按 VERIFIER.md 第 6 条抽的 5 条，不是全量 559 条的逐条人工复读；全量核对是机械的（find/count/切片/哈希四项）。",
+
+  "evidence": [
+    {"path": "loop/state/out/read_xiyou_L1_0023.candidate.json", "sha256": "c3c57bff3e9fef25c8366da2614924f56c1939ba3338e8a473ff9c449160002e", "kind": "reviewed-candidate", "note": "被复核的候选；哈希为复核时刻实测值。"},
+    {"path": "data/cache/df959d743e53206f56db2f92.docs.json", "sha256": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2", "kind": "source-text", "note": "原文来源（候选声明的键）；[156853,164172) 为复核区间，与任务 sourceHash 一致。"},
+    {"path": "data/cache/5b064a5575f0c330f6f2cd2e.docs.json", "sha256": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2", "kind": "source-text-alias", "note": "index.json chapterUnits 所用的键；与上一文件字节相同（同 sha256），我两个都抽查过。"},
+    {"path": "loop/state/out/read_xiyou_L1_0023.json", "kind": "reviewed-record", "note": "被复核任务的提交记录：agent=w-xiyou-1、status=done、verifyState=pending、reviews 为空（此前无复核）。我 w-dafeng-3 ≠ w-xiyou-1，非自签。"}
+  ],
+
+  "commands": [
+    "python3 -c \"import json,hashlib; print(hashlib.sha256(open('data/cache/df959d743e53206f56db2f92.docs.json','rb').read()).hexdigest())\" => c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+    "python3 -c \"import json; t=json.load(open('data/cache/df959d743e53206f56db2f92.docs.json'))[0]['text']; print(t.find('第二十三回'), t.find('第二十四回'), len(t[156853:164172]))\" => 156853 164172 7319",
+    "# 全量引文核对（559 条）：TEXT.count(q)==1 / S<=start<E / TEXT[start:end]==q / sourceHash 一致 => not-found 0、越界 0、哈希不符 0、偏移不符 58（全在 quoteAttributionAudit，全为 60 字截断）",
+    "# factStatus 复算：切片内配对 111 对引号，按 (end-start) 跨度口径 => 174/174 与候选 fracInsideQuotes 吻合（mean|diff|=0.00025），标签 0 处不符",
+    "# 位置空档：区间内被引文覆盖 0.6064（与候选 assertingPlusGapCharCoverage 0.6064 一致）",
+    "# 随机抽 5 条 find（seed=23）=> 5/5 逐字命中且偏移一致"
+  ]
+}

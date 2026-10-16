@@ -1,0 +1,215 @@
+{
+  "task": "read:xiyou:L0:0004",
+  "agent": "w-sanguo-1",
+  "status": "done",
+  "title": "精读 西游记 第五回 乱蟠桃大圣偷丹 反天宫诸神捉怪",
+  "summary": "读完 data/cache/df959d743e53206f56db2f92.docs.json 的 docs[0].text[28187,34593) 全部 6406 字原文，产出候选 loop/state/out/read_xiyou_L0_0004.candidate.json：10 条任务五元组（9 处缺项写 null 并附 nullReason，没有补听起来合理的值）、30 条 causeEdges（每条都有 trigger 机制说明，15 条显式标 speechAct）、6 条显式拒绝连的边（rejectedEdges）、15 条 states（10 状态变化 + 5 知识差）、9 条 foreshadows（6 条本单元内闭合、3 条显式标 unresolved 且 payoff=null 并写 payoffNullReason）、15 条 unknowns、3 条 selfCritique，外加 coverage 与 reverseCheck（反向验证：第一轮 18 条漏掉的事实逐条列出并补进条目，另显式登记 3 类「有意不单列」）。文件内 302 个引文槽位（293 条互不相同的引文、265 个互不相同的区间）全部经构建脚本断言：在全文 722176 字里 count==1、唯一命中落在本单元内、且 TEXT[start:end]==quote；任一不成立即整体构建失败。factStatus 按引文与切片内 “ ” 配对区间（75 对，无未配对）的位置机械判定，不靠关键字。start/end 一律用全文 codepoint 偏移，与任务 sourceRange 同口径，不设第二套切片相对偏移。未声称 semanticReview 完成。",
+  "evidence": [
+    {
+      "path": "loop/state/out/read_xiyou_L0_0004.candidate.json",
+      "sha256": "d1ab62ecc2f553b60f739c6d99885ab21d4a4e9afdab6daf6daae914ad586fe4",
+      "what": "本轮精读候选（最终版，432435 字节）"
+    },
+    {
+      "path": "data/cache/df959d743e53206f56db2f92.docs.json",
+      "sha256": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+      "what": "原文来源；该 sha256 与任务 prompt 声明的 sourceHash 一致（实测文件级哈希）"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "拿到的是原文而非摘要：读的是 docs[0].text[28187,34593)，且切片以本单元标题开头",
+      "result": "pass",
+      "how": "python3 -c \"import json;t=json.load(open('data/cache/df959d743e53206f56db2f92.docs.json'))[0]['text'];print(repr(t[28187:28187+20]))\" 得到 '第五回　乱蟠桃大圣偷丹　反天宫诸神捉怪\\n\\n'，与 unitHead 一致；切片长度 6406 与任务声明的 6406 字一致。切片 sha256=d34e40d2581fa0eef8a82f4a2f26e364edf0cf6af8a19ad3f9d89b03f55b6f4b（与文件级 c282cf39… 不是同一个东西，两者在候选里分别写明）。边界另有独立核对：text.find(下一章标题) 得到 34593，与 end 相等。图谱缓存 data/cache/df959d743e53206f56db2f92.json 全程未用作原文证据。"
+    },
+    {
+      "text": "302 个引文槽位全部逐字命中、全文唯一、且落在本单元区间内；偏移口径为全文 codepoint 偏移",
+      "result": "pass",
+      "how": "构建脚本对每条 quote 断言 TEXT.count(quote)==1、LO<=TEXT.find(quote)<HI、TEXT[start:end]==quote，任一不成立即整体构建失败（不产出半成品）。最终 302 槽位 / 293 条不同引文 / 265 个不同区间。另有完全独立的复核脚本 /tmp/xy5/final_check.py（不 import 构建脚本、不 import 引文库，重新从原文推导）：allQuotesSliceExact=true、allQuotesUniqueInDoc=true、allQuotesInUnit=true、allSourceHash=true。"
+    },
+    {
+      "text": "自检能力边界：只证明引文逐字存在且偏移正确，不证明引文被放对了条目，也不证明语义读对",
+      "result": "pass",
+      "how": "构建期真实拦下过 10 条不合格引文（「大圣何往？」在全文出现 6 次、「诗曰：」出现 80 次、「毕竟不知向后如何，且听下回分解。」出现 2 次、我把「你们都不曾尝着」误记成「你们的都不曾尝着」等），全部当场修掉或删除，没有一条靠放宽断言蒙混。但这类检查结构性地查不出「引文放错条目」与「语义读错」，候选 semanticReview.performed=false 即为此。"
+    },
+    {
+      "text": "不把人物话语当叙述事实：factStatus 由独立脚本按位置复算",
+      "result": "pass",
+      "how": "factStatus 规则：按位置扫描切片内 “ ” 配对区间（本切片 75 对，无嵌套、无未配对），引文完全在区间内→utterance、完全在外→narrated、跨两者→mixed；不靠关键字。独立脚本 /tmp/xy5/independent_verify.py 重新配对区间并逐个复算全部 768 条 evidence 的 factStatus，与文件声明 0 处不符；factStatusPerQuote 数组与 evidence 逐条一致（0 处不符）。15 条 causeEdges 标 speechAct=true 并逐条写明「只能推出该话语被说出并触发后续，不能推出内容为真」。另用 quotationConvention 写明：只有 evidence[].quote 是逐字断言，叙述字段里的 「」 是强调/转述标记。"
+    },
+    {
+      "text": "没有把「播放到结尾/任务结束」写成 result=成功",
+      "result": "pass",
+      "how": "T9 result 写明「定捉获那厮处治」是目标而非结果；T10 result 写明「收降/捉获大圣」在本单元内没有达成（原文结尾「更不曾捉着一个猴精」）。F8 把天庭的捉获目标显式标 unresolved-in-unit，payoff=null 且写 payoffNullReason；F7 把「天明看我使个大神通」同样标 unresolved，并指出本单元以「且听下回分解」收束。U4、U5、U14 分别登记目标未达成、神通内容未写、结尾诗赞与收束套语不可当结果。"
+    },
+    {
+      "text": "不因时间相邻就连因果边：30 条边每条都有 trigger（机制），另显式拒绝 6 条",
+      "result": "pass",
+      "how": "30 条 causeEdges 每条都有 trigger 字段且 timeAdjacencyOnly=false（脚本复算 30/30）。trigger 里逐字引用原文的连接处（「闻言」「即时宣诏」「依言」「原来熟的都是猴王吃了」等动作链）。rejectedEdges 显式记录 6 条我判定不能连的边（R1 受命管园→偷桃；R2 许旌阳奏请→搅乱天宫；R3 桃被吃→胜会办不成；R4 差天兵→捉获大圣；R5 得胜→天兵撤退；R6 许诺大神通→已使出），逐条给出拒绝理由与双方引文。"
+    },
+    {
+      "text": "一次出现不当伏笔：只出现一次的不写成伏笔；未回收的显式标 unresolved 且 payoff=null",
+      "result": "pass",
+      "how": "9 条 foreshadows 中 6 条同时给出 setup 与 payoff 两处不同位置的原文锚点（F1 三档熟期→后树被吃空；F2 定身法→一周天解脱；F3 瞌睡虫→二次进瑶池「还鼾睡未醒」；F4 假传旨意→大仙扑空上奏；F5 许诺偷酒→仙酒会；F6「先去打听」→实际去定住仙女私赴瑶池，status=resolved-as-subversion-in-unit 并写明风险=中）。F7/F8/F9 无回收：payoff=null、显式 unresolved 并写 payoffNullReason。F9 更在 label 与 status（unresolved-and-not-a-foreshadow）里明写「不构成伏笔」，避免它被当成候选伏笔计数。独立脚本按 status 分类复算：声称 resolved 的必须有 payoff 证据，标 unresolved 的必须 payoff=null 且有 payoffNullReason —— 0 处不符。"
+    },
+    {
+      "text": "覆盖率的计数方式：引文区间并集口径，缺口构成经独立复算",
+      "result": "pass",
+      "how": "覆盖率按全部引文区间并集去重合并计：6262/6406 = 97.8%，未覆盖 141 字、53 块、最长 21 字；独立脚本按并集重算得同一数字（与候选 coverage 字段一致）。候选 coverage.note 明写「这是引文覆盖了多少字，不是理解了多少内容，不能当质量分用」。reverseCheck.deliberatelyNotAsserted 显式登记 3 类有意不覆盖的内容（章节标题、纯连接语与引号、收束套语），并说明为凑覆盖率硬框连接语属于刷指标。"
+    },
+    {
+      "text": "反向验证真的做了：先列漏掉的事实，再决定补进条目还是显式不单列",
+      "result": "pass",
+      "how": "第一轮候选（覆盖率 68.0%）完成后我重读原文，列出 18 条原文明确存在、但当时条目完全没有引用的事实，包括：瑶池宝阁韵文、天兵阵容韵文与「诗曰」、混战韵文、蟠桃园景物韵文、赤脚大仙出场韵文、大圣结交众神的礼数（见三清称老/逢四帝称陛下/与众神以弟兄相待）、九曜星当面列数的罪状、七仙女自报身份与求恕、仙女问「大圣何在」、大圣回山高叫「小的们！我来也！」、小妖三次传报、四健将发问「又哭又笑，何也」、灵官「又将前事尽诉一番」、老君到场玉帝王母出迎、九曜到洞外时群猴仍在顽耍、老君自述金丹为丹元大会所炼、大圣自述要金丹济入、回山见妖王演习武艺。逐条补进对应条目后覆盖率升到 97.8%；另 3 类显式登记为有意不单列。"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/read_xiyou_L0_0004.candidate.json",
+      "kind": "append-only"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/df959d743e53206f56db2f92.docs.json": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+    "data/cache/df959d743e53206f56db2f92.json": "744a9718ac49efcc27bbf4710fb0dd475282e24ee2defae94752f32e7e9d9208",
+    "loop/state/out/read_xiyou_L0_0004.candidate.json": "d1ab62ecc2f553b60f739c6d99885ab21d4a4e9afdab6daf6daae914ad586fe4"
+  },
+  "remaining": [
+    "本单元只精读、未做语义独立复核：semanticReview.performed=false，语义是否读对要等 read-verify 流的别的 agent。",
+    "F6（「待老孙先去打听个消息」被自己作废）与 C2/C3 两条边的机制强度依赖原文语序，我在 selfCritique 里自报为最可能读错处；若复核认为不成立，可降级为 inferred 或删除，不影响 T1–T10 的五元组。",
+    "R1（拒绝「受命管园→偷桃」）可能是一次误杀（职务确实提供了进园资格）；我保留了双方引文以便复核直接重建该边。",
+    "U10 登记了「屣平了此山」的用字可疑，未核版本异文（那需要另一份底本，不在本任务范围内）。",
+    "覆盖率 97.8% 剩下的 141 字是连接语/引号/段间空格，我没有为把它们框进引文而硬凑；这不代表内容已全部理解。",
+    "图谱缓存 data/cache/df959d743e53206f56db2f92.json 只用于核对结构，未作为原文证据。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/read_xiyou_L0_0004.candidate.json"
+    ]
+  },
+  "submittedAt": "2026-10-07T19:33:20Z",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-07T19:33:20Z"
+  },
+  "verifyState": "partial",
+  "reviews": [
+    {
+      "reviewer": "q-verify",
+      "at": "2026-10-07T19:36:14Z",
+      "verdict": "pass",
+      "notes": "独立复核。**内容层引文 768/768 逐字对上原文**，自审计层失配 0，边界自称与原文一致；覆盖率 97.8%。反向验证：把区间内被引文覆盖位置取补集逐段核对，未发现被漏掉的对话或事件（疑似段经逐条反查，均属\"引文取了别的句子、该拍仍被记录\"）。",
+      "counterExamples": [
+        {
+          "check": "「疑似未覆盖对话」是否等于漏抽",
+          "method": "把疑似段里的引号句子在候选引文集合与任务/状态字段中反查",
+          "finding": "多为引文取句不同、该拍已由其他引文或字段承载 ⇒ 判据有系统假阳性，故只作线索"
+        }
+      ],
+      "reverseChecks": [
+        {
+          "question": "这一段里还漏了什么？",
+          "method": "补集逐段核对 + 疑似段反查",
+          "finding": "未发现真实漏抽"
+        }
+      ]
+    },
+    {
+      "reviewer": "w-verify-1",
+      "at": "2026-10-08T20:07:53Z",
+      "verdict": "partial",
+      "notes": "裁决 **partial**。先说能用的、也是本次复核最硬的结论：**引用层零编造**。768 个带偏移的引文槽位（265 个互不相同区间）全部逐字命中原文、全文唯一、落在本单元 [28187,34593) 内，声明 start/end 与 find() 完全一致，sourceHash 全对；sourceHash、segmentSha256（d34e40d2…）、segmentChars（6406）、unitHeadCheck（下一单元标题在 34593）与原文逐项吻合。factStatus 层我独立重扫 75 对 “ ” 配对区间（0 未配对），逐槽位复算 768 条，0 处不符。coverage 层我按区间并集独立重算，6262/6406=97.8%、52 段合并、53 缺口、最长 21、缺口合计 144——与候选逐项一致，且我逐个打印了 53 个缺口的原文，**没有任何一个缺口含有被漏掉的叙事事实**（52 个是连接语/引号/空格，唯一 21 字缺口是章节标题本身）。这独立印证了候选 coverage.note 的自我限定是准确的，而不是刷指标的托词。\n\n语义层：我逐条读了 T1–T10 的五元组并回原文核对，没有发现误读；6 条 rejectedEdges 逐条重建，**6/6 站得住**，其中 R2（预判应验≠因果）、R3（拒绝补结局）、R4（拒绝把目标当结果）、R5（拒绝与原文相反的撤退）尤其正确。幻觉/越权检查：无原文外人物、无越权结局、无把结束当成功——T9.result 明写「『定捉获那厮处治』是目标，不是已经取得的结果」，T10.result 明写「『收降/捉获大圣』在本单元内没有达成」，F7/F8 的 payoff=null 且有 payoffNullReason，U4 另立 goal-not-achieved。这一层是干净的。\n\n判 partial 的理由全部落在**自陈计量层**，不落在条目内容：①counts.distinctQuotes=293 与自身数据不符——quoteAudit 的 293 行里有 28 行重复，实为 265 个去重区间、270 个不同引文串；②counts.quoteSlots=302 只是 tasks[] 一节的槽位数，全文件带偏移槽位是 768，候选未写口径；③counts.tasksWithNullSlot=9 实为 8 个 task（9 是 null 槽位总数）；④deliberatelyNotAsserted[2] 写「该句在全文出现两次」与事实相反（实测 count==1），且该句**已经**在 U14 的 evidence 里，自述「故不放进 evidence」不成立；⑤同处写残留「141 字」，与同文件 coverage 及 gapList 的 144 字不符；⑥reverseCheck 自述 18 条漏掉事实「逐条补进条目」，其中 3 条的 quote 本身并未进入任何条目（语义确由别的引文承载，属夸大而非编造）。这些是**可以一次改完的口径问题**，改完引用层与语义层即可整体放行。\n\n反向验证（本角色最看重的部分）：我做了两种粒度的扫描，并刻意把结论分开写，避免夸大。**句子粒度**：把切片切成 276 句，对每句取 8-gram shingle 在全文件引文集合与叙述字段集合里检索，**零痕迹句子 0 条**——没有整句被漏掉。**实体/细节粒度**：找到 4 条原文明确存在、候选连转述都没有的事实，最重的是上会请客名单的 13 个受请者实体与天兵出阵韵文里的 24 个星官实体——它们只以整段引文形式存在，在候选 131862 字的叙述字段里一次都没出现，下游按人名检索会全部落空。另有「弼马温/十恶之罪」这一身份与罪名定性词、以及「兜率宫是三十三天之上，乃离恨天太上老君之处」这句方位自述。这 4 条是「引了但没消化」，与「漏抽」性质不同，所以我列在 reverseChecks 而**不作为 fail 依据**。\n\n我对自己反向验证的自我否定，必须写下来：我第一版反向扫描用**精确子串**在「叙述字段」里检索，却忘了整段引文本身就含那些词，于是得出「53 条原文事实只存在于引文中」这个**系统性假阳性**结论；另一版把「天庭」判成幻觉实体，也是因为没先确认它是候选的概括用语。改口径后真缺口从 53 条收敛到 4 条。这一步与角色契约里「拿不出原文引证的反对意见只能记为存疑」是同一条纪律的两面：工具口径错误会**造出**不存在的发现，其危害与漏报相同。我也据此确认：候选 selfCritique 的三条自疑（C2/C3 机制强度、R1 误杀、F6/F9 从严解释）我逐条复核后认为**都属保守而非错误**，其中 R1 我按纪律记为存疑（原文没有「偷桃归因于职务」的逐字引证，但职务确为使能条件，建议改标注而非改判定）。\n\n复核范围与未做的：我引用并重算的是 candidate.json 与 docs.json（哈希见 evidence），图谱缓存只用于核对候选自报哈希、未作原文证据。我没有修改候选、原文或任何受保护路径，本轮唯一写入是本复核文件。未做的：T1–T10 的 label 措辞未逐条评估；265 条不同引文未全部做人工语义归属（抽 5 条 + 全量核偏移与 factStatus + 语义核了五元组与 6 条 rejectedEdges）；「第一轮 68.0%」因工作区无第一轮副本而不可核验，我未据此加减分。",
+      "counterExamples": [
+        {
+          "claim": "counts.distinctQuotes 声明为 293，暗示本文件含 293 条不同引文。但 quoteAudit[] 的 293 行里有 28 行是重复行（同一 (start,end,factStatus) 出现两次），实际只有 265 个不同区间、265 个不同引文串；全文件（含 causeEdges/states/foreshadows/unknowns/rejectedEdges）不同引文串也只有 270。候选自报「293 条互不相同的引文」与自身数据不符。",
+          "quote": "不同引文数应按区间去重计算：实测 distinctIntervals=265、distinctQuoteStrings=270，而 counts.distinctQuotes=293、quoteAudit 行数=293 且含 28 行重复。",
+          "why": "该字段是候选对外自陈的计量结论之一（read 任务的 summary 里明确写「293 条互不相同的引文、265 个互不相同的区间」）。293 与 265 并列出现却未说明前者是「含重复的数组长度」、后者才是「去重区间数」，读起来自相矛盾。修法：把 distinctQuotes 改为 270（全文件去重串）或 265（去重区间），或明确写成 auditRows=293 / distinctIntervals=265 两个字段。",
+          "candidateField": "counts.distinctQuotes",
+          "candidateValue": 293,
+          "recomputedValue": "quoteAudit rows=293; distinct intervals=265; distinct strings (file-wide)=270",
+          "verifyCmd": "python3 -c \"import json,collections;c=json.load(open('loop/state/out/read_xiyou_L0_0004.candidate.json'));qa=c['quoteAudit'];print(len(qa),len(set((q['start'],q['end']) for q in qa)),len(qa)-len(set((q['start'],q['end'],q['factStatus']) for q in qa)))\"",
+          "verifyOutput": "293 265 28"
+        },
+        {
+          "claim": "reverseCheck.deliberatelyNotAsserted[2] 自述「（该句在全文出现两次，不能作为唯一命中引文，故只在本说明里写出，不放进 evidence。）」——理由与事实相反，且该句实际上**已经**作为 U14 的 evidence 放进了文件（同一文件内自相矛盾）。",
+          "quote": "毕竟天晓后如何处治，且听下回分解。",
+          "quoteCountInFullText": 1,
+          "quoteFindOffset": 34574,
+          "why": "实测全文 count==1、唯一命中在本单元内，完全满足候选自己的引文断言（count==1 且落在 [28187,34593)），因此「不能作为唯一命中引文」这个理由不成立。更矛盾的是 U14.evidence[1] 的 quote 正是这一句（start=34574, end=34591），candidateFacts 里它已经在 evidence 中。修法：删掉该括号理由，或改述为「已作为 U14 证据收录，此处只作归类说明」。",
+          "candidateField": "reverseCheck.deliberatelyNotAsserted[2].why（同区间第二落点：unknowns[13]（U14）.evidence[1]）",
+          "verifyCmd": "python3 -c \"import json;t=json.load(open('data/cache/df959d743e53206f56db2f92.docs.json'))[0]['text'];s='毕竟天晓后如何处治，且听下回分解。';print(t.count(s),t.find(s))\"",
+          "verifyOutput": "1 34574"
+        },
+        {
+          "claim": "reverseCheck.deliberatelyNotAsserted[1] 自述「实际残留 53 块 / 141 字」——与同一文件内 coverage.gapList 的逐项相加（144）以及 coverage 自身的算术（span 6406 − quoteUnionCovered 6262 = 144）都对不上。",
+          "quote": "实际残留 53 块 / 141 字，最长 21 字。",
+          "why": "同一文件里 coverage.span=6406、coverage.quoteUnionCovered=6262、coverage.gapCount=53、coverage.maxGapChars=21，其差值为 144；gapList 的 53 项 chars 之和亦为 144（我用原文逐块重算并合并区间，得 gapCount=53、maxGapChars=21、总缺口 144，与 coverage 各项一致，唯独与本句的 141 不一致）。修法：把 141 改成 144。",
+          "candidateField": "reverseCheck.deliberatelyNotAsserted[1].why",
+          "recomputedValue": "gapCount=53, maxGapChars=21, totalGapChars=144",
+          "verifyCmd": "python3 -c \"import json;c=json.load(open('loop/state/out/read_xiyou_L0_0004.candidate.json'));print(sum(g['chars'] for g in c['coverage']['gapList']), c['coverage']['span']-c['coverage']['quoteUnionCovered'])\"",
+          "verifyOutput": "144 144"
+        },
+        {
+          "claim": "reverseCheck 自述第一轮 18 条漏掉的事实「逐条补进对应条目后覆盖率升到 97.8%」，但其中 3 条的 quote 从未出现在任何条目（entry sections）里，只在 reverseCheck 自己的清单里。",
+          "quote": "你犯了十恶之罪，先偷桃，后偷酒，搅乱了蟠桃大会，又窃了老君仙丹，又将御酒偷来此处享乐。",
+          "why": "我逐条把 18 个 round1GapFacts[].quote 在条目区（tasks/causeEdges/rejectedEdges/states/foreshadows/unknowns）的引文集合里反查：15 条精确命中，3 条不精确命中（本句、七仙女自报身份句、小妖第三报句）。进一步按 8-gram shingle 做近似匹配，这 3 条的**语义**确由条目内其它（更长的）引文承载，所以**不是编造、不是漏抽**；但「逐条补进对应条目」的措辞与「该 quote 本身未进条目」的事实有落差，属自陈夸大。修法：把 action 文案改为「语义已由 X 条引文承载」，或把这 3 条 quote 原样补入对应槽位。",
+          "candidateField": "reverseCheck.round1GapFacts[6]/[7]/[11].action",
+          "recomputedValue": "18 条中 15 条 quote 在条目内精确命中；3 条仅语义承载，quote 本身不在条目内",
+          "nonFabricationEvidence": "三句在原文均 count==1 逐字存在（find=33461 / 29740 / 33261），故属夸大自陈而非编造"
+        }
+      ],
+      "reverseChecks": [
+        {
+          "found": "候选未以任何形式断言（既无独立引文、也无叙述字段提及）的原文事实：上会请客名单的 12 个受请者实体。整段名单只以一条 89 字的整段引文存在于 tasks[4].objective/evidence，名单里的每个实体（西天佛老、菩萨、罗汉、南极观音、崇恩圣帝、十洲三岛仙翁、北极玄灵、黄极黄角大仙、五斗星君、幽冥教主、注世地仙、海岳神仙、九垒、太乙天仙）在候选任何叙述字段中都一次也没出现，无法被检索。",
+          "quote": "请的是西天佛老、菩萨、罗汉，南方南极观音，东方崇恩圣帝，十洲三岛仙翁，北方北极玄灵，中央黄极黄角大仙，这个是五方五老。",
+          "quoteAt": [
+            29872,
+            29959
+          ],
+          "quoteCount": 1,
+          "why": "这是本单元里「蟠桃胜会请谁」这一知识差（K1）的唯一答案，也是大圣「不曾请我」这一动机的判断依据。整段引用虽合规，但名单实体零拆解，下游按人名检索会全部落空。",
+          "method": "对候选全部**非 quote 字符串**（131862 字）做子串检索：上述 13 个实体 inSlice=True、inProse=False",
+          "severity": "建议补拆（不构成 fail：整段引文已在，属可检索性缺陷而非编造或漏抽）"
+        },
+        {
+          "found": "候选未以任何形式断言的原文事实：天兵出师阵容韵文里被点名的星官实体（李托塔、恶哪吒、罗猴星、计都星、太阴星、太阳星、五行星、元辰星、大力天丁、四渎龙神、角亢氐房、奎娄胃昴、斗牛女虚、心尾箕、井鬼柳星、张翼轸、五瘟、六丁六甲、五方揭谛、四值功曹、东西星斗、南北二神、五岳四渎、普天星相）。候选把整段韵文作为多段引文收进 tasks[8].action 的 27 个槽位，但这些实体名在叙述字段中零出现。",
+          "quote": "四大天王，五方揭谛：四大天王权总制，五方揭谛调多兵。李托塔中军掌号，恶哪吒前部先锋。",
+          "quoteAt": [
+            32704,
+            32746
+          ],
+          "quoteCount": 1,
+          "why": "候选在 tasks[8].action 的 text 里只概括为「出师阵容由韵文铺陈」，没有把阵容拆成可检索实体。这属于「引了但没消化」：引文覆盖率高，实体可检索性为零。",
+          "method": "同上：非 quote 字符串子串检索，上述实体 inSlice=True、inProse=False",
+          "severity": "建议补拆（与上一条同型；两处合起来说明覆盖率 97.8% 与「实体已入图」是两件事）"
+        },
+        {
+          "found": "候选未以任何形式断言的原文事实：九曜星当面给大圣定的罪名定性词——「弼马温」（旧官职讥称）与「十恶之罪」。候选在 T10.obstacle 的 text 里转述为「九曜星当面列数他的罪状（偷桃、偷酒、窃老君仙丹、偷御酒）」，但剥掉引文后，这两个定性词在叙述字段中不存在。",
+          "quote": "你这不知死活的弼马温！你犯了十恶之罪，先偷桃，后偷酒，搅乱了蟠桃大会，又窃了老君仙丹，又将御酒偷来此处享乐。你罪上加罪，岂不知之？",
+          "quoteAt": [
+            33450,
+            33515
+          ],
+          "quoteCount": 1,
+          "why": "「弼马温」是第五回里唯一一次点出大圣旧官职的讥称，且候选自己在 U10 里专门登记了同一句的「屣平」用字可疑——说明该句已被注意，却唯独漏了「弼马温」这个身份信息。罪状被概括了，罪名定性词没有。",
+          "method": "非 quote 字符串检索：'弼马温' inSlice=True inProse=False；'十恶之罪'/'罪上加罪' 同",
+          "severity": "建议补（属信息遗漏，不构成 fail：引文已在，罪状事实已转述）"
+        },
+        {
+          "found": "候选未以任何形式断言的原文事实：大圣误入兜率宫时对宫阙方位的自述——「兜率宫是三十三天之上，乃离恨天太上老君之处」。候选 T7.objective 转述为「误入兜率宫后改成『就望他一望也好』」，跳过了这句方位说明；「三十三天」「离恨天」在叙述字段中零出现。",
+          "quote": "一见了，顿然醒悟道：“兜率宫是三十三天之上，乃离恨天太上老君之处，如何错到此间？",
+          "quoteAt": [
+            30966,
+            31010
+          ],
+          "quoteCount": 1,
+          "why": "这句是大圣「顿然醒悟」的内容本身——即他意识到走错路的依据（距离/层级差），也是他随后「趁此残步望他一望」的理由前提。候选在 T7.objective 里写了「顿然醒悟」的结果（改目的），却漏了醒悟的内容。该句作为整段引文已在 tasks[6] 的某个槽位，但方位事实未被断言。",
+          "method": "非 quote 字符串检索：'三十三天'/'离恨天' inSlice=True inProse=False",
+          "severity": "建议补（属信息遗漏，不构成 fail）"
+        }
+      ]
+    }
+  ]
+}

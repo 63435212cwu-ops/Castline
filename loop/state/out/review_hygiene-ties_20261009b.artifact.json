@@ -1,0 +1,100 @@
+{
+  "task": "review:hygiene-ties:20261009b",
+  "agent": "review-hygiene",
+  "at": "2026-10-09T10:17:42.728315+00:00",
+  "verdict": "pass",
+  "summary": "当前跨书同秒不计为同作品版本并列；source_key优先/title后备，保留基线maxTieGroup=1和独立排序全序契约；真实正例及两个内存反例均验证。",
+  "finding": {
+    "currentCollision": {
+      "at": "2026-10-09 17:23:31",
+      "books": [
+        {
+          "title": "西游记",
+          "key": "ed3dc1255ca08fbdaae30bbd",
+          "source_key": "d16db79a529a1727"
+        },
+        {
+          "title": "大奉打更人",
+          "key": "215f4b88fb087a7d735a6fae",
+          "source_key": "2ef47b2ecaa99a67"
+        }
+      ]
+    },
+    "fault": "原maxTieGroup全库只按at聚合，将不同作品发布在同一秒当作同一版本链冲突。",
+    "resolution": "按(source identity,at)计数。source_key优先，无source用title；缺身份保守并组，不用version key隐藏冲突。",
+    "sorting": "真实orderWorks对正序/逆序输入的全序检查保持不变，不以时间计数替代排序正确性。"
+  },
+  "verification": {
+    "mergedSourceMatchesReviewedCandidate": true,
+    "baselineUnchanged": true,
+    "positive": {
+      "maxTieGroup": 1,
+      "ratchetExit": 0,
+      "knownFailureRetained": "④c stable ID migration remains unresolved; unchanged ratchet records this."
+    },
+    "negative": [
+      {
+        "case": "same_work_same_second",
+        "exit": 1,
+        "lastLines": [
+          "PASS ⑥c 负例 · 默认项恰为事件最多者时必须判否  · 默认=A 最多=A ⇒ 判否成立",
+          "产物：/tmp/castline-artifacts/review-20261009b/library-tie-negative-same_work_same_second/library-version-choice.json",
+          "RATCHET FAIL · 已知缺陷恶化：{\"id\": \"P2.8\", \"maxTieGroup\": 1, \"distinctAt\": 80, \"scopeFieldsPresent\": [\"scopeLine@libCard\", \"scopeOf/gapsOf@sky-switcher\"], \"defaultIsMaxEvents\": false, \"stableIdMigration\": false} → {\"id\": \"P2.8\", \"maxTieGroup\": 2, \"distinctAt\": 79, \"scopeFieldsPresent\": [\"scopeLine@libCard\", \"scopeOf/gapsOf@sky-switcher\"], \"defaultIsMaxEvents\": false, \"stableIdMigration\": false}"
+        ]
+      },
+      {
+        "case": "old_cross_book_grouping",
+        "exit": 1,
+        "lastLines": [
+          "PASS ⑥a 自持反例 · 缺身份不能用不同版本key掩盖并列  · maxTieGroup=2 expected=2；棘轮阈值保持1",
+          "PASS ⑥a 负例 · 同一作品61/80并列仍必须检出  · 最大同作品并列组 61（现有棘轮阈值1，不放宽）",
+          "SELFTEST FAIL · 版本时间分组反例未通过，禁止棘轮放行"
+        ]
+      }
+    ],
+    "selfContainedCases": [
+      "跨书同秒最大组1",
+      "同源同秒即使标题变化最大组2",
+      "同名不同源最大组1",
+      "缺source按title识别版本",
+      "缺身份不按version key拆散",
+      "同一作品61/80并列仍检出61"
+    ],
+    "checks": [
+      "AST parse",
+      "git apply --check",
+      "candidate --ratchet",
+      "in-memory same-source same-second mutation exit1",
+      "in-memory old global-at grouping mutation exit1"
+    ]
+  },
+  "sourceHashes": {
+    "tests/p2_library_version_choice.py": "63d6187a3701bf753ba55eeef5c0fedc02b51737b79ff3d7648b154b54f66188",
+    "tests/p2_library_version_baseline.json": "b6820773f6ef643519576b3d2120e21ced290437a396432e6026542d97620d4e",
+    "js/sky/sky-switcher.js": "32df77de1032fba461f5b047cae235e43e688054ce4752c597e585ffd3b1ac36"
+  },
+  "externalEvidence": [
+    {
+      "path": "/tmp/castline-artifacts/review-20261009b/library-version-tie-scope.patch",
+      "sha256": "38c42f02a59b600382ae26594a75749810a95e39896f99f7eab809a1fb93446e"
+    },
+    {
+      "path": "/tmp/castline-artifacts/review-20261009b/library-version-tie-scope.json",
+      "sha256": "9b97c55f8247c4737e0812fac7bdd77398716584f4b518313d4ba786979ed424"
+    },
+    {
+      "path": "/tmp/castline-artifacts/review-20261009b/library-tie-negative-checks.json",
+      "sha256": "d91bc4c0a4defe47a95d259a3471b329f231364cee3e7592393694f0b5081009"
+    },
+    {
+      "path": "/tmp/castline-artifacts/review-20261009b/library-tie-candidate-check/library-version-choice.json",
+      "sha256": "819a2dc469b6fab8fbb3a7875b9c6821413d0efc2fefa1a409113133ed432065"
+    }
+  ],
+  "changes": [],
+  "limitations": [
+    "同作品同秒是现有时间棘轮异常信号，不单凭该计数断言排序不确定。",
+    "未改产品源码、数据或基线；共享测试补丁由root持GATE合入。",
+    "未运行浏览器；该变更是CPU测试分组口径修正。"
+  ]
+}

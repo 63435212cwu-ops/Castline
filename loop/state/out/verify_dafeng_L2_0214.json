@@ -1,0 +1,334 @@
+{
+  "task": "verify:dafeng:L2:0214",
+  "agent": "w-verify-0",
+  "role": "VERIFIER（独立反向复核者）",
+  "verdict": "partial",
+  "reviewedTask": "read:dafeng:L2:0214",
+  "reviewedAuthor": "w-sanguo-0",
+  "verifierIsNotAuthor": true,
+  "reviewedFile": "loop/state/out/read_dafeng_L2_0214.candidate.json",
+  "reviewedSha256": "0ae17cec8700c1e8732a135faed010eaa5fd3159ccba6b2cc854b49da529f9cb",
+  "book": "dafeng",
+  "lane": 2,
+  "unitIndex": 214,
+  "unitHead": "第两百一十三章 惊愕",
+  "source": {
+    "path": "data/cache/1063b17ca65ec1b76f30e460.docs.json",
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "sourceHashRecomputed": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "range": [
+      796142,
+      799532
+    ],
+    "sliceCodepoints": 3390,
+    "sliceStartsWithUnitHead": true,
+    "segmentSha256": "59a36d2b2412ed2070950dc8674e65d20bea90b064d8d643fcb79faeeb2f42fc",
+    "segmentSha256Claimed": "59a36d2b2412ed2070950dc8674e65d20bea90b064d8d643fcb79faeeb2f42fc"
+  },
+  "method": [
+    "1. 先自己读原文：先独立导出 docs[0].text[796142,799532)（3390 码点 / 81 非空段）通读一遍并逐段编号，此阶段**未打开候选**；之后才读候选逐条比对（角色契约第 1 步：先看结论会让你只检查〔他写的对不对〕）。",
+    "2. 抽取项核对：候选全部 205 条引文节点递归抽取，逐条独立重算 TEXT[start:end]==quote / 区间包含 / sourceHash / wholeTextOccurrences / occurrencesInRange / paraLabel / sentUnit。",
+    "3. 反向验证（不只看已写项）：自建段/句单元模型，扫描〔哪些句单元没有被任何引文覆盖〕，再逐条判断其信息量，而不是检查候选列的条目。",
+    "4. 误杀检查：逐条审 5 条 rejectedEdges、5 条 notForeshadows、5 条 notWorldSettings，找〔合法却被排除〕；并对 W06 判 mentioned 而非 arrived 做专项核对（提示词点名的〔提及≠到达〕形态）。",
+    "5. 幻觉/越权检查：专有名词全表比对（候选出现次数 vs 区间出现次数），并对唯一命中〔区间 0 次〕的词回溯上下文定性。",
+    "6. 引用核验：随机抽 5 条 quote（seed=214）各做一次 TEXT.find，报逐字与偏移是否一致。",
+    "7. 反向验证判据 3 本身：不复用候选的 span_key/sent_key **相等式**，改用句单元**覆盖集合求交**重算跨栏复用，并回头检验我自己的新判据是否产生假阳性。"
+  ],
+  "quoteAudit": {
+    "totalQuoteNodes": 205,
+    "verbatimAndOffsetExact": 205,
+    "inRange": 205,
+    "sourceHashConsistent": 205,
+    "wholeTextOccurrencesMatch": 205,
+    "occurrencesInRangeMatch": 205,
+    "paraLabelMismatch": 0,
+    "sentUnitMismatchUnderCandidateConvention": 0,
+    "defects": [],
+    "randomFive": {
+      "seed": 214,
+      "sampleSize": 5,
+      "verbatimHits": 5,
+      "findEqualsClaimedStart": 5,
+      "paths": [
+        "/foreshadows/0/quotes/1 => 798743 '反正忽悠就好了，骗女孩子都是这么骗的。'",
+        "/themeReadings/0/support/0/quotes/2 => 798225 '“何况，司天监的望气术尚且不能当做证据，你的格物致知，更无法说服朝廷。”'",
+        "/causeEdges/12/quotes/2 => 799170 '张巡抚皱眉道：“那人是谁？'",
+        "/states/1/quotes/2 => 798643 '大概是司天监的金字招牌起到了作用，苏苏开始有了兴趣，并产生一定的向往。'",
+        "/causeEdges/8/quotes/0 => 798337 '许七安起身走到女鬼苏苏身边，捏了捏她的脸，那张如花似玉的绝美面孔顿时凹陷下去。'"
+      ]
+    },
+    "coverageRecomputed": {
+      "quoteUnionCodepoints": 2641,
+      "nonSpaceCodepoints": 2910,
+      "ratio": 0.9076,
+      "nonEmptyParagraphs": 81,
+      "zeroCoveredList": [
+        "P000",
+        "P003",
+        "P008",
+        "P024",
+        "P063",
+        "P080"
+      ],
+      "matchesCandidateClaims": true
+    }
+  },
+  "counterExamples": [
+    {
+      "id": "CE1",
+      "claim": "候选 machineSelfCheck.checks['3_taskColumnQuotesDisjoint']=true，且 quotePolicy.withinTaskUniqueness 声称〔同一任务五栏的引文在字符区间级与句单元级两套判据下互不重复（判据 3 现算）〕——即〔同一句话被多栏共用〕这一被提示词明令禁止的风险已被机器排除。",
+      "quote": "但总感觉她一颗心不在这里了，时不时看一眼许七安，然后低头沉思。",
+      "why": "**该担保不成立，且我独立复现。** T5.action 的引文 [799405,799449) 在字符区间上**完全包含** T5.result 的引文 [799418,799449)：重叠 31 个码点，被共用的正是上面这句原文（它同时充当 action 与 result 的依据）。候选判据 3 的实现见 build_candidate.py:1297-1303 —— `if sent_key(a) == sent_key(b)` 与 `if span_key(a) == span_key(b)` 都是**相等式**：字符层只比较 (start,end) 是否全等，包含关系不触发；句单元层把引文**起点**落在哪个单元就记哪个编号（action 起点 799405 落在 P076/u0 ⇒ sentUnit=0；result 起点 799418 落在 P076/u1 ⇒ sentUnit=1），于是 sent_key 也不相等。**相等式判据在结构上不可能发现包含关系**，而提示词禁的恰恰是同一句话被两栏共用。所以它给出的 true 是一处**假 PASS**：判据在跑、有输出、报 true，却不产生信息。",
+      "evidence": {
+        "file": "loop/state/out/read_dafeng_L2_0214.candidate.json",
+        "fileSha256": "0ae17cec8700c1e8732a135faed010eaa5fd3159ccba6b2cc854b49da529f9cb",
+        "task": "T5",
+        "action": {
+          "quote": "脸蛋变形的苏苏乖巧的研磨。但总感觉她一颗心不在这里了，时不时看一眼许七安，然后低头沉思。",
+          "start": 799405,
+          "end": 799449,
+          "sentUnit": 0
+        },
+        "result": {
+          "quote": "但总感觉她一颗心不在这里了，时不时看一眼许七安，然后低头沉思。",
+          "start": 799418,
+          "end": 799449,
+          "sentUnit": 1
+        },
+        "containment": "action.start(799405) <= result.start(799418) and result.end(799449) <= action.end(799449) => True",
+        "overlapCodepoints": 31,
+        "sharedOriginalSentenceFindResult": 799418,
+        "candidateClaims": {
+          "machineSelfCheck.checks.3_taskColumnQuotesDisjoint": true,
+          "machineSelfCheck.columnConflicts": [],
+          "quotePolicy.withinTaskUniqueness": "同一任务五栏的引文在字符区间级与句单元级两套判据下互不重复（判据 3 现算）。"
+        },
+        "defectCode": "loop/state/out/read_dafeng_L2_0214.w-sanguo-0.build/build_candidate.py:1297-1303（相等式）"
+      },
+      "evidenceType": "原文引证 + 机器可复算的区间包含关系（本条是判 partial 的主依据；quote 逐字可查，find=>799418）"
+    },
+    {
+      "id": "CE2",
+      "claim": "候选 quotePolicy.markerConvention 声称『『…』 只允许包住 docs[0].text 的逐字子串（判据 7 现算强制）；候选自己的标签、转述、截断引文一律用 〔…〕』，且 machineSelfCheck.cornerBracketNonVerbatim=[]。",
+      "quote": "『…』 只允许包住 docs[0].text 的**逐字子串**（判据 7 现算强制）",
+      "why": "**该『一律』不成立。** 判据 7 的扫描作用域是 12 个 SECTIONS + coverage.perParagraph（见 fix_markers_and_recheck.py:92-97），**不含 nullFieldDisposition**；而 nullFieldDisposition 正是候选花最长篇幅讨论 cost 的字段。我独立重算：全文件 229 对 『』，落在 12 个 SECTIONS 内 207 对且非逐字 0 对（与 cornerBracketPairs=207 相符），**落在作用域外的 nullFieldDisposition 有 14 对，其中 6 对在 docs[0].text 里 find()==-1**（即候选自己的标签/转述）。修复脚本 docstring 写的是把非逐字 『…』**一律**改写，实际只遍历 SECTIONS + perParagraph ⇒『一律』与其作用域不符。这与候选自己批评上一稿〔判据 7 扫的 「」 在文件里出现 0 次所以恒真〕是同一形态：只补了自己看的那个字段，同一形态在隔壁字段仍在。",
+      "evidence": {
+        "file": "loop/state/out/read_dafeng_L2_0214.candidate.json",
+        "fileSha256": "0ae17cec8700c1e8732a135faed010eaa5fd3159ccba6b2cc854b49da529f9cb",
+        "outOfScopeNonVerbatimCornerSpans": {
+          "field": "nullFieldDisposition",
+          "totalPairsInField": 14,
+          "nonVerbatim": 6,
+          "spans": [
+            "透露秘密",
+            "答应办事",
+            "她与杨川南的线索被朝廷接手",
+            "回忆杨川南一路上对他似有似无的敌意",
+            "待验证不是代价",
+            "她的信任"
+          ],
+          "findAgainstDocs0Text": {
+            "透露秘密": -1,
+            "答应办事": -1,
+            "她与杨川南的线索被朝廷接手": -1,
+            "回忆杨川南一路上对他似有似无的敌意": -1,
+            "待验证不是代价": -1,
+            "她的信任": -1
+          }
+        },
+        "inScopeNonVerbatimCount": 0,
+        "outOfScopeNonVerbatimCount": 6,
+        "candidateClaims": {
+          "machineSelfCheck.cornerBracketPairs": 207,
+          "machineSelfCheck.cornerBracketNonVerbatim": [],
+          "machineSelfCheck.checks.7_proseCornerBracketsAllVerbatim_nonVacuous": true
+        },
+        "fixScriptScope": "loop/state/out/read_dafeng_L2_0214.w-sanguo-0.build/fix_markers_and_recheck.py:92-97（SECTIONS 列表 + coverage.perParagraph，不含 nullFieldDisposition / quotePolicy）"
+      },
+      "evidenceType": "**缺席证明**型：违规对象在候选文件自身（『』 包了非逐字串），原文侧只能给 find()==-1，拿不出可引的原文串。按角色契约这类意见**不能单独判 fail**，此处如实降为辅证；即便完全去掉 CE2，CE1 仍足以支撑 partial。",
+      "correctionToPriorDraft": "另需更正一处**计数**：本 lane 上一轮未提交草稿把 quotePolicy 里的 『…』 也计入非逐字（合计 7）。实测 docs[0].text.find('…')=23667（全文出现 200 次），按候选自己声明的口径（对 docs[0].text 求 find）该串**是**逐字的，故作用域外非逐字应计 **6** 处而非 7 处。此更正不改变 partial 结论。"
+    }
+  ],
+  "reverseChecks": [
+    {
+      "id": "RV1",
+      "found": "李妙真开口前的那处**遮蔽**描写：叙述层先写她『早已打好腹稿』（有备），紧接着写『阴影挡住了美眸』（看不透）。候选在 P067 只截取了前 6 个字『李妙真似乎早已打好腹稿』[798993,799004)，把同段后 29 码点整段丢弃——而这一段恰恰发生在她即将交出线索、张巡抚即将追问的关口。",
+      "quote": "李妙真似乎早已打好腹稿，烛光中，微微垂头，长而翘的睫毛牵住了光，阴影挡住了美眸。",
+      "candidateCoverage": "P067 覆盖 11/44 码点（frac=0.25）；被丢弃部分 '打好腹稿，烛光中，微微垂头，长而翘的睫毛牵住了光，阴影挡住了美眸。' 在整个候选文件中 0 次出现。",
+      "note": "『烛光』在区间内仅 1 次、候选 0 次；这是本区间唯一的时间/光线描写，也是唯一一处对李妙真的容貌描写。它与候选自己的 K1（她拒答情报来源）与 U7（张巡抚是否采信）相关：原文在她开口前先给了『看不透』这个信号。**候选已就 P067 写了 perParagraph 处置**（判定为〔不产生新状态〕），故这是**取舍分歧**而非静默遗漏——我有理由认为它低估了评价性信息，但拿不出原文证据证明取舍必错，按契约不据此判 fail。"
+    },
+    {
+      "id": "RV2",
+      "found": "鬼物监视的**覆盖面**事实：许七安当场推演监视是全时段贴身、连私密生活都在内的视线，这是〔五品武者瞒不过〕（P021）之所以要紧的前提。候选登记了『在他身边安排了鬼物监视』（P013）与『知道又如何』（P023），但从未登记这条覆盖面的后果。",
+      "quote": "那杨川南有妻子吗，鬼物岂不是阅片无数？",
+      "candidateCoverage": "该句在整个候选文件中 0 次出现；同段只引了『幸好神殊大师在沉睡』并登记为 notForeshadows N4。『妻子』『阅片』两词在区间内各 1 次、候选各 0 次。",
+      "note": "候选 perParagraph 对 P026 的处置只提到 N4 的笑点，未提监视覆盖面。属**取舍分歧**（候选判定该段不产生新行动或状态），记为反向发现，不据此判 fail。"
+    },
+    {
+      "id": "RV3",
+      "found": "那句承诺的**叙述层语气标记**：『许七安一本正经的说。』候选引了承诺本身（P056）并把它登记进 F1（空头支票），但把说话方式这 10 个字丢了——而『一本正经』正是叙述层对这场表演的直接标注，与 P060『反正忽悠就好了』互为表里（一为外部表演、一为内心独白）。丢掉它，F1 只剩内心独白单证。",
+      "quote": "许七安一本正经的说。",
+      "candidateCoverage": "该句在整个候选文件中 0 次出现。『一本正经』区间内 1 次、候选 0 次。",
+      "note": "取舍分歧，不据此判 fail。"
+    },
+    {
+      "id": "RV4",
+      "found": "叙述层对李妙真披露杨川南算盘时的**唯一一次评价**：『李妙真坦然的说出杨川南的算盘。』候选引了她的原话（P043 前段）但未引这句评语。它是本区间叙述者对她人品仅有的一次直接表态，与 S1/T1.result〔她没有被采信，但线索被要了过去〕构成另一侧：她至少是坦然的。",
+      "quote": "李妙真坦然的说出杨川南的算盘。",
+      "candidateCoverage": "该句在整个候选文件中 0 次出现（同段只引了她的话 [797963,797995)）。『坦然』区间内 1 次、候选 0 次。",
+      "note": "取舍分歧，不据此判 fail。"
+    },
+    {
+      "id": "RV5-selfRefuted",
+      "found": "**我自己的反向验证不成立的一处，如实记录。** 我用〔句单元覆盖集合求交〕重算跨栏复用时，除 CE1 外还得到第二处命中：T5.objective ∩ T5.action = P053/u1。",
+      "quote": "“死人吗？”",
+      "whyItIsMyError": "复核后我判**这是我自己判据的假阳性**，不是候选缺陷。两栏引文分别是 action [798470,798476)（『“死人吗？”』）与 objective [798476,798507)（〔苏苏斜睨他，冷笑道：…〕）——**是相邻的两个不同句子**。它们之所以在集合判据下相交，唯一原因是句单元切分把 action 的收尾引号 ”（码点 798475）划进了下一个单元 u1 [798475,798506)。即：相交的只是**一个标点字符的边界归属**，不构成〔同一句话被两栏共用〕。所以真实的跨栏复用**只有 CE1 一处**。",
+      "note": "把这条写出来的理由：若照我第一版集合判据去『修』，会把 T5.objective 的一句正常引文也误伤（正是 VERIFIER 契约第 4 步〔误杀检查〕要防的形态）。任何按集合判据重写判据 3 的修法都必须先排除这类标点边界假阳性。"
+    }
+  ],
+  "misKillCheck": {
+    "reviewed": [
+      "rejectedEdges R01–R05",
+      "notForeshadows N1–N5",
+      "notWorldSettings NW1–NW5",
+      "worldSettings W06 的 placeState 判定"
+    ],
+    "result": "**未发现误杀。**逐条可复核：R01（天宗直觉→杨川南清白）被 P048/P049 原文明确排除（『司天监的望气术尚且不能当做证据，你的格物致知，更无法说服朝廷』在区间内命中 1 次），若接受这条边，正是原文里被驳回的那种证据；R02（P076 心思→决定跟许七安）原文用『但总感觉』『时不时』保留口吻，无决定动作；R03（拿石头砸掉→决裂）原文有反事实标记『要是』；R04（回忆敌意→认定有罪）原文只写『眯着眼，回忆着』，无判断句；R05（许诺肉身→得到肉身）被 P060『反正忽悠就好了』当场否掉。NW1（生命炼金术）只有许七安的话且他自认忽悠，排除正确；NW2（无主肉身）无实物交付；NW3（地书碎片）无区间内传递动作；NW5（齐党/巫神教）只是背景势力名，无行动/资源/约束。",
+    "arrivalVsMention": "W06（黄伯街，丁15号狗肉铺）判 placeState=mentioned 而非 arrived，**判对了**：全区间无人前往该地，且区间内〔前往/赶到/来到/抵达〕四词各 0 次，只在画像落点处被提及一次（P079），符合提示词〔取荆州是图谋不是到达〕的口径。"
+  },
+  "hallucinationAndOverreach": {
+    "properNounTable": "逐个专有名词比对〔候选出现次数 vs 区间出现次数〕：许七安/李妙真/苏苏/张巡抚/姜律中/杨川南/宋卿/神殊/周旻/周百户/杨莺莺/三号/二号/齐党/巫神教/都指挥使司/司天监/天宗/小铜锣/驿站/黄伯街/狗肉铺/地书碎片/望气术/格物致知/天人合一/太上忘情/经历司/库房/生命炼金术/阴气/心魔/道心 —— **无一个在区间出现 0 次却被当作本区间事实使用**。",
+    "knownOutOfRangeWord": "『打更人』在区间内 0 次、候选 3 次。逐处回溯上下文：① bookTitle『大奉打更人』（书名元数据）；② T3.who〔打更人铜锣，本区间的视角人物〕；③ W01.explain〔一个朝廷在编的打更人〕。三处均为**叙事身份称谓/元数据**，不是对本区间事实的断言（区间内实际用的是『小铜锣』3 次，候选亦用『小铜锣』），**不构成幻觉**。",
+    "noFabricatedEnding": "候选未把任何未发生的事写成结局：F1/F2/F3 三条伏笔全部显式 status=unresolved 并写明〔回收在区间之外〕；T2.result 明确〔结束不等于定案〕；T4.result 不写〔收服苏苏〕而写『一定的向往』并注明该线被张巡抚当场叫停；T1.result 写明〔她没有被采信，但她的线索被要了过去〕。",
+    "noSuccessClaim": "候选 semanticReview='not-performed' 并写明〔引文定位正确 ≠ 语义已核验〕，未声称语义复核或独立复核完成。",
+    "conclusion": "零编造人物、零编造结局、零越权成功判定、零把人物的话当叙述事实（宋卿/生命炼金术/天宗能力/事权规则均按人物言语登记，并各自列入 notWorldSettings 或 unknowns）。"
+  },
+  "usableVsDiscard": {
+    "可直接使用": [
+      "全部 205 条引文的定位（逐字、偏移、区间包含、sourceHash、paraLabel、双次数、段/句单元）—— 我独立重算 0 缺陷，含随机 5 条 find 核验 5/5 命中。",
+      "覆盖率声明（2641/2910=0.9076、81 非空段、6 个零覆盖段清单）—— 独立复算逐项相符。",
+      "tasks T1–T4 的五栏抽取与引证（未发现跨栏复用）。",
+      "causeEdges E01–E13 的机制描述、rejectedEdges R01–R05 的拒因（未发现误杀）。",
+      "states S1–S3、knowledgeDiffs K1–K4、foreshadows F1–F3（全部 unresolved 且给理由）、unknowns U1–U10、selfCritique SC1–SC3。",
+      "worldSettings W01–W09 的三套判别字段（placeState / institution / itemStates，W06 判 mentioned 正确）与 notWorldSettings NW1–NW5。",
+      "themeReadings TH1–TH2（均带 counter，且未用事件密度/篇幅中点定义高潮）。"
+    ],
+    "必须修正后才能用": [
+      "T5：action 与 result 必须拆开证据——二者目前共用 P076/u1 同一句（CE1）。建议 action 只保留 [799405,799418)（『脸蛋变形的苏苏乖巧的研磨。』，即她的动作本体），把 [799418,799449) 整句让给 result（她的状态）。**不要**顺带改动 T5.objective（见 RV5：那是我的假阳性）。",
+      "machineSelfCheck.checks['3_taskColumnQuotesDisjoint'] 的 true 与 quotePolicy.withinTaskUniqueness 的断言必须撤回或改写：现判据是相等式，结构上发现不了包含关系。若要真的生效，须把句单元判据从〔起点单元相等〕改成〔覆盖单元集合求交为空〕**并同时排除标点边界假阳性**（RV5）。",
+      "nullFieldDisposition 内 6 处非逐字 『…』 必须改写为 〔…〕，或把判据 7 的作用域扩到全文件；否则 markerConvention 的『一律』不成立（CE2）。"
+    ],
+    "降级为存疑": [
+      "E13 的方向：它把 P071（她答『经历司的一名经历』，[799190,799229)）列在 from 侧，而要解释的 to 侧 P070（『那人是谁？』，[799170,799183)）在原文里更早。按〔因在前果在后〕读是方向倒置；但 E13 的 from 文本写的是〔她给出的线索只有身份轮廓而没有姓名（P068、P071）〕，P068 确实在 P070 之前，P071 可读作〔即便她作答，给的仍只是职位而非姓名〕的补强。两种读法都通，**我拿不出决定性的原文反证，故只记存疑、不据此判 fail**。",
+      "unknowns U7（张巡抚是否采信）—— 与我的独立阅读一致，本就是 unverified，无需改动。",
+      "RV1–RV4 四条反向发现属取舍分歧，是否登记由采纳者按〔装饰层〕口径裁定。"
+    ],
+    "必须丢弃": []
+  },
+  "notes": "**总判 partial：定位层 pass，抽取内容层基本可用，但被复核文件对自己的机器判据作了一处不成立的担保（CE1，原文引证型硬缺陷），并另有一处作用域漏洞（CE2，缺席证明型辅证）。**\n\n**干净的一面（我独立复算的硬事实）**：源文件 sha256 与任务 sourceHash 相符；切片 [796142,799532) 3390 码点、以『第两百一十三章 惊愕』开头、segmentSha256 与声明逐字相等；81 个非空段。205/205 条 quote 逐字命中、偏移自洽、区间内、sourceHash 一致、全文次数与区间次数全部相符；paraLabel 0 处错。随机抽 5 条 find 一次，5/5 与声明 start 完全一致。覆盖率 2641/2910=0.9076 与 6 个零覆盖段清单复算相符。零编造人物、零编造结局、零越权成功判定。5 条被拒边 + 5 条非伏笔 + 5 条非设定逐条审过，**没有一处误杀**；W06 判 mentioned 正确。它的克制值得单独记一笔：F1/F2/F3 全部显式 unresolved 并写明回收在区间之外，T2.result 写〔结束不等于定案〕，T4.result 不写〔收服苏苏〕——这些都是本项目反复出错的形态（结束当成功、单次出现当伏笔、把人物的话当事实）上的正确处置。\n\n**证据强度声明（先说清哪条硬、哪条软）**：CE1 是**原文引证**型的硬缺陷——被共用的原文串逐字可查（find=799418）、包含关系可复算、缺陷代码行可指认，它是本判 partial 的**主依据**。CE2 是**缺席证明**型的辅证：违规对象在候选文件自身，原文侧只能给 find()==-1，**拿不出可引的原文串**；按角色契约这类意见不能单独判 fail，我如实降为辅证。即便完全去掉 CE2，CE1 仍足以支撑 partial。\n\n**判 partial 而不是 pass 的理由**：CE1 不是措辞问题，而是**文件对自己机器判据的担保不成立**，且正是 VERIFIER 契约点名的失败形态——〔机制存在、有代码、有产出，但不产生信息〕：判据 3 确实在跑、确实有输出、确实报 true，但它用相等式，结构上不可能发现包含关系，而提示词禁的恰恰是同一句话被两栏共用。被复核文件自己在 reworkReason 里批评上一稿〔判据 7 恒真、永不可能变红〕并修好了判据 7；同一形态在判据 3（相等式）与判据 7（作用域）上各留了一处。\n\n**我自己的错，如实记录（两处）**：① 我第一版句单元切分按〔收尾引号后也断句〕实现，于是报出 2 处 sentUnit 失配；改用与候选一致的约定（只在 。！？… 后断句）后失配为 0——**那 2 处是我仪器的假阳性，不是候选缺陷**，已撤回。② 我改用〔覆盖集合求交〕重算跨栏复用时，多报了一处 T5.objective ∩ T5.action；复核后确认那是**标点边界假阳性**（相交的只是引号 ” 一个字符的单元归属），真实复用只有 CE1 一处（见 RV5）。把这条写出来是因为：若不先排除这类假阳性就去改判据 3，会把 T5.objective 的一句正常引文误伤——正是契约第 4 步〔误杀检查〕要防的形态。\n\n**与上一轮未提交草稿的关系（诚实登记）**：本 lane 上一轮（22:45:41Z）已在 read 记录上留下一条 partial 复核，且已写好本文件；但 verify 任务本身始终没有记录文件（cmd_verify 只写 read 记录，不产出 verify 任务记录），故该轮未闭环、任务仍在待办中。我本轮**未先读它**（遵守契约第 1 步：先自读原文），独立走完全部 7 步，主要结论**独立收敛到同一处 CE1**；此外我新增了 RV5（假阳性自查）并更正了它的 CE2 计数（7→6，见 CE2.correctionToPriorDraft）。凡我未独立复算的部分，我不为其背书。\n\n**未做的事（不编）**：我没有重跑候选的构建脚本，也没有执行 loop/bin/loop.py 之外的任何测试；无 GPU/浏览器动作（本任务不需要）。我没有复核区间之外的原文（仅在理解语境时看过边界），也未复核候选所引构建脚本之外的证据文件。",
+  "status": "done",
+  "summary": "独立反向复核 verify:dafeng:L2:0214（《大奉打更人》第两百一十三章 惊愕，原文区间 [796142,799532)，3390 码点 / 81 非空段）。按 VERIFIER.md 顺序执行：先把 docs[0].text[796142,799532) 独立导出逐段编号并通读，此阶段未打开候选；之后才读候选逐条比对。裁决 **partial**。机械层全量重算（非抽样）：205 条 quote 逐条 TEXT[start:end]==quote、全部在区间内、sourceHash 与整个 docs.json 的 sha256 三方一致、wholeTextOccurrences/occurrencesInRange 与 TEXT.count 相符、paraLabel 0 错、sentUnit 0 错（在候选自身约定下）；随机抽 5 条（seed=214）find 一次，5/5 逐字命中且 find==声明 start；覆盖率 2641/2910=0.9076、81 非空段、6 个零覆盖段，逐项复算相符。**主依据 CE1（原文引证型硬缺陷，独立复现）**：T5.action 引文 [799405,799449) 完全包含 T5.result 引文 [799418,799449)，共用同一句原文『但总感觉她一颗心不在这里了，时不时看一眼许七安，然后低头沉思。』（逐字，find=799418）——即提示词明令禁止的〔同一句话同时当作多栏依据〕确实发生；而候选 machineSelfCheck.checks['3_taskColumnQuotesDisjoint']=true 与 quotePolicy.withinTaskUniqueness 均担保此风险已被排除，其实现（build_candidate.py:1297-1303）用的是 span_key/sent_key **相等式**，结构上不可能发现包含关系 ⇒ 假 PASS。辅证 CE2（缺席证明型，按契约不单独判 fail）：判据 7 作用域为 12 个 SECTIONS（fix_markers_and_recheck.py:92-97），作用域内 207 对 『』 非逐字 0 对；作用域外的 nullFieldDisposition 有 14 对，其中 6 对在 docs[0].text 里 find()==-1，故 markerConvention 的『一律』不成立。反向验证另列 RV1–RV4 四条候选未覆盖但原文明确存在的事实（P067『阴影挡住了美眸』遮蔽描写、P026 监视全时段覆盖『鬼物岂不是阅片无数』、P056 语气标记『一本正经』、P043 叙述层评价『坦然』），均为取舍分歧、不据此判 fail；RV5 记录我自己集合判据的标点边界假阳性，并更正我自己第一版的 2 处 sentUnit 误报。误杀检查：R01–R05 / N1–N5 / NW1–NW5 逐条审过，无一处误杀；W06 判 placeState=mentioned（区间内〔前往/赶到/来到/抵达〕各 0 次）符合〔提及≠到达〕口径。幻觉检查：专有名词全表比对无区间 0 次却被当事实使用者；唯一越界词『打更人』3 次均在书名/T3.who/W01.explain 的身份元数据位置，非本区间事实断言。零编造人物、零编造结局、零越权成功判定，候选未声称 semanticReview 完成。**必须修正**：拆 T5.action 与 result 的共用句（action 只保留 [799405,799418)，**勿动** T5.objective）；撤回或重写判据 3 的 true 与 withinTaskUniqueness 断言（须改为覆盖集合求交并排除标点边界假阳性）；把 nullFieldDisposition 的 6 处 『…』 改为 〔…〕或扩大判据 7 作用域。**存疑不判 fail**：E13 方向（from 侧 P071 晚于 to 侧 P070，但 P068 在前，两种读法都通，拿不出决定性原文反证）。",
+  "assertions": [
+    {
+      "text": "原文切片自检：shasum -a 256 data/cache/1063b17ca65ec1b76f30e460.docs.json = fdde5558…39839（与任务 sourceHash 一致）；docs[0].text[796142:799532] 以『第两百一十三章 惊愕』开头、长 3390、切片 sha256=59a36d2b…f42fc（与候选声明相等）。",
+      "result": "pass"
+    },
+    {
+      "text": "引用层全量复算（205/205，非抽样）：TEXT[start:end]==quote / 区间包含 / sourceHash 全等 / wholeTextOccurrences 与 occurrencesInRange 对 TEXT.count 比对 ⇒ 0 失配。",
+      "result": "pass"
+    },
+    {
+      "text": "段落与句单元模型**另行实现**（不复用候选构建脚本任何中间量）：205 条 paraLabel 0 失配；sentUnit 在候选自身断句约定下 0 失配（我第一版按〔引号后也断句〕报出的 2 处经复核确认是我仪器的假阳性，已撤回）。",
+      "result": "pass"
+    },
+    {
+      "text": "覆盖率独立复算：quoteUnion 2641 / nonSpace 2910 / ratio 0.9076 / 非空段 81 / 零覆盖段 [P000,P003,P008,P024,P063,P080]，与候选声明逐项相等。",
+      "result": "pass"
+    },
+    {
+      "text": "随机抽 5 条 quote（seed=214）做 TEXT.find：5/5 逐字命中、find==声明的 start，无偏移漂移。",
+      "result": "pass"
+    },
+    {
+      "text": "CE1 决定性复现：T5.action [799405,799449) ⊇ T5.result [799418,799449)，重叠 31 码点，共用句 find=799418；候选判据 3 实现在 build_candidate.py:1297-1303 为相等式（`sent_key(a)==sent_key(b)` / `span_key(a)==span_key(b)`），故其 true 为假 PASS。",
+      "result": "pass"
+    },
+    {
+      "text": "CE2 计数复现：全文件 229 对 『』；12 个 SECTIONS 内 207 对且非逐字 0（=cornerBracketPairs）；nullFieldDisposition 14 对中 6 对 find()==-1；fix_markers_and_recheck.py:92-97 的 SECTIONS 不含 nullFieldDisposition。另更正上一稿把 quotePolicy 的 『…』 计入非逐字（find('…')=23667⇒实为逐字），作用域外非逐字应为 6 而非 7。",
+      "result": "pass"
+    },
+    {
+      "text": "误杀检查：逐条审 R01–R05 / N1–N5 / NW1–NW5 的排除理由，各条均能在原文中找到支撑（如 R01 的排除依据 P048 在区间内命中 1 次）；W06 判 mentioned 另有〔前往/赶到/来到/抵达〕各 0 次佐证。结论：0 误杀。",
+      "result": "pass"
+    },
+    {
+      "text": "幻觉/越权检查：33 个专有名词全表比对，无区间 0 次却被当作本区间事实使用者；越界词『打更人』3 处上下文均为身份元数据/书名，非事实断言；候选 semanticReview='not-performed'，无成功判定。",
+      "result": "pass"
+    },
+    {
+      "text": "RV5 自查：我第一版〔覆盖集合求交〕判据多报的 T5.objective ∩ T5.action 经复核确认为标点边界假阳性（仅引号 ” 一个字符的单元归属），真实跨栏复用只有 CE1 一处——已写入 RV5 以免采纳者误伤 T5.objective。",
+      "result": "pass"
+    }
+  ],
+  "changes": [],
+  "sourceHashes": {
+    "loop/state/out/read_dafeng_L2_0214.candidate.json": "0ae17cec8700c1e8732a135faed010eaa5fd3159ccba6b2cc854b49da529f9cb",
+    "data/cache/1063b17ca65ec1b76f30e460.docs.json": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "loop/state/out/read_dafeng_L2_0214.w-sanguo-0.build/build_candidate.py": "2dbafa84544bb6c611f24d876ceb7804eb3006727ec150fc1741b3e677f802ed",
+    "loop/state/out/read_dafeng_L2_0214.w-sanguo-0.build/fix_markers_and_recheck.py": "4c153bca1afc21c6f7ea34217e5441914f02f4002f33cfd96121ff124cad50f9",
+    "note": "以上四个为只读审阅对象，动手前后各取一次、哈希未变。**未列入** loop/state/out/read_dafeng_L2_0214.json：该文件会因本次 verify 追加 review 而改变，列入会使其后必然被判证据失效（实测 verify_dafeng_L2_0210 的同类条目即因此 hash-changed）。"
+  },
+  "remaining": [
+    "CE1 需要原作者拆 T5 的两栏证据（action 让出 P076/u1），并撤回判据 3 的 true 担保；判据 3 若真要生效，须把句单元判据从〔起点单元相等〕改成〔覆盖单元集合求交为空〕，且必须同时排除标点边界假阳性（RV5），否则会误伤 T5.objective。",
+    "CE2 需要把 nullFieldDisposition 等 SECTIONS 之外的字段纳入记号扫描，或把其中 6 处 『…』 改为 〔…〕。",
+    "E13 方向存疑，留待原作者一句话澄清或下一次复核，本轮不判 fail。",
+    "RV1–RV4 属取舍分歧（候选对自己的 perParagraph 处置给了理由），是否补登记由采纳者按〔装饰层〕口径裁定。",
+    "我未复核区间之外的原文，也未重跑候选构建脚本；候选其余内建判据（判据 1/2/4/5/8/9 等）我未逐条验证其〔会变红〕，只验证了与我结论相关的判据 3 与判据 7。",
+    "本轮证据包含 w-sanguo-0 的 build 目录下两个脚本；若该目录日后被原作者重写，本记录的证据哈希会失效并触发重做——这是把〔缺陷代码行〕纳入证据的代价，已如实登记。"
+  ],
+  "rollback": "只读复核：未改动候选、源文件、构建脚本与任何受保护路径（js/ css/ index.html serve.py narrative.py scripts/ tests/ docs/ data/ 一字未动）。本文件（loop/state/out/verify_dafeng_L2_0214.verdict.json）是本轮唯一写入；提交过程按既有工具追加写入 loop/state/out/read_dafeng_L2_0214.json 的 reviews 与 loop/state/out/verify_dafeng_L2_0214.json，均为 append-only 登记。",
+  "evidence": [
+    {
+      "path": "loop/state/out/read_dafeng_L2_0214.candidate.json",
+      "sha256": "0ae17cec8700c1e8732a135faed010eaa5fd3159ccba6b2cc854b49da529f9cb",
+      "kind": "reviewed-artifact",
+      "note": "被复核候选（只读，未修改）；205 条 quote 的定位、覆盖率、判据 3/7 的担保均从它重算。"
+    },
+    {
+      "path": "data/cache/1063b17ca65ec1b76f30e460.docs.json",
+      "sha256": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+      "kind": "source-text",
+      "note": "原文（只读）；docs[0].text[796142,799532) 即本单元，segmentSha256=59a36d2b2412ed2070950dc8674e65d20bea90b064d8d643fcb79faeeb2f42fc。CE1 的共用句、RV1–RV4 的引证均出自此处。"
+    },
+    {
+      "path": "loop/state/out/read_dafeng_L2_0214.w-sanguo-0.build/build_candidate.py",
+      "sha256": "2dbafa84544bb6c611f24d876ceb7804eb3006727ec150fc1741b3e677f802ed",
+      "kind": "defect-code-evidence",
+      "note": "CE1 的直接代码证据：1297-1303 行的判据 3 为 span_key/sent_key 相等式，结构上无法发现包含关系。只读，未修改。"
+    },
+    {
+      "path": "loop/state/out/read_dafeng_L2_0214.w-sanguo-0.build/fix_markers_and_recheck.py",
+      "sha256": "4c153bca1afc21c6f7ea34217e5441914f02f4002f33cfd96121ff124cad50f9",
+      "kind": "scope-evidence",
+      "note": "CE2 的作用域证据：92-97 行 SECTIONS 列表 + coverage.perParagraph，不含 nullFieldDisposition。只读，未修改。"
+    }
+  ],
+  "reproduce": [
+    "python3 -B -c \"import hashlib;print(hashlib.sha256(open('data/cache/1063b17ca65ec1b76f30e460.docs.json','rb').read()).hexdigest())\"  # => fdde5558…39839",
+    "python3 -B -c \"import json;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];print(len(t[796142:799532]), t[796142:799532][:12])\"  # => 3390 第两百一十三章 惊愕",
+    "python3 -B -c \"import json;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];print(t.find('但总感觉她一颗心不在这里了，时不时看一眼许七安，然后低头沉思。'))\"  # => 799418（CE1 共用句）",
+    "python3 -B -c \"import json;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];print([t.find(s) for s in ['透露秘密','答应办事','她与杨川南的线索被朝廷接手','回忆杨川南一路上对他似有似无的敌意','待验证不是代价','她的信任']])\"  # => [-1,-1,-1,-1,-1,-1]（CE2 的 6 处）",
+    "python3 -B -c \"import json;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];print(t.find('…'))\"  # => 23667（更正：『…』在全文里是逐字的，故作用域外非逐字为 6 而非 7）",
+    "grep -n 'sent_key(a) == sent_key(b)\\|span_key(a) == span_key(b)\\|c3_ok = not column_conflicts' loop/state/out/read_dafeng_L2_0214.w-sanguo-0.build/build_candidate.py  # => 1297 / 1300 / 1303（CE1 的相等式实现）",
+    "grep -n 'SECTIONS = ' -A 3 loop/state/out/read_dafeng_L2_0214.w-sanguo-0.build/fix_markers_and_recheck.py  # => 92-94（CE2 的作用域，不含 nullFieldDisposition）",
+    "python3 -B -c \"import hashlib;print(hashlib.sha256(open('loop/state/out/read_dafeng_L2_0214.candidate.json','rb').read()).hexdigest())\"  # => 0ae17cec…29f9cb"
+  ],
+  "submittedAt": "2026-10-14T23:18:31Z",
+  "wallClockSeconds": 1785,
+  "wallClockFrom": "lease.startedAt",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-14T23:18:31Z"
+  },
+  "verifyState": "pending"
+}

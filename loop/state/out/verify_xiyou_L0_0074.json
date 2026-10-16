@@ -1,0 +1,113 @@
+{
+  "task": "verify:xiyou:L0:0074",
+  "agent": "w-dafeng-2",
+  "role": "VERIFIER",
+  "status": "done",
+  "summary": "独立反向复核《西游记》第七十四回精读候选：先自读原文 [533821,541744) 全 7923 字，再全量复算 204 条引文（逐字/唯一/偏移/sourceHash 全过）、自建栈式配对独立重算 factStatus（0 处不一致），反向验证找出 6 组零覆盖原文事实、1 条误杀、3 条带原文引证的 counterExample（说话人写错 / 因果边时序写反 / 因果边因端引文张冠李戴且跨边复用），判 partial。",
+  "evidence": [
+    {
+      "path": "loop/state/out/verify_xiyou_L0_0074.verdict.json",
+      "sha256": "c9a3bbc3760e0b1cc7b59ba9f17079e1250ced8f8ecfb085176d937e38788328",
+      "kind": "verdict-json"
+    },
+    {
+      "path": "loop/state/out/read_xiyou_L0_0074.candidate.json",
+      "sha256": "69dea2feb921ead5d8e18133b719d8fbdca4385bbcebc825869e7d63f34ac8cd",
+      "kind": "reviewed-candidate"
+    },
+    {
+      "path": "data/cache/a065244455cfb2221bcda94a.docs.json",
+      "sha256": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+      "kind": "source-original-text"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "先自己读原文再读候选：先通读 [533821,541744) 全 7923 codepoint（分三段读完、与第七十五回起始边界核对），之后才打开 read_xiyou_L0_0074.candidate.json。切片的 sha256 = 74f70397106cb2217e30ed93578314a58712f03d99d40e28a6af5b5979df0a4b，与候选自报一致。",
+      "result": "pass"
+    },
+    {
+      "text": "抽取项核对（编造检查）：候选全部 204 个 quote 对象逐条复算 T[start:end]==quote、切片内 count==1、[start,end) ⊆ [533821,541744)、sourceHash 一致 —— 204/204 全过，0 条编造引文。候选自带的 reproduce 脚本我逐字跑过，输出 `OK 204 quote refs verified`。",
+      "result": "pass"
+    },
+    {
+      "text": "factStatus 独立重算：我自己重建切片内 “ ” 栈式配对（原始 152 span / 4 defect），再按候选登记的 3 处修正（sliceIndex 1042 插左引号、1939 左改右、7627 插右引号）得 155 span / maxDepth 2 / 0 defect，与候选自报的 spansAfterRepair=155、maxNestingDepth=2 一致；逐条比对 204 条 factStatus 与 factStatusRawPairing，不一致 0 处。",
+      "result": "pass"
+    },
+    {
+      "text": "引用核验：seed=74 随机抽 5 条 quote 用 T.find() 复算，declaredStart 与 find 结果全部相等、T[start:end]==quote 全部成立、切片内均唯一。样本逐条列在 verdict.quoteAudit.randomSample5。",
+      "result": "pass"
+    },
+    {
+      "text": "反向验证（计划100 教训）：把 204 条引文合并成覆盖集（102 个 merged span，覆盖 3577/7923 = 45.1%），再按段与探针问「原文这条事实有没有任何定位引文落在它上面」。找出 6 组零覆盖原文事实，其中最大一处是行者家世自述+闹阴司履历 [535114,535243)（142 字，0 覆盖），其余为开篇词 [533844,533908)、结语诗 [540771,540791)、笔峰下复数小钻风集合 [539441,539473)、大大王吞天兵全链 [539816,539952)、二大王形貌 [540000,540040)、老孙也曾干过 [539951,539976)。",
+      "result": "pass"
+    },
+    {
+      "text": "counterExample CE1（说话人写错）：rejectedForeshadows[2].item 写「三藏说『他这报信，必有几分虚话…』」，但原文 [537623,537655) 的说话人是行者 —— 上文 [537605,537623) 即「行者道：“莫哭莫哭！一哭便脓包行了！」，整条引文落在行者引号跨度 [537609,537663) 内；候选自己在 claimVerification 第 12 条、unknowns[7]、themeReadings[0].reading 三处都记成行者，自相矛盾。",
+      "result": "pass"
+    },
+    {
+      "text": "counterExample CE2（因果边时序写反）：causeEdges[4]（C5）写「八戒带回四万八千之数 → 三藏毛骨悚然 → 八戒主张各自顾命」，但原文顺序相反：八戒顾命 [536589,536612) → 行者喝骂 [536618,536642) → 八戒才报数 [536659,536706) → 三藏才战兢兢 [536731,536745)。C5 的 evidence 起点数组 [536664, 536731, 536589] 亦非单调。",
+      "result": "pass"
+    },
+    {
+      "text": "counterExample CE3（因果边因端引文张冠李戴）：causeEdges[15]（C16）的因端是「众妖散去」，但 evidence[0] 引的是 [541215,541240)「行者不应，低着头就走。走至二层营里，又被小妖扯住道」——该句在散去之前 384 字、与 C16 声称的因端无关，且与 causeEdges[12]（C13）.evidence[2] 完全同区间（跨边复用）。C16 本可引的「呜的一声都哄然而去了」[541599,541609) 在切片内存在且唯一。",
+      "result": "pass"
+    },
+    {
+      "text": "误杀检查 MK1：rejectedForeshadows[0] 以「南岭头会齐一班的动作也没有在正文里演出」为由排除该条，与原文相反 —— [539441,539453)「叫道：“钻风！都过来！”」之后紧接着 [539453,539473)「那些小钻风在下面躬身道：“长官，伺候。”」是复数应答，另有 [539572,539592)「小钻风连声应道：『长官，我们俱是真的。』」佐证。行走路径也接得上（南岭头承诺 [539313,539334) → 同去 [539334,539350) → 前走相跟 [539350,539366)）。该条中「见面钱五两未回收」那半边理由成立。",
+      "result": "pass"
+    },
+    {
+      "text": "幻觉/越权检查：扫候选专名，第七十五回及以后才点明的身份（文殊/普贤/如来/大鹏/金翅/青狮/白象/狮奴）在候选里全部 0 次，无跨回越界；resultIsSuccess 6 条无一条写成目标达成，区间末尾明确记为「毕竟不知见那个老魔头有甚吉凶」的悬念套语，未把结束当成功。",
+      "result": "pass"
+    },
+    {
+      "text": "判定纪律自检：3 条 counterExample 与 1 条误杀均给出逐字可查的原文引证 + 偏移 + 复算命令，故可据以判 partial；对本想判缺陷但引证不足的 3 项（F2 的 setup/payoff 同时性、T1.cost 的尺度、候选已自声明的 T6.objective 弱点）主动撤回，降级记入 notDefects_recordedAsDoubt，未据此判 fail。",
+      "result": "pass"
+    },
+    {
+      "text": "自我纠错并如实登记：第一版说话人归属扫描用 T[e[0]:]（切到全篇末尾）取说话人，把跨度起点之后的名字误当说话人，报出 12 处假失配；改为只看跨度起点之前的 T[S:spanStart] 后降到 1 处（即 CE1）。该 12 条误报未进入任何结论，已写进 notes 的【自我纠错】。",
+      "result": "pass"
+    },
+    {
+      "text": "复核独立性：本会话租约 loop/state/leases/verify:xiyou:L0:0074.d/lease.json 的 agent 是 w-dafeng-2；被复核记录 loop/state/out/read_xiyou_L0_0074.json 的 agent 是 w-xiyou-0，两者不同名，cmd_verify 的自签判据不会拒绝。复核前该记录 status=done、verifyState=pending、无 reviews，属首次复核。",
+      "result": "pass"
+    },
+    {
+      "text": "只写了任务 writes 指定的 1 个文件 loop/state/out/verify_xiyou_L0_0074.verdict.json；未改 js/ css/ index.html serve.py narrative.py scripts/ tests/ docs/ data/ 等受保护路径；未跑 GPU/浏览器测试。",
+      "result": "pass"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/verify_xiyou_L0_0074.verdict.json",
+      "kind": "append-only"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/a065244455cfb2221bcda94a.docs.json": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2"
+  },
+  "remaining": [
+    "语义最优性未判：本轮只核「引文是否逐字可查、断言是否被引文支撑、漏了什么、有没有误杀」，没有判断候选对人物动机与世界观的文学解读是不是最优读法（原候选 semanticReview 保持 not-performed）。",
+    "跨回内容未核：三大王身份、阴阳二气瓶与十万天兵的下文都在第七十五回及以后，本轮按本区间证据判，未把下一回内容当本区间事实的对照物。",
+    "R4 的形态是「候选 prose 有概述、无定位引文」：我只核到概述与原文句子一致（一口吞十万天兵、鼻子卷人），没有逐字追每一条概述的来源，故记为遗漏而非编造。",
+    "未替候选做修复：按 VERIFIER 契约本轮只判读，4 处 must-fix 交由原提交者或发布侧重交后再复核。",
+    "factStatus 的三处引号修正我复算为自洽（155 span / maxDepth 2 / 0 defect），但修正是解读不是原文；若换一种修法，少数引文的话语归属可能不同。候选已给 factStatusRawPairing 两栏，此点处理正确。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/verify_xiyou_L0_0074.verdict.json"
+    ]
+  },
+  "submittedAt": "2026-10-09T16:14:06Z",
+  "wallClockSeconds": 2458,
+  "wallClockFrom": "lease.startedAt",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-09T16:14:06Z"
+  },
+  "verifyState": "pending"
+}

@@ -1,0 +1,303 @@
+{
+  "task": "verify:sanguo:L0:0072",
+  "verifier": "w-verify-3",
+  "role": "VERIFIER",
+  "reviewedTask": "read:sanguo:L0:0072",
+  "reviewedAgent": "w-dafeng-1",
+  "independentOf": "read:sanguo:L0:0072",
+  "selfSign": false,
+  "unitHead": "第七十三回　玄德进位汉中王　云长攻拔襄阳郡",
+  "sourceRange": [
+    367615,
+    372678
+  ],
+  "source": {
+    "path": "data/cache/fe42d01f3826fe8096f86614.docs.json",
+    "fileSha256": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+    "textSha256": "9d28638de0b0a89fa080cc2defb4a1f8de6adb1260c4545c04ef80f73cbb221e",
+    "sliceSha256": "070b9607a942c51f0eeef5a601753ec2cf50278b0ccaea5d6cb25b72c166718b",
+    "codepoints": 5063,
+    "bodyEnd": 372621,
+    "offsetBase": "docs[0].text 绝对码点偏移",
+    "readFirst": "先把 TEXT[367615,372678) 导出成 27 行（14 个正文段）逐行读完、并写下自己的事实清单与因果连接词清单，之后才打开候选文件。"
+  },
+  "verdict": "fail",
+  "verdictRationale": "判 fail 而不是 partial，依据 VERIFIER.md「抽取项在原文里找不到对应文字 = 编造，最严重的一类」。候选有两处**编造级**断言，都不是口味问题而是可机器复算的事实错误：① C21/S09/W_P04 把一个**只发生过一次**的事件写成「二次求救」「两次求救」；② T11 把曹操拨给吕常出击的二千兵写成樊城的「现有兵力」。两条都有逐字原文引证。机械层（引文逐字、偏移、哈希）是干净的 —— 这正是本条最值得记的地方：**引文全对，仍然能编出原文没有的事实**，因为编造发生在引文之外的 mechanism/summary 散文里，而候选自带的审计脚本结构性地查不到这一层（见 auditBlindSpot，已用注入实验复现）。",
+  "counterExamples": [
+    {
+      "id": "CE1",
+      "claim": "C21.mechanism：「机制是**二次求救**：残败军奔入樊城 → 曹仁急差人求救 → 使命星夜至长安呈书 → 曹操指班部内一人令解围 → 于禁应声而出。」（另见 S09.after「曹仁**再**差人星夜求救于长安」、W_P04.explain「直接引出曹仁退守樊城与两次求救」、R04「曹仁退守樊城、两次求救的戏」）",
+      "quote": "马步军折其大半，残败军奔入樊城。曹仁急差人求救，使命星夜至长安，将书呈上曹操，言：“云长破了襄阳，现围樊城甚急。望拨大将前来救援。”",
+      "quoteStart": 372417,
+      "quoteEnd": 372483,
+      "why": "全区间「求救」只出现 **1** 次（偏移 372438），且该句正是 C21 自己引的那一句（span [372433,372483)）。原文里曹仁**只求救过一次**：退守樊城后并无第二次遣使，曹操派于禁正是对这一次求救的回应；C18 与 C21 共用同一个 span [372433,372483) 作为因果边的端点，把**同一次求救**拆成「第一次（C18）」与「第二次（C21）」两件事。复算：`python3 -c \"import json;t=json.load(open('data/cache/fe42d01f3826fe8096f86614.docs.json'))[0]['text'];s=t[367615:372678];print(s.count('求救'))\"` → 1。这不是措辞问题：「二次」是一个可证伪的事件重数断言，且它还把 C21 的因果链（围城 → 求救 → 遣将）讲成了一条**不存在的前因**。"
+    },
+    {
+      "id": "CE2",
+      "claim": "T11.obstacle.text：「障碍是军情本身：襄阳已破、樊城被围甚急，而**樊城现有兵力（二千）刚折其大半**。」（basis 标为 explicit）",
+      "quote": "仁即与兵二千，令吕常出樊城迎战。",
+      "quoteStart": 372335,
+      "quoteEnd": 372351,
+      "why": "原文的「二千」是曹仁**拨给吕常出城迎战**的兵力，不是「樊城现有兵力」。原文从未给樊城的守军总数；樊城是「被围甚急」的一方，而二千是**出城野战**的部队。候选把出击分队的兵力改写成守城总兵力，并在此基础上断言「障碍是军情本身」，属把 A 的数字安到 B 头上。可复算：全区间「二千」仅 1 处（372339 行内），上下文为「若兵临城下，将至壕边，急难抵当矣。”仁即与兵二千，令吕常出樊城迎战」。另注：T11.obstacle 只挂了一条引文「云长破了襄阳，现围樊城甚急。」（[372459,372473)），该引文**并不支持**「二千」这半句 —— 即这一段是引文之外的自由增写。"
+    }
+  ],
+  "reverseChecks": [
+    {
+      "id": "RC1",
+      "found": "候选漏掉：曹魏**前线将领翟元当众说出**「魏王令将军约会东吴取荆州」——即曹吴之约不只曹操/司马懿/满宠/吴方知道，襄阳前线的曹仁部将也知道，且拿它当主战理由。这直接影响 knowledgeGaps K01 的 knownBy 名单（K01 只列了曹操、司马懿、满宠、孙权及吴方谋士、步骘，未列曹仁/翟元）。",
+      "quote": "今魏王令将军约会东吴取荆州；今彼自来，是送死也，何故避之！",
+      "quoteStart": 371371,
+      "quoteEnd": 371400,
+      "evidence": "候选 JSON 全文（json.dumps(C, ensure_ascii=False)）不含该句任何 ≥8 字子串；`blob.count('约会东吴')` = 1，但那一处只是 worldSettings W_P03.explain 里顺带列的「翟元『约会东吴取荆州』」六个字，属枚举计数用途、无偏移引文、未进入 K01/任何 causeEdge/task。"
+    },
+    {
+      "id": "RC2",
+      "found": "候选漏掉：进位汉中王之后的**政权建制**（封许靖为太傅、法正为尚书令、诸葛亮总理军国重事）。T01 的 result 只写到「登坛受贺 + 立刘禅为王世子」就停了，紧接其后的三行任命在候选里**一字未提**（`blob.count('太傅')`=0、`'尚书令'`=0、`'总理军国重事'`=0）。这不是背景装饰：它把「王号」落成了可运转的政府，也是后文「封五虎大将」得以发出的制度前提。",
+      "quote": "封许靖为太傅，法正为尚书令；诸葛亮为军师，总理军国重事。",
+      "quoteStart": 368372,
+      "quoteEnd": 368400,
+      "evidence": "该引文（含任意 ≥8 字子串）在候选 JSON 中不存在；worldSettings 里许靖只以「请玄德登坛」的司仪身份出现（W_P01.explain、rejectedForeshadows RF02 引文），法正只以「入见玄德」出现，均无任命内容。"
+    },
+    {
+      "id": "RC3",
+      "found": "候选漏掉：汉中王**回成都**并令魏延总督军马守御东川。这是本回「蜀方一侧」唯一的人事与地理调度（成都—白水营建那一段候选记了 W_P11，却漏掉同段开头的守将任命与回銮动作），而它解释了为什么后文荆州方向的战事由云长独力承担。",
+      "quote": "却说汉中王令魏延总督军马，守御东川。遂引百官回成都。",
+      "quoteStart": 370089,
+      "quoteEnd": 370115,
+      "evidence": "候选 `blob.count('魏延总督')`=0、`'守御东川'`=0、`'回成都'`=0。魏延在候选里只出现在两处：开篇「被魏延射了一箭」（C00/S00，属曹操退兵线）与名单「魏延为汉中太守」（W/RF03），都与此处守东川的任命无关。"
+    },
+    {
+      "id": "RC4",
+      "found": "候选漏掉：司马懿献计时给出的**吴刘旧怨前提**（孙权嫁妹又乘间窃取回去、刘备据占荆州不还、彼此俱有切齿之恨）。候选的 C04/F05 只引了司马懿的方案句，把「为什么孙权肯听」的动机基础整段丢掉 —— 而这恰恰是本回联吴计得以成立的推理起点。",
+      "quote": "江东孙权，以妹嫁刘备，而又乘间窃取回去；刘备又据占荆州不还：彼此俱有切齿之恨。",
+      "quoteStart": 369178,
+      "quoteEnd": 369217,
+      "evidence": "候选不含该句及任意 ≥8 字子串；`blob.count('窃取回去')`=0、`'据占荆州不还'`=0、`'切齿'`=0。"
+    },
+    {
+      "id": "RC5",
+      "found": "候选漏掉：诸葛瑾出使的**可行性前提**（云长有子有女、其女尚幼未许字人）。T13/F01 直接跳到「求婚被拒」，但诸葛瑾方案的说服力正建立在「云长之女尚未许人」这一事实上；漏掉它会让「求婚」看起来是无来由的试探。",
+      "quote": "某闻云长自到荆州，刘备娶与妻室，先生一子，次生一女。其女尚幼，未许字人。",
+      "quoteStart": 369565,
+      "quoteEnd": 369601,
+      "evidence": "候选 `blob.count('未许字人')`=0、`'一子，次生一女'`=0。"
+    },
+    {
+      "id": "RC6",
+      "found": "结构性遗漏（非单句）：正文按句末标点切成 224 句（≥6 字），其中 **118 句未被任何引文整句覆盖**；字符级覆盖率 **68.4%**（3465/5063）。缺口集中在三类：① 表文长句（P03 段覆盖仅 25.2%）；② 人物长对答（孔明劝进、费诗说云长、王甫谏言各只取首句）；③ 逆序动作句（如「云长急披挂上马，出城看时」「饮至二更，忽报城外寨中火起」）。候选 verification.reverseCoverage 自称「正文 13 个叙事段每段都有引文覆盖」——该说法按「段内至少 1 字符被覆盖」的弱口径成立（我复算 13/13 段均 ≥1），但它作为「覆盖」的表述会让读者误以为缺口很小；实测逐段覆盖率区间为 25.2%–99.4%。",
+      "quote": "　　玄德再三推辞不过，只得依允。建安二十四年秋七月，筑坛于沔阳，方圆九里，分布五方，各设旌旗仪仗。",
+      "quoteStart": 368269,
+      "quoteEnd": 368318,
+      "evidence": "复算命令见 evidence.auditScript（V3 段）：V3 未被覆盖句数 118、字符级覆盖率 68.4%、P02 段（偏移 368269 起）覆盖率 25.2%。"
+    }
+  ],
+  "misKillCheck": {
+    "summary": "未发现误杀。候选的 rejectedEdges（6 条）与 rejectedForeshadows（4 条）我逐条复核，判定都成立，且都不是因为词表/正则误挡：① RX01 拒绝「进位→取襄阳」直连，理由（中间隔八环）与原文一致；② RX02/RX03 拒绝梦→足痛、祭旗→胜利，属正确的「无机制不连边」；③ RX05 拒绝跨单元的「王甫谏换守将→失荆州」，符合本区间纪律；④ RF01–RF04 用「一次出现不叫伏笔」挡掉胡班旧情、印玺、五虎封号、广积粮草，口径一致。候选把「云长不赶」（R04）与「年近六旬」（U11）等易被误读句单独登记，属加分项。我另做的因果连接词普查（故/因此/于是/遂/因，共 19 处）中，**每一处**候选都已在该连边处连边（C00 用「因此」、C01 用「遂」、C02 用「于是」、C16 用「于是」、C07 用「遂」），没有发现被漏掉的合法因果边。"
+  },
+  "hallucinationCheck": {
+    "summary": "无人名/地点幻觉，但有 2 处事实级编造（见 counterExamples）。",
+    "personScan": "候选散文里出现的全部专名（曹操、司马懿、满宠、孙权、张昭、顾雍、诸葛瑾、步骘、玄德、孔明、法正、许靖、张飞、关羽、张飞、赵云、马超、黄忠、魏延、刘禅、费诗、云长、傅士仁、糜芳、廖化、关平、马良、伊籍、胡班、胡华、王甫、潘浚、赵累、吕蒙、曹仁、翟元、夏侯存、吕常、于禁、董承、董卓、刘封、孟达、王平、申耽）逐一到原文区间内验证，命中数均 ≥1，**没有原文不存在的人物**；反查原文有人、候选没写的专名也只为漏抽（RC1/RC3），未见张冠李戴式幻觉。",
+    "placeScan": "斜谷在候选中出现 0 次（属漏抽，非幻觉）；其余地点（京兆、上庸、沔阳、白水、许都、邺郡、陆口、公安、南郡、长安、襄江、襄阳、樊城、荆州、成都）均 ≥1 次且在原文可查。",
+    "overreachScan": "未见把结束当成功：候选明确写「樊城未下」「胜负未决」「得援≠解围」，T11/F07 把回末未具名请战者记为 unknowns U03 而不猜，S09 明写「不写解围或城破」。这一点做得好，CE1/CE2 属事实错误而非成功判定越权。"
+  },
+  "citationSample": {
+    "method": "定步长抽 5 条（objCount=236，step=47），报告逐字命中与偏移一致性。",
+    "results": [
+      {
+        "path": "$.tasks[0].objective.quotes[0]",
+        "quote": "今已抚有两川之地，可以应天顺人，即皇帝位，名正言顺，以讨国贼。",
+        "start": 367894,
+        "end": 367925,
+        "verbatim": true,
+        "offsetConsistent": true
+      },
+      {
+        "path": "$.tasks[8].action.quotes[0]",
+        "quote": "主公可遣使去许都见操，令曹仁旱路先起兵取荆州，云长必掣荆州之兵而取樊城。若云长一动，主公可遣一将，暗取荆州，一举可得矣。",
+        "start": 369950,
+        "end": 370010,
+        "verbatim": true,
+        "offsetConsistent": true
+      },
+      {
+        "path": "$.causeEdges[13].quotes[0]",
+        "quote": "诗曰：“关、张、赵、马、黄是也。”",
+        "start": 370363,
+        "end": 370380,
+        "verbatim": true,
+        "offsetConsistent": true
+      },
+      {
+        "path": "$.states[9].quotes[1]",
+        "quote": "云长破了襄阳，现围樊城甚急。望拨大将前来救援。",
+        "start": 372459,
+        "end": 372482,
+        "verbatim": true,
+        "offsetConsistent": true
+      },
+      {
+        "path": "$.worldSettings[13].quotes[0]",
+        "quote": "诗曰：“关、张、赵、马、黄是也。”",
+        "start": 370363,
+        "end": 370380,
+        "verbatim": true,
+        "offsetConsistent": true
+      }
+    ],
+    "passed": "5/5",
+    "fullSweep": "不止抽样：236 个 {quote,start,end} 对象全量复算，TEXT[start:end]!=quote 0 条、find(quote)!=start 0 条、inUnitOccurrences 不符 0 条、inRange 判定不符 0 条、sourceHash 不符 0 条。**引用层零编造**。"
+  },
+  "quoteIndexCheck": {
+    "note": "候选自述 quotationConvention 声明「『』内是我的分析用语；「」内必须是原文里 find 得到的逐字子串」。我按此口径复核 523 处「」（382 个不同 span）：122 处不可 find。逐类核对后判定**该约定在实际使用中并未被严格遵守**，但不据此判 fail —— 122 处中 103 处是 ≤5 字的分析标签（如「取荆州」「到达」「回收」）、9 处含省略号「…」、10 处是跨句拼接式压缩（如「云长拜受印绶」「满宠为使说吴」「令曹仁先起兵」）。这些出现在 note/explain/mechanism 等**散文**里，属表述习惯问题；全部 236 个**正式 quote 字段**均为逐字原文（D1：quote 字段中「」『』出现数 = 0）。仅登记为「约定与用法不一致」，不构成 counterExample。",
+    "quoteFieldCount": 236,
+    "quoteFieldVerbatim": 236
+  },
+  "auditBlindSpot": {
+    "finding": "被复核候选自带的审计脚本 `$CL_ARTIFACTS/read-sanguo-L0-0072/audit0072.py`（作者自带，我已独立跑通：FAIL 0 / WARN 0）**结构性地查不出 CE1 这一类错误**。其 A6 判据只要求 causeEdges 的 mechanism「非空」，从不核对 mechanism 里断言的事件重数/计数是否与原文相符。",
+    "reproducedExperiment": "向候选深拷贝注入 2 处重数篡改（C21：『二次求救』→『四次求救』；S09：『再差人』→『三度差人』），重跑该审计 → 仍然 FAIL: 0 / WARN: 0 / rc=0。即：把同一件事说成两次、三次、四次，该审计一律放行。",
+    "significance": "这正是本项目反复出现的失败形态的一个新变体：**审计只覆盖了它自己被设计的那个维度（引文定位），而编造迁移到了引文之外的散文层**。候选的 negative_control0072.py 自测 18/18 全部命中，但那 18 种注入缺陷里没有一种是「散文层事件重数造假」，所以自测通过并不构成对该层的保证。",
+    "artifactSha256": "audit0072.py = f244126d09ef73dfb4785848c103fe316d5c403d139b5e86512ed0a300f7f4f5"
+  },
+  "usableVsDiscard": {
+    "usable": [
+      "全部 236 条 quote 及其 start/end/sourceHash（引用层零编造，可整批复用）",
+      "causeEdges C00–C20（C21 除外）：机制与原文连接词一一对应，我逐个连接词普查后未发现误连",
+      "states S00–S08、S10–S12",
+      "worldSettings 全部 29 条（W_P03 的「取荆州 12 次全为图谋/议论/部署」经我逐处复核成立）",
+      "foreshadows F01–F08（含 F08 的 resolved 判定，其自限表述「只主张指令被执行，不主张敌军胆寒」正确）",
+      "rejectedEdges RX01–RX06、rejectedForeshadows RF01–RF04、misKill 口径",
+      "knowledgeGaps K02/K03、unknowns U01–U13（U07「忠城」照录底本、U09/U12 拒绝代拟，均为加分项）",
+      "themeReadings TH01/TH02（TH02 自带反例段，未把「计划落空」写成普遍规律）"
+    ],
+    "mustDiscardOrDowngrade": [
+      "C21.mechanism 的「二次求救」—— 必须删除「二次」，改写为单次求救（该边本身可与 C18 合并，或改述为「围城 → 曹仁求救 → 曹操遣于禁」）；其引文 span [372433,372483) 与 C18 第二条引文完全重合，重数说法去掉后两条边实为同一事件的两种切分。",
+      "S09.after 的「再差人星夜求救于长安」—— 「再」字删除。",
+      "W_P04.explain 的「与两次求救」—— 改为「与向曹操求救」。",
+      "reverseFindings R04 的「两次求救的戏」—— 改为「求救的戏」。",
+      "T11.obstacle.text 的「樊城现有兵力（二千）刚折其大半」—— 「（二千）」须删除或改为「曹仁拨二千与吕常出击，折其大半」；该栏 basis 标 explicit 但引文不支持「二千」这半句，若保留须改标 inferred 并补 [372335,372351) 引文。"
+    ]
+  },
+  "notes": "总判 **fail**，但要说清性质：这不是一条「引用层烂掉」的候选。我全量复算 236 个引文对象，逐字/偏移/重数/区间/哈希五項失败数**全为 0**；误杀检查未发现误挡；无人物与地点幻觉；未见把结束当成功。两处 counterExample 都落在**引文之外的散文层**：CE1 把一个只发生一次的事件写成两次（求救全文仅 1 处，偏移 372438），CE2 把拨给吕常出击的二千兵写成樊城守军总数。按 VERIFIER.md「抽取项在原文里找不到对应文字 = 编造」，这两条够判 fail；且它们不是孤立笔误 —— C18/C21/S09/W_P04/R04 五处互相呼应地把同一个错误当成了一条叙事线（「曹仁被放走 → 所以后面还有两次求救的戏」），说明这是理解偏差而非打字错误，被下游引用会继续放大。\n\n不确定处（如实登记）：① 我给 CE1 的定性是「编造」而非「措辞不严」——依据是「二次」是可证伪的事件计数，且候选在 5 处重复该说法；但若复核我的人认为这属于修辞层，我接受降为 partial，两处 counterExample 与全部 reverseChecks 仍然成立。② CE2 的「二千」在候选 T10/C19/C20 等处使用是**正确的**（确指拨给吕常的兵），只有 T11.obstacle 这一处错位；我按「同一文件内同一数字的错位使用」定性为事实错误，未上纲到全篇。③ 我自己也可能错：我最初的句子切分把引号内的句号也当句末，得出 113 句未覆盖；改用「引文 span 字符级覆盖」与「整句包含」两种口径后定为 118 句（≥6 字）/ 68.4%。若复核者用不同切分口径，数值会变，但「P02 段覆盖率仅 25.2%」「表文整段无引文」这两个结论在两种口径下都成立，我据此保留 RC6 但不给它加权重。\n\n关于 sourceHash 不一致（候选已自行登记，我独立复现并确认其说法成立）：任务 JSON 顶层 sourceHash = 2988ce6e…，而 data/cache/fe42d01f3826fe8096f86614.docs.json 的**文件**哈希 = 8ab7298a…。实测 2988ce6e… 命中另外两份缓存（152e2a6eed94f1075e7e7070.docs.json 与 f0b45e85aac6c95e584075a2.docs.json），三者 docs[0].text 逐字相同（长度均 607191，text sha256 均 9d28638de0b0a89f…）。故 sourceHash 差异源于**同一文本的多副本缓存**，不是文本不同、也不是候选改坏了源。此项记入 notes，不作为 counterExample。\n\n给 READER 的可执行结论：候选的机械层可以直接复用（236 条引文全部可用）；需重做的是「引文之外的散文」——具体见 usableVsDiscard.mustDiscardOrDowngrade 的 5 条，以及 reverseChecks 的 6 条补抽。按角色纪律，我**只判定、不代改**被复核文件。",
+  "evidence": [
+    {
+      "path": "loop/state/out/verify_sanguo_L0_0072.verdict.json",
+      "kind": "worker-output",
+      "note": "本复核结论本体（verdict=fail、counterExamples[2]、reverseChecks[6]、misKillCheck/hallucinationCheck/citationSample/auditBlindSpot）"
+    },
+    {
+      "path": "loop/state/out/read_sanguo_L0_0072.candidate.json",
+      "sha256": "a6650f0d00110b61baac9aa7b95055b0f290dad893129b93f7adfe5774eba63b",
+      "kind": "reviewed-artifact",
+      "note": "被复核候选（w-dafeng-1 产出）"
+    },
+    {
+      "path": "data/cache/fe42d01f3826fe8096f86614.docs.json",
+      "sha256": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+      "kind": "source",
+      "note": "原文源（docs[0].text，607191 码点）"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/verify-sanguo-L0-0072/verify_audit0072.py",
+      "sha256": "93ebc7b34fb1ebd1551304d7295cc2ec05afedc39635ac5b5190c396015cfe70",
+      "kind": "audit-script",
+      "note": "复核者的独立审计脚本（V1–V7），不 import 候选作者的任何模块；用法：python3 -B <该路径>"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/verify-sanguo-L0-0072/verify_audit0072.out.txt",
+      "sha256": "b844428632ce5719ff747c0e69ab447b28a6ae6a0412955edb3dca3cfda0eaf1",
+      "kind": "audit-output",
+      "note": "上述脚本的完整输出（127 行）：V2 引用层失败项 0、V3 未覆盖 118 句/68.4%、V4 5/5 事实未覆盖、V6 抽检 5/5"
+    },
+    {
+      "path": "loop/state/runs/task-read_sanguo_L0_0072.json",
+      "sha256": "06811e6c40be86c3277c0c0c06411ab9205f30d0e2595dd469a08386055e9ec1",
+      "kind": "task-definition",
+      "note": "被复核任务定义（sourceHash=2988ce6e…，与文件哈希不同，原因见 notes）"
+    }
+  ],
+  "auditCmd": "python3 -B \"$CL_ARTIFACTS/verify-sanguo-L0-0072/verify_audit0072.py\"",
+  "auditScript": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/verify-sanguo-L0-0072/verify_audit0072.py",
+  "recheckCmd": {
+    "CE1_求救计数": "python3 -c \"import json;t=json.load(open('data/cache/fe42d01f3826fe8096f86614.docs.json'))[0]['text'];print(t[367615:372678].count('求救'))\"  # → 1",
+    "CE2_二千归属": "python3 -c \"import json;t=json.load(open('data/cache/fe42d01f3826fe8096f86614.docs.json'))[0]['text'];i=t.find('仁即与兵二千，令吕常出樊城迎战。');print(i,repr(t[i-40:i+22]))\"  # → 372335 '…急难抵当矣。”仁即与兵二千，令吕常出樊城迎战。'",
+    "RC_漏抽子串": "python3 -c \"import json;d=json.load(open('loop/state/out/read_sanguo_L0_0072.candidate.json'));b=json.dumps(d,ensure_ascii=False);[print(s,b.count(s)) for s in ['约会东吴','太傅','尚书令','魏延总督','据占荆州不还','未许字人']]\"  # → 全部 0（'约会东吴'=1，但仅为枚举计数，无引文）"
+  },
+  "sourceHashes": {
+    "data/cache/fe42d01f3826fe8096f86614.docs.json": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+    "data/cache/152e2a6eed94f1075e7e7070.docs.json": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+    "data/cache/f0b45e85aac6c95e584075a2.docs.json": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+    "loop/state/out/read_sanguo_L0_0072.candidate.json": "a6650f0d00110b61baac9aa7b95055b0f290dad893129b93f7adfe5774eba63b"
+  },
+  "assertions": [
+    {
+      "text": "先自己读原文再看候选：把 TEXT[367615,372678) 导出为 27 行（14 个正文段）逐行读完，独立写出事实清单与因果连接词清单后，才打开 read_sanguo_L0_0072.candidate.json。",
+      "result": "pass"
+    },
+    {
+      "text": "引文层全量核验（非抽样）：遍历候选全部 236 个含 quote+start/end 的对象，TEXT[start:end]==quote、find(quote)==start、inUnitOccurrences、inRange、sourceHash 五项失败数均为 0。",
+      "result": "pass"
+    },
+    {
+      "text": "反向验证：不复用候选的逐句覆盖脚本，自写 V3（正文按句切分 + 字符级 span 覆盖）与 V4（复核者自选 5 条原文事实逐条问『候选里有没有』），得未覆盖 118 句 / 68.4% 与 5/5 事实未覆盖。",
+      "result": "pass"
+    },
+    {
+      "text": "误杀检查：自写 V5 逐处列出原文自带因果连接词（故/因此/于是/遂/因，共 19 处），逐处核对候选是否已连边，未发现被误挡的合法因果边。",
+      "result": "pass"
+    },
+    {
+      "text": "引用核验：定步长抽 5 条 quote 报逐字命中与偏移一致性，5/5 通过。",
+      "result": "pass"
+    },
+    {
+      "text": "审计盲区复现：向候选深拷贝注入 2 处事件重数篡改后重跑候选自带 audit0072.py，仍 FAIL 0，证明 A6 只查 mechanism 非空、不查重数（注入只写临时文件，真实候选未被改动）。",
+      "result": "pass"
+    },
+    {
+      "text": "0 编造自检未通过：CE1（二次求救，原文仅 1 次）、CE2（樊城现有兵力二千，原为拨给吕常的出击兵）逐字引证成立，故判 fail 而非 pass/partial。",
+      "result": "fail"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/verify_sanguo_L0_0072.verdict.json",
+      "kind": "append-only",
+      "note": "本任务 writes 指定的唯一仓库内产物（新建）"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/verify-sanguo-L0-0072/",
+      "kind": "artifact-only",
+      "note": "仓库外测试产物（CL_ARTIFACTS）：复核审计脚本与输出"
+    }
+  ],
+  "remaining": [
+    "CE1：C21.mechanism 的「二次求救」、S09.after 的「再差人」、W_P04.explain 的「两次求救」、R04 的「两次求救的戏」须删除重数说法（原文「求救」全文仅 1 处 @372438）——由 READER 重做，复核者不代改。",
+    "CE2：T11.obstacle.text 的「樊城现有兵力（二千）」须删除或改述为「拨二千与吕常出击」，并补 [372335,372351) 引文或改标 inferred。",
+    "RC1：knowledgeGaps K01 的 knownBy 应补入曹仁/翟元（魏方前线将领知情，引文 [371371,371400)）。",
+    "RC2/RC3：补抽进位后的政权建制（[368372,368400)）与魏延守东川/回成都（[370089,370115)）。",
+    "RC4/RC5：补抽司马懿计的吴刘旧怨前提（[369178,369217)）与诸葛瑾求婚的可行性前提（[369565,369601)）。",
+    "RC6：表文段（偏移 368269 起，覆盖率 25.2%）与人物长对答段需补引文或显式登记为「整段未逐句引证」。",
+    "候选 verification.reverseCoverage 与 R11 的「逐段都有引文覆盖」表述建议改为逐段覆盖率数字，避免弱口径被读成强结论。",
+    "本次复核未跑 GPU/浏览器测试（任务未要求，且 GPU 全局串行）；未改动 js/ css/ index.html serve.py narrative.py scripts/ tests/ docs/ data/ 任何受保护路径。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/verify_sanguo_L0_0072.verdict.json"
+    ],
+    "note": "仓库内只新增本 verdict 文件（任务 writes 指定的唯一路径）。read 记录 loop/state/out/read_sanguo_L0_0072.json 的 reviews[] 末条由 loop.py verify 追加；如需回退删该末条即可，不影响候选本体。仓库外测试产物位于 CL_ARTIFACTS，按约定不回滚源目录。"
+  },
+  "agent": "w-verify-3",
+  "submittedAt": "2026-10-13T00:26:34Z",
+  "wallClockSeconds": 2006,
+  "wallClockFrom": "lease.startedAt",
+  "validation": {
+    "problems": [
+      "缺字段 status",
+      "缺字段 summary"
+    ],
+    "at": "2026-10-13T00:26:34Z"
+  },
+  "status": "rejected"
+}

@@ -1,0 +1,127 @@
+{
+ "task": "read:xiyou:L1:0037",
+ "agent": "w-dafeng-0",
+ "status": "done",
+ "summary": "精读《西游记》第三十七回「鬼王夜谒唐三藏　悟空神化引婴儿」（docs[0].text codepoint [260834,268832)，7998 字）。本轮是**重做**：上一轮同一 agent 被超时杀掉（rc=124），留下的是完整但未确认的中间态（loop/state/out/REJECTED__read_xiyou_L1_0037.json 记 status=partial）。我先把它整体复核了一遍（313 个引文节点逐条重跑，全部通过），保用其引文层，然后补上它漏掉的反向覆盖，产出 392 个引文节点的候选：7 条任务五元组（3 条 cost=null 且逐条写明为何不补）、13 条因果边（每条带方向+触发+机制，另列 8 条被拒边说明为何不连边）、10 条状态变化（前值→后值+事件锚点）、6 条知识差（谁知/不知分层）、6 条伏笔（3 回收 / 3 显式 unresolved）、15 条世界设定（rule 7 / place 4 / item 4；place 分 arrived·mentioned、item 四态多选、rule 分 executed·misunderstood）、2 条主题读法（perspective+support+counter 三件齐全）、10 条说法台账、7 条人物发言、6 条文本校勘注、2 条跨单元说明（区间外原文一律不引）、9 条 unknowns、6 条 openThreads、8 条 selfCritique。核心新增：① 三藏不是道具——他与鬼王有整段「理上难行/欺邦灭国/大逆之罪/画虎刻鹄」的可行性辩论（T6），又与太子有独立完成的「四恩」之辩（T7），这两场上一轮零覆盖；② 「梦」这条链（行者先以「梦从想中来」否定、沙僧提议开门、见玉圭后改口「想此事是真」）是本回由怀疑转行动的机制，上一轮只当引子（CE13/ST10/SP7）；③ 新增 reverseCoverage 分区，把区间内 35 段（每段 ≥25 codepoint）未被引文覆盖的残余片段连原文逐段登记，供复核者直接抽查。覆盖度由上一轮的 0.457 提升到 0.647，段落级缺口 1 → 0。",
+ "evidence": [
+  {
+   "path": "loop/state/out/read_xiyou_L1_0037.candidate.json",
+   "sha256": "14596874f0c44cb394346727fe15666f42b34525c98f7ea048165e159a00e3b2",
+   "kind": "candidate"
+  }
+ ],
+ "assertions": [
+  {
+   "text": "源哈希三方逐字相同：`shasum -a 256 data/cache/a065244455cfb2221bcda94a.docs.json` = c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2，与 task.sourceHash、candidate.source.sourceHash 一致。",
+   "result": "pass"
+  },
+  {
+   "text": "区间口径自检：`docs[0].text[260834:260855]` == '第三十七回　鬼王夜谒唐三藏　悟空神化引婴儿'（21 codepoint，切片以本单元标题开头）；`len(docs[0].text[260834:268832])` == 7998 == task 声明；`T.find('第三十八回')` == 268832 == 区间终点。三条由候选 reproduce.cmd_slice 复现（实测输出 `'第三十七回　鬼王夜谒唐三藏　悟空神化引婴儿' 7998`）。",
+   "result": "pass"
+  },
+  {
+   "text": "全部 392 个引文节点机械核验（独立脚本 /tmp/cl37/verify.py，**不复用构建逻辑**，只读 docs.json 与候选成品）：T[start:end]==quote 逐字成立（bad=0）、全部落在 [260834,268832) 内（bad=0）、T.find(quote)==start 即全书首次出现即本处（bad=0）、每条引文全书唯一（bad=0）、sourceHash 字段一致（bad=0）、wholeTextOccurrences 声明与实际一致（bad=0）。另由候选自带的 reproduce.cmd_quotes 复现得到 `quoteNodes 392 mismatch 0`。",
+   "result": "pass"
+  },
+  {
+   "text": "构建期断言（/tmp/cl37/build.py）：任一引文 NOTFOUND / 非全书唯一 / 越界 / 逐字不符，构建直接 raise 不产出候选；本次 392 个节点全部通过。构建脚本另对**上一轮 313 个节点**逐个重跑同一断言，全部通过后才保用。",
+   "result": "pass"
+  },
+  {
+   "text": "五元组分栏独立性复核：7 条任务 × 5 栏，跨栏共用同一引文的条数为 0（禁用的「五栏共用一句」形态未出现）；null 栏位 3 个（T4/T5/T7 的 cost）全部带同名 costNote 写明为何不补；非 null 栏位均有引文（0 个空引文栏）。此处是重做中**实际发现的缺陷**：T7 初稿的 obstacle/cost 共用太子怒斥句、action/result 共用三藏「言之有失」句，被独立复核脚本判出后已改（cost 改 null 并写 costNote，result 改用太子「拿来我看」与行者跳出的两句）。",
+   "result": "pass"
+  },
+  {
+   "text": "内容分区齐备：required_sections(prompt) = ['tasks','causeEdges','states','foreshadows','worldSettings','themeReadings']，候选六个分区全部存在；另按任务 4b/4c 要求产出 worldSettings 与 themeReadings（非空）。",
+   "result": "pass"
+  },
+  {
+   "text": "worldSettings 三类区分写进字段：7 条 rule 全部有 institution ∈ {declared,executed,misunderstood}（executed 5 / misunderstood 2）；4 条 place 全部有 placeState ∈ {arrived,mentioned}（arrived 2 / mentioned 2）；4 条 item 全部有 itemStates 数组 ⊆ {hold,transfer,use,lose}，四态分开写、未合并成「物品链」。字段缺失/非法取值数 0。",
+   "result": "pass"
+  },
+  {
+   "text": "「提及≠到达」纪律：PL2_wuji_guo_cheng 记 mentioned —— 本区间取经四人无一进城，行者只在空中望、太子是从城里出来又回去，故不写成 arrived；PL4_TAIZI_chugong（东门外二十里猎场）记 arrived，依据是叙述写出太子与三千人马确实到了那里；两处口径不同已在各自 caveat 里写明主体（「本区间内有人到达」vs「取经队伍是否到达」），供复核裁断。",
+   "result": "pass"
+  },
+  {
+   "text": "themeReadings 三件齐备：2 条均含非空 perspective + support + counter（counter 另有 counterEvidence 逐字引文）；未用事件密度/剧情点数量/死亡人数/篇幅中点定义「高潮」，未套三幕或英雄旅程（TH1 的 note 是「不借助三幕或英雄旅程框架」的否认式提及，判据脚本已区分否认句与使用句）。semanticReview.performed=false，未声称语义核验完成。",
+   "result": "pass"
+  },
+  {
+   "text": "未把人物话语当事实：CL1（阴司诸神与那怪的关系）、CL2（玉圭怎么丢的两个版本）、CL3（太子「非我父王而何」）、CL4（「成了精魅」）、CL5（指行者是骗宝的全真）、CL6（行者「果然是个妖精」）、CL8（三藏以诗断定父冤未报，随后自认「贫僧不知」）、CL9（太子以礼制解释大怒）、CL10（行者「全凭三寸舌」）逐条标为人物说法/错误归因/无法核实；KD1/KD2/KD5 显式写「未闭合」，未写成人物已经明白。WS7_yinsi_gaozhuang 的 institution 记 misunderstood，理由是本区间阴司无一人出场。",
+   "result": "pass"
+  },
+  {
+   "text": "「结束≠成功」执行到位：T3 的 result 写「降妖本身在本区间内尚未发生」；T1/T5 的 result 写到「应承」「问母之计被接受」为止，不写救出国王或拿住妖怪；T7 的 result 明确「**不写太子被说服**」——他随后仍斥「胡说」，区间末只是「三分儿真实」的动摇。",
+   "result": "pass"
+  },
+  {
+   "text": "伏笔判据（铺设+回收）：6 条中 FS1/FS2/FS6 记 resolved 且同时给出 setupEvidence 与 payoffEvidence；FS3（琉璃井与芭蕉）、FS4（问母）、FS5（托梦）记 resolved=false 并写 unresolvedPart，未用区间外原文补回收。FS6 与 FS2 的关系（FS2 记玉兔化身整条链、FS6 专记「引进寺」这一空间结果与匾额入寺理由）已在 note 里写明，并说明若复核认为应合并则合并后引文仍可逐条复验。",
+   "result": "pass"
+  },
+  {
+   "text": "覆盖度独立复算：引文区间并集覆盖 5173/7998 = 0.647，与候选 coverage.coveredCharacters/coverageRatio 一致（声明 5173/0.647，实测 5173/0.647）；段落级缺口 0（独立按空行切段复算 33 段，无一段未被引文覆盖），与 coverage.paragraphsWithNoQuote=0 一致。上一轮该值为 0.457 / 1 段缺口。",
+   "result": "pass"
+  },
+  {
+   "text": "反向覆盖台账可核验：reverseCoverage.segments 共 35 段，每段含 range + quote + kind；35 段的 quote 逐段与 T[a:b] 复算一致（mismatch 0），且 35 段与引文并集**零重叠**（即确实是未覆盖片段，不是因为算错而误报）。reproduce.cmd_reverseCoverage 实测输出 `covered 5173 ratio 0.647` / `segments>=25 35`。",
+   "result": "pass"
+  },
+  {
+   "text": "内部交叉引用可解析：正文中出现的 WS*/CE*/RE*/ST*/FS*/TH*/KD*/CL*/TX*/CU*/U*/OT*/SC*/PL*/IT*/SP* 引用全部按「id 精确命中或唯一前缀」解析到本文件条目（dangling 0 / ambiguous 0）。此处是重做中**实际发现的缺陷**：上一轮留下的中间态有 10 处短名引用（CE7/CE8/FS1/FS3/FS4/FS5/PL2/ST7/U5/U6）指向不存在的 id，已逐处替换为完整 id（映射写在 revisions RV3）。",
+   "result": "pass"
+  },
+  {
+   "text": "计数类断言全部复算：候选正文里「X」N 次 型断言 13 处逐一取出对应词在区间内 count() 比对，全部一致（bad=0）。此处是重做中**实际发现的缺陷**：初稿 TX6 写「『鞍』字只出现 1 次」、SC8 写「『水贼』各 1 次」，实测区间内分别为 2 次与 2 次（「鞍」另一处在「紧随鞍马」，「水贼」两处在同一句里），已改正并补上可复现判据。",
+   "result": "pass"
+  },
+  {
+   "text": "metrics 自洽：候选 metrics 的 14 个分区计数与实际条目数逐一比对一致（bad=0）；quoteNodes=392 与实际引文节点数一致；tasksWithNullCost=3 与实际 cost 为 null 的条数一致。",
+   "result": "pass"
+  },
+  {
+   "text": "未复用未经复算的旧数字：上一轮中间态的 generatedAt（2026-10-09T15:04:18Z）、quoteNodeConvention.anchorsChecked（146）都是构建被打断时的中途值，已分别改为本轮真实生成时刻并另加 generatedAtNote、重算为 392 并另加 anchorsCheckedNote；coverage/metrics 全部按新内容重算，未沿用旧值。",
+   "result": "pass"
+  },
+  {
+   "text": "只写任务 writes 指定的路径：本轮的写入动作只有 loop/state/out/read_xiyou_L1_0037.candidate.json（writes[0]）与本次提交文件；未改 js/ css/ index.html serve.py narrative.py scripts/ tests/ docs/ data/ 等受保护路径（`git status --porcelain` 中这些路径的改动均为本轮之前就存在的并行工作，非本 agent 所为）。构建脚本与复核脚本都放在 /tmp/cl37/ 下，不进仓库。",
+   "result": "pass"
+  },
+  {
+   "text": "未跑 GPU/浏览器测试（本任务不需要，任务声明里也没有）；未使用 git checkout/reset/stash。",
+   "result": "pass"
+  }
+ ],
+ "changes": [
+  {
+   "path": "loop/state/out/read_xiyou_L1_0037.candidate.json",
+   "kind": "append-only"
+  }
+ ],
+ "sourceHashes": {
+  "data/cache/a065244455cfb2221bcda94a.docs.json": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2"
+ },
+ "remaining": [
+  "语义未核验：semanticReview.performed=false。本文件只证明引文逐字、偏移可复现、五栏不共用引文；不证明我对这些引文的语义判断正确。15 条世界设定是否成立、2 条主题读法是否站得住，需独立复核者按 loop/ROLES/VERIFIER.md 读原文后判断。引文定位正确 ≠ 语义已核验。",
+  "覆盖率 0.647：段落级缺口已为 0，但仍有 2825 个 codepoint 未被引文覆盖，且已逐段登记在 reverseCoverage（35 段，每段 ≥25 codepoint，含原文与分类）。这些是韵文铺陈、问答复述与过渡句；「段被引到」不等于「该段读完」，登记是为了让复核者能直接抽查，不是声称已全覆盖。",
+  "本文件 7 条任务里有 3 条 cost 为 null（T4_taizi_ruSi、T5_taizi_wenmu、T7_sanzang_sien_bian），每条都带 costNote 写明为何不补：原文只写情绪与动作，没有写出损失或让渡。这是本区间的真实空白，不是我没读到；但 null 与「已确认无代价」的界限依赖复核者认可我给的理由。",
+  "T6_sanzang_bianNan 的 cost 是 inferred 而非 explicit：原文没有「他不再责备鬼王」这句话，是我把前段的责备（「想必是你不慈恤万民」）与后段的帮忙并置推出来的，已在 costNote 写明「若复核认为这属立场改变而非代价，可降级为 states」。",
+  "T6/T7 是否应算独立任务存在口径分歧：T6 与 T1（鬼王求助）是同一场对话的两面，T7 与 T2（三藏应承做局）是同一个人。我按「谁想要什么」切分并保证每栏引文零共用，但复核者可能认为应合并（已写在 SC6_t6_t7_qiefen）。",
+  "PL4_TAIZI_chugong 记 arrived 的口径是「本区间内有人到达」（太子与三千人马），与 PL2_wuji_guo_cheng 的 mentioned（取经队伍无人进城）用的是不同主体；两种口径都写在各自 caveat 里，若复核要求统一为「取经队伍口径」，PL4 应降为 mentioned。",
+  "FS3_liuli_jing（琉璃井与芭蕉）、FS4_taizi_wenmu（问母）、FS5_yeyoushen_tuomeng（托梦）与 FS1_yugui_biaoji 后半（报仇）在本区间内未回收，已显式标 unresolved，未用区间外原文补写。",
+  "U1（冤魂是否真已死三年）、U2（殿上那位究竟是什么）、U3/U4（玉圭怎么丢的、太子信不信）、U5（托梦是否送到）、U6（取经队伍如何入城）、U7（三藏身世是否被核实）、U8（阴司是否真告不动）、U9（「＋」是否讹字）共 9 条 unknowns 在本区间内无据，本文件不补。",
+  "TX6 登记的「＋」（U+FF0B，全书 1 次，偏移 261121）只记「原文如此」，不裁定是刻工讹字还是转录讹误——本区间内没有异文可对校。",
+  "本文件未核对 data/cache/a065244455cfb2221bcda94a.json 里的旧图谱结论，只按任务说明把它当对照物而非证据；未做对照，故不声称任何一致性。",
+  "本次为重做：上一轮（同一 task id，agent 记 w-dafeng-0）被超时杀掉（rc=124，2700s），loop/state/runs/run-read_xiyou_L1_0037.json 与 loop/state/out/REJECTED__read_xiyou_L1_0037.json 都有记录。我保用了它的引文层（313 节点全部重跑通过），新增 79 个节点与 15 个条目；新增/保用的区分写在 candidate.revisions（RV1–RV5）。上一轮产物原件另存在 /tmp/cl37/prior_partial_candidate.json（不进仓库），可用 reproduce.cmd_priorDiff 逐 id 对账（实测 kept 85 / dropped 0）。",
+  "本轮未在共享工作树里改任何受保护路径；构建与复核脚本位于 /tmp/cl37/build.py 与 /tmp/cl37/verify.py（非仓库文件，不随提交保留），复核脚本的 36 项检查全部通过。"
+ ],
+ "reworkOf": "loop/state/out/REJECTED__read_xiyou_L1_0037.json",
+ "reworkReason": "上一轮同一 task 的 agent 被 2700s 超时杀掉（rc=124），worker 按退出码闸门如实拒发 done（记 partial）；产物是完整 JSON 但未经 agent 自己确认，且经我复核后确认存在反向覆盖缺口（三藏两场正面交锋、梦这条链零覆盖）与 10 处悬空短引用，故本轮重做而非原样提交。",
+ "rollback": {
+  "kind": "append-only",
+  "strategy": "delete-added-files",
+  "files": [
+   "loop/state/out/read_xiyou_L1_0037.candidate.json"
+  ]
+ }
+}

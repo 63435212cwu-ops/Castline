@@ -1,0 +1,456 @@
+{
+  "task": "read:sanguo:L0:0066",
+  "agent": "w-dafeng-1",
+  "status": "done",
+  "summary": "精读《三国演义》第六十七回 曹操平定汉中地 张辽威震逍遥津，原文区间 [336692,342369) 共 5677 codepoint（正文至 342094，其后 7 行为站点样板）。先逐行读完整切片（26 行：回目 + 11 个正文叙事段 + 段间空行 + 回末「正是」钩子 + 样板行），再建段落图；全部 202 条引文由 gen_candidate.py 的 ref() 用 str.find 在**全文**定位（找不到 / 越出正文 / 命中数不符即抛错中断构建），无手写偏移。候选：16 条任务五元组（每栏各自引文；同任务五栏内 0 处共用同句、0 处区间重叠；8 个 null 栏位全部带 <栏位>Note）、17 条因果边 + 4 条被否（写明为什么只是时间相邻）、10 条状态、6 条知识差、6 条伏笔（5 resolved / 1 显式 unresolved）+ 2 条被否、19 条 worldSettings（place 8 / item 6 / rule 5；地点 arrived 7 / mentioned 1，物件四态多选分开写，规则 declared 3 / executed 2）+ 4 条被否、2 条主题解读（各带 perspective/support/counter 三件、各 3 支持 3 反例、均标 inferred）、11 条 unknowns、3 条 selfCritique。\n\n本轮建立了两个**独立**脚本（都不在仓库内，放外置盘）：\n① audit66.py —— 刻意不 import 构建脚本，自己从 docs.json 重算偏移口径、自己重解析候选，35 项判据 35 PASS / 0 FAIL；\n② negative_control66.py —— 向候选注入 20 种已知缺陷形态，20/20 被抓、0 漏检。\n\n构建期实抓并修掉的真实缺陷（不是走过场）：\n· 「五栏共用同句」同类形态：构建脚本的 C() 原先用**转述文本**当 quote，一跑就暴露 40 处 NOT-FOUND；改为 display text 与 quote 分离的 QUOTES 表后归零。\n· 子串包含：新增「A 栏引文是 B 栏引文子串」检查（比同句检查更严），真抓出 T10 的 result「遂按兵不动。」被 obstacle 的长引文整句包含，已把 obstacle 收窄到「操曰：“士卒远涉劳苦，且宜存恤。”」。\n· 散文误引：新增「note/explain/caveat 里用「」引的原文也必须逐字成立」检查（「」=逐字原文，『』=分析用语；实测原文全篇不含「」『』，故该约定是本候选声明的）。这条检查真抓出并修掉 9 处误引：如「张鲁欲斩庞德」应为「张鲁大怒，唤庞德责骂，欲斩之」、「引全家老小开南门杀出」应为「张鲁引全家老小，开南门杀出」、「弟卫领兵出敌被斩」应为「张鲁使弟卫领兵出敌，与许褚交锋；被褚斩于马下」、「李典与张辽素不睦」应为「素与张辽不睦，闻辽此言，默然不答」等。这些是 quoteRef 机器校验兜不住、但复核者一眼能看出的错。\n· 审计自身的 3 处误报也一并修掉（A5 把自己的否定声明当成「声称完成」、H3 词表黑名单把反例里的否定用法判失败、J1 未拆分拼接引用），避免「审计假绿/假红」。",
+  "evidence": [
+    {
+      "path": "loop/state/out/read_sanguo_L0_0066.candidate.json",
+      "sha256": "178e15a46f03a37eaaa720dd6bfd9636e87cf45158914b93dbaaa1a9f031c8c7"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/read_sanguo_L0_0066/gen_candidate.py",
+      "sha256": "a4a99128c6c6003c2422589e8a378a767be550367200544c36c79310d01c3024"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/read_sanguo_L0_0066/audit66.py",
+      "sha256": "cf1591eb030d8d86f2aba6a3ee0ba2bb7fcfa633b2402878a166f527e94f3d9a"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/read_sanguo_L0_0066/negative_control66.py",
+      "sha256": "dd7debc54e616692c83a5561f251e83f50a0d1e2a31a89ac9117334a583fc11c"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/read_sanguo_L0_0066/body.txt",
+      "sha256": "d35bcaa37eb8d561008967977f29fea3618c1e50120b618f61124eca667dfadc"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/read_sanguo_L0_0066/slice.txt",
+      "sha256": "1b3bf3775a35837288bbe07ca94a915ad5417893e1cba9b09e4a0b4b7fbf7994"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "区间口径自检：docs[0].text[336692:336692+21] == 「第六十七回　曹操平定汉中地　张辽威震逍遥津」（以本单元标题开头），切片长度 5677 与提示词声明一致；正文结束于 342094，其后为站点样板行。复现：python3 -c \"import json;t=json.load(open('data/cache/fe42d01f3826fe8096f86614.docs.json'))[0]['text'];print(repr(t[336692:336713]),len(t[336692:342369]),repr(t[342094:342124]))\"",
+      "result": "pass"
+    },
+    {
+      "text": "sourceHash 口径：data/cache/fe42d01f3826fe8096f86614.docs.json 整文件 sha256 = 8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2，与提示词正文/自检口径一致。任务 JSON 里的 2988ce6e36c8 命中另两份文件（f0b45e85aac6c95e584075a2.docs.json、152e2a6eed94f1075e7e7070.docs.json）。**实测三份 docs[0].text 逐字相同**（均 607191 codepoint、utf-8 sha256 同为 9d28638de0b0a89f…），故本候选偏移在三份上都能复算；未改写任何一侧，分歧登记在 unknowns U11。复现：python3 -c \"import json,hashlib;a=json.load(open('data/cache/fe42d01f3826fe8096f86614.docs.json'))[0]['text'];b=json.load(open('data/cache/f0b45e85aac6c95e584075a2.docs.json'))[0]['text'];print(a==b,hashlib.sha256(open('data/cache/fe42d01f3826fe8096f86614.docs.json','rb').read()).hexdigest())\"",
+      "result": "pass"
+    },
+    {
+      "text": "引文逐字：候选内全部 202 条引用均满足 TEXT[start:end] == quote，且 336692 <= start < end <= 342094（正文内），end-start == len(quote)（codepoint 口径），每条 quote 都能在全文 find 到，sourceHash 均为 8ab7298a6960。由 audit66.py 独立重算（不 import 构建脚本）。复现：python3 '/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/read_sanguo_L0_0066/audit66.py' → 35 PASS / 0 FAIL",
+      "result": "pass"
+    },
+    {
+      "text": "任务五元组分列且每栏独立引文：16 条任务、五栏（objective/obstacle/action/result/cost）各自带 quotes；机器检查同任务内「五栏共用同句」= 0 处、「A 栏引文是 B 栏引文子串」= 0 处、「不同栏引文区间重叠」= 0 处（第 2、3 项比提示词要求更严，是本轮新增）。8 个 null 栏位（cost 8 个：T01/T03/T07/T08/T10/T12/T13/T16；obstacle 1 个：T06）全部带 <栏位>Note 写明为什么没有依据。复现：gen_candidate.py 尾部机检输出 SHARED-QUOTE ACROSS COLUMNS: 0 / SUBSTRING-CONTAINED ACROSS COLUMNS: 0 / NULL-WITHOUT-NOTE: []",
+      "result": "pass"
+    },
+    {
+      "text": "causeEdges 有方向与触发：17 条每条都含 direction（A → B）/ trigger（触发事件）/ mechanism（A 导致 B 的机制）/ quotes；另列 4 条 rejectedCauseEdges 写明为什么「时间相邻但无机制」故不连边（如「凌统筵前舞剑」→「次日进兵」）。2 条借助人物预判的边（CE12 孔明「操必勒兵南向矣」、CE16 断小师桥）都标 basis=derived 并带 caveat，未把人物语当叙述层确认。复现：audit66.py 判据 D1–D3",
+      "result": "pass"
+    },
+    {
+      "text": "states 有前值/后值+事件锚点：10 条每条含 before/after/anchor/quotes；另有 6 条 knowledgeGaps 写清谁知/不知（含 counterpart 对照）。复现：audit66.py 判据 E1–E2",
+      "result": "pass"
+    },
+    {
+      "text": "foreshadows 有铺设与回收：6 条中 5 条 resolved（各有 setup+payoff，如木匣「贼来乃发」的启封条件被「孙权十万大军来攻」兑现）、1 条显式 unresolved（凌统甘宁杀父之仇，本区间只发作未化解，故 payoff 为空并标 unresolved）；另 2 条 rejectedForeshadows 写明为什么只算单次事件/过场钩子。audit66 判据 F2 同时校验 resolved 必有 payoff、unresolved 必无 payoff。",
+      "result": "pass"
+    },
+    {
+      "text": "worldSettings 三区分写进字段：19 条 = place 8（placeState: arrived 7 / mentioned 1；濡须坞判 mentioned，因本区间只有「杀奔濡须坞来」与「将欲兴兵进取」，双方都未到达，按提示词「提及≠到达」口径处理）、item 6（itemStates 从 hold/transfer/use/lose 多选且四态分开写，照原文动词：付与/今披在贴肉/夺了/封锁/开匣观之）、rule 5（institution: declared 3 / executed 2；「欲斩二人以明军法」因众官告免未执行故只写 declared）。另 4 条 rejectedWorldSettings 写明为什么不立条目。audit66 判据 G2 同时校验区分字段不串味（place 不得带 institution 等）。",
+      "result": "pass"
+    },
+    {
+      "text": "themeReadings 三件齐备且不违禁：2 条（TH01 守与降的抉择 / TH02 私憾与公事），每条都含 perspective + support（各 3 条带 quoteRef）+ counter（各 3 条反例带 quoteRef），basis 均为 inferred。机器检查：未用事件密度/剧情点数量/死亡人数/时间或篇幅中点定义「高潮」，未强套三幕或英雄旅程（audit66 判据 H3 按**否定语境**判定，避免把反例里的否定用法误判为违规）。",
+      "result": "pass"
+    },
+    {
+      "text": "散文引文自查（本轮新增维度）：「」之内必为逐字原文、『』之内为分析用语（实测 docs[0].text 全篇不含「」『』，该约定已在 quotationConvention.bracketConvention 声明）。audit66 判据 J1 对 note/explain/caveat/why/perspective 等所有散文串检查「」内文逐字成立，含省略号的按每段各自成立拆分。本轮据此真抓出并修掉 9 处误引。",
+      "result": "pass"
+    },
+    {
+      "text": "负向控制：negative_control66.py 注入 20 种已知缺陷形态（偏移错位、越界、五栏共用同句、栏间区间重叠、null 栏缺 Note、非 null 栏无引文、causeEdge 缺 trigger、state 缺 after、resolved 伏笔无回收、unresolved 伏笔有回收、place 缺 placeState、itemStates 非法、rule 缺 institution、区分字段串味、theme 缺 counter、theme 超 2 条、声称语义已核验、散文「」误引、sourceHash 错、用禁止口径定义高潮），20/20 被抓、0 漏检。复现：python3 '…/negative_control66.py' → 20/20 被抓，0 漏检",
+      "result": "pass"
+    },
+    {
+      "text": "构建确定性：连续两次运行 gen_candidate.py，候选 sha256 不变（178e15a46f03a37e…），说明文件内容不依赖运行顺序或时间。",
+      "result": "pass"
+    },
+    {
+      "text": "未改受保护路径：本轮在共享树只写 loop/state/out/read_sanguo_L0_0066.candidate.json 一个文件（任务 writes 指定）。find js css index.html serve.py narrative.py scripts tests docs data -newermt '2026-10-13 03:52:40' -type f 输出为空（无一个受保护路径文件在本轮被修改）；git status 中 js/css 等改动均早于本会话开始时刻，属其他并行 agent 的未提交工作，本轮未触碰、未回滚。",
+      "result": "pass"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/read_sanguo_L0_0066.candidate.json",
+      "kind": "append-only",
+      "note": "任务 writes 指定的唯一写入物。本轮从零创建（写入前该路径不存在）。"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/fe42d01f3826fe8096f86614.docs.json": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+  },
+  "remaining": [
+    "语义未核验：本候选只做引用定位、分段证据、逐栏标注与分区产出。所有引文可用 TEXT[start:end]==quote 复算，但这只证明**定位**正确，不证明语义已核验；semanticReview 明确写为 not-performed，留给 read-verify 通道。",
+    "T16 的 result 只记回末「正是」钩子本身，不写曹操解围成功：原文以「未知胜负如何，且看下文分解」收束，本区间没有结果（unknowns U01）。这与「播放到结尾≠目标达成」同一条纪律。",
+    "小师桥是谁断的、何时断的无法从本区间确定：张辽之计只说「可先断小师桥」，李典只是「领命，自去点军埋伏」，原文未直述断桥执行者；CE16 因此标 derived 并带 caveat（unknowns U03）。这是最可能被复核者要求补证的一处。",
+    "T09 的 cost（张卫被斩计入张鲁的代价）标 derived 而非 explicit：原文直述张卫被许褚斩于马下，但「这构成张鲁的代价」是跨段归属。若复核者认为该归属过强，此栏应改 null 或移出五元组。",
+    "T13（凌统舞剑）的 objective 标 explicit，但「报甘宁杀父之仇」是叙述层转述凌统的心理（「凌统想起甘宁杀父之仇」），他出口的只有「筵前无乐，看吾舞剑」。已在 objectiveNote 标明；若复核者认为心理转述不足以作 objective，此处应改 inferred。",
+    "W05（合淝）的 arrived 依据取的是曹军一方「辽即回兵归合淝」的驻守动作，不是吴军的到达（吴军原文只作「望合淝杀来」「起兵进取合淝」）。已在 explain 里写明这一取舍。",
+    "版本异文照原文未校勘：本区间一律作「张颌」（全书他处作「张郃」）、作「小师桥」，且「今披在贴肉」的「今」字、曹操叹语缺前引号（「叹曰：人苦不知足…」）均照原文引用，登记在 unknowns U06/U07。本候选无法在本区间内判定版本是非。",
+    "任务 JSON 的 sourceHash（2988ce6e36c8）与提示词正文口径（8ab7298a6960）不一致。实测三份 docs.json 的 docs[0].text 逐字相同，故引文偏移在三份上都成立；本候选按提示词正文取 fe42d01f3826fe8096f86614.docs.json 并登记在 unknowns U11，未擅自改写任何一侧。",
+    "W12（金甲与密书）的交付动作出自细作转述（人物语「特使某送金甲为信。更有密书呈上。」），不是叙述层确认的交付；故只写 transfer/use，未写 hold。已写入 selfCritique SC01。",
+    "本候选不做人物动机的心理推断，也不把人物语当叙述事实：各栏 note 里逐条标出哪些是人物的话（如曹操「吾以退军为名…必胜贼矣」、贾诩离间计全案、孔明「操必勒兵南向矣」的预判、张卫「二将失了隘口」的归责），并把杨松「庞德受了曹操贿赂」明确标为诬告而非事实（CE07 caveat）。",
+    "TH01/TH02 属解释层（inferred），各带 3 条反例；不声称是唯一主题或作者意图，也未套三幕/英雄旅程。同一批事实可有多种合理解释，本候选只并列呈现其中两种。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/read_sanguo_L0_0066.candidate.json"
+    ],
+    "note": "候选为 append-only 新建文件，共享树中此前不存在；回滚即删除该文件。构建与审计脚本、切片/正文留存件全部在外置盘 read_sanguo_L0_0066/ 下，不在仓库内，无需回滚。"
+  },
+  "submittedAt": "2026-10-12T20:22:12Z",
+  "wallClockSeconds": 1771,
+  "wallClockFrom": "lease.startedAt",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-12T20:22:12Z"
+  },
+  "verifyState": "partial",
+  "reviews": [
+    {
+      "reviewer": "w-sanguo-1",
+      "at": "2026-10-13T00:02:42Z",
+      "verdict": "partial",
+      "notes": "判定 partial：候选在『引用定位』这一层无缺陷，且无编造、无幻觉、无越权成功判定，已产出的条目**全部可用、无需丢弃**；但作为精读产出它结构性漏抽，不能判 pass。\n可用（保留）：tasks T01–T16 的五栏与引文、causeEdges CE01–CE17、states ST01–ST10、knowledgeGaps KG01–KG06、foreshadows FS01–FS06、worldSettings W01–W19 的引文与大部分 explain ——202/202 引文逐字可复算，出现次数与 inRange 全部一致。\n必须补或改（不影响已引条目的可用性）：\n  (1) 补曹操中伏遇救段 [337016,337342)（CE01）；\n  (2) 补徐晃其人与其两次作用，或说明为何不立（CE02/RC02）；\n  (3) 补刘晔第二段谏言与诸葛亮/关张（CE03/RC03）；\n  (4) 补逍遥津诱敌链的因果边，否则标题战役成因缺失（CE04/RC04）；\n  (5) W15 的 executed 拆分或降级，乐进守城半条无执行证据（CE05）；\n  (6) W06 巴中 placeState 与濡须坞口径统一（CE06）；\n  (7) 修正 coverage.nonEmptyLines=17、正文段数=10（CE07）。\n存疑（不作为判 fail 依据，仅记录）：W12 金甲是否实际交付只有细作转述（候选 SC01 已自陈，取舍可接受）；T06 把杨松被斩记为『cost』属跨段归属，可争论但引文属实。\n复核者自省：我的反向验证基于『候选全文不含该子串』的机械判据，对同一事实的**同义改写**会漏判；已对 CE01/CE04 额外用 40 字滑窗（29 窗命中 0）复核，确认不是改写而是真缺。候选若在 note 层面提过某事实而未引原文，我的子串判据会算作『已覆盖』，这方向上我不会高估缺漏。\n复现命令：python3 -c \"import json;T=(json.load(open('data/cache/f0b45e85aac6c95e584075a2.docs.json'))['docs'])[0]['text'];print(T.find('徐晃保着曹操奔过山坡，前面又一军到'))\" → 337254；候选哈希 178e15a46f03a37eaaa720dd6bfd9636e87cf45158914b93dbaaa1a9f031c8c7，源文件哈希 2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff。",
+      "counterExamples": [
+        {
+          "id": "CE01_ambush_episode_uncovered",
+          "claim": "候选 coverage.paragraphMap 的 n=2 自称覆盖「许褚救曹操」，但整段曹操中伏遇救 (codepoint [337016,337342)，326 字) 在候选里**没有任何抽取项、也没有任何引文**：落在该窗口内的 quoteRef 数为 0，该窗口内 29 个 40 字滑窗在候选全文里命中 0 个。",
+          "quote": "许褚大呼曰：“吾当敌贼！徐公明善保主公。”",
+          "evidence": {
+            "quote": "许褚大呼曰：“吾当敌贼！徐公明善保主公。”",
+            "start": 337193,
+            "end": 337214,
+            "sourceHash": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+            "inRange": true,
+            "globalOccurrences": 1,
+            "inUnitOccurrences": 1
+          },
+          "corroboratingQuotes": [
+            {
+              "quote": "吾若知此处如此险恶，必不起兵来。",
+              "start": 337064,
+              "end": 337080,
+              "sourceHash": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+              "inRange": true,
+              "globalOccurrences": 1,
+              "inUnitOccurrences": 1
+            },
+            {
+              "quote": "次日，操上马，只带许褚、徐晃二人，来看张卫寨栅。",
+              "start": 337099,
+              "end": 337123,
+              "sourceHash": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+              "inRange": true,
+              "globalOccurrences": 1,
+              "inUnitOccurrences": 1
+            },
+            {
+              "quote": "背后一声喊起，箭如雨发。杨昂、杨任分两路杀来。",
+              "start": 337166,
+              "end": 337189,
+              "sourceHash": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+              "inRange": true,
+              "globalOccurrences": 1,
+              "inUnitOccurrences": 1
+            },
+            {
+              "quote": "徐晃保着曹操奔过山坡，前面又一军到",
+              "start": 337254,
+              "end": 337271,
+              "sourceHash": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+              "inRange": true,
+              "globalOccurrences": 1,
+              "inUnitOccurrences": 1
+            },
+            {
+              "quote": "操重赏四将。",
+              "start": 337316,
+              "end": 337322,
+              "sourceHash": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+              "inRange": true,
+              "globalOccurrences": 1,
+              "inUnitOccurrences": 1
+            }
+          ],
+          "why": "这是本回前半唯一一次主帅气几陷没、由二将救出的实战段落，候选却整段未覆盖；其自述『逐行读完、没有跳读』与 paragraphMap 的覆盖声明因此与产出不符，并把覆盖声明本身变成了未经产出的断言。",
+          "severity": "high"
+        },
+        {
+          "id": "CE02_xuhuang_absent_though_named_actor",
+          "claim": "徐晃在切片内出现 6 次，在候选全文出现 0 次；其中两次是离间计的执行者。",
+          "quote": "却教徐晃挑战，不数合败走。",
+          "evidence": {
+            "quote": "却教徐晃挑战，不数合败走。",
+            "start": 338604,
+            "end": 338617,
+            "sourceHash": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+            "inRange": true,
+            "globalOccurrences": 1,
+            "inUnitOccurrences": 1
+          },
+          "corroboratingQuotes": [
+            {
+              "quote": "徐晃又战三五合也退了。",
+              "start": 338331,
+              "end": 338342,
+              "sourceHash": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+              "inRange": true,
+              "globalOccurrences": 1,
+              "inUnitOccurrences": 1
+            },
+            {
+              "quote": "正中是徐晃、许褚，左张颌，右夏侯渊。",
+              "start": 338681,
+              "end": 338699,
+              "sourceHash": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+              "inRange": true,
+              "globalOccurrences": 1,
+              "inUnitOccurrences": 1
+            }
+          ],
+          "why": "候选 T05/CE08 把诱敌只记到「许褚诈败」（那是第二次诱敌），第一次把庞德引进空寨、促成『庞德却夺了曹操寨栅』的执行者正是徐晃（338604）。徐晃同时是缓斗庞德的四将之一，也是夜劫三路中的中路将。人名与因果链均缺。",
+          "severity": "high"
+        },
+        {
+          "id": "CE03_liuye_argument_and_kongming_absent",
+          "claim": "刘晔反驳取蜀的实质论据（339717–339775，58 字）完全未引；其中点名的诸葛亮、关、张在候选全文出现 0 次。候选 T10 只引了曹操的两句回应，未记『为什么不可击』的理由。",
+          "quote": "刘晔曰：“司马仲达之言是也。若少迟缓，诸葛亮明于治国而为相，关、张等勇冠三军而为将，蜀民既定，据守关隘，不可犯矣。”",
+          "evidence": {
+            "quote": "刘晔曰：“司马仲达之言是也。若少迟缓，诸葛亮明于治国而为相，关、张等勇冠三军而为将，蜀民既定，据守关隘，不可犯矣。”",
+            "start": 339717,
+            "end": 339775,
+            "sourceHash": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+            "inRange": true,
+            "globalOccurrences": 1,
+            "inUnitOccurrences": 1
+          },
+          "why": "T16 的 obstacle 只引了刘晔第一句「蜀中稍定，已有提备，不可击也」，把『据守关隘，不可犯』的完整理由层省去，等于删掉了原文给出的战略判断依据；诸葛亮/关张虽为提及而非到场，但属原文明确存在的事实。",
+          "severity": "medium"
+        },
+        {
+          "id": "CE04_xiaoyaojin_lure_mechanism_missing",
+          "claim": "回目战役『张辽威震逍遥津』的触发机制——乐进诈败诱敌、吴军前队追击、孙权因前军得胜而深入——在 causeEdges 里没有任何一条；候选全文不含「诈败而走」「招呼吕蒙」「一齐引军赶去」。",
+          "quote": "甘宁出马与乐进交锋，战不数合，乐进诈败而走。甘宁招呼吕蒙一齐引军赶去。",
+          "evidence": {
+            "quote": "甘宁出马与乐进交锋，战不数合，乐进诈败而走。甘宁招呼吕蒙一齐引军赶去。",
+            "start": 341408,
+            "end": 341443,
+            "sourceHash": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+            "inRange": true,
+            "globalOccurrences": 1,
+            "inUnitOccurrences": 1
+          },
+          "corroboratingQuotes": [
+            {
+              "quote": "孙权在第二队，听得前军得胜，催兵行至逍遥津北，",
+              "start": 341443,
+              "end": 341466,
+              "sourceHash": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+              "inRange": true,
+              "globalOccurrences": 1,
+              "inUnitOccurrences": 1
+            }
+          ],
+          "why": "候选 CE14 由木匣直接跳到『张辽决定出城迎战并部署埋伏』，CE16 只讲断桥计划，中间缺『吴军为何会走到伏击圈』这一环；而这一环正是本回标题事件的成因。属于因果链缺环，不是措辞差异。",
+          "severity": "high"
+        },
+        {
+          "id": "CE05_w15_executed_overstated",
+          "claim": "W15 把教帖分工整条记为 institution=executed，explain 写「乐进迎击／守城」；但原文把乐进放在野战前队，先与吴军先锋相迎、再诈败、最后从后追来，并无任何守城动作，『乐将军守城』这半条缺少执行证据。",
+          "quote": "吕蒙、甘宁前队兵进，正与乐进相迎。",
+          "evidence": {
+            "quote": "吕蒙、甘宁前队兵进，正与乐进相迎。",
+            "start": 341391,
+            "end": 341408,
+            "sourceHash": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+            "inRange": true,
+            "globalOccurrences": 1,
+            "inUnitOccurrences": 1
+          },
+          "corroboratingQuotes": [
+            {
+              "quote": "却被乐进从后追来",
+              "start": 341742,
+              "end": 341750,
+              "sourceHash": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+              "inRange": true,
+              "globalOccurrences": 1,
+              "inUnitOccurrences": 1
+            }
+          ],
+          "why": "候选自身 CE14 的 mechanism 也写「自己与乐进正面迎击」，与 W15 的「守城」自相矛盾。建议把该条拆为『出战分工已执行』与『守城分工未见执行』，或降级为 declared/部分执行。",
+          "severity": "low"
+        },
+        {
+          "id": "CE06_bazhong_placestate_inconsistent",
+          "claim": "W06 把巴中记为 placeState=arrived，但切片内巴中只有「往巴中」×2 与张卫**提议**的「去守巴中」×1，没有『到/入/至巴中』任一到达动词（实测三者在切片内计数均为 0）。同为「往/奔+地名」的濡须坞被该候选标为 mentioned，两条口径不一致。",
+          "quote": "操得书，亲自引兵往巴中。",
+          "evidence": {
+            "quote": "操得书，亲自引兵往巴中。",
+            "start": 339339,
+            "end": 339351,
+            "sourceHash": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+            "inRange": true,
+            "globalOccurrences": 1,
+            "inUnitOccurrences": 1
+          },
+          "corroboratingQuotes": [
+            {
+              "quote": "卫曰：“放火尽烧仓廪府库，出奔南山，去守巴中可也。”",
+              "start": 339148,
+              "end": 339174,
+              "sourceHash": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+              "inRange": true,
+              "globalOccurrences": 1,
+              "inUnitOccurrences": 1
+            },
+            {
+              "quote": "遂差人往巴中，劝使投降。",
+              "start": 339299,
+              "end": 339311,
+              "sourceHash": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+              "inRange": true,
+              "globalOccurrences": 1,
+              "inUnitOccurrences": 1
+            }
+          ],
+          "why": "提示词明确把「图谋≠到达」列为禁止混淆项。此处证据强度与被判 mentioned 的濡须坞（「杀奔濡须坞来」）同级，宜改 mentioned 或在 explain 里给出 arrived 的独立依据。",
+          "severity": "medium"
+        },
+        {
+          "id": "CE07_coverage_counts_wrong",
+          "claim": "coverage.nonEmptyLines 记 18，实测切片非空行为 17；readMethod 称「11 个正文叙事段」，实测正文段为 10（第 11 个 paragraphMap 项是回目）。",
+          "quote": "第六十七回　曹操平定汉中地　张辽威震逍遥津",
+          "evidence": {
+            "quote": "第六十七回　曹操平定汉中地　张辽威震逍遥津",
+            "start": 336692,
+            "end": 336713,
+            "sourceHash": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+            "inRange": true,
+            "globalOccurrences": 1,
+            "inUnitOccurrences": 1
+          },
+          "why": "切片 26 行 = 回目 1 + 正文 10 + 空行 8 + 站点样板 6 + 末尾空 1，实测 len([l for l in seg.split(chr(10)) if l.strip()])==17，len([l for l in seg.split(chr(10)) if l.startswith('\\u3000\\u3000')])==10。属可复算的计数错误，不影响引文，但 coverage 是自称的覆盖证据。",
+          "severity": "low"
+        }
+      ],
+      "reverseChecks": [
+        {
+          "id": "RC01",
+          "found": "曹操只带许褚、徐晃二人看寨、中伏、被徐晃保过山坡、事后重赏四将——整段 326 字无任何引文覆盖。",
+          "quote": "徐晃保着曹操奔过山坡，前面又一军到",
+          "evidence": {
+            "quote": "徐晃保着曹操奔过山坡，前面又一军到",
+            "start": 337254,
+            "end": 337271,
+            "sourceHash": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+            "inRange": true,
+            "globalOccurrences": 1,
+            "inUnitOccurrences": 1
+          }
+        },
+        {
+          "id": "RC02",
+          "found": "徐晃在切片内出现 6 次、候选 0 次；他既参与缓斗庞德，又是第一次诱敌（挑战不数合败走）的执行者。",
+          "quote": "徐晃又战三五合也退了。",
+          "evidence": {
+            "quote": "徐晃又战三五合也退了。",
+            "start": 338331,
+            "end": 338342,
+            "sourceHash": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+            "inRange": true,
+            "globalOccurrences": 1,
+            "inUnitOccurrences": 1
+          }
+        },
+        {
+          "id": "RC03",
+          "found": "刘晔第二段谏言点名诸葛亮、关、张，给出『据守关隘，不可犯』的完整理由，候选全未引用。",
+          "quote": "刘晔曰：“司马仲达之言是也。若少迟缓，诸葛亮明于治国而为相，关、张等勇冠三军而为将，蜀民既定，据守关隘，不可犯矣。”",
+          "evidence": {
+            "quote": "刘晔曰：“司马仲达之言是也。若少迟缓，诸葛亮明于治国而为相，关、张等勇冠三军而为将，蜀民既定，据守关隘，不可犯矣。”",
+            "start": 339717,
+            "end": 339775,
+            "sourceHash": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+            "inRange": true,
+            "globalOccurrences": 1,
+            "inUnitOccurrences": 1
+          }
+        },
+        {
+          "id": "RC04",
+          "found": "逍遥津的诱敌链（乐进诈败→吴军前队追→孙权因前军得胜而深入）缺失，导致标题战役的成因无因果边。",
+          "quote": "甘宁出马与乐进交锋，战不数合，乐进诈败而走。甘宁招呼吕蒙一齐引军赶去。",
+          "evidence": {
+            "quote": "甘宁出马与乐进交锋，战不数合，乐进诈败而走。甘宁招呼吕蒙一齐引军赶去。",
+            "start": 341408,
+            "end": 341443,
+            "sourceHash": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+            "inRange": true,
+            "globalOccurrences": 1,
+            "inUnitOccurrences": 1
+          }
+        },
+        {
+          "id": "RC05",
+          "found": "张卫是『知二将败走、诸营已失』后半夜主动弃关，候选只以『张卫弃关』四字带过，未记其时间与自主性（这影响『失了隘口』的归责是否成立）。",
+          "quote": "原来卫知二将败走，诸营已失，半夜弃关，奔回去了。",
+          "evidence": {
+            "quote": "原来卫知二将败走，诸营已失，半夜弃关，奔回去了。",
+            "start": 337820,
+            "end": 337844,
+            "sourceHash": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+            "inRange": true,
+            "globalOccurrences": 1,
+            "inUnitOccurrences": 1
+          }
+        },
+        {
+          "id": "RC06",
+          "found": "皖城之战吴军的完整编成（先锋吕蒙甘宁、合后蒋钦潘璋、中军周泰陈武董袭徐盛，程普黄盖韩当未随征）7 个人名全部未出现在候选里。",
+          "quote": "遂教吕蒙、甘宁为先锋，蒋钦、潘璋为合后，权自引周泰、陈武、董袭、徐盛为中军。时程普、黄盖、韩当在各处镇守，都未随征。",
+          "evidence": {
+            "quote": "遂教吕蒙、甘宁为先锋，蒋钦、潘璋为合后，权自引周泰、陈武、董袭、徐盛为中军。时程普、黄盖、韩当在各处镇守，都未随征。",
+            "start": 340337,
+            "end": 340395,
+            "sourceHash": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+            "inRange": true,
+            "globalOccurrences": 1,
+            "inUnitOccurrences": 1
+          }
+        },
+        {
+          "id": "RC07",
+          "found": "甘宁攻皖城的实际破城动作是『拨开箭林，一链打倒朱光』，候选只引了『士卒乱刀砍死朱光』的结果，未记甘宁本人的关键动作。",
+          "quote": "朱光令弓弩手齐射，甘宁拨开箭林，一链打倒朱光。",
+          "evidence": {
+            "quote": "朱光令弓弩手齐射，甘宁拨开箭林，一链打倒朱光。",
+            "start": 340619,
+            "end": 340642,
+            "sourceHash": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+            "inRange": true,
+            "globalOccurrences": 1,
+            "inUnitOccurrences": 1
+          }
+        }
+      ]
+    }
+  ]
+}

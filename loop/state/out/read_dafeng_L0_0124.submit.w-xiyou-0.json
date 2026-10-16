@@ -1,0 +1,93 @@
+{
+  "task": "read:dafeng:L0:0124",
+  "agent": "w-xiyou-0",
+  "status": "done",
+  "summary": "精读《大奉打更人》第一百二十五章 秘辛（区间 codepoint [426079,429891)，3812 字；叙事正文到 429874，其后只有一行分隔线「------------」，本区间没有作者 PS，候选对 paratext 零提取）。本轮**接手**上一轮 w-dafeng-0 留下的候选（mtime 2026-10-13T01:55:44Z，该轮 agent 始终没有 submit，任务在 done 台账里缺席），按 READER 契约的要求**独立复核**它的每一条引文与自报计数，然后**定点更正**、并把更正过程写进文件的 provenance 段。**独立复核做了什么**：从磁盘重读 docs.json 与候选，遍历全部 183 个引文节点（非 crossRef 181 + crossRef 2），逐条复算 docs[0].text[start:end]==quote、start/end 是否落在 [426079,429891)、sourceHash 是否等于 fdde5558…、occurrencesInFullText/occurrencesInUnit/firstOccurrenceInFullText 是否与 text.count()/text.find() 一致 —— 全部 0 错。另复算：同任务五栏 0 处共用引文、0 处区间重叠；9 处 null 栏全部带顶层 <栏位>Note；worldSettings 的 place/item/rule 三档枚举无一非法（placeState∈{arrived,mentioned}、itemStates⊆{hold,transfer,use,lose}、institution∈{declared,executed,misunderstood}）；coverage 从 426079 铺到 429891 且 31 处缝隙全为空白字符；segmentSha256 复算与声明一致；metrics 的 19 个计数项 + worldSettingsByKind 逐项复算全等；系统校验器 loop.required_sections(task.prompt) 要求的 6 个分区（tasks/causeEdges/states/foreshadows/worldSettings/themeReadings）在候选里全部存在。**查出并修掉 2 条真缺陷**（都是「自报计数与原文不符」，与复核判定 L0:0120 partial 的缺陷①同一形态）：① W8（京城）原写「只在…逃离了京城时出现一次」，实际切片内出现 2 次（426152「在京城传的沸沸扬扬的桑泊案」＋428237「逃离了京城」）；② W9（西域）原写「出现在两处」，实际 3 处（428653 传承句、428795「西域佛门可有相关记载？」、429209「纷纷退回西域」）。两条都**只改 explain 里的计数口径、不动 placeState 结论、不动任何引文**——因为复算证明 mentioned 的判断本身成立（两处/三处都只是提到，场景仍在青龙寺内），并把可复算的原文绝对偏移写进 explain 供复核逐条验证。**没有做的事**（写进 remaining，不编）：没有重跑上一轮的生成器、没有改它的断言代码、没有声称语义已核验（semanticReview.performed 仍为 false）。",
+  "evidence": [
+    {
+      "path": "loop/state/out/read_dafeng_L0_0124.candidate.json",
+      "sha256": "f165f6926996bb5d8824d7272c5c95fff53847a2ede7c767653ad594e88dfba0",
+      "kind": "candidate-read-output（任务 writes 指定的唯一写入路径；本轮的 2 处更正 + provenance 段都在此文件内）"
+    },
+    {
+      "path": "data/cache/1063b17ca65ec1b76f30e460.docs.json",
+      "sha256": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+      "kind": "source-text（只读引用，未修改；与 task.sourceHash 及角色契约给的哈希一致）"
+    },
+    {
+      "path": "data/cache/1063b17ca65ec1b76f30e460.json",
+      "sha256": "98370a39df4f8105063004d6bc8194e50aa8008e111a584ffec32f7ad14a14df",
+      "kind": "graph-cache（只读对照，**不作为原文证据**；候选的 crossRef 段已声明其摘要不算原文）"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "源哈希与区间口径：shasum -a 256 data/cache/1063b17ca65ec1b76f30e460.docs.json 得 fdde5558…，与 task.sourceHash 逐字一致；docs[0].text[426079:429891] 以「第一百二十五章 秘辛」开头、以分隔线「------------」结尾，长度 3812 codepoint 与任务声明一致；下一章标题「第一百二十六章 长公主召唤」恰在 429891（=区间终点）。",
+      "result": "pass"
+    },
+    {
+      "text": "引文逐字与偏移：遍历候选全部 183 个引文节点，逐条断言 docs[0].text[start:end]==quote、start/end 落在区间内、sourceHash==fdde5558…、occurrencesInFullText==text.count(quote)、occurrencesInUnit==slice.count(quote)、firstOccurrenceInFullText==text.find(quote) —— 0 处不符。",
+      "result": "pass"
+    },
+    {
+      "text": "提示词点名的「五栏共用一句」：对 7 条任务逐条检查五个栏位的引文字面串与区间，0 处共用引文、0 处区间重叠；9 处 null 栏（T2.objective/obstacle/cost、T3.objective/cost、T4.cost、T5.cost、T6.cost、T7.cost）全部带顶层 <栏位>Note 写明为什么没有依据。",
+      "result": "pass"
+    },
+    {
+      "text": "P3.10 三条区分写进字段：placeState 只出现 arrived(青龙寺)/mentioned(桑泊、京城、西域、永镇山河庙)，无「图谋写成到达」；item 只有那件法器，itemStates=[lose,transfer] 四态分开且原文动词照抄「盗走了/不在/逃离」，未合成物品链；rule 的 institution 分 declared(W1/W3)/executed(W4)/misunderstood(W2/W5) 且逐条 explain 写明它如何解释人物能做或不能做。枚举值无一非法。",
+      "result": "pass"
+    },
+    {
+      "text": "本轮 2 处更正的复算：python3 -c \"import json;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'][426079:429891];print(t.count('京城'))\" → 2（原写「出现一次」）；同法 print(t.count('西域')) → 3（原写「出现在两处」）。两条 explain 已改为真值并写入绝对偏移 426152/428237 与 428653/428795/429209。",
+      "result": "pass"
+    },
+    {
+      "text": "分区完整性与 metrics 自洽：loop.required_sections(task.prompt) 要求 tasks/causeEdges/states/foreshadows/worldSettings/themeReadings 六个顶层分区，validate_sections() 返回空（无缺失）；metrics 的 codepointsInRange/paragraphs/paragraphsUncited/tasks/causeEdges/notCauseEdges/states/foreshadows/foreshadowsResolved/notForeshadows/worldSettings/excludedSettings/themeReadings/unknowns/deliberatelyNotAsserted/quoteNodes/quoteNodesUnique/crossRefQuoteNodes/taskColumnQuotes 共 19 项，外加 worldSettingsByKind（rule/place/item 三档计数）—— 逐项复算全等。",
+      "result": "pass"
+    },
+    {
+      "text": "没有把「定位正确」写成「语义已核验」：semanticReview.performed 仍为 false，note 明确写「本文件未做任何 semanticReview；语义是否读对由独立复核者拿原文判」。本轮的 work 只到「引文定位 + 自报计数复算 + 定点更正」，没有替复核者下语义结论。",
+      "result": "pass"
+    },
+    {
+      "text": "受保护路径未动：本轮的写入只有 loop/state/out/read_dafeng_L0_0124.candidate.json（loop/ = append-only）与本次提交记录本身；js/ css/ index.html serve.py narrative.py scripts/ tests/ docs/ data/ 一律未改（data/cache 两个文件按证据只读引用，sha256 与任务声明一致，可证明未被改动）。未跑 GPU/浏览器测试、未 git checkout/reset/stash。",
+      "result": "pass"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/read_dafeng_L0_0124.candidate.json",
+      "kind": "append-only",
+      "note": "任务 writes 指定的唯一写入路径。本轮改动：worldSettings[7]（W8 京城）与 worldSettings[8]（W9 西域）两条 explain 的计数口径改为复算真值；顶层 agent 改为 w-xiyou-0 并新增 originalAuthor/agentNote 如实登记原作者；新增 provenance 段（接手方式、2 条更正的前值/后值/理由/复现命令、本轮没做什么）。全部 183 个引文节点的 quote 与 start/end **一个字节都没动**。"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/1063b17ca65ec1b76f30e460.docs.json": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "data/cache/1063b17ca65ec1b76f30e460.json": "98370a39df4f8105063004d6bc8194e50aa8008e111a584ffec32f7ad14a14df"
+  },
+  "reworkOf": "loop/state/out/read_dafeng_L0_0124.candidate.json",
+  "reworkReason": "上一轮 agent（w-dafeng-0）产出了候选但从未 submit（loop/state/out/ 下没有 read_dafeng_L0_0124.json 这条规范记录，也无 REJECTED__ 记录），任务因此一直不在 done 台账里；本轮按 READER 契约重新领取，独立复核该候选后定点更正 2 条自报计数缺陷并提交。不是重新生成：引文层原样保留。",
+  "remaining": [
+    "语义层未核验：本文件只保证引文逐字与定位正确、自报计数经复算，**不主张**这些引文在语义上已足够支撑结论。「引用定位正确 ≠ 语义已核验」，本轮没有写 semanticReview 完成。",
+    "本区间是断章（第 125 章末）：恒清为何变色、法器下落、封印内容、恒清最终去向都在区间之外；未回收项已标 unresolved（F1/F2）并列入 unknowns，未跨区间取证。",
+    "T1.cost 记的是「重述旧事时的两难与痛苦纠结」，归因是上一轮的判断（basis=inferred）；若复核要求代价必须是原文明确的损失，该栏应改判 null 并保留 note。",
+    "T7.objective 也是 inferred（原文只写她的进食动作，没有一句话交代她「想要什么」）；已在栏内 note 写明改判 null 的条件。",
+    "C6 是跨段推导（basis=derived），原文没有明写机制句；若复核要求机制句，应降级到 notCauseEdges。",
+    "F3 是把「先交代境界、后写凭空来去」读成铺设—回收（basis=inferred），已在 caveat 里写明它也能被读成单纯背景交代；留给复核判定。",
+    "W9（西域）的 placeState 记 mentioned 是判断：灭佛后「退回西域」确有移动动作，但发生在方丈口述的过去、本区间无人身处西域；若复核要求「有到达动作即 arrived」，该条需单独讨论。",
+    "W1 的 institution 记 declared、W4 记 executed 都是判断（前者只有叙述层体系说明，后者依据方丈口述的寺史、无第三方佐证）；理由已写进各自 explain 与上一轮 remaining。",
+    "T2（执事）与 T3（盘树）的 objective 都是 null：原文只写动作与台词，没有写这两人的目的；按纪律留 null 并写明理由，没有替原文补动机。",
+    "「蒸之间淋了芝麻油」与「盘树僧人」两处疑为原文用字/脱字问题，本文件逐字保留、未作改动；是否属错字需比对其他版本。",
+    "U2 涉及一件本区间内无法判定的事：许七安的自陈是否属实。本文件既没有采信也没有否定；若后续区间给出独立证据，该条应重估。",
+    "本轮**没有**重跑上一轮的生成器 gen_candidate.py 与校验器 check_candidate.py（它们在外置盘 /Volumes/资源库/…/测试产物/read-0124-w0/，属上一轮的运行产物）。本轮的复核是我自己重写的独立复算脚本，不复用上一轮的断言代码；上一轮自报的「PASS 41 / FAIL 0 / 变异测试 24/24」我**没有**复现，因此不作为本轮证据。",
+    "本轮发现的两条缺陷（京城计数、西域计数）提示同一形态可能存在于其它已提交候选的自报计数里——那属于跨单元的横切检查，不在本任务范围内，未做。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/read_dafeng_L0_0124.submit.w-xiyou-0.json"
+    ],
+    "note": "候选文件 loop/state/out/read_dafeng_L0_0124.candidate.json 是任务 writes 指定的产出、且上一轮已存在，本轮的改动是就地更正而非新增文件；若要回退本轮改动，需把 W8/W9 两条 explain 恢复为「出现一次」/「出现在两处」并删除 provenance 段与 agentNote（改前的完整内容见上一轮生成器 /Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/read-0124-w0/gen_candidate.py 第 667/670 行）。"
+  }
+}

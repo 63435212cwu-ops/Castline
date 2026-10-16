@@ -1,0 +1,247 @@
+{
+  "task": "verify:xiyou:L0:0090",
+  "reviewer": "w-verify-0",
+  "roleFile": "loop/ROLES/VERIFIER.md",
+  "candidateUnderReview": "loop/state/out/read_xiyou_L0_0090.candidate.json",
+  "candidateAgent": "w-xiyou-1",
+  "candidateSha256": "386f70663288f8ef533f9a8b26a7028f18f343bef567ae0b7ddd4b0fbf41d961",
+  "source": {
+    "path": "data/cache/a065244455cfb2221bcda94a.docs.json",
+    "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+    "sourceHashMatchesTask": true,
+    "range": [649352, 656082],
+    "rangeCodepoints": 6730,
+    "sliceSha256": "49be386adcd870839a14e0196c9204a5eeb480b8671216814074de9059961a4b",
+    "textSha256": "ffcc680a63ca5180ced6e629fd3171ab2ed4dd4b92ddbf21c3a6fe80cfaef1aa",
+    "boundaryCheck": "TEXT[649352:656082) 以「第九十回　师狮授受同归一　盗道缠禅静九灵」开头（U+3000 全角空格），6730 codepoint，与任务 sourceRange 一致；全文 722176 codepoint，sourceHash 与任务声明逐字相符（我自己用 hashlib 重算，未采信候选自述）。"
+  },
+  "method": "按 VERIFIER.md 的顺序执行：①**先自己通读原文**——把 [649352,656082) 切成两半用 read/python 逐字读完，自己记下时间锚点与动作链（城下两战／老妖上城噛人／行者上东天门请天尊／收伏／焚洞／传艺起程），此时**没有打开候选的结论**；②再打开候选，逐条把 claims 与原文对齐；③独立重写机械审计脚本（/Volumes/资源库/我的资源/回滚点/cl-verify-0090/audit.py），**不复用**候选的 build_0090.py / audit_0090.py / check_reverse_table.py 任何代码或常量，自己读 docs.json、自己递归抽引用对象：251 条 quote 逐条断言 TEXT[start:end]==quote、str.find(quote)==start、全文唯一、区间内、sourceHash 相符；覆盖率用区间并集独立重算；五栏重叠用区间相交独立判；反向登记表用**集合运算**（而不是候选的『逐点∈未覆盖集合』口径）核对；④反向验证（计划100 教训）：不只看『他写的对不对』，而是另写 reverse_probe.py / evidence.py 问『**这一段里他还漏了什么**』——把候选 78 段排除登记逐段与原文对照，并抽查候选结论里是否有**仅由被自己排除的文本承载**的断言；⑤引用核验：固定种子 random.seed(90) 抽 5 条 quote 逐条 find。外部产物（4 个脚本 + 输出）写在 /Volumes/资源库/我的资源/回滚点/cl-verify-0090/，仓库内只写任务 writes 指定的 verdict 文件。未跑 GPU/浏览器测试。\n\n【本文件的引号约定（先说清，免得复核我的人重踩我批评的那一坑）】本 verdict 里：`quote`/`counterQuote` 字段一律是**逐字原文**（带 start/end，可 TEXT[s:e]==quote 复算）；正文里的『』**不承诺逐字**，它同时用于概念指代（如『人物语』『离开—补位』）与短语指认；凡我声称是原文原话的地方一律改用**直角引号「」＋原文自带的引号**（例如「老妖一毂辘爬起来道：“是谁人解放？”」）。我最初草稿把原文原话也写成『』，与概念指代混在一起——这正是我批评候选『引号纪律』assertion 的那个问题（声称扫「」而候选里 0 个「」）。我已把 4 处原文原话改成「」形式，并在此声明约定；我另用脚本对全部带 start/end 的 11 条 quote 做过 assert TEXT[s:e]==quote，11/11 通过。",
+  "verdict": "partial",
+  "counterExamples": [
+    {
+      "id": "EXCL-verse-误分类",
+      "claim": "reverseCoverageExclusions 把 21 段共 1875 codepoint 登记为 category=`verse`（韵文），统一理由为『韵文（战阵赋／景物赋／回末诗）。铺陈声势或景色，不给出影响行动、资源、约束或后果的设定』。",
+      "quote": {
+        "quote": "孙大圣收了法毛，同沙僧径至城楼上，见了唐僧。",
+        "start": 650289,
+        "end": 650311,
+        "sourcePath": "data/cache/a065244455cfb2221bcda94a.docs.json",
+        "docIndex": 0,
+        "offsetUnit": "absolute-doc-codepoint",
+        "verbatim": true,
+        "findHits": 1,
+        "inRange": true
+      },
+      "why": "这段被登记的区块 [650289,650454)（165 codepoint）**不是韵文，是散文对话**：内容是行者回到城楼见唐僧、唐僧问八戒死活、行者答『他那里断不敢伤』并说出自己的换俘计划、三个王子叩头追问分身法、行者答『身外身之法』。全段没有一个韵文标记（无『但见：』『好杀：』『诗曰：』『正是』）。判据是可复算的：21 段 verse 登记中，**18 段（1437/1875 = 76.6%）不含任何韵文标记**，其中 12 段含成对引号的对话（1346 codepoint）。这不是个别笔误——它意味着『verse』这一类别承担的排除理由（『不给出影响行动、资源、约束或后果的设定』）对这 18 段**整体不成立**。复算：`python3 -B /Volumes/资源库/我的资源/回滚点/cl-verify-0090/evidence.py` 第 1 节（输出 10 段贴了该理由且含对话散文的区块，合计 1195 codepoint）。",
+      "severity": "medium",
+      "reproduce": "python3 -B -c \"import json;T=json.load(open('data/cache/a065244455cfb2221bcda94a.docs.json'))[0]['text'];print(repr(T[650289:650454]))\""
+    },
+    {
+      "id": "T4-obstacle-断言无引文承载",
+      "claim": "T4_tianzun_recover_mount.obstacle.text 写：『而且他缩在洞里睡觉不应战——行者连叫数声也「无人答应」，**须打进洞去才把他惊出来**』，basis=explicit。",
+      "quote": {
+        "quote": "行者性急起来，轮铁棒，往里打进，口中不住的喊骂。",
+        "start": 654701,
+        "end": 654725,
+        "sourcePath": "data/cache/a065244455cfb2221bcda94a.docs.json",
+        "docIndex": 0,
+        "offsetUnit": "absolute-doc-codepoint",
+        "verbatim": true,
+        "findHits": 1,
+        "inRange": true
+      },
+      "why": "T4.obstacle 只给了 2 条引文：[(654581,654621) 天尊评语]、[(654683,654701)『连叫了数声，那老妖睡着了，无人答应。』]。『打进洞去才把他惊出来』这一分句的**唯一原文依据在 [654701,654767)**——而这整段被候选自己登记进 reverseCoverageExclusions 并归为 `verse`（第 58 项），排除理由写的是『不给出影响行动、资源、约束或后果的设定』。即：**候选一边把这段排除为无信息，一边把它作为 T4.obstacle（explicit 档）的论断**。我独立核验：『往里打进』与『惊醒』（654725/654730）在候选全部 251 条引文区间里**均不出现**（被引=False），且这两个字符串在候选全部非引文文本里也没有出现（`惊醒` 只出现在 CE7 描述八戒那次暴露，与 T4 无关）。这不是引文偏移错，而是**结论超出了自己给出的引文**。复算：`python3 -B /Volumes/资源库/我的资源/回滚点/cl-verify-0090/verdict_evidence.py` 的 C2a/C2b/C2c 三行。",
+      "severity": "medium",
+      "reproduce": "python3 -B -c \"import json;C=json.load(open('loop/state/out/read_xiyou_L0_0090.candidate.json'));print(C['tasks'][3]['obstacle']['text']);print([(q['start'],q['end']) for q in C['tasks'][3]['obstacle']['quotes']])\""
+    },
+    {
+      "id": "T2-obstacle-引文不足",
+      "claim": "T2_jiuling_hostage_and_raid.obstacle.text 写：『柳棍打到「打折了柳棍」，行者「只好与他拂痒」、「略不介意」』。",
+      "quote": {
+        "quote": "打折了柳棍，直打到天晚，也不计其数。",
+        "start": 652363,
+        "end": 652381,
+        "sourcePath": "data/cache/a065244455cfb2221bcda94a.docs.json",
+        "docIndex": 0,
+        "offsetUnit": "absolute-doc-codepoint",
+        "verbatim": true,
+        "findHits": 1,
+        "inRange": true
+      },
+      "why": "同一形态的较轻一例：T2.obstacle 的引文只有 [(652298,652341)『行者本是熬炼过的身体…略不介意。』] 与 [(652941,652972)『又找寻行者，但见几层门尽皆破损…』]。但它用『』当作逐字引用标出的『打折了柳棍』位于 [652363,652381)，落在被登记为 `verse` 的排除块 [652341,652381)（第 28 项）内，**不在任何引文区间里**。判据同前：这是『引文定位机制正确、但论断取值超出引文』——比编造轻，比严谨重。**降级建议**：T2.obstacle 的文字若保留，须把 [652363,652381) 补进 quotes；否则删去『打折了柳棍』四字。",
+      "severity": "low",
+      "reproduce": "python3 -B -c \"import json;T=json.load(open('data/cache/a065244455cfb2221bcda94a.docs.json'))[0]['text'];print(T.find('打折了柳棍，直打到天晚，也不计其数。'))\""
+    }
+  ],
+  "falseKills": [
+    {
+      "id": "WS7-误杀-hold",
+      "claim": "WS7_weapons_reforged 的 itemStates 只写 ['use']，note 的理由是『本区间只写**使用**（王子执、传艺轮动）与造成后的交付…故不写 hold』；提交记录里的 assertions 进一步写成『原文无一句写铸成后由谁持有』。",
+      "quote": {
+        "quote": "叫请三位王子出来，各人执兵器。",
+        "start": 655441,
+        "end": 655456,
+        "sourcePath": "data/cache/a065244455cfb2221bcda94a.docs.json",
+        "docIndex": 0,
+        "offsetUnit": "absolute-doc-codepoint",
+        "verbatim": true,
+        "findHits": 1,
+        "inRange": true
+      },
+      "why": "**这是一次真实误杀，且候选自己的引文里就带着反证。** 任务提示词对 itemStates 的定义是『从 hold / transfer / use / lose 里**多选**（可同时成立）』，hold 的语义是**持有**。原文 [655441,655456)『叫请三位王子出来，各人执兵器。』与 [655584,655604)『他三人就各轮兵器，在王府院中，一一传授。』明写王子**手执**这三般兵器并轮动演武——这正是 hold。但 WS7 只记 use，并把 [655441,655456) 自己列为该条的引文（quotes 第 3 条）。也就是说：**同一条引文既被用来支持 use，又被用来否认 hold**，而『各人执兵器』按字面就是持有动作。这不是『原文没写』（提交记录的措辞），是**四态多选的漏选**。修法：WS7.itemStates 应为 ['hold','use']（是否再加 transfer 由原作者判断，我不断言）。注意此条与上面三条形态相反：上面是『论断超出引文』，这条是『引文足以支持的状态被排除』——两者都指向同一个根因：**引文区间与四态/五栏的标注是两套独立的人手判断，没有互相回代检查**。",
+      "severity": "medium",
+      "reproduce": "python3 -B -c \"import json;C=json.load(open('loop/state/out/read_xiyou_L0_0090.candidate.json'));w=C['worldSettings'][6];print(w['itemStates']);print([q['quote'] for q in w['quotes']])\""
+    }
+  ],
+  "reverseChecks": [
+    {
+      "found": "行者自己也提出了换俘计划（与 CE2 老妖的换俘逻辑互为镜像）——行者对唐僧说『他那里断不敢伤。且将二精牢拴紧缚，待明早抵换八戒也』。这是本区间**第二次**出现『以人质换人质』的算法，且是行者一方主动提出；CE2 只记了老妖那一侧，导致这一对镜像结构缺了一半。",
+      "quote": "且将二精牢拴紧缚，待明早抵换八戒也。",
+      "start": 650363,
+      "end": 650381,
+      "note": "该句与『他那里断不敢伤。』同属被登记为 verse 的排除块 [650289,650454)（见 counterExample EXCL-verse-误分类）。候选任何字段都没有承载它：全文检索候选文件，『抵换八戒』『断不敢伤』均 0 次命中。"
+    },
+    {
+      "found": "天尊也做了一次『离开—补位』式的部署：原文作「叫狮奴道：“你且起来，饶你死罪，跟我与大圣下方去收他来。汝众仙都回去，不用跟随。”」——CE17 只登记了**行者**派遣揭谛金甲与土地（同一种『离开—补位』的分工），却漏了天尊这同型的一手。原文把两者写成对照，候选只收了一侧。",
+      "quote": "汝众仙都回去，不用跟随。",
+      "start": 654479,
+      "end": 654491,
+      "note": "该句所在的 [654479,654494) 被登记为 category=`interrogation-filler`（理由：『审问过程的衔接句…衔接语不单独成条』）。但『遣散众仙、只带狮奴下界』是**部署决定**，不是衔接语；理由与实际内容不符。候选文件检索『汝众仙都回去』0 次命中。"
+    },
+    {
+      "found": "众神押解土地来见行者的**理由**被原文写明：『我等见他法力甚大，却将竹节山土地押解至此。』——CE8 只引了丁甲神请求行者问土地的那半句（『他知那妖精的根由…』），把『为什么是押解土地而不是别的办法』这一层（神将自认法力不敌）丢了。这一层恰是 CE8『情报改变策略空间』机制的前置：连神将都自认打不过。",
+      "quote": "我等见他法力甚大，却将竹节山土地押解至此。",
+      "start": 653212,
+      "end": 653233,
+      "note": "该句所在的 [653182,653233) 被登记为 `verse`（第 36 项），理由同样是那句统一的韵文话术——但这段是丁甲神的**口供散文**，无任何韵文标记。候选文件检索『法力甚大』0 次命中。",
+      "selfCorrection": "这一条与下面第 4 条的关系要说明白：我最初把它当作『CE8 漏了推理步』，核验后确认 CE8 的机制（情报改变策略）本身成立、引文也够——漏的是**强度证据**（连神将都打不过），属遗漏而非错误，故不列入 counterExamples。"
+    },
+    {
+      "found": "老妖独自出洞时**无甲无兵**被原文特写：『你看他身无披挂，手不拈兵，大踏步走到前边，只闻得孙行者吆喝哩。』这是 T2.action（『二次交战又亲自张口把行者、沙僧衔入洞中』）的**情境反讽**：他敢空手出门，靠的就是九口噛人的本体能力；候选记了 action 与 result，丢了『无甲无兵』这个把『本体即武器』点明的细节。",
+      "quote": "你看他身无披挂，手不拈兵",
+      "start": 652056,
+      "end": 652068,
+      "note": "所在 [652015,652122) 被登记为 `verse`（第 26 项）。这段含老妖吩咐看守的**命令语**与出洞叙述，是散文。候选文件检索『身无披挂』0 次命中。"
+    },
+    {
+      "found": "老妖那场『破案』的完整叙述被整体丢弃：[652812,652914) 写他叫门无人应、取灯火看见地下三块肉饼、老王父子及唐僧八戒俱在、只不见了行者沙僧、前后赶看——这是**唯一写出越狱后果如何被敌方发现**的一段。S2/S3 只引了结果句（沙僧被拿住、行者破门走），把这段归为 `verse`。",
+      "quote": "及取灯火来看时，只见地下血淋淋的三块肉饼",
+      "start": 652861,
+      "end": 652881,
+      "note": "该块 [652812,652914) 含 5 处叙述/对话标记、被归类为 verse；它同时是 CE7（八戒喊声暴露）的**下游闭环**：CE7 引了『这呆子喊了一声，却早惊动老妖』与「老妖一毂辘爬起来道：“是谁人解放？”」，但这两句与『发现肉饼』之间的连接叙述被排除，读者看不到惊慌的完整链条。"
+    },
+    {
+      "found": "王子对分身法的**追问**被丢弃：原文作「三个小王子对行者叩头道：“师父先前赌斗，只见一身，及后佯输而回，却怎么就有百十位师身？及至拿住妖精，近城来还是一身，此是甚么法力？”」这是一个原文明确写出的**知识差**（王子不知身外身之法），候选 12 条 states 里没有对应条目——KG1/KG2/KG3/KG4 分别是土地／老妖／洞中人／众神，缺了玉华州一方。",
+      "quote": "此是甚么法力？”行者笑道：“",
+      "start": 650440,
+      "end": 650454,
+      "note": "同一被误分类的 verse 块 [650289,650454)。注意 WS7/NW3 已引用了行者的**回答**（『我身上有八万四千毫毛…皆身外身之法也』@[650454,650492)），与这段追问**首尾相接**——即候选引了答句、排除了问句，知识差因此看不出『差』。候选文件检索『此是甚么法力』0 次命中。"
+    },
+    {
+      "found": "天尊对行者行程的**已知状态**被丢弃：『大圣，这几年不见，前闻得你弃道归佛，保唐僧西天取经，想是功行完了？』——这是原文明确的信息状态（天尊此前已知行者改宗、且知道他在取经），与 KG1（行者不知妖精根由）同属知识差族，候选未收。",
+      "quote": "前闻得你弃道归佛",
+      "start": 653956,
+      "end": 653964,
+      "note": "所在 [653833,654008) 被登记为 `verse`（第 44 项），实为仙童通报＋天尊出迎＋寒暄的散文。候选把跨单元信息一律排除（其 remaining 第 7 条原文作『未读本单元以外的原文区间（悟空与天尊的对话里提到的『弃道归佛』等跨单元信息一律未引入结论…）』）——**这条纪律本身我认可**（不引入跨单元结论）；但『天尊已知此事』这一**知识状态**是本区间原文直述的（见本条 quote 字段，[653956,653964)），不需要跨单元知识就能读出来，与『弃道归佛发生了什么』无关。属可收而未收，严重度低。"
+    }
+  ],
+  "checks": [
+    {
+      "id": "机械层-引文复算",
+      "result": "pass",
+      "detail": "独立脚本（不复用候选代码）递归抽出 251 条引用对象，逐条：TEXT[start:end]==quote、TEXT.find(quote)==start、TEXT.count(quote)==1、[start,end)⊆[649352,656082)、sourceHash 相符 —— 越界 0 / 不等 0 / find错 0 / 非唯一 0 / hash错 0。**引文定位层零编造**。"
+    },
+    {
+      "id": "覆盖率独立复算",
+      "result": "pass",
+      "detail": "只用引文区间做并集重算：唯一 span 163、合并 77 段、覆盖 3793/6730 = 0.5636 —— 与候选 machineSelfCheck 的 quoteRefs 251 / uniqueSpans 163 / coverageRatio 0.5636 / covered 3793 逐位一致。我**没有**读候选自报值来比对（脚本先算后打印）。"
+    },
+    {
+      "id": "五栏不共用引文",
+      "result": "pass",
+      "detail": "用**区间相交**（不只完全相等）检查 T1–T6 各五栏两两引文：重叠 0 例。提示词点名的 714/1664 共用句缺陷在本候选不存在。"
+    },
+    {
+      "id": "null 栏标注",
+      "result": "pass",
+      "detail": "T1.cost 与 T4.cost 两处 null 均带同名 costNote，且理由是**实质性的**（不是敷衍）：T1 指出『黄狮精之死已计入 result，再在 cost 复述即同一事填两栏』并说明旧损属人物语；T4 指出『赦免是处置权不是代价』。我另核：任务提示词要求『缺哪一项写 null，不要补一个听起来合理的值』『不写理由的 null 会被判为未标注的未知』——两条均满足。**我认可这两条 null**（候选 selfCritique 的 SC4 自陈可能判错，我判定其不成立，见 notes）。"
+    },
+    {
+      "id": "反向登记表集合一致性",
+      "result": "pass",
+      "detail": "我用**区间集合运算**（登记并集 vs [S,E) 减已覆盖），不用候选的『逐点∈未覆盖集合』口径：78 段登记、合并后仍 78 段、登记覆盖 2937 == 实际未覆盖 2937，两侧集合**逐段相等**（虚假登记 0、漏登记 0）。这一层候选做得扎实。**但集合相等只证明『区间对得上』，不证明『理由成立』**——见 counterExamples 与 reverseChecks：集合全对，理由层有 18/21 段 verse 标签不成立。"
+    },
+    {
+      "id": "引用核验-随机抽 5 条",
+      "result": "pass",
+      "detail": "random.seed(90) 抽 5 条 quote（/causeEdges[0]/quotes[1]、/worldSettings[5]/quotes[0]、/tasks[2]/action/quotes[1]、/states[4]/quotes[0]、/notForeshadows[2]/quotes[0]），逐条 find：全部逐字命中、偏移一致、全文唯一、区间内。"
+    },
+    {
+      "id": "非引文文本的逐字纪律",
+      "result": "pass-但断言措辞不实",
+      "detail": "候选提交记录里的 assertion 写『扫描候选全部非引文文本里的**「」**内容…0 处非逐字命中』。我实测：候选全文 `「`/`」` 各 **0** 次，`『`/`』` 各 276 次 —— 那条检查扫的是一个**空集合**（vacuous），等于没检查。改用真实括号重扫：276 个『』片段中 77 个不是原文子串，但逐个人工核对后，绝大多数是**概念指代**（如『人物语』『提及≠到达』『打了就赢』）而非声称的逐字引用；含省略号的 2 个片段（『专打行者…直打到天晚』）按 … 切片后**两片都逐字命中**。结论：**没有通过该路径混入编造引文**，但那条 assertion 的措辞（自称扫过「」）与实际不符，应改写为『候选未使用「」』。"
+    },
+    {
+      "id": "幻觉/越权检查",
+      "result": "pass",
+      "detail": "逐条核对候选出现的人物（黄狮精、狻猊/抟象/白泽/伏狸/猱/雪六狮、九头狮子/九灵元圣、青脸儿、刁钻古怪、古怪刁钻、行者、八戒、沙僧、唐僧、老王父子三王子、太乙救苦天尊、狮奴、广目天王、金头揭谛、六甲六丁、城隍、各厢土地、王妃）——**全部在原文区间内出现**，无凭空人物。结局未越权：六个活狮精被杀吃肉、九头狮子被骑回宫、众人获救、四众西去，均原文直述；未把『结束』写成『成功』（T2.result 明写『复仇与对命都没有兑现』，FS5 明标 unresolved）。无原文没有的伏笔被写成已回收（6 条 foreshadows 中 5 条 resolved 的 payoff 我逐条在原文找到对应，FS6 自标 inferred 并给了降级条件）。"
+    },
+    {
+      "id": "计划100 误杀形态定向排查",
+      "result": "1 例",
+      "detail": "按 VERIFIER.md 点名的真实案例（整词判定把西游『遂行』挡掉）在本区间定向检索：『遂行』出现 **0** 次（不适用）；另查四态多选是否有『引文支持却被排除』的合法项 —— **WS7 的 hold 是一例真实误杀**（见 falseKills）。"
+    },
+    {
+      "id": "受保护路径与写入面",
+      "result": "pass",
+      "detail": "候选只在 loop/state/out/read_xiyou_L0_0090.candidate.json 写入（append-only 例外已自陈为覆盖前手未提交候选并留了外置盘备份）；我本轮只在任务 writes 指定的 loop/state/out/verify_xiyou_L0_0090.verdict.json 与 /Volumes/资源库/我的资源/回滚点/cl-verify-0090/ 写入。js/ css/ index.html serve.py narrative.py scripts/ tests/ docs/ data/ 未由我改动。"
+    }
+  ],
+  "notes": "**总判 partial（可用但需修补，不是 fail）**。分层结论：\n\n【一、机械层：优秀，可以放心用】引文定位、偏移、唯一性、覆盖率的自报值与我的独立复算**逐位一致**（251/163/0.5636/3793），五栏不共用句成立，null 栏带实质理由，反向登记表与实际未覆盖集合**集合相等**。这一层我给 pass，且认为它比本项目多数候选扎实（生成器把锚点定位做成硬断言、并留下 9 处实际拦截记录，这是真证据不是自夸）。\n\n【二、语义层：不判 fail，但排除理由层有系统性弱点】**我没有找到一条『编造』**：没有原文不存在的人物、结局、伏笔，没有把人物语当叙述事实（T1.objective、T2.result、FS5 都明确标注了人物语），没有把结束当成功。所以我判 partial 而不是 fail——按 VERIFIER.md『判 fail 必须有 counterExample』，我手上的三条 counterExample 是**『论断超出引文』与『类别标签不成立』，不是编造**。\n\n【三、真正的发现形态（这才是本次复核的价值）】问题不在『他写的那几条对不对』，而在**排除表的理由层**：\n· reverseCoverageExclusions 有 78 段，集合层完美（逐段相等），但 21 段 `verse` 标签中 **18 段（1437/1875 = 76.6%）不含任何韵文标记**，是散文；`verse` 携带的统一理由『不给出影响行动、资源、约束或后果的设定』对这些段整体不成立。\n· 后果是**真信息被静默丢弃**：reverseChecks 里 7 条（行者自己的换俘计划、天尊遣散众仙、神将自认法力不敌、老妖无甲无兵出洞、老妖破案全过程、王子追问分身法的知识差、天尊已知行者改宗）都落在这些被误分类的块里，且**候选任何字段都没有承载**（我逐条在候选全文做过字符串检索，全部 0 次命中）。其中『行者自己的换俘计划』与 CE2 老妖的换俘逻辑构成镜像、『王子追问分身法』与候选已引的 NW3 答句首尾相接——这不是『漏了些景色』，是**结构性的半条边**。\n· 根因可定位：**引文区间与类别标签是两套独立的人手判断，没有互相回代检查**。同一个根因也造出反方向的错：WS7 引了『各人执兵器』（=持有）却只记 use 不记 hold，把合法状态误杀。\n· 我的反向验证是**脚本驱动**的（不靠我更仔细地读）：先按机械判据（有无韵文标记、有无成对引号）把 21 段 verse 分类，再对候选全部非引文文本抽 4-gram 反查『只在未引用原文中出现的短语』——43 个命中里除回目/称谓外，相当一部分正是上述被误分类块里的句子。这正是计划100 说的『机制存在、有产出，但不产生信息』的变体：**排除表看起来做了 78 段工作，实际有 1437 codepoint 被一个不成立的类别标签一键关掉**。\n\n【四、我判自己错的地方（按 VERIFIER.md『你可以判自己错』）】\n① 我最初的探针脚本有个 bug：用 `text.find(ph)` 取**全文首次**出现位置来判断『是否在区间内』，于是『保你无事』被判成 `区间内=False`（它在全文 615757 处另有一次，本区间那次在 651451）。我已修正为 `text.find(ph, S, E)` 并复算，结论未变（该短语确实未被引用）。\n② 我起初想以『候选某条 assert 自称扫了「」但候选里 0 个「」』作为 counterExample 判 fail——**不成立，已撤回**：那是措辞不准（该扫的集合是空的），且我用真实括号重扫后确认**没有编造引文混入**。按纪律，拿不出原文引证的反对只能记为存疑；这条我记为 checks 里的『pass-但断言措辞不实』，不据此判 fail。\n③ 候选 SC4 自陈『T1/T4 的 cost=null 可能是误判』——我**认为该自陈过谦**：T1 的黄狮精之死确已计入 result，T4 的赦免确非代价，两条 null 与提示词『不要补一个听起来合理的值』一致。这一条我判候选对、候选自评错。\n④ 候选 remaining 声明『未读本单元以外区间、不引入跨单元信息』——我认可这条纪律本身（是本项目反复踩过的坑）；因此 reverseChecks 里『天尊已知行者弃道归佛』我标注为『可收而未收、严重度低』，不升级为 counterExample。\n\n【五、给下一位的处理建议（可用/需丢弃的清单）】\n· **可以直接用**（我逐条在原文找到对应、无编造）：tasks 6 条的五栏划分与全部引文；causeEdges 19 条（机制判断我抽查 CE1/CE2/CE3/CE7/CE9/CE10/CE11/CE12/CE14/CE17/CE19，均成立）；states 12 条；foreshadows 6 条（含 FS6 自标 inferred 并给出降级条件）；worldSettings 16 条；themeReadings 2 条（**这两条质量高**：TH1 的反证二用『祖翁—六狮』平行关系证伪『授受即善果』，TH2 的反证二用黄狮精同样『有主』却被当场打死证伪『归属保命』——counter 是真反证，不是走过场）；unknowns 12 条（UN1/UN3/UN7 是真存疑，UN7『三名而称二怪』我核验属实：原文 [651166,651188) 确写『二怪』而列青脸儿、刁钻古怪、古怪刁钻三名）。\n· **必须修**：①WS7.itemStates 应含 hold（误杀，引文自带反证）；②T4.obstacle 的『须打进洞去才把他惊出来』须补引 [654701,654725)，否则删；③T2.obstacle 的『打折了柳棍』须补引 [652363,652381)，否则删。\n· **应重新分类或补收**：被误标 `verse` 的 18 段中，[650289,650454)、[652015,652122)、[652812,652914)、[653182,653233)、[653833,654008)、[654701,654767) 六段含真信息（见 reverseChecks），应改类别并把内容补进对应 causeEdges/states；其余段落可保留排除，但理由须改成描述实际内容（对话/过场/铺陈），不能沿用『韵文…不给出设定』这句对散文不成立的统一话术。\n· **须降级为 unknowns**：无。我核验了候选全部 12 条 unknowns 的引文均逐字成立，无需降级；反倒是被误分类的 7 条事实应**升格**进结论（或至少进 unknowns），而不是留在排除表里。\n· **须丢弃**：无。**本候选没有需要整条丢弃的编造项**——这是我判 partial 而非 fail 的核心依据。\n\n【六、我没做的事（写进 remaining，不编）】未跑 GPU/浏览器测试（任务未声明，且全局串行）；未读本单元以外的原文区间（跨单元信息一律未用于结论，与候选同纪律）；未复核候选 evidence 里外置盘上 build_0090.py / audit_0090.py / reverse_rules_0090.py / check_reverse_table.py 四个脚本的**内部逻辑**（我只读了 check_reverse_table.py 的判据口径，用以解释为何它的『问题合计 0』与我的集合运算结论一致——两者不矛盾，它的口径更弱）；未验证前手 w-read-4 遗留候选备份的存在性与哈希（该备份在外置盘，我未打开；我复核的对象只是**本轮 w-xiyou-1 的候选成品**）。\n\n【七、不确定处】①我用来判『verse 误分类』的机械判据是『区块内不含韵文标记』，标记表为 好杀：/但见：/诗曰：/正是/有诗为证（另有『真个是』一项，我核验后确认它在本区间**出现 0 次**，故对判定无贡献，列出以求口径可复算）——这对 18 段成立，但『无标记』不等于『一定不是韵文』（可能有我未列入标记的变体）；我另做了人工通读确认这 18 段均为叙述/对话散文，并给出 6 段的具体内容为证。②候选的 basis 档位（explicit/inferred/derived）我未全量重判，只抽查了 CE6/CE8/FS6 三条 inferred/derived 标注，与原文相符（原文确实未直述推理过程）。③覆盖率的『已覆盖』口径是『被引字符占比』，只引半句也算已覆盖——这一点候选的 audit 脚本与我的一致，但**它掩盖了『引了位置、读错意思』这一类**；我用『论断是否超出引文』做了定向抽查（查出 2 例），但没有也无法穷尽此项。",
+  "evidenceArtifacts": [
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/cl-verify-0090/audit.py",
+      "kind": "mechanical-audit",
+      "note": "独立机械审计：251 条 quote 逐条 TEXT[s:e]==quote / find==start / 唯一 / 区间内 / hash；覆盖率区间并集重算；五栏区间相交；null 栏理由；worldSettings 三态；反向登记表集合运算；「」片段扫描。输出『问题合计: 0』。"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/cl-verify-0090/reverse_probe.py",
+      "kind": "reverse-probe",
+      "note": "反向验证：A) verse 标签区块中含散文特征的 6 段；B) 10 条『原文明确存在、候选未承载』的定向检查；C) 统一理由与区块内容不符的 10 段；D) random.seed(90) 抽 5 条 quote 逐字复算；E) 文件哈希。"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/cl-verify-0090/evidence.py",
+      "kind": "evidence-table",
+      "note": "把误分类与遗漏固定成可复算的行：10 段贴 verse 理由却含对话散文的区块（1195 codepoint，占 verse 类 64%）；T4.obstacle 断言超出引文的逐项定位；7 条真遗漏的字符串级 0 命中复核。"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/cl-verify-0090/verdict_evidence.py",
+      "kind": "verdict-replay",
+      "note": "复核结论里每条引证的逐字复算（assert TEXT[find:find+len]==片段），含切片 sha256 与 13 条 C1a–C5a 证据行；verse 标签统计（21 段 1875 cp；含标记 3 段 438 cp；无标记 18 段 1437 cp）。"
+    },
+    {
+      "path": "data/cache/a065244455cfb2221bcda94a.docs.json",
+      "kind": "source-document",
+      "sha256": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+      "note": "原文。与任务 sourceHash 逐字一致（我用 hashlib 独立重算）。docs[0].text 全文 722176 codepoint，text sha256=ffcc680a63ca5180ced6e629fd3171ab2ed4dd4b92ddbf21c3a6fe80cfaef1aa；切片 [649352,656082) sha256=49be386adcd870839a14e0196c9204a5eeb480b8671216814074de9059961a4b。"
+    },
+    {
+      "path": "loop/state/out/read_xiyou_L0_0090.candidate.json",
+      "kind": "candidate-under-review",
+      "sha256": "386f70663288f8ef533f9a8b26a7028f18f343bef567ae0b7ddd4b0fbf41d961",
+      "note": "被复核的候选，哈希由我在复核开始与结束时各重算一次，复核期间未变更。"
+    }
+  ],
+  "reproduce": [
+    "# 1) 独立机械审计（应输出『问题合计: 0』）",
+    "cd /Users/carmen/Desktop/星系 && python3 -B '/Volumes/资源库/我的资源/回滚点/cl-verify-0090/audit.py'",
+    "# 2) 反向验证（verse 误分类 + 定向遗漏 + 抽查 5 条 quote）",
+    "cd /Users/carmen/Desktop/星系 && python3 -B '/Volumes/资源库/我的资源/回滚点/cl-verify-0090/reverse_probe.py'",
+    "# 3) 误分类与遗漏的证据表",
+    "cd /Users/carmen/Desktop/星系 && python3 -B '/Volumes/资源库/我的资源/回滚点/cl-verify-0090/evidence.py'",
+    "# 4) 结论引证逐字复算（含 assert）",
+    "cd /Users/carmen/Desktop/星系 && python3 -B '/Volumes/资源库/我的资源/回滚点/cl-verify-0090/verdict_evidence.py'",
+    "# 5) 哈希核对",
+    "cd /Users/carmen/Desktop/星系 && shasum -a 256 loop/state/out/read_xiyou_L0_0090.candidate.json data/cache/a065244455cfb2221bcda94a.docs.json"
+  ]
+}

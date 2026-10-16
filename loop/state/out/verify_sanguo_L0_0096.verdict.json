@@ -1,0 +1,406 @@
+{
+ "schema": "castline/verify-verdict/2",
+ "task": "verify:sanguo:L0:0096",
+ "reviewedTask": "read:sanguo:L0:0096",
+ "reviewerRole": "VERIFIER",
+ "agent": "w-verify-2",
+ "book": "sanguo",
+ "lane": 0,
+ "unitIndex": 96,
+ "unitHead": "第九十七回　讨魏国武侯再上表　破曹兵姜维诈献书",
+ "status": "done",
+ "verdict": "partial",
+ "candidateVerdict": "not-fail",
+ "verdictScope": "抽取层（引文逐字定位、区间、哈希、五栏不相交）= 全量复算通过；反向覆盖层与自述记账层 = 有可机械证伪的缺陷。故不判 fail、不判 pass。",
+ "reviewedArtifact": {
+  "path": "loop/state/out/read_sanguo_L0_0096.candidate.json",
+  "sha256": "3dedc4e7dea676e00482534507f5a32bac87cefee608746c658e03e0123efd83",
+  "producedBy": "w-read-3",
+  "producedAt": "2026-10-14T13:45:56Z",
+  "verifiedUnchanged": true
+ },
+ "source": {
+  "path": "data/cache/fe42d01f3826fe8096f86614.docs.json",
+  "docIndex": 0,
+  "docName": "0014《三国演义》-罗贯中 著",
+  "range": [
+   489034,
+   493949
+  ],
+  "codepoints": 4915,
+  "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+  "sourceHashVerified": true,
+  "segmentSha256": "c120989d5e51a568c1d8e5d46e9c8b3609fbc818e0863d1572aab84989dab4e4",
+  "segmentSha256Verified": true,
+  "hashDiscrepancyAdjudicated": "任务 JSON 的 sourceHash=2988ce6e… 实测是 data/cache/152e2a6eed94f1075e7e7070.docs.json 与 data/cache/f0b45e85aac6c95e584075a2.docs.json 的 sha256；prompt 正文明示、且被复核候选实际读取的 fe42d01f3826fe8096f86614.docs.json 实测为 8ab7298a…。三文件的 docs[0].text 同为 607191 码点，本区间切片逐字符相同（切片 sha256 三者均为 c120989d…），故两种口径下候选全部引文都成立。候选把它登记进 sourceHashDiscrepancy 且未改任务元数据、未改校验规则 —— 我复核认可这一处理，不据此加减判定。"
+ },
+ "summary": "独立反向复核《三国演义》第九十七回 [489034,493949)。按 ROLES/VERIFIER.md 顺序执行：先把 docs[0].text[489034:493949) 全片读完（4915 码点、含回目、正文 17 个自然段、页末整理者标记）并抄事实清单，之后才打开候选。**抽取层零编造、零定位错误**：递归抽出 395 个带 start/end 的引文对象，395/395 满足 docs[0].text[start:end]==quote、全部 ⊆ 区间、sourceHash 全等、start 是该串的真实出现位置、globalOccurrences 与全篇实测相等、occurrenceIndex==start —— 失败 0（我做全量，不是抽样）；五栏两两不相交 0 违反（独立重算）；14 个 null 栏全部带同名 Note；切片 sha256 与 segmentSha256 相符；固定种子 20261014 抽 5 条 5/5 逐字命中。**未发现任何原文没有的人物、事件、结局、伏笔**（我把 57 个三国人物名在本区间与候选里双向计数，『候选有而原文无』的条目为 0；马谡/张飞/马超/孟获/刘备/黄忠/周瑜/鲁肃等本区间外人物在候选内出现次数均为 0）；**未发现把结束当成功** —— T03.result、T04.cost、T05.cost、T06.cost、T07.cost、T09.cost、T10.cost 等多处 null 正是这条纪律的正确执行，F04/F05/F06/F07 显式 resolved=false 并写明缺哪一半。\n\n判 **partial** 而非 pass，是三处可机械复算的自述层缺陷 + 两处结构性覆盖缺口：① 候选散文两处把跨分区复用登记承诺指向 `crossSectionQuoteReuse`，**该字段在候选里不存在**（同批 0090/0092/0094 三个兄弟候选都有此字段，本候选把它改名成 `quoteReuse` 并让 `crossOccurrenceCount: 0` 恒真），而实测跨顶层分区复用的引文区间有 **87 组**、涉及 331 个引用实例，登记表为空；② `source.graphCache.note` 末尾承诺『以上数字可用 source.graphCacheRepro 的命令复算』，该键不存在（实际字段名是 `source.graphCache.repro`），同批 0092 正因同类悬空承诺被判 partial；③ 反向覆盖自述把『提及量达标』当『句子已覆盖』，导致两条承载独立机制的原文被记成已覆盖（见 CE1/CE2）。不做 fail：按契约判 fail 必须有 counterExample 且 quote 逐字可查 —— 我有（下面三条全部逐字命中），但三处缺陷**全部落在自述与覆盖记账层，不改变任何一条抽取结论的真值**，且引文层 395/395 无一处自相矛盾，与同批 verify_sanguo_L0_0088/0092/0094 判 partial 的尺度一致，本仓库尚无『抽取层零缺陷仅记账缺陷即判 fail』的判例（0092 在同一形态下亦判 partial）。",
+ "counterExamples": [
+  {
+   "id": "CE1",
+   "claim": "候选 quotationConvention.columnRule 写：「跨任务／跨分区复用不禁止，**全部登记在 crossSectionQuoteReuse**。」tasks.T08.cost.basisNote 进一步写：「第二条与 T05 的 action 共用同一句，属跨任务复用…**已登记 crossSectionQuoteReuse**。」",
+   "quote": "于是孙礼、辛毗星夜具表申奏魏主，言蜀兵又出祁山，曹真损兵折将，势甚危急。",
+   "start": 493753,
+   "end": 493789,
+   "why": "「全部登记在 crossSectionQuoteReuse」为假，且该字段**根本不存在**。我按候选自己的口径递归抽出全部 395 个带 start/end 的引文对象，按 (start, quote) 归组、取 JSON 路径的顶层分区名，得到 **87 个跨 ≥2 个顶层分区的复用组**（涉及 331 个引用实例；最大组被 causeEdges/states/tasks/themeReadings/unknowns 五个分区共用）。候选的登记表 `quoteReuse.crossOccurrenceQuotes` 是**空数组**、`crossOccurrenceCount: 0`。上面这条 quote @493753 同时被 causeEdges.CE32 与 tasks.T14.obstacle 当作依据（原文逐字命中），却不在任何登记表里。结构对照可复现：同批 read_sanguo_L0_0090/0092/0094 三个候选**都有** `crossSectionQuoteReuse` 字段（含 rule/count/items），只有本候选把它改名成 `quoteReuse` —— 而 `quoteReuse.crossOccurrenceCount` 恰好恒为 0，因为该字段设计上只统计『同一对象的跨次出现』，本候选无此形态，于是『全部登记』的承诺落在一个永远为空的口径上。",
+   "evidence": {
+    "measuredCrossSectionReuseGroups": 87,
+    "measuredRefInstancesOnSharedIntervals": 331,
+    "declaredCrossOccurrenceCount": 0,
+    "declaredCrossOccurrenceQuotesLen": 0,
+    "crossSectionQuoteReuseFieldPresent": false,
+    "fieldStillPromisedInProse": 2,
+    "siblingCandidatesWithField": [
+     "read_sanguo_L0_0090.candidate.json",
+     "read_sanguo_L0_0092.candidate.json",
+     "read_sanguo_L0_0094.candidate.json"
+    ],
+    "quoteUsedBy": [
+     "$.causeEdges[?id=CE32].quotes[0]",
+     "$.tasks[?id=T14].obstacle.quotes[0]"
+    ]
+   },
+   "reproduce": "python3 -B -s \"$AGENT_ARTIFACTS/cl-verify-sanguo-L0-0096/audit0096.py\" → 行 `PASS       D1 跨顶层分区复用组 == 87` / `PASS       D1b 共享区间上的引用实例 == 331  refInstances=331 distinctSectionUses=299` / `DEFECT-OK  D2 承诺的 crossSectionQuoteReuse 字段不存在  散文提及 2 次；实际字段为 quoteReuse` / `DEFECT-OK  D3 登记表为空而真实复用非空  declared=0 realGroups=87 refInstances=331`（脚本 sha256=36c0f07f99c32ad78adaba53fe28dfaa99a0249f3972e8ba8bef7c0d2fdd52e5，输出全文见同目录 audit0096.out，sha256=c7b2817fb91e6563159c0bf9106fd371464b7ba7be88acfc57b7af160837a41a）"
+  },
+  {
+   "id": "CE2",
+   "claim": "候选 source.graphCache.note 以「以上数字可用 **source.graphCacheRepro** 的命令复算」收尾（该 note 本身以「实测」开头，给出 events 3 条 / causeEdges 339 / tasks 178 / characterStates 129 / relations 1539 等数字）。",
+   "quote": "早有细作报入洛阳。司马懿奏知魏主，大会文武商议。",
+   "start": 490575,
+   "end": 490599,
+   "why": "**`source.graphCacheRepro` 这个键不存在** —— 它是悬空指针。候选里实际的复算命令放在 `source.graphCache.repro`（键名不同、层级不同）。我用点路径解析器把候选全文出现的 `source.*` 指针逐个解析：`source.graphCache` → 存在；`source.graphCacheRepro` → 不存在，回退 `source.graphCache.graphCacheRepro` → 同样不存在。注意我**只**判指针悬空这一条机械事实，不判数字：我独立复算了 note 里的数字，**全部为真**（events[] 共 1286 条，quoteRef.start 落在 [489034,493949) 的恰为 3 条，且 489456/490500/491306 三处按切片的实际文本与 note 引文逐字相符；causeEdges 339 / tasks 178 / characterStates 129 / relations 1539 与文件实测全等；其余分区带 quoteRef.start 落在区间内的条目为 0 —— 这一点与本候选不同，同批 verify_sanguo_L0_0092 的 CE2 是 note 内容本身为假（它漏了 5 条），本候选的 note 内容为真、坏的只是指针）。上面这条 quote 是 note 所解释的『细作报入洛阳』链条的原文锚点（@490575 逐字命中），也是 note 里 events 之外被候选当作叙述事实使用的一处。",
+   "evidence": {
+    "pointerResolved": false,
+    "actualFieldPath": "source.graphCache.repro",
+    "noteNumbersIndependentlyRecomputedAllTrue": true,
+    "graphEventsTotal": 1286,
+    "graphEventsWithQuoteRefStartInSlice": 3,
+    "graphCauseEdges": 339,
+    "graphTasks": 178,
+    "graphCharacterStates": 129,
+    "graphRelations": 1539,
+    "exampleOffsetsVerified": {
+     "489456": "子龙身故，国家损一栋梁，吾去一臂也！」众将无不挥涕。",
+     "490500": "臣鞠躬尽瘁，死而后已；至于成败利钝，非臣之明所能逆睹也。",
+     "491306": "吾受国恩，但有死而已，兄不必下说词。早回见诸葛亮"
+    }
+   },
+   "reproduce": "python3 -B -s \"$AGENT_ARTIFACTS/cl-verify-sanguo-L0-0096/audit0096.py\" → 行 `DEFECT-OK  E1 承诺的 source.graphCacheRepro 键不存在  实际 keys=['path', 'used', 'note', 'repro']` 与随后的 `PASS E2/E3/E4/E5`（note 数字全部为真、三处举例 offset 逐字成立）"
+  },
+  {
+   "id": "CE3",
+   "claim": "候选 reverseCoverage 自述：「chunks 292、coveredChunks 236、uncoveredChunks 44」，并声明方法为『按句末标点切成 chunk，再按全部引文字符区间**逐字符**标记覆盖（严格半开）』，note 里把未覆盖的 44 条逐类归档为『有意不扩 / 礼节性对话 / 纯动作衔接 / 外貌与评赞』四类。",
+   "quote": "军士各把短梯软索，听军中擂鼓，一齐上城。",
+   "start": 491658,
+   "end": 491678,
+   "why": "自述的**块数与未覆盖清单我独立重算逐位相等**（292 / 44，对称差 0，我按同一 chunk 规则与同一半开区间判据复算）—— 记账本身是诚实的。问题在于**判据把『块内任意一个字符被引到』当作『整块已覆盖』**，于是当一条长句的句尾套语被引、或句中一小段被引时，承载独立机制的**前半句**被判为已覆盖、不进入 uncovered 清单。我实测：44 条未覆盖之外，另有 **29 条 ≥12 字的句子**零字符被引而未进 44 条清单，以及 **5 条**引文占比 <34% 仍被判为 covered，其中至少两条承载了原文写出的独立机制、而候选的六个内容分区完全没有触及（见 reverseChecks R1/R2）。最极端的一例是把 67 字的整句 `[489940,490007)` 因句尾 8 个字『此臣之未解一也。』被引而整块放过（该块被引字符仅 8/67 = 12%），使『未解一』的实质论证内容（高帝明并日月…欲以长策取胜，坐定天下）在候选全文里一次都没出现。上面这条 quote @491658 是同类形态的又一例（云梯攻法的第三步动作，T08.action 的引文止于 @491658 之前一字，该句零字符被引，却因句读切分落在被引邻块内而未单列）。我不据此判 fail：这属覆盖度量的**口径选择**而非数据编造，且候选已把『未覆盖≠遗漏』的免责写进 note；但我据此判 partial —— 因为用该口径自证『只剩四类可解释的缺口』会掩盖 R1/R2 这两条真实的机制空缺。",
+   "evidence": {
+    "chunksRecomputed": 292,
+    "uncoveredRecomputed": 44,
+    "symmetricDifference": 0,
+    "coverageSemantics": "union（逐字符标记，与候选自述一致）—— 我第一版用重复累加得到 4 条薄覆盖块，改用 union 后为 5 条；差值来自 R1 所在的 chunk @489133（重复累加 52%、union 18%），因『司马懿引兵还』被三个分区各引一次。如实记录该自纠。",
+    "sentencesAtLeast12CharsWithZeroCitedChars": 29,
+    "thinCoveredChunksUnder34Pct": 5,
+    "worstCoveredChunk": {
+     "start": 489940,
+     "len": 67,
+     "citedChars": 8,
+     "ratio": 0.12
+    },
+    "thinCoveredChunks": [
+     {
+      "start": 489940,
+      "len": 67,
+      "citedChars": 8,
+      "ratio": 0.12,
+      "what": "未解一的论证实体（高帝明并日月…长策取胜，坐定天下）"
+     },
+     {
+      "start": 493892,
+      "len": 57,
+      "citedChars": 18,
+      "ratio": 0.32,
+      "what": "页末整理者标记与导航行"
+     },
+     {
+      "start": 490339,
+      "len": 54,
+      "citedChars": 8,
+      "ratio": 0.15,
+      "what": "未解六的论证实体（以一州之地与贼持久）"
+     },
+     {
+      "start": 489133,
+      "len": 34,
+      "citedChars": 6,
+      "ratio": 0.18,
+      "what": "司马懿与众将的质问原话 —— R1 所在块"
+     },
+     {
+      "start": 493459,
+      "len": 33,
+      "citedChars": 10,
+      "ratio": 0.3,
+      "what": "将次近火，山路中鼓角喧天…两军杀出"
+     }
+    ]
+   },
+   "reproduce": "python3 -B -s \"$AGENT_ARTIFACTS/cl-verify-sanguo-L0-0096/audit0096.py\" → 行 `PASS F1 chunk 数 == 292` / `PASS F2 未覆盖 == 44` / `PASS F3 未覆盖集合与候选自曝对称差 0` / `DEFECT-OK  F4 字符级口径把薄覆盖块判为 covered（信息项）  >=12字零引用句=29；薄覆盖块(<34%)=5 最极端=(489940, 67, 8)`。即：候选的记账数字全部为真（故 F1–F3 是 PASS），缺陷只在判据口径（F4）。"
+  }
+ ],
+ "reverseChecks": [
+  {
+   "id": "R1",
+   "found": "司马懿回兵这一段里，**众将的质问原话**被候选整体漏掉 —— 而它正是 CE02/CE03 两条因果边的 trigger。原文写的是『众将接入问曰：“曹都督兵败，即元帅之干系，何故急回耶？”』：众将的疑问不是候选所述的『解释之后未被采信』，而是**先有当面质问、司马懿才作答**。候选 CE03.trigger 写『他在回兵后对众将给出解释；原文只写他的解释与众将的反应』—— 这句话把『众将质问』这一步删掉了；CE03.mechanism 又说『他主动说明理由…**说明众将的疑问已经存在**』，即候选自己意识到疑问存在，却没引用写出该疑问的原句。我全文检索：`众将接入问曰` 与 `何故急回` 在本候选（含散文、含全部引文）中出现 **0 次**。这条缺口使 T03 的 obstacle 判 null 的理由（『原文没有写任何阻止他回兵的力量』）与 CE03 的机制描述都缺了原文给出的第一步，属**结构性遗漏**而非措辞差异。",
+   "quote": "众将接入问曰：“曹都督兵败，即元帅之干系，何故急回耶？”",
+   "start": 489140,
+   "end": 489168,
+   "inCandidate": false,
+   "note": "该句落在 chunk @489133（长度 34）内，因同块内『司马懿引兵还』被引而整块被判已覆盖 —— 按 union（逐字符标记）口径该块仅 6/34 = 18% 被引（『司马懿引兵还』被 causeEdges/states/tasks 各引一次，若按重复累加会虚高到 52%）。故未出现在候选自曝的 44 条未覆盖清单里，这正是 CE3 所述口径问题的实例。"
+  },
+  {
+   "id": "R2",
+   "found": "曹真一线的**战功反馈环**被漏掉：原文在曹真分调守将之后写『闻知王双斩将立功，大喜，乃令中护军大将费耀，权摄前部总督，诸将各自守把隘口』。『闻知王双斩将立功，大喜』是原文明确写出的『前线战果 → 主帅反应 → 人事任命』的因果链首环（且用了『乃』字连接），而候选对费耀『权摄前部总督』这一任命的来源只在 states.S16 记为『叙述者介绍他为中护军大将，受命权摄前部总督』，**没有引用『王双斩将立功』这一触发**。我全文检索：`闻知王双斩将立功` 在本候选（含散文与全部引文）中出现 **0 次**；CE12 的 to 写作『曹真到洛阳分调郭淮、孙礼东西守把，并在得知陈仓告急后令王双去救』，止于派王双，未接回『王双立功 → 曹真大喜 → 费耀权摄』这一环。候选 36 条 causeEdges 里没有任何一条的引文包含该句（我逐条检索确认）。",
+   "quote": "闻知王双斩将立功，大喜，乃令中护军大将费耀，权摄前部总督，诸将各自守把隘口。",
+   "start": 492591,
+   "end": 492629,
+   "inCandidate": false,
+   "note": "该句落在 chunk @492591（长度 38）内，因后半句『乃令中护军大将费耀，权摄前部总督…』@492603 被引（union 口径 26/38 = 68%）而整块被判已覆盖，故未进 44 条清单。前半句是候选承认存在（S16 记了任命）却找不到触发源的部分。"
+  },
+  {
+   "id": "R3",
+   "found": "《后出师表》的实质论证内容被整体略过：候选 T01.objective 的散文说表文『以六条「臣之未解」逐条论证，第一条与第六条分别针对「以长策取胜、坐定天下」的幻想与「以一州之地与贼持久」的不可行』—— 但这两句**只出现在候选自己的散文里，没有引用原文**（我检索 `长策取胜`/`坐定天下` 在候选全部带偏移引文中出现 0 次、仅在散文出现；`高帝明并日月` 在候选全文出现 0 次）。T01.objective 为该论断实际引的是两个 8 字套语（`此臣之未解一也。` @489999、`此臣之未解六也。` @490385），即**用『第 N 条』的编号标记代替了该条的论证内容**。原文『未解一』的完整句为『谨陈其事如左：高帝明并日月，谋臣渊深，然涉险被创，危然后安；今陛下未及高帝，谋臣不如良、平，而欲以长策取胜，坐定天下，此臣之未解一也。』——候选概括的两处措辞确实在该句内逐字存在，故散文内容**不是编造**；问题在于承载它的原句 67 字里只有 8 字被引（12%），使该论断在引文层**无逐字依据可核**。这是覆盖度而非真值问题，我按契约记为反向发现、不判 fail。",
+   "quote": "谨陈其事如左：高帝明并日月，谋臣渊深，然涉险被创，危然后安；今陛下未及高帝，谋臣不如良、平，而欲以长策取胜，坐定天下，此臣之未解一也。",
+   "start": 489940,
+   "end": 490007,
+   "inCandidate": "partial",
+   "note": "同段『未解六』同理：候选引 `此臣之未解六也。` @490385 共 8 字，而承载『以一州之地与贼持久』的原句 @490339 长 54 字。另有一条相关的独立事实被漏：本回开篇的时间与来源『蜀汉建兴六年秋九月』@489062 在候选全文出现 0 次（候选的 states 与 tasks 均未记这一时间锚点，而该句同时是回目之后第一句、也是曹休病死与石亭之战的系年）。"
+  },
+  {
+   "id": "R4",
+   "found": "候选对文本自身的异体字做了正确登记（`巍`/`嶷` 同人、`办`/`便` 疑误），我复核该登记为真且是加分项；但**同一段的另一处字形现象未被登记**：『骑千里征马宛马』@490637 段内的『征马宛马』是『征宛马』的衍字形态（同段还有『开两石铁胎弓』），候选在 notModeled 里把这段外貌描写整体排除时引了整句，却未像对待 `巍`/`办` 那样把这一处登记进 unknowns 的文本问题条目。这属**同类问题处理不一致**，量级很小，仅作记录、不构成判定依据（我无法从本区间内证明它是衍文而非原貌，故按契约只记为存疑）。",
+   "quote": "臣近得一员大将，使六十斤大刀，骑千里征马宛马，开两石铁胎弓，暗藏三个流星锤，百发百中，有万夫不当之勇，乃陇西狄道人，姓王，名双，字子全。臣保此人为先锋。",
+   "start": 490637,
+   "end": 490713,
+   "inCandidate": true,
+   "note": "同一句已被 notModeled 完整引用、并作为 T04.objective 的引文；我反对的只是『文本异形登记』这一项的覆盖不一致，不是该句被漏引。"
+  },
+  {
+   "id": "R5",
+   "found": "候选正确地把『费耀只道号火』这一误判记为知识差（S14/K02），但**『火是谁放的』原文确实没写** —— 这一点候选在 CE29/CE35/F02 三处主动声明『不替原文指定放火者』，我复核原文：`蜀兵背后火起` 之外，本区间再无以蜀方为主语的放火动作句（`火烧`/`放火`/`举火` 的施动者均未写明），故候选的留白是**正确执行**而非遗漏。我把它列入反向验证是为了记录一条**我查证后判定候选无错**的项（VERIFIER.md 要求可判自己错）。",
+   "quote": "行不到三十里，望见蜀兵背后火起，喊声不绝。",
+   "start": 493407,
+   "end": 493428,
+   "inCandidate": false,
+   "note": "该句本身在 44 条未覆盖清单内（候选已自曝）。我另行确认：候选 F02.layerNote 与 CE29.mechanism 的『不指定放火者』声明与原文一致，属正确留白。"
+  }
+ ],
+ "misKillCheck": {
+  "performed": true,
+  "result": "未发现词表/正则式误杀。候选主动拒绝的 4 条边（RCE01–RCE04）我逐条评估，**全部以义理拒绝、无一误杀**：RCE01 拒『风折松树→赵云病死』不仅方向可疑、**时间顺序也不成立**（报丧句写赵云死于『昨夜三更』，早于宴会上风吹折松树的时刻，我在原文逐字复核该先后：风吹折松树 @489328 是宴会当场，死讯是『昨夜三更』@489435），拒绝理由比候选写的还硬；RCE02 拒『曹休病死→司马懿引兵还』正确（原文给出的理由是防诸葛亮乘虚取长安，与曹休病情无字面联系）；RCE03 拒『二十余日→改道』正确（原文把触发写成『孔明见折二将，张嶷又被打伤』）；RCE04 把粗边拆成 CE31/CE32 正确。",
+  "boundaryCase": "最接近误杀的是候选把『羽扇』『四轮车』『锹镢』排除出 worldSettings（列在 worldSettingsExcluded）。我核原文：三者在本区间各出现 1 次，且候选**仍然把它们当作证据使用**（CE34 引了含『把羽扇一招』的整句 @493375，T08.action 引了含『三千锹镢军』的整句 @491854），即排除的是『升级为独立 item 条目』而非『引用』。按 prompt『没有依据就不扩出物品链或术语装饰层』，此排除正确，**不构成误杀**。",
+  "note": "候选对『人物语不等于叙述事实』的执行我抽查了 6 处（曹真『天使吾成功也』、郝昭『吾受国恩但有死而已』、曹真『他原是魏人』、姜维密书内容、司马懿『吾料诸葛亮…』、王双武艺经曹真之口转述），全部在 basisNote/evidenceType 或 unknowns 里标注为 speech/report，未当成叙述事实。"
+ },
+ "hallucinationAndOverreachCheck": {
+  "performed": true,
+  "result": "未发现幻觉或越权。① **人物**：我把 57 个三国人物/地名在本区间与候选内双向计数，『候选有而原文切片无』的条目为 **0**；本区间外人物（马谡、张飞、马超、孟获、刘备、黄忠、周瑜、鲁肃、曹爽、何晏、夏侯楙等）在候选内出现次数均为 **0**，说明不是碰巧没写而是真的没挪用。② **结局**：候选 T14.result 明确止于『司马懿答已有退诸葛亮之计』，未写计策内容与成败；F07 把『全凭仲达有良谋』标为联语（引文层声明它不是结果证据），符合『不许因为播放到结尾就写 result=成功』。③ **假成功**：费耀中伏大胜后，候选 T10.result 仍写『缩水的战果』并引『某恨不得杀曹真也』与『可惜大计小用矣』，未把战术胜利写成战略达成；F04 显式 unresolved。④ **越权**：`semanticReview.performed=false` 且 note 写明『引文定位正确 ≠ 语义已核验；语义须由 read-verify 通道独立复核』，**没有**声称语义已核。⑤ 候选未引用本区间之外的任何章句（称号诗『后人有诗曰…』被引时标为评赞并在 worldSettingsExcluded 说明未从中取证）。",
+  "counts": {
+   "namesChecked": 57,
+   "candidateOnlyNames": 0,
+   "outOfSliceNamesLeaked": 0
+  }
+ },
+ "citationVerification": {
+  "method": "固定种子 20261014 从 395 个带 start/end 的引文对象中随机抽 5 条，逐条做 text.find(quote) 与 text[start:end]==quote 双判；另对全文 395 条做**全量**复算（不是抽样）。",
+  "randomFive": [
+   {
+    "path": "$.unknowns[5].quotes[0]",
+    "start": 491563,
+    "find": 491563,
+    "sliceMatch": true,
+    "verdict": "逐字命中、偏移一致"
+   },
+   {
+    "path": "$.foreshadows[7].quotes[0]",
+    "start": 491026,
+    "find": 491026,
+    "sliceMatch": true,
+    "verdict": "逐字命中、偏移一致"
+   },
+   {
+    "path": "$.tasks[11].result.quotes[4]",
+    "start": 493642,
+    "find": 493642,
+    "sliceMatch": true,
+    "verdict": "逐字命中、偏移一致"
+   },
+   {
+    "path": "$.themeReadings[0].counter[0].quotes[1]",
+    "start": 493025,
+    "find": 493025,
+    "sliceMatch": true,
+    "verdict": "逐字命中、偏移一致"
+   },
+   {
+    "path": "$.notModeled[2].quotes[0]",
+    "start": 489525,
+    "find": 489525,
+    "sliceMatch": true,
+    "verdict": "逐字命中、偏移一致"
+   }
+  ],
+  "randomFiveResult": "5/5 逐字命中、偏移一致、notFound=0",
+  "fullSweep": "395/395 满足 text[start:end]==quote ∧ start 是该串真实出现位置 ∧ ⊆[489034,493949) ∧ sourceHash==8ab7298a… ∧ globalOccurrences==全篇实测次数 ∧ occurrenceIndex==start；失败 0。",
+  "nonUniqueHandling": "候选对 3 个非唯一引文字符串（`左有关兴，右有张苞。`×2、`未知其计如何，且看下文分解。`×5、`------------------`×119）主动登记进 nonUniqueQuotes 并预告 `find()==start` 会误判。我复核该登记为**真且必要**：这 5 个对象（含 3 个套语重复引用）的 start 全部落在区间内且为真实出现位置，故候选 selfCritique[3] 所述的判据修正是对的。**但 note 写『两处都已逐一满足』而 count=5、items=5** —— 『两处』与 5 条不符，属措辞残留（我判为笔误级瑕疵，不单列 counterExample）。",
+  "danglingPointer": "nonUniqueQuotes.note 末尾以『（见 indepVerify）』指向 `indepVerify` —— 该键在候选里**不存在**（全文仅此 1 次出现）。与 CE2 同类，均为悬空自指。"
+ },
+ "differencesFromPriorReview": {
+  "priorReviews": "本任务此前无复核记录（`loop/state/out/read_sanguo_L0_0096.json` 的 reviews[] 为空、verifyState=pending）。故无对照。",
+  "note": "我未读同批 0090/0092/0094 的 verdict 内容后再下判断 —— 只在完成自己的通读、脚本与判定之后，才打开 0092 的 verdict 用于**校准尺度**（确认同类自述层缺陷在该批次被判 partial 而非 fail）。该比对见 notes 末段。"
+ },
+ "dispositionOfItems": {
+  "usable": [
+   "tasks T01–T14 全部 14 条（含 14 个带同名 Note 的 null 栏）—— 五元组切分与原文对应，null 理由具体且我逐条复核成立",
+   "causeEdges CE01–CE36 全部 36 条 —— 每条机制可查，未发现时间相邻冒充因果（CE01 的『忧惧→成病』机制由原文『休惶恐之甚，气忧成病』直接给出）",
+   "rejectedCauseEdges RCE01–RCE04 —— 4 条拒边理由我逐条复核成立，RCE01 的时序论证还比候选写的更硬",
+   "states S01–S17 —— 除 S16 的触发来源缺一环（见 R2）外，前后值与锚点均成立",
+   "foreshadows F01–F08 —— 4 条 resolved / 4 条显式 unresolved，layerNote 对占验层与因果层的分离正确",
+   "knowledgeGaps K01–K04、worldSettings WS-*（24 条）、worldSettingsExcluded（6 条）、themeReadings TR01–TR02（各带反证）、unknowns（20 条）、notModeled（4 条）、selfCritique（5 条）",
+   "引文层全部 395 个带 start/end 的对象 —— 逐字、在区间内、哈希正确，可直接消费",
+   "reverseCoverage 的 292/44 两个数字与清单 —— 我独立重算对称差为 0，记账诚实"
+  ],
+  "mustFix": [
+   "CE1：把 `crossSectionQuoteReuse` 补齐（87 组 / 331 实例），或把 columnRule 与 T08.cost.basisNote 的措辞改为『登记在 quoteReuse』并说明该表只统计同对象的跨次出现、当前为空是设计结果 —— 后者更诚实，因为 quoteReuse 的口径本就装不下跨分区复用",
+   "CE2：`source.graphCacheRepro` → `source.graphCache.repro`（一句话修正，note 里的数字无需改动，我复算全部为真）",
+   "CE3：reverseCoverage 的口径改为『块内被引字符占比 ≥ 阈值才算 covered』，或至少把 4 条 <34% 的薄覆盖块单列；否则 R1/R2 这类『后半句被引、前半句承载机制』的空缺永远不会浮出",
+   "R1：CE03.trigger 补引『众将接入问曰：“曹都督兵败，即元帅之干系，何故急回耶？”』@489140 —— 该句是 T03.obstacle 判 null 的直接相关证据（众将质问是疑问的来源，不是『阻止他回兵的力量』，故 null 结论可保留、但理由需补全）",
+   "R2：CE12 的 to 或新增一条边补上『闻知王双斩将立功，大喜 → 乃令费耀权摄前部总督』@492591",
+   "R3：T01.objective 换引承载论证的原句 @489940（67 字）替代 8 字套语 @489999；同理未解六换 @490339",
+   "nonUniqueQuotes.note 的『两处』改为『五条（3 个 distinct 字符串）』；`indepVerify` 悬空指针改名或删除"
+  ],
+  "mustDiscardOrDowngrade": [
+   "无需整体丢弃的条目。降级建议：T01.objective 的论证若无法补引原句，应把 basis 从 explicit 降为 inferred（当前引文只支持『表文有六条未解』这一形式事实，不支持『第一条针对长策取胜』这一内容概括）",
+   "notModeled[1] 说『关兴张苞的夹击记在 CE29』—— 实测 CE29 的三条引文**都不含关兴/张苞**（该动作实际由 CE35 引 @493482『左有关兴，右有张苞。』承载）。CE35 确实存在，故不是编造，但**指针指错了边**，应改指 CE35"
+  ]
+ },
+ "myOwnErrors": [
+  "**最重要的自纠**：我第一版覆盖统计把每条引文的覆盖字符数**重复累加**（同一区间被 N 个分区各引一次就算 N 倍），而候选自述的方法与正确口径都是『逐字符标记』= 集合语义（union）。这个 bug 使 R1 所在块 @489133 的覆盖率从 18% 虚高到 52%，并让薄覆盖块数从 5 误算为 4。改用位图 union 后：薄覆盖块 5 条、最极端仍为 @489940（8/67=12%）、未覆盖 44 条与候选自曝对称差仍为 0（该结论不受影响）。我已把脚本与 verdict 同步修正，并在 CE3 的 evidence 里显式登记 union 口径与这次自纠 —— 一个把重复引用当覆盖率的复核者，恰好会犯下与它要指控的候选同型的方法错误。",
+  "第一版跨分区复用统计把 tasks 按『task:T01.col』细分而非按顶层分区 `tasks` 归并，得到 508 个『跨分区对』这一虚高数字；改用顶层分区归并后为 87 组 / 331 实例。同一坑我在 pts 前一版还犯过一次『只统计带 quote 键的对象』的漏计（本候选无纯字符串 quotes[]，故本次无影响），如实记录。",
+  "第一版按『完整句子子串是否出现在候选原始文本』判遗漏，误报 30+ 条『未引』；实际候选多为子串截取引用（如引『此臣之未解一也。』而不引整句）。改用『引文对象集合的成员判定 + 字符级覆盖』后，真实零引用的长句为 29 条，其中承载独立机制的只有 R1/R2 两条 —— 我第一版的量级是错的，结论方向不变。",
+  "我最初把 CE3 当作『覆盖清单造假』，复核后确认 292/44 两个数字与清单**逐位为真**、对称差 0，缺陷只在覆盖判据的口径与由此产生的解释力，已改写为现在的措辞并保留推导。",
+  "我一度准备把 `quoteReuse.crossOccurrenceCount: 0` 单独列为一条独立缺陷；复核后确认该字段口径（同一对象的跨次出现）在本候选下**确实应为 0**，真正的问题是『登记承诺落在错误的字段上』，故合并进 CE1 而不再单列。",
+  "本次**未做**语义层独立复核：某条任务是否该这样切、36 条 causeEdges 的机制解读是否唯一合理、themeReadings 是否过度解读，我均未独立判定（与候选 semanticReview.performed=false 的自我声明一致）。R5 是我唯一主动查证并判定候选无错的项。"
+ ],
+ "notes": "总判断：**判 partial**。这是一份抽取层质量很高、留白纪律执行得很好的候选 —— 395 条引文全量零失配、零编造人物、零越权结局、14 个 null 栏全部带具体理由、『结束≠成功』在多处正确执行、对自身最易被误读的一处（占课 vs 因果）主动做了三层声明并在 selfCritique 首条自曝。这些都不是『有代码有产出』的形式合规，而是真的把原文的机制与留白分辨开了。\n\n【为什么不是 fail】按 ROLES/VERIFIER.md，判 fail 必须有 counterExample 且 quote 逐字可查 —— 我有（CE1 的 quote @493753、CE2 的 @490575、CE3 的 @491658 全部逐字命中），所以 fail 在授权范围内。但我不判 fail，理由有三：① **三处缺陷全部落在自述/记账层**，没有一条改变抽取结论的真值：CE1 是登记表缺位（引文本身正确、复用不违规）、CE2 是键名悬空（note 内容我复算全真）、CE3 是覆盖度量口径（292/44 记账诚实）。② **引文层自洽度是满分**：395/395 全量通过六项判据，无一条非逐字、无一条越界、无一条哈希不符 —— 与同批被判 fail 的形态（如 0072 自述数字与结构化字段自相矛盾到影响结论）不同。③ **本批已建立 partial 判例**：verify_sanguo_L0_0088/0092/0094 三份复核均在同一『抽取层零缺陷 + 自述层可证伪』形态下判 partial，其中 0092 的 CE1 与本候选 CE1 同型（登记承诺与实测不符）、CE2 亦同型（graphCache note），且 0092 的 CE2 是**内容为假**（漏 5 条）而本候选 CE2 只是**指针名字错**（内容为真）。若对本候选判 fail，则与本批尺度不一致。故判 partial 并与 0092 同口径。\n\n【为什么不是 pass】三处硬伤都可复算、都属『候选关于自身的陈述被同一份候选机械证伪』：（a）承诺登记 `crossSectionQuoteReuse` 而该字段不存在、真实复用 87 组未登记；（b）承诺 `source.graphCacheRepro` 可复算而该键不存在；（c）自证『只剩四类可解释缺口』的覆盖口径把承载机制的句子按字符占比判为已覆盖，掩盖了 R1/R2。加上 R1/R2/R3 三条结构性覆盖缺口（司马懿与众将的质问原话、曹真的战功反馈环、后出师表未解一/未解六的论证实体），以及三处悬空自指（`crossSectionQuoteReuse`×2、`source.graphCacheRepro`×1、`indepVerify`×1），不足以给 pass。\n\n【不确定处】① CE1 的 87 组里，selfCritique/unknowns/notModeled 这些自述性分区引用同一句时是否应算『当作依据用』有判断空间 —— 若只算六个内容分区（tasks/causeEdges/states/foreshadows/worldSettings/themeReadings），仍远超 0，结论不变；② 我把 sourceHash 的两种口径判为『不构成缺陷』，依据是三文件 docs[0].text 逐字符相同、切片哈希一致；若后续有规则要求任务 JSON 的 sourceHash 必须与被读文件一致，则该差异应升级为流程问题 —— 但那属任务元数据侧，非候选之责（候选已如实登记）；③ R3 里『建兴六年秋九月』未被登记是否算缺口，取决于 states 是否必须收录系年：prompt 未强制，故我只作为反向发现列出、未计入 mustFix 的硬项。\n\n【复核者立场】按契约顺序执行：先自己通读全区间并把事实清单抄在案（含 136 条源级探针全数在切片内命中、0 条不在），之后才打开候选；引文层用自建脚本全量重算，未 import 候选构建器、未复用其自检块（其 buildSelfCheck.script 位于外置盘，我只把它当作被核对象、不执行）；反向验证按『这一段里他还漏了什么』提问，5 条 reverseChecks 全部来自对原文的独立扫描而非对候选已写项的复查，其中 R5 是我查证后判定候选正确的项。本次未跑 GPU/浏览器测试，未改动受保护路径；唯一写入是任务 writes 指定的 loop/state/out/verify_sanguo_L0_0096.verdict.json。",
+ "evidence": [
+  {
+   "path": "loop/state/out/read_sanguo_L0_0096.candidate.json",
+   "sha256": "3dedc4e7dea676e00482534507f5a32bac87cefee608746c658e03e0123efd83",
+   "kind": "被复核候选（只读，未修改）"
+  },
+  {
+   "path": "data/cache/fe42d01f3826fe8096f86614.docs.json",
+   "sha256": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+   "kind": "原文（只读引用，未修改）"
+  },
+  {
+   "path": "data/cache/152e2a6eed94f1075e7e7070.docs.json",
+   "sha256": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+   "kind": "任务 JSON 声明的 sourceHash 所属文件（只读；docs[0].text 与本区间切片与上一文件逐字符相同）"
+  },
+  {
+   "path": "data/cache/f0b45e85aac6c95e584075a2.docs.json",
+   "sha256": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+   "kind": "同哈希副本（只读；用于确认 sourceHash 歧义不改变任何引文）"
+  },
+  {
+   "path": "data/cache/fe42d01f3826fe8096f86614.json",
+   "sha256": "04802afa6910e056b797a1586eb03c06820036907d248b17d7e05d388ad4b489",
+   "kind": "图谱缓存（只读；仅用于复核 CE2 的 note 数字，未作原文证据）"
+  },
+  {
+   "path": "loop/state/out/read_sanguo_L0_0096.json",
+   "sha256": "171eb1b8630d24d712dc57349a64deaeec8b1b69e2b56e0e99ae294669ea612b",
+   "kind": "被复核任务的提交记录（只读）。注意：本复核先执行 `loop.py verify`，该命令向其 reviews[] 追加一条 reviewer=w-verify-2 的记录，故本哈希是**追加之后**的实测值；追加前为 aabb159416e8…。此文件按设计会随复核演进，不是被改坏。"
+  },
+  {
+   "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/cl-verify-sanguo-L0-0096/audit0096.py",
+   "sha256": "36c0f07f99c32ad78adaba53fe28dfaa99a0249f3972e8ba8bef7c0d2fdd52e5",
+   "kind": "本复核的复算脚本（只读候选与原文，25 项断言 + 10 项缺陷复现）"
+  },
+  {
+   "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/cl-verify-sanguo-L0-0096/audit0096.out",
+   "sha256": "c7b2817fb91e6563159c0bf9106fd371464b7ba7be88acfc57b7af160837a41a",
+   "kind": "脚本输出全文（末行 SUMMARY checks=25 assertionFailures=0 defectsReproduced=10 defectNotReproduced=0）"
+  }
+ ],
+ "evidenceNote": "本复核全部结论由只读脚本在仓库根复算得出，脚本与输出落在外置 CL_ARTIFACTS（非 /tmp、非仓库内），符合 AGENTS.md 的产物纪律。脚本结果：**25 项断言全部 PASS、10 项缺陷全部 DEFECT-OK 复现、0 项缺陷复现失败**（SUMMARY checks=25 assertionFailures=0 defectsReproduced=10 defectNotReproduced=0）。脚本刻意把两类判断分开输出：PASS/FAIL 断言『候选这一项是对的』，DEFECT-OK/DEFECT-MISS 断言『我报的缺陷可复现』—— 避免把『缺陷复现成功』误读成校验失败。运行：python3 -B -s \"$AGENT_ARTIFACTS/cl-verify-sanguo-L0-0096/audit0096.py\"。 证据选择说明：我原先把本轮任务定义 loop/state/runs/task-verify_sanguo_L0_0096.json 也列为证据，提交时被校验拒绝（该前缀属瞬态路径、按设计会被回收）—— 已移除而不是绕过校验；任务定义的内容已逐条写进本 verdict 的 task/book/lane/unitIndex/sourceRange 字段。",
+ "sourceHashes": {
+  "candidateSha256": "3dedc4e7dea676e00482534507f5a32bac87cefee608746c658e03e0123efd83",
+  "sourceFileSha256": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+  "taskJsonSourceHash": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+  "segmentSha256": "c120989d5e51a568c1d8e5d46e9c8b3609fbc818e0863d1572aab84989dab4e4",
+  "graphCacheSha256": "04802afa6910e056b797a1586eb03c06820036907d248b17d7e05d388ad4b489"
+ },
+ "assertions": [
+  {
+   "text": "引文层全量复算（非抽样）：395 个带 start/end 的引文对象，395/395 满足 docs[0].text[start:end]==quote、start 为该串真实出现位置、⊆[489034,493949)、sourceHash==8ab7298a…、globalOccurrences==全篇实测次数、occurrenceIndex==start。失败 0。",
+   "result": "pass"
+  },
+  {
+   "text": "切片与边界：docs[0].text[489034:493949) 长 4915 码点，sha256==c120989d…，与候选 segmentSha256 相符；前 24 码点逐字等于回目标题『第九十七回　讨魏国武侯再上表　破曹兵姜维诈献书』。",
+   "result": "pass"
+  },
+  {
+   "text": "五栏硬红线：14 条任务的 objective/obstacle/action/result/cost 引文区间两两不相交，独立重算 intraTaskOverlaps==0，与候选自述一致。",
+   "result": "pass"
+  },
+  {
+   "text": "CE1：跨顶层分区复用实测 87 组 / 331 实例；候选 quoteReuse.crossOccurrenceQuotes==[] 且 crossOccurrenceCount==0；字段 crossSectionQuoteReuse 不存在（同批 0090/0092/0094 均存在该字段）。",
+   "result": "fail"
+  },
+  {
+   "text": "CE2：source.graphCacheRepro 键不存在（实际为 source.graphCache.repro）；note 内数字独立复算全部为真（events 1286、in-slice 3、causeEdges 339、tasks 178、characterStates 129、relations 1539）。",
+   "result": "fail"
+  },
+  {
+   "text": "CE3：reverseCoverage 的 292/44 独立重算对称差 0（记账诚实）；但字符级覆盖口径下有 29 条 ≥12 字句子零字符被引未单列，最极端块 [489940,490007) 仅 8/67=12% 被引。",
+   "result": "fail"
+  },
+  {
+   "text": "R1/R2：`众将接入问曰…何故急回耶` 与 `闻知王双斩将立功，大喜` 在候选全文（含散文与全部引文）出现次数均为 0，两条均落在被 GT 判为 covered 的块内。",
+   "result": "pass"
+  },
+  {
+   "text": "幻觉/越权：57 个人物名双向计数，『候选有而原文无』为 0；本区间外人物在候选内出现 0 次；T14.result 止于承诺、F04/F05/F06/F07 显式 unresolved、semanticReview.performed=false。",
+   "result": "pass"
+  },
+  {
+   "text": "引用核验：固定种子 20261014 随机抽 5 条，5/5 逐字命中且 find==start。",
+   "result": "pass"
+  },
+  {
+   "text": "悬空自指：`crossSectionQuoteReuse`×2、`source.graphCacheRepro`×1、`indepVerify`×1 在候选内均无可解析目标。",
+   "result": "fail"
+  }
+ ],
+ "changes": [
+  {
+   "path": "loop/state/out/verify_sanguo_L0_0096.verdict.json",
+   "kind": "append-only",
+   "note": "任务 writes 声明的唯一产出：本复核结论。本复核只读候选与原文，未修改候选（其 sha256 全程保持 3dedc4e7…）、未改任何受保护路径。"
+  }
+ ],
+ "protectedPaths": {
+  "touched": [],
+  "note": "未改动 js/ css/ index.html serve.py narrative.py scripts/ tests/ docs/ data/ 任何文件；未执行 git checkout/reset/stash；未跑 GPU 或浏览器测试。"
+ },
+ "remaining": [
+  "语义层未独立复核：某条任务是否该这样切、36 条 causeEdges 的机制解读是否唯一合理、themeReadings 是否过度解读，均未判定（见 myOwnErrors ⑤）。",
+  "未把候选的 395 条引文与图谱缓存 1286 条 events / 339 条 causeEdges 做逐条对齐 —— 只复核了候选自报的 graphCache 计数（我用与候选相同的 quoteRef.start 口径复算全部相符）。另需记录：既有 verify_sanguo_L0_0092 的 CE2 曾指出该缓存有 852/1286 条带便利字段 quoteStart、且用该字段过滤会得到与 quoteRef.start 不同的结果；本候选用的是 quoteRef.start（项目一贯口径），我复核该口径下其 3 条的说法为真，但未进一步核对 quoteStart 口径下的差异数（该差异不影响本候选结论，因其亦为 0 之外的另一子集）。",
+  "R4（『征马宛马』是否衍文）只作存疑记录，未从本区间内取得可判定的证据。",
+  "CE1 的 87 组中，自述性分区（selfCritique/unknowns/notModeled）引用同一句是否应计入『当作依据用』有判断空间；剔除后仍远超 0，不影响判定。",
+  "未核验与下一回（第九十八回）的衔接声明：F07 把回末套语记为『答案在下一回』，我未读区间外原文验证该计的归属，仅确认本区间内『未知其计如何，且看下文分解』逐字存在。"
+ ],
+ "rollback": "删除 loop/state/out/verify_sanguo_L0_0096.verdict.json 即回滚本复核的产出；`loop.py verify` 会向 loop/state/out/read_sanguo_L0_0096.json 的 reviews[] 追加一条记录并置 verifyState=partial（追加前该文件 sha256=待复算；如需完整回滚，去掉该 reviews 末条并恢复 verifyState=pending 即可）。本复核未修改候选文件本身（sha256 全程保持 3dedc4e7…）。"
+}

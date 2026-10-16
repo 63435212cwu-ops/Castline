@@ -1,0 +1,85 @@
+{
+ "task": "a11y:real-device",
+ "agent": "q-a11y",
+ "generatedAt": "2026-10-07T19:59:57Z",
+ "kind": "a11y-real-device-availability-and-simulation",
+ "realDevice": {
+  "verdict": "不可得（逐条实测）",
+  "tried": [
+   {
+    "tool": "adb",
+    "command_v": "不存在",
+    "usable": false
+   },
+   {
+    "tool": "idevice_id",
+    "command_v": "不存在",
+    "usable": false
+   },
+   {
+    "tool": "xcrun simctl",
+    "command_v": "xcrun 存在",
+    "usable": false,
+    "evidence": "xcrun: error: unable to find utility \"simctl\", not a developer tool or in PATH（无 Xcode）"
+   },
+   {
+    "tool": "safaridriver",
+    "command_v": "存在",
+    "usable": false,
+    "evidence": "能监听（/status → {\"ready\":true}）但建会话失败：\"The session timed out while connecting to a Safari instance... waiting for its RWIApplication to appear and become ready.\" HTTP 500",
+    "rootCause": "defaults read com.apple.Safari AllowRemoteAutomation → 未设置；safaridriver --enable → 需要交互式管理员密码，无法自动化"
+   },
+   {
+    "tool": "USB 真机",
+    "evidence": "system_profiler SPUSBDataType 中 iPhone/iPad/Android 匹配数 0",
+    "usable": false
+   },
+   {
+    "tool": "Playwright WebKit",
+    "evidence": "~/Library/Caches/ms-playwright 下只有 b/ 与 __dirlock，无 webkit* 目录；playwright 包未安装",
+    "usable": false
+   },
+   {
+    "tool": "Firefox/Edge",
+    "evidence": "/Applications 下不存在",
+    "usable": false
+   }
+  ],
+  "note": "系统 Safari.app 26.2 存在，但远程自动化未启用且启用需管理员密码 ⇒ 真 WebKit 亦不可用"
+ },
+ "simulationOnly": {
+  "warning": "以下全部是 **CDP 仿真，不是真机**；不得作为兼容性结论",
+  "gates": {
+   "zoom_reflow": "46/46 PASS（100%/200%/400% × deconstruction/story/search × 4 项断言）",
+   "a11y_tree": "PASS（语义树/标签页/箭头导航/Escape 焦点返回/命中点/受信事件）",
+   "focus_visibility": "PASS（真实 CDP Tab 走查，像素噪声 0）",
+   "keyboard_owner": "27/27 OK（组内左右不越界、上下卡片导航、Enter/Esc、legacy R 保留）",
+   "interaction_access": "PASS（触控/移动抽屉/命中点/受信事件/运行时健康）"
+  },
+  "base": "http://127.0.0.1:8765",
+  "data": "data/cache/f6a657935c945a3a9bcfc000.json",
+  "matrix": {
+   "zoom": "200%/400% 已实测通过（计划交付维度明确要求）",
+   "mobile": "390×844 触控（interaction_access 覆盖）",
+   "keyboard": "完整 Tab 旅程 + 组内方向键 + Enter/Esc",
+   "screenReaderSubstitute": "可访问树 dump + 焦点序审计（**替代，不是读屏**）"
+  }
+ },
+ "screenReaderLimits": [
+  "替代手段只能证明「语义树里有正确的角色/名称/状态」，不能证明「VoiceOver/TalkBack 真的朗读成句」",
+  "无法验证：读屏的朗读顺序、略读语义、发音、手势导航、以及读屏与焦点高亮的交互",
+  "⇒ 计划 §04「没有真机或读屏却声称全面兼容：交付不能满分」适用"
+ ],
+ "remaining": [
+  "真机 iOS Safari / Android Chrome：无设备",
+  "iOS 模拟器：无 Xcode",
+  "桌面真 WebKit：AllowRemoteAutomation 未启用、启用需管理员密码",
+  "VoiceOver / TalkBack：无真机且属 GUI 交互，无法脚本化"
+ ],
+ "contentionNote": {
+  "found": "一个泄漏的孤儿 Chrome（PPID=1，about:blank，GPU 子进程持续 ~23% CPU，已 24 分钟）",
+  "impact": "它与我本轮 a11y 测试并发；a11y 判据是 DOM/焦点/几何而非帧率，故结论不受影响；但**帧率类结论会被它污染**（见 perf 交叉核查）"
+ },
+ "provenance": "assistant-reviewed-source",
+ "claimVerified": false
+}

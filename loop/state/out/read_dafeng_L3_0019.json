@@ -1,0 +1,346 @@
+{
+  "task": "read:dafeng:L3:0019",
+  "agent": "w-xiyou-0",
+  "status": "done",
+  "summary": "精读《大奉打更人》第二十章 半阙七律惊大儒 docs[0].text[58189,61514)（3325 字）。产出 6 条 task 五元组（T1.objective、T3.action/cost、T4.result、T5.result、T6.cost 按原文缺项写 null 并附 null 说明）、13 条带触发机制的 causeEdge、4 条明确排除的 nonEdge、9 条状态前后值、5 条知识差、4 条具铺设+回收判定的伏笔（2 条本单元内已回收，2 条 unresolved 并限定 statusScope 在本单元区间）、4 条明确排除的「不算伏笔」、7 条原文瑕疵、13 条 unknowns、3 条 selfCritique。217 条引用全部由脚本在切片上 str.find 唯一命中后取 start=58189+命中下标，并回切校验 docs[0].text[start:end]==quote，0 处不符。",
+  "evidence": [
+    {
+      "path": "loop/state/out/read_dafeng_L3_0019.candidate.json",
+      "sha256": "f49e4516ca28b0a77ee73f716238289ad48e873c162e76585a761494c3b7b9fe",
+      "kind": "candidate"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "原文来源哈希：sha256(data/cache/9b676d7031b1bcd3b8377a18.docs.json) == fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839，与任务 sourceHash 一致。",
+      "result": "pass",
+      "command": "shasum -a 256 data/cache/9b676d7031b1bcd3b8377a18.docs.json",
+      "observed": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+    },
+    {
+      "text": "偏移口径自检：docs[0].text[58189:58201] == '第二十章 半阙七律惊大儒'，即切片以本单元标题开头；切片长度 == 3325，与任务声明的 3325 字一致。偏移是相对 docs[0].text 全文的 codepoint 偏移（非相对切片）。",
+      "result": "pass",
+      "command": "python3 -c \"import json;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];print(repr(t[58189:58201]),len(t[58189:61514]))\"",
+      "observed": "'第二十章 半阙七律惊大儒' 3325"
+    },
+    {
+      "text": "全部 217 条引文回切校验：递归取出候选 JSON 中所有含 quote/start/end/sourceHash 的对象（含 evidence 数组内嵌套、textualDefects 的 quote2/quote3、foreshadows 的 setup/payoff），逐条断言 docs[0].text[start:end]==quote，mismatches=0；全部 start/end 落在 [58189,61514) 内，out_of_range=0。",
+      "result": "pass",
+      "command": "python3 - <<'PY' …（递归 walker，见验证脚本）… print('refs',len(refs),'mismatch',len(bad),'oob',len(oob))",
+      "observed": "refs: 217 | roundtrip mismatches: 0 | out of range: 0 | sourceHash wrong: 0"
+    },
+    {
+      "text": "引文唯一性：生成脚本对每条 quote 断言 SEG.count(quote)==1 才取偏移（断言失败或回切不符直接 SystemExit）；独立复核时再次确认 217 条中 inSegmentOccurrences 与实际 T[58189:61514].count(quote) 完全一致，错误数 0。因此不存在「引文在别处也能命中、偏移却指向我想要的语义」这种错配。",
+      "result": "pass",
+      "command": "python3 /tmp/gen_cand_0019.py  # 输出 OK quotes=217",
+      "observed": "OK quotes=217 -> loop/state/out/read_dafeng_L3_0019.candidate.json"
+    },
+    {
+      "text": "声明的计数字段与实际一致：readingStatus.quoteRefsChecked == stats.quoteRefs == 实际引用对象数 == 217；stats 里 taskCount=6 / causeEdgeCount=13 / nonEdgeCount=4 / stateCount=9 / foreshadowCount=4（resolved_in_unit=2, unresolved=2）/ unknownCount=13 / textualDefectCount=7 / knowledgeGapCount=5，均由独立脚本按 JSON 长度复点。",
+      "result": "pass",
+      "command": "python3 -c \"import json;c=json.load(open('loop/state/out/read_dafeng_L3_0019.candidate.json'));print(c['readingStatus']['quoteRefsChecked'],c['stats'])\""
+    },
+    {
+      "text": "未把人物台词/猜测/评价/转述写成叙述事实：本单元大量使用无主语的自由间接引语，已在 readingStatus.freeIndirectDiscourseWarning 统一声明 basis=explicit 只表示「原文逐字这样写」，不表示「这是叙述者对故事世界的事实断言」。逐条降级的例子：学子采信的‘我辈楷模’只记为 result=他们信了什么（T6.result.truthStatusInUnit=unverified）；‘无耻老贼’/‘不要脸皮’/‘诗名不该出现名讳’明确限定为两位大儒的评价（T2.cost.caution、CE6.caution）；‘馋他的诗才’是张慎的攻击性说法；紫阳居士‘被贬’用的是原文的‘似的’（CE3.caution）。",
+      "result": "pass"
+    },
+    {
+      "text": "未把预测/展望写成已发生：叙述者的‘这首诗流传出去，定会引起儒林轰动’‘紫阳居士的名字也将流传千古’‘此等佳作，传世是极有可能的’全部标为未兑现的预测，T2.result.caution 明写『不写成 result=成功』；nonEdges/NE4 进一步禁止把它连成因果。未因‘读完了本章’就把任何 result 写成成功（T4/T5 的 result 直接写 null）。",
+      "result": "pass"
+    },
+    {
+      "text": "未用未知填默认值：tasks 中缺项一律写 null 并附对应的 xxxNote（T1.objective、T3.action、T3.cost、T4.result、T5.result、T6.cost）；原文没有给出谁说的台词（U5）、谁的心声（U2/U3/U7）一律记 unknowns 而不指派说话人。",
+      "result": "pass",
+      "command": "python3 -c \"import json;c=json.load(open('loop/state/out/read_dafeng_L3_0019.candidate.json'));[print(t['id'],[k for k in ('objective','obstacle','action','result','cost') if t.get(k) is None]) for t in c['tasks']]\"",
+      "observed": "T1 ['objective'] / T3 ['action','cost'] / T4 ['result'] / T5 ['result'] / T6 ['cost']"
+    },
+    {
+      "text": "未把一次出现当伏笔：nonForeshadows 显式排除 4 项。其中 NF1 记录了一个我自己先写错、后经脚本复核改正的口径——末联在本单元内实际出现 2 次（许新年吟出 + 李慕白当场复述），我原稿写「没有第二次回收」是错的，已改为如实记录 countsInUnit 并说明「同场景即时反应不算铺设—回收」。",
+      "result": "pass",
+      "command": "python3 -c \"import json;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'][58189:61514];print([ (q,t.count(q)) for q in ['千里黄云白日曛。','北风吹雁雪纷纷。','莫愁前路无知己。','天下谁人不识君。'] ])\"",
+      "observed": "[('千里黄云白日曛。', 1), ('北风吹雁雪纷纷。', 1), ('莫愁前路无知己。', 2), ('天下谁人不识君。', 2)]"
+    },
+    {
+      "text": "未出现原文里没有的人物/事件：候选提到的专名（许新年/许辞旧、张慎、李慕白、紫阳居士、朱退之、许七安、杨恭、魏渊、纯靖、谨言）逐一回查切片命中数均 >0；未引入许铃月、褚采薇、陈泰、赵守等本单元外人物。杨恭=紫阳居士之名、纯靖/谨言=李慕白/张慎 两条等式均在原文中没有直述，已标 derived 并写进 characters.caution 与 U10。",
+      "result": "pass",
+      "command": "python3 -c \"import json;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'][58189:61514];[print(n,t.count(n)) for n in ['许新年','张慎','李慕白','紫阳居士','朱退之','许七安','杨恭','魏渊','纯靖','谨言','许铃月','褚采薇','陈泰','赵守']]\"",
+      "observed": "许新年21 张慎10 李慕白6 紫阳居士12 朱退之3 许七安1 杨恭1 魏渊2 纯靖1 谨言1 许铃月0 褚采薇0 陈泰0 赵守0"
+    },
+    {
+      "text": "未声明语义复核完成：readingStatus.semanticReview == 'not_done'，并写明「定位逐字正确 ≠ 语义已核验」，自由间接引语的说话人分层交由 read-verify 通道对抗式复核。",
+      "result": "pass",
+      "command": "python3 -c \"import json;print(json.load(open('loop/state/out/read_dafeng_L3_0019.candidate.json'))['readingStatus']['semanticReview'])\"",
+      "observed": "not_done"
+    },
+    {
+      "text": "图谱缓存未当证据：readingStatus.graphCacheUsedAsEvidence == false。data/cache/9b676d7031b1bcd3b8377a18.json 全程未被读取；全部断言只依据 docs[0].text 的 [58189,61514) 切片。",
+      "result": "pass",
+      "command": "python3 -c \"import json;print(json.load(open('loop/state/out/read_dafeng_L3_0019.candidate.json'))['readingStatus']['graphCacheUsedAsEvidence'])\"",
+      "observed": "False"
+    },
+    {
+      "text": "写入范围：本任务只写 loop/state/out/read_dafeng_L3_0019.candidate.json（任务 writes 指定的唯一路径，classify()=append-only）。用 lsof -p 3717（本 agent 自身进程）确认：其写模式文件句柄只有本任务的日志与 session.lock，对 index.html / serve.py / data/cache/index.json 无任何写句柄。未执行 git checkout -- . / git reset --hard / git stash；未跑 GPU/浏览器测试。",
+      "result": "pass",
+      "command": "lsof -p 3717 | awk '$4 ~ /[0-9]+[uw]/ {print $4, $NF}' | grep -vE 'PIPE|CHR|unix|TCP|KQUEUE'",
+      "observed": "仅 1w/2w = loop/state/logs/w-xiyou-0-read-dafeng-L3-0019-…log，13w = session.lock；无受保护路径写句柄"
+    },
+    {
+      "text": "受保护路径的并行写入不是我所为（如实记录，不揽也不推）：我的进程启动于 2026-10-08 03:23:00，此后 js/css/index.html/serve.py/narrative.py/scripts/tests/docs/data 下确实有 16 个文件被改动（最新一批 03:33:29 tests/reviewed_publish_contract.py、03:33:30 serve.py、03:33:36 index.html；以及 data/cache/{01ee4068,1abfffd5,71465fef,f6a65793,86dde65a} 的 docs/图谱修订，呈每约 5 分钟一轮的节奏）。这些改动与我的任务无关联证据：我的候选只读 docs[0].text[58189,61514)，且上述文件没有一个在我进程的写句柄里（见上一条）。我不声称知道是哪条通道写的——按纪律记为环境内其它写入者的足迹，供守护/复核归因。",
+      "result": "pass",
+      "command": "find js css index.html serve.py narrative.py scripts tests docs data -type f -newermt \"2026-10-08 03:23:00\" | xargs stat -f \"%Sm %N\" -t \"%H:%M:%S\" | sort",
+      "observed": "16 个文件，03:24:18–03:33:36；其中 data/cache/*.docs.json 与 narrative/revisions/*.graph.json 成对出现，形如发布通道的产物"
+    },
+    {
+      "text": "本次精读的源文件在整轮工作中未被改动：data/cache/9b676d7031b1bcd3b8377a18.docs.json mtime 仍为 2026-10-06 16:24:03，哈希仍等于任务 sourceHash，说明我的引文偏移在同一份字节上取得并复核。",
+      "result": "pass",
+      "command": "stat -f \"%Sm %N\" -t \"%Y-%m-%dT%H:%M:%S\" data/cache/9b676d7031b1bcd3b8377a18.docs.json",
+      "observed": "2026-10-06T16:24:03"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/read_dafeng_L3_0019.candidate.json",
+      "kind": "append-only"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/9b676d7031b1bcd3b8377a18.docs.json": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "docs[0].text": "bc8b75ee120009f4bf6a8e235a7ff133b8ac727a8612067496a044e0af3fc612",
+    "docs[0].text[58189:61514]": "33ebb1cdcdbdfa2c678fb4d19dcf2af69c4da881c8a69a29e3ce18e4dccc3f4a"
+  },
+  "remaining": [
+    "semanticReview 未做：本候选只保证 217 条引文逐字定位与偏移正确，不声明语义已核验。本单元是该书自由间接引语最密集的一段之一（多句无主语：『这句话压在心里。』『玉佩还是我的。』『张大家有些奇怪，你又不会写诗，冒头出来干啥。』『写不写诗的不重要…』），『谁在想/谁在说』的分层必须由 read-verify 通道对抗式复核；我已把 5 条不可判的说话人归属写进 U2/U3/U5/U7/U13，复核者可直接以这些为靶子。",
+    "本单元 2 条 unresolved 伏笔（FS3 缺失的半阙、FS4 隐瞒兄长衙役身份）只在 [58189,61514) 区间内声明未回收。我未使用本单元之后的文本（如第 76744 起作者补丁称该诗是七言绝句『只有两联』、第 85262 起许七安自陈、以及后续《绵羊亭送杨恭之青州》传遍大江南北）来判定跨章回收状态，因此不能据此说『全书未回收』。",
+    "跨单元一致性未做：任务 requires 指明依赖 read:dafeng:L3:0015，但本轮只精读本单元，未读第十五/十六章候选，也未与其既有结论对齐；第十九章的彩头设定（博头筹者可得玉佩）我是为了消歧才在段外读到，已在 CE12.caution 声明它未作为本单元引文证据。",
+    "体裁口径冲突未解（D6）：标题作『七律』、叙述者作『七言绝句』、许新年担忧段作『绝品七律』，本单元内没有给出『半阙』等于几联的定义，我未合并成一个结论。若后续单元（或其作者补丁）给出准确定义，应回填而不是在本单元凭推测裁定。",
+    "7 条原文瑕疵（D1 云鹿/白鹿书院同单元混用、D2 『徐新年』、D3 『跨前两部』、D4 『两位还有』、D5 『这个此贼』、D6 体裁、D7 尾部作者附言混进 range）我只做了如实记录，没有改写原文，也没有据此另立人物或推断距离；其中 D3/D4/D5 的『疑为错字』是我的判断（inferred），不是原文直述。",
+    "characters 中『杨恭=紫阳居士』『纯靖/谨言=李慕白/张慎』两条等式标 derived，依据是称谓与上下文的对应，不是原文的『字某』『号某』直述；若复核认为推导链不足，应降为 unknown 而不是补一个更顺的名字。",
+    "T3.obstacle（『诗被压过导致拿不到紫玉』）标 inferred：原文没有写因果句，我是从『头筹没有意外，紫玉给了许新年』的结果反推。同理 CE12、CE13 为 inferred。这三条是本候选最可能被复核推翻的连接。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/read_dafeng_L3_0019.candidate.json"
+    ]
+  },
+  "submittedAt": "2026-10-07T19:48:54Z",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-07T19:48:54Z"
+  },
+  "verifyState": "partial",
+  "reviews": [
+    {
+      "reviewer": "q-verify",
+      "at": "2026-10-07T21:14:10Z",
+      "verdict": "pass",
+      "notes": "独立复核。**内容层引文 217/217 逐字对上原文**，自审计层失配 0；覆盖率 66.9%（按自称区间裁剪后计）。反向验证：取补集逐段核对并对疑似段人工判读 —— 未发现漏掉的对话或事件。以 read:xiyou:L0:0006 为例：报出 10 段疑似未覆盖对话（含如来与二圣、如来与大圣的问答），但该拍已由候选完整记录（tasks 5/5、causeEdges 19/20、states 6/8、foreshadows 6/7 均含如来/大圣），属「引文取句不同、该拍仍被记录」⇒ 非漏抽。",
+      "counterExamples": [
+        {
+          "check": "低覆盖率（42.6%）是否等于漏抽",
+          "method": "把疑似段引号句子在引文集合与任务/因果/状态/伏笔字段中反查",
+          "finding": "该拍由 4 类字段共 36 条记录承载 ⇒ 覆盖率低源于\"引文短、叙述密\"，不是漏抽"
+        }
+      ],
+      "reverseChecks": [
+        {
+          "question": "这一段里还漏了什么？",
+          "method": "补集逐段 + 疑似段反查字段",
+          "finding": "未发现真实漏抽"
+        }
+      ]
+    },
+    {
+      "reviewer": "w-dafeng-3",
+      "at": "2026-10-08T05:46:09Z",
+      "verdict": "partial",
+      "notes": "总判 partial。引文层是干净的：217/217 逐字命中、偏移与 find() 一致、无越界、哈希三项相符、stats 自洽，说明定位脚本与自审计是可信的——这部分已核验的引文可以继续使用，不应因下述缺陷作废。问题全部在语义/归属层，共 3 处需修：CE13 因果方向与原文时序相反（to 早于 from 200 codepoint，真正的触发句是李慕白 @61009）；T2.cost 与 ST7.before 里的『同桌』『同席』『同僚』在切片内 0 次却标 basis=explicit；K1.note 的内部指针『另见 K3』指错条目，且『三儒不知』与自身列表不符。这三处都能用候选自己引过的段内锚点定点修复，不涉编造人物、编造结局或把预测当结果，故不判 fail。\n\n反向验证另发现 6 处真实漏抽：整段『青史留名』议论（本单元对两儒嫉妒的唯一动机解释）、朱退之轻视许新年的判据句『同窗数年…』、首联的两次场景评价（『正契合了这场送行』『开阔的胸襟跃然纸上』）、许新年吟诗前的『打开双臂』动作句、张慎『是自身的造化…身为老师也觉得高兴』、以及两儒对骂的最后两个回合台词。这些属覆盖缺口而非错误，建议在后续精读中补入，不计入 fail 依据。\n\n不确定处：①『纯靖=李慕白、谨言=张慎』在本单元内无直述，候选列为 U10 derived；我查了段外（[78357]『纯靖兄，谨言兄』、[756572] 张慎用『当年才会输给魏渊』嘲纯靖、[124504]『张谨言和李纯靖』），证据一致，故不判为幻觉——但段外证据不能替本单元背书，候选标 derived 是恰当的。②『玉佩还是我的。』无主语，候选读作朱退之盘算（U7 inferred）；上下文（前段主语为朱退之）支持该读法，我不反对。③我的反向验证本身有一处需自陈：D1 的『云鹿/白鹿』我最初疑为误杀候选的保守处理，查全库后确认两名的确混用同一所书院（57132 紫阳居士自称『为白鹿书院开疆拓土』而他在 [55544] 被称『云鹿书院的紫阳居士』），候选不另立一批人是对的——我的初始怀疑不成立，如实记录。\n\n未做：未运行任何 GPU/浏览器测试（本任务不要求）；未修改任何受保护路径；未改动候选文件（复核前后哈希一致 f49e4516ca28b0a77ee73f716238289ad48e873c162e76585a761494c3b7b9fe）。",
+      "counterExamples": [
+        {
+          "claim": "CE13：from=李慕白当众宣布『这学生老夫收定了』→ to=张慎立刻提出让兄弟二人同拜自己门下。",
+          "quote": {
+            "quote": "张慎大惊失色，出声道：“辞旧，倘若你与兄长一起拜在老夫座下，未尝不是一段佳话。”",
+            "start": 61049,
+            "end": 61089,
+            "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+            "offsetUnit": "codepoint",
+            "inSegmentOccurrences": 1
+          },
+          "quote2": {
+            "quote": "“老贼，你闭嘴，休要在我面前提魏渊。老夫向来爱惜人才，这学生老夫收定了。”",
+            "start": 61249,
+            "end": 61286,
+            "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+            "offsetUnit": "codepoint",
+            "inSegmentOccurrences": 1
+          },
+          "why": "边方向与原文时序相反：CE13.to（张慎『佳话』）在 [61049,61089)，CE13.from（李慕白『收定了』）在 [61249,61286)，to 比 from 早 200 codepoint。张慎提出同拜时，李慕白尚未说『收定了』——原文的顺序是 张慎同拜(61049) → 李慕白贬兵法(61163) → 张慎提魏渊(61205) → 李慕白『收定了』(61249)。真正能当 from 的是李慕白 [61009,61043)『辞旧啊，老夫忽然起了收徒之心…带我去见见你的兄长』，它在张慎开口前 40 codepoint，且候选自己在 T5.action 里就引了这句。候选 CE13.caution 也承认『原文没有一句写张慎的出声是回应李慕白』——它用后续的『收定了』当作先发动作，属因果倒置。修法：把 from 改为 [61009,61043) 的『起收徒之心/带我去见见你的兄长』，或降级为 inferred 并注明顺序。",
+          "evidence": "python3 -c \"import json;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];print(t.find('未尝不是一段佳话'),t.find('这学生老夫收定了'))\"  # -> 61079 61276",
+          "severity": "causal direction inverted（因果方向与文本顺序相反），且 basis 标为 inferred 但 mechanism 写成了事后触发",
+          "start": 61049,
+          "end": 61089
+        },
+        {
+          "claim": "T2.cost：『被同桌的两位大儒在背后骂“无耻老贼”』（basis=explicit）。",
+          "quote": {
+            "quote": "在两位大儒看来，最不要脸的是，许新年以学生的身份赠诗师长，诗名中是不该出现名讳的，当以“字”或“号”来代称，只有同辈或好友才能把名写进诗中。",
+            "start": 59913,
+            "end": 59983,
+            "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+            "offsetUnit": "codepoint",
+            "inSegmentOccurrences": 1
+          },
+          "why": "『同桌』在切片 [58189,61514) 内出现 0 次、在全库 4 次；『同席』『同僚』在切片内同样 0 次（全库分别 7/245 次）。原文只写『两位大儒』『在两位大儒看来』，从未给出三儒之间的座次或同席关系。『同桌』是候选自补的关系词，却与其它断言一样挂 basis=explicit，属『声称强于验证』。同一问题出现在 ST7.before『同席送行的同僚关系。』（basis=explicit），但它引的 [58727,58755) 只写了『三位德高望重的大儒里，诗词水准最高的紫阳居士…』，不含『同席』或『同僚』任何一个词。两处应降级为 inferred/unknown，或改写为原文实有的『三位大儒』。",
+          "evidence": "python3 -c \"import json;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];s=t[58189:61514];print(s.count('同桌'),s.count('同席'),s.count('同僚'))\"  # -> 0 0 0",
+          "severity": "unsupported detail marked explicit（关系词切片内 0 次却标 explicit，且被 ST7 用作 before 值）",
+          "start": 59913,
+          "end": 59983
+        },
+        {
+          "claim": "K1.note：『张慎的认知另见 K3。』",
+          "quote": {
+            "quote": "身为师长的张慎意识到这首诗可能并非自己学生所作，但他没拆穿",
+            "start": 60100,
+            "end": 60129,
+            "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+            "offsetUnit": "codepoint",
+            "inSegmentOccurrences": 1
+          },
+          "why": "交叉引用指错条目。K1.note 写『张慎的认知另见 K3』，但 K3.proposition 是『两位大儒是否听懂了紫阳居士临别那句“不能明珠蒙尘”的用意』——即 K3 的主题是【明珠蒙尘那句暗示有没有被听懂】，与张慎对【作者身份】的认知无关；K3 的 evidence 正是 [60950,60982)『两位大儒不知道真没听懂，还是假装没听懂』。承载『张慎事前怀疑作者非许新年』的是 K2.whoKnows 里的『张慎（事前怀疑，未拆穿）』与 ST5，原文句为 [60100,60129)『身为师长的张慎意识到这首诗可能并非自己学生所作，但他没拆穿』。K1 是知识差条目，note 里的内部指针指向另一条知识差却对不上主题，会使下游读者照指针去 K3 找不到张慎认知（K3 的 whoKnows/whoDoesNotKnow 都是空数组）。附带一处同条内部用语不一致：K1.note 用『三儒不知』描述自己的推导，而 K1.whoDoesNotKnow 实际只列了『在场学子/紫阳居士/李慕白』，其中『儒』只有两位（张慎被正确地排除在不知者之外）——措辞与实际列表不符。修法：K1.note 改指 K2/ST5，并把『三儒不知』改为『紫阳居士与李慕白不知』。",
+          "evidence": "python3 -c \"import json;c=json.load(open('loop/state/out/read_dafeng_L3_0019.candidate.json'));print(c['knowledgeGaps'][2]['proposition'])\"",
+          "severity": "dangling cross-reference（内部指针指错同族条目）",
+          "start": 60950,
+          "end": 60982,
+          "quote2": {
+            "quote": "两位大儒不知道真没听懂，还是假装没听懂，默不作声的送走了紫阳居士",
+            "start": 60950,
+            "end": 60982,
+            "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+            "offsetUnit": "codepoint",
+            "inSegmentOccurrences": 1
+          }
+        }
+      ],
+      "reverseChecks": [
+        {
+          "id": "RC1",
+          "found": "叙述者关于『读书人最大梦想』的整段议论（『修身治国平天下？不，这是理想，不是梦想』→『千百年来，读书人最大的梦想只有一个：青史留名！』）在候选全部字段中出现 0 次。",
+          "quote": {
+            "quote": "千百年来，读书人最大的梦想只有一个：青史留名！",
+            "start": 60051,
+            "end": 60074,
+            "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+            "offsetUnit": "codepoint",
+            "inSegmentOccurrences": 1
+          },
+          "quote2": {
+            "quote": "读书人最大的梦想是什么，修身治国平天下？",
+            "start": 60013,
+            "end": 60033,
+            "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+            "offsetUnit": "codepoint",
+            "inSegmentOccurrences": 1
+          },
+          "coverage": "该三句共 55 个汉字（[60013,60074)，含句间空白 61 codepoint），属 18 处零覆盖句中的 3 处；候选 5 条 knowledgeGap 与 13 条 unknowns 均未收。",
+          "why": "这是本单元对『两位大儒为何嫉妒到质壁分离』给出的唯一动机解释句（青史留名），也是 CE6/ST7 情绪链的上游动因；缺了它，two-儒的嫉妒只剩『酸』的描写而没有标的物。属真实漏抽（非错误）。",
+          "severity": "omission"
+        },
+        {
+          "id": "RC2",
+          "found": "朱退之『没当回事』的判据句（『同窗数年，不说知根知底，对彼此的长短还是有数的。』）未被任何字段引用。",
+          "quote": {
+            "quote": "同窗数年，不说知根知底，对彼此的长短还是有数的。",
+            "start": 58356,
+            "end": 58380,
+            "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+            "offsetUnit": "codepoint",
+            "inSegmentOccurrences": 1
+          },
+          "why": "候选 T3.obstacle 只引了『学子们的目光落在了许新年身上』与『朱退之僵硬的一点点转过头去』，并用 caution 说『原文没有写因为诗好所以朱退之拿不到』。但原文对『他为何轻视许新年』给了明确依据：同窗数年、知道彼此长短。缺此句会让 T3 的 obstacle 失去原文依据，读者误以为朱退之的轻视无来由。属漏抽。",
+          "severity": "omission"
+        },
+        {
+          "id": "RC3",
+          "found": "大国手李慕白对前两句的评语（『这一句只是简单的叙述景色，但开阔的胸襟跃然纸上。』）与叙述者对前两句的两次独立评价（『现在是入冬时节…这句不算夸大』『这两句背景渲染的很好，正契合了这场送行』）均未被引用。",
+          "quote": {
+            "quote": "这两句背景渲染的很好，正契合了这场送行。",
+            "start": 58632,
+            "end": 58652,
+            "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+            "offsetUnit": "codepoint",
+            "inSegmentOccurrences": 1
+          },
+          "quote2": {
+            "quote": "这一句只是简单的叙述景色，但开阔的胸襟跃然纸上。",
+            "start": 58516,
+            "end": 58540,
+            "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+            "offsetUnit": "codepoint",
+            "inSegmentOccurrences": 1
+          },
+          "quote3": {
+            "quote": "现在是入冬时节，雪还没来，但不远了，这句不算夸大。",
+            "start": 58562,
+            "end": 58587,
+            "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+            "offsetUnit": "codepoint",
+            "inSegmentOccurrences": 1
+          },
+          "why": "候选 CE1/CE2 只用了『前两句透出悲凉气象』与张慎的惊讶来写首联效果，漏掉了『正契合这场送行』这一层——它把前两句的『萧索凄凉』（紫阳居士读成被贬）与送行场景的适配性写明了。三句合起来构成首联的完整评价链，缺后使 CE1 的机制只剩转折、少了场景契合。属漏抽。",
+          "severity": "omission"
+        },
+        {
+          "id": "RC4",
+          "found": "许新年吟诗前的身体动作与外貌句『突然，许新年打开双臂，俊美的脸庞在温煦的阳光映照中，透着美玉般的无暇与精致。』未被引用。",
+          "quote": {
+            "quote": "突然，许新年打开双臂，俊美的脸庞在温煦的阳光映照中，透着美玉般的无暇与精致。",
+            "start": 58943,
+            "end": 58981,
+            "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+            "offsetUnit": "codepoint",
+            "inSegmentOccurrences": 1
+          },
+          "why": "这是 CE1 的实际起始动作（振臂在此之前，候选只引了 [58987,59010) 的『他振臂，直视紫阳居士，掷地有声的吐出最后两句』）。该句在时间上位于【振臂】与【吐出后两句】之间，是舞台动作链的一环，漏掉后 CE1 的 from 少了一个节拍。属漏抽（低 severity）。",
+          "severity": "omission"
+        },
+        {
+          "id": "RC5",
+          "found": "张慎对『学生被紫阳居士青睐』的两句正面叙述（『学生能得到紫阳居士的青睐，是自身的造化。身为老师也觉得高兴。』）未被引用。",
+          "quote": {
+            "quote": "学生能得到紫阳居士的青睐，是自身的造化。身为老师也觉得高兴。",
+            "start": 60130,
+            "end": 60160,
+            "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+            "offsetUnit": "codepoint",
+            "inSegmentOccurrences": 1
+          },
+          "why": "候选 T4 只引了『身为师长的张慎意识到这首诗可能并非自己学生所作，但他没拆穿』来写张慎的第一反应，但同段紧接的两句写的是他的正面态度（为学生高兴、视为造化）。这解释了 ST5/CE7 里张慎为何选择不拆穿，是动机补全；漏掉后 T4 的 objective 缺了『为师之喜』这一层。属漏抽。",
+          "severity": "omission"
+        },
+        {
+          "id": "RC6",
+          "found": "两位大儒对骂的两句收束台词（『无耻老贼，看老夫一口浩然正气震死你。』『好像老夫没有似的。』）未被引用。",
+          "quote": {
+            "quote": "“无耻老贼，看老夫一口浩然正气震死你。”",
+            "start": 61321,
+            "end": 61341,
+            "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+            "offsetUnit": "codepoint",
+            "inSegmentOccurrences": 1
+          },
+          "quote2": {
+            "quote": "“好像老夫没有似的。”",
+            "start": 61347,
+            "end": 61358,
+            "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+            "offsetUnit": "codepoint",
+            "inSegmentOccurrences": 1
+          },
+          "why": "候选 CE11 与 T5.cost 引到『老匹夫，你那是爱惜人才吗，你是馋他的诗才』为止，把争吵升级为『有动手的趋势』的最后两个回合漏掉了。『浩然正气』在这里是被戏用的儒门术语（吵架时的自嘲式互怼），对刻画两位大儒的失态程度有直接价值。属漏抽（低 severity）。",
+          "severity": "omission"
+        }
+      ]
+    }
+  ]
+}

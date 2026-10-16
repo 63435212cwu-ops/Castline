@@ -1,0 +1,85 @@
+{
+  "task": "read:sanguo:L0:0040",
+  "agent": "w-read-2",
+  "status": "done",
+  "summary": "逐段通读《三国演义》第四十一回原文区间 [203675,209822) 共 6147 codepoint（19 个非空行，正文止于 209765），产出候选 JSON：15 条任务五元组（10 个栏位为 null 且每栏都写了 <栏位>Note 说明为什么没有依据）、17 条 causeEdges（另 4 条 rejectedCauseEdges 记下我判定不连边的理由）、12 条 states、6 条 knowledgeGaps、6 条 foreshadows（2 resolved / 2 partial / 2 unresolved，另 4 条 rejectedForeshadows）、26 条 worldSettings（place 12 / item 8 / rule 6；arrived 6、mentioned 6；declared 2、executed 3、misunderstood 1，另 4 条 rejectedWorldSettings）、2 条 themeReadings（各带 perspective/support/counter 三件）、13 条 unknowns、6 条 selfCritique。全文件 266 条引用逐字命中 docs[0].text 且偏移全部落在本单元区间内，sourceHash 一律为 prompt 指定文件的 sha256。semanticReview 保持 not-performed。",
+  "evidence": [
+    {
+      "path": "loop/state/out/read_sanguo_L0_0040.candidate.json",
+      "sha256": "7de973f495fc5035349e0b94f20697d205c62f0dde697492060530dfa9c8d8a2"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "引用层：对候选文件做递归遍历，凡含 quote/start/end 的字典都用 json.load(open('data/cache/fe42d01f3826fe8096f86614.docs.json'))[0]['text'] 复算 text[start:end]==quote，并断言 S<=start<end<=E 且 sourceHash 等于 8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2。结果：266 条全部逐字命中、0 条失败、0 条越界。审计脚本（/tmp/c040/audit.py）与构建脚本（/tmp/c040/build.py）是两个独立实现，审计脚本不复用构建脚本的变量。",
+      "result": "pass"
+    },
+    {
+      "text": "偏移口径：断言 docs[0].text[203675:203696] == '第四十一回　刘玄德携民渡江　赵子龙单骑救主'（切片以本单元标题开头）；并复算下一单元起点：text[209822:209848] == '第四十二回　张翼德大闹长坂桥'，证明 209822 确为本单元上界。命令：python3 -c \"import json;t=json.load(open('data/cache/fe42d01f3826fe8096f86614.docs.json'))[0]['text'];print(t[203675:209696][:21]==t[203675:203696], repr(t[209822:209840]))\"",
+      "result": "pass"
+    },
+    {
+      "text": "sourceHash 口径：shasum -a 256 data/cache/fe42d01f3826fe8096f86614.docs.json == 8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2，与候选 source.sourceHash 一致。另给出 textSha256=9d28638de0b0a89fa080cc2defb4a1f8de6adb1260c4545c04ef80f73cbb221e（docs[0].text 全文，607191 codepoint）与 segmentSha256（text[203675:209822]）另起字段，未覆盖 sourceHash。",
+      "result": "pass"
+    },
+    {
+      "text": "任务 JSON 顶层 sourceHash=2988ce6e… 与 prompt 正文指定的 fe42d01f3826fe8096f86614.docs.json 不一致。我复算了另一份缓存 data/cache/152e2a6eed94f1075e7e7070.docs.json：其 sha256 正是 2988ce6e…，且两份文件 docs[0].text 长度同为 607191、text 的 sha256 同为 9d28638d…、[203675,209822) 切片逐字相同（ta[203675:209822]==tb[203675:209822] 为 True）。因此本候选全部偏移在两份文件里都成立；我按 prompt 指定文件计算 sourceHash，并把该不一致登记为 unknowns U13，未修改任何缓存文件。",
+      "result": "pass"
+    },
+    {
+      "text": "五元组分栏独立性：脚本检查每条任务的五个栏位，断言同一句引文不在同一任务的另一栏位出现。构建过程中该检查先后抓出 T0 的 objective/action 与 obstacle/action 两次复用，均已改为各栏引各自原句；最终 15 条任务 0 条违规。",
+      "result": "pass"
+    },
+    {
+      "text": "null 栏位标注：10 个 null 栏位（T2/T3? 等共 10 处）逐一检查存在同名 <栏位>Note 且内容非空串。审计脚本对 '为 null 但无 Note' 与 'Note 为空串' 分别报错，结果 0 条。",
+      "result": "pass"
+    },
+    {
+      "text": "世界设定三态字段：place 12 条全部有 placeState∈{arrived,mentioned}；item 8 条全部有 itemStates⊆{hold,transfer,use,lose} 非空且带 stateEvidence 单列该态的原文字样；rule 6 条全部有 institution∈{declared,executed,misunderstood} 且 explain 非空。'荆州' 记 mentioned 而非 arrived：区间内「荆州」5 处全为钱粮/官爵/图谋/所得感言，无「到荆州」「入荆州」的到达动作；真实的到达句（进屯襄阳城外、入城至府中坐定）已单列为襄阳的 arrived。",
+      "result": "pass"
+    },
+    {
+      "text": "伏笔：resolved-in-unit / partial-in-unit 必须有 payoff 引用，unresolved-in-unit 必须无 payoff。6 条中 FS3（张飞疑兵）与 FS4（江夏求救兵）标 unresolved 且 payoff=null；FS5、FS6 标 partial 并写明哪一半未兑现（糜夫人仍投井；赵云誓言的后半在本区间既未兑现也未取消）。另 4 条 rejectedForeshadows 记下不列为伏笔的理由（含 RFS4 更正了我最初把王威出现次数写成 2 次的错误）。",
+      "result": "pass"
+    },
+    {
+      "text": "metrics 自洽：审计脚本按候选文件实际重算 tasks/taskColumnsNull/causeEdges/states/knowledgeGaps/foreshadows/worldSettings/themeReadings/unknowns/selfCritique 各计数，与候选 metrics 自报值逐项相等（0 处不符）。",
+      "result": "pass"
+    },
+    {
+      "text": "红线自查：(1) semanticReview=not-performed，未声称语义已核验；(2) 无原文以外的人物或事件——区间内 44 个实名人物全部在候选中有落点（最初漏了许褚，反向覆盖检查抓出后补为 T0 与 CE0）；(3) result 栏对 T2/T13 写 null 并说明理由（江夏是否发兵本区间无交代；张飞疑兵是否奏效在下回），未把「结束」当「成功」；(4) 因果边均给 trigger+mechanism，另 4 条 rejectedCauseEdges 显式拒绝「时间相邻当因果」（占课→夜袭、占课→扎营、糜芳中箭→误报等）。",
+      "result": "pass"
+    },
+    {
+      "text": "受保护路径未改动：本轮只新增 loop/state/out/read_sanguo_L0_0040.candidate.json 一个文件（loop/ 属追加式可写前缀）。未运行任何 GPU/浏览器测试，未执行 git checkout -- . / git reset --hard / git stash。构建与审计脚本位于 /tmp/c040/，不入库。",
+      "result": "pass"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/read_sanguo_L0_0040.candidate.json",
+      "kind": "append-only"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/fe42d01f3826fe8096f86614.docs.json": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+    "data/cache/152e2a6eed94f1075e7e7070.docs.json": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+    "loop/state/runs/task-read_sanguo_L0_0040.json": "70d4b1b3f4d5d3a633ecb091b80121bdc3f639c5091ac69f531ccb0ee63d7349"
+  },
+  "remaining": [
+    "语义未核验：本候选只完成「引文逐字命中 + 全文绝对偏移自洽 + 区间逐段通读」这一层。人物动机强弱、因果强度、伏笔判定、世界设定三态归类（arrived/mentioned、hold/transfer/use/lose、declared/executed/misunderstood）一律待 read-verify 通道独立复核。",
+    "T9 的 cost（曹操对刘琮的承诺破产）与 T1 的 cost（派徐庶致军情外泄）都是跨段推导，basis=derived，是本轮最可能被复核推翻的两栏；已在 selfCritique SC1/SC2 主动写明。",
+    "青扛剑被拆成 4 条 item 条目（transfer/hold/transfer/use）而非 1 条多选 itemStates，与 prompt 对 itemStates「多选」的表述存在口径差异；已在 SC3 写明我不改的理由，若复核要求合并，请保留四态各自的引文。",
+    "「荆州」判 mentioned 与本区间曹操实际入襄阳城存在张力（他自称「吾不喜得荆州」）；已把到达句单列为襄阳的 arrived 并在 SC4 给出反方论据，两处都写全供复核改判。",
+    "任务 JSON 顶层 sourceHash 指向另一份缓存文件，与 prompt 正文不一致。我未修改任何缓存或任务文件，只登记为 unknowns U13；此口径是否统一需上游决定。",
+    "区间末尾（209653-209765）钟缙、钟绅拦路与「且听下回分解」属下一回的引子，本区间不写其结果；张飞疑兵、江夏救兵、赵云脱身三线的回收都在下一回，本候选按纪律标 unresolved。",
+    "本轮未做（也不应做）：未跑 GPU/浏览器测试，未产出页面或图谱写回，未发布新审阅版本。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/read_sanguo_L0_0040.candidate.json"
+    ]
+  }
+}

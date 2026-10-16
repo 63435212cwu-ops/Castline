@@ -1,0 +1,951 @@
+--- a/js/sky/sky-model.js
++++ b/js/sky/sky-model.js
+@@ -193,6 +193,219 @@
+       items.push({ index: i, evidence: ok ? 'anchored' : 'inherited-pending', label: ok ? '原文锚点' : '继承 · 待核验' });
+     }
+     return { version: 'relationHonesty/1', total: rels.length, anchored: anchored, inherited: rels.length - anchored, items: items };
++  }
++
++  /* C1/M97: read-only one-hop neighbor comparison. Endpoints are resolved through the
++   * published stable IDs and CLAtlasSource's real alias owners; this never infers edges
++   * from events, co-occurrence projections, or the rendered line pool. */
++  function compareRelations(G, aId, bId, options) {
++    options = options || {};
++    function list(v) { return Array.isArray(v) ? v : []; }
++    function key(v) { return v == null || v === '' ? null : String(v); }
++    function add(map, k, v) {
++      if (k == null) return;
++      var rows = map[k] || (map[k] = []);
++      if (rows.indexOf(v) < 0) rows.push(v);
++    }
++    function sortedRows(map) { return Object.keys(map).map(function (k) { return map[k]; }); }
++    var a = key(aId), b = key(bId), rels = G && Array.isArray(G.relations) ? G.relations : null;
++    var empty = { ok: false, mode: 'unavailable', aId: a, bId: b, common: [], onlyA: [], onlyB: [],
++      kinds: [], stats: { sourceRelations: rels ? rels.length : 0, includedRelations: 0, copresenceExcluded: 0,
++        scopeExcluded: 0, kindFiltered: 0, duplicateEdges: 0, conflictingRelationIds: 0,
++        selfEdges: 0, directPairEdges: 0, ambiguousEndpoints: 0, unresolvedEndpoints: 0,
++        identityVetoEndpoints: 0 }, reason: '' };
++    if (!G || !Array.isArray(G.characters) || !rels) { empty.reason = 'graph_or_relations_missing'; return empty; }
++    var source = g.CLAtlasSource, relationScope = g.CLSkyRelationScope;
++    if (!source || typeof source.aliasIndex !== 'function' || !relationScope || typeof relationScope.of !== 'function') {
++      empty.reason = 'identity_or_relation_adapter_missing'; return empty;
++    }
++    var characters = G.characters.filter(function (c) { return c && typeof c === 'object' && !Array.isArray(c); }), idRows = Object.create(null), personById = Object.create(null);
++    characters.forEach(function (c) {
++      if (!c || typeof c !== 'object') return;
++      var cid = key(c.id), eid = key(c.entityId), stable = cid || eid;
++      if (cid != null) add(idRows, cid, c);
++      if (eid != null && eid !== cid) add(idRows, eid, c);
++      if (stable != null) add(personById, stable, c);
++    });
++    var alias = source.aliasIndex(characters), aliasOwners = alias && alias.owners || Object.create(null);
++    function identityProblem(c) {
++      var status = String(c && c.identityStatus || '').trim().toLowerCase();
++      if (c && (c.identityReview || c.identityConflict === true || c.identityPending === true)) return status || 'review_required';
++      return status && status !== 'resolved' ? status : '';
++    }
++    function uniquePerson(id) {
++      var rows = idRows[id] || [];
++      if (rows.length !== 1) return { person: null, status: rows.length ? 'duplicate_id' : 'missing_id' };
++      var c = rows[0], cid = key(c.id), eid = key(c.entityId);
++      if (cid != null && eid != null && cid !== eid) return { person: null, status: 'id_entity_id_conflict' };
++      var identityStatus = identityProblem(c);
++      if (identityStatus) return { person: null, status: 'identity_' + identityStatus };
++      var stable = cid || eid;
++      if (!stable || stable !== id) return { person: null, status: 'id_mismatch' };
++      if ((personById[stable] || []).length !== 1) return { person: null, status: 'duplicate_id' };
++      return { person: c, id: stable, status: 'resolved' };
++    }
++    var aPerson = a == null ? { person: null, status: 'missing_id' } : uniquePerson(a);
++    var bPerson = b == null ? null : uniquePerson(b);
++    if (!aPerson.person) { empty.reason = 'a_' + aPerson.status; return empty; }
++    if (b != null && !bPerson.person) { empty.reason = 'b_' + bPerson.status; return empty; }
++    if (b != null && a === b) { empty.reason = 'same_person'; return empty; }
++
++    function resolveEndpoint(value) {
++      var token = key(value);
++      if (token == null) return { status: 'missing_endpoint' };
++      if (idRows[token]) return uniquePerson(token);
++      var owners = list(aliasOwners[token]);
++      if (owners.length !== 1 || owners[0] == null || owners[0] === '') {
++        return { status: owners.length > 1 ? 'ambiguous_alias' : 'unresolved_alias' };
++      }
++      return uniquePerson(String(owners[0]));
++    }
++    var scope = options.scope && typeof options.scope === 'object' ? options.scope : {};
++    var permittedIds = Array.isArray(scope.relationIds) ? Object.create(null) : null;
++    if (permittedIds) scope.relationIds.forEach(function (id) { permittedIds[String(id)] = true; });
++    function permitted(rel, index, relId) {
++      if (permittedIds && !permittedIds[relId == null ? '' : relId]) return false;
++      if (typeof scope.allowsRelation === 'function' && !scope.allowsRelation(rel, index)) return false;
++      return true;
++    }
++    var edges = [], noIdSeen = Object.create(null), kinds = Object.create(null);
++    /* Audit every raw ID group before scope, kind, endpoint, or copresence filtering.
++     * Otherwise a malformed/filtered sibling can be silently hidden behind a usable row. */
++    function stable(value) {
++      if (Array.isArray(value)) return value.map(stable);
++      if (value && typeof value === 'object') {
++        var out = {}; Object.keys(value).sort().forEach(function (k) { out[k] = stable(value[k]); }); return out;
++      }
++      return value;
++    }
++    var rawById = Object.create(null), rawSignature = typeof WeakMap === 'function' ? new WeakMap() : null;
++    rels.forEach(function (rel) {
++      if (!rel || typeof rel !== 'object' || Array.isArray(rel)) return;
++      var rawId = key(rel.id) || key(rel.entityId);
++      if (key(rel.id) && key(rel.entityId) && key(rel.id) !== key(rel.entityId)) {
++        empty.stats.conflictingRelationIds++;
++        if (rawSignature) rawSignature.set(rel, 'id-conflict:' + key(rel.id) + ':' + key(rel.entityId));
++        return;
++      }
++      if (rawId == null) return;
++      var sig = JSON.stringify(stable(rel));
++      if (rawSignature) rawSignature.set(rel, sig);
++      (rawById[rawId] || (rawById[rawId] = [])).push({ rel: rel, signature: sig });
++    });
++    var badRelationIds = Object.create(null), duplicateRawIds = Object.create(null);
++    Object.keys(rawById).forEach(function (id) {
++      var signatures = Object.create(null);
++      rawById[id].forEach(function (row) { signatures[row.signature] = true; });
++      if (Object.keys(signatures).length > 1) { badRelationIds[id] = true; empty.stats.conflictingRelationIds++; }
++      else if (rawById[id].length > 1) duplicateRawIds[id] = true;
++    });
++    rels.forEach(function (rel, index) {
++      if (!rel || typeof rel !== 'object' || Array.isArray(rel)) { empty.stats.unresolvedEndpoints++; return; }
++      var relId0 = key(rel.id), entityId = key(rel.entityId);
++      var relId = relId0 || entityId;
++      if ((relId != null && badRelationIds[relId]) || (relId0 != null && entityId != null && relId0 !== entityId)) return;
++      if (!permitted(rel, index, relId)) { empty.stats.scopeExcluded++; return; }
++      var meta = relationScope.of(rel);
++      if (meta.isCopresence) { empty.stats.copresenceExcluded++; return; }
++      var kind = meta.kind || 'other';
++      kinds[kind] = { code: kind, label: meta.kindLabel || '其他类型' };
++      var left = resolveEndpoint(rel.a), right = resolveEndpoint(rel.b);
++      if (!left.person || !right.person) {
++        if (left.status === 'ambiguous_alias' || right.status === 'ambiguous_alias' || left.status === 'duplicate_id' || right.status === 'duplicate_id' || left.status === 'id_entity_id_conflict' || right.status === 'id_entity_id_conflict' || /^identity_/.test(left.status || '') || /^identity_/.test(right.status || '')) empty.stats.ambiguousEndpoints++;
++        else empty.stats.unresolvedEndpoints++;
++        if (/^identity_/.test(left.status || '') || /^identity_/.test(right.status || '')) empty.stats.identityVetoEndpoints++;
++        return;
++      }
++      if (left.id === right.id) { empty.stats.selfEdges++; return; }
++      if ((left.id === a && right.id === b) || (left.id === b && right.id === a)) { empty.stats.directPairEdges++; return; }
++      var signature = relId == null ? JSON.stringify(stable({ endpoints: left.id < right.id ? [left.id, right.id] : [right.id, left.id],
++        kind: kind, line: rel.line || '', description: rel.desc || rel.description || '', scope: rel.scope,
++        fromChapter: rel.fromChapter, toChapter: rel.toChapter, chapterRange: rel.chapterRange,
++        chapterSpan: rel.chapterSpan, eventIds: rel.eventIds, events: rel.events,
++        quoteVerified: rel.quoteVerified, sourceRefs: rel.sourceRefs, evidenceRefs: rel.evidenceRefs })) : rawSignature && rawSignature.get(rel);
++      edges.push({ relation: rel, index: index, id: relId, signature: signature, leftId: left.id, rightId: right.id,
++        left: left.person, right: right.person, meta: meta, recordUnique: relId == null || !duplicateRawIds[relId] });
++    });
++    var byRelId = Object.create(null), unique = [];
++    edges.forEach(function (edge) {
++      if (edge.id == null) {
++        if (noIdSeen[edge.signature]) { empty.stats.duplicateEdges++; return; }
++        noIdSeen[edge.signature] = true; unique.push(edge); return;
++      }
++      add(byRelId, edge.id, edge);
++    });
++    Object.keys(byRelId).forEach(function (id) {
++      var rows = byRelId[id], signatures = Object.create(null);
++      rows.forEach(function (edge) { signatures[edge.signature] = true; });
++      if (Object.keys(signatures).length > 1) { empty.stats.conflictingRelationIds++; return; }
++      unique.push(rows[0]); empty.stats.duplicateEdges += rows.length - 1;
++    });
++    if (options.kind && options.kind !== 'all') {
++      unique = unique.filter(function (edge) {
++        if (String(options.kind) === edge.meta.kind) return true;
++        empty.stats.kindFiltered++; return false;
++      });
++    }
++    var setA = Object.create(null), setB = Object.create(null), detailA = Object.create(null), detailB = Object.create(null);
++    function addNeighbor(set, details, person, edge, side) {
++      var id = side === 'a' ? edge.rightId : edge.leftId;
++      if (id === a || id === b) return;
++      set[id] = true;
++      var c = side === 'a' ? edge.right : edge.left, row = details[id];
++      if (!row) row = details[id] = { id: id, name: c.name || '', role: c.role || '', identity: c.identity || '', relations: [] };
++      if (!row.relations.some(function (item) { return item.id != null && item.id === edge.id; }) || edge.id == null) {
++        row.relations.push({ id: edge.id, kind: edge.meta.kind, kindLabel: edge.meta.kindLabel, evidence: edge.meta.evidence,
++          evidenceLabel: edge.meta.evidenceLabel, evidenceHint: edge.meta.evidenceHint, scope: edge.meta.scope,
++          scopeLabel: edge.meta.scopeLabel, scopeHint: edge.meta.scopeHint, line: edge.relation.line || '', recordUnique: edge.recordUnique,
++          description: edge.relation.desc || edge.relation.description || '' });
++      }
++    }
++    unique.forEach(function (edge) {
++      empty.stats.includedRelations++;
++      if (edge.leftId === a || edge.rightId === a) addNeighbor(setA, detailA, aPerson.person, edge, edge.leftId === a ? 'a' : 'b');
++      if (b != null && (edge.leftId === b || edge.rightId === b)) addNeighbor(setB, detailB, bPerson.person, edge, edge.leftId === b ? 'a' : 'b');
++    });
++    var common = [], onlyA = [], onlyB = [];
++    Object.keys(detailA).forEach(function (id) {
++      if (setB[id]) common.push({ id: detailA[id].id, name: detailA[id].name, role: detailA[id].role,
++        identity: detailA[id].identity, relationsA: detailA[id].relations, relationsB: (detailB[id] || {}).relations || [] });
++      else onlyA.push({ id: detailA[id].id, name: detailA[id].name, role: detailA[id].role,
++        identity: detailA[id].identity, relationsA: detailA[id].relations, relationsB: [] });
++    });
++    Object.keys(detailB).forEach(function (id) { if (!setA[id]) onlyB.push({ id: detailB[id].id, name: detailB[id].name, role: detailB[id].role,
++      identity: detailB[id].identity, relationsA: [], relationsB: detailB[id].relations }); });
++    function order(rows) { return rows.sort(function (x, y) { return String(x.name).localeCompare(String(y.name), 'zh') || x.id.localeCompare(y.id); }); }
++    empty.ok = true; empty.mode = b == null ? 'single' : 'compare'; empty.aId = a; empty.bId = b;
++    empty.a = { id: a, name: aPerson.person.name || '', role: aPerson.person.role || '', identity: aPerson.person.identity || '' };
++    empty.b = b == null ? null : { id: b, name: bPerson.person.name || '', role: bPerson.person.role || '', identity: bPerson.person.identity || '' };
++    empty.common = order(common); empty.onlyA = order(onlyA); empty.onlyB = order(onlyB);
++    empty.kinds = Object.keys(kinds).map(function (k) { return kinds[k]; }).sort(function (x, y) { return x.label.localeCompare(y.label, 'zh'); });
++    empty.stats.candidateRelations = rels.length; empty.stats.uniqueEdges = unique.length;
++    empty.reason = rels.length ? '' : 'relation_records_missing';
++    return empty;
++  }
++
++  function relationPeople(G) {
++    if (!G || !Array.isArray(G.characters) || !g.CLAtlasSource || typeof g.CLAtlasSource.aliasIndex !== 'function') return { ok: false, people: [] };
++    var chars = G.characters.filter(function (c) { return c && typeof c === 'object' && !Array.isArray(c); });
++    var aliases = g.CLAtlasSource.aliasIndex(chars), owners = aliases && aliases.owners || Object.create(null), ids = Object.create(null);
++    chars.forEach(function (c) {
++      var id = c.id != null ? String(c.id) : c.entityId != null ? String(c.entityId) : null;
++      if (id != null) (ids[id] || (ids[id] = [])).push(c);
++    });
++    return { ok: true, people: chars.map(function (c) {
++      var id = c.id != null ? String(c.id) : c.entityId != null ? String(c.entityId) : null;
++      var mismatch = c.id != null && c.entityId != null && String(c.id) !== String(c.entityId);
++      var duplicate = id == null || (ids[id] || []).length !== 1;
++      var ambiguousName = !!(c.name && (owners[String(c.name)] || []).length > 1);
++      var status = String(c.identityStatus || '').trim().toLowerCase();
++      var unknownIdentity = !!(c.identityReview || c.identityConflict === true || c.identityPending === true) || (status !== '' && status !== 'resolved');
++      return { id: id, name: String(c.name || ''), role: String(c.role || ''), camp: String(c.camp || ''),
++        identity: String(c.identity || ''), identityStatus: c.identityStatus || null,
++        ambiguousName: ambiguousName, selectable: !!id && !duplicate && !mismatch && !unknownIdentity,
++        reason: !id ? '缺少稳定ID' : duplicate ? '稳定ID重复' : mismatch ? '人物双ID不一致' : unknownIdentity ? '人物身份待区分' : '' };
++    }) };
+   }
+ 
+   function salience(G) {
+@@ -915,5 +1128,5 @@
+   g.CLSkyModel = { build: build, angleAt: angleAt, chapterNo: chapterNo, chapterShort: chapterShort, GAP: GAP, version: '1',
+     chapterLabel: chapterLabel, chapterSpan: chapterSpan,
+     salience: salience, isKeyEvent: isKeyEvent, keyEvents: keyEvents, KEY_SHARE: KEY_SHARE, storylineProvenance: storylineProvenance,
+-    relationHonesty: relationHonesty };
++    relationHonesty: relationHonesty, compareRelations: compareRelations, relationPeople: relationPeople };
+ })(typeof window !== 'undefined' ? window : this);
+
+--- a/js/sky/sky-shell.js
++++ b/js/sky/sky-shell.js
+@@ -23,6 +23,7 @@
+   var interaction = {hover:null,focus:null,selection:null,current:null}, interactionGraph = null, interactionKey = null;
+   var interactionPeople = Object.create(null), interactionNames = Object.create(null), interactionEvents = Object.create(null);
+   var interactionSVG = null, choiceSVG = null, choicePanel = null, choiceRequest = null, choiceSerial = 0, choiceProgress = 0;
++  var neighborSVG = null, neighborRequest = null, neighborSerial = 0, neighborProgress = 0, neighborPose = '';
+   var interactionScene = null, choicePointer = false, interactionKeyboard = false, interactionBound = false, interactionPose = '';
+   function stableId(item) { return item && item.id != null ? String(item.id) : item && item.entityId != null ? String(item.entityId) : null; }
+   function interactionWorkKey() { var A=app(); return A&&A.key?A.key():null; }
+@@ -82,6 +83,73 @@
+     if(choiceSVG)choiceSVG.textContent='';
+     setInteraction('focus',null);setInteraction('hover',null);
+     if(restore&&old.returnFocus&&old.returnFocus.isConnected&&old.returnFocus.focus)old.returnFocus.focus({preventScroll:true});
++  }
++  function clearNeighborCompare() {
++    neighborSerial++; neighborRequest = null; neighborProgress = 0; neighborPose = '';
++    if (g.CLSkyMotion) g.CLSkyMotion.cancelAll('relation-neighbors');
++    if (neighborSVG) neighborSVG.textContent = '';
++  }
++  function beginNeighborCompare(data) {
++    if (!G || !data || !data.a || !data.a.name) return false;
++    clearNeighborCompare();
++    var serial = ++neighborSerial;
++    var demo=[], common=data.common.slice(0,4);
++    common.forEach(function(x){demo.push({sides:['A','B'],person:x,common:true});});
++    var lineCount=common.length*2, budget=Math.max(0,8-lineCount);
++    data.onlyA.slice(0,budget).forEach(function(x){demo.push({sides:['A'],person:x,common:false});lineCount++;});
++    budget=Math.max(0,8-lineCount);
++    data.onlyB.slice(0,budget).forEach(function(x){demo.push({sides:['B'],person:x,common:false});lineCount++;});
++    neighborRequest = { graph:G, key:interactionWorkKey(), scene:scene(), data:data, demo:demo, serial:serial };
++    neighborProgress = reduced() ? 1 : 0;
++    if (!neighborSVG && hud) {
++      neighborSVG = doc.createElementNS('http://www.w3.org/2000/svg','svg');
++      neighborSVG.id = 'skyRelationNeighborMarks'; neighborSVG.setAttribute('class','sky-interaction-marks sky-neighbor-marks');
++      neighborSVG.setAttribute('aria-hidden','true'); hud.appendChild(neighborSVG);
++    }
++    if (!reduced() && g.CLSkyMotion) g.CLSkyMotion.tween({ from:0, to:1, dur:g.CLSkyTokens.DUR.participants, tag:'relation-neighbors', onUpdate:function(v) {
++      if (neighborRequest && neighborRequest.serial === serial) { neighborProgress = v; neighborPose = ''; }
++    }});
++    return { ok:true, demoCounts:{ common:common.length, onlyA:demo.filter(function(x){return !x.common&&x.sides[0]==='A';}).length,
++      onlyB:demo.filter(function(x){return !x.common&&x.sides[0]==='B';}).length, fibers:lineCount } };
++  }
++  function frameNeighborCompare() {
++    var q = neighborRequest;
++    var readingPanel=doc.getElementById('skyDeconPanel');
++    if (!q || q.graph !== G || q.key !== interactionWorkKey() || q.scene !== scene() || mode === 'compass' || (readingPanel && readingPanel.hidden)) { if (q) clearNeighborCompare(); return; }
++    if (reduced()) { neighborProgress = 1; if (g.CLSkyMotion) g.CLSkyMotion.finishAll('relation-neighbors'); }
++    if (!neighborSVG) return;
++    var d=q.data, names=[d.a.name].concat(q.demo.map(function(x){return x.person.name;}));
++    if (d.b) names.push(d.b.name);
++    var pts=starScreens(names)||{}, rows=[], pA=pts[d.a.name], pB=d.b&&pts[d.b.name], amount=Math.max(0,Math.min(1,neighborProgress));
++    function add(side, person, endpoint, index, isCommon) {
++      var p=pts[person.name]; if (!p || !endpoint || !isFinite(p[0]) || !isFinite(p[1])) return;
++      var t=Math.max(0,Math.min(1,(amount-0.2)/0.467));
++      rows.push({side:side,id:person.id,name:person.name,x:p[0],y:p[1],ax:endpoint[0],ay:endpoint[1],t:t,common:!!isCommon});
++    }
++    q.demo.forEach(function(item,i){item.sides.forEach(function(side){add(side,item.person,side==='A'?pA:pB,i,item.common);});});
++    var pose=JSON.stringify([rows,amount,g.innerWidth,g.innerHeight,pA,pB]); if(pose===neighborPose)return;
++    neighborPose=pose;neighborSVG.textContent='';neighborSVG.setAttribute('viewBox','0 0 '+g.innerWidth+' '+g.innerHeight);
++    var ns='http://www.w3.org/2000/svg';
++    var painted=Object.create(null);
++    rows.forEach(function(r){
++      var x=r.ax+(r.x-r.ax)*r.t,y=r.ay+(r.y-r.ay)*r.t,line=doc.createElementNS(ns,'path');
++      line.setAttribute('class','sky-neighbor-line '+(r.common?'is-common ':'')+(r.side==='B'?'from-b':'from-a'));
++      line.setAttribute('d','M'+r.ax+','+r.ay+' L'+x+','+y);neighborSVG.appendChild(line);
++      if(r.t>=1&&amount>=0.667&&!painted[r.id]){painted[r.id]=true;var mark=doc.createElementNS(ns,'g');mark.setAttribute('class','sky-neighbor-node '+(r.common?'is-common':''));mark.setAttribute('transform','translate('+r.x+','+r.y+')');
++        var ring=doc.createElementNS(ns,'circle');ring.setAttribute('r',r.common?'11':'8');mark.appendChild(ring);
++        if(r.common){var path=doc.createElementNS(ns,'path');path.setAttribute('d','M-15,-5 v-5 h5 M5,-10 h10 v10 M15,5 v10 H5 M-5,10 h-10 V0');mark.appendChild(path);}
++        var label=doc.createElementNS(ns,'text');label.setAttribute('class','sky-neighbor-label');label.setAttribute('x','13');label.setAttribute('y','-9');label.textContent=r.name;mark.appendChild(label);
++        neighborSVG.appendChild(mark);
++      }
++    });
++    function endpoint(point,owner,kind){if(!point||amount<0.2)return;var group=doc.createElementNS(ns,'g');group.setAttribute('class','sky-neighbor-owner from-'+kind);group.setAttribute('transform','translate('+point[0]+','+point[1]+')');
++      var shape=doc.createElementNS(ns,'path');shape.setAttribute('d',kind==='a'?'M-15,0 a15,15 0 1,0 30,0 a15,15 0 1,0 -30,0':'M-18,-7 v-11 h11 M7,-18 h11 v11 M18,7 v11 H7 M-7,18 h-11 V7');group.appendChild(shape);
++      var label=doc.createElementNS(ns,'text'),labelText=kind.toUpperCase()+' · '+owner,labelWidth=(Array.from(labelText).length||1)*12,gx,gy;
++      label.setAttribute('class','sky-neighbor-owner-label');
++      if(kind==='a'){gx=Math.max(6,Math.min(g.innerWidth-labelWidth-6,point[0]+18));gy=Math.max(14,point[1]-20);label.setAttribute('text-anchor','start');}
++      else{gx=Math.max(labelWidth+6,Math.min(g.innerWidth-6,point[0]-18));gy=Math.min(g.innerHeight-6,point[1]+32);label.setAttribute('text-anchor','end');}
++      label.setAttribute('x',String(gx-point[0]));label.setAttribute('y',String(gy-point[1]));label.textContent=labelText;group.appendChild(label);neighborSVG.appendChild(group);}
++    endpoint(pA,d.a.name,'a');if(d.b)endpoint(pB,d.b.name,'b');
+   }
+   function commitPickChoice(index) {
+     var q=choiceRequest,row=q&&q.rows[index],S=scene();
+@@ -118,7 +186,7 @@
+   }
+   function openPickChoices(snapshot) {
+     if(!G||mode==='compass'||!snapshot||!snapshot.nodes||snapshot.nodes.length<2)return false;
+-    closePickChoices(false);stopPlay();
++    clearNeighborCompare();closePickChoices(false);stopPlay();
+     if(g.CLSkyDeep&&g.CLSkyDeep.finishStructure)g.CLSkyDeep.finishStructure();
+     if(playerUnit.finishParticipants)playerUnit.finishParticipants();
+     var S=scene();if(S&&S.cancelCameraMotion)S.cancelCameraMotion();
+@@ -169,7 +237,7 @@
+     if(g.CLSkyTug&&g.CLSkyTug.on)g.CLSkyTug.on('grab',function(){closePickChoices(false);});
+   }
+   function syncInteractionGraph() {
+-    closePickChoices(false);var key=interactionWorkKey(),oldKey=interactionKey;
++    closePickChoices(false);clearNeighborCompare();var key=interactionWorkKey(),oldKey=interactionKey;
+     interactionGraph=G;interactionKey=key;interactionPeople=Object.create(null);interactionNames=Object.create(null);interactionEvents=Object.create(null);
+     function add(map,key,value){if(key)(map[key]||(map[key]=[])).push(value);}
+     (G.characters||[]).forEach(function(c){add(interactionPeople,stableId(c),c);add(interactionNames,c.name,c);});
+@@ -190,10 +258,11 @@
+   function invalidatePickChoicesAtLoad(e) {
+     var d=e&&(e.detail||{});
+     /* The real load chain announces a new transaction with stage=fetch; graph/key can still be old here. */
+-    if(d.stage==='fetch'){closePickChoices(false);setInteraction('hover',null);setInteraction('focus',null);}
++    if(d.stage==='fetch'){clearNeighborCompare();closePickChoices(false);setInteraction('hover',null);setInteraction('focus',null);}
+   }
+   function frameInteraction() {
+     if(!interactionSVG||interactionGraph!==G)return;
++    frameNeighborCompare();
+     var current=playerUnit.currentRef(),ref=current.graph===G&&current.eventLevel&&current.playback==='events'&&current.eventId?'event:'+current.eventId:null;
+     setInteraction('current',ref);
+     if(choiceRequest&&(choiceRequest.graph!==G||choiceRequest.key!==interactionWorkKey()||mode==='compass'))closePickChoices(false);
+@@ -444,6 +513,7 @@
+ 
+   /* ── 罗盘 ──────────────────────────────────────────── */
+   function openCompass(name) {
++    clearNeighborCompare();
+     if (!G || !app()) return false;
+     closePickChoices(false);setInteraction('selection',personReference(name));
+     stopPlay();
+@@ -878,6 +948,8 @@
+     enabled: function () { return ENABLED; }, isApplying: function () { return applying; }, handlesKey: handlesKey,
+     setPlot: setPlot, plot: function () { return plot; }, field: function () { return field; }, compassArea: compassArea, openCompass: openCompass, closeCompass: closeCompass, regroup: regroup, seek: seek, play: togglePlay, stop: stopPlay,
+     interactionState: interactionState,
++    beginNeighborCompare: beginNeighborCompare,
++    clearNeighborCompare: clearNeighborCompare,
+     finishParticipants: function () { return playerUnit.finishParticipants(); },
+     showParticipants: function (on) { return playerUnit.showParticipants(on); },
+     seekEvent: function (id) { return playerUnit.seekEvent(id); }, stepEvent: function (delta) { return playerUnit.stepEvent(delta); },
+
+--- a/js/sky/sky-deconstruction.js
++++ b/js/sky/sky-deconstruction.js
+@@ -20,6 +20,7 @@
+   var LAYERS = { tasks: '任务', relations: '人物关系', causeEdges: '因果', clues: '伏笔', characterStates: '状态', narrativeUnits: '剧情单元', reviewIssues: '核验批注' };
+   browse.mechanics = { query: '', filter: 'all', layer: 'tasks', page: 0, selected: null };
+   browse.mechanicQuotes = { page: 0 }; browse.references = { page: 0 }; browse.attributes = { page: 0 };
++  browse.neighbors = { bId: '', kind: 'all', tab: 'common', result: null, origin: null, scrollTop: null };
+   browse.coverage = { page: 0 };
+   browse.causal = { query: '', filter: 'all', page: 0 };
+   browse.payoffs = { page: 0 }; browse.unresolved = { page: 0 };
+@@ -531,6 +532,7 @@
+   }
+   function setMode(mode) {
+     if (['overview', 'lines', 'people', 'evidence', 'mechanics', 'causal', 'foreshadow', 'states'].indexOf(mode) < 0) mode = 'overview';
++    if (mode !== 'people') { if (g.CLSky && g.CLSky.clearNeighborCompare) g.CLSky.clearNeighborCompare(); browse.neighbors.bId = ''; browse.neighbors.result = null; browse.neighbors.demoCounts = null; browse.neighbors.origin = null; }
+     if (searchTimer != null) { g.clearTimeout(searchTimer); searchTimer = null; }
+     state.mode = mode; state.focus = null; render();
+   }
+@@ -541,6 +543,8 @@
+     var closeBtn = root.querySelector('.sd-close'); if (closeBtn && closeBtn.focus) closeBtn.focus({ preventScroll: true });
+   }
+   function close(refocus) {
++    if (g.CLSky && g.CLSky.clearNeighborCompare) g.CLSky.clearNeighborCompare();
++    browse.neighbors.bId = ''; browse.neighbors.result = null; browse.neighbors.demoCounts = null; browse.neighbors.origin = null; browse.neighbors.returnAfterBasis = false;
+     state.open = false; syncButton();
+     reframe();
+     if (refocus && button && button.focus) button.focus({ preventScroll: true });
+@@ -595,6 +599,36 @@
+     }
+     if (action === 'read-review') { showRecord('reviewIssues', b.getAttribute('data-review-key')); return; }
+     if (action === 'read-record') { showRecord(b.getAttribute('data-record-layer'), b.getAttribute('data-record-id')); return; }
++    if (action === 'neighbor-compare') { comparePersonNeighbors(); return; }
++    if (action === 'neighbor-open') {
++      var picked = index.people.filter(function (p) { return personKey(p) === personDetail; })[0];
++      if (picked) { var origin = personKey(picked); if (browse.neighbors.origin !== origin) { browse.neighbors.bId = ''; browse.neighbors.kind = 'all'; browse.neighbors.result = null; }
++        browse.neighbors.origin = origin; browse.neighbors.tab = 'common'; if (g.CLSky && g.CLSky.clearNeighborCompare) g.CLSky.clearNeighborCompare(); state.restore = { attr: 'data-action', value: 'neighbor-open' }; render(); }
++      return;
++    }
++    if (action === 'neighbor-clear-b') { clearNeighborPerson(); return; }
++    if (action === 'neighbor-tab') {
++      browse.neighbors.tab = b.getAttribute('data-neighbor-tab') || 'common';
++      browse.neighbors.demoCounts = { common: 0, onlyA: 0, onlyB: 0, fibers: 0 };
++      if (g.CLSky && g.CLSky.clearNeighborCompare) g.CLSky.clearNeighborCompare();
++      state.restore = { attr: 'data-neighbor-tab', value: browse.neighbors.tab }; render(); return;
++    }
++    if (action === 'neighbor-basis') {
++      if (g.CLSky && g.CLSky.clearNeighborCompare) g.CLSky.clearNeighborCompare();
++      browse.neighbors.returnScrollTop = root.querySelector('#skyDeconBody').scrollTop;
++      browse.neighbors.returnAfterBasis = true;
++      if (!showRecord('relations', b.getAttribute('data-record-id'))) {
++        browse.neighbors.returnAfterBasis = false;
++        var note = root.querySelector('.sd-neighbor-basis-note'); if (note) note.textContent = '依据入口不可用：图中没有唯一的关系记录ID。';
++      }
++      return;
++    }
++    if (action === 'neighbor-return') {
++      browse.neighbors.returnAfterBasis = false; state.mode = 'people'; personDetail = browse.neighbors.origin;
++      browse.neighbors.scrollTop = browse.neighbors.returnScrollTop; browse.neighbors.returnScrollTop = null;
++      if (browse.neighbors.result && g.CLSky && g.CLSky.beginNeighborCompare) { var demo = g.CLSky.beginNeighborCompare(browse.neighbors.result); browse.neighbors.demoCounts = demo && demo.demoCounts || null; }
++      state.restore = { attr: 'data-neighbor-person', value: 'b' }; render(); return;
++    }
+     if (action === 'page-prev' || action === 'page-next') {
+       var section = b.getAttribute('data-page-mode');
+       if (browse[section]) { browse[section].page += action === 'page-prev' ? -1 : 1; state.restore = { attr: 'data-action', value: action, pageMode: section }; render(); }
+@@ -618,7 +652,7 @@
+     }
+     if (mode) { setMode(mode); return; }
+     var detailPerson = b.getAttribute('data-person-detail');
+-    if (detailPerson) { personDetail = detailPerson; browse.arc.page = 0; state.restore = { attr: 'data-person-detail', value: detailPerson }; render(); return; }
++    if (detailPerson) { if (browse.neighbors.origin !== detailPerson && g.CLSky && g.CLSky.clearNeighborCompare) g.CLSky.clearNeighborCompare(); personDetail = detailPerson; browse.arc.page = 0; state.restore = { attr: 'data-person-detail', value: detailPerson }; render(); return; }
+     var line = b.getAttribute('data-line-id'), event = b.getAttribute('data-event-index'), person = b.getAttribute('data-person');
+     if (line) { focusLine(line); return; }
+     if (event != null && event !== '' && /^\d+$/.test(event)) { focusEvent(+event); return; }
+@@ -642,6 +676,8 @@
+     else if (order === 'evidence') { browse.evidence.order = el.value; browse.evidence.page = 0; state.restore = { attr: 'data-order', value: order }; }
+     else if (kind === 'evidence') { browse.evidence.kind = el.value; browse.evidence.page = 0; state.restore = { attr: 'data-event-kind', value: kind }; }
+     else if (stateKind === 'states') { browse.states.kind = el.value; browse.states.page = 0; state.restore = { attr: 'data-state-kind', value: stateKind }; }
++    else if (el.getAttribute('data-neighbor-person') === 'b') { browse.neighbors.scrollTop = root.querySelector('#skyDeconBody').scrollTop; state.restore = { attr: 'data-neighbor-person', value: 'b' }; browse.neighbors.bId = el.value; browse.neighbors.result = null; browse.neighbors.tab = 'common'; if (el.value) comparePersonNeighbors(); else { if (g.CLSky && g.CLSky.clearNeighborCompare) g.CLSky.clearNeighborCompare(); render(); } return; }
++    else if (el.getAttribute('data-neighbor-kind') === 'filter') { browse.neighbors.scrollTop = root.querySelector('#skyDeconBody').scrollTop; state.restore = { attr: 'data-neighbor-kind', value: 'filter' }; browse.neighbors.kind = el.value; comparePersonNeighbors(); return; }
+     else if (browse[page]) { browse[page].page = Math.max(0, num(el.value, 1) - 1); state.restore = { attr: 'data-page-number', value: page }; }
+     else return;
+     render();
+@@ -889,7 +925,7 @@
+       var attributes = pageWindow(arr(entity.attributes).filter(function (a) { return a && typeof a === 'object'; }), browse.attributes);
+       var journey = (layer === 'tasks' || layer === 'narrativeUnits') && g.CLSky && g.CLSky.journeyPlan ? g.CLSky.journeyPlan(layer, entity.id) : null;
+       var journeyAction = journey ? '<div class="sd-person-actions"><button type="button" class="sd-detail-action" data-action="play-record" data-record-layer="' + esc(layer) + '" data-record-id="' + esc(entity.id) + '"' + (journey.ok ? '' : ' disabled') + '>播放此' + (layer === 'tasks' ? '任务' : '剧情单元') + (journey.ok ? ' · ' + journey.count + ' 个事件' : '') + '</button></div><p class="sd-evidence-note sd-journey-message" role="status">' + esc(journey.ok ? '仅播放此记录引用的事件；可暂停、逐项阅读或返回全书。' : journey.message || '事件引用或原文依据不完整，暂不能播放。') + '</p>' : '';
+-      detail = '<article class="sd-mechanics-card"><div class="sd-detail-top"><b>' + esc(mechanicTitle(layer, entity)) + '</b><em>' + esc(semanticLabel(entity)) + '</em></div>' + journeyAction + '<p class="sd-evidence-note">' + esc(mechanicsStatus(layer, entity).label) + '。引用通过校验不等于这条关系已经得到人工确认。</p><div class="sd-fact-grid">' + fields + '</div>' +
++      detail = '<article class="sd-mechanics-card"><div class="sd-detail-top"><b>' + esc(mechanicTitle(layer, entity)) + '</b><em>' + esc(semanticLabel(entity)) + '</em></div>' + (layer === 'relations' && browse.neighbors.returnAfterBasis ? '<button type="button" class="sd-detail-action" data-action="neighbor-return">← 返回共同联系人</button>' : '') + journeyAction + '<p class="sd-evidence-note">' + esc(mechanicsStatus(layer, entity).label) + '。引用通过校验不等于这条关系已经得到人工确认。</p><div class="sd-fact-grid">' + fields + '</div>' +
+         (attributes.items.length ? '<div class="sd-attributes">' + attributes.items.map(function (attribute) { return '<section class="sd-attribute">' + fact(attribute.name || '属性', attribute.value) + (attribute.quote ? quoteRow(attribute, attribute.quote) : '<p class="sd-empty">该属性未提供引句。</p>') + '</section>'; }).join('') + (attributes.pages > 1 ? pager('attributes', attributes) : '') + '</div>' : '') +
+         '<div class="sd-evidence-links">' + refs.items.map(referenceRow).join('') + '</div>' + (refs.pages > 1 ? pager('references', refs) : '') +
+         (quoteView.items.length ? '<div class="sd-mechanic-quotes">' + quoteView.items.map(function (q) { return quoteRow(entity, q); }).join('') + (quoteView.pages > 1 ? pager('mechanicQuotes', quoteView) : '') + '</div>' : '<p class="sd-empty">这条记录未提供原文引句。</p>') + '</article>';
+@@ -983,6 +1019,51 @@
+     return '<section class="sd-section"><div class="sd-section-head"><b>故事线 · 章节跨度</b><span>点击定位星盘</span></div><p class="sd-evidence-note">轨道标出已有事件的章节范围。目标、结局与来源分别标注；章节中点不代表剧情高潮。</p><div class="sd-axis">' + axis + '</div><div class="sd-lines">' + (declared.join('') || (automatic.length ? '<p class="sd-evidence-note">当前仅有自动分段，尚未建立可确认的故事骨架。</p>' : '<p class="sd-empty">这份材料没有可绘制的剧情线。</p>')) + '</div>' +
+       (automatic.length ? '<details class="sd-auto-lines"' + (focusedAutomatic ? ' open' : '') + '><summary>自动分段 ' + automatic.length + ' 条 · 非作者结构</summary><p class="sd-evidence-note">保留全部事件与定位入口，不将等分片段作为任务深度依据。</p><div class="sd-lines">' + automatic.join('') + '</div></details>' : '') + '</section>';
+   }
++  function personStableId(p) { var raw = p && p.raw || {}; var id = raw.id != null ? raw.id : raw.entityId; return id == null || id === '' ? null : String(id); }
++  function comparePersonNeighbors() {
++    var cfg = browse.neighbors, origin = cfg.origin, list = index && index.people || [];
++    var person = list.filter(function (p) { return personKey(p) === origin; })[0], aId = personStableId(person);
++    if (!aId || !cfg.bId || !g.CLSkyModel || typeof g.CLSkyModel.compareRelations !== 'function') { cfg.result = null; if (g.CLSky && g.CLSky.clearNeighborCompare) g.CLSky.clearNeighborCompare(); render(); return false; }
++    cfg.result = g.CLSkyModel.compareRelations(graph, aId, cfg.bId, { kind: cfg.kind }); cfg.tab = 'common'; cfg.demoCounts = null;
++    if (cfg.result.ok && g.CLSky && g.CLSky.beginNeighborCompare) { var demo = g.CLSky.beginNeighborCompare(cfg.result); cfg.demoCounts = demo && demo.demoCounts || null; }
++    else if (g.CLSky && g.CLSky.clearNeighborCompare) g.CLSky.clearNeighborCompare();
++    render(); return !!cfg.result.ok;
++  }
++  function clearNeighborPerson() {
++    var cfg = browse.neighbors; cfg.bId = ''; cfg.tab = 'onlyA';
++    var list = index && index.people || [], person = list.filter(function (p) { return personKey(p) === cfg.origin; })[0], aId = personStableId(person);
++    cfg.result = aId && g.CLSkyModel && g.CLSkyModel.compareRelations ? g.CLSkyModel.compareRelations(graph, aId, null, { kind: cfg.kind }) : null; cfg.demoCounts = null;
++    if (cfg.result && cfg.result.ok && g.CLSky && g.CLSky.beginNeighborCompare) { var demo = g.CLSky.beginNeighborCompare(cfg.result); cfg.demoCounts = demo && demo.demoCounts || null; }
++    else if (g.CLSky && g.CLSky.clearNeighborCompare) g.CLSky.clearNeighborCompare();
++    render();
++  }
++  function renderNeighborPanel(detail) {
++    var cfg = browse.neighbors, people = g.CLSkyModel && g.CLSkyModel.relationPeople ? g.CLSkyModel.relationPeople(graph).people : [];
++    var aId = personStableId(detail), aRows = people.filter(function (p) { return p.id === aId; }), aOk = !!(aId && aRows.length === 1 && aRows[0].selectable);
++    var choices = people.filter(function (p) { return p.id !== aId; });
++    var select = '<label><span class="sd-control-label">B · 明确选择另一人</span><select data-neighbor-person="b" aria-label="选择比较人物B"><option value="">请选择人物B</option>' + choices.map(function (p) { return '<option value="' + esc(p.id || '') + '"' + (cfg.bId === p.id ? ' selected' : '') + (p.selectable ? '' : ' disabled') + '>' + esc(p.name + (p.role ? ' · ' + p.role : '') + (p.selectable ? '' : ' · ' + (p.reason || '身份待区分'))) + '</option>'; }).join('') + '</select></label>';
++    if (cfg.result && cfg.result.ok) {
++      var result = cfg.result, groups = { common: result.common, onlyA: result.onlyA, onlyB: result.onlyB }, labels = { common: '共同联系人', onlyA: result.mode === 'single' ? 'A的一度联系人' : '仅与A有记录', onlyB: '仅与B有记录' };
++      var tabs = ['common','onlyA','onlyB'].map(function (key) { return '<button type="button" data-action="neighbor-tab" data-neighbor-tab="' + key + '" aria-pressed="' + (cfg.tab === key) + '">' + labels[key] + ' · ' + groups[key].length + '</button>'; }).join('');
++      var rows = groups[cfg.tab] || [], list = rows.map(function (person) {
++        var rels = cfg.tab === 'onlyB' ? person.relationsB : cfg.tab === 'onlyA' || result.mode === 'single' ? person.relationsA : person.relationsA.concat(person.relationsB);
++        var summary = rels.map(function (rel) {
++          var open = rel.id != null && rel.recordUnique;
++          var owner = cfg.tab === 'common' ? (person.relationsA.indexOf(rel) >= 0 ? result.a.name : (result.b && result.b.name || 'B')) : cfg.tab === 'onlyA' ? result.a.name : result.b && result.b.name || 'B';
++          return '<button type="button" class="sd-neighbor-record" data-action="neighbor-basis" data-record-id="' + esc(rel.id || '') + '"' + (open ? '' : ' disabled title="重复或缺少记录ID，不能唯一返回依据"') + '><b>' + esc(owner + ' · ' + (rel.kindLabel || rel.kind || '关系类型未标明')) + '</b><small>' + esc((rel.evidenceLabel || '依据状态未标明') + ' · ' + (rel.scopeLabel || '范围未标明')) + '</small></button>';
++        }).join('');
++        return '<article class="sd-neighbor-person" data-neighbor-id="' + esc(person.id) + '"><b>' + esc(person.name || '姓名未提供') + '</b>' + (summary || '<p class="sd-neighbor-note">当前筛选范围内没有可展示的关系记录。</p>') + '</article>';
++      }).join('');
++      var demos = cfg.demoCounts ? (cfg.tab === 'common' ? cfg.demoCounts.common : cfg.tab === 'onlyA' ? cfg.demoCounts.onlyA : cfg.demoCounts.onlyB) : 0;
++      var totalDemo = cfg.demoCounts ? cfg.demoCounts.common + cfg.demoCounts.onlyA + cfg.demoCounts.onlyB : 0;
++      return '<section class="sd-neighbor"><div class="sd-neighbor-head"><b>共同联系人</b><small>A · ' + esc(detail.name) + (result.b ? '　B · ' + esc(result.b.name) : '') + '</small><button type="button" class="sd-neighbor-clear" data-action="neighbor-clear-b">清除B，回到A</button></div>' +
++        '<div class="sd-neighbor-controls">' + select + '<label><span class="sd-control-label">关系类型</span><select data-neighbor-kind="filter" aria-label="按关系类型筛选"><option value="all">全部关系类型</option>' + result.kinds.map(function (k) { return '<option value="' + esc(k.code) + '"' + (cfg.kind === k.code ? ' selected' : '') + '>' + esc(k.label) + '</option>'; }).join('') + '</select></label></div>' +
++        '<p class="sd-neighbor-note">当前图谱关系汇总；每条范围分别标注，不表示同时生效。当前组原位演示 ' + demos + ' / ' + rows.length + ' 人；所有分组合计演示 ' + totalDemo + ' 人、' + (cfg.demoCounts ? cfg.demoCounts.fibers : 0) + ' 条关系线（最多8条），名单完整。</p><nav class="sd-neighbor-tabs" aria-label="关系集合分组">' + tabs + '</nav>' +
++        '<div class="sd-neighbor-group"><h4><span>' + esc(labels[cfg.tab]) + '</span><span>' + rows.length + ' 人</span></h4>' + (list || '<p class="sd-empty">当前筛选范围没有此类关系记录。</p>') + '</div><p class="sd-neighbor-note sd-neighbor-basis-note" role="status"></p></section>';
++    }
++    var problem = !aOk ? 'A不可比较：' + (aRows[0] && aRows[0].reason || (aId ? '稳定身份重复或不唯一' : '缺少稳定ID')) : cfg.result && !cfg.result.ok ? '无法比较：' + (cfg.result.reason || '人物身份或关系记录不可用。') : '选择B后，再计算两侧的一度关系集合。';
++    return '<section class="sd-neighbor"><div class="sd-neighbor-head"><b>共同联系人</b><small>A · ' + esc(detail.name) + '</small></div><div class="sd-neighbor-controls">' + select + '<button type="button" class="sd-neighbor-clear" data-action="neighbor-compare"' + (cfg.bId && aOk ? '' : ' disabled') + '>比较共同联系人</button></div><p class="sd-neighbor-note" role="status">' + esc(problem) + '</p></section>';
++  }
+   function renderPeople() {
+     var cfg = browse.people, people = index.people.filter(function (p) { return matches(p.search, cfg.query) && (cfg.filter === 'all' || p.raw.role === cfg.filter); });
+     var view = pageWindow(people, cfg), total = Math.max(1, model.nCh);
+@@ -1013,7 +1094,8 @@
+       var c = detail.raw, arcs = pageWindow(arr(c.arc).filter(function (arc) { return arc && arc.text; }), browse.arc);
+       detailHtml = '<section class="sd-section sd-person-detail"><div class="sd-detail-top"><b>' + esc(detail.name) + '</b><em>材料支持的归纳</em></div>' + reviewNotes(c, 'character') +
+         (c.identity ? '<p class="sd-detail-meta">' + esc(c.identity) + '</p>' : '') + (c.brief ? '<p class="sd-detail-summary">' + esc(c.brief) + '</p>' : '') +
+-        '<div class="sd-person-actions"><button type="button" class="sd-detail-action" data-person="' + esc(detail.name) + '">进入人物罗盘</button><button type="button" class="sd-detail-action" data-action="person-events" data-person-events="' + esc(detail.name) + '">浏览全部 ' + detail.events.length + ' 个事件</button></div>' +
++        '<div class="sd-person-actions"><button type="button" class="sd-detail-action" data-person="' + esc(detail.name) + '">进入人物罗盘</button><button type="button" class="sd-detail-action" data-action="person-events" data-person-events="' + esc(detail.name) + '">浏览全部 ' + detail.events.length + ' 个事件</button><button type="button" class="sd-detail-action" data-action="neighbor-open">共同联系人</button></div>' +
++        (browse.neighbors.origin === personKey(detail) ? renderNeighborPanel(detail) : '') +
+         '<div class="sd-arc-list">' + (arcs.items.length ? arcs.items.map(function (arc) { return '<article class="sd-arc"><b>' + esc(arc.phase || '角色阶段') + '</b><p>' + esc(arc.text || '') + '</p></article>'; }).join('') : '<p class="sd-empty">材料未提供角色弧；出场跨度不等于人物成长。</p>') + '</div>' + (arcs.pages > 1 ? pager('arc', arcs) : '') + '</section>';
+     }
+     return '<section class="sd-section"><div class="sd-section-head"><b>人物弧线</b><span>完整人物表 · 出场区间为概览</span></div>' +
+@@ -1235,7 +1317,7 @@
+     setText('skyDeconMeta', (model.axis && model.axis.summary || model.nCh + ' 个章节段') + ' · ' + graph.events.length + ' 剧情点 · ' + graph.characters.length + ' 人物 · ' + unresolved + ' 条线未收束');
+     Array.prototype.forEach.call(root.querySelectorAll('.sd-tabs [role="tab"]'), function (b) { var active = b.getAttribute('data-mode') === state.mode; b.classList.toggle('is-on', active); b.setAttribute('aria-selected', String(active)); b.tabIndex = active ? 0 : -1; });
+     var body = doc.getElementById('skyDeconBody');
+-    if (body) { body.innerHTML = state.mode === 'lines' ? renderLines() : state.mode === 'people' ? renderPeople() : state.mode === 'evidence' ? renderEvidence() : state.mode === 'mechanics' ? renderMechanics() : state.mode === 'causal' ? renderCausal() : state.mode === 'foreshadow' ? renderForeshadow() : state.mode === 'states' ? renderStates() : renderOverview(); body.setAttribute('aria-labelledby', 'skyDeconTab' + state.mode.charAt(0).toUpperCase() + state.mode.slice(1)); bindVars(body); restoreFocus(body); }
++    if (body) { body.innerHTML = state.mode === 'lines' ? renderLines() : state.mode === 'people' ? renderPeople() : state.mode === 'evidence' ? renderEvidence() : state.mode === 'mechanics' ? renderMechanics() : state.mode === 'causal' ? renderCausal() : state.mode === 'foreshadow' ? renderForeshadow() : state.mode === 'states' ? renderStates() : renderOverview(); body.setAttribute('aria-labelledby', 'skyDeconTab' + state.mode.charAt(0).toUpperCase() + state.mode.slice(1)); if (browse.neighbors.scrollTop != null) { body.scrollTop = browse.neighbors.scrollTop; browse.neighbors.scrollTop = null; } bindVars(body); restoreFocus(body); }
+   }
+ 
+   function restoreFocus(body) {
+@@ -1317,6 +1399,7 @@
+     if (!index || !index.people) return false;
+     var p = index.people.filter(function (x) { return x.name === name; })[0];
+     if (!p) return false;
++    if (browse.neighbors.origin !== personKey(p)) { if (g.CLSky && g.CLSky.clearNeighborCompare) g.CLSky.clearNeighborCompare(); browse.neighbors.origin = null; browse.neighbors.bId = ''; browse.neighbors.result = null; browse.neighbors.demoCounts = null; }
+     personDetail = personKey(p); browse.arc.page = 0;
+     state.restore = { attr: 'data-person-detail', value: personDetail };
+     state.mode = 'people'; open(); return true;
+
+--- a/css/sky-reading.css
++++ b/css/sky-reading.css
+@@ -1075,3 +1075,35 @@
+   .sky-structure-button .sk-structure-short { display: inline; }
+   .sky-structure-button { padding-inline: 8px; min-width: 44px; flex: 0 0 auto; }
+ }
++/* C1/M97: relation comparison stays in the existing reading sheet and host HUD. */
++.sd-neighbor { margin-top: var(--abyss-space-md); padding-top: var(--abyss-space-sm); border-top: 1px solid var(--skd-hair); }
++.sd-neighbor-head, .sd-neighbor-controls, .sd-neighbor-tabs { display: flex; align-items: center; flex-wrap: wrap; gap: var(--abyss-space-sm); }
++.sd-neighbor-head { justify-content: space-between; }
++.sd-neighbor-controls { margin: var(--abyss-space-sm) 0; }
++.sd-neighbor-controls select { min-height: 44px; max-width: 100%; color: var(--skd-ink); background: var(--skd-void-1); border: 1px solid var(--skd-hair); }
++.sd-neighbor-tabs button, .sd-neighbor-clear, .sd-neighbor-record { min-height: 44px; color: var(--skd-ink); background: var(--skd-void-1); border: 1px solid var(--skd-hair); border-radius: 8px; padding: 7px 11px; }
++.sd-neighbor-tabs [aria-pressed="true"] { border-color: var(--skd-hair-brass); color: var(--skd-brass-hot); }
++.sd-neighbor-group { margin-top: var(--abyss-space-sm); }
++.sd-neighbor-group > h4 { display: flex; justify-content: space-between; margin: 0 0 6px; color: var(--skd-brass-hot); }
++.sd-neighbor-person { padding: 9px 0; border-top: 1px solid var(--skd-hair); }
++.sd-neighbor-person > b { display: block; }
++.sd-neighbor-record { display: inline-flex; align-items: center; gap: 6px; margin: 5px 5px 0 0; text-align: left; }
++.sd-neighbor-record small { color: var(--skd-ink-2); }
++.sd-neighbor-record:disabled { opacity: .58; cursor: not-allowed; }
++.sd-neighbor-note { color: var(--skd-ink-2); font: var(--skd-fs-sm)/1.6 var(--skd-font-sans); }
++.sky-neighbor-marks { z-index: var(--z-hud); }
++.sky-neighbor-line { fill: none; stroke: var(--skd-ink-2); stroke-width: 1.6; opacity: .78; }
++.sky-neighbor-line.from-b { stroke: var(--skd-brass); }
++.sky-neighbor-line.is-common { stroke-width: 2.1; opacity: .95; }
++.sky-neighbor-node { fill: color-mix(in oklch, var(--skd-ink-2) 8%, transparent); stroke: var(--skd-ink-2); stroke-width: 1.8; }
++.sky-neighbor-node.from-b { stroke: var(--skd-brass); }
++.sky-neighbor-node.is-common { stroke: var(--skd-brass-hot); }
++.sky-neighbor-node path { fill: none; stroke: var(--skd-brass); stroke-width: 2; }
++.sky-neighbor-label, .sky-neighbor-owner-label { fill: var(--skd-ink); stroke: var(--skd-void-0); stroke-width: 3px; paint-order: stroke; font: var(--skd-fs-sm)/1.3 var(--skd-font-sans); }
++.sky-neighbor-owner { fill: none; stroke: var(--skd-ink-2); stroke-width: 1.6; }
++.sky-neighbor-owner.from-b { stroke: var(--skd-brass); }
++.sky-neighbor-owner-label { fill: var(--skd-brass-hot); stroke-width: 2px; }
++@media (max-width: 600px) {
++  .sd-neighbor-controls, .sd-neighbor-tabs { align-items: stretch; flex-direction: column; }
++  .sd-neighbor-controls select, .sd-neighbor-tabs button, .sd-neighbor-clear { width: 100%; }
++}
+
+--- a/tests/sky_relation_scope_contract.js
++++ b/tests/sky_relation_scope_contract.js
+@@ -23,7 +23,12 @@
+  */
+ const assert = require('node:assert/strict');
+ const fs = require('node:fs');
++const vm = require('node:vm');
+ const R = require('../js/sky/sky-relation-scope.js');
++const Source = require('../js/atlas/atlas-source.js');
++const modelWindow = { CLAtlasSource: Source, CLSkyRelationScope: R };
++vm.runInNewContext(fs.readFileSync('js/sky/sky-model.js', 'utf8'), { window: modelWindow });
++const M = modelWindow.CLSkyModel;
+ 
+ let passed = 0;
+ function test(name, run) { run(); passed++; console.log('PASS ' + name); }
+@@ -144,6 +149,119 @@
+   assert.equal(t2.pending, 2);
+ });
+ 
++test('C1正例 · 冻结西游稳定ID由完整关系数组计算交集、双方来源、仅A/B', () => {
++  const g = JSON.parse(fs.readFileSync('data/cache/ed3dc1255ca08fbdaae30bbd.json', 'utf8'));
++  const before = JSON.stringify(g);
++  const c = M.compareRelations(g, 'ch_25537390c961aa39', 'ch_1dee9e1be8a97b5f');
++  assert.equal(c.ok, true, c.reason);
++  assert.equal(c.a.name, '孙悟空'); assert.equal(c.b.name, '猪八戒');
++  assert.deepEqual(JSON.parse(JSON.stringify(c.common.map(x => [x.id, x.name]))), [['ch_0ebf2655f1fb3db3', '陈玄奘']]);
++  assert.equal(c.onlyA.length, 6); assert.equal(c.onlyB.length, 0);
++  const common = c.common[0];
++  assert.deepEqual(JSON.parse(JSON.stringify(common.relationsA.map(r => r.id))), ['rel_review_617180930c9aadd0']);
++  assert.deepEqual(JSON.parse(JSON.stringify(common.relationsB.map(r => r.id))), ['rel_review_eca2bade5e2847a8']);
++  [common.relationsA[0], common.relationsB[0]].forEach(r => {
++    assert.equal(r.kind, 'mentorship'); assert.equal(r.scope, 'atTime'); assert.equal(r.evidence, 'anchored');
++  });
++  assert.equal(c.stats.sourceRelations, 20); assert.equal(c.stats.copresenceExcluded, 0);
++  assert.equal(JSON.stringify(g), before, '适配不能改关系、人物或来源记录');
++});
++
++test('C1类型和许可范围在交集计算前生效；单人/空图保持未知边界', () => {
++  const g = JSON.parse(fs.readFileSync('data/cache/ed3dc1255ca08fbdaae30bbd.json', 'utf8'));
++  const a = 'ch_25537390c961aa39', b = 'ch_1dee9e1be8a97b5f';
++  const kinship = M.compareRelations(g, a, b, { kind: 'kinship' });
++  assert.equal(kinship.common.length, 0, '过滤掉构成交集的师徒边后不得沿用旧交集');
++  assert.equal(kinship.stats.kindFiltered > 0, true);
++  const scoped = M.compareRelations(g, a, b, { scope: { relationIds: ['rel_review_617180930c9aadd0'] } });
++  assert.equal(scoped.common.length, 0, '仅许可A侧关系时不能继续宣称共同');
++  assert.equal(scoped.onlyA.some(x => x.id === 'ch_0ebf2655f1fb3db3'), true);
++  const single = M.compareRelations(g, a, null);
++  assert.equal(single.mode, 'single'); assert.equal(single.b, null);
++  assert.equal(single.common.length, 0); assert.equal(single.onlyA.length, 8, '单人模式把原B作为A的一度联系人恢复出来');
++  const absent = M.compareRelations({ characters: [], events: [] }, 'ch_missing', null);
++  assert.equal(absent.ok, false); assert.equal(absent.reason, 'graph_or_relations_missing');
++});
++
++test('C1反例 · 同名别名、重复人物ID、双ID冲突都不猜端点归属', () => {
++  const ambiguous = { characters: [
++    { id: 'ch_a', entityId: 'ch_a', name: '甲', aliases: ['共享名'] },
++    { id: 'ch_b', entityId: 'ch_b', name: '乙', aliases: ['共享名'] },
++    { id: 'ch_c', entityId: 'ch_c', name: '丙' }
++  ], relations: [{ id: 'r1', a: '共享名', b: '丙', kind: '师徒' }] };
++  const amb = M.compareRelations(ambiguous, 'ch_a', 'ch_c');
++  assert.equal(amb.common.length, 0); assert.equal(amb.onlyA.length, 0);
++  assert.equal(amb.stats.ambiguousEndpoints, 1, '冲突owner不得回退到第一个姓名命中');
++  const duplicate = { characters: [
++    { id: 'ch_dup', entityId: 'ch_dup', name: '甲' },
++    { id: 'ch_dup', entityId: 'ch_dup', name: '乙' }
++  ], relations: [] };
++  assert.equal(M.compareRelations(duplicate, 'ch_dup', null).reason, 'a_duplicate_id');
++  const dual = { characters: [{ id: 'ch_a', entityId: 'ch_other', name: '甲' }], relations: [] };
++  assert.equal(M.compareRelations(dual, 'ch_a', null).reason, 'a_id_entity_id_conflict');
++});
++
++test('C1反例 · 重复边只计一次，冲突关系ID、同场、自身环和A-B边不构成邻居', () => {
++  const g = { characters: [
++    { id: 'ch_a', entityId: 'ch_a', name: '甲' }, { id: 'ch_b', entityId: 'ch_b', name: '乙' },
++    { id: 'ch_c', entityId: 'ch_c', name: '丙' }, { id: 'ch_d', entityId: 'ch_d', name: '丁' }
++  ], relations: [
++    { id: 'ab', a: '甲', b: '乙', kind: '师徒' },
++    { id: 'same', a: '甲', b: '丙', kind: '师徒' },
++    { id: 'same', a: '甲', b: '丙', kind: '师徒' },
++    { id: 'conflict', a: '甲', b: '丙', kind: '师徒' },
++    { id: 'conflict', a: '甲', b: '丁', kind: '师徒' },
++    { id: 'bc', a: '乙', b: '丙', kind: '师徒' },
++    { id: 'self', a: '甲', b: '甲', kind: '师徒' },
++    { id: 'co', a: '甲', b: '丁', kind: '同场' }
++  ] };
++  const c = M.compareRelations(g, 'ch_a', 'ch_b');
++  assert.deepEqual(JSON.parse(JSON.stringify(c.common.map(x => x.id))), ['ch_c']);
++  assert.equal(c.stats.directPairEdges, 1); assert.equal(c.stats.selfEdges, 1);
++  assert.equal(c.stats.copresenceExcluded, 1); assert.equal(c.stats.duplicateEdges, 1);
++  assert.equal(c.stats.conflictingRelationIds, 1);
++  assert.equal(c.onlyA.length, 0); assert.equal(c.onlyB.length, 0, '冲突关系ID不得伪造丁为邻居');
++});
++
++test('C1反例 · relation ID 全组先审计；类型、许可范围、同场或端点错误不能藏住冲突', () => {
++  const chars = [
++    { id: 'ch_a', entityId: 'ch_a', name: '甲' }, { id: 'ch_b', entityId: 'ch_b', name: '乙' },
++    { id: 'ch_c', entityId: 'ch_c', name: '丙' }, { id: 'ch_d', entityId: 'ch_d', name: '丁' }
++  ];
++  const cases = [
++    { label: '类型过滤前', options: { kind: 'mentorship' }, sibling: { id: 'r', a: '甲', b: '丁', kind: '同场' } },
++    { label: '许可范围过滤前', options: { scope: { allowsRelation: rel => rel.keep === true } }, sibling: { id: 'r', a: '甲', b: '丁', kind: '师徒', keep: false } },
++    { label: '端点解析过滤前', options: {}, sibling: { id: 'r', a: '未登记人物', b: '丁', kind: '师徒' } }
++  ];
++  cases.forEach(({ label, options, sibling }) => {
++    const graph = { characters: chars, relations: [
++      Object.assign({ id: 'r', a: '甲', b: '丙', kind: '师徒', keep: true }, {}), sibling
++    ] };
++    const result = M.compareRelations(graph, 'ch_a', 'ch_b', options);
++    assert.equal(result.stats.conflictingRelationIds, 1, label + '必须先数同ID冲突');
++    assert.equal(result.onlyA.some(row => row.id === 'ch_c' || row.id === 'ch_d'), false, label + '不得留下冲突组的可用半边');
++  });
++});
++
++test('C1反例 · 待区分人物不可选；精确重复关系ID的依据入口不可声称唯一', () => {
++  const pending = { characters: [
++    { id: 'ch_a', entityId: 'ch_a', name: '甲', identityStatus: 'pending' },
++    { id: 'ch_b', entityId: 'ch_b', name: '乙' }
++  ], relations: [{ id: 'r1', a: '甲', b: '乙', kind: '师徒' }] };
++  const people = M.relationPeople(pending).people;
++  assert.equal(people.find(p => p.id === 'ch_a').selectable, false);
++  assert.equal(M.compareRelations(pending, 'ch_a', 'ch_b').reason, 'a_identity_pending');
++  const duplicate = { characters: [
++    { id: 'ch_a', entityId: 'ch_a', name: '甲' }, { id: 'ch_b', entityId: 'ch_b', name: '乙' },
++    { id: 'ch_c', entityId: 'ch_c', name: '丙' }
++  ], relations: [
++    { id: 'r1', a: '甲', b: '丙', kind: '师徒' }, { id: 'r1', a: '甲', b: '丙', kind: '师徒' }
++  ] };
++  const result = M.compareRelations(duplicate, 'ch_a', null);
++  assert.equal(result.onlyA.length, 1, '集合里相同记录ID只计一次');
++  assert.equal(result.onlyA[0].relationsA[0].recordUnique, false, '精确重复ID不能冒充唯一依据入口');
++});
++
+ test('真实数据：大奉 2106 条关系必须**全部**无锚点，且面板须能说出来', () => {
+   const g = JSON.parse(fs.readFileSync('data/cache/1063b17ca65ec1b76f30e460.json', 'utf8'));
+   const rels = g.relations || [];
+
+--- a/tests/p3_relation_scope_render_probe.py
++++ b/tests/p3_relation_scope_render_probe.py
+@@ -21,6 +21,8 @@
+   CL_GPU=1 python3 -B -s tests/p3_relation_scope_render_probe.py --base http://127.0.0.1:8781
+ """
+ import argparse
++import base64
++import hashlib
+ import json
+ import os
+ import sys
+@@ -32,6 +34,9 @@
+ from qa_cinema_wave02_capture import Wave2AuditRunner  # noqa: E402
+ 
+ BOOKS = {"dafeng": "1063b17ca65ec1b76f30e460", "xiyou": "a065244455cfb2221bcda94a"}
++NEIGHBOR_BOOK = "ed3dc1255ca08fbdaae30bbd"
++NEIGHBOR_GRAPH_SHA256 = "3005a49ae29146d3a7b78bc35767c0407bd265f459b7aed715306c51309b8eb5"
++PAGE_HEALTH_JS = "(()=>{const h=window.__headlessHealth,A=window.CLApp,S=A&&A.scene(),G=A&&A.graph(),d=S&&S.digest&&S.digest(),sh=S&&S.shaderErrors&&S.shaderErrors();return {listener:!!h,jserr:h&&Array.isArray(h.jserr)?h.jserr:null,jsrej:h&&Array.isArray(h.jsrej)?h.jsrej:null,app:!!A,graph:!!G,graphKey:A&&A.key&&A.key(),scene:!!S,digest:!!d,frameHooks:d&&d.frameHooks||null,shaderErrors:Array.isArray(sh)?sh:null};})()"
+ 
+ OPEN = r"""(()=>{
+   const out={};
+@@ -129,11 +134,219 @@
+             pass
+ 
+ 
++def _native_click(runner, selector):
++    """Click a visible control using CDP mouse input, never HTMLElement.click()."""
++    point = runner.eval("(()=>{const e=document.querySelector(%s);if(!e)return null;e.scrollIntoView({block:'center',inline:'nearest'});const r=e.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2,t=document.elementFromPoint(x,y);return {x:x,y:y,visible:!!(r.width&&r.height&&getComputedStyle(e).visibility!=='hidden'),disabled:!!e.disabled,hit:!!(t&&(t===e||e.contains(t))),target:t&&t.tagName};})()" % json.dumps(selector))
++    if not isinstance(point, dict) or not point.get("visible") or point.get("disabled") or not point.get("hit"):
++        raise RuntimeError("native click target unavailable: %s (%r)" % (selector, point))
++    runner.ws.call("Input.dispatchMouseEvent", type="mouseMoved", x=point["x"], y=point["y"])
++    runner.ws.call("Input.dispatchMouseEvent", type="mousePressed", x=point["x"], y=point["y"], button="left", clickCount=1)
++    runner.ws.call("Input.dispatchMouseEvent", type="mouseReleased", x=point["x"], y=point["y"], button="left", clickCount=1)
++
++
++def _wait_value(runner, expression, timeout=12, interval=0.05):
++    deadline = time.monotonic() + timeout
++    last = None
++    while time.monotonic() < deadline:
++        last = runner.eval(expression)
++        if last is True:
++            return True
++        time.sleep(interval)
++    return last
++
++
++def _native_typeahead(runner, text):
++    for char in text:
++        runner.ws.call("Input.dispatchKeyEvent", type="char", key=char, text=char, unmodifiedText=char)
++
++
++def probe_neighbors(base, width, height, reduced, mobile):
++    """Real C1 path. A is fixture setup through the public showPerson API; all user controls use CDP input."""
++    runner = Wave2AuditRunner(width=width, height=height, dpr=1)
++    graph_path = ROOT / "data" / "cache" / (NEIGHBOR_BOOK + ".json")
++    graph_sha = hashlib.sha256(graph_path.read_bytes()).hexdigest()
++    report = {"book": NEIGHBOR_BOOK, "graphSha256": graph_sha,
++              "viewport": {"width": width, "height": height, "mobile": mobile},
++              "reducedMotion": reduced, "input": "CDP trusted mouse + native select typeahead"}
++    report["checks"] = {"fixed_graph_hash": graph_sha == NEIGHBOR_GRAPH_SHA256}
++    if graph_sha != NEIGHBOR_GRAPH_SHA256:
++        report["fatal"] = "fixed C1 graph hash changed; refusing silent fixture substitution"
++        report["ok"] = False
++        return report
++    try:
++        runner.start()
++        runner.ws.call("Emulation.setDeviceMetricsOverride", width=width, height=height,
++                       deviceScaleFactor=1, mobile=mobile)
++        runner.ws.call("Emulation.setEmulatedMedia", features=[{"name": "prefers-reduced-motion",
++                                                                  "value": "reduce" if reduced else "no-preference"}])
++        runner.navigate("%s/?sky=1&data=data/cache/%s.json" % (base, NEIGHBOR_BOOK))
++        deadline = time.time() + 150
++        while time.time() < deadline:
++            if runner.eval("!!(window.CLApp&&CLApp.graph()&&CLApp.key()==='%s'&&window.CLSky&&document.querySelector('#loader.off'))" % NEIGHBOR_BOOK) is True:
++                break
++            time.sleep(0.4)
++        else:
++            raise RuntimeError("fixed Xiyou graph did not finish loading")
++        # Public read-panel setup only. It does not dispatch or emulate user input.
++        setup = runner.eval("(()=>{CLSkyDeconstruction.setMode('people');return CLSkyDeconstruction.showPerson('孙悟空');})()")
++        report["public_a_setup"] = {"method": "CLSkyDeconstruction.showPerson", "name": "孙悟空", "ok": setup is True}
++        if setup is not True:
++            raise RuntimeError("public A setup did not find 孙悟空")
++        panel_ready = _wait_value(runner, "!!(window.CLSkyDeconstruction&&CLSkyDeconstruction.ready()&&document.querySelector('#skyDeconPanel .sd-person-actions [data-action=neighbor-open]'))")
++        if panel_ready is not True:
++            raise RuntimeError("A person action row did not settle after public showPerson setup: %r" % panel_ready)
++        runner.eval("(()=>{const e=document.querySelector('#skyDeconPanel .sd-person-actions [data-action=neighbor-open]');if(e)e.scrollIntoView({block:'center',inline:'nearest'});return !!e})()")
++        click_ready = _wait_value(runner, "(()=>{const e=document.querySelector('#skyDeconPanel .sd-person-actions [data-action=neighbor-open]');if(!e)return false;const r=e.getBoundingClientRect(),t=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);return !!(r.width&&r.height&&t&&(t===e||e.contains(t)))})()")
++        if click_ready is not True:
++            raise RuntimeError("neighbor-open target did not become hittable after scrolling")
++        a_identity = runner.eval("(()=>{const p=document.querySelector('#skyDeconPanel .sd-person.is-focus');return p&&p.getAttribute('data-person-detail')})()")
++        report["A_stable_id"] = a_identity
++        report["checks"]["A_uses_frozen_stable_id"] = a_identity == "ch_25537390c961aa39"
++        _native_click(runner, "#skyDeconPanel .sd-person-actions [data-action=neighbor-open]")
++        b_ready = _wait_value(runner, "!!document.querySelector('#skyDeconPanel select[data-neighbor-person=b]')")
++        if b_ready is not True:
++            raise RuntimeError("B select did not render after native open action")
++        # Focus is setup only; the B choice itself is native CDP typeahead, not a scripted value change.
++        focus = runner.eval("(()=>{window.__c1NativeChange=[];document.addEventListener('change',e=>{if(e.target.matches&&e.target.matches('select[data-neighbor-person=b],select[data-neighbor-kind=filter]'))window.__c1NativeChange.push({trusted:e.isTrusted,attr:e.target.getAttribute('data-neighbor-person')?'person':'kind',value:e.target.value});},true);const s=document.querySelector('#skyDeconPanel select[data-neighbor-person=b]');if(s)s.focus();return !!s&&document.activeElement===s;})()")
++        if focus is not True:
++            raise RuntimeError("B selector did not receive focus before native typeahead")
++        _native_typeahead(runner, "猪")
++        initial = runner.eval("new Promise(resolve=>requestAnimationFrame(()=>resolve({lines:document.querySelectorAll('#skyRelationNeighborMarks .sky-neighbor-line').length,nodes:document.querySelectorAll('#skyRelationNeighborMarks .sky-neighbor-node').length,owners:document.querySelectorAll('#skyRelationNeighborMarks .sky-neighbor-owner').length})))", await_promise=True)
++        report["first_frame"] = initial
++        time.sleep(0.75)
++        state = runner.eval("(()=>{const s=document.querySelector('#skyDeconPanel select[data-neighbor-person=b]'),n=document.querySelector('#skyDeconPanel .sd-neighbor');if(!s||!n)return null;const tabs=[...n.querySelectorAll('[data-neighbor-tab]')];return {b:s.value,events:window.__c1NativeChange||[],tabs:tabs.map(x=>({id:x.getAttribute('data-neighbor-tab'),text:x.textContent,pressed:x.getAttribute('aria-pressed')})),groups:[...n.querySelectorAll('.sd-neighbor-person')].map(x=>x.getAttribute('data-neighbor-id')),note:(n.querySelector('.sd-neighbor-note')||{}).textContent||'',aLabel:(n.querySelector('.sd-neighbor-head')||{}).textContent||'',fiberCount:document.querySelectorAll('#skyRelationNeighborMarks .sky-neighbor-line').length,nodeCount:document.querySelectorAll('#skyRelationNeighborMarks .sky-neighbor-node').length,ownerLabels:[...document.querySelectorAll('#skyRelationNeighborMarks .sky-neighbor-owner-label')].map(x=>({text:x.textContent,box:(()=>{const r=x.getBoundingClientRect();return {left:r.left,right:r.right,top:r.top,bottom:r.bottom}})()}))};})()")
++        if not isinstance(state, dict):
++            raise RuntimeError("native B typeahead did not open comparison")
++        report["after_typeahead"] = state
++        if state.get("b") != "ch_1dee9e1be8a97b5f" or not any(e.get("trusted") for e in state.get("events", [])):
++            raise RuntimeError("native B selection was not trusted or did not resolve to 猪八戒")
++        def tab_count(tab_id):
++            _native_click(runner, "#skyDeconPanel [data-action=neighbor-tab][data-neighbor-tab=%s]" % tab_id)
++            time.sleep(0.18)
++            return runner.eval("(()=>{const n=document.querySelector('#skyDeconPanel .sd-neighbor'),b=n&&n.querySelector('[data-neighbor-tab=%s]');return {pressed:b&&b.getAttribute('aria-pressed'),count:n&&n.querySelectorAll('.sd-neighbor-person').length,ids:n?[...n.querySelectorAll('.sd-neighbor-person')].map(x=>x.getAttribute('data-neighbor-id')):[],lines:document.querySelectorAll('#skyRelationNeighborMarks .sky-neighbor-line').length};})()" % json.dumps(tab_id))
++        groups = {key: tab_count(key) for key in ("common", "onlyA", "onlyB")}
++        report["groups"] = groups
++        report["checks"].update({
++            "common_exact": groups["common"].get("count") == 1 and groups["common"].get("ids") == ["ch_0ebf2655f1fb3db3"],
++            "only_a_exact": groups["onlyA"].get("count") == 6,
++            "only_b_empty": groups["onlyB"].get("count") == 0,
++            "native_change_trusted": any(e.get("trusted") for e in state.get("events", [])),
++            "line_budget": 0 <= state.get("fiberCount", 999) <= 8,
++            "demo_counts_match_scene_overlay": state.get("nodeCount") == 7 and state.get("fiberCount") == 8 and "当前组原位演示 1 / 1 人" in state.get("note", "") and "所有分组合计演示 7 人、8 条关系线" in state.get("note", ""),
++            "owner_labels_visible_in_viewport": len(state.get("ownerLabels", [])) == 2 and all(0 <= x["box"]["left"] and x["box"]["right"] <= width and 0 <= x["box"]["top"] and x["box"]["bottom"] <= height for x in state.get("ownerLabels", [])),
++        })
++        shot_dir = Path(os.environ.get("CL_SHOTS", "/tmp/castline-shots")) / "p3-relation-neighbors"
++        shot_dir.mkdir(parents=True, exist_ok=True)
++        screenshot = runner.ws.call("Page.captureScreenshot", format="png")
++        shot = shot_dir / ("%s-%s-compare-%s.png" % ("mobile" if mobile else "desktop", "reduced" if reduced else "motion", int(time.time())))
++        shot.write_bytes(base64.b64decode(screenshot["data"]))
++        report["screenshot_comparison"] = str(shot)
++        responsive = runner.eval("(()=>{const n=document.querySelector('#skyDeconPanel .sd-neighbor'),s=n&&n.querySelector('select[data-neighbor-person=b]'),tabs=n&&n.querySelector('.sd-neighbor-tabs'),r=n&&n.getBoundingClientRect();return {width:innerWidth,height:innerHeight,scrollWidth:document.documentElement.scrollWidth,clientWidth:document.documentElement.clientWidth,selectHeight:s&&s.getBoundingClientRect().height,tabsDirection:tabs&&getComputedStyle(tabs).flexDirection,panelWidth:r&&r.width};})()")
++        report["responsive"] = responsive
++        if mobile:
++            report["checks"]["mobile_vertical_and_no_horizontal_overflow"] = bool(responsive.get("tabsDirection") == "column" and responsive.get("scrollWidth") <= responsive.get("clientWidth") + 1 and responsive.get("selectHeight") >= 44)
++        else:
++            report["checks"]["desktop_layout_fits_viewport"] = bool(responsive.get("scrollWidth") <= responsive.get("clientWidth") + 1)
++        # Return from one real relation basis record to the same comparison tab and IDs.
++        tab_count("onlyA")
++        _native_click(runner, "#skyDeconPanel .sd-neighbor-person [data-action=neighbor-basis]")
++        time.sleep(0.3)
++        relation = runner.eval("(()=>({open:!!document.querySelector('#skyDeconPanel .sd-mechanics-card'),back:!!document.querySelector('#skyDeconPanel [data-action=neighbor-return]')}))()")
++        report["basis"] = relation
++        _native_click(runner, "#skyDeconPanel [data-action=neighbor-return]")
++        time.sleep(0.2)
++        returned = runner.eval("(()=>{const n=document.querySelector('#skyDeconPanel .sd-neighbor'),s=n&&n.querySelector('select[data-neighbor-person=b]'),r=s&&s.getBoundingClientRect(),body=document.querySelector('#skyDeconBody'),br=body&&body.getBoundingClientRect();return {visible:!!n,b:s&&s.value,tab:n&&[...n.querySelectorAll('[data-neighbor-tab]')].filter(x=>x.getAttribute('aria-pressed')==='true').map(x=>x.getAttribute('data-neighbor-tab')),scroll:body&&body.scrollTop,focus:document.activeElement===s,selectorVisible:!!(r&&br&&r.top>=br.top&&r.bottom<=br.bottom)};})()")
++        report["returned"] = returned
++        report["checks"]["basis_roundtrip_keeps_b_tab_focus_and_scroll"] = bool(relation.get("open") and relation.get("back") and returned.get("visible") and returned.get("b") == "ch_1dee9e1be8a97b5f" and returned.get("tab") == ["onlyA"] and returned.get("focus") and returned.get("selectorVisible"))
++        kind_focus = runner.eval("(()=>{const s=document.querySelector('#skyDeconPanel select[data-neighbor-kind=filter]');if(s)s.focus();return !!s&&document.activeElement===s})()")
++        if not kind_focus:
++            raise RuntimeError("relation-type selector did not receive focus")
++        _native_typeahead(runner, "师徒")
++        time.sleep(0.4)
++        filtered = runner.eval("(()=>{const n=document.querySelector('#skyDeconPanel .sd-neighbor'),s=n&&n.querySelector('select[data-neighbor-kind=filter]');return {kind:s&&s.value,active:n&&[...n.querySelectorAll('[data-neighbor-tab]')].filter(x=>x.getAttribute('aria-pressed')==='true').map(x=>x.getAttribute('data-neighbor-tab')),common:n&&n.querySelectorAll('.sd-neighbor-person').length,recordLabels:n?[...n.querySelectorAll('.sd-neighbor-record')].map(x=>x.textContent):[],trusted:window.__c1NativeChange.filter(x=>x.attr==='kind').map(x=>x.trusted)};})()")
++        report["native_type_filter"] = filtered
++        report["checks"]["native_type_filter_recalculates_list"] = bool(filtered.get("kind") == "mentorship" and filtered.get("active") == ["common"] and filtered.get("common") == 1 and len(filtered.get("recordLabels", [])) == 2 and all("师徒" in x for x in filtered.get("recordLabels", [])) and any(filtered.get("trusted", [])))
++        _native_click(runner, "#skyDeconPanel .sd-neighbor-clear")
++        time.sleep(0.2)
++        single = runner.eval("(()=>{const n=document.querySelector('#skyDeconPanel .sd-neighbor'),s=n&&n.querySelector('select[data-neighbor-person=b]');return {b:s&&s.value,groups:[...n.querySelectorAll('[data-neighbor-tab]')].map(x=>x.textContent),a:(n.querySelector('.sd-neighbor-head')||{}).textContent||'',lines:document.querySelectorAll('#skyRelationNeighborMarks .sky-neighbor-line').length};})()")
++        report["after_clear_b"] = single
++        report["checks"]["clear_b_restores_single_person"] = bool(single.get("b") == "" and any("A的一度联系人" in x for x in single.get("groups", [])))
++        _native_click(runner, "#skyDeconPanel [role=tab][data-mode=overview]")
++        time.sleep(0.15)
++        mode_clear = runner.eval("(()=>({mode:document.querySelector('#skyDeconPanel [role=tab][data-mode=overview]')?.getAttribute('aria-selected'),lines:document.querySelectorAll('#skyRelationNeighborMarks .sky-neighbor-line').length,nodes:document.querySelectorAll('#skyRelationNeighborMarks .sky-neighbor-node').length}))()")
++        report["after_mode_change"] = mode_clear
++        report["checks"]["leaving_comparison_clears_overlay"] = bool(mode_clear.get("lines") == 0 and mode_clear.get("nodes") == 0)
++        _native_click(runner, "#skyDeconPanel .sd-close")
++        close_overlay = runner.eval("(()=>({lines:document.querySelectorAll('#skyRelationNeighborMarks .sky-neighbor-line').length,nodes:document.querySelectorAll('#skyRelationNeighborMarks .sky-neighbor-node').length}))()")
++        close_end = _wait_value(runner, "!!(document.querySelector('#skyDeconPanel')&&document.querySelector('#skyDeconPanel').hidden)", timeout=2)
++        closed = runner.eval("(()=>({hidden:document.querySelector('#skyDeconPanel')?.hidden,lines:document.querySelectorAll('#skyRelationNeighborMarks .sky-neighbor-line').length}))()")
++        report["after_close"] = {"overlayAtClose": close_overlay, "settled": close_end, "panel": closed}
++        report["checks"]["close_clears_overlay"] = bool(close_overlay.get("lines") == 0 and close_overlay.get("nodes") == 0 and close_end is True and closed.get("hidden"))
++        report["checks"]["reduced_motion_first_frame_is_final"] = (not reduced or (isinstance(initial, dict) and initial.get("lines") == 8 and initial.get("nodes") == 7 and initial.get("owners") == 2))
++        shot_dir = Path(os.environ.get("CL_SHOTS", "/tmp/castline-shots")) / "p3-relation-neighbors"
++        shot_dir.mkdir(parents=True, exist_ok=True)
++        screenshot = runner.ws.call("Page.captureScreenshot", format="png")
++        shot = shot_dir / ("%s-%s-%s.png" % ("mobile" if mobile else "desktop", "reduced" if reduced else "motion", int(time.time())))
++        shot.write_bytes(base64.b64decode(screenshot["data"]))
++        report["screenshot"] = str(shot)
++        health = runner.eval(PAGE_HEALTH_JS)
++        report["health"] = health
++        ordinary = health
++        report["ordinary_health"] = ordinary
++        report["checks"]["CLApp_scene_health_fields_present"] = bool(isinstance(ordinary, dict) and isinstance(ordinary.get("jserr"), list) and isinstance(ordinary.get("jsrej"), list) and ordinary.get("app") and ordinary.get("graph") and ordinary.get("graphKey") == NEIGHBOR_BOOK and ordinary.get("scene") and ordinary.get("digest") and isinstance(ordinary.get("frameHooks"), dict) and isinstance(ordinary["frameHooks"].get("errors"), (int, float)) and isinstance(ordinary.get("shaderErrors"), list))
++        frame_hooks = health.get("frameHooks") if isinstance(health, dict) else None
++        report["checks"]["page_health_present_and_clean"] = bool(isinstance(health, dict) and health.get("jserr") == [] and health.get("jsrej") == [] and isinstance(frame_hooks, dict) and frame_hooks.get("errors") == 0 and health.get("shaderErrors") == [])
++        report["ok"] = all(report["checks"].values())
++        return report
++    except Exception as error:
++        report["fatal"] = str(error)
++        report["ok"] = False
++        try:
++            failure_dir = Path(os.environ.get("CL_SHOTS", "/tmp/castline-shots")) / "p3-relation-neighbors"
++            failure_dir.mkdir(parents=True, exist_ok=True)
++            if runner.ws:
++                report["failure_state"] = runner.eval("(()=>({active:document.activeElement&&document.activeElement.outerHTML,openButton:!!document.querySelector('#skyDeconPanel .sd-person-actions [data-action=neighbor-open]'),bSelect:!!document.querySelector('#skyDeconPanel select[data-neighbor-person=b]'),panelReady:window.CLSkyDeconstruction&&CLSkyDeconstruction.ready&&CLSkyDeconstruction.ready()}))()")
++                shot = runner.ws.call("Page.captureScreenshot", format="png")
++                failure_path = failure_dir / ("failure-%s.png" % int(time.time()))
++                failure_path.write_bytes(base64.b64decode(shot["data"]))
++                report["failure_screenshot"] = str(failure_path)
++        except Exception as capture_error:
++            report["failure_capture_error"] = str(capture_error)
++        try:
++            report["health"] = runner.eval(PAGE_HEALTH_JS)
++        except Exception as health_error:
++            report["health_error"] = str(health_error)
++        return report
++    finally:
++        try:
++            runner.close()
++        except Exception:
++            pass
++
++
+ def main() -> int:
+     ap = argparse.ArgumentParser()
+     ap.add_argument("--base", default=os.environ.get("CASTLINE_BASE", "http://127.0.0.1:8781"))
+     ap.add_argument("--out", default=str(Path(os.environ.get("CL_SHOTS", "/tmp/castline-shots")) / "p3-relation-scope"))
++    ap.add_argument("--neighbors", action="store_true", help="运行C1/M97固定西游双人关系页面路径，使用CDP原生输入")
++    viewport = ap.add_mutually_exclusive_group()
++    viewport.add_argument("--neighbors-desktop", dest="neighbors_mobile", action="store_false", help="C1路径使用1440×900桌面模拟（默认）")
++    viewport.add_argument("--neighbors-mobile", dest="neighbors_mobile", action="store_true", help="C1路径使用390×844窄屏模拟")
++    ap.set_defaults(neighbors_mobile=False)
++    ap.add_argument("--reduced-motion", action="store_true", help="C1路径模拟prefers-reduced-motion: reduce")
++    ap.add_argument("--neighbors-out", default=str(Path(os.environ.get("CL_ARTIFACTS", "/tmp/castline-artifacts")) / "p3-relation-neighbors"))
+     args = ap.parse_args()
++    if args.neighbors:
++        width, height = (390, 844) if args.neighbors_mobile else (1440, 900)
++        result = probe_neighbors(args.base, width, height, args.reduced_motion, args.neighbors_mobile)
++        out = Path(args.neighbors_out)
++        out.mkdir(parents=True, exist_ok=True)
++        variant = ("mobile" if args.neighbors_mobile else "desktop") + ("-reduced" if args.reduced_motion else "-motion")
++        report_path = out / ("%s-%s.json" % (variant, int(time.time())))
++        report_path.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
++        print(json.dumps({"ok": result.get("ok", False), "checks": result.get("checks"), "fatal": result.get("fatal"),
++                          "report": str(report_path), "screenshot": result.get("screenshot")}, ensure_ascii=False))
++        return 0 if result.get("ok") else 1
+     out = Path(args.out)
+     out.mkdir(parents=True, exist_ok=True)
+ 
+

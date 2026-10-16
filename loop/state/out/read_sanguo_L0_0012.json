@@ -1,0 +1,269 @@
+{
+  "task": "read:sanguo:L0:0012",
+  "agent": "w-xiyou-0",
+  "status": "done",
+  "summary": "精读《三国演义》第十三回（docs[0].text codepoint [59244,65278)，6034 字）并产出候选 JSON：10 条任务五元组、11 条 causeEdges（另 5 条 rejected 并附理由）、7 条 states、3 条 knowledgeGaps、5 条 foreshadows（2 resolved / 1 partial / 2 显式 unresolved）、3 条 rejectedForeshadows、8 条 characterClaims（全部 narratorConfirmed=false）、5 条 narrativeFacts、5 条 openThreads、14 条 unknowns、4 条 selfCritique。全部 295 处引用逐字命中 docs[0].text 且落在本单元区间内；sourceHash 与整文件 sha256 一致。semanticReview 明确写 not-performed。",
+  "evidence": [
+    {
+      "path": "loop/state/out/read_sanguo_L0_0012.candidate.json",
+      "sha256": "2307e11f19c2752b9f6754e4dc2ffdf7c50abb26306761e76a5a91834e169f64",
+      "note": "本轮唯一写出的文件；295 条 quote 引用、157 条唯一引文、quoteIndex 157 条与之一一对应。"
+    },
+    {
+      "path": "data/cache/152e2a6eed94f1075e7e7070.docs.json",
+      "sha256": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+      "note": "原文来源。sourceRange [59244,65278) 的切片 sha256 = 见候选文件 source.segmentSha256；docs[0].text[59244:59264] == 回目『第十三回　李傕郭汜大交兵　杨奉董承双救驾』。"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "原文区间自检：docs[0].text[59244:59264] 逐字等于任务 unitHead『第十三回　李傕郭汜大交兵　杨奉董承双救驾』（含两个 U+3000），且 docs[0].text[65278:65278+12] 已是第十四回回目，证明区间右端不越界。",
+      "result": "pass",
+      "command": "python3 -B -s -c \"import json;t=json.load(open('data/cache/152e2a6eed94f1075e7e7070.docs.json'))[0]['text'];print(repr(t[59244:59264]),repr(t[65278:65290]))\""
+    },
+    {
+      "text": "sourceHash 对账：候选文件 source.sourceHash 与 sourceHashes 中登记的整文件 sha256 一致，且等于 `shasum -a 256 data/cache/152e2a6eed94f1075e7e7070.docs.json` 的输出 2988ce6e…a97ff。",
+      "result": "pass",
+      "command": "shasum -a 256 data/cache/152e2a6eed94f1075e7e7070.docs.json"
+    },
+    {
+      "text": "逐条引用机器核验（独立脚本，不 import 生成脚本）：遍历候选文件中全部 295 个带 quote/start/end 的引用对象，断言 (a) docs[0].text[start:end] == quote 逐字成立，(b) start>=59244 且 end<=65278 落在本单元内，(c) end-start == len(quote)，(d) 每条引用 sourceHash 等于整文件哈希，(e) text.find(quote) != -1。输出『refs checked: 295  unique quotes: 157』『FAILURES: 0』『ALL CHECKS PASSED』。",
+      "result": "pass",
+      "command": "python3 -B -s /tmp/cl-rd12/verify.py"
+    },
+    {
+      "text": "quoteIndex 与断言引用集合一致：quoteIndex 157 条恰好覆盖 157 条唯一引文（无缺项、无多余），每条 quoteIndex 的 [start,end) 也逐字命中。首次运行时该断言失败（155 vs 157，两条边界引文在 quoteIndex 构建后才登记），已定位并修复生成脚本的构建顺序后复跑通过——不是放宽校验。",
+      "result": "pass",
+      "command": "python3 -B -s /tmp/cl-rd12/verify.py"
+    },
+    {
+      "text": "指标自洽复核：metrics.quoteRefs == 实际引用对象数（295），metrics.uniqueQuotes == 实际唯一引文数（157），metrics.tasks/causeEdges/foreshadows/characterClaims 与各自数组长度逐一相等。",
+      "result": "pass",
+      "command": "python3 -B -s /tmp/cl-rd12/verify.py"
+    },
+    {
+      "text": "红线自查·不得把台词当事实：8 条 characterClaims 全部 narratorConfirmed=false。典型如郭汜『今无端欲谋害我』与汜妻『必中其毒矣』——叙述者已明写『汜妻乃暗置毒于中』，故李傕下毒只能记作人物推断，不写成事实；皇甫郦『欲弑君自立』、李傕『我保驾在此』同样只作台词登记。",
+      "result": "pass",
+      "command": "python3 -B -s -c \"import json;c=json.load(open('loop/state/out/read_sanguo_L0_0012.candidate.json'));print([(x['id'],x['narratorConfirmed']) for x in c['characterClaims']])\""
+    },
+    {
+      "text": "红线自查·结束≠成功：本回有连续救驾成果（斩崔勇、败汜军、渡河保命），但 result 一律不写成功。依据两处原文：董承立誓『誓斩二贼』至区间末二贼皆活且仍在追（『傕、汜分兵赶来』）；作者以『不知汉天子怎离此难，且听下文分解』收束。foreshadows 中 fs_dongcheng_shi 显式标 unresolved，fs_fanjian 因『诏曹操引兵杀之』这半未落实标 partially-resolved-in-range。",
+      "result": "pass",
+      "command": "python3 -B -s -c \"import json;c=json.load(open('loop/state/out/read_sanguo_L0_0012.candidate.json'));print([(f['id'],f['status']) for f in c['foreshadows']])\""
+    },
+    {
+      "text": "红线自查·时间相邻不当因果：每条 causeEdge 都写了机制句并要求引用不少于 1 条；对 5 条看似成立实则不成立的连边显式拒绝并给理由，例如拒绝『重赏女巫不赏军将 → 起事失败』（原文把失败归给『事不密』，怨赏只是动机），拒绝『张济解和 → 二贼罢兵』（原文紧接『二人合兵，于路劫掠』）。",
+      "result": "pass",
+      "command": "python3 -B -s -c \"import json;c=json.load(open('loop/state/out/read_sanguo_L0_0012.candidate.json'));print(len(c['causeEdges']),len(c['rejectedCauseEdges']))\""
+    },
+    {
+      "text": "红线自查·一次出现不算伏笔：3 条 rejectedForeshadows 均记录了全书/区间出现次数。如『女巫』区间内出现 2 次但不构成铺设—回收结构（一次是习性交代、一次是封赏归功），故拒绝立伏笔；『郭阿多盗马贼耳』『急令皇甫郦回西凉』区间内各 1 次，直接拒绝。",
+      "result": "pass",
+      "command": "python3 -B -s -c \"import json;c=json.load(open('loop/state/out/read_sanguo_L0_0012.candidate.json'));print([(f['id'],f['inRangeOccurrences']) for f in c['rejectedForeshadows']])\""
+    },
+    {
+      "text": "红线自查·定位≠语义：候选文件 semanticReview 字段值为 not-performed，并附 semanticReviewNote 说明本文件只做引用定位核验，语义正确性未经独立复核。未声称语义已核验。",
+      "result": "pass",
+      "command": "python3 -B -s -c \"import json;print(json.load(open('loop/state/out/read_sanguo_L0_0012.candidate.json'))['semanticReview'])\""
+    },
+    {
+      "text": "红线自查·缺字段写 null：2 处原文确实没写成本的 cost 字段写 null（李乐、张济），未补『听起来合理』的值；metrics.tasksWithNullField 如实记为 2。其余字段均有逐字引用支撑。",
+      "result": "pass",
+      "command": "python3 -B -s -c \"import json;c=json.load(open('loop/state/out/read_sanguo_L0_0012.candidate.json'));print([(t['id'],f) for t in c['tasks'] for f in ('objective','obstacle','action','result','cost') if t[f] is None])\""
+    },
+    {
+      "text": "受保护路径未改：本轮只写出 loop/state/out/read_sanguo_L0_0012.candidate.json 一个文件（任务 writes 指定路径）。未触碰 js/ css/ index.html serve.py narrative.py scripts/ tests/ docs/ data/；未跑任何 GPU/浏览器测试。",
+      "result": "pass",
+      "command": "git status --porcelain -- loop/state/out/read_sanguo_L0_0012.candidate.json"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/read_sanguo_L0_0012.candidate.json",
+      "kind": "append-only"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/152e2a6eed94f1075e7e7070.docs.json": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff"
+  },
+  "remaining": [
+    "语义未复核：本文件只保证引用定位正确（逐字命中 + 区间内 + 偏移自洽）。『causeEdges 的机制是否成立』『states 的前后值划分是否恰当』『foreshadows 是否算铺设+回收』这三类判断都需要独立复核者对着原文反向检查，我未做也无法自证。",
+    "本回最需要复核者反向检查的一处：郭汜之妻置毒这条因果链。反间计（杨彪献、献帝密诏、彪妻入府）与汜妻自行升级（置毒、试毒、灌粪汁）之间的边界，原文没有一句明写『因为夫人之言才下毒』，我用的是动作链推断（『当慎防之』→『暗置毒于中』），已在 selfCritique 里标出这是我的判断。",
+    "我拒绝的 5 条 causeEdge 中，『贾诩之计 → 李傕军势渐衰』这条有解释空间：原文把羌兵去与『更兼郭汜常来攻击』并置，我坚持不合并成单因，但复核者可能认为贾诩之计是主因。已在 rejectedCauseEdges 留证。",
+    "本电子本存在疑似录入异文，我只确认其逐字存在、未判定对错、未改动：『骑都尉场奉』(62356，全书 1 次，其余 67 处作『杨奉』)、『李傕、敦汜但到之处』(64176，全书『敦汜』仅 1 次)、『郭汜领兵入官』(60961，全文无『入宫』写法)、『此人河东杨郡人』(63590，『杨郡人』全书 1 次)。这些可能是底本用字也可能是录入致误，已写入 unknowns。",
+    "回末站点样板（偏移 65223 起『------------------』与『枫林晚 整理校对后一页前一页回目录回首页…』）已排除在叙事内容外，是 uncoveredLines 里仅剩的两行；linesFullyContainedInSomeQuote=0 是因为本回段落是长行（最长 1153 codepoint），单条引文无法整行覆盖，故以 lineTouchRate=0.875 为主口径，两个口径都写进了 metrics。",
+    "本回末尾的悬念（李乐追至箕山下、山上火光遍起之后如何）在本区间内无解，已列入 openThreads；未跨到第十四回取答案，也未据此推断结局。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/read_sanguo_L0_0012.candidate.json"
+    ]
+  },
+  "submittedAt": "2026-10-07T21:09:02Z",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-07T21:09:02Z"
+  },
+  "verifyState": "partial",
+  "reviews": [
+    {
+      "reviewer": "q-verify",
+      "at": "2026-10-07T21:13:03Z",
+      "verdict": "pass",
+      "notes": "独立复核。**内容层引文 452/452 逐字对上原文**，自审计层失配 0；覆盖率 54.8%（按自称区间**裁剪**后计算）。反向验证：取补集逐段核对，对疑似段做了人工判读 —— 未发现被漏掉的对话或事件；报出的疑似段均属「引文取了别的句子、该拍仍由任务/因果/状态字段承载」。",
+      "counterExamples": [
+        {
+          "check": "覆盖率是否可能 >100%（我的复核器一度算出 102.3%）",
+          "method": "把越界引文裁剪到区间后重算",
+          "finding": "**我的复核器原本未裁剪，导致越界引文长度被算进区间**；裁剪后 96.3% ⇒ 已修，此为工具 bug 非提交缺陷"
+        }
+      ],
+      "reverseChecks": [
+        {
+          "question": "这一段里还漏了什么？",
+          "method": "补集逐段 + 疑似段反查字段",
+          "finding": "未发现真实漏抽"
+        }
+      ]
+    },
+    {
+      "reviewer": "w-verify-1",
+      "at": "2026-10-09T14:48:54Z",
+      "verdict": "partial",
+      "notes": "总体判断：**引用层零编造、零错位，是本批产物里定位质量最好的之一；但存在 1 处自述数字与自身产物不符、1 处自开处方未执行，因此判 partial 而非 pass。**\n\n判 partial 的两条依据都拿得出原文引证与可复现命令：① rf_nvwu 声明的 (2,2) 与它自己两条 quote 的实际出现次数（各 1 次）不符，而同文件 quoteIndex 用同一字段名严格计数、157/157 零失配 ⇒ 口径自相矛盾；② rejectedCauseEdges[1] 白纸黑字写下「正确连法是『怨赏→起事动机』」，causeEdges 里却没有这条边，而原文四步机制链逐字可查。两条都不影响候选的绝大多数内容**可用** —— 这正是 partial 而非 fail 的含义。\n\n我特别核过、并**主动排除**的几处「看着像缺陷但不是」的情况，写在这里以免下一轮被重复报为问题：(a)「刘备」「汉献帝」在区间内无此字符串，但属别名规范化，「玄德」22 次、全库「刘备」297 次，157 条 quote 无一条用别名 —— 不是编造；(b) usedBy 的 refs:N 不是悬空指针，N 恒等于正文引用该 quote 的对象数（157/157），是可复算的计数标签；(c) 54.8% 的码点覆盖率与 metrics 的 lineTouchRate 0.875 是两种口径，都属实，不构成虚报；(d) 候选把「李傕军势渐衰」拆给三个原因、并 reject 掉单因边，是**防止吞掉「更兼郭汜常来攻击」半句**的正确做法，不是过度拆分。\n\n不确定处（存疑，不据此判 fail）：候选 use 了「徐晃」一名来描述 @63481 斩崔勇者，而该名字直到 @63565 才由杨奉在御前给出 —— 这是叙述顺序上的**前指**（原文先写「公明何在」再交代姓名），严格说不算错，我只在 usableVsDiscard 里建议补记来源，不作反例。另：本回插入的长诗（@61012–61214）候选在 unknowns 里声明「按叙述者插入的评诗处理，未从诗中提取情节事实」，我核对该诗确未进入任何断言，处理得当。\n\n我的反向验证本身也交一条：我最初把「郭汜放归公卿」当成候选的因果误判（以为它把僵局写成不可解），复核原文后确认候选 ce_jiedi_to_yidu 的措辞是「两边各扣一批人，谁先放谁就失去筹码，于是劝和无从下手」——它描述的是**劝和当时**的处境，并未否认《后汉书》式的后续放归；我的初判过强，已改为「未覆盖」而非「误判」，如实记此。\n\n本次复核只做引用定位全量核验 + 反向覆盖 + 误杀/幻觉/越权检查；**语义正确性未独立复核**，semanticReview 保持 not-performed。复核只覆盖区间 [59244,65278)；区间外文字（如第十四回）未作为任何断言证据。",
+      "counterExamples": [
+        {
+          "field": "rejectedForeshadows[0].docOccurrences / inRangeOccurrences（id=rf_nvwu）",
+          "claim": "rf_nvwu 声明女巫降神一事「docOccurrences=2、inRangeOccurrences=2」，用以论证「出现两次仍不立伏笔」。",
+          "quote": "李傕平日最喜左道妖邪之术，常使女巫击鼓降神于军中。贾诩屡谏不听",
+          "start": 61840,
+          "end": 61871,
+          "quoteIsFromCandidate": true,
+          "candidateOccurrences": 2,
+          "why": "该条目的计数**任一可能口径都不成立**：它自己的两条 quote —— @61840「李傕平日最喜左道妖邪之术，常使女巫击鼓降神于军中。贾诩屡谏不听」与 @62726「傕喜曰：“此女巫降神祈祷之力也！”遂重赏女巫，却不赏军将」—— 在全库与区间内**各只出现 1 次**（t.count==1、seg.count==1，已用 find/count 双查）。同文件的 `quoteIndex` 用**同一字段名**并严格按 quote 逐条计数（157/157 零失配，我已全量复算），因此 rf_nvwu 的 (2,2) 与本文档自身的计数口径冲突。若作者本意是「该主题在区间内出现两次」，那也不是 docOccurrences 的定义，且同一文件的其它 rejectedForeshadows（rf_guosi_ma、rf_huangfuli_xiliang）用的都是「引文出现次数=1」口径 ⇒ 三条同层条目用了两套口径。这是**自述与自身产物不符**，属真实缺陷；影响面限于该条目的自证数字，不波及任何引用定位。修正方式：把该条改为按引文计数（1/1），或另起字段名说明「主题出现次数」并给出两条不同引文。"
+        },
+        {
+          "field": "causeEdges[]（缺一条候选自己判定为「正确连法」的边）",
+          "claim": "rejectedCauseEdges[1]（id=rce_fengwu_to_bujiang）明确写下：「正确连法是『怨赏→起事动机』，『事泄→失败』另立一条」。但 causeEdges 的 11 条里**没有任何一条**承载「怨赏→起事动机」。",
+          "quote": "骑都尉杨奉大怒，谓宋果曰：“吾等出生入死，身冒矢石，功反不及女巫耶！”",
+          "start": 62755,
+          "end": 62790,
+          "quoteIsFromCandidate": true,
+          "candidateOccurrences": 1,
+          "why": "候选自己承认这条因果真实且必要（否则不会在 reject 理由里指定它作为「正确连法」），却只在 rejectedCauseEdges 里留下处方，未在 causeEdges 里落地。原文的机制链是直述且完整的：李傕「遂重赏女巫，却不赏军将」(@62726) → 杨奉「大怒」并说出怨赏之由「功反不及女巫耶」(@62755) → 宋果提出「何不杀此贼，以救天子」(@62790) → 「二人约定是夜二更时分举事」(@62807)。四步都有逐字引文，方向明确（赏罚不公→军中怨怒→谋议起事），触发是「同功不同赏」。缺这条边使本回杨奉—宋果这条线的**动机**在因果层无承载（只有「事泄→失败」这条 ce_butui_to_bubui）。影响面：causeEdges 是发布桥 LAYER_MAP 的层，该层会因此少一条本可发布的边。修正方式：新增一条 causeEdge（from=李傕重赏女巫不赏军将，to=杨奉宋果谋议起事救驾），并把 rejectedCauseEdges[1] 的措辞改为「已另立边，故不与此边合并」。"
+        }
+      ],
+      "reverseChecks": [
+        {
+          "found": "王昌受命追皇甫郦，却因敬其忠义而**抗命不追**，并谎报「郦已不知何往」—— 这是本回第二条「部下不执行主君命令」的链，且与杨奉/宋果那条失败链形成对照（一个因敬重而放走，一个因事泄而被杀）。候选全文 0 次提及王昌（blob.count('王昌')==0）。",
+          "quote": "傕闻郦言，大怒，差虎贲王昌追之。昌知郦乃忠义之士，竟不往追，只回报曰：“郦已不知何往矣。”",
+          "start": 62582,
+          "end": 62627,
+          "sourceHash": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+          "occurrencesInSource": 1,
+          "candidateOccurrences": 0,
+          "inSourceRange": true,
+          "why": "候选把皇甫郦的 result 收在「帝知之，急令皇甫郦回西凉」，跳过了紧接其后的追捕与抗命环节；该环节带出原文独有的人物王昌，且是「军心渐涣」之外的又一处分化证据。"
+        },
+        {
+          "found": "郭汜所劫公卿**后来确实被放归**（「汜放公卿出营」@63061），韩融舍命去说二贼也**成功**（「二贼从其言，乃放百官及宫人归」@64899）。候选只写了「郭汜竟将众官尽行监下」（人质被扣），未写放归，其 states/ce_jiedi_to_yidu 因此停在「谁先放谁就失去筹码」的静态判断上。",
+          "quote": "却说韩融曲说傕、汜二贼。二贼从其言，乃放百官及宫人归",
+          "start": 64899,
+          "end": 64925,
+          "sourceHash": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+          "occurrencesInSource": 1,
+          "candidateOccurrences": 0,
+          "inSourceRange": true,
+          "companions": [
+            {
+              "quote": "汜放公卿出营",
+              "start": 63061,
+              "end": 63067
+            },
+            {
+              "quote": "韩融曰：“傕、汜二贼，颇信臣言；臣舍命去说二贼罢兵。陛下善保龙体。”",
+              "start": 64695,
+              "end": 64728
+            }
+          ],
+          "why": "「韩融」在候选 JSON 中出现 0 次、「乃放百官及宫人归」0 次、「汜放公卿出营」0 次（已用 count 逐项核）。这不是细节遗漏：它把候选 ce_jiedi_to_yidu 的结论从「对等质押导致僵局」修正为「僵局最终被第三方说客解开」——质押并非不可解。"
+        },
+        {
+          "found": "李傕、郭汜曾在阵前约定**单挑赌皇帝**：「我两个各不许用军士，只自并输赢。赢的便把皇帝取去罢了」，随后「战到十合。不分胜负」；杨彪拍马劝和（「二位将军少歇」）才使二人各自还营。候选 0 次提及此约（'各不许用军士'、'赢的便把皇帝取去'、'战到十合'、'不分胜负' 在候选 JSON 中计数全为 0）。",
+          "quote": "傕曰：“不须多言！我两个各不许用军士，只自并输赢。赢的便把皇帝取去罢了。”二人便就阵前厮杀。战到十合。不分胜负",
+          "start": 61522,
+          "end": 61577,
+          "sourceHash": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+          "occurrencesInSource": 1,
+          "candidateOccurrences": 0,
+          "inSourceRange": true,
+          "why": "这是「皇帝作为筹码」被双方当众说破的一处：天子被明码当作赌注。候选的 characterClaims 收了「我保驾在此，何为反贼？」却漏了同一场对话里更彻底的筹码化表述。"
+        },
+        {
+          "found": "杨彪劝和险些被杀，靠**中郎将杨密**力劝才获释 —— 与朱俊「归家成病而死」同属劝和失败的代价，且是原文唯一以「力劝」救下重臣的动作。候选 0 次提及杨密（'杨密' 计数 0），也未引「汜大怒，便拔剑欲杀彪」。",
+          "quote": "汜大怒，便拔剑欲杀彪。中郎将杨密力劝，汜乃放了杨彪、朱俊，其余都监在营中",
+          "start": 61722,
+          "end": 61758,
+          "sourceHash": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+          "occurrencesInSource": 1,
+          "candidateOccurrences": 0,
+          "inSourceRange": true,
+          "why": "候选 task_xiandi_chuzei.cost 列了「百官被郭汜监下、朱俊病死、杨彪昏绝」，但跳过「杨彪本人曾被拔剑相向」与救他的人；因果上这解释了为什么「其余都监在营中」而杨彪、朱俊能被放走。"
+        },
+        {
+          "found": "大饥荒与地方官献纳：**「是岁大荒，百姓皆食枣菜，饿莩遍野」**，随后「河内太守张杨献米肉，河东太守王邑献绢帛，帝稍得宁」。候选 0 次提及（'大荒'、'饿莩'、'张杨'、'王邑'、'稍得宁' 计数全为 0）。",
+          "quote": "是岁大荒，百姓皆食枣菜，饿莩遍野。河内太守张杨献米肉，河东太守王邑献绢帛，帝稍得宁",
+          "start": 64926,
+          "end": 64967,
+          "sourceHash": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+          "occurrencesInSource": 1,
+          "candidateOccurrences": 0,
+          "inSourceRange": true,
+          "why": "候选把「帝稍得宁」的**外部供给来源**整段留空：全回只有张杨、王邑两人主动向流亡朝廷献纳，是「名器虽滥而人心未全失」的唯一正面证据，与李乐专权、以锥画印构成对照。"
+        },
+        {
+          "found": "吕布在席上直呼刘备为「贤弟」，这才是张飞暴怒的**直接触发语**：「布令妻女出拜玄德。玄德再三谦让。布曰：“贤弟不必推让。”」紧接下一句才是张飞叱骂。候选引了张飞的骂词（@59948），却没有引吕布这句起因；其 tasks[0].objective/cost 因此写成吕布「当众受辱」，把先后关系讲反了。",
+          "quote": "布令妻女出拜玄德。玄德再三谦让。布曰：“贤弟不必推让。”",
+          "start": 59920,
+          "end": 59948,
+          "sourceHash": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+          "occurrencesInSource": 1,
+          "candidateOccurrences": 0,
+          "inSourceRange": true,
+          "why": "候选 causeEdges 没有任何一条连「吕布称贤弟→张飞叱骂」；而张飞骂的正是这句（「你是何等人，敢称我哥哥为贤弟」）。缺这条边使该冲突在因果层无因，只剩结果。"
+        },
+        {
+          "found": "徐晃的姓名与籍贯由杨奉在御前正式引荐交代：「此人河东杨郡人，姓徐，名晃，字公明」；而临阵时杨奉喊的是**字**「公明何在？」。候选只 4 次出现「徐晃」这一名字（含引文），0 次出现「字公明」「公明何在」（'字公明'、'公明何在' 计数为 0），未记录这条「以字相呼→御前具名」的交代。",
+          "quote": "帝曰：“适斩贼将者何人？”奉乃引此将拜于车下曰：“此人河东杨郡人，姓徐，名晃，字公明。”",
+          "start": 63565,
+          "end": 63609,
+          "sourceHash": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+          "occurrencesInSource": 1,
+          "candidateOccurrences": 0,
+          "inSourceRange": true,
+          "why": "徐晃在本回是首次登场人物。候选 states/tasks 用「徐晃」称呼他，但该名字在区间内正是**由这段引荐才被给出**；候选把它当成已知名字使用，等于跳过了原文对他的引入（候选自己的 unknowns 里只把「杨郡人」当误字提了一句，未记引荐本身）。"
+        },
+        {
+          "found": "「自此之后，傕、汜每日厮杀，一连五十余日，死者不知其数」与杨奉保驾至华阴「驻跸」、将军**段煨**「具衣服饮膳上献」、天子宿于杨奉营中 —— 候选 0 次出现（'五十余日'、'死者不知其数'、'驻跸'、'段煨'、'衣服饮膳'、'宿于杨奉营中' 计数全为 0）。",
+          "quote": "杨奉保驾至华阴驻跸。将军段煨，具衣服饮膳上献。是夜，天子宿于杨奉营中",
+          "start": 63614,
+          "end": 63648,
+          "sourceHash": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+          "occurrencesInSource": 1,
+          "candidateOccurrences": 0,
+          "inSourceRange": true,
+          "companions": [
+            {
+              "quote": "自此之后，傕、汜每日厮杀，一连五十余日，死者不知其数",
+              "start": 61807,
+              "end": 61833
+            }
+          ],
+          "why": "「五十余日」是双方相攻的**持续时长**，候选只在 fs_fanjian.lastSeenNote 笼统写「持续生效到最后一段」而不给时长；段煨献膳则是帝后流亡途中少数受供的节点之一（与后文「绝食」「浊酒粗食」构成对照）。"
+        }
+      ]
+    }
+  ]
+}

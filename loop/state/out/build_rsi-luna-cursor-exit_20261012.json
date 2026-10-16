@@ -1,0 +1,101 @@
+{
+  "task": "build:rsi-luna-cursor-exit:20261012",
+  "agent": "rsi-luna-cursor-exit-20261012",
+  "status": "done",
+  "summary": "ClearCursor now closes the reading surface and invalidates pending context responses; groups shell reconciles an already available graph at DOMContentLoaded or when loaded after that event.",
+  "candidate": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-234458-195161-40272/测试产物/rsi-luna-cursor-exit-20261012",
+  "candidateHashes": {
+    "js/sky/sky-shell-player.js": "c40734bfb95162b88457244f0fe50a5615f1f3b6afef4402f846fce15a7b7ee6",
+    "js/sky/sky-groups-shell.js": "570fcc0cc9e7551ff32c55d12a3cae81117911b52db15a3636ed64aed1e248e2"
+  },
+  "sourceHashes": {
+    "js/sky/sky-shell-player.js": "1c2da433abbba99d8b894cf5268e58dd571e00bd10725139b8d5ed9efc2f8f20",
+    "js/sky/sky-groups-shell.js": "9ea1deb303391d1f6cd1dd5c26ea5cb345567566deddca9274b42ac79eccab0f"
+  },
+  "diff": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-234458-195161-40272/测试产物/rsi-luna-cursor-exit-20261012/candidate.diff",
+  "diffSha256": "fe58f04b1c5ca03ee9d3f86f56aeff3f85aa4b507fa886a6a40f966090a2b914",
+  "evidence": [
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-234458-195161-40272/测试产物/rsi-luna-cursor-exit-20261012/candidate.diff",
+      "sha256": "fe58f04b1c5ca03ee9d3f86f56aeff3f85aa4b507fa886a6a40f966090a2b914"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-234458-195161-40272/测试产物/rsi-luna-cursor-exit-20261012/build-report.json",
+      "sha256": "d5ec40d72aaf2d5fce80ef5933148cdbb445ac62b4493589923ff288c67907b2"
+    }
+  ],
+  "rootFindings": {
+    "readingPanel": "Product gap: clearCursor cleared cursor data but did not close the existing story panel; render() returns early without a current event. A pending source response could otherwise complete against stale context. Candidate hides the panel, clears explanation overlays, nulls ctx and increments ctxReq before clearing cursor.",
+    "groupsInitialization": "Independent product gap: groups-shell listened only for cl:graph-ready and had no DOMContentLoaded or already-loaded fallback. It can miss graph-ready when its deferred module arrives late. Candidate runs ensure+refresh once when the initial graph, app, scene, and enabled sky are ready, with !inst guard; existing ensure reuses instance and frame hook.",
+    "atlasProbe": "Not a product finding: root reports two Atlas failures arose from the probe SNAPSHOT reading CLSky.disc without a null guard. Root will fix the existing probe separately and preserve those failures."
+  },
+  "checks": [
+    "node --check passed for both candidate JavaScript files"
+  ],
+  "assertions": [
+    {
+      "text": "Both candidate JavaScript files pass Node syntax parsing",
+      "result": "pass"
+    },
+    {
+      "text": "Candidate changes only player clearCursor and groups-shell initial graph reconciliation; no shared files touched",
+      "result": "pass"
+    },
+    {
+      "text": "No browser/GPU execution by builder; root serial browser verification remains pending",
+      "result": "pending"
+    }
+  ],
+  "remaining": [
+    "Root serial story/group and keyboard page verification; no GPU/browser run by builder"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-234458-195161-40272/测试产物/rsi-luna-cursor-exit-20261012"
+    ]
+  },
+  "changes": [
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-234458-195161-40272/测试产物/rsi-luna-cursor-exit-20261012/js/sky/sky-shell-player.js",
+      "kind": "artifact-only"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-234458-195161-40272/测试产物/rsi-luna-cursor-exit-20261012/js/sky/sky-groups-shell.js",
+      "kind": "artifact-only"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-234458-195161-40272/测试产物/rsi-luna-cursor-exit-20261012/candidate.diff",
+      "kind": "artifact-only"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-234458-195161-40272/测试产物/rsi-luna-cursor-exit-20261012/build-report.json",
+      "kind": "artifact-only"
+    }
+  ],
+  "submittedAt": "2026-10-12T15:49:28Z",
+  "wallClockSeconds": 297,
+  "wallClockFrom": "lease.startedAt",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-12T15:49:28Z"
+  },
+  "verifyState": "partial",
+  "reviews": [
+    {
+      "reviewer": "motion-e1-merge-20261010T162850Z",
+      "at": "2026-10-12T17:48:54Z",
+      "verdict": "partial",
+      "notes": "ClearCursor cancellation and group DCL repair verified in root CPU35/34 and native390 clear17. Independent audit identified header close does not cancel late sourceDocuments; patch is queued as separate build, old candidate preserved.",
+      "counterExamples": [
+        "counterexample header close pending sourceDocuments reopens panel"
+      ],
+      "reverseChecks": [
+        "clearCursor late request invalidated and previous plot reader hidden",
+        "group boot parent exists after scene fix",
+        "counterexample header close pending sourceDocuments reopens panel"
+      ]
+    }
+  ]
+}

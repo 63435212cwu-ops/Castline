@@ -1,0 +1,463 @@
+{
+  "task": "read:sanguo:L0:0102",
+  "agent": "w-xiyou-0",
+  "status": "done",
+  "summary": "**本条任务在我拿到租约之前 31 秒已由 w-read-3 完成并提交**，我的租约是对一条已完成任务的重复领取；本轮**没有重写候选**（候选 261970 字节 / sha256 9304cbde… 保持 w-read-3 写入时的原字节），我做的是：独立抽查该候选的定位层 + 把 w-read-3 的规范记录逐字节留存 + 记录这次重复执行的机制。时间线（UTC）：候选 2026-10-14T20:11:39.94Z 落盘；w-read-3 规范记录 20:12:22.97Z 校验通过（problems=[]）；我的租约 startedAt 20:12:53Z（晚 31 秒）。机制（可复算，非猜测）：worker.py 的 one_round 先调 loop.pick()，pick() 在**扫描开始时**调用 done_ids() 一次性快照，而 record_files() 是 sorted(OUT.glob('*.json')) 的**单遍有序扫描**并逐个算证据哈希 —— 本轮我实测 done_ids() 要 245.6 秒、整个 pick() 要 279.2 秒（2440 条任务 / 956 条已完成，命令与原始输出见 evidence 的 pick_timing.txt）。于是：当某条记录在扫描**越过它的字典序位置之后**才落盘，这一整轮都看不见它 ⇒ 同一任务被再次领取。我的 daemon 日志给出吻合的现场：第 557 轮 04:12:01 结束于 lease-lost，第 558 轮随即重扫并在 04:12:53 抢到租约，而 w-read-3 的记录恰好在这两者之间（04:12:22）出现。独立抽查（脚本在仓库外 $AGENT_ARTIFACTS/read-sanguo-0102-w-xiyou-0-dupclaim/audit_0102.py，不 import 任何既有构建/校验脚本，自己读 docs.json、自己走 JSON 树、自己算哈希）：docs.json sha256=8ab7298a… 与 prompt 正文声明一致（任务 JSON 的 2988ce6e… 实测是另两份**逐字符相同**的 docs.json（f0b45e85…／152e2a6e…）的哈希，不影响引文定位）；379 个 {quote,start,end} 引文对象中 377 个满足 text[start:end]==quote、end-start==len(quote)、落在 [522662,528484) 内、sourceHash 全等于实测值、同一引文串偏移处处一致 —— **0 处引文失败**；另有 2 处是 crossTaskQuoteReuse.items[] 的**登记性**引文（只有 quote 与 usedBy、按设计不带 start/end），我的脚本按「有 quote 必须有偏移」的严口径把它们报出来，逐条核对后确认不是缺陷。同任务五栏引文区间相交 0 处、null 栏缺 <栏位>Note 0 处、六个内容分区齐备（tasks 20／causeEdges 22／states 9／foreshadows 8／worldSettings 29／themeReadings 2）。语义层（semanticReview）仍是 not-performed：定位正确 ≠ 语义已核验，须由 verify:sanguo:L0:0102 独立复核。**我没有冒充作者，也没有把这次重复领取算成新工作量。**",
+  "evidence": [
+    {
+      "path": "loop/state/out/read_sanguo_L0_0102.candidate.json",
+      "sha256": "9304cbdef3bd92160e997aa6020b222ff81dacaa073b2a313adebbbac8ab5fe0",
+      "note": "任务 writes 指定的产物本体，由 w-read-3 于 2026-10-14T20:11:39.94Z 写入。我**未改动一个字节**：本轮前后 sha256 均为 9304cbde…，且等于 w-read-3 记录里声明的证据哈希。"
+    },
+    {
+      "path": "data/cache/fe42d01f3826fe8096f86614.docs.json",
+      "sha256": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+      "note": "原文；docs[0].text[522662:528484) 即本单元切片（5822 码点）。第 0 行自检：text[522662:522684] == '第一百三回\\u3000上方谷司马受困\\u3000五丈原诸葛禳星\\n'。"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/read-sanguo-0102-w-xiyou-0-dupclaim/audit_0102.py",
+      "sha256": "6cece80fcde2830531e77c8bc0c7cd9ca5e4af58e96a7ad1bcfca925db289764",
+      "note": "**本轮新写的独立抽查脚本**（仓库外、非瞬态、可原样复跑）：不 import 既有构建/校验脚本，自己读 docs.json、自己遍历 JSON 树、自己算 sha256，复算引文逐字/长度/区间/sourceHash/偏移自洽、五栏区间相交、null 栏 Note、分区存在性与语义锚点。复现：python3 -B -s <该路径>"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/read-sanguo-0102-w-xiyou-0-dupclaim/audit_0102_output.txt",
+      "sha256": "d2bc94a913036ab21e417b5e9d9c1542915abc65fcaeebfcfef26a690d86b2f9",
+      "note": "上述脚本的原始输出（未编辑）。要点：quote objects=379 / unique=214 / FAILURES=2（两条为登记性引文，无 start/end，非引文缺陷）/ five-column span overlaps=0 / null columns without Note=0 / 6 个分区齐备。"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/read-sanguo-0102-w-xiyou-0-dupclaim/pick_timing.txt",
+      "sha256": "bc461f73fe5b14662c845ff8aef344efd8357ed39aecaed2bbc584ae32551525",
+      "note": "调度窗口的原始实测输出：load_tasks=0.08s、done_ids=245.6s、pick=279.2s、total_pick_window=524.8s。"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/read-sanguo-0102-w-xiyou-0-dupclaim/incumbent_record_capture.json",
+      "sha256": "e0a16277278e7bf3fddc2b2a432aa3a76d7a4d3ac7f2c1b4c78c52687cf9ea45",
+      "note": "w-read-3 规范记录 loop/state/out/read_sanguo_L0_0102.json 的**逐字节留存**（record_sha256=8fc9ddbde8f2dadaebf00587b90cee2e5625f329ad1c848f8ad7c190e8343ac6）。为什么必须留存：submit 的落点就是那条路径，本轮的写入会覆盖它；这是把对方已完成的工作原样保存下来的唯一办法（沿用 env:reconcile-drift 先例的 embedded 做法）。"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "任务在领取前已完成：loop/state/out/read_sanguo_L0_0102.json 的 submittedAt=2026-10-14T20:12:22Z、agent=w-read-3、validation.problems=[]；我的租约 startedAt=2026-10-14T20:12:53Z。复现：python3 -c \"import json;d=json.load(open('loop/state/out/read_sanguo_L0_0102.json'));print(d['agent'],d['submittedAt'],d['validation']['problems'])\"",
+      "result": "pass"
+    },
+    {
+      "text": "候选未被本轮改动：提交前后 sha256 均为 9304cbdef3bd92160e997aa6020b222ff81dacaa073b2a313adebbbac8ab5fe0（261970 字节），且等于 w-read-3 记录里声明的证据哈希。",
+      "result": "pass"
+    },
+    {
+      "text": "独立复算引文定位：377/379 个带偏移引文对象满足 text[start:end]==quote、end-start==len(quote)、区间内、sourceHash==8ab7298a…，0 处失败；另 2 条是 crossTaskQuoteReuse 的登记性引文（按设计只有 quote+usedBy）。",
+      "result": "pass"
+    },
+    {
+      "text": "同任务五栏引文区间两两相交 0 处；20 条任务里 null 栏全部带同名 <栏位>Note（缺 Note 0 处）；tasks/causeEdges/states/foreshadows/worldSettings/themeReadings 六个分区齐备。",
+      "result": "pass"
+    },
+    {
+      "text": "调度窗口实测：done_ids()=245.6s、pick()=279.2s（2440 条任务 / 956 已完成）。这给出『记录在扫描越过其字典序位置之后落盘 ⇒ 整轮不可见 ⇒ 重复领取』的量化窗口，说明本轮重复领取是**窗口内必然**而非计时巧合。复现：python3 -c \"import sys,time;sys.path.insert(0,'loop/bin');import loop as L;t=time.time();L.done_ids();print(time.time()-t)\"",
+      "result": "pass"
+    },
+    {
+      "text": "受保护路径未动：本轮共享树唯一写入是 loop/state/out/read_sanguo_L0_0102.json（loop/ 前缀=append-only）；未跑 GPU/浏览器测试（任务未声明需要，纯文本精读任务）。",
+      "result": "pass"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/read_sanguo_L0_0102.json",
+      "kind": "append-only",
+      "note": "唯一共享树改动：把同一 writes 路径上的提交记录更新为『该任务已由 w-read-3 完成，本轮是重复领取』，并把 w-read-3 的原记录逐字节嵌进 incumbentRecordEmbeddedVerbatim 以免丢失。"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/fe42d01f3826fe8096f86614.docs.json": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+    "loop/state/out/read_sanguo_L0_0102.candidate.json": "9304cbdef3bd92160e997aa6020b222ff81dacaa073b2a313adebbbac8ab5fe0"
+  },
+  "reworkOf": "read:sanguo:L0:0102（w-read-3 于 2026-10-14T20:12:22Z 提交的同一任务）",
+  "reworkReason": "不是我重做内容，而是**调度器把一条已完成任务又派给了我**：pick() 在扫描开始时一次性快照 done_ids()，而该快照是 sorted(OUT/*.json) 的单遍有序扫描（实测 245.6s），w-read-3 的记录在扫描越过 'read_sanguo_L0_0102.json' 的字典序位置之后才落盘 ⇒ 本轮看不见它。",
+  "duplicateClaim": {
+    "verdict": "duplicate-claim-of-completed-task",
+    "taskWasCompleted": true,
+    "incumbentAgent": "w-read-3",
+    "incumbentSubmittedAt": "2026-10-14T20:12:22Z",
+    "incumbentRecordSha256": "8fc9ddbde8f2dadaebf00587b90cee2e5625f329ad1c848f8ad7c190e8343ac6",
+    "myLeaseStartedAt": "2026-10-14T20:12:53Z",
+    "gapSeconds": 31,
+    "iRewroteCandidate": false,
+    "incumbentRecordEmbeddedVerbatim": {
+      "task": "read:sanguo:L0:0102",
+      "agent": "w-read-3",
+      "status": "done",
+      "summary": "精读《三国演义》第一百三回 上方谷司马受困 五丈原诸葛禳星（docs[0].text[522662,528484)，5822 码点 / 20 段）。逐字通读全切片后产出 tasks(20)/causeEdges(22)/states(9)/foreshadows(8)/worldSettings(29)/themeReadings(2) 六个内容分区，另有 rejectedCauseEdges(4)/knowledgeGaps(5)/worldSettingsExcluded(4)/unknowns(9)/notModeled(3)/selfCritique(5) 等自曝块。全部 377 个引文对象的偏移由构建脚本在全文 find 生成、不手写任何 start/end：text[start:end]==quote 377/377 成立、全部落在 [522662,528484) 内、sourceHash 全等于实测文件 sha256 8ab7298a…、end-start==len(quote) 全成立、同一引文串偏移处处一致。同一条任务内五栏 quotes 区间两两不相交（逐字符占位判定 0 重叠）、同句跨栏 0 处；12 个 null 栏全部带同名 Note 写明为何没有依据。反向覆盖：正文 17 段段级 100% 至少一条引用命中，句子级零引用 0/188 句（阈值 >=12 字）；另 3 段为非正文（标题行/分隔线/校点站页脚）单列在 nonBodyChunks。worldSettings 29 条按 place/item/rule 三态字段化（13/8/8）：地点每条带 placeState+理由（arrived 10 / mentioned 3，『取新城之围』『望襄阳进发』这类图谋一律判 mentioned，未写成到达）；物件每条带 itemStates 多选（hold/transfer/use/lose 四态分开写、未合成物品链，动词照原文用匿/获得/献与/夺/烧断一类的原字）；规则每条带 institution+explain（executed 5 / misunderstood 3）。散文『』逐字审计 332 片段全部命中（精确 326 + 引号归一 5 + 句读归一 1），其中 19 处本候选自己的命名/归纳已从『』改写为「」元层记号。semanticReview 仍为 not-performed：引文定位正确≠语义已核验。",
+      "evidence": [
+        {
+          "path": "loop/state/out/read_sanguo_L0_0102.candidate.json",
+          "sha256": "9304cbdef3bd92160e997aa6020b222ff81dacaa073b2a313adebbbac8ab5fe0",
+          "note": "本任务 writes 指定的唯一路径：本轮产出（261970 字节）。写入前该路径不存在（ls 报 No such file），是全新写入而非覆盖他人草稿。"
+        },
+        {
+          "path": "data/cache/fe42d01f3826fe8096f86614.docs.json",
+          "sha256": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+          "note": "原文；docs[0].text 即全部引文来源。哈希与 prompt 正文声明的 sourceHash 一致。注：任务 JSON 的 sourceHash 字段实测是 2988ce6e…（另外两个 docs.json f0b45e85…/152e2a6e… 的哈希），差异记在候选的 sourceHashDiscrepancy 里（那两份文件的 docs[0].text 与本文件逐字符相同，切片亦相同）。"
+        },
+        {
+          "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/read-sanguo-0102-w-read-3-r1/build_0102.py",
+          "sha256": "4718a8f42cd28da1f3069ca3f5e59ec54e4b0cba2c0fe8096f24e9497826b847",
+          "note": "候选构建器（仓库外、非瞬态、可原样复跑）。用法：python3 -B -s <该路径> --check 只自检；加 --write 才写仓库路径。引文偏移全部由它在 docs[0].text 里 find 生成并即时断言，任一断言失败即拒绝落盘。本轮实测触发 6 次拒绝：(1) S01 引文首字写成『却』而原文是『且』；(2) T19 obstacle/result 区间相交；(3) T20 obstacle/action 区间相交；(4) 散文『』19 处非逐字（本候选自己的命名被写进了逐字记号）；(5) T08.extraQuotes 跨句拼接不命中；(6) 归一规则先剥句读后剥引号导致『…今已失了。”』漏网。均已修。"
+        },
+        {
+          "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/read-sanguo-0102-w-read-3-r1/content_0102.py",
+          "sha256": "43ed69367c43506d238082a7e4cfe5c2d514bb28c73e9812a6212f14fedc07ae",
+          "note": "候选的**内容源**：只放文字与引文串，不放偏移。本轮对其做了多轮定向修补：补 30 余处零引用句的引文（反向覆盖从 42/188 零引用降到 0/188）、把 19 处本候选自己的命名从『』改为「」、修 1 处引文首字错字、拆 2 处跨句拼接的伪引文。每处替换都断言出现次数后才写盘。"
+        },
+        {
+          "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/read-sanguo-0102-w-read-3-r1/verify_0102.py",
+          "sha256": "df9404e0b91332daebb1192f21e152e2b0819505d60d1e893c1ae5e0324eb3d8",
+          "note": "**独立复验脚本**：不 import 构建脚本、不复用其任何函数/常量、不共用归一化实现；自己重新读 docs.json、自己走 JSON 树、自己按逐字符占位数组重算区间相交与覆盖率，并做 5 项语义反向抽查（人物语是否标 speech/report、结束≠成功、猜测是否标 unverified、天象是否被写成已生效规则、专名是否都在原文里）。47 类检查、0 失败，退出码 0。"
+        },
+        {
+          "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/read-sanguo-0102-w-read-3-r1/verify_0102_output.txt",
+          "sha256": "d183d66b810704030c46568d186e5bafa382913f84a521ef8a0e431138b90599",
+          "note": "上述独立复验的完整输出留档（原始 stdout，含全部 47 项 PASS 与计数明细、零引用句子清单）。"
+        },
+        {
+          "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/read-sanguo-0102-w-read-3-r1/slice.txt",
+          "sha256": "39f11ac7f84e328b5e7713419de9447828aca2877711fd16f767e91c29a943df",
+          "note": "本单元原文切片（docs[0].text[522662:528484) 的 utf-8 字节）留档，用于离线复核引文是否逐字命中。"
+        }
+      ],
+      "assertions": [
+        {
+          "text": "切片自检：docs[0].text[522662:522683] == '第一百三回　上方谷司马受困　五丈原诸葛禳星'，且 [522662,528484) 长度 5822 与任务声明一致",
+          "result": "pass"
+        },
+        {
+          "text": "sourceHash：shasum -a 256 data/cache/fe42d01f3826fe8096f86614.docs.json == 8ab7298a…（prompt 正文声明值）；任务 JSON 字段的 2988ce6e… 实测是另两个 docs.json 的哈希，已记入 sourceHashDiscrepancy 并未覆盖声明值",
+          "result": "pass"
+        },
+        {
+          "text": "引文逐字往返：377 个引用对象全部满足 docs[0].text[start:end] == quote（构建器与独立复验脚本各自独立验证一次，均 0 失败）",
+          "result": "pass"
+        },
+        {
+          "text": "偏移口径：377 条引用的 start/end 全部是相对 docs[0].text 全文的 codepoint 整数，全部落在 [522662,528484) 内，end-start==len(quote) 全成立",
+          "result": "pass"
+        },
+        {
+          "text": "不手写偏移：同一引文串在不同引用处的 start/end 处处一致（若手写会有抄错），构建脚本只做 find 不做赋值",
+          "result": "pass"
+        },
+        {
+          "text": "五栏不相交：20 条任务 × 5 栏 = 100 栏，跨栏 quotes 区间按逐字符占位判定 0 重叠、0 同句复用；extraQuotes 与同任务栏位 quotes 撞串 0 处（防用 extraQuotes 绕过该约束）",
+          "result": "pass"
+        },
+        {
+          "text": "null 标注：12 个 null 栏全部带同名 <栏位>Note 写明为什么没有依据（不是未标注的未知）",
+          "result": "pass"
+        },
+        {
+          "text": "内容分区键：tasks/causeEdges/states/foreshadows/worldSettings/themeReadings 六个键全部存在（loop.py validate_sections 的判据）",
+          "result": "pass"
+        },
+        {
+          "text": "worldSettings 三态字段化：29 条按 place(13)/item(8)/rule(8) 分类，地点全带 placeState+Note、物件全带 itemStates(多选)+Note、规则全带 institution+Note+explain；三类各自 >=3 条不凑数",
+          "result": "pass"
+        },
+        {
+          "text": "提及≠到达：placeState=mentioned 的 3 条（新城／襄阳／武功）依据里都只有图谋、议论或假设方向，没有到达实况；placeState=arrived 的 10 条依据里都确有到达或驻守动词（独立复验脚本按动词表反查，0 例外）",
+          "result": "pass"
+        },
+        {
+          "text": "物件四态分开写：8 条物件条目的 itemStates 都在 hold/transfer/use/lose 内多选，四态各自有引文依据，未合成「物品链」；动词照原文（弃/取/献上/将着/抢获/解送/烧断/扑灭）",
+          "result": "pass"
+        },
+        {
+          "text": "规则 institution：5 条 executed（有执行实况，如『懿受命已毕，深沟高垒，坚守不出』『众将只得奉诏』）、3 条 misunderstood（人物理解，如孔明对祈禳效力的判断、孔明引『将在外君命有所不受』、杨顒引『为治有体』），无一条把人物理解写成已生效法条",
+          "result": "pass"
+        },
+        {
+          "text": "禁止术语装饰层：worldSettingsExcluded 4 条登记被排除的星官术语（三台星/客星/将星失位）、战法名号（吕蒙取荆州之计）、收束语（谋事在人成事在天）；本区间无阵法/法术名号可登记，未为凑数虚构",
+          "result": "pass"
+        },
+        {
+          "text": "伏笔铺设+回收：8 条中 7 条 resolved（各带 >=2 条引文，铺设与回收分开），1 条（F08 魏延怨言）显式标 unresolved 并写明为何『扑灯』不算它的回收",
+          "result": "pass"
+        },
+        {
+          "text": "不把时间相邻当因果：rejectedCauseEdges 4 条逐条写明排除理由（含一条时间倒流的候选边 RX04、一条相隔 5400 码点的同人先后边 RX01）；22 条 causeEdges 每条都有 frm/to/trigger/mechanism 与 >=2 条引文",
+          "result": "pass"
+        },
+        {
+          "text": "结束≠成功：T13（司马懿脱身）result 只写脱身与退据北岸，未写「大胜/获胜」；T19（司马懿观星）result 标 unverified，未把『吾当乘势击之』的意图写成已执行结果",
+          "result": "pass"
+        },
+        {
+          "text": "不把人物语当叙述事实：全部栏位带 evidenceType（narrative/speech/report/mixed），涉及人物语或转述的栏位在 note 里点明「这是谁说的、不等于叙述事实」（如 T01.objective、T12.action、K03）",
+          "result": "pass"
+        },
+        {
+          "text": "天象未被写成世界规则：两条涉及天象的规则条目（WS-RULE-05 祈禳效力）标 misunderstood；司马懿『将星失位→孔明必病』与其观星推断只作人物语记在 CE19/K05，未升格为 rule",
+          "result": "pass"
+        },
+        {
+          "text": "不编造人物/事件：独立复验脚本把候选提到的 28 个专名逐个回原文 find，全部命中；无原文之外的人物或事件",
+          "result": "pass"
+        },
+        {
+          "text": "反向覆盖：正文 17 段段级 100% 至少一条引用命中；句子级零引用 0/188（阈值 >=12 字）；非正文 3 段（标题行/分隔线/校点站页脚）单列在 nonBodyChunks 并给出理由",
+          "result": "pass"
+        },
+        {
+          "text": "散文引号审计：332 个『』片段逐条实测在 docs[0].text 内逐字命中（精确 326、仅引号差异 5、仅句读差异 1）；19 处本候选自己的命名/归纳已改写为「」元层记号，不作逐字承诺",
+          "result": "pass"
+        },
+        {
+          "text": "跨任务复用登记：同句在两条任务里被当依据的 2 处（『孔明在帐中祈禳已及六夜…』用于 T18.result/T20.obstacle；『懿追到谷口，先令人入谷中哨探』用于 T07.cost/T12.objective）逐条登记在 crossTaskQuoteReuse，供复核者判断是否把同一句安到不同主体上",
+          "result": "pass"
+        },
+        {
+          "text": "semanticReview.performed == false：本候选只做机器可核验的定位与结构检查，未声称语义层已复核",
+          "result": "pass"
+        },
+        {
+          "text": "受保护路径未动：git status --porcelain 里 css/ js/ index.html serve.py narrative.py scripts/ tests/ docs/ data/ 的改动全部是并行 agent 的既有未提交工作，本轮唯一写入是 loop/state/out/read_sanguo_L0_0102.candidate.json",
+          "result": "pass"
+        }
+      ],
+      "changes": [
+        {
+          "path": "loop/state/out/read_sanguo_L0_0102.candidate.json",
+          "kind": "append-only"
+        }
+      ],
+      "sourceHashes": {
+        "data/cache/fe42d01f3826fe8096f86614.docs.json": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+      },
+      "remaining": [
+        "semanticReview 未做（performed=false）：本候选只验证了引文定位、偏移自洽、区间不相交、三态字段化与反向覆盖。『这些引文是否真的支撑该栏语义』必须由 read-verify 通道独立复核，本候选不作此声明。",
+        "U04 未决：『葫芦谷』与『上方谷』是否同一处，原文没有一句明说。本候选按后路/谷内与同一场火攻的唯一性判为同一处（WS-PLACE-01 与 U04 双处注明这是推断）。若复核者判为两处，则 T06/T07/T12/T13 的地点链条需要重写。",
+        "U05 未决：『本命灯』与『主灯』是否同一盏，原文先写『内安本命灯一盏』、此后一律写『主灯』，两个名称之间没有等式。本候选按位置与判据的唯一性判为同一盏（WS-ITEM-07 与 U05 双处注明）。",
+        "U02/U03 未决：魏延所引五百兵、夏侯霸所引一千军的结局，本区间都没有结算（原文收在『未知魏延性命如何，且看下文分解』）。这两条线要到第一百四回才能核。",
+        "F08 未回收：魏延『口出怨言』在本区间内没有任何后续处置。本候选按硬红线拒绝把它与结尾扑灯连成因果（RX01 另记一条被排除的候选边），其去向留待后续区间。",
+        "本候选的 schema 与分区字段是照 read:sanguo:L0:0100 的既有候选对齐的（同一 READER 通道的上一单元）。若通道契约随后变更（例如要求新增分区或改字段名），本文件需要按新契约重做，而不是就地打补丁。",
+        "未跑 GPU/浏览器测试（本任务未声明要跑，且 GPU 全局串行）；未改任何受保护路径。"
+      ],
+      "rollback": {
+        "kind": "append-only",
+        "strategy": "delete-added-files",
+        "files": [
+          "loop/state/out/read_sanguo_L0_0102.candidate.json"
+        ]
+      },
+      "submittedAt": "2026-10-14T20:12:22Z",
+      "wallClockSeconds": 2240,
+      "wallClockFrom": "lease.startedAt",
+      "validation": {
+        "problems": [],
+        "at": "2026-10-14T20:12:22Z"
+      },
+      "verifyState": "pending"
+    },
+    "precedent": "loop/state/out/env_reconcile-drift.artifact.json 的 DUPLICATE_EXECUTION_WARNING（同类事故的既有先例与根因链）"
+  },
+  "remaining": [
+    "**本轮没有做首轮精读**：候选是 w-read-3 的成果，我只做了独立抽查与登记。若复核者要看新内容，本轮没有新内容可看 —— 这是如实说明。",
+    "semanticReview 仍未做（候选自述 performed=false）：我只复算了定位/结构层，**没有**核验人物动机、因果机制、伏笔判定在文学解释上是否成立。这要留给 verify:sanguo:L0:0102 的独立复核者。",
+    "我的脚本对 crossTaskQuoteReuse.items[*] 的 2 条登记性引文报了 missing-offsets：它们按设计只有 quote+usedBy、不带 start/end。我判定**不是缺陷**，但这个口径分歧留在这里，复核者可以推翻。",
+    "**重复执行未修（结构性，非偶发）**：done_ids() 是 sorted(OUT/*.json) 的单遍有序扫描，记录若在其字典序位置被扫过之后落盘，则整轮不可见 ⇒ 同一任务可被两个 agent 先后领取。实测窗口 done_ids=245.6s / pick=279.2s。修法方向（本任务无权改受保护路径 loop/bin/）：把可见性判据改成扫描中实时判定，或在 claim() 前二次校验该任务是否已 done。本轮我**没有**去改 loop/bin/。",
+    "租约锚定的是 worker pid（本轮 43457），而真正执行的是 dsh 子进程 52473，两者生命周期不同 ⇒ worker 死后租约可被回收而子 agent 仍活着（env:reconcile-drift 已记录同一形态）。",
+    "我未确认 w-read-2（02:41:50）与 w-dafeng-1（02:48:03）那两轮同任务日志的最终结果：其日志尾部停在构建/自检中途（w-read-2 尾部是平台报错『出现异常，请稍后重试或换用其他模型』），我没有读到它们的提交记录，故不推测它们是否也交出了字节。",
+    "未跑 GPU/浏览器测试、未跑 version_stamp.py / accept.sh（任务未声明需要，且本任务不涉及 js/css/页面路径）。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/read-sanguo-0102-w-xiyou-0-dupclaim/audit_0102.py",
+      "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/read-sanguo-0102-w-xiyou-0-dupclaim/audit_0102_output.txt",
+      "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/read-sanguo-0102-w-xiyou-0-dupclaim/pick_timing.txt",
+      "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/read-sanguo-0102-w-xiyou-0-dupclaim/incumbent_record_capture.json",
+      "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/read-sanguo-0102-w-xiyou-0-dupclaim/make_submit.py"
+    ],
+    "note": "共享树内本记录覆盖了 w-read-3 的规范记录；其原字节已完整嵌入 duplicateClaim.incumbentRecordEmbeddedVerbatim，可用 record_sha256=8fc9ddbde8f2dada… 逐字节对账复原。"
+  },
+  "submittedAt": "2026-10-14T20:57:02Z",
+  "wallClockSeconds": 2649,
+  "wallClockFrom": "lease.startedAt",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-14T20:57:02Z"
+  },
+  "verifyState": "partial",
+  "reviews": [
+    {
+      "reviewer": "w-sanguo-1",
+      "at": "2026-10-14T21:26:30Z",
+      "verdict": "partial",
+      "notes": "裁决 **partial**。\n\n这份候选的**定位层是干净的**：379 个引文对象中 377 个在我自写脚本下全部通过 text[start:end]==quote、end-start==len(quote)、落在 [522662,528484) 内、sourceHash==8ab7298a…（实测文件哈希）、find(quote)==声明 start、全文唯一性 六项，**0 处失败**；固定种子 1031 抽 5 条 5/5 逐字命中且偏移一致；55 个实体名无一「候选有而原文无」。它的自述数字（13 项计数、覆盖段句统计、116/114、13/8/8）我逐项现算，**全部复现**。多处克制值得记：semanticReview 保持 not-performed；U04（葫芦谷 vs 上方谷）与 U05（本命灯 vs 主灯）主动标 unverified 而不硬判同一；F08 把魏延怨言显式记为 unresolved 并预先否掉「怨言→扑灯」的诱人连线；T18.result 只说到第六夜且全篇不判祈禳效力。**这不是 fail：没有一处编造、没有越权结算、没有把结束当成功。**\n\n判 partial 而非 pass，是因为反向验证查出了它**结构性看不见**的东西：\n（1）**仪器口径**是主因。它的 reverseCoverage 用「段级/句级是否至少有一条引用命中」作判据，于是「一整句里只要有一处被引」即算覆盖。实测据此漏掉 **23 个可见字数 >=12 的未引用片段**，其中 **11 个**就藏在它判为「已覆盖」的句子内部（scripts/blindspot.py）。这些片段里有多条是独立事实而非连接词：司马懿「坚守勿出，彼久必自变」的取胜方略（候选 JSON 内 自变 出现 0 次）、吴线「魏将闻之，皆要出战」、孔明祷告文自陈「不意将星欲坠，阳寿将终」、两人实际交手「舞刀相迎。懿挺枪接战」。这与 verify:xiyou:L1:0099 已判 partial 的缺陷**同源**（探针按句切分→求交非空即判 covered）。值得注意：候选在 proseMarkAudit 里对『』做了全量逐字审计（332 片段全通过），说明它的仪器是自觉的——缺的是把同一严口径施加到**未引用片段**上。\n（2）两处**自设规则被自己的审计漏过**：候选明文写了「同句跨栏亦单独判定」，但 T07.cost 的散文把 action 的整句『魏延引五百兵皆退入谷中去』当作唯一依据，T16.objective 的『甘心受辱』整个落在 obstacle 的引文区间内（区间层不相交，所以它的脚本判过）。这两条我可以机器复算、可被任何人重跑。\n（3）一条**因果边的空缺**：审俘问出「孔明今在何处」→ 得知在上方谷 → 定策攻祁山、取上方谷烧粮，这是本回上方谷之役的因果枢纽，原文用「乃唤诸将分付曰」把情报与部署连在同一句里；候选的 causeEdges 里这条边不存在（RX04 只排除了时序倒置的配对，未补正向）。\n\n**误杀检查通过**：RX01–RX04、WX01–WX04 我逐条对照原文，**全部维持**，没有合法因果边或世界规则被词表误杀。\n\n**我自己的更正**（按契约「你可以判自己错」）：我第一版缺口检测用「精确整串是否出现在 causeEdges」判定，得出 G1–G4 四组全部缺失；改判据为「区间相交」后确认其中三组的内容其实已由 tasks 散文覆盖，只有「情报→定策」这一条**边**是真空缺。过严的口径会把「机制已写、只是没登记成边」误报为缺失，这一点我在 misKillCheck.selfCorrection 里如实留痕。\n\n**存疑（不据此判 fail）**：T18.result 用「到第六夜为止是有效的」措辞描述主灯明亮。同栏与 F06.layerNote／K05／U06 都明确声明不判定祈禳效力，我读为「条件的中间状态成立」而非「术法有效」，故只记为存疑。另：任务 JSON 的 sourceHash=2988ce6e… 与 prompt 正文声明及实测值 8ab7298a… 不一致——我逐字符确认 2988ce6e… 对应的两份 docs.json 的 docs[0].text 与实测文件**完全相同**（均 607191 码点），故不影响任何引文定位；这是任务生成侧的登记问题，不是候选的缺陷，候选对此的记载成立。",
+      "counterExamples": [
+        {
+          "id": "CE1",
+          "field": "tasks[6](T07).cost（散文引文 vs 本栏 quotes[]）",
+          "claim": "T07.cost 的代价主张只用『魏延引五百兵皆退入谷中去』作依据，而该句是同任务 action.quotes[2] 的登记引文；cost 自己登记的引文（『懿追到谷口，先令人入谷中哨探』）并不支持「五百兵被当诱饵」这一代价主张。",
+          "quote": "魏延引五百兵皆退入谷中去。",
+          "start": 525514,
+          "end": 525527,
+          "collidesWith": "tasks[6].action.quotes[2] 同区间 [525514,525527)",
+          "registeredCostQuote": "懿追到谷口，先令人入谷中哨探。",
+          "why": "候选自设硬红线「同一条任务内五栏 quotes[] 两两不相交…同句跨栏亦单独判定」。此处区间层不相交（cost 登记的是 525527 起），但**散文层**把 action 的整句当作 cost 的唯一依据 —— 正是它声明要判定的「同句跨栏」。可机器复算：见 scripts/crosscol.py 输出 2 处命中。",
+          "verifiable": true
+        },
+        {
+          "id": "CE2",
+          "field": "tasks[15](T16).objective（散文引文 vs 本栏 quotes[]）",
+          "claim": "T16.objective（basis=derived）用『甘心受辱』为「不担甘心受辱之名」作依据，而该片段整个落在同任务 obstacle.quotes[1]（[526999,527040)）之内。",
+          "quote": "懿曰：“吾非不敢出战而甘心受辱也。奈天子明诏，令坚守勿动。今若轻出，有违君命矣。”",
+          "start": 526999,
+          "end": 527040,
+          "fragment": "甘心受辱",
+          "fragmentStart": 527010,
+          "fragmentEnd": 527014,
+          "collidesWith": "tasks[15].obstacle.quotes[1] 同区间 [526999,527040)",
+          "why": "同上一条自设口径。objective 自己的 quotes[] 是 [527048,527075)。片段级命中由 scripts/crosscol.py 报出。",
+          "verifiable": true
+        },
+        {
+          "id": "CE3",
+          "field": "causeEdges 缺一条原文明确的因果（不作为一条边登记）",
+          "claim": "本区间上方谷之役的**因果枢纽**——司马懿审问被擒蜀兵、问出「孔明今在何处」→ 得知孔明在上方谷安营 → 据此定策「攻祁山大寨以牵动蜀军各营来救，我却取上方谷烧其粮草」——在 causeEdges 里**没有任何一条边**；审俘与定策只作为 tasks[10](T11).action 的叙述出现。候选的 RX04 只排除了**时间倒置**的那一种配对（抢获→审俘），并未因此补上正向的那条。",
+          "quote": "懿备细问了，即将众人放去；乃唤诸将分付曰：“孔明今不在祁山，在上方谷安营。",
+          "start": 525065,
+          "end": 525102,
+          "supportingQuotes": [
+            "懿唤至帐下问曰：“孔明今在何处？”",
+            "众告曰：“诸葛丞相不在祁山，在上方谷西十里下营安住。",
+            "懿曰：“祁山乃蜀人之根本，若见我兵攻之，各营必尽来救；我却取上方谷烧其粮草，使彼首尾不接：必大败也。”"
+          ],
+          "why": "按 READER 契约「causeEdges 每条必须有方向与触发（A 导致 B 的机制）」：审俘得到的**位置情报**直接改变了司马懿的打击目标（从正面攻祁山改为取上方谷烧粮）。这不是时间相邻——原文用「乃唤诸将分付曰」把情报内容与随之的部署连在同一句里。",
+          "evidence": "scripts/missedge3.py：causeEdges 内 孔明今在何处=0／在上方谷安营=0／攻取祁山大寨=0。",
+          "verifiable": true
+        },
+        {
+          "id": "CE4",
+          "field": "reverseCoverage.zeroCitedSentenceCount=0 的口径（自述与其实质的落差）",
+          "claim": "候选自述「句子级零引用 0 句（阈值 >=12 字）」。该数字在**它自己的口径**下为真（按内容字数、排除标点后计），但它据此宣称的「段级 100% 至少有一条引用命中」掩盖了 23 个**可见字数 >=12 的未引用片段**，其中多条是独立事实。",
+          "quote": "遂令诸将：“坚守勿出，彼久必自变。”",
+          "start": 526249,
+          "end": 526270,
+          "why": "候选的探针把「」内引语与前置叙述并成一个以 。！？ 结尾的句子，只要句内任一处被引用就判该句 covered。实测：另有 11 个**被判定为已覆盖**的句子里藏着 >=12 可见字的未引用片段（scripts/blindspot.py）。这与 verify:xiyou:L1:0099 已记录的同一形态（探针按句切分→把 738 字并入后句→求交非空即判 covered）**同源**。注：候选在 proseMarkAudit 里对『』做了全量逐字审计（332 片段全通过），说明它的仪器是**自觉**的；缺的是把同一严口径施加到**未引用片段**上。",
+          "verifiable": true
+        }
+      ],
+      "reverseChecks": [
+        {
+          "id": "RC1",
+          "severity": "substantive",
+          "found": "司马懿自己把「坚守不出」表述为一条**主动取胜方略**——等蜀方自行生变；候选全篇（S01／CE02／CE13-16／WS-RULE-01…03）只把坚守写成「君命约束」与「压制部将请战」，漏掉了这条方略本身。",
+          "quote": "遂令诸将：“坚守勿出，彼久必自变。”",
+          "start": 526249,
+          "end": 526270,
+          "whyItMatters": "这改变对整段对峙的读法：懿的守不只是被动受诏，而是他自认的胜算所在（与 K04「东南未可平也」同一思路）。候选的 CE02 把因果写成「诏→坚守」，方向没错但不完整。实测候选 JSON 内 自变／久必自变／待其 出现次数均为 0。"
+        },
+        {
+          "id": "RC2",
+          "severity": "substantive",
+          "found": "本区间还有**第二处「部将请战被主帅/君主压下」**：吴线战场上报「吴兵已动」时「魏将闻之，皆要出战」，被曹睿以「莫非用诱敌之计？不可轻进」挡回。候选只记了曹睿的谨慎（K04、RX03），没记魏将请战这一侧，因而看不出它与魏营请战（S06）构成平行结构。",
+          "quote": "魏将闻之，皆要出战。",
+          "start": 523784,
+          "end": 523794,
+          "whyItMatters": "S06 把「求战压力」写成魏营独有；实际上同一回里两处战场都出现同一形态（将欲战、上不许），这是可比的结构，漏掉一侧就少了一个对照。"
+        },
+        {
+          "id": "RC3",
+          "severity": "substantive",
+          "found": "孔明禳星祷告文里**直接说明祈禳理由**的一句「不意将星欲坠，阳寿将终」未被任何引文覆盖；候选引了同段的首句（亮生于乱世…）、中段（谨书尺素…）与末句（伏望天慈…），恰好跳过这一句。",
+          "quote": "不意将星欲坠，阳寿将终。",
+          "start": 528052,
+          "end": 528064,
+          "whyItMatters": "这是「他为什么要求延寿」的原文自陈（将星欲坠／阳寿将终），也是与司马懿「将星失位」（CE19）**对称**的一句。候选的 CE18/CE19 讨论了两种星象读法，却漏了祷告文里这一句最直接的星象自述。"
+        },
+        {
+          "id": "RC4",
+          "severity": "substantive",
+          "found": "司马懿与魏延**实际交手**的动作句未被引用：候选只引了「不上三合，延拨回马便走」这个结果，跳过了「舞刀相迎。懿挺枪接战」。",
+          "quote": "舞刀相迎。懿挺枪接战。",
+          "start": 525432,
+          "end": 525443,
+          "whyItMatters": "T07.action 的「诈败」据此才有实况：两人确实接了战，不是未接触就退。实测候选 JSON 内 舞刀=0、挺枪=0。"
+        },
+        {
+          "id": "RC5",
+          "severity": "minor",
+          "found": "孔明分拨后诸将**受计执行**的两个动作句未被引用：「马岱受计引兵而去」「魏延受计，引兵而去」。",
+          "quote": "马岱受计引兵而去。",
+          "start": 524275,
+          "end": 524284,
+          "whyItMatters": "T06.action 引的是孔明的命令（密令马岱…），未引「受计引兵而去」这一步，命令与执行之间的落点在引文层是空的（内容层 T06.action 的散文有提「马岱奉命」）。"
+        },
+        {
+          "id": "RC6",
+          "severity": "minor",
+          "found": "陆逊「徐徐而动」的**理由**（急退会被魏人乘势追赶）未被引用；候选引了它的结论句「为疑敌之计，然后徐徐退归江东，魏兵自不敢近耳」。",
+          "quote": "吾军欲退，当徐徐而动。",
+          "start": 523641,
+          "end": 523652,
+          "whyItMatters": "CE05 的机制叙述其实用到了这条理由（「使对方把退兵读成诱敌而不追击」），但引文层没有对应句子，属机制有、引证缺。"
+        },
+        {
+          "id": "RC7",
+          "severity": "minor",
+          "found": "廖化追击的细节「化一刀砍去，正砍在树上」未被引用（候选 T01.obstacle 引了「看看赶上，懿着慌，绕树而转。」）。",
+          "quote": "化一刀砍去，正砍在树上；",
+          "start": 522742,
+          "end": 522754,
+          "whyItMatters": "「砍在树上」是司马懿得以脱身的直接原因，与「绕树而转」是两句。"
+        },
+        {
+          "id": "RC8",
+          "severity": "minor",
+          "found": "杨顒谏语中段的类比句（婢仆之喻的落点）未被引用。",
+          "quote": "岂其智之不如婢仆哉？失为家主之道也。",
+          "start": 526773,
+          "end": 526791,
+          "whyItMatters": "T17.action 的散文概括了治家之喻（执耕／典爨），但该栏引文只到「汗流终日岂不劳乎」。"
+        },
+        {
+          "id": "RC9",
+          "severity": "minor",
+          "found": "回末诗**前半**（火势与骤雨的意象）未被引用；候选引了该诗后半「武侯妙计如能就，安得山河属晋朝」。",
+          "quote": "谷口风狂烈焰飘，何期骤雨降青霄。",
+          "start": 526071,
+          "end": 526087,
+          "whyItMatters": "WX03 把回末诗整体列为「已放进 themeReadings 作为解释层证据」，实际只引了后半；TR01 的 support 走的是叙述句而非该诗前半。"
+        },
+        {
+          "id": "RC10",
+          "severity": "minor",
+          "found": "司马懿表文与祷告文的**结句**均未被引用。",
+          "quote": "臣不胜激切之至！",
+          "start": 527189,
+          "end": 527197,
+          "whyItMatters": "候选引了表文前半（臣才薄任重，伏蒙明旨…），结句不在引文层；同形见祷告文「非敢妄祈，实由情切」（[528111,528121)）。"
+        },
+        {
+          "id": "RC11",
+          "severity": "minor",
+          "found": "张翼在追击开始时**收住后军**（追击实际由廖化独进）未被引用。",
+          "quote": "张翼收住后军，廖化当先追赶。",
+          "start": 522714,
+          "end": 522728,
+          "whyItMatters": "该句区间其实被 T01/T02 的某条引文**部分覆盖**（故不计入零覆盖片段），但候选没有任何引文登记它，T02 的分工（谁追谁止）在引文层无依据。"
+        },
+        {
+          "id": "RC12",
+          "severity": "structural",
+          "found": "覆盖率口径：候选报告「正文 17 段段级 100% 至少一条引用命中、句子级零引用 0 句」。我独立复算**确认这两个数字在它的口径下为真**（20 段=17 正文+3 非正文，17/17 段覆盖，按内容字数计 0 句零引用；最薄正文段覆盖比 0.689）。但同一份数据在**字符级**是 5086/5822=87.4%，有 23 个可见字数 >=12 的未引用片段、77 个未引用片段段。",
+          "quote": "孔明请入问之，祎曰：“魏主曹睿闻东吴三路进兵，乃自引大军至合淝，",
+          "start": 527524,
+          "end": 527556,
+          "whyItMatters": "这不是数字造假（数字可复现），而是**仪器口径**问题：段级/句级判据对「一整句里有一处被引」即算覆盖，因而对**遗漏**结构性不敏感。与 verify:xiyou:L1:0099 记录的同源缺陷。建议下一轮把「>=12 可见字未引用片段」直接加进 reverseCoverage 输出。"
+        }
+      ]
+    }
+  ]
+}

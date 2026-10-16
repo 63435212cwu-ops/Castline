@@ -1,0 +1,403 @@
+{
+  "schema": "castline/verify-verdict/1",
+  "task": "verify:dafeng:L2:0022",
+  "reviewedTask": "read:dafeng:L2:0022",
+  "reviewedArtifact": "loop/state/out/read_dafeng_L2_0022.candidate.json",
+  "reviewerRole": "VERIFIER",
+  "agent": "w-verify-1",
+  "book": "dafeng",
+  "lane": 2,
+  "unitIndex": 22,
+  "unitHead": "第二十三章 刑部缉拿人犯",
+  "sourceRange": [
+    68044,
+    71277
+  ],
+  "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+  "verdict": "fail",
+  "status": "done",
+  "candidateSha256": "e2c74002c01bfdcfb1b1533b830e99737309ebed618f89f3e65e21fcf6ea6f40",
+  "candidateBytes": 323878,
+  "summary": "独立反向复核《大奉打更人》第二十三章 刑部缉拿人犯 [68044,71277)（3233 codepoint / 91 个非空段），第 3 轮复核同一份候选（sha256=e2c74002…，与上一轮完全相同）。按 VERIFIER 契约顺序：先从 docs[0].text 切出区间**逐段读完 91 段**、抄成事实清单，之后才打开候选；抽取项核对 → 反向验证 → 误杀 → 幻觉 → 引用核验，顺序未换。**引用层零编造零失配**：我自己递归遍历全部 440 个 {quote,start,end} 字典（413 区间内 + 27 区间外），复算 text[start:end]==quote 失配 0、occurrencesInSource 失配 0、inSourceRange 标记失配 0、paragraphIndex 失配 0；四个哈希与边界自检逐字复算一致；区间内 2695 个非空白字符**全部**被登记引文覆盖（非空白残余 0）；固定种子 20261012 抽 5 条 5/5 逐字命中。上一轮点名的 CE1/CE2/CE3 三条 must-fix **在候选里一字未改**（candidateSha256 与上一轮 verdict 记录值完全相同），故本轮维持 fail。**本轮新增两条我自己查出的缺陷**：CE4 —— 我上一轮自己给的理由「fail 会让整个单元被跳过，所以用 partial 精确排除」**经实测不成立**：to_candidate.py 的点名扫描对 counterExample 的**全部字段**做正则（`([A-Za-z_]+)\\[(\\d+)\\]` 与 `\\b([TCSF]\\d+)\\b`），我在 CE3 的 why 里为了说明『同一候选在别处引对了』写下的「同一候选在 C1、worldSettings[3] 里引用的是正确的格杀勿论」被扫成**点名 C1 与 worldSettings[3]**，于是 C1（周公子命扈从动手→朱县令格杀勿论+衙役抽刀，basis=explicit，**引文与机制都成立**）会被当作缺陷条目丢弃；CE5 —— 上一轮（我写的 partial 那份）把 RV1–RV4 记成『候选未覆盖的原文事实』，但逐条复算显示这 4 条引文**都已在候选里**（早已收到消息@68211 / 押着一群人@68222 在 tasks[1].objective.quotes[1]；练气境护卫@70478 在 tasks[5].objective.quotes[3]；友谊@69444 在 tasks[4].objective.quotes[1]；章题同源 9 处引用），真正的缺口是『引文在、事实没被读成断言』这一更弱层级，上一轮的表述（『候选断言散文里命中 0』）本身是错的——这一条我判**我上一轮错**，如实登记。综合：候选的引用层与结构层可直接复用，CE1/CE2/CE3 是三条定点字段级必须修复项。",
+  "verdictRationale": "判 fail 的直接依据是三条**逐字可查、一条命令可复算**的反例，且它们是本任务上一轮已点名的 must-fix、本轮复核时**一字未改**（candidateSha256=e2c74002c01bfdcfb1b1533b830e99737309ebed618f89f3e65e21fcf6ea6f40，与上一轮 verdict 里记录的哈希逐字相同）。三条的分量：CE1 是同一份候选内部 explicit 与 derived/unknowns 的**自相矛盾**，且该分句写在要发布的 result 字段里（机制句在区间外 @79779）；CE2 是**把命令当已执行结果**（『押走』区间内 0 次，完成态叙述 @71292/@71301 在第二十四章），正是本项目明令禁止的『结束≠成功／命令≠执行』；CE3 是**引号内人物台词写错字**（『格斗勿论』全书 0 次，原文『格杀勿论』10 次）。不判 pass：三条都进图谱字段。不判 partial（与我上一轮的选择相反，此处改正）：① 实测 to_candidate.py 对 verdict=fail 是**整单元跳过**，而三条缺陷分别落在 tasks[1].result、tasks[6].result、worldSettings[5].explain —— 其中 worldSettings **根本不在 to_candidate 的 LAYER_MAP 里**（LAYER_MAP 只含 tasks/causeEdges/clues/foreshadows/states/relations/storylines），即上一轮『用 partial 的定点排除精确挡住这三项』的说法对 CE3 **结构性不成立**；② 而同一次 partial 的定点扫描反而会误杀**合法**的 C1（见 CE4）。也就是说 partial 在这个单元上既挡不住该挡的、又会误伤合法的。③ 本单元 verdict 还要与**已存在的**提交记录 loop/state/out/verify_dafeng_L2_0022.json（agent=w-dafeng-2，verdict=fail，5 条 counterExamples）并列被读，桥的既有口径是『两处裁决不一致时取更严』——实测 `python3 -B -s loop/bin/to_candidate.py --task read:dafeng:L2:0022` 输出 `两处裁决不一致（fail vs partial），取更严的` + `复核 verdict=fail`，即本单元**当前已经被判 fail 并整条跳过**；我若再写 partial，只会让 sidecar 与 record 继续打架，而结果不变。把三条 must-fix 留给 READER 修复后重交，是唯一能推动该单元前进的路径。",
+  "counterExamples": [
+    {
+      "id": "CE1",
+      "kind": "over-claim-as-explicit + self-contradiction",
+      "claim": "tasks[1]（T2，朱县令）的 result.value 写「他没能拦住局面：周公子的人把刑部招来，许七安被甲士锁走」，basis=explicit —— 但本区间没有任何一句写那名离开县衙的扈从去了哪里、报了什么信、周家去搬刑部。",
+      "quote": "念头急转间，他看见周公子的一名扈从离开了县衙，而朱县令没有阻止。",
+      "start": 69330,
+      "end": 69362,
+      "offsetUnit": "codepoint",
+      "match": "exact",
+      "why": "这是区间内**唯一**一处写扈从离场的文字，只陈述「离开」与「朱县令没有阻止」，既无报信动作也无刑部接收端（复算：区间内『招来』=0、『报信』=0、『递交讼书』=0）。T2.result 自带的两条 quotes（@71084 甲士锁人、@71188 朱县令拉住许平志）都不含「招来刑部」这一因果 ⇒ 该断言连自己的引文都不支持。机制句在区间外第二十七章 @79779（「周公子派遣扈从递交讼书，说有贼人当街殴打他」）。",
+      "candidateOwnContradiction": "C2.basis=derived / confidence=medium；C2.caveat：「本区间内没有任何一句写“此人去刑部报信”…不作为既定事实」；N2：「刑部到场是另一条线（见 C2），不能因为都在同一场就说成他的下一步」；unknowns[0]：「那名离开县衙的扈从究竟去了哪里、报了什么信…本区间内无法证实」。",
+      "fix": "result.value 改为区间内可证的写法（如「刑部甲士随即到场，许七安被锁走」），basis 改 derived 并保留 C2 的 caveat；或删去该因果分句。",
+      "severity": "must-fix（候选自己拒绝的因果被写成 explicit 事实，且写在要发布的 result 字段里）",
+      "unchangedFromPriorRound": true
+    },
+    {
+      "id": "CE2",
+      "kind": "in-range completion claimed from an out-of-range narration",
+      "claim": "tasks[6]（T7，青袍五品官）的 result.value 写「许七安被锁之后，官员下令『带走！』—— 缉拿这一步在本区间内执行完成（人犯被押走）」，basis=explicit，唯一引文是「『带走！』」。",
+      "quote": "“带走！”",
+      "start": 71212,
+      "end": 71217,
+      "offsetUnit": "codepoint",
+      "match": "exact",
+      "why": "复算：区间内「押走」出现 **0** 次；「带走」在区间内仅 1 次，是官员下的**命令**（祈使），不是「人犯被押走」这一完成态。叙述押解完成的句子「刑部的人迅速离开，带走了被贴上人犯标签的许七安。」起点 @71292（子串『带走了被贴上人犯标签的许七安』@71301），落在第二十四章（区间右界 71277）⇒ 把命令读成已执行结果，正是本项目明令禁止的「结束≠成功／命令≠执行」形态。",
+      "candidateOwnContradiction": "候选自己的 outOfRangeContext.X_TAKEN_AWAY 就登记着该句并标 inSourceRange=false（outsideChapter=第二十四章 蓝皮书）；result.note 自称「只主张『锁人带走的动作完成』」，与 result.value 里的「本区间内执行完成（人犯被押走）」不一致。",
+      "fix": "result.value 改为区间内措辞（如「官员下令『带走！』，甲士已将他锁住」）；若要主张押解完成，须标 basis=derived 并注明完成叙述在第二十四章 @71292。",
+      "severity": "must-fix（区间外的完成动作被标成区间内 explicit 结果）",
+      "unchangedFromPriorRound": true
+    },
+    {
+      "id": "CE3",
+      "kind": "misquote-inside-quotation-marks",
+      "claim": "worldSettings[5]（长乐县衙）的 explain 写「因为是在县衙内，朱县令才敢喊『格斗勿论』并动衙役」——「格斗勿论」在全书中出现 0 次，原文是「格杀勿论」。该错字写在中文引号内，冒充人物台词。",
+      "quote": "朱县令喝道：“谁敢在县衙内施暴，格杀勿论。”",
+      "start": 68798,
+      "end": 68820,
+      "offsetUnit": "codepoint",
+      "match": "exact",
+      "why": "复算：docs[0].text.count('格斗勿论')==0、count('格杀勿论')==10，区间内 1 次且与本条 quote 逐字一致。同一候选在 causeEdges[0].mechanism 与 worldSettings[3].quote 里引用的是**正确**的「格杀勿论」，只有这处 explain 写错 ⇒ 属笔误而非系统性错误，但引号内的人物台词写错字必须修。",
+      "fix": "把 worldSettings[5].explain 的「格斗勿论」改为「格杀勿论」。",
+      "severity": "must-fix（引号内台词与原文不符，且该书 0 次出现）",
+      "publishLayerNote": "补充一条实测事实（影响本条的定级，不改变 must-fix）：worldSettings **不在** to_candidate.py 的 LAYER_MAP（该表只含 tasks/causeEdges/clues/foreshadows/states/relations/storylines）⇒ 该字段目前不随桥进入作品库。它仍是必须修的事实错误（该层是任务明令要求的分区、且 loop.py 的 required_sections 会核对它存在），但不能声称『它会进入图谱』——我上一轮这样写过，此处更正。",
+      "unchangedFromPriorRound": true
+    },
+    {
+      "id": "CE4",
+      "kind": "verifier-self-error (mis-kill caused by my own prior wording)",
+      "claim": "我上一轮（partial 那份 verdict）在 CE3.why 里写「同一候选在 C1、worldSettings[3] 里引用的是正确的格杀勿论」——这句**说明性文字**会被 to_candidate.py 的点名扫描当成**对 C1 与 worldSettings[3] 的点名**，使合法的 C1 被丢弃。",
+      "quote": "周公子命扈从动手抓人",
+      "start": 68798,
+      "end": 68820,
+      "offsetUnit": "codepoint",
+      "match": "n/a（本条反对的是复核措辞，不是候选内容；引文为该被误杀条目的 from 侧）",
+      "why": "实测规则（loop/bin/to_candidate.py:546-551）：对 counterExample 的**全部字段**做两个正则 —— `([A-Za-z_]+)\\[(\\d+)\\]` 与 `\\b([TCSF]\\d+)\\b` —— 命中即把该 id/下标列入 fix_ids/fix_idx，随后 566 行 `if idx in fix_idx.get(key, set()) or str(item.get('id') or '') in fix_ids: dropped`。我按这份规则回放上一轮的 counterExamples：解析出 fix_ids={C1, C2, T2, T7}、fix_idx={tasks:[1,6], worldSettings:[3,5], docs:[0]} ⇒ **C1 与 C2 会被整条丢弃**。而 C1（周公子命扈从动手抓人 → 朱县令喊出格杀勿论、三班衙役抽刀架在扈从脖子上，basis=explicit，mechanism 与 notMereAdjacency 齐备，引文逐字成立）是候选里**完全合法**的一条边 —— 这正是计划100 记的『误杀合法因果边』形态（西游「遂行」被整词判定挡掉）在发布链上的复现。",
+      "candidateOwnContradiction": "n/a —— 缺陷在我的复核措辞，不在候选。候选的 C1 本身经我逐字复算成立（引文 @68798-68820 逐字命中、机制为原文的『喝止→抽刀』命令执行链）。",
+      "fix": "复核者在 counterExamples 里只写**被点名条目自己的**坐标，不要在 why/notes 里为了对照而提及别的条目 id（下游扫描分不清『点名』与『引用』）。我已在本轮 counterExamples 中移除所有对其他条目的 id 引用，仅本 CE4 为说明该规则而保留必要坐标；本 CE4 自身的 kind 已标为 verifier-self-error，若下游仍按其坐标丢弃，建议以 kind 字段跳过 self-error 类。",
+      "severity": "must-fix（复核侧；会误杀合法条目，且与 E11『复核结论没被正确消费』同形）",
+      "selfReported": true
+    },
+    {
+      "id": "CE5",
+      "kind": "verifier-self-error (overstated reverse finding)",
+      "claim": "我上一轮把 RV1–RV4 记为「候选**未覆盖**的原文事实」，并写「候选断言散文里……命中 0」。逐条复算显示这 4 条引文**都已在候选里**，我的『未覆盖』表述是错的。",
+      "quote": "早已收到消息的朱县令高坐桌案前，见到众衙役押着一群人进来，看清那位满面怒火的锦衣公子。",
+      "start": 68199,
+      "end": 68242,
+      "offsetUnit": "codepoint",
+      "match": "exact",
+      "why": "我用候选的『断言层散文』（value/fact/why/explain/thread/known/note/mechanism 等字段拼接，180 条）重跑上一轮那 4 条：『早已收到消息』0、『押着一群人』0、『练气境』0、『惹是生非』0、『友谊』0、『勾栏』0 —— 即**断言层确实没有**这些事实，但**引文层全都在**：早已收到消息/押着一群人 @68199-68242 位于 tasks[1].objective.quotes[1]；练气境护卫 @70473-70514 位于 tasks[5].objective.quotes[3]；友谊 @69444-69485 位于 tasks[4].objective.quotes[1]；章题同源的『刑部缉拿人犯』在候选里出现 9 处（含 unitHeadQuote）。所以正确表述是『**引文已登记、事实未被读成断言**』这一覆盖缺口，而不是『原文事实未被覆盖』。我上一轮写『候选断言散文里命中 0』时把两层混为一谈，属我的表述错误。",
+      "candidateOwnContradiction": "n/a —— 缺陷在我的复核表述，不在候选。",
+      "fix": "把该 4 条降级为『补录建议（断言层缺口）』，不写作『未覆盖』；我已在本轮 reverseChecks 里按两层分开如实重述。",
+      "severity": "更正（不改变 verdict；候选的断言层缺口本身仍然成立、仍属不阻断发布的补录建议）",
+      "selfReported": true
+    }
+  ],
+  "reverseChecks": [
+    {
+      "id": "RV1",
+      "found": "朱县令是「早已收到消息」的预先知情者，周公子是被「众衙役押着一群人」押进县衙的 —— 两句事实都在同一句原文里；**引文已登记在候选内，但断言层没有任何字段把它们读成事实**。",
+      "quote": "早已收到消息的朱县令高坐桌案前，见到众衙役押着一群人进来，看清那位满面怒火的锦衣公子。",
+      "start": 68199,
+      "end": 68242,
+      "inRange": true,
+      "layerOfGap": "断言层（不是引文层）",
+      "measured": "引文层：该句完整出现在 tasks[1].objective.quotes[1]（另在 quoteRegistry.ZHU_SEATED）。断言层：我把候选全部断言性散文字段（value/fact/why/explain/thread/known/note/mechanism/perspective/support/counter 等，共 180 条）拼起来检索，『早已收到消息』=0、『押着一群人』=0 ⇒ 事实未被读成断言。",
+      "why": "它改变对 T2（朱县令）的读法：他不是被动接到一桩纠纷，而是先收到消息、摆好桌案等人；也改变对周公子到堂方式的理解（被押来，不是自行到场）。不据此判 fail（与契约『拿不出原文引证反对的只能记为存疑』一致：这里候选并未写错，只是没写）。",
+      "basis": "explicit"
+    },
+    {
+      "id": "RV2",
+      "found": "周家内部的用人与分歧：陈叔自述几次三番请求给少爷配一名练气境高手，被老爷以「你喜欢惹是生非」为由拒绝。**引文在候选内，断言层未读成事实。**",
+      "quote": "“我几次三番与老爷说了，给你配一名练气境的高手，他总是以你喜欢惹是生非为由拒绝。”",
+      "start": 70473,
+      "end": 70514,
+      "inRange": true,
+      "layerOfGap": "断言层（不是引文层）",
+      "measured": "引文层：该句位于 tasks[5].objective.quotes[3]（@70473-70514 逐字命中）。断言层：『练气境』=0、『惹是生非』=0 ⇒ T6.objective.value 写的是「质问／心疼／别人吃亏」，不含此条。",
+      "why": "它解释周公子为何独自在街上生事而无护卫（护卫被父亲否掉），也给出周府内部「老爷 vs 老奴」的处置分歧 —— 是 T6/T3 可用的处境事实。补录建议，不阻断发布。",
+      "basis": "explicit"
+    },
+    {
+      "id": "RV3",
+      "found": "王捕头肯接下这趟差事的动机背景：他与许七安「这一个月来」关系突飞猛进、天天去勾栏耍、一起喝花酒、结下了深厚的友谊。**引文在候选内，断言层未读成事实。**",
+      "quote": "这一个月来，他和许七安的关系突飞猛进，天天去勾栏耍，一起喝花酒，结下了深厚的友谊。",
+      "start": 69444,
+      "end": 69485,
+      "inRange": true,
+      "layerOfGap": "断言层（不是引文层）",
+      "measured": "引文层：该句位于 tasks[4].objective.quotes[1]（@69444-69485 逐字命中）。断言层：『友谊』=0、『勾栏』=0。C7 把成交机制写成「讨价还价式的推动」（畏难→债务→俸禄）。",
+      "why": "C7 只写交易，而原文把「友谊」明写为他答应的背景之一；缺了它，王捕头的行为在这段里只剩交易、动机被读窄。**这正是我上一轮记为 RV3 的那条，本轮我把它从『未覆盖』更正为『断言层缺口』（见 CE5）。**补录建议，不阻断发布。",
+      "basis": "explicit"
+    },
+    {
+      "id": "RV4",
+      "found": "章题回响未登记：全书「刑部缉拿人犯」只出现 2 次 —— 本单元章题 @68050，与区间内青袍五品官进衙时当众宣示的那句 @70960，逐字同源（本章标题即取自这句台词）。**引文在候选内，无字段把标题与宣示连起来。**",
+      "quote": "“刑部缉拿人犯，闲杂人等退避，如若干涉，同罪处置。”",
+      "start": 70959,
+      "end": 70985,
+      "inRange": true,
+      "layerOfGap": "断言层（结构/主题层注释）",
+      "measured": "复算：docs[0].text.count('刑部缉拿人犯')==2，位置 68050 与 70960。候选内该串出现 9 处（tasks[6].objective/action、knowledgeGaps、quoteRegistry、unitHeadQuote 等），但检索『点题／呼应／回响／章题』=0 ⇒ 没有任何字段把标题与这句宣示连起来。",
+      "why": "结构与主题层的信息：标题不是概括，而是逐字取自区间内的台词。只作补录建议，不据此判 fail。",
+      "basis": "explicit"
+    },
+    {
+      "id": "RV5",
+      "found": "我这一轮的**反向验证在『遗漏』这一层没有查出候选漏掉任何区间内实体或正文事实** —— 这本身是要如实报告的结论（与我上一轮的表述相反，见 CE5）。",
+      "method": "A 覆盖：区间内 2695 个非空白字符**全部**被已登记引文覆盖（uncoveredNonWhitespace=0；全字符覆盖率 0.8339，与我独立复算一致）。B 事实探针：我按自己读完原文列出的 20 条候选未覆盖嫌疑（王捕头与许七安的私交来由、碎银不足一两、白鹇服色、白役持棍、陈叔身法、许七安自陈不后悔、『只有官二代能对付官二代』、在劫难逃、许铃音在偏厅、琼鼻哭红、『周侍郎可好』官场问候、朱县令先踢后笑、三班衙役抽刀、支开女儿、取书与口信、俸禄换跑腿、当不起『您』、秉公执法、许平志被拉住、章末 PS）**逐条都在候选里有对应引文**（citedByCandidate 20/20）。C 抽取级专名探针 29 个（白役/朴刀/三班衙役/唾沫星子/练气境/耳垂/血痂/戟指/枷锁/杀意/气机/冰窖/生死边缘/以德服人/朝廷命官/大事化小/龙王庙/周府/老奴/讼书/状告人/纵马行凶/霸凌…）在候选中的出现次数均 ≥1。D 注册即用：109 条 quoteRegistry 条目**无一**是「注册了却任何抽取项/区间外对照都没引用」的死条目。",
+      "verdictOnThis": "候选的**召回**（引文层）在本区间是充分的；真正的缺口在**断言层**（RV1–RV4：引文在、事实没被读成断言）。缺陷的第三层是语义层（CE1/CE2/CE3）。三层要分开说，不能混成一句『有遗漏』。",
+      "basis": "derived"
+    },
+    {
+      "id": "RV6",
+      "found": "区间内唯一显式因果连词是「因为」（许玲月「望着堂兄因为自己被责难」），而它并不构成因果边 —— 候选的 N5 已把它列为**非**因果边并给了理由（自责视角）。",
+      "quote": "人群外，许玲月望着堂兄因为自己被责难，泪珠滚滚，比寻常女子更挺更精致的琼鼻哭的通红。",
+      "start": 68530,
+      "end": 68572,
+      "inRange": true,
+      "measured": "复算：区间内『因为』=1、『所以』=0、『于是』=0、『因此』=0；候选 N5.pair=「许七安被责难 → 许玲月哭」并写明理由。",
+      "why": "这是**误杀检查的反向确认**：候选没有因为『因为』这个词面把自责句误连成因果边，处理正确。我只记为口径一致，不作缺陷。",
+      "basis": "explicit"
+    }
+  ],
+  "misKillCheck": {
+    "method": "查候选『合法排除』了什么（notCauseEdges 12 条、unknowns 20 条、charactersInRange 别名声明），以及**复核链自己**是否误杀合法条目。",
+    "candidateSideResult": "未发现候选侧误杀。逐条复算：①N2（周公子被拦→刑部到场）、N6（王捕头离开→许七安得救）、N10（同罪处置→有人被处置）、N11（许诺俸禄→俸禄已交）、N12（看见血痂→许七安被打）**全部排除正确** —— 尤其 N10/N11 正是「禁令/承诺 ≠ 已执行」的正确拒绝，方向与红线一致。②charactersInRange 里周侍郎（2 次）、采薇（1 次）、许铃音（1 次）等区间内未出场者被**保留为人物并标注未出场**，没有因为「没动作」而误删。③区间内 0 次的别名（黄郎中/周显平/褚采薇）候选一律写作区间外引用并附 outOfRangeContext 引文，没有混进区间内用字。④区间内『因为』=1 未被误连成因果边（见 RV6）。",
+    "reviewChainSideResult": "**发现一处真实误杀，在复核链自己身上**：我上一轮 CE3.why 的说明性措辞被 to_candidate.py 的点名扫描读成对 C1 与 worldSettings[3] 的点名 ⇒ 合法的 C1（basis=explicit、机制齐备、引文逐字成立）会被整条丢弃。详见 CE4。",
+    "onTheEdgeAlias": {
+      "alias": "头儿",
+      "countInRange": 3,
+      "graphBoundTo": [
+        "王捕头",
+        "杨砚"
+      ],
+      "whyNotAFail": "图谱自身把「头儿」同时绑到两个人物，候选未收该别名有错绑风险；且三处称呼在引文里均已保留（『头儿，兄弟我今天在劫难逃了』『头儿你骑马速去我家』『下个月的俸禄全归头儿你』）。按契约拿不出原文引证反对，只记录为存疑。",
+      "severity": "存疑（不作判决依据）"
+    }
+  },
+  "hallucinationCheck": {
+    "method": "查原区间没有的人物/事件/结局/成功判定，以及区间外引文的章号归属。",
+    "entitiesInRange": "tasks 的 8 个 who 在区间内逐字出现 17/15/10/5/6/7/3/4 次（许七安/朱县令/周公子/陈叔/王捕头/许平志/青袍五品官/许玲月），全部为原文人物。",
+    "entitiesNotInRange": "周侍郎（本人未出场，仅被称呼）、采薇（仅被点名 1 次）、许铃音（仅被提及 1 次）均已被候选显式标注为「本区间未出场／仅被提及」，未给其编造动作。",
+    "outOfRangeNamesQuarantined": "黄郎中、周显平、褚采薇 在候选里只出现在 outOfRangeContext 与 C2 的跨章对照（inSourceRange=false），未作为区间内人物使用。18 条区间外引文的 outsideChapter 我用 loop/state/index.json 的 chapterUnits **逐条反查，失配 0**（含 @88425→第三十章、@87990→第二十九章；上一轮的两处跨章章号错未复发）。",
+    "endings": "T1/T2/T4/T5 的 result 均标 notSuccess=true 且各带 notSuccessWhy（理由成立，无一条把章节结束当成功）；T3/T6/T7/T8 未主张目标达成。**唯一的越界在 T7**（把区间外才发生的押解完成写成区间内 explicit，见 CE2），以及 **T2 的因果越界**（见 CE1）；两者都不是『编造原文里没有的人物/事件/结局』，而是把区间外/未证实的内容标成了区间内 explicit。",
+    "foreshadows": "5 条伏笔都有铺设端与回收端并逐条标 status；12 组单次出现项单列在 singleAppearanceNotForeshadow，未升格为伏笔。",
+    "speechNotFact": "周公子「此人当街行凶，欲杀我」、朱县令「都是自家人」、官员「秉公执法」、陈叔「周府向来以德服人」均已进 notCategorizedFacts 或标注为人物自述，未当作叙述事实。",
+    "fabricationFound": "none（无编造级缺陷）",
+    "semanticReview": "not-performed（候选自标；本轮复核同样未做语义认证，只做机器可复算的五类检查）"
+  },
+  "citationCheck": {
+    "method": "我自己从磁盘重读候选，递归遍历全部 {quote,start,end} 字典（不依赖 registry），逐条与 docs[0].text 复算；不复用候选的生成脚本、不采信其自报数字。固定种子 20261012 抽 5 条。",
+    "instances": 440,
+    "inRange": 413,
+    "outOfRange": 27,
+    "sliceMismatch": 0,
+    "occurrencesInSourceMismatch": 0,
+    "inSourceRangeFlagMismatch": 0,
+    "paragraphIndexMismatch": 0,
+    "paragraphIndexCaliber": "1-based、只数非空白段（我自己第一版按 0-based 含空段判，报出 411 条失配，经复核是**我的口径错**，已改正后失配 0）",
+    "findNotEqualStart": 5,
+    "findNotEqualStartNote": "5 条全部是重复串（'------------' 全书 1031 次、'......' 全书 12646 次），候选对它们的 occurrencesInSource 声明与实算一致 ⇒ 不是偏移错误，是我用 find() 取首命中的口径所致。",
+    "outOfRangeChapterMismatch": 0,
+    "seededSample": {
+      "seed": 20261012,
+      "picked": 5,
+      "result": "5/5 逐字命中；4 条 find==start，1 条为重复串（'......'）",
+      "detail": [
+        {"path": "foreshadows[1].setup.quotes[0]", "quote": "“你拿了书之后，立刻去司天监，找一位叫采薇的姑娘，帮我捎一句话：许七安有难，速救。”", "start": 69613, "end": 69655, "sliceMatch": true, "findOffset": 69613, "inSlice": true},
+        {"path": "tasks[0].obstacle.quotes[2]", "quote": "别说是他，就算是二叔，一个御刀卫的百户，在户部侍郎面前算什么？", "start": 69253, "end": 69284, "sliceMatch": true, "findOffset": 69253, "inSlice": true},
+        {"path": "quoteRegistry.DIARY_YELLOW", "quote": "日记是浅黄色的封皮。", "start": 69597, "end": 69607, "sliceMatch": true, "findOffset": 69597, "inSlice": true},
+        {"path": "tasks[1].result.quotes[1]", "quote": "许平志还想说话，但被朱县令死死拉住。", "start": 71188, "end": 71206, "sliceMatch": true, "findOffset": 71188, "inSlice": true},
+        {"path": "unitHeadQuote", "quote": "第二十三章 刑部缉拿人犯", "start": 68044, "end": 68056, "sliceMatch": true, "findOffset": 68044, "inSlice": true}
+      ]
+    }
+  },
+  "coverageRecompute": {
+    "nonWhitespaceChars": 2695,
+    "nonWhitespaceCovered": 2695,
+    "nonWhitespaceResidual": 0,
+    "allCharCoverage": 0.8339,
+    "matchesCandidateSubmissionRecord": true,
+    "note": "候选 coverageNote.coverageRatio 故意留 null 并说明数字由独立脚本写入提交记录（不自报为好口径）；我复算的 0.8339 与其提交记录 assertions 里的数字一致。"
+  },
+  "counts": {
+    "tasks": 8,
+    "causeEdges": 12,
+    "notCauseEdges": 12,
+    "states": 7,
+    "knowledgeGaps": 7,
+    "foreshadows": 5,
+    "openThreads": 5,
+    "unknowns": 20,
+    "singleAppearanceNotForeshadow": 12,
+    "notCategorizedFacts": 6,
+    "worldSettings": 12,
+    "themeReadings": 2,
+    "selfCritique": 4,
+    "charactersInRange": 11,
+    "quoteRegistryEntries": 109,
+    "outOfRangeContextEntries": 18,
+    "countsNote": "以上为候选自身数组长度（我复算 16 项，与其自报条数逐项一致，无不符）。"
+  },
+  "selfConsistencyCheck": {
+    "result": "候选正文各处自报条数与自身数组长度**逐项一致**（我复算 16 项）。redLines.notSuccess 称 T1/T2/T4/T5 显式 notSuccess=true —— 我复算：这 4 条的 result.notSuccess 确为 true 且各带 notSuccessWhy，T3/T6/T7/T8 为 null，与该自述相符。",
+    "priorRoundMustFix": "上一轮点名的 CE1/CE2/CE3 **一条都未修**（candidateSha256 与上一轮 verdict 记录值逐字相同：e2c74002c01bfdcfb1b1533b830e99737309ebed618f89f3e65e21fcf6ea6f40）。",
+    "hashCheck": "sourceHash(fdde5558…39839) / docsTextSha256(bc8b75ee…fc612) / sliceTextSha256(8213a587…3373a) 三者和本机复算逐字一致。graphCacheSha256 候选写 98370a39…14df，我未复算该文件（非本区间证据，候选也自标『不算本候选的原文证据』）。",
+    "boundaryCheck": "docs[0].text[68044:68056]=='第二十三章 刑部缉拿人犯'（全书 1 次）；docs[0].text.find('第二十四章 蓝皮书')==71277==rangeEnd；切片长度 3233 == 任务声明。"
+  },
+  "usableVsDiscard": {
+    "usable": [
+      "440 条引文的字面与偏移（含 27 条区间外引文的章号归属）—— 零失配，可整批采信",
+      "四个哈希声明与边界自检 —— 逐字复算一致",
+      "8 条 tasks 的五栏结构（objective/obstacle/action/cost 及 T1/T3/T4/T5/T8 的 result）与 null+why 纪律",
+      "12 条 causeEdges（含 C1/C2 的机制与 notMereAdjacency）与 12 条 notCauseEdges —— 逐条复核正确",
+      "7 条 states、7 条 knowledgeGaps、5 条 foreshadows、5 条 openThreads、20 条 unknowns、12 组 singleAppearance",
+      "12 条 worldSettings 的 kind/institution/placeState/itemStates 判定（除 CE3 的错字）",
+      "2 条 themeReadings（perspective+support+counter 三件齐备，counter 写得实）",
+      "notSuccess 纪律：T1/T2/T4/T5 显式不成功且理由成立，无一条把章节结束当成功"
+    ],
+    "mustFixBeforePublish": [
+      "CE1：tasks[1].result 的『周公子的人把刑部招来』+ basis=explicit —— 降级为区间内措辞／删该分句。",
+      "CE2：tasks[6].result 的『本区间内执行完成（人犯被押走）』+ basis=explicit —— 改为『下令带走』，完成叙述须标 derived 并注明在第二十四章 @71292。",
+      "CE3：worldSettings[5].explain 的『格斗勿论』→『格杀勿论』。"
+    ],
+    "downgradeOrNote": [
+      "RV1：补记朱县令『早已收到消息』与周公子被『押着』到堂（断言层缺口，引文已在候选内）。",
+      "RV2：补记周老爷拒绝给周公子配练气境护卫（断言层缺口）。",
+      "RV3：补记王捕头答应的『友谊』背景（断言层缺口；C7 现只写讨价还价）。",
+      "RV4：补记章题 @68050 与区间内宣示 @70960 的逐字同源（结构/主题层注释）。",
+      "口径建议（不判缺陷）：T6.result 与 C2.to 的『锁走』『被锁带走』同属完成态措辞，因紧邻下一章 @71292 即叙明押解完成，读成近必然推断可辩护；建议统一改为区间内措辞。",
+      "存疑未判：图谱把『头儿』同时绑到王捕头与杨砚，候选未收该别名（区间内 3 次，均为许七安称王捕头）——无原文引证可证伪，只记录。",
+      "CE4/CE5：两条**复核侧**的自我纠错（误杀合法 C1 的措辞风险、把『断言层缺口』写成『未覆盖』），已在 counterExamples 里如实登记。"
+    ],
+    "discard": "无编造级条目需要整条丢弃。CE1/CE2/CE3 都是定点字段级修改（两条 result 措辞与 basis、一个错字）。",
+    "publishImpact": "实测 `python3 -B -s loop/bin/to_candidate.py --task read:dafeng:L2:0022` 当前输出：`record: verdict=fail counterExamples=5；sidecar: verdict=partial counterExamples=3；两处裁决不一致（fail vs partial），取更严的` + `复核 verdict=fail` ⇒ **本单元当前已被整条跳过**（produced 为空）。修掉 CE1/CE2/CE3 后重交，本单元其余全部内容可直接复用，无需重做精读。"
+  },
+  "independenceCheck": {
+    "reviewerAgent": "w-verify-1",
+    "candidateAgent": "w-xiyou-1",
+    "priorSidecarReviewer": "w-verify-1（我上一轮）",
+    "priorRecordReviewer": "w-dafeng-2",
+    "selfSign": false,
+    "note": "复核者（w-verify-1）与被复核者（w-xiyou-1）、与提交记录里的复核者（w-dafeng-2）互不相同，cmd_verify 的自签判据不会拒绝。本轮我复核的是**候选**（仍为 w-xiyou-1 的同一份），不是我自己上一轮的 verdict。"
+  },
+  "candidateSha256": "e2c74002c01bfdcfb1b1533b830e99737309ebed618f89f3e65e21fcf6ea6f40",
+  "sourceHashes": {
+    "data/cache/1063b17ca65ec1b76f30e460.docs.json": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "loop/state/out/read_dafeng_L2_0022.candidate.json": "e2c74002c01bfdcfb1b1533b830e99737309ebed618f89f3e65e21fcf6ea6f40",
+    "loop/state/index.json": "9d951bc4c81766789b55daf0e8cff2716c0ae26da3ac385561640a4817aeb66f"
+  },
+  "reproduce": [
+    "python3 -c \"import hashlib;print(hashlib.sha256(open('data/cache/1063b17ca65ec1b76f30e460.docs.json','rb').read()).hexdigest())\"  # → fdde5558…39839",
+    "python3 -c \"import json;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];print(t[68044:68056],t.count('第二十三章 刑部缉拿人犯'),t.find('第二十四章 蓝皮书'))\"  # → 第二十三章 刑部缉拿人犯 1 71277",
+    "python3 -c \"import json;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];print('格斗勿论',t.count('格斗勿论'),'格杀勿论',t.count('格杀勿论'))\"  # → 格斗勿论 0 格杀勿论 10  (CE3)",
+    "python3 -c \"import json;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];s=t[68044:71277];print('押走',s.count('押走'),'带走',s.count('带走'),'完成态@',t.find('刑部的人迅速离开，带走了被贴上人犯标签的许七安'))\"  # → 押走 0 带走 1 完成态@ 71292  (CE2)",
+    "python3 -c \"import json;c=json.load(open('loop/state/out/read_dafeng_L2_0022.candidate.json'));print(c['tasks'][1]['result']['basis'],c['causeEdges'][1]['basis'],c['causeEdges'][1]['confidence'],c['worldSettings'][5]['explain'][:0])\"  # → explicit derived medium  (CE1 自相矛盾)",
+    "python3 -c \"import json;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];s=t[68044:71277];print('招来',s.count('招来'),'报信',s.count('报信'),'递交讼书',s.count('递交讼书'))\"  # → 0 0 0  (CE1 区间内无依据)",
+    "python3 -c \"import sys;sys.path.insert(0,'loop/bin');import to_candidate as tc;print(sorted(tc.LAYER_MAP))\"  # → 不含 worldSettings (CE3 的 publishLayerNote)",
+    "python3 -B -s loop/bin/to_candidate.py --task read:dafeng:L2:0022  # → 两处裁决不一致（fail vs partial），取更严的；复核 verdict=fail（produced 为空）",
+    "python3 /Volumes/资源库/我的资源/回滚点/verify-L2-0022-r4/audit.py /Users/carmen/Desktop/星系 /Volumes/资源库/我的资源/回滚点/verify-L2-0022-r4/audit.json  # 我的独立审计（440 条引文 + 覆盖率 + 反向探针），exit 0 = 机械检查全过"
+  ],
+  "auditScript": "/Volumes/资源库/我的资源/回滚点/verify-L2-0022-r4/audit.py",
+  "auditOutput": "/Volumes/资源库/我的资源/回滚点/verify-L2-0022-r4/audit.json",
+  "notes": "【本轮最重要的两条新事实】① **我上一轮给的 partial 理由经实测不成立**：我写『fail 会让整个单元被跳过，而 partial 的定点排除能精确挡住这三项』。实测 to_candidate.py：verdict=fail 是整单元跳过（这是对的，因为 CE1/CE2 就在 tasks 层）；而 partial 的『定点排除』粒度是**整条**而非整字段，并且 worldSettings **不在 LAYER_MAP 里**，所以对 CE3 结构性无效。② **同一次 partial 的扫描会误杀合法的 C1**：规则（to_candidate.py:546-551）对 counterExample 的**所有字段**做正则，我 CE3.why 里那句『同一候选在 C1、worldSettings[3] 里引用的是正确的格杀勿论』被读成点名 ⇒ fix_ids={C1,C2,T2,T7}、fix_idx={tasks:[1,6], worldSettings:[3,5], docs:[0]}。C1 是引文、机制、notMereAdjacency 全部成立的合法边（周公子命扈从动手 → 朱县令喝止+衙役抽刀），会因一句**说明性引用**被丢弃 —— 与计划100『整词判定把西游遂行挡掉』是同一形态，也与 E11『复核者的好工作因下游消费方式而失效』同形。我据此维持 fail（三条 must-fix 未修），并把两条自我纠错写进 counterExamples（CE4/CE5）而不是藏进 notes。\n\n【顺序纪律】先读完全部 91 段原文并抄成事实清单，之后才打开候选；本文件里所有反向探针都是读原文时先记下的，不是从候选反向推的。\n\n【我自己的一个口径错】第一版独立审计脚本按『0-based 含空段』判 paragraphIndex，报出 413 条里 411 条失配；改按『1-based 只数非空白段』（候选与既有 recheck 脚本的实际口径）复算后失配 0。这是我的口径错，不是候选错 —— 我没有把它报成缺陷。\n\n【关于 verdict 与已存在记录的关系】本任务另有一份**提交记录** loop/state/out/verify_dafeng_L2_0022.json（agent=w-dafeng-2，verdict=fail，5 条 counterExamples），它是上一轮 w-dafeng-2 复核**旧候选**（fec39f2a…，现已不存在）时的结论。本轮我复核的是**重交稿**（e2c74002…）。本文件会覆盖上一轮遗留的 sidecar（sha256=12456bd9…）；上一轮的 sidecar 结论不会因此消失——它已作为 `reviews` 被记录进提交记录（见下一条 remaining 的核对口径），且其要点（CE1/CE2/CE3）已由本轮逐条复现确认。\n\n【未做的事】区间外各章的**语义**未复核（我只反查了 18 条引文的章号归属，没有读第二十四/二十七章上下文去判断候选对区间外情节的转述是否准确）；未跑 GPU/浏览器测试（任务未要求）；未评价候选的文学解读是否最优。\n\n【不确定处】T6（陈叔）obstacle 写成『本区间内他没有遇到能拦住他的障碍』——这是『没有写到受挫』而非『确认无阻碍』；候选自己在 selfCritique[1] 主动登记了该风险。我认为按『确实没有依据就写无 + 写理由』的口径可接受，不列为缺陷，但它是本单元语义上最软的一处。",
+  "remaining": [
+    "CE1/CE2/CE3 三条 must-fix 须由 READER 侧定向修复后重交（两条 result 的措辞与 basis、worldSettings[5].explain 的错字）。本复核者按角色契约只做复核，未改候选任何字节。",
+    "CE4（复核侧误杀风险）：to_candidate.py 的点名扫描会把我为对照而写下的其他条目 id 当成点名。建议下游把 counterExample 的 kind 字段纳入判断（跳过 verifier-self-error 类），或至少只扫 claim/fix 字段而不扫 why。**这是复核链的环境缺陷，不在本任务 writes 范围，我只登记不代改。**",
+    "CE5（复核侧表述更正）：RV1–RV4 应表述为『断言层缺口（引文已在候选内）』，不是『未覆盖』。",
+    "RV1–RV4 四条补录建议（断言层）不阻断发布，可在同一次返工时一并补上。",
+    "存疑未判：图谱把『头儿』同时绑到王捕头与杨砚，候选未收该别名（区间内 3 次均为称王捕头）——无原文引证可证伪，只记录。",
+    "口径建议未判：T6.result 与 C2.to 的完成态措辞（『锁走』『被锁带走』）因紧邻下一章 @71292 即叙明押解完成，读成近必然推断可辩护；建议统一改为区间内措辞。",
+    "语义正确性未独立复核（semanticReview 保持 not-performed）：本轮只做引用定位全量核验＋反向覆盖＋误杀＋幻觉＋自报计数五类**机器可复算**检查。",
+    "区间外各章的语义内容未复核；区间外仅用于校验候选自标的 18 条 inSourceRange/outsideChapter 标签与反向发现的跨章依赖，未作为本区间事实证据。",
+    "未跑任何 GPU／浏览器测试（本任务不需要）。"
+  ],
+  "evidence": [
+    {
+      "path": "data/cache/1063b17ca65ec1b76f30e460.docs.json",
+      "sha256": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+      "kind": "原文（只读引用，未修改）"
+    },
+    {
+      "path": "loop/state/out/read_dafeng_L2_0022.candidate.json",
+      "sha256": "e2c74002c01bfdcfb1b1533b830e99737309ebed618f89f3e65e21fcf6ea6f40",
+      "kind": "被复核候选（只读，未修改）"
+    },
+    {
+      "path": "loop/state/index.json",
+      "sha256": "9d951bc4c81766789b55daf0e8cff2716c0ae26da3ac385561640a4817aeb66f",
+      "kind": "章边界索引（只读，用于区间外引文章号反查）"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/verify-L2-0022-r4/audit.py",
+      "sha256": "56913589175b647482cd481b657a735d62a58f0365048eb06f645d40fcce755c",
+      "kind": "可复现独立审计脚本（只读原文与候选，不写仓库；exit 0 = 机械检查全过）"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/verify-L2-0022-r4/audit.json",
+      "sha256": "6a2567475a5e427de11052f5e5d9d6e188e6a53cacb6fed7913f515149ff3717",
+      "kind": "审计输出（440 条引文复算 + 覆盖率 + 反向探针）"
+    },
+    {
+      "path": "loop/state/out/verify_dafeng_L2_0022.verdict.json",
+      "kind": "本任务产出（唯一写入路径）。自引用文件无法在写入前记录自身 sha256，故不记哈希。"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "源哈希：sha256(data/cache/1063b17ca65ec1b76f30e460.docs.json)=fdde5558…39839，与任务 sourceHash 逐字一致；docs[0].text 哈希 bc8b75ee…fc612、切片哈希 8213a587…3373a 均与候选自报一致。命令：python3 -c \"import hashlib;print(hashlib.sha256(open('data/cache/1063b17ca65ec1b76f30e460.docs.json','rb').read()).hexdigest())\"",
+      "result": "pass"
+    },
+    {
+      "text": "偏移口径：docs[0].text[68044:68056]=='第二十三章 刑部缉拿人犯' 且全书仅 1 次；docs[0].text.find('第二十四章 蓝皮书')==71277==rangeEnd；切片长 3233。",
+      "result": "pass"
+    },
+    {
+      "text": "引文逐字命中（独立复算，不复用候选生成代码）：递归遍历候选内全部 440 个 {quote,start,end} 字典，复算 text[start:end]==quote 失配 0、occurrencesInSource 失配 0、inSourceRange 标记失配 0、paragraphIndex（1-based 非空白段口径）失配 0。命令：python3 /Volumes/资源库/我的资源/回滚点/verify-L2-0022-r4/audit.py /Users/carmen/Desktop/星系 /Volumes/资源库/我的资源/回滚点/verify-L2-0022-r4/audit.json（exit 0）",
+      "result": "pass"
+    },
+    {
+      "text": "覆盖率独立复算：区间内 2695 个非空白字符全部被已登记引文覆盖，非空白残余 0，全字符覆盖率 0.8339（与候选提交记录 assertions 自报一致）。",
+      "result": "pass"
+    },
+    {
+      "text": "反向验证（三层分开报告）：引文层无遗漏（20/20 事实探针与 29 个专名探针均有引文、109 条 registry 无死条目）；断言层有 4 处缺口（RV1–RV4：引文在、事实未被读成断言）；语义层有 3 处缺陷（CE1/CE2/CE3）。",
+      "result": "pass"
+    },
+    {
+      "text": "三条 must-fix 逐字可查且未修：格斗勿论 全书 0 次 / 格杀勿论 10 次；押走 区间内 0 次、完成态叙述 @71292（第二十四章）；tasks[1].result.basis=explicit 而 causeEdges[1].basis=derived+confidence=medium，且 N2 与 unknowns[0] 均拒绝该因果。candidateSha256=e2c74002… 与本任务上一轮 verdict 记录值逐字相同 ⇒ 未修。",
+      "result": "pass"
+    },
+    {
+      "text": "区间外引文章号反查：用 loop/state/index.json 的 chapterUnits 对 18 条 outOfRangeContext 的 outsideChapter 逐条复核，失配 0（含 @88425→第三十章、@87990→第二十九章），跨章章号错未复发。",
+      "result": "pass"
+    },
+    {
+      "text": "复核链误杀实测（CE4）：按 to_candidate.py:546-551 的正则回放上一轮 counterExamples，解析出 fix_ids={C1,C2,T2,T7} ⇒ 合法的 C1（basis=explicit、引文 @68798-68820 逐字成立）会被整条丢弃。另实测 `python3 -B -s loop/bin/to_candidate.py --task read:dafeng:L2:0022` 输出『两处裁决不一致（fail vs partial），取更严的』⇒ 本单元当前已被整条跳过。",
+      "result": "pass"
+    },
+    {
+      "text": "未做：区间外各章的语义未复核（只反查章号归属）；未跑 GPU/浏览器测试（任务未要求）。如实记入 remaining。",
+      "result": "unknown"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/verify_dafeng_L2_0022.verdict.json",
+      "kind": "append-only",
+      "note": "任务 writes 声明的唯一产出：本复核结论（覆盖上一轮遗留的 sidecar，其 sha256=12456bd9f609b2123058e2e11793733df551bbd143a219be71fab5769ac7363c）。未改 js/ css/ index.html serve.py narrative.py scripts/ tests/ docs/ data/ 等受保护路径；候选与原文全程只读。"
+    }
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/verify_dafeng_L2_0022.verdict.json"
+    ]
+  }
+}

@@ -1,0 +1,336 @@
+{
+  "task": "read:dafeng:L1:0117",
+  "agent": "w-sanguo-0",
+  "role": "READER",
+  "status": "done",
+  "reworkOf": "loop/state/out/REJECTED__read_dafeng_L1_0117.json",
+  "reworkReason": "上一轮被 worker 代提交为拒绝（agent rc=1 退出，writes 路径上没有文件；REJECTED 记录写「agent 未产出任务要求的文件，且未提交」）。本轮重做，未继承上一轮任何未核验内容：我从 docs[0].text[398486:402669) 重读全部 228 段，再建候选。",
+  "summary": "精读《大奉打更人》第一百一十八章 灭口（docs[0].text 的 [398486,402669) 切片，4183 codepoint / 228 段，逐段读过），产出候选 loop/state/out/read_dafeng_L1_0117.candidate.json：tasks[8]（五元组分列，每栏各自带逐字引文；T1.obstacle、T1.cost、T2.cost、T3.cost、T4.cost、T6.action、T6.cost 共 7 处 null 全部带同名 Note 说明为什么没有；同一条任务五栏之间零共用引文——构建期同时查「精确 (start,end) 相等」与「互为子串包含」，违规即终止，实测 0）、causeEdges[8]（每条带 from/to/trigger/mechanism；CE2/CE8 标 inferred+medium 并各自写明可推翻的反例）、rejectedEdges[6]（显式拒绝的伪因果，含「下旨≠已开城门」「标题=灭口 不能当区间内事实」）、states[6]、knowledgeDiffs[5]、foreshadows[7]（逐条标 status=resolved-out-of-range 并给出区间外回收位置；区间内没有已回收项）、worldSettings[14]（rule 5 / place 6 / item 3，placeState 与 itemStates 与 institution 三套区分逐条写进字段）、excludedSettings[5]（显式拒绝扩层：观想法未交付故不记 item、手书未出现、赵守神通无约束、穿越者词汇无设定、灰户无说明）、themeReadings[2]（各带 perspective/support/counter）、characterClaims[8]（把人物说法与叙述者确认分开，其中朱退之「修身境」一条是叙述者确认的例外）、sourceAnomalies[5]、outOfRangeContext[8]、unknowns[20]、selfCritique[6]。verification：239 条带偏移引文（区间内 204 / 区间外 35，区间内去重 114），全部 text[start:end]==quote 逐字成立、sourceHash 全等、inRange 与章节名全对。",
+  "evidence": [
+    {
+      "path": "loop/state/out/read_dafeng_L1_0117.candidate.json",
+      "sha256": "9c82f8ff5a7901413d25dc6d2c0903239db00bcfae841c0f9d6720d69c68206b",
+      "kind": "candidate",
+      "note": "本轮精读产物（任务 writes 指定的唯一路径）"
+    },
+    {
+      "path": "data/cache/1063b17ca65ec1b76f30e460.docs.json",
+      "sha256": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+      "kind": "source",
+      "note": "原文来源；sha256(整个 docs.json 文件) 与任务 JSON 的 sourceHash 逐字相同"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "源文件哈希与任务 sourceHash 一致：sha256(data/cache/1063b17ca65ec1b76f30e460.docs.json) = fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+      "result": "pass",
+      "command": "python3 -c \"import hashlib;print(hashlib.sha256(open('data/cache/1063b17ca65ec1b76f30e460.docs.json','rb').read()).hexdigest())\""
+    },
+    {
+      "text": "偏移口径自检：docs[0].text[398486:402669] 长度 4183 且以本单元标题开头（全文 codepoint 偏移，左闭右开，非切片相对偏移）；切片 sha256=bc82846544c77537105192584d973929a92d4a00e4e790155a9d97a92b7a14a0",
+      "result": "pass",
+      "command": "python3 -c \"import json,hashlib;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];s=t[398486:402669];print(len(s),repr(s[:10]),hashlib.sha256(s.encode()).hexdigest())\""
+    },
+    {
+      "text": "独立复验（不 import 构建脚本）python3 -B -s /tmp/audit_0117.py：239 条带偏移引文逐字回切 239/239 命中、sourceHash 239/239 相符、inRange 标志 239/239 正确、章节名 239/239 与 bisect 重算的章节表相符、occurrencesInFullText/Unit 全对、六个必需分区键齐全、worldSettings 三套枚举合法、themeReadings 三件套齐全、causeEdges 均有 trigger+mechanism、全部 basis 取值合法且 semanticReview=not-performed；fails=[]，rc=0",
+      "result": "pass",
+      "command": "python3 -B -s /tmp/audit_0117.py"
+    },
+    {
+      "text": "「同一条任务五栏不得共用一句」按精确 (start,end) 与「互为子串包含」双尺子断言：taskColumnsShareNoQuote=true，实测违规 0（构建脚本遇违规即抛错终止）；跨任务复用 4 组已登记在 verification.quoteReuseAcrossTasks（如「第三条指令，前往府衙，审太康县令。」被 T3.objective 与 T4.objective 各自使用，同学科同一句对不同 who 可分别成立）",
+      "result": "pass",
+      "command": "python3 -c \"import json;c=json.load(open('loop/state/out/read_dafeng_L1_0117.candidate.json'));print(c['verification']['taskColumnsShareNoQuote'], c['verification']['quoteReuseAcrossTasksCount'], c['verification']['nullColumnsWithNotes'])\""
+    },
+    {
+      "text": "每一处 null 栏位都有同名 Note：nullColumnsWithNotes=7，脚本对每个 null 断言 t[cn+'Note'] 存在且非空，实测 0 处缺失（T6.action 的 Note 写明目标与动作落在同一句、不得拆成两栏充数）",
+      "result": "pass",
+      "command": "python3 -c \"import json;c=json.load(open('loop/state/out/read_dafeng_L1_0117.candidate.json'));print([ (t['id'],k) for t in c['tasks'] for k in ('objective','obstacle','action','result','cost') if t.get(k) is None])\""
+    },
+    {
+      "text": "区间外引文全部真实存在且不在区间内：35 条 outOfUnitQuotes 由 ref_oor() 断言 text.find>0 且不落在 [398486,402669)，章节名由独立章节表重算（如「狱卒又吼了几声…」在第一百一十九章 社交三要素、offset 402688）",
+      "result": "pass",
+      "command": "python3 -c \"import json;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];q='狱卒又吼了几声，赵县令依旧纹丝不动。';print(t.find(q), len(q))\""
+    },
+    {
+      "text": "受保护路径在本轮租约期内零改动：以租约 startedAt=2026-10-09T11:27:29Z 为界，find js css index.html serve.py narrative.py scripts tests docs data -newermt '2026-10-09 19:27:25' 返回 0 个文件（find 按 mtime，覆盖创建与修改）。注意：git status 里那些 M/D 条目是**本轮之前**其他会话留下的未提交改动（AGENTS.md 已声明共享树里有大量这类改动），不是我做的；我的 changes 只含本任务 writes 指定的候选文件与提交记录本身，两者都在 loop/ 下（append-only 分类）。",
+      "result": "pass",
+      "command": "date -u +%Y-%m-%dT%H:%M:%SZ; find js css index.html serve.py narrative.py scripts tests docs data -newermt \"2026-10-09 19:27:25\" -type f | wc -l"
+    },
+    {
+      "text": "提交文件与候选文件的证据哈希在提交时刻一致：sha256(loop/state/out/read_dafeng_L1_0117.candidate.json) = 9c82f8ff5a7901413d25dc6d2c0903239db00bcfae841c0f9d6720d69c68206b",
+      "result": "pass",
+      "command": "python3 -c \"import hashlib;print(hashlib.sha256(open('loop/state/out/read_dafeng_L1_0117.candidate.json','rb').read()).hexdigest())\""
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/read_dafeng_L1_0117.candidate.json",
+      "kind": "append-only",
+      "note": "任务 writes 指定的唯一内容写入路径；本轮为新建（上一轮被拒时该路径上没有文件，不存在覆盖他人未提交产物的问题）"
+    },
+    {
+      "path": "loop/state/out/read_dafeng_L1_0117.submit.json",
+      "kind": "append-only",
+      "note": "本提交记录自身（READER 契约要求写成 JSON 再 submit）；与既有 89 个 *.submit.json 同目录同命名约定，落在 loop/ 下"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/1063b17ca65ec1b76f30e460.docs.json": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+  },
+  "remaining": [
+    "semanticReview 未完成，也不应由我完成：本文件只保证引文逐字命中、偏移自洽与字段枚举合法；情节含义层面的判断（哪条算真因果、哪句是说法）留给 read-verify 的独立复核者（须换 agent）。",
+    "CE2（报出封印物→魏渊岔开话题）与 CE8（栽培承诺→效忠表态）标 inferred/medium，两条都写明了可推翻的反例；若复核认为机制不成立，正确处置是移入 rejectedEdges，而不是保留成因果边。",
+    "T5（少尹）objective 与 cost 均为 inferred：原文只写他的反问与「屁话，命都没了，还管这些」，没有一句直述他的意图或损失；若复核认为这属过度归纳，应把两项一并降为 null 并补 Note。",
+    "worldSettings 中桑泊/极渊/大黄山三条只记 placeState=mentioned、无地理描写；若复核认为这仍属「没有依据就扩地图」，删掉这三条不影响任何任务栏位。",
+    "F4 把章节标题「灭口」登记为铺设端之一（已单独标 note 说明它是标题而非叙述句）；若复核不接受标题作为证据，删掉该条 quote 后 F4 用正文引文仍成立。",
+    "本区间只覆盖到「赵县令一动不动，似乎没有听到」，本章标题所指的灭口、以及三条指令的任何结果都在区间外（已逐条记入 outOfRangeContext 与 foreshadows 的 payoffWhere）；这些不能在后续任务里倒算成本区间的 result。",
+    "未跑任何 GPU/浏览器测试（任务未要求，且 GPU 全局串行）。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/read_dafeng_L1_0117.candidate.json"
+    ],
+    "note": "回滚即删除本任务 writes 指定的候选文件；源文件与受保护路径本轮未被修改，无需回滚。"
+  },
+  "submittedAt": "2026-10-09T12:08:25Z",
+  "wallClockSeconds": 2456,
+  "wallClockFrom": "lease.startedAt",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-09T12:08:25Z"
+  },
+  "verifyState": "partial",
+  "reviews": [
+    {
+      "reviewer": "w-sanguo-1",
+      "at": "2026-10-09T12:44:00Z",
+      "verdict": "partial",
+      "notes": "总判 partial。引文层我全部独立复算，239/239 逐字命中且六项元数据零误差，候选自报的 15 项核验数字（含 239/204/35、114/21 distinct、7 个 null 栏、4 条跨任务复用、69 条跨分区复用、五栏互不共用）也全部复现——这一层可以直接用，没有编造，也没有把区间外结论倒算进来。扣分点是 prose 层的 2 处章号写错（其中 F1 与自身字段矛盾）与 25/113 段的引文覆盖缺口。这些都是可定位、可单点修复的问题，不需要推翻整个候选，所以既不 pass 也不 fail。\n\n自我更正（按契约「你可以判自己错」）：我第一版复核把 tasks[5].who 的「原文称他先前是李玉春的下属」列为 counterExample，核对全书后撤回——该关系在原文里有据（offset 333695 宋廷风称李玉春「头儿」；869680 李玉春说「不愧是我带出来的铜锣」；1235817「李玉春正要带着宋廷风朱广孝几个铜锣去巡街」；1903177「银锣李玉春，铜锣宋廷风和朱广孝」），所以它是「区间内那句话的指代对象其实是许七安、关系依据在区间外」的标注不精确，属存疑，不构成编造。同理撤回「两处省略号」那条：该段确实只有一处点串（'....'），但「两处」也可以被读成两个省略单位，我不想用一个可争议的计数去支撑判定，改记存疑。\n\n存疑（不据此判 fail）：\n① tasks[0].who 写「本区间内两位义子杨砚、南宫倩柔称他义父」——「义子」确指两人（「让两位义子退出浩气楼」），但「义父」二字只出现在写杨砚的那句旁白里，南宫倩柔本区间一声不吭（「懒得抱怨嘲讽，一声不吭的走人」），说两人都「称他义父」略超出区间文字。\n② sourceAnomalies[3] 的「两处省略号」与第三十二段的实际点串数（1 处 '....'）不一致，但计数口径可争议，记存疑。\n③ tasks[5].who 的隶属关系有全书依据、无区间依据（见上），建议改写为「区间外称他是李玉春带出来的铜锣」或删去。\n④ tasks[5].action=null 的理由（目标与动作同一句）在区间内成立，但宋廷风本区间另有可归他的动作（「找到了插嘴的机会」「宋廷风摇头」），只是已被其它栏引用——属可以做得更满，不算错。",
+      "counterExamples": [
+        {
+          "claim": "foreshadows[0].payoffWhere 写「第一百四十七章附近 offset 474052」——错误。offset 474052 落在第一百三十六章（章首 470430）；该条目自己那条引文的 chapterAtOffset 字段写的就是「第一百三十六章 真相（为盟主“小海豚的翎小晨”加更）」，prose 与自带结构化字段自相矛盾。",
+          "quote": {
+            "quote": "这样看来，就不是初代监正了啊，难怪现任监正一点都不急，还装病。",
+            "start": 474024,
+            "end": 474055,
+            "sliceSha256": "ebfa3da1b235b34e7a91eecf21f42bef5012780e602ff249c9d064899e99c807",
+            "occurrencesInFullText": 1,
+            "occurrencesInUnit": 0,
+            "inRange": false
+          },
+          "why": "章号标注错会把下游发布/引用带到别的章节。引文本身逐字正确、inRange 也如实标了 false，所以这是「定位标注错」而不是「编造」；但它与自身字段矛盾，属可机检的自洽性缺陷。",
+          "severity": "low（标注错，非编造）",
+          "reproduce": "宽松正则 第[一二三四五六七八九十百零两]+章[ \\u3000][^\\n]{1,40} 建表后对 474052 做 bisect → 章首 470430 = 第一百三十六章；全书共 12 处章号回卷（卷首重启），第一百四十七章确实存在于 518679/1784659/4089892 三处，但都不在 474052 附近。"
+        },
+        {
+          "claim": "foreshadows[1].payoffWhere 写「第一百九十章 offset 693249；同章后段 offset 702316」——错误。693249 在第一百九十章（章首 691573），而 702316 在第一百九十二章 未亡人（章首 701036），两者不是同一章；该条 payoff 提到的「观想巨人图、金狮咆哮」实际在 702056 / 702180 / 702322，均属第一百九十二章。",
+          "quote": {
+            "quote": "“还有一个问题，他似乎是两种观想一同修行...而且都已登堂入室。这已经可以冲击炼神境。”",
+            "start": 702340,
+            "end": 702384,
+            "sliceSha256": "902dbbf9e7513adf6496dbd722e7ae3d5c7023a17cfc217bb4a50c460d8bb584",
+            "occurrencesInFullText": 1,
+            "occurrencesInUnit": 0,
+            "inRange": false
+          },
+          "why": "「同章后段」这个说法不成立，回收点被标错一章。内容（观想实战）确实存在，属标注错误。",
+          "severity": "low（标注错，非编造）",
+          "reproduce": "bisect(702316) → 章首 701036 = 第一百九十二章 未亡人"
+        }
+      ],
+      "reverseChecks": [
+        {
+          "found": "区间内明确写出「桑泊是本朝开国皇帝的证道之地、且已被炸毁」，并由云鹿书院学子当众议论。候选没有为这条事实落任何引文，也没有 worldSettings 条目：「证道之地」「开国皇帝」「桑泊怎么被炸了」「竟被宵小之徒毁坏」在候选 JSON 里出现次数均为 0；唯一痕迹是 rejectedEdges[0].whyNot 与 worldSettings[10].explain 里的转述（「议论桑泊被炸」「爆炸与脱困都是此前的事」），不是证据条目。worldSettings[10] 把桑泊记成 placeState=mentioned、explain 只写「本区间没有人到桑泊」，漏掉了它在区间内被赋予的身份（开国皇帝证道之地）。",
+          "quote": {
+            "quote": "“桑泊怎么被炸了，我大奉开国皇帝的证道之地，竟被宵小之徒毁坏。果然，都是一群废物，若是我云鹿书院坐镇京城，根本不会发生这种事。”",
+            "start": 401244,
+            "end": 401308,
+            "sliceSha256": "99ab1c117d221f92ec59fa81e6f357962eba54e20a7ad69f4e7c9a4732560436",
+            "occurrencesInFullText": 1,
+            "occurrencesInUnit": 1,
+            "inRange": true
+          },
+          "extra": [
+            {
+              "quote": "“是可忍孰不可忍。”",
+              "start": 401314,
+              "end": 401324,
+              "sliceSha256": "3cce72a5065ee323e7a10ea0ffa773392f50de23cca3880a0d2d068dd9a3a076",
+              "occurrencesInFullText": 1,
+              "occurrencesInUnit": 1,
+              "inRange": true
+            },
+            {
+              "quote": "学子们义愤填膺，习惯性的怼天怼地，藐视一切非读书人。",
+              "start": 401330,
+              "end": 401356,
+              "sliceSha256": "f76f512900ac0b1937909d1c4bf32feb3ced104a098cbcb760f475fea91999e2",
+              "occurrencesInFullText": 1,
+              "occurrencesInUnit": 1,
+              "inRange": true
+            }
+          ],
+          "severity": "medium（影响 worldSettings 的身份设定与一处公开议论场）"
+        },
+        {
+          "found": "区间内有一整组关于佛门灭妖国动机的三句问答（魏渊判断＋许七安问＋魏渊反问），候选零覆盖：「传教扩张」「天下苍生」「野心越来越盛」「灭妖国」在候选 JSON 里出现 0 次，三段都没有引文、prose 也没提。候选只在 causeEdges[0] 的链条里由「故土遍地佛寺」推出「佛门扩张」四个字，落不下「谁在什么语境下说了什么」。漏掉后 characterClaims 少一条可标注说话人的动机主张（魏渊对佛门动机的判断）。",
+          "quote": {
+            "quote": "“这些年，佛门扩张的野心越来越盛。”魏渊叹息道。",
+            "start": 398920,
+            "end": 398944,
+            "sliceSha256": "09ae2c21b465ac2c3ceff0849f11200bbca3b29c8402ed99cd8340e4168c66f9",
+            "occurrencesInFullText": 1,
+            "occurrencesInUnit": 1,
+            "inRange": true
+          },
+          "extra": [
+            {
+              "quote": "许七安心里一动：“佛门当年灭妖国，是为了传教扩张？”",
+              "start": 398950,
+              "end": 398976,
+              "sliceSha256": "eb535f9df22457692202bcf135f545b563011167153944a8a891d353c33db725",
+              "occurrencesInFullText": 1,
+              "occurrencesInUnit": 1,
+              "inRange": true
+            },
+            {
+              "quote": "魏渊哂笑：“难不成是为了天下苍生？”",
+              "start": 398982,
+              "end": 399000,
+              "sliceSha256": "b98d403e361e789b4ae3e012c4c2a392b9aaa0e69e9bc52d9235fdce3eab14a2",
+              "occurrencesInFullText": 1,
+              "occurrencesInUnit": 1,
+              "inRange": true
+            }
+          ],
+          "severity": "medium（漏一条人物主张＋其语境）"
+        },
+        {
+          "found": "区间内写了「为什么不能靠司天监术士审朝堂诸公」的完整推理链，候选零覆盖：「术士也是人」「被收买」「衮衮诸公」「权欲」在候选 JSON 里出现 0 次。它既解释了候选已登记的「屏蔽望气术的法器」（worldSettings[12]）为何是敏感物件，又给出元景帝的性格状态（多疑＋旺盛的权欲），而元景帝的性格正是 states[0]/knowledgeDiffs[3] 里他「解释不了城禁」那一整条判断的背景。",
+          "quote": {
+            "quote": "是人就有可能被收买，普通小案子无所谓，涉及到衮衮诸公，肯定不能光靠术士一张嘴，元景帝既多疑又有旺盛的权欲....许七安微微颔首。",
+            "start": 400865,
+            "end": 400929,
+            "sliceSha256": "a0bd85c373148bb6709d5526cb562253ac75221a3543205509e73c141637618e",
+            "occurrencesInFullText": 1,
+            "occurrencesInUnit": 1,
+            "inRange": true
+          },
+          "extra": [
+            {
+              "quote": "顿了顿，含蓄补充：“术士也是人。”",
+              "start": 400842,
+              "end": 400859,
+              "sliceSha256": "232ca9ff110f4ee22a079a73cefd4e85f5988e05266a500b17545ec4fa46b1ea",
+              "occurrencesInFullText": 1,
+              "occurrencesInUnit": 1,
+              "inRange": true
+            },
+            {
+              "quote": "“头儿，你说为什么陛下不招来司天监的术士，挨个儿的质问朝堂诸公？”",
+              "start": 400750,
+              "end": 400783,
+              "sliceSha256": "2a2f2cc126416eb2a15817d013f72cffe8904711e28013c9ddd741b9dbaa5477",
+              "occurrencesInFullText": 1,
+              "occurrencesInUnit": 1,
+              "inRange": true
+            }
+          ],
+          "severity": "medium（漏一条解释性推理＋元景帝性格依据）"
+        },
+        {
+          "found": "许七安对城禁的假设被候选少算一条：states[0].after 与 knowledgeDiffs[3] 都写他「并列两种猜测（示好／引蛇出洞）」，但原文在「结果是装病！」之后还有第三种假设——初代监正「不复巅峰，正藏在某处养伤」；「养伤」「不复巅峰」在候选 JSON 里出现 0 次，该段无引文。同一段还写出他对元景帝的评价基线（「虽然是个不称职的皇帝，但不是蠢货」「当代监正也不会同意元景帝背叛革命」），「不称职」「背叛革命」同样 0 次。因此 S1/K4 的枚举是不完整的，下游照此会漏掉一条假设边。",
+          "quote": {
+            "quote": "这其中会不会有更深层次的目的，比如，初代监正被封印五百年，不复巅峰，正藏在某处养伤。",
+            "start": 400249,
+            "end": 400291,
+            "sliceSha256": "88174e5b5993871969c2905d43ba138137e1456425785424124ce588d7aa03c2",
+            "occurrencesInFullText": 1,
+            "occurrencesInUnit": 1,
+            "inRange": true
+          },
+          "extra": [
+            {
+              "quote": "不可能，元景帝虽然是个不称职的皇帝，但不是蠢货。而且，当代监正也不会同意元景帝背叛革命。",
+              "start": 400106,
+              "end": 400150,
+              "sliceSha256": "c492632cc3352afba8e39933d532a1c494dfd4a9c3c0d604c57fa49379968117",
+              "occurrencesInFullText": 1,
+              "occurrencesInUnit": 1,
+              "inRange": true
+            }
+          ],
+          "severity": "medium（状态/知识差枚举不完整）"
+        },
+        {
+          "found": "许七安的穿越者自我认知（本区间唯一一处正面写「他与这个时代的隔阂」）候选零覆盖：「愣头青」「马列主义」「隔阂」在候选 JSON 里出现 0 次，两段都没有引文；两条 themeReadings（TR1 信息分层／TR2 标题落差）也都没有覆盖它。这是人物内在状态的一条直接证据，可归入 states 或 characterClaims。",
+          "quote": {
+            "quote": "这不是愣，这是原则，是信仰，马列主义了解一下....许七安心里吐槽，同时，有些悲哀的想，这也是我与这个时代的隔阂。",
+            "start": 399841,
+            "end": 399898,
+            "sliceSha256": "1d8ff51445d7cd5bfddaa1b478bef87134641a6d882f079b97141eb49a6976ec",
+            "occurrencesInFullText": 1,
+            "occurrencesInUnit": 1,
+            "inRange": true
+          },
+          "extra": [
+            {
+              "quote": "魏渊“嗤”的笑了一声：“你也不是愣头青，可有些时候，比愣头青更愣。”",
+              "start": 399801,
+              "end": 399835,
+              "sliceSha256": "3fe62f8f0032e0bd1965e5c8519e30d71d0eede6e4f730407a7ad1c1aa8b039c",
+              "occurrencesInFullText": 1,
+              "occurrencesInUnit": 1,
+              "inRange": true
+            }
+          ],
+          "severity": "low-medium（漏一条人物内在状态）"
+        },
+        {
+          "found": "引文覆盖面的量化缺口：本单元 113 个非空段落中有 25 段（22%）没有任何候选引文落在其上；其中我逐个用精确子串探过、在候选 JSON 里 0 次出现的事实还有：少尹的「混账东西！」、主事的「大人何意？」、叙述者的「论吵架，许辞旧一生不弱于人。」、云鹿书院的「辞旧，回头踏青游山去。」与「是可忍孰不可忍。」、以及「退之，何必与他争论。」等劝架台词。这些是零散台词，单条价值不高，但合起来说明覆盖是按「结论需要」取的，不是按段落读全的（候选 reworkReason 自称「逐段读全部 228 段」）。",
+          "quote": {
+            "quote": "“混账东西！”",
+            "start": 402320,
+            "end": 402327,
+            "sliceSha256": "7a6e29843516afa058f8270bc577bf062005a92c2d44512da335c1528b840b74",
+            "occurrencesInFullText": 6,
+            "occurrencesInUnit": 1,
+            "inRange": true
+          },
+          "extra": [
+            {
+              "quote": "“大人何意？”",
+              "start": 402442,
+              "end": 402449,
+              "sliceSha256": "558361301917d6d4bdf7e74e652293dc3f5aba44b7aeaf30a940414c352f3ff3",
+              "occurrencesInFullText": 1,
+              "occurrencesInUnit": 1,
+              "inRange": true
+            },
+            {
+              "quote": "论吵架，许辞旧一生不弱于人。",
+              "start": 402067,
+              "end": 402081,
+              "sliceSha256": "923b765b790a813593db1c49ecdb013da3f3e822ed8066e3d66ff82da9f4ba4e",
+              "occurrencesInFullText": 1,
+              "occurrencesInUnit": 1,
+              "inRange": true
+            },
+            {
+              "quote": "“辞旧，回头踏青游山去。”",
+              "start": 401384,
+              "end": 401397,
+              "sliceSha256": "3d33773ff7c9833e1cb9d4cd2c01124e6f161acd0cdf1dbb03bc18f23a4d26d0",
+              "occurrencesInFullText": 1,
+              "occurrencesInUnit": 1,
+              "inRange": true
+            }
+          ],
+          "severity": "low（量化补充，作为上面几条的旁证）"
+        }
+      ]
+    }
+  ]
+}

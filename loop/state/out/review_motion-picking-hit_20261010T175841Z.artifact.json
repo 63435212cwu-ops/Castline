@@ -1,0 +1,148 @@
+{
+  "task": "review:motion-picking-hit:20261010T175841Z",
+  "agent": "motion-picking-hit-20261010T175841Z",
+  "status": "done",
+  "summary": "已追到人物星真实core→scene→app→shell命中链，提出同次全候选快照及标签优先、手势取消、稳定ID确认的最小接线；附CPU候选函数。",
+  "entryChain": [
+    {
+      "path": "js/core/scene-core.js",
+      "line": 379,
+      "function": "pick(clientX,clientY)",
+      "fact": "一次ray.intersectObjects(sprites,false)得到hits全集。过滤render/g.visible/alpha>.3/kind非idle/sideHidden。随后选屏幕星心最近项，丢掉其余。"
+    },
+    {
+      "path": "js/scene.js",
+      "line": 2960,
+      "function": "labelNodeAt",
+      "fact": "可见.cl-lab.char.on字盒包含指针时，用el引用找到真实节点；当前只保留最小字盒。"
+    },
+    {
+      "path": "js/scene.js",
+      "line": 2987,
+      "function": "pickAt",
+      "fact": "labelNodeAt || core.pick；标签优先是既有已修选错人物问题的关键，不能取消。"
+    },
+    {
+      "path": "js/scene.js",
+      "line": 3008,
+      "function": "pointerup listener",
+      "fact": "过滤拖拽/按键/交互HUD，pickAt后直接fire(select,{name})；M91必须在这里拦截，进入shell以后已晚。"
+    },
+    {
+      "path": "js/app.js",
+      "line": 3979,
+      "function": "scene.on(select)",
+      "fact": "转select(d.name)；select约3530先尝试CLSky.focusReading。"
+    },
+    {
+      "path": "js/sky/sky-shell.js",
+      "line": 317,
+      "function": "focusReading(name)",
+      "fact": "真实函数名不是focusReadingPerson，星座非plot时定位/读板/关系/相机。"
+    },
+    {
+      "path": "js/sky/sky-tug.js",
+      "line": 195,
+      "function": "onDown/onUp capture",
+      "fact": "捕获阶段裁定牵引与长按，普通短按pointerup仍交给scene。改M91不能抢此输入所有权。"
+    }
+  ],
+  "implementation": [
+    "core：把一次ray查询抽成同次快照入口（如pickCandidates）；只在实际hits上投影所有节点，camera/group矩阵只更新一次、canvas rect只读一次。现有pick返回最近单项供hover/旧消费者使用；新增接口给pointerup决策，不能先pick再第二次ray重查。",
+    "core屏幕投影沿实际命中的sprite.getWorldPosition(v).project(camera)，屏幕x=rect.left+(v.x*.5+.5)*rect.width、y=rect.top+(-v.y*.5+.5)*rect.height；稳定ID取命中node.data.id/entityId，和scene.js n.data=c是同对象。去重同node的多条intersection，不能按姓名去重。",
+    "scene：labelNodesAt一次收齐所有包含指针的可见字盒，字盒归属仍按n.el===el引用，不猜data-name。若标签集合非空，候选集合只用这些标签；标签无命中才用同次ray集合，避免把可见标签后面的邻星混进来。不要把标签与背后sprite并集。",
+    "选择范围：本卡人物候选只在星座人物拾取分支启用；原最近项若是attr/meta/chap/hub，继续既有selectNode流程，不能把非人物上层命中替换成背后人物列表。保留Shift点选与长按pin的既有专门路径。",
+    "scene pointerup：已有拖拽/交互目标守卫通过后取得一次快照。0人物沿background/非人物旧流程；1人物沿旧选择；多个真实人物命中时触发pickCandidates(snapshot)事件并return，禁止同时fire(select)。snapshot必须带graph对象或graphKey、递增requestId、点击x/y、每个候选稳定ID/节点key/屏幕x/y/完整名字。",
+    "壳/既有panel-manager：监听该新事件，创建一个可关闭候选选择层；360ms只动说明副本，最多6个前景副本与无箭头导线，全量候选放可滚列表。候选集锁定，打开后不每帧再pick、不随排序自动换人；首行可获得键盘focus，但aria-selected=false，selection不变。",
+    "确认：只有用户点行/Enter/Space明确提交才消费requestId；核对当前graph仍是快照graph、图谱characters中stableId唯一、当前scene.nodeOf(key).data稳定ID匹配该行后调用CLApp.select(canonicalName)。缺失/冲突ID保留候选文本但禁确认，不能落第一个。名称仅作为当前同书已核对stableID的渲染适配，跨书不携带名称。",
+    "可见标签身份说明：同名候选须提供现有role/camp或identityStatus/依据入口，不能靠距指针近者猜人。identityStatus=ambiguous可作为现有节点的待核说明，不可把选择这个节点解释成裁决了原文身份；同stableId多渲染节点必须拒绝确认。",
+    "取消：下一次图谱pointerdown、拖拽/牵引grab、wheel/缩放、Esc、pointercancel、失焦、cl:graph-loading、cl:graph-ready对象变化、cl:sky-plot/compass及resize均废弃旧request。Esc恢复打开前焦点，不改已选人物与player current。面板内pointerdown不算图谱外点；提交行引发的新select先清候选再进入阅读。",
+    "手势细节：scene既有dragSuppressClick由阈值>5px后保留到pointerup之后，继续使用；CLSkyTug.on(grab)能可靠取消候选并标本次指针事务不可提交。不要只在pointerup时看sky-tug-grabbing类：捕获onUp可能已将其清掉。拖拽后继续保持未选中状态，不用新timer猜80ms。",
+    "减少动态直接静态候选层；主图节点/坐标不变；一次动作复用SkyMotion或现有帧钩子，不另建rAF。开层不调用focusReading/openCompass/locate来做预选动画。"
+  ],
+  "candidateSnippet": "function snapshotCharacterHits(labelRows, rayRows, clientX, clientY) {\n  // Rows are projections of actual label containment / actual ray intersections.\n  // This function never grows a new screen-radius hit area.\n  var rows = labelRows.length ? labelRows : rayRows;\n  var out = [], seenNodes = [], ids = Object.create(null);\n  rows.forEach(function(r, index) {\n    var n=r.node, d=n && n.data, p=r.screen;\n    if(!n || n.kind!=='char' || n.render===false || !n.g || !n.g.visible || (!labelRows.length && !(n.alpha>0.3))) return;\n    if(!p || !isFinite(p.x) || !isFinite(p.y) || !isFinite(p.z) || p.z < -1 || p.z > 1) return;\n    if(seenNodes.indexOf(n)>=0) return;\n    seenNodes.push(n);\n    var id=d && d.id!=null ? String(d.id) : d && d.entityId!=null ? String(d.entityId) : null;\n    var name=d && typeof d.name==='string' ? d.name : n.label || '';\n    var coherent=!!id && !(d.id!=null && d.entityId!=null && String(d.id)!==String(d.entityId));\n    var dx=p.x-clientX,dy=p.y-clientY;\n    var item={node:n,key:n.key,id:id,name:name,x:p.x,y:p.y,z:p.z,distance2:dx*dx+dy*dy,\n      source:labelRows.length?'label':'sprite',identityStatus:d && d.identityStatus || null,\n      selectable:coherent,reason:coherent?'':'缺失或冲突的稳定身份',_ordinal:index};\n    out.push(item); if(id) (ids[id] || (ids[id]=[])).push(item);\n  });\n  Object.keys(ids).forEach(function(id) { if(ids[id].length>1) ids[id].forEach(function(r){r.selectable=false;r.reason='同一ID指向多个渲染节点';}); });\n  out.sort(function(a,b){return a.distance2-b.distance2 || a._ordinal-b._ordinal;});\n  out.forEach(function(r){delete r._ordinal;});\n  return {source:labelRows.length?'label':'sprite',x:clientX,y:clientY,candidates:out,\n    ambiguous:out.length>1,selectedId:null};\n}",
+  "snippetBoundary": "这个纯函数只处理已经由真实字盒包含/真实ray命中得到的rows，不包含第二套半径命中。rows.screen为当前同次CSS像素投影含NDC z，rows.node是命中真实node。标签row即便投影/身份失效也不能回退到背后sprite；UI显示不可用说明。",
+  "m99Notes": [
+    "CLSkySelectionModel已有empty/set/advance，但当前shell/app真实选择入口仍以name参数串联；建议shell持单一{hover,focus,selection,current}稳定ID状态，hover更新来自scene.hover、focus仅来自候选列表/人物可访问入口focusin、selection仅来自明确选行/现有单点确认、current只读player.eventId。",
+    "候选列表第一行focus不等于selection；打开歧义层之前的selection与current均须保持。候选导线用中性样式，不借已选实线环冒充选中。",
+    "tests/sky_selection_model_contract.js现在audit将selection===current记conflated；实际同一事件可既被用户选择又正播放，并不自然构成错误。M99渲染与状态隔离验证应检查更新来源及其他槽未被改，不能把值相同一律判错。不要为本卡无关地改模型语义。"
+  ],
+  "tests": {
+    "CPU": "无需新增脚本：候选身份/不默认首项/稳定ID确认可以扩tests/sky_selection_model_contract.js的选择边界责任；真实投影/射线纯函数若纳入core，扩tests/sky_tug_camera_contract.js（它已用生产Three.js CPU几何和真实拖拽模块）来覆盖同屏多sprite命中、拖拽不提交、短按候选与投影偏移；导出测试读取的生产helper，不复制算法当测试。",
+    "cases": [
+      "同一pointer射线中有2个不同stableId，完整返回且selectedId=null",
+      "同sprite重复intersection只记一次；不同node同stableId保留并标身份冲突",
+      "标签命中1人且其背后射线多人时，只选标签候选；两个标签真重叠才弹多候选",
+      "rect left/top非0、非1 dpr：CSS投影仍准确；z<-1/z>1/alpha≤.3/render=false均不可供确认",
+      "候选>6时全部保留列表，前景截取不能反过来截断模型",
+      "候选开着时拖动/换书/点另一处，旧确认request无效；Esc只关候选",
+      "M99首行键盘焦点不修改selection/current；hover移走只改hover"
+    ],
+    "browser": "tests/sky_interaction_access_browser.py已有真实CDP触摸/Tab/Enter/Space和窗口两档，适合加M91同路径；tests/sky_deep.py已有实际S.pick人物星命中与投影责任，扩同次候选与原单命中保真；tests/sky_tug.py保留牵引/longPress不被候选抢占的真实手势回归。主线程固定真实重叠画面，缺夹具失败，不能搬真实节点制造成功截图。"
+  },
+  "evidence": [
+    {
+      "path": "data/cache/ed3dc1255ca08fbdaae30bbd.json",
+      "sha256": "3005a49ae29146d3a7b78bc35767c0407bd265f459b7aed715306c51309b8eb5"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "已读真实core/scene/app/shell/sky-tug链；不把field/disc误作人物星拾取源",
+      "result": "pass"
+    },
+    {
+      "text": "本轮只写指定loop产物，无GPU、无受保护路径修改",
+      "result": "pass"
+    },
+    {
+      "text": "候选函数8项CPU检验含生产Three.js真实Sprite射线相交及CSS偏移；并非产品已验收",
+      "result": "pass"
+    }
+  ],
+  "sourceHashes": {
+    "js/core/scene-core.js": "296c89b6bdeef8073754198109f204df9e4b14a40453d9083363550cef30ca71",
+    "js/scene.js": "0c1333594e8da4ee1968a2dfe5722ad21ad66933cb03041e2b692b440f1976ca",
+    "js/app.js": "0432d38ac89a1af61a0499d5825e2a69bbbab464842c238bcb8ba0b9df0fabe5",
+    "js/sky/sky-shell.js": "c6308db4f316ecb376925da90274ecfe08a28ea5444ec4ea89db9f3efcbdd34b",
+    "js/sky/sky-tug.js": "785d1d862f17ae768a470a1c781a62b39017652d44d34097787b6d45068e576c",
+    "js/sky/sky-shell-camera.js": "2c8682ed04f848fef97043d14d0a56a4195f9e4ce3d547fab0cd08e6895fb4a5",
+    "js/sky/sky-selection-model.js": "91a92bb20c7afaed53af115cf977c60f8ab73b156ccb0d223fc8054fdf38b314",
+    "tests/sky_tug_camera_contract.js": "556ed2b094aad1654b1b0946a6e6dba8a0bb521fa0bf163bc387137963e50ee4",
+    "tests/sky_selection_model_contract.js": "23af01aa2a44b7227fe6fad63c09fc0c56a5ff49ca7bc318b8665053dd8daf4d",
+    "tests/sky_interaction_access_browser.py": "eca77207cd88ae1db052f6fd8778de940977dbd588d342b8af9a93f7b5fd1c32",
+    "tests/sky_deep.py": "d6d9703282bc1d10e397a43b527e815f9a8278b2465c74efda550028f4c81d54",
+    "data/cache/ed3dc1255ca08fbdaae30bbd.json": "3005a49ae29146d3a7b78bc35767c0407bd265f459b7aed715306c51309b8eb5"
+  },
+  "changes": [
+    {
+      "path": "loop/state/out/review_motion-picking-hit_20261010T175841Z.artifact.json",
+      "kind": "append-only"
+    }
+  ],
+  "remaining": [
+    "实现与真实重叠画面取证由主线程完成。",
+    "既有core.pick单项接口必须继续可用，真实canvas/label命中和拖拽取消不能靠CPU候选函数检验代替。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/review_motion-picking-hit_20261010T175841Z.artifact.json"
+    ]
+  },
+  "candidateVerification": {
+    "kind": "CPU snippet and shipped Three.js intersections only; no browser/GPU",
+    "passed": 8,
+    "checks": [
+      "two actual candidates do not select first",
+      "duplicate hit same node collapses",
+      "visible label beats behind sprites",
+      "visible label need not satisfy sprite alpha",
+      "duplicate stable ID never auto-merges render nodes",
+      "invalid projections and near/far clipping excluded",
+      "all over-six candidates retained",
+      "actual Three sprite intersections preserve projected CSS offset"
+    ]
+  }
+}

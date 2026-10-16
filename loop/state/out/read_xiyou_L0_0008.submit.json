@@ -1,0 +1,95 @@
+{
+  "task": "read:xiyou:L0:0008",
+  "agent": "w-sanguo-1",
+  "role": "READER",
+  "status": "done",
+  "summary": "精读《西游记》附录「陈光蕊赴任逢灾 江流僧复仇报本」（全文 codepoint [53085,60072)，6987 字，39 段）：产出 tasks 7 条（五元组，原文确无该项的写 null，另用 nullFields 逐条说明是哪 4 项及为什么）、causeEdges 21 条（每条带方向+触发机制）、rejectedEdges 8 条（主动否掉的连边及理由）、states 11 条（前值/后值+事件锚点）、knowledgeDiffs 4 条（谁知／不知）、foreshadows 7 条（F1–F5、F7 有铺设+回收两处引文；F6「异日声名远大」显式标 resolved=false）、unknowns 14 条、selfCritique 3 条、crossUnitEchoes 4 组（单元外，只标呼应不参与断言）。共 217 条单元内引文 + 10 条单元外引文；每条引文由构建脚本断言「全文唯一 + 落在区间内 + TEXT[start:end] 逐字相等」，另用独立审计脚本（不引用构建脚本逻辑）从产物与原文重算全部 227 条引文节点与 factStatus，problems=0。过程中自查并改掉两个我自己杜撰的称谓（「洪江龙王」全书 0 次、「陈玄奘」在本单元 0 次）。未声明 semanticReview 完成。",
+  "evidence": [
+    {
+      "path": "loop/state/out/read_xiyou_L0_0008.candidate.json",
+      "sha256": "24a3330fb574a9e7c67181d909394712109fccd32ec503d7ccdd00163c99d237",
+      "note": "任务 writes 指定的唯一产物。"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "区间与标题自检：docs[0].text[53085:60072] 以 '附  录　陈光蕊赴任逢灾　江流僧复仇报本\\n' 开头；text.find('第九回', 60072-12)==60072==end；反向核对 text.find('第八回')==46657==上一单元起点；len(slice)==6987，与任务 prompt 声明的字数一致。候选 unitHeadCheck 记录了这几条（含“本单元不是第…回格式而是附录”的说明）。命令：python3 -c \"import json;T=json.load(open('data/cache/df959d743e53206f56db2f92.docs.json'))[0]['text'];print(T.find('第九回',60072-12),T.find('第八回'),len(T[53085:60072]))\" → 60072 46657 6987。",
+      "result": "pass"
+    },
+    {
+      "text": "引文逐字校验：构建脚本对每条 quote 逐条断言 TEXT.count(quote)==1（全文 722176 字内唯一）、落在 [53085,60072) 内、TEXT[start:end]==quote、sourceHash 正确，任一不成立即整体构建失败。脚本实跑通过，输出 'OK in-unit=217 distinct=118 reused=53 cross=10'。命令：python3 -B -s /tmp/rd0008/bin/build.py（exit 0）。",
+      "result": "pass"
+    },
+    {
+      "text": "独立审计（不复用构建脚本逻辑，另写一套引号配对与 factStatus 判定）：/tmp/rd0008/bin/audit_xy8.py 直接从候选 JSON 与 docs.json 重算 227 条引文节点（217 单元内 + 10 单元外）的 start/end/唯一性/sourceHash/offsetBase、逐节点重算 factStatus 并与 counts.factStatusDistribution={narrated:143, utterance:73, mixed:1} 对齐、重算段落覆盖、核 basis 取值合法、核 F6 标 unresolved 且不携带单元内回收引文、核单元外节点 factStatus 必须为 null。命令：python3 -B -s /tmp/rd0008/bin/audit_xy8.py → 'PROBLEMS=0'（exit 0）。",
+      "result": "pass"
+    },
+    {
+      "text": "审计抓出并已修掉的两个真实缺陷（我自报，不是复核者发现的）：(1) T1.cost 原本写成一个空 evidence 的伪节点（factStatus=null），审计的 roll-up 检查报 'T1.cost factStatus roll-up None != mixed'——已按任务要求改写成 JSON null 并列入 nullFields；(2) 审计第一版对 T7.result 报 'claims success' 是**它自己的假阳性**：T7.result 原文写的是「所以本条不写 result=成功」，关键词匹配把否定句当成了主张。我改的是审计脚本（剥离否定式后再匹配），没有改产物去迎合脚本；这一点如实记在这里。",
+      "result": "pass"
+    },
+    {
+      "text": "称谓出处自查（红线“不许出现原文里没有的人物”）：我最初用了「洪江龙王」——在全 722176 字里出现 0 次，是从图谱缓存 data/cache/df959d743e53206f56db2f92.json 的摘要里借来的标签，而任务规定摘要不算原文证据；又用了「陈玄奘」，在本单元切片里出现 0 次（全书 14 次都在第十一回及以后）。两处已全部改为原文自己的称谓「龙王」（切片内 11 次）与「玄奘」（36 次），并在候选的 nameAttestationRule 里写明这次自查。命令：python3 -c \"import json;T=json.load(open('data/cache/df959d743e53206f56db2f92.docs.json'))[0]['text'];print(T.count('洪江龙王'),T.count('陈玄奘'),T[53085:60072].count('龙王'),T[53085:60072].count('玄奘'))\" → 0 14 11 36。审计第 9/10 项会拒绝任何未在单元内出现的 actor/who 实体名，并硬检查「洪江龙王」不得回流。",
+      "result": "pass"
+    },
+    {
+      "text": "factStatus 机械判定：由引文与**本切片内** “ ” 配对区间（170 个引号记号 = 85 对，无未配对；切片自足，故用切片内配对而非全文配对）的位置关系判定——完全落在某对引号内=utterance，有配对界严格落在引文内=mixed，否则 narrated。审计脚本用**另一种算法**（正则交替走查而非栈）重算配对与全部节点，得 {narrated:143, utterance:73, mixed:1}，与候选完全一致。命令：python3 -B -s /tmp/rd0008/bin/audit_xy8.py（输出 'factStatus recomputed: {...}'）。",
+      "result": "pass"
+    },
+    {
+      "text": "sourceHash 口径：任务声明 c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2；实测 shasum -a 256 data/cache/df959d743e53206f56db2f92.docs.json == 该值（整文件哈希）。切片自身哈希另记在候选 segmentSha256=6d2b845f33b388be9849c0107a3aa599b4b75079ccb70dd9c75218ea0dfb5883，审计另断言它不得等于 sourceHash，也不覆盖 sourceHash。",
+      "result": "pass"
+    },
+    {
+      "text": "单元外引文严格隔离：4 组 crossUnitEchoes（10 条）与 F6 的 2 条 outsideUnitEvidence 全部带 outsideUnit:true；审计断言它们必须完全落在 [53085,60072) 之外、且**不得**声明机械 factStatus（一律 null + 粗判说明），也不计入 factStatus 分布。另：F6 标 resolved=false 时若携带单元内回收引文，审计会报错——实跑无此项，确认 F6 只有铺设没有回收。",
+      "result": "pass"
+    },
+    {
+      "text": "覆盖率机械核算：切片按 '\\n' 切成 39 段，逐段与全部单元内引文区间求交；未被任何引文覆盖的只有 1 段，即章节标题行 [53085,53105)「附  录　陈光蕊赴任逢灾　江流僧复仇报本」（kind=chapterHead）。proseParagraphsWithNoQuote 为空——即本单元所有叙述散句都至少被一条引文锚定（审计第 5 项会把非空视为问题）。1 处未覆盖已在文档内如实列出，不隐瞒。",
+      "result": "pass"
+    },
+    {
+      "text": "红线自检：(1) 未把人物话语当叙述事实——factStatus=utterance 的 73 条引文只用于“某人说了这话”，逐条带事实状态；例如刘洪的威胁「一刀两断」、龙王自述「金色鲤鱼即我也」、南极星君的嘱语都只记为话语。(2) 未把结束当成功——虽回末有「真正合家欢乐」与「今日此宴可取名为团圆会」，但同一段紧接着写「后来殷小姐毕竟从容自尽」，T6/T7 的 result 都显式写「不写 result=成功」，并把该矛盾列为 U1/U6 与一条 rejectedEdge。(3) 未编造人物/事件/结局：所引专名均可 find（龙王、玄奘、殷小姐、温娇、满堂娇、张氏、刘洪、李彪、殷开山、唐太宗、魏征、法明、南极星君、观音菩萨、巡海夜叉、鳖无帅、城隍土地、刘小二、王左衙、李右衙、江州同知、吏书门皂、御林军、酒肉和尚）；两个我自己杜撰的称谓已自查改掉（见上）。(4) 缺字段写 null：tasks 的 T1.obstacle/T1.cost/T2.obstacle/T3.cost/T7.obstacle 共 5 项为 JSON null，并在 nullFields 里逐条说明为什么原文确实没有该项。(5) 未写 semanticReview 完成：semanticReview.performed=false。",
+      "result": "pass"
+    },
+    {
+      "text": "只写指定路径：本轮唯一写入是 loop/state/out/read_xiyou_L0_0008.candidate.json 与提交记录 loop/state/out/read_xiyou_L0_0008.submit.json（均为 loop/ 下的追加式新文件），未在共享树触碰 js/ css/ index.html serve.py narrative.py scripts/ tests/ docs/ data/ 任何受保护路径，也未运行 GPU/浏览器测试（任务未声明要跑）。构建与审计脚本放在 /tmp/rd0008/bin/，不入库、不影响并行 agent。",
+      "result": "pass"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/read_xiyou_L0_0008.candidate.json",
+      "kind": "append-only",
+      "note": "任务 writes 指定的候选文件，本轮新增。"
+    },
+    {
+      "path": "loop/state/out/read_xiyou_L0_0008.submit.json",
+      "kind": "append-only",
+      "note": "本提交记录，本轮新增。"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/df959d743e53206f56db2f92.docs.json": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+    "data/cache/df959d743e53206f56db2f92.json": "744a9718ac49efcc27bbf4710fb0dd475282e24ee2defae94752f32e7e9d9208",
+    "loop/state/out/read_xiyou_L0_0008.candidate.json": "24a3330fb574a9e7c67181d909394712109fccd32ec503d7ccdd00163c99d237"
+  },
+  "remaining": [
+    "语义未独立复核：本文件只保证引文定位逐字成立、事实状态是机械判定的，不保证引文被放在正确的条目下、也不保证语义读对。semanticReview.performed=false，需走 read-verify 由别的 agent 反向复核。",
+    "最可能被推翻的三处已写进 selfCritique：(1) C17「祭文呈与龙王→龙王送还魂」可能把紧接发生读成因果（我据龙王自报的触发条件与“祭文”这一传递物件仍判 explicit）；(2) F5 把南极星君嘱语里的三件事合并成一条伏笔，可能掩盖三件回收强弱不同；(3) K3「殷小姐十八年间是否知道丈夫还活着」是原文自相抵牾处，我的折中可能两头都不对。",
+    "rejectedEdges 里有 8 条我主动否掉的连边，其中「舔眼→复明」（U5）与「团圆→自尽」（U1/U6）是原文自身没给机制的并置，我只能记为存疑，不连边也不下判词。若复核认为原文的并置本身足以成边，这两条需重新讨论。",
+    "unknowns 14 条里有多条是原文自身的落差而非我的疏漏，短期内无法在原文内解决：U1/U6（「真正合家欢乐」与「后来殷小姐毕竟从容自尽」并置）、U3（小姐知不知丈夫还活着）、U4（万花店在“洪州西北”与赴江州途中留店不符，另有“海州弘农县”并称）、U10（本单元与第九回都写“十三年岁在己巳”，却与内部十八年不相合）、U14（牒文说“救他的性命”而实际把还魂推到“日后”）。",
+    "单元外呼应（4 组）只用于标明本单元人物/物件/年表在后文另有交代，回收位置在单元外；其中「定颜珠」在后文的再次出现是同词不同物（井龙王与乌鸡国王），我因此**没有**把它记成跨单元伏笔，理由写在 foreshadowRuleNote。若复核要求伏笔严格限定在单元内，F1–F5、F7 的回收本身就都在单元内，不受影响；受影响的只是 crossUnitEchoes 应否保留。",
+    "causeEdges 中只有 1 条记 inferred（C8）、1 条记 derived（C21），其余 19 条为 explicit；这与我上一轮（0006）记了 6 条 inferred / 3 条 derived 的分布不同，原因是本单元原文大量使用「就」「遂」「即」「因此上」等显式连接词。复核可优先攻击 C8（依赖一句引号归属存疑的心理描写，见 U2）与 C21（措辞不对应，见 U8）。",
+    "未做：不跑 GPU/浏览器测试（任务未声明要跑）；不写回任何受保护路径；不做语义评审（属 read-verify 流）；不推算年份、距离、年数（原文只有相对时间标记）。",
+    "本单元出现 1 个我未能解决的归属问题（U2）：「此子若待贼人回来，性命休矣」等句究竟属小姐心里的话还是叙述者转述，引号范围使我无法用机械规则判定；我因此在 C8 里只标明推理来源、不把该句作为独立引文节点单列。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/read_xiyou_L0_0008.candidate.json",
+      "loop/state/out/read_xiyou_L0_0008.submit.json"
+    ]
+  }
+}

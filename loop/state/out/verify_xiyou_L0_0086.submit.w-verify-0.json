@@ -1,0 +1,152 @@
+{
+ "task": "verify:xiyou:L0:0086",
+ "agent": "w-verify-0",
+ "status": "done",
+ "summary": "独立反向复核 read:xiyou:L0:0086（《西游记》第八十六回 木母助威征怪物 金公施法灭妖邪，原文区间 [622174,629871)，7697 码点）。按 VERIFIER.md 顺序执行：①先把 docs[0].text 该区间整片读完（69 行）并自记要点，**未先看候选结论**；②再打开候选逐条比对；③独立复算引文/覆盖/计数/备份；④反向验证问「他还漏了什么」；⑤按 random.seed(20261013) 抽 5 条 quote 逐字 find。裁决 **partial**（2 条 counterExample + 6 条 reverseChecks + 4 条误杀撤回）。先说候选的好（全部经我独立复算，非采信自述）：机械层 333/333 引文六项检查通过；覆盖 3857/7697=0.5011、163 个唯一 span 与自报逐位一致；140 个 id 全部可解析、**无悬空 id**；17 类计数与 machineSelfCheck 逐位一致；6 个任务五栏两两区间重叠 = 0；readMethod「69 行/34 行非空」实测相符；「日值功曹」7 个偏移与候选所列逐位相同；上一轮裁决的 6 条 counterExample **逐条真已修复**（KG3 已引 @625320「南山大豹」、CE20 存在且 RCE3 指路有效、RC_final_verse 改如实、RC_verse_blocks 已删虚构的「分身法赋」并补入长老忧思诗、行数已改 34、314→315 口径已更正）；从回滚点备份复算得 INHERITED=314/149、PRE-REWORK=315/149、CURRENT=333/163，与候选自述的 314→315、327→333 更正**与实数吻合**。**判 partial 的原因**：候选自称「与 counterExample 6 同型的自述缺陷已全部清除」（reworkAudit + disclosures DS1–DS6），但我在它自己声明的修复范围内又抓到**同型缺陷 2 处**：① T6.result.note 称行者那句「才绝了后患」**「另有引用」**，而递归抽全部 333 条 quote 后含该句者 **0** 条、覆盖 [628612,628618) 者 0 条——与上一轮 counterExample 3 **完全同型**，而该条正是 reworkAudit.corrections[2] 声称已修的对象；② KG3.note 称「『花皮会吃老虎』……（**见 SP 栏**）」，而 SP1–SP11 序列化后「花皮」「后患」各 0 次、该句在 333 条 quote 中亦 0 次，属与上一轮 counterExample 2 同型的悬空指路（只是指向存在但无关的分区）。两处均可一行命令复算证伪，故不能判 pass；又因缺陷只在标注层、未动摇任何一条任务/因果/状态/伏笔/设定的语义结论，故不判 fail。反向验证（VERIFIER.md 第 3 步）：合并全部引文区间求补集得 97 段 / 3840 codepoint 未覆盖，按长度降序逐段判读，列出 6 组原文明确存在而候选 0 次引用的事实：RV1 埋葬动机（怕头臭「恐一时弄臭了」@624139、「乘生气埋下再哭」@624152，候选只记动作不记动机）、RV2 八戒对行者的担忧（「莫连你也捞去了」@626104、「就要哭得乱了」@626133，是「八戒仍信师父已死」的第二个证据）、RV3 会合的发起者（行者叫长老「你可叫他一声」@627883，候选 S2/CE11 跳过了这一步）、RV4 老怪兵器铁杵（@624757/@624938/@625237 三次，候选为行者八戒都建了 item 条目而妖精兵器为 0）、RV5 群妖列阵（「那群妖扎下营盘」@624738、「将一面锦绣花旗闪一闪」@624746）、RV6 混战双方（「搪着钯，九孔血出」@625628、「从阵里往外杀来」@625609、「先锋帅众齐来」@625280）。误杀检查：我列为可疑后**撤回** 4 项——FK1 韵文行内句抽取（合法，候选已主动披露 3 处）、FK2 WS3=arrived（维持，按任务规则有到达动作）、FK3 跨因果边复用引文（合法，规则只禁同一任务五栏内共用）、FK4 版本讹字未登记（不在五类抽取范围内）。【我的自我纠错】第一次复算时我的脚本漏掉 worldSettings[].quote[]、themeReadings[].support[].quote[] 等 31 处嵌套 list，得 302 条/3833/0.498，与候选自报 333/3857/0.5011 不符，当时几乎据此写下「候选虚报引文数」的指控；修正为递归抽取后与候选**逐位一致**，错在我的尺子，已撤回并记录。【下游可用性】我实测 to_candidate.py 的 must-fix 匹配只认 `层名[数字]` 或裸 id，我按 VERIFIER.md schema 写的 `tasks[T6_wukong_cleanup_final].result.note` **不会绑定**（候选 id 是全称、方括号内非数字），模拟丢弃数 = 0；应改写为 `tasks[5].result.note` / `states[9].note`，已在 notes 里给出。另实测 tasks/characterStates 的发布节点**不搬 note 字段**，故这两处假指路不进作品库文本；但 T6.result 的**正文**（会发布为 outcome）确实写了「行者评价『这顿打死，才绝了后患也』」而该栏两条 quoteRef 均不含此句 ⇒ 真实后果是「本该补齐的引文缺口被一句假话掩盖」，这也印证 partial 的分寸。未做：语义层不替 semanticReview 背书、未跑 GPU/浏览器测试、未逐字重读全部未覆盖段故**不声称遗漏已穷尽**。未修改候选文件、未触碰任何受保护路径。",
+ "evidence": [
+  {
+   "path": "loop/state/out/verify_xiyou_L0_0086.verdict.json",
+   "sha256": "7a7b7615e6e846432e6d5b2b61d2faa4b99a4dafd1eb090a0a7dd644718a4dfc",
+   "kind": "verdict",
+   "note": "任务 writes 指定的唯一写入路径。含 verdict=partial、2 条 counterExamples（各带逐字原文引证与 start/end）、6 条 reverseChecks、4 条 misKillCheck、citationSample、mechanicalAudit、hallucinationCheck、usableVsDiscard、notes（含我对自己的 2 处纠错与下游绑定实测）。"
+  },
+  {
+   "path": "loop/state/out/read_xiyou_L0_0086.candidate.json",
+   "sha256": "d3b6290fe08bde17dd012fa89e66cb261f699c848518b4c4c0549392eba20e0b",
+   "kind": "candidate-under-review",
+   "note": "被复核候选（w-dafeng-0）。哈希在复核开始与结束时各重算一次，复核期间未变更（d3b6290f…）。我未修改此文件。"
+  },
+  {
+   "path": "data/cache/a065244455cfb2221bcda94a.docs.json",
+   "sha256": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+   "kind": "source-document",
+   "note": "原文。与任务 sourceHash 逐字一致（hashlib 独立重算）。docs[0].text 全文 722176 codepoint；切片 [622174,629871) 的 sha256=eb7fc093439d6b590a36fffa4fcd7b2bef053b8838eca2a1133d20de329fe19d，codepoint 数 7697。"
+  },
+  {
+   "path": "data/cache/ee3430ef493546bbcd2e700b.docs.json",
+   "sha256": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+   "kind": "source-duplicate-proof",
+   "note": "与上一份 docs.json 逐字节相同（同一 sha256），证明候选声明的 a0652444 与任务声明的 c282cf39 并非版本错配，两键互为副本。"
+  },
+  {
+   "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-read-xiyou-L0-0086-20261013/backup/read_xiyou_L0_0086.candidate.PRE-REWORK.json",
+   "sha256": "7089b79fc0ae6fb4aabf9b1acc0263bb04ad979c54088fc1b4734716dd2c1d78",
+   "kind": "prior-version-backup",
+   "note": "上一轮被判 fail 的候选版本（=reworkAudit.preReworkSha256）。我据此复算得 315 条/149 span，确认旧裁决 counterExample 6 的 314→315 口径更正成立。"
+  },
+  {
+   "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/备份/read_xiyou_L0_0086-inherited/read_xiyou_L0_0086.candidate.INHERITED.json",
+   "sha256": "11f48505280e6e113ebb59c90a2d838b29fdd054ce296d59c469ca904d0530c6",
+   "kind": "prior-version-backup",
+   "note": "第 3 轮前的候选（=inheritedAudit.inheritedSha256）。我据此复算得 314 条/149 span，并确认 T3.cost 被删去的「催促」「数日」两处表述确在该版本中存在。"
+  },
+  {
+   "path": "loop/state/out/verify_xiyou_L0_0086.json",
+   "kind": "prior-verdict-record",
+   "note": "上一轮复核提交记录（只读）。其 summary 与 14 条 assertions 完整保留了旧裁决 6 条 counterExample 的实质内容，是本轮覆盖 sidecar 后历史不丢失的凭据。"
+  }
+ ],
+ "assertions": [
+  {
+   "text": "复核者独立性：reviewer=w-verify-0 ≠ 候选 agent=w-dafeng-0，亦 ≠ 上一轮复核者 w-sanguo-1；loop.py verify 未拒自签（rc=0）",
+   "result": "pass"
+  },
+  {
+   "text": "引文机械层全量复算：递归抽全部 333 条 quote（含嵌套 worldSettings[].quote[] / themeReadings[].support[].quote[]），六项检查 333/333 通过、问题 0",
+   "result": "pass",
+   "cmd": "python3 - <<'EOF' (walk all dict keys=='quote')"
+  },
+  {
+   "text": "自报计数逐字段复算：tasks/causeEdges/rejectedCauseEdges/states/foreshadows/notForeshadows/worldSettings/notWorldSettings/themeReadings/unknowns/selfCritique/reverseCheck/knowledgeGaps/foreshadowsUnresolved/worldSettingsByKind/placeStatesByValue/nullFields 共 17 类，全部与 machineSelfCheck 一致",
+   "result": "pass"
+  },
+  {
+   "text": "五栏包含式共用复算：6 个任务的五栏两两区间重叠 = 0，与 sameSentenceAcrossFields=0 一致",
+   "result": "pass"
+  },
+  {
+   "text": "id 解析：140 个 id 唯一；正文引用的 CE8/9/10/17/20/21/22/23、NF3/NF4、S7/S8/S10/S11、KG1/KG3/KG6、FS5/FS6/FS7、WS3/WS5/WS14、UN1–UN18、T1–T6、TH1/TH2、RCE1–RCE5 全部解析成功，无悬空 id",
+   "result": "pass"
+  },
+  {
+   "text": "旧裁决 6 条 counterExample 逐条复算：6 条全部真已修复（KG3 引 @625320、CE20 存在且 RCE3 指路有效、RC_final_verse 已改如实、RC_verse_blocks 已删虚构韵文并补长老忧思诗 @629632、69/34 行、314→315 口径）",
+   "result": "pass"
+  },
+  {
+   "text": "反向验证：合并全部引文区间求补集，得 97 段 / 3840 codepoint 未覆盖；按长度降序逐段判读，列出 RV1–RV6 共 6 组原文明确存在而候选 0 次引用的事实（每条断言 in-slice + 全文唯一 + 候选 0 次 + 位于未覆盖补集）",
+   "result": "pass"
+  },
+  {
+   "text": "反例 A 可复算：333 条 quote 中含「才绝了后患」者 0 条、覆盖 [628612,628618) 者 0 条，而 T6.result.note 称「另有引用」",
+   "result": "pass",
+   "cmd": "python3 -c \"import json;c=json.load(open('loop/state/out/read_xiyou_L0_0086.candidate.json'));q=[];w=lambda o:[q.append(v) if k=='quote' and isinstance(v,str) else w(v) for k,v in o.items()] if isinstance(o,dict) else [w(v) for v in o];w(c);print(len(q),sum(1 for x in q if '才绝了后患' in x))\"  # → 333 0"
+  },
+  {
+   "text": "反例 B 可复算：SP1–SP11 序列化后「花皮」0 次、「后患」0 次，而 KG3.note 称「见 SP 栏」",
+   "result": "pass",
+   "cmd": "python3 -c \"import json;c=json.load(open('loop/state/out/read_xiyou_L0_0086.candidate.json'));s=json.dumps(c['speechAsClueNotFact'],ensure_ascii=False);print(s.count('花皮'),s.count('后患'))\"  # → 0 0"
+  },
+  {
+   "text": "引用核验（VERIFIER.md 第 6 步）：random.seed(20261013) 抽 5 条 quote 在原文独立 find —— 5/5 逐字命中且偏移一致、长度自洽",
+   "result": "pass"
+  },
+  {
+   "text": "历史版本复算：从两个回滚点备份独立复算 INHERITED=314 条/149 span、PRE-REWORK=315 条/149 span、CURRENT=333 条/163 span、覆盖 3857/7697=0.5011，与候选自述的 314→315、327→333 更正一致",
+   "result": "pass"
+  },
+  {
+   "text": "备份完整性：reworkAudit.preReworkBackup 与 inheritedAudit.backupPath 两个路径均存在，且 sha256 与候选声明逐位相符",
+   "result": "pass"
+  },
+  {
+   "text": "DS6 复算：段 @627055–627245 长 190 codepoint、四个说话人引导语（「内中忽跳出一个小妖告道」「又一个小妖拍着手道」「又一个说」「又一个道」）段内各 1 次，与自述一致（上一轮写「三个」已修）",
+   "result": "pass"
+  },
+  {
+   "text": "误杀检查：FK1/FK2/FK3/FK4 四项经复核后**撤回**，不据此判 fail，并在 verdict 的 misKillCheck 里逐条写明理由",
+   "result": "pass"
+  },
+  {
+   "text": "下游绑定实测：模拟 to_candidate.py 的 must-fix 提取，我写的 `tasks[T6_wukong_cleanup_final].result.note` 不绑定（丢弃数 0）；`tasks[5]` / `states[9]` 或裸 id 写法可绑定。已写进 verdict.notes 并给出建议写法",
+   "result": "pass"
+  },
+  {
+   "text": "发布面实测：tasks/characterStates 的发布节点键集均不含 note，故两处假指路不进作品库文本；但 T6.result 正文会作为 outcome 发布且含无引文支撑的那句，已在 verdict.notes 说明",
+   "result": "pass"
+  },
+  {
+   "text": "边界纪律：未修改被复核候选（哈希复核前后一致 d3b6290f…）；未触碰 js/ css/ index.html serve.py narrative.py scripts/ tests/ docs/ data/ 等受保护路径；本轮仓库内唯一写入 = loop/state/out/verify_xiyou_L0_0086.verdict.json",
+   "result": "pass"
+  }
+ ],
+ "changes": [
+  {
+   "path": "loop/state/out/verify_xiyou_L0_0086.verdict.json",
+   "kind": "append-only",
+   "note": "任务 writes 指定的唯一写入路径。该路径原有上一轮针对旧候选 7089b79f 的裁决；本轮 candidate 已被返修为 d3b6290f，按任务要求覆盖写。旧裁决实质内容保留在 loop/state/out/verify_xiyou_L0_0086.json。"
+  }
+ ],
+ "sourceHashes": {
+  "loop/state/out/read_xiyou_L0_0086.candidate.json": "d3b6290fe08bde17dd012fa89e66cb261f699c848518b4c4c0549392eba20e0b",
+  "data/cache/a065244455cfb2221bcda94a.docs.json": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+  "data/cache/ee3430ef493546bbcd2e700b.docs.json": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+  "loop/state/out/verify_xiyou_L0_0086.verdict.json": "7a7b7615e6e846432e6d5b2b61d2faa4b99a4dafd1eb090a0a7dd644718a4dfc"
+ },
+ "remaining": [
+  "**未做语义层仲裁**：TH1/TH2 属解释层，我不否决其读法，也未替 semanticReview 背书（该项仍为 not-performed）。",
+  "**不声称遗漏已穷尽**：RV1–RV6 是我在未覆盖补集（97 段 / 3840 codepoint）里按长度降序判读到的部分，我只逐段判读了最长的约 28 段；再次复算仍可能挖出新的中程因果。",
+  "**RV4/RV5/RV6 属口径选择而非硬缺陷**：候选把器物/场面层归入「不扩装饰层」是允许的取舍；我登记它们是因为同批任务里行者与八戒都建了 item 条目而妖精兵器缺失（口径不齐），不构成判 fail 的理由。",
+  "**反例 A 的证据强度弱于反例 B**（已在 verdict.notes 如实登记）：「才绝了后患也」与「花皮会吃老虎」确实存在于图谱缓存 a0652444.json 的既有引文里（episodes[49]/narrativeUnits[49]/storylines[1] 各一处，属上一版图谱自带），故「另有引用」若解释为「图谱里另有一处引用」字面上并非全假。我仍维持反例 A 成立（note 语境与候选用词惯例均指候选内 quoteRefs），但已写明：若只认反例 B，partial 结论不变，must-fix 可缩为 1 条。",
+  "**我的 counterExample 定位符在下游绑不上**（已在 verdict.notes 与 assertions 登记）：应改为 tasks[5].result.note / states[9].note 才能在 to_candidate.py 里真正拦下发布。这是**我的产出可用性问题**，不是候选缺陷。",
+  "**未跑 GPU/浏览器测试**（任务未要求，GPU 全局串行）。",
+  "**未逐字校勘版本层讹字**（「鄱身下马」「睮」「滞住手」等）：不在本任务五类抽取范围内，仅登记为未做，不据此判 fail（见 FK4）。"
+ ],
+ "rollback": {
+  "kind": "append-only",
+  "strategy": "delete-added-files",
+  "files": [
+   "loop/state/out/verify_xiyou_L0_0086.verdict.json"
+  ],
+  "note": "本复核在仓库内只写 verdict 一个文件（覆盖同路径旧裁决属任务规定行为）。未修改候选文件，故无需回滚候选。旧裁决可通过 loop/state/out/verify_xiyou_L0_0086.json 的 summary/assertions 与回滚点备份（7089b79f…）还原。"
+ }
+}

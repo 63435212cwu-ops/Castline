@@ -1,0 +1,224 @@
+{
+  "task": "review:motion-picking-final:20261010T175841Z",
+  "agent": "motion-picking-final-20261010T175841Z",
+  "status": "done",
+  "verdict": "changes_required",
+  "signedOff": false,
+  "summary": "已完成受限只读反查，发现9项需主线程处置的问题；用户新指令后停止进一步审核和测试，仅保存已有发现作为施工输入。M91/M99未签收。",
+  "evidence": [
+    {
+      "path": "docs/QUALITY.md",
+      "sha256": "dff26cfff8d8e5d488eb11278dd4121eee9f6d9a2a70c1c1a0b34738f0b7e948"
+    },
+    {
+      "path": "docs/SCHEMA.md",
+      "sha256": "d6f938cb1be0d6f81d4c241e7e62766136ae5a3638faff51a3aa2e3f1751cbfb"
+    }
+  ],
+  "sourceHashes": {
+    "docs/QUALITY.md": "dff26cfff8d8e5d488eb11278dd4121eee9f6d9a2a70c1c1a0b34738f0b7e948",
+    "docs/SCHEMA.md": "d6f938cb1be0d6f81d4c241e7e62766136ae5a3638faff51a3aa2e3f1751cbfb",
+    "js/core/scene-core.js": "843396f819a123c93c9e5ac6e485bcb763cae0798766248ffb37688cc9a77537",
+    "js/scene.js": "11b4bb5a14d447b92f2b857d64b25f71cb3a1273876c3f3b6fa80d3f3373f16e",
+    "js/sky/sky-shell.js": "10785d83d6289a944c8272974abe1aafcef4c8538f62998425aacbb721f0c133",
+    "js/sky/sky-shell-player.js": "e29170e070657721496485a3b807a76b1b6ba6d56a0e5840b8505997107577fa",
+    "js/sky/sky-selection-model.js": "9d5f3a614204f52d15cb0acd8660a639031db9ac89027e31665b36a92ace1fa3",
+    "css/sky-reading.css": "23cfc6b8c5d2845fdd6585c4f4110eeb2a24909ac0ea577c779533a5f81b3c53",
+    "js/keys.js": "82e861a417cc68763d93335c070f6f276dc7c55d5a9bbbfcbb877ae7b2853f90",
+    "tests/sky_selection_model_contract.js": "995c0550200c8ca71537492642939f78409e9a52dd3d0263252905e48c4a1551"
+  },
+  "assertions": [
+    {
+      "text": "对照主线程保存的before基线阅读实际增量；未改产品、未启动浏览器或GPU。",
+      "result": "pass"
+    },
+    {
+      "text": "CPU抽取生产handlesKey/pickChoiceKey分别复现Space未被菜单认领及焦点row1却提交row0。",
+      "result": "pass"
+    },
+    {
+      "text": "输入到渲染已有真实接线，但上列缺陷未修复重验，明确不签收产品。",
+      "result": "pass"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/review_motion-picking-final_20261010T175841Z.artifact.json",
+      "kind": "append-only"
+    }
+  ],
+  "remaining": [
+    "R1–R9交由主线程按用户新要求分配Luna施工与亲自验收。",
+    "没有对后续候选作复审，没有等待或评判新的页面结果。",
+    "真实触控设备、读屏、动画视觉质量不在本次只读结论内。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "retain-findings-as-implementation-input",
+    "files": [
+      "loop/state/out/review_motion-picking-final_20261010T175841Z.artifact.json"
+    ]
+  },
+  "createdAt": "2026-10-10T18:49:47.823571+00:00",
+  "reviewBaseline": "/tmp/castline-artifacts/motion-picking-20261010T175841Z/before/",
+  "stopReason": "父线程传达用户最新要求：计划与审核由主线程承担、施工交Luna6；停止继续审核/扩展测试，仅保存已发现问题。",
+  "positiveObservations": [
+    "core.pickCandidates来自真实Three.js射线，labelNodesAt优先真实可见姓名字盒，未虚造重叠候选。",
+    "personReference及selectPickCandidate对重复稳定ID、同名数量、id/entityId不一致有拒绝，未发现把这些自动归为确定人物的新漏洞。",
+    "确认走S.selectPickCandidate→fire(select)→原app链，没有调用不存在的公共CLApp.select。",
+    "M99四槽已实际驱动独立SVG形状，currentRef已避开完整player.state遍历并区分整章/逐事件语义。",
+    "selection-model.audit已取消同值即耦合的错误判据，以操作前后其他槽变化判断。"
+  ],
+  "findings": [
+    {
+      "id": "R1",
+      "severity": "high",
+      "title": "候选菜单的Space仍先触发全局动效开关",
+      "path": "js/sky/sky-shell.js",
+      "lines": [
+        645,
+        675,
+        686,
+        688
+      ],
+      "related": "js/keys.js:638,267,708",
+      "evidence": "handlesKey没有候选菜单归属；星座态Space仅命中plot&&Space分支而返回false。keys的window捕获监听先处理，MAP Space切calm；同window后注册的shell监听又pickChoiceKey确认候选。stopPropagation不阻止同一window的后续监听。",
+      "cpuReplay": {
+        "spaceOwnedInConstellation": false
+      },
+      "requestedFix": "把候选菜单的真正owned键纳入handlesKey，供keys正确让行；pickChoiceKey尊重CLModal、e.__clPanelEsc、组合键/IME门禁，保证同一Esc不同时退PM和候选两层。",
+      "verificationInput": "星座打开真实候选，Space确认目标前后calm值不变；顶层模态存在时Esc/方向键由顶层拥有。"
+    },
+    {
+      "id": "R2",
+      "severity": "high",
+      "title": "实际DOM焦点与q.at不同会Enter选错人物",
+      "path": "js/sky/sky-shell.js",
+      "lines": [
+        90,
+        95,
+        106,
+        154
+      ],
+      "evidence": "q.at只由focusPickChoice更新，native focusin只写四态focus。原生按下另一条tabindex=-1的候选B可落DOM焦点B；若拖出取消click后Enter，代码仍commitPickChoice(q.at)而非焦点行。",
+      "cpuReplay": {
+        "enterFocusedRow": 1,
+        "committedRow": 0
+      },
+      "requestedFix": "Enter/Space以真实e.target最近data-pick-index确认，或统一focusin同步q.at和roving；保证取消手势不提交旧索引。",
+      "verificationInput": "按下B→移出释放取消click→Enter确认B；focus与选择须对应同稳定ID。"
+    },
+    {
+      "id": "R3",
+      "severity": "medium",
+      "title": "确认后无条件聚焦隐藏的星座标签",
+      "path": "js/sky/sky-shell.js",
+      "lines": [
+        80,
+        85,
+        87
+      ],
+      "evidence": "S.selectPickCandidate同步沿原app链进入focusReading或openCompass。plot里确认人物会进罗盘，n.el为星座标签在该视图隐藏；随后代码仍n.el.focus。",
+      "requestedFix": "确认后的焦点交给仍可见的目的地控件/读板标题/罗盘返回入口，不向隐藏或已脱离DOM的星名聚焦。",
+      "verificationInput": "星盘候选用键盘确认→罗盘，activeElement必须可见且后续Tab/方向键可用；星座确认同样不因LOD得到不可见焦点。"
+    },
+    {
+      "id": "R4",
+      "severity": "medium",
+      "title": "新书开始加载时旧候选快照仍可确认",
+      "path": "js/sky/sky-shell.js",
+      "lines": [
+        82,
+        161,
+        184,
+        708
+      ],
+      "evidence": "onLoading仅转发loadUnit.onLoading；清理在onGraph/syncInteractionGraph。fetch阶段G/key仍可能旧值，commit的graph/key guard仍通过，旧菜单仍可键盘确认。",
+      "requestedFix": "真正新加载开始时立即撤候选、作废request/tween，清临时hover/focus覆盖；已选恢复与失败策略可以另行保留，但不能继续确认旧快照。",
+      "verificationInput": "真实候选打开→触发新书fetch→在graph-ready之前按Enter/Esc，旧书候选不得确认或覆盖新状态。"
+    },
+    {
+      "id": "R5",
+      "severity": "medium",
+      "title": "current覆盖先于星盘本帧投影更新",
+      "path": "js/sky/sky-shell.js",
+      "lines": [
+        750,
+        751,
+        752
+      ],
+      "evidence": "shell frame hook先frameInteraction后disc.frame；interactionPoint(event)调用disc.eventPoint，后者消费缓存E。镜头运动时覆盖标记使用前一帧E而真实事件珠按本帧更新。",
+      "requestedFix": "frameInteraction放在disc/field/compass/deep完成本帧投影之后，保持同一宿主帧钩子。",
+      "verificationInput": "跟镜或手动转动中逐帧比较current标记中心与disc.eventPoint同一时刻坐标，不出现一帧追赶。"
+    },
+    {
+      "id": "R6",
+      "severity": "medium",
+      "title": "多候选和长身份文本可把面板底部放出视口",
+      "path": "js/sky/sky-shell.js",
+      "lines": [
+        132,
+        133,
+        135
+      ],
+      "evidence": "定位top按假设height<=410算，maxHeight却按innerHeight-minTop-16，不扣最后实际top。内容高于410时允许高度超过当前剩余空间。此项为代码边界分析，未运行页面构造。",
+      "requestedFix": "先确定top，再maxHeight=innerHeight-top-16；列表允许flex收缩滚动，取消与键盘提示保持可达。",
+      "verificationInput": "实际多行候选与长身份文本、390宽或低高度视口，面板四边及取消入口在可用范围。"
+    },
+    {
+      "id": "R7",
+      "severity": "medium",
+      "title": "四态形状没有消费对象名称或状态图例",
+      "path": "js/sky/sky-shell.js",
+      "lines": [
+        60,
+        190,
+        194
+      ],
+      "evidence": "interactionLabel已定义但未在渲染消费。overlay只有path；当选中标签被LOD收起时用户只见无名环。QUALITY M99要求不同对象各自保持标签且可读说明状态。",
+      "requestedFix": "在最多四个状态对象上保留可读名称/状态说明或复用可靠现成标签，不为全图新增常驻姓名；静态减弱动态同信息。",
+      "verificationInput": "hover A、focus B、selection C、current E各不同且C姓名被LOD收起时仍可判明对象及状态。"
+    },
+    {
+      "id": "R8",
+      "severity": "low",
+      "title": "指针从候选行移到面板标题后hover残留",
+      "path": "js/sky/sky-shell.js",
+      "lines": [
+        149,
+        151
+      ],
+      "evidence": "pointerover只有row存在时写hover，没有else；pointerleave只在离开整个panel时触发。A行移到标题/取消按钮仍保持A的hover。",
+      "requestedFix": "面板pointerover无候选row时清hover，或按row pointerout/relatedTarget管理；不清selection/current。",
+      "verificationInput": "候选A→标题/取消按钮，A虚线括号撤下，其他槽位不变。"
+    },
+    {
+      "id": "R9",
+      "severity": "low",
+      "title": "Home/End遇未知禁用行时朝越界方向扫描",
+      "path": "js/sky/sky-shell.js",
+      "lines": [
+        104,
+        105,
+        108
+      ],
+      "evidence": "Home/End的disabled跳过方向由next>=q.at决定。从后部Home到disabled第0行时step=-1直接越界；End到disabled最后行时step=+1越界，均不能到首/末合法行。",
+      "requestedFix": "Home从0向+1找第一合法候选，End从最后向-1找；箭头保留其实际方向。",
+      "verificationInput": "混合合法/身份待确认禁用候选时Home/End到首末合法项，绝不提交未知项。"
+    }
+  ],
+  "cpuReplay": {
+    "method": "用已有tests/scene_motion_clock_contract.js的block抽取函数；仅在内存补两空格匹配该辅助函数的缩进前提，生产函数体未改；VM提供明确外部依赖桩，不运行浏览器。",
+    "output": {
+      "spaceOwnedInConstellation": false,
+      "enterFocusedRow": 1,
+      "committedRow": 0
+    },
+    "limits": "CPU重放证明分支语义，不等价于页面原生事件/焦点/GPU签收。"
+  },
+  "notClaimed": [
+    "未称9项都已被页面复现，R6明确是静态边界分析。",
+    "未把主线程已通过的13项CPU测试换算成四态完整签收。",
+    "未增设测试脚本，未继续扩充审核范围。"
+  ]
+}

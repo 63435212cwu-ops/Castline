@@ -1,0 +1,121 @@
+{
+ "audit": "read:dafeng:L0:0224 dupclaim forensics + independent candidate audit",
+ "agent": "w-xiyou-0",
+ "at": "2026-10-15T01:38:49Z",
+ "source": {
+  "docsJsonSha256": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+  "matchesTaskSourceHash": true,
+  "sliceCodepoints": 3937,
+  "sliceSha256": "7516fd1f545b651807d19a3291ca1ac85dbae5529a8893e0d4692d4e1c1c3ccf",
+  "sliceStartsWithHead": true
+ },
+ "raceForensics": {
+  "myAgent": "w-xiyou-0",
+  "myLeasePid": 43457,
+  "myLeaseStartedAt": "2026-10-15T01:06:05Z",
+  "priorSubmission": {
+   "agent": "w-sanguo-0",
+   "status": "done",
+   "submittedAt": "2026-10-15T01:05:06Z",
+   "validationProblems": [],
+   "verifyState": "pending",
+   "recordPath": "loop/state/out/read_dafeng_L0_0224.json"
+  },
+  "secondsBetweenPriorSubmitAndMyLease": 59.0,
+  "verdict": "DUPLICATE CLAIM (TOCTOU): 任务在我领取前已提交并通过机器校验；我是被 pick() 的陈旧 done 快照放进来的",
+  "isEvolvingCandidate": false,
+  "isTransientCandidate": false,
+  "overwriteHazard": {
+   "demonstratedInMemory": true,
+   "staleAfterSimulatedOverwrite": [
+    {
+     "path": "loop/state/out/read_dafeng_L0_0224.candidate.json",
+     "why": "hash-changed"
+    }
+   ],
+   "why": "loop/state/out/ 属 MUTABLE_EXCEPTIONS，is_evolving()=False ⇒ 覆写证据文件会让 evidence_stale() 报 hash-changed ⇒ done_ids() 剔除该任务 ⇒ 一条已通过机器校验的产物被降级成『没做完』"
+  },
+  "rootCause": {
+   "where": [
+    "loop/bin/loop.py:651 pick() → :653 done=done_ids() 为一次性快照",
+    "loop/bin/loop.py:715 claim() 只判 lease_alive / mkdir，不重查 done",
+    "loop/bin/worker.py:519 one_round(): pick() → claim() 两步不原子"
+   ],
+   "measuredDoneIdsSeconds": null,
+   "note": "done_ids() 需遍历全部提交记录并逐个复算证据哈希，耗时远超 pick→claim 的间隔"
+  },
+  "evidence": [
+   {
+    "path": "loop/state/out/read_dafeng_L0_0224.candidate.json",
+    "exists": true,
+    "hashMatchesRecord": true,
+    "sha256Now": "c7a050b7aeff28cc7bc938474ff5e29b030497879e4c69e9335a09b9139d5f3a"
+   },
+   {
+    "path": "loop/state/out/read_dafeng_L0_0224.w-sanguo-0.build/build_candidate.py",
+    "exists": true,
+    "hashMatchesRecord": true,
+    "sha256Now": "43f0121371147a1e9cd8f4f6891c987e4ca58d098e32b8dc81748d51f52f8f2c"
+   },
+   {
+    "path": "loop/state/out/read_dafeng_L0_0224.w-sanguo-0.build/content_core.py",
+    "exists": true,
+    "hashMatchesRecord": true,
+    "sha256Now": "45df8b307835bde0327ffd4adcf3ef351ec0d65359326052b10a33d141110fba"
+   },
+   {
+    "path": "loop/state/out/read_dafeng_L0_0224.w-sanguo-0.build/gen_quotes.py",
+    "exists": true,
+    "hashMatchesRecord": true,
+    "sha256Now": "e0c597f58c8aa0c9764ace3d80d592b5ae99619179c291a46bff6c6195d777cb"
+   },
+   {
+    "path": "loop/state/out/read_dafeng_L0_0224.w-sanguo-0.build/quotes_spec.py",
+    "exists": true,
+    "hashMatchesRecord": true,
+    "sha256Now": "976d90800cf6087a6f88a95aa274ca65f9b72a6888df97039abce94533e67868"
+   },
+   {
+    "path": "loop/state/out/read_dafeng_L0_0224.w-sanguo-0.build/quotes.py",
+    "exists": true,
+    "hashMatchesRecord": true,
+    "sha256Now": "cc3e6672b9f339aaf7bebd87cab298215197e1e893fe6821f9f0ee3a8bcdef9f"
+   },
+   {
+    "path": "loop/state/out/read_dafeng_L0_0224.w-sanguo-0.build/audit_candidate.py",
+    "exists": true,
+    "hashMatchesRecord": true,
+    "sha256Now": "da4d8aca5b1958714e997778d0e699f2327c32ca6b453b9474e78a55a7c81e2d"
+   }
+  ]
+ },
+ "independentAudit": {
+  "script": "audit_dupclaim.py（不 import w-sanguo-0 的任何构建/审计脚本）",
+  "quoteObjects": 198,
+  "badLiteral": 0,
+  "badRange": 0,
+  "badSourceHash": 0,
+  "notUniqueInSlice": 0,
+  "fiveColumnReuse": 0,
+  "nullWithoutNote": 0,
+  "worldSettingsBad": 0,
+  "foreshadowBad": 0,
+  "themeBad": 0,
+  "coverageCrossCheck": {
+   "claimed": {
+    "nonEmptyParagraphs": 104,
+    "paragraphsTouchedByQuotes": 77,
+    "zeroCoverageParagraphs": 27
+   },
+   "recomputed": {
+    "nonEmptyParagraphs": 104,
+    "paragraphsTouchedByQuotes": 77,
+    "zeroCoverageParagraphs": 27
+   },
+   "matches": true
+  },
+  "ok": true
+ },
+ "failures": [],
+ "ok": true
+}

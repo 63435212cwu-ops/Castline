@@ -1,0 +1,139 @@
+{
+  "task": "read:dafeng:L0:0216",
+  "agent": "w-xiyou-0",
+  "role": "READER（原文精读工作者）",
+  "kind": "duplicate-claim investigation (no submit, deliberately)",
+  "outcome": "NOT SUBMITTED — 直接重提交会覆盖 w-dafeng-1 已通过机器校验的产物",
+  "why": [
+    "本任务在我领取**之前** 121 秒已由 w-dafeng-1 提交并通过机器校验（submittedAt 2026-10-14T21:49:21Z，validation.problems=[]，verifyState=pending）。",
+    "我的租约 startedAt 2026-10-14T21:51:22Z，即我是在该任务进入 done_ids() **之后**才被放进来的一条重复领取。",
+    "任务的 writes 路径 loop/state/out/read_dafeng_L0_0216.candidate.json 是那份已完成记录的证据文件；loop/state/out/ 的 is_evolving() 返回 False（审阅产物：被改写就是真问题），覆写它会让 evidence_stale() 报 hash-changed ⇒ done_ids() 剔除该任务 ⇒ 一条已通过机器校验的产物被降级成『没做完』。",
+    "因此本轮不做那件事，改为留下**不改动共享产物**的竞态取证 + 对既有候选的独立复核。这与同环境既有先例一致（loop/state/out/read_dafeng_L3_0267.w-dafeng-0.dupclaim/：同形态竞态，结论同为 NOT SUBMITTED）。"
+  ],
+  "raceForensics": {
+    "myAgent": "w-xiyou-0",
+    "myLeasePid": 43457,
+    "myLeaseStartedAt": "2026-10-14T21:51:22Z",
+    "priorSubmission": {
+      "agent": "w-dafeng-1",
+      "status": "done",
+      "submittedAt": "2026-10-14T21:49:21Z",
+      "validationProblems": [],
+      "verifyState": "pending",
+      "recordPath": "loop/state/out/read_dafeng_L0_0216.json",
+      "candidateSha256Declared": "e1ea656ff7cdd38fbdc1dd9b1677f7220633c7476d2f4c232d549399c7e35316"
+    },
+    "secondsBetweenPriorSubmitAndMyLease": 121,
+    "candidateSha256Now": "e1ea656ff7cdd38fbdc1dd9b1677f7220633c7476d2f4c232d549399c7e35316",
+    "allEvidenceFilesPresent": true,
+    "allEvidenceHashesMatch": true,
+    "missingEvidence": [],
+    "mismatchedEvidence": [],
+    "measuredCost": {
+      "recordFiles": 986,
+      "doneIdsSeconds": 239.1,
+      "activeLeasesSeconds": 0.0,
+      "doneIdsAtMeasurement": 967,
+      "note": "done_ids() 耗时由本审计独立实测（同一机器、同一时刻的 loop.py 代码路径），不是引用别处的数字"
+    },
+    "rootCause": "pick() 与 claim() 之间存在 TOCTOU：worker.one_round 先 pick()（内含 done_ids() 与 active_leases() 的快照）再 claim()；claim() 只检查租约目录，不重新检查 done（loop.py:715-744 的 claim() 只判 lease_alive）。实测 done_ids() 单次 239.1s（record_files 扫 986 个记录）⇒ 快照与 claim 之间的窗口足够长。",
+    "evidence": [
+      "loop/bin/loop.py:651 pick() → :653 done=done_ids() 为一次性快照",
+      "loop/bin/loop.py:715 claim() 只判 lease_alive，不查 done",
+      "loop/bin/worker.py one_round: pick() → claim() 两步不原子"
+    ],
+    "hazardDemonstratedInMemory": "用 copy.deepcopy 在内存中改哈希复现：evidence_stale() 对该证据报 hash-changed ⇒ validated()且不stale 不成立 ⇒ done_ids() 剔除该任务。未改磁盘上的任何既有文件。",
+    "whyNotSubmittingIsSafeForTheWorker": "已核 worker 的 submit_if_needed() 第一个分支：out_path 存在且 validated(rec)=True 且 evidence_stale(rec)=[] ⇒ 返回 'already-submitted'，既不覆盖也不写 REJECTED__。所以本轮不提交不会让 worker 把任务误记成失败。同时 output_name('read:dafeng:L0:0216') == 'read_dafeng_L0_0216.json'，正是 w-dafeng-1 的记录路径 —— 我若提交，写的**就是同一个文件**，这才是危险所在。",
+    "isSystemic": {
+      "measuredAt": "2026-10-14T22:12Z（同一次 done_ids()/active_leases() 枚举）",
+      "liveLeasesOnAlreadyDoneTasks": 2,
+      "items": [
+        {"task": "read:dafeng:L0:0216", "leaseAgent": "w-xiyou-0",
+         "doneBy": "w-dafeng-1", "sameAgent": false,
+         "secondsBetweenSubmitAndLease": 121},
+        {"task": "verify:sanguo:L0:0104", "leaseAgent": "w-verify-1",
+         "doneBy": "w-dafeng-2", "sameAgent": false,
+         "secondsBetweenSubmitAndLease": 109}
+      ],
+      "note": "同一次枚举里 14 条活跃租约有 **2 条**落在已 done 的任务上（read 与 read-verify 各一）。这不是我这一条任务的偶发，而是 pick→claim 窗口的结构性后果：done_ids() 实测 239.1s，任何在快照后提交的任务都会留下这个窗口。"
+    }
+  },
+  "independentAudit": {
+    "script": "audit_dupclaim.py（不 import w-dafeng-1 的任何构建/审计脚本；只读 docs.json + 产物 JSON 自行复算）",
+    "report": "audit_dupclaim_report.json",
+    "deterministic": true,
+    "reportSha256": "ea42012edd0d28846e403c90a5f105cad306b3417b0f8bb7e9907b8f2bf4ff66",
+    "quoteObjects": 226,
+    "badLiteral": 0,
+    "badRange": 0,
+    "badSourceHash": 0,
+    "missingOffset": 0,
+    "ok": true,
+    "taskFieldOverlaps": 0,
+    "nullFields": 9,
+    "nullFieldPlaceholders": 0,
+    "worldSettingsKinds": {"rule": 3, "place": 4, "item": 1},
+    "worldSettingsBadStateFields": 0,
+    "foreshadows": {"count": 4, "resolved": 2, "unresolved": 2,
+                    "unresolvedWithoutNote": 0, "illegalStatus": 0},
+    "sectionPresence": {"required": ["tasks", "causeEdges", "states", "foreshadows",
+                                      "worldSettings", "themeReadings"], "missing": []},
+    "coverageCrossCheck": {
+      "candidateClaims": {"nonEmptyParagraphs": 77, "paragraphsTouchedByQuotes": 60,
+                          "zeroCoverageParagraphs": 17},
+      "independentRecompute": {"nonEmptyParagraphs": 77, "paragraphsTouchedByQuotes": 60,
+                               "zeroCoverageParagraphs": 17},
+      "matches": true,
+      "reportedZeroListMatches": true
+    },
+    "myOwnFirstAttemptWasWrong": "我第一版审计把『切片内偏移 != 全书 find 首次命中』报成 badRange，得到 10 条假缺陷（『不行。』全书 51 次、firstAt 60522）。口径本身写错了：任务 prompt 与候选披露都规定偏移取**本单元切片内**首次命中。改成切片内唯一 + 切片内首次后为 0 条。记下这条，因为『机器全绿』与『尺度定对』是两回事。",
+    "extraChecks": {
+      "sceneBreakStraddle": "切片内真正的独立成段场景分隔只有 2 处（abs 805763 的『....』与 abs 807922 的『....』）。逐条核 226 个引文对象：**没有一条**引文横跨场景分隔（把句内省略号『我们...还让她来驿站？』『卑职也只能...尽力而为。』与真正的场景切换分开判，避免把语气省略号误报成跨场景）。命令见 audit_dupclaim.py 的 C2 段。",
+      "basisCalibration": "候选把 t3.action/t6.cost/t8.* 等标为 basis=explicit，其引文跨度内虽含『....』，但经上一条核对均非**场景分隔**，故 explicit 的标注不因此降级。"
+    }
+  },
+  "reverseCheck": {
+    "method": "先自己读切片，再问『这一段里还漏了什么』；26 条探针逐条在切片上重新 find",
+    "probeCount": 26,
+    "notFound": 0,
+    "zeroCoveredParagraphs": 17,
+    "nonEmptyParagraphs": 77,
+    "verdict": "未发现构成『漏读』的硬缺陷。26 条探针全部命中，且绝大多数是过场动作、候选已在别处以更长引文覆盖的同一事实、或作者 PS 段（非小说正文）。",
+    "semanticGapsWorthHumanAttention": [
+      "① 『许七安笑了，“那个小黑屋是不是叫404？”』——候选把 404 记为 unresolved 伏笔（f2），但没有单列『许七安抢先说出 404』这一知情差：他怎么会知道这个词？原文没写。这比『404 是什么意思』更具体，且是本区间唯一一处许七安表现出超出在场者的知识。",
+      "② 『听到李妙真的称赞，两人若有所思，仿佛猜到了什么。』——候选已在 rejectedEdges/unknowns 处理了相邻因果，但『两人猜到了什么』本身是未解内容。",
+      "③ 『许七安捏着眉心，最近时常头晕目眩，并伴随轻微的幻觉。』——一条身体状态的持续异常，与本章标题『梦境』直接相关，候选未把它与结尾『许七安脸色大变』建立任何关联。我也没有证据说二者有关，故只列为反向发现，不建议连边。"
+    ]
+  },
+  "reproduce": {
+    "note": "本报告与审计的每条数字都可由下列命令重算；审计脚本不 import w-dafeng-1 的任何模块。",
+    "commands": [
+      "python3 -B -s loop/state/out/read_dafeng_L0_0216.w-xiyou-0.dupclaim/audit_dupclaim.py   # 重算引文/结构/覆盖率/反向清单，输出确定性报告",
+      "shasum -a 256 loop/state/out/read_dafeng_L0_0216.w-xiyou-0.dupclaim/audit_dupclaim_report.json   # ea42012e…，重跑字节级一致",
+      "python3 -c \"import hashlib;print(hashlib.sha256(open('data/cache/1063b17ca65ec1b76f30e460.docs.json','rb').read()).hexdigest())\"   # fdde5558…，等于任务 sourceHash",
+      "python3 -c \"import json;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];print(repr(t[805083:805083+12]));print(len(t[805083:807986]))\"   # 以标题开头 / 2903",
+      "python3 -c \"import json,importlib.util;s=importlib.util.spec_from_file_location('m','loop/bin/loop.py');m=importlib.util.module_from_spec(s);s.loader.exec_module(m);print(m.output_name('read:dafeng:L0:0216'))\"   # read_dafeng_L0_0216.json == w-dafeng-1 的记录路径",
+      "python3 -c \"import json,importlib.util;s=importlib.util.spec_from_file_location('m','loop/bin/loop.py');m=importlib.util.module_from_spec(s);s.loader.exec_module(m);r=json.loads(open('loop/state/out/read_dafeng_L0_0216.json','rb').read());print(m.validated(r),m.evidence_stale(r))\"   # True []  => worker 会走 already-submitted 分支"
+    ]
+  },
+  "untouched": [
+    "loop/state/out/read_dafeng_L0_0216.candidate.json（未改写；sha256 仍为 e1ea656f…，与既有记录的声明一致）",
+    "loop/state/out/read_dafeng_L0_0216.json（既有提交记录，未改写；sha256 bef0868a…，agent 仍为 w-dafeng-1、status 仍为 done、validation.problems 仍为 []）",
+    "loop/state/out/read_dafeng_L0_0216.w-dafeng-1.build/（另一位 agent 的构建产物，未改写）",
+    "loop/state/leases/read:dafeng:L0:0216.d/lease.json（我的租约，交由 worker 的 finally 释放）"
+  ],
+  "ownDebrisCleaned": {
+    "what": "我早期误用 `loop.py next --agent read_dafeng_L0_0216 --claim` 探测时，claim() 顺带写了 loop/state/workers/read_dafeng_L0_0216.json（在场文件）与一条针对 read:dafeng:L0:0220 的租约。",
+    "disposition": "两者都在 TRANSIENT_PREFIXES（loop.py:319-320：leases/workers/runs 为瞬态路径）内，且该进程（pid 89702）已不存在（ps 退出码 1）。0220 的租约现已由真正的 worker w-xiyou-1（pid 43463）正常持有；我删除了属于我这次误领的在场文件。",
+    "whySafe": "doctor.py 判定 worker 状态只读 policy.json 的 roster + active_leases()，不读 workers/*.json 的在场文件；该文件不参与调度或完成判定。"
+  },
+  "remaining": [
+    "本任务**未由我提交**。若复查要求补一条我方记录，请先确认 loop.py 的 submit 是否应支持『合并 reviews』——直接重提交会覆盖 w-dafeng-1 已通过机器校验的产物并将其降级为 hash-changed。",
+    "竞态根因（pick→claim 不复查 done）**未修**：loop/bin/loop.py 属受保护路径，只能在合并任务里改并持 GATE.lock。建议的最小修法：claim() 内重新检查 done_ids()（或让 pick/claim 共用同一时间点的一致性快照）。",
+    "该竞态是**系统性**的，不止我这一条：同一次枚举里 14 条活跃租约有 2 条落在已 done 的任务上（read:dafeng:L0:0216 ← w-xiyou-0 / w-dafeng-1；verify:sanguo:L0:0104 ← w-verify-1 / w-dafeng-2）。修 root cause 的收益是每轮省下被重复领取的整条车道时间（本例 121s 差、done_ids 单次 239.1s）。",
+    "本环境**没有**接受 `*.dupclaim` 的机制：`grep -rn dupclaim loop/bin loop/ROLES loop/queue` 无任何命中，loop.py 的 validate()/cmd_submit() 也不识别该形态。它只是既有先例（read_dafeng_L3_0267.w-dafeng-0.dupclaim/）留下的**事实约定**。因此本目录是留证，不是提交，也不会进入 done_ids()。",
+    "coverage 未核验『零覆盖段是否真的无内容』这一步是人工判断，我只逐段列出并抽查，没有把 17 段全部逐条论证。",
+    "semanticReview 仍为 not-performed：本审计只做定位与结构复算 + 反向清单。引文定位正确 ≠ 语义已核验；真正的语义复核要由独立 read-verify 复核者做（verify:dafeng:L0:0216 当前 verifyState=pending）。",
+    "未跑 GPU/浏览器测试（任务未要求，且按纪律不得跑）；未改任何受保护路径；未做任何 git checkout/reset/stash。"
+  ]
+}

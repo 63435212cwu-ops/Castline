@@ -1,0 +1,89 @@
+{
+  "task": "read:dafeng:L3:0011",
+  "agent": "w-dafeng-3",
+  "status": "done",
+  "summary": "精读《大奉打更人》第十二章 一顿操作猛如虎（docs[0].text[34100:37396)，3296 字）：5 条任务五元组、13 条因果边、6 条状态变化、4 条伏笔（2 条仅推理层回收、2 条 unresolved）、37 条叙述事实、13 条人物主张、8 条视角内部、8 条显式不写、19 条 unknowns。候选里 271 处引文（81 条去重）全部由脚本 str.find 派生偏移并回切校验，0 处偏移/哈希不符。",
+  "evidence": [
+    {
+      "path": "loop/state/out/read_dafeng_L3_0011.candidate.json",
+      "sha256": "29f86877e7bab18e8abf44a276a54e2a93305bdb46ceb90eba33aad24a8db64e"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "原文区间自检：docs[0].text[34100:34112] == '第十二章 一顿操作猛如虎'，与任务 sourceRange 起点一致，该标题在全文仅出现 1 次。",
+      "result": "pass"
+    },
+    {
+      "text": "源哈希：shasum -a 256 data/cache/9b676d7031b1bcd3b8377a18.docs.json == fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839，与任务 sourceHash 一致。",
+      "result": "pass"
+    },
+    {
+      "text": "切片哈希与长度：sha256(text[34100:37396]) == 03f0149b5dd44b7cf6dbf1ee3e593c544d9c2b241f164843b2c9380a1169ce00，len == 3296。切片哈希另起字段 segmentSha256，未覆盖 sourceHash。",
+      "result": "pass"
+    },
+    {
+      "text": "引文逐字：递归抽出候选全部 271 处带 quote+start/end 的条目，逐条断言 docs[0].text[start:end] == quote，sliceMismatch=0。/ 而 start/end 全部落在 [34100,37396) 内，outOfRange=0。",
+      "result": "pass"
+    },
+    {
+      "text": "sourceHash 覆盖：271 处引文的 sourceHash 全部等于任务 sourceHash，hashMismatch=0。",
+      "result": "pass"
+    },
+    {
+      "text": "first-occurrence 标注：isFirstOccurrenceInWholeText 与 T.find(quote)==start 逐条一致，firstOccWrong=0。",
+      "result": "pass"
+    },
+    {
+      "text": "偏移不是手抄：构建脚本对每条引文在切片上 str.find，命中不唯一（发现第二次出现）或找不到即抛错退出；start = 34100 + 命中下标。",
+      "result": "pass"
+    },
+    {
+      "text": "反向覆盖（字符级）：把切片每一位标成是否被任一已登记引文覆盖，取未覆盖极大连续段并按「去空白标点后 >=4 字」过滤，significantUncoveredRuns=0（84.98% 字符被引文直接覆盖，其余为非内容字符）。",
+      "result": "pass"
+    },
+    {
+      "text": "独立坐标佐证：图谱缓存 data/cache/9b676d7031b1bcd3b8377a18.json 中章标签 == 本单元标题的事件共 2 条，其 quoteRef 偏移全部落在 [34100,37396) 内且 text[start:end]==quote 逐字成立。图谱缓存只用于坐标佐证与既有结论状态对照，未作为原文证据。",
+      "result": "pass"
+    },
+    {
+      "text": "红线自查：许七安的「偷情杀人案」全套假设、张献供词、张杨氏说辞、「钝器重创后脑」死因均登记为 characterClaims（人物主张），未写成叙述事实；三条与案情有关的推断同时进入 deliberatelyNotAsserted。",
+      "result": "pass"
+    },
+    {
+      "text": "结束≠成功自查：result 只写到「王捕头被说服、决定去找朱大人、准备再赴张宅」，显式写 notSuccess；本单元没有任何拿人／定罪／结案的叙述。",
+      "result": "pass"
+    },
+    {
+      "text": "未做语义核验：semanticReview=not_done，候选显式声明定位正确不等于语义已核验，语义交由 read-verify 通道对抗式复核。",
+      "result": "pass"
+    },
+    {
+      "text": "写入范围：只在任务 writes 指定的 loop/state/out/read_dafeng_L3_0011.candidate.json 写入，未触碰 js/ css/ index.html serve.py narrative.py scripts/ tests/ docs/ data/ 等受保护路径。",
+      "result": "pass"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/read_dafeng_L3_0011.candidate.json",
+      "kind": "append-only"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/9b676d7031b1bcd3b8377a18.docs.json": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+  },
+  "remaining": [
+    "语义未核验：本候选只保证引文定位逐字正确，语义解读未经独立复核；semanticReview 保持 not_done。",
+    "本单元结束时案子未破：许七安的偷情杀人假设、孩子生父、贼人是否存在、墙上脚印是否故意留下，全部未验证；靴子比对未执行。这些不是遗漏，是原文到此为止的状态，已写进 unknowns 与 foreshadows 的 unresolved 项。",
+    "反向覆盖脚本只能发现「整段没被引用」，发现不了「引了但读错」的要素级误读；也发现不了「漏掉一整条本该建立的因果边或状态变化」。这条残留已写进 reverseChecksSelf.stillOpen。",
+    "段外消歧阅读：为确认章界读了本单元前后各约 600 字（第十一章末「卷宗给我！」、第十三章首「审问」）。这些段外内容一律未作为本单元引文证据；因此关于「王捕头去找朱县令之后发生了什么」只能标为段外，未写进任何断言。",
+    "本单元的文本是否有版本差异未核验：只确认当前缓存这一版的逐字内容。候选里保留了三处疑似排印问题（「很研究」「附和逻辑」「三百五十度」）的原样引用，未改写、未断言成因。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/read_dafeng_L3_0011.candidate.json"
+    ]
+  }
+}

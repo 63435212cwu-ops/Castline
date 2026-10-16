@@ -1,0 +1,272 @@
+{
+ "schema": "read-verify-verdict/1",
+ "task": "verify:xiyou:L0:0092",
+ "agent": "w-dafeng-2",
+ "role": "VERIFIER",
+ "roleFile": "loop/ROLES/VERIFIER.md",
+ "status": "done",
+ "reviewedTask": "read:xiyou:L0:0092",
+ "reviewedArtifact": "loop/state/out/read_xiyou_L0_0092.candidate.json",
+ "candidateAgent": "w-xiyou-1",
+ "candidateSha256": "b81e4c326309ab23d00fef9f1abfc84d110bd849466e67bc74a9efca52bb625e",
+ "candidateBytes": 260910,
+ "book": "xiyou",
+ "lane": 0,
+ "unitIndex": 92,
+ "unitHead": "第九十二回　三僧大战青龙山　四星挟捉犀牛怪",
+ "source": {
+  "path": "data/cache/a065244455cfb2221bcda94a.docs.json",
+  "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+  "range": [
+   662992,
+   670221
+  ],
+  "sliceCodepoints": 7229,
+  "boundaryCheck": "复核者独立复算：docs.json 的 sha256 == 任务 sourceHash（相等）；docs[0].text[662992:670221] 长 7229 codepoint，首 26 字逐字等于回目『第九十二回　三僧大战青龙山　四星挟捉犀牛怪』；右界 670221 处为回末『…且听下回分解。』后的空行。"
+ },
+ "verdict": "partial",
+ "verdictRationale": "引文层 363/363 全部逐字命中、偏移与 find 一致、全文唯一、哈希全等、零越界——**没有一条编造**，覆盖账目（217 span / 4904 cp / 0.6784 / 59 大块 / 73 小块 286cp）经独立复算与候选完全一致，人物地名扫描未发现原文不存在者。这些是候选最核心的契约面，全部成立，故不判 fail。但语义层有 4 条可用逐字原文否证的错误，其中 CE1（cost 把『依然』读成升级）、CE2（把第二次索战的令回填进第一次的 obstacle）直接落在被提取的实义栏位上，会让下游读到与原文相反的结论；CE3 主语错位、CE4 机制叙述与原文相反。这些错误可局部改写修掉，不影响其余条目与整份引文语料的复用，故判 partial。",
+ "counterExamples": [
+  {
+   "id": "CE1_tiesuo_is_continuity_not_escalation",
+   "claim": "tasks[0].cost 写『拘束由锁升级为铁索』，states[0] 与 worldSettings[8] 重复同一判断（WS9 写『比原先的「锁」更重的拘束』）。",
+   "quote": {
+    "quote": "那妖王把唐僧捉住，依然使铁索锁了",
+    "start": 664133,
+    "end": 664149,
+    "offsetUnit": "absolute-doc-codepoint",
+    "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2"
+   },
+   "why": "『依然』是**照旧、同原来一样**的连续性标记，不是升级标记。本区间前文对唐僧的拘束只写作『锁在后房檐柱上』（663291）与『解了锁』（663717）/『那锁早自开了』（663757），从未写作铁索；『依然使铁索锁了』说的是**重新照原样锁上**，原文没有任何『更重』的比较级表述。候选把一个重申原状的句子读成了拘束升级，并据此把 cost 栏填成实质内容。这是硬性红线里点名的『cost 尤其注意』一类：该栏的证据必须真的写出代价，而『依然』恰恰否证了变化。可复现：python3 -c \"import json;T=json.load(open('data/cache/a065244455cfb2221bcda94a.docs.json'))[0]['text'];print(T[664133:664149])\""
+  },
+  {
+   "id": "CE2_obstacle_quote_spliced_from_the_second_sortie",
+   "claim": "tasks[2]（T3_three_monks_storm_the_cave，三僧索战）的 obstacle 第三条引文『小的们，都要用心围绕，休放他走了。』被当作**第一次**索战中与『小的们上来』同一场的临战令，并称它『把一对一变成多对少』。",
+   "quote": {
+    "quote": "小的们，都要用心围绕，休放他走了。",
+    "start": 666653,
+    "end": 666670,
+    "offsetUnit": "absolute-doc-codepoint",
+    "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2"
+   },
+   "why": "该句在 666653，属**第二次**索战（四木禽星下界之后）。第一次索战的临战令在 664754（『那辟寒大王喊一声，叫：「小的们上来！」』），两者相隔 1899 codepoint。时点上：八戒在 664782 已被捆入洞，直到 666984 二星入洞才被解下；666653 正落在这段**八戒、沙僧都已被捆、只有行者一人在洞外**的区间内。因此该令约束的对象既不是『三僧』，也不存在『一对一变成多对少』——当时洞外只有行者一人。候选自己在 tasks[2].result 里已写明八戒沙僧被擒，却又把第二次的令回填进第一次的 obstacle，属场景错位。可复现：python3 -c \"import json;T=json.load(open('data/cache/a065244455cfb2221bcda94a.docs.json'))[0]['text'];print(T.find('小的们，都要用心围绕'),T.find('早把个八戒绊倒在地'),T.find('却向玄英洞里解了唐僧'))\""
+  },
+  {
+   "id": "CE3_state_subject_shifted_from_underlings_to_demon_kings",
+   "claim": "states[4]（S5_three_demon_kings_from_sleep_to_ruin）的 before 写『三个妖王…征战一日后睡熟，连梆铃不响都要妖王自己叫问』，其首条引文与掣棒引文都不支持该主语。",
+   "quote": {
+    "quote": "原来那伙小妖征战一日，俱辛辛苦苦睡着，听见叫唤，却才醒了。",
+    "start": 663819,
+    "end": 663848,
+    "offsetUnit": "absolute-doc-codepoint",
+    "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2"
+   },
+   "why": "被引句的主语是**小妖**（『那伙小妖』），且它前面的紧邻原文恰恰证明**妖王当时是醒着的**——663772 是妖王本人在中厅内房叫『小的们，紧闭门户，小心火烛。这会怎么不叫更巡逻，梆铃都不响了？』，正是他这一叫才把巡逻小妖唤醒并导致师徒被撞见。候选把这个『叫问』安到『睡熟的妖王』头上，因果方向正好相反：不是妖王睡熟中糊里糊涂，而是妖王醒着查岗、小妖睡熟失职。候选在 tasks[0].obstacle 里对同一句的用法（主语＝小妖）是对的，说明这是 S5 一处的栏目错误而非全篇误读。可复现：python3 -c \"import json;T=json.load(open('data/cache/a065244455cfb2221bcda94a.docs.json'))[0]['text'];print(T[663772:663848])\""
+  },
+  {
+   "id": "CE4_ce10_mechanism_omits_the_intervening_engagement",
+   "claim": "causeEdges[9]（CE10）的 mechanism 写『三个妖王认得克星，未战先怯…机制是**认得对手**，不是**被打散**』。",
+   "quote": {
+    "quote": "那壁厢四木禽星一个个各轮兵刃道：“孽畜！休动手！”",
+    "start": 666765,
+    "end": 666790,
+    "offsetUnit": "absolute-doc-codepoint",
+    "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+    "note": "本句所在的 666720–666790 整段在候选的 reverseCoverageExclusions 里登记为 not-extracted。"
+   },
+   "why": "原文在『看他四星，自然害怕』（666790）**之前**先写了交手的发生：行者被『猢狲』二字激怒、『咬牙发狠举铁棒就打』（666720），三个妖王随即『调小妖，跑个圈子阵，把行者圈在垓心』（666742），四木这才『各轮兵刃』喊『孽畜！休动手！』（666765）。所以妖王弃守逃走发生在一场**已经打起来的**围斗之后，不是候选所写的『未战先怯』；候选同一份产出里 tasks[4].action 还给了四木的伏兵之计『你先去索战，引他出来，我们随后动手』（666509），与之互相矛盾。『认得对手』这层是原文有的（666790），但『未战先怯／不是被打散』这层被原文否定。可复现：python3 -c \"import json;T=json.load(open('data/cache/a065244455cfb2221bcda94a.docs.json'))[0]['text'];print(T[666720:666790])\""
+  }
+ ],
+ "reverseChecks": [
+  {
+   "id": "RC1_four_stars_first_on_scene_action_is_an_armed_shout",
+   "found": "四木禽星到阵后的**第一个**动作是各轮兵刃喊『孽畜！休动手！』——一次主动的武装喝令，不是单纯被妖王看见后被动生效。候选把它整段登记为 not-extracted，于是 worldSettings[16]（WS17 四木克星规则）的回收端只引 666790『自然害怕』，规则被呈现为纯粹的相性效果，抹掉了四星实际出手介入这一步。",
+   "quote": {
+    "quote": "那壁厢四木禽星一个个各轮兵刃道：“孽畜！休动手！”",
+    "start": 666765,
+    "end": 666790,
+    "offsetUnit": "absolute-doc-codepoint",
+    "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2"
+   },
+   "severity": "补登（不推翻 WS17 的结论，但其 explain 的机制叙述不完整）"
+  },
+  {
+   "id": "RC2_xingzhe_strikes_because_of_the_insult_and_is_encircled",
+   "found": "第二次索战里行者动手的**触发**是『猢狲』二字（他『最恼得是这猢狲二字，咬牙发狠举铁棒就打』），且他随后被三个妖王的**圈子阵**围在垓心。两件事实候选全无：tasks[4].action 直接跳到四木现身，states[1] 把行者写成『带四木下界的引路人』，中间这次被围没有进入任何分区。这也直接削弱 CE10 的『未战先怯』（见 CE4）。",
+   "quote": {
+    "quote": "三个妖王，调小妖，跑个圈子阵，把行者圈在垓心。",
+    "start": 666742,
+    "end": 666765,
+    "offsetUnit": "absolute-doc-codepoint",
+    "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2"
+   },
+   "severity": "补登（同时构成 CE4 的旁证）"
+  },
+  {
+   "id": "RC3_tangseng_reads_the_calamity_as_his_own_fate",
+   "found": "唐僧在哭词里把这场灾厄归因于自己的命数：『不识灯中假佛像，概因命里有灾愆』。这是一条**人物对自身处境的解释**，与候选已提取的相邻句（663329『一别长安十数年』、663377『贤徒追袭施威武』）同在 663345–663377 的未提取块内。候选的 states[0] 只记他被锁、被铁索锁的外部状态，没有任何一条记录他对灾厄的自我归因；而 tasks[3].action 里行者对众僧说『我师父该有此难』（665266）被单列为 notWorldSettings[4]（NW5『人物对灾厄的解释』）——同一类『人物自认命定』的理解，在唐僧身上漏掉、在行者身上登记了，口径不一致。",
+   "quote": {
+    "quote": "不识灯中假佛像，概因命里有灾愆。",
+    "start": 663361,
+    "end": 663377,
+    "offsetUnit": "absolute-doc-codepoint",
+    "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2"
+   },
+   "severity": "补登（建议入 states 的 knowledge/attitude 或 unknowns）"
+  },
+  {
+   "id": "RC4_uncovered_verse_block_contains_a_causal_line",
+   "found": "被判为装饰性铺陈而整体未提取的韵文块 664605–664739 里，『这壁厢因师性命发狠打，那壁厢不放唐僧劈脸挝』是一句**因果陈述**：三僧因师父性命而拼命、妖怪则死扣唐僧不放。它不是兵器名物的对仗堆砌，而是双方战斗动机的说明。候选的 notWorldSettings[1]（NW2）以『兵器铺陈…没有说明任何一方因为兵器而能做或不能做什么』为整块韵文定性的口径，套到这一句上不成立。该块在 reverseCoverageExclusions 里的类别是 not-extracted（诚实登记、未给排除理由），所以这是**漏提取**，不是隐蔽的误杀；但复核按契约仍须把它列为误杀风险点：若下游按 NW2 的口径把整块韵文一律当装饰，这条因果会被结构性挡掉。",
+   "quote": {
+    "quote": "这壁厢因师性命发狠打，那壁厢不放唐僧劈脸挝。",
+    "start": 664685,
+    "end": 664707,
+    "offsetUnit": "absolute-doc-codepoint",
+    "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2"
+   },
+   "severity": "误杀风险（建议：该句单列，或把 NW2 的口径缩到确有兵器铺陈的句子）"
+  },
+  {
+   "id": "RC5_the_execution_is_triggered_by_bajie_losing_patience",
+   "found": "府堂行刑的直接触发句『少顷间，八戒发起性来』落在未提取块 [669387,669398) 内。tasks[6].action 从 669398『掣出戒刀』起引，读者看不到这是八戒自己**发起性来**的即时动作；而 foreshadows[2]（F3 审问未发生）把审问落空归到八戒那句『已此情真罪当，再有甚讲』（669041），却漏了这个更直接的行动触发点。",
+   "quote": {
+    "quote": "少顷间，八戒发起性来，",
+    "start": 669387,
+    "end": 669398,
+    "offsetUnit": "absolute-doc-codepoint",
+    "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2"
+   },
+   "severity": "补登（不影响 F3 的 unresolved 结论）"
+  },
+  {
+   "id": "RC6_the_return_to_ciyun_temple_is_dropped",
+   "found": "二星烧洞之后的**回寺动作**『却才领唐僧找路回金平慈云寺去』在未提取块 [667405,667420) 内。states[12]（S13 玄英洞→灰烬）写到『烧成灰烬』为止，没有登记三众离洞回寺这一步；而 tasks[4].result 说『人救出来了』、states[5]（S6）说二星『入洞解人』，从解人到回寺之间的位移在候选里缺一环。",
+   "quote": {
+    "quote": "却才领唐僧找路回金平慈云寺去。",
+    "start": 667405,
+    "end": 667420,
+    "offsetUnit": "absolute-doc-codepoint",
+    "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2"
+   },
+   "severity": "补登（小事，但属状态链断点）"
+  }
+ ],
+ "falseKills": [
+  {
+   "id": "FK1_verse_block_not_uniformly_decorative",
+   "what": "被整体归入『韵文/诗赞铺陈，未提取』的 664605–664739 块",
+   "why": "该块内 664685『这壁厢因师性命发狠打，那壁厢不放唐僧劈脸挝』是合法可提取的因果陈述，按『整块＝装饰』的口径会被挡掉。候选在 reverseCoverageExclusions 里已如实登记为 not-extracted 并把判断交还复核者，未给排除理由，所以不构成『自称已排除』的误杀；登记在此以备下游按类别批量过滤时不要把这一句一起滤掉。",
+   "quote": {
+    "quote": "这壁厢因师性命发狠打，那壁厢不放唐僧劈脸挝。",
+    "start": 664685,
+    "end": 664707,
+    "offsetUnit": "absolute-doc-codepoint",
+    "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2"
+   }
+  }
+ ],
+ "verifiedOk": {
+  "quotesExact": 363,
+  "quotesTotal": 363,
+  "quoteMismatch": 0,
+  "hashMismatch": 0,
+  "outOfRange": 0,
+  "findNeDeclared": 0,
+  "nonUniqueInWholeDoc": 0,
+  "coverageMatch": true,
+  "hallucinatedEntities": [],
+  "citationSample": {
+   "seed": 92,
+   "drawn": 5,
+   "allExact": true
+  }
+ },
+ "machineRecheck": {
+  "cmd": "python3 -B \"$AGENT_ARTIFACTS/verify-xiyou-L0-0092/audit.py\"",
+  "what": "独立脚本从磁盘复算，不 import 候选的任何构建脚本、不读摘要：①363 条引文逐字回切 + find + 全文唯一性 + sourceHash + 区间；②引文区间并集取补复算覆盖账目，与 machineSelfCheck 及 reverseCoverageExclusions 逐块比对；③31 个人名/地名在候选散文与原文之间的存在性扫描；④随机 5 条引文 find 抽样。"
+ },
+ "usableVsDiscard": {
+  "usable": [
+   "tasks[1..7]（除 tasks[2].obstacle 第三条引文）",
+   "causeEdges 除 CE10 的 mechanism 措辞外",
+   "states[0..3]、states[5..15]（states[4] 需改主语）",
+   "foreshadows 全部 5 条（F3/F4 的 unresolved 判断成立）",
+   "worldSettings 除 WS9 的『更重』措辞外",
+   "themeReadings 全部 2 条（各自带 counter，符合契约）",
+   "unknowns 全部 12 条",
+   "rejectedCauseEdges 全部 6 条（与原文相符，抽查 RCE1/RCE4 机制成立）"
+  ],
+  "mustFix": [
+   "tasks[0].cost 删除『升级为铁索』的判断，改为 null + reason 或改标 status",
+   "states[0] 与 worldSettings[8] 同步删除/改写该判断",
+   "tasks[2].obstacle 第三条引文改为第一次索战的 664754，或删该条",
+   "states[4].before 主语改回小妖，并补妖王醒着查岗这一反向事实"
+  ],
+  "downgradeToUnknowns": [
+   "CE10 的『未战先怯／不是被打散』——原文有交手过程，该机制叙述应降级或改写"
+  ],
+  "drop": []
+ },
+ "assertions": [
+  {
+   "text": "复核者独立性：本轮复核者 w-dafeng-2 ≠ 候选 agent w-xiyou-1（租约 loop/state/leases/verify:xiyou:L0_0092.d/lease.json 的 agent=w-dafeng-2），不构成自签。",
+   "result": "pass",
+   "cmd": "python3 -c \"import json;print(json.load(open('loop/state/leases/verify:xiyou:L0_0092.d/lease.json'))['agent']);print(json.load(open('loop/state/out/read_xiyou_L0_0092.json'))['agent'])\""
+  },
+  {
+   "text": "先读原文后看候选：先整片读完 docs[0].text[662992,670221)（64 行）并自行抽取要点，之后才打开候选文件。",
+   "result": "pass",
+   "cmd": "python3 -c \"import json;T=json.load(open('data/cache/a065244455cfb2221bcda94a.docs.json'))[0]['text'];print(T[662992:670221])\""
+  },
+  {
+   "text": "363 条引文全部逐字命中且偏移自洽（!= 0），sourceHash 全等，无越界，全全文唯一。",
+   "result": "pass",
+   "cmd": "python3 -B \"$AGENT_ARTIFACTS/verify-xiyou-L0-0092/audit.py\""
+  },
+  {
+   "text": "覆盖账目独立复算与候选 machineSelfCheck 及 reverseCoverageExclusions 逐块一致（217/4904/0.6784/59/73+286）。",
+   "result": "pass",
+   "cmd": "python3 -B \"$AGENT_ARTIFACTS/verify-xiyou-L0-0092/audit.py\""
+  },
+  {
+   "text": "原文与候选全程只读未改：复核前后 sha256 一致。",
+   "result": "pass",
+   "cmd": "shasum -a 256 data/cache/a065244455cfb2221bcda94a.docs.json loop/state/out/read_xiyou_L0_0092.candidate.json"
+  }
+ ],
+ "evidence": [
+  {
+   "path": "loop/state/out/read_xiyou_L0_0092.candidate.json",
+   "sha256": "b81e4c326309ab23d00fef9f1abfc84d110bd849466e67bc74a9efca52bb625e",
+   "kind": "被复核候选（只读，未改动；复核前后哈希一致）"
+  },
+  {
+   "path": "data/cache/a065244455cfb2221bcda94a.docs.json",
+   "sha256": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+   "kind": "原文（只读，未改动；等于任务 sourceHash）"
+  },
+  {
+   "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/verify-xiyou-L0-0092/audit.py",
+   "sha256": "27461ec0c36576880ea1e4ae7ce68df9833bfe661f1f213afb19b63a6d756255",
+   "kind": "本次复核审计脚本（外置盘留存；可复现全部机器结论）"
+  }
+ ],
+ "changes": [
+  {
+   "path": "loop/state/out/verify_xiyou_L0_0092.verdict.json",
+   "kind": "append-only",
+   "note": "本轮唯一写入。未改 js/ css/ index.html serve.py narrative.py scripts/ tests/ docs/ data/ 等受保护路径。"
+  }
+ ],
+ "sourceHashes": {
+  "data/cache/a065244455cfb2221bcda94a.docs.json": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2"
+ },
+ "remaining": [
+  "未做：把 59 个未覆盖大块**逐块**论证为『该提取／该排除』——本复核只逐块读了 12 个 codepoint 数最大的块并给出 RC1–RC6，其余块沿用候选的诚实登记（not-extracted），未逐块定性。",
+  "未做：读上一单元（read:xiyou:L0:0090）核实 unknowns[11]（四值功曹传报）——该条候选自己已标为人物语存疑，本轮未越区间取证。",
+  "未做：判定 WS21（行者所持『师父料不伤命』之据）标 misunderstood 是否恰当——原文确实无叙述层印证，本轮未另找反证。"
+ ],
+ "rollback": "本轮只追加 loop/state/out/verify_xiyou_L0_0092.verdict.json 一个文件；回滚＝删除该文件即可，不影响被复核候选与原文（两者哈希未变）。",
+ "notes": "【与提示词五问的对应】1 抽取项核对：363 条引文无一条找不到对应文字，零编造。2 反向验证：给出 RC1–RC6 六条候选未覆盖而原文明确存在的事实（四木武装喝令；行者被猢狲激怒动手并被圈子阵围住；唐僧自认命里有灾愆；未提取韵文块里的因果句；八戒发起性来触发行刑；烧洞后回寺动作），其中 RC1/RC2 直接补正 CE10 的机制。3 误杀检查：FK1 一条——被判为装饰的韵文块里含合法因果句；候选已如实登记为 not-extracted 并把判断交还复核者，故记为误杀**风险**而非既成误杀。4 幻觉/越权检查：候选散文里的人名地名 31 个全部在原文中存在，未发现原文没有的人物、结局或伏笔；F3/F4 显式标 unresolved 是正确做法（『明究其由』与『向后免征』在本区间确无回收），未把结束当成功。5 引用核验：随机种子 92 抽 5 条 find，declared start 与 find 一致且逐字命中；全量 363 条的 find!=declared 计数为 0。\n【我撤回/降级了什么】我原本想把 tasks[6].cost（『犀角不能自留』）列为第 5 条 counterExample，但重新读原文后发现行者是**主动**分派（『孙大圣更有主张，就教』），且『献灵山佛祖』本是取经的既定目标，把它记为『代价』虽偏弱却非原文否证——按角色契约『拿不出原文引证的反对意见只能记为存疑』，我把它降级为 notes 里的存疑，不计入 counterExamples，也不作为判 partial 的依据。\n【不确定处】CE2 有一种为候选辩护的读法：候选可能把第二次索战视为第一次的延续（同一回的同名战斗）。但候选自己在 tasks[2].obstacle 里写『先是三对三…随后…把一对一变成多对少』，明确把它当作三对三那一场的内部转折，而该句时点八戒沙僧已在洞内被捆，这一读法无法成立。\n【独立性】本复核不 import 候选的任何构建脚本；候选文件里没有可执行代码，全部结论由本文件 audit.py 从磁盘复算。",
+ "summary": "独立反向复核 read:xiyou:L0:0092（《西游记》第九十二回，原文区间 [662992,670221)，7229 codepoint）。按 VERIFIER.md 顺序执行：先把 64 行原文整片读完并自行抽取要点，之后才打开候选。裁决 **partial**。\n\n【引文层：0 编造】独立脚本从磁盘复算（不 import 候选任何构建脚本、不读摘要）：363 条引文节点全部 text[start:end]==quote 逐字成立、find() 返回的 index 与声明 start 全部相等、在全书 722176 codepoint 内全部唯一、sourceHash 全等、零越界；随机种子 92 抽 5 条独立 find 全部逐字命中。覆盖账目独立复算与候选 machineSelfCheck 及 reverseCoverageExclusions **逐块完全一致**（217 span / 4904 cp / 0.6784 / 59 大块 / 73 小块 286cp）；31 个人名地名扫描未发现原文不存在者。这些是候选最核心的契约面，全部成立，故不判 fail。\n\n【counterExamples 4 条，每条 quote 逐字可查】① tasks[0].cost 写『拘束由锁升级为铁索』（states[0]、worldSettings[8] 同）——但『依然』是**照旧**的连续性标记，前文只写『锁在后房檐柱上』/『解了锁』，从未写铁索，原文无任何『更重』的比较级；② tasks[2].obstacle 把**第二次**索战的临战令『小的们，都要用心围绕，休放他走了。』(666653) 当作**第一次**三对三的转折，而该时点八戒(664782 被捆)沙僧都已在洞内、直到 666984 才被解下，洞外只有行者一人，『把一对一变成多对少』无法成立（第一次的令在 664754，相隔 1899cp）；③ states[4].before 写『三个妖王…睡熟』，但其引文主语是『那伙小妖』，且紧邻原文 663772 是妖王本人叫问『这会怎么不叫更巡逻』——妖王当时醒着，因果方向相反；④ causeEdges[9].mechanism 写『未战先怯…不是被打散』，而原文 666720–666790 先写行者被『猢狲』激怒动手、妖王『跑个圈子阵，把行者圈在垓心』，四木才各轮兵刃喊『孽畜！休动手！』，逃走发生在一场已打起来的围斗之后（该段正是候选自己登记的 not-extracted 块）。\n\n【反向验证 6 条】RC1 四木到阵的第一个动作是各轮兵刃武装喝令（被整段漏提，WS17 回收端只剩『自然害怕』）；RC2 行者动手的触发是『猢狲』二字且被圈子阵围住（削弱 CE10）；RC3 唐僧自认『命里有灾愆』，与候选已在行者身上登记的 NW5 同类却漏登；RC4 被判装饰的韵文块内含合法因果句『这壁厢因师性命发狠打』；RC5 行刑触发句『少顷间，八戒发起性来』未提取；RC6 烧洞后回寺动作未提取。\n\n【误杀 1 条】FK1：整块判装饰的 664605–664739 里含真因果句；候选已如实登记为 not-extracted、未给排除理由并把判断交还复核者，故记为风险而非既成误杀。\n\n【幻觉/越权】未发现原文没有的人物、结局或伏笔；F3『明究其由』与 F4『向后免征』显式标 unresolved 正确，未把结束当成功；semanticReview 保持 not-performed，未越权声称语义已核。\n\n【我撤回的】原拟把 tasks[6].cost（犀角不能自留）列为第 5 条 CE，重读后发现行者是主动分派『孙大圣更有主张，就教』、献佛本是取经既定目标，原文未否证，按契约降级为 notes 存疑，不计入判据。"
+}

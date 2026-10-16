@@ -1,0 +1,101 @@
+{
+ "task": "read:sanguo:L0:0044",
+ "agent": "w-xiyou-1",
+ "status": "done",
+ "summary": "逐行通读《三国演义》第四十五回原文区间 [223801,229433) 共 5632 codepoint（按 \\n 切分 37 行：21 行非空、16 行为空行；正文止于 229377，229378 起为分隔线、229399 起为站点导航），按 19 个叙事段（P00 回目 – P18 换将与回末）分段做笔记，产出候选 JSON：12 条任务五元组（8 个 null 栏位，每个都写了 <栏位>Note 说明为什么没有依据）、13 条 causeEdges（另 5 条 rejectedCauseEdges 记下不连边的理由，其中 RCE3「三江口战败→斩蔡张」与 RCE5「鲁肃劝谏→不杀玄德」是本回最容易被误连的两条）、7 条 states、5 条 knowledgeGaps、4 条 foreshadows（1 resolved-in-unit / 3 unresolved，另 4 条 rejectedForeshadows）、15 条 worldSettings（place 7 / item 4 / rule 4；arrived 3、mentioned 4；declared 2、executed 1、misunderstood 1，另 6 条 rejectedWorldSettings）、2 条 themeReadings（各带 perspective/support/counter 三件）、15 条 unknowns、4 条 selfCritique。全文件 277 条引用逐字命中 docs[0].text 且偏移全部落在本单元区间内，sourceHash 一律为 prompt 指定文件的 sha256。semanticReview 保持 not-performed。",
+ "evidence": [
+  {
+   "path": "loop/state/out/read_sanguo_L0_0044.candidate.json",
+   "sha256": "d47632384090a9f1ac5e29a53c2965d3e8fb29e5752226ea419f684069c027b7"
+  },
+  {
+   "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261011-195516-813640-53101/测试产物/probe-read_sanguo_L0_0044/audit.py",
+   "sha256": "b602f1c6c932b508f90c36500fae835efb6d96ca35f21395f7d009528ae6bd0a"
+  },
+  {
+   "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261011-195516-813640-53101/测试产物/probe-read_sanguo_L0_0044/build.py",
+   "sha256": "2578a7135b4faca9937c7d6113db7ae20dc771c78387fb6dbf9679d182204db4"
+  },
+  {
+   "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261011-195516-813640-53101/测试产物/probe-read_sanguo_L0_0044/quotes.py",
+   "sha256": "11a33e7c6b9b3f1a592fec83c041042c7d4e341bdea03a601599e70187e937a0"
+  }
+ ],
+ "assertions": [
+  {
+   "text": "引用层（全量复算，独立实现）：audit.py 不 import build.py，只读候选 JSON + docs.json + 任务 JSON，递归遍历凡含 quote/start/end 的字典，用 json.load(open('data/cache/fe42d01f3826fe8096f86614.docs.json'))[0]['text'] 复算 text[start:end]==quote，并断言 223801<=start<end<=229433 且 sourceHash==8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2。结果：277 条全部逐字命中、0 条失败、0 条越界、0 条哈希不符；另独立重算 inUnitOccurrences/globalOccurrences，277/277 与自报值一致，且 136 个不同引文在全文各只出现一次（定位锐利）。命令：python3 -B -s <artifacts>/probe-read_sanguo_L0_0044/audit.py loop/state/out/read_sanguo_L0_0044.candidate.json（返回码 0，OK 22 / WARN 1 / FAIL 0）。",
+   "result": "pass"
+  },
+  {
+   "text": "偏移口径：断言 docs[0].text[223801:229433] 以本单元标题开头，且 text[223801:223822]=='第四十五回　三江口曹操折兵　群英会蒋干中计'。命令：python3 -c \"import json;t=json.load(open('data/cache/fe42d01f3826fe8096f86614.docs.json'))[0]['text'];print(t[223801:229433][:21]==t[223801:223822])\" → True。全部偏移一次性由 build.py 内的 q() 用 TEXT.find 实测写出，未手写任何一个偏移数字。",
+   "result": "pass"
+  },
+  {
+   "text": "sourceHash 口径：shasum -a 256 data/cache/fe42d01f3826fe8096f86614.docs.json == 8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2，与候选 source.sourceHash 及全部 277 条引文一致。textSha256（docs[0].text 全文 607191 codepoint）=9d28638de0b0a89fa080cc2defb4a1f8de6adb1260c4545c04ef80f73cbb221e、segmentSha256(text[223801:229433]) 另起字段，未覆盖 sourceHash。",
+   "result": "pass"
+  },
+  {
+   "text": "任务 JSON 顶层 sourceHash 与 prompt 正文指定的文件不一致（WARN D1，登记项非本候选缺陷）：任务文件顶层 sourceHash=2988ce6e…，而 prompt 正文要求读 data/cache/fe42d01f3826fe8096f86614.docs.json。复算另一份缓存 data/cache/152e2a6eed94f1075e7e7070.docs.json：其 sha256 正是 2988ce6e…，且两份 docs[0].text 长度同为 607191、text 的 sha256 同为 9d28638d…、本单元切片 [223801,229433) 逐字相同。因此本候选全部偏移在两份文件里都成立；按 prompt 指定文件计 sourceHash，并把该不一致登记为 unknowns U13。未修改任务文件或任何缓存。",
+   "result": "pass"
+  },
+  {
+   "text": "五元组分栏独立性：audit.py 逐条任务检查五个栏位，断言同一句引文不在同一任务的多个栏位重复出现（任务提示词点名旧图谱有 714/1664 条共用一句）。结果：12 条任务、0 处跨栏共用。8 个 null 栏位（T1/T4/T7/T8/T9/T10/T11 的 cost，T5 的 objective）全部配了 <栏位>Note 写明为什么没有依据，8/8。",
+   "result": "pass"
+  },
+  {
+   "text": "内容分区完整性：机器从 prompt 抽出的 6 个必需分区 tasks/causeEdges/states/foreshadows/worldSettings/themeReadings 全部存在且非空。worldSettings 三类区分写进字段而非留给读者分辨：kind=place 的必带 placeState 且不带 institution/itemStates（arrived 3：三江口/樊口/旱寨；mentioned 4：聚铁山/夏口/江夏/江东，其中聚铁山是周瑜派孔明去断粮却被撤回的地点，按「提及≠到达」记 mentioned）；kind=item 的必带 itemStates 且取自 hold/transfer/use/lose 多选（4 条，四态分开给证据，照原文用字「赍/示/接/暗藏/扯碎」）；kind=rule 的必带 institution（declared 2 / executed 1 / misunderstood 1）。全部 basis 取值在 explicit/inferred/derived/unverified 内。",
+   "result": "pass"
+  },
+  {
+   "text": "因果边不得靠时间相邻：audit.py 断言每条 causeEdges 都有 direction/trigger/mechanism 三个字段且 trigger 长度>=8（不像随手截的短语）。13 条全部通过。另列 5 条 rejectedCauseEdges 记录**不连边**的理由，其中 RCE3（三江口战败→曹操斩蔡张）是本回最关键的一条：曹操战后确实责问过蔡张，但那次的结局是授权练兵（「可以便宜从事」），斩人的真接触发是二十余段之后蒋干呈书（「操大怒曰：二贼如此无礼耶」）。RCE5 同理：鲁肃「再三劝谏」的结果原文写明是「瑜只不听」，玄德活着离寨的原因是关云长在侧。",
+   "result": "pass"
+  },
+  {
+   "text": "伏笔判定：audit.py 断言 resolved-in-unit 的必须有 payoff.quote，unresolved 的**不得**带 payoff.quote（未回收不得伪称回收证据）。结果 4 条：1 条 resolved（FS2 周瑜「说客至矣」+「如此如此」→ 曹操「吾中计矣」+ 周瑜自陈「吾料诸将不知此计」，铺设与回收相距约 1400 codepoint）；3 条 unresolved，各写明为什么本区间没有回收（FS1 东南风之约的日期与信号都在区间外；FS3 杀孔明之意在区间内只被推迟未被取消；FS4 同盟「各相谋害」只有反向印证、没有兑现）。另 4 条 rejectedForeshadows 记下只出现一次或未及实施的东西（含蒋干「同窗交契」出现两次但两次是同场合重申、不构成铺设+回收）。",
+   "result": "pass"
+  },
+  {
+   "text": "说法与事实分离：本回的核心是诈伪，故逐处标注。曹操斩蔡张的依据只有一封他没有核实过的信，叙述层随后写明「操方省悟曰：吾中计矣」，且「蔡、张二人不知其意，惊慌不能回答」；周瑜「借曹操之手」是他自己对鲁肃说的（人物语）。回末插入的评断诗（「蔡张卖主求生计」）把二人写成确实通敌，与叙述层的「中计」相反——本候选不采用诗的口径，并把这一冲突登记为 unknowns U15。全部人物语在栏位 note 或 text 里注明出处。",
+   "result": "pass"
+  },
+  {
+   "text": "结果不等于成功：T1（周瑜设计断粮）的 result 写「落空」而非成功——孔明没有死、令被周瑜自己撤回（「不用他去！」）；T3（诱杀玄德）的 result 写「没有下手」而非「周瑜失败」，因为原文未写他当场放弃的理由，该空白登记为 U1；T9（蒋干说降）的 result 按本人回话写失败（「非言词所能动也」），未把其副产品（伪书）混进本条 result。",
+   "result": "pass"
+  },
+  {
+   "text": "反向自检（这一段里还漏了什么）：把候选全文与原文切片做对照，逐一核对 33 个出现过的人名与 215 条预备引文键，发现 4 处可补的真实缺口并已补入——(1) T1 action 补周瑜选孔明的理由句「先生久居汉上，熟知地理」；(2) ST3 补云长谏阻「恐其中有诈，不可轻去」作为被驳回的 obstacle 证据；(3) T12 action 补「蔡、张二人不知其意，惊慌不能回答」（二人对伪书一无所知的直接证据）；(4) 新增 U15 登记回末诗与叙述层的口径冲突。仍未写进候选的原文要素属于**故意不收**并已在 rejected* 栏说明理由（如「同窗交契」「二十四座水门」「汉大丞相」官号）。",
+   "result": "pass"
+  },
+  {
+   "text": "未声称语义已核验：semanticReview 保持 not-performed。本候选只完成「引文逐字命中＋全文绝对偏移自洽＋区间被逐行通读」这一层；五元组编排、因果强度、伏笔铺设/回收判定、世界设定归类与两条主题读法均为待独立复核的判断，已在 selfCritique（4 条，含两条自认可判 fail 的 cost 栏）与 remaining 中列明。",
+   "result": "pass"
+  }
+ ],
+ "changes": [
+  {
+   "path": "loop/state/out/read_sanguo_L0_0044.candidate.json",
+   "kind": "append-only"
+  }
+ ],
+ "sourceHashes": {
+  "data/cache/fe42d01f3826fe8096f86614.docs.json": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+  "data/cache/152e2a6eed94f1075e7e7070.docs.json": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+  "loop/state/runs/task-read_sanguo_L0_0044.json": "9d152df29563ed1bedaf51577cff0824f9a16ced3e880bf96fa3ed7169200de3"
+ },
+ "remaining": [
+  "语义层未核验：五元组编排（尤其 T3 的 cost 与 T1 的 obstacle）、13 条因果边的机制强度、4 条伏笔的铺设/回收判定、15 条世界设定的归类，都需独立 VERIFIER 反向复核。selfCritique SC1/SC2 已自认两处偏弱（T2、T3 的 cost 若按「可记账损失」严格判，应改为 null）。",
+  "任务 JSON 顶层 sourceHash（2988ce6e…）指向 data/cache/152e2a6eed94f1075e7e7070.docs.json，与 prompt 正文指定的 fe42d01f… 不一致。两份文件的 docs[0].text 与切片均逐字相同，故不影响本候选，但这是**环境侧索引生成的问题**，需 OPS 处置（不在 worker 的 writes 范围内，本轮未改任何任务文件或缓存）。",
+  "本区间正文止于 229377，之后为站点样板（分隔线 + 导航），已单列 coverage.boilerplate，未计入正文与 paragraphMap。",
+  "coverage.paragraphs=37 沿用「按 \\n 切分的行数」口径，与 coverage.segmentCount=19（叙事段数）含义不同；两个数字并存且已各自标注，若下游要统一口径需另行决定。",
+  "底本用字异文未规范化：「蔡熏」（U3）、「涨允」（U4）、「带着鼓东」「饮至半醋」（U5）。改写成通行写法会让引文在原底本里 find 不到，故一律照录。",
+  "T12 的 objective 记 derived 而非 explicit：曹操对蔡瑁说「我欲使汝二人进兵」是试探还是真要求，原文未写，已登记为 U7。若复核者认为该句足以支撑 explicit，可上调。",
+  "本候选未做的事：未与 data/cache/fe42d01f3826fe8096f86614.json 里的已有图谱结论做逐条对照（该文件按 prompt 说明不算原文证据，只能用来对照已有结论，本轮时间用在了原文侧）。这一步留给 VERIFIER。"
+ ],
+ "rollback": {
+  "kind": "append-only",
+  "strategy": "delete-added-files",
+  "files": [
+   "loop/state/out/read_sanguo_L0_0044.candidate.json"
+  ]
+ }
+}

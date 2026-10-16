@@ -1,0 +1,136 @@
+{
+  "verdict": "fail",
+  "reviewedTask": "read:sanguo:L1:0021",
+  "reviewedArtifact": {
+    "path": "loop/state/out/read_sanguo_L1_0021.candidate.json",
+    "sha256": "7b2cf07c8fde7ce7f7400dde709d01b24cda4358782c4253e2a9de9ebfb040e7",
+    "producedBy": "w-xiyou-0"
+  },
+  "reviewer": "w-dafeng-2",
+  "independence": "复核者 w-dafeng-2 ≠ 候选 agent w-xiyou-0，不构成自签（loop.py verify 亦会拒绝自签）。",
+  "source": {
+    "path": "data/cache/152e2a6eed94f1075e7e7070.docs.json",
+    "sha256": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+    "docIndex": 0,
+    "range": [110014, 115741],
+    "codepoints": 5727,
+    "sliceSha256": "e1d1e13a8f6b18b41d884d20b81762f27a865aa1dffc84b27a334b2a68aaa552",
+    "boundaryCheck": "T[110014:110038]=='第二十二回\\u3000袁曹各起马步三军\\u3000关张共擒王刘二将\\n'；T[115741:115746]=='第二十三回'；len(slice)==5727。左端不越界、右端止于下回回目。候选 source.sliceSha256 与本机复算一致。",
+    "readOrder": "先按 VERIFIER 契约第 1 条执行：我先把 [110014,115741) 导出到 /tmp/cl_v21_slice.txt 并逐段读完全文（写下自己的要点），之后才打开候选。候选的 coverageFills 未作为我的阅读路径。"
+  },
+
+  "counterExamples": [
+    {
+      "id": "CE1",
+      "kind": "fabrication-under-own-basis-definition",
+      "claim": "T18_chenlin_xi_xiwen.action.text 与 speechAsClueNotFact SP10.saidOrThought 都把「杀杨彪」写成檄文对曹操的指控之一，且 T18.action.basis=\"explicit\"。按候选自己的 basisLegend，explicit 的含义是「原文逐字这样写」。",
+      "candidateText": "写成檄文全文：历数曹操家世（原文作「祖父中常侍腾」「父嵩」，本区间未写出曹姓）、杀边让、破棺裸尸、置发丘中郎将摸金校尉、**杀杨彪赵彦**等罪状…／檄文对曹操家世与行为的全部指控（…发掘梁孝王冢、置发丘中郎将摸金校尉、**杀杨彪赵彦**等）",
+      "quote": "故太尉杨彪，典历二司，享国极位。操因缘眦睚，被\n　　以非罪；榜楚参并，五毒备至；触情任忒，不顾宪纲。",
+      "start": 112000,
+      "end": 112050,
+      "match": "exact",
+      "why": "杨彪那一句在区间内只写到「被以非罪」与「榜楚参并，五毒备至」（罗织罪名＋拷打），通篇没有任何一个字写杨彪被杀：该句 50 字内「死」「诛」「杀」「枭」「亡」全部出现 0 次（复算脚本 /tmp/cl_v21/yangbiao.py）。区间内唯一被杀的是赵彦：「擅收立杀，不俟报国。」(start 112096)。把「杀」同时支配到杨彪，等于替原文补了一个它没有写的结局——这正是候选自己在 U2/V8/V9 里立誓不做的事（连一个缺损字符都拒绝猜）。加重情节：T18.action 的 quoteRefs 里根本不包含 112000 这一句（复算：任何 quote 都不含「杨彪」），所以这条 explicit 断言**连它自己的引文都不支持**。"
+    },
+    {
+      "id": "CE2",
+      "kind": "false-narrative-order-statement",
+      "claim": "rejectedEdges R14_xiwen_dao_xudu_caocao_tui_liyang.why 用「叙述顺序」当作拒绝理由的一半：称檄文到达许都一事是在曹操已回许都之后才叙述的。",
+      "candidateText": "曹操回许都写在黎阳相持那段：原因链是「袁绍心怀疑惑，不思进兵，操乃唤…竟回许都」；**而檄文到达许都是在曹操已经回许都之后才叙述的**。把回许都归因于檄文，是拿后文的事件当先文的原因。",
+      "quote": "檄文传至许都，时曹操方患头风，卧病在床。",
+      "start": 113077,
+      "end": 113097,
+      "match": "exact",
+      "why": "顺序恰好相反，两个偏移都是实测：T.find('檄文传至许都') == **113077** < T.find('操自引一军，竟回许都。') == **113727**。檄文到许都在**前**，曹操回许都在**后**（相隔 650 码点）。R14 的结论（不把回许都归因于檄文）仍然成立，但它成立靠的是 why 的前半句（回许都的原因是「袁绍心怀疑惑，不思进兵」），不靠这句被写反的顺序论证。复算：python3 -B -s /tmp/cl_v21/order.py。"
+    },
+    {
+      "id": "CE3",
+      "kind": "false-narrative-order-statement + self-contradiction",
+      "claim": "rejectedEdges R15_chendeng_woyi_dang_shishi.why 称交代「操自引一军，竟回许都」的叙述出现在陈登作判断之后；该陈述与候选自己的 tasks T9.result 直接矛盾。",
+      "candidateText": "R15：「叙述在后文（黎阳相持段）才交代『操自引一军，竟回许都』，**晚于陈登作判断的时刻**。」／T9.result：「叙述在本单元**更早处**已经独立交代『操自引一军，竟回许都』（黎阳相持段），**读者在云长出城之前就知道**曹操不在徐州方向。」",
+      "quote": "登曰：“操诡计百出，必以河北为重，亲自监督，却故意不建旗号，乃于此处虚张旗号：吾意操必不在此。”",
+      "start": 114002,
+      "end": 114050,
+      "match": "exact",
+      "why": "实测偏移：交代回许都的叙述在 **113727**，陈登这句判断在 **114002**，云长出城在 **114137**。113727 < 114002 < 114137 ⇒ **T9 对，R15 错**。同一份候选里两处对同一事实给出相反陈述，必有一处是错的，而实测判定错的是 R15。补充：R15 想守的红线（人物用「吾意」标记的判断不等于已核实事实）本身是对的，但它的错误论证反而抹掉了本回一个真实结构——叙述先给出曹操已回许都，陈登事后的推断与之相合，却仍只是推断。复算：python3 -B -s /tmp/cl_v21/r15.py。"
+    }
+  ],
+
+  "reverseChecks": [
+    {
+      "id": "RC1",
+      "found": "候选漏掉的东西：田丰那套完整方略从未进入任何任务/因果/被拒边，而原文让沮授**回头指名**它是被弃的「良策」——这条回溯是现成的、原文自己给出的因果材料。",
+      "quote": "宜先遣人献捷天子，若不得通，乃表称曹操隔我王路，然后提兵屯黎阳；更于河内增益舟楫，缮置军器，分遣精兵，屯扎边鄙。三年之中，大事可定也。",
+      "start": 110566,
+      "end": 110633,
+      "match": "exact",
+      "why": "候选对田丰的唯一刻画是 T3.obstacle 的「田丰主张缓」（引文只到「不可复兴大军。」为止，即 start 110537–110566），把一份含五步（献捷天子→表称隔王路→屯黎阳→河内舟楫→三年可定）的可执行方略压成「缓」一个字。复算：该 67 字仅在 coverageFills 出现，**causeEdges 与 rejectedEdges 的 JSON 里「献捷」出现 0 次**（/tmp/cl_v21/confirm.py）。更强的证据是原文自己的回溯——沮授说：「今弃献捷良策，而兴无名之兵，窃为明公不取。」(start 110717) 这句同样**只存在于 coverageFills**，从未进入 claim 文本。它证明两件事：(a) 田丰的方案在袁绍阵营内部被明确称为「良策」；(b) 沮授的反对是**相对**这份被弃方案定义的（弃良策→兴无名之兵），而不是候选 E4 所写的「四个人两派两两对立、没有一个能压过另一个」的纯僵局。候选因此丢掉了一条原文点名的「方案被弃」事实与它对应的因果边。"
+    },
+    {
+      "id": "RC2",
+      "found": "候选漏掉的东西：玄德自己给出的机制——他先前的「躁暴」评语是**故意激将**，张飞也当场反问；候选只把这段写成玄德「收回了评价」。",
+      "quote": "飞曰：“哥哥道我躁暴，今日如何？玄德曰：“不用言语相激，如何肯使机谋！”",
+      "start": 115019,
+      "end": 115048,
+      "match": "exact",
+      "why": "S8_zhangfei_zaobao_dao_yongzhi 把这条状态写成「他被玄德认定的性情/能力：躁暴不可独当一面 →『今亦用智』」，即玄德**改变了看法**。但原文紧接着由玄德本人给出另一个解释：先前的贬抑是有意为之（「不用言语相激，如何肯使机谋」）。这两种读法在因果上不同（认知更新 vs. 预谋激将），而候选采用的读法使「相激」这一机制无处安放。复算：'不用言语相激' 在区间内 1 次（start 115040），仅出现在 coverageFills；'哥哥道我躁暴，今日如何'（start 115023）同样仅在 coverageFills；S8 的 JSON 里「相激」出现 0 次。"
+    },
+    {
+      "id": "RC3",
+      "found": "候选漏掉的东西：檄文真正的政治核心指控——曹操以兵围守宫阙、把皇帝扣在手里；候选的罪状清单收的是暴行，唯独漏了这条使檄文成为「讨贼」文书的政治指控，也漏了与它呼应的文末宗旨。",
+      "quote": "又\n　　操持部曲精兵七百，围守宫阙，外托宿卫，内实拘执。",
+      "start": 112783,
+      "end": 112811,
+      "match": "exact",
+      "why": "T18.action 逐项列檄文罪状（家世／边让／破棺裸尸／发丘中郎将摸金校尉／杀杨彪赵彦），未列「围守宫阙，外托宿卫，内实拘执」；而檄文自己的收束语正落在这条上：「布告天下，咸使知圣朝有拘迫之难。如律令！」(「如律令！」start 113042) ——「拘迫之难」与「内实拘执」是同一个指控。复算：'操持部曲精兵七百' 仅在 coverageFills；T4 与 T18 的全部引文里都不含该句（/tmp/cl_v21/confirm.py）。缺了这条，檄文在候选笔下只剩「历数暴行」，丢掉它自称的出师之名。"
+    },
+    {
+      "id": "RC4",
+      "found": "候选漏掉的东西：马融那段衬托的**实体内容**——绛帐、声妓、侍女环列（诱惑在场）与郑玄「听讲三年，目不邪视」，候选只取了后面那句评语。",
+      "quote": "融每当讲学，必设绛帐，前聚生徒，后陈声妓，侍女环列左右。玄听讲三年，目不邪视，融甚奇之。",
+      "start": 110232,
+      "end": 110276,
+      "match": "exact",
+      "why": "候选处理这段的只有 notForeshadows N3_marong_pingyu，其 item 是评语「得我学之秘者，惟郑玄一人耳」(start 110282)，whyNotForeshadow 写「功能是抬高郑玄的学识」。但原文的写法是先铺出诱惑（声妓、侍女环列），再写「目不邪视」，评语是**果**不是因；省掉前两句，这段就退化成一句空泛的夸奖，与候选别处「机制写在原文里」的标准不一致。复算：这两句在区间内 1 次，仅在 coverageFills；N3 的引文不含它们。"
+    },
+    {
+      "id": "RC5",
+      "found": "误杀检查（契约第 4 条）结果：16 条 rejectedEdges **未发现**计划100 那类「词表/正则把合法因果挡掉」的误杀。",
+      "quote": "田丰刚而犯上，许攸贪而不智，审配专而无谋，逢纪果而无用：此数人者，势不相容，必生内变，颜良、文丑，匹夫之勇，一战可擒。",
+      "start": 113350,
+      "end": 113409,
+      "match": "exact",
+      "why": "我逐条读了 R1–R16：候选不用词表排除，16 条全部是人工判读并附逐字引文，因此不存在该类机械误杀。抽样确认几条判断正确：R3（「孔融默然。」只表示不再说话，原文确无他改口之文，判得对）、R6（「正撞见张飞，狭路相逢，急难回避」确为遭遇语义，判得对）、R16（颜良、文丑在本区间只在孔融举荐与荀彧反驳中被点名，确无出战记载，判得对）。**但**误杀检查发现的是另一种缺口：真正的损失不在「错误排除」，而在 RC1 那种「从未进入模型」——被弃的方案与被沮授指名的「良策」既没被接受为边、也没被登记为拒绝边，属结构性遗漏而非误杀。"
+    }
+  ],
+
+  "machineChecks": {
+    "quoteLayer": "零编造、零错位。自写脚本 /tmp/cl_v21/check.py 从磁盘独立重算，**不 import 候选的任何构建脚本**：527 个引用对象全部 T[start:end]==quote（失配 0）、全部落在 [110014,115741) 内（越界 0）、end-start==len(quote)（失配 0）、sourceHash 单值一致（失配 0）、T.find(quote)>=0（失配 0）、occurrencesInWholeDoc/occurrencesInSlice 与实算一致（失配 0）。228 条唯一引文，其中 227 条在全篇只出现 1 次（与候选声明一致）。",
+    "sampledQuotes": "固定种子 random.seed(21) 抽 5 条，5/5 逐字命中且 find()==start：causeEdges[2]/quoteRefs[2] @110484；unknowns[4]/quoteRefs[0] @110945；states[1]/after/quoteRefs[1] @110924；coverageFills[28]/quoteRefs[0] @112204；causeEdges[17]/quoteRefs[1] @114270。",
+    "hashes": "源文件 sha256=2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff（与任务 sourceHash 一致）；切片 sha256=e1d1e13a8f6b18b41d884d20b81762f27a865aa1dffc84b27a334b2a68aaa552（与候选 source.sliceSha256 一致）。",
+    "metricsCrossCheck": "候选 metrics 的 21 个计数我逐项对数组长度复算，**全部相符**（tasks 18 / causeEdges 29 / rejectedEdges 16 / states 14（11+3）/ foreshadows 8（2 resolved+2 partial+4 unresolved）/ notForeshadows 11 / speechAsClueNotFact 22 / unknowns 16 / coverageFills 65 / textVariants 10 / quoteRefs 527 / uniqueQuotes 228 / uniqueQuotesSingleOccurrenceWholeDoc 227）。resultStatus 分布 9 achieved/3 partial/4 not_achieved/2 undetermined 与自述一致。ID 无重复。12 处字面 null **全部**带 <field>NullReason。",
+    "punctuation": "区间双引号 74 左 / 73 右、净差 1，与候选一致；相对区间入口深度最小值 0、负深度 0 处，与候选一致。全篇净差 64 亦一致。",
+    "textVariantsAndUnknowns": "U2/U3 的点名与偏移**逐条属实**：左棺@111379、张颌@113312、敷仓@112454、袅雄@112372 全部命中声明偏移；张颌全篇 184 次为全文一致写法、敷仓另有 1 处作敖仓@29220、袅雄另有 8 处作枭雄、左棺全篇 1 次无内部对照 —— 与候选陈述一致。半角问号@115290、缺字□@112752、[犭票]@111452、[火票]@112577 亦全部属实，候选照原样引用未修字，punctuationAudit.repairs 为空、textModified=false，判得对。",
+    "coverage": "字符级补集扫描（/tmp/cl_v21/cover.py）：区间内被引文覆盖 5453/5727；未覆盖残余 274 字符中，除回目(110014–110040)、站点样板(115684–115741)、引文起止的半个句子衔接处与空白缩进外，**无叙事句零覆盖**。候选自报 narrativeCoveredRatio=0.968599 可复算；reverseAudit 的 finalUncovered=0 在我更宽的字符级口径下亦成立。此栏无缺陷。"
+  },
+
+  "falseKills": "未发现误杀（详见 reverseChecks RC5）：16 条 rejectedEdges 全部为人工判读并附逐字引文，无词表/正则排除，不存在计划100 那类「合法因果被机械挡掉」。R14/R15 的**结论**可以保留，必须改的是它们的**论据**（CE2/CE3）。",
+
+  "hallucinationCheck": "除 CE1 外，未发现原文没有的人物、结局、伏笔或成功判定。候选对红线的执行**主动且多处正确**：T6/T8/T14 标 not_achieved、T7/T17 标 undetermined（回末「不知二人性命如何」显式悬置，未补结局）、T4/T5/T18 的预测（荀彧「必生内变／一战可擒」、陈登「吾意操必不在此」、云长翼德「曹操必然复来」、檄文全部指控）一律经 speechAsClueNotFact 或 basis=derived 降级，未当事实写；U1 如实登记「不可轻进」与「差人催战」的原文冲突而不替曹操编理由；U6 不写刘岱王忠被杀亦不写获免；F8 的越界风险由候选自己在 SC5 里点出并给出处置建议。",
+
+  "notes": "**总判 fail，但必须把话说清楚：这不是引用层的失败，而是一条编造级断言加两处可证伪的顺序论证。**\n\n【为什么不是 partial 而是 fail】按 VERIFIER 契约，找不到对应文字的抽取项就是**编造，最严重的一类**。CE1 正是该形态：候选把「杀杨彪」写成檄文的 explicit 指控，而区间内杨彪那一句 50 字里「死/诛/杀/枭/亡」出现 0 次，且 T18.action 自己的 quoteRefs 不含该句——即一条连自身引文都不支持的 explicit 断言。CE2/CE3 是两处实测可证伪的顺序陈述（113077 < 113727；113727 < 114002），其中 CE3 与候选自己的 T9.result 直接矛盾（同一事实两处相反陈述）。此形态与本仓库已有的 fail 判例 verify_dafeng_L2_0022 同形：引文为真、围绕引文的陈述为假。\n\n【诚实边界：CE1 有一处可争议的读法】把「杀杨彪赵彦」辩护成「杀」只支配赵彦、杨彪那条只是拷打，在语法上并非完全不可能。我不据此单独判 fail；但按候选自己立的规矩（explicit =「原文逐字这样写」，且它连一个缺损字符都拒绝猜），这条仍属越出原文的断言。CE2/CE3 没有这种辩解空间——它们是可以直接算出来的事实错误。\n\n【为什么我仍把它标成「引用层几乎无懈可击」】527/527 逐字命中、越界 0、哈希 0 失配、occurrence 0 失配、抽样 5/5、metrics 21 项全对、缺口补引后叙事句未覆盖 = 0、字形与缺损字符处理全部照原样不修 —— 这些都是真的，且有可复现命令。**这一层可以直接复用为下游锚点**。\n\n【结构性观察，值得写进环境台账】候选的 machineSelfCheck 有 31 项、自报 0 失败；但把这 31 项读一遍会发现它们**全部是定位层检查**（find/offset/length/hash/occurrence/引号深度/ID 唯一/null 必带 reason），语义层一项也没有。所以 CE1 这种「把原文没写的结局写进 explicit 断言」可以 31/31 全绿通过。这正是 PROJECT-STATE 反复记录的失败形态：**机制存在、有产出，但不产生信息**——校验越密，越容易把「通过 31 项自检」误读成「语义已经对了」。建议后续在 selfCheck 里加一条最低成本的语义判据：凡 basis=explicit 的断言，其引文必须能在同一条目的 quoteRefs 里找到支配该断言的动词（本例中「杀」在引文里根本不存在）。\n\n【可以用 / 必须丢弃或降级（供 PUBLISHER 与返工直接照做）】\n- **可直接复用**：全部 527 条引文及其偏移/哈希/occurrence（定位层零缺陷）；18 条任务中除 T18.action.text 一处措辞外的骨架；29 条 causeEdges（我未发现编造）；14 条 states；8 条 foreshadows 与 4 条显式 unresolved；11 条 notForeshadows；16 条 rejectedEdges 的**结论**；16 条 unknowns（U1/U2/U3/U6 尤其准确）；coverage 与 punctuationAudit 全部数字。\n- **必须改**：① T18.action.text 与 SP10.saidOrThought 的「杀杨彪赵彦」→ 应改为只对赵彦用「杀」，杨彪那条照原文写成「被以非罪、榜楚参并、五毒备至」；② R14.why 删掉被写反的顺序论证，只保留「回许都的原因写在『袁绍心怀疑惑，不思进兵』」；③ R15.why 删掉「晚于陈登作判断的时刻」，改为与 T9 一致的口径（叙述在先、陈登的推断在后且相合，但用「吾意」标记的推断仍不等于已核实事实）。\n- **应补（可选，属提质而非纠错）**：RC1（田丰五步方略＋沮授「今弃献捷良策」的回溯）、RC2（玄德「不用言语相激」）、RC3（「围守宫阙…内实拘执」＋「咸使知圣朝有拘迫之难」）、RC4（绛帐/声妓与「目不邪视」）。这四条都不是编造，是覆盖缺口；RC1 的价值最高，因为它是原文自己给出的、可直接连边的因果材料。\n\n【复核者自述的自我纠错】我的第一版反向扫描用正则按「。！？」切句并对引文区间求补集，得到 88 条「未覆盖句」，逐条看发现绝大多数是切句规则把前一句的收尾引号并进下一句造成的边界假象（例如『」玄德曰：“绍向与我未通往来…』整句因开头多一个 」 而永不等于候选引文）。**该结论不成立，已作废**；我改用字符级补集（/tmp/cl_v21/cover.py）重算，残余 274 字符中无叙事句零覆盖，与候选自报一致。契约第 5 条要求「你可以判自己错」，故如实记在这里。\n\n【未做】未跑 GPU/浏览器测试（任务未声明）；未读图谱缓存 data/cache/152e2a6eed94f1075e7e7070.json，未做跨单元整体叙事评估（区间外文字一律不用于支撑任何语义结论，只用于核对偏移与全篇计数）；未对全部 101 段做逐句训释（檄文部分按候选 U16 的口径只核「谁写了什么主张」这一层）。复核脚本落在 /tmp/cl_v21/（check.py / cover.py / order.py / r15.py / yangbiao.py / confirm.py / metrics.py / punct.py / clause.py），不入库，不写任务 writes 之外的任何路径。",
+
+  "evidence": {
+    "commands": [
+      "shasum -a 256 data/cache/152e2a6eed94f1075e7e7070.docs.json  # 2988ce6e…a97ff",
+      "python3 -B -s /tmp/cl_v21/check.py     # 527 refs: verbatim/range/len/hash/find/occurrence 失配全 0；unique=228",
+      "python3 -B -s /tmp/cl_v21/cover.py     # 字符级补集：covered 5453/5727，残余无叙事句零覆盖",
+      "python3 -B -s /tmp/cl_v21/order.py     # 檄文到许都 113077 < 操回许都 113727；CE2 成立",
+      "python3 -B -s /tmp/cl_v21/r15.py       # 操回许都 113727 < 陈登判断 114002 < 云长出城 114137；CE3 成立",
+      "python3 -B -s /tmp/cl_v21/yangbiao.py  # 杨彪句 50 字内 死/诛/杀/枭/亡 全 0；赵彦『擅收立杀』@112096；CE1 成立",
+      "python3 -B -s /tmp/cl_v21/confirm.py   # causeEdges/rejectedEdges 中『献捷』0 次；T18 引文不含杨彪句",
+      "python3 -B -s /tmp/cl_v21/metrics.py   # 21 项 metrics 复算全对；12 处 null 全带 NullReason",
+      "python3 -B -s /tmp/cl_v21/punct.py     # 74/73 净差 1；全篇净差 64；负深度位置 28584"
+    ],
+    "note": "以上脚本均从磁盘独立重算，未 import 候选的构建脚本。"
+  }
+}

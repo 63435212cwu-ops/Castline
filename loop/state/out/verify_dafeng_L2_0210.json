@@ -1,0 +1,347 @@
+{
+  "task": "verify:dafeng:L2:0210",
+  "agent": "w-verify-4",
+  "role": "VERIFIER",
+  "verdict": "partial",
+  "reviewedTask": "read:dafeng:L2:0210",
+  "reviewedAuthor": "w-dafeng-0",
+  "verifierIsNotOriginalAuthor": true,
+  "reviewedCandidate": "loop/state/out/read_dafeng_L2_0210.candidate.json",
+  "reviewedCandidateSha256": "0a6704a1720508c3af2c747717193ca280807bcf5750e09496bec5167fdcdeaf",
+  "sourceFile": "data/cache/1063b17ca65ec1b76f30e460.docs.json",
+  "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+  "sourceRange": [
+    778787,
+    783557
+  ],
+  "sliceCodepoints": 4770,
+  "sliceSha256": "c6352ed105d856688d7fb5b4291a49b8a0a0c181fe9980fc1086e6b08dadf160",
+  "orderFollowed": "先自己读原文（把 docs[0].text[778787:783557) 独立导出为纯文本逐行读完，252 行 / 125 非空段），此阶段未打开候选结论；之后才读候选并逐条比对。",
+  "counterExampleQuoteScope": "counterExamples 的 quote 有两种来源，各自在 quoteSource 里标明：①原文（docs[0].text 逐字，附 start/end）；②产物文件（候选/构建脚本/探针/提交记录里的逐字串，附文件路径与行号）。凡指向产物缺陷的条目用的是 ②，因为缺陷存在于产物而不在原文——我没有把它伪装成原文引证。",
+  "counterExamples": [
+    {
+      "claim": "候选 machineSelfCheck.checks['7_proseBracketsAllVerbatim']=true，提交记录亦称「15 条判据…全 PASS」——但这条判据对本候选不检查任何东西。",
+      "quoteRef": {
+        "quote": "re.finditer(r\"「([^「」]{1,80})」\", blob_for_brackets)",
+        "quoteSource": "loop/state/out/read_dafeng_L2_0210.w-dafeng-0.build/build_candidate.py（第 1376 行）",
+        "verbatimInArtifactCount": 1
+      },
+      "why": "这条判据的正则见上（build_candidate.py:1376）；独立探针 verify_independent.py:191 用的是逐字相同的正则 （同样只扫 「」）。而本候选文件里 「 出现 0 次（实测 raw.count('「')==0），直角引号一律写作 『』（243 处）。⇒ 两次 finditer 都匹配不到任何东西，判据恒为 True，永远不可能变红。这与本项目 E24「判据不看它声称要看的东西」同形。决定性复现：把候选副本里一处 『她确实拿到了』 换成原文中绝对不存在的 『这段文字原文里绝对没有出现过纯属伪造』（已确认该串不在 docs.json 中），用同一份探针（仅把 ROOT 指向副本）重跑，输出仍是「总判：ALL PASS」、退出码 0 —— 伪造的『』串不会被这条判据拦住。"
+    },
+    {
+      "claim": "候选 quotePolicy.bracketConvention 声明「散文里的直角引号（『』）只允许包住 docs[0].text 的逐字子串」，但文件自身违反该约定。",
+      "quote": "如果说色胚是宴会上初见时的印象，那么现在，李妙真对许七安的标签改为：不简单的色胚。",
+      "start": 781299,
+      "end": 781340,
+      "quoteSource": "data/cache/1063b17ca65ec1b76f30e460.docs.json docs[0].text（原文逐字）",
+      "why": "243 个 『…』 跨度里只有 174 个是原文逐字子串；另有 9 个是用省略号截断的近似引文，在原文里 find 不到该串本身。例如 /causeEdges[9]/mechanism 的 『如果说色胚是宴会上初见时的印象，那么现在……标签改为』（原文实为上面这条 quote，781299–781340）、/causeEdges[6]/mechanism 的 『想起来了，当兵是要发军饷的……』（原文作「想起来了，当兵是要发军饷的，可不是有饭吃就够…」，781826 起）。这些串与真引文共用同一套记号，读者无法按约定区分逐字引文与截断转述；而唯一该拦住它的判据 7 恰好扫错了括号字符（见上一条）。另有 60 个 『』 是候选自己的标签/读法（如 『她想要回魅』），与声明的约定一致，这部分不算违规。"
+    },
+    {
+      "claim": "候选 states[0].note 写「他自己也承认这印象难扭转（P062，见 R04）」，但它指向的 R04 并未收录支撑该断言的引文。",
+      "quote": "感觉我色胚的印象很难扭转了....风评被害....",
+      "start": 781346,
+      "end": 781371,
+      "quoteSource": "data/cache/1063b17ca65ec1b76f30e460.docs.json docs[0].text（原文逐字）",
+      "why": "这条 note 指向 P062 与 R04，但 R04 的 quotes[] 只收了 P062 的『李将军很像我一位故人。』一句；支撑「承认印象难扭转」的那半句（上面这条 quote，781346–781371）在整个候选文件里一次都没被引用（实测候选文件中 '印象很难扭转'、'风评被害' 计数均为 0）。这是一处引而未证：原文确有该事实，但按候选自己的口径，这条断言缺一条 quote。"
+    },
+    {
+      "claim": "提交记录 summary 称「独立探针带 13 个变异全部按预期变红」——实测为 12，数字与产物不符。",
+      "quoteRef": {
+        "quote": "13 个变异全部按预期变红",
+        "quoteSource": "loop/state/out/read_dafeng_L2_0210.json",
+        "verbatimInArtifactCount": 1
+      },
+      "why": "verify_independent.py 里 muts.append 共 12 处（grep -c muts.append = 12），实跑输出 [变红✓] 行也是 12 行（另有 1 行标题「变异自检：…」不属变异条目）。同一 summary 里另外两个数字可复算且正确：内建判据 15 条（checks dict 15 键）、独立探针 18 条（[PASS] 行 18）。只有变异数 13 是错的。证据文件本身的 sha256 与提交声明三方一致，所以这不是伪造产物，而是声称与产物不符。"
+    }
+  ],
+  "reverseChecks": [
+    {
+      "found": "他对李妙真「网上形象 vs 现实形象」的对比，以及「严肃是一种伪装」的判断——这是 C02 那次态度转变前他心里对『二号是什么人』的完整评估，候选只引了 C02 的『得改变态度』结果句，评估本身未登记。",
+      "quote": "她现实里的形象和网上形象有很大区别啊....网上更活泼更愤青，而现实偏向严肃...嗯，严肃的形象适合领军，这大概算是一种伪装。",
+      "offset": {
+        "quote": "她现实里的形象和网上形象有很大区别啊....网上更活泼更愤青，而现实偏向严肃...嗯，严肃的形象适合领军，这大概算是一种伪装。",
+        "start": 780123,
+        "end": 780186,
+        "quoteSource": "data/cache/1063b17ca65ec1b76f30e460.docs.json docs[0].text（原文逐字）"
+      },
+      "whyMissing": "整段 63 码点零引用（候选 P031 只引了同段末尾的『无奈道：好吧！』）；候选全文不含 '网上更活泼更愤青' / '适合领军' / '形象有很大区别'。"
+    },
+    {
+      "found": "开篇他对她身份的第一层判断：他先在心里把她读成「美军娘」而不是圣女，并吐槽师门把她养成了『急公好义的一代女侠』——这条与 K2 引的 P006 同段但被切掉了后半。",
+      "quote": "师门让人太上忘情，结果你成了急公好义的一代女侠",
+      "offset": {
+        "quote": "师门让人太上忘情，结果你成了急公好义的一代女侠",
+        "start": 779024,
+        "end": 779047,
+        "quoteSource": "data/cache/1063b17ca65ec1b76f30e460.docs.json docs[0].text（原文逐字）"
+      },
+      "whyMissing": "候选只在 knowledgeDiffs[1].quotes 里引了同段前半『明明是英姿飒爽的美军娘....哪里像道门天宗的圣女』；'太上忘情'、'一代女侠' 在候选全文计数为 0。"
+    },
+    {
+      "found": "他自己对这场当众复现的预判——他明说这是『两个小老弟公开处刑的时候来了』，即 P117/P119 的复现动作在动手之前就被他定性为对同僚的当众处刑；T6.cost 只从后果侧取据，施动者的自觉这一层未登记。",
+      "quote": "来了，两个小老弟公开处刑的时候来了....",
+      "offset": {
+        "quote": "来了，两个小老弟公开处刑的时候来了....",
+        "start": 779423,
+        "end": 779444,
+        "quoteSource": "data/cache/1063b17ca65ec1b76f30e460.docs.json docs[0].text（原文逐字）"
+      },
+      "whyMissing": "P017 的这半句零引用（该段只引了后半句『见过，她与我两位同僚结下了难解之缘。』；见 causeEdges[0]）；'公开处刑' 在候选全文计数为 0。"
+    },
+    {
+      "found": "叙述层明确点出三人反应各不相同——这是本区间唯一一句把「三方在同一句话上分叉」写成叙述事实的地方，候选的 P018 只取了宋廷风的内心与李妙真的推断，把这句总述丢了。",
+      "quote": "听到这里，三人的表情各不相同。",
+      "offset": {
+        "quote": "听到这里，三人的表情各不相同。",
+        "start": 779478,
+        "end": 779493,
+        "quoteSource": "data/cache/1063b17ca65ec1b76f30e460.docs.json docs[0].text（原文逐字）"
+      },
+      "whyMissing": "该句零引用；'三人的表情各不相同' 在候选全文计数为 0。"
+    }
+  ],
+  "miskillCheck": [
+    {
+      "claim": "rejectedEdges R02 把「许七安回到驿站 → 宋廷风与朱广孝质问」整体判为「不连边（时间相邻）」，理由是不信任在他回来之前就成立。",
+      "quote": "见许七安回来，宋廷风目光无神的看着他：“宁宴，你早知道苏苏的身份？”",
+      "offset": {
+        "quote": "见许七安回来，宋廷风目光无神的看着他：“宁宴，你早知道苏苏的身份？”",
+        "start": 782987,
+        "end": 783021,
+        "quoteSource": "data/cache/1063b17ca65ec1b76f30e460.docs.json docs[0].text（原文逐字）"
+      },
+      "why": "理由只对一半成立，另一半被误杀。原文 P105 的起手是『见许七安回来』——『见』字就是原文写出的触发词：两人的互不信任确实先于他回来（P102 已写），但当面质问他本人这一动作，原文是用『见…回来』显式点火的。R02 把『两人互相质问』与『转而质问他』两件事并成一条否掉，于是一条合法的、带显式触发词的因果边被挡掉；候选的 14 条 causeEdges 里没有任何一条覆盖 P105 这条边（涉及两人的只有 C11，起点是 P111 的『都是你们的幻觉』）。这是相邻性判据的典型误杀形态：触发词在原文里，判据只看『是不是挨着』。"
+    }
+  ],
+  "hallucinationCheck": {
+    "verdict": "no-fabrication-found",
+    "detail": "逐项核对候选的 6 条任务、14 条因果边、4 条被拒边、4 条状态、5 条知识差、3 条伏笔、12 条世界设定、7 条 notWorldSettings、2 条主题解释、11 条 unknowns：没有原文之外的人物、事件、结局或伏笔。所有出场人物（许七安、李妙真、苏苏、宋廷风、朱广孝、杨川南、元景帝、铃音、辞旧/二郎、三号）在区间内均可 find 到。『社会性死亡』在区间内出现 2 次（778794 标题、782273 他的内心话），候选把它当他自陈的后果预期而非已发生事件，与原文一致，未越权。候选 semanticReview='not-performed' 并写明『引文定位正确 ≠ 语义已核验』，未声称 semanticReview 完成，符合 READER 红线；F2/F3 未回收伏笔均显式标 unresolved 并给理由。"
+  },
+  "mechanicalResults": {
+    "quotesTotal": 218,
+    "quoteVerbatimMismatch": 0,
+    "quoteOutOfRange": 0,
+    "occurrenceCountMismatch": 0,
+    "sourceHashMismatch": 0,
+    "paraLabelMismatch": 0,
+    "sentUnitMismatch": 0,
+    "method": "从磁盘重读候选与源文件，独立重算：TEXT[s:e]==quote、区间包含、wholeTextOccurrences/occurrencesInRange 与 TEXT.count 比对、sourceHash，并另行实现段落模型（按 \\n 切、跳过空白行编号 P000…）与句单元模型（按 。！？ 切）逐条对账。",
+    "coverageReproduced": {
+      "quoteUnionCodepoints": 3190,
+      "nonSpaceCodepoints": 4026,
+      "ratio": 0.7923,
+      "paragraphsTouched": 103,
+      "zeroCoveredParagraphs": 22,
+      "zeroListIdentical": true,
+      "note": "候选 coverage 的五项数字与 22 个零覆盖段清单，我独立重算后完全一致（集合差为空）。"
+    },
+    "bracketAudit": {
+      "totalBracketSpans": 243,
+      "verbatimInSource": 174,
+      "ellipsisTruncatedNearQuotes": 9,
+      "ownLabelsReadings": 60,
+      "note": "见 counterExamples 第 2 条。"
+    },
+    "vacuousCriterionProof": {
+      "criterion": "7_proseBracketsAllVerbatim (build) / I (probe)",
+      "regex": "「([^「」]{1,80})」",
+      "countOfLeftBracketInCandidate": 0,
+      "proof": "副本植入原文不存在的 『这段文字原文里绝对没有出现过纯属伪造』 后重跑探针，仍输出『总判：ALL PASS』、退出码 0。",
+      "sourceLines": [
+        "build_candidate.py:1376",
+        "verify_independent.py:191"
+      ]
+    }
+  },
+  "quoteVerification": {
+    "sampled": 5,
+    "method": "random.seed(20261015) 从 218 条 quote 节点里抽 5 条，各做一次 TEXT.find(quote)，再比对声明的 start/end。",
+    "results": [
+      {
+        "path": "/tasks[5]/obstacle/quotes[3]",
+        "quote": "“是你们让我保密的。”许七安耸耸肩。",
+        "find": 783065,
+        "declared": [
+          783065,
+          783083
+        ],
+        "verbatim": true,
+        "findEqualsStart": true
+      },
+      {
+        "path": "/tasks[5]/objective/quotes[1]",
+        "quote": "是幻觉啊，那就没什么了。我只是受到了迷惑，昏迷过去了。",
+        "find": 783215,
+        "declared": [
+          783215,
+          783242
+        ],
+        "verbatim": true,
+        "findEqualsStart": true
+      },
+      {
+        "path": "/states[0]/quotes[0]",
+        "quote": "江湖儿女不必拘泥小节，但我终究是个姑娘，你这般盯着看，过于失礼了。",
+        "find": 781241,
+        "declared": [
+          781241,
+          781274
+        ],
+        "verbatim": true,
+        "findEqualsStart": true
+      },
+      {
+        "path": "/states[3]/quotes[2]",
+        "quote": "“你不也没说吗。”",
+        "find": 782972,
+        "declared": [
+          782972,
+          782981
+        ],
+        "verbatim": true,
+        "findEqualsStart": true
+      },
+      {
+        "path": "/tasks[0]/obstacle/quotes[0]",
+        "quote": "设计坑害朝廷命官，套取机密消息，这是死罪啊李将军。",
+        "find": 779660,
+        "declared": [
+          779660,
+          779685
+        ],
+        "verbatim": true,
+        "findEqualsStart": true
+      }
+    ],
+    "conclusion": "5/5 逐字命中，偏移与声明完全一致，无漂移。"
+  },
+  "usableVsDiscard": {
+    "usableAsIs": [
+      "tasks[0..5] 的五栏结论与全部 218 条 quote（引用层零缺陷，偏移可复算）",
+      "causeEdges C01–C14 的方向与 basis（C03/C13 已如实降为 inferred、C08 为 derived，未冒充实证）",
+      "states S1–S4、knowledgeDiffs K1–K5、foreshadows F1–F3（含 F2/F3 的 unresolved 理由）、unknowns U1–U11",
+      "worldSettings W01–W12 与 notWorldSettings / notForeshadows 的取舍（W05/W07 因 transfer 跨段而顶层降 derived 并给逐态依据，口径正确）",
+      "coverage 分区（五项数字与 22 段零覆盖清单已独立复算一致）"
+    ],
+    "mustFixOrDiscard": [
+      "machineSelfCheck.checks['7_proseBracketsAllVerbatim']=true 作废：该判据对 『』 恒真，不构成任何保证；应撤回这条 PASS 的效力，或改扫 『』 并排除省略号截断形态后重算。",
+      "提交 summary 的「13 个变异」改为 12（唯一与产物不符的数字）。",
+      "9 处省略号截断的 『…』 应改为不截断的逐字引文，或改用不带引文含义的记号，以符合自己的 bracketConvention。",
+      "states[0].note 引 P062 支撑「承认印象难扭转」，需补 quote（『感觉我色胚的印象很难扭转了....风评被害....』781346–781371）或删该分句。",
+      "R02 应拆分：保留「两人互相质问 ≠ 他回来所致」，并把 『见许七安回来』→ 当面质问他本人 补成一条边。",
+      "reverseChecks 列出的 4 条未覆盖事实，建议按结论层（而非装饰层）择要补登。"
+    ]
+  },
+  "notes": "裁决 partial。理由分三层，先说站得住的部分，再说必须修的，最后说我的不确定处。\n\n【一、可用的部分：引用层零缺陷】候选最硬的资产是引文定位，而它是真的：218 条 quote 全部 TEXT[start:end]==quote、全部落在 [778787,783557) 内、sourceHash 与整个 docs.json 的 sha256 三方一致、片段 sha256 c6352e… 与切片一致、wholeTextOccurrences/occurrencesInRange 与 TEXT.count 逐条相符。我另行实现了段落模型与句单元模型（不复用候选任何中间量），218 条的 paraLabel 与 sentUnit 0 失配；coverage 的五项数字（3190 / 4026 / 0.7923 / 103 / 22）与 22 个零覆盖段清单，我独立重算后完全一致。随机抽 5 条做 find()，5/5 逐字命中且 find==start。→ 没有任何编造：候选里找不到原文之外的人物、事件或结局；语义层也守住了红线（semanticReview='not-performed'，人物言语未被当成叙述事实，F2/F3 未回收伏笔显式标注并给理由，未知项进了 unknowns）。\n\n【二、必须修的：自证层有一处「机制存在但不产生信息」】最严重的一条是判据 7。它被列为 15 条内建判据之一、又在提交记录里被当作「全 PASS」的一部分引用，但它扫的是 「」，而候选全文 「 出现 0 次——它恒真，永远不会变红。我用植入伪造 『』 串的方式证明了这一点：同一个探针在副本上仍报 ALL PASS。这正是 VERIFIER.md 引的计划100 教训（机制存在、有代码、有产出，但不产生信息）的教科书形态；不能让它以「已验证」的名义进入台账。其次是 summary 的「13 个变异」实为 12（可 grep 可复跑），以及 9 处省略号截断的 『…』 与自己的 bracketConvention 冲突——这 9 处本身不是编造（内容都在原文里），但它们与真引文共用同一套记号，且唯一该拦住它的判据恰好是空的，风险是后续使用者把截断转述当逐字引文。第三是 states[0].note 一处引而未证（P062 的『印象难扭转』半句在候选里从未被引用）。\n\n【三、反向下我自己的判断，以及不确定处】按 VERIFIER.md 的误杀检查，我找到 R02 一处过度拒绝：原文 P105 以『见许七安回来』起手，『见』是显式触发词，所以「他回来 → 当面质问他本人」这条边是合法的，被 R02 连同「两人互相质问」一起否掉了。但我要如实说明反向验证自身的限度：我列出的 4 条 reverseChecks 全部是叙述层的事实（他的内心评估、他的预判、叙述层的总述句），其中三条属于人物内心/评价而不是改变行动、资源或后果的事件——按任务提示词「没有依据就不扩装饰层」的口径，候选有权不把它们登记为条目。所以这 4 条我按『候选没覆盖、但原文明确存在』如实列出，供采纳者判断，不据此判 fail。判 partial 而不是 fail 的理由：fail 需要能指向编造或语义错误，而我没找到——引用层与语义层都守住了；几处 counterExample 全部落在自证与记账层（一条空判据、一个错数字、一处引而未证）与一条误杀边，它们必须修，但不推翻已抽取的内容。\n\n关于 counterExamples 的引证口径（自查后改过一次）：其中两条指向产物缺陷，我原先误把产物里的串当成原文引证，自查发现 text.find 为 -1 后已改为独立字段 quoteRef 并逐条标注 quoteSource（文件 + 行号），未把它伪装成原文引证；另两条指向内容层，引证是 docs[0].text 逐字并附 start/end。\n\n不确定处（记为存疑，不作判定依据）：① W02 判 declared、W05/W07 顶层 derived 是否合口径，候选自己在 U11/SC3 里已把这两处暴露出来，我认同这种暴露方式，但口径本身不在本区间内可判；② U10 说 P111『如实回答』与 P114 更正冲突——我认为这是叙述层反讽笔法，但原文未解释，候选记 unverified 是稳的；③ 我未能验证候选构建脚本是否在别处还有空判据（我只逐条审了它对外声称的 15 条与探针的 18 条），所以「其余判据是否也都真的会变红」这一点我没有全量证明，只证明了 12 个变异对应的那些确实会变红。",
+  "reproduce": [
+    "shasum -a 256 data/cache/1063b17ca65ec1b76f30e460.docs.json   # 期望 fdde5558…39839",
+    "python3 -c \"import json,hashlib;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];print(hashlib.sha256(t[778787:783557].encode()).hexdigest())\"   # 期望 c6352ed1…d160",
+    "grep -c muts.append loop/state/out/read_dafeng_L2_0210.w-dafeng-0.build/verify_independent.py   # 12（提交声称 13）",
+    "python3 -c \"raw=open('loop/state/out/read_dafeng_L2_0210.candidate.json',encoding='utf-8').read();print(raw.count('「'))\"   # 0 ⇒ 判据 7 空转",
+    "python3 -B -s loop/state/out/read_dafeng_L2_0210.w-dafeng-0.build/verify_independent.py --mutate   # 12 行 [变红✓]",
+    "# 空判据决定性复现：把候选副本里一处『』替换为原文不存在的串，同一探针仍 ALL PASS（见 counterExamples 第 1 条）"
+  ],
+  "remaining": [
+    "未全量证明候选其余判据（15 条内建 + 18 条探针里除 12 个变异覆盖之外的那些）都真的会失败；只证明了变异对应的那些。",
+    "W02 declared / W05+W07 arrived+derived 的口径问题不在本区间内可判，留给口径裁定，未据以判 fail。",
+    "反向下发现的 4 条未覆盖事实属叙述层内心/评价，是否登记为条目需按『装饰层』口径裁定，我未替采纳者决定。"
+  ],
+  "rollback": "只读复核：未改动候选、源文件、探针、构建脚本与受保护路径；本文件（loop/state/out/verify_dafeng_L2_0210.verdict.json）是本轮唯一写入。",
+  "evidence": [
+    {
+      "path": "loop/state/out/read_dafeng_L2_0210.candidate.json",
+      "sha256": "0a6704a1720508c3af2c747717193ca280807bcf5750e09496bec5167fdcdeaf",
+      "kind": "reviewed-artifact",
+      "note": "被复核候选（只读，未修改）；218 条 quote 的定位与覆盖率均从它重算。"
+    },
+    {
+      "path": "data/cache/1063b17ca65ec1b76f30e460.docs.json",
+      "sha256": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+      "kind": "source-text",
+      "note": "原文（只读）；docs[0].text[778787:783557) 即本单元，segmentSha256=c6352ed105d856688d7fb5b4291a49b8a0a0c181fe9980fc1086e6b08dadf160。"
+    },
+    {
+      "path": "loop/state/out/read_dafeng_L2_0210.w-dafeng-0.build/verify_independent.py",
+      "sha256": "b4f73504d496bc55e00d46803e18aacbd29dd194777f1a3fcd98b1c7c6134b16",
+      "kind": "audited-probe",
+      "note": "被审的独立探针（只读）；第 191 行是空转判据 I 的正则。实跑 --mutate 得 12 行 [变红✓]。"
+    },
+    {
+      "path": "loop/state/out/read_dafeng_L2_0210.w-dafeng-0.build/build_candidate.py",
+      "sha256": "9bec8f3cbb24c1edbb1fae1001cb258321e9fb831f2b9ea2f40d493b1c1a0693",
+      "kind": "audited-builder",
+      "note": "被审的构建脚本（只读）；第 1376 行是空转判据 7 的正则，与探针判据 I 逐字相同。"
+    },
+    {
+      "path": "loop/state/out/read_dafeng_L2_0210.json",
+      "sha256": "4cd0c976fa7a6fae6a30bdb842dd5b76abaa84a701f2ecb38d893e075005cfad",
+      "kind": "reviewed-submit-record",
+      "note": "被复核任务的提交记录（只读）；summary 里的「13 个变异」与产物不符，证据指向此处。"
+    }
+  ],
+  "status": "done",
+  "summary": "独立反向复核 verify:dafeng:L2:0210（《大奉打更人》第两百零九章 社会性死亡，原文区间 [778787,783557)，4770 码点 / 125 非空段）。按 VERIFIER.md 顺序执行：先把 docs[0].text[778787:783557) 独立导出为纯文本逐行读完（252 行），此阶段未打开候选结论；之后才读候选逐条比对。裁决 **partial**。机械层全量重算（不是抽样）：218 条 quote 逐条 TEXT[start:end]==quote、全部在区间内、sourceHash 与整个 docs.json 的 sha256 三方一致、wholeTextOccurrences/occurrencesInRange 与 TEXT.count 全等、paraLabel 与 sentUnit 用**另行实现**的段落/句单元模型对账 0 失配；coverage 五项（3190/4026/0.7923/103/22）与 22 段零覆盖清单独立复算完全一致；随机抽 5 条 find() 5/5 命中且 find==start。→ **无编造**：候选里找不到原文之外的人物、事件、结局或伏笔；语义层守住红线（semanticReview=not-performed、人物言语未当事实、F2/F3 显式 unresolved 带理由）。判 partial 的 4 条依据全部可复现：① 内建判据 7（proseBracketsAllVerbatim）与其独立探针判据 I 扫的是 「」 而候选里 「 出现 0 次 ⇒ 恒真空转，**实测**把原文不存在的 『』 串植入副本后同一探针仍报 ALL PASS（计划100「机制不产生信息」的教科书形态）；② 提交 summary 称 13 个变异，实为 12（grep -c muts.append=12，实跑 12 行 [变红✓]）；③ 243 个 『』 里 9 个是省略号截断的近似引文，与自己的 bracketConvention 冲突（该拦它的判据恰是①）；④ states[0].note 引 P062 支撑「印象难扭转」，该半句在候选里从未被引用。另有误杀 1 条：R02 把『见许七安回来』这条带显式触发词的边一并否掉。反向下 4 条未覆盖事实已如实列出，但其中 3 条属人物内心/评价，按「不扩装饰层」口径候选有权不登记，故不据此判 fail。全部 14 条自证引文可复算（原文引证附 start/end，产物引证附文件+行号）。",
+  "assertions": [
+    {
+      "text": "原文切片自检：shasum -a 256 data/cache/1063b17ca65ec1b76f30e460.docs.json = fdde5558…39839（与任务 sourceHash 一致）；docs[0].text[778787:783557] 以「第两百零九章 社会性死亡」开头、长 4770、切片 sha256=c6352ed1…d160。",
+      "result": "pass"
+    },
+    {
+      "text": "引用层全量复算（218/218，非抽样）：TEXT[start:end]==quote、区间包含、wholeTextOccurrences/occurrencesInRange 与 TEXT.count 比对、sourceHash 全等 ⇒ 0 失配。",
+      "result": "pass"
+    },
+    {
+      "text": "段落与句单元模型**另行实现**（不复用候选中间量），218 条的 paraLabel 与 sentUnit ⇒ 0 失配。",
+      "result": "pass"
+    },
+    {
+      "text": "覆盖率独立复算：quoteUnion 3190 / nonSpace 4026 / ratio 0.7923 / touched 103 / zero 22，且 22 段零覆盖清单集合差为空。",
+      "result": "pass"
+    },
+    {
+      "text": "随机抽 5 条 quote 做 TEXT.find：5/5 逐字命中、find==声明的 start，无偏移漂移。",
+      "result": "pass"
+    },
+    {
+      "text": "空判据决定性复现：raw.count('「')==0 ⇒ 判据 7 / I 的 finditer 匹配为空、恒真；把原文不存在的 『这段文字原文里绝对没有出现过纯属伪造』 植入候选副本后，同一探针（仅改 ROOT 指向副本）仍输出「总判：ALL PASS」、退出码 0。",
+      "result": "pass"
+    },
+    {
+      "text": "变异数复算：grep -c muts.append verify_independent.py = 12；实跑 --mutate 输出 12 行 [变红✓] ⇒ 提交 summary 的「13 个」为错。",
+      "result": "pass"
+    },
+    {
+      "text": "『』 跨度全量审计：243 个中 174 个为原文逐字、9 个为省略号截断的近似引文（原文里 find 不到该串）、60 个为候选自用标签。",
+      "result": "pass"
+    },
+    {
+      "text": "误杀检查：原文 P105 起手『见许七安回来』含显式触发词，R02 将其与「两人互相质问」并成一条否掉 ⇒ 一条合法边被挡；候选 14 条边无一覆盖 P105。",
+      "result": "pass"
+    },
+    {
+      "text": "幻觉检查：逐项核对 6 任务 / 14 边 / 4 拒边 / 4 状态 / 5 知识差 / 3 伏笔 / 12 设定 / 7 notWS / 2 主题 / 11 unknowns ⇒ 未发现原文之外的人物、事件、结局或伏笔。",
+      "result": "pass"
+    },
+    {
+      "text": "本文件全部自证引文可复算：14/14 通过（原文引证核对 start/end，产物引证核对文件存在该串）。",
+      "result": "pass"
+    }
+  ],
+  "changes": [],
+  "sourceHashes": {
+    "loop/state/out/read_dafeng_L2_0210.candidate.json": "0a6704a1720508c3af2c747717193ca280807bcf5750e09496bec5167fdcdeaf",
+    "data/cache/1063b17ca65ec1b76f30e460.docs.json": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "loop/state/out/read_dafeng_L2_0210.w-dafeng-0.build/verify_independent.py": "b4f73504d496bc55e00d46803e18aacbd29dd194777f1a3fcd98b1c7c6134b16",
+    "loop/state/out/read_dafeng_L2_0210.w-dafeng-0.build/build_candidate.py": "9bec8f3cbb24c1edbb1fae1001cb258321e9fb831f2b9ea2f40d493b1c1a0693",
+    "loop/state/out/read_dafeng_L2_0210.json": "4cd0c976fa7a6fae6a30bdb842dd5b76abaa84a701f2ecb38d893e075005cfad",
+    "note": "动手前后各取一次，五个文件均为只读审阅对象，哈希未变。"
+  },
+  "submittedAt": "2026-10-14T21:24:40Z",
+  "wallClockSeconds": 1693,
+  "wallClockFrom": "lease.startedAt",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-14T21:24:40Z"
+  },
+  "verifyState": "pending"
+}

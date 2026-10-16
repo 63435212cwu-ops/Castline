@@ -1,0 +1,98 @@
+{
+ "task": "merge:bridge-page-default-and-b001:20261009",
+ "agent": "reform-lead",
+ "at": "2026-10-08T19:17:36Z",
+ "gateLock": "本合并任务持有 GATE.lock（agent=reform-lead）",
+ "changed": {
+  "loop/bin/to_candidate.py": {
+   "sha256": "1ded8fcc8a61bca961d0ff263ca47bf73437f826142820bd555204f4994f912f",
+   "change": "graph_target 改为**两级**取默认版本：① data/cache/index.json 里该书标题的第一条（页面真实默认入口，/api/history 就按它返回）② 回退 loop/state/index.json 的 graphKey；两级都校验 .json/.docs.json 存在，否则回退基线键并在产物里标明。"
+  }
+ },
+ "why": "发布是纯追加式的，父版本决定新键叠在哪条链上。上一版只读 loop 的 graphKey，而**页面实际读的是 data/cache/index.json**：两者一旦不同步（我发布后手工同步过一次，正说明这个风险真实存在），批次就会再次分叉到旁支。现在以页面真实来源为准，链不会再分叉。",
+ "b001_publish": {
+  "batch": "publish:dafeng:B001",
+  "newKey": "cb21b33ec8aac4cee3bc8604",
+  "parentKey": "07957550dbf5aba05076df6e",
+  "referencePrecision": "100%",
+  "claimAnchorPrecision": "100%",
+  "contractProblems": [],
+  "scope": [
+   61514,
+   122388
+  ],
+  "parentPreserved": false,
+  "chainAccumulated": {
+   "tasks": "48 → 118",
+   "characterStates": "25 → 39",
+   "clues": "9 → 18",
+   "causeEdges": "5 → 6"
+  },
+  "addedQuality": {
+   "addedTasks": 70,
+   "shells": 0,
+   "mislabeledCompleted": 0
+  },
+  "reviewHistoryScopes": [
+   [
+    35,
+    18759
+   ],
+   [
+    35,
+    61514
+   ],
+   [
+    61514,
+    122388
+   ]
+  ],
+  "defaultSwitched": "data/cache/index.json 第 1 条 + loop/state/index.json graphKey 均 = cb21b33e",
+  "servedOnRealPage": "/api/history[0]=cb21b33e（at=2026-10-09 03:14:52）；/data/cache/cb21b33e.json → tasks 118 / states 39 / clues 18 / causeEdges 6，空壳 0、误标 0"
+ },
+ "verification": {
+  "bridgeContract": "tests/loop_bridge_contract.py 四批 38/38",
+  "selftest": "113/113",
+  "productAccept": "sh scripts/accept.sh 132/132",
+  "versionStamp": "336 处引用 8 位内容哈希 100% 匹配"
+ },
+ "bookkeeping": {
+  "pageIndexFirst": "cb21b33ec8aac4cee3bc8604（大奉）",
+  "loopIndexGraphKey": "cb21b33ec8aac4cee3bc8604",
+  "ledgerEntries": 4,
+  "ledgerLatest": "publish:dafeng:B001"
+ },
+ "assertions": [
+  {
+   "text": "桥的父版本以页面真实默认为准",
+   "command": "B001..B003 sourceKey 全 = 页面默认键",
+   "result": "pass"
+  },
+  {
+   "text": "发布在默认链上累积（不再分叉）",
+   "command": "tasks 48→118、states 25→39、clues 9→18",
+   "result": "pass"
+  },
+  {
+   "text": "父版本字节未变",
+   "command": "07957550… sha 前后均 d8b7e5b9fa96d042",
+   "result": "pass"
+  },
+  {
+   "text": "真实页面可读到新内容",
+   "command": "/data/cache/cb21b33e.json → 118 tasks / 39 states / 18 clues",
+   "result": "pass"
+  },
+  {
+   "text": "门禁全绿",
+   "command": "accept 132/132；selftest 113/113",
+   "result": "pass"
+  }
+ ],
+ "remaining": [
+  "已发布 2 批（B000+B001）= 40/912 单元；不得据此声称全书完成。",
+  "B002/B003/B004… 未发布；B004 尚缺 6 条复核前置。",
+  "P2.8 ④c（书签/续读按稳定 ID 迁移）仍未修，仍在棘轮基线内。",
+  "P4 V1 视觉母版、P5 同版八维终审未开始。"
+ ]
+}

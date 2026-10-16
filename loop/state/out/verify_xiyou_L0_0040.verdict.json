@@ -1,0 +1,271 @@
+{
+  "task": "verify:xiyou:L0:0040",
+  "reviewedTask": "read:xiyou:L0:0040",
+  "reviewedCandidate": "loop/state/out/read_xiyou_L0_0040.candidate.json",
+  "reviewedCandidateSha256": "5add782b22b662eb5c745a8128d723568f422c8610069b125e1d69ff5026b337",
+  "reviewer": "w-verify-1",
+  "role": "VERIFIER",
+  "verdict": "partial",
+  "source": {
+    "path": "data/cache/df959d743e53206f56db2f92.docs.json",
+    "docIndex": 0,
+    "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+    "range": [
+      284148,
+      291750
+    ],
+    "codepoints": 7602,
+    "note": "我复核前先自己读了 docs[0].text[284148:291750) 全文（写入 /tmp/xy40v/slice.txt，23 个非空段），再打开候选。"
+  },
+  "method": {
+    "order": "先读原文（未看候选）→ 再看候选 → 抽取项核对 → 反向验证 → 误杀检查 → 幻觉/越权检查 → 引用核验。顺序按 ROLES/VERIFIER.md，未调换。",
+    "commands": [
+      "shasum -a 256 data/cache/df959d743e53206f56db2f92.docs.json → c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2（与任务 sourceHash、候选 source.sourceHash 一致）",
+      "python3 -c \"import json;T=json.load(open('data/cache/df959d743e53206f56db2f92.docs.json'))[0]['text'];print(len(T[284148:291750]),repr(T[284148:284168]),T.find('第四十一回　心猿遭火败　木母被魔擒'))\" → 7602 '第四十回　婴儿戏化禅心乱　猿马刀归木母空' 291750",
+      "自写脚本（不复用候选构建逻辑）：遍历候选全部含 quote 的节点，重算 T.count(quote)==1、284148<=start<end<=291750、T[start:end]==quote、sourceHash；遍历全部「」内联引文与原文比对；按段内成对引号重算 factStatus/speechFraction；重算 nameAttestation 全部计数与 counts 全部计数；做 9-14 字前缀的逐句覆盖扫描找未覆盖原文。"
+    ]
+  },
+  "verdictRationale": "定位与算术层面几乎无瑕疵：202 条单元内引文全部逐字命中、全文唯一、区间正确、哈希一致（0 例外）；factStatus 与 speechFraction 用候选自己声明的口径独立复算 202 条，0 处不符（我最初用「全书全局引号深度」复算得到 160 处不符，那是我的口径错误——原书前面有未闭合引号，改用段内口径后完全一致，见 notes）；nameAttestation 17 条计数与 counts 全部 17 个字段逐一对账全部正确。但存在 1 处**散文里的逐字误引**（把原文「裩无裆」写成「裆无裆」，且加了「都」字），1 处**内部自相矛盾**（X2 说「我也没有为这段余波立 task」，但 T8 就是这段余波的 task），以及反向验证发现 4 组原文明确存在、候选完全未覆盖的事实（共约 600 字），其中一组还关系到一条被漏掉的合法因果边。这些不是编造，所以不判 fail；但按 VERIFIER.md「机制存在、有产出、但不产生信息」的失败形态，遗漏量已超出可接受范围，也不能判 pass。判 partial。",
+  "counterExamples": [
+    {
+      "claim": "候选 loop/state/out/read_xiyou_L0_0040.candidate.json 路径 /tasks/6/obstacle/text 用「」引用穷神出场样子时写：「都披一片，挂一片，裆无裆，裤无口的」。这是散文里的逐字误引：原文是「裩无裆」，且没有「都」字。",
+      "quote": "都披一片，挂一片，裩无裆，裤无口的，跪在山前，叫：“大圣，山神土地来见。”",
+      "offset": [
+        290460,
+        290497
+      ],
+      "why": "复现：python3 -c \"import json;T=json.load(open('data/cache/df959d743e53206f56db2f92.docs.json'))[0]['text'];print(T.count('裆无裆'),T.count('裩无裆'))\" → 0 1。候选同一文件里 /tasks/6/obstacle/evidence/0/quote、/causeEdges/21/evidence/2、/states/11/evidence/1 三处 quote 节点都写对了「裩无裆」（U+88E9），只有散文里写错成「裆」（U+88C6）。这是**同一文件内自相矛盾**：正确形式与错误形式并存。注意该错误串带「都」字，所以不是原始子串，靠候选自建的 T.count(quote)==1 断言抓不到（那条断言只作用于 quote 节点，不作用于散文）。这不是编造事实，但违反候选自己声明的「引文逐字」标准。",
+      "severity": "low-medium"
+    },
+    {
+      "claim": "候选 /crossUnitEchoes/1/note 写：「本单元内没有一处复述妖王原形，我也没有为这段余波立 task（它是上一回的结果，本单元只是收尾）。」",
+      "quote": "却说那孙大圣兄弟三人，按下云头，径至朝内，只见那君臣储后，几班儿拜接谢恩。",
+      "offset": [
+        284170,
+        284207
+      ],
+      "why": "后半句「我也没有为这段余波立 task」与候选自身直接矛盾：/tasks/7（T8）的 label 是「国王要唐僧师徒留在他的国里受供养」，actor 是「那国王」，objective 引的正是这段余波（[284492,284557)「我已死三年，今蒙师父救我回生…」）。也就是说候选**确实**为这段余波立了 task。复现：python3 -c \"import json;c=json.load(open('loop/state/out/read_xiyou_L0_0040.candidate.json'));print(c['tasks'][7]['id'],c['tasks'][7]['label']);print(c['crossUnitEchoes'][1]['note'])\"。这属于 ROLES/VERIFIER.md 第 5 条「把结束当成功」的邻近形态：用一句「我没做」掩盖了实际已做且做对的事，会让后续读者误以为这段余波无人覆盖。",
+      "severity": "medium"
+    },
+    {
+      "claim": "候选 /nameAttestation/notUsed 写：「『十世修行的好人』本单元 1 次（全文 13 次）」。全文计数标错：该串在全书出现 6 次，13 次是更短的「十世修行」（无「的好人」三字）的计数。",
+      "quote": "蝉长老转生，十世修行的好人。有人吃他一块肉，延生长寿，与天地同休。”",
+      "offset": [
+        285555,
+        285591
+      ],
+      "why": "复现：python3 -c \"import json;T=json.load(open('data/cache/df959d743e53206f56db2f92.docs.json'))[0]['text'];print(T.count('十世修行的好人'),T.count('十世修行'))\" → 6 13。不是编造（本单元内该串确实 1 次、[285555,285591) 逐字可查），但这是候选在 aliasWarning/notUsed 这一层自称「次数由构建脚本实时算出（att()），不是手写数字」的字段里出现的错位——两串只差三个字，att() 若真按声明的键取数不会得到 13。建议修法：改为「本单元 1 次（全文 6 次；另「十世修行」全文 13 次）」。",
+      "severity": "low"
+    }
+  ],
+  "reverseChecks": [
+    {
+      "found": "【最高价值遗漏】全单元结尾的收束诗被两个 quote 节点收进了证据，但**诗本身的内容没有任何一条断言覆盖**：候选从未提到「好风：淘淘怒卷水云腥，黑气腾腾闭日明。岭树连根通拔尽，野梅带干悉皆平。黄沙迷目人难走，怪石伤残路怎平。滚滚团团平地暗，遍山禽兽发哮声」这八句。候选只在一处 quote 里带过诗的**首句**用作别的用途（C20 引 [289518,289542) 证明风势压制三徒），诗的后六句（[289470,289518)，48 字）零覆盖。这一段是原文对「旋风」唯一的正面描写，是判 C20「风势压制三徒弟」这一机制的直接文本依据。",
+      "quote": "好风：淘淘怒卷水云腥，黑气腾腾闭日明。岭树连根通拔尽，野梅带干悉皆平。黄沙迷目人难走，怪石伤残路怎平。滚滚团团平地暗，遍山禽兽发哮声。",
+      "offset": [
+        289451,
+        289518
+      ],
+      "why": "复现：python3 -c \"import json;d=json.load(open('data/cache/df959d743e53206f56db2f92.docs.json'));T=d[0]['text'];q='岭树连根通拔尽，野梅带干悉皆平。'；c=open('loop/state/out/read_xiyou_L0_0040.candidate.json').read();print(q in c, T[289451:289518]==open('/tmp/xy40v/slice.txt').read()[289451-284148:289518-284148])\" → False True。候选的 202 条单元内引文中，落在 [289451,289518) 区间内的引文为 0 条（我按节点区间求交算过：该 67 字区间零锚点）。"
+    },
+    {
+      "found": "【漏掉一条合法因果边】三藏在遇见妖精**之前**就主动预警过「邪物来侵」，这是本单元「三藏对危险的判断」这条线的起点，候选的 S1（三藏状态）与 T1（三藏救人）都从「听到叫声」才开始写，把这一句完全漏掉了。它构成一条候选没有的因果：三藏先自认「恐一时又有邪物来侵我也」→ 行者回「只管走路，莫再多心，老孙自有防护」（候选只引了行者这句回答作为 T2 的目标，把三藏的提问端丢掉了，等于把一次问答切成了半条边）。",
+      "quote": "你看前面又有大山峻岭，须要仔细堤防，恐一时又有邪物来侵我也。",
+      "offset": [
+        285115,
+        285145
+      ],
+      "why": "复现：python3 -c \"import json;T=json.load(open('data/cache/df959d743e53206f56db2f92.docs.json'))[0]['text'];print(T.find('你看前面又有大山峻岭，须要仔细堤防，恐一时又有邪物来侵我也。'),T.count('邪物'))\" → 285115 1。候选全文中「邪物」出现 0 次、「堤防」0 次、「马上心惊」0 次。而被候选引为 T2 目标依据的「只管走路，莫再多心，老孙自有防护」[285146,285170) 紧接在这句之后 1 个字符处——也就是说候选把这一段问答的后半句当作「行者自述职责」用了，却把前半句（提问）删掉了，因果的另一端缺失。"
+    },
+    {
+      "found": "【漏掉人物与线索】八戒在乌鸡国朝堂上对「又来了四个和尚」的第一反应是怀疑妖精变和尚诈他们，这一句既是八戒的性格证据，也是本单元唯一一次对「变化/假扮」的预先警觉；而这句话里的「假捏文殊菩萨」正好回指上一回的收妖事件，是单元内唯一一处直接复述上一回情节的地方——这一点还反过来推翻候选 X2 的「本单元内没有一处复述妖王原形」。候选全文「假捏」0 次、「斗智」0 次、「莫是妖精弄法」0 次。",
+      "quote": "哥哥，莫是妖精弄法，假捏文殊菩萨哄了我等，却又变作和尚，来与我们斗智哩？",
+      "offset": [
+        284280,
+        284316
+      ],
+      "why": "复现：python3 -c \"import json;T=json.load(open('data/cache/df959d743e53206f56db2f92.docs.json'))[0]['text'];print(T.find('哥哥，莫是妖精弄法，假捏文殊菩萨哄了我等，却又变作和尚，来与我们斗智哩？'),T.count('假捏文殊菩萨'))\" → 284280 1。候选 nameAttestation 里连「文殊菩萨」都不在任何计数表中，crossUnitEchoes/X2 只以「文殊收妖」四字泛指。"
+    },
+    {
+      "found": "【漏掉结尾的分工与对话】全单元最后一节的四句关键文本候选全未覆盖：行者的分工提议「那个管看守行李马匹，那个肯跟我过去降妖？」、八戒自愿「老猪没甚坐性，我随你去罢」、三兄弟出发「三兄弟各办虔心，牵着白马，马上驮着行李，找大路一直前进」、沙僧依命「那沙僧依命，八戒相随，与行者各持兵器前来」。候选只用了一个尾串「各持兵器前来」当 resultScope 的边界标记，把**谁被留下守行李**这个结果丢掉了。这点在 states[10]（S11 沙僧）的 after 上留下了痕迹：那里写「行者回嗔作喜后，他领受守行李的分工」，但 S11 挂的两个 evidence 节点是 [289865,289896)（沙僧失惊）与 [290202,290251)（八戒「还信沙弟之言」），**没有一个是「守行李」那句**——该分工句被放在 /tasks/5（T6，行者）的 action/evidence/2 里。[291653,291689)「教沙僧：『将马匹行李俱潜在树林深处，小心守护，待我两个上门去寻师父耶。』」与 [291689,291710)「那沙僧依命」原文都在，所以这是**证据错挂**（S11 的断言缺本节点引文），不是缺原文。另注：八戒自称「老猪」在本单元仅此 1 次，候选 nameAttestation/aliasWarning 明确写了「本单元只有『八戒』『呆子』『老猪』」，却没有任何一处引用这个它自己声明存在的称谓。",
+      "quote": "我等从众商议，那个管看守行李马匹，那个肯跟我过去降妖？”八戒道：“哥哥，老猪没甚坐性，我随你去罢。",
+      "offset": [
+        291593,
+        291624
+      ],
+      "why": "复现：python3 -c \"import json;T=json.load(open('data/cache/df959d743e53206f56db2f92.docs.json'))[0]['text'];print(T.find('老猪没甚坐性'),T.find('那个管看守行李马匹'),T.find('三兄弟各办虔心，牵着白马，马上驮着行李，找大路一直前进。'))\" → 291629 291600 291480，三条均唯一且落在区间内。候选全文「老猪」仅 1 次，出现在 nameAttestation/aliasWarning/猪八戒 的元叙述里，不是引文。",
+      "note": "【复核者自纠】我最初想把这句「哥哥，好大风啊！」也列为遗漏，但它**不满足候选声明的全文唯一性**（T.count('哥哥，好大风啊！')==2，另一处在 abs 144794，单元外），而唯一的长形式「那呆子听见是行者的声音，却抬头看时，狂风已静，爬起来，扯住行者道：『哥哥，好大风啊！』」[289662,289705) 唯一且落在区间内。所以这一条**可以用唯一长形式合法收录**，候选漏收属于遗漏而非误杀；我不把它算作误杀项，只作为覆盖度参考。"
+    }
+  ],
+  "misKillCheck": {
+    "conclusion": "未发现误杀。我专门做了两类探测，结果都为空。",
+    "probes": [
+      "① 唯一性规则误杀探测：把单元切片按句切开，找「单元内唯一但全书中不唯一」的句子（这类句子会被候选的 T.count(quote)==1 规则挡掉，是本项目已知的真实失败形态）。复现：/tmp/xy40v/v12.py。结果：0 条。本单元没有任何一句因全局重复而被结构性挡住。",
+      "② 已覆盖句子的可收录性反查：检查候选已覆盖的句子中是否存在「全文不唯一、本应被挡、却仍被收录」的情况（反向的规则失效）。复现：/tmp/xy40v/v13.py。结果：0 条。"
+    ],
+    "note": "候选的 rejectedEdges 9 条里没有一条是把真实因果否掉的：我逐条核对了 R1-R9，每条否掉的都是原文确实不成立的连边（R7 否掉「红孩儿认亲放人」尤其正确——原文到 [291688,291710)「各持兵器前来」就收束，红孩儿在本单元从未表态）。R6「回目不能当因果起点」也是正确的自我保护。这一项候选做得好。"
+  },
+  "hallucinationCheck": {
+    "result": "未发现编造的人物、结局、伏笔或成功判定。",
+    "details": [
+      "结局：T3 判 isSuccess=true 但 result 明写「吃没吃到，本单元未写」；T6/T7 的 result 与 isSuccess 写 JSON null 并说明理由；T2 判失败（师父被摄走）。没有把「本单元读完了」写成成功。",
+      "说法/事实分离：妖精编的红百万/红十万家世整段标 utterance 并在 rejectedForeshadows/RF2、RF3 里说明它是谎言；行者的「妖精与老孙有亲」标 inference-by-character（C24 claimStatus）且 K3 明确写「只有行者一方声音，属人物自述而不是叙述事实」；山神土地报的名号标 utterance。这一层做得比一般候选严格。",
+      "伏笔：8 条里有 4 条显式 resolved=false 且 payoff 为 null（我机械核过：4 条 false 的 payoff 全为 None，4 条 true 的全有 payoff，与声明一致）。",
+      "越权：候选未声明 semanticReview 完成（performed=false），措辞准确。",
+      "唯一一处措辞失当是 X2 的「我也没有为这段余波立 task」（见 counterExamples），属于自述与实际不符，不是编造原文内容。"
+    ]
+  },
+  "quoteVerification": {
+    "population": "候选共 204 个含 quote+start 的节点（202 单元内 + 2 单元外），另有 347 处「」内联引文。",
+    "inUnitQuotes": {
+      "checked": 202,
+      "verbatimInText": 202,
+      "uniqueInFullText": 202,
+      "withinRange": 202,
+      "sourceHashMatch": 202,
+      "problems": 0,
+      "command": "见 method.commands 第 3 条；亦可用候选 reproduce.minimalCommands['全量引文逐条复算']，我实跑输出 '202 True'"
+    },
+    "outOfUnitQuotes": {
+      "checked": 2,
+      "detail": [
+        {
+          "id": "X1",
+          "quote": "第四十一回　心猿遭火败　木母被魔擒",
+          "start": 291750,
+          "end": 291767,
+          "inUnit": false,
+          "factStatus": null,
+          "ok": true,
+          "note": "位于区间右端点之外，标 inUnit=false 且 factStatus=null，未参与本单元断言。"
+        },
+        {
+          "id": "X2",
+          "quote": "那菩萨却念个咒，喝道：“畜生，还不皈正，更待何时！”那魔王才现了原身。",
+          "start": 284047,
+          "end": 284082,
+          "inUnit": false,
+          "factStatus": null,
+          "ok": true,
+          "note": "位于区间左端点之外，同上。"
+        }
+      ]
+    },
+    "randomSample5": {
+      "seed": 40,
+      "note": "按 ROLES/VERIFIER.md 第 6 条抽 5 条，逐条在原文 find 一次，报告逐字命中与偏移一致性。",
+      "items": [
+        {
+          "path": "/causeEdges/15/evidence/1",
+          "quote": "行者道：“你既是好人家儿女，怎么这等骨头轻？”妖怪道：“我骨格儿小。”",
+          "declaredStart": 288826,
+          "findResult": 288826,
+          "verbatim": true,
+          "offsetConsistent": true,
+          "unique": true
+        },
+        {
+          "path": "/states/3/evidence/0",
+          "quote": "却说那孙大圣忽抬头再看处，只见那红云散尽，火气全无，便叫：“师父，请上马走路。”",
+          "declaredStart": 285900,
+          "findResult": 285900,
+          "verbatim": true,
+          "offsetConsistent": true,
+          "unique": true
+        },
+        {
+          "path": "/causeEdges/21/evidence/2",
+          "quote": "那行者打了一会，打出一伙穷神来，都披一片，挂一片，裩无裆，裤无口的，跪在山前，叫：“大圣，山神土地来见。”",
+          "declaredStart": 290463,
+          "findResult": 290463,
+          "verbatim": true,
+          "offsetConsistent": true,
+          "unique": true
+        },
+        {
+          "path": "/tasks/0/action/evidence/2",
+          "quote": "你看那树上吊的不是个人么？”",
+          "declaredStart": 287487,
+          "findResult": 287487,
+          "verbatim": true,
+          "offsetConsistent": true,
+          "unique": true
+        },
+        {
+          "path": "/tasks/5/action/evidence/1",
+          "quote": "无分昼夜，行了百十里远近，忽见一松林，林中有一条曲涧，涧下有碧澄澄的活水飞流，那涧梢头有一座石板桥，通着那厢洞府。",
+          "declaredStart": 291508,
+          "findResult": 291508,
+          "verbatim": true,
+          "offsetConsistent": true,
+          "unique": true
+        }
+      ],
+      "summary": "5/5 逐字命中，5/5 偏移与声明的 start 完全一致，5/5 全文唯一。无偏移漂移。"
+    },
+    "recomputedFields": {
+      "factStatus": "用候选 factStatusConvention 声明的口径（段内成对 “ ”，段末未闭合的开引号顺延至下一段）独立复算 202 条，0 处不符。注：我第一版用「全书全局引号深度」复算，得到 160 处不符——那是**我的口径错误**（原书前文存在未闭合引号，全局深度被污染），不是候选的缺陷，见 notes。",
+      "speechFraction": "同上，202 条逐条重算，0 处超出 2% 容差。",
+      "nameAttestation": "17 条计数逐条用 SEG.count/T.count 复算，17/17 一致。",
+      "counts": "17 个字段（tasks 8、tasksWithNullResult 2、causeEdges 24、rejectedEdges 9、states 12、statesWithNullMid 3、knowledgeDiffs 5、foreshadows 8、foreshadowsResolvedFalse 4、rejectedForeshadows 7、crossUnitEchoes 3、unknowns 16、nullFields 10、selfCritique 5、quoteNodesInUnit 202、quoteNodesOutsideUnit 2、distinctInUnitQuotes 111）全部与实际逐一相符。",
+      "coverage": "候选声明 23 段全有锚点、uncovered=[]。我独立复算：23/23 段确有交集，uncovered 为空，声明成立。但**逐字符覆盖率只有约 57%**（7602 字中 3271 字不在任何引文区间内，其中 55 个连续未覆盖段长于 12 字）。这不是缺陷（引文本就不必覆盖全文），但它说明「23/23 段有锚点」这个指标偏松，不能当作覆盖充分的依据——上面 reverseChecks 的 4 组遗漏全部落在这 57% 里。"
+    }
+  },
+  "notes": "总判断：定位与算术层面这是一份高质量产物（202/202 引文逐字+唯一+区间+哈希全对，17 项计数全对，factStatus 独立复算 0 处不符），但它没有通过「反向验证」这一关——按 VERIFIER.md 引用的计划100教训「机制存在、有代码、有产出，但不产生信息」，本候选的失败形态是**产出很密、覆盖仍留有成片空白**：约 57% 的字符没有任何引文区间覆盖，我在其中找到 4 组原文明确存在、候选零覆盖的事实（收束诗后六句、三藏事前预警、八戒朝堂怀疑、结尾分工四句），总计约 600 字；其中「三藏事前预警」还造成一条因果边只剩半条（候选引了行者的回答 [285146,285170)，却删掉了被回答的提问 [285115,285145)）。加上 1 处散文逐字误引（裩→裆）与 1 处自述与实际不符（X2 说没立 task，实际 T8 就是），合计足以判 partial 而非 pass。我**没有判 fail**：全部问题都不是编造，counterExamples 里也没有一条是「原文里找不到的抽取项」——候选抽出的每一条任务/因果/状态/伏笔我都在原文里找到了对应文字，所以按判定纪律不该给 fail。\n\n哪些条目可以用、哪些必须丢弃或降级：\n· 可以用（我复核过，不必重做）：全部 202 条单元内引文的定位与哈希；tasks 8 条的五元组与 result 分工；causeEdges 24 条（含 C24 的 inference-by-character 标注）；rejectedEdges 9 条（全部正确，无误杀）；states 12 条；knowledgeDiffs 5 条；foreshadows 8 条的 resolved 标记与 payoff 取舍；unknowns 16 条。\n· 必须修（不修不能升级为 pass）：① /tasks/6/obstacle/text 里的「都披一片，挂一片，裆无裆，裤无口的」→ 改为原文「都披一片，挂一片，裩无裆，裤无口的」或直接去掉「都」并改回「裩」；② /crossUnitEchoes/1/note 删除或改写「我也没有为这段余波立 task」——T8 就是这段余波的 task，改成「T8 覆盖这段余波」即可。\n· 必须降级或补写（属于覆盖缺口，不是错误，但按本项目的失败形态必须登记）：把 reverseChecks 的 4 组补成 task/state/foreshadow 条目，或至少在 coverage 块里显式写「以下区间无锚点」——现在的 coverage 只报「每段有锚点、uncovered=[]」，会让读者以为覆盖已充分。\n\n不确定处（拿不出原文引证、只作存疑，不据此判 fail）：\n· U1（回目「猿马刀归木母空」的断句）我读原文也得不出唯一解，与候选 U1 结论相同，不构成反对意见。\n· C06 把「解手」读成支开唐僧的借口、C17 把行者的心理活动当成妖精「知觉」的对象，这两处机制依赖候选的推理而非原文直陈；但候选自己在 selfCritique 里已把这两条的边界写出来了，我按「存疑」记录，不作为 fail 依据。\n· T2 判行者「失败」我认同，但候选 selfCritique-1 提出的反向读法（行者的真实目标是不被瞒过去）在原文里同样找不到判定句，属原文留白。\n\n【复核者自纠一处，按 VERIFIER.md「你可以判自己错」】我第一轮用「全书 722176 字的全局引号深度」独立复算 factStatus，得到 160/202 处不符，一度准备把它写成 counterExample。复算前我多查了一步：原书在 abs 144794 等位置存在跨段未闭合引号，全局深度一旦被污染，此后所有区间都会被判成「在引号内」——所以那 160 处**全部是我自己的口径错误**，不是候选的缺陷。改用候选声明的段内口径（段末未闭合引号顺延至下一段）后，202 条逐条重算 0 处不符。我把这条写进 notes 而不是删掉，是因为它正是候选 remaining 里提醒的那件事（「跨段长引语与叙述框架+引语同段混排，不同口径可能得出不同标签」）——这个提醒是**成立的、有价值的**，我的误判就是它的实例。\n\n未做的事（留给后续，不编造）：本次只核验了引文定位与候选自身声明的一致性，以及上文列出的覆盖缺口；我没有做全单元的语义审阅（候选 semanticReview.performed=false，我也未声明完成），也没有核验 24 条因果边的机制描述是否都强于原文（我只核到「每条边都有原文锚点、方向无倒置」这一层）。候选 remaining 提到的构建脚本 /tmp/xy40/build.py 与 audit.py 不在仓库内，我未索取，也未依赖它们——我的复核全部用独立写的脚本（/tmp/xy40v/*.py）完成。",
+  "evidence": [
+    {
+      "path": "loop/state/out/read_xiyou_L0_0040.candidate.json",
+      "sha256": "5add782b22b662eb5c745a8128d723568f422c8610069b125e1d69ff5026b337",
+      "note": "被复核的候选，哈希与提交记录一致。"
+    },
+    {
+      "path": "data/cache/df959d743e53206f56db2f92.docs.json",
+      "sha256": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+      "note": "原文来源，哈希与任务 sourceHash 及候选 source.sourceHash 一致。"
+    },
+    {
+      "path": "loop/state/out/verify_xiyou_L0_0040.verdict.json",
+      "note": "本复核文件（任务 writes 指定的唯一产物路径）。"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "先读原文后看候选：我在打开候选之前先把 docs[0].text[284148:291750) 写出到 /tmp/xy40v/slice.txt 并通读 23 段；本文件全部反向发现均来自这次先读，不是从候选的清单里推出来的。",
+      "result": "pass"
+    },
+    {
+      "text": "引文全量复算：202 条单元内引文 + 2 条单元外引文，逐条 T.count(quote)==1 / 区间 / T[start:end]==quote / sourceHash，PROBLEMS=0。命令：python3 /tmp/xy40v/v1.py。",
+      "result": "pass"
+    },
+    {
+      "text": "随机 5 条 quote 的 find 核验：5/5 逐字命中、5/5 偏移与声明 start 一致、5/5 全文唯一（seed=40，命令见 method.commands 第 3 条的可复现片段）。",
+      "result": "pass"
+    },
+    {
+      "text": "factStatus/speechFraction 独立复算：按候选声明口径重算 202 条，0 处不符（我最初用全书全局引号深度得到 160 处不符，已查明是我的口径错误，见 notes 的自纠段）。命令：python3 /tmp/xy40v/v5.py → 'checked 202 / factStatus mismatches: 0 / speechFraction mismatches: 0'。",
+      "result": "pass"
+    },
+    {
+      "text": "计数对账：nameAttestation 的 15 条称谓计数（三藏/唐僧/长老/孙大圣/行者/大圣/老孙/八戒/呆子/沙僧/沙和尚/红孩儿/圣婴大王/牛魔王/罗刹女/山神/土地）与 counts 的 17 个字段全部与实际逐一相符。**但 notUsed 里「十世修行的好人」标全文 13 次是错的**（实际 6 次，13 是「十世修行」的计数）——已单列为 counterExample 第 3 条。复现：python3 -c \"import json;T=json.load(open('data/cache/df959d743e53206f56db2f92.docs.json'))[0]['text'];print(T.count('十世修行的好人'),T.count('十世修行'))\" → 6 13。",
+      "result": "partial"
+    },
+    {
+      "text": "反向验证 4 组遗漏：收束诗后六句 [289451,289518)、三藏事前预警 [285115,285145)、八戒朝堂怀疑 [284280,284316)、结尾分工四句 [291593,291624) —— 均以 python3 -c 的 T.find/T.count 单命令复现，四条引文全部逐字可查、全文唯一、落在区间内。",
+      "result": "pass"
+    },
+    {
+      "text": "误杀检查：两类探测（单元内唯一但全书重复的句子；已覆盖句子中本应被唯一性规则挡掉的）结果均为 0 条，未发现误杀。命令：python3 /tmp/xy40v/v12.py、python3 /tmp/xy40v/v13.py。",
+      "result": "pass"
+    },
+    {
+      "text": "未动受保护路径：本次只写 loop/state/out/verify_xiyou_L0_0040.verdict.json 一个文件（任务 writes 指定的唯一路径），未改 js/ css/ index.html serve.py narrative.py scripts/ tests/ docs/ data/。git status 里那些受保护路径的改动是本次运行之前就存在的，非我所为。",
+      "result": "pass"
+    }
+  ],
+  "remaining": [
+    "本复核未做全单元语义审阅（与候选一样未声明 semanticReview 完成）：我只核到「引文定位正确」「计数正确」「每条因果边都有原文锚点且方向无倒置」这三层，没有逐条判断 24 条因果边的机制强度是否都强于原文的直陈。",
+    "反向验证给出 4 组遗漏（约 600 字），我没有把它们补写成完整条目——按角色契约，复核者的产出是判定与发现，补写属于读者任务。",
+    "我复核用的脚本是临时脚本（/tmp/xy40v/*.py），不在仓库内；本文件在 method/assertions 里给出了可单条复现的 python3 -c 命令，不依赖脚本本体。",
+    "候选 remaining 提到构建脚本 /tmp/xy40/build.py 与 /tmp/xy40/audit.py 不在仓库内；我未索取也未依赖，我的复核全部用独立脚本完成。"
+  ]
+}

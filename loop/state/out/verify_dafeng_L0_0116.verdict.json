@@ -1,0 +1,313 @@
+{
+ "task": "verify:dafeng:L0:0116",
+ "reviewer": "w-verify-0",
+ "roleFile": "loop/ROLES/VERIFIER.md",
+ "candidateUnderReview": "loop/state/out/read_dafeng_L0_0116.candidate.json",
+ "candidateAgent": "w-dafeng-1",
+ "source": {
+  "path": "data/cache/215f4b88fb087a7d735a6fae.docs.json",
+  "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+  "sourceHashKind": "sha256(整个 docs.json 文件)",
+  "range": [
+   393895,
+   398486
+  ],
+  "codepoints": 4591,
+  "segmentSha256": "4c58e5a4c5e5a4d5ae39d91136f8ca410e49d01597807dd806035664416323df",
+  "boundaryCheck": "复核者独立复算：docs[0].text[393895:393911]=='第一百一十七章 桑泊底下的封印物'；docs[0].text[398486:398496]=='第一百一十八章 灭口'；切片长度 4591 == 任务声明。另注：候选 readsSource 指向 1063b17ca65ec1b76f30e460.docs.json，与本复核使用的 215f4b88fb087a7d735a6fae.docs.json **sha256 完全相同（fdde5558…）**，是两个字节相同的缓存副本，故不构成路径不一致。"
+ },
+ "method": "按 VERIFIER.md 顺序执行：①先独立通读 [393895,398486) 整段原文（4591 字，未先打开候选结论）；②再打开候选，用独立脚本对**全部** 158 条 quote 节点逐条做 text[start:end]==quote 回切 + 全文 find() + occurrencesInFullText 复算 + sourceHash 复算 + 区间内判定；③反向验证：按「段落覆盖 / 句子覆盖 / 未被任何分区登记的人名与事实 / 因果边补集」四条路径扫描候选**没有**覆盖的原文事实；④误杀检查；⑤幻觉/越权检查；⑥随机抽 5 条 quote 做独立 find()（seed=116 固定可复现）。所有证据命令与哈希见 notes.reproduce。",
+ "verdict": "partial",
+ "verdictRationale": "候选的**引文机械质量无懈可击**：158/158 条 quote 逐字命中、偏移与 find() 完全一致、occurrencesInFullText 全对、sourceHash 全对、无一条越出区间、无编造人物/结局/伏笔、无「把结束当成功」、metrics 十项结构计数与 taskColumnQuotes/tasksWithNullColumn 全部复算相符、列内引文共用与区间重叠 0 处、作者 PS 与下一章完全未被引用。故**不能判 fail**。但存在 5 条原文可证的错误断言/遗漏，其中 3 条会把错误事实传给下游（D1 引语归属错、D2 分区说明与自身数据矛盾、D3 把他人台词记成褚采薇的话），且有 3 条原文明确存在的事实未被任何分区覆盖（R1–R3），故**不能判 pass**。缺陷局部、可定点修复，不动摇主体抽取，故判 partial。",
+ "counterExamples": [
+  {
+   "claim": "tasks[6]（T7，褚采薇）obstacle.note 写「**她的**直接引语」并把「“除此之外呢？”」列为她这一栏的障碍依据。",
+   "quote": {
+    "quote": "而他显然不是....许七安颔首，继续问道：",
+    "start": 395237,
+    "end": 395258,
+    "occurrencesInFullText": 1,
+    "occurrencesInUnit": 1,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "offsetUnit": "codepoint",
+    "offsetBase": "docs[0].text 全文（0-based，左闭右开）",
+    "match": "docs[0].text[start:end]==quote 逐字回切",
+    "note": "该句叙述层主语是许七安；「“除此之外呢？”」紧接其后。"
+   },
+   "why": "该引语不是褚采薇的话。原文叙述层明写「许七安颔首，继续问道：」，紧接着才是「“除此之外呢？”」（395264）——发问者是**许七安**，不是褚采薇。候选自己在同一任务的 action.note 里正确写着「追问『除此之外呢』」，却在 obstacle.note 里把同一句的说话人写成她，属归属自相矛盾。这与 D1 同形：一句话的说话人记错。",
+   "severity": "medium",
+   "fix": "把 T7.obstacle.quotes[1] 移出该栏，或把 obstacle.note 的「她的直接引语」改为「这一栏的两条引语分属两人：第一条是褚采薇的答复，第二条是许七安的反问」。"
+  },
+  {
+   "claim": "tasks[4]（T5，魏渊）action.note 开头写「**八句**都是他的直接引语」。",
+   "quote": {
+    "quote": "许七安皱了皱眉：“我懂这样的道理，所以人性需要时时敲打，常常威慑，才能吏治清明。魏公是不是过于纵容了。”",
+    "start": 397565,
+    "end": 397617,
+    "occurrencesInFullText": 1,
+    "occurrencesInUnit": 1,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "offsetUnit": "codepoint",
+    "offsetBase": "docs[0].text 全文（0-based，左闭右开）",
+    "match": "docs[0].text[start:end]==quote 逐字回切",
+    "note": "这是 T5.action 的第 5 条引文（quotes[4]），说话人是许七安。"
+   },
+   "why": "该栏实际有 **12** 条引文节点，note 只描述了其中 8 条，且其中至少两条不是魏渊的话：quotes[4] 是**许七安**的直接引语（上引，原文「许七安皱了皱眉：『我懂这样的道理…』」），quotes[11] 的 layer 被候选自己标为 narration（「魏渊的意思是…许七安想了想，觉得有理。」——前半是叙述层替他总结、后半是许七安的反应）。因此「八句都是他的直接引语」既与自身节点数（12）不符，也与节点归属（含许七安台词 1 条、叙述层 1 条）不符。注：candidate 的 metrics 并未单列该栏句数，这是 note 正文与自身数据的不一致，不是计数指标错误。",
+   "severity": "medium",
+   "fix": "把 note 改为「本栏 12 条引文中，10 条是魏渊的直接引语（含他回答许七安质疑的部分），另 1 条是许七安的质疑、1 条是叙述层替魏渊总结的意思」并核对每条 layer。"
+  },
+  {
+   "claim": "tasks[6]（T7）obstacle.note 称省略号「表示她说到一半接不上」。",
+   "quote": {
+    "quote": "“我们司天监倒是有，其他地方....”褚采薇歪着脑袋，想来一会儿：“我得回去问问宋师兄。”",
+    "start": 395514,
+    "end": 395559,
+    "occurrencesInFullText": 1,
+    "occurrencesInUnit": 1,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "offsetUnit": "codepoint",
+    "offsetBase": "docs[0].text 全文（0-based，左闭右开）",
+    "match": "docs[0].text[start:end]==quote 逐字回切"
+   },
+   "why": "这一句的省略号叙述层已给出明确解释：她「歪着脑袋，想来一会儿」，即**在思索**而非「接不上」。原文紧接的下一句就是她自己的完整答复「我得回去问问宋师兄」——话是说完的。把思索写成语塞是对原文的加戏。（存疑部分：若只取「其他地方…」这一截断，说「说不下去」尚可；候选写的是「接不上」，与「想来一会儿」的语义不符。）",
+   "severity": "low",
+   "fix": "note 改为「省略号处叙述层写她『歪着脑袋，想来一会儿』，即当场想不出京城的其他可能，随后给出下一步（问宋师兄）」。"
+  },
+  {
+   "claim": "textArtifacts[3].where 与 coverage.notCovered 均把分节符记为 `[394394,394400)`。",
+   "quote": {
+    "quote": "    .....",
+    "start": 394394,
+    "end": 394403,
+    "occurrencesInFullText": 2841,
+    "occurrencesInUnit": 1,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "offsetUnit": "codepoint",
+    "offsetBase": "docs[0].text 全文（0-based，左闭右开）",
+    "match": "docs[0].text[start:end]==quote 逐字回切",
+    "note": "该段完整区间是 [394394,394403)，共 9 字符；[394394,394400) 只截到 6 个字符。"
+   },
+   "why": "`docs[0].text[394394:394400]` 实际等于 `'    ..'`（4 空格 + 2 点），**不等于**候选在同一句里描述的「「.....」」；完整分节符段落是 `[394394,394403)` = `'    .....'`。候选两处（textArtifacts[3].where 与 coverage.notCovered）都把右端少写了 3 个字符。这是一个**只在极少数段落出现**的短串，因此 t.count('    ..') 在全文中高达 3061 次——该区间不唯一，无法用 find() 复原，属不可定位的偏移声明。",
+   "severity": "low",
+   "fix": "两处 394400 改为 394403。"
+  },
+  {
+   "claim": "textArtifacts[2]（疑为原文用字/断句问题）声明列举了本区间的疑点字串，selfCritique.otherCautions 同。",
+   "quote": {
+    "quote": "大奉官僚风气FǔBài，颓势已成",
+    "start": 397647,
+    "end": 397663,
+    "occurrencesInFullText": 1,
+    "occurrencesInUnit": 1,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "offsetUnit": "codepoint",
+    "offsetBase": "docs[0].text 全文（0-based，左闭右开）",
+    "match": "docs[0].text[start:end]==quote 逐字回切",
+    "note": "该串是本区间**唯一**一处拉丁字母+声调符号混排，是比已列 4 处更明显的排版异常，但候选的疑点清单里没有它。"
+   },
+   "why": "候选的 artifacts 清单（4 处：『脸色开始变的认真，仔细』/『鳝饿无鲍』/『敢到战栗』/『主需要』）漏了同样是排版异常的 `FǔBài`（397647，出现在魏渊台词里，且**被候选自己当作引文引用**于 T5.action.quotes[5]）。另有 `每个三五天`（394131，疑为「没个三五天」，语义反转：原文写「每个三五天不可能」，若「每」为「没」之误则意为「没个三五天不可能查清」）也未被登记。这不影响引文正确性（候选逐字保留了），但让「疑点清单」这一自陈不完整。",
+   "severity": "low",
+   "fix": "把 FǔBài 与 每个三五天 补进 textArtifacts[2]，或把该条标题从隐含的「全部疑点」改为「已发现的疑点举例」。"
+  },
+  {
+   "claim": "deliberatelyNotAsserted[5] 与 N-系列引用式为「（见 U）」。",
+   "quote": {
+    "quote": "元景帝让他戴罪立功，那么魏渊就有责任看住他这个死刑犯，他跑了，会连累魏渊。",
+    "start": 396437,
+    "end": 396474,
+    "occurrencesInFullText": 1,
+    "occurrencesInUnit": 1,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "offsetUnit": "codepoint",
+    "offsetBase": "docs[0].text 全文（0-based，左闭右开）",
+    "match": "docs[0].text[start:end]==quote 逐字回切",
+    "note": "复核者用它确认候选在别处确实写了「见 U」这一无编号引用。"
+   },
+   "why": "引用完整性缺陷（非事实错误）：deliberatelyNotAsserted[5] 写「两处都没有交代二者的关系（见 U）」——「U」不是任何条目的 id，候选的 unknowns 是 U1–U20。同一现象在 T7.objective 的注释里也出现（引用 `objectiveNote`，但没有任何 task 定义过该字段）。两处都是**悬空引用**，读者无法跳转。这不构成编造，故只记为缺陷、不作为判 fail 依据。",
+   "severity": "low",
+   "fix": "「见 U」改为具体条目号（或补一条 U21 专记周百户/周赤雄关系）；T7 的 objectiveNote 改为指向实际存在的字段或直接内联说明。"
+  }
+ ],
+ "reverseChecks": [
+  {
+   "found": "候选漏掉的原文事实①：许七安「升起逃离京城的想法」的直接触发点，是紧接在前一句的「初代监正已脱困」这个判断——原文两句相邻，构成一条完整的「判断→动机」链，但候选的 7 条 causeEdges 与 4 条 notCauseEdges 都没有登记它。",
+   "quote": {
+    "quote": "不，初代监正已经脱困了。",
+    "start": 396297,
+    "end": 396309,
+    "occurrencesInFullText": 1,
+    "occurrencesInUnit": 1,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "offsetUnit": "codepoint",
+    "offsetBase": "docs[0].text 全文（0-based，左闭右开）",
+    "match": "docs[0].text[start:end]==quote 逐字回切"
+   },
+   "quote2": {
+    "quote": "这一刻，许七安竟升起了逃离京城的想法。",
+    "start": 396315,
+    "end": 396334,
+    "occurrencesInFullText": 1,
+    "occurrencesInUnit": 1,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "offsetUnit": "codepoint",
+    "offsetBase": "docs[0].text 全文（0-based，左闭右开）",
+    "match": "docs[0].text[start:end]==quote 逐字回切"
+   },
+   "why": "两句在原文里相距仅 6 个字符（396309→396315），「这一刻」明确回指前句。候选把 F2 记为「脱困→后果」的悬念线、把 T4.objective 记为「想跑」，也把 T4.cost 记为「放弃这条退路」，却**没有把这三者之间的因果边登记出来**——即 T4 的目标从何而来，在因果分区里是空的。复核者按「问还漏了什么」扫描时，这是本区间最明显的一条未登记因果。",
+   "checkCommand": "python3 -c \"import json;t=json.load(open('data/cache/215f4b88fb087a7d735a6fae.docs.json'))[0]['text'];print(t.find('不，初代监正已经脱困了。'),t.find('这一刻，许七安竟升起了逃离京城的想法。'))\"  → 396297 396315"
+  },
+  {
+   "found": "候选漏掉的原文事实②：「车厢」是本区间第一个场景的所在地（南宫倩柔读材料、杨砚驾车对话都发生在车厢），但候选的 worldSettings 4 条 place（案牍库/浩气楼/桑泊/十三州）里没有它，excludedSettings 8 条里也没有它——它既未被登记、也未被说明为何不登记，在**所有**分区中都是隐形的。",
+   "quote": {
+    "quote": "“办案的好料子？”杨砚的声音从车厢外传来，很感兴趣的样子，追问道：“是指许七安？”",
+    "start": 394231,
+    "end": 394272,
+    "occurrencesInFullText": 1,
+    "occurrencesInUnit": 1,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "offsetUnit": "codepoint",
+    "offsetBase": "docs[0].text 全文（0-based，左闭右开）",
+    "match": "docs[0].text[start:end]==quote 逐字回切"
+   },
+   "why": "候选在 T1.label 与若干 note 的**散文中**确实用了「车厢」这个词（所以不是完全没看见），但分区层面：车厢既不在 worldSettings（4 place 无它），也不在 excludedSettings（8 条无它）。按候选自己的 worldSettingsConvention（「有到达动作才算 arrived」），车厢可以合规地记为 arrived——原文的 T1/T2 场景就在车厢里。它被静默丢弃了，而不是被显式排除。这正是「只查已写项发现不了」的遗漏形态。",
+   "checkCommand": "python3 -c \"import json;t=json.load(open('data/cache/215f4b88fb087a7d735a6fae.docs.json'))[0]['text'];print(t[393895:398486].count('车厢'))\"  → 1"
+  },
+  {
+   "found": "候选漏掉的原文事实③：监正被叙述层交代为「术士一品」——这是一个直接决定「为什么必须封印、为什么二品是底线」的品级设定，候选把它写进了 C4 的引文里，却没有在任何 rule 分区登记它（W1–W5 无此条），excludedSettings 也没有说明为何排除。",
+   "quote": {
+    "quote": "单凭术士一品的监正就能轻松解决",
+    "start": 395828,
+    "end": 395843,
+    "occurrencesInFullText": 1,
+    "occurrencesInUnit": 1,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "offsetUnit": "codepoint",
+    "offsetBase": "docs[0].text 全文（0-based，左闭右开）",
+    "match": "docs[0].text[start:end]==quote 逐字回切"
+   },
+   "why": "该串是许七安推理「能被封印在桑泊，二品是底线」的**前提**：正因为监正是术士一品，低于二品的封印对象没有封印的必要。候选的 C4.mechanism 正确复述了这个逻辑，但世界设定分区里没有这条品级信息，导致「监正为何能『轻松解决』」在下游只剩引文、没有可检索的设定条目。对照候选对同段的处理（「二品是底线」被 C4 标明是「他自己设的门槛（不是原文交代的世界规则）」），监正的「术士一品」却是**原文直述**，二者的证据等级本应区别对待。",
+   "checkCommand": "python3 -c \"import json;t=json.load(open('data/cache/215f4b88fb087a7d735a6fae.docs.json'))[0]['text'];print(t.find('单凭术士一品的监正就能轻松解决'))\"  → 395828"
+  },
+  {
+   "found": "候选漏掉的原文事实④：「李玉春」在本区间被点名两次（魏渊用他作正面例子反问许七安「如果打更人里全是李玉春这样的人」），但候选只把它留在 T5.action 的引文里，states/foreshadows/notForeshadows/worldSettings/excludedSettings/unknowns 均无登记。",
+   "quote": {
+    "quote": "“打更人衙门的诸多弊端，我心里清楚，但人性本就如此，光暗交织。李玉春那样的人，有多少？如果打更人里全是李玉春这样的人，打更人就做不到压制满朝文武。”",
+    "start": 397485,
+    "end": 397559,
+    "occurrencesInFullText": 1,
+    "occurrencesInUnit": 1,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "offsetUnit": "codepoint",
+    "offsetBase": "docs[0].text 全文（0-based，左闭右开）",
+    "match": "docs[0].text[start:end]==quote 逐字回切"
+   },
+   "why": "复核者另查图谱缓存：`李玉春` 不在 characters[453] 里，即他也不是已有图谱角色——所以既不能靠缓存兜住，候选也没在 unknowns 里记「李玉春是谁」。对照候选对同段其他人名的处置（宋师兄→U9、一号→U4 都进了 unknowns），李玉春被漏掉，口径不一致。",
+   "checkCommand": "python3 -c \"import json;g=json.load(open('data/cache/1063b17ca65ec1b76f30e460.json'));print('李玉春' in {c['name'] for c in g['characters']})\"  → False"
+  }
+ ],
+ "misKillCheck": {
+  "verdict": "未见误杀",
+  "detail": "候选的排除决策共 8 条 excludedSettings + 4 条 notCauseEdges + 6 条 notForeshadows，逐条核对原文后，**没有发现把合法项挡掉的误杀**：(a) 雷击木/温养物品确为「比如/又比如」举例；(b) 大黄山硝石矿确在转述纸面材料内、区间内无人到达；(c) 「以力犯禁」「和光同尘」确为人物说理、无对应执行动作；(d) N1（决断→吏员来传）确以「恰好这时」标明巧合，拒绝登记有理；(e) N2/N3 拒绝的确实是时间相邻而非因果。尤其值得记的是：候选**没有**因词表/正则把「躲在案牍库」这类非典型在场动词挡掉（W6 记 arrived 并逐字保留「躲在」，且 submission 记录显示这正是生成器/校验器白名单曾经误杀、后被修正的一处），说明误杀风险在本轮被真实处理过。",
+  "note": "复核者的反向验证本身也接受反驳：见 notes.selfDoubt。"
+ },
+ "hallucinationCheck": {
+  "verdict": "未发现幻觉/越权",
+  "detail": "逐项检查：①**无原文外人物**——本区间出现的全部人名（许七安/魏渊/南宫倩柔/杨砚/褚采薇/元景帝/武宗/初代监正/第二代监正/镇北王/周赤雄/周百户/李玉春/宋师兄/一号/师祖）均可逐字 find 到；②**无原文外结局**——候选把「桑泊封印的是初代监正」全程标为许七安的心声/derived（S3、T3.result、U1、deliberatelyNotAsserted[0]），把「初代监正已脱困」标为 F2 的 inferred 判断，均未升格为叙述层事实；③**无编造伏笔**——3 条 foreshadows 的 setup 引文全部逐字可查，且 payoff 一律 null、status=unresolved、resolved=false；④**未把结束当成功**——T7.result / T8.result / F1.payoff / F3.payoff 全部写 null 并说明「区间在此结束」，没有把「交出差事」写成「查到了法器」、没有把「要求屏退」写成「已经禀告」；⑤**未引用区间外内容**——最大引文右端 398236 < 398238（PS 起点），下一章标题（398486 起）仅用于边界校验、未作任何抽取依据。"
+ },
+ "quoteSpotCheck": {
+  "method": "random.seed(116) 后从 158 条 quote 节点中随机抽 5 条，用独立 find() 重新定位（不使用候选声明的 start），比对 find() 结果与声明偏移、以及 text[start:end]==quote。",
+  "sampled": 5,
+  "allMatched": true,
+  "results": [
+   {
+    "path": "themeReadings[1].support.quotes[0]",
+    "quote": "“一品强者之间的恩恩怨怨，我插不上手....捅出去，把事情捅出去，自然有高个的去顶。”",
+    "declared": [
+     396602,
+     396645
+    ],
+    "findResult": 396602,
+    "offsetConsistent": true,
+    "sliceEqualsQuote": true
+   },
+   {
+    "path": "worldSettings[7].quotes[0]",
+    "quote": "但有一点可以肯定，桑泊里封印的绝不是那位被堂弟篡位的倒霉皇帝。",
+    "declared": [
+     394515,
+     394546
+    ],
+    "findResult": 394515,
+    "offsetConsistent": true,
+    "sliceEqualsQuote": true
+   },
+   {
+    "path": "causeEdges[3].quotes[0]",
+    "quote": "许七安扫了一眼，失望的发现，名单上以四品武者最多，三品寥寥无几，二品没有，就更别说一品。",
+    "declared": [
+     395760,
+     395804
+    ],
+    "findResult": 395760,
+    "offsetConsistent": true,
+    "sliceEqualsQuote": true
+   },
+   {
+    "path": "tasks[0].obstacle.quotes[1]",
+    "quote": "按照南宫金锣的经验判断，这件事想要查出点眉目，每个三五天不可能。",
+    "declared": [
+     394131,
+     394163
+    ],
+    "findResult": 394131,
+    "offsetConsistent": true,
+    "sliceEqualsQuote": true
+   },
+   {
+    "path": "tasks[3].result.quotes[1]",
+    "quote": "恰好这时，一位吏员进来，见到许七安，大喜过望：“卑职寻了许大人好一会儿了，魏公找您呢。”",
+    "declared": [
+     396750,
+     396794
+    ],
+    "findResult": 396750,
+    "offsetConsistent": true,
+    "sliceEqualsQuote": true
+   }
+  ],
+  "note": "5/5 逐字命中且偏移与 find() 一致。作为加强，复核者另对**全部 158 条**节点做了同样的 find() 复算：158/158 命中，0 条偏移不一致，0 条 occurrencesInFullText 错误，0 条 sourceHash 错误，0 条越出 [393895,398486)。"
+ },
+ "coverageAudit": {
+  "paragraphLevel": "叙事正文（<398238）共 110 个非空段落；除章节标题行 [393895,393911) 与分节符 [394394,394403) 两个结构性段落外，**108/108 叙事段落都有引文覆盖**。",
+  "sentenceLevel": "按中文句读切分为 147 句，逐句计算与所有引文的最大重叠；**仅 2 句未被实质覆盖**，即上述标题行与分节符，均为非叙事结构行。",
+  "conclusion": "候选 remaining 里「引文覆盖了本区间叙事正文的全部段落」这一自陈**成立**（复核者独立复算确认）。但需说明：段落/句子全覆盖不等于每句的**语义归属**都判对——D1/D3 两处正是「句子被引用了，但说话人记错」，这类缺陷是覆盖率指标结构性地发现不了的。"
+ },
+ "notes": {
+  "summary": "判 **partial**。这是一个机械质量很高的候选：158/158 引文逐字命中且偏移、全文出现次数、sourceHash 全部复算相符，10 项结构计数与 69 条栏位引文数、10 个空栏数全部对得上，列内引文共用/重叠 0 处，3 条 crossRef 缓存事件逐条核实（含缓存文件 sha256 一致），作者 PS 与下一章零引用，未发现任何编造或越权。它不能被判 fail。",
+  "whyNotPass": "但也不能判 pass：①3 条原文可证的归属/描述错误（D1、D2、D3）会把错误事实传给下游——尤其 D1 把许七安的台词记成褚采薇的话、D2 的「八句都是他的直接引语」与自身 12 条节点矛盾；②4 条原文明确存在的事实未被任何分区登记（R1 脱困→想逃的因果边、R2 车厢、R3 术士一品、R4 李玉春），其中 R1 是本区间最明显的因果链缺口；③3 条低级但不该有的清单缺陷（分节符右端少 3 字符、疑点清单漏 FǔBài、两处悬空引用）。",
+  "usableParts": "以下部分**可以直接沿用**：全部 158 条 quote 的字面与偏移（复核者已全量复算）、source 区间的边界声明、metrics 的十项结构计数、causeEdges C1–C7 的引文与方向、notCauseEdges N1–N4 的拒绝理由、states S1–S9 的 before/after 事实骨架、foreshadows F1–F3 的 setup 引文与 unresolved 判定、worldSettings W1–W10 的引文、unknowns U1–U20（除引用编号问题外内容成立）。",
+  "mustFixOrDowngrade": [
+   "T7.obstacle.quotes[1]「“除此之外呢？”」必须移出褚采薇的障碍栏（说话人是许七安），或改注为「许七安的反问」——否则是错误归属。",
+   "T5.action.note「八句都是他的直接引语」必须改为与实际 12 条节点一致，并标出 quotes[4] 是许七安的话、quotes[11] 是叙述层。",
+   "T7.obstacle.note 的「说到一半接不上」应降级为「歪着脑袋，想来一会儿」（原文语义是思索，不是语塞）。",
+   "textArtifacts[3].where 与 coverage.notCovered 的 [394394,394400) 改为 [394394,394403)。",
+   "deliberatelyNotAsserted[5] 的「见 U」与 T7.objective 引用的 objectiveNote 两处悬空引用需补实。"
+  ],
+  "downgradeToUnknowns": [
+   "R3「监正＝术士一品」若不入 worldSettings，应至少与「二品是底线」并列为 C4 的 explicit 前提，而不是只出现在引文里。",
+   "R4「李玉春」应比照宋师兄（U9）、一号（U4）进入 unknowns，或在 excludedSettings 说明为何不记。"
+  ],
+  "selfDoubt": "复核者对自己的反向验证保留两点：①R2（车厢）最弱——候选的 placeState 口径是「有到达动作才算 arrived」，车厢严格说是**场景所在**而非人物「前往」的目的地（他本就在车里），因此把它记 mentioned/arrived 还是完全不记，取决于口径；我按「至少该显式排除」记录，但它作为「遗漏」的强度低于 R1/R3/R4。②R4（李玉春）可以是合理省略——他只是被当作正面例子一提，未必需要进 unknowns；我把它记为口径不一致（同段宋师兄进了 U9），而非必须补。③我最初把 D2 误读为「metrics 计数错误」，复算后确认 metrics.taskColumnQuotes=69 与 tasksWithNullColumn=10 **完全正确**，错误只在 action.note 的散文描述里，故已把该条的表述改为 note 与自身数据不一致，而非指标错误——这是我自己反向验证的一次自我纠正。",
+  "reproduce": {
+   "docsHash": "shasum -a 256 data/cache/215f4b88fb087a7d735a6fae.docs.json  → fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+   "candidateHash": "shasum -a 256 loop/state/out/read_dafeng_L0_0116.candidate.json  → 04f97e4d7b9c6b9ae5e0502800b57f90b9e5d430e792dfa245481cd3611c3b2f",
+   "segmentHash": "python3 -c \"import json,hashlib;t=json.load(open('data/cache/215f4b88fb087a7d735a6fae.docs.json'))[0]['text'];print(hashlib.sha256(t[393895:398486].encode()).hexdigest())\"  → 4c58e5a4c5e5a4d5ae39d91136f8ca410e49d01597807dd806035664416323df",
+   "allQuoteAudit": "python3 -B -s /tmp/clv0116/audit.py  → 158 quote nodes, mismatched slice 0, not-found 0, out-of-range 0, occurrences wrong 0, sourceHash wrong 0",
+   "structureAudit": "python3 -B -s /tmp/clv0116/audit2.py  → metrics 10/10 OK, taskColumnQuotes 69 OK, tasksWithNullColumn 10 OK, column separation violations 0",
+   "coverageAudit": "python3 -B -s /tmp/clv0116/audit3.py 与 audit7.py  → 110 narrative paragraphs, only structural lines uncovered; 147 sentences, 2 uncovered (both structural)",
+   "speakerEvidence": "python3 -c \"import json;t=json.load(open('data/cache/215f4b88fb087a7d735a6fae.docs.json'))[0]['text'];i=t.find('“除此之外呢？”');print(repr(t[i-30:i]))\"  → '…而他显然不是....许七安颔首，继续问道：\\n\\n    '",
+   "candidatePathAlias": "shasum -a 256 data/cache/1063b17ca65ec1b76f30e460.docs.json data/cache/215f4b88fb087a7d735a6fae.docs.json  → 两个文件 sha256 相同（fdde5558…），候选引用的路径是有效别名",
+   "crossRefAudit": "python3 -c \"import json;g=json.load(open('data/cache/1063b17ca65ec1b76f30e460.json'));print(sum(1 for e in g['events'] if isinstance(e.get('quoteRef'),dict) and isinstance(e['quoteRef'].get('start'),int) and 393895<=e['quoteRef']['start']<398486))\"  → 3（与候选 crossRefQuoteNodes 一致）"
+  }
+ }
+}

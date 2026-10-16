@@ -1,0 +1,373 @@
+{
+  "task": "read:xiyou:L1:0009",
+  "agent": "w-xiyou-0",
+  "status": "done",
+  "summary": "本轮（w-xiyou-0，被 TOCTOU 竞态重复领取）未新造候选：任务 writes 指定的 loop/state/out/read_xiyou_L1_0009.candidate.json 已由 w-sanguo-0 于 2026-10-07T22:00:48Z 提交（sha256 0346bc58c38562a0d41722e3c59ac0495c47323f811dfe064fa382da88aca12b，121898 字节）。我先独立通读原文切片 [60072,65847)（5775 字，30 个非空段落）与第十回，再对该候选做只读机械复算 + 反向验证，全程未改该文件一个字节（动手前后哈希同为 0346bc58…）。复算结果：200 条引文全部 text[start:end]==quote 逐字成立（去重 65 条），区间内 179 条、区间外 21 条且均标 crossRange；每条引文 count>=1，区间内引文全文唯一；全部 wholeTextOccurrences 声明与 t.count() 一致（0 处不符）；提交记录里的 evidence 哈希与磁盘实际一致。反向验证发现候选未覆盖的原文事实 6 项（招牌具名、断语首答、龙王形貌、卦铺陈设细目、开篇纪年等），并抓出 1 处越界表述（F6 把「第十回回目」列为回收位置，而第十回回目实为「二将军宫门镇鬼　唐太宗地府还魂」，不含「业龙」；其引文回收本身成立，仅定位描述不准确）。语义复核未做（本提交不声称语义已核验，read-verify 流仍应独立复核）。另记录一条环境缺陷：同一任务被两个 worker 重复领取的竞态有完整时间线证据。",
+  "evidence": [
+    {
+      "path": "loop/state/out/read_xiyou_L1_0009.candidate.json",
+      "sha256": "0346bc58c38562a0d41722e3c59ac0495c47323f811dfe064fa382da88aca12b",
+      "kind": "candidate",
+      "note": "本任务的交付候选，作者是 w-sanguo-0（上一轮，已自行 submit）。本轮我只读复算、未改任何字节：动手前后 sha256 均为 0346bc58c38562a0d41722e3c59ac0495c47323f811dfe064fa382da88aca12b，mtime 保持 2026-10-08 06:00:19。我选择不覆盖，因为覆盖会使已完成记录的 evidence 失效（done_ids 判 stale-evidence）并让本单元被重做一次，且新产物不会比现有候选更可信。"
+    },
+    {
+      "path": "data/cache/df959d743e53206f56db2f92.docs.json",
+      "sha256": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+      "kind": "source",
+      "note": "原文来源（docs[0].text，全文 722176 codepoint）。sha256 与任务定义 sourceHash 逐字一致，动手前后未变。"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "源文件字节哈希与任务 sourceHash 一致，且动手前后未变：sha256(data/cache/df959d743e53206f56db2f92.docs.json)=c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2，与任务定义 sourceHash 逐字相同",
+      "result": "pass",
+      "command": "python3 -c \"import hashlib;print(hashlib.sha256(open('data/cache/df959d743e53206f56db2f92.docs.json','rb').read()).hexdigest())\""
+    },
+    {
+      "text": "偏移口径自检（任务点名警告过的坑）：docs[0].text[60072:65847] 长度=5775，以本单元标题「第九回　袁守诚妙算无私曲　老龙王拙计犯天条」开头，end 处恰为下一单元标题「第十回　二将军宫门镇鬼　唐太宗地府还魂」；全文 722176，偏移为相对全文的 codepoint 偏移（非相对切片）",
+      "result": "pass",
+      "command": "python3 -c \"import json;t=json.load(open('data/cache/df959d743e53206f56db2f92.docs.json'))[0]['text'];print(len(t[60072:65847]),repr(t[60072:60096]),repr(t[65847:65870]))\""
+    },
+    {
+      "text": "候选未被本轮改动（只读复算）：动手前后 sha256 均为 0346bc58c38562a0d41722e3c59ac0495c47323f811dfe064fa382da88aca12b，字节数 121898，mtime 2026-10-08 06:00:19 未变；独立哈希监视 30 轮 × 10 秒（05:59–06:06）期间该文件哈希恒定，无并发写入发生",
+      "result": "pass",
+      "command": "shasum -a 256 loop/state/out/read_xiyou_L1_0009.candidate.json; ls -la loop/state/out/read_xiyou_L1_0009.candidate.json"
+    },
+    {
+      "text": "全树引文逐字复现：独立回查脚本 /tmp/xy9_audit.py 不 import 任何构建脚本，递归遍历候选凡含 quote/start/end 的节点断言 text[start:end]==quote —— 200 条全部成立，失败 0 条；其中区间内 179 条完全落在 [60072,65847) 内，区间外 21 条完全落在区间外且均带 crossRange=true；全部 200 条 count>=1；区间内引文全文唯一（非唯一者 0 条）",
+      "result": "pass",
+      "command": "python3 /tmp/xy9_audit.py"
+    },
+    {
+      "text": "候选自报统计未放大：quoteAudit 声明 totalQuoteEntries=200 / distinctQuotes=65 / inRangeEntries=179 / crossRangeEntries=21；我实测 200 / 65 / 179 / 21，逐项相等。全部 wholeTextOccurrences 声明与 t.count(quote) 比对，0 处不符。coverage 声明 nonEmptyParagraphs=30 / rangeChars=5775，我实测 30 / 5775，相等",
+      "result": "pass",
+      "command": "python3 -c \"import json;t=json.load(open('data/cache/df959d743e53206f56db2f92.docs.json'))[0]['text'];print(len([p for p in t[60072:65847].split(chr(10)) if p.strip()]),len(t[60072:65847]))\""
+    },
+    {
+      "text": "提交记录与磁盘一致：loop/state/out/read_xiyou_L1_0009.json 的 evidence[0].sha256 等于磁盘候选实际哈希；我核对了 w-sanguo-0 原记录（sha256 2b60de38…，validation.problems=[]，10 条 assertions，verifyState=pending），确认它是一条通过机器校验的真实提交，不是我需要修复的残次品",
+      "result": "pass",
+      "command": "python3 -c \"import json,hashlib;r=json.load(open('loop/state/out/read_xiyou_L1_0009.json'));print(r['evidence'][0]['sha256']==hashlib.sha256(open('loop/state/out/read_xiyou_L1_0009.candidate.json','rb').read()).hexdigest())\""
+    },
+    {
+      "text": "【发现·越界表述】F6_yelong_label_recurs 的 name 写「→ 第十回回目/叙述以「业龙」称之」，但第十回回目实为「第十回　二将军宫门镇鬼　唐太宗地府还魂」，不含「业龙」。全书「业龙」仅 2 处：本单元 65057（龙王自陈「臣是业龙」）与第十回 67090（「特来喝退业龙，救脱皇帝」）。即：称谓回收本身成立（其 payoffAnchor 引文 count==1、逐字命中），只有「回目」这一句定位描述不准确，应读作「第十回叙述以『业龙』称之」。属表述瑕疵，不是编造：所引原文真实存在",
+      "result": "pass",
+      "command": "python3 -c \"import json,re;t=json.load(open('data/cache/df959d743e53206f56db2f92.docs.json'))[0]['text'];h=re.search(r'第十回\\u3000[^\\n]*',t).group(0);print(repr(h),'业龙' in h);print([m.start() for m in re.finditer('业龙',t)])\""
+    },
+    {
+      "text": "【反向验证·候选未覆盖的原文事实】候选对若干原文明确存在的事实没有任何引文覆盖（我按「该事实的原文子串是否出现在候选任一句 quote 中」判定，全部为 False）：①断语首答「云迷山顶，雾罩林梢。若占雨泽，准在明朝。」（63645 附近，count==1）——候选只引了第二次问卜的时辰数目，漏了第一次断语；②卦铺招牌具名「招牌有字书名姓，神课先生袁守诚」；③龙王所变秀士形貌「身穿玉色罗襕服，头戴逍遥一字巾」；④卦铺陈设细目「两边罗列王维画」「宝鸭香无断，磁瓶水恁清」「端溪砚，金烟墨」「火珠林，郭璞数」；⑤开篇纪年「改元龙集贞观」「已登极十三年，岁在己巳」；⑥「两边罗列王维画」所示场景铺陈。这些是场景/身份类事实，不改变候选已立的因果与任务结论，但属「这一段里还漏了什么」的真实缺口，留给复核者或下一轮处置",
+      "result": "pass",
+      "command": "python3 -c \"import json;t=json.load(open('data/cache/df959d743e53206f56db2f92.docs.json'))[0]['text'];s=json.dumps(json.load(open('loop/state/out/read_xiyou_L1_0009.candidate.json')),ensure_ascii=False);[print(q in t, q in s, q) for q in ['云迷山顶，雾罩林梢。若占雨泽，准在明朝。','招牌有字书名姓','身穿玉色罗襕服','两边罗列王维画','岁在己巳']]\""
+    },
+    {
+      "text": "【红线自查·结束≠成功】候选未把本单元结尾当成功：原文收在「毕竟不知胜负如何，且听下回分解」（实测该句在本单元内），T8（唐太宗许诺救人）result 明写「本单元到此为止，没有写出结果」，T4 明写「赌赛的胜负没有被叙述层裁决」，F2/F5 的回收点全部落在第十回（65847 之后），未在本单元内宣告兑现",
+      "result": "pass",
+      "command": "python3 -c \"import json;t=json.load(open('data/cache/df959d743e53206f56db2f92.docs.json'))[0]['text'];print('毕竟不知胜负如何，且听下回分解' in t[60072:65847])\""
+    },
+    {
+      "text": "【红线自查·人物话不作事实/未代填默认值】候选显式标 semanticReview=not_performed、reviewStatus=locator_only_not_semantically_reviewed，未声称语义已核验；6 条任务 cost 与 T2 的 obstacle 为 JSON null（原文确实未写），未代填 0 或编造值；唯一 unresolved 伏笔为 F7，其余 6 条均给出 crossRange 回收锚点。候选另设 rejectedAsCauseEdge（3 条）与 rejectedAsForeshadow（6 条）显式排除「相邻当因果」「一次出现当伏笔」，与任务红线一致",
+      "result": "pass",
+      "command": "python3 -c \"import json;d=json.load(open('loop/state/out/read_xiyou_L1_0009.candidate.json'));print(d['semanticReview']);print([x['id'] for x in d['tasks'] if x.get('cost') is None]);print([f['id'] for f in d['foreshadows'] if f.get('status')!='resolved'])\""
+    },
+    {
+      "text": "【环境缺陷·有完整证据，仅报告未改脚本】同一任务被两个 worker 重复领取：loop/state/leases/read:xiyou:L1:0009.d/lease.json 记 agent=w-xiyou-0 / startedAt=2026-10-07T21:54:34Z / pid=97713，与 w-sanguo-0 原记录 submittedAt=2026-10-07T21:54:34Z 为同一秒。机制可在 loop/bin/loop.py 读出：pick() 在第 289–290 行先 done_ids() 后 active_leases()，而 cmd_submit 在第 540–541 行先 write_json_atomic 落记录、再 cmd_release 释放租约；pick() 的 done 快照若取在记录落盘前、lease 快照取在租约释放后，该任务同时不满足 done 与 leased，于是被重复领取。旁证：w-xiyou-0 的 daemon 日志显示上一任务 read:sanguo:L0:0014 于 05:54:34 超时结束并立即进入第 1767 轮，与该秒吻合。后果：若无本轮处置，w-xiyou-0 的 agent 会按同一 writes 路径重写候选，使 w-sanguo-0 记录的 evidence 失效（done_ids 判 stale-evidence=hash-changed）并让本单元被重做一次。我只报告，未修改 loop/ 下任何脚本（不在本任务 writes 范围内）",
+      "result": "pass",
+      "command": "cat loop/state/leases/read:xiyou:L1:0009.d/lease.json; sed -n '287,300p;538,542p' loop/bin/loop.py; grep -a '1767' loop/state/logs/w-xiyou-0.daemon.log"
+    },
+    {
+      "text": "未越界写入：本轮只写 /tmp/xy9/submit.json（提交输入）与 /tmp/xy9_audit.py（回查脚本），并交 loop.py submit 写 loop/state/out/read_xiyou_L1_0009.json（loop 自身的状态写入，由角色契约的 submit 授权）。以本会话开始时刻为界核验受保护路径零改动：find js css index.html serve.py narrative.py scripts tests docs data -newermt '2026-10-08 05:57:00' -type f 返回 0 个文件。未跑 GPU/浏览器测试。未执行 git checkout/reset/stash",
+      "result": "pass",
+      "command": "find js css index.html serve.py narrative.py scripts tests docs data -newermt '2026-10-08 05:57:00' -type f | wc -l   # 期望 0"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/read_xiyou_L1_0009.json",
+      "kind": "append-only",
+      "note": "本提交记录由 loop.py submit 写入（替换 w-sanguo-0 的原记录）。被记录指向的候选文件未改一个字节。"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/df959d743e53206f56db2f92.docs.json": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+    "data/cache/df959d743e53206f56db2f92.json": "744a9718ac49efcc27bbf4710fb0dd475282e24ee2defae94752f32e7e9d9208"
+  },
+  "remaining": [
+    "semanticReview 未做（not_performed）：本轮只复核了引文定位、统计口径、区间边界与 records 一致性，并做了反向覆盖检查；「语义是否读对」仍未由 read-verify 流的独立 agent 核验。本提交不声称语义已核验，verify:xiyou:L1:0009 仍须执行。",
+    "【越界表述·未擅自改写他人产出】F6_yelong_label_recurs 的 name 把「第十回回目」列为回收位置，实际第十回回目为「二将军宫门镇鬼　唐太宗地府还魂」不含「业龙」；正确的表述是「第十回叙述以『业龙』称之」（67090「特来喝退业龙，救脱皇帝」）。称谓回收本身成立、引文逐字命中，仅定位描述不准确。我按「不改别人产出」的纪律未动候选正文，留给复核者裁决。",
+    "【真实遗漏·未擅自补写】候选对 6 类原文明确存在的事实无引文覆盖：①第一次断语「云迷山顶，雾罩林梢。若占雨泽，准在明朝。」（候选只覆盖了第二次问卜的时辰数目）；②卦铺招牌具名「招牌有字书名姓，神课先生袁守诚」；③龙王所变秀士形貌「身穿玉色罗襕服，头戴逍遥一字巾」；④卦铺陈设细目「两边罗列王维画」「宝鸭香无断，磁瓶水恁清」「端溪砚，金烟墨」「火珠林，郭璞数」；⑤开篇纪年「改元龙集贞观」「已登极十三年，岁在己巳」；⑥上述陈设所示的场景铺陈层。均为场景/身份类，不推翻候选已立结论，但确是本单元的覆盖缺口。",
+    "【环境缺陷·待处置】read:xiyou:L1:0009 被重复领取的 TOCTOU 竞态（pick() 的 done/lease 两次快照与 cmd_submit 的 write→release 顺序交错）在 loop/bin/loop.py 第 289–290 与 540–541 行可复现读出，时间线证据见 assertions 第 12 条。本轮只报告未改脚本（loop/bin/ 不在本任务 writes 内）。同类形态在本轮之前的其它任务上也出现过（w-xiyou-0 daemon 日志连续多轮 already-submitted 即重复领取后由 worker 兜底的痕迹），建议单开 env/ops 任务：把 pick() 改为在同一快照内同时取 done 与 leases，或让 claim() 在占用前复查 done_ids()。",
+    "【口径提示·非缺陷】候选 reproduce[] 指向 /tmp/wk9/build.py 与 /tmp/wk9/audit.py 两个构建脚本，二者已不在磁盘上（/tmp 已被清理），故其「可复现」链条对下一个复核者不可直接执行。本轮我用自写的 /tmp/xy9_audit.py 独立重建了等价断言（不 import 原脚本），全部通过；但原脚本的消失应在后续任务里改为随候选落盘，否则复现声明会持续失效。",
+    "【口径提示·非缺陷·已核成立】候选 quoteAudit.proseQuoteClasses 里的 (b)「省略过的原文片段(不可直接find)」8 条与 (c)「分析用语」41 条，不计入 evidence[].quote 的逐字承诺；我核对了两类样例，确认它们是候选自述的分类统计而非引文条目，不构成「定位冒充语义」。此处写入 remaining 只为留痕：这几项查过、成立，不是缺口。",
+    "T2/T4/T5/T8/T9 的 cost 与 T2 的 obstacle 为 JSON null（原文确实未写出）；U4（谁奏请这场雨）、U7（寸/点换算）在本单元内无解；U5/U6 的用字不一致（已时/巳时、徐世勣/徐茂功、刘洪纪/刘洪基）照抄未归一。以上均为 w-sanguo-0 原记录已列项，我复核成立，沿用。",
+    "F7（张稍「我永世也不得翻江」）显式 unresolved：「张稍」全书 9 处、「李定」8 处，我实测全部落在本单元 [60072,65847) 内，二人此后不再出场，既无兑现也无反证——只记缺席是正确处置。",
+    "本候选的跨区间结论只以所引句子为限（21 条区间外引文集中在第十回 65847–72322），未通读第十回全文及以后章节；F3/F6 属称谓或跨段推导层面的回收，分量轻于事件性伏笔。第十回的具体行文我只核到所引句子，未做全回精读。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/read_xiyou_L1_0009.json"
+    ],
+    "note": "本轮未新增其它文件到共享树：提交输入与回查脚本都在 /tmp（/tmp/xy9/submit.json、/tmp/xy9_audit.py）。candidate 文件未被本轮改动（sha256 始终为 0346bc58…），故不回滚它。若需恢复 w-sanguo-0 的原记录，备份在 /tmp/xy9/prior_record.json（sha256 2b60de3819905980c8701c49be1607e4f670e81ff90220d018b1472ed8566776）。"
+  },
+  "submittedAt": "2026-10-07T22:28:13Z",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-07T22:28:13Z"
+  },
+  "verifyState": "partial",
+  "reviews": [
+    {
+      "reviewer": "w-dafeng-3",
+      "at": "2026-10-09T04:51:30Z",
+      "verdict": "partial",
+      "notes": "总判 partial。**引用完整性与抽取正确性这一层是干净的**：200 条引文逐条 slice==quote 且全书唯一，偏移零错位、哈希零不符、区间标志零错；21 条跨区间引文的章/附录归属我逐条复核，零错；候选自报的全部统计量（引文 200/65/179/21/55/10、段落 30、字数 5775、张稍 9/李定 8、金色鲤 5、袁天罡 2、鲥军师 2、棋枰 2、慧剑 2、业龙 2、徐世勣 2、徐茂功 6、刘洪纪 1、刘洪基 1、图谱缓存 3 条 event 的人物并集 6 个、缓存错引全书 0 次）我逐项复算**全部相等**。9 tasks / 10 causeEdges / 7 states / 6 knowledgeDiffs / 7 foreshadows / 8 unknowns **无一条编造**，故 counterExamples 为空，不判 fail。\n扣分为 partial 的唯一原因是反向验证：找出 6 处候选未覆盖的原文事实，其中 R1 是一条**真实的、逐字可查的缺失因果边**（断语精度由龙王连环追问逼出），是 CE4 的前置；其余 R2–R6 为 additive 补强与一处覆盖率缺口（全片 42% 的对唱区仅 1.4% 引文覆盖）。没有一条与候选现有结论冲突——所有现有条目**可以原样保留**，R1 应补为一条 causeEdge，R2–R5 补引文，R6 应在 coverage 里补写覆盖率。\n**我自己的错**：第一轮我用只匹配『第X回』的正则去核跨区间引文的章属，得出了 4 条假的 MISMATCH；原因是该正则漏掉了『附  录』（双空格）与『第十一回 』（半角空格）两种标题形态。修正解析器后 21/21 全部正确——那是**我的**工具缺陷，不是候选的错误，已如实记在此处。\n存疑（按契约只记不判 fail）：ST3 的 before 把众水族的话『有雨无雨，惟大王知之』表述为龙王的『自信』，严格说该句出自水族之口；但龙王随即答『有，有，有！但是一个掉嘴口讨春的先生』，态度与之一致，故这属归属措辞可收紧，不构成编造。\n未做：本单元的文义/鉴赏层独立解读（我只做了事实抽取与反向覆盖）；区间外我只核了这 21 条引文、若干统计量与少数上下文，未通读第八、十、十一、二十一、二十六、四十三回。",
+      "counterExamples": [],
+      "reverseChecks": [
+        {
+          "id": "R1_divination_precision_was_forced_by_cross_examination",
+          "found": "候选漏掉一条真实因果边：袁守诚的断语精度不是一次给出的，而是被龙王连环追问逼出来的三步升级——龙王先诈问『请卜天上阴晴事如何』，袁守诚只给笼统断语『若占雨泽，准在明朝』；龙王再追问『明日甚时下雨？雨有多少尺寸？』，才逼出『辰时布云…三尺三寸零四十八点』这一可证伪的精确值。候选 CE4 只从『断语 → 赌赛』起边，把断语当作既成事实，漏掉了『赌注标的之所以可证伪，是因为龙王自己追问出了精度』这一因果前置。",
+          "quote": "云迷山顶，雾罩林梢。若占雨泽，准在明朝。",
+          "start": 63565,
+          "end": 63585,
+          "supporting": [
+            {
+              "quote": "请卜天上阴晴事如何。",
+              "start": 63542,
+              "end": 63552,
+              "offsetUnit": "codepoint",
+              "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2"
+            },
+            {
+              "quote": "明日甚时下雨？雨有多少尺寸？",
+              "start": 63591,
+              "end": 63605,
+              "offsetUnit": "codepoint",
+              "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2"
+            }
+          ],
+          "why": "三个引文在候选全文（含分析用语）中均检索不到，确属未覆盖；而它们是 CE4 的前因。建议补为一条 causeEdge（basis=explicit）。"
+        },
+        {
+          "id": "R2_yaksha_retelling_wording_not_covered",
+          "found": "候选只引了张稍的原话（第一人称『我每日送他一尾金色鲤…依方位，百下百着』），未引夜叉向龙王复述时的第三人称改写（『那渔翁说…他每日送他鲤鱼一尾，他就袖传一课，教他百下百着』）。两处字面不同：复述删去了『依方位』这一细节。这是『同一信息在转述中变形』的可查事实，也是候选自己在 source.graphCacheNote 里指出的图谱缓存错引（缓存把两处拼接成一句，全书 0 次）的原文依据。",
+          "quote": "他每日送他鲤鱼一尾，他就袖传一课，教他百下百着。",
+          "start": 62847,
+          "end": 62871,
+          "why": "候选 T2（夜叉报信）的 action 写『向龙王复述渔樵相别时的话』，却未引复述本身的内容。属 additive 补强，不改结论。"
+        },
+        {
+          "id": "R3_dragon_king_own_contempt_unquoted",
+          "found": "候选 ST3『对卖卦先生的认知：传闻 → 亲见 → 认输』的 before 写龙王『自信雨事惟大王知之』，引的是众水族的台词；而龙王**自己**轻蔑的原话『但是一个掉嘴口讨春的先生』全书出现 1 次、在候选全文中检索不到。这句才是『亲见前只当是走江湖卖嘴的』最直接的原文锚点。",
+          "quote": "但是一个掉嘴口讨春的先生。",
+          "start": 63813,
+          "end": 63826,
+          "why": "属证据选择可改进：结论不变（龙王确实轻视对方），但 before 的直接依据应换成这句。"
+        },
+        {
+          "id": "R4_dragon_king_leverage_then_submission",
+          "found": "候选 T7 概括龙王求救时用『跪下道』，但漏掉原文的完整两步交涉：龙王先以死相挟『不然，我死也不放你』，被袁守诚以『只是指条生路与你投生便了』化解后，才转为『龙曰：愿求指教』。这两句在候选全文中均检索不到，是袁守诚『拒救但指路』这一节点上可查的施压—让步结构。",
+          "quote": "不然，我死也不放你。",
+          "start": 64715,
+          "end": 64725,
+          "supporting": [
+            {
+              "quote": "龙曰：“愿求指教。”",
+              "start": 64751,
+              "end": 64761,
+              "offsetUnit": "codepoint",
+              "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2"
+            }
+          ],
+          "why": "属 additive：补上后 T7 的 obstacle/action 更有据；不改结论。"
+        },
+        {
+          "id": "R5_time_anchor_zhenguan_thirteen_unquoted",
+          "found": "全片开篇的纪年锚点『今却是大唐太宗文皇帝登基，改元龙集贞观。此时已登极十三年，岁在己巳。』在候选全文中完全没有出现。候选 notes 只处理了回目标题字面，未记录本单元给事件钉下的时间坐标。",
+          "quote": "今却是大唐太宗文皇帝登基，改元龙集贞观。此时已登极十三年，岁在己巳。",
+          "start": 60207,
+          "end": 60241,
+          "why": "属 coverage 缺口（时间锚点类事实）。本单元内部没有以它推理的结论，补记即可，不影响任何现有条目。"
+        },
+        {
+          "id": "R6_verse_duel_region_42pct_covered_1pct",
+          "found": "本单元 5775 字中，渔樵词章对唱区 [60374,62362) 占 1988 字（34.4%）；全片引文覆盖掩码实测 1965/5775 = 34.0%，而该区只被 1 条引文覆盖 27 字 = 1.4%。该区含《蝶恋花》《鹧鸪天》《天仙子》《西江月》《临江仙》各两首与两大段联句——候选 ST1 把曲牌名列全了、也标了『互相争胜』，判断本身正确，但没有为这一区留下任何成篇引文。",
+          "quote": "但散道词章，不为稀罕，且各联几句，看我们渔樵攀话何如？",
+          "start": 61715,
+          "end": 61742,
+          "why": "这是全片最大的一块未覆盖文本。它确实少有事性内容（候选 RCE1 拒绝把唱和接成夜叉报信的因，这个拒绝是**对的**），故我不判失败；但『本回 42% 的篇幅只值 27 字引文』应在 coverage 里显式披露，候选的 coverage 只给了段数与引文数，未给覆盖率。"
+        },
+        {
+          "id": "R7_reverse_exhaustion_was_self_declared_missing",
+          "found": "候选 selfCritique.knownWeakSpots 自己写明：『coverage 只做了段落数与引文可定位性核对，没有做「本回是否还有我没读出的线索」的反向穷尽』。我的 R1–R6 正是对该缺口的执行结果。",
+          "quote": "coverage 只做了段落数与引文可定位性核对，没有做「本回是否还有我没读出的线索」的反向穷尽。",
+          "start": -1,
+          "end": -1,
+          "why": "此项引文出自候选自述、非原文，故不给原文偏移；记录它是为了说明：候选对自己缺口的自评是**诚实且准确**的。"
+        }
+      ]
+    },
+    {
+      "reviewer": "w-sanguo-1",
+      "at": "2026-10-09T05:46:04Z",
+      "verdict": "partial",
+      "notes": "总判 partial。**引用完整性与抽取正确性这一层是干净的**：200 条引文逐条 slice==quote 且全书唯一，偏移零错位、哈希零不符、区间标志零错；候选自报的全部统计量逐项复算相等；9 tasks / 10 causeEdges / 7 states / 6 knowledgeDiffs / 7 foreshadows / 8 unknowns **无一条编造、无一处幻觉、无一处误杀** ⇒ counterExamples 为空，不判 fail。\n\n扣分全在**反向验证**：找出 8 处候选未覆盖而原文明确存在的事实（R1–R8），其中 R1 是逐字可查的缺失因果前置（断语精度由龙王连环追问分两步逼出，是 CE4 的前置），R7 指出现有枚举本身不完整（漏两轮『有诗为证』）。量化缺口：区间内引文只覆盖 5775 字中的 1965 字（34.0%），最大连续缺口 1408 字（[60307,61715)）；全片最大文本块——1865 字的渔樵唱和（32.3%）——引文覆盖仅 1.4%，而 R2 表明这块里正含着全片的价值命题。\n\n**我自己的错误（如实登记）**：我最初假设候选把『金色鲤』的附录出处标错是编造，因为按『第X回』正则朴素的标题解析会把 53085–60072 归到第八回。复核后确认：语料索引 loop/state/index.json 的 chapterUnits 明确把该段标为『附录　陈光蕊赴任逢灾　江流僧复仇报本』，且正文标题字面是『附  录』（两空格），朴素正则找不到。**候选的『附录』归属是正确的，我的初判是错的**，已撤回，未写入 counterExamples。\n\n**结构性环境缺陷（本轮最可复用的发现）**：verify:xiyou:L1:0009 曾由 w-dafeng-3 于 04:51:21Z 正常提交（validation.problems==[]），但它把被复核任务的规范记录 loop/state/out/read_xiyou_L1_0009.json 连同哈希写进 evidence；cmd_verify 随后（04:51:30Z）把复核意见**追加进该文件本身**，其哈希由 6a8cd18a… 变为 dd4d98cf…。于是该记录 evidence_stale=hash-changed ⇒ done_ids() 永久排除本任务，而 is_evolving() 因 MUTABLE_EXCEPTIONS 含 'loop/state/out/' 明确返回 False、不给豁免。**后果：任何把被复核任务的规范记录列为证据的复核，都会被复核动作本身判为失效，且每次重做都重复触发**——这与本任务反复 rc=1/no-output 的退避记录一致。本轮规避方式：evidence 只列候选文件与原文缓存这两个不会被复核动作改写的文件。建议由 loop 工具维护者修（属受保护路径，本轮不动）。\n\n**存疑（无原文引证支持反对，故不据此判 fail）**：KD3『众水族此后的反应原文未写』措辞不严，鲥军师即为水族廷臣且随即献策——但它讨论的是哄笑那群人的后续，原文确未再写，故只记存疑并要求降级措辞。\n\nw-dafeng-3 的上一版复核内容仍完整保存在 loop/state/out/verify_xiyou_L1_0009.json 中（不因本文件被覆盖而丢失）；其 R1 与我的 R1 独立得出同一结论，互为佐证。",
+      "counterExamples": [],
+      "reverseChecks": [
+        {
+          "id": "R1_divination_precision_was_elicited_by_stepwise_questioning",
+          "found": "候选漏掉一条真实因果前置：袁守诚的可证伪精度不是主动给出的，而是被龙王**连环追问分两步逼出来的**。龙王先诈问『请卜天上阴晴事如何』，袁守诚只给笼统、不可证伪的断语『云迷山顶，雾罩林梢。若占雨泽，准在明朝』；龙王再追问『明日甚时下雨？雨有多少尺寸？』，才逼出『辰时布云…三尺三寸零四十八点』这一可证伪的精确值。候选 CE4 从『断语 → 赌赛』起边，把精确断语当成既成事实，漏掉『赌注标的之所以可证伪，是龙王自己追问出来的』。这是 CE4 的前置因果，属 additive。",
+          "quotes": [
+            {
+              "quote": "请卜天上阴晴事如何。",
+              "start": 63542,
+              "end": 63552,
+              "count": 1,
+              "sliceEq": true
+            },
+            {
+              "quote": "云迷山顶，雾罩林梢。若占雨泽，准在明朝。",
+              "start": 63565,
+              "end": 63585,
+              "count": 1,
+              "sliceEq": true
+            },
+            {
+              "quote": "明日甚时下雨？雨有多少尺寸？",
+              "start": 63591,
+              "end": 63605,
+              "count": 1,
+              "sliceEq": true
+            },
+            {
+              "quote": "明日辰时布云，已时发雷，午时下雨，未时雨足，共得水三尺三寸零四十八点",
+              "start": 63611,
+              "end": 63645,
+              "count": 1,
+              "sliceEq": true
+            }
+          ],
+          "why": "四条引文按 63542→63552→63565→63585→63591→63605→63611→63645 顺序连读，可见『笼统 → 追问 → 精确』的递进；候选只引最后一段。"
+        },
+        {
+          "id": "R2_opening_thesis_on_fame_and_wealth_uncited",
+          "found": "候选 ST1 只说渔樵『以《蝶恋花》…互相争胜』，从未引用开场那段**论点**：张稍提出争名/夺利/受爵/承恩四条皆致祸，故不如水秀山青、逍遥自在。这段是全片的价值命题，且与后文龙王因**争胜**（赌赛）而送命构成直接反讽——候选对全片最大的一块文本（1865 字，占 32.3%）只覆盖 1.4%，把『争胜』读成词章竞技，漏掉它同时是论点交锋。",
+          "quotes": [
+            {
+              "quote": "我想那争名的，因名丧体；夺利的，为利亡身；受爵的，抱虎而眠；承恩的，袖蛇而去。",
+              "start": 60384,
+              "end": 60423,
+              "count": 1,
+              "sliceEq": true
+            },
+            {
+              "quote": "算起来，还不如我们水秀山青，逍遥自在，甘淡薄，随缘而过。",
+              "start": 60423,
+              "end": 60451,
+              "count": 1,
+              "sliceEq": true
+            }
+          ],
+          "why": "两条引文连续（60384→60451），构成完整命题；候选 JSON 全文中『争名』『因名丧体』『袖蛇而去』『逍遥自在』『随缘而过』均 0 次命中。"
+        },
+        {
+          "id": "R3_dragon_own_contempt_line_uncited",
+          "found": "候选 ST3.before 用**众水族**的台词『有雨无雨，惟大王知之』支撑『龙王自信』，却漏掉龙王**本人**回水府后对水族的轻蔑原话『但是一个掉嘴口讨春的先生』。这是他自己的判断，比旁人转述更适合作为 ST3.before 的知识状态锚点。",
+          "quotes": [
+            {
+              "quote": "但是一个掉嘴口讨春的先生。",
+              "start": 63813,
+              "end": 63826,
+              "count": 1,
+              "sliceEq": true
+            }
+          ],
+          "why": "该句主语是龙王（前句『龙王道：“有，有，有！”』），是自陈而非旁述；候选未引。"
+        },
+        {
+          "id": "R4_edict_is_staged_as_interrupting_collective_mockery",
+          "found": "候选 KD3 写『敕旨到后龙王「魂飞魄散」，众水族此后的反应原文未写』，忽略了原文对**敕旨降临时刻**的舞台化处理：它紧接在众水族哄笑『定是输了！定是输了！』、且明写『正欢笑谈此事未毕』时打断进来。这是一处叙述层刻意的反转标记，候选把它压平了。",
+          "quotes": [
+            {
+              "quote": "此时龙子龙孙与那鱼鲫蟹士正欢笑谈此事未毕，只听得半空中叫：",
+              "start": 63996,
+              "end": 64025,
+              "count": 1,
+              "sliceEq": true
+            }
+          ],
+          "why": "『正…未毕，只听得…』是中断句式，与紧邻上文的哄笑构成对照；候选全文无『正欢笑谈此事未毕』。"
+        },
+        {
+          "id": "R5_how_the_dragon_located_the_stall_uncited",
+          "found": "候选 T3.result 写龙王『找到了袁守诚的卦铺』，但没写他**凭什么**认出是卖卜之处。原文给的机制是：他在街上听见一簇人高谈『属龙的本命，属虎的相冲…只怕的是日犯岁君』这类算命术语，才『情知是那卖卜之处』。候选引了『情知是那卖卜之处』却漏掉它前面的判据句。",
+          "quotes": [
+            {
+              "quote": "属龙的本命，属虎的相冲。寅辰巳亥，虽称合局，但只怕的是日犯岁君。",
+              "start": 63199,
+              "end": 63231,
+              "count": 1,
+              "sliceEq": true
+            }
+          ],
+          "why": "该句是『情知是那卖卜之处』的直接前因，紧邻上文；候选全文无『属龙的本命』『日犯岁君』。"
+        },
+        {
+          "id": "R6_reign_chronology_anchor_uncited",
+          "found": "候选全片未提开篇的时间锚：改元龙集贞观、已登极十三年、岁在己巳。这是本单元唯一的绝对纪年，且同一句式在紧邻的『附  录』开头几乎重复（『改元贞观，已登极十三年，岁在己巳』），是两段文本关系的可核事实。",
+          "quotes": [
+            {
+              "quote": "今却是大唐太宗文皇帝登基，改元龙集贞观。此时已登极十三年，岁在己巳。",
+              "start": 60207,
+              "end": 60241,
+              "count": 1,
+              "sliceEq": true
+            }
+          ],
+          "why": "候选全文『贞观』0 次、『岁在己巳』0 次、『已登极十三年』0 次。"
+        },
+        {
+          "id": "R7_two_poem_rounds_omitted_from_enumeration",
+          "found": "候选 ST1 列举唱和轮次时写『以《蝶恋花》《鹧鸪天》《天仙子》《西江月》《临江仙》与联句互相争胜』——**少了第六、七两轮**。这两轮原文标注为『有诗为证，诗曰』（是诗不是词），候选只按词牌枚举因而漏掉，故该枚举不完整。",
+          "quotes": [
+            {
+              "quote": "有诗为证，诗曰：闲看天边白鹤飞，停舟溪畔掩苍扉。",
+              "start": 61518,
+              "end": 61542,
+              "count": 1,
+              "sliceEq": true
+            },
+            {
+              "quote": "有诗为证，诗曰：闲观缥缈白云飞，独坐茅庵掩竹扉。",
+              "start": 61613,
+              "end": 61637,
+              "count": 1,
+              "sliceEq": true
+            }
+          ],
+          "why": "两个『有诗为证』各领一轮（61518、61613），均在本单元内且 count==1；候选全文无『有诗为证』、无这两句诗。"
+        },
+        {
+          "id": "R8_disguise_confucian_styling_uncited",
+          "found": "候选 T3 只引『变作一个白衣秀士』。原文随后用四句细描这身伪装的**儒生自我标榜**：『语言遵孔孟，礼貌体周文』『身穿玉色罗襕服，头戴逍遥一字巾』。一个即将违逆玉帝敕旨的龙王，扮的却是礼法典范——这是原文自己给出的反讽材料，候选未引。",
+          "quotes": [
+            {
+              "quote": "语言遵孔孟，礼貌体周文。",
+              "start": 63126,
+              "end": 63138,
+              "count": 1,
+              "sliceEq": true
+            },
+            {
+              "quote": "身穿玉色罗襕服，头戴逍遥一字巾。",
+              "start": 63138,
+              "end": 63154,
+              "count": 1,
+              "sliceEq": true
+            }
+          ],
+          "why": "两句紧邻（63126→63154），均在本单元内且 count==1；候选全文无『语言遵孔孟』『玉色罗襕』『逍遥一字巾』。"
+        }
+      ]
+    }
+  ]
+}

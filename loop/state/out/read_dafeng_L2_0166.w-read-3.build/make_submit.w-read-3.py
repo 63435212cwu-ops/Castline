@@ -1,0 +1,138 @@
+# -*- coding: utf-8 -*-
+"""生成提交记录：所有哈希现算，不手写。"""
+import json, hashlib, subprocess, os
+
+ROOT = '/Users/carmen/Desktop/星系'
+os.chdir(ROOT)
+def sha(p): return hashlib.sha256(open(p,'rb').read()).hexdigest()
+
+CAND = 'loop/state/out/read_dafeng_L2_0166.candidate.json'
+PRIOR= 'loop/state/out/read_dafeng_L2_0166.w-read-3.build/prior_draft_unsubmitted.deb6065b.json'
+SCAN = 'loop/state/out/read_dafeng_L2_0166.w-read-3.build/scan_claims.w-read-3.py'
+VERI = 'loop/state/out/read_dafeng_L2_0166.w-read-3.build/verify_candidate.w-read-3.py'
+FIX1 = 'loop/state/out/read_dafeng_L2_0166.w-read-3.build/fix_defects.w-read-3.py'
+FIX2 = 'loop/state/out/read_dafeng_L2_0166.w-read-3.build/fix_quotes.w-read-3.py'
+SRC  = 'data/cache/1063b17ca65ec1b76f30e460.docs.json'
+GRAPH= 'data/cache/1063b17ca65ec1b76f30e460.json'
+VRPT = 'loop/state/out/read_dafeng_L2_0166.w-read-3.build/verify_report.w-read-3.json'
+SNAP = '/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/备份/read-L2-0166-w-read-3/candidate.snapshot-62e1d7f61fdfa3f5c5fe23ccf741496b278b322dfc941f2da785b94b5e5617cd.json'
+
+cand = json.load(open(CAND))
+h_cand = sha(CAND)
+
+rec = {
+ "task": "read:dafeng:L2:0166",
+ "agent": "w-read-3",
+ "role": "READER（原文精读工作者）",
+ "status": "done",
+ "summary": (
+  "精读《大奉打更人》第一百六十六章「带妹子和婶婶看新宅」"
+  "（docs[0].text codepoint [594977,599088)，4111 码点，100 个非空段，切片 sha256 "
+  "79c3ea8ff9cc12587907fd847c95312f4722aa62a9945841d338d02e8a2f6604）。"
+  "本区间两场戏：① 御书房小朝会——魏渊当廷揭出内城私宅案（十三名嫖客、井中四十具骸骨、"
+  "私宅主人招供为工部刘尚书做事、与巫神教有牵扯），场面失控；人犯已被巫术咒杀、死无对证，"
+  "工部尚书当廷喊冤；魏渊请传唤铜锣许七安，皇帝准奏；许七安当廷复述买宅撞鬼、由共情发现私宅的经过，"
+  "并补上「女鬼收在风水盘中、可挑信得过的人共情」；元景帝挑自幼伺候自己的大太监受验，"
+  "褚采薇以风水盘操作一刻钟，大太监醒后转述女鬼记忆并当廷指着工部尚书说「就是刘尚书」，"
+  "皇帝脸色铁青、众臣调转矛头。② 出宫后——许七安建议抓工部尚书连根拔起齐党被魏渊否掉，"
+  "试探「我可算戴罪立功」得「刑部不会再捉拿你、其余看陛下、晚些递折子」，请假回外城家中，"
+  "告知婶婶「事情已经平了」并提议带玲月、铃音去看选好的新宅，婶婶答应同去（**看宅在本区间内没有发生**）。"
+  "产出：6 条任务五元组（每栏自带独立引文；同任务跨栏共用引文 0、跨度重叠 0；"
+  "3 处空栏 T2.cost/T5.cost/T6.cost 全部带同名 costNote 写明判据）、"
+  "16 条 causeEdges（每条有方向＋触发机制）＋8 条 rejectedEdges（逐条写明为什么不连边）、"
+  "7 条状态前后值、8 条知识差、4 条伏笔（1 条区间内回收、3 条显式 unresolved 且带 payoffNote）"
+  "＋6 条 notForeshadows、11 条 worldSettings（rule 2＝declared 1·executed 1 / place 5＝arrived 2·mentioned 3 / "
+  "item 4，四态分开登记）＋8 条 notWorldSettings、2 条主题读法（perspective＋support＋counter 齐全）、"
+  "8 条说法台账、9 条场景节拍、4 条叙述议论单列、16 条 unknowns、6 条 selfCritique。"
+  "共 234 处逐字引用（131 条唯一串），覆盖 100 段中的 96 段，未覆盖 4 段（p1 标题/p73 分隔符/p90 单字应答/p100 分隔线）"
+  "逐条在 paragraphDisposition 给理由。"
+  "**本轮为返工**：上一轮同 agent 写出候选但未提交（无 submit 记录）；本轮对既有稿做独立复算，"
+  "查出并修正 8 处可用原文逐字证伪的散文层缺陷（详见 reworkReason），引文层 234 个对象全程未改动。"
+  "本候选**不声称**任何 semanticReview 完成，也不声称独立复核。"
+ ),
+ "evidence": [
+  {"path": CAND, "sha256": h_cand,
+   "kind": "candidate-read-output（任务 writes 指定的唯一写入路径；本轮最终产物）"},
+  {"path": SNAP, "sha256": sha(SNAP),
+   "kind": "candidate-snapshot（写盘后复制到外置回滚点的同哈希副本，对抗同路径第二写入者）"},
+  {"path": VERI, "sha256": sha(VERI),
+   "kind": "independent-verify-script（不复用构建期偏移，全部从 docs[0].text 现取现验：逐字/长度/区间/哈希/全书出现次数/首现位置/段号/跨栏不共用/跨度不重叠/空栏带理由/世界设定三态/主题三件/覆盖集复现）"},
+  {"path": VRPT, "sha256": sha(VRPT),
+   "kind": "verify-report（verdict=pass，234/234 引文全过，problems=[]）"},
+  {"path": SCAN, "sha256": sha(SCAN),
+   "kind": "count-claim-scanner（16xx 系列被判 partial 的根因是**散文层**计数错误而结构化字段全对，故单列此脚本扫散文；A/B 自证：对修复前草稿报 11 条缺陷、对修复后候选报 0）"},
+  {"path": FIX1, "sha256": sha(FIX1),
+   "kind": "rework-fix-1（定点修 7 处计数/措辞/段号错误；替换前断言旧串唯一、替换后复算计数并全量回验引文）"},
+  {"path": FIX2, "sha256": sha(FIX2),
+   "kind": "rework-fix-2（把散文里用『』改写的原文引号还原为原文的“”，源文本『』出现 0 次）"},
+  {"path": PRIOR, "sha256": sha(PRIOR),
+   "kind": "prior-unsubmitted-draft（开工时已存在、且无任何 submit 记录的草稿的原样快照；仅作对照，未采信其语义判断）"},
+  {"path": SRC, "sha256": sha(SRC),
+   "kind": "source-text（只读引用，未修改；sha256 与 task.sourceHash 逐字一致）"},
+  {"path": GRAPH, "sha256": sha(GRAPH),
+   "kind": "graph-cache（只读对照，按提示词**不作原文证据**；仅用于确认单元边界）"},
+ ],
+ "assertions": [
+  {"text": "源哈希：shasum -a 256 data/cache/1063b17ca65ec1b76f30e460.docs.json = "
+           "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839，与 task.sourceHash 逐字一致。",
+   "result": "pass"},
+  {"text": "边界自检式：docs[0].text[594977:599088] 以「第一百六十六章 带妹子和婶婶看新宅」开头，长度 4111，"
+           "与 task.sourceRange/unitHead 一致（verify_candidate 第 1 节）。",
+   "result": "pass"},
+  {"text": "引文层全量复算：234/234 个引文对象满足 text[start:end]==quote、len==end-start、"
+           "start/end 落在区间内、sourceHash 正确、wholeTextOccurrences 与 text.count 相符、"
+           "firstOccurrenceAt 与 text.find 相符、startIsFirstOccurrence 相符、para 与独立枚举的段索引相符"
+           "（命令：python3 -B -s loop/state/out/read_dafeng_L2_0166.w-read-3.build/verify_candidate.w-read-3.py，"
+           "verdict=pass，problems=[]）。",
+   "result": "pass"},
+  {"text": "五元组纪律：6 条任务中同任务跨栏共用同一引文跨度 0 处、五栏跨度两两重叠 0 处；"
+           "3 处 null 栏位（T2.cost/T5.cost/T6.cost）各带同名 costNote 写明「为什么没有」"
+           "（不是未标注的未知）。",
+   "result": "pass"},
+  {"text": "散文层计数与逐字断言扫描（0162 partial 的同形缺陷）："
+           "python3 -B -s loop/state/out/read_dafeng_L2_0166.w-read-3.build/scan_claims.w-read-3.py "
+           "→ DEFECTS: 0（A 计数 30 / B 逐字 0 / C 段号 78 / D 原文措辞 0 / E 裸计数 5 条已核）。"
+           "同一脚本对修复前草稿报 11 条缺陷 —— 证明它确实能抓到本轮修掉的那一类错，不是空转。",
+   "result": "pass"},
+  {"text": "内容分区齐全：loop.required_sections(task.prompt) = "
+           "['tasks','causeEdges','states','foreshadows','worldSettings','themeReadings']，候选全部存在。",
+   "result": "pass"},
+  {"text": "受保护路径未改：本任务只写 loop/state/out/ 下的候选、脚本与提交记录（追加式路径）；"
+           "js/ css/ index.html serve.py narrative.py scripts/ tests/ docs/ data/ 均未改动（data/cache 只读）。",
+   "result": "pass"},
+  {"text": "覆盖声明可复现：独立枚举 100 个非空段，与候选 coverageDeclaration.nonEmptyParagraphs 一致；"
+           "独立算出的零引文段集合 {1,73,90,100} 与 uncoveredItems 逐项相同，且与 paragraphDisposition 一一对应。",
+   "result": "pass"},
+ ],
+ "changes": [
+  {"path": CAND, "kind": "append-only"},
+  {"path": "loop/state/out/read_dafeng_L2_0166.w-read-3.build/", "kind": "append-only"},
+ ],
+ "sourceHashes": {
+  SRC: sha(SRC),
+  GRAPH: sha(GRAPH),
+ },
+ "remaining": [
+  "语义正确性未由本人声称完成：本候选只做引文定位的机器可复算 + 本人通读判断；"
+  "「引文定位正确」不等于「语义已核验」，独立复核仍待 read-verify 流执行。",
+  "散文层断言只能靠**可逐字证伪**的形态（计数/引文/段号/原文措辞）机器兜底；"
+  "因果机制、主题读法、状态前后值这些**解释层**判断没有机器判据，仍可能读错。",
+  "本区间内无法判定的问题已全部登记在 unknowns（16 条），例：人犯真实死因无第三方核实；"
+  "「上次周赤雄的**」在原文即被两个星号遮蔽、内容不可读（全区间仅此 1 次、全书 78 次）；"
+  "井中四十具骸骨与那名被抛尸的女鬼数目未搭接；工部尚书的最终下场在本区间外。",
+  "章节标题承诺的「看新宅」在本区间内**没有发生**（停在 p98 婶婶答应），已在 F3 与 rejectedEdges R6 显式标 unresolved。",
+ ],
+ "rollback": {"kind": "append-only", "strategy": "delete-added-files",
+              "files": [CAND, "loop/state/out/read_dafeng_L2_0166.w-read-3.build/"]},
+ "reworkOf": PRIOR,
+ "reworkReason": cand.get('reworkReason'),
+}
+
+out = 'loop/state/out/read_dafeng_L2_0166.w-read-3.submit.json'
+open(out, 'w', encoding='utf-8').write(json.dumps(rec, ensure_ascii=False, indent=1) + "\n")
+print("WROTE", out)
+for e in rec['evidence']:
+    p = e['path']
+    ok = os.path.exists(p)
+    got = sha(p) if ok else None
+    print(f"  {'OK ' if ok and got==e['sha256'] else 'BAD'} {p}")

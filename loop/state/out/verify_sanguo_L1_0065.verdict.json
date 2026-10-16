@@ -1,0 +1,330 @@
+{
+ "task": "verify:sanguo:L1:0065",
+ "agent": "w-verify-4",
+ "role": "VERIFIER",
+ "status": "done",
+ "verdict": "partial",
+ "candidateVerdict": "partial",
+ "reviewedTask": "read:sanguo:L1:0065",
+ "reviewedArtifact": {
+  "path": "loop/state/out/read_sanguo_L1_0065.candidate.json",
+  "sha256": "3f10786820eaf4e5060bcf52fd6fd389d2015bcf01786435521a20d6e8c0f779",
+  "bytes": 233314,
+  "producedBy": "w-read-2"
+ },
+ "source": {
+  "path": "data/cache/fe42d01f3826fe8096f86614.docs.json",
+  "sha256": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+  "docIndex": 0,
+  "docName": "三国演义",
+  "range": [
+   331394,
+   336692
+  ],
+  "codepoints": 5298,
+  "segmentSha256": "970ba71909b4f50467286539b1857657ebfa1d79202a90e16632a3c962008613",
+  "offsetBase": "docs[0].text 全文绝对 codepoint 偏移"
+ },
+ "method": "先自己通读原文区间 [331394,336692)（5298 codepoint）并逐段记事实，再打开候选结论；顺序未颠倒。随后四层机器复算：①387 条引文实例 t[start:end]==quote / find 一致 / inRange / sourceHash；②去重后的引文覆盖并集；③候选每个可核自述（globalOccurrences、nthOccurrence、『三首』、『12 处』、check_disjoint）回原文与仓库复算；④固定种子抽 5 条 quote 做 find。",
+ "summary": "独立反向复核《三国演义》第六十六回（[331394,336692)，5298 codepoint）。**引用层零缺陷**：387/387 引文实例满足 t[start:end]==quote、find(quote)==start、落在区间内、sourceHash 与实测文件一致；globalOccurrences/nthOccurrence 全量复算 0 处不符；30 个任务的五栏引文区间两两相交数 = 0；固定种子 20261013 抽 5 条 5/5 逐字命中且偏移一致；无原文外人物、无原文外结局、未把结束当成功、semanticReview 正确保持 not-performed。但反向验证查出 4 类必须修正的问题：①NF03 把区间内**四首**后人诗写成「三首」，漏掉赞单刀赴会的「后人有诗赞关公曰」（334163–334206），而 selfCritique 自称该诗「属于 T27」经查为**不成立**（T27 三条引文为 335885/335928/336200，全篇无 334163）；②T07 用 332739「正合吾意」当「否掉了阐泽的劝告」的证据，真正否掉阐泽的 332790–332817 全区间**未被引用**，引文与结论时序倒置；③quotationConvention 引用的构建脚本 check_disjoint 在仓库中查无定义（`grep -rn \"def check_disjoint\" --include=*.py .` rc=1；注意 json 全文匹配会连同本复核文件自身一起命中，故只认 .py 定义这条判据），且自述「共 12 处」栏位标注与实测（跨栏相交 0 处，同产物 submit.json 亦写「最终 0 处」）自相矛盾；④四处原文明确的铺设／桥接句被遗漏（刘备「吾弟性如烈火」预警、诸葛瑾「将军何太无面目」的起因、鲁肃「贪而背义」整段、回末「且看下文分解」与收束诗）。判 partial 而非 fail：**无一条属编造**，387 条引文与全部抽取内容经原文核验为真，缺陷是覆盖不全与说明性文字越界（含 1 处自述与自身产物不符）；判 partial 而非 pass：上述①②③④均可被原文／仓库复算证伪，其中 NF03 是候选内的**事实性计数错误**。",
+ "counterExamples": [
+  {
+   "id": "CEX01",
+   "claim": "notForeshadows[2]（NF03）列出「「后人有诗叹曰」「后人有诗叹华歆曰」「又有诗赞管宁曰」三首诗」，即断言本区间后人诗共三首。",
+   "quote": "后人有诗赞关公曰：“藐视吴臣若小儿，单刀赴会敢平欺。当年一段英雄气，尤胜相如在渑池。”",
+   "start": 334163,
+   "end": 334206,
+   "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+   "inRange": true,
+   "verbatimInSource": true,
+   "findOffset": 334163,
+   "why": "原文区间内「后人有诗…曰／又有诗…曰」共 **4** 处（334163 赞关公、335885 叹华歆、335928 赞管宁、336200 叹曹操），候选只列 3 首，第 4 首被静默省略。该诗是回目正题「单刀赴会」的叙述层评价，且与 T13 的离场、T27 的收束同属态度层，不是装饰。复算：re.finditer(r'后人(有诗|诗)[^曰]{0,6}曰|又有诗[^曰]{0,6}曰', 区间) 命中 4 处。",
+   "offset": 334163,
+   "severity": "high",
+   "kind": "candidate 内事实性计数错误 + 正题评价被漏"
+  },
+  {
+   "id": "CEX02",
+   "claim": "selfCritique[0]：「我选择不把那首诗写进 T04 的证据（它属于 T27）」。",
+   "quote": "后人有诗赞关公曰：“藐视吴臣若小儿，单刀赴会敢平欺。当年一段英雄气，尤胜相如在渑池。”",
+   "start": 334163,
+   "end": 334206,
+   "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+   "inRange": true,
+   "verbatimInSource": true,
+   "findOffset": 334163,
+   "why": "该诗（334163–334206）在**整个候选文件里一次也没有被引用**：T27.action 引文是 335885–335928、335928–335970，T27.result 引文是 336200–336241，均不含 334163；字符串「藐视吴臣若小儿」在候选文件中出现 0 次。即「它属于 T27」与自身产物不符——它在本候选内**没有任何归属**。真实状态应写「本候选未收录该诗」。",
+   "offset": 334163,
+   "severity": "high",
+   "kind": "自述与产物不符"
+  },
+  {
+   "id": "CEX03",
+   "claim": "T07.result.text：「结果是孙权当场同意并下令执行，否掉了阐泽的劝告。」，其 result.quotes 只有「孙权曰：正合吾意。可即行之。」（332739–332755）",
+   "quote": "孙权怒曰：“若如此，荆州何日可得！”便命鲁肃速行此计。",
+   "start": 332790,
+   "end": 332817,
+   "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+   "inRange": true,
+   "verbatimInSource": true,
+   "findOffset": 332790,
+   "why": "原文时序是 332739 孙权同意 → 332755 阐泽进谏反对 → **332790 孙权怒斥并命速行**（真正「否掉阐泽」的一句）。候选把 332739 当 result 证据，却把 332755 的反对列为 obstacle，于是同一任务内引文时序倒置（result 早于 obstacle）；而能支撑「否掉了阐泽」的 332790–332817 在**全区间未被任何引文覆盖**。结论方向不错，但引文不支撑该措辞。",
+   "offset": 332790,
+   "severity": "medium",
+   "kind": "引文与结论不匹配"
+  },
+  {
+   "id": "CEX04",
+   "claim": "quotationConvention.sharedQuotePolicy 全文（见下 quote 字段，取自候选自身，**非原文**）：声称五栏不相交由「构建脚本 check_disjoint」强制，并称「已在对应栏位 note 中逐处显式标注，共 12 处」。",
+   "quote": "同一任务的五栏引文区间**两两不相交**（构建脚本 check_disjoint 强制，重叠即中止）。少数任务因原文对该事件只有一句记载而无法避免重复，已在对应栏位 note 中**逐处显式标注**，共 12 处，未拆句造假独立。",
+   "start": null,
+   "end": null,
+   "sourceHash": null,
+   "verbatimInSource": false,
+   "quoteSource": "loop/state/out/read_sanguo_L1_0065.candidate.json#quotationConvention.sharedQuotePolicy",
+   "why": "两半分别被证伪／无法复核：①**脚本不存在**——构建脚本必然是定义函数的源码，而 `grep -rn \"def check_disjoint\" --include=*.py .` 返回 rc=1（全仓无任何 .py 定义该函数），故该「强制机制」在仓库内不可复核；②**「共 12 处」与实测矛盾**——按候选自身 JSON 复算 30 个任务的五栏引文区间，跨栏相交对数 = **0**，故当前产物中不存在「无法避免重复、需逐处标注」的栏位（全篇 note 里提到「不重复引」的只有 tasks[4].costNote 与 worldSettings[21].note，二者都不是跨栏共用引文）；这与同一份 candidate 在 submit.json assertions 里写的「最终 0 处」也互相矛盾。注①：**不相交这一结果本身经复算为真**（0 处重叠），被证伪的只是「由 check_disjoint 强制」与「共 12 处标注」这两项自述。注②（本轮自查发现的取证陷阱，如实登记）：`grep -rl check_disjoint --include=*.json loop/state/out/` 现在会命中 **4** 个文件——本任务的 read_sanguo_L1_0065.{json,submit.json,candidate.json} **加上我这份复核文件自身**（因为它引用了这个字符串）。因此「仓库内无此脚本」的**唯一可靠判据**是上面按 `.py` 定义检索的那条；若只用 json 全文匹配，复核者会把自己的引用误当成候选的新证据——这正是「仪器不可信 ⇒ 结论不可信」的同形陷阱。",
+   "severity": "medium",
+   "kind": "机制无法复核 + 产物内部自相矛盾",
+   "reproduce": [
+    "grep -rn \"def check_disjoint\" --include=*.py .   # rc=1：全仓无该函数的定义（唯一可靠判据）",
+    "grep -rl check_disjoint --include=*.json loop/state/out/   # 4 个文件：3 个候选侧 + 本复核文件自身（污染，不可单独作判据）"
+   ]
+  }
+ ],
+ "reverseChecks": [
+  {
+   "id": "R1",
+   "found": "区间内第 4 首后人诗——赞「单刀赴会」的「后人有诗赞关公曰」（334163–334206），候选全篇未引用、未收录，且 NF03 把它算漏成「三首」。它是回目正题的评价与关羽形象的直接定性（「藐视吴臣若小儿」）。",
+   "quote": "后人有诗赞关公曰：“藐视吴臣若小儿，单刀赴会敢平欺。当年一段英雄气，尤胜相如在渑池。”",
+   "start": 334163,
+   "end": 334206,
+   "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+   "inRange": true,
+   "verbatimInSource": true,
+   "findOffset": 334163,
+   "evidence": "覆盖并集复算：该 span 与候选 387 条引文实例的任一 [start,end) 均不相交；「藐视吴臣若小儿」在候选文件中出现 0 次。"
+  },
+  {
+   "id": "R2",
+   "found": "刘备在给书之前对诸葛瑾的**预警**：「子瑜到彼，须用善言求吾弟。吾弟性如烈火，吾尚惧之。切宜仔细。」（331990–332026）候选完全未引用、未提及。这是本回一处完整的**铺设**：刘备预判关羽会抗命 → 332099 关羽果然拒绝交割；它也解释了刘备为何只肯先还三郡而不真交割（对关羽脾气的顾虑），是 T03 与 T04 之间缺失的一环，FS01–FS07／NF01–NF05 均未收录。",
+   "quote": "玄德曰：“子瑜到彼，须用善言求吾弟。吾弟性如烈火，吾尚惧之。切宜仔细。”",
+   "start": 331990,
+   "end": 332026,
+   "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+   "inRange": true,
+   "verbatimInSource": true,
+   "findOffset": 331990,
+   "evidence": "「性如烈火」在候选文件中出现 0 次；该 span 未被任何引文覆盖。"
+  },
+  {
+   "id": "R3",
+   "found": "「无面目」是一组**对话扣合**，候选只收了答句、丢了起因：诸葛瑾先讥「将军何太无面目？」（332215–332228），关羽才答「此剑上并无面目！」（332228–332250，候选已引）。缺了前句，T04 把这场对答读成单向的「拒绝升级为威胁」，读不出它是回敬对方的讥讽。",
+   "quote": "瑾曰：“将军何太无面目？”",
+   "start": 332215,
+   "end": 332228,
+   "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+   "inRange": true,
+   "verbatimInSource": true,
+   "findOffset": 332215,
+   "evidence": "该 span 未被任何引文覆盖；候选引文只覆盖紧邻其后的 332228–332250。"
+  },
+  {
+   "id": "R4",
+   "found": "T11.action.text 断言鲁肃施压的两点之一是「刘备已得西川又占荆州、贪而背义」，但该断言所依据的整段（333743–333837：长坂之败、吾主矜念、愆德隳好、贪而背义、恐为天下所耻笑）**未被引用**；T11 只引了 333619–333699 与 333857–333892，恰好跳过中间这一段。「长坂」「贪而背义」仅作为 NWS03 的术语名出现在列举里，不构成引证。",
+   "quote": "而皇叔愆德隳好，已得西川，又占荆州，贪而背义，恐为天下所耻笑。惟君侯察之。”",
+   "start": 333799,
+   "end": 333837,
+   "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+   "inRange": true,
+   "verbatimInSource": true,
+   "findOffset": 333799,
+   "evidence": "t.find('贪而背义')=333817，与候选全部引文 span 均不相交；该段不在引文覆盖并集内。"
+  },
+  {
+   "id": "R5",
+   "found": "候选对「鲁肃之计落空→孙权转向」的链条（CE11）引了 334206 与 334264，但跳过中间的桥接句「肃即时使人申报孙权。」（334254–334264）——「申报」这一使计败变成孙权决策的动作本身未被引用。**自我降级**：CE11 的两条引文已能支撑因果方向，本条记为建议补引而非缺陷。",
+   "quote": "肃即时使人申报孙权。",
+   "start": 334254,
+   "end": 334264,
+   "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+   "inRange": true,
+   "verbatimInSource": true,
+   "findOffset": 334254,
+   "evidence": "该 span 未被任何引文覆盖；334206–334234 与 334264–334300 两条引文之间存在 334234–334264 的引文空档。"
+  },
+  {
+   "id": "R6",
+   "found": "T30.result.text 写「本回以「且看下文分解」收束」，但该句（336621–336635）未被引用，T30 引的是 336585–336602。回末诗「正是：方逞凶谋欺弱主，又驱劲卒扫偏邦。」（336602–336621）亦全篇未引用——它是叙述层对本回两条线（欺弱主＝伏后事／扫偏邦＝西征）的收束判断。",
+   "quote": "未知后事如何，且看下文分解。",
+   "start": 336621,
+   "end": 336635,
+   "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+   "inRange": true,
+   "verbatimInSource": true,
+   "findOffset": 336621,
+   "evidence": "336602–336635 与候选任一引文 span 均不相交；「方逞凶谋」在候选文件中出现 0 次。",
+   "relatedQuote": {
+    "quote": "正是：方逞凶谋欺弱主，又驱劲卒扫偏邦。",
+    "start": 336602,
+    "end": 336621,
+    "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+    "inRange": true,
+    "verbatimInSource": true,
+    "findOffset": 336602
+   }
+  },
+  {
+   "id": "R7",
+   "found": "候选 source.selfCheck 说「叙事正文止于 336635『且看下文分解。』，其后 336637–336692 为整理者分隔线与页脚」——此自述**经复算为真**（t[336621:336635]='未知后事如何，且看下文分解。'，t[336635:336640]='\\n\\n\\u3000\\u3000-'），登记为反向检查中**成立**的一条，以免反向验证退化为只报缺陷。",
+   "quote": "未知后事如何，且看下文分解。",
+   "start": 336621,
+   "end": 336635,
+   "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+   "inRange": true,
+   "verbatimInSource": true,
+   "findOffset": 336621,
+   "evidence": "边界复算一致；区间末 57 codepoint 为整理者分隔线与页脚，未混入叙事。"
+  }
+ ],
+ "coverage": {
+  "quoteInstances": 387,
+  "distinctSpans": 189,
+  "mergedIntervals": 28,
+  "coveredCodepoints": 4600,
+  "rangeCodepoints": 5298,
+  "coveredPct": 86.83,
+  "coveredPctExclPreamble": 88.09,
+  "note": "覆盖并集 86.83%（以正文起点 331415 计为 88.09%）。未覆盖部分多为标点/换行/提示语与说话人标签，但其中含 6 处**实质性**遗漏（见 reverseChecks R1–R4、R6），故不是纯标点问题。"
+ },
+ "quoteIndexCheck": {
+  "instances": 387,
+  "exactSliceMatch": 387,
+  "findEqualsStart": 387,
+  "inRange": 387,
+  "sourceHashMatch": 387,
+  "globalOccurrencesMismatch": 0,
+  "nthOccurrenceInvalid": 0,
+  "failures": 0
+ },
+ "citationSample": {
+  "seed": 20261013,
+  "n": 5,
+  "hits": 5,
+  "detail": [
+   {
+    "path": "worldSettings[18].quotes[0]",
+    "offset": 333171,
+    "verbatim": true
+   },
+   {
+    "path": "states[7].quotes[2]",
+    "offset": 335391,
+    "verbatim": true
+   },
+   {
+    "path": "tasks[18].result.quotes[0]",
+    "offset": 335052,
+    "verbatim": true
+   },
+   {
+    "path": "worldSettings[9].quotes[1]",
+    "offset": 333933,
+    "verbatim": true
+   },
+   {
+    "path": "causeEdges[1].quotes[0]",
+    "offset": 331848,
+    "verbatim": true
+   }
+  ]
+ },
+ "misKillCheck": {
+  "verdict": "未发现误杀",
+  "detail": "逐条复核候选主动排除的 5 条 rejectedCauseEdges 与 5 条 notForeshadows：RCE01（带剑→战栗，只有并置无机制）、RCE02（把并置两线硬连）、RCE03（以「于是」当因果）、RCE04（割席属倒叙回照而非伏笔，顺序反了）、RCE05（周仓奉命发难，原文未写）——五条排除理由均与原文相符，未见把合法因果/伏笔误挡。FS05（傅干谏南征↔末段西征）被显式降级为 partially-resolved、FS06（「他日令人请公到荆州赴会」）标 unresolved，属**从紧**而非误杀。唯一近于「误杀」形态的是 CEX01/R1：第 4 首诗被静默省略，既未收入也未列入 notForeshadows 并说明理由，属遗漏而非有理由的排除。"
+ },
+ "hallucinationCheck": {
+  "verdict": "未发现幻觉或越权",
+  "detail": "①候选使用的全部人物名（孙权/张昭/诸葛瑾/诸葛亮/刘备/关平/马良/周仓/鲁肃/吕蒙/甘宁/阐泽/傅干/王粲/杜袭/卫凯/和洽/荀攸/荀彧/曹操/献帝/伏后/伏完/穆顺/郗虑/华歆/邴原/管宁/许褚/曹仁/夏侯敦/贾诩/张鲁…）逐一在区间原文中可 find；②未出现区间外人物，未把后文（荆州之失、曹丕篡汉等）倒填进本区间；③T04/T06/T07/T13/T30 的 result 均止于区间内可核落点，未把结束当成功，未把「起兵西征」写成西征成功；④「告密者是谁」「密诏是否写出」「曹操是否下令杀荀攸」等 17 条 unknowns 与 KG08 一致地保留空白，未用默认值填补；⑤semanticReview 保持 not-performed，未声称语义已核验。附带核对：actor 标签用「关羽」而区间原文 0 次出现「关羽」（原文用云长 34 次、关公 2 次、关云长 4 次）——这是回目与通行称谓的规范化，不是原文外人物，**不计为编造**，登记以明该项已查。"
+ },
+ "usableVsDiscard": {
+  "usableAsIs": [
+   "全部 30 条任务五元组（T01–T30）的 actor/label 与各栏事实内容（引文逐字可核）",
+   "causeEdges CE01–CE25 的因果方向与机制（机制措辞均能在原文找到落点）",
+   "rejectedCauseEdges RCE01–RCE05 与 notForeshadows NF01/NF02/NF04/NF05 的排除理由",
+   "states S01–S16、knowledgeGaps KG01–KG10、foreshadows FS01–FS07（含 FS05 降级、FS06 unresolved）",
+   "worldSettings 22 条条目本体（8 place + 7 item + 6 rule）与 notWorldSettings NWS01–NWS05",
+   "speechAsClueNotFact 11 条、unknowns 17 条、themeReadings 2 条、selfCritique 第 2/3/4 条",
+   "sourceHashDiscrepancy 一节（2988ce6e 与 8ab7298a 的分歧、以及偏移口径不受影响的结论）经本轮独立复算**成立**"
+  ],
+  "mustFix": [
+   "NF03：把「三首」改为**四首**，收入 334163–334206 的「后人有诗赞关公曰」（或写明为何不收），否则该条计数是事实性错误。",
+   "selfCritique[0]：更正「它属于 T27」——T27 不含该诗，该诗在候选内**根本没有归属**。",
+   "T07.result：改引 332790–332817「孙权怒曰：若如此，荆州何日可得！便命鲁肃速行此计。」以支撑「否掉了阐泽的劝告」；332739 只能证明「当场同意」。",
+   "quotationConvention.sharedQuotePolicy：删去或改正 check_disjoint 机制描述与「共 12 处」；仓库中无该脚本，且实测跨栏相交 0 处。",
+   "T11.action：为「贪而背义」补 333743–333837 的引文，或删去该转述；T30.result：为「且看下文分解」补 336621–336635。"
+  ],
+  "downgradeToUnknowns": [
+   "R2 刘备「吾弟性如烈火」的预警 → 宜作为**新增铺设**收录（原文明确，不必降级）；若本轮不改，则 T03/T04 之间「刘备为何只肯先还三郡」应记为 unknowns 而非留白。",
+   "R3「将军何太无面目？」→ 若不定为 T04 的起因，则 T04 对该对答的读法应降为 inferred（现标 explicit/narrative，而其起因缺引文）。"
+  ]
+ },
+ "notes": "总体判断：这是一份**引用层近乎无可挑剔**的候选——387/387 引文实例逐字命中、偏移与 find 一致、sourceHash 与实际文件相符、globalOccurrences/nthOccurrence 全量复算无一处不符、五栏引文实测零重叠、无编造、无原文外人物与结局、unknowns 与 speechAsClueNotFact 的使用符合 READER 红线。判 partial 的唯一理由是**覆盖与自述**这两层，不是抽取层。\n\n为什么不是 pass：NF03 的「三首」是可被原文直接证伪的计数错误（实为四首），且 selfCritique 声称该诗「属于 T27」与自身产物不符；T07 的 result 引文与结论时序倒置、真正支撑结论的一句全区间未被引用；quotationConvention 引了一个在仓库 .py 源码中查无定义的构建脚本 check_disjoint（判据：grep -rn \"def check_disjoint\" --include=*.py . ⇒ rc=1）并声称「共 12 处」标注，而实测跨栏相交 0 处且与同一产物 submit.json 的「最终 0 处」自相矛盾。\n\n为什么不是 fail：按 VERIFIER 契约，判 fail 需 counterExample 且 quote 逐字可查——本轮 4 条 counterExample 中 CEX01/02/03 的 quote 逐字可查、CEX04 的 quote 取自候选自身文本（已显式标注 verbatimInSource=false，不冒充原文），但四者的性质是**覆盖不全与说明性文字越界**，没有一条是编造：所有被抽取的事实都能在原文找到对应文字，没有原文没有的人物/结局/伏笔，没有把结束当成功。这与本项目同类「引文全对、自述越界」的既有复核口径一致（判 partial）。\n\n不确定处（如实登记为存疑，**未据此判 fail**）：①「首次运行报出 12 处重叠」是**历史瞬时状态**，我无法观测，故只对「当前产物中标 12 处」这半句提出反证；②check_disjoint 可能是**未入库的临时脚本**（存在于仓库外），我只能证明它在仓库内无定义、无法复核，不能证明它从未存在；③R2/R3/R5 属遗漏而非错误，若项目口径只要求「有据不假」而不要求「穷尽铺设」，则可降为建议。\n\n我自己的反向验证是否成立——自查：R1/R2/R3/R4/R6 的 quote 均逐字可查且与候选任一引文 span 不相交，「覆盖并集」与「span 不相交」两项都是**机器复算**而非目测；R7 是我主动登记的「反向检查里成立的一条」，以免反向验证退化为只报缺陷；R5 的「因果链在引文层是断的」措辞偏强（CE11 的两条引文已能支撑方向），已在条目内**自我降级**为建议补引。",
+ "evidence": [
+  {
+   "cmd": "python3 -c \"import json;print(len(json.load(open('data/cache/fe42d01f3826fe8096f86614.docs.json'))[0]['text']))\"",
+   "result": "607191",
+   "meaning": "docs[0].text 长度；切片 [331394,336692) 长 5298"
+  },
+  {
+   "cmd": "shasum -a 256 data/cache/fe42d01f3826fe8096f86614.docs.json",
+   "result": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+   "meaning": "任务 JSON 的 sourceHash 写 2988ce6e… 与实际使用文件不符；候选已如实登记。本轮复算确认 2988ce6e 对应 152e2a6e/f0b45e85 两文件，且 12 个同文本文件的 docs[0].text[331394:336692] 逐字相同 ⇒ 偏移口径不受影响"
+  },
+  {
+   "cmd": "全量引文复算（t[start:end]==quote、find(quote)==start、inRange、sourceHash、globalOccurrences、nthOccurrence）",
+   "result": "387/387 pass；offset mismatches 0；not-substring 0；out-of-range 0；occurrence 不符 0",
+   "meaning": "引用层零缺陷"
+  },
+  {
+   "cmd": "grep -rn \"def check_disjoint\" --include=*.py .",
+   "result": "rc=1（全仓无 .py 定义该函数）；作为对照，grep -rl check_disjoint --include=*.json loop/state/out/ 命中 4 个文件 = 候选侧 3 个 + 本复核文件自身（自引用污染）",
+   "meaning": "候选引用的构建脚本在仓库内无定义，机制无法复核；判据必须限定 .py 定义，否则复核者会用自己的引用污染证据"
+  },
+  {
+   "cmd": "跨栏引文相交复算（30 任务 × 五栏两两比较）",
+   "result": "相交对数 = 0",
+   "meaning": "与候选「最终 0 处」一致，与「共 12 处需标注」矛盾"
+  },
+  {
+   "cmd": "re.finditer(r'后人(有诗|诗)[^曰]{0,6}曰|又有诗[^曰]{0,6}曰', t[331394:336692])",
+   "result": "4 处：334163 / 335885 / 335928 / 336200",
+   "meaning": "NF03「三首」为误，漏 334163 赞关公诗"
+  }
+ ],
+ "remaining": [
+  "未做跨回目追查（告密者身份、密诏与吴蜀联络的下落、伏后二子姓名等 17 条 unknowns 是否在别回被回收）——本轮只按任务给定的 [331394,336692) 复核。",
+  "未与图谱缓存 data/cache/fe42d01f3826fe8096f86614.json 逐条对照（按提示词不算原文证据）。",
+  "「首次运行报出 12 处重叠」无法观测，未做任何追溯性判定。",
+  "check_disjoint 是否为仓库外临时脚本，本轮无法证明或证伪。",
+  "未运行任何 GPU/浏览器测试（本任务不需要）。"
+ ],
+ "changes": [
+  {
+   "path": "loop/state/out/verify_sanguo_L1_0065.verdict.json",
+   "kind": "append-only"
+  }
+ ],
+ "rollback": {
+  "kind": "append-only",
+  "strategy": "delete-added-files",
+  "files": [
+   "loop/state/out/verify_sanguo_L1_0065.verdict.json"
+  ]
+ },
+ "auditCmd": "python3 -B -s \"$CL_ARTIFACTS/verify-sanguo-L1-0065/audit.py\"",
+ "auditScriptPath": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/verify-sanguo-L1-0065/audit.py",
+ "auditScriptSha256": "f9e2a5f2f71261be6f67ffe83cccbed63efd75b35c673055fb023f8dd2be13d7",
+ "auditOutputPath": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/verify-sanguo-L1-0065/audit-output.txt",
+ "auditOutputSha256": "1ccbb8843066a3f0ca65f96ec26493d6495f4a00d8fb3fe7ca2826054f31c1d4",
+ "auditScript": "#!/usr/bin/env python3\n# -*- coding: utf-8 -*-\n\"\"\"verify:sanguo:L1:0065 的独立复核审计脚本（可复现本复核的每一个数字）。\n\n用法（仓库根）：\n    python3 -B -s \"$CL_ARTIFACTS/verify-sanguo-L1-0065/audit.py\"\n\n只读：本脚本不写任何文件。原文与候选全程只读。\n\"\"\"\nimport hashlib\nimport json\nimport re\nimport subprocess\nimport sys\nfrom pathlib import Path\n\nROOT = Path(\"/Users/carmen/Desktop/星系\")\nSRC = ROOT / \"data/cache/fe42d01f3826fe8096f86614.docs.json\"\nCAND = ROOT / \"loop/state/out/read_sanguo_L1_0065.candidate.json\"\nVERDICT = ROOT / \"loop/state/out/verify_sanguo_L1_0065.verdict.json\"\nLO, HI = 331394, 336692\nSRC_SHA = \"8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2\"\nTASK_SRC_SHA = \"2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff\"\n\nt = json.loads(SRC.read_bytes())[0][\"text\"]\ncand = json.loads(CAND.read_text(encoding=\"utf-8\"))\nseg = t[LO:HI]\n\n\ndef sha(b):\n    return hashlib.sha256(b).hexdigest()\n\n\ndef quotes(obj):\n    \"\"\"收集 obj 里全部 {quote,start,end} 实例。\"\"\"\n    out = []\n\n    def w(o):\n        if isinstance(o, dict):\n            if \"quote\" in o and \"start\" in o and \"end\" in o:\n                out.append(o)\n            for v in o.values():\n                w(v)\n        elif isinstance(o, list):\n            for v in o:\n                w(v)\n\n    w(obj)\n    return out\n\n\ndef head(s):\n    print(\"\\n\" + \"=\" * 72 + \"\\n\" + s + \"\\n\" + \"=\" * 72)\n\n\n# ── A. 源与切片口径 ────────────────────────────────────────────────────────\nhead(\"A. 源文件 / 切片 / 候选 哈希\")\nprint(\"source file sha256 :\", sha(SRC.read_bytes()))\nprint(\"  任务声明 sourceHash:\", TASK_SRC_SHA)\nprint(\"  A 段结论: 任务 JSON 的 sourceHash 与实际使用文件不符 ->\", sha(SRC.read_bytes()) != TASK_SRC_SHA)\nprint(\"text sha256        :\", sha(t.encode()))\nprint(\"text codepoints    :\", len(t))\nprint(\"segment [%d,%d) len : %d\" % (LO, HI, len(seg)))\nprint(\"segment sha256     :\", sha(seg.encode()))\nprint(\"segment 以回目开头  :\", seg.startswith(\"第六十六回　关云长单刀赴会　伏皇后为国捐生\"))\nprint(\"candidate sha256   :\", sha(CAND.read_bytes()))\nprint(\"candidate bytes    :\", len(CAND.read_bytes()))\n\n# 2988ce6e 落在哪些文件上；这些文件的切片是否与本次一致\nhead(\"A2. sourceHash 分歧的文件级复算（证明偏移口径不受影响）\")\ntext_sha = sha(t.encode())\nsame_text_files = []\nfor p in sorted((ROOT / \"data/cache\").glob(\"*.docs.json\")):\n    b = p.read_bytes()\n    try:\n        d = json.loads(b)\n    except Exception:\n        continue\n    if not (isinstance(d, list) and d and isinstance(d[0], dict)):\n        continue\n    txt = d[0].get(\"text\", \"\")\n    if sha(txt.encode()) == text_sha:\n        same_text_files.append((p.name, sha(b)[:12], txt[LO:HI] == seg))\nprint(\"docs[0].text 哈希相同的文件数:\", len(same_text_files))\nfor n, h, same in same_text_files:\n    print(\"   %-40s fileSha=%s segIdentical=%s\" % (n, h, same))\nprint(\"全部切片逐字相同 :\", all(x[2] for x in same_text_files))\nhits = [p.name for p in sorted((ROOT / \"data/cache\").glob(\"*.docs.json\")) if sha(p.read_bytes()) == TASK_SRC_SHA]\nprint(\"文件级 sha256 == 2988ce6e 的文件:\", hits)\n\n# ── B. 全量引文核验 ────────────────────────────────────────────────────────\nhead(\"B. 全量引文核验（387 实例）\")\nallq = quotes(cand)\nn_slice = n_find = n_range = n_hash = n_occ = n_nth = 0\nfail_slice = fail_find = fail_range = fail_hash = fail_occ = fail_nth = 0\nfor q in allq:\n    s, e, qt = q[\"start\"], q[\"end\"], q[\"quote\"]\n    if t[s:e] == qt:\n        n_slice += 1\n    else:\n        fail_slice += 1\n    if t.find(qt) == s:\n        n_find += 1\n    else:\n        fail_find += 1\n    if LO <= s and e <= HI:\n        n_range += 1\n    else:\n        fail_range += 1\n    if q.get(\"sourceHash\") == SRC_SHA:\n        n_hash += 1\n    else:\n        fail_hash += 1\n    if q.get(\"globalOccurrences\") is not None:\n        if t.count(qt) == q[\"globalOccurrences\"]:\n            n_occ += 1\n        else:\n            fail_occ += 1\n    if q.get(\"nthOccurrence\") is not None and q[\"nthOccurrence\"] > t.count(qt):\n        fail_nth += 1\n    else:\n        n_nth += 1\nprint(\"引文实例总数            :\", len(allq))\nprint(\"t[start:end]==quote 通过 : %d 失败 %d\" % (n_slice, fail_slice))\nprint(\"find(quote)==start  通过 : %d 失败 %d\" % (n_find, fail_find))\nprint(\"落在区间内           通过 : %d 失败 %d\" % (n_range, fail_range))\nprint(\"sourceHash 一致      通过 : %d 失败 %d\" % (n_hash, fail_hash))\nprint(\"globalOccurrences 一致通过 : %d 失败 %d\" % (n_occ, fail_occ))\nprint(\"nthOccurrence 合法    通过 : %d 失败 %d\" % (n_nth, fail_nth))\n\n# ── C. 覆盖并集 ────────────────────────────────────────────────────────────\nhead(\"C. 引文覆盖并集\")\nspans = sorted({(q[\"start\"], q[\"end\"]) for q in allq})\nmerged = []\nfor s, e in spans:\n    if merged and s <= merged[-1][1]:\n        merged[-1][1] = max(merged[-1][1], e)\n    else:\n        merged.append([s, e])\ncov = sum(e - s for s, e in merged)\nprint(\"distinct spans :\", len(spans), \" merged:\", len(merged))\nprint(\"covered %d / %d = %.2f%%\" % (cov, HI - LO, cov / (HI - LO) * 100))\nprint(\"covered %d / %d = %.2f%% (正文自 331415 起)\" % (cov, 5222, cov / 5222 * 100))\nuncov = [(a, b) for a, b in zip([LO] + [m[1] for m in merged], [m[0] for m in merged] + [HI]) if b - a >= 20]\nprint(\"未覆盖且 >=20 codepoint 的空档数:\", len(uncov))\nfor a, b in uncov:\n    print(\"   [%d,%d) %r\" % (a, b, t[a:b][:64]))\n\n# ── D. 反向验证：实质遗漏 ──────────────────────────────────────────────────\nhead(\"D. 反向验证（候选未覆盖、原文明确存在）\")\n\n\ndef uncited(ph):\n    i = t.find(ph)\n    if i < 0:\n        return None\n    cov_by = [s for s in spans if s[0] <= i < s[1]]\n    in_blob = ph[:18] in json.dumps(cand, ensure_ascii=False)\n    return i, bool(cov_by), in_blob\n\n\nCHECKS = [\n    (\"R1 第4首后人诗(赞关公/单刀赴会)\", \"后人有诗赞关公曰：“藐视吴臣若小儿，单刀赴会敢平欺。当年一段英雄气，尤胜相如在渑池。”\"),\n    (\"R2 刘备预警(吾弟性如烈火)\", \"玄德曰：“子瑜到彼，须用善言求吾弟。吾弟性如烈火，吾尚惧之。切宜仔细。”\"),\n    (\"R3 诸葛瑾讥问(将军何太无面目)\", \"瑾曰：“将军何太无面目？”\"),\n    (\"R4 鲁肃斥贪而背义整段\", \"而皇叔愆德隳好，已得西川，又占荆州，贪而背义，恐为天下所耻笑。惟君侯察之。”\"),\n    (\"R5 桥接句(申报孙权)\", \"肃即时使人申报孙权。\"),\n    (\"R6 回末(且看下文分解)\", \"未知后事如何，且看下文分解。\"),\n    (\"R6b 回末收束诗(方逞凶谋)\", \"正是：方逞凶谋欺弱主，又驱劲卒扫偏邦。\"),\n    (\"R7 边界自述(成立项)\", \"未知后事如何，且看下文分解。\"),\n]\nfor label, ph in CHECKS:\n    r = uncited(ph)\n    if r is None:\n        print(\"%-38s NOT FOUND\" % label)\n        continue\n    i, cov_by, in_blob = r\n    print(\"%-38s @%-6d covered=%-5s inClaimText=%s  %r\" % (label, i, cov_by, in_blob, t[i:i + 30]))\n\n# ── E. 候选自述复算 ────────────────────────────────────────────────────────\nhead(\"E. 候选自述复算\")\n\n\ndef walk(o, path=\"\"):\n    if isinstance(o, dict):\n        for k, v in o.items():\n            if isinstance(v, str):\n                yield path + \"/\" + str(k), v\n            else:\n                yield from walk(v, path + \"/\" + str(k))\n    elif isinstance(o, list):\n        for i, v in enumerate(o):\n            yield from walk(v, path + \"[%d]\" % i)\n\n\nblob_pairs = list(walk(cand))\nblob = json.dumps(cand, ensure_ascii=False)\n\nprint(\"E1 后人诗计数（NF03 自述『三首』）\")\npoems = [m.start() + LO for m in re.finditer(r\"后人(?:有诗|诗)[^曰]{0,6}曰|又有诗[^曰]{0,6}曰\", seg)]\nprint(\"   原文区间内后人诗/又诗处数 :\", len(poems), poems)\nnf03 = cand[\"notForeshadows\"][2][\"what\"]\nprint(\"   NF03 自述 :\", nf03)\nprint(\"   -> 自述三首 vs 实测 %d 首，漏 %s\" % (len(poems), poems[0] if poems else None))\n\nprint(\"\\nE2 selfCritique 声称该诗『属于 T27』\")\nt27 = quotes(cand[\"tasks\"][26])\nt27_spans = [(q[\"start\"], q[\"end\"]) for q in t27]\npoem_span = poems[0]\nprint(\"   T27 引文 spans :\", t27_spans)\nprint(\"   诗 span :\", (poem_span, poem_span + len(t[poem_span:t.find('”云长自回荆州', poem_span) + 1])))\nprint(\"   诗被 T27 覆盖? :\", any(s <= poem_span < e for s, e in t27_spans))\nprint(\"   诗被全候选任一引文覆盖? :\", any(s <= poem_span < e for s, e in spans))\nprint(\"   『藐视吴臣若小儿』在候选文件中出现:\", blob.count(\"藐视吴臣若小儿\"), \"次\")\n\nprint(\"\\nE3 T07 时序倒置\")\nt07 = cand[\"tasks\"][6]\nfor f in (\"obstacle\", \"action\", \"result\"):\n    for q in (t07.get(f) or {}).get(\"quotes\", []):\n        print(\"   %-8s [%d,%d) %r\" % (f, q[\"start\"], q[\"end\"], q[\"quote\"][:36]))\novr = t.find(\"孙权怒曰：“若如此，荆州何日可得！”便命鲁肃速行此计。\")\nprint(\"   真正『否掉阐泽』句 @%d 被任一引文覆盖? %s\" % (ovr, any(s <= ovr < e for s, e in spans)))\nprint(\"   result 引文(%d) 早于 obstacle 引文(%d) ? %s\" % (\n    t07[\"result\"][\"quotes\"][0][\"start\"], t07[\"obstacle\"][\"quotes\"][0][\"start\"],\n    t07[\"result\"][\"quotes\"][0][\"start\"] < t07[\"obstacle\"][\"quotes\"][0][\"start\"]))\n\nprint(\"\\nE4 五栏引文相交复算（自述『共 12 处』）\")\ntot = 0\nfor task in cand[\"tasks\"]:\n    cols = {}\n    for f in (\"objective\", \"obstacle\", \"action\", \"result\", \"cost\"):\n        v = task.get(f)\n        if isinstance(v, dict) and v.get(\"quotes\"):\n            cols[f] = [(q[\"start\"], q[\"end\"]) for q in v[\"quotes\"]]\n    ks = list(cols)\n    for i in range(len(ks)):\n        for j in range(i + 1, len(ks)):\n            for s1, e1 in cols[ks[i]]:\n                for s2, e2 in cols[ks[j]]:\n                    if s1 < e2 and s2 < e1:\n                        tot += 1\nprint(\"   跨栏相交对数 :\", tot, \"(候选 submit.json 亦自述『最终 0 处』)\")\n\nprint(\"\\nE5 check_disjoint 是否存在于仓库\")\n# 唯一可靠判据：构建脚本必然是 .py 源码里的函数定义。\n# 反面教训（本轮自查）：json 全文匹配会把**复核文件自身**也算进去（它引用了该字符串），\n# 于是复核者用自己的引用污染证据 —— 只认 .py 定义这条。\ntry:\n    r = subprocess.run([\"grep\", \"-rn\", \"def check_disjoint\", \"--include=*.py\", \".\"],\n                       cwd=str(ROOT), capture_output=True, text=True, timeout=120)\n    print(\"   [可靠] grep -rn 'def check_disjoint' --include=*.py .  rc =\", r.returncode,\n          \"| 命中:\", [x for x in r.stdout.split(\"\\n\") if x.strip()])\nexcept Exception as exc:\n    print(\"   grep 失败:\", exc)\ntry:\n    r2 = subprocess.run([\"grep\", \"-rl\", \"check_disjoint\", \"--include=*.json\", \"loop/state/out/\"],\n                        cwd=str(ROOT), capture_output=True, text=True, timeout=120)\n    hits2 = [x for x in r2.stdout.split(\"\\n\") if x.strip()]\n    print(\"   [仅对照] grep -rl check_disjoint --include=*.json loop/state/out/ 命中 %d 个：\" % len(hits2))\n    for x in hits2:\n        tag = \"  <-- 本复核文件自身（自引用污染）\" if \"verdict\" in x else \"\"\n        print(\"        %s%s\" % (x, tag))\nexcept Exception as exc:\n    print(\"   grep2 失败:\", exc)\n\n# ── F. 抽样 5 条 ───────────────────────────────────────────────────────────\nhead(\"F. 固定种子抽样 5 条（seed=20261013）\")\nimport random\n\npool = []\n\n\ndef collect(o, path=\"\"):\n    if isinstance(o, dict):\n        if \"quote\" in o and \"start\" in o:\n            pool.append((path, o))\n        for k, v in o.items():\n            collect(v, path + \"/\" + str(k))\n    elif isinstance(o, list):\n        for i, v in enumerate(o):\n            collect(v, path + \"[%d]\" % i)\n\n\nfor key in (\"tasks\", \"causeEdges\", \"states\", \"foreshadows\", \"worldSettings\", \"themeReadings\", \"speechAsClueNotFact\"):\n    collect(cand[key], key)\nrandom.seed(20261013)\nhit = 0\nfor path, q in random.sample(pool, 5):\n    ok_slice = t[q[\"start\"]:q[\"end\"]] == q[\"quote\"]\n    ok_find = t.find(q[\"quote\"]) == q[\"start\"]\n    hit += bool(ok_slice and ok_find)\n    print(\"   %-42s @%-6d slice=%s find=%s\" % (path, q[\"start\"], ok_slice, ok_find))\nprint(\"   命中 %d/5\" % hit)\n\n# ── G. 幻觉：人物名 ────────────────────────────────────────────────────────\nhead(\"G. 幻觉/越权：人物名与区间外实体\")\nNAMES = [\"孙权\", \"张昭\", \"诸葛瑾\", \"诸葛亮\", \"孔明\", \"刘备\", \"玄德\", \"云长\", \"关平\", \"马良\", \"周仓\",\n         \"鲁肃\", \"吕蒙\", \"甘宁\", \"阐泽\", \"傅干\", \"王粲\", \"杜袭\", \"卫凯\", \"和洽\", \"荀攸\", \"荀彧\",\n         \"曹操\", \"献帝\", \"伏后\", \"伏完\", \"穆顺\", \"郗虑\", \"华歆\", \"邴原\", \"管宁\", \"许褚\", \"曹仁\",\n         \"夏侯敦\", \"贾诩\", \"曹贵人\", \"张鲁\", \"蔺相如\", \"董承\"]\nmissing = [n for n in NAMES if n not in seg]\nprint(\"区间原文中找不到的人名:\", missing if missing else \"无\")\nprint(\"『关羽』在区间出现次数:\", seg.count(\"关羽\"), \"（原文用云长 %d / 关公 %d / 关云长 %d）\"\n      % (seg.count(\"云长\"), seg.count(\"关公\"), seg.count(\"关云长\")))\nprint(\"候选 semanticReview :\", cand.get(\"semanticReview\"))\n\n# ── H. 复核自身产物 ────────────────────────────────────────────────────────\nhead(\"H. 复核产出自身可核性\")\nv = json.loads(VERDICT.read_text(encoding=\"utf-8\"))\nvq = quotes(v)\nbad = [q for q in vq if q.get(\"verbatimInSource\") is not False and t[q[\"start\"]:q[\"end\"]] != q[\"quote\"]]\nprint(\"verdict 路径          :\", VERDICT)\n# 刻意**不**在这里打印 verdict 自身的 sha256：本脚本的内容与输出哈希都被 verdict 引用\n# （verdict.auditScript / verdict.auditOutputSha256），若输出里再包含 verdict 的哈希，\n# 就成了自指——每次改写 verdict 都会让已声明的 output 哈希失效，永远取不到不动点。\n# verdict 的 sha256 由**提交记录**（verify_*.submit.json 的 evidence[]）声明，那里不在环内。\nprint(\"verdict.verdict       :\", v.get(\"verdict\"))\nprint(\"counterExamples 条数   :\", len(v.get(\"counterExamples\") or []))\nprint(\"reverseChecks 条数     :\", len(v.get(\"reverseChecks\") or []))\nprint(\"verdict 内原文引文实例 : %d，逐字不符 %d\" % (len(vq), len(bad)))\nnon_src = [q for q in vq if q.get(\"verbatimInSource\") is False]\nprint(\"其中显式标注非原文的   : %d（CEX04 取自候选自身文本）\" % len(non_src))\nprint(\"auditScript 已内嵌     :\", isinstance(v.get(\"auditScript\"), str) and len(v[\"auditScript\"]) > 1000)\n# 同样**不**打印 verdict.auditOutputSha256：它是本文件（output）的哈希，\n# 打印出来会让 output 内容依赖于「output 的哈希」⇒ 每轮回填都改变 output，\n# 永远到不了不动点。可复现性的判据是「重跑本脚本得到的 stdout 与 output 文件逐字相同」，\n# 见下方 H2 自校验（不涉及任何自身哈希）。\nprint(\"H2 可复现性：本脚本不打印自身/输出/verdict 的任何哈希，故重跑 stdout 恒等（可自行 diff 验证）\")\n\nprint(\"\\n审计完成。\")\nsys.exit(0)\n"
+}

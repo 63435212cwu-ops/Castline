@@ -1,0 +1,124 @@
+{
+  "task": "read:sanguo:L0:0068",
+  "agent": "w-dafeng-0",
+  "status": "done",
+  "summary": "精读《三国演义》第六十九回 卜周易管辂知机 讨汉贼五臣死节，原文区间 [347496,352433) 共 4937 codepoint（正文至 352380，其后 2 行为分隔线与站点样板）。逐行读完整个切片（13 行：回目 + 10 个正文叙事段 + 段间空行 + 回末「正是」钩子 + 样板行），再建段落图；最终候选 184 条带偏移引文全部由 gen_final68.py 的 ref() 用 str.find 在**全文**定位（找不到 / 命中数不符 / 越出正文区间即抛错中断），无手写偏移。候选：13 条任务五元组（每栏各自引文；同任务五栏内 0 处共用同句、0 处区间互相包含；null 栏位全部带理由）、12 条因果边（各带机制）+ 3 条被否（写明为什么只是时间相邻/同场景）、11 条状态、7 条伏笔（4 resolved / 2 partial / 1 显式 unresolved）、34 条 worldSettings（place 18 / item 9 / rule 7）、2 条主题解读（各带 perspective/support/counter 三件）、20 条 unknowns、10 条 selfCritique、10 条 reverseFindings。\n\n【本轮的真实情况必须先说清：我接的是一份**未提交的草稿**】\n本任务租约在本轮开始时归属于 w-dafeng-0（= 我，worker.py --agent w-dafeng-0 --stream read，pid 43423），但 loop/state/out/read_sanguo_L0_0068.candidate.json 是一份 **w-dafeng-1 留下的、未经 submit 的草稿**（文件头 agent 字段写着 w-dafeng-1；loop/state/out/ 下无该任务的提交记录；loop/state/DOOROR 与 GUARD-REPORT 里 w-dafeng-1 的 task 曾一度记为本任务）。草稿不是已完成任务，但也不该丢掉：它结构完整、引文机器可核。故取草稿为基、只做有证据的增改，并在候选里显式登记作者谱系（readerLineage.draftAuthor / finalAuthor / handoverReason / whatFinalAuthorChanged）。草稿原文另存为证据 draft_by_w-dafeng-1.json（sha256 b914a117…），与本轮最终文件可逐字对比。\n\n【我自己独立做的两件事，都不 import 构建脚本】\n① audit68.py —— 自己从 docs.json 重算偏移口径、自己重解析候选，判据 A1–A6 / B0–B7 / C0–C3 / D1–D2。对最终候选：**PASS 28 / FAIL 0**。\n② negative_control68.py —— 「审计通过」只有在其**有能力失败**时才有意义。向最终候选注入 13 种已知缺陷形态，**13/13 被抓、0 漏检**（含偏移错 1、改一字、编造句、越出区间、五栏共用同句、栏间互相包含、未标注的 null、散文误引、谎称 semanticReview、假 sourceHash、删掉矛盾登记、谎报命中次数）。\n\n【真抓出并修掉的草稿缺陷（不是走过场）】\n草稿自己声明「原文全篇不含「」『』，故「」之内必为逐字原文」——但实测它有 **24 个不同的分析用语**也写在「」里（『条件成立』『达成讨贼』『物品链』『时间相邻当因果』『图谋≠到达』『教场红白旗』等）。这是候选**自相矛盾**，且正是计划点名的「把分析当原文」形态。修法不是打地鼠式换名单，而是改成**规则**：以 TEXT.find(「」内内容) >= 0 为唯一标准，命中则保留「」，未命中一律降为『』；且该修正在生成脚本**最后**执行，以便同时约束我自己新写入的文本。修后 D1 判据 0 命中。\n\n【反向验证：草稿漏了什么（coverage68.py + 人工筛选）】\n只查「已写项对不对」结构性地发现不了遗漏。故 coverage68.py 把正文切成 296 句，用候选全部带偏移引文做字符覆盖统计，输出 162 句覆盖 <60% 的清单；据此回原文逐条取逐字引文，筛出 10 条**真遗漏**（reverseFindings R01–R10），每条都写明「为什么重要」：\n· R01 管辂还卜了**传祚修短之数**（「狮子宫中…王道鼎新」）并以「茫茫天数，不可预知」拒解——草稿只覆盖了「辞太史」，漏掉这条独立第二卜辞，会使其自身主题 TH01 只剩单例。\n· R02 曹操**直接请管辂相自己**，管辂答「位极人臣，又何必相？」再三问之但笑而不答——这是知识差的关键一环，草稿 states 未登记。\n· R03 管辂自评「只可泰山治鬼，不能治生人也」（六处形貌缺陷）——草稿只引结论「命薄相穷」，未引其**理由本身**。\n· R04 曹操改亲征为**分兵两路**：曹洪领兵**五万**援东川 + 夏侯敦领兵**三万**巡许都——草稿 action 写「不敢轻动，留居邺郡」，易被读成「什么都没做」。\n· R05 举事夜**曹氏心腹爪牙死据宫门**——这解释了「请天子登五凤楼」为何物理上无法执行，是 T07 目标未达成的机制。\n· R06 回末**作者判词**「正是：自古骄兵多致败，从来轻敌少成功」——叙述者对张颌的显式定性，草稿只引了程式化钩子句。\n· R07 「三停内只有一停立于白旗下」——集体误判的**规模**证据，草稿只记了绝对数三百余员。\n· R08 军令状的三步机制：曹洪先问「倘有疏失，若何？」→ 张颌答「甘当军令」→ 曹洪才勒文状（草稿只记了张颌的话）。\n· R09 耿纪厉声诅咒「死当作厉鬼以击贼」、刽子以刀搠其口；韦晃顿地咬牙皆碎而死——二人死法不同，是「五臣死节」的落点。\n· R10 「真个金吾不禁，玉漏无催」——叙述者对当夜**无宵禁**状态的确认，正是五臣得在二更后行动的条件。\n\n【一处环境缺陷，已登记不掩盖】\n任务 JSON 顶层 sourceHash=2988ce6e… 与 data/cache/fe42d01f3826fe8096f86614.docs.json 的实际文件 sha256=8ab7298a… **不一致**；而提示词正文第 6 条内嵌的恰是 8ab7298a…。我实测：顶层哈希命中另外两份缓存（f0b45e85aac6c95e584075a2、152e2a6eed94f1075e7e7070），三份 docs[0].text **逐字相同**（均 607191 codepoint、utf-8 sha256 均 9d28638d…），只是 JSON 序列化不同。故偏移在三份上都能复算。候选引文一律用**实测文件哈希** 8ab7298a…，两个哈希都在 sourceHashes 里登记，写进 unknowns U01，未改任何一侧、未改校验规则。\n\n【红线自守】\n· 未把人物语当叙述事实：许芝转述的管辂早年事迹（郭恩/王基/诸葛原/刘?/赵颜）整段标为**转述层**（layerNote）；管辂的卦辞、金祎的计画、司马懿之谏、众官自辩、张颌「甘当军令」均标为人物语并说明为何不当作事实。\n· 结束≠成功：T07 明确写「本任务**未达成**目标：被杀/被捉是结局，不是达成讨贼」；T09 结果栏写 null 并在 Note 说明「正文止于回末钩子，胜负在本单元未写」，不写成功也不写失败。\n· 未声称语义已核验：semanticReview=not-performed，语义复核留给 read-verify 通道（verify:sanguo:L0:0068）。\n· 未出现原文没有的人物/事件/结局；「三八纵横」「狮子宫中」两处卜辞语义本区间无解，写进 U14/U15 而不代原文补答案。",
+  "evidence": [
+    {
+      "path": "loop/state/out/read_sanguo_L0_0068.candidate.json",
+      "sha256": "4366f30cb0dc513e35017ca9295c411d17a8e3edebe75da0ccede186ca9472a2"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/read_sanguo_L0_0068_w-dafeng-0/audit68.py",
+      "sha256": "b3693c7edb67139aeeb5d2ebc7571e985dd0469045c8d2ecc8ea0c4f14eca35a"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/read_sanguo_L0_0068_w-dafeng-0/negative_control68.py",
+      "sha256": "080c3f94e9835000087b4230618231ba8a507b2ed90ecd4d091da57d0c8db340"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/read_sanguo_L0_0068_w-dafeng-0/coverage68.py",
+      "sha256": "ed3c4e9fa2c30beca10d1c4bd9de3a8d07086b3e5d76b253339ddb5ad7f17883"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/read_sanguo_L0_0068_w-dafeng-0/gen_final68.py",
+      "sha256": "9ae6e96e54e7e43dbe1822b6ec5f0f24c6cce9a1d4eced21a6586b186f2b2cd4"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/read_sanguo_L0_0068_w-dafeng-0/reverse_quotes68.py",
+      "sha256": "606c9da1c6a63402285550ae302aeee9148ebad6997bbed85ea1c33590fa6c65"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/read_sanguo_L0_0068_w-dafeng-0/draft_by_w-dafeng-1.json",
+      "sha256": "b914a117928fd4fa5d388b968460cca01b021ee65f39cac54722b22b6a296cff"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/read_sanguo_L0_0068_w-dafeng-0/audit_final.txt",
+      "sha256": "aefcd9baad38c465a2add772bdd0dfb05ac0c880d9dfbe18726c11b54a63f282"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/read_sanguo_L0_0068_w-dafeng-0/audit_draft.txt",
+      "sha256": "8db93661bd8943ecb6b9e5e04d5caf3df591a88f963da114fcc986e6e192861c"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "切片口径自检：docs[0].text[347496:352433] 以本单元回目「第六十九回　卜周易管辂知机　讨汉贼五臣死节」逐字开头，切片长度 4937 codepoint，与任务声明一致。命令：python3 -B -c \"...\" 见 audit68.py 判据 A3（PASS）。",
+      "result": "pass"
+    },
+    {
+      "text": "全部 184 条带偏移引文机器复算：TEXT[start:end] == quote 逐字成立、str.find 命中、globalOccurrences 与实测一致、且全部落在 [347496,352433) 内。由 audit68.py 判据 B2/B3/B4/B5 复核，FAIL 0。生成侧另有 gen_final68.py 的 ref() 在写入前抛错拦截，回读校验「共 184 条引文，失败 0」。",
+      "result": "pass"
+    },
+    {
+      "text": "审计自身有效性（负向对照）：negative_control68.py 先确认基线通过，再注入 13 种已知缺陷形态，13/13 被抓、0 漏检，退出码 0。这排除了「假绿」——审计通过不是因为判据太弱。",
+      "result": "pass"
+    },
+    {
+      "text": "五栏不共用同句、栏间引文不互相包含：audit68.py 判据 C2/C3 对 13 条任务逐条检查（C3 比同句检查更严，会抓出子串包含），FAIL 0。",
+      "result": "pass"
+    },
+    {
+      "text": "null 栏位全部带理由：草稿的 7 个无据栏位用 text=null + note（或任务级 <栏位>Note）标注原因；audit68.py 判据 C1 曾在第一版误报，我查明是**审计的 bug**（未兼容 text=null+note 形态）并修审计、不改候选。修后 C1 全部 PASS。",
+      "result": "pass"
+    },
+    {
+      "text": "引号约定自洽：候选声明「」内必为逐字原文。audit68.py 判据 D1 递归扫描全部字符串字段，对每个「」内容断言 TEXT.find >= 0。修掉草稿 24 个误用后为 0 命中；negative_control68 注入一条假引文即被抓。",
+      "result": "pass"
+    },
+    {
+      "text": "反向验证可复跑：coverage68.py 输出 296 句的覆盖统计与 162 句未覆盖清单，R01–R10 是从该清单人工筛出并逐条回原文取逐字引文的；reverse_quotes68.py 对 25 条候选引文定位，NOT-FOUND 0、越界 0。复核者可用这两个脚本换标准重跑，不必接受我的取舍。",
+      "result": "pass"
+    },
+    {
+      "text": "红线自守机器可查：semanticReview 字段为 not-performed（audit68.py 判据 D2，若写成 done/complete/pass 即 FAIL）；T07/T09 记有「未达成/结果未发生于本区间」的显式声明；transferred-layer 段（许芝转述）逐条带 layerNote。",
+      "result": "pass"
+    },
+    {
+      "text": "sourceHash 矛盾实测确认并登记：顶层 2988ce6e… ≠ 实测文件 8ab7298a…；实测顶层哈希命中另外两份 docs.json，三份 docs[0].text 的 utf-8 sha256 同为 9d28638d…（逐字相同）。已写入 unknowns U01 与提交的 sourceHashes 两侧，未改校验规则。audit68.py 判据 A1/A2/A5/A6 覆盖。",
+      "result": "pass"
+    },
+    {
+      "text": "受保护路径未动：本轮只写 loop/state/out/read_sanguo_L0_0068.candidate.json（任务 writes 指定）与外置盘 $AGENT_ARTIFACTS 下的证据；find js css index.html serve.py narrative.py scripts tests docs data -newermt '-60 minutes' 返回空，且未跑 git checkout/reset/stash，未跑 GPU/浏览器测试。",
+      "result": "pass"
+    },
+    {
+      "text": "内容分区完整：按 loop.py 的 required_sections() 从本任务 prompt 抽出 6 个顶层分区 tasks/causeEdges/states/foreshadows/worldSettings/themeReadings，候选全部存在（missing=[]）。",
+      "result": "pass"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/read_sanguo_L0_0068.candidate.json",
+      "kind": "append-only"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/fe42d01f3826fe8096f86614.docs.json": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+    "task-json-declared-sourceHash": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+    "data/cache/f0b45e85aac6c95e584075a2.docs.json": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+    "data/cache/152e2a6eed94f1075e7e7070.docs.json": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+    "docs0-text-utf8-sha256": "9d28638de0b0a89fa080cc2defb4a1f8de6adb1260c4545c04ef80f73cbb221e",
+    "slice-347496-352433-utf8-sha256": "7f6dd6ea3415430e462f764b60764eb16abc9a8a1cd2537556d8782d8957fd71"
+  },
+  "remaining": [
+    "语义未核验：本候选只做到「引用定位正确 + 逐栏标注 + 分区产出」。定位正确 ≠ 语义已核验，read-verify 通道（verify:sanguo:L0:0068）尚未跑，本候选不声称 semanticReview 完成。",
+    "草稿作者 w-dafeng-1 已退出（其 daemon 日志末行为「[19:12:35] 收到信号 15：当前任务结束后退出」，共 564 轮），无法向原作者确认其草稿意图；我对草稿的增改依据全在 readerLineage.whatFinalAuthorChanged 里逐条列出，可核。",
+    "R01–R10 的筛选标准（影响行动/资源/约束/后果）是我自定的，带主观性。coverage68.py 只做字符覆盖统计，不能判断「未覆盖的句子是否已在语义上被别处并入」。换标准会得到不同清单——故我把完整未覆盖清单与脚本一并交出，而不是把 R01–R10 说成穷尽。",
+    "管辂卜辞「三八纵横，黄猪遇虎；定军之南，伤折一股」与「狮子宫中…王道鼎新」的确切指涉，本区间内**无解**（原文未给），已登记 U14/U15，未代原文补答案。",
+    "「刘?」中的半角问号疑为底本缺字或转码残留，照原文逐字引用未改写，无法确定该太守本名（U03）。",
+    "worldSettings 我未在草稿 34 条之外再扩：草稿已覆盖 place/item/rule 三类且各带 placeState/itemStates/institution。新增 R04/R10 涉及的地点与规则我放进 reverseFindings 而未硬塞进 worldSettings，避免为凑数扩出装饰性设定层。",
+    "未跑 GPU/浏览器测试（本任务未声明需要，且 GPU 全局串行）；未跑 sh scripts/accept.sh（本轮未改受保护路径，无页面路径需要验收）。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/read_sanguo_L0_0068.candidate.json"
+    ],
+    "note": "本轮只新增/覆盖这一个仓库内文件；原 w-dafeng-1 草稿已另存为外置盘证据 draft_by_w-dafeng-1.json（sha256 b914a117928fd4fa5d388b968460cca01b021ee65f39cac54722b22b6a296cff），删掉候选即可回退到「该任务无候选」状态，草稿内容可据该备份逐字还原。其余证据都在外置盘，不删仓库内容。"
+  },
+  "reworkOf": "loop/state/out/read_sanguo_L0_0068.candidate.json",
+  "reworkReason": "该路径下已有 w-dafeng-1 留下的一份**未经 submit** 的草稿（无提交记录，只有候选文件）。本任务租约本轮归属 w-dafeng-0（我）。我未推倒重写，而是：独立机器审计该草稿（28 PASS / 0 FAIL）→ 真抓出并修掉它 24 处「分析用语误用「」」的自相矛盾 → 用 coverage68.py 做反向验证、追加 R01–R10 共 10 条草稿未覆盖的原文事实 → 登记作者谱系与 sourceHash 矛盾 → 补 unknowns/selfCritique。留下而非重写的理由：草稿引文经独立复算全部成立，逐字重写会引入新偏移错误并丢掉已正确的证据。",
+  "wallClockNote": "租约 startedAt=2026-10-12T20:56:53Z 是 w-dafeng-0 本轮领取时刻；我（本 agent）实际从该租约下开始读原文，wallClockSeconds 由 submit 自行按租约计算，不由我填。"
+}

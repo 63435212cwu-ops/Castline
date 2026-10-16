@@ -1,0 +1,405 @@
+{
+  "task": "verify:xiyou:L0:0088",
+  "reviewer": "w-verify-2",
+  "roleFile": "loop/ROLES/VERIFIER.md",
+  "candidateUnderReview": "loop/state/out/read_xiyou_L0_0088.candidate.json",
+  "candidateAgent": "w-read-4",
+  "candidateSha256": "e87944daed03da9206cc96e42613dbdae97877391078f3a9781a38f63fcde576",
+  "source": {
+    "path": "data/cache/a065244455cfb2221bcda94a.docs.json",
+    "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+    "range": [
+      636512,
+      643066
+    ],
+    "sliceSha256": "d3070a8748332768fdab150c11000d80beb0a36fe4a70e24a6df895bbfdc78cf",
+    "boundaryCheck": "TEXT[636512:643066) 以「第八十八回　禅到玉华施法会　心猿木母授门人」开头，以「……且听下回分解。\\n\\n」结尾；6554 codepoint，与任务 rangeCodepoints 一致",
+    "sourceHashMatchesTask": true
+  },
+  "method": "按 VERIFIER.md 的顺序执行，未先看候选结论：①先把 [636512,643066) 切片按 \\n 切成 28 个非空段逐段读完，自己记下时间锚点（当日抵城／「一宵晚景题过，明早」641260／「次日，三个王子又来称谢」642603／「先一日将钢铁炼熟，次日」642753）与四条动作链；②再打开候选。机器侧我**没有复用**候选的 machineSelfCheck，而是自己另写脚本重算：239 条 quote 对象逐条 TEXT[start:end]==quote、str.find(quote)==start、全文唯一、区间内；覆盖用区间并集独立重算；同一任务五栏区间两两不重叠独立复查；候选 110 条 uncoveredSentences 按同口径重算；把候选全部字符串值取出，单独审计**正文 prose 里的 382 处「」引用**（候选生成器声称「」只留给逐字原文）——这是编造最直接的探测器；再按『被引字符占比』重算覆盖，暴露『只引半句也算已覆盖』这一口径盲区；最后对每条因果边求日期跨度，找跨日错引。外部产物（脚本+输出）写在 $CL_ARTIFACTS/verify-0088/，未改任何受保护路径。",
+  "verdict": "partial",
+  "counterExamples": [
+    {
+      "id": "CE7-跨日错引",
+      "claim": "CE7_effortless_lift_reverses_relation 的 from/notMereAdjacency 断言这是**同一天、同一根棒**上的对照：「行者先把棒插在地上说『我把这棍子送你罢』……王子双手尽气力拔不动，行者再轻轻拿起」「两者是同一天同一根棒」，并把 [641375,641414) 列为该链条的第 2 条引文。",
+      "quote": {
+        "quote": "那王子听言，即丢了自己棍，去取那棒，双手尽气力一拔，莫想得动分毫",
+        "start": 639606,
+        "end": 639638,
+        "sourcePath": "data/cache/a065244455cfb2221bcda94a.docs.json",
+        "docIndex": 0,
+        "offsetUnit": "absolute-doc-codepoint",
+        "offsetBase": "[636512,643066)",
+        "verbatim": true,
+        "findHits": 1,
+        "inRange": true
+      },
+      "counterQuote": {
+        "quote": "二王子与三王子跳起去便拿，就如蜻蜓撼石柱，一个个挣得红头赤脸，莫想拿动半分毫。",
+        "start": 641375,
+        "end": 641414,
+        "sourcePath": "data/cache/a065244455cfb2221bcda94a.docs.json",
+        "docIndex": 0,
+        "offsetUnit": "absolute-doc-codepoint",
+        "offsetBase": "[636512,643066)",
+        "verbatim": true,
+        "findHits": 1,
+        "inRange": true
+      },
+      "why": "[641375,641414) 这句发生在**次日**：其上文 641260 原文写「一宵晚景题过，明早，那老王父子，又来相见这长老。昨日相见，还是王礼，今日就行师礼」；且该句的主语是二王子与三王子，所拿之物是刚被抛在地下的**钉钯与宝杖**（紧邻上文「八戒闻言，欣然取出钉钯，抛在地下。沙僧将宝杖抛出，倚在墙边」），**不是金箍棒**；金箍棒到次日是由大王子另行索看的（「大王子求行者的金箍棒看。」@641520）。因此这条引文既不支持「同一天」，也不支持「同一根棒」，CE7 的 from/notMereAdjacency 与实际引文不符。真正对应「同一天同一根棒」的逐字句是 [639606,639638)——候选自己在 WS10 引过它，却没有把它放在 CE7 里。",
+      "severity": "medium",
+      "reproduce": "python3 -B -c \"import json;T=json.load(open('data/cache/a065244455cfb2221bcda94a.docs.json'))[0]['text'];print(repr(T[641260:641288]));print(repr(T[641345:641377]));print(T.find('大王子求行者的金箍棒看。'))\""
+    },
+    {
+      "id": "WS10-误杀-use",
+      "claim": "WS10_item_three_princes_own_weapons 的 explain 以「三人出场后并没有用自己的兵器真的交手（第一个照面就被八戒、行者、沙僧的神兵压住）」为由，把 itemStates 定为 ['hold','lose']，**排除 use**。",
+      "quote": {
+        "quote": "好王子，大的个拿一条齐眉棍，第二个轮一把九齿钯，第三个使一根乌油黑棒子",
+        "start": 639134,
+        "end": 639169,
+        "sourcePath": "data/cache/a065244455cfb2221bcda94a.docs.json",
+        "docIndex": 0,
+        "offsetUnit": "absolute-doc-codepoint",
+        "offsetBase": "[636512,643066)",
+        "verbatim": true,
+        "findHits": 1,
+        "inRange": true
+      },
+      "counterQuote": {
+        "quote": "第三个撒起莽性，使乌油杆棒来打，被沙僧一手劈开，取出降妖宝杖，拈一拈，艳艳光生，纷纷霞亮，唬得那典膳等官，一个个呆呆挣挣，口不能言。",
+        "start": 639656,
+        "end": 639722,
+        "sourcePath": "data/cache/a065244455cfb2221bcda94a.docs.json",
+        "docIndex": 0,
+        "offsetUnit": "absolute-doc-codepoint",
+        "offsetBase": "[636512,643066)",
+        "verbatim": true,
+        "findHits": 1,
+        "inRange": true
+      },
+      "why": "排除理由与原文相反：二王子「掣开步，双手舞钯，便要打八戒」(@639437) 是挥钯进击，三王子「撒起莽性，使乌油杆棒来打」(@639663 起) 是实际挥棒攻击，只是被沙僧用降妖宝杖架开。两件凡人兵器都**被实际使用于攻击**——被对手压住不等于没交手，恰恰是交手的结果。「没有真的交手」这一判断不成立，use 是被误杀的状态。注意这条与 CE7 同源：候选把「神兵一出手就压住对方」读成了「凡人兵器没被使用」。",
+      "severity": "medium",
+      "reproduce": "python3 -B -c \"import json;T=json.load(open('data/cache/a065244455cfb2221bcda94a.docs.json'))[0]['text'];print(T.find('二王子掣开步，双手舞钯，便要打八戒。'));print(T.find('第三个撒起莽性'))\""
+    }
+  ],
+  "falseKills": [
+    {
+      "id": "WS10-use",
+      "what": "三王子自带的齐眉棍／九齿钯／乌油黑棒子的 use 状态被排除",
+      "quote": {
+        "quote": "第三个撒起莽性，使乌油杆棒来打，被沙僧一手劈开，取出降妖宝杖，拈一拈，艳艳光生，纷纷霞亮，唬得那典膳等官，一个个呆呆挣挣，口不能言。",
+        "start": 639656,
+        "end": 639722,
+        "sourcePath": "data/cache/a065244455cfb2221bcda94a.docs.json",
+        "docIndex": 0,
+        "offsetUnit": "absolute-doc-codepoint",
+        "offsetBase": "[636512,643066)",
+        "verbatim": true,
+        "findHits": 1,
+        "inRange": true
+      },
+      "why": "与上条 counterExample 同一处；按 VERIFIER.md 第 4 步单列，建议补 use 状态。"
+    },
+    {
+      "id": "WS8-use-缺一次实战",
+      "what": "降妖宝杖的 use 只登记了空中演武 [640007,640069)，未登记同日在暴纱亭内架开乌油杆棒这一次实战使用",
+      "quote": {
+        "quote": "被沙僧一手劈开，取出降妖宝杖，拈一拈，艳艳光生，纷纷霞亮，唬得那典膳等官，一个个呆呆挣挣，口不能言。",
+        "start": 639672,
+        "end": 639722,
+        "sourcePath": "data/cache/a065244455cfb2221bcda94a.docs.json",
+        "docIndex": 0,
+        "offsetUnit": "absolute-doc-codepoint",
+        "offsetBase": "[636512,643066)",
+        "verbatim": true,
+        "findHits": 1,
+        "inRange": true
+      },
+      "why": "同一件兵器在同一区间内的两次使用，候选只收了「演武」这一次；这是采样式取证而非穷举，属漏项（非编造）。",
+      "severity": "low"
+    }
+  ],
+  "reverseChecks": [
+    {
+      "found": "传法并非只到「传与口诀」为止：紧接着写「运添了火候，却象个脱胎换骨之法。运遍了子午周天」，三人「方才苏醒……一个个骨壮筋强」。T3.action 的引文止于「传与口诀」(@642365)，此后 642366–642434 这 69 个 codepoint 在候选分析栏里**一个字都没有**（火候／脱胎换骨／子午周天 在候选全文出现 0 次）。",
+      "quote": {
+        "quote": "运添了火候，却象个脱胎换骨之法。运遍了子午周天，那三个小王子，方才苏醒，一齐爬将起来，抹抹脸，精神抖擞，一个个骨壮筋强",
+        "start": 642375,
+        "end": 642434,
+        "sourcePath": "data/cache/a065244455cfb2221bcda94a.docs.json",
+        "docIndex": 0,
+        "offsetUnit": "absolute-doc-codepoint",
+        "offsetBase": "[636512,643066)",
+        "verbatim": true,
+        "findHits": 1,
+        "inRange": true
+      },
+      "note": "这是本单元最实质的整段漏读：传法内容被截断成半步，火候／周天／苏醒这一完整过程没有进入任何分区。"
+    },
+    {
+      "found": "沙僧在本区间**有一次实战**：三王子挥乌油杆棒打来，被沙僧一手劈开、取出降妖宝杖压住，典膳等官当场呆住。这一句（639656–639722）在候选分析栏里 0 次出现，也未登记为宝杖的 use。",
+      "quote": {
+        "quote": "第三个撒起莽性，使乌油杆棒来打，被沙僧一手劈开，取出降妖宝杖，拈一拈，艳艳光生，纷纷霞亮，唬得那典膳等官，一个个呆呆挣挣，口不能言。",
+        "start": 639656,
+        "end": 639722,
+        "sourcePath": "data/cache/a065244455cfb2221bcda94a.docs.json",
+        "docIndex": 0,
+        "offsetUnit": "absolute-doc-codepoint",
+        "offsetBase": "[636512,643066)",
+        "verbatim": true,
+        "findHits": 1,
+        "inRange": true
+      }
+    },
+    {
+      "found": "大王子索看金箍棒这一动作（金箍棒来历长诗的**触发句**）未被覆盖：候选引了长诗本身，却没有引是谁、在什么情况下要求看棒的。",
+      "quote": {
+        "quote": "大王子求行者的金箍棒看。",
+        "start": 641520,
+        "end": 641532,
+        "sourcePath": "data/cache/a065244455cfb2221bcda94a.docs.json",
+        "docIndex": 0,
+        "offsetUnit": "absolute-doc-codepoint",
+        "offsetBase": "[636512,643066)",
+        "verbatim": true,
+        "findHits": 1,
+        "inRange": true
+      }
+    },
+    {
+      "found": "三王子当面选定所学兵器（行者问「你三人不知学那般武艺」的直接答复）未被覆盖；候选引了「学棍的演棍…」这一**次日执行**句，却没引前一日**选定**句。",
+      "quote": {
+        "quote": "愿使棍的就学棍，惯使钯的就学钯，爱用杖的就学杖。",
+        "start": 641906,
+        "end": 641930,
+        "sourcePath": "data/cache/a065244455cfb2221bcda94a.docs.json",
+        "docIndex": 0,
+        "offsetUnit": "absolute-doc-codepoint",
+        "offsetBase": "[636512,643066)",
+        "verbatim": true,
+        "findHits": 1,
+        "inRange": true
+      }
+    },
+    {
+      "found": "三藏吩咐「徒弟们谨慎，切不可放肆」之后，三徒各自的**执行动作**未被覆盖：八戒低头、沙僧掩脸、只有行者搀着师父。候选引了吩咐句，没引执行句。",
+      "quote": {
+        "quote": "那八戒低了头，沙僧掩着脸，惟孙行者搀着师父。",
+        "start": 637354,
+        "end": 637376,
+        "sourcePath": "data/cache/a065244455cfb2221bcda94a.docs.json",
+        "docIndex": 0,
+        "offsetUnit": "absolute-doc-codepoint",
+        "offsetBase": "[636512,643066)",
+        "verbatim": true,
+        "findHits": 1,
+        "inRange": true
+      }
+    },
+    {
+      "found": "朝王这一场的收束动作「三藏谢了恩，辞王下殿」未被覆盖；候选 S10 的 before 用自由叙述提到「自己辞王下殿」，但该句从未作为引文出现，也未进 uncoveredSentences（被判定为与引文区间相交）。",
+      "quote": {
+        "quote": "三藏谢了恩，辞王下殿，同至亭内",
+        "start": 638673,
+        "end": 638688,
+        "sourcePath": "data/cache/a065244455cfb2221bcda94a.docs.json",
+        "docIndex": 0,
+        "offsetUnit": "absolute-doc-codepoint",
+        "offsetBase": "[636512,643066)",
+        "verbatim": true,
+        "findHits": 1,
+        "inRange": true
+      }
+    },
+    {
+      "found": "三藏自述取经之苦「万蛰千魔，也不知受了多少苦楚，才到得宝方」未被覆盖——这是「一十四遍寒暑」这一问答的关键答句，候选只引了里程与年数两句。",
+      "quote": {
+        "quote": "万蛰千魔，也不知受了多少苦楚，才到得宝方",
+        "start": 638181,
+        "end": 638201,
+        "sourcePath": "data/cache/a065244455cfb2221bcda94a.docs.json",
+        "docIndex": 0,
+        "offsetUnit": "absolute-doc-codepoint",
+        "offsetBase": "[636512,643066)",
+        "verbatim": true,
+        "findHits": 1,
+        "inRange": true
+      }
+    },
+    {
+      "found": "八戒抱怨的**具体内容**（他在凤仙郡受了什么、想要什么）只被引了后半「就该住上半年」；前半「施了恩惠与万万之人」与被行者作践的四项处置（捆／吊／煮／蒸）在候选分析栏 0 次出现。",
+      "quote": {
+        "quote": "常照顾我捆，照顾我吊，照顾我煮，照顾我蒸",
+        "start": 636720,
+        "end": 636740,
+        "sourcePath": "data/cache/a065244455cfb2221bcda94a.docs.json",
+        "docIndex": 0,
+        "offsetUnit": "absolute-doc-codepoint",
+        "offsetBase": "[636512,643066)",
+        "verbatim": true,
+        "findHits": 1,
+        "inRange": true
+      }
+    },
+    {
+      "found": "结构性缺陷（比逐条漏项更重要）：候选的 uncoveredSentences 以「与任一引文区间**相交**」判定该句已被覆盖。于是只被引了一小截的句子会被算作已覆盖、不进清单。按被引字符占比重算，有 **9 句**实际被引占比 < 34% 却未进 uncoveredSentences（最低 2.2%：沙僧「比丘国只救得一千一百一十一个小儿…」只被引了「比丘国」三字所在的极小片段）。这个口径把「引一半就丢」系统性地藏起来——正是计划100 说的「机制在、但不产生信息」。",
+      "quote": {
+        "quote": "”沙僧道：“比丘国只救得一千一百一十一个小儿，怎似这场大雨，滂沱浸润，活彀者万万千千性命！",
+        "start": 636583,
+        "end": 636628,
+        "sourcePath": "data/cache/a065244455cfb2221bcda94a.docs.json",
+        "docIndex": 0,
+        "offsetUnit": "absolute-doc-codepoint",
+        "offsetBase": "[636512,643066)",
+        "verbatim": true,
+        "findHits": 1,
+        "inRange": true
+      },
+      "note": "同一口径下，候选自称 110 条 uncovered，我按同口径复算得 112 条（多出的 2 条是单引号字符行，可忽略；候选清单本身**无缺项**）。缺陷不在清单漏算，而在判据太松。"
+    }
+  ],
+  "checks": {
+    "quotesAudited": 239,
+    "quoteMismatch": 0,
+    "findOffsetDiff": 0,
+    "nonUniqueInWholeDoc": 0,
+    "outsideSlice": 0,
+    "recomputedCoverageRatio": 0.6024,
+    "recomputedUniqueSpans": 160,
+    "recomputedCoveredCodepoints": 3948,
+    "taskFiveColumnOverlaps": 0,
+    "candidateClaimedVsRecomputed": "全部逐项一致（239/160/0.6024/3948）——候选的 machineSelfCheck 可信，我独立复算得到同一组数。",
+    "proseQuoteAudit": "候选全部字符串值（非 quote 字段）里的 382 处「」引用逐条 find：365 处逐字命中；17 处不命中，其中 15 处是单/双字的**自造术语**（「离身」「问罪」「皈依」「献与」「夺」「诏」「未完成」「试」「拿得动」——用「」标概念而非引原文，属体例不严，非编造），2 处是带省略号的合法截断（「二王子与三王子跳起去便拿…莫想拿动半分毫」「引礼官即为传奏…传旨召进」，两端的片段均逐字可查）。",
+    "hallucinationCheck": "区间内未出现的人物／结局／伏笔：查黄狮精、九灵元圣、玉华州、金平府、旻天县、慈云寺、辟寒／辟暑／辟尘等 12 个本区间**没有**的专名，候选正文只在 UN1 出现 1 次「与后文黄狮精的关系」，且是**明确拒绝借名**的边界声明（『本区间一律称「妖精」，不从下一回回目或其他单元借名字』）。无幻觉人物、无把结束当成功：T4.result 明写「**没有**得到新兵器」，WS9 只记 use 不记 hold，S4 只记到「被收走」并写明下落未决。",
+    "boundaryNote": "★ 存疑（不据此判 fail）：UN6.what 引了「篷下不见」四字，该串在全文的位置是 643122，**落在 [636512,643066) 之外**，属第八十九回开篇。候选把它明确标注为「下一回开篇铁匠天明起来打造时」，是有标注的边界引用而非冒充本区间证据；但严格按「只读本区间」的纪律，正文里出现区间外逐字引文仍应改为转述。建议把该处改为不带「」的转述，或在 UN6 明写「该句在区间外，仅作边界说明，不作为证据」。",
+    "roleSeparation": "复核者 w-verify-2 ≠ 原提交者 w-read-4，非自签。"
+  },
+  "notes": "结论：**partial**。可用面很大——239 条引文我逐条独立复算，TEXT[start:end]==quote、str.find==start、全文唯一、区间内**四项全 0 违例**；覆盖 60.24%／160 唯一 span／3948 codepoint 与候选自报**逐项一致**；任务五栏区间两两不重叠独立复查 0 冲突；14 条 worldSettings 三态字段齐全、places 全 arrived；6 条伏笔的 resolved 判定我未发现事实性错误（FS6 的 false→true 改动在原文「就在筵前各传各授」上站得住）；13 条 unknowns 逐条有引文支撑，UN1/UN7 拒认身份、UN6/UN8 限定否定判断适用范围的写法，正是本任务最该有的『边界诚实』。**没有发现编造**：无幻觉人物、无越界结局、无把未完成读成完成。\n\n必须改的两处（已在 counterExamples 给出逐字反证）：①CE7 的第 2 条引文跨日且换了兵器，与它自己的「同一天同一根棒」断言不符——要么把该引文换成 [639606,639638)，要么把 CE7 拆成「首日以棒立威」与「次日试拿钉钯宝杖」两条边；②WS10 以「并没有用自己的兵器真的交手」排除 use，与二王子挥钯、三王子挥棒来打两句相反，应补 use。另有 WS8 的 use 少登记一次实战（低severity，属采样不全而非错误）。\n\n最值得记的一条不是逐条漏项，而是**判据太松**：uncoveredSentences 用「与任一引文区间相交」当覆盖判据，于是「引半句也算引过」，9 句被引占比 < 34% 的句子从未进入清单，其中包含 T3 传法段的火候／子午周天／苏醒这一整段实质内容（该段在候选分析栏出现 0 次）。这正是本项目反复出现的失败形态：机制在、清单在、数字自洽，但它对最该暴露的那一类缺口**不产生信息**。建议把该判据从「相交」改成「被引占比 ≥ 阈值（如 2/3）或整体被引」，或对每句同时报出被引占比。\n\n我自己的复核也有一处自我修正：v1 脚本把沙僧架开乌油杆棒那句的引文写错了三个字（「呆呆挣挣」误作「呆呆怔怔」），已用 find 断言（找不到即抛错）重跑并改为逐字正确的版本；本文件所有 quote 均由 q() 用 str.find 定位 + 唯一性 + 区间内三重断言生成，不手写偏移。\n\n不确定处：①CE7 是否真的构成「结论错误」还是仅仅引文选择不当——我倾向后者，故判 partial 而非 fail；②WS10 的 use 是否属于 L0 必录状态，取决于该轮任务对 item 四态的严格度，我按字面理由被原文证伪来记；③「微微冷笑」「灶君」这类原文不解释处，候选拒绝解读（UN2/UN11）我认为是正确处置，未计入漏项。",
+  "evidenceArtifacts": [
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/verify-0088/adversarial2.py",
+      "sha256": "4d2fd299122136a84645413dcec203e26d9d9d2748d19db81e7f9d65e65fa110",
+      "note": "复核脚本/输出（外置存储，非受保护路径）"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/verify-0088/complement_audit.py",
+      "sha256": "0bdab10f4b64752f4947fd8fa24ecc0916908e5af1ca6e496edd1c82070114c3",
+      "note": "复核脚本/输出（外置存储，非受保护路径）"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/verify-0088/composition.txt",
+      "sha256": "1b57b7f9bde1289d51c6d9f92d7346ce1c0edd85e4a029abfa46ddd4a1a74aea",
+      "note": "复核脚本/输出（外置存储，非受保护路径）"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/verify-0088/coverage_gap.py",
+      "sha256": "f91fccc675a3fcad40ed256a6875073334b9fccbea4f9afddaf9723ac16d1a44",
+      "note": "复核脚本/输出（外置存储，非受保护路径）"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/verify-0088/crossday.txt",
+      "sha256": "aab718378499850b74e8152959b8b737df1e5ff4f13559bf2e9366857e70bf3f",
+      "note": "复核脚本/输出（外置存储，非受保护路径）"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/verify-0088/crossday_audit.py",
+      "sha256": "c085ce9952d6415b23dd0ad6dd362092cef7d0dc342570e133870ee3f23df9ad",
+      "note": "复核脚本/输出（外置存储，非受保护路径）"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/verify-0088/dump.py",
+      "sha256": "848ad682df1ed9b3e1557e00944036ac3559e58c62db8039d23297613a38cec0",
+      "note": "复核脚本/输出（外置存储，非受保护路径）"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/verify-0088/evidence.txt",
+      "sha256": "80d38286ce43357576ba344400b841edbee2f20c87fa0a95d1994ed149d6d9ec",
+      "note": "复核脚本/输出（外置存储，非受保护路径）"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/verify-0088/evidence2.txt",
+      "sha256": "f666334b2bdd06ab9b761fc3f594ff376030fd6c83dda6de9ad653f4cb8c17e1",
+      "note": "复核脚本/输出（外置存储，非受保护路径）"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/verify-0088/finalize_evidence.py",
+      "sha256": "bc492144d12bfaabb79c99e1146b81469df674a42e52befa78875a81cb92c0ef",
+      "note": "复核脚本/输出（外置存储，非受保护路径）"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/verify-0088/finalize_evidence2.py",
+      "sha256": "579e9c584ec5d77bc9a1ee12466a8a82bffe3f0d22fa9a8ab57971924c553b8d",
+      "note": "复核脚本/输出（外置存储，非受保护路径）"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/verify-0088/locate_prose.py",
+      "sha256": "cf76e456967c470489c735a24c20d20f54f5dfc8b6d7c4316f3da31a4e02e490",
+      "note": "复核脚本/输出（外置存储，非受保护路径）"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/verify-0088/make_verdict.py",
+      "sha256": "a5ed152c6bbcc419cfeb60ebefe8c2f053c3980fcfb306f8d0e35705b132da2c",
+      "note": "复核脚本/输出（外置存储，非受保护路径）"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/verify-0088/paras.txt",
+      "sha256": "acbd4cea5f9559ed84f6b661ca144db26b390d49b4c82fe85debc11054f11dc0",
+      "note": "复核脚本/输出（外置存储，非受保护路径）"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/verify-0088/partial.txt",
+      "sha256": "598abde8699792ccb1c38cb11a105d96bc9a8be6e72ce46343b9631da61a0820",
+      "note": "复核脚本/输出（外置存储，非受保护路径）"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/verify-0088/partial_coverage_audit.py",
+      "sha256": "b089ae9cfb8134d8af8ec6f80b1876918181745a98a13d5f75cb96d534fa452b",
+      "note": "复核脚本/输出（外置存储，非受保护路径）"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/verify-0088/prose_cover.py",
+      "sha256": "50e4f5e613429673673cf3e9154cca91b77c0bfdb8488f496788ce02085adaab",
+      "note": "复核脚本/输出（外置存储，非受保护路径）"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/verify-0088/prose_quote_audit.py",
+      "sha256": "e168647e0fbf5d48dd9c9072df12210db40cf5efc9be2907ad4846a3b88dd14b",
+      "note": "复核脚本/输出（外置存储，非受保护路径）"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/verify-0088/quote_audit.json",
+      "sha256": "3bf9e0f9fc96c44478a75203a3ff9610d26e5a5356c59a79a22c250d789f13b2",
+      "note": "复核脚本/输出（外置存储，非受保护路径）"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/verify-0088/quote_audit.py",
+      "sha256": "b508bdcceaac272eed9e2b035948e63754a87d99a9223fe77141cf2ada492fc3",
+      "note": "复核脚本/输出（外置存储，非受保护路径）"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/verify-0088/reverse.py",
+      "sha256": "7f4163d2a1a901fc0146ef700c7a5d706ea53bbe860fb1f4020cc55058597b24",
+      "note": "复核脚本/输出（外置存储，非受保护路径）"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/verify-0088/reverse_extra.py",
+      "sha256": "e6536901cea94955abf1f5b7039a7f03e308ef70e601d228d7b57598c1bfd298",
+      "note": "复核脚本/输出（外置存储，非受保护路径）"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/verify-0088/reverse_extra.txt",
+      "sha256": "d608a35f6a7b2a174dbad7ea280c4ae4f9029bdf24ec3391f6ec5b056cc8f850",
+      "note": "复核脚本/输出（外置存储，非受保护路径）"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/verify-0088/span_check.py",
+      "sha256": "919402176a55e94c19480a5fbb7ee571b04cef8f0e3fe76ac1cbd1f07d509e6b",
+      "note": "复核脚本/输出（外置存储，非受保护路径）"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/verify-0088/uncovered_composition.py",
+      "sha256": "db90dea9f28e9547e2dbdbfa1e3d6e50f9b9ebfe5bc8ba4ca97e674bc9f894f7",
+      "note": "复核脚本/输出（外置存储，非受保护路径）"
+    }
+  ]
+}

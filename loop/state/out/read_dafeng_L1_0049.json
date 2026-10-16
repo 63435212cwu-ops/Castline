@@ -1,0 +1,487 @@
+{
+  "task": "read:dafeng:L1:0049",
+  "agent": "w-dafeng-1",
+  "status": "done",
+  "summary": "精读《大奉打更人》第五十章「投壶」原文区间 codepoint [149848,153453)（3605 字，逐段读完），产出 5 条任务五元组、9 条带方向与机制的 causeEdges、6 条 states（含前值/后值与事件锚点，其中一条是知识差）、6 条伏笔（1 条 unresolved：F6）、8 条「不构成伏笔」的说明、6 条反向验证、12 条 unknowns、6 条 selfCritique。全部 133 条引用由真实 text 定位后切片生成并回验 TEXT[start:end]==quote 且 TEXT.find(quote)==start，0 处不符（区间内 109 条全部落在本单元内，区间外 24 条一律标 inRange=false）；另对文件内 215 处「」逐字引文做过 find() 核对，0 处落空，我自己的复述一律改用〔〕。本章的关键判断：许七安在本区间内没有拿到投壶的奖品——正文停在「停车！」这一拍，兑奖（「公子，二选一。」）发生在紧接的第五十一章，因此 T2.result 不写「他赢了金锭银锭」；老道拒绝黄金六十两只有一句台词「规矩，就是规矩」，动机原文无字，T4.objective 只能标 inferred。",
+  "evidence": [
+    {
+      "path": "loop/state/out/read_dafeng_L1_0049.candidate.json",
+      "sha256": "2e045a337c87eca853992b9693b5598d7587b83347aff38ad3f47d5a073c08e0",
+      "kind": "candidate",
+      "note": "本轮精读产物（任务 writes 指定路径）"
+    },
+    {
+      "path": "data/cache/9b676d7031b1bcd3b8377a18.docs.json",
+      "sha256": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+      "kind": "source",
+      "note": "原文来源；sha256(整个文件) 与 task.sourceHash 一致"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "原文区间与切片：docs[0].text[149848:153453] 长度 3605 字，与任务 sourceRange 一致，且切片以本章标题「第五十章 投壶」开头",
+      "result": "pass",
+      "command": "python3 -c \"import json;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];print(len(t[149848:153453]),repr(t[149848:149860]))\""
+    },
+    {
+      "text": "sourceHash 对得上：任务声明 fdde5558…39839 == sha256(data/cache/9b676d7031b1bcd3b8377a18.docs.json) 实际值",
+      "result": "pass",
+      "command": "shasum -a 256 data/cache/9b676d7031b1bcd3b8377a18.docs.json"
+    },
+    {
+      "text": "全部 133 条引用逐字命中且偏移自洽：TEXT[start:end]==quote、TEXT.find(quote)==start、出现次数与 occurrencesInFullText 一致，0 处不符",
+      "result": "pass",
+      "command": "python3 -c \"import json;T=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];C=json.load(open('loop/state/out/read_dafeng_L1_0049.candidate.json'));Q=[o for b in ('tasks','causeEdges','states','foreshadows','rejectedAsForeshadow','reverseCheck') for i in C[b] for o in (i.get('evidence') or [])+(i.get('payoffEvidence') or [])+(i.get('continuationEvidence') or [])+([i['quote']] if isinstance(i.get('quote'),dict) else [])];bad=[o for o in Q if T[o['start']:o['end']]!=o['quote'] or T.find(o['quote'])!=o['start']];print('quotes',len(Q),'bad',len(bad));print('ALL VERBATIM' if not bad else 'MISMATCH')\""
+    },
+    {
+      "text": "区间内外不混：109 条 inRange=true 的引用全部落在 [149848,153453) 内；24 条区间外引用无一落进本单元（含 reverseCheck 与 rejectedAsForeshadow 里的单条 quote）",
+      "result": "pass",
+      "command": "python3 -c \"import json;T=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];C=json.load(open('loop/state/out/read_dafeng_L1_0049.candidate.json'));Q=[o for b in ('tasks','causeEdges','states','foreshadows','rejectedAsForeshadow','reverseCheck') for i in C[b] for o in (i.get('evidence') or [])+(i.get('payoffEvidence') or [])+(i.get('continuationEvidence') or [])+([i['quote']] if isinstance(i.get('quote'),dict) else [])];print('inRangeLeaks',[o['quote'][:20] for o in Q if o['inRange'] and not (149848<=o['start'] and o['end']<=153453)]);print('crossLeaks',[o['quote'][:20] for o in Q if not o['inRange'] and 149848<=o['start'] and o['end']<=153453])\""
+    },
+    {
+      "text": "「」只用于逐字原文：文件内 215 处「…」全部能被 text.find() 找到；我自己的复述/标签另行改用〔〕（见 method.quoteDiscipline）",
+      "result": "pass",
+      "command": "python3 -c \"import json,re;T=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];C=json.load(open('loop/state/out/read_dafeng_L1_0049.candidate.json'));miss=[m.group(1) for s in re.findall(r'\\\"(?:[^\\\"\\\\\\\\]|\\\\\\\\.)*\\\"',json.dumps(C)) for m in re.finditer(r'「([^」]{2,})」',s) if T.find(m.group(1))<0];print('not verbatim',len(miss))\" # 等价可复现：按 method.quoteDiscipline 的规则遍历所有字符串字段"
+    },
+    {
+      "text": "章号由偏移机器判定，不靠手写：selfCheck.crossRangeChapterMap 给出每条区间外引文落在哪个真实章标题之后（21 条，含卷首重编号后的标题原文）",
+      "result": "pass",
+      "command": "python3 -c \"import json;C=json.load(open('loop/state/out/read_dafeng_L1_0049.candidate.json'));m=C['selfCheck']['crossRangeChapterMap'];print(len(m));[print(v['offset'],v['chapter'],q[:30]) for q,v in m.items()]\""
+    },
+    {
+      "text": "本区间内「买下/赢得奖品」核对：区间内唯一一处「买下」是甲士出价被拒，许七安本人没有兑奖动作——兑奖（二选一、取走玉石镜）都在第五十一章，故 T2.result 不写成功",
+      "result": "pass",
+      "command": "python3 -c \"import json;T=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];s=T[149848:153453];print('二选一' in s, '取走玉石镜' in s, T.find('“公子，二选一。”'))\""
+    },
+    {
+      "text": "受保护路径未被本 agent 改动：changes[] 只列 loop/ 下的追加式写入；共享树里 js/ css/ docs/ data/ 的既有改动来自其它会话，非本次提交产生",
+      "result": "pass",
+      "command": "git status --porcelain loop/ | head"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/read_dafeng_L1_0049.candidate.json",
+      "kind": "append-only",
+      "note": "本轮精读候选（新文件）"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/9b676d7031b1bcd3b8377a18.docs.json": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+  },
+  "remaining": [
+    "semanticReview 未完成：本次只做了引用定位与自洽校验，未做独立语义复核（reviewStatus.semanticReview = not_performed）。引用定位正确 ≠ 语义已核验。",
+    "F6（「有空一定要带玲月妹子来内城玩」）标 unresolved：我只做了关键词检索，找到的第一百六十六章「带玲月看新宅」是否算兑现需要语义判断，未硬判 resolved。",
+    "F5（凭书）与 F4（运气线）都违反「一次出现当伏笔」的宽严边界，我在各自 limits 里写明了降级理由，供复核者直接改判为 rejectedAsForeshadow。",
+    "T3（马车主人）的 objective 取自甲士转述的台词、cost 为 null：区间内关于她只有窗帘动作、一句转述、一句「停车！」，其身份在后文仍未被在本时间点上确认。",
+    "本区间内「永康街」只作地名出现，它与后续案件/地理的关系未在本区间，未立项。",
+    "我未对全书做逐章通读：区间外的结论全部来自定点片段阅读 + 全书关键词检索，检索能证明「我没找到」，不能证明「不存在」。",
+    "末尾作者 PS（出差/提前更新）按非正文处理，未计入情节结论。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/read_dafeng_L1_0049.candidate.json"
+    ]
+  },
+  "submittedAt": "2026-10-08T03:53:58Z",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-08T03:53:58Z"
+  },
+  "verifyState": "partial",
+  "reviews": [
+    {
+      "reviewer": "w-verify-0",
+      "at": "2026-10-08T04:37:57Z",
+      "verdict": "partial",
+      "notes": "总判 partial：抽取主体经我独立通读与逐字复算后**可用**，缺陷集中在一处硬性覆盖断言与三处可修的数字/归属/分桶问题，没有编造情节，没有幻觉人物，没有把结束当成功。\n\n【为什么不是 pass】CE1 是硬错，且是自我矛盾：「许二郎在本区间完全未出场」被候选**自己的** T1.result 与 S1.after（引文均为偏移 150682「许二郎和许二叔态度顿时好转，纷纷点头。」）当场证伪。这不是措辞分歧，是关于区间内容的事实陈述与现实相反，必须修。\n\n【为什么不是 fail】按角色纪律，判 fail 必须有 counterExample 且 quote 逐字可查 —— 反例我拿得出（CE1 有五条逐字引证），但它否定的是 coverage 层的一条断言，不是抽取主体：133 条引文全部逐字命中、偏移与 find() 完全一致、occurrences 与 inRange 标记零错、三个哈希全对、selfCheck 三个计数与我独立复算完全一致；T1–T5、C1–C8、S1–S6、F1/F2/F6 我逐条回原文核过，全部有对应文字。用一条覆盖层断言否定整份可用产出，会滑向角色文件警告的「凭感觉否决」。\n\n【我独立确认的强项】① 本章最易出错处候选做对了：没有把「许二郎和许二叔态度顿时好转，纷纷点头」读成「三人决定不去教坊司」——它在 T1.result、C3.mechanism、S1.after 三处都显式拒绝了这个读法，并在 selfCritique[0] 写明理由（后文三人当晚都出现在教坊司）。② C6 把主角的「运气积攒」推想标 inferred 并双重声明「叙述层未认证」，符合「不许把猜测写成真相」。③ T2.result 明写「本区间没有写他领到奖品」，没有把三箭入壶当成功。④ F6 保留 unresolved 而不硬判 resolved，并写明「关键词检索能证明我没找到，不能证明不存在」。\n\n【反向验证的产出】我算出候选从未引用的区间跨度（52 个已引跨度、1843 字未引，其中约 700 字是段间空行），逐段追问后列出 RC1–RC9。其中 RC1 最有价值：官员父子在教坊司撞见的整套先例（255 字）零引用，而「打茶围」在本区间仅此一次出现，正是下一章章题 —— 这不是修辞遗漏，是两章之间的接缝没被看见。\n\n【我修正了自己一次】RC7 我最初写成「候选把因果顺序读反」，复核原文后确认候选 C6 对它引用的四个偏移并未读反（152975 难度句确实在 153082 自信句之前），漏掉的只是更早那一拍（152943 已「胜券在握」），故降级为单纯遗漏，并把这处自我修正留在 RC7.selfCorrection 与 mechanicalAudit 里。\n\n【存疑（拿不出现成证据但值得后续注意）】① T3.objective 依据的是甲士转述台词，候选标 explicit，建议降 inferred —— 我不据此判 fail，因叙事常规下传令可靠，且候选已自述风险。② F5「凭书」违反「一次出现当伏笔」红线，候选已自述可降级；我核到第六十一章确有硬回收，故支持保留但仅作存疑。③ CE3 若作者本意是泛指「镜」字（673 次），「数百」可辩护；但该句主语是「玉石镜」法器，自然读法下 124 次才是分母，故仍记为过度声明。\n\n【覆盖声明】我读的是原文切片，未使用图谱缓存作证据；区间外引文的章号我逐条用全文章节索引复核（含卷首重编号：770 个章标题里有 190 个重号，故一律按标题原文而非序号引用）。候选 crossRangeChapterMap 的 21 条章号我抽查第六十一章/第五十六章/第一百六十六章/第一百六十七章全部正确。",
+      "counterExamples": [
+        {
+          "id": "CE1",
+          "severity": "hard",
+          "claim": "coverage.omissions 与 coverage.namedEntitiesInRange 断言「许二郎在本区间完全未出场」，并以此为由不为他立项。",
+          "candidateField": "coverage.omissions[3] / coverage.namedEntitiesInRange[1]",
+          "candidateText": "许二郎在本区间完全未出场（只有被翻衣服的房间），五元组凑不齐，未单列 tasks。 / 许新年／二郎（被取衣的堂弟，区间内未出场）",
+          "why": "许二郎（许新年）在本区间**有动作、有台词、有态度转变**，不是「完全未出场」。三处原文：他在座（「在座的三个男人都是有人设的」并列名「正人君子许辞旧」）、被主角看着（「许七安看着许二叔和许二郎」）、并当场做出反应（「许二郎和许二叔态度顿时好转，纷纷点头」）。后者正是候选自己 T1.result 与 S1.after 所依据的那一句 —— 即这条断言被候选**自己的抽取项**证伪。这是本文件唯一一处「关于区间内容的事实陈述与现实相反」，属必须修的硬错（不是措辞分歧）。注意最小修法是改这两条覆盖描述，不是删 T1/S1：T1 把三人作为共同议事者处理是对的。",
+          "evidence": [
+            {
+              "quote": "而在座的三个男人都是有人设的：",
+              "start": 150088,
+              "end": 150103,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "inRange": true,
+              "occurrencesInFullText": 1
+            },
+            {
+              "quote": "许七安看着许二叔和许二郎，脑海里不由自主的浮现画面：",
+              "start": 150442,
+              "end": 150468,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "inRange": true,
+              "occurrencesInFullText": 1
+            },
+            {
+              "quote": "听他这么说，许二郎和许二叔态度顿时好转，纷纷点头。",
+              "start": 150682,
+              "end": 150707,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "inRange": true,
+              "occurrencesInFullText": 1
+            },
+            {
+              "quote": "正人君子许辞旧。",
+              "start": 150109,
+              "end": 150117,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "inRange": true,
+              "occurrencesInFullText": 1
+            },
+            {
+              "quote": "许新年：“呦，爹，您也来啦，今儿这姑娘让给我，明儿她归你。”",
+              "start": 150474,
+              "end": 150504,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "inRange": true,
+              "occurrencesInFullText": 1
+            }
+          ],
+          "selfContradictionProof": "候选 tasks[0].evidence 与 states[0].evidence 都含偏移 150682 的「听他这么说，许二郎和许二叔态度顿时好转，纷纷点头。」——与「完全未出场」不能同真。复现见 mechanicalAudit.reproduce.CE1",
+          "minimalFix": "把 omissions[3] 改为「许二郎在座并表态，但与许二叔共用同一拍反应，五元组与许二叔不可分，故并入 T1 而不单列」；把 namedEntitiesInRange[1] 的「区间内未出场」改为「出场于议事场景，未单独行动」。"
+        },
+        {
+          "id": "CE2",
+          "severity": "soft (out-of-range note)",
+          "claim": "rejectedAsForeshadow「许七安穿的月白色儒衫」把「我说我的袍子怎么不见了」写成许二叔桑落主角的话：「借许二叔之口点出」。",
+          "candidateField": "rejectedAsForeshadow[4].reason",
+          "candidateText": "后文第五十二章再次写他穿「月白色书生长袍」，但那是同一件衣服的继续使用（且第五十二章还借许二叔之口点出「我说我的袍子怎么不见了」）",
+          "why": "这句不是许二叔说的，是**许新年（二郎）的内心话**。第五十二章那一段是三人内心戏交替连排、每人一段：第一段「两个兔崽子不是说没时间吗」（许二叔的心声）、第二段「二叔不是说今晚值班吗」（许七安的心声）、第三段「大哥不是从不去勾栏吗.....我说我的袍子怎么不见了，呸，厚颜无耻。爹不是说深爱着娘从不进烟花之地吗....」（许新年的心声——「大哥」指许七安，「爹」指许平志）。归属依据：整段以「三人的内心戏远比僵硬的表情要丰富多彩。」收束，且没有任何引号——全是内心话。方向也不对：丢袍子的人是许新年，他才是「我的袍子」的所有者（区间内「推开许二郎的房间……找出了那件月白色的儒衫」）。这是区间外注释里的人物-台词对接错误，不影响 F 项本身的结论（儒衫是道具连续性而非伏笔），但必须改正归属。",
+          "evidence": [
+            {
+              "quote": "许七安轻车熟路的去了内院，推开许二郎的房间，翻箱倒柜的找出了那件月白色的儒衫，面料珍贵，绣同色云纹。",
+              "start": 150836,
+              "end": 150886,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "inRange": true,
+              "occurrencesInFullText": 1
+            },
+            {
+              "quote": "他脱下捕快服，换上了小老弟最体面的这件衣服，腰带上悬一块质地还算可以的玉佩。",
+              "start": 150892,
+              "end": 150930,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "inRange": true,
+              "occurrencesInFullText": 1
+            }
+          ],
+          "outOfRangeEvidence": [
+            {
+              "quote": "两个兔崽子不是说没时间吗....辞旧也就罢了，毕竟对他的内心真实想法我也算了解一二了.....宁宴可是从不去勾栏的....",
+              "start": 158424,
+              "end": 158485,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "inRange": false,
+              "occurrencesInFullText": 1
+            },
+            {
+              "quote": "二叔不是说今晚值班吗....以前每次我和婶婶闹矛盾，他就说这辈子能娶到这么漂亮的媳妇是八辈子的福气，不愿意呵斥婶婶....呸，还不是出来嫖了。",
+              "start": 158491,
+              "end": 158562,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "inRange": false,
+              "occurrencesInFullText": 1
+            },
+            {
+              "quote": "大哥不是从不去勾栏吗.....我说我的袍子怎么不见了，呸，厚颜无耻。爹不是说深爱着娘从不进烟花之地吗....",
+              "start": 158568,
+              "end": 158622,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "inRange": false,
+              "occurrencesInFullText": 1
+            },
+            {
+              "quote": "三人的内心戏远比僵硬的表情要丰富多彩。",
+              "start": 158628,
+              "end": 158647,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "inRange": false,
+              "occurrencesInFullText": 1
+            }
+          ],
+          "minimalFix": "把「借许二叔之口点出」改为「以许新年的内心话点出」。"
+        },
+        {
+          "id": "CE3",
+          "severity": "soft (numeric over-claim, out-of-range)",
+          "claim": "foreshadows[0].payoff 写玉石镜「此后数百处」。",
+          "candidateField": "foreshadows[0].payoff",
+          "candidateText": "玉石镜则成为贯穿全书的储物/传讯法器（第五十七章：「那面玉石小镜可以容纳物品以及活物」，此后数百处）。",
+          "why": "以该引文偏移 174792 为界，指该法器的写法在全书只出现**百余处**，不是数百处：玉石小镜 110、玉石镜（严格）8、小镜 116、小镜|玉石镜 去重 124。要到「数百」只能把全部「镜」字算进去（673 次），而那包含铜镜 64、镜面/镜子/梳妆镜等无关用法。量级差 2–5 倍，属可复算的数字夸大（非编造情节）。复现命令见 mechanicalAudit.reproduce.CE3。",
+          "evidence": [
+            {
+              "quote": "那面玉石小镜可以容纳物品以及活物",
+              "start": 174792,
+              "end": 174808,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "inRange": false,
+              "occurrencesInFullText": 1
+            }
+          ],
+          "looseReading": "若作者本意是「镜」字泛指，673 次可算数百——但该句主语是「玉石镜」（法器），所以自然读法下不成立。此为可争辩处，故本条不作为 fail 的主要依据。",
+          "minimalFix": "把「此后数百处」改为「此后全书出现百余处（玉石小镜 110 次、小镜|玉石镜 去重 124 次）」。"
+        },
+        {
+          "id": "CE4",
+          "severity": "soft (self-description)",
+          "claim": "coverage.structureRead 的分桶互相重叠 56 字，且 bucket7 的跨度把它自己标注为「不计入内容立项」的作者 PS 包了进去。",
+          "candidateField": "coverage.structureRead[7] / [8]",
+          "candidateText": "[153245,153379) 三支箭几乎同时入壶 → 路人惊叹 → 车窗飘出柔媚嗓音「停车！」 / [153323,153451) 作者 PS 与分隔线（非正文情节，不计入内容立项）",
+          "why": "两桶在 [153323,153379) 重叠 56 字；而作者 PS 的实际起点是 153327（「PS：明天要出差一趟」），位于 bucket7 区间内。bucket7 的标签只写了正文三拍，实际跨度却含 PS 开头；bucket8 又把同一段再包一次。这不是内容错误，但会让「每个字属于哪个分场」不可机器化核验。修法：bucket7 改为 [153245,153327)，bucket8 改为 [153327,153451)。",
+          "evidence": [
+            {
+              "quote": "PS：明天要出差一趟，哎，我其实不太想出去，毕竟疫情也没彻底结束，有点怂。但为了恰饭，只能硬着头皮飞了。",
+              "start": 153327,
+              "end": 153379,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "inRange": true,
+              "occurrencesInFullText": 1
+            },
+            {
+              "quote": "“停车！”",
+              "start": 153316,
+              "end": 153321,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "inRange": true,
+              "occurrencesInFullText": 3
+            },
+            {
+              "quote": "三支箭矢不分先后，几乎同时入壶。",
+              "start": 153249,
+              "end": 153265,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "inRange": true,
+              "occurrencesInFullText": 1
+            }
+          ],
+          "minimalFix": "拆分点改为 PS 起点 153327。"
+        },
+        {
+          "id": "CE5",
+          "severity": "soft (internal-consistency flag, not a rejection)",
+          "claim": "F3 把第五十二章的三人同场认作「本章脑补画面被回收」，但候选自己已标明这是宽口径：脑补台词是三句，F3.evidence 只引了两句，漏了第三句「许七安：『你们都退下，我要独上其身。』」。",
+          "candidateField": "foreshadows[2].evidence / limits",
+          "candidateText": "他脑补的是〔爹/二郎/自己〕三人同场，第五十二章实现的是同一组三人的同场。",
+          "why": "三句脑补对白里，F3 只引了许新年与许二叔两句，主角自己那句（偏移 150534）全文件零引用。候选 limits 已自认「脑补里三人互相打招呼，现实里三人默契装作不认识」属宽口径，故我不要求降级；但既然 F3 的论据就是「三人同场」，第三句不引会让「三人」缺一角。这一条**不构成反对意见**，只是完整性提醒（依角色纪律，无引证的反对只能存疑，而此处我拿得出引证但认为分量不足以否决 F3）。",
+          "evidence": [
+            {
+              "quote": "许七安：“你们都退下，我要独上其身。”",
+              "start": 150534,
+              "end": 150553,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "inRange": true,
+              "occurrencesInFullText": 1
+            }
+          ],
+          "minimalFix": "把 150534 那句补进 F3.evidence。"
+        }
+      ],
+      "reverseChecks": [
+        {
+          "id": "RC1",
+          "found": "区间内「社会性死亡」的**具体先例**整段 255 字零偏移锚点：官员父子同在教坊司打茶围撞见→次日传遍京城官场→连王捕头都从朱县令处听说。候选只引了抽象定义句「即使事出有因，嫖就是嫖了」，没有引这个把抽象变成画面的例子。且「打茶围」在本区间只出现这一次，而它正是紧接的第五十一章章题 —— 这条先例与下一章的章题同名，是本章与下一章的接缝，漏掉它会看不出两章为什么接得上。",
+          "evidence": [
+            {
+              "quote": "脑海里浮现一些关于青楼里的趣事，某次勾栏听曲时，王捕头起了个话题，朝里的某位官员去教坊司睡姑娘，结果打茶围的时候，遇到了自己的儿子。",
+              "start": 150267,
+              "end": 150333,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "inRange": true,
+              "occurrencesInFullText": 1
+            },
+            {
+              "quote": "父子同穴，场面甚是尴尬。",
+              "start": 150339,
+              "end": 150351,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "inRange": true,
+              "occurrencesInFullText": 1
+            },
+            {
+              "quote": "第二天就传遍京城官场了，引为笑谈，以致于连王捕头都从朱县令那里听说了此事。",
+              "start": 150357,
+              "end": 150394,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "inRange": true,
+              "occurrencesInFullText": 1
+            },
+            {
+              "quote": "对于这个重视三纲五常以及名声的时代而言，发生这种事，是脸皮不能承受之重。",
+              "start": 150400,
+              "end": 150436,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "inRange": true,
+              "occurrencesInFullText": 1
+            }
+          ],
+          "machineCheck": "候选全文件（含 evidence/notes/selfCritique）对『父子同穴』出现 0 次、对『引为笑谈』0 次、对偏移 150267/150339/150357/150394 均无引用对象。"
+        },
+        {
+          "id": "RC2",
+          "found": "许平志反对去教坊司的**区间内理由**是单独一句、且是生理性的（年轻气盛、姑娘一逗弄忍不住），候选把三人不去的理由全部归到「人设崩塌／名声」一条上（T1.obstacle），这句零引用。区间外第四十九章另有「炼精巅峰未入练气境前破身是巨大损失」的加成，但本区间只给了「谁忍得住」，两者不能合并——否则会读成三人理由同源。",
+          "evidence": [
+            {
+              "quote": "这就是为什么许平志反对许七安去教坊司，本来就是年轻气盛的小伙，留宿教坊司，人家姑娘一逗弄，谁忍得住？",
+              "start": 150011,
+              "end": 150061,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "inRange": true,
+              "occurrencesInFullText": 1
+            }
+          ],
+          "machineCheck": "候选全文件对该句与偏移 150011 均零引用；T1.obstacle 只写「人设崩塌」。",
+          "calibration": "这条与候选 reverseCheck[0] 说的「本章新给的只有社会性死亡这条统一解释」并不矛盾：候选说对了『统一解释是新增的』，但漏了这一句仍是**许平志个人的反对理由**，不能因为有了统一解释就归并。"
+        },
+        {
+          "id": "RC3",
+          "found": "旁白给出的「蒙眼为什么难」的**机制句**被漏掉，且它正好夹在候选引用的两句之间（候选引了「几乎不可能投中」与「能不能投中，全看脸」，唯独跳过中间这句）。丢掉的是一条真实因果（视力是五感最重要一环 → 武者手感降低 → 命中难度增加），而不只是一个修辞。",
+          "evidence": [
+            {
+              "quote": "眼睛是五感中最重要的一环，失去视力，会让武者的手感降低，增加命中难度。",
+              "start": 153025,
+              "end": 153060,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "inRange": true,
+              "occurrencesInFullText": 1
+            }
+          ],
+          "machineCheck": "偏移 153019 在候选全文件中无引用对象；『五感』在候选文件中出现 0 次。"
+        },
+        {
+          "id": "RC4",
+          "found": "豪华马车的**形制全套描写**（四马、弧形穹顶冠银涂金、明黄缎、玉轓、金钉、裹玉毂辘）零偏移锚点；候选只在 T4.obstacle 的散文里用了「皇家宗室专用的金丝楠木」六个字，没有给出处。这段是 F2「车主是皇室」唯一的区间内依据（金丝楠木=皇家宗室专用）——不引它，F2 的身份推断看起来像凭空。",
+          "evidence": [
+            {
+              "quote": "那是一辆由四匹体格健壮的骏马拉着的马车，弧形穹顶冠银涂金，车窗明黄缎子垂下，再往下是用来遮蔽浮尘的轓，用剔透的白玉包裹着。",
+              "start": 152056,
+              "end": 152117,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "inRange": true,
+              "occurrencesInFullText": 1
+            },
+            {
+              "quote": "而真正内涵的是马车材质，皇家宗室专用的金丝楠木。",
+              "start": 152155,
+              "end": 152179,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "inRange": true,
+              "occurrencesInFullText": 1
+            },
+            {
+              "quote": "“我估计奋斗一辈子，都买不起人家一个车轮子....”许七安伤心的想，仿佛又找到了上辈子当社畜时的心情。",
+              "start": 152185,
+              "end": 152236,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "inRange": true,
+              "occurrencesInFullText": 1
+            }
+          ],
+          "machineCheck": "偏移 152056/152155/152186 在候选全文件中均无引用对象。"
+        },
+        {
+          "id": "RC5",
+          "found": "永康街两百米宽度的**制度性原因**（皇帝或宗室出行要提前清场）零引用。候选只引了后果句「军弩火铳失去用武之地」。这一句才是「有讲究」的正面回答，并与 RC4 的金丝楠木构成同一套「皇室出行规格」信息——两条一起漏，本章「内城是权力空间」这层就没立住。",
+          "evidence": [
+            {
+              "quote": "主干道如此宽敞是有讲究的，皇帝或宗室贵胄出行，会有侍卫提前清场。",
+              "start": 151860,
+              "end": 151892,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "inRange": true,
+              "occurrencesInFullText": 1
+            }
+          ],
+          "machineCheck": "偏移 151860 无引用对象；『清场』在候选文件中出现 0 次。"
+        },
+        {
+          "id": "RC6",
+          "found": "许七安对甲士出价的**当场判断**（以为对方是「投壶没投中，直接氪金」）零引用。这是本章唯一一处主角对「买摊」这件事的解读，候选 T3/C4 只写了甲士与老道两侧，主角观察被整段略去，场景里少了一个视角。",
+          "evidence": [
+            {
+              "quote": "这是投壶没投中，直接氪金了吗....许七安站在不远处，看着这一幕。",
+              "start": 152736,
+              "end": 152769,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "inRange": true,
+              "occurrencesInFullText": 1
+            }
+          ],
+          "machineCheck": "偏移 152736 无引用对象；『氪金』在候选文件中出现 0 次。"
+        },
+        {
+          "id": "RC7",
+          "found": "许七安在拿到箭矢后**已经自信**这一拍零引用：它在旁白解释难度**之前**（152943 < 152975）。候选 C6.mechanism 描述的自述链条（先给难度→再给自信）对它自己引的四处而言是**准确的**，我不说它读反了；漏掉的只是更早这一拍，读了它会看出「自信先于被告知很难」这层意味。",
+          "evidence": [
+            {
+              "quote": "许七安接过箭矢，笑了，觉得自己胜券在握。",
+              "start": 152949,
+              "end": 152969,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "inRange": true,
+              "occurrencesInFullText": 1
+            }
+          ],
+          "machineCheck": "偏移 152949 无引用对象。",
+          "selfCorrection": "我最初想把这条写成「因果顺序被读反」，复核原文后确认候选 C6 对它引用的四个偏移并未读反，故降级为单纯遗漏。这是我对自己反向验证的一次修正。"
+        },
+        {
+          "id": "RC8",
+          "found": "甲士们投壶时的**现场对话**（两句）零引用。候选只引了总结句「轮番投壶，但全部铩羽而归，老道面前的碎银越堆越高」，把「十五名甲士轮流上」的现场感压成了统计数据。",
+          "evidence": [
+            {
+              "quote": "“又没中，可恨！”",
+              "start": 152565,
+              "end": 152574,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "inRange": true,
+              "occurrencesInFullText": 1
+            },
+            {
+              "quote": "“走开，该我了。”",
+              "start": 152580,
+              "end": 152589,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "inRange": true,
+              "occurrencesInFullText": 1
+            }
+          ],
+          "machineCheck": "偏移 152565/152583 无引用对象。"
+        },
+        {
+          "id": "RC9",
+          "found": "区间内存在两种**互相竞争**的世界内解释被候选合并了：许七安自己的「运气积攒／欧皇」与旁白的「全看脸」（修辞，未给规则）。候选 C6 把它们并排列出且 basisNote 已声明「全是主角猜测、叙述层未认证」，这一点做得对；我另记一条是因为『能不能投中，全看脸』紧接在旁白的难度机制句之后，更自然的读法是**旁白在说「此局无技术解、只剩掷骰子」**，而不是在认证主角的运气。这不否定 C6，只是提示不要把两句都读成同一层。",
+          "evidence": [
+            {
+              "quote": "能不能投中，全看脸。",
+              "start": 153066,
+              "end": 153076,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "inRange": true,
+              "occurrencesInFullText": 1
+            },
+            {
+              "quote": "许七安脸不好看，但他有绝对的自信，因为，他已经连续好几天没有捡到银子了。",
+              "start": 153082,
+              "end": 153118,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "inRange": true,
+              "occurrencesInFullText": 1
+            }
+          ],
+          "machineCheck": "此条为读法提示，不要求修改。",
+          "calibration": "与候选 C6.basisNote 一致，故不计为反例。"
+        }
+      ]
+    }
+  ]
+}

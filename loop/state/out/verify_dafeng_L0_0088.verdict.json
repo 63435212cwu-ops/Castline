@@ -1,0 +1,320 @@
+{
+ "task": "verify:dafeng:L0:0088",
+ "reviewer": "w-dafeng-3",
+ "roleFile": "loop/ROLES/VERIFIER.md",
+ "candidateUnderReview": "loop/state/out/read_dafeng_L0_0088.candidate.json",
+ "candidateAgent": "w-xiyou-0",
+ "candidateSha256": "f67ee47eaf9a325022f2ae0f69f983b6249fcb5c9aff2a93e583a8c1d0ee9164",
+ "source": {
+  "path": "data/cache/215f4b88fb087a7d735a6fae.docs.json",
+  "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+  "range": [
+   280782,
+   284144
+  ],
+  "sliceSha256": "94aa3ba8e9852d576b657519a6c8929b70c2ed1ccaeab05a906e7b87789d12c7",
+  "boundaryCheck": "复核者独立复算：docs[0].text[280782:284144] 长 3362 且以「第八十九章 此时无声胜有声」开头、以 12 个连字符结尾；右边界 docs[0].text[284144:284157]=='第九十章 许公子开堂讲课'。任务 sourceHash 与本文件 sha256 一致（候选写的 docsJson 键 1063b17ca65ec1b76f30e460 是同内容的另一份别名，sha256 相同，不构成缺陷）。"
+ },
+ "method": "按 VERIFIER.md 顺序：先把 [280782,284144) 原文整片逐段读完并自行抽取要点（未先看候选），再打开候选比对。机器侧：136 条 quote 对象逐条复算 text[start:end]==quote、end-start==len(quote)、sourceHash、inRange、occurrencesInFullText、occurrencesInUnit、chapterAtOffset（同时用「含两」与「不含两」两套章节正则各算一遍，本单元两者结果相同，不存在 0084 那种跨「第两百X章」的归属漂移）；任务五栏做「逐字相等 + 互为子串 + 区间求交」三重共用判定；随机种子 20261009 抽 5 条 in-range 引文独立 find。反向验证：把原文切成 91 个自然段，标出候选引文未覆盖的 22 段，逐段判是否有可登记事实。候选散文里每一处区间外「offset N」逐个回原文切片并重算所在章标题。审计脚本不 import 任何构建脚本，独立从磁盘复算。",
+ "verdict": "partial",
+ "counterExamples": [
+  {
+   "id": "ce_out_of_range_honorific_in_who",
+   "claim": "tasks[T1].who=「魏渊（打更人指挥使；在场：姜律中、杨砚、南宫倩柔）」、tasks[T4].who=「许平志（许二叔，御刀卫百户）」，把「指挥使」「百户」当作本区间成立的身份直接写进 who 栏；excludedSettings 更把它升级为对区间的断言：「本区间有官职称呼（金锣、银锣、铜锣、百户、指挥使）」。",
+   "quote": {
+    "quote": "元景帝狠狠的斥责了京城五卫的指挥使，以及打更人指挥使魏渊。",
+    "start": 270018,
+    "end": 270047,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "offsetUnit": "codepoint",
+    "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+    "verbatim": true,
+    "findHits": 1,
+    "inRange": false
+   },
+   "why": "可复现的反证：'指挥使' 与 '百户' 在本区间 [280782,284144) 内各出现 **0 次**，全书分别 207 / 101 次，最近的一次在 offset 270018（指挥使）与 6565（百户），都在区间外。本区间内实际出现的职务字样只有 金锣（1）、银锣（4）、铜锣（1）——即 excludedSettings 那句断言把两个**没出现**的词列进了「本区间有」。这不是措辞问题：who 栏是被下游直接引用的身份字段，且候选自己在 T2.obstacle.note 里写明「用背景知识补原文没写的字段，是本角色最典型的失误形态」（同类事故在同书 0064 单元被判 policy-violation）。对照：候选为 states[].before 里同样属区间外的内容都挂了 inRange=false 引文并注 caveat，who 栏却没有任何标注，标准不一致。修法：who 改为区间内可证的称呼（魏渊 / 许平志（许二叔）），把「打更人指挥使」「御刀卫百户」移进 outOfRangeContext 或就地标 inRange=false。",
+   "counterQuote": {
+    "quote": "由御刀卫的百户许平志临时决定",
+    "start": 6576,
+    "end": 6590,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "offsetUnit": "codepoint",
+    "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+    "verbatim": true,
+    "findHits": 1,
+    "inRange": false
+   },
+   "severity": "policy-violation-in-own-scope",
+   "reproduce": "python3 -c \"import json;t=json.load(open('data/cache/215f4b88fb087a7d735a6fae.docs.json'))[0]['text'];u=t[280782:284144];print({k:(u.count(k),t.count(k)) for k in ['指挥使','百户','金锣','银锣','铜锣']})\""
+  },
+  {
+   "id": "ce_f2_payoff_contradicts_ch91_narration",
+   "claim": "foreshadows[F2].payoff 写「第91章「一字马」：魏渊向两位义子复述「宋卿曾经与他说过，许七安是了不得的炼金术奇才……甚至被称为『吾师』」，南宫倩柔与杨砚这才把「许公子」与「许七安」对上号」。",
+   "quote": {
+    "quote": "魏渊看了两位义子一眼，他们脸庞、眼中，有着同样的困惑和茫然。显然没有把许公子和许七安联系在一起，当日宋卿说的话，两人也忘了。",
+    "start": 287990,
+    "end": 288052,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "offsetUnit": "codepoint",
+    "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+    "verbatim": true,
+    "findHits": 1,
+    "inRange": false
+   },
+   "why": "第91章的原叙述正好相反：魏渊**没有**向义子复述——「宋卿曾经与他说过……」是叙述对魏渊**自己记忆**的交代（紧接在「魏渊眼里露出恍然之色，也有了一定的猜测」之后），而魏渊在该场景里唯一的台词是「魏渊笑了笑：“上楼一看便知。”」；本章紧接着明写两位义子「显然没有把许公子和许七安联系在一起，当日宋卿说的话，两人也忘了」。两人真正认出许七安是在 offset 289192 起（「原来姜律中说的都是实话....杨砚盯着许七安看了片刻，微不可查的颔首。」）——靠**眼看**，不是靠魏渊复述。也就是说：payoff 句把「叙述交代魏渊的记忆」误写成「魏渊向义子复述」，把「两人忘了、没对上号」反写成「这才对上号」，并把认出的时点从「看见人」提前到「听复述」。引文本身逐字无误（@287884 的 payoffQuotes[0] 可 find），错在引文之外的散文描述——这正是「定位正确≠语义已核」的形态，且 F2 的 status=resolved-out-of-range 会让下游把它当回收事实读。修法：payoff 改写为「第91章：叙述交代魏渊曾听宋卿说过许七安是炼金术奇才；两位义子当时并未把『许公子』与许七安联系起来，直到看见讲台上的许七安本人才恍然」。",
+   "counterQuote": {
+    "quote": "原来姜律中说的都是实话....杨砚盯着许七安看了片刻，微不可查的颔首。",
+    "start": 289246,
+    "end": 289281,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "offsetUnit": "codepoint",
+    "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+    "verbatim": true,
+    "findHits": 1,
+    "inRange": false
+   },
+   "severity": "downstream-fact-error",
+   "reproduce": "python3 -c \"import json;t=json.load(open('data/cache/215f4b88fb087a7d735a6fae.docs.json'))[0]['text'];print(t[288020:288060]);print(t[289185:289215])\""
+  },
+  {
+   "id": "ce_f3_parenthetical_heng_hui_not_in_ch93",
+   "claim": "foreshadows[F3].payoff 写「凶手的线索引向六号（恒慧/恒远一线）」，把 恒慧 列为第93章回收点里的一线。",
+   "quote": {
+    "quote": "“贫僧有一位弟子，法号恒慧，天资聪颖，贫僧原本对他寄予厚望，奈何他六根未净，与上山的女香客有了私情。盗走了那件法器，携手私奔，逃离了京城。”",
+    "start": 428171,
+    "end": 428241,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "offsetUnit": "codepoint",
+    "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+    "verbatim": true,
+    "findHits": 1,
+    "inRange": false
+   },
+   "why": "第93章区间 [294547,301126) 内 '恒慧' 出现 **0 次**、'恒远' 出现 4 次（@296396/296471/296670/296751）；'恒慧' 在全书的**首次**出现是 offset 428182，比第93章晚了约 12.7 万字。所以第93章能支持的是「六号（恒远）一线」，'恒慧' 是提前引入的后续人物。等级属于「描述文字里混进区间外人物名」，不改动 F3 的 seed 与 payoffQuotes，但下游若照抄会把恒慧错认成第93章已登场者。修法：括号收窄为「（恒远/六号一线）」。",
+   "counterQuote": {
+    "quote": "在周边住户里静等了两天的恒远大师，终于等来了异常。",
+    "start": 296384,
+    "end": 296409,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "offsetUnit": "codepoint",
+    "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+    "verbatim": true,
+    "findHits": 1,
+    "inRange": false
+   },
+   "severity": "minor-out-of-range-name",
+   "reproduce": "python3 -c \"import json;t=json.load(open('data/cache/215f4b88fb087a7d735a6fae.docs.json'))[0]['text'];print(t[294547:301126].count('恒慧'),t[294547:301126].count('恒远'),t.find('恒慧'))\""
+  },
+  {
+   "id": "ce_f1_note_chapter_attribution_off_by_one",
+   "claim": "foreshadows[F1].note 写「同一日期在第94-95章被反复提到（另见 offset 295448「明后两天要值夜，大后天是皇帝祭祖的日子，打更人要负责安保工作」……）」。",
+   "quote": {
+    "quote": "明后两天要值夜，大后天是皇帝祭祖的日子，打更人要负责安保工作",
+    "start": 295448,
+    "end": 295478,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "offsetUnit": "codepoint",
+    "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+    "verbatim": true,
+    "findHits": 1,
+    "inRange": false
+   },
+   "why": "可复算：该引文 start=295448，其最近的前置章标题是 offset 294547 的「第九十三章 三号不愧是读书人」，下一章标题「第九十四章 凶杀案」在 offset 297902。故 offset 295448 落在**第93章**，不在第94-95章。这与 0084 被判 counterExample 的是同一类缺陷（散文里的区间外章节归属），只是幅度为 1 章而非 61 章，且候选同时给出了可自查的 offset，故烈度低。修法：改为「第93章（另在第94-95章被反复提到）」或删去章号只留 offset。",
+   "severity": "minor-attribution",
+   "reproduce": "python3 -c \"import json;t=json.load(open('data/cache/215f4b88fb087a7d735a6fae.docs.json'))[0]['text'];print(t.find('明后两天要值夜'),t.find('第九十三章 三号不愧是读书人'),t.find('第九十四章 凶杀案'))\""
+  },
+  {
+   "id": "ce_unknowns3_overstates_no_reply",
+   "claim": "unknowns[3] 写「许七安有没有接受萍儿的自荐：原文在他『审视着大丫鬟的姿色』之后直接以『.....』断开，本区间没有回应」；tasks[T3].result 同写「本区间内没有回应」。",
+   "quote": {
+    "quote": "这是你愿不愿意的事儿吗，这是我想不想的事儿。",
+    "start": 282543,
+    "end": 282565,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "offsetUnit": "codepoint",
+    "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+    "verbatim": true,
+    "findHits": 1,
+    "inRange": true
+   },
+   "why": "该断言可被原文反驳：在萍儿自荐（@282499）与「审视着大丫鬟的姿色」（@282567）**之间**，还有 offset 282543 的「这是你愿不愿意的事儿吗，这是我想不想的事儿。」，其后紧接的审视结论是「模样清秀，但与浮香想必，天壤之别」，再才是「.....」。按候选自己的口径，这类句子就是许七安的内心直述——它在 tasks[T5].objective 里正是这样处理同构句的：「你瞒你老婆，我瞒你女儿啊！」被标为「叙述直接写出的他的心理话」并作为 explicit 引文。同一口径下，@282543 就是他对自荐的（未出声的）回绝，「本区间没有回应」因此不成立；这不是「替他补原文」，而是候选漏引了一句落在它自己引文区间之内的句子。影响面：把可判定的「已回绝」降级成 unknown，是反向的过度保守（与「结束当成功」相反的错，但同样让下游读不到原文给了的信息）。修法：把 @282543 补进 T3.result（basis=explicit，注明是未出声的内心回绝），unknowns[3] 收窄为「他有没有**出声**答复萍儿：没有」。",
+   "severity": "omission-creates-false-negative",
+   "reproduce": "python3 -c \"import json;t=json.load(open('data/cache/215f4b88fb087a7d735a6fae.docs.json'))[0]['text'];print(t[282499:282610])\""
+  }
+ ],
+ "reverseChecks": [
+  {
+   "found": "杨砚为什么会「降低评分」——叙述给出的价值体系整段（目空一切 / 视各大体系修行者如蝼蚁 / 藐视一切才无所畏惧）。候选只引了结论条件句，把它挂在 states[S2].before 与 characterClaims[CC8]，却没有登记解释这条结论的那三句；缺了它，S2 的 before 只是一个孤立的条件句，下游读不出杨砚的判准是什么。",
+   "quote": {
+    "quote": "他本人是那种目空一切的武夫，对各大体系的修行者视如蝼蚁，觉得这是高品武夫必须要具备的气势。",
+    "start": 281592,
+    "end": 281637,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "offsetUnit": "codepoint",
+    "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+    "verbatim": true,
+    "findHits": 1,
+    "inRange": true
+   },
+   "supporting": [
+    {
+     "quote": "藐视一切，才能无所畏惧。",
+     "start": 281643,
+     "end": 281655,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+     "offsetUnit": "codepoint",
+     "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+     "verbatim": true,
+     "findHits": 1,
+     "inRange": true
+    },
+    {
+     "quote": "杨砚皱了皱眉。",
+     "start": 281579,
+     "end": 281586,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+     "offsetUnit": "codepoint",
+     "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+     "verbatim": true,
+     "findHits": 2,
+     "inRange": true
+    }
+   ]
+  },
+  {
+   "found": "许七安对二叔的「第二刀」——当场点破二叔过去「不去教坊司」是哄人的。候选在 causeEdges[C6] 的 mechanism 散文里提到了「侄儿的第二刀」，却既没有为它建任何条目、也没有把它作为引文登记；而它实质改变了 T4 的 obstacle：二叔的封口请求是在自己的前科已被当面戳穿的前提下提出的，T4.obstacle 只写了「笑声卡住」与「气味可能露馅」。",
+   "quote": {
+    "quote": "“所以二叔以前说自己不去教坊司，是哄人的。”许七安又补了一刀，最后说：“二叔想和我说什么？”",
+    "start": 283371,
+    "end": 283417,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "offsetUnit": "codepoint",
+    "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+    "verbatim": true,
+    "findHits": 1,
+    "inRange": true
+   }
+  },
+  {
+   "found": "御刀卫议论的完整三段递进。候选只引了「浮香姑娘现在连见一面都难了」，漏掉紧邻的两句：「咱们有福了，哈哈哈。」（把「大老爷们家眷充入教坊司」直接接成自己的收益）与「浮香现在名满京城，以后也会传到各州，地位层层拔高。」。worldSettings[0] 用「规则的恐惧面把资源让给了不怕丢官的人」解释京察→许七安，其机制的另一半（受益者的幸灾乐祸）在原文里有逐字句而未被登记。",
+   "quote": {
+    "quote": "“咱们有福了，哈哈哈。”",
+    "start": 282929,
+    "end": 282941,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "offsetUnit": "codepoint",
+    "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+    "verbatim": true,
+    "findHits": 1,
+    "inRange": true
+   },
+   "supporting": [
+    {
+     "quote": "“浮香现在名满京城，以后也会传到各州，地位层层拔高。”",
+     "start": 282973,
+     "end": 283000,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+     "offsetUnit": "codepoint",
+     "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+     "verbatim": true,
+     "findHits": 1,
+     "inRange": true
+    },
+    {
+     "quote": "“真是好福气。”",
+     "start": 283056,
+     "end": 283064,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+     "offsetUnit": "codepoint",
+     "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+     "verbatim": true,
+     "findHits": 1,
+     "inRange": true
+    }
+   ]
+  },
+  {
+   "found": "叔侄撞见的两个物理前提句：①许七安是**牵马**上马背的（他出现在马棚的原因，不是路过）；②许平志的外貌（国字脸、身材昂藏）。候选登记了「打更人制服」这一身份标识，却没有登记马匹/牵马动作，也没有任何人物外貌条目；而撞见之所以成立，原文给的是「取马的人」与「走向马棚的人」在同一处相遇。",
+   "quote": {
+    "quote": "他从教坊司的“服务人员”手中牵过马匹，跨上马背，忽然听见一阵爽朗的谈笑声。",
+    "start": 282618,
+    "end": 282655,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "offsetUnit": "codepoint",
+    "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+    "verbatim": true,
+    "findHits": 1,
+    "inRange": true
+   },
+   "supporting": [
+    {
+     "quote": "其中一人国字脸，身材昂藏，可不就是许二叔。",
+     "start": 282691,
+     "end": 282712,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+     "offsetUnit": "codepoint",
+     "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+     "verbatim": true,
+     "findHits": 1,
+     "inRange": true
+    }
+   ]
+  },
+  {
+   "found": "递橘子时二叔的反问「你又用不到。」——这是「你瞒你老婆，我瞒你女儿」之所以是笑点的支点：二叔以为橘皮只有自己需要。候选的 tasks[T4]/[T5] 与 knowledgeDiffs 都没有覆盖这次交换，K3/K4 只写了「两人都知道对方去了教坊司」，漏掉「二叔不知道侄儿也需要掩盖」这一层信息差。",
+   "quote": {
+    "quote": "许二叔一边递橘子，一边好奇的问：“你又用不到。”",
+    "start": 283637,
+    "end": 283661,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "offsetUnit": "codepoint",
+    "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+    "verbatim": true,
+    "findHits": 1,
+    "inRange": true
+   }
+  },
+  {
+   "found": "婶婶「面无表情」的传递是**双向**的：她递给二叔之后，二叔「也剥了一瓣吃，然后面无表情的递给许七安」。候选 rejectedForeshadows[RF-3] 用婶婶那一句判「不能立伏笔」是对的，但没有任何条目登记二叔那句镜像动作——它是「全家人各自面无表情地传下去」这一场面节律的另一半。",
+   "quote": {
+    "quote": "许二叔见老婆分享，也剥了一瓣吃，然后面无表情的递给许七安。",
+    "start": 283812,
+    "end": 283841,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "offsetUnit": "codepoint",
+    "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+    "verbatim": true,
+    "findHits": 1,
+    "inRange": true
+   }
+  }
+ ],
+ "falseKills": [
+  {
+   "id": "fk_rf1_fuxiang_meihuo",
+   "excluded": "rejectedForeshadows[RF-1]「那无形无质的魅惑让许大郎一阵燥热」→ 浮香有魅惑法术的伏笔",
+   "candidateWhy": "单次出现＋随后自我否定：原文紧接着写「仅是那么一刹那，那种说不清道不明的感觉便消失，许七安还以为自己隔着屏风看错了」。本区间没有第二处呼应，也没有任何回收；要立这条需要后文证据，区间内不立。",
+   "why": "被排除的对象本身是合法的（区间内确实只有一次描写且叙述自给了错觉解释，不构成误杀）；但候选给出的理由里含一句对**全书**的断言——「也没有任何回收」。这一句与原文不符：浮香的非人身份在本书后文被明确回收。",
+   "quote": {
+    "quote": "尽管知道浮香是妖族暗子，死亡只是借机脱身，但听到她如今安好，许七安依旧松了口气",
+    "start": 2514560,
+    "end": 2514599,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "offsetUnit": "codepoint",
+    "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+    "verbatim": true,
+    "findHits": 1,
+    "inRange": false
+   },
+   "verdictOnThis": "存疑，不作为 fail 依据。伏笔粒度（一句感官描写算不算「铺设」）的定义权在 READER/计划侧，我拿不出禁止它的原文条款；但同一份候选对 F1/F2/F3 都按「区间内铺设 + 区间外回收」立了 resolved-out-of-range，RF-1 却以「需要后文证据」为由不立，两处口径不一致。建议统一：要么按 F1-F3 口径标 resolved-out-of-range（回收点=浮香身份揭露），要么把拒绝理由收窄为「本区间只有一次描写、且叙述自己给了错觉的解释」，删掉「也没有任何回收」这句对全书的断言。"
+  },
+  {
+   "id": "fk_no_other_false_kill",
+   "excluded": "其余 3 条 rejectedForeshadows（RF-2 院门牌子 / RF-3 婶婶面无表情 / RF-4 申公豹）与 8 条 rejectedCauseEdges",
+   "why": "我逐条复核，未发现误杀。两个可复现的关键计数：'牌子' 全书 7 处，仅 1 处在区间内，其余 6 处（@1344153 路边乞讨牌、@2127709/2127719/2127754/2127778/2127797 马脖子木牌「许银锣之弟」）与影梅小阁无关，候选的「不构成铺设—回收」成立；R-08 对「一家人放心」的拒读也正确——原文的「放心」紧接在许铃音被酸到之后（@283977→@284001），不是放心叔侄。「用比较形象的比喻：天天都想着申公豹」全文仅此一次，RF-4 拒立正确；R-01/R-02/R-03 拒的是纯相邻，原文确无触发机制句。"
+  }
+ ],
+ "falseKillsNote": "误杀检查结论：候选 12 条排除项里只有 RF-1 的理由站不住（且只到「存疑」级别），其余逐条复核对原文后均成立。没有发现「因为词表/正则把真实因果挡掉」的形态。",
+ "hallucinationCheck": "未发现编造：逐条核对 tasks/causeEdges/states/knowledgeDiffs/foreshadows/characterClaims 后，没有原文之外的人物、事件、结局或伏笔；没有把「结束」当「成功」（T2.result 写明诉求悬置、T4.result 写明进府不等于瞒住、F4/F5 显式标 unresolved 并给出全文检索计数）；semanticReview 如实保持 not-performed；source 区块自报的 docsJson 关键名与任务里的 graphKey 不同，但我复算两份文件 sha256 相同（都是 fdde5558…），不构成缺陷。",
+ "notes": "裁决 partial。三句话概括：**引用层无可指摘、抽取主体无编造，但身份字段与三条区间外描述各有可复算的错，且一处 unknown 被原文反驳。**\n\n1) 机器复核（我独立从磁盘复算，不 import 候选任何构建脚本）：136 条 quote 对象全部 text[start:end]==quote、end-start==len(quote)、sourceHash 一致、inRange 与 occurrencesInFullText/occurrencesInUnit 全对；chapterAtOffset 用「含两」与「不含两」两套正则各算一遍结果相同（本单元的章标题不含「两」字头，不存在 0084 的漂移）；sliceSha256=94aa3ba8… 与候选一致；任务五栏的「相等 + 互为子串 + 区间求交」三重判定**全部为 0 处共用**，即候选自报的 taskColumnsShareNoQuote=true 在此单元**经独立复算是真的**——这正是 0084 被判缺陷的同一检查项，本单元确实按 0084 复核意见改用了包含判定。随机种子 20261009 抽 5 条 in-range 引文独立 find，5/5 逐字命中且偏移一致。**没有发现任何编造**：没有原文之外的人物、结局、伏笔；「结束≠成功」执行得好（T2.result 写明诉求悬置、T4.result 写明进府不等于瞒住、F4/F5 显式标 unresolved）；semanticReview 如实保持 not-performed。\n\n2) 为什么不是 pass：5 条 counterExample 都能用一条可复现命令证伪，且都属于「下游照抄会读到错事实」的类别——who 栏把区间内 0 次出现的「指挥使」「百户」当身份写（excludedSettings 更把它们错列为「本区间有」）；F2 的 payoff 描述与第91章原叙述相反（原文是「两人没有把许公子和许七安联系在一起」，不是「这才对上号」，且魏渊并未复述）；F3 把首次出现在 12.7 万字之后的「恒慧」写进第93章回收点；F1 把一个第93章的 offset 说成「第94-95章」；unknowns[3] 宣称「本区间没有回应」，而回绝句就在它自己引的两句之间。\n\n3) 为什么不是 fail：没有一条 counterExample 触及 tasks/causeEdges/states 的抽取本体（那些栏位的引文逐字可查、语义未被我证伪），缺陷集中在 who 标签、三条区间外描述文字、一处 unknown 的措辞；我所有反对意见都附了逐字可查的引文，但没有一条构成「编造抽取项」，故判 partial。\n\n4) 我判自己错的地方（如实登记）：我的第一版检查器用 find()==quote_start 做唯一性断言，对 '.....'（全文 16075 次）与 '------------'（1031 次）报了 2 个假阳性；候选对这两条**正确地**声明了 occurrencesInFullText/occurrencesInUnit 且 match='exact'，是我的断言过强，不是候选的缺陷，已把判定改为「切片相等 + 计数一致」。\n\n5) 存疑未判：T2.obstacle.note 写「「杨砚不放人」的直接叙述在第88章末尾（区间外，见 outOfRangeContext）」，但 outOfRangeContext 的 3 条里没有这一条（原文在 @280641「杨砚理都不理他。」，确在第88章末，@280641<280782）。指针落空是事实，但 outOfRangeContext[0]（@280715，同属第88章末）部分覆盖了该区域，我无法断定作者是笔误还是泛指，故只记存疑、不写进 counterExamples。\n\n6) 本复核未做的：不认证解释层（semanticReview 仍为 not-performed）；未核 F2/F3 的 payoff 是否为**最贴切**的回收点（候选 F3 自己声明是关键词检索而非通读，我只核了引文逐字存在与所在章）；未逐条枚举全书其余「区间外章节归属」类错误（超出本区间）。"
+}

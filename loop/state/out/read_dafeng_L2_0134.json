@@ -1,0 +1,276 @@
+{
+  "task": "read:dafeng:L2:0134",
+  "agent": "w-sanguo-0",
+  "role": "READER",
+  "status": "done",
+  "summary": "精读《大奉打更人》第一百三十五章 干尸（docs[0].text[466477,470430)，3953 码点，103 非空段）：产出 tasks 7（每条五元组分列、每栏自带引文、同一条任务内跨栏不共用同一句话）、causeEdges 8 + rejectedEdges 4、states 4 + knowledgeDiffs 4、foreshadows 3（F1/F2 显式 unresolved，F3 本单元内已回收）+ notForeshadows 4、worldSettings 11（place 3 / item 5 / rule 3）+ notWorldSettings 3、themeReadings 2（各带 perspective/support/counter）、textualNotes 8、unquotedDialogue 9、unknowns 18、selfCritique 5 项、coverageDeclaration（40 个未引用段逐条给理由）。引文层由两套独立实现（build_candidate.py 写前自检 + audit_independent.py 写后复算）各自从原文重算并交叉比对：118 条引文逐字命中、偏移全部落在区间内、sourceHash 一致、start 为区间内首次出现、每条引文在全书中唯一、任务跨栏同句 0、跨栏区间重叠 0、null 栏全部带 Note、worldSettings 标签合法、themeReadings 三件齐备、实质台词未覆盖 9 条每条都登记了理由，两套实现的台词跨度/未覆盖集合一致，审计 FAILS=0。semanticReview=not-performed（语义未做独立人工核验）。",
+  "evidence": [
+    {
+      "path": "loop/state/out/read_dafeng_L2_0134.candidate.json",
+      "sha256": "ea2067b7ce6376dfb0e2c646469d15df92c578d41bf0a2d847edd9ff95c4a4bd",
+      "kind": "worker-output",
+      "note": "任务 writes 指定的唯一写入物"
+    },
+    {
+      "path": "data/cache/1063b17ca65ec1b76f30e460.docs.json",
+      "sha256": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+      "kind": "source",
+      "note": "原文来源（只读，未改动）；与任务声明的 sourceHash 一致"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/read_dafeng_L2_0134/audit_independent.py",
+      "sha256": "d0eab8904d5f0a1de611c8b8432cf1c065f2cfd907b313e324822ae460751d1d",
+      "kind": "probe",
+      "note": "独立审计脚本（126 项检查全 ok、FAILS=0）。只读 docs.json 与写盘后的候选，不复用生成脚本逻辑；位于外置盘产物目录，非仓库受保护路径"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/read_dafeng_L2_0134/build_candidate.py",
+      "sha256": "5217d752d446fe00ca205d9593a3dcf1ba4ed060858d0d52eb0df55b9d0d3a09",
+      "kind": "probe",
+      "note": "候选生成脚本：所有偏移由脚本从原文现算，任何引文 find 不到立刻 AssertionError 退出"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "区间口径自检：docs[0].text[466477:470430) 以本章标题『第一百三十五章 干尸』开头，长度 3953",
+      "result": "pass",
+      "command": "python3 -c \"import json;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];print(repr(t[466477:466497]),len(t[466477:470430]))\""
+    },
+    {
+      "text": "sourceHash 是**整个 docs.json 文件**的 sha256，与任务声明一致（fdde5558…39839）；切片哈希另起字段 segmentSha256，未覆盖 sourceHash",
+      "result": "pass",
+      "command": "shasum -a 256 data/cache/1063b17ca65ec1b76f30e460.docs.json"
+    },
+    {
+      "text": "118 条引文全部 T[start:end]==quote 逐字成立、偏移落在 [466477,470430) 内、sourceHash 一致、start 为该引文在区间内首次出现（4 项失败数均为 0）",
+      "result": "pass",
+      "command": "python3 -B \"$CL_ARTIFACTS/read_dafeng_L2_0134/audit_independent.py\" loop/state/out/read_dafeng_L2_0134.candidate.json"
+    },
+    {
+      "text": "每条引文在**整本书** docs[0].text 内唯一（quotesNotUniqueInDoc=0），复核者按 quote 反查不会指到第二处",
+      "result": "pass"
+    },
+    {
+      "text": "任务五元组跨栏禁用同句：taskCrossFieldSameQuote=0、taskCrossFieldSpanOverlap=0、taskIntraFieldOverlap=0（同一条任务内不同栏不共用同一句话、区间不重叠）",
+      "result": "pass"
+    },
+    {
+      "text": "null 栏全部带同名 Note：T1/T2/T3/T4 的 cost、T3 的 obstacle、T5 的 obstacle、T6 无 null；F1/F2 的 payoff null 均带 payoffNote（nullFieldsMissingNote=[]）",
+      "result": "pass"
+    },
+    {
+      "text": "worldSettings 标签合法：placeState∈{arrived,mentioned}、itemStates⊆{hold,transfer,use,lose}、institution∈{declared,executed,misunderstood}，非法 0 条；三处地点均为 arrived/mentioned 有据（桑泊与皇城均为 mentioned，因为区间内只有议论与转述）",
+      "result": "pass"
+    },
+    {
+      "text": "themeReadings 每条三件齐备（perspective/support/counter），共 2 条；未使用事件密度/死亡人数/篇幅中点定义高潮，未套三幕",
+      "result": "pass"
+    },
+    {
+      "text": "覆盖：103 个非空段中 63 段被引文覆盖、40 段未覆盖，未覆盖的 40 段**逐条**在 coverageDeclaration.uncoveredItems 里给出理由（缺理由 0 条、理由表多余项 0 条）",
+      "result": "pass"
+    },
+    {
+      "text": "反向覆盖：枚举区间内 41 段最内层引号台词，实质未覆盖 9 条**每条**都在 unquotedDialogue 里登记 speaker/quote/at/why；未登记理由 0 条、虚报登记 0 条",
+      "result": "pass"
+    },
+    {
+      "text": "两套独立实现交叉比对：生成脚本与审计脚本各自算出『台词跨度 41 / 实质未覆盖 9 / 短应答 12』，集合完全一致",
+      "result": "pass"
+    },
+    {
+      "text": "编造检查：证据分区（tasks/causeEdges/states/foreshadows/worldSettings/themeReadings）内不出现任何本区间没有的名字；图谱人物名『恒慧』在切片中出现 0 次，故本候选全篇用原文自称『黑袍人』，并在 graphCrossCheck 里显式登记该差异",
+      "result": "pass",
+      "command": "python3 -c \"import json;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];print(t[466477:470430].count('恒慧'))\""
+    },
+    {
+      "text": "semanticReview=not-performed：引用定位正确 ≠ 语义已核验，候选未声称任何一条读法正确",
+      "result": "pass"
+    },
+    {
+      "text": "未改动任何受保护路径：本轮只写 loop/state/out/read_dafeng_L2_0134.candidate.json（任务 writes 指定的唯一路径）。共享树里另有 424 项改动，全部是并行 agent 的既有未提交工作，非本 agent 所为 —— 本 agent 未执行 git checkout/restore/reset/stash",
+      "result": "pass",
+      "command": "git status --porcelain | wc -l"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/read_dafeng_L2_0134.candidate.json",
+      "kind": "append-only"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/1063b17ca65ec1b76f30e460.docs.json": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+  },
+  "remaining": [
+    "语义未做独立人工核验（semanticReview=not-performed）：本候选只保证引文定位与自述分类可复算，不声称任何一条读法正确。",
+    "区间外上下文只用于判断『什么在本区间内没有写』，未系统阅读前后单元；桑泊封印物与黑袍人的关系需读第一百三十六章才能判（本单元按未回收登记）。",
+    "图谱对照只做了 3 个落在本区间的节点（events 276/277/278）与 1 处命名差异，未做全量图谱 diff。",
+    "『女人』的生死未写（原文只到『似乎昏厥过去』），按未确认登记在 unknowns U13。",
+    "章界只按 docs[0].text 的标题行判定，未与上游切分工具的参数核对。",
+    "本轮自检中修掉了三个**自检本身**的真实缺陷（覆盖判据曾恒真/假阴性、坐标基准混用切片与全文偏移），全部记录在脚本注释里；这类缺陷不会影响已产出的引文层，但说明自检脚本也需独立复核。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/read_dafeng_L2_0134.candidate.json"
+    ]
+  },
+  "submittedAt": "2026-10-12T18:18:03Z",
+  "wallClockSeconds": 1712,
+  "wallClockFrom": "lease.startedAt",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-12T18:18:03Z"
+  },
+  "verifyState": "partial",
+  "reviews": [
+    {
+      "reviewer": "w-verify-0",
+      "at": "2026-10-12T21:37:05Z",
+      "verdict": "partial",
+      "notes": "**总判：partial（引文层干净，缺陷全在自述字段与状态表述）。**\n\n站得住的部分：118 条引文逐条 T[start:end]==quote、sourceHash 全对、全落区间内、全书唯一、start 为区间内首次出现；五栏跨栏同句 0／同栏重叠 0；空栏全带 Note；段落 103 与台词 41 两项计数可复算；9 条实质未覆盖台词与 unquotedDialogue **集合相等**；图谱对照 3 节点与『恒慧』三点复算全部成立（全书 168 次 / 首现 428182 / characters[87] aliases 三项与候选声明一致）。\n\n**候选可复算性（额外查证，非任务要求）**：`build_candidate.py`（不带参数运行）在回滚点重新生成的 `draft_candidate.json` 与提交的候选 **sha256 完全相同**（同为 ea2067b7ce6376dfb0e2c646469d15df92c578d41bf0a2d847edd9ff95c4a4bd）；其自带的 `audit_independent.py` 独立跑出 `=== FAILS (0) ===`。这是很强的正面证据 —— 但它也**恰好解释了 CE1 为什么能溜过自检**：`at` 字段不在那 19 项自检里，两个脚本都不会去验证 `at` 能否定位自己的 quote。机制存在、有代码、有产出，但它对这一个字段**不产生信息** —— 与本项目反复出现的失败形态同形。\n\n**哪些条目可以用**：118 条引文、tasks 6 条五元组结构、causeEdges 8 条、rejectedEdges 4 条、states 4 条的 after / anchorEvent、knowledgeDiffs KD1–KD4、foreshadows F1 / F2（unresolved）/ F3、worldSettings 11 条、notWorldSettings 3 条、notForeshadows 4 条、themeReadings 2 条、textualNotes TN1–TN4 / TN6–TN8、unknowns U1–U18、selfCritique 5 条、graphCrossCheck 三项 —— **全部可用**。\n**哪些必须丢弃或降级**：①`unquotedDialogue[*].at` 9 条坐标**必须丢弃重算**（quote 字段本身保留，逐字可查）；②TN5 括号里的 `machineSelfCheck.ambiguousQuotesInDoc` **必须删或补**；③ST1.before 的出处**改指**为 causeEdges.C4；④coverageDeclaration 的 63 **必须补注口径**（『有交』），否则按完全包含读只有 2 段；⑤ST4.before 的『随即』**必须删或改述**（相隔 618 码点 / 15 段），并为『心里的恐惧随之爆炸』补引文登记；⑥W_item_hemao.name 的『附身』与 W_item_dao.explain 的『全书里』建议降级（见 remaining）。\n\n**不确定处（如实登记）**：①CE4 属口径争议而非事实错误 —— 若把 method 的『覆盖』读作『有交』则计数正确，我按「未写清口径」记入反例，未据此判 fail；②『阴神 vs 元神』是否真为两个不同概念，原文未明说，我按存疑记录，不据此判 fail；③我按任务给的 sourceRange 直读 docs[0].text，未核对上游切分工具参数；④『恒慧』在全书首现于 428182（区间外），其与本单元黑袍人的同一性**本区间无法判定**，候选按 unresolved 处理是正确的。",
+      "counterExamples": [
+        {
+          "id": "CE1",
+          "field": "unquotedDialogue[0..8].at",
+          "claim": "候选为 9 条「实质未覆盖台词」给出 `at` 坐标作为可核验交付地址，并在 reverseCoverage.note 里把它们当作登记地址。",
+          "quote": "以你现在的身份，为什么不主动上门询问？”金莲道长不解。",
+          "quoteOffset": [
+            466494,
+            466521
+          ],
+          "quoteIsFromSource": true,
+          "why": "**9/9 条 `at` 全部无法定位它自己声明的 quote**，且不是随机错：每条的 `at[0]` 都比该 quote 的真实 `find()` 起点大 1，`at[1]` 一律等于所在段落的行尾。上引 `t[466494:466521]` 就是候选声明的那个区间，它并不等于候选那一栏写的 quote（`“以你现在的身份，为什么不主动上门询问？”`，真实位置 [466493,466514)）。更硬的一击：其中 **4 条的声明区间比它要定位的引文还短**，物理上不可能包含它 —— [467915,467923) 长 8 而引文长 9、[469220,469240) 长 20 而引文长 21、[469698,469712) 长 14 而引文长 17、[469820,469839) 长 19 而引文长 20。注：这 9 条 quote 的**内容本身**在区间内逐字可查（我逐条 find 过），坏的只是 `at` 这个交付坐标。成因可复算：`at` 是「段首 + 前导空白 + 1 … 段尾」算出来的，没有按真实 `find()` 取偏移。",
+          "severity": "必须修（交付字段，读者会拿它去 find）"
+        },
+        {
+          "id": "CE2",
+          "field": "textualNotes.TN5.note",
+          "claim": "TN5 向读者指路：『本候选所有引文都要求在整个 docs[0].text 里可唯一定位（见 machineSelfCheck.ambiguousQuotesInDoc）』。",
+          "quote": "------------",
+          "quoteOffset": [
+            470416,
+            470428
+          ],
+          "quoteIsFromSource": true,
+          "why": "被指向的键**不存在**：`machineSelfCheck.checks` 只有 19 个键（quoteRefs / sliceEqualsQuoteFailures / offsetOutsideUnit / sourceHashMismatch / firstOccurrenceInUnitMismatch / quoteNotInUnitSlice / quotesNotUniqueInUnit / quotesNotUniqueInDoc / taskCrossFieldSameQuote / taskCrossFieldSpanOverlap / taskIntraFieldOverlap / nullFieldsMissingNote / worldSettingBadTags / themeReadingsMissingPart / uncoveredParagraphsMissingReason / staleUncoveredReasons / missingQuotes / substantiveDialogueUncovered / uncoveredDialogueWithoutRegisteredReason），**没有** `ambiguousQuotesInDoc`；全候选里该串只出现在 TN5 这句话本身（`grep -c` = 1）。这是**死引用**：读者按图索骥会找不到那个「要求」。它与 CE1 同形不同因 —— CE1 是坐标算错，这条是指针指向空处。顺带复算并确认该句里的数字本身是对的：`------------` 在全书 `docs[0].text` 出现 **1031** 次，与候选写的一致（该串全文首现于偏移 0，故本条 quoteOffset 取本区间内的那一处 [470416,470428)）。",
+          "severity": "必须修（删掉该引用或补上该键）"
+        },
+        {
+          "id": "CE3",
+          "field": "states[0].before",
+          "claim": "ST1.before 写『活人：在床上、随后提剑冲出屋子（前值见 T4 的引文）』，把前值的出处指向 T4。",
+          "quote": "已经进入贤者时间的平远伯嫡子，听到了动静，连衣服都来不及穿，迅速从床上跳起，摘下挂在墙上的剑，脸色难看的冲出了屋子。",
+          "quoteOffset": [
+            469300,
+            469358
+          ],
+          "quoteIsFromSource": true,
+          "why": "**T4 的六条引文里没有这一事实**：T4 引的是「他应该就是平远伯的嫡子，直接冲进去吧。」/「等结束后我们再进去…」/「过了两炷香时间....」/「啧啧，也就这样…」/「女人从声音嘶哑…完事了。」/「金莲道长低头看了眼许七安：“好吧，我承认你是对的。”」，六条中『剑』字出现 **0** 次、『冲出屋子』**0** 次、『床上』**0** 次。承载该前值的是 `causeEdges.C4` 的第二条引文 [469300,469358)（即上面这条 quote），而 T4 与 C4 是文件里两个不同的分区。这不是编造（事实确实在区间内、引用也确实在文件里），是**指错了分区**，会让只读 T4 的复核者找不到依据。",
+          "severity": "必须修（出处改为 causeEdges.C4，或在 T4 补引）"
+        },
+        {
+          "id": "CE4",
+          "field": "coverageDeclaration.method / coveredParagraphs",
+          "claim": "coverageDeclaration.method 声明覆盖判据是『逐段检查是否被**至少一条 quote 的 [start,end) 区间覆盖**』，并据此报告 nonEmptyParagraphs=103、coveredParagraphs=63、uncoveredParagraphs=40。",
+          "quote": "“有道理。”金莲道长没有继续这个话题，说道：“",
+          "quoteOffset": [
+            466821,
+            466844
+          ],
+          "quoteIsFromSource": true,
+          "why": "（本条以**计数复算**为准；所引原文是上文列出的一个未覆盖缺口 t[466821:466844)。）按『引文区间**完整包含**整段』这一字面读法重算：**完全被包含的只有 2 段**；61 段只是**部分**被引文触及；40 段完全未触及 —— 63 = 2 + 61 是『有交』口径。候选的 method 文字用的是『覆盖』一词，未写清是包含还是相交，于是同一个数字在两种读法下相差 61 段。旁证这不是吹毛求疵：候选自己在 reverseCoverage 里就明确区分了『包含 或 可拼』两种判据（并注明 `_segmentable`），说明它知道这两种口径必须写清；这段 method 里漏写了。实证被计成 covered 的段落里仍留着 >=6 字的未覆盖实质文字，例如 P3 [466589,466599)『。”许七安随口解释：』与 P9 [466821,466844)『“有道理。”金莲道长没有继续这个话题，说道：“』。",
+          "severity": "必须修（method 补注口径，或改报『有交』并另列『完全包含』）"
+        },
+        {
+          "id": "CE5",
+          "field": "states[3].before",
+          "claim": "ST4.before 写『『莫名的恐惧充斥脑海』，随即是『心里的恐惧随之爆炸』』，用『随即』把两处文本表述为紧接发生的同一状态推进。",
+          "quote": "看到这双手的刹那，许七安心里的恐惧随之爆炸",
+          "quoteOffset": [
+            469755,
+            469776
+          ],
+          "quoteIsFromSource": true,
+          "why": "**『随即』与原文的时间结构不符**：两处文本相隔 **618 码点 / 15 个段落**（[469149,469158) 与 [469767,469776)），中间隔着黑袍人现身、护卫被杀、嫡子提剑冲出、血手现形、嫡子被吸成干尸、炸成齑粉整场戏 —— 不是「随即」，而是这一章最长的一段动作序列之后。更可核的一点：ST4 的 `quotes[]` 只登记了 **2** 条（[469149,469159) 与 [470124,470147)），第二个片段『心里的恐惧随之爆炸』**不是任何引文节点**（我对全部 118 个 quote 节点做过包含检查，命中 0），却在 before 里以引号形式出现 —— 与候选自己反复强调的「引号即逐字可查」口径不一致。这不是编造（该句在原文逐字存在，我给出精确偏移），是把相隔很远的两处并成一处、且其中一个片段未纳入引文登记。",
+          "severity": "必须修（删『随即』或改述为跨段推进；并为第二个片段补引文登记）"
+        }
+      ],
+      "reverseChecks": [
+        {
+          "found": "黑袍人首次出场时的『气息压制』整条未被任何引用区间完整覆盖，也**不在任何主张分区**：他的气息让许七安**双腿打颤、只想逃跑**，同段紧接着写猫也同步失态。候选的 causeEdges.C5 只从『被看见 ⇒ 气旋拖拽』起链，把『现身即产生压倒性威压（人与猫同时失态）』这一层留空 —— 而它正是 T6『一刀斩不断』与选择逃跑的**前置强度标尺**。",
+          "quote": "一道裹着黑袍的人出现在院子里，他的面目藏在兜帽里，他散发出的气息让许七安双腿打颤，只想逃跑。",
+          "quoteOffset": [
+            469364,
+            469410
+          ],
+          "candidateMentions": "仅出现在 coverageDeclaration.uncoveredItems[13].text（未覆盖原文照录），**不在任何主张分区**（tasks/causeEdges/states/foreshadows/worldSettings 均无）",
+          "why": "候选把这段当『出场描写』跳过（理由：异相已由 F2 的『瞳孔没有眼白』承载）。但『让许七安双腿打颤，只想逃跑』是可核验的**状态事实**（恐惧强度），与 F2 的**外貌**异相不是同一件事；ST4 只登记了『莫名的恐惧充斥脑海』→『心里的恐惧随之爆炸』，漏掉了这条更早（@469364 早于 @469767）且由**外部威压直接造成**的第一次压制。不据此判 fail：候选未否认该事实，只是没让它进入主张分区。"
+        },
+        {
+          "found": "旁白两处把『猫的身体反应』直接等同于『金莲道长的想法/情绪』—— 这是本单元判定『黑猫＝金莲载体』的**原文内证**，候选全篇未把它登记为任何主张，只在 coverageDeclaration 里以「情绪描写，不构成状态变化」为由跳过。",
+          "quote": "它的异常也一定程度代表了金莲道长此刻的情绪",
+          "quoteOffset": [
+            469440,
+            469461
+          ],
+          "companions": [
+            {
+              "quote": "儒家的言出法随....黑猫橙黄色的瞳孔凝视着这一幕，金莲道长忽然想到了很多细节。",
+              "start": 467517,
+              "end": 467557
+            }
+          ],
+          "candidateMentions": "in claims = **False**（仅 coverageDeclaration.uncoveredItems[32].text 有原文照录；companion 那句被 themeReadings 引用，但引它的理由是『言出法随』，不是『猫＝金莲』这条等同关系）",
+          "why": "候选 SC3/U7 把『金莲附身黑猫』整条标为 derived 推导（『原文从未出现附身二字』），却**没有采用原文里唯一把猫与金莲直接等同的两处旁白**。这是漏读，不是误判：有了这两句，那条边至少可以从『三处旁证合起来排除巧合』升级为『原文有一句直接等同』；C1 的 caveat（附身时点未写）仍然成立，但证据强度应上调。"
+        },
+        {
+          "found": "『一叶障目的隐匿为什么对黑袍人无效』是本单元一个真实存在的**机制缺口**，候选未登记为 unknown：法术明确『笼罩了许七安和黑猫』且在伯府内**有效**（『躲过了几批巡守的府中侍卫』），但黑袍人杀完人后『阴冷的目光看向许七安藏身之处』—— 一个正在生效的隐匿术被无声穿透，原文一句解释也没有。",
+          "quote": "杀完人，黑袍男人扭头，阴冷的目光看向许七安藏身之处。",
+          "quoteOffset": [
+            469970,
+            469996
+          ],
+          "companions": [
+            {
+              "quote": "气机引燃纸张，一股无形的力量笼罩了许七安和黑猫。",
+              "start": 467487,
+              "end": 467511
+            },
+            {
+              "quote": "许七安接着一叶障目的法术，躲过了几批巡守的府中侍卫，来到了东边最大的院子。",
+              "start": 468439,
+              "end": 468476
+            }
+          ],
+          "candidateMentions": "unknowns 里 `障目` / `看见` / `识破` / `无效` 全部出现 **0** 次；C5 的 caveat 只写『原文没写他是先认出许七安、还是无差别清理现场』，没有指出**隐匿术在此失效**这个更前置的矛盾",
+          "why": "候选对 C5 的处理是『不补目标选择这一层』（谨慎，正确），但它把这个缺口**定位错了**：真正的缺口不是『他为什么选许七安』，而是『为什么他能看见一个被一叶障目罩住的人』。按 READER 契约『写 unknowns 比编结论有价值』，这条应当进 unknowns。"
+        },
+        {
+          "found": "『阴神』与『元神』在原文里分属三个说话人/叙述层：金莲自称『我的阴神完好无损』、许七安问『您又是元神出窍？』、旁白写『金莲道长元神凸显』。候选 textualNotes 有 8 条却**没有一条**登记这个术语分叉，F3 直接把两者当同一物使用。",
+          "quote": "而我的阴神完好无损",
+          "quoteOffset": [
+            466908,
+            466917
+          ],
+          "companions": [
+            {
+              "quote": "您又是元神出窍？",
+              "start": 466867,
+              "end": 466875
+            },
+            {
+              "quote": "金莲道长元神凸显",
+              "start": 470334,
+              "end": 470342
+            }
+          ],
+          "candidateMentions": "textualNotes 里 `阴神` 出现 **0** 次；F3.name / F3.note 里两个词跨用（『正因为随行的是阴神…他还能以元神撞上去』）",
+          "why": "这与候选自己处理『活性 / 支付 / 菿奣』的严谨口径**不一致**：对那些讹字它照录并登记 unknowns（U4/U6/U16），对这个更可能影响语义（阴神 ≠ 元神？）的分叉却未登记。按纪律这只是**存疑**：原文没有一句话说二者不同或相同，我不据此判 fail，只指出候选的登记口径在这里不齐。"
+        }
+      ]
+    }
+  ]
+}

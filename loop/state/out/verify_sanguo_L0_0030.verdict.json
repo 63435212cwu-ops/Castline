@@ -1,0 +1,359 @@
+{
+ "task": "verify:sanguo:L0:0030",
+ "agent": "w-sanguo-1",
+ "role": "VERIFIER",
+ "status": "done",
+ "verdict": "partial",
+ "candidateVerdict": "partial",
+ "reviewedTask": "read:sanguo:L0:0030",
+ "reviewedArtifact": {
+  "path": "loop/state/out/read_sanguo_L0_0030.candidate.json",
+  "sha256": "97fd7b4693c437f8931fee8f709284d63df5a2b4b995ac7fd439d228ef3be567",
+  "producedBy": "w-dafeng-3"
+ },
+ "source": {
+  "path": "data/cache/152e2a6eed94f1075e7e7070.docs.json",
+  "sha256": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+  "docIndex": 0,
+  "docName": "0014《三国演义》-罗贯中 著",
+  "range": [
+   155993,
+   160829
+  ],
+  "codepoints": 4836,
+  "segmentSha256": "6205064a05ff19b7e2c1d027a91a3b8c36e4acf8bcd41f078c1006626346fa0d",
+  "offsetBase": "absolute-doc-codepoint",
+  "boundaryHead": "第三十一回　曹操仓亭破本初　玄德荆州依刘表",
+  "boundaryAfter": "第三十二回　夺冀州袁尚争锋　决漳河许攸献计",
+  "boundaryNote": "T.find('第三十二回')==160829==区间右端点（右端点属下一单元）；切片 sha256 复算 == 任务 range 的 hash == 候选自报 segmentSha256；源文件 sha256 == 任务 sourceHash == 2988ce6e…；切片长度 4836 == 任务「4836 字」。",
+  "readingOrderNote": "本复核先独立把 docs[0].text[155993:160829) 通读一遍（自建 /tmp/slice_0030.txt），之后才打开被复核候选。"
+ },
+ "summary": "独立反向复核《三国演义》第三十一回 [155993,160829)。先自己读原文、后看候选。判 **partial**（不是 fail，也不是 pass）。\n\n**引用层零编造**：递归抽出全部 445 个 quote 节点（413 条非 tiling / 32 条 tiling；按区间去重 139 个、按 quoteKey 去重 139 个）。逐条执行 text[start:end]==quote：**失败 0 / 445**。occurrencesInWholeDoc 与 text.count(quote) 复算：**不一致 0 / 445**。inUnitRange 标志与区间包含关系复算：**错 0 / 445**。sourceHash 在全部 445 条上一致且等于文件实际 sha256。tilingBlocks 32 块无缝铺满 [155993,160773) 共 4780 字，逐块逐字命中（bad=0）；anchorCatalog 139 条与 quoteRefs 的 key/span/chars 全部对齐（anchorBad=0）。候选自报的关键数字我**独立复算全部相等**：整篇左 9327 / 右 9263 / 末深度 64 / 最大 66 / 负深度点 727 / 首个 7775；切片左 59 / 右 59 / 末深度 0 / 最小 0 / 最大 1 / 负深度点 0；进出切片的全局深度 9 → 9（delta 0）；coverageRatio 1.0 与 coverageRatioAssertionsOnly 0.911088（我用「非 tiling 且完全落在正文内」的引文区间取并集独立算出 4355/4780 = 0.911088，**与自报逐位相同**）。随机 5 条 quote 的 find() 5/5 逐字命中且偏移一致（seed=31）。\n\n**一条必须写明的口径更正（对我自己）**：445 条里有 1 条的 `text.find(quote)` 不等于自报 start —— tilingBlocks[31] 的 `'未知胜负如何，且听下文分解。\\n'`。这不是缺陷：该串全书出现 2 次（偏移 25695 与 160758），候选在 occurrencesInWholeDoc 字段里**如实写了 2**，切片断言 T[160758:160773]==quote 仍然成立；find() 返回的是首次出现。我第一版断言草稿写成「find()==start 失败 0」，是错的，已按实测改正。\n\n**判 partial 的三类理由**（每条都能用一条命令复现，见 assertions）：\n\n(1) 两条可复算的数字错误：counterExamples CE-A（TV2 把「夏侯敦」全书记数写成 231，实测 115）、CE-B（U17 写「722 个负深度点」，候选自己的 quoteBalanceAudit 写 727，实测 727 ⇒ **候选内部自相矛盾**）。\n\n(2) 一条改写原文事实的概括：CE-C（ST2.after 把「袁熙、高干皆被箭伤」写成「两子一甥被箭伤」——高干是外甥不是儿子，且原文只列 2 人；候选自己在 T4.cost 写的是「袁熙、高干被箭伤」，同一事实两种写法）。\n\n(3) 「断言里引了、证据里没有」的引语共 10 处，其中 **4 处在全部非 tiling 引文里都不存在**（hardList：tasks[1] 的「吾今归去，羞见此人」、tasks[10] 的「忽报曹操进兵官渡，来攻冀州」、states[2] 的「今方稍愈」、states[13] 的「袁绍聚三子一甥」），另 6 处能在别的断言的引文里找到。这不是编造（这些字原文都有、偏移我都核了），但复核者按 quoteRefs 复算时取不到。\n\n**不判 fail 的理由**：三类问题没有一条推翻 tasks/causeEdges/states 的语义骨架。候选对红线执行得很干净，我做了针对性探针：正文层（排除全部 quote 节点与 tiling/anchor）出现 5 个本区间原文没有的名字——于吉（apparitionNote 里用来**否定**本单元有显灵）、郭嘉（foreshadows/crossUnitRefs 的**区间外**对照）、张郃与夏侯惇（textVariants/unknowns 里讨论**异体字**）、孙仲谋（孙乾说辞，切片内有逐字原文）——**没有一个是把区间外人物当区间内事实写的**。「结束≠成功」执行到位：T5 明写「本区间内没有取到冀州」；6 处 cost 如实写 null 并附 costNote，没有为填满五元组编代价。\n\n**误杀检查：未发现误杀**。7 条 rejectedCauseEdges 我逐条在原文里验了理由，全部站得住（RCE1 有明写的「因谮」连接词、RCE3 当日「各鸣金收军还寨」明写未分胜负、RCE5 方向确实相反）。但我另发现 2 条**原文明确存在、既没进 causeEdges 也没进 rejectedCauseEdges** 的近边因果（RC9 郭图谏阻→袁绍踌躇未决、RC10 见子得胜→挥鞭一指发动混战），登记在 reverseChecks，供原读者与下游取舍。\n\n**本复核自身修正（如实记录）**：① 我第一版的覆盖缺口统计写成「30 段 / 395 个非空白字符 / ratio 0.916109」，复算后**全部错误**，正确值是 33 段（非空白 26 段）/ 401 个非空白字符，ratio 与候选自报的 0.911088 **完全一致** —— 候选的覆盖率自报是对的，我原稿的「不一致」指控不成立，已撤回。② 我最初怀疑 ST10 的「高览全書 0 次」是编造，逐字复算后该断言**成立**（全书 22 次、区间内 7 次、区间结束后 0 次），已撤回怀疑。③ 我最初把 RC8 列为实质遗漏，核对后发现该整句**确实**在 tasks[5].result.quoteRefs[3]（start=159611）里，已自我核减为弱条目。④ 我最初把 RC9/RC10 写成「缺引文」，核对后发现两句**都已被引用**（「袁绍踌躇未决。」在 tasks[2].result、「挥鞭一指…」在 tasks[3].obstacle/action），缺的只是**边**，已改写。",
+ "counterExamples": [
+  {
+   "id": "CE-A",
+   "claim": "textVariants[1]（TV2_xiahoudun）的 countsInWholeDoc 把「夏侯敦」的全书记数写成 231；实测全书该写法出现 115 次。同一候选的 machineSelfCheck 声明「occurrence counts recomputed」，该声明覆盖不到这个字段。",
+   "quote": "左：一队夏侯敦，二队张辽，三队李典，四队乐进，五队夏侯渊；右：一队曹洪，二队张颌，三队徐晃，四队于禁，五队高览。中军许褚为先锋。",
+   "quoteStart": 157635,
+   "quoteEnd": 157699,
+   "why": "复算：T.count('夏侯敦')==115，T.count('夏侯惇')==0。候选写 {'夏侯敦': 231, '夏侯惇': 0}。同一候选的 countsInUnit（夏侯敦 6 / 夏侯惇 0）与 TV1（张邰 13 / 张颌 184 / 张郃 0）我复算**全部相等**，说明这是 TV2 的 whole-doc 单字段错，不是整类字段失守。231 与任何自然口径都对不上（115+115+1=231、6+115=121、全文115+图谱缓存15=130 均非「全书」的合理口径），故不是口径差异。"
+  },
+  {
+   "id": "CE-B",
+   "claim": "候选对同一个量给出两个不同数字：quoteBalanceAudit.wholeBaseFile.negativeDepthPointCount = 727，而 unknowns[16]（U17）正文写「722 个负深度点」。实测 727 ⇒ U17 是错的那一个，且它恰好是写给复核者读的结论句。",
+   "quote": "整篇底本的中文引号**不平衡**：左引号 9327 / 右引号 9263（净 +64），末深度 64，722 个负深度点，首个负深度点在偏移 7775。",
+   "quoteStart": null,
+   "quoteEnd": null,
+   "why": "U17 是候选自己的归纳文本、不是原文引文，故 quote 填该结论句本身、偏移如实填 null（不伪造原文偏移）。复算：逐字遍历 T，遇 '“' +1、遇 '”' -1，在深度转负时计数 ⇒ 727（与 quoteBalanceAudit 一致），且首个负深度点 7775、深度转负发生在偏移 7775 的 '”' 上（此前深度为 0）。同句其余各数（9327 / 9263 / 净+64 / 末深度64 / 首个7775）我全部复算一致 ⇒ 是单个数字抄错。"
+  },
+  {
+   "id": "CE-C",
+   "claim": "states[1]（ST2_yuanshao_army_fortune）的 after.text 把原文「袁熙、高干皆被箭伤」概括成「两子一甥被箭伤」。高干是袁绍**外甥**不是儿子，「两子一甥」指三个人，而原文只列两个伤者。候选自己在 tasks[3].cost.text 写的是「另有袁熙、高干被箭伤」，同一事实两处不一致。",
+   "quote": "袁熙、高干皆被箭伤。",
+   "quoteStart": 158064,
+   "quoteEnd": 158074,
+   "why": "该 quoteRef 就挂在 ST2.after 自己身上（start=158064），所以不是「引文找不到」，而是**引文与它自己的概括句不符**。亲属关系可复算：T.find('次子袁熙字显奕，出守幽州')==156648（袁熙=次子）、T.find('外甥高干亦引兵五万')==156956（高干=外甥）。同段的「袁绍聚三子一甥」(157866,157873) 指随行四人，不能用来把伤者说成「两子一甥」。修法：改回与引文一致的「袁熙、高干皆被箭伤」，代价为零。"
+  }
+ ],
+ "reverseChecks": [
+  {
+   "id": "RC1",
+   "found": "袁绍当着逢纪的面说的「吾今归去，羞见此人」——它是 causeEdges CE3（悔/羞 → 杀田丰，basis=derived）唯一的文字依据，也是候选 tasks[1].obstacle.text 直接引用的句子，却在**全部非 tiling 引文里都不存在**（只有不下断言、不挂 basis 的 tilingBlocks[1] 覆盖它）。任何按 quoteRefs 复算的复核者都取不到这条边的人证。",
+   "quote": "绍对逢纪曰：“吾不听田丰之言，致有此败。吾今归去，羞见此人。”",
+   "quoteStart": 156228,
+   "quoteEnd": 156259,
+   "whyMissing": "候选 tasks[1].obstacle.text 引了「吾今归去，羞见此人」，但该断言的 quoteRefs 只挂了 156180-156212（「绍大悔曰…」）；实测该短语在全部 413 条非 tiling 引文中命中数为 0。"
+  },
+  {
+   "id": "RC2",
+   "found": "「且说袁绍自旧岁感冒吐血症候，今方稍愈，商议欲攻许都。」——候选在 states[2].after（「至建安七年『今方稍愈』」）、tasks[10]（审配谏的语境）与 foreshadows[4].payoffNote 三处使用这句的内容，却没有任何非 tiling 引文锚定它；U17 讨论的「三种病程写法是否同一次」也因此缺了最关键的一句原文。该句同时给出袁绍方本单元最后的意图「商议欲攻许都」，候选只在 knowledgeGaps[3].note 里转述。",
+   "quote": "且说袁绍自旧岁感冒吐血症候，今方稍愈，商议欲攻许都。",
+   "quoteStart": 160563,
+   "quoteEnd": 160589,
+   "whyMissing": "该句完整落在候选「非 tiling 引文未覆盖」的 26 个非空白区间之一 (160563,160589) 内；「今方稍愈」「商议欲攻许都」在全部非 tiling 引文中命中数均为 0。"
+  },
+  {
+   "id": "RC3",
+   "found": "仓亭对阵时袁绍方的叫阵动作：「绍大怒，回顾众将曰：『谁敢出马？』」——这是袁尚出阵的直接触发，候选 T4/T10 只写袁尚「欲于父前逞能，便舞双刀，飞马出阵」，缺了引他出阵的这一问。",
+   "quote": "绍大怒，回顾众将曰：“谁敢出马？”",
+   "quoteStart": 157383,
+   "quoteEnd": 157400,
+   "whyMissing": "落在未覆盖区间 (157383,157400) 内；「谁敢出马」在全部非 tiling 引文中命中数为 0。"
+  },
+  {
+   "id": "RC4",
+   "found": "曹操战前安抚百姓那一场的开头：「时操引得胜之兵，陈列于河上，有土人箪食壶浆以迎之。」候选 T15 写了曹操赐坐赐酒与号令，把这句整句漏在覆盖之外，于是「百姓主动迎军」这个动作没有引文。",
+   "quote": "时操引得胜之兵，陈列于河上，有土人箪食壶浆以迎之。",
+   "quoteStart": 156990,
+   "quoteEnd": 157015,
+   "whyMissing": "落在未覆盖区间 (156990,157015) 内；「箪食壶浆」「陈列于河上」在全部非 tiling 引文中命中数均为 0。"
+  },
+  {
+   "id": "RC5",
+   "found": "刘备败退汉江、土人主动供给羊酒：「玄德权且安营。土人知是玄德，奉献羊酒，乃聚饮于沙滩之上。」候选 CE17 的 from 字段写了「土人献羊酒」，但它自己的 quoteRefs 里没有这句；刘备那句自责是在「聚饮于沙滩之上」这个具体场合说的，states[5].anchor 只写「汉江沙滩聚饮」四字。这是与 RC4 前后呼应的第二处「百姓主动供给」，两处都缺引文。",
+   "quote": "玄德权且安营。土人知是玄德，奉献羊酒，乃聚饮于沙滩之上。",
+   "quoteStart": 159692,
+   "quoteEnd": 159720,
+   "whyMissing": "落在未覆盖区间 (159692,159720) 内；「奉献羊酒」「聚饮于沙滩」在全部非 tiling 引文中命中数均为 0。"
+  },
+  {
+   "id": "RC6",
+   "found": "十面埋伏的执行准备两句：「左右各分五队。」与「次日，十队先进，埋伏左右已定。」候选 T4.action 与 CE7 引了十队的**名单**（157635-157699）与诱敌动作（157714-157753），但伏兵「何时、如何进入位置」这一环没有引文。",
+   "quote": "次日，十队先进，埋伏左右已定。",
+   "quoteStart": 157699,
+   "quoteEnd": 157714,
+   "whyMissing": "落在未覆盖区间 (157699,157714) 与 (157628,157635) 内；「左右各分五队」「十队先进，埋伏左右已定」在全部非 tiling 引文中命中数均为 0。"
+  },
+  {
+   "id": "RC7",
+   "found": "「操与诸将商议破绍之策。」——它把十面埋伏之计定位成**集体商议**的产物而非程昱单方面献策，候选 CE7 的 from 只写「程昱之计」，未登记商议场合，也没有引文。",
+   "quote": "操与诸将商议破绍之策。",
+   "quoteStart": 157564,
+   "quoteEnd": 157575,
+   "whyMissing": "落在未覆盖区间 (157560,157575) 内；该句在全部非 tiling 引文中命中数为 0。"
+  },
+  {
+   "id": "RC8",
+   "found": "【本条经自我核减，如实降级保留】原拟指控「刘备败退时亲自殿后（『玄德教孙乾等保护老小先行。玄德与关、张、赵云在后，且战且走』）未被覆盖」。逐条核对后**该指控不成立**：整句确实出现在 tasks[5].result.quoteRefs[3]（start=159611，end=159662），属「已覆盖但未在其它断言里单独使用」，与 RC1–RC7 的「命中数为 0」性质不同，不计入实质遗漏。",
+   "quote": "人报曹军大队赶来，玄德教孙乾等保护老小先行。玄德与关、张、赵云在后，且战且走。操见玄德去远，收军不赶。",
+   "quoteStart": 159611,
+   "quoteEnd": 159662,
+   "whyMissing": "不适用 —— 本条是自我核减记录，作用是把「我查过、不成立」写下来，避免下游把它当缺口。"
+  },
+  {
+   "id": "RC9",
+   "found": "【缺的是**边**，不是引文】原文以「…立嗣之事，毋容多议。」袁绍踌躇未决。」紧连成句，是「郭图谏阻 → 袁绍未决」的显式连写。候选把「袁绍踌躇未决。」引在 tasks[2].result（该事实**有**引文）、把郭图引在 tasks[2].obstacle，但 **causeEdges 的 24 条里没有任何一条** from/to 含「郭图」或「踌躇/未决」，rejectedCauseEdges 的 7 条里也没有 ⇒ 这条最近的显式因果既没被收录也没被登记为排除。按候选自己对 RCE1 采用的「时间相邻当因果」严格口径，标准应一致。",
+   "quote": "议。”袁绍踌躇未决。",
+   "quoteStart": 156920,
+   "quoteEnd": 156930,
+   "whyMissing": "causeEdges 24 条的 from/to 字段全文检索「踌躇」「未决」命中数 0；rejectedCauseEdges 7 条同样为 0。"
+  },
+  {
+   "id": "RC10",
+   "found": "【缺的是**边**，不是引文】原文「…坠马而死。袁绍见子得胜，挥鞭一指，大队人马拥将过来，混战大杀一场，各鸣金收军还寨。」中，「见子得胜」是因而「挥鞭一指」发动全军是果，方向明确。候选把「袁绍见子得胜，挥鞭一指…」引在 tasks[3].obstacle 与 action（该事实**有**引文），RCE3 也讨论了史涣之死，但 RCE3 排除的是「史涣之死 → 仓亭战败」这条更远的边，**没有**任何一条边把「子得胜」接到「挥鞭一指」这个近动作上。",
+   "quote": "而死。袁绍见子得胜，挥鞭一指，大队人马拥将过来，混战大杀一场，各鸣金收军还寨。",
+   "quoteStart": 157521,
+   "quoteEnd": 157560,
+   "whyMissing": "causeEdges 24 条的 from/to 字段全文检索「挥鞭」「史涣」命中数 0。"
+  }
+ ],
+ "misKillCheck": {
+  "verdict": "未发现误杀",
+  "detail": "逐条读 7 条 rejectedCauseEdges 的 whyRejected 并在原文里验证：RCE1（哭声→杀田丰）成立，中间确有一次明写的重新定性（『逢纪因谮曰』@156259）；RCE2（黄星之谶→官渡得胜）成立，原文只有人物话语、无叙述确认句；RCE3（史涣之死→仓亭战败）成立，当日『各鸣金收军还寨』明写未分胜负；RCE4（田丰之死→仓亭之败）成立，『河北栋梁皆折断』是插入诗的评价层；RCE5（卧病→仓亭战败）成立且方向确实相反（本区间先败后病）；RCE6（粮食极广→不攻）成立，原文三项并列、单挑一项会丢信息；RCE7（说辞→接纳）成立，刘表的接受句落在同宗。7 条中没有一条属于「按词表/正则把真实因果机械挡掉」的形态。",
+  "nearMiss": "RCE5 的排除顺带盖住了「建安七年病稍愈 → 商议欲攻许都」这条**合法**因果：它不是 RCE5 讨论的对象（RCE5 讨论病→仓亭败），但因共用「吐血症候」一词存在被一并略过的风险。候选未登记该边，与 RC2/RC9/RC10 同类。"
+ },
+ "hallucinationCheck": {
+  "verdict": "未发现编造",
+  "detail": "①45 条口径：445 条 quote 逐字可查（slice 失败 0）、occurrences 复算不一致 0 ⇒ 引用层无编造。②实体探针（**只用非 quote 的叙述文本**，排除全部 quote 节点与 tiling/anchor）：命中 5 个本区间原文没有的名字，逐个查证——『于吉』出现在 apparitionNote，句子是「本单元没有神异/显灵类描写（上一单元于吉显灵之类的内容不在本区间）」，即用来**否定**；『郭嘉』出现在 foreshadows[0].payoff 与 crossUnitRefs[4]，属**区间外**对照；『张郃』『夏侯惇』出现在 unknowns[11]/[12] 与 textVariants 的 note，是在讨论**异体字**（全书作 张颌/夏侯敦）；『孙仲谋』出现在 tasks[6].action 与 CE18，是孙乾说辞里的词，切片内有逐字原文（159976-160105）。⇒ **没有一个是把区间外人物当作区间内已发生事实写入的**。③越权：9 条 inUnitRange=false 的跨单元引文全部标 outOfUnitNote，且递归扫描确认**没有一条被挂进 tasks/states/causeEdges**（leak=[]）。④结束≠成功：T5 明写「本区间内没有取到冀州」并在 note 写「结束≠成功，不写 result=成功」；T2/T5/T9/T10/T11/T13/T16 共 6 处 cost 如实写 null 并附 costNote。⑤apparitionNote 的「本单元无显灵」成立：于吉最后一次出现于 148161，落在上一单元 read:sanguo:L0:0028 的区间 [145025,150108] 内，本区间确无于吉。"
+ },
+ "citationSample": {
+  "method": "random.seed(31); random.sample(全部 445 个 quote 节点, 5)，逐条执行 T.find(quote) 并与自报 start/end 比对，另做 T[start:end]==quote 的切片比对。",
+  "results": [
+   {
+    "path": "/tasks[0]/cost/quoteRefs[0]",
+    "quote": "丰曰：“大丈夫生于天地间，不识其主而事之，是无智也！今日受死，夫何足惜！”乃自刎于狱中。",
+    "claimedStart": 156505,
+    "findResult": 156505,
+    "sliceMatch": true
+   },
+   {
+    "path": "/states[3]/before/quoteRefs[0]",
+    "quote": "绍大悔曰：“吾不听田丰之言，兵败将亡；今回去，有何面目见之耶！”",
+    "claimedStart": 156180,
+    "findResult": 156180,
+    "sliceMatch": true
+   },
+   {
+    "path": "/tasks[5]/action/quoteRefs[3]",
+    "quote": "玄德不敢出战，候至天明，教军士饱餐，步军先起，马军后随，寨中虚传更点。玄德等离寨约行数里，转过土山，火把齐明，山头上大呼曰：“休教走了刘备！丞相在此专等！”玄德慌寻走路。赵云曰：“主公勿忧，但跟某来。”赵云挺枪跃马，杀开条路，玄德掣双股剑后随。",
+    "claimedStart": 158911,
+    "findResult": 158911,
+    "sliceMatch": true
+   },
+   {
+    "path": "/selfCritique[5]/quoteRefs[0]",
+    "quote": "父老曰：“桓帝时，有黄星见于楚、宋之分，辽东人殷馗善晓天文，夜宿于此，对老汉等言：黄星见于乾象，正照此间。后五十年，当有真人起于梁沛之间。今以年计之，整整五十年。袁本初重敛于民，民皆怨之。丞相兴仁义之兵，吊民伐罪，官渡一战，破袁绍百万之众，正应当时殷馗之言，兆民可望太平矣。”",
+    "claimedStart": 157077,
+    "findResult": 157077,
+    "sliceMatch": true
+   },
+   {
+    "path": "/causeEdges[22]/quoteRefs[1]",
+    "quote": "绍曰：“若候兵临城下，将至壕边，然后拒敌，事已迟矣。吾当自领大军出迎。”",
+    "claimedStart": 160643,
+    "findResult": 160643,
+    "sliceMatch": true
+   }
+  ],
+  "verdict": "5/5 逐字命中，偏移全部一致，切片比对全部成立。"
+ },
+ "quoteAudit": {
+  "totalQuoteNodes": 445,
+  "nonTilingRefs": 413,
+  "tilingRefs": 32,
+  "distinctSpans": 139,
+  "distinctQuoteKeys": 139,
+  "sliceMismatches": 0,
+  "occurrenceCountMismatches": 0,
+  "inUnitRangeFlagErrors": 0,
+  "sourceHashMismatches": 0,
+  "findNotEqualStart": {
+   "count": 1,
+   "detail": "tilingBlocks[31] 的 quote '未知胜负如何，且听下文分解。\\n' 全书出现 2 次（25695 与 160758），find() 返回 25695 而自报 start=160758；候选已在该条 occurrencesInWholeDoc 如实写 2，切片断言仍成立 ⇒ 不是缺陷，但「find()==start 失败 0」的说法不成立，如实记录。"
+  },
+  "outOfUnitRefs": 9,
+  "outOfUnitRefsLeakedIntoAssertions": 0,
+  "tilingBlocks": {
+   "count": 32,
+   "seamless": true,
+   "totalChars": 4780,
+   "verbatimFailures": 0,
+   "endsAt": 160773
+  },
+  "anchorCatalog": {
+   "count": 139,
+   "uniqueKeys": 139,
+   "spanKeyCharsMismatches": 0
+  },
+  "selfReportedCoverageRecomputed": {
+   "coverageRatio": 1.0,
+   "coverageRatioAssertionsOnly": 0.911088,
+   "match": true,
+   "method": "对「非 tiling 且完全落在正文 [155993,160773) 内」的引文区间取并集 = 4355 codepoint，4355/4780 = 0.911088，与自报逐位相同"
+  },
+  "selfReportedQuoteBalanceRecomputed": {
+   "whole": {
+    "left": 9327,
+    "right": 9263,
+    "finalDepth": 64,
+    "maxDepth": 66,
+    "negativeDepthPoints": 727,
+    "firstNegativeAt": 7775
+   },
+   "slice": {
+    "left": 59,
+    "right": 59,
+    "finalDepth": 0,
+    "minDepth": 0,
+    "maxDepth": 1,
+    "negativeDepthPoints": 0
+   },
+   "globalDepthBefore": 9,
+   "globalDepthAfter": 9,
+   "match": true
+  },
+  "uncoveredByAssertionQuotes": {
+   "intervalsTotal": 33,
+   "intervalsNonBlank": 26,
+   "charsTotal": 425,
+   "charsNonBlank": 401,
+   "note": "与候选自报的 0.911088 一致；未覆盖部分含 7 个纯标点/换行残片与 19 个过场句（如「绍以前事诉与义渠。」「军行之次，夜宿荒山。」），其中 RC1–RC7 点名的 7 处是实质缺口。"
+  }
+ },
+ "usableVsDiscard": {
+  "usableAsIs": [
+   "全部 445 条引文的 quote/start/end/sourceHash 定位（逐字、偏移、occurrences、inUnitRange 全部正确，可直接下游使用）",
+   "tasks[0..15] 的语义骨架与 basis 标注（T1/T2/T4/T5/T6/T7/T8 尤其干净）",
+   "causeEdges CE1/CE2/CE4/CE6–CE24 的方向与 basis；CE3/CE5/CE12/CE13 的 derived/inferred 标注与 caveat 写法",
+   "states ST1/ST3–ST14 的 before/anchor/after 结构",
+   "insertedVerses、notForeshadows NF1–NF6、textVariants TV1/TV3、crossUnitRefs X1–X9 的定位",
+   "quoteBalanceAudit 的全部数字（9327/9263/净64/末64/最大66/727/首个7775，以及切片 59/59/0/0/1/0 与全局 9→9）",
+   "tilingBlocks 与 coverage 的自报数字（我独立复算全部相等，含 0.911088）",
+   "machineSelfCheck 的 15 项（我抽验的 6 类全部成立）"
+  ],
+  "mustFixOrDiscard": [
+   "textVariants[1].countsInWholeDoc 的 231 ⇒ 必须改为 115（CE-A）",
+   "unknowns[16] 的「722 个负深度点」⇒ 必须改为 727（CE-B），否则与 quoteBalanceAudit 自相矛盾",
+   "states[1].after.text 的「两子一甥被箭伤」⇒ 必须改为「袁熙、高干被箭伤」（CE-C）",
+   "tasks[1].obstacle、tasks[10].obstacle/result、states[2].after、states[13].before、tasks[6].result、tasks[12].result、tasks[14].objective/result、causeEdges[13].to 共 10 处「」引语 ⇒ 应在各自 quoteRefs 里补上对应引文（或删去引号改为转述），其中 4 处（hardList）在全部非 tiling 引文中命中数为 0",
+   "causeEdges 缺 RC9（郭图谏阻→踌躇未决）与 RC10（见子得胜→挥鞭一指）两条近边：应按同一口径补为 explicit 边，或补进 rejectedCauseEdges 说明不连的理由"
+  ],
+  "downgradeToUnknowns": [
+   "U17 的病程同一性讨论本身合理，只需把 722 改成 727，结论不变",
+   "SC6 的「刘辟是否即死」处理（basis=inferred + U18 对照）经复核**成立且应保留**：原文在史涣/龚都/田丰三处明写死，在刘辟/高览两处只写落马，这一对照可复算"
+  ]
+ },
+ "notes": "总体判断：这是一份**引用层几乎无懈可击、语义纪律执行得很好，但有可复算的数字错误与覆盖空洞**的候选。判 partial 而非 pass，因为 CE-A/CE-B/CE-C 三条都能一条命令复现，且 CE-B 是候选**内部自相矛盾**、CE-C 是候选**与自己挂的引文不符**——不属于解读分歧，属于事实登记错误。判 partial 而非 fail，因为没有一条 counterExample 触及 tasks/causeEdges/states 的语义骨架，也没有任何编造：445 条引文 0 条落空、9 条越界引文 0 条泄漏，这在 4836 字的单元上是很干净的成绩。\n\n**我犯过并已改正的错误（写下来，因为它影响你怎么读这份复核）**：\n① 我第一版把覆盖缺口算成「30 段 / 395 非空白字符 / ratio 0.916109」。复算发现是我自己的区间合并写错（把含空白整段算进去、又把边界算漏）。正确值是 33 段 / 非空白 26 段 / 401 个非空白字符，ratio **0.911088 —— 与候选自报逐位相同**。也就是说候选的覆盖率自报是对的，我原稿隐含的「不一致」指控不成立，已撤回。\n② 我第一版写「find()==start 失败 0」。逐条复算后有 1 条不等（tilingBlocks[31]，因为该串全书出现 2 次且候选已如实声明 occurrencesInWholeDoc=2）。这不是候选的缺陷，但我的原话不准确，已改。\n③ 我最初怀疑 ST10 的「高览全書 0 次」是编造 —— 复算后**该断言成立**（全书 22 次、区间内 7 次、区间结束后 0 次）。撤回怀疑。\n④ 我最初把 RC8（刘备殿后）列为实质遗漏 —— 核对后发现该整句确实在 tasks[5].result.quoteRefs[3]。已自我核减并如实标注。\n⑤ 我最初把 RC9/RC10 写成「缺引文」—— 核对后发现两句都已被引用（「袁绍踌躇未决。」在 tasks[2].result、「挥鞭一指…」在 tasks[3].obstacle/action），缺的只是**边**。已改写。\n\n**存疑（按纪律只记录、不作为 fail 依据）**：\n1. CE-A 的 231 我无法解释其来源（115/121/130 等自然口径都对不上）。若原读者能给出可复算口径，本条应据其说明改判。\n2. RC9/RC10 是否算「遗漏」取决于该流对 causeEdges 的收录口径（是否要求穷举显式近边）。我倾向算，因为候选对 RCE1 用了严格口径、标准应一致；但若该流只要求收录跨状态的有意义边，这两条可降为可选。\n3. 「非 tiling 引文未覆盖」的 26 个非空白区间里，7 处经我点名（RC1–RC7）为实质缺口，其余多为过场句；但「过场句是否值得占一条引文」是口径问题，不是事实问题——我按「该单元是否用它做过断言」来判，未做断言的过场句不计入实质缺口。\n4. 未做的工作见 remaining：语义机制解读是否唯一合理、与既有图谱结论的对照、版本比对，均未做。",
+ "evidence": [
+  {
+   "path": "loop/state/out/read_sanguo_L0_0030.candidate.json",
+   "sha256": "97fd7b4693c437f8931fee8f709284d63df5a2b4b995ac7fd439d228ef3be567",
+   "kind": "被复核候选（只读，未修改）"
+  },
+  {
+   "path": "data/cache/152e2a6eed94f1075e7e7070.docs.json",
+   "sha256": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+   "kind": "原文（只读引用，未修改）"
+  }
+ ],
+ "sourceHashes": {
+  "data/cache/152e2a6eed94f1075e7e7070.docs.json": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+  "loop/state/out/read_sanguo_L0_0030.candidate.json": "97fd7b4693c437f8931fee8f709284d63df5a2b4b995ac7fd439d228ef3be567",
+  "loop/state/out/read_sanguo_L0_0030.json": "5ebf30ea2a326175dde357da0725a08400561794cbd203e5a84203c8087d8cac"
+ },
+ "assertions": [
+  {
+   "text": "源文件 sha256 == 任务 sourceHash == 2988ce6e…；切片 sha256 == 6205064a…；切片长 4836、以回目开头、右端点即下一回回目",
+   "result": "pass",
+   "cmd": "python3 -B -s -c \"import json,hashlib;b=open('data/cache/152e2a6eed94f1075e7e7070.docs.json','rb').read();T=json.loads(b)[0]['text'];print(hashlib.sha256(b).hexdigest());print(hashlib.sha256(T[155993:160829].encode()).hexdigest());print(len(T[155993:160829]),repr(T[155993:156014]),repr(T[160829:160850]))\""
+  },
+  {
+   "text": "全部 445 个 quote 节点：切片逐字比对失败 0、occurrencesInWholeDoc 复算不一致 0、inUnitRange 标志错 0；find()!=start 仅 1 条（tilingBlocks[31]，该串全书 2 次且候选已如实声明）",
+   "result": "pass",
+   "cmd": "python3 -B -s -c \"import json\nT=json.load(open('data/cache/152e2a6eed94f1075e7e7070.docs.json',encoding='utf-8'))[0]['text']\nC=json.load(open('loop/state/out/read_sanguo_L0_0030.candidate.json',encoding='utf-8'))\nR=[]\ndef w(o,p=''):\n    if isinstance(o,dict):\n        if 'quote' in o and 'start' in o: R.append((p,o)); return\n        for k,v in o.items(): w(v,p+'/'+str(k))\n    elif isinstance(o,list):\n        for i,v in enumerate(o): w(v,p+'['+str(i)+']')\nw(C)\nprint('refs',len(R))\nprint('sliceMismatch',sum(1 for p,r in R if T[r['start']:r['end']]!=r['quote']))\nprint('occMismatch',sum(1 for p,r in R if r.get('occurrencesInWholeDoc')!=T.count(r['quote'])))\nprint('findNeStart',[(p,r['start'],r['occurrencesInWholeDoc']) for p,r in R if T.find(r['quote'])!=r['start']])\nprint('flagBad',sum(1 for p,r in R if (155993<=r['start'] and r['end']<=160829)!=r['inUnitRange']))\""
+  },
+  {
+   "text": "引号深度与平衡独立复算：整篇 左9327/右9263/末深度64/最大66/负深度点727/首个7775；切片 左59/右59/末深度0/最小0/最大1/负深度点0 —— 与候选自报全部相等",
+   "result": "pass",
+   "cmd": "python3 -B -s -c \"import json\nT=json.load(open('data/cache/152e2a6eed94f1075e7e7070.docs.json',encoding='utf-8'))[0]['text']\nd=0;neg=0;first=None;mx=0\nfor i,ch in enumerate(T):\n    if ch=='\\u201c': d+=1; mx=max(mx,d)\n    elif ch=='\\u201d':\n        d-=1\n        if d<0:\n            neg+=1\n            if first is None: first=i\ns=T[155993:160829];sd=0;smn=0;smx=0;sneg=0\nfor ch in s:\n    if ch=='\\u201c': sd+=1\n    elif ch=='\\u201d': sd-=1\n    smn=min(smn,sd); smx=max(smx,sd); sneg+= sd<0\nprint('whole',T.count('\\u201c'),T.count('\\u201d'),d,mx,neg,first)\nprint('slice',s.count('\\u201c'),s.count('\\u201d'),sd,smn,smx,sneg)\""
+  },
+  {
+   "text": "覆盖率独立复算：「非 tiling 且完全落在正文内」的引文区间并集 = 4355 codepoint，4355/4780 = 0.911088，与候选 coverageRatioAssertionsOnly 逐位相同；未覆盖 33 段（非空白 26 段，401 个非空白字符）",
+   "result": "pass",
+   "cmd": "python3 -B -s -c \"import json\nT=json.load(open('data/cache/152e2a6eed94f1075e7e7070.docs.json',encoding='utf-8'))[0]['text']\nC=json.load(open('loop/state/out/read_sanguo_L0_0030.candidate.json',encoding='utf-8'))\nR=[]\ndef w(o,p=''):\n    if isinstance(o,dict):\n        if 'quote' in o and 'start' in o: R.append((p,o)); return\n        for k,v in o.items(): w(v,p+'/'+str(k))\n    elif isinstance(o,list):\n        for i,v in enumerate(o): w(v,p+'['+str(i)+']')\nw(C)\nBS,BE=155993,160773\nsp=sorted(set((r['start'],r['end']) for p,r in R if 'tilingBlocks' not in p and 'anchorCatalog' not in p and r['start']>=BS and r['end']<=BE))\nm=[]\nfor a,b in sp:\n    (m.append([a,b]) if not m or a>m[-1][1] else m[-1].__setitem__(1,max(m[-1][1],b)))\nu=sum(b-a for a,b in m); g=[]; cur=BS\nfor a,b in m:\n    if a>cur: g.append((cur,a))\n    cur=max(cur,b)\nif cur<BE: g.append((cur,BE))\nnb=[(a,b) for a,b in g if T[a:b].strip()]\nprint('union',u,'ratio',round(u/(BE-BS),6))\nprint('gaps',len(g),sum(b-a for a,b in g),'nonblank',len(nb),sum(b-a for a,b in nb))\""
+  },
+  {
+   "text": "tilingBlocks 32 块无缝铺满 [155993,160773)、逐块逐字命中、总长 4780；anchorCatalog 139 条与 quoteRefs 的 key/span/chars 全部对齐；无 inUnitRange=false 的跨单元引文泄漏进 tasks/states/causeEdges",
+   "result": "pass",
+   "cmd": "python3 -B -s -c \"import json\nT=json.load(open('data/cache/152e2a6eed94f1075e7e7070.docs.json',encoding='utf-8'))[0]['text']\nC=json.load(open('loop/state/out/read_sanguo_L0_0030.candidate.json',encoding='utf-8'))\nR=[]\ndef w(o,p=''):\n    if isinstance(o,dict):\n        if 'quote' in o and 'start' in o: R.append((p,o)); return\n        for k,v in o.items(): w(v,p+'/'+str(k))\n    elif isinstance(o,list):\n        for i,v in enumerate(o): w(v,p+'['+str(i)+']')\nw(C)\ncur=155993;bad=0\nfor b in C['tilingBlocks']:\n    bad+= (b['start']!=cur) or (T[b['start']:b['end']]!=b['quote']); cur=b['end']\nprint('tiling',len(C['tilingBlocks']),bad,cur,sum(b['end']-b['start'] for b in C['tilingBlocks']))\nrm={r['quoteKey']:(r['start'],r['end']) for p,r in R if 'quoteKey' in r}\nprint('anchorBad',sum(1 for a in C['anchorCatalog'] if rm.get(a['key'])!=tuple(a['span']) or a['chars']!=a['span'][1]-a['span'][0]))\nprint('leak',[p for p,r in R if r.get('inUnitRange') is False and any(k in p for k in ('/tasks','/states','/causeEdges'))])\""
+  },
+  {
+   "text": "反向验证的核心判据：4 处被点名引语在全部非 tiling 引文中命中数为 0（「吾今归去，羞见此人」「今方稍愈」「袁绍聚三子一甥」「忽报曹操进兵官渡，来攻冀州」）",
+   "result": "pass",
+   "cmd": "python3 -B -s -c \"import json\nT=json.load(open('data/cache/152e2a6eed94f1075e7e7070.docs.json',encoding='utf-8'))[0]['text']\nC=json.load(open('loop/state/out/read_sanguo_L0_0030.candidate.json',encoding='utf-8'))\nR=[]\ndef w(o,p=''):\n    if isinstance(o,dict):\n        if 'quote' in o and 'start' in o: R.append((p,o)); return\n        for k,v in o.items(): w(v,p+'/'+str(k))\n    elif isinstance(o,list):\n        for i,v in enumerate(o): w(v,p+'['+str(i)+']')\nw(C)\nimport re\ndef own(o):\n    out=[]\n    def q(x):\n        if isinstance(x,dict):\n            if 'quote' in x and 'start' in x: out.append(x['quote']); return\n            for v in x.values(): q(v)\n        elif isinstance(x,list):\n            for v in x: q(v)\n    q(o); return out\nNT=[r['quote'] for p,r in R if 'tilingBlocks' not in p and 'anchorCatalog' not in p]\nP=['\\u543e\\u4eca\\u5f52\\u53bb\\uff0c\\u7f9e\\u89c1\\u6b64\\u4eba','\\u4eca\\u65b9\\u7a0d\\u6108','\\u8881\\u7ecd\\u805a\\u4e09\\u5b50\\u4e00\\u7525','\\u5ffd\\u62a5\\u66f9\\u64cd\\u8fdb\\u5175\\u5b98\\u6e21\\uff0c\\u6765\\u653b\\u5180\\u5dde']\nprint([(p,[q for q in P if not any(q in x for x in NT)]) for p,x in [(p,x) for p,x in []]])\nprint('phrases',[(q,any(q in x for x in NT)) for q in P])\""
+  },
+  {
+   "text": "CE-A 复算：夏侯敦 全书 115（非候选所写 231）、夏侯惇 0；CE-C 亲属关系复算：次子袁熙@156648、外甥高干@156956、原文 158064 逐字为「袁熙、高干皆被箭伤。」",
+   "result": "pass",
+   "cmd": "python3 -B -s -c \"import json;T=json.load(open('data/cache/152e2a6eed94f1075e7e7070.docs.json',encoding='utf-8'))[0]['text'];print(T.count('\\u590f\\u4faf\\u6566'),T.count('\\u590f\\u4faf\\u60c7'),T.find('\\u6b21\\u5b50\\u8881\\u7199\\u5b57\\u663e\\u5955\\uff0c\\u51fa\\u5b88\\u5e7d\\u5dde'),T.find('\\u5916\\u7525\\u9ad8\\u5e72\\u4ea6\\u5f15\\u5175\\u4e94\\u4e07'),repr(T[158064:158074]))\""
+  },
+  {
+   "text": "CE-B 与幻觉探针复算：U17 写的 722 != quoteBalanceAudit 的 727（实测 727）；正文层（排除全部 quote 节点与 tiling/anchor）实体探针命中 5 个区间外名字，逐个查证均为元讨论或区间外对照，无一是把区间外事实写入区间内",
+   "result": "pass",
+   "cmd": "python3 -B -s -c \"import json;T=json.load(open('data/cache/152e2a6eed94f1075e7e7070.docs.json',encoding='utf-8'))[0]['text'];C=json.load(open('loop/state/out/read_sanguo_L0_0030.candidate.json',encoding='utf-8'));b=json.dumps({k:v for k,v in C.items() if k not in ('tilingBlocks','anchorCatalog')},ensure_ascii=False);print('probe',[n for n in ['\\u5218\\u7426','\\u4e8e\\u5409','\\u90ed\\u5609','\\u8bf8\\u845b\\u4eae','\\u5b59\\u6743','\\u5f20\\u90c3','\\u590f\\u4faf\\u60c7','\\u5b59\\u4ef2\\u8c0b'] if n in b]);print('u17num',[u['id'] for u in C['unknowns'] if u['id'].startswith('U17')],C['quoteBalanceAudit']['wholeBaseFile']['negativeDepthPointCount'],C['textVariants'][1]['countsInWholeDoc'])\""
+  },
+  {
+   "text": "随机 5 条 quote（seed=31）的 find() 5/5 逐字命中、偏移与自报一致、切片比对成立",
+   "result": "pass",
+   "cmd": "python3 -B -s -c \"import json,random;T=json.load(open('data/cache/152e2a6eed94f1075e7e7070.docs.json',encoding='utf-8'))[0]['text'];C=json.load(open('loop/state/out/read_sanguo_L0_0030.candidate.json',encoding='utf-8'));R=[]\nw=lambda o:([R.append(o)] if isinstance(o,dict) and 'quote' in o and 'start' in o else ([w(v) for v in (o.values() if isinstance(o,dict) else o)] if isinstance(o,(dict,list)) else None))\nw(C)\nrandom.seed(31)\nprint([(r['start'],T.find(r['quote']),T[r['start']:r['end']]==r['quote']) for r in random.sample(R,5)])\""
+  }
+ ],
+ "changes": [
+  {
+   "path": "loop/state/out/verify_sanguo_L0_0030.verdict.json",
+   "kind": "append-only",
+   "note": "任务 writes 声明的唯一产出：本复核结论。"
+  }
+ ],
+ "protectedPaths": null,
+ "remaining": [
+  "语义正确性未独立判定：本复核只核了「引用定位是否正确」「抽取项在原文能否找到」「有无编造/遗漏/误杀」，未判定因果机制解读是否唯一合理（例：CE7「断己退路以换死志」是否为该段唯一读法、CE3「羞+谮言=杀」的加法是否过强）。",
+  "未把候选与 data/cache/152e2a6eed94f1075e7e7070.json 的既有图谱结论逐条对照，因此不知道本候选与图谱已有断言有哪些冲突或重复。",
+  "未做版本比对：TV1（张邰/张颌）、TV2（夏侯敦）、TV3（5 处标点刮擦）与 U11（庄公）是否为底本原样，因为没有第二版本可比对，只能记录不能裁定。",
+  "复核只覆盖原文区间 [155993,160829)；区间外仅用于边界核验（T.find('第三十二回')==160829）与 9 条跨单元引文的定位复算，未把区间外内容作为本区间证据写入任何断言。",
+  "CE-A 的 231 来源未能解释，已在 notes 记为存疑而非 fail 依据。",
+  "未运行 GPU/浏览器测试（任务未要求，GPU 全局串行）。"
+ ],
+ "rollback": "删除 loop/state/out/verify_sanguo_L0_0030.verdict.json 即回滚本复核的产出；`loop.py verify` 已向 loop/state/out/read_sanguo_L0_0030.json 的 reviews[] 追加一条记录（reviewer=w-sanguo-1），如需回退需另行处理该记录（本复核不自行改写被复核记录）。全程只读候选与原文，未修改任何被复核文件，未触碰 js/ css/ index.html serve.py narrative.py scripts/ tests/ docs/ data/ 等受保护路径。",
+ "evidenceNote": "关于「被复核任务的提交记录」loop/state/out/read_sanguo_L0_0030.json：**不把它列入 evidence**，因为 `loop.py verify` 会向它的 reviews[] 追加一条本复核的记录，其哈希在提交动作产生的那一刻就会变——把这种「已知会被本步骤改变」的值声明成证据，等于声明一个提交后立刻失效的哈希。这不是回避复核：该记录的内容我已逐字读过（agent=w-dafeng-3、status=done、verifyState 由 pending 变成本复核的结论），提交前哈希 = 5ebf30ea2a326175dde357da0725a08400561794cbd203e5a84203c8087d8cac，已记在 sourceHashes 里。"
+}

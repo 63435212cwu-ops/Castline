@@ -1,0 +1,90 @@
+{
+ "task": "read:xiyou:L1:0045",
+ "agent": "w-read-2",
+ "status": "done",
+ "summary": "精读《西游记》第四十五回「三清观大圣留名　车迟国猴王显法」（docs[0].text codepoint [323712,330871)，7159 字）。产出 241 个引文节点的候选：7 条任务五元组（每栏自带 quotes；同一任务内**跨栏共用引文 0 条**；2 条 cost=null 且各自写明为何不补）、9 条因果边（各带方向+触发+机制）与 6 条被拒边（逐条说明为何不连边）、8 条状态变化（前值→后值+事件锚点）、5 条知识差、7 条伏笔（6 回收/部分回收，2 条显式 unresolved）、18 条世界设定（rule 5 / place 6 / item 7；place 分 arrived 5·mentioned 1，item 四态多选，rule 分 executed 3·declared 2·misunderstood 1）、2 条主题读法（perspective+support+counter 三件齐全）、11 条说法台账、20 条人物发言、10 条文本校勘、3 条跨单元说明、13 条 unknowns、6 条 openThreads、9 条 selfCritique。覆盖度 0.6192（未覆盖片段逐段登记，共 31 段 ≥25 codepoint）。本轮回改了四类**真实错误**（均由构建期机器校验拦下，见 assertions）。",
+ "evidence": [
+  {
+   "path": "loop/state/out/read_xiyou_L1_0045.candidate.json",
+   "sha256": "7ad2988beee7f7c17c975364fbe157260255c188f2a70b97b5e9b452184463ee",
+   "kind": "candidate",
+   "bytes": 224496
+  }
+ ],
+ "assertions": [
+  {
+   "text": "源哈希三方一致：`shasum -a 256 data/cache/a065244455cfb2221bcda94a.docs.json` = c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2，与 task.sourceHash、候选 source.sourceHash、241 个引文节点各自的 sourceHash 全部相同（逐节点比对 bad=0）。构建脚本在开工前先核对整个 docs.json 的 sha256，不符即拒绝运行。",
+   "result": "pass"
+  },
+  {
+   "text": "区间口径自检（三条，可用候选 reproduce.cmd_slice 复现）：`len(json.load(open('data/cache/a065244455cfb2221bcda94a.docs.json'))[0]['text'][323712:330871])` == 7159 == task 声明；`text[323712:323733]` == '第四十五回　三清观大圣留名　车迟国猴王显法'（切片以本单元标题开头）；`text[330871:330875]` == '第四十六回'（区间终点正是下一回起点）。切片 UTF-8 字节 sha256 = 92073f28e637ab8ae50a5635adf72a0ef39182597873871f34be3b093d5cfcce，另起字段 segmentSha256，未覆盖 sourceHash。",
+   "result": "pass"
+  },
+  {
+   "text": "241 个引文节点**机械全量**核验（独立脚本 /tmp/cl-r2/audit.py，不复用构建逻辑，只读 docs.json 与候选成品）：T[start:end]==quote 逐字成立、全部落在 [323712,330871) 内、T.find(quote)==start（全书首次出现即本处）、sourceHash 字段一致、wholeTextOccurrences 与 T.count(quote) 一致。实测输出：`nodes 241  mismatches {'verbatim': 0, 'range': 0, 'first': 0, 'hash': 0, 'occ': 0, 'empty': 0, 'nonstr': 0}`；241 条引文**全部全书唯一**（unique=241/241）。同一命令（候选 reproduce.cmd_quotes）可复算 `241 True`。",
+   "result": "pass"
+  },
+  {
+   "text": "五元组分栏独立性（同一独立脚本复核）：7 条任务 × 5 栏，**同一任务内跨栏共用同一引文的条数 = 0**（另加「同一切片被两栏引用」的检查，同样 0）。实现方式不是事后过滤：构建器 q() 只接受**在切片内唯一**的前缀锚，任何手打错字或歧义锚串都会进 FAILED 并阻止落盘。",
+   "result": "pass"
+  },
+  {
+   "text": "**构建期拦下四类真实错误**（本轮的实质修正，非事后自查）：① 锚串失败 2 条 —— RE3 的「行者厉声道：『陛下，龙神俱在家……』」实际原文无「行者厉声道：」这一前缀（该句前是叙述转折），CU1 的「我等被他蒙蔽了……偷吃了御赐供养。」落在**两个段落**里，跨段落切片不成句；② null 栏位缺 Note 2 条 —— T5/T7 的 cost 原先写成 `{\"text\": null, ...}` 而不是裸 `null` + 同级 `costNote`，与 metrics 的 nullFields 口径不一致；③ 伏笔状态与数据矛盾 1 条 —— F4 有 payoff 却标 unresolved；④ **note 里的交叉引用失效**（最严重的一类）：改稿后仍指向已重编的编号（T2.summary 不存在、「见 T6/T7」指错、SC3 自称「三栏里都出现欲诛四众」而数据里只在 1 条任务出现）。为此在构建器里新增**引用完整性校验**：把所有 note 里的 T/ST/WS/F/TN/CU/OT/SC/CE/RE/CL/SP/KD/TH 编号抽出，逐个核对是否真实存在；该检查已把上述失效引用全部拦下后才落盘。",
+   "result": "pass"
+  },
+  {
+   "text": "反向验证（不是只查已写项）：用独立脚本把区间按句切开，逐句判断它有没有被任何引文节点覆盖，列出**完全未覆盖**的句子（241 节点版：完全未覆盖句 64 条，其中含对话的 34 条）。据此补入了 9 条先前漏掉的原文事实：行者「我与你都上坛祈雨，知雨是你的，是我的？」、「那晚辈小仙，不须拜伏……」、「不是打你们，但看我这棍子往上一指」澄清、五凤楼下听事官策马冒雨来报「圣僧，雨彀了」、行者对龙王的「凭你怎么处治了罢」、国王「即去登坛，寡人还在此候雨」、八戒「他害你了……一把火了帐！」、文武「就是我国师求雨虽灵，若要晴，细雨儿还下半日」、坛场「每一桩边立两个道士各执铁锤伺候着打桩」；并据此新增 1 条因果边（CE9 提议验法→国王定规则）、1 条说法台账、8 条人物发言、1 条文本校勘、2 条 unknowns。",
+   "result": "pass"
+  },
+  {
+   "text": "空值已标注：2 条 null 栏位（T5_xingzhe_jieduo_zhushen.cost、T7_guowang_dusheng.cost）**全部**带同级 <栏位>Note 写明为何不补。T5 的 cost 写明「拔毫毛变假身、真身出元神是手段而非代价，毫毛事后收回，原文写明无损」；T7 的 cost 写明「『寡人改日醮谢』是未执行的口头承诺，按提示词口径未执行的承诺不算已执行的代价」。空值一律不填 0/0.5/『未提及』以外的编造值。",
+   "result": "pass"
+  },
+  {
+   "text": "不把说法当事实：11 条 claimLedger 逐条标注说话人与真假两半，其中最易误读的三条做了显式处理 —— CL2「今日龙神都不在家」（被行者当场反驳且龙王随即现身）、CL5「想是别方召请……所以就雨」（原文自带「想是」二字，明标猜测）、CL6「我僧乃东土之人，乍来此处，街道尚且不通」（**诈辩**：他正是昨夜闯进观中的人，同一区间内叙述与他这句直接冲突）。这三条都不进任何 result/states 的 after 值。",
+   "result": "pass"
+  },
+  {
+   "text": "结束≠成功：区间以「毕竟不知怎么除邪，且听下回分解」收束，且国王「正用御宝时」被道士阻住 —— 候选显式登记 OT1（关文未换成）、OT2/OT6（斗法未了、未出车迟国），并在 T3.result / T7.result 的 note 里写明「不因为区间结束就写 result=成功」；RE2 专门记录「雨下了→关文换成」这条被拒绝的边。",
+   "result": "pass"
+  },
+  {
+   "text": "语义核验未声明完成：候选 semanticReview.performed=false，note 写明「只做了引文定位核验与逐条人工比对，未做也不声称任何 semanticReview 完成；语义正确性由独立复核者判定」。定位正确没有被当成语义已核验。",
+   "result": "pass"
+  },
+  {
+   "text": "未越界引用：crossUnitContext 3 条全部只用**本区间内**的转述句与收束句说明前情与后续（道士告发词、回末套语、龙王口中「那厮」），明确写明「上一回/下一回原文未读、不引、不猜、不补」；F4 与 OT3 对区间外的旧妖怪发落显式标 unresolved。",
+   "result": "pass"
+  },
+  {
+   "text": "内容分区齐备：tasks / causeEdges / states / foreshadows / worldSettings / themeReadings 六个顶层分区全部产出（另附 rejectedEdges、knowledgeDiffs、claimLedger、speakerStatements、textualNotes、crossUnitContext、unknowns、openThreads、selfCritique、coverage、reverseCoverage、metrics、reproduce）。worldSettings 逐条检查 kind 专用字段：rule 必带 institution（executed 3 / declared 2 / misunderstood 1），place 必带 placeState（arrived 5 / mentioned 1），item 必带 itemStates 多选（hold/transfer/use/lose，无重复），且三类不混用字段。",
+   "result": "pass"
+  }
+ ],
+ "changes": [
+  {
+   "path": "loop/state/out/read_xiyou_L1_0045.candidate.json",
+   "kind": "append-only"
+  }
+ ],
+ "sourceHashes": {
+  "data/cache/a065244455cfb2221bcda94a.docs.json": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2"
+ },
+ "remaining": [
+  "未做语义核验（候选 semanticReview.performed=false）：本候选是原文精读的**候选**，语义正确性由独立复核者判。",
+  "未读第四十四回／第四十六回原文补写前因后果；crossUnitContext 只用本区间内的转述句与收束句。",
+  "四篇韵文（风、云、雷、雨）未逐句纳入引文节点，只在 reverseCoverage 登记为未覆盖片段（景语不承载任务五元组，不拿它充当证据）。",
+  "「倥着脸」的「倥」（全书仅 1 次）与「有些酣郸之味」的「郸」（全书仅 1 次）两个孤例字未做版本校勘，已登记为 unknowns U1/U2，未据此推任何情节。",
+  "「打桩」陈设（每桩边两个道士各执铁锤伺候着）在本区间内从未执行，已登记 unknowns U9b，未写成已发生动作。",
+  "行者号令「多打死几个贪赃坏法之官、忤逆不孝之子」是否执行，区间内无下文，已登记 unknowns U9c，未写入任何因果或状态。",
+  "龙王口中「那厮」的旧妖怪发落属区间外，F4 标 partial（本区间只回收「龙王肯助力」那一半）/OT3 标 unresolved。",
+  "本候选未对任何跨单元因果下结论；241 个引文节点全部落在 [323712,330871) 内。"
+ ],
+ "rollback": {
+  "kind": "append-only",
+  "strategy": "delete-added-files",
+  "files": [
+   "loop/state/out/read_xiyou_L1_0045.candidate.json"
+  ]
+ }
+}

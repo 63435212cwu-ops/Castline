@@ -1,0 +1,38 @@
+--- a/js/sky/sky-deconstruction.js
++++ b/js/sky/sky-deconstruction.js
+@@ -219,14 +219,18 @@
+   }
+   function renderPositionExplanation(eventIndex) {
+     var d = positionExplanationData(eventIndex), p = d.status, bounded = p.code === 'legacy_interval';
++    var matchedBounds = (d.before.state === 'matched' ? 1 : 0) + (d.after.state === 'matched' ? 1 : 0);
++    var boundaryNote = matchedBounds === 2 ? '当前两侧均找到同源、同版本的定位边界。'
++      : matchedBounds === 1 ? '当前只有一侧找到可核验的定位边界；另一侧未提供或无法核验。'
++      : '当前没有可核验的事件边界；范围端点保持开放。';
+     var detail = bounded
+-      ? '<p class="sd-position-explanation-note">该记录由原文中的相邻边界限定。边界只在同一来源和文本版本中比较。</p><div class="sd-position-span' + (d.before.state === 'matched' ? '' : ' is-open-before') + (d.after.state === 'matched' ? '' : ' is-open-after') + '" aria-label="原文位置范围"><span class="sd-position-bracket" aria-hidden="true"></span>' +
++      ? '<p class="sd-position-explanation-note">' + boundaryNote + '边界只在同一来源和文本版本中比较。</p><div class="sd-position-span' + (d.before.state === 'matched' ? '' : ' is-open-before') + (d.after.state === 'matched' ? '' : ' is-open-after') + '" aria-label="原文位置范围"><span class="sd-position-bracket" aria-hidden="true"></span>' +
+         positionBoundaryMarkup(d.before, 'before') +
+         '<div class="sd-position-range"><i class="sd-position-texture" aria-hidden="true"></i><b>具体位置未定</b></div>' +
+         positionBoundaryMarkup(d.after, 'after') + '</div><p class="sd-position-explanation-note">这只说明原文位置范围，不代表剧情持续时间；不推测范围中的精确落点。</p>'
+       : '<p class="sd-position-explanation-note"><b>' + esc(p.label) + '</b> · ' + esc(p.hint) + '</p>' +
+         (p.code === 'exact_quote' ? '<p class="sd-position-explanation-note">该记录有精确引句锚点；引句位置准确不代表事件结论已核实。</p>' : p.code === 'conflicted' ? '<p class="sd-position-explanation-note">来源之间无法排出唯一顺序，因此不展开边界名称。</p>' : '<p class="sd-position-explanation-note">当前没有可展开的可信位置边界。</p>');
+-    return '<section class="sd-position-explanation" data-position-explanation data-position-event-index="' + eventIndex + '" data-position-kind="' + esc(p.code) + '"><div class="sd-position-explanation-head"><b>位置说明 · ' + esc(p.label) + '</b><button type="button" class="sd-detail-action" data-action="position-explain" data-event-index="' + eventIndex + '">收起位置说明</button></div>' + detail + '</section>';
++    return '<section class="sd-position-explanation" data-position-explanation data-position-event-index="' + eventIndex + '" data-position-kind="' + esc(p.code) + '"><div class="sd-position-explanation-head"><b>位置说明 · ' + esc(p.label) + '</b><button type="button" class="sd-detail-action sd-position-explain-action" data-action="position-explain" data-event-index="' + eventIndex + '">收起位置说明</button></div>' + detail + '</section>';
+   }
+   function animatePositionExplanation() {
+     var stage = root && root.querySelector('[data-position-explanation]'); if (!stage) return;
+--- a/tests/sky_position_label_contract.js
++++ b/tests/sky_position_label_contract.js
+@@ -148,9 +148,12 @@
+   input.event.sourcePosition.beforeEventId = null;
+   const openMarkup = window.positionMarkupForTest(graph, at);
+   assert.match(openMarkup, /sd-position-span is-open-before/);
++  assert.match(openMarkup, /只有一侧找到可核验的定位边界/);
+   assert.match(openMarkup, /前界未提供/);
++  assert.match(openMarkup, /class="sd-detail-action sd-position-explain-action"/);
+   assert.doesNotMatch(openMarkup, /data-position-side="before"/);
+   assert.match(readingCSS, /is-open-before \.sd-position-bracket::before[\s\S]*display: none/);
++  assert.match(readingCSS, /\.sd-position-explain-action, \.sd-position-return \{ min-height: 44px; \}/);
+ });
+ 
+ console.log('SKY POSITION LABEL ' + passed + '/' + passed);

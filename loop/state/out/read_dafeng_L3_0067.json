@@ -1,0 +1,124 @@
+{
+  "task": "read:dafeng:L3:0067",
+  "agent": "w-dafeng-2",
+  "status": "done",
+  "summary": "精读《大奉打更人》第六十八章 矿，docs[0].text[207268,210224)（2956 字）。产出 12 条 task 五元组、12 条带触发机制的 causeEdge、6 条明确排除的「不算因果」、8 条状态前后值、9 条知识差、6 条伏笔（4 条段外回收 / 1 条本单元部分回收 / 1 条显式 unresolved）、6 条「不算伏笔」、8 条文本缺陷、2 条「不算缺陷」、7 条人物说法登记（不当事实）、12 条 unknowns、7 条 selfCritique、10 条段外登记、4 条未认领描写、3 条声明推导。320 条引用全部由脚本在 docs[0].text 上 find 定位并回切校验，0 处不符；in-unit 引文 281 条全部要求切片内唯一命中。",
+  "evidence": [
+    {
+      "path": "loop/state/out/read_dafeng_L3_0067.candidate.json",
+      "sha256": "cff4ccb5baed74fc06111c6b5025b384ca0c0e385ea07e4202e716adbe982c5e",
+      "kind": "candidate"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "原文来源哈希：sha256(data/cache/9b676d7031b1bcd3b8377a18.docs.json) == fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839，与任务 sourceHash 一致（动手前后各算一次，未变）。",
+      "result": "pass",
+      "command": "shasum -a 256 data/cache/9b676d7031b1bcd3b8377a18.docs.json",
+      "observed": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+    },
+    {
+      "text": "偏移口径自检：docs[0].text[207268:207275] == '第六十八章 矿'，即切片以本单元标题开头；偏移是相对 docs[0].text 全文的 codepoint 偏移（不是相对切片）。下一单元标题 '第六十九章 神来之笔的射击' 起于 210224 == end。",
+      "result": "pass",
+      "command": "python3 -c \"import json;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];print(repr(t[207268:207275]),repr(t[210224:210237]))\"",
+      "observed": "'第六十八章 矿' '第六十九章 神来之笔的射击'"
+    },
+    {
+      "text": "全部 320 条引文回切校验：递归取出候选 JSON 中所有含 quote/start/end 的对象，逐条断言 docs[0].text[start:end]==quote，mismatches=0。",
+      "result": "pass",
+      "command": "python3 -c \"import json;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];c=json.load(open('loop/state/out/read_dafeng_L3_0067.candidate.json'));R=[];w=lambda o:[R.append((o['quote'],o['start'],o['end'])) if isinstance(o,dict) and 'quote' in o and 'start' in o and 'end' in o else None,[w(v) for v in (o.values() if isinstance(o,dict) else o)] if isinstance(o,(dict,list)) else None];w(c);print('refs=%d mismatches=%d'%(len(R),len([r for r in R if t[r[1]:r[2]]!=r[0]])))\"",
+      "observed": "refs=320 mismatches=0"
+    },
+    {
+      "text": "引文唯一性：生成脚本对每条 in-unit quote 断言 SEG.count(quote)==1（切片内唯一命中）后才取偏移，命中 0 或多于 1 条直接 SystemExit；out-of-unit 引文另标 inUnitRange=false。因此不存在「引文在别处也命中、偏移却指向我想要的语义」这种错配。",
+      "result": "pass",
+      "command": "python3 /tmp/gen_cand_0067.py",
+      "observed": "OK quotes=320 roundtrip_mismatch=0 out_of_segment=39 coverage=0.8285 / significant uncovered runs: 0"
+    },
+    {
+      "text": "独立复核脚本（不复用生成脚本状态，从盘上重读候选文件）12 组检查全部通过：源哈希、偏移口径、全量回切、in/out-of-unit 标记一致、in-unit 切片内唯一、结构计数自洽、缺项为真 null 且有 *NullReason、basis 取值合法、semanticReview=not_done、伏笔铺设/回收成对、覆盖率复算、声明的检索结论可复现。",
+      "result": "pass",
+      "command": "python3 /tmp/verify_cand_0067.py",
+      "observed": "RESULT: PASS (0 failures)"
+    },
+    {
+      "text": "缺项纪律：task 的 objective/obstacle/action/result/cost 缺项一律写 JSON null，并把理由写进同级的 <字段>NullReason；没有用 0 / 0.5 / 「未提及」以外的编造值填空。实测 12 条 task 中 objective 缺 0、obstacle 缺 4、result 缺 0、cost 缺 8。",
+      "result": "pass",
+      "command": "python3 -c \"import json;c=json.load(open('loop/state/out/read_dafeng_L3_0067.candidate.json'));print({f:sum(1 for t in c['tasks'] if t[f] is None) for f in ['objective','obstacle','action','result','cost']})\"",
+      "observed": "{'objective': 0, 'obstacle': 4, 'action': 0, 'result': 0, 'cost': 8}"
+    },
+    {
+      "text": "声音归属分离的可复现检查（SC2 的证据）：本单元内『望气术』1 次、『司天监』6 次，分别落在 3 个不同声源上——叙述句 @207934、宋廷风台词 @207960、许七安内心 @208021。用切片内计数可复现，不用叙述句去冒充制度事实。",
+      "result": "pass",
+      "command": "python3 -c \"import json;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];s=t[207268:210224];print('望气术',s.count('望气术'),'司天监',s.count('司天监'))\"",
+      "observed": "望气术 1 司天监 6"
+    },
+    {
+      "text": "F3（司天监承诺 unresolved）的检索结论可复现：在 docs[0].text[210224,232000) 上检索『术士』『望气』『司天监』，命中 4 次、集中在 2 处（@214835 段与 @229749 段各 2 次），均与术士到场无关；『望气』在该区间 0 次命中。故不写 resolved。",
+      "result": "pass",
+      "command": "python3 -c \"import json;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];[print(k,[i for i in range(210224,232000) if t.startswith(k,i)]) for k in ['术士','司天监','望气']]\"",
+      "observed": "术士 [214867, 229753] / 司天监 [214863, 229749] / 望气 [] —— 共 4 次命中，2 处"
+    },
+    {
+      "text": "TD5（跨章数字不一致）可复现：单元内 @209295 吕青问『最后进山那十余人』，段外 @206391 吕青自己说『那次进山烧灰的二十余人』，两处指同一次事件。全库『二十余人』3 次、『十余人』4 次，切片内各 1 次。这是登记，不是替作者圆场。",
+      "result": "pass",
+      "command": "python3 -c \"import json;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];print(t.count('二十余人'),t.count('十余人'),t.find('那次进山烧灰的二十余人'),t.find('最后进山那十余人'))\"",
+      "observed": "3 4 206391 209317（209295 是吕青问句所在段首，句内『最后进山那十余人』起于 209317）"
+    },
+    {
+      "text": "TD6/TD7 用字缺陷可复现：全库『练气本身』0 次 / 『练气本能』1 次；『撒向』0 次 / 『撒想』1 次；『人工开凿』1 次 / 『人口开凿』1 次；『千疮百孔』0 次 / 『千穿百孔』6 次（六处写法一致，故 TD3 只作用字一致性登记、不当本单元缺陷）。",
+      "result": "pass",
+      "command": "python3 -c \"import json;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];[print(k,t.count(k)) for k in ['练气本身','练气本能','撒向','撒想','人工开凿','人口开凿','千疮百孔','千穿百孔']]\"",
+      "observed": "练气本身 0 / 练气本能 1 / 撒向 0 / 撒想 1 / 人工开凿 1 / 人口开凿 1 / 千疮百孔 0 / 千穿百孔 6"
+    },
+    {
+      "text": "prose 里所有 @NNNN 偏移逐条核对：46 个 distinct 偏移全部在 docs[0].text 上打印后人工确认指向其自称的句子（本候选有多轮自查，修掉过若干把偏移写成段首/章标题的错误，例如把『这是硝石』从章标题 210224 修正为句子起点 210243，把『绑起来带走』从 210575 修正为 210583，把『白役们』从段首 207281 修正为词起点 207298）。",
+      "result": "pass",
+      "command": "python3 -c \"import json,re;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];raw=open('loop/state/out/read_dafeng_L3_0067.candidate.json',encoding='utf-8').read();o=sorted(set(int(x) for x in re.findall('@([0-9]{4,})',raw)));print('distinct offsets:',len(o));[print(x,repr(t[x:x+26])) for x in o]\"",
+      "observed": "46 个偏移全部命中真实文本（见输出）"
+    },
+    {
+      "text": "语义复核未声明完成（READER 红线：定位正确 ≠ 语义已核验）：readingStatus.semanticReview 与 stats.semanticReview 均为 not_done，并在 semanticReviewNote 里列出四处最需要对抗式复核的地方。",
+      "result": "pass",
+      "command": "python3 -c \"import json;c=json.load(open('loop/state/out/read_dafeng_L3_0067.candidate.json'));print(c['readingStatus']['semanticReview'],c['stats']['semanticReview'])\"",
+      "observed": "not_done not_done"
+    },
+    {
+      "text": "未改任何受保护路径：本轮只在 loop/state/out/ 下新增 2 个文件（候选 + 本提交记录），均为未跟踪的新文件。受保护路径的时间戳检查：本任务租约起于 2026-10-08T03:26:43Z（本地 11:26），在此之后 js/ css/ index.html serve.py narrative.py scripts/ tests/ docs/ data/ 下没有任何文件被写过。注意：git status 里那些受保护路径的 M/D 是**并行 agent 的既有未提交改动**（本会话开始前就在），不是本 agent 产生的。",
+      "result": "pass",
+      "command": "find js css index.html serve.py narrative.py scripts tests docs data -newermt \"2026-10-08 11:26:00\" -type f | head",
+      "observed": "（无输出 = 任务开始后受保护路径零写入）"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/read_dafeng_L3_0067.candidate.json",
+      "kind": "append-only"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/9b676d7031b1bcd3b8377a18.docs.json": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+  },
+  "remaining": [
+    "semanticReview 未做：本候选只完成定位与结构层，未做语义复核。最需要对抗式复核的四处已写进 readingStatus.semanticReviewNote：①『硝石？！』是内心判断还是叙述确认；②『还是嗅出来的。』主语缺失；③『十余人』与段外『二十余人』数字冲突；④『充当染料』疑为『燃料』。",
+    "段外回收全部未在本单元内验证：F1/F2/F5/F6 的回收端在第六十九章及更后文，本候选只用它们证明铺设后来被回收，没有把它们的内容写进本单元结论。复核者若认为「设定」不算伏笔，F6 可直接降级为背景登记（已在 F6.caution 声明接受）。",
+    "妖物本体未解决：本单元内它从未出场，只有脚印。我按红线把形态/名称全部留在段外（U1），没有用第六十九章的『形似蝾螈』反填本单元。",
+    "『府衙的另一位捕快』与『那位炼精境巅峰的捕快』是否同一人（U7）无法从本单元判定，段外第六十七章也没给名字。",
+    "本候选的 T2/T8/T10/T11/T12 的 objective 是 inferred（从行为反推），不是原文直述；复核时若认为反推过强，可把这些 objective 降级为 unknowns。",
+    "未跑 GPU/浏览器测试（任务未要求，且 READER 角色禁止）。",
+    "候选内所有引文的定位证据由脚本产出，但『引文是否支撑该条语义』这一步仍需人工/复核者判断——本轮没有做，也不声称做了。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/read_dafeng_L3_0067.candidate.json"
+    ]
+  },
+  "submittedAt": "2026-10-08T04:04:40Z",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-08T04:04:40Z"
+  },
+  "verifyState": "pending"
+}

@@ -1,0 +1,393 @@
+{
+  "task": "verify:sanguo:L0:0102",
+  "agent": "w-verify-4",
+  "role": "VERIFIER",
+  "kind": "duplicate-claim investigation（**未提交**，故意不提交）",
+  "outcome": "NOT SUBMITTED — 该任务在我领取**之前 3 分 46 秒**已由 w-sanguo-1 完成并提交，且其记录当前仍然有效（validate()=[]、evidence_stale()=[]、inDoneIds=True）。任务 writes 指定的唯一路径 `loop/state/out/verify_sanguo_L0_0102.verdict.json` 是那条已通过校验的记录的 evidence（哈希 bc43b8ec… 实测一致）；而 `loop.py cmd_submit` 对 `OUT/output_name(tid)`（= `verify_sanguo_L0_0102.json`）是**整文件覆盖**且**不合并 reviews**。我若按默认做法提交，会同时毁掉两样东西：① w-sanguo-1 的 verdict 文件（它是该 partial 判决的**唯一载体**，含 4 条 counterExamples 与 12 条 reverseChecks）；② 使该文件哈希不再匹配 ⇒ `evidence_stale()` 报 hash-changed ⇒ 任务从 `done_ids()` 掉出，被系统读成「没做完」——把一条已完成任务变成失败，是净损失。所以本轮产出是**独立复核 + 取证**，不是第二份 verdict。",
+  "safetyProof": {
+    "claim": "我**不提交**并不会让这条任务悬空：worker 的代提交闸门不会覆写它。",
+    "mechanism": "loop/bin/worker.py:300 submit_if_needed() 先查 `OUT/output_name(tid)` 是否存在；存在且 `validated(rec) and not evidence_stale(rec)` ⇒ 直接 return 'already-submitted'，**提前返回、不调用 cmd_submit**。",
+    "measured": "out_path.exists()=True；validated(rec)=True；evidence_stale(rec)=[] ⇒ 命中 'already-submitted' 分支（实测输出见 remaining）。",
+    "reproduce": "python3 -c \"import sys;sys.path.insert(0,'loop/bin');import loop as L;r=L.load_json(L.OUT/L.output_name('verify:sanguo:L0:0102'));print(L.validated(r), L.evidence_stale(r))\"  ->  True []"
+  },
+  "groundTruth": {
+    "incumbentAgent": "w-sanguo-1",
+    "incumbentSubmittedAt": "2026-10-14T21:26:26Z",
+    "incumbentVerdict": "partial",
+    "myLeaseStartedAt": "2026-10-14T21:30:12Z",
+    "gapSeconds": 226,
+    "reproduce": [
+      "python3 -c \"import json;d=json.load(open('loop/state/out/verify_sanguo_L0_0102.json'));print(d['agent'],d['status'],d['validation'])\"  ->  w-sanguo-1 done {'problems': []}",
+      "cat 'loop/state/leases/verify:sanguo:L0:0102.d/lease.json'  ->  agent=w-verify-4 startedAt=2026-10-14T21:30:12Z",
+      "sha256(loop/state/out/verify_sanguo_L0_0102.json) = 0ca79ff2f7d2148d618b1bb03f9e26029759ec1d85a8797a538a259206471a6d"
+    ],
+    "recordStillValidNow": {
+      "validate()": [],
+      "evidence_stale()": [],
+      "validated()": true,
+      "inDoneIds": true,
+      "evidenceHashesLive": {
+        "loop/state/out/verify_sanguo_L0_0102.verdict.json": "bc43b8ec55c93ad18418ebc225f38b017efff2e1a3d1828cb35a6c4c9cce4270",
+        "loop/state/out/read_sanguo_L0_0102.candidate.json": "9304cbdef3bd92160e997aa6020b222ff81dacaa073b2a313adebbbac8ab5fe0",
+        "data/cache/fe42d01f3826fe8096f86614.docs.json": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+      },
+      "allThreeMatchDeclared": true
+    }
+  },
+  "raceForensics": {
+    "rootCause": "与 loop/state/out/read_dafeng_L3_0267.w-dafeng-0.dupclaim/DUPCLAIM-REPORT.json、loop/state/out/verify_dafeng_L1_0229.w-verify-2.dupclaim/DUPCLAIM-REPORT.json 记录的是**同一个 TOCTOU**：worker.one_round 先 pick() 再 claim()；pick() 在扫描开始时调 done_ids() 一次性快照（loop/bin/loop.py:653 `done = done_ids()`），claim() 只检查租约目录、**不复查 done**。本轮该任务正是 verify 通道自己的任务，而 read:sanguo:L0:0102 的复核任务与它同批 —— 于是「记录在我这轮快照之后落盘」的窗口被命中。",
+    "codePaths": [
+      "loop/bin/worker.py one_round(): pick() → claim()（先快照后占用）",
+      "loop/bin/loop.py:653 pick(): `done = done_ids()` 为快照；循环内 `if tid in done or tid in leases: continue`",
+      "loop/bin/loop.py:715 claim(): 只判 lease_alive，不复查 done",
+      "loop/bin/loop.py:1077 cmd_submit(): write_json_atomic(OUT/output_name(tid)) —— 整文件覆盖，不合并 reviews"
+    ],
+    "measuredWindow": {
+      "done_idsSeconds": 374.8,
+      "record_filesSeconds": 1.5,
+      "recordFiles": 985,
+      "doneTasks": 965,
+      "note": "本轮我实测 done_ids() 单次 374.8 秒（该函数对 985 个记录逐个读盘并算证据哈希）。同一测量在今天的另两份 dupclaim 报告里是 43.1/61.6/90.9 秒 与 245.6 秒 —— 同一函数在一天内从 43 秒涨到 375 秒。**窗口宽度本身就是这条 TOCTOU 的量级**：只要记录在快照扫过其字典序位置之后落盘，整轮都看不见它。我的租约在 w-sanguo-1 提交后 226 秒建立，远小于 374.8 秒的窗口。",
+      "reproduce": "python3 -c \"import sys,time;sys.path.insert(0,'loop/bin');import loop as L;t=time.time();d=L.done_ids();print('%.1fs %d'%(time.time()-t,len(d)))\""
+    },
+    "isNotSelfInflicted": "与 read:sanguo:L0_0104 那次不同（那次是提交者自己在 submit 后又改候选文件，使 evidence_stale 把任务从 done_ids 里剔除）。本轮 w-sanguo-1 提交后**没有再动任何文件**：我核验了三个证据哈希全部与声明一致，记录 sha256 自 21:26 落盘后未变（mtime 2026-10-14T21:26:26Z）。这是**纯粹的调度器侧 TOCTOU**，被领取方无过错。",
+    "whyNotOverwrite": [
+      "会替换 w-sanguo-1 的 partial 判决；该判决的 4 条 counterExamples 与 12 条 reverseChecks **不在任何别的地方**（我查过：verify_sanguo_L0_0102.verdict.json 是唯一载体）",
+      "会使该 verdict 文件的哈希与记录里声明的 bc43b8ec… 不符 ⇒ evidence_stale() 报错 ⇒ 任务从 done_ids() 掉出，被读成未完成（把一条已完成任务变成失败，是净损失）",
+      "AGENTS.md：同一文件只设一个写入负责人；不得覆盖其他会话在途工作",
+      "该任务当前**没有下游消费者**（我扫过 loop/queue/read.jsonl 全部 2268 行：requires 里含 'verify:sanguo:L0:0102' 或 independentOf 指向它的任务数 = 0），所以「不改就无法推进」这个理由不成立"
+    ]
+  },
+  "independentAudit": {
+    "method": "按 VERIFIER.md 顺序：①先自己逐字通读 docs[0].text[522662,528484) 全 5822 码点并自记事实（脚本外，人工读 slice.txt）；②再打开 w-sanguo-1 的 verdict；③自写 4 个脚本从磁盘重算（audit_quotes.py / my_gaps.py / recheck_ce.py / reverse_probe.py），**不 import 候选的 selfcheck，也不 import w-sanguo-1 在 verify0102/ 下的任何脚本**；④对被复核者的每条实质指控逐条机器复算；⑤对我自己的仪器错误做反向检查。",
+    "candidateCitationAudit": {
+      "offsetBearingQuoteObjects": 377,
+      "passed": 377,
+      "failed": 0,
+      "criteria": [
+        "text[start:end]==quote",
+        "end-start==len(quote)",
+        "落在 [522662,528484) 内",
+        "find(quote)==声明 start",
+        "全文唯一性",
+        "sourceHash==实测文件哈希"
+      ],
+      "noOffsetQuoteObjects": 2,
+      "noOffsetVerdict": "crossTaskQuoteReuse.items[0..1] 只有 quote+usedBy、按设计不带偏移 —— 逐条核对后确认**不是缺陷**（我采纳与被复核者相同的判定）。",
+      "spotCheck": {
+        "seed": 1031,
+        "picked": 5,
+        "verbatimHit": 5,
+        "offsetConsistent": 5,
+        "note": "我按被复核者声明的同一协议（seed 1031）重抽，得到**同一批 5 条路径**：$.unknowns[0].quotes[1]、$.worldSettings[15].extraQuotes[0]、$.worldSettings[12].quoteRef、$.tasks[3].action.quotes[1]、$.tasks[3].objective.quotes[0] —— 5/5 逐字命中、偏移一致、唯一性成立。"
+      },
+      "independentConclusion": "候选定位层**零编造**，377/377。我的独立脚本与被复核者得出同一结论。"
+    },
+    "candidateSelfReportedCounts": {
+      "reproduced": true,
+      "detail": "tasks 20／taskColumnsTotal 100／taskColumnsNull 12／taskColumnsNullWithNote 12／causeEdges 22／rejectedCauseEdges 4／states 9／knowledgeGaps 5 逐项现算与声明一致，0 处不符。worldSettingsByKind place13/item8/rule8 亦一致。",
+      "semanticReview": "performed=false —— 候选自己没有冒充语义已核验，这一点被如实保留。"
+    },
+    "hallucinationCheck": {
+      "entitiesProbed": 34,
+      "entitiesInSourceMissingFromCandidate": 0,
+      "note": "对原文 34 个人名/称谓逐个计数：司马懿 38/214、孔明 46/234、陆逊 11/50、辛毗 5/50、杨顒 1/14 … 全部 >0；未发现「候选有而原文无」的人物。世界规则/结局层面：候选 unknowns U01–U09 明确不替原文结算（五百兵结局、夏侯霸一千军、本命灯 vs 主灯、祈禳效力），F08 把魏延怨言显式记 unresolved 并**预先否掉**「怨言→扑灯」这条诱人连线（RX01）。未把结束当成功。"
+    }
+  },
+  "recheckOfIncumbentClaims": {
+    "note": "被复核者 w-sanguo-1 判 partial，给出 4 条 counterExamples 与 12 条 reverseChecks。我逐条机器复算——**全部成立**。下面是我自己的复算结果，不是转述。",
+    "counterExamples": [
+      {
+        "id": "CE1",
+        "claim": "T07.cost 散文把 action 的整句当唯一依据（同句跨栏）",
+        "myRecheck": "成立",
+        "evidence": "cost.text 中『魏延引五百兵皆退入谷中去』与 action.quotes[2] 去句末标点后**逐字相等**（我实测 rstrip('。！？')==inner 为 True，另两条 action 引文均 False）；cost 自己登记的引文 [525527,525542) 不含「五百兵」「诱」。"
+      },
+      {
+        "id": "CE2",
+        "claim": "T16.objective 的『甘心受辱』落在 obstacle 引文区间内",
+        "myRecheck": "成立",
+        "evidence": "『甘心受辱』全文偏移 527010，区间 [527010,527014)；obstacle.quotes[1]=[526999,527040) 完整包含它（True），objective.quotes[0]=[527048,527075) 不含（False）。"
+      },
+      {
+        "id": "CE3",
+        "claim": "「审俘→得知上方谷→定策取上方谷烧粮」这条因果边在 causeEdges 里不存在",
+        "myRecheck": "成立",
+        "evidence": "22 条 causeEdges 中同时含「上方谷」与「粮/烧」的 = **0 条**（我遍历全量）。该情报内容确实存在（'孔明今在何处' 1 次、'取上方谷烧其粮草' 3 次），但只作为 T11.action 的叙述出现，未登记为边。"
+      },
+      {
+        "id": "CE4",
+        "claim": "候选句级覆盖口径掩盖句内未引用片段",
+        "myRecheck": "**成立，但它的数字「23」依赖口径，且它未说明口径**",
+        "evidence": "我独立复算：藏在「已覆盖句」内部的 >=12 片段 = **11 个**，与它声称的 11 **完全一致**。全部未引用片段中 len(strip())>=12 的 = **23**（与它一致）；但我按「排除标点后的可见字数 >=12」这一更严口径算得 **15**。两种口径都能自圆其说，**差别在标点算不算字数**，而它在 verdict 里只写「可见字数>=12」、没有写明是 strip() 长度。这不是编造（23 可复现），是**口径未标注**。"
+      }
+    ],
+    "reverseChecks": {
+      "verifiedCount": 12,
+      "allSubstantivelyValid": true,
+      "note": "我对 RC1–RC12 的每条 quote 都做了独立的「该片段在切片内是否被任何候选引文区间覆盖」判定：**12/12 全部为 uncovered，全部成立**。其中 RC1『坚守勿出，彼久必自变』与 RC3『不意将星欲坠，阳寿将终』、RC4『舞刀相迎。懿挺枪接战』是我自己也会独立列出的实质遗漏（我另行确认候选 JSON 内 自变/久必自变/待其/舞刀/挺枪 出现次数均为 0）。",
+      "misKillCheckVerified": "我复核了它的误杀结论：RX01/RX02/RX03/RX04 与 WX01–WX04 的排除理由我逐条对照原文，**全部维持**；未发现被词表误杀的合法因果边或世界规则。它主动记下的自我更正（首版用「精确整串」判缺口过严，改区间相交后撤回 3 组误报）**方向正确**——我自己第一版也踩了同类仪器错误，见 selfCorrection。"
+    }
+  },
+  "counterExamples": [
+    {
+      "claim": "被复核者 w-sanguo-1 的 verdict 自身有 2 处引文偏移不自洽：声明 [526249,526270)（宽 21），而 quote 长度 18，正确 end 应为 526267。它用这条引文支持 RC1 与 CE4（其最实质的两条发现之一）。",
+      "quote": "遂令诸将：“坚守勿出，彼久必自变。”",
+      "why": "机器可复算：text[526249:526270] = '遂令诸将：“坚守勿出，彼久必自变。”\\n\\u3000\\u3000' ≠ quote；text[526249:526267] == quote（True）。越界 3 个码点是换行+两个全角空格。**判据与被复核者自己对候选用的完全同一条**（end-start==len(quote)、text[start:end]==quote）。注意：这不影响它 RC1/CE4 的**实质结论**（我独立复算该片段确实未被候选引文覆盖，成立），只影响它自己那份 verdict 的偏移自洽性——我用它的 16 个带偏移引文跑同一脚本，2 个失败，其余 14 个通过。"
+    }
+  ],
+  "reverseChecks": [
+    {
+      "found": "候选与被复核者**都没有**登记「孔明禁止闲杂人放入、需用之物只令二小童搬运」这条祈禳的执行约束——它在引文层是缺口。",
+      "quote": "闲杂人等，休教放入。凡一应需用之物，只令二小童搬运。",
+      "why": "该片段 [527884,527910) 在字符级有 26 字中 10 字未被任何候选引文覆盖，且整串在候选 JSON 与 verdict JSON 里**都搜不到**。它是祈禳能否成立的关键约束（正是「闲杂人等」这一条被魏延闯入打破），也是 T18 之外的独立事实。这是对**双方**的反向发现。"
+    },
+    {
+      "found": "候选与被复核者都没有逐字登记祷告文的结句「非敢妄祈，实由情切」——它在引文层是完整缺口。",
+      "quote": "非敢妄祈，实由情切。",
+      "why": "该片段 [528111,528121) 10 字**全部**未被覆盖。被复核者的 RC10 提到了它（作为与「臣不胜激切之至」同形的例子），但只把它写在 whyItMatters 的散文里、**没有作为独立的 RC 条目**给出，且我核验其 RC10 的 quote 字段只含表文结句。这是一条被提及但未被当作缺口登记的遗漏。"
+    },
+    {
+      "found": "我的第一版反向探针有**仪器错误**（假阳性），必须如实记录：我用 text.find(frag) 取全文**首次**出现位置来判是否被引用。",
+      "quote": "将在外，君命有所不受。",
+      "why": "该串在 607191 码点的全文里有 **5 处**出现（108271/332139/527452/574452/594189），首次出现在第 38 回、**不在本区间**，于是被判 MISS。修正为「只认落在 [522662,528484) 内的出现位置」后，切片内唯一出现 527452 **已被** [527424,527511) 引文覆盖 ⇒ 该条撤回。这与被复核者的 T4 判据（find(quote)==声明 start）防的是**同一类**错：拿全文搜索结果代理切片内定位。我 42 条探针里因此撤回 1 条，最终 41/42 覆盖、1 条真缺口（『诸将因此未敢进兵』，见下）。"
+    },
+    {
+      "found": "另一条字符级真缺口，双方都未登记：「诸将因此未敢进兵」（接在「自此孔明自觉神思不宁」之后）。",
+      "quote": "诸将因此未敢进兵。",
+      "why": "『自此孔明自觉神思不宁。』被 [526915,526926) 覆盖，但紧接的『诸将因此未敢进兵。』[526926,526935) **9 字全部未覆盖**，且候选 JSON 内 '诸将因此未敢进兵' 出现 0 次。这是「孔明病 → 蜀军停止进攻」这一态势的原文落点（被复核者的 RC 列表里没有它）。按 len(strip())>=12 口径它不到 12 字、进不了它的 23 条；但作为独立事实它比若干入选片段更实质。"
+    }
+  ],
+  "selfCorrection": [
+    "我第一版反向探针用 text.find() 全文首次出现位置判覆盖，产生 1 处假阳性（『将在外，君命有所不受。』），已修正并撤回，如实记在上条 reverseChecks 里。**这正是被复核者 T4 判据要防的同一形态**——我用了我自己正在核验的判据的反面，且直到逐字符复核才发现。",
+    "我对「23 个片段」的第一次复算得 15，一度准备记为数字不符；查明后确认是**我**换了口径（排除标点）而它用的是 strip() 长度，它的 23 可复现。按 VERIFIER.md「拿不出原文引证的反对意见只能记为存疑」，口径差异不构成 fail，我把它降级为「口径未标注」写在 CE4 的 myRecheck 里。",
+    "我一度把「verify 任务自身 reviews=[]、verifyState=pending」误读为「w-sanguo-1 的复核没有落账」，并把它写进 remaining 当成真实缺口。复查被复核任务后发现**复核已完整落账**：read_sanguo_L0_0102.json 的 reviews=[w-sanguo-1/partial/4 CE/12 RC]、verifyState=partial。我错在**看错了字段所在的对象**——复核结论按设计写在被复核任务上。已在 remaining 里改正并留痕。"
+  ],
+  "usableVsDiscard": {
+    "usableAsIs": [
+      "w-sanguo-1 的 partial 判决**整体可用**：4 条 counterExamples（CE1–CE3 我已独立复现成立；CE4 结论成立、口径需注明）、12 条 reverseChecks（12/12 实质成立）、误杀检查通过、幻觉检查通过。",
+      "其 citationAudit 的 377/377 与我独立脚本结果一致，可采信。",
+      "建议：CE4 的「可见字数>=12」应写成「len(strip())>=12」或直接改用排除标点口径；RC1/CE4 引文的 end 应改为 526267。二者都是**登记层**修正，不改变 partial 的结论。"
+    ],
+    "discardOrDowngrade": [
+      "没有任何一条被复核者的**实质结论**需要丢弃。",
+      "唯一需要丢弃的是那 2 处偏移的 end 值（526270 → 526267），以及「可见字数」这个未定义术语。"
+    ]
+  },
+  "remaining": [
+    "**我未提交**，因此 verify:sanguo:L0:0102 在台账里仍由 w-sanguo-1 的记录代表（status=done、verifyState=pending、reviews=[]）。★ 这里我**先写错、后修正**：我一度把「这条 verify 任务自己的 reviews 为空」读成「这次复核没有落账」。现算证明不成立 —— w-sanguo-1 **确实**调用了 `cmd_verify`，其判决完整写在**被复核任务** `loop/state/out/read_sanguo_L0_0102.json` 上：reviews=[{reviewer: w-sanguo-1, at: 2026-10-14T21:26:30Z, verdict: partial, counterExamples: 4 条, reverseChecks: 12 条}]，该记录的 verifyState=partial。**落账正确，无缺口。** 我把 verify 任务自身 verifyState 仍是 pending 误读成了「复核未登记」，这是**看错了字段所在的对象**（复核结论按设计写在被复核任务上，不写在 verify 任务自己身上）。",
+    "（承接上条的干净结论）`cmd_submit` 与 `cmd_verify` 对 `OUT/output_name(tid)` 都是整文件覆盖且不合并 reviews：若某条 verify 任务的复核者**只 submit 不 verify**，它的判决不会进被复核记录的 verifyState。本轮**没有**踩到这个坑（w-sanguo-1 两条都做了）。我把它留作观察项而非缺陷 —— 我没有证据说这种「只 submit 不 verify」的案例真实发生过。",
+    "TOCTOU 根因未修（结构性、非偶发）：pick() 的快照 vs claim() 不复查 done。实测窗口 done_ids()=374.8s。今天已有 3 份 dupclaim 报告指向同一根因（read_dafeng_L3_0267 / verify_dafeng_L1_0229 / 本份）。修法方向：claim() 在建租约前复查 done_ids()，或把 done 判据改为扫描中实时判定。属受保护路径，我不改。",
+    "semanticReview 仍未做：候选自述 performed=false，w-sanguo-1 也没有冒充做过语义核验。引文定位正确 ≠ 语义已核验——人物动机、因果机制、伏笔判定的文学解释层仍无人核验。",
+    "我没有跑 GPU/浏览器测试，没有跑 accept.sh / version_stamp.py（本任务不涉及 js/css/页面路径），没有改任何受保护路径。"
+  ],
+  "untouched": {
+    "gitDestructive": false,
+    "gpuOrBrowserTests": false,
+    "protectedPaths": true,
+    "sharedVerdict": true,
+    "sharedRecord": true,
+    "sharedCandidate": true
+  },
+  "evidence": [
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/verify-sanguo-0102-w-verify-4-dupclaim/audit_quotes.py",
+      "sha256": "d495b6ac905ddd5d31b44adbe5cd3e02b099cf456329e83982d27e3e00f64b98",
+      "kind": "我自写的引文核验器（对候选 377 条 + 被复核者 16 条各跑一遍）"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/verify-sanguo-0102-w-verify-4-dupclaim/audit_quotes_result.json",
+      "sha256": "e9b08809ef381942811fe74d9ab5a5b6efdae98a4082de8a9fed04eb2d5bdcee",
+      "kind": "上述脚本的输出（候选 377/377 通过；被复核者 14/16，2 处 end 越界）"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/verify-sanguo-0102-w-verify-4-dupclaim/my_gaps.py",
+      "sha256": "4b19fb4fe79222ada7d6e3248c0d99796b05dfd1128168d46be780e758f9ffcb",
+      "kind": "我的字符级缺口图（不复用候选的 reverseCoverage，也不复用被复核者的 blindspot.py）"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/verify-sanguo-0102-w-verify-4-dupclaim/my_gaps.json",
+      "sha256": "33429ab4adba1611ad577ba64de0ead272dff5de9dd06e6a2f201ce4d8f2a343",
+      "kind": "上述输出：覆盖 5086/5822=87.4%、77 个未覆盖段、去标点 >=12 的 15 个"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/verify-sanguo-0102-w-verify-4-dupclaim/recheck_ce.py",
+      "sha256": "5204cd72b1a0d39b2c2de73218c315fe6b34d431821f3ddd92271635417e59a5",
+      "kind": "对 CE1–CE4 的逐条机器复算脚本"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/verify-sanguo-0102-w-verify-4-dupclaim/reverse_probe.py",
+      "sha256": "4ba2ef49b78b059f368b17c35f78618e9eaf1328b85af62860b1eb0f30536b7e",
+      "kind": "我的 42 条反向探针（**修正版**；第一版的 find() 假阳性写在文件头注释里）"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/verify-sanguo-0102-w-verify-4-dupclaim/reverse_probe.json",
+      "sha256": "35830f72278519b03224de1da523064fb5dd40548dab71232310aabaff8120f2",
+      "kind": "上述探针输出：41/42 覆盖，1 条真缺口"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/verify-sanguo-0102-w-verify-4-dupclaim/slice.txt",
+      "sha256": "39f11ac7f84e328b5e7713419de9447828aca2877711fd16f767e91c29a943df",
+      "kind": "我逐字通读的原文切片（5822 码点），从 docs[0].text[522662:528484) 提取"
+    },
+    {
+      "path": "data/cache/fe42d01f3826fe8096f86614.docs.json",
+      "sha256": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+      "kind": "原文基准（只读）"
+    },
+    {
+      "path": "loop/state/out/read_sanguo_L0_0102.candidate.json",
+      "sha256": "9304cbdef3bd92160e997aa6020b222ff81dacaa073b2a313adebbbac8ab5fe0",
+      "kind": "被复核候选（只读，未改动一个字节）"
+    },
+    {
+      "path": "loop/state/out/verify_sanguo_L0_0102.verdict.json",
+      "sha256": "bc43b8ec55c93ad18418ebc225f38b017efff2e1a3d1828cb35a6c4c9cce4270",
+      "kind": "w-sanguo-1 的复核结论（只读，未改动一个字节；我拒绝覆写的就是它）"
+    },
+    {
+      "path": "loop/state/out/verify_sanguo_L0_0102.json",
+      "sha256": "0ca79ff2f7d2148d618b1bb03f9e26029759ec1d85a8797a538a259206471a6d",
+      "kind": "该任务的既有规范记录（w-sanguo-1，status=done，problems=[]）—— 只读引用，我未覆写"
+    },
+    {
+      "path": "loop/state/out/verify_sanguo_L0_0102.w-verify-4.dupclaim/audit_quotes.py",
+      "sha256": "d495b6ac905ddd5d31b44adbe5cd3e02b099cf456329e83982d27e3e00f64b98",
+      "kind": "仓库内镜像：引文核验器"
+    },
+    {
+      "path": "loop/state/out/verify_sanguo_L0_0102.w-verify-4.dupclaim/audit_quotes_result.json",
+      "sha256": "e9b08809ef381942811fe74d9ab5a5b6efdae98a4082de8a9fed04eb2d5bdcee",
+      "kind": "仓库内镜像：核验输出"
+    },
+    {
+      "path": "loop/state/out/verify_sanguo_L0_0102.w-verify-4.dupclaim/my_gaps.py",
+      "sha256": "4b19fb4fe79222ada7d6e3248c0d99796b05dfd1128168d46be780e758f9ffcb",
+      "kind": "仓库内镜像：字符级缺口图"
+    },
+    {
+      "path": "loop/state/out/verify_sanguo_L0_0102.w-verify-4.dupclaim/my_gaps.json",
+      "sha256": "33429ab4adba1611ad577ba64de0ead272dff5de9dd06e6a2f201ce4d8f2a343",
+      "kind": "仓库内镜像：缺口图输出"
+    },
+    {
+      "path": "loop/state/out/verify_sanguo_L0_0102.w-verify-4.dupclaim/recheck_ce.py",
+      "sha256": "5204cd72b1a0d39b2c2de73218c315fe6b34d431821f3ddd92271635417e59a5",
+      "kind": "仓库内镜像：CE1–CE4 复算"
+    },
+    {
+      "path": "loop/state/out/verify_sanguo_L0_0102.w-verify-4.dupclaim/reverse_probe.py",
+      "sha256": "4ba2ef49b78b059f368b17c35f78618e9eaf1328b85af62860b1eb0f30536b7e",
+      "kind": "仓库内镜像：反向探针（修正版）"
+    },
+    {
+      "path": "loop/state/out/verify_sanguo_L0_0102.w-verify-4.dupclaim/reverse_probe.json",
+      "sha256": "35830f72278519b03224de1da523064fb5dd40548dab71232310aabaff8120f2",
+      "kind": "仓库内镜像：探针输出"
+    },
+    {
+      "path": "loop/state/out/verify_sanguo_L0_0102.w-verify-4.dupclaim/audit_quotes.py",
+      "sha256": "d495b6ac905ddd5d31b44adbe5cd3e02b099cf456329e83982d27e3e00f64b98",
+      "kind": "仓库内镜像副本（原始位置在 artifacts 目录；两侧逐字节一致）"
+    },
+    {
+      "path": "loop/state/out/verify_sanguo_L0_0102.w-verify-4.dupclaim/audit_quotes_result.json",
+      "sha256": "e9b08809ef381942811fe74d9ab5a5b6efdae98a4082de8a9fed04eb2d5bdcee",
+      "kind": "仓库内镜像副本（原始位置在 artifacts 目录；两侧逐字节一致）"
+    },
+    {
+      "path": "loop/state/out/verify_sanguo_L0_0102.w-verify-4.dupclaim/my_gaps.json",
+      "sha256": "33429ab4adba1611ad577ba64de0ead272dff5de9dd06e6a2f201ce4d8f2a343",
+      "kind": "仓库内镜像副本（原始位置在 artifacts 目录；两侧逐字节一致）"
+    },
+    {
+      "path": "loop/state/out/verify_sanguo_L0_0102.w-verify-4.dupclaim/my_gaps.py",
+      "sha256": "4b19fb4fe79222ada7d6e3248c0d99796b05dfd1128168d46be780e758f9ffcb",
+      "kind": "仓库内镜像副本（原始位置在 artifacts 目录；两侧逐字节一致）"
+    },
+    {
+      "path": "loop/state/out/verify_sanguo_L0_0102.w-verify-4.dupclaim/recheck_ce.py",
+      "sha256": "5204cd72b1a0d39b2c2de73218c315fe6b34d431821f3ddd92271635417e59a5",
+      "kind": "仓库内镜像副本（原始位置在 artifacts 目录；两侧逐字节一致）"
+    },
+    {
+      "path": "loop/state/out/verify_sanguo_L0_0102.w-verify-4.dupclaim/reverse_probe.json",
+      "sha256": "35830f72278519b03224de1da523064fb5dd40548dab71232310aabaff8120f2",
+      "kind": "仓库内镜像副本（原始位置在 artifacts 目录；两侧逐字节一致）"
+    },
+    {
+      "path": "loop/state/out/verify_sanguo_L0_0102.w-verify-4.dupclaim/reverse_probe.py",
+      "sha256": "4ba2ef49b78b059f368b17c35f78618e9eaf1328b85af62860b1eb0f30536b7e",
+      "kind": "仓库内镜像副本（原始位置在 artifacts 目录；两侧逐字节一致）"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "按 VERIFIER.md 顺序：先自己逐字通读原文全 5822 码点（写入 slice.txt 并人工读毕），再打开 w-sanguo-1 的 verdict；顺序未颠倒。",
+      "result": "pass"
+    },
+    {
+      "text": "候选 377 个带偏移引文经我自写脚本六项核验：377/377 通过、0 失败；2 个 crossTaskQuoteReuse 登记性引文按设计无偏移，确认非缺陷。",
+      "result": "pass"
+    },
+    {
+      "text": "seed 1031 抽 5 条 quote：5/5 逐字命中、偏移一致、唯一性成立，且抽出的是与被复核者相同的 5 条路径。",
+      "result": "pass"
+    },
+    {
+      "text": "被复核者 CE1/CE2/CE3 逐条机器复算成立；CE4 的「11 个藏在已覆盖句内」精确复现为 11；「23」在 len(strip())>=12 口径下复现（我换口径算得 15，属口径差异非数字造假）。",
+      "result": "pass"
+    },
+    {
+      "text": "被复核者 RC1–RC12 共 12 条 quote 全部经我独立判定为 uncovered：12/12 实质成立；其误杀检查（RX01–RX04、WX01–WX04）我逐条对照原文全部维持。",
+      "result": "pass"
+    },
+    {
+      "text": "反查出被复核者自身 2 处引文偏移不自洽（end 526270 应为 526267，宽 21 vs 长 18），机器可复算，且用的是它自己对候选的同一判据；不影响其实质结论。",
+      "result": "fail"
+    },
+    {
+      "text": "我自己的反向探针查出 2 条**双方都没有**登记的引文层缺口（『闲杂人等，休教放入…』『非敢妄祈，实由情切。』）与 1 条字符级缺口（『诸将因此未敢进兵。』）。",
+      "result": "fail"
+    },
+    {
+      "text": "如实记录我自己的仪器错误：第一版探针用 text.find() 全文首次出现位置判覆盖，产生 1 处假阳性（『将在外，君命有所不受。』），已修正撤回。",
+      "result": "fail"
+    },
+    {
+      "text": "幻觉/越权检查通过：34 个实体名无一「候选有而原文无」；候选 unknowns U01–U09 未替原文结算；F08 显式 unresolved；semanticReview 保持 not-performed。",
+      "result": "pass"
+    },
+    {
+      "text": "未提交、未覆写任何既有产物：任务 writes 指定的 verdict 路径与规范记录均保持原字节（哈希已核验一致）；未跑 GPU/浏览器测试；未改受保护路径。",
+      "result": "pass"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/fe42d01f3826fe8096f86614.docs.json": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+    "loop/state/out/read_sanguo_L0_0102.candidate.json": "9304cbdef3bd92160e997aa6020b222ff81dacaa073b2a313adebbbac8ab5fe0",
+    "loop/state/out/verify_sanguo_L0_0102.verdict.json": "bc43b8ec55c93ad18418ebc225f38b017efff2e1a3d1828cb35a6c4c9cce4270",
+    "loop/state/out/verify_sanguo_L0_0102.json": "0ca79ff2f7d2148d618b1bb03f9e26029759ec1d85a8797a538a259206471a6d"
+  },
+  "changes": [
+    {
+      "path": "loop/state/out/verify_sanguo_L0_0102.w-verify-4.dupclaim/",
+      "kind": "append-only",
+      "note": "新建目录：本报告 + 4 个自写脚本 + 3 个输出 + 报告内镜像。全部为**新增**，不覆写任何既有文件；与另两份同类 dupclaim 报告（read_dafeng_L3_0267.w-dafeng-0.dupclaim、verify_dafeng_L1_0229.w-verify-2.dupclaim）同形。"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/verify-sanguo-0102-w-verify-4-dupclaim/",
+      "kind": "artifact-only",
+      "note": "仓库外测试产物目录（脚本与输出的原始位置）"
+    }
+  ],
+  "rollback": {
+    "kind": "artifact-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/verify-sanguo-0102-w-verify-4-dupclaim/"
+    ],
+    "note": "共享树内我没有写入任何文件；删除该目录即可完全回滚本轮。"
+  },
+  "selfHashNote": "本报告**不**声明自身哈希，也**不**声明 MANIFEST.json 的哈希 —— 避免自指/双向循环。方向是单向的：MANIFEST.json → DUPCLAIM-REPORT.json（清单登记报告的哈希）。"
+}

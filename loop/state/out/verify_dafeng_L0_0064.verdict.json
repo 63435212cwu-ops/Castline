@@ -1,0 +1,284 @@
+{
+ "task": "verify:dafeng:L0:0064",
+ "verifier": "w-dafeng-2",
+ "role": "loop/ROLES/VERIFIER.md",
+ "reviewedCandidate": {
+  "path": "loop/state/out/read_dafeng_L0_0064.candidate.json",
+  "sha256": "8590784d1c238bf5e27a854e1381d51493dd7ec3f73f794d78922839efb8b1c1",
+  "agent": "w-xiyou-1",
+  "producedAt": "2026-10-08T12:13:59Z",
+  "note": "哈希与 read_dafeng_L0_0064.json 中 evidence[0].sha256 一致（8590784d1c238bf5e27a854e1381d51493dd7ec3f73f794d78922839efb8b1c1）。复核者 w-dafeng-2 与原提交者 w-xiyou-1 非同一人。"
+ },
+ "source": {
+  "path": "data/cache/9b676d7031b1bcd3b8377a18.docs.json",
+  "docIndex": 0,
+  "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+  "range": [
+   197876,
+   201191
+  ],
+  "codepoints": 3315,
+  "segmentSha256": "96c2708ad583f2ef264c7156b6acb20b366648fd3d1c8f84415aa19337fb88e9",
+  "headerCheck": {
+   "startswith": "第六十五章 绝世天才？！",
+   "after": "第六十六章 突发任务\n"
+  },
+  "note": "sourceHash 与任务声明 fdde5558…39839 一致；区间长度 3315 与任务声明一致。"
+ },
+ "verdict": "partial",
+ "counterExamples": [
+  {
+   "id": "ce_count_li_yuchun",
+   "claim": "textCritical.tc_liu_vs_li 的 counts 与 issue 写『李玉春(本区间)=5』『本单元其他 5 处与全书其余部分均作“李玉春”』，并以此把“刘玉春”描述成孤立笔误。",
+   "quote": "李玉春：“.....",
+   "start": 200129,
+   "end": 200139,
+   "why": "该计数与原文不符（低估）。区间内『李玉春』实测 17 次，绝对偏移为 197894/198119/198227/198312/198422/198493/198902/199164/199263/199929/200068/200129/200166/200536/200631/200900/201099；『刘玉春』1 次 @199750。换口径重算仍是 17：含『李玉春』的区间内非空段落 17 个、按句切分 17 句。我逐一试过能凑出 5 的口径只有两种——候选自己的 states[] 里 character 含『李玉春』的条目恰为 5 条，或『刘玉春』±500 字窗口——两者都不是该字段声称的『本区间出现次数』。后果：复核者会据此以为笔误只影响 5 处引用点，实际是 17 处。笔误本身（几乎可判为 typo）结论不因此推翻，但计数必须按实测改写。",
+   "severity": "factual-error-in-metadata",
+   "reproduce": "python3 -c \"import json;T=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'][197876:201191];print(T.count('李玉春'),T.count('刘玉春'))\"   # -> 17 1",
+   "evidence_ref": "counter 实测；17 个偏移可用 [m.start() for m in re.finditer('李玉春',T[197876:201191])] 复现"
+  },
+  {
+   "id": "ce_jiupin_lianjing_out_of_range",
+   "claim": "states[st_xu_realm].before.text 用『九品炼精境』给许七安的境界贴标签。",
+   "quote": "“而炼精境只是武夫体系的初始，你可以想象，要达到高品境界，延年益寿，这有多难。”",
+   "start": 199353,
+   "end": 199393,
+   "why": "『九品炼精境』这个连写串在区间内出现 0 次、全书出现 5 次（首次 @23213『许七安就是非酋体系的九品炼精境；二叔是八品巅峰练气境；七品是炼神境。』），是区间外知识。区间内『九品』仅 2 次，均属别的体系（@198046 划分九品、@198542 术士九品是医者），『炼精』4 次全在 @199164 之后，两者最小间距 631 字、从不共现。更关键：candidate 自己给这条挂的两条引文（『十七年。』与『三个周天…内外交感』）都不含『九品』，也没有挂任何 inRange=false 的佐证引文——直接违反它自己在 unknowns u13 与 outOfRangeTermsNotUsed 里立的口径，以及它自称已生效的『机器回归闸』（check0064.py 检查项 12）。闸门漏过的原因可复现：该闸的白名单是 [银锣,铜锣,炼神境,百户,铜皮铁骨,甲上] 六个词，规则为子串匹配，『九品炼精境』不含其中任何一个，因此被判通过。我实跑候选自带脚本 /tmp/check0064.py，15 项 FAILS=0 WARNS=0——即这条缺陷确实能穿过它的自查。",
+   "severity": "policy-violation-in-own-scope",
+   "reproduce": "python3 -c \"import json;T=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];print(T[197876:201191].count('九品炼精境'), T.count('九品炼精境'))\"   # -> 0 5",
+   "evidence_ref": "gate 源码 /tmp/check0064.py:255 OUT_OF_RANGE_TERMS；实跑输出 15 项全 pass"
+  },
+  {
+   "id": "ce_rfs_quotes_point_at_wrong_line",
+   "claim": "rejectedForeshadows 两条的 candidate 论点与被挂引文不是同一句：rfs_books 论『藏书阁』、挂的 quote 不含『藏书阁』；rfs_huangli 论『负责更新、制定黄历』、两条挂的 quote 都不含『黄历』。",
+   "quote": "李玉春大马金刀的坐在浴桶边的椅子上，颔首：“这些知识你有空可以自己去藏书阁看。",
+   "start": 197894,
+   "end": 197933,
+   "why": "被讨论的原文句真实存在（@197894–197933，inRange），candidate 却挂了紧邻的下一段『“不过，反正我要在这里盯着你…』。rfs_huangli 同理：论点是黄历，挂的是『术士九品是医者』（@198529）与『宋卿同学是其中翘楚』（@198663）。真正含『黄历』的区间内原句是 @198731『此外，许七安还知道司天监的术士负责更新、制定黄历。』与 @198762『对于农耕文明来说，黄历太重要了，直接关乎田地收成。』。定性：结论未必错（原文确有对应文字），但**引证挂错**——按挂的引文去 find 找不到论点所依赖的关键词，复核与下游都会取不到证据。按角色契约这不算编造，故不据此判 fail，但必须改引文。",
+   "severity": "citation-mismatch",
+   "reproduce": "python3 -c \"import json;c=json.load(open('loop/state/out/read_dafeng_L0_0064.candidate.json'));[print(r['id'],[('藏书阁' in q['quote']) or ('黄历' in q['quote']) for q in r['quotes']]) for r in c['rejectedForeshadows']]\"   # -> rfs_books [False] ; rfs_huangli [False, False]",
+   "evidence_ref": "候选 rejectedForeshadows[0].quotes 仅 1 条且不含藏书阁；[1].quotes 2 条均不含黄历"
+  },
+  {
+   "id": "ce_unregistered_out_of_range_quotes",
+   "claim": "至少 3 处区间外原文以中文弯引号写进 prose 字段充当证据，但未登记为带 inRange=false 的 quote 条目，破坏候选自述的『每条引文都由生成脚本逐字断言』口径。",
+   "quote": "如果是乙，凭着一周天就自寻气感的天资，已经能加到乙上。",
+   "start": 200717,
+   "end": 200744,
+   "why": "三处实测（全书各仅 1 次命中、inRange=false、均不在候选任何 quote 条目内，用脚本遍历全部 quote 字段复核为 0 命中）：①『在户籍上写了“甲上”二字。』@197086，出现在 knowledgeGaps[0].gap、foreshadows[0].setup.text、unknowns[1]；②『打更人建立以来，得此评价者，屈指可数。』@197147，出现在 foreshadows[0].setup.text；③『罕见的出现了震惊的表情』@202110，出现在 foreshadows[1].payoff.text。对照之下，其他区间外引用（『看到了鲜红的两个字：甲上！』@201456、『…收了他四百两。』@201867、『…差不多要一百五十两银子。』@197275）都规范地挂了 quote 条目并标 inRange=false——所以这是**局部漏挂**，不是整体性编造。后果：候选 metrics 声称的 293 条引文全量逐字核验，不覆盖这三个串。",
+   "severity": "unregistered-citation",
+   "reproduce": "python3 -c \"import json;T=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];c=json.load(open('loop/state/out/read_dafeng_L0_0064.candidate.json'));q=[];f=lambda o:[q.append(o['quote']) if isinstance(o,dict) and isinstance(o.get('quote'),str) else [f(v) for v in (o.values() if isinstance(o,dict) else o)]];f(c);print([(s, any(s in x for x in q)) for s in ['在户籍上写了“甲上”二字。','打更人建立以来，得此评价者，屈指可数。','罕见的出现了震惊的表情']])\"   # -> all False",
+   "evidence_ref": "三串均 T.count()==1、inRange=false、quote 条目内 0 命中"
+  }
+ ],
+ "reverseChecks": [
+  {
+   "found": "皇帝动机是**问而不答**：许七安问『皇帝二十几年潜心修道是不是为了长生不死』，李玉春不答此问，用反问『你炼精用了多久？』把话题转回许七安。候选没有把它登记为知识缺口。",
+   "quote": "许七安点点头：“所以，我们的皇帝陛下，二十几年来潜心修道，是为了长生不死？”",
+   "start": 198968,
+   "end": 199006,
+   "inRange": true,
+   "candidateCoverage": "未登记为 knowledgeGap/unknown",
+   "severity": "missed-open-question",
+   "why": "候选正确地把这句标为 dialogue（cc_xu_immortality，narratorConfirmed=false），也在 t_xu_kaitianmen.objective 引用，但**没有登记它在本区间没有得到回答**。knowledgeGaps 的 6 条 id 为 kg_xu_no_grade / kg_li_no_weiyuan_source / kg_nobody_knows_gods / kg_li_only_three_weeks / kg_xu_unaware_of_own_talent / kg_recipe_source，unknowns 13 条，均无一条涉及皇帝动机（对『皇帝』『修道』『动机』『长生不死？』逐个检索候选全文，knowledgeGaps 与 unknowns 内 0 命中）。对照旁白对『神仙』之问的处理——明写『这个问题李玉春无法回答，因为没有答案。』并立了 kg_nobody_knows_gods——同为悬置的问句，处理标准不一致。紧接着的反问句 @199155 就是它被绕开的文本证据。"
+  },
+  {
+   "found": "李玉春的阈值自身不自洽：规则里说『正常人的极限，是九个周天』，判据却是『如果第八个周天你还无法自寻气感，那你就不适合武夫这条路』——『第九个周天』在判定中从未被使用。",
+   "quote": "“资质越差，气机运转的次数就越多，而正常人的极限，是九个周天。也就是说，如果第八个周天你还无法自寻气感，那你就不适合武夫这条路。”",
+   "start": 199858,
+   "end": 199923,
+   "inRange": true,
+   "candidateCoverage": "未登记；textCritical 覆盖不一致",
+   "severity": "missed-internal-inconsistency",
+   "why": "候选把这条完整引用并登记为 characterClaims.cc_li_threshold（narratorConfirmed=false，正确），但它自己的字段里同时并列『九个周天』与『第八个周天』（候选全文『八个周天』6 次、『九个周天』11 次），却没有任何一处指出两个数字在文本内对不齐。候选专门开了 textCritical 栏登记同类文本异常（『刘玉春』用字、『一周天/一个周天』计数写法），3 条里没有一条涉及 8 vs 9。我**不**主张 8/9 有唯一正确解，也不要求候选替作者裁决；只指出：这处恰好是判定许七安资质的核心标尺，按候选自己的登记标准应进 textCritical 或 unknowns。"
+  },
+  {
+   "found": "同段三项外貌变化的归因并不统一：第三项明写由**药水**造成（浸泡毛孔排杂质），不是由练气境造成。",
+   "quote": "最后是皮肤，药水浸泡皮肤，刺激毛孔，排除了潜藏在毛孔里的杂质，比如黑头。",
+   "start": 200305,
+   "end": 200341,
+   "inRange": true,
+   "candidateCoverage": "已引用，但归因被合并抹平",
+   "severity": "attribution-flattened",
+   "why": "tasks[1].result 写作『踏入练气境这件事由旁白给出三个可见变化与一次威力演示』，把三项并列成同一归因。但这一句的主语是『药水』，且紧接的『通红的皮肤透着一种娇嫩的感觉』（红是泡出来的）同属药浴效果。真正由境界给出的证据是候选自己也引了的『气机外放，这是练气境初期的神异。』。候选全文检索不到对这两套归因的区分。"
+  },
+  {
+   "found": "『他没有镜子，所以看不见踏入练气境带来的细微变化』是明确的认知受限陈述：当事人对自己身体的变化没有观测手段，后文三项外貌变化全部由旁白给出而非他自述。",
+   "quote": "三周天运转结束，许七安睁开眼，他没有镜子，所以看不见踏入练气境带来的细微变化。",
+   "start": 200181,
+   "end": 200220,
+   "inRange": true,
+   "candidateCoverage": "已引用，但未登记为认知状态",
+   "severity": "missed-epistemic-state",
+   "why": "候选在 4 处引用了这一整句，但只把它当作『三周天结束』的时间/动作标记，没有登记为 knowledgeGaps 或 states 中的认知状态。对照候选对同级事实的处理——kg_xu_unaware_of_own_talent 专门登记『他对自己这份天资没有任何表示』——『他看不见自身变化』这条同等性质的认知限制落在所有字段之外。"
+  }
+ ],
+ "quoteSample": {
+  "seed": 20261008,
+  "picked": 5,
+  "howChosen": "random.sample(全部 293 条 {quote,start,end} 条目)",
+  "results": [
+   {
+    "path": "(见候选)",
+    "quote": "“正说到你呢，幸运的得了一位人才。”魏渊笑容温和。",
+    "findResult": 201004,
+    "T[a:b]==quote": true,
+    "lenMatch": true,
+    "inRangeDeclared": true,
+    "inRangeActual": true,
+    "verdict": "逐字命中且偏移一致",
+    "start": 201004,
+    "end": 201029,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "inRange": true
+   },
+   {
+    "path": "(见候选)",
+    "quote": "说完，他离开了密室，走出房门的一瞬间，春哥满脑子“不可能”的念头。",
+    "findResult": 200592,
+    "T[a:b]==quote": true,
+    "lenMatch": true,
+    "inRangeDeclared": true,
+    "inRangeActual": true,
+    "verdict": "逐字命中且偏移一致",
+    "start": 200592,
+    "end": 200625,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "inRange": true
+   },
+   {
+    "path": "(见候选)",
+    "quote": "“小人想知道许七安的评级，顺便向魏公禀报一件小事。”",
+    "findResult": 201123,
+    "T[a:b]==quote": true,
+    "lenMatch": true,
+    "inRangeDeclared": true,
+    "inRangeActual": true,
+    "verdict": "逐字命中且偏移一致",
+    "start": 201123,
+    "end": 201149,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "inRange": true
+   },
+   {
+    "path": "(见候选)",
+    "quote": "感觉身体里新生的力量在四处乱串，许七安舒展四肢，抬手，隔空一掌打在窗户上。",
+    "findResult": 200368,
+    "T[a:b]==quote": true,
+    "lenMatch": true,
+    "inRangeDeclared": true,
+    "inRangeActual": true,
+    "verdict": "逐字命中且偏移一致",
+    "start": 200368,
+    "end": 200405,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "inRange": true
+   },
+   {
+    "path": "(见候选)",
+    "quote": "“头儿，我突然开始疼了。”许七安皱了皱眉。",
+    "findResult": 198831,
+    "T[a:b]==quote": true,
+    "lenMatch": true,
+    "inRangeDeclared": true,
+    "inRangeActual": true,
+    "verdict": "逐字命中且偏移一致",
+    "start": 198831,
+    "end": 198852,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "inRange": true
+   }
+  ],
+  "summary": "5/5 逐字命中、find() 与声明 start 一致、长度自洽、inRange 声明与实际一致。"
+ },
+ "aggregateIndependentRecheck": {
+  "quotesTotal": 293,
+  "quotesInRangeDeclared": 272,
+  "verbatimHit": 293,
+  "offsetEqualsFirstFind": 287,
+  "offsetDiffersFromFirstFind": 6,
+  "offsetDiffersExplanation": "6 条与 find() 首命中不同，全部是候选已声明 globalOccurrences>1 的多命中引文（‘绝世天才？!’全局2次、‘许七安点点头。’31次、‘嗯？’69次），候选显式取区间内偏移，属正确消歧，非缺陷。",
+  "lengthOk": 293,
+  "inRangeFlagCorrect": 293,
+  "sourceHashAllMatch": 293,
+  "fails": 0,
+  "method": "本复核自写脚本 /tmp/verif0064/vcheck.py 独立遍历候选全部 quote 条目，从磁盘重读 docs.json，不导入候选的生成/检查脚本。"
+ },
+ "coverageRecheck": {
+  "nonEmptyParagraphs": 91,
+  "excluded": [
+   "第六十五章 绝世天才？！（章标题）",
+   "PS：刚在写细纲，写着写着，就忘记更新了。（作者附言）",
+   "------------（分隔行）"
+  ],
+  "contentParagraphs": 88,
+  "covered": 88,
+  "uncovered": [],
+  "sentenceLevel": {
+   "sentences": 101,
+   "notFullyInsideAnyRegisteredQuote": [
+    "第六十五章 绝世天才？！",
+    "PS：刚在写细纲，写着写着，就忘记更新了。"
+   ]
+  },
+  "note": "我独立重算段落覆盖（含缩进偏移，不依赖候选的 covered 字段）得 88/88，与候选一致。我第一版脚本漏加行首缩进，曾误报 30+ 段『覆盖率偏低』；那是我的脚本 bug，已在重算中修正，如实记在此处。"
+ },
+ "hallucinationCheck": {
+  "fabricatedEntities": "未发现。区间内被写到的人物/物件/专名（李玉春、许七安、魏渊、杨砚、阴柔男子、宋卿、浮香、二叔、司天监、藏书阁、浩气楼、洗髓液相关药浴等）在区间内均有原文出现；候选另用登记表显式列出区间内 0 次的全书专名（银锣/铜锣/炼神境/百户/铜皮铁骨/甲上），方向正确。",
+  "fabricatedOutcomes": "未发现把结束当成功。t_li_report.result 明确写『未决』；『评了几等』的答案标为区间外（第六十六章），foreshadows 标 resolved-outside-unit 且每条区间外引文带 inRange=false 与 chapter 字段。",
+  "fabricatedForeshadows": "未发现。4 条成立伏笔都有铺设+回收两段；2 条被拒伏笔（藏书阁、黄历）写明拒绝理由。拒绝标准与它自己的口径一致（但见 ce_rfs_quotes_point_at_wrong_line：被拒条目的引文挂错）。",
+  "unauthorizedWrites": "未发现。candidate 未声明改动 js/ css/ index.html serve.py narrative.py scripts/ tests/ docs/ data/ 等受保护路径；changes[] 只列自身候选文件，kind=append-only。",
+  "cacheUntouched": "候选对图谱缓存的 2 处分歧（拼接引文 find=-1、人物键名『许玉春』）只登记不改动。我已独立复算：cache.events 中本章事件 quote 为『绝世天才？！这么轻易给我遇上了吧？』，T.find()=-1；cache characters 含『许玉春』、不含『李玉春』。两条分歧结论成立。",
+  "note": "结论：无编造类缺陷。缺陷集中在元数据计数、自定口径被自身违反、引证挂错行、区间外引文漏登记四类。"
+ },
+ "misKillCheck": {
+  "checked": 3,
+  "misKilled": 0,
+  "items": [
+   {
+    "excluded": "rejectedCauseEdges.rce_17years_to_slow 拒绝了『“十七年。”→ 所以许七安资质差』这条边。",
+    "isItMisKilled": "不该误杀——拒绝是对的，但理由可以更强。",
+    "why": "候选的理由是『17 年是炼精耗时，而“资质”在本章是开天门耗几个周天的判据，两套判据在原文里没有被合并』。事实上李玉春当场给了 17 年一个直接评语：『“慢了些，拥有拥有充足资源的世家子弟，十六岁左右就能炼精巅峰…”』——『慢了些』@199216 就是对 17 年的评价，属于**存在评价性联系但不等同于资质判据**。候选拒绝连边正确（因为『慢』针对的是炼精速度，不是开天门资质），但把两者说成完全未被合并略强于原文：原文确实把两条信息放在相邻两段里对照。建议把理由改写为『有评价性联系、但无因果等同』，而不是『没有被合并』。",
+    "quote": "“慢了些，拥有充足资源的世家子弟，十六岁左右就能炼精巅峰，考虑到身体发育问题，十五岁是极限。”李玉春说道：",
+    "start": 199216,
+    "end": 199269,
+    "inRange": true
+   },
+   {
+    "excluded": "rejectedForeshadows.rfs_books 拒绝了『藏书阁』伏笔；rfs_huangli 拒绝了『黄历/宋卿人兽』伏笔。",
+    "isItMisKilled": "未误杀，两条拒绝都成立。",
+    "why": "藏书阁全书 13 次，区间内仅 1 次且是『你以后可以自己去看』的去处建议，区间内无任何回收；其余 12 次分属云鹿书院、司天监观星楼、国子监、文渊阁等**不同地点**，接成一条伏笔确属跨场景硬连。黄历/宋卿两句在本区间是『这个知识点许七安知道』式的既有知识罗列，无『尚未发生』指向，按『一次出现不叫伏笔』拒绝正确。（引文挂错的问题另见 counterExamples，与此处判断无关。）",
+    "quote": "对于农耕文明来说，黄历太重要了，直接关乎田地收成。",
+    "start": 198762,
+    "end": 198787,
+    "inRange": true
+   },
+   {
+    "excluded": "rejectedCauseEdges.rce_wufu_to_shortlife 拒绝了『武夫没有超越品级 → 许七安认为武夫不能延年益寿』。",
+    "isItMisKilled": "未误杀，拒绝正确且理由准确。",
+    "why": "原文用的是反问『但应该能延年益寿吧？』——许七安主张武夫**能**延年益寿，与候选『反了』的判断一致；旁白『但谁敢说自己见过仙人？』只否证『见过仙人』，不否证延年益寿。不连此边正确。",
+    "quote": "“可是，武夫虽然没有超越品级的存在，但应该能延年益寿吧？潜心修武就好了，何必追逐虚无缥缈的长生呢。”",
+    "start": 199099,
+    "end": 199149,
+    "inRange": true
+   },
+   {
+    "excluded": "候选把『银锣/铜锣/炼神境/百户/铜皮铁骨/甲上』整体排除在 character/states 字段之外。",
+    "isItMisKilled": "这个排除方向正确，但边界划得比必要更宽——见 ce_jiupin_lianjing_out_of_range：它一边拒绝用『炼神境』，一边自己用了同样区间外成立的『九品炼精境』，标准不一致。",
+    "why": "『银锣』『铜锣』『炼神境』在区间内实测 0 次，排除正确。问题不在排除，而在排除未贯彻：同一批『全书成立、区间内 0 次』的专名里，『九品炼精境』被漏在白名单外并实际写进了 states。",
+    "quote": "李玉春点点头：“但不可否认，术士是所有体系中，贡献最大的。”",
+    "start": 198493,
+    "end": 198523,
+    "inRange": true
+   }
+  ]
+ },
+ "verdictRationale": {
+  "whyPartial": "候选的主体工程是可靠的：293 条引文全部逐字命中且偏移/find/长度/inRange/源哈希零错（我独立复算，非采信其自述）；88/88 段落覆盖；无编造人物/结局/伏笔；对『是否真有神仙』『魏渊信息来源』『评级结果』三处悬置处理得当，未把台词当事实、未把结束当成功；对图谱缓存的分歧结论经我复算成立。这些都可以用。",
+  "whyNotPass": "但有四类必须修的真实缺陷：(1) textCritical 的『李玉春(本区间)=5』与实测 17 不符，且是会被下游当事实引用的计数；(2) states 里用了区间内 0 次、且未挂区间外佐证的『九品炼精境』，违反候选自定口径，并且穿透了它自称的回归闸（该闸白名单只有 6 个词，子串匹配挡不住）；(3) 两条 rejectedForeshadows 的引文挂错行，按挂的 quote 找不到论点关键词；(4) 至少 3 处区间外原文写进 prose 却未登记为 quote 条目，使『293 条全覆盖核验』的口径出现缺口。这四类都不构成编造（原文有对应文字），故不判 fail；但都会让下游引用到无据或错位的证据，故不判 pass。",
+  "whatToSalvage": "tasks[]/causeEdges[]/states[]/knowledgeGaps[]/foreshadows[] 的**结论**可继续使用；下列条目必须改：tc_liu_vs_li.counts（5→17）、tc_liu_vs_li.issue 措辞、st_xu_realm.before.text（去掉『九品』或补一条 inRange=false 的佐证引文）、rfs_books.quotes、rfs_huangli.quotes、以及把 3 处漏挂的区间外串补成规范 quote 条目。",
+  "whatToDiscardOrDowngrade": "没有必须整条丢弃的结论；建议降级项：tasks[1].result 中『三个可见变化』的统一归因应改写为两项归因（境界 / 药浴），否则会把药浴效果读成境界效果。"
+ },
+ "notes": "复核者自述：我先自己通读区间原文（docs[0].text[197876,201191)）并写下独立要点，之后才打开候选，顺序符合角色契约第 1 条。反向验证（第 3 条）我按『这段里他还漏了什么』提问，得到 4 条候选未覆盖的原文事实；其中『皇帝动机问而不答』与『8 vs 9 阈值不自洽』两条我认为价值最高——前者是候选对同类悬置（神仙之问）已有专门字段、却漏了这一条，属标准不一致；后者落在候选自己开的 textCritical 栏的应覆盖范围内。误杀检查（第 4 条）我复查了候选的 3 条拒绝边与 2 条拒绝伏笔，未发现误杀（候选把『遂行』式整词误挡的问题在这三个单元里没有出现）。我也可以判自己错：我第一版段落覆盖脚本漏加行首缩进，曾误报大量段落覆盖率偏低，重算后为 88/88，与候选一致——该 bug 已修正，不构成对候选的指控。存疑但不作为判定依据的两项：(a) 候选 unknowns u5 关于『十七年/两年记在许七安还是原主名下』我同意无法在本区间裁决，候选保留引文原样、不合并的处理是对的；(b) 候选 unknowns u3（一周天机制未给出）我认为处理正确，不应用后文补。此外我确认候选关于图谱缓存的两条分歧独立成立（拼接引文 T.find()=-1；缓存 characters 有『许玉春』无『李玉春』）。本次复核未运行 GPU/浏览器测试，未改动任何受保护路径，只写本文件。"
+}

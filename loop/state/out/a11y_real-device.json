@@ -1,0 +1,66 @@
+{
+  "task": "a11y:real-device",
+  "agent": "q-a11y",
+  "status": "done",
+  "summary": "真机可得性**逐条实测**后确认仍不可得（safaridriver 能监听但建会话超时、AllowRemoteAutomation 未启用且启用需管理员密码；无 adb/simctl/USB/WebKit 二进制）；把 CDP 能做的部分全部做掉并标注「仿真，不是真机」：200%/400% 缩放 46/46、可访问树 PASS、焦点可见性 PASS（真实 Tab 走查）、键盘 owner 27/27、触控交互 PASS",
+  "evidence": [
+    {
+      "path": "loop/state/out/a11y_real-device.artifact.json",
+      "sha256": "71af2135512c2544d9a731c11970f9afd45d752f5771b64bb334a89e912fde37"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "真机可得性不是\"看有没有装\"而是逐条实测：safaridriver 启动监听成功（/status ready:true）但 /session 返回 HTTP 500 且错误信息指向 RWIApplication 未就绪",
+      "result": "pass"
+    },
+    {
+      "text": "根因已定位且可复现：defaults read com.apple.Safari AllowRemoteAutomation 未设置；safaridriver --enable 要求交互式管理员密码",
+      "result": "pass"
+    },
+    {
+      "text": "Playwright WebKit 已排除：缓存目录无 webkit*，包未安装",
+      "result": "pass"
+    },
+    {
+      "text": "200%/400% 缩放实测通过 46/46（计划交付维度明确要求）",
+      "result": "pass"
+    },
+    {
+      "text": "全部 CDP 结论标注「仿真，不是真机」，并写出读屏替代手段的三条局限",
+      "result": "pass"
+    },
+    {
+      "text": "未声称任何真机/读屏兼容性",
+      "result": "pass"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/a11y_real-device.artifact.json",
+      "kind": "append-only"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/f6a657935c945a3a9bcfc000.json": "c67068977706db7deb49160c4e693e3709b94e668bb4d73299c2bd1add183920"
+  },
+  "remaining": [
+    "真机 iOS/Android：无设备",
+    "iOS 模拟器：无 Xcode",
+    "桌面真 WebKit：需管理员密码启用远程自动化",
+    "VoiceOver/TalkBack：无真机、无法脚本化"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/a11y_real-device.artifact.json"
+    ]
+  },
+  "submittedAt": "2026-10-07T20:00:06Z",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-07T20:00:06Z"
+  },
+  "verifyState": "pending"
+}

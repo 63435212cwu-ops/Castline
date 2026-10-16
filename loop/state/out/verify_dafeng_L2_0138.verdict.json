@@ -1,0 +1,345 @@
+{
+  "task": "verify:dafeng:L2:0138",
+  "agent": "w-dafeng-3",
+  "role": "VERIFIER",
+  "status": "done",
+  "verdictRationale": "判 partial 而非 fail：两条 counterExample 都有可复算证据（CE1 是证否型——区间内 `铜锣` 计数为 0，不需要引文即可判定该描写无据；CE2 是逐字符覆盖掩码），且都指向**可局部修复**的缺陷（删一句、或把引文起点提前 5 字 / 改一个计数），不触及引文层与主体结论 —— 177/177 条引文逐字成立、覆盖记账与候选声明完全一致。判 partial 而非 pass：CE1 是交付字段里写进了区间内无依据的内容，CE2 是候选自己声明要堵的口径漏洞在另一张表里复发，两者都不是措辞问题。",
+  "summary": "独立反向复核《大奉打更人》第一百三十八章 [482331,486120)（3789 码点，97 非空段）。**引文层完全干净**：177/177 条 `text[start:end]==quote` 逐字成立、偏移全落区间内、sourceHash 全为 fdde5558…9839、start 均为全文首次出现、`wholeTextOccurrences`/`inUnitOccurrences` 声明数与实测逐条相等、同任务跨栏同句 0、跨栏区间重叠 0、null 栏全部带 Note；随机 5 条 quote（seed=138）find() 全部命中且偏移一致；段级覆盖 12 条未覆盖 + 6 条部分覆盖（并集掩码口径 0.58/0.40/0.48/0.57/0.33/0.25）与候选声明**逐条相同**。未发现编造的人物、结局、伏笔或成功判定（T4 明确『目标未达成』、F1–F4 全 unresolved、作者 PS 按非叙事处理）。**裁决 partial 的两条 must-fix**：CE1 = states.ST1.before 写『并不把一个铜锣放在眼里』，而区间内 `铜锣`/`打更人`/`放在眼里` 计数均为 0（`铜锣` 全文首现 @184436，在区间外），且 ST1 的 5 条引文无一承接 ⇒ 无依据内容写进交付字段；CE2 = reverseCoverage 把 51 条台词记成 covered 47 / uncovered 4 / substantiveUncovered []，实测『何其荒谬，…』（482988–483041）句首 5 字『何其荒谬，』无任何引文覆盖（引文起点在 482993），即候选自己在段级 partialCoverage 里声明要堵的『引文落在段内但盖不住全段』漏洞，在台词表里复发并被计入 covered。**三条反向发现（候选未覆盖、原文明确存在）**：RC1 许府／小院是两个场面的发生地且有到达动作（485352『骑马来到许府，敲开了小院的门』、485795『返回自己小院』），却未登记为 place——反而把区间内无到达动作的誉亲王府登记了（候选自陈 mentioned 成立）；RC2 姜律中（484636 听见命令、484664 勒马）与魏渊护卫（484545 握紧刀柄）只作为引文字符串出现，未提取为人物条目；RC3 许七安『已经脱下差服』（485399）这一身份/场合状态切换只进了 textualNotes TN6，未登记为任何 state。**误杀检查**：MK1 誉王人情入 notForeshadows 而大力丸立为 F3，两条在本区间都只出现一次，属同标准不同判的口径不一致（人情句『将来必定回报』后指更强）；MK2 rejectedEdges R4 拒绝连『点破身份→作揖许诺』可辩护且信息未丢失（中间步在 T2.action 引文里），不记为误杀。**如实登记我自己的两次口径错误**：①台词覆盖初算得 27 段假阳性（把引号内层跨度与含引号引文混口径），修正后为 4 完全未覆盖 + 1 部分覆盖，与候选 4 条吻合；②partialCoverage 初算用引文长度求和（重叠重复计数）得 15 段假阳性（如 484471 段算出 1.90），改用并集掩码后复现候选 6 条且比值逐条相同——两处都是我错、候选对。语义正确性本身未做独立核验（引用定位正确 ≠ 语义已核验）。",
+  "reviewedTask": "read:dafeng:L2:0138",
+  "reviewedArtifact": {
+    "path": "loop/state/out/read_dafeng_L2_0138.candidate.json",
+    "sha256": "23463d7092db2d559feb1e3fdd8806ef2dd96b5396b83ef0861809c832fc5d33",
+    "note": "复核期间只读，未修改；哈希为本次复核开始时实测。"
+  },
+  "source": {
+    "file": "data/cache/1063b17ca65ec1b76f30e460.docs.json",
+    "fileSha256": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "docIndex": 0,
+    "range": [
+      482331,
+      486120
+    ],
+    "sliceSha256": "cc6d5e4d0d6cf1de6c1b900972463488a04a2f5c223ca3cc631d31b9eba1c449",
+    "sliceChars": 3789,
+    "sliceHeadOk": "docs[0].text[482331:486120] 以『第一百三十八章 下一个受害者（为盟主“小海豚的翎小晨”加更）』开头，与任务 unitHead 一致",
+    "offsetUnit": "codepoint"
+  },
+  "method": {
+    "order": "按 VERIFIER.md：①先自己读原文（全文 97 非空段逐段读过，含分隔符与作者 PS）②再读候选 ③独立复算引文层 ④反向枚举未被覆盖的文本 ⑤误杀检查 ⑥幻觉/越权检查 ⑦随机抽 5 条 quote 做 find() 核验。",
+    "independentRecompute": "未调用候选的 audit 脚本、未读 $CL_ARTIFACTS 下的构建脚本；全部结论由本文件 reproduce 里的命令从 docs.json 直接重算。"
+  },
+  "verdict": "partial",
+  "counterExamples": [
+    {
+      "id": "CE1_unsourced_tongluo_in_state",
+      "severity": "must-fix（内容层：无依据的人物态度描写）",
+      "field": "states[ST1].before",
+      "claim": "候选 ST1.before 原文（候选自己的措辞）：『神色平静，眼神里是不以为然与轻视 —— 他不相信许七安说的话，半隐退多年、并不把一个铜锣放在眼里。』其中『并不把一个铜锣放在眼里』在**本区间内没有任何依据**。",
+      "quote": "话虽这么说，他眼神里有着不以为然，以及轻视。显然是不相信许七安说的话。",
+      "start": 482462,
+      "end": 482497,
+      "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+      "why": "①区间内 `铜锣` 出现 **0** 次、`打更人` **0** 次、`放在眼里` **0** 次（`锣` 亦为 0）；`铜锣` 在全文首次出现在 @184436，属区间外概念。②ST1 自带的 5 条引文（482411/482462/482704/482884/483547）**没有一条**含该内容，即这条描写没有任何引文承接。③原文在本区间只支持『不以为然与轻视』（上引 482462）与『本王早就半隐退了』（482411），支持不到把区间外的『打更人／铜锣』写成誉王的态度对象。按任务红线『不许出现原文里没有的人物、事件』与『没有依据就不扩出……术语装饰层』，这句应删除，或降级为 unknowns 里的推断并标明依据不足；`半隐退` 有据（482411），`多年` 二字仍属加码。",
+      "minimalRepair": "ST1.before 改为『神色平静，眼神里是不以为然与轻视 —— 他不相信许七安说的话；自述早已半隐退。』并保留 482411/482462 两条引文。",
+      "reproduce": "python3 -c \"import json;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];s=t[482331:486120];print(s.count('铜锣'),s.count('打更人'),s.count('放在眼里'),t.find('铜锣'))\"  # → 0 0 0 184436"
+    },
+    {
+      "id": "CE2_dialogue_coverage_counts_partial_as_covered",
+      "severity": "must-fix（记账层：口径与其自身段级标准不一致，导致一条实质台词被静默吞掉）",
+      "field": "reverseCoverage.coveredSpans / substantiveUncovered / unquotedDialogue",
+      "claim": "候选声明 `dialogueSpans=51, coveredSpans=47, uncoveredSpans=4, substantiveUncovered=[], unquotedDialogue=[]`，即『本区间实质未覆盖数为 0』。实测：4 条完全未覆盖的台词与候选列的 4 条一致（2 条叙述内引号短语『小海豚的翎小晨』『富二代』+ 2 条短应答『啊？』『采薇。』），但另有 **1 条实质台词只是部分覆盖却被计入 covered**。",
+      "quote": "何其荒谬，婚姻大事父母之命媒妁之言，岂是她一个女子可以自己做主？她怎么知道别人不是在欺骗她，对她另有所图。",
+      "start": 482988,
+      "end": 483041,
+      "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+      "why": "该句是誉王在 ST1/T2 语境里的实质台词（53 字）。候选取的引文是 [482993,483041)『婚姻大事父母之命媒妁之言……对她另有所图。』（48 字），**句首 5 字『何其荒谬，』（482988–482993）无任何引文覆盖**（逐字符掩码实测 missing=5/53）。候选在**段级**覆盖里已经意识到这个口径漏洞并专门加了 partialCoverage 表（threshold=0.6，ListItem 6 条，原文自己写『边界判据会把「引文落在段内但盖不住全段」算成已覆盖，这个口径漏洞是我在反向验证里自己发现的』）—— 但同一个漏洞**没有套用到它自己的 reverseCoverage 台词表**，于是这一条既不在 uncoveredSpans（它算了 4 条），也不在 substantiveUncovered（[]），也没进 unquotedDialogue（[]）。这不是内容错误（该句 48/53 字确有覆盖），而是**记账不一致**：同一份文件对段落用严格口径、对台词用宽松口径（『包含或可拼』），后者恰好掩盖了唯一一处部分覆盖。",
+      "minimalRepair": "两条路任选：①把引文起点从 482993 提前到 482988（`“何其荒谬，…` 一并引用），则该句转为完全覆盖；②或在 reverseCoverage 增列 partialSpans[]（『何其荒谬，』5 字）并把 coveredSpans 改为 46。不改就是『已声明口径未被执行』。",
+      "reproduce": "python3 -c \"import json;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];print(repr(t[482988:482993]),repr(t[482993:483041]))\"  # 5 字句首未被候选引文覆盖"
+    }
+  ],
+  "reverseChecks": [
+    {
+      "id": "RC1_xufu_place_missing",
+      "found": "许府／小院是本区间**两个独立场面**（褚采薇送药 T5、橘猫夜访 T6）的发生地，且原文给出了明确的**到达**动作，但 worldSettings 的 4 条 place（誉亲王府 mentioned / 张府 arrived / 宫城口 arrived / 内城城门口 arrived）里**没有许府**。更矛盾的是：被登记为 place 的 `W_place_yuwangfu` 恰恰是本区间内**没有**到达动作的一条（候选自己写 placeState=mentioned，理由成立），而真正有到达动作的许府却整条缺失。",
+      "quote": "黄昏，在长公主府里风流快活了一天的褚采薇，骑马来到许府，敲开了小院的门。",
+      "start": 485352,
+      "end": 485388,
+      "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+      "why": "按任务 4b 的判据『有到达/驻守动作 ⇒ arrived』，本段（485352）与 485795『许七安返回自己小院』都是到达动作，够格登记为 arrived；同段还给出空间约束（门被敲开、院子被关上 485720）。缺这一条会让『本区间发生在哪』只剩 4 个地点、丢掉两场戏的场所，属**提取不完整**而非判断错误。"
+    },
+    {
+      "id": "RC2_jianglvzhong_and_guards_not_extracted",
+      "found": "姜律中 是本区间内**唯一被点名、且有明确执行动作**的次级人物（他听见魏渊的命令并勒马停车）；魏渊的护卫 另有一处『握紧刀柄』的戒备动作。这两人在候选里**只作为引文字符串出现**：tasks/states/knowledgeDiffs 没有任何一条以他们为主体的条目，deliverableIndex 也不体现。",
+      "quote": "姜律中听见魏渊的声音从车厢里传出：“停车。”",
+      "start": 484636,
+      "end": 484658,
+      "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+      "why": "配套两句同样未被登记为事实：『他当即勒住马缰，停了下来。』(484664–484677) 与『听到身后马蹄声飞快逼近，魏渊的护卫警惕的回头扫来，顺势握紧刀柄。』(484545–484577)。C5 的 trigger 里其实写了这条链（『[484636]车厢里传出「停车。」→[484664]勒缰停车』），但那是边的触发描述，不是人物条目 —— 于是『魏渊身边有人替他执行命令、且护卫会先按敌意反应』这一层在交付物里没有落点。"
+    },
+    {
+      "id": "RC3_xuqian_changfu_state_not_registered",
+      "found": "许七安在本区间有一处明确的**身份／场合状态切换**：他已脱下打更人差服、换上玲月妹妹缝的常服。这解释了他此后以『家中人』身份接待褚采薇、并在小院接见那只猫。候选只把它写进 textualNotes TN6（作《游子吟》典故照录），**没有登记为任何 state**，6 条 states 的 aspect 里也没有『衣着／身份场合』。",
+      "quote": "许七安此刻已经脱下差服，换了寻常的衣衫，玲月妹妹一针一线给他缝的。",
+      "start": 485399,
+      "end": 485432,
+      "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+      "why": "区间内 `差服` 仅 1 次（485399）。这条不是装饰：它标出『本区间后半段他不在当值状态』，与他前半夜『策马赶向宫城、向魏渊禀报』的当值身份形成前后值（可写成 before=着差服办案 / after=脱差服居家）。候选已把同段引文收进 TN6，说明它读到了，只是没往 states 里放。"
+    }
+  ],
+  "misKillCheck": [
+    {
+      "id": "MK1_renqing_vs_daliwan_inconsistent",
+      "item": "誉王许诺的『天大的人情』被放进 notForeshadows，而褚采薇的两瓶大力丸被立为 F3。",
+      "why": "候选给 notForeshadows 的理由是『本区间只出现这一次……没有铺设也没有回收，单句不构成伏笔』；但 F3（大力丸）在本区间**同样只出现一次**，候选给它的理由是『「省着点吃」这句提醒本身就指向「以后要吃」，所以它够得上铺设』。而人情句自带的后指其实**更强**：『将来必定回报』是显式的将来承诺。两条同标准不同判（一取一弃），属口径不一致，不是事实错误。",
+      "quote": "许大人若是能帮本王找到她，本王欠你一个天大的人情。将来必定回报。",
+      "start": 483583,
+      "end": 483615,
+      "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+      "suggest": "要么两条都进 foreshadows 并标 unresolved（人情有更强后指），要么两条都进 notForeshadows；不要一取一弃。这条**不构成 fail 依据**（属分类口径分歧）。"
+    },
+    {
+      "id": "MK2_rejected_edge_pointbreak_to_promise",
+      "item": "rejectedEdges R4 拒绝连『许七安点破平阳郡主身份 → 誉王作揖许诺人情』。",
+      "why": "拒绝本身**可辩护**：原文确实没写机制的句子，中间隔着自述婚事、追扑失态、道歉一大段。且信息没有丢失 —— 中间那步『你有她消息？她在哪，她在哪！！』被候选放在 T2.action 的引文里（483498–483515）。故只记为口径选择，**不记为误杀**。此处如实登记，避免把『我不同意的分类』写成『他误杀』。",
+      "quote": "誉王现实一愣，接着激动了起来，他三步并作两步扑到许七安面前，一手扣住他的手腕，一手拽住领口，“你有她消息？她在哪，她在哪！！”",
+      "start": 483448,
+      "end": 483515,
+      "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+    }
+  ],
+  "hallucinationCheck": {
+    "fabricatedPeople": "未发现。区间内出现的人物（许七安／誉王／管家／张奉／张易／褚采薇／魏渊／姜律中／护卫／守城羽林卫／守城士卒／羽林卫／橘猫／玲月／平阳郡主／恒慧／平远伯／恒慧与平远伯嫡子／王贞文／张奉／元景帝／金莲道长／洛玉衡）在候选里都能对应到原文句子；未出现原文没有的人物。",
+    "fabricatedEndingOrSuccess": "未发现。T4.result 明确写『目标未达成』（张易被拦）；T1/T3/T6 的 result 只写到叙述者交代的那一步（『知道了自己想知道的信息』『什么事』『聚元丹已经拿到』），F1–F4 全部显式 unresolved；末段作者附言（PS，486015–486103）被 TN4 明确按非叙事处理，未当作结局。",
+    "outOfIntervalImports": "发现 1 处：CE1 的『铜锣』（区间内 0 次）。另有两处**自陈的**区间外引用，属合规：KD3 自述『上（第135–137章）有金莲以黑猫为载体的情节，但那不在本区间内，不作为本区间的证据』；W_place_gongcheng 的 note 自述『臣子不得在宫城里驾车、骑马』写在本区间之外（实测 @479557 < 482331，确在区间外），故不引用。",
+    "speechVsFact": "抽查合格：台词一律带 speechAct 或 markedAs 标注（誉王的否认/忏悔/许诺、张奉的命令、守卒转述的旨意、橘猫的问句、许七安的自述持有），『定是被那个野男人拐跑了....我是这么想的』被标为誉王猜想，『或许本身就是一个局』被标为许七安推断，未把猜测写成真相。"
+  },
+  "quoteIndexCheck": {
+    "method": "遍历候选全部 177 条含 quote/start/end 的引用（含 tasks 五栏、causeEdges、rejectedEdges、states、knowledgeDiffs、foreshadows、notForeshadows、worldSettings、notWorldSettings、themeReadings、textualNotes、speechAsClueNotFact、coverageDeclaration、reverseCoverage、graphCrossCheck），逐条重算。",
+    "quoteRefs": 177,
+    "uniqueSpans": 95,
+    "sliceEqualsQuoteFailures": 0,
+    "offsetOutsideUnit": 0,
+    "sourceHashMismatch": 0,
+    "startIsFirstOccurrenceInDocFailures": 0,
+    "wholeTextOccurrencesMismatch": 0,
+    "firstOccurrenceAtMismatch": 0,
+    "inUnitOccurrencesMismatch": 0,
+    "crossFieldSameQuoteWithinTask": 0,
+    "crossFieldSpanOverlapWithinTask": 0,
+    "nullFieldMissingNote": 0,
+    "segmentSha256Match": true,
+    "randomSample": [
+      {
+        "quote": "说完，剐了他一眼，牵着马缰，扭着小屁股蛋走远了。",
+        "start": 485690,
+        "end": 485714,
+        "find": 485690,
+        "sliceOk": true,
+        "wholeTextOccurrences": 1
+      },
+      {
+        "quote": "最开始，我恨的咬牙切齿，恨她不知廉耻，恨她给宗室丢尽脸面。",
+        "start": 483195,
+        "end": 483224,
+        "find": 483195,
+        "sliceOk": true,
+        "wholeTextOccurrences": 1
+      },
+      {
+        "quote": "定是被那个野男人拐跑了....我是这么想的。",
+        "start": 483166,
+        "end": 483188,
+        "find": 483166,
+        "sliceOk": true,
+        "wholeTextOccurrences": 1
+      },
+      {
+        "quote": "吐槽完许七安，他才问道：“什么事。”",
+        "start": 484769,
+        "end": 484787,
+        "find": 484769,
+        "sliceOk": true,
+        "wholeTextOccurrences": 1
+      },
+      {
+        "quote": "房门被推开，一只橘猫迈着优雅的步子走进来，尾巴高高竖起，黄橙橙的猫眼凝视着他，吐口人言：",
+        "start": 485890,
+        "end": 485934,
+        "find": 485890,
+        "sliceOk": true,
+        "wholeTextOccurrences": 1
+      }
+    ],
+    "note": "5 条随机 quote（random.seed(138)）全部 find() 命中、与候选 start/end 一致、切片逐字相等、全文唯一。引文层**未发现任何编造或偏移错误**。"
+  },
+  "coverageRecheck": {
+    "nonEmptyParagraphs": 97,
+    "coveredByOverlap": 85,
+    "uncovered": 12,
+    "uncoveredMatchesCandidate": true,
+    "partialCoverageUnionMask": {
+      "threshold": "0<ratio<0.6，ratio=并集覆盖字符数/段内非空白字符数",
+      "items": [
+        [
+          483679,
+          483698,
+          0.58
+        ],
+        [
+          483775,
+          483800,
+          0.4
+        ],
+        [
+          484471,
+          484492,
+          0.48
+        ],
+        [
+          484925,
+          484955,
+          0.57
+        ],
+        [
+          485502,
+          485608,
+          0.33
+        ],
+        [
+          486019,
+          486103,
+          0.25
+        ]
+      ],
+      "matchesCandidateExactly": true
+    },
+    "dialogueSpansCharLevel": {
+      "spans": 51,
+      "fullyCovered": 46,
+      "partiallyCovered": 1,
+      "fullyUncovered": 4,
+      "detail": "完全未覆盖的 4 条 = 候选自己列的 4 条（『小海豚的翎小晨』『富二代』为叙述内引号短语，『啊？』『采薇。』为短应答）；部分覆盖 1 条 = CE2 的『何其荒谬，……』（缺句首 5 字）。"
+    }
+  },
+  "usableVsDiscard": {
+    "usable": [
+      "tasks T1–T6 的全部引文与 speechAct 标注（五元组分列、同栏不共用句、null 栏均带 Note）—— 引文层 177/177 复算通过，可用。",
+      "causeEdges C1–C7（机制与方向写明；C5 自陈方向修正，与原文顺序一致）—— 可用。",
+      "rejectedEdges R1–R4（『时间相邻≠因果』的执行）—— 可用，其中 R4 属口径选择（MK2）。",
+      "states ST2–ST6、knowledgeDiffs KD1–KD5、foreshadows F1–F4（全 unresolved）、notForeshadows、worldSettings 既有 4 place/2 rule/4 item、notWorldSettings、textualNotes TN1–TN9、unknowns U1–U19、selfCritique SC1–SC6 —— 可用。",
+      "coverageDeclaration（12 未覆盖段逐条给理由 + partialCoverage 6 条，并集口径实测完全一致）—— 可用且是加分项。",
+      "graphCrossCheck 的 4 个节点（events 288–291）实测切片与图谱 quote 逐字相等，归属章节一致；另实测 events[645]『神殊示警』的 quote『离开京城。』在全文有 3 处出现，均不在本区间，候选未误引 —— 可用。"
+    ],
+    "mustDiscardOrDowngrade": [
+      "ST1.before 的『并不把一个铜锣放在眼里』：删除，或降级为 unknowns 并写明区间内无依据（CE1）。",
+      "reverseCoverage.coveredSpans=47 应改为 46，或把『何其荒谬，』补进引文使该句转为完全覆盖；同时 substantiveUncovered=[] 的『实质未覆盖为 0』说法应限定口径（CE2）。",
+      "worldSettings 应补许府（arrived）或写明为何不登记（RC1）；姜律中／护卫（RC2）与『已脱差服』（RC3）应补条目或明确降级为 unknowns。"
+    ]
+  },
+  "notes": "总判断：**引文层完全干净，分类纪律执行到位；判 partial 只因一条无依据内容（CE1）、一条覆盖记账口径未贯彻（CE2），外加三处提取不完整（RC1–RC3）。** 证据：177/177 条引文 `text[start:end]==quote` 逐字成立、偏移全落区间内、sourceHash 全为 fdde5558…9839、start 均为全文首次出现、`wholeTextOccurrences`/`inUnitOccurrences` 声明数与实测**逐条相等**、同任务跨栏同句 0、跨栏区间重叠 0、null 栏全部带 Note、段级覆盖 12 条与并集口径的 6 条部分覆盖**与候选声明完全一致**；随机 5 条 quote 的 find() 全部命中且偏移一致。未发现编造的人物、结局、伏笔或成功判定。本次**没有**用『播放到结尾』当成功：T4 明确『目标未达成』、F1–F4 全 unresolved，与原文一致。\n\n口径与限度：①判 partial 而非 fail —— 按 VERIFIER.md『拿不出原文引证的反对意见只能记为存疑』，我给出的两条 counterExample 都带可复算证据（CE1 是**证否型**证据：区间内 `铜锣` 计数为 0，故无需引文即可判定该描写无据；CE2 是逐字符掩码）。没有任何一条反对意见是凭感觉的。②判 pass 也不成立：CE1 是**无依据内容写进了交付字段**，CE2 是候选自己声明要堵的口径漏洞在另一张表里复发，两者都不是措辞问题。③我没有复核语义正确性本身（引用定位正确 ≠ 语义已核验）：本复核只验『引文是否逐字在原文、分类是否与原文语气一致、有无遗漏与越权』，不声称候选中的人物动机读法正确。\n\n**我自己两次口径错误（如实登记）**：①第一次算台词覆盖时，我把『引号内层跨度』（不含引号）与候选『含引号的引文』对齐比较，得到 27 段『未覆盖』的假阳性；把内层跨度与引文区间改为同一口径后降为 4 段完全未覆盖 + 1 段部分覆盖，与候选的 4 条完全吻合。②第一次算 partialCoverage 比值时我用『引文长度求和』做分子（同一段内多条引文重叠会重复计数），得到 15 段低于 0.6 的假阳性（如 484471 段算出 1.90、485502 段算出 0.78）；改用**并集掩码**后复现出候选的 6 条、比值 0.58/0.40/0.48/0.57/0.33/0.25 **逐条相同**。两处都是我错、候选对。\n\n存疑（不作为 fail 依据）：speechAsClueNotFact.note 写『97 个非空段里对话占了大半』—— 三个自然口径实测为：段首即引号 35/97=36%、含引号段 53/97=55%、引号内字符 1133/3213=35%，只有『含引号段』口径过半。措辞夸大，但与任何交付条目无关，记为存疑。另：candidate 的 coverageDeclaration.uncoveredItems 给出的 range 从段内首个非空白字符起算（如『砰！』记 [482696,482698)，含缩进实为 [482692,482698)），属其自定口径，不影响计数。",
+  "remaining": [
+    "语义正确性未做独立核验（本复核只核引文层、分类纪律、遗漏与越权）；候选自己声明 semanticReview=not-performed，与本复核一致。",
+    "未读本区间之外的第135–137章去实证『金莲以黑猫为载体』（KD3 自述其为区间外信息，本复核接受该自我限制，不据此加分或减分）。",
+    "未做全量图谱 diff：只复核了候选点名的 events 288–291，另抽查 events[645] 的『离开京城。』确认不在本区间。",
+    "未与其他 VERIFIER 的复核交叉比对；本次为单人独立复核。"
+  ],
+  "reproduce": [
+    {
+      "what": "**一键全量复算**（本复核全部结论的来源；FAILS 应为 {}）",
+      "cmd": "python3 -B \"/Volumes/资源库/我的资源/回滚点/verify-L2-0138-r1/audit.py\" loop/state/out/read_dafeng_L2_0138.candidate.json"
+    },
+    {
+      "what": "区间口径自检（切片以本章标题开头、长度 3789）",
+      "cmd": "python3 -c \"import json;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];print(repr(t[482331:482371]),len(t[482331:486120]))\""
+    },
+    {
+      "what": "sourceHash 是**整个 docs.json 文件**的 sha256；切片哈希另算",
+      "cmd": "shasum -a 256 data/cache/1063b17ca65ec1b76f30e460.docs.json; python3 -c \"import json,hashlib;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];print(hashlib.sha256(t[482331:486120].encode()).hexdigest())\""
+    },
+    {
+      "what": "CE1：区间内 铜锣/打更人/放在眼里 计数（应全为 0）",
+      "cmd": "python3 -c \"import json;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];s=t[482331:486120];print(s.count('铜锣'),s.count('打更人'),s.count('放在眼里'))\""
+    },
+    {
+      "what": "CE2：『何其荒谬，』5 字在候选引文起点之外",
+      "cmd": "python3 -c \"import json;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];c=json.load(open('loop/state/out/read_dafeng_L2_0138.candidate.json'));print(repr(t[482988:482993]),[ (q['start'],q['end']) for q in c['tasks'][1]['obstacle']['quotes'] if q['start']==482993 ])\""
+    },
+    {
+      "what": "RC1/RC3：许府到达动作与『脱下差服』的偏移",
+      "cmd": "python3 -c \"import json;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];[print(i,repr(q)) for q in ['黄昏，在长公主府里风流快活了一天的褚采薇，骑马来到许府，敲开了小院的门。','许七安此刻已经脱下差服，换了寻常的衣衫，玲月妹妹一针一线给他缝的。'] for i in [t.find(q)]]\""
+    },
+    {
+      "what": "RC2：姜律中与魏渊护卫的动作句偏移",
+      "cmd": "python3 -c \"import json;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];[print(i,repr(q[:30])) for q in ['姜律中听见魏渊的声音从车厢里传出：“停车。”','他当即勒住马缰，停了下来。','听到身后马蹄声飞快逼近，魏渊的护卫警惕的回头扫来，顺势握紧刀柄。'] for i in [t.find(q)]]\""
+    },
+    {
+      "what": "引文层全量复算（177 条：逐字/区间/哈希/首现/唯一性/跨栏/空栏 Note）",
+      "cmd": "python3 -c \"import json;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];c=json.load(open('loop/state/out/read_dafeng_L2_0138.candidate.json'));R=[]\nw=lambda o:[R.append(o) if isinstance(o,dict) and 'quote' in o and 'start' in o and 'end' in o else None, [w(v) for v in (o.values() if isinstance(o,dict) else o)] if isinstance(o,(dict,list)) else None]\nw(c);S,E=482331,486120\nprint('refs',len(R),'sliceFail',sum(t[o['start']:o['end']]!=o['quote'] for o in R),'rangeFail',sum(not(S<=o['start']<E and S<o['end']<=E) for o in R),'firstFail',sum(t.find(o['quote'])!=o['start'] for o in R),'hashFail',sum(o.get('sourceHash')!='fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839' for o in R))\""
+    }
+  ],
+  "evidence": [
+    {
+      "path": "loop/state/out/read_dafeng_L2_0138.candidate.json",
+      "sha256": "23463d7092db2d559feb1e3fdd8806ef2dd96b5396b83ef0861809c832fc5d33",
+      "kind": "被复核候选（只读，未修改）"
+    },
+    {
+      "path": "data/cache/1063b17ca65ec1b76f30e460.docs.json",
+      "sha256": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+      "kind": "原文（区间 [482331,486120) 的唯一证据来源）"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/verify-L2-0138-r1/audit.py",
+      "sha256": "481f2ab75af1ec95716552c2a57c63caab1906f722ad92bfe5d849fb2baee9cc",
+      "kind": "我的独立复核脚本（不复用候选构建脚本；本次全部结论均由它从 docs.json 重算）"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/verify-L2-0138-r1/audit.json",
+      "sha256": "95af39dc3329c632864375a89316d332d0a720eab10d721e0f1d9943107374be",
+      "kind": "独立复核实测输出（FAILS={}：177 条引文零失败；CE1/CE2/RC1/RC3 的原始计数）"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/1063b17ca65ec1b76f30e460.docs.json": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "loop/state/out/read_dafeng_L2_0138.candidate.json": "23463d7092db2d559feb1e3fdd8806ef2dd96b5396b83ef0861809c832fc5d33",
+    "slice[482331:486120]": "cc6d5e4d0d6cf1de6c1b900972463488a04a2f5c223ca3cc631d31b9eba1c449"
+  },
+  "assertions": [
+    {
+      "text": "177/177 条引文逐字命中、偏移在区间内、sourceHash 一致、start 为全文首次出现、唯一性声明与实测逐条相等（复算命令见 reproduce）。",
+      "result": "pass"
+    },
+    {
+      "text": "随机 5 条 quote（seed=138）find() 全部命中且与候选 start/end 一致。",
+      "result": "pass"
+    },
+    {
+      "text": "CE1：『并不把一个铜锣放在眼里』在区间内无依据（铜锣/打更人/放在眼里 计数均为 0），且 ST1 的 5 条引文无一承接。",
+      "result": "fail（内容层，must-fix）"
+    },
+    {
+      "text": "CE2：『何其荒谬，』（482988–482993，5 字）无引文覆盖，却被计入 coveredSpans=47；候选自身的段级 partialCoverage 口径未套用到台词表。",
+      "result": "fail（记账层，must-fix）"
+    },
+    {
+      "text": "RC1–RC3：许府（有到达动作）未登记为 place；姜律中/护卫未被提取为人物条目；『已脱差服』未登记为 state。",
+      "result": "缺口（提取不完整）"
+    },
+    {
+      "text": "段级覆盖 12 条未覆盖 + 6 条部分覆盖（并集掩码口径）与候选声明完全一致。",
+      "result": "pass"
+    },
+    {
+      "text": "未发现编造人物/结局/伏笔/成功判定；台词一律带 speechAct 标注；F1–F4 全 unresolved。",
+      "result": "pass"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/verify_dafeng_L2_0138.verdict.json",
+      "kind": "artifact-only",
+      "note": "本复核的唯一写入物，属任务 writes 指定路径。未改动候选、原文或任何受保护路径。"
+    }
+  ],
+  "rollback": "本复核只新增一个文件；如需回滚，删除 loop/state/out/verify_dafeng_L2_0138.verdict.json 即可，不影响候选与原文。"
+}

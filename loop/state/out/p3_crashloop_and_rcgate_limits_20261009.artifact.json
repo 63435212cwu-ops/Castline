@@ -1,0 +1,53 @@
+{
+ "task": "p3:crashloop-and-rcgate-limits:20261009",
+ "agent": "reform-lead",
+ "at": "2026-10-08T20:39:20Z",
+ "scope": "只读审计：重试/崩溃循环的真实代价，以及**我自己刚合并的 rc 闸门的能力边界**。",
+ "finding_crashloop": {
+  "id": "P3-CRASHLOOP",
+  "fact": "存在**拒绝服务级**的崩溃循环：worker 反复起 dsh、立刻失败、再起。",
+  "evidence": [
+   "read:dafeng:L0:0080   尝试 1626 次，其中 **1510 次 rc=127**（命令找不到，每条 <1s）",
+   "verify:dafeng:L3:0099 尝试 1213 次，其中 **1116 次 rc=127**",
+   "read:xiyou:L0:0058   尝试  181 次，其中 **180 次 rc=127**",
+   "ops:accept-full      尝试  241 次，其中 **205 次 rc=127**"
+  ],
+  "rootCause": "rc=127 = `dsh` 子进程启动即失败。实测日志证据：`Error: dsh: profile \"castline\" does not exist` —— worker 缺 DSH_HOME 时 profile 解析失败。我已在 sentinel 侧修了**拉起时**的环境（repair_path + discover_dsh_home），最近 30 分钟已无此错误；但**崩溃循环的放大器**（无限重试、无尝试上限）仍在 worker 侧。",
+  "whyItMatters": "QUALITY 明确禁止『机制存在、有产出、但不产生信息』，而这是它的镜像形态：**机制在跑、有进程活动、但零产出，且成本极高**（1500+ 次进程启动）。看板上它表现为『worker 很忙』。",
+  "notFixedYet": "worker 侧无『同一任务连续失败 N 次就暂停该任务并告警』的闸门；`idleSleepSeconds`/退避只作用于**空转**，不作用于**失败重试**（失败后立即领回同一任务）。"
+ },
+ "finding_myOwnFixLimits": {
+  "id": "P3-RCGATE-LIMITS",
+  "fact": "我刚合并的 rc 闸门修的是『**状态语义**』（rc≠0 的中断态不得说成 done），它**不修**崩溃循环 —— 必须如实说明，不能把前者的修复说成解决了后者。",
+  "reasoning": "合并前：rc=127 崩溃 1510 次后，最后一次 rc=0 成功 ⇒ 最终 done。合并后：rc≠0 不产 done ⇒ 若该单元**结构性**总是 rc≠0，它会永远停在 partial 并被无限重试。**同一个 1626 次的循环不会因为闸门而变好，只是记录状态更诚实了。**",
+  "honestConclusion": "两件事必须分开：①状态诚实（已修）②失败重试要有上限与告警（未修）。在②完成前，①的效果是『把隐藏的失败暴露出来』，而不是『减少失败』。"
+ },
+ "recommendation": [
+  "在 worker 侧加**同一任务连续失败计数**：连续 N 次（建议 3）rc≠0 即暂停该任务、写进告警并在提交里点名，而不是立刻領回同一任务。",
+  "区分失败类型：rc=127/125（环境/启动失败）应**立即停止重试该任务**并告警（重试无意义），rc=124（超时）可有限重试（可能是偶发），rc=1（agent 自行报错）按连续次数限流。",
+  "把尝试次数写进任务看板，使『同一单元尝试 1626 次』这种事实**可见**（现在只藏在 daemon 日志里）。"
+ ],
+ "assertions": [
+  {
+   "text": "崩溃循环有可复现的证据链",
+   "command": "daemon 日志按任务统计 rc 分布",
+   "result": "pass"
+  },
+  {
+   "text": "根因有日志证据（不是猜的）",
+   "command": "fast-fail 日志含 `profile \"castline\" does not exist`",
+   "result": "pass"
+  },
+  {
+   "text": "如实界定我自己修复的能力边界",
+   "command": "finding_myOwnFixLimits 说明闸门不治循环",
+   "result": "pass"
+  },
+  {
+   "text": "确认该 profile 故障近期已绝迹",
+   "command": "近 30 分钟无该错误（sentinel 修复生效）",
+   "result": "pass"
+  }
+ ],
+ "next": "该项属 loop/bin/worker.py 的失败重试策略，需在持 GATE 的合并任务里与告警一起落地。"
+}

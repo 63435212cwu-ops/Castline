@@ -1,0 +1,83 @@
+{
+  "task": "read:dafeng:L3:0283",
+  "agent": "w-read-3",
+  "status": "done",
+  "summary": "精读《大奉打更人》第五十四章 问答（docs[0].text codepoint [1206041,1212202)，6161 码点，171 个非空段，切片 sha256 见 candidate.source.sliceSha256）。产出 12 条任务五元组（61 条栏位引文：同一任务内栏间区间重叠 0、共用同一条引文 0、跨任务复用 0；10 个 null 栏全部带理由）、56 条因果边（每条带方向+触发机制；basis: explicit 46 / derived 9 / inferred 1）、11 条被拒边（时间相邻或相邻但无机制，逐条写明为什么不连）、11 条状态变化（前值/后值/事件锚点各带引文）、6 条知识差（谁知/不知分列）、4 条伏笔（3 条本单元内回收、1 条显式标 unresolved）、16 条世界设定（place 6 / rule 8 / item 2，地点 arrived 与 mentioned 分列、物件四态多选、规则 declared 与 executed 分列）、6 条 notWorldSettings 与 3 条 notForeshadows（逐条写明为什么不列入）、2 条主题解读（每条都带 counter 反例）、9 条「人物话语≠叙述事实」清单、13 条文本注记、16 条 unknowns、5 条 selfCritique。全部 431 条引文由生成脚本在原文里定位后切片，机器自检 problems 为空。",
+  "evidence": [
+    {"path": "loop/state/out/read_dafeng_L3_0283.candidate.json", "sha256": "1fcede3b32e4ca9af26ccfa8ce57197462d41872fe12b6bca14a1019d4b013cd"},
+    {"path": "loop/state/out/read_dafeng_L3_0283.w-read-3.build/build_candidate.py", "sha256": "5c70b345d3675fd7e5e471f78cecf3bf08692143b4af2cab38ad975ed5871a16"},
+    {"path": "loop/state/out/read_dafeng_L3_0283.w-read-3.build/content_0283.py", "sha256": "a79cbe9efbd166e762fd15e8a5e69e24e08caae1892b22d89bf8b81b377c22db"},
+    {"path": "loop/state/out/read_dafeng_L3_0283.w-read-3.build/task-definition.snapshot.json", "sha256": "dc4206fb47288d61c1f8fe5089ff71c1c4d2b71219ddcf170abfa83f45761f8b"},
+    {"path": "data/cache/1063b17ca65ec1b76f30e460.docs.json", "sha256": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"}
+  ],
+  "assertions": [
+    {
+      "text": "偏移口径：python3 -B -c \"import json;d=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'));t=d[0]['text'];print(repr(t[1206041:1206061]));print(len(t[1206041:1212202]))\" 输出 '第五十四章 问答\\n\\n    恒远皱' 与 6161 —— docs[0].text[start:end] 以本单元标题开头，区间长度 6161 与任务声明一致",
+      "result": "pass"
+    },
+    {
+      "text": "sourceHash 是**整个 docs.json 文件**的 sha256：shasum -a 256 data/cache/1063b17ca65ec1b76f30e460.docs.json = fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839，与任务声明逐字一致；切片哈希另起字段 source.sliceSha256（4 行独立复算），不覆盖 sourceHash",
+      "result": "pass"
+    },
+    {
+      "text": "全部 431 条引文逐字命中：用**独立于生成脚本**的一段代码遍历候选 JSON 的每个含 quote/start/end 的对象，断言 docs[0].text[start:end]==quote、sourceHash 相符、区间落在 [1206041,1212202) 内 —— 输出 'quotes re-verified: 431 bad: 0'",
+      "result": "pass"
+    },
+    {
+      "text": "引文不是手抄的：每条引文在 content_0283.py 里只写「逐字子串 + 第 occ 次出现」，由 build_candidate.py 用 slice.find 定位后切片；找不到/出现次数不足/定位段落与该 label 声明的 Pnnn 不符时**构建直接失败**（本轮实测触发过 3 次：p170_girls 少一个「的」、p082_worry 少一个「要」、分隔行 occ 选错，均当场报错并已修）",
+      "result": "pass"
+    },
+    {
+      "text": "同任务内栏间零重叠、零共用：build_candidate.py 对每条任务的五栏引文做区间两两相交判定，输出 machineSelfCheck.taskFieldIntervalOverlap=0、crossColumnSharedQuotes=0；另有跨任务复用检查 crossTaskReusedQuotes=0（原先 T05.result 与 T05b.result 复用「九代单传」那句，已拆开：推辞归 T05b，承诺归 T05）",
+      "result": "pass"
+    },
+    {
+      "text": "null 栏全部带理由：10 个 null（T03.objective、T04/T05/T05b/T06/T07/T09/T10/T11.cost、T05b.objective）逐个在 machineSelfCheck.nullFields 里登记 hasNote=true、noQuotes=true；构建时对「null 无 Note」直接报错",
+      "result": "pass"
+    },
+    {
+      "text": "反向补检（漏读检查）：切片 171 个非空段中 163 段被至少一条引文触及；未被触及的 8 段全部在 AUTHOR_REGION=[(1211985,1212200)] 内（PS 与单章说明及其分隔线），按纪律不作叙事证据 —— machineSelfCheck.coverage.uncoveredParagraphAudit 的「其他未覆盖」为空数组。补检过程中据未覆盖清单回读原文，补出 20 段材料（音响词、旁观者反应、称呼应答、分场分隔行等）",
+      "result": "pass"
+    },
+    {
+      "text": "作者区域泄漏为 0：machineSelfCheck.authorRegionLeaks=0，即所有叙事引文都不落在 PS 与单章说明区间内（notForeshadows/notWorldSettings 的引文按纪律不计入叙事证据）",
+      "result": "pass"
+    },
+    {
+      "text": "受保护路径未改动：本任务只写 loop/state/out/ 下的 4 个文件（候选、build 脚本、内容模块、任务定义快照），changes 里没有 js/ css/ index.html serve.py narrative.py scripts/ tests/ docs/ data/",
+      "result": "pass"
+    },
+    {
+      "text": "未做语义评审：candidate.semanticReview=not-performed。本轮完成的是构造性自检与结构自检；「这条因果边读得对不对」「这条状态该不该记」需要独立复核者先读原文再判定 —— 不得据此记为 semanticReview 完成",
+      "result": "pass"
+    }
+  ],
+  "changes": [
+    {"path": "loop/state/out/read_dafeng_L3_0283.candidate.json", "kind": "append-only"},
+    {"path": "loop/state/out/read_dafeng_L3_0283.w-read-3.build/build_candidate.py", "kind": "append-only"},
+    {"path": "loop/state/out/read_dafeng_L3_0283.w-read-3.build/content_0283.py", "kind": "append-only"},
+    {"path": "loop/state/out/read_dafeng_L3_0283.w-read-3.build/task-definition.snapshot.json", "kind": "append-only"}
+  ],
+  "sourceHashes": {
+    "data/cache/1063b17ca65ec1b76f30e460.docs.json": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+  },
+  "remaining": [
+    "语义层未核验：本候选只做了构造性自检与结构自检，没有做独立语义评审（semanticReview=not-performed）。需要复核者先自己读第五十四章原文，再判定「56 条因果边的机制是否成立」「11 条状态该不该记」「4 条伏笔里 F02（律者戒律的两次使用）算不算伏笔」。",
+    "三条 obstacle 记 inferred 而非 explicit（T04 净尘的信息上限、T05b 佛门规矩、T07 人不在衙门）：引文都是原文直陈，降级理由是「这条内容构成障碍」属我的归纳。已在 selfCritique 第 5 条写明两种口径的取舍，留给复核判定。",
+    "T03.objective 与 T05b.objective 记 null：如果复核认为「挡在净尘面前」或「问能不能娶妻生子」这个动作本身就足以推出目标，这两栏应补上并标 inferred。理由已写进各自的 objectiveNote。",
+    "T02.result「没有拿下」记 derived：依据是净尘改口留人（p088）与恒远事后在内院自由干活（p136）。若复核的判定标准是「人被留在驿站不得离开」，这一栏应改写成「达成」。已写进 selfCritique 第 1 条。",
+    "worldSettings 的 place 一项标了 6 处，其中「皇宫」「桑泊」「打更人衙门」「青龙寺」四处按纪律记 mentioned（本区间无到达动作）。若复核认为「度厄从宫里回来」隐含有到达，皇宫一条的口径需要重判。",
+    "覆盖率为 76.68%（引文并集 4724/6161 码点），未覆盖部分全部是作者区域与标点/段落缩进。覆盖率**不是质量分**，本候选没有把它当成绩。",
+    "本单元属第五十四章，原文在结尾处停在度厄的问句「他是一个怎样的人。」上，答案不在本区间；后续单元的读解需要另开任务。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/read_dafeng_L3_0283.candidate.json",
+      "loop/state/out/read_dafeng_L3_0283.w-read-3.build/build_candidate.py",
+      "loop/state/out/read_dafeng_L3_0283.w-read-3.build/content_0283.py",
+      "loop/state/out/read_dafeng_L3_0283.w-read-3.build/task-definition.snapshot.json"
+    ]
+  }
+}

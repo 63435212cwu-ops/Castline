@@ -1,0 +1,170 @@
+{
+ "task": "verify:xiyou:L0:0084",
+ "reviewer": "w-verify-2",
+ "roleFile": "loop/ROLES/VERIFIER.md",
+ "candidateUnderReview": "loop/state/out/read_xiyou_L0_0084.candidate.json",
+ "candidateAgent": "w-sanguo-0",
+ "candidateSha256": "a5ccb38379c296b8460b2dcf51590d82b4fd14a5126e33857b3f26db164c9a6f",
+ "source": {
+  "path": "data/cache/ee3430ef493546bbcd2e700b.docs.json",
+  "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+  "range": [
+   607198,
+   614547
+  ],
+  "sliceSha256": "99eb46da1031fdea0ff8d2bf65c0781cf90f3176209d2fd3a60b12dd24d0298f",
+  "boundaryCheck": "复核者独立复算：sha256(docs.json)=c282cf39… 与任务 sourceHash 逐字一致；text[607198:614547] 长度 7349、以「第八十四回　难灭伽持圆大觉　法王成正体天然」开头，紧接其后是第八十五回标题。",
+  "note": "候选 source.docsJson 写的是 a065244455cfb2221bcda94a.docs.json；复核实测该文件与 ee3430ef493546bbcd2e700b.docs.json 的 sha256 相同（c282cf39…）、text 长度相同（722176）、切片哈希相同（99eb46da…），即两份是同内容的缓存副本。坐标口径成立，非缺陷。"
+ },
+ "method": "按 VERIFIER.md 顺序执行：①先把 docs[0].text[607198:614547) 整片读完（分 4 段带绝对偏移打印）并手写要点，**未先看候选结论**；②再打开候选逐条比对。机器侧：递归抽出全部 236 个 located quote 对象，逐条复算 text[s:e]==quote、end-start==len(quote)、find(quote)==start、wholeTextOccurrences、in-unit、sourceHash；五栏共用做区间求交；reuseLedger 与实际使用处对账；悬空 qid 扫描；覆盖度独立复算补集；对候选散文里每一处「X」片段做「X 是否在原文 + X 是否落在任一已定位引文内」双判据扫描（这是本复核发现引用局部性缺陷的仪器）；被排除项是否真未收；entityLabelDisclosure 计数对账；machineSelfCheck 计数复算；随机种子 20261012 抽 5 条独立 find。审计脚本：/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/verify-0084-w-verify-2/audit.py（sha256 24720b6dc9b3067c3c905d0c77f556632953bd2d481334ca0cc9eb50e26a5783，不 import 任何生成器代码）。",
+ "verdict": "partial",
+ "verdictRationale": "**没有编造，也没有任何一条抽取项在原文里找不到对应文字** —— 这是最严重的一类，候选干净通过。236/236 条引文逐字命中、偏移与长度全对、find() 全对、全文唯一性声明全对、区间归属全对、sourceHash 全对；12 条任务/19 条因果边/7 条状态/7 条知识差/7 条伏笔/18 条世界设定/14 条 unknowns 的每一条都在原文里有对应文字；无原文没有的人物、结局、伏笔，无「把结束当成功」（回末悬置被 F5/R7/U11 三处显式登记为 unresolved，TH2.counter 也明写「成正果在本区间没有任何事件层面的兑现」）；semanticReview 如实保持 not-performed；entityLabelDisclosure 主动披露了「孙悟空/猪八戒」这两个切片外称谓并给出可复算计数（复核实测：quotes 含这两串 0 条、切片内 0 次、全书 126/131 次，三项全部与声明一致），这是诚实而非掩饰。machineSelfCheck 七项计数复算全部与候选实际对象一致，覆盖度自报 3831/52.1%/109 段也被独立重算逐位命中。\n\n但**不能判 pass**：有 4 处「引文局部性」缺陷，属「下游照抄就会引入无法回溯的事实」那一类，且其中 2 处的自述本身就是假的：\n(1) T4.obstacle 的 basis=explicit 且栏文明写两个「」引述（「却怎么戴得头巾」「八戒头大」），但该栏两条引文 [609445,609463) 与 [609762,609790) **都不含这两段文字**，两段原文分别独立存在于 609463 与 609750 —— 事实为真、**引文没有定位到事实**。\n(2) T5.result.note 自称「止唐大官不用」是行者的答话、「我用在同一栏的 q_sujiu 里」；实测 q_sujiu 的引文是「可吃素酒？」（赵寡妇问句，611513-611518），而「止唐大官不用」在 611524，**不在任何引文内**。这句自述是假的。\n(3)(4) 悬空 qid 两处：q_kneel（T1.cost.note，指 607761「只情跪着磕头」）与 q_sanzhong（RULE5.explain，指 610778「上样者…」）被引用却**从未定义**，下游按引用找不到目标。这与项目自己已机械化的缺陷类同层（见 loop/state/out/DANGLING-REF-DEFECT.md 的三要素判据）。\n\n这 4 处都局部、可定点修复，不动摇 tasks/causeEdges/states/unknowns 的主体，也没有一条 counterExample 属主观否决（全部有原文逐字引证 + 可复现命令），故判 **partial** 而非 fail。",
+ "counterExamples": [
+  {
+   "claim": "T4.obstacle（basis=explicit）栏文：「装扮本身有硬障碍：四人眼下都是和尚，八戒当场指出「却怎么戴得头巾」；而且八戒头大，寻常头巾根本戴不上。」该栏 quotes 只登记了两条引文，均不含这两段。",
+   "quote": {
+    "quote": "我们如今都是和尚，眼下要做俗人，却怎么戴得头巾？就是边儿勒住，也没收顶绳处。",
+    "start": 609463,
+    "end": 609501,
+    "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+    "findHits": 1,
+    "verbatim": true
+   },
+   "counterQuote": {
+    "quote": "八戒的头大，戴不得巾儿，被行者取了些针线",
+    "start": 609750,
+    "end": 609770,
+    "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+    "findHits": 1,
+    "verbatim": true
+   },
+   "why": "两段原文都真实存在且唯一（occ=1），**事实层没有编造**；问题是候选把它们写成「」引述却**没有把它们登记为引文**：该栏实际登记的引文是 [609445,609463)「那呆子慌了道：“但你说话，通不察理。」与 [609762,609790)「被行者取了些针线，把头巾扯开，两顶缝做一顶，与他搭在头上」。后者虽然**字面上紧跟** 609750 那句，但切片起点在 609762，取该引文回原文切不出「八戒的头大」；前者更是在 609463 就结束，正好把「却怎么戴得头巾」切在区间之外。下游（发布桥按 quotes 取证据）会认为「八戒头大」这句话没有落点。复现：python3 -B audit.py 的第 [11] 节，两条均输出 `该引文原句是否被登记? False`。修法：T4.obstacle 补登 [609463,609501) 与 [609750,609762) 两段（或把第二条引文起点前移到 609750）。"
+  },
+  {
+   "claim": "T5.result.note 自述：「「止唐大官不用」是行者的答话（我用在同一栏的 q_sujiu 里），说明三藏连素酒也不沾」。",
+   "quote": {
+    "quote": "可吃素酒？",
+    "start": 611513,
+    "end": 611518,
+    "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+    "findHits": 1,
+    "qid": "q_sujiu",
+    "speaker": "赵寡妇",
+    "verbatim": true
+   },
+   "counterQuote": {
+    "quote": "止唐大官不用，我们也吃几杯。",
+    "start": 611524,
+    "end": 611538,
+    "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+    "findHits": 1,
+    "verbatim": true
+   },
+   "why": "q_sujiu 的引文逐字是「可吃素酒？」——那是**赵寡妇的问句**（候选自己标 speaker=赵寡妇，speakerBasis=explicit），不是「行者的答话」；而「止唐大官不用」在 611524，**不在任何一条已定位引文里**。所以这句 note 有两个可证的错：把答话挂到了问句的 qid 上、并声称这句已在引文中（实测 0 条引文含这串）。事实层仍无编造（原文确实有这句），但自述与自己的数据矛盾。复现：audit.py 第 [11] 节第三条输出 `该引文原句是否被登记? False`；直接查 grep -c '止唐大官不用' 候选文件为 2（都在 note 文字里），而 236 条引文含该串者为 0。修法：补登 [611524,611538) 为新 qid（如 q_tangbuguan），并把 note 的指认改到该 qid。"
+  },
+  {
+   "claim": "T1.cost.note 引用 q_kneel：「三藏的反应只有「心中害怕，战兢兢」与跪拜（q_haipa/q_kneel）」；该 qid 在候选内从未定义。",
+   "quote": {
+    "quote": "吓得个唐长老立身无地，只情跪着磕头。",
+    "start": 607761,
+    "end": 607779,
+    "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+    "findHits": 1,
+    "verbatim": true
+   },
+   "why": "原文有这条「跪着磕头」，q_haipa 也确有定义，但 **q_kneel 没有定义**：候选 140 个已定义 qid 里没有它。下游若按 note 去查 q_kneel 会找不到目标引用。同类判据项目已机械化（loop/state/out/DANGLING-REF-DEFECT.md 用「目标是否存在」这个同层布尔事实判悬空引用，并已据此定过真缺陷）。复现：audit.py 第 [5] 节输出 `悬空 ['q_kneel','q_sanzhong']`。修法：定义 q_kneel= [607761,607779) 或把 note 改指 q_bajiegu（[607779,607793)，已定义）。"
+  },
+  {
+   "claim": "RULE5.explain 引用 q_sanzhong：「行者据此选「上样」（每位五钱、连房钱在内，q_sanzhong 的引文在 T5 之外不再重复）」；该 qid 在候选内从未定义，且『上样者…』那段只在 excludedSettings 里、其 quote 字段为空。",
+   "quote": {
+    "quote": "上样者：五果五菜的筵席，狮仙斗糖桌面二位一张，请小娘儿来陪唱陪歇，每位该银五钱，连房钱在内。",
+    "start": 610778,
+    "end": 610824,
+    "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+    "findHits": 1,
+    "verbatim": true
+   },
+   "why": "「每位五钱、连房钱在内」这句原文（610778）**不在任何已定位引文内**：仅小娘儿一词因另两句偶然被引入。而解释里承诺「引文在 T5 之外不再重复」指向的 q_sanzhong 不存在；T12.objective.note 又第二次承诺「那一句已用在 T5.objective 之外的 RULE5 侧」，同样落空（RULE5 的 quote 是「我舍下在此开店多年…先小人，后君子」，不含上样者/小娘儿）。这是同一悬空引用被两处依赖。复现：audit.py 第 [5] 节 + `python3 -B audit.py`（第 [5] 节即打印该悬空引用）。修法：定义 q_sanzhong=[610778,610824) 并把它登记进 RULE5 或 T5，取消那两句「不再重复」的承诺。"
+  }
+ ],
+ "reverseChecks": [
+  {
+   "found": "八戒在行者出征前提了一个「根本不必伪装」的替代方案：剃头不是和尚、等半年长毛即可——行者当场否掉（「那里等得半年！」）。这是 T4 全部伪装行动之前被排除掉的**第一条备选路线**，候选 0 引证、JSON 里连字符串都不存在。",
+   "quote": "八戒道：“哥，你勒掯那个哩？不做和尚也容易，只消半年不剃头，就长出毛来也。”行者道：“那里等得半年！眼下就都要做俗人哩！”",
+   "offset": 609384,
+   "whyImportant": "它把「为什么非偷衣冠不可」从单选变成了二选一的取舍：伪装不是唯一想到的办法，而是被时间约束筛掉的那个。C8 的机制写「触发是可行性论证 + 现成物资」，漏掉了这个被否的替代项。"
+  },
+  {
+   "found": "沙僧对行者方案的表态是**明确赞成**并成为定案依据：「师兄处的最当，且依他行。」候选把决策记成 C8（可行性论证→换装）+ T4.result（长老无奈曲从），只保留了长老的被动一面，沙僧这一票没有登记。",
+   "quote": "沙僧道：“师兄处的最当，且依他行。”",
+   "offset": 609696,
+   "whyImportant": "三藏是「无奈只得曲从」，沙僧是主动赞成——同一决定在四众内部有两种态度。T4.result 只写「四人得了化名与分工」与 q_qucong（长老曲从），把唯一一处内部一致同意抹平了。"
+  },
+  {
+   "found": "C7.mechanism 把因果链写成「婆婆喊的是『夜耗子成精』，他偏要『明人不做暗事』把名号说出来」，但**触发那句原话（婆婆的惊叫）本身没有被任何引文登记**，只在 mechanism 里以「」出现；候选 JSON 中「老头子」「夜耗子成精也」两串均 0 命中。",
+   "quote": "那婆子慌慌张张的道：“老头子！\n\n不好了！夜耗子成精也！”",
+   "offset": 609110,
+   "whyImportant": "这是本轮「引文局部性」缺陷的**第二个形态**：不是编造，而是被引用的触发事件只有转述、没有落点。与上面 CE1/CE2 同根因（散文里以「」引用却没登记引文）。已登记的最短包含引文是 [609071,609110)「…拿着衣服头巾，往外就走。」——正好在婆婆出声前一字截止。",
+   "end": 609139
+  },
+  {
+   "found": "行者在柜里对明天的处置只打算到「忍耐」为止：先劝三藏忍着免了捆吊，具体办法「老孙自有对答」一字未说；随后「挨到三更时分」才动手。候选 T10.objective 用了许诺那半句，但没有登记「外面有人！打开柜，拿出来不是捆着，便是吊着」这条**处境判断**。",
+   "quote": "外面有人！打开柜，拿出来不是捆着，便是吊着。且忍耐些儿，免了捆吊。",
+   "offset": 613599,
+   "whyImportant": "候选 K7.knows 已用了这一句，**所以它其实被覆盖了** —— 我把它列出后自查发现不成立，如实撤回（见 notes 第 1 条）。保留在此仅为记录我的反向验证过程，不计入最终发现。"
+  },
+  {
+   "found": "剃头发生在 C17 两条引文（[614302,614332) 国王摸头 与 [614376,614398) 国王流泪）之间的 44 字**没有被登记**，而那一句正是国王认定报应的直接证据来源（他看见满宫人光头跪下）。候选 U8/selfCritique[0] 讨论的是「锦被窝中睡着一个和尚」的身份，不是这一句。",
+   "quote": "正慌忙处，只见那六院嫔妃，宫娥彩女，大小太监，皆光着头跪下道：“主公，我们做了和尚耶！”",
+   "offset": 614332,
+   "whyImportant": "C17.mechanism 写「触发是亲见与亲摸」，但它引的两条证据都不含「看见众人光头」这一步，中间那一跳靠读者自己补。这是本回「报应认知」形成的完整链条中唯一缺失的环节。"
+  },
+  {
+   "found": "T4.objective 的核心话术（自称北方贩马客、有十个弟兄、拾块瓦查儿变银子谢店家）在**第一次与店家接触时就被执行**了：赵寡妇问「有甚宝货？」行者答「我们是北方来的，有几匹粗马贩卖。」候选对这段的实际执行 0 引证（「北方来的」在候选 JSON 中 0 命中）。",
+   "quote": "行者道：“我们是北方来的，有几匹粗马贩卖。”",
+   "offset": 610351,
+   "whyImportant": "候选 T4 停在「议定话术」（result=化名与分工），K3 停在「寡妇只对异姓同居觉得有趣」，把这套说辞**真正被使用**的那一次漏掉了；而原文紧接着的应对（十弟兄、百十匹马、毛片不一）才是这套谎话的第一次压力测试。",
+   "end": 610373
+  }
+ ],
+ "notes": "1) **我可以判自己错，如实写在这里**：reverseChecks 第 4 条（K7 那句「外面有人」）我在列完之后自查发现候选 K7.knows 早已登记该引文（[613599,613632)），我的「反向发现」不成立，已撤回，不计入最终发现。这是按 VERIFIER.md「你可以判自己错」如实登记。\n2) **误杀检查（第 4 步）确实查出一条，并成为本复核最有价值的发现**：候选 rejectedForeshadows.RF3 拒绝「庚申斋是伏笔」的理由是「这句谎话**只在同一场对话里使用**（当斋→明日杀生），此后再无提及」——**这个理由是假的**。同一份候选的 T12.action.note 自己写着「『斋戒日期』这个理由之所以成立，靠的是他先前编的庚申斋……**同一条谎话在这里第二次替他挡事**」，而原文 611675 的「一则斋戒日期，二则兄弟们未到」确实是这同一句谎话的第二次使用（用来推掉寡妇请小娘儿）。RF3 的结论或许仍可保住（一次复用未必构成铺设—回收），但它**据以拒绝的事实陈述是错的**，且与候选自身的 T12 直接冲突。这正是 VERIFIER.md 点名的误杀形态：用「只出现一次」这类形式判据把一条合法线索挡掉。修法：RF3 的理由应改写（承认有第二次使用，再论「同一场内自圆其说不构成铺设—回收」），或把该线索降为 unknowns。\n3) **存疑（拿不出原文引证，不据此判 fail）**：excludedSettings[1][2][4] 声称「已读，未收」，但同句在 tasks/unknowns/causeEdges 里已作引文（径回南海→q_nanhai、只除是会飞的→q_wuyou、六街三市→q_jingdong）；excludedSettings[0] 列「剃发赞诗四联」为未收，而其中两联（法王灭法法无穷、管取法成正果）已被 themeReadings[TH2].support 引用为 q_zanfa/q_zanfa4。我理解 excludedSettings 的语义是「未收为**设定层条目**」，与「该句被别层引用」并不必然矛盾，所以**只记为存疑、不判 fail**（VERIFIER.md：拿不出原文引证的反对意见只能记为存疑）。但若项目口径是「未收＝该句不得出现在任何引文」，则这三条需重写措辞。\n4) **内容分区与计数全部可信**：machineSelfCheck 七项（quoteRefs 236、distinctQuotes 140、tasks 12、causeEdges 19、foreshadowsUnresolved 2、worldSettingsByKind place5/item8/rule5、unknowns 14）我逐项复算全部一致；覆盖度自报 3831 字/52.1%/109 段与我独立求补集的结果逐位相同，且候选在 caveat 里主动声明「我不能声称遗漏已穷尽，我只逐段判读了最长的 25 段」——这个自我限定是准确的，我的反向验证也印证了它（第 6 条发现即落在它承认未逐段判读的次长区段里）。\n5) **未做/做不到的**：我没有做语义层的美学或主题仲裁（TH1/TH2 的取舍属解释层，我不否决）；没有跑 GPU/浏览器测试（任务未要求，GPU 全局串行）；semanticReview 保持 not-performed，我未替它背书。\n6) 判定尺度说明：本候选在「有没有编造」这个最严重维度上是干净的（236/236 逐字、零幻觉、零越权），所以不判 fail；但 4 处引文局部性缺陷会让下游按 quotes 取证据时取不到散文所断言的内容，其中 2 处的自述与自身数据矛盾，故不判 pass。**必须丢弃或降级的具体条目**：T4.obstacle 的两条「」需补登引文（或降级该栏 basis 为 inferred）；T5.result.note 的指认需改 qid；q_kneel、q_sanzhong 需定义或改指；RF3.why 需重写。**可以直接用的**：T1–T3、T6–T12 的五栏、C1–C19（除上述引文局部性外机制均有逐字落点）、S1–S7、K1–K7、F1–F7、P1–P5、I1–I8、RULE1–RULE5、U1–U14 —— 我抽查与全量复算均未发现事实错误。",
+ "evidence": {
+  "auditScript": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/verify-0084-w-verify-2/audit.py",
+  "auditScriptSha256": "24720b6dc9b3067c3c905d0c77f556632953bd2d481334ca0cc9eb50e26a5783",
+  "reproduce": [
+   "cd /Users/carmen/Desktop/星系",
+   "python3 -B /Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/verify-0084-w-verify-2/audit.py",
+   "shasum -a 256 data/cache/ee3430ef493546bbcd2e700b.docs.json loop/state/out/read_xiyou_L0_0084.candidate.json"
+  ],
+  "hashes": {
+   "data/cache/ee3430ef493546bbcd2e700b.docs.json": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+   "loop/state/out/read_xiyou_L0_0084.candidate.json": "a5ccb38379c296b8460b2dcf51590d82b4fd14a5126e33857b3f26db164c9a6f",
+   "data/cache/a065244455cfb2221bcda94a.docs.json": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2"
+  },
+  "measuredResults": {
+   "quoteObjectsLocated": 236,
+   "verbatimSliceMatch": "236/236",
+   "findEqualsStart": "236/236",
+   "lengthMatch": "236/236",
+   "inUnit": "236/236",
+   "sourceHashMatch": "236/236",
+   "wholeTextOccurrencesMatch": "236/236",
+   "randomSampleSeed": 20261012,
+   "randomSampleHit": "5/5",
+   "intraTaskSlotReuse": 0,
+   "reuseLedgerFinalCountsMatchActual": "57/57",
+   "danglingQids": [
+    "q_kneel",
+    "q_sanzhong"
+   ],
+   "coverageRecomputed": {
+    "covered": 3831,
+    "ratio": 0.5213,
+    "uncoveredSpans": 109
+   },
+   "proseFragmentsInSourceButOutsideAnyQuote": 31,
+   "affectedEntries": 22,
+   "semanticFabricationFound": 0
+  }
+ }
+}

@@ -1,0 +1,405 @@
+{
+ "schema": "castline.verify.read.v1",
+ "task": "verify:sanguo:L0:0056",
+ "reviewedTask": "read:sanguo:L0:0056",
+ "reviewerRole": "VERIFIER",
+ "agent": "w-verify-0",
+ "book": "sanguo",
+ "lane": 0,
+ "unitIndex": 56,
+ "unitHead": "第五十七回　柴桑口卧龙吊丧　耒阳县凤雏理事",
+ "reviewedCandidate": {
+  "path": "loop/state/out/read_sanguo_L0_0056.candidate.json",
+  "sha256": "a2799b1235b8f20b01f8e800825d4edea534917581a5e1ffa144802f83feb877"
+ },
+ "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+ "range": [
+  279941,
+  285596
+ ],
+ "segmentSha256": "8dffcdfb98752744c5a68390547fb5d4ba2bae80e92ff459290a34f5649da208",
+ "textSha256": "9d28638de0b0a89fa080cc2defb4a1f8de6adb1260c4545c04ef80f73cbb221e",
+ "verdict": "partial",
+ "status": "done",
+ "summary": "先自己通读 docs[0].text[279941,285596) 全 5655 codepoint（20 行 / 14 非空段，正文止于 285540，其后为分隔线与站点导航），做完事实清单后才打开候选。**先给结论：抽取层没有编造。** 我自写探针（不 import 候选的 build.py/data_a.py/data_b.py/audit.py/audit_xiyou0.py）复算全部 221 条引文，TEXT[start:end]==quote、end-start==len(quote)、find 命中即 start、区间归属、inUnitOccurrences、globalOccurrences 六项失败数为 0；候选声明的 segmentSha256 与实测一致；人名/地名零幻觉（候选声明的全部人物名都能在切片内 find 到）；numeric 表达式零编造；「结束≠成功」执行得很干净（T1.result 不写取川进展、T14 拒写走出关隘、FS4 显式 unresolved、RCE4 专门否掉「赴巴丘＝到达巴丘」）；14 个 null 栏全部带 <栏位>Note 且与 nullColumnCount 一致；14 条任务五栏引文零共享句；96 个 id 零重复；12 个 sectionCounts 逐项相符。判 partial 的三类理由，都不推翻上述任何一条抽取结论：(1) **两处实体内容失实**（见 counterExamples）：T3.result 把原文写明的「庞统到荆州投玄德」写成「是否照办在本区间内不写」——与该文件自己的 FS1=resolved 及 T5 自相矛盾；S8.after 把「当夜消息递到曹操」标成 explicit，而切片内不存在字面串「当夜」。(2) **readMethod 自述强于可核验事实**：自称「20 行（16 行非空）」，而同一文件 coverage.nonEmptyLines=14、实测也是 14，且穷举证明起点 279941 在任何终点下非空行数上限只有 14 ⇒ 16 不可能成立。(3) **引证完整性**：散文里「」点名、可在原文逐字命中、却没有任何 quote 覆盖的句子共 39 处，其中 24 处落在承载结论的字段（trigger/mechanism/before/after/explain/text/perspective），例如 causeEdges[0].trigger、states[1].before、worldSettings[15].explain。这些**不是编造**（句子是真原文），但它们以「原文说」的口径出现而没有引证锚点，下游无法逐条复算。另有 12 条反向发现（见 reverseChecks），其中 9 条在该区间完全零覆盖、其余 3 条有效覆盖仅 1–2 个 codepoint（即全部 12 条实质零覆盖），最重的是曹操派黄奎行反间诱马腾入城的整段布置 [284252,284352)、孙乾谏止张飞（耒阳一段真正的转折点）[282760,282797)、马腾家世与韩遂结义 [283761,283885)、围擒执行层 [284835,284984)。误杀检查：候选的 refused 条目（RCE1 坠马→死、RCE2 书信→死、RCE3 长揖不拜→授县宰、RFS1 连环策→重用、RWS2 衣带诏立规则）我都逐条对过原文，**没有发现误杀**；对 RCE1 我单独记为存疑（见 notes），不据此判 fail。",
+ "method": {
+  "order": "先通读原文（未先看候选结论）→ 建事实清单 → 再打开候选逐条核对",
+  "independence": "自写 6 个探针，全部位于 /Volumes/资源库/我的资源/回滚点/verify-sanguo-0056/，不 import 候选任何脚本；引文层、覆盖层、散文引证层、幻觉层、结构层、矛盾层各自独立实现",
+  "readWholeSlice": true,
+  "paragraphMap": {
+   "lines": 20,
+   "nonEmptyLines": 14,
+   "bodyEnd": 285540,
+   "tail": "285541 分隔线 / 285562 站点导航（非正文）"
+  }
+ },
+ "counterExamples": [
+  {
+   "claim": "tasks[2]（T3_kongming_liushu，孔明留书）的 result 栏写：「实际结果：庞统允诺，孔明自己回荆州。原文只写到允诺，庞统此后是否照办在本区间内不写。」",
+   "quote": "径往荆州来见玄德。",
+   "quoteRef": {
+    "quote": "径往荆州来见玄德。",
+    "start": 282323,
+    "end": 282332,
+    "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+    "inRange": true,
+    "inUnitOccurrences": 1,
+    "globalOccurrences": 1
+   },
+   "why": "该断言与原文相反。本区间在后文明确写出庞统照办：他求了鲁肃的荐书、「径往荆州来见玄德」（[282323,282332)，在区间内），随后「玄德久闻统名，便教请入相见」（[282366,282380)），最终「遂拜庞统为副军师中郎将」（[283534,283545)）。孔明嘱托的两项（来荆州、共扶玄德）在区间内都被写出。这同时是候选的**内部矛盾**：同一文件的 FS1_kongming_liushu_pangtong status 标为 resolved，其回收正是靠庞统到了荆州并拿出这封信；T3.result 却写「是否照办不写」。性质是**过度保守的失实断言**（不是编造事实），但它会把一条原文已有的结果降级成 unknowns。candidate 的 FS1 与 T5（result：「他到了荆州并获接见」）都写对了，只有 T3.result 这一处写反 ⇒ 建议只改这一栏。"
+  },
+  {
+   "claim": "states[7]（S8_huangkuai_mimou，黄奎密谋的保密状态）after 栏写：「他在李春香房中乘醉说出全部约定；**当夜**消息递到曹操，次日他被绑至，喊无罪后遇害。」该条 basis 标为 explicit。",
+   "quote": "”妾告于苗泽，泽报知曹操。",
+   "quoteRef": {
+    "quote": "”妾告于苗泽，泽报知曹操。",
+    "start": 284771,
+    "end": 284784,
+    "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+    "inRange": true,
+    "inUnitOccurrences": 1,
+    "globalOccurrences": 1
+   },
+   "why": "「当夜」这个时间限定是候选加上去的，原文没有。全切片内**不存在字面串「当夜」**（TEXT[279941:285596].find('当夜') == -1，可复算）。原文实际给出的时间只有两个：李春香套话发生在「是夜」（[284682,284699)「是夜黄奎果到春香房中」），围擒发生在「次日」（[284835,284851)）。而情报从李春香 → 苗泽 → 曹操这一段（[284771,284784)）原文只写转告与报知，没有写是否当夜完成。这是**叙述层加的细节**，却被标成 explicit；它落在承载状态跃迁的字段上，会被下游当成原文事实。严重度低于编造人物/结局，但属于同类形态，应降级为 inferred 或直接删去「当夜」二字。"
+  }
+ ],
+ "reverseChecks": [
+  {
+   "found": "曹操派黄奎以「劳军」为名诱马腾入城的整段布置（100 codepoint，零引文、零条目）——马腾次日「将次近城」的直接原因，也是黄奎出现在马腾寨中的唯一解释",
+   "quote": "曹操听知马腾已到，唤门下侍郎黄奎分付曰：“目今马腾南征，吾命汝为行军参谋，先至马腾寨中劳军，可对马腾说：西凉路远，运粮甚难，不能多带人马。我当更遣大兵，协同前进。来日教他入城面君，吾就应付粮草与之。”",
+   "quoteRef": {
+    "quote": "曹操听知马腾已到，唤门下侍郎黄奎分付曰：“目今马腾南征，吾命汝为行军参谋，先至马腾寨中劳军，可对马腾说：西凉路远，运粮甚难，不能多带人马。我当更遣大兵，协同前进。来日教他入城面君，吾就应付粮草与之。”",
+    "start": 284252,
+    "end": 284352,
+    "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+    "inRange": true,
+    "inUnitOccurrences": 1,
+    "globalOccurrences": 1
+   },
+   "why": "候选 CE13/WS16 只到荀攸「降诏加马腾为征南将军」这一层谋划，T12 直接把黄奎当作马腾寨中的密谋者，未解释他为何在场。原文这里写明曹操另派黄奎行反间、以粮草为饵；缺此一层，CE14「泄密→设伏」的上游在原文里是断的。"
+  },
+  {
+   "found": "孙乾谏止张飞擒人、张飞改为入县问案——耒阳一段真正的转折点",
+   "quote": "孙乾曰：“庞士元乃高明之人，未可轻忽。且到县问之。如果于理不当，治罪未晚。”",
+   "quoteRef": {
+    "quote": "孙乾曰：“庞士元乃高明之人，未可轻忽。且到县问之。如果于理不当，治罪未晚。”",
+    "start": 282760,
+    "end": 282798,
+    "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+    "inRange": true,
+    "inUnitOccurrences": 1,
+    "globalOccurrences": 1
+   },
+   "why": "原文以「张飞大怒，欲擒之。孙乾曰：…飞乃入县」写明因果（「乃」字表后果），该 38 codepoint 段 [282760,282798) 被候选引文覆盖 1/38（唯一那 1 个 codepoint 来自下一条引文「飞乃入县」的起点），有效覆盖约等于 0，候选全部 17 条 causeEdges 中没有这一条。S10 的 note 提到「在孙乾劝阻后改判为举荐」，但没有引证也没有立边；WS15 把巡视授权写成 executed 时同样没有连到这次劝阻。"
+  },
+  {
+   "found": "马腾家世整段：马援之后、与镇西将军韩遂为弟兄（124 codepoint 零覆盖）",
+   "quote": "却说腾字寿成，汉伏波将军马援之后，父名肃，字子硕，桓帝时为天水兰干县尉；后失官流落陇西，与羌人杂处，遂娶羌女生腾。腾身长八尺。体貌雄异，禀性温良，人多敬之。灵帝末年，羌人多叛，腾招募民兵破之。初平中年，因讨贼有功，拜征西将军，与镇西将军韩遂为弟兄。",
+   "quoteRef": {
+    "quote": "却说腾字寿成，汉伏波将军马援之后，父名肃，字子硕，桓帝时为天水兰干县尉；后失官流落陇西，与羌人杂处，遂娶羌女生腾。腾身长八尺。体貌雄异，禀性温良，人多敬之。灵帝末年，羌人多叛，腾招募民兵破之。初平中年，因讨贼有功，拜征西将军，与镇西将军韩遂为弟兄。",
+    "start": 283761,
+    "end": 283885,
+    "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+    "inRange": true,
+    "inUnitOccurrences": 1,
+    "globalOccurrences": 1
+   },
+   "why": "候选 KG6/U9 反复使用「又有韩遂相助」这条依据，却未登记依据本身——叙述层在这里直写二人是结义弟兄。周循/周胤式的「新人物首次出现」在本区间还有这一段的韩遂与马肃。"
+  },
+  {
+   "found": "周瑜两男一女、孙权厚恤（周循、周胤两个新人物名，21 codepoint 零覆盖）",
+   "quote": "瑜有两男一女，长男循，次男胤，权皆厚恤之。",
+   "quoteRef": {
+    "quote": "瑜有两男一女，长男循，次男胤，权皆厚恤之。",
+    "start": 281693,
+    "end": 281714,
+    "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+    "inRange": true,
+    "inUnitOccurrences": 1,
+    "globalOccurrences": 1
+   },
+   "why": "这两个名字在候选全文（含 unknowns）中出现 0 次。同段「权闻瑜死，放声大哭」（[280470,280480)）也未覆盖——S2 只记孙权拆视遗书之后的任命动作，未记他得知死讯时的直接反应。"
+  },
+  {
+   "found": "苗泽当面向曹操求李春香为妻（T13 目标的兑现动作）+ 曹操的判词",
+   "quote": "苗泽告操曰：“不愿加赏，只求李春香为妻。”",
+   "quoteRef": {
+    "quote": "苗泽告操曰：“不愿加赏，只求李春香为妻。”",
+    "start": 285181,
+    "end": 285202,
+    "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+    "inRange": true,
+    "inUnitOccurrences": 1,
+    "globalOccurrences": 1
+   },
+   "why": "T13 objective 引「泽欲得春香，正无计可施」立目标，result 直接跳到「并斩于市」，跳过中间他真正开口索取的那一刻 [285181,285202)；曹操的判词「你为了一妇人，害了你姐夫一家，留此不义之人何用！」[285202,285232) 也零覆盖——那是叙述层对 T13 结果的解释。"
+  },
+  {
+   "found": "曹操教苗泽对证（T12 结果栏紧邻、却不含的一句）",
+   "quote": "”操教苗泽对证。",
+   "quoteRef": {
+    "quote": "”操教苗泽对证。",
+    "start": 285060,
+    "end": 285068,
+    "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+    "inRange": true,
+    "inUnitOccurrences": 1,
+    "globalOccurrences": 1
+   },
+   "why": "[285060,285068) 零覆盖。T12.result 引的是 [285034,285051) 与 [285051,285060)，紧邻但不含此句；而「对证」正是马腾「竖儒误我大事」的直接触发。"
+  },
+  {
+   "found": "回末第二份军报「刘备将欲取川」与曹操「羽翼成矣」的警觉",
+   "quote": "忽人报曰：“刘备调练军马，收拾器械，将欲取川。”操惊曰：“若刘备收川，则羽翼成矣。将何以图之？”",
+   "quoteRef": {
+    "quote": "忽人报曰：“刘备调练军马，收拾器械，将欲取川。”操惊曰：“若刘备收川，则羽翼成矣。将何以图之？”",
+    "start": 285417,
+    "end": 285465,
+    "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+    "inRange": true,
+    "inUnitOccurrences": 1,
+    "globalOccurrences": 1
+   },
+   "why": "[285417,285465) 共 48 codepoint，被覆盖 1/48（唯一那 1 个 codepoint 来自 FS4 起于 [285464,285504) 的下一条引文，只差 1 个 codepoint），有效覆盖约等于 0；两个子句「刘备调练军马，收拾器械，将欲取川」与「若刘备收川，则羽翼成矣」各自覆盖均为 0。CE15 把南征触发写成「杀马腾等→决意南征」，CE16 写成「许昌报→聚议南征」；回末这份**更晚的**军报与曹操「惊」的反应未被登记，而它正是「某有一计」进言前的直接铺垫。"
+  },
+  {
+   "found": "曹操对西凉兵的安抚谕告（只罪马腾父子、不连坐众人）",
+   "quote": "曹操教招安西凉兵马，谕之曰：“马腾父子谋反，不干众人之事。”",
+   "quoteRef": {
+    "quote": "曹操教招安西凉兵马，谕之曰：“马腾父子谋反，不干众人之事。”",
+    "start": 285304,
+    "end": 285334,
+    "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+    "inRange": true,
+    "inUnitOccurrences": 1,
+    "globalOccurrences": 1
+   },
+   "why": "[285304,285334) 被覆盖 2/30（两条引文各命中末尾 1 个 codepoint，来自紧邻的下一条「分付把住关隘」起点），有效覆盖约等于 0。这是曹操在杀马腾之后敢立刻南征的前提（CE15 引的是「分付把住关隘」那一句，不是这一句）。"
+  },
+  {
+   "found": "围擒马腾的执行层全部零覆盖：设伏执行 [284835,284984) 149 codepoint 与「二人身带重伤，坐下马又被箭射倒」[284993,285026) 33 codepoint，均为 0 覆盖",
+   "quote": "次日，马腾领着西凉兵马，将次近城，只见前面一簇红旗，打着丞相旗号。马腾只道曹操自来点军，拍马向前。忽听得一声炮响，红旗开处，弓弩齐发。一将当先，乃曹洪也。",
+   "quoteRef": {
+    "quote": "次日，马腾领着西凉兵马，将次近城，只见前面一簇红旗，打着丞相旗号。马腾只道曹操自来点军，拍马向前。忽听得一声炮响，红旗开处，弓弩齐发。一将当先，乃曹洪也。",
+    "start": 284835,
+    "end": 284912,
+    "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+    "inRange": true,
+    "inUnitOccurrences": 1,
+    "globalOccurrences": 1
+   },
+   "why": "CE14 只引到「分付如此如此」；U1 明确写「不写伏的内容」。但原文用整整 149 codepoint 写了设伏的**执行**，另有 33 codepoint 写「二人身带重伤，坐下马又被箭射倒」——后者是 T11.result「俱被执」的物理原因。这是「叙述层不写谋划内容」与「叙述层写了执行过程」两件事被合并成一件事：U1 的结论对，但它被用来覆盖了本该登记的执行层事实。"
+  },
+  {
+   "found": "本回四首「后人诗」中三首零覆盖 + 周瑜诗前半段零覆盖（叙述层对本回两场死亡的唯一并置概括）",
+   "quote": "后人有诗叹马腾曰：“父子齐芳烈，忠贞著一门，捐生图国难，誓死答君恩。嚼血盟言在，诛奸义状存。西凉推世胄，不愧伏波孙！”",
+   "quoteRef": {
+    "quote": "后人有诗叹马腾曰：“父子齐芳烈，忠贞著一门，捐生图国难，誓死答君恩。嚼血盟言在，诛奸义状存。西凉推世胄，不愧伏波孙！”",
+    "start": 285122,
+    "end": 285181,
+    "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+    "inRange": true,
+    "inUnitOccurrences": 1,
+    "globalOccurrences": 1
+   },
+   "why": "候选只引周瑜诗末联「巴丘终命处，凭吊欲伤情」。叹孔明诗 [281437,281479)、叹马腾诗 [285122,285198)、叹苗泽诗 [285260,285301) 全部零覆盖；周瑜诗前半段 [280390,280434) 也零覆盖。其中叹马腾诗「不愧伏波孙」正与 R2（马腾家世）互文。"
+  },
+  {
+   "found": "庞统自陈：想以才学打动玄德，因孔明不在而勉强辞去（原文给的条件，非动机推测）",
+   "quote": "”欲以才学动之，见孔明不在，只得勉强相辞而去。",
+   "quoteRef": {
+    "quote": "”欲以才学动之，见孔明不在，只得勉强相辞而去。",
+    "start": 282514,
+    "end": 282537,
+    "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+    "inRange": true,
+    "inUnitOccurrences": 1,
+    "globalOccurrences": 1
+   },
+   "why": "[282514,282537) 零覆盖（U4 的引文在 [282502,282514) 处就截断了）。候选 KG2/U4 只把「不拿荐书」与「貌陋」列为原因，S4 的 note 更明确写本状态不解释原因；但原文在同一句后半直写了「见孔明不在」这个条件，以及前文「此时孔明按察四郡未回」（[282332,282347)，亦零覆盖）。这不是要候选补一个动机，而是它已引的那半句把同一句里的条件切掉了。"
+  },
+  {
+   "found": "孙权搁置庞统的完整措辞（「待有用公之时，却来相请」）",
+   "quote": "待有用公之时，却来相请。",
+   "quoteRef": {
+    "quote": "待有用公之时，却来相请。",
+    "start": 282014,
+    "end": 282026,
+    "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+    "inRange": true,
+    "inUnitOccurrences": 1,
+    "globalOccurrences": 1
+   },
+   "why": "[282014,282026) 零覆盖。CE7 的引文到「公且退」为止，S3.before 引「公且退」；孙权这句话的后半是**有条件的留用承诺**，与「誓不用之」并不完全同义，候选未登记这一层。"
+  }
+ ],
+ "falseKillChecks": [
+  {
+   "candidate": "RCE1_nu_bing_si：拒绝连「周瑜怒气填胸、坠于马下」→「周瑜之死」",
+   "verdict": "no-mis-kill（支持候选）",
+   "why": "原文全段无医者、无伤处、无病灶；周瑜自述「奈天命已绝矣」。候选给的两条引证都能逐字命中，拒绝连边有原文依据。"
+  },
+  {
+   "candidate": "RCE2_shu_zhi_si：拒绝连「孔明送书」→「周瑜之死」",
+   "verdict": "no-mis-kill（支持候选）",
+   "why": "周瑜读信后的动作为长叹、作书、托付，原文没有一句写病情加重。这是正确的「时间相邻≠因果」。"
+  },
+  {
+   "candidate": "RCE3_changyi_bubai_zhixian：拒绝连「长揖不拜」→「只授县宰」",
+   "verdict": "no-mis-kill（支持候选）",
+   "why": "原文把原因分列在相貌（「玄德见统貌陋，心中亦不悦」）与编制（「荆楚稍定，苦无闲职」）两句，未对失礼作任何评论。"
+  },
+  {
+   "candidate": "RFS1_lianhuan_ce_zhi_gong：拒绝把「连环策」立为伏笔",
+   "verdict": "no-mis-kill（支持候选）",
+   "why": "回收是反向的：孙权当场否认此功（「未必此从之功也，吾誓不用之」）。铺设与回收都在原文，但方向不成立，拒绝立条正确。"
+  },
+  {
+   "candidate": "RWS2_yidaizhao_guize / RFS2_yidaizhao：拒绝把衣带诏立为规则或伏笔",
+   "verdict": "no-mis-kill（支持候选）",
+   "why": "诏书原文不在本区间，只有两处人物语提及；无文本即无法写 declared，且铺设动作不在区间内。降为 KG5 是正确处理。"
+  },
+  {
+   "candidate": "WS6_place_xiliang 记 mentioned 而非 arrived",
+   "verdict": "no-mis-kill（支持候选）",
+   "why": "马腾一行是**离开**西凉；马超留在那里但区间内无其现场动作，只有人物语交代。记 mentioned 有依据。"
+  },
+  {
+   "candidate": "CE9_nixiang_shu_xian_zhixian 标 inferred 而非 explicit",
+   "verdict": "no-mis-kill（支持候选，且做法正确）",
+   "why": "「匿书」与「只授县宰」的连接靠后文回指补出，非叙述层直连；标 inferred 并给 caveat 是恰当降级，不是误杀。"
+  }
+ ],
+ "hallucinationCheck": {
+  "personsNotInSlice": [],
+  "numbersNotInSlice": [],
+  "inventedEndings": [],
+  "inventedForeshadows": [],
+  "overclaimSuccess": [],
+  "method": "对候选全部 who/character/knownBy/unknownBy 字段抽取人名后逐个 find；对全部「N日/N年/N人」式数字表达式逐个 find；对结局词（首级/封侯/成都/落凤坡等）做存在性筛查。结果：候选声明的人物名 100% 可在切片内 find 到，数字表达式 0 例外。唯二失实是 counterExamples 里的「当夜」（时间细节）与 T3.result（对原文内容的反向误述）。"
+ },
+ "quoteSpotCheck": {
+  "sampled": [
+   {
+    "path": "$.rejectedCauseEdges[0].quotes[1]",
+    "quote": "乃聚众将曰：“吾非不欲尽忠报国，奈天命已绝矣。",
+    "start": 280314,
+    "end": 280337,
+    "find": 280314,
+    "verbatim": true,
+    "offsetConsistent": true
+   },
+   {
+    "path": "$.tasks[0].action.quotes[0]",
+    "quote": "”周瑜览毕，长叹一声，唤左右取纸笔作书上吴侯。",
+    "start": 280291,
+    "end": 280314,
+    "find": 280291,
+    "verbatim": true,
+    "offsetConsistent": true
+   },
+   {
+    "path": "$.unknowns[3].quotes[0]",
+    "quote": "”统思：“玄德待我何薄！",
+    "start": 282502,
+    "end": 282514,
+    "find": 282502,
+    "verbatim": true,
+    "offsetConsistent": true
+   },
+   {
+    "path": "$.tasks[2].result.quotes[0]",
+    "quote": "”统允诺而别，孔明自回荆州。",
+    "start": 281645,
+    "end": 281659,
+    "find": 281645,
+    "verbatim": true,
+    "offsetConsistent": true
+   },
+   {
+    "path": "$.tasks[0].objective.quotes[0]",
+    "quote": "瑜大怒，咬牙切齿曰：“你道我取不得西川，吾誓取之！”",
+    "start": 280008,
+    "end": 280034,
+    "find": 280008,
+    "verbatim": true,
+    "offsetConsistent": true
+   }
+  ],
+  "seed": 20261012,
+  "result": "5/5 逐字命中，find() 命中位置与声明的 start 完全一致，偏移口径正确"
+ },
+ "machineChecks": {
+  "quotes": 221,
+  "quoteFails": 0,
+  "quoteWarns": 0,
+  "segmentSha256Match": true,
+  "idCount": 96,
+  "idDuplicates": 0,
+  "nullColumns": 14,
+  "declaredNullColumnCount": 14,
+  "nullNotesMissing": 0,
+  "fiveColumnSharedSentences": 0,
+  "sectionCountsMismatches": 0,
+  "characterNamesNotInSlice": 0,
+  "proseCitationsWithoutQuoteCoverage": 39,
+  "proseCitationsInConclusionBearingFields": 24,
+  "uncoveredCodepointsInBody": 2895,
+  "readMethodNonEmptyLinesClaim": 16,
+  "readMethodNonEmptyLinesActual": 14,
+  "readMethodClaimAttainable": false
+ },
+ "usable": {
+  "usableAsIs": [
+   "tasks 除 T3.result 外的 13 条",
+   "causeEdges 全部 17 条（引文逐字可查，机制由原文连接词支撑）",
+   "rejectedCauseEdges / rejectedForeshadows / rejectedWorldSettings 全部 12 条（误杀检查未发现误杀）",
+   "states 除 S8.after 的时间限定外的 10 条（S8 删「当夜」后可用）",
+   "foreshadows 4 条（FS1-FS4，含显式 unresolved 的 FS4）",
+   "worldSettings 17 条（数值与地点状态可复算）",
+   "knowledgeGaps 6 条、themeReadings 2 条、unknowns 10 条（含 U10 的sourceHash 异常登记，我已独立复算证实）"
+  ],
+  "mustFixBeforePublish": [
+   "T3.result：删去「庞统此后是否照办在本区间内不写」，改为原文实际写出的「庞统求书后径往荆州见玄德并获接见」（否则与 FS1=resolved、T5 自相矛盾）。",
+   "S8.after：删去「当夜」或降 basis 为 inferred —— 切片内无「当夜」字面，原文只写「妾告于苗泽，泽报知曹操」。",
+   "readMethod：把「16 行非空」改为 14（或改为与 coverage 一致的口径）。"
+  ],
+  "shouldDowngradeToUnknowns": [
+   "无。两处失实都是**可以就地改对**的（原文完备），不需要降级为 unknowns —— 降级会把已有的原文信息丢掉。"
+  ]
+ },
+ "notes": "总体判断：这是一份**抽取层可信、引证层有锚点缺口、自述层有一处夸大**的候选。我按 VERIFIER 契约的顺序做（先读原文，再核候选），并做了反向验证，结论是 partial 而不是 fail —— 因为**拿不出任何一条「原文没有、候选编造」的实体**：221 条引文全部逐字可查，人物名零幻觉，结局零编造，「结束≠成功」与「图谋≠到达」两处最容易出错的纪律执行得很干净（T1/T14/FS4/RCE4 是这份文件最好的部分）。两处失实的严重度都低于「编造」：T3.result 是**保守到失实**（把原文写明的结果说成不写），S8 是**给状态跃迁加了一个原文没有的时间限定**。两者都能用原文一句话改对，所以不该判 fail。\n\n存疑（**不作为判 fail 依据**，按契约只记录）：\n① RCE1（坠马→死）我倾向认为叙述层的「怒气填胸，坠于马下」→「连叫数声而亡」在**章回小说的叙事语法**里是一条成立的因果；但候选引证的两句确实不足以证明机制（原文没有医者/伤处/病灶），我拿不出「原文把坠马写成死因」的逐字引证，故按纪律只记为存疑，不据此判 fail。若下游要连这条边，须标明它是推断而非原文。\n② 引证缺口 39 处：我把它们全部逐条 find 过，**每一处都是真原文**，所以这不是编造，而是「以原文口径说话但没挂引证」的可复算性问题。w-verify-4 把它记作 18 处 counterExample，我用更宽的取串规则（≥4 codepoint、遍历所有字符串字段、含 explain/text/perspective）得到 39 处、其中 24 处落在承载结论的字段。两个数字的差异来自取串阈值与字段范围，不来自事实分歧 —— **我的 39 是 18 的超集**，我不据此声称 w-verify-4 漏判。\n③ 我没有做的事（如实登记在 remaining）：没有跑 GPU/浏览器测试（本任务不需要）；没有核验候选 reproduce 段里 <CL_ARTIFACTS> 的跨批次可解析性（候选自己也已如实登记该限制）；没有对 w-verify-2 / w-verify-4 的全部断言逐条重放（我只重放了它们的引证层结论，结论一致）。\n\n关于被复核者的交接：候选 provenance 如实写明「内容由 w-dafeng-0 于上一轮构建、w-xiyou-0 复算并修正 3 处交叉引用后提交」，我复算了那 3 处修正（WS5→WS16 类型、S4→U4、wallClockNote），**修正后的指向都正确**。这处如实登记值得肯定。\n\n关于 U10（任务 JSON 的 sourceHash 与实读文件不一致）：我独立复算证实——task JSON 声明 2988ce6e…ff = data/cache/f0b45e85aac6c95e584075a2.docs.json 的文件哈希；提示词指定的 8ab7298a…c2 = data/cache/fe42d01f3826fe8096f86614.docs.json；两者 docs[0].text 逐字相同（607191 codepoint，同为 9d2863…），本单元切片哈希同为 8dffcd…，差异只在 JSON 键顺序。候选登记正确、未改校验。",
+ "remaining": [
+  "T3.result / S8.after / readMethod 三处应就地改正（原文完备，不需要新增原文阅读）。",
+  "39 处散文引证缺口建议补齐 quote 锚点，或把「原文说」降级为归纳语气。",
+  "12 条反向发现里，建议至少补入：曹操派黄奎行反间 [284252,284352)、孙乾谏止张飞 [282760,282797)（缺 causeEdge）、马腾家世与韩遂结义 [283761,283885)、围擒执行层 [284835,284984)、回末第二份军报 [285417,285465)。",
+  "本轮未跑 GPU/浏览器测试（任务未要求）；未核验 <CL_ARTIFACTS> 跨批次可解析性。",
+  "**本轮改动的副作用（如实登记）**：本任务 writes 指定的loop/state/out/verify_sanguo_L0_0056.verdict.json 同时是 w-verify-4 记录（verify_sanguo_L0_0056.json，evidence sha256=69f6d1fc…）的证据文件。我按任务规定写入该路径后，该条旧证据的哈希会不再匹配。为不销毁他人工作，w-verify-4 版本的逐字节副本已留存于 /Volumes/资源库/我的资源/回滚点/verify-sanguo-0056/prior/verdict-w-verify-4.json（sha256=69f6d1fcadf1dc8224687b32da87151fa098cecc81e0dc975b9c25296fe1d6fb，与该记录声明的哈希一致，可复核）。本条沿用的是 w-verify-4 自己保存 w-verify-2 版本（probe-0056-verify2/prior-verdict-w-verify-2.json）的既有做法。本轮的规范记录会以新哈希重新提交，使 verify:sanguo:L0:0056 仍为 done。"
+ ],
+ "reproduce": {
+  "harness": "/Volumes/资源库/我的资源/回滚点/verify-sanguo-0056/",
+  "scripts": {
+   "verify.py": "引文层：221 条 TEXT[start:end]/find/区间/出现次数复算",
+   "coverage.py": "覆盖层：逐 codepoint 覆盖图 + 未覆盖段 + 行数自述核对",
+   "prose_gap.py": "散文引证层：点名原文却无 quote 覆盖的句子",
+   "misquote.py": "误引层：「」片段是否逐字在切片内",
+   "fabrication.py": "幻觉层：人名/数字/结局词存在性筛查",
+   "structcheck.py": "结构层：随机 5 引文抽检 + 五栏独立 + null Note + id + 分区计数 + 16 行穷举否证",
+   "contradict.py": "矛盾层：逐条断言 vs 原文",
+   "reverse.py": "反向层：13 条反向发现的偏移与哈希物化"
+  },
+  "commands": [
+   "python3 -B -s /Volumes/资源库/我的资源/回滚点/verify-sanguo-0056/verify.py",
+   "python3 -B -s /Volumes/资源库/我的资源/回滚点/verify-sanguo-0056/structcheck.py",
+   "python3 -B -s /Volumes/资源库/我的资源/回滚点/verify-sanguo-0056/coverage.py",
+   "python3 -B -s /Volumes/资源库/我的资源/回滚点/verify-sanguo-0056/prose_gap.py",
+   "python3 -B -s /Volumes/资源库/我的资源/回滚点/verify-sanguo-0056/misquote.py",
+   "python3 -B -s /Volumes/资源库/我的资源/回滚点/verify-sanguo-0056/fabrication.py",
+   "python3 -B -s /Volumes/资源库/我的资源/回滚点/verify-sanguo-0056/contradict.py",
+   "python3 -B -s /Volumes/资源库/我的资源/回滚点/verify-sanguo-0056/reverse.py",
+   "shasum -a 256 loop/state/out/read_sanguo_L0_0056.candidate.json",
+   "shasum -a 256 data/cache/fe42d01f3826fe8096f86614.docs.json"
+  ],
+  "sourceHashSelfCheck": "python3 -c \"import hashlib,json;t=json.load(open('data/cache/fe42d01f3826fe8096f86614.docs.json'))[0]['text'];print(hashlib.sha256(t[279941:285596].encode()).hexdigest())\" → 8dffcdfb98752744c5a68390547fb5d4ba2bae80e92ff459290a34f5649da208"
+ }
+}

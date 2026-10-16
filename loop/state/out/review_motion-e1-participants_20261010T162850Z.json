@@ -1,0 +1,181 @@
+{
+  "task": "review:motion-e1-participants:20261010T162850Z",
+  "agent": "motion-e1-participants-20261010T162850Z",
+  "status": "done",
+  "summary": "M85参与者最小接线只读审阅：明确稳定ID解析、投影、安全清理、同帧钩子一次显影及现有责任测试扩展；附可验证纯函数候选。",
+  "hotspots": [
+    {
+      "path": "js/sky/sky-shell-player.js",
+      "line": 277,
+      "function": "refresh",
+      "use": "图/模型变更的唯一重建处，构建身份catalog；立即清参与SVG与当前解释事件。"
+    },
+    {
+      "path": "js/sky/sky-shell-player.js",
+      "line": 296,
+      "function": "ensure",
+      "use": "复用#skyStoryPanel委派data-story动作及唯一registerFrameHook(frame)；把新#skyStoryParticipants SVG追加在现有因果SVG之后。"
+    },
+    {
+      "path": "js/sky/sky-shell-player.js",
+      "line": 590,
+      "function": "render",
+      "use": "现有.ssp-cast后插入谁在场按钮，展开完整名单；不移走紧随其后的原文入口。"
+    },
+    {
+      "path": "js/sky/sky-shell-player.js",
+      "line": 862,
+      "function": "frame",
+      "use": "先调用参与绘制，再允许现有因果!links.length早退。不得把参与g混入svg因果childNodes数组。"
+    },
+    {
+      "path": "js/sky/sky-shell-camera.js",
+      "line": 167,
+      "function": "starScreen/starScreens",
+      "use": "输入规范人物名，输出以viewport CSS像素为尺度的[x,y]；每帧共享一次canvas rect。"
+    },
+    {
+      "path": "js/sky/sky-shell.js",
+      "line": 574,
+      "function": "shellContext",
+      "use": "目前未传starScreens；只加starScreens:starScreens桥，不复制投影公式。"
+    },
+    {
+      "path": "js/scene.js",
+      "line": 991,
+      "function": "人物mkNode创建段",
+      "use": "n.data=c可校验稳定ID；渲染键仍是c:<规范姓名>。"
+    },
+    {
+      "path": "js/atlas/atlas-source.js",
+      "line": 369,
+      "function": "aliasIndex",
+      "use": "owners[token]返回稳定ID集合；tokens及queue保留歧义。"
+    },
+    {
+      "path": "css/sky-reading.css",
+      "line": 513,
+      "selector": ".sky-hud svg.sky-story-beams",
+      "use": "复用fixed inset0 full viewport pointer-events:none外层样式，新增独立无箭头参与线class。"
+    }
+  ],
+  "minimalDesign": {
+    "identity": "每次graph更换构建一次participantCatalog；逐token读owners→唯一stableId→唯一人物对象，拒绝token歧义、id/entityId不一致、重复ID、重复规范名或identityStatus非resolved。不要因为event.attribution整体review_required就屏蔽其余确定token，也不要因为人物某个无关别名冲突就屏蔽其唯一规范名。未解析token完整文本保留且不可连接。",
+    "sceneIdentity": "每条实际连线前，S.nodeOf(\"c:\"+row.name)必须存在；n.data.id/entityId与row.id相等才用X.starScreens(row.name)返回的坐标。不存在、身份不符、非有限或图外投影只保留名单。最多6个唯一已解析人物进前景，事件原始全名单可达。",
+    "eventPoint": "直接调用X.disc.eventPoint(sequence[pos])，返回{x,y}。不调用point()的无eventPoint后备，因为其按同章slot角度造显示位置；无真实eventPoint只保留名单和不能定位说明。",
+    "svg": "新svg仅aria-hidden视觉层，id=skyStoryParticipants，class=sky-story-beams sky-story-participants；viewBox 0 0 innerWidth innerHeight。每人物g存data-event-id/data-character-id/data-character-name以供浏览器对照。只有path+circle+text，没有polygon/marker-end/flow。线旁静态参与此事件图例。SVG不捕获点击，操作全部在panel。",
+    "frontBack": "在现有因果svg之后追加新svg可保留旧测试hud.childNodes[1]含义；参与线前景只在自己的说明模式中出现，启动时先清因果links表现避免同时两项主解释。不重排真实图坐标，不另飞镜。",
+    "timing": "点击先stopPlay，然后设置participantState={eventId,graph,age:0,active:true}。同一个frame(dt)推进局部一次600ms显影：0–120事件圈，120–360最多6个人物40ms错峰（线无方向语义），360–600完整名单进入终态。不要以X.playing为推进条件，否则stopPlay后动画永远0；语义时钟始终暂停。X.reduced()直接age=0.6静态终态；无rAF/setTimeout。后台不推进age，不追赶积压dt，返回保持静态终态最稳。",
+    "pauseAndInput": "此显影由明确点击触发，局部说明可在语义暂停下完成；用户再次点收起、切换对象、原文、关闭、换书直接cancel。若全局暂停被用户明确触发而说明尚在动，可将age置终态，保留全部内容；普通render不能重新启动。",
+    "cleanup": "clearParticipants函数只清自己的state/SVG。refresh、caption(null)、clearCursor、seekEventAt、seek导致eventId变化、close按钮、Escape、contextOpen、exitJourney、setPlayback、togglePlay开始、completeJourney，及frame里plot=false/compass/panel.hidden/contextOpen/doc.hidden均要收敛；每帧先核对current graph对象与eventId防遗留。禁止仅links=[]当作清理。",
+    "staticAndPointer": "静态终态仍有事件名、全部参与者名单、歧义文案、固定无箭头线；屏幕不容纳时宁可只留名单。说明状态存eventId而非数组slot，换事件后不得旧名字晚回填。",
+    "readability": "按钮最小44px，aria-pressed/aria-expanded同步；完整名单不缩成首6名。现有quoteSectionHtml紧跟事件一句话的顺序应保留，避免新内容把原文入口推下不可见区域；名单展开放按钮后details区域或后续section。"
+  },
+  "candidateSnippet": "function participantCatalog(graph, source) {\n  var chars = Array.isArray(graph && graph.characters) ? graph.characters : [];\n  var aliases = source && typeof source.aliasIndex === 'function' ? source.aliasIndex(chars) : null;\n  var byId = Object.create(null), byName = Object.create(null);\n  function stable(c) { return c && c.id != null ? String(c.id) : c && c.entityId != null ? String(c.entityId) : null; }\n  chars.forEach(function(c) { var k=stable(c); if(k) (byId[k] || (byId[k]=[])).push(c); if(c && typeof c.name === 'string') (byName[c.name] || (byName[c.name]=[])).push(c); });\n  return function(event) {\n    var tokens = Array.isArray(event && event.characters) ? event.characters : [];\n    var blocked = Array.isArray(event && event.ambiguousTokens) ? event.ambiguousTokens : [];\n    return tokens.map(function(token) {\n      var out = {token:typeof token === 'string' ? token : '人物记录格式待确认', id:null, name:null, resolved:false, reason:'身份待确认'};\n      if(typeof token !== 'string' || !token || !aliases || blocked.indexOf(token)>=0) return out;\n      var owners=aliases.owners[token] || []; if(owners.length!==1 || owners[0]==null) return out;\n      var hits=byId[String(owners[0])] || []; if(hits.length!==1) return out;\n      var c=hits[0];\n      if(c.identityStatus && c.identityStatus!=='resolved') return out;\n      if(c.id!=null && c.entityId!=null && String(c.id)!==String(c.entityId)) return out;\n      if(typeof c.name!=='string' || !c.name || (byName[c.name] || []).length!==1) return out;\n      out.id=stable(c); out.name=c.name; out.resolved=true; out.reason=''; return out;\n    });\n  };\n}",
+  "fixedSample": {
+    "graphKey": "ed3dc1255ca08fbdaae30bbd",
+    "eventId": "ev_116e38236a62b1d2",
+    "title": "叫门索师",
+    "participants": [
+      {
+        "token": "孙悟空",
+        "id": "ch_25537390c961aa39"
+      },
+      {
+        "token": "猪八戒",
+        "id": "ch_1dee9e1be8a97b5f"
+      },
+      {
+        "token": "红孩儿",
+        "id": "ch_a2e4af3c16de0b8c"
+      }
+    ],
+    "note": "生产CLAtlasSource.normalize后aliasIndex逐token唯一；三人均无identityStatus阻断。"
+  },
+  "existingTestExtensions": {
+    "tests/sky_event_player_contract.js": [
+      "make()基础数据当前只有events，没有characters，也没加载CLAtlasSource；M85专项用extra注入人物与真实aliasIndex，不强改全测试假数据。",
+      "复用addDom与registerFrameHook spy；验证唯一别名→规范ID、规范名撞另一人别名不连、identityStatus阻断、重复ID/重复规范名不连。",
+      "点击参与者动作先暂停语义而0.6秒frame仍可到终态；reduced无dt也直接终态；无额外timer。",
+      "无因果links时参与层仍出现；每帧eventPoint仅盘倾斜变化或starScreens仅人物移动也更新，不能只看相机dirty。",
+      "换事件、换graph、close/Escape/contextOpen/退出plot后参与SVG清零；列表完整但前景≤6；无箭头。"
+    ],
+    "tests/sky_story_browser.py": [
+      "现有路径使用c84e旧西游与f0b三国；追加固定ed3西游路径或沿现有真实可用event定位，不悄悄替换原夹具。",
+      "用真实Input click谁在场，验证3名完整、各g稳定ID与scene.n.data一致；端点分别与disc.eventPoint和场景camera投影重算一致（误差<1CSS px）。",
+      "移动/旋转/窄屏后端点仍贴合，SVG实际rect与CTM是viewport且pointerEvents=none；当前测试45–46行可扩同责任。",
+      "切下一事件后旧参与图层消失，reduced-mode新开直接静态可读，关闭与Esc焦点回按钮；已有第85行退出plot清理可扩。"
+    ]
+  },
+  "evidence": [
+    {
+      "path": "data/cache/ed3dc1255ca08fbdaae30bbd.json",
+      "sha256": "3005a49ae29146d3a7b78bc35767c0407bd265f459b7aed715306c51309b8eb5"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "已核实真正生产函数/字段、同帧绘制早退及DOM索引边界",
+      "result": "pass"
+    },
+    {
+      "text": "只追加指定loop产物，无受保护路径改写、无GPU、无发布",
+      "result": "pass"
+    },
+    {
+      "text": "候选纯身份解析函数经9个CPU反例/真样本检验（未改产品、未跑GPU）",
+      "result": "pass"
+    }
+  ],
+  "sourceHashes": {
+    "js/sky/sky-shell-player.js": "945e74c02e497b7dc4de412ce1527323920ea14b43517af7ddd82ffc878ce740",
+    "js/sky/sky-shell-camera.js": "2c8682ed04f848fef97043d14d0a56a4195f9e4ce3d547fab0cd08e6895fb4a5",
+    "js/sky/sky-shell.js": "f45e86c9248e4769d5538a79181146a22c4c290958cc143c296e1e0d4a6baa50",
+    "js/atlas/atlas-source.js": "05969cb5c17ba3bd325ca17c84a41ae3e7e8aa6f55dc5e2743ab302d0d44dc66",
+    "js/scene.js": "d9aa1021b06fc88f5cec4604d038d8553a100df814c60c28769260eecb82f5c7",
+    "tests/sky_event_player_contract.js": "4d063779dcb4550398ef305d488231c3cecbdeeeb2cc7bc10a7dcd3848cb85bd",
+    "tests/sky_story_browser.py": "faa0a3b3698a864f316440e13b3d836dcc96712c745a0143785c497cd58dbccd",
+    "css/sky-reading.css": "4ee0dd20f370ec65366f7c8b3b006c95ecd8aac1c9ecb1717e0d351c5e74ef3b",
+    "data/cache/ed3dc1255ca08fbdaae30bbd.json": "3005a49ae29146d3a7b78bc35767c0407bd265f459b7aed715306c51309b8eb5"
+  },
+  "changes": [
+    {
+      "path": "loop/state/out/review_motion-e1-participants_20261010T162850Z.artifact.json",
+      "kind": "append-only"
+    }
+  ],
+  "remaining": [
+    "候选片段尚未合入产品。主线程需完成实际M85入口和GPU串行页面验收。",
+    "starScreens既有接口只判z>1，调用端须拒绝不可见/非有限/图外点；如涉及z<-1剪裁，应由camera责任者修单一投影接口，不能复制另一套公式。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/review_motion-e1-participants_20261010T162850Z.artifact.json"
+    ]
+  },
+  "candidateVerification": {
+    "kind": "CPU-only candidate snippet tests; not product tests",
+    "checks": [
+      "unique alias resolves canonical stable ID",
+      "canonical-alias collision never prefers canonical",
+      "explicit identity veto blocks unique name",
+      "one ambiguous token does not poison other event members",
+      "duplicate ID rejected despite aliasIndex owners dedup",
+      "conflicting dual ID rejected",
+      "duplicate canonical scene names rejected",
+      "unrelated alias conflict does not block canonical token",
+      "fixed real sample maps exactly three supplied IDs"
+    ],
+    "passed": 9
+  },
+  "submittedAt": "2026-10-10T16:31:42Z",
+  "wallClockSeconds": 151,
+  "wallClockFrom": "lease.startedAt",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-10T16:31:42Z"
+  },
+  "verifyState": "pending"
+}

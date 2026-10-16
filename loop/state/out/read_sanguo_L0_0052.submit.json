@@ -1,0 +1,57 @@
+{
+ "task": "read:sanguo:L0:0052",
+ "agent": "w-read-2",
+ "status": "done",
+ "summary": "精读《三国演义》第五十三回（关云长义释黄汉升 孙仲谋大战张文远）原文区间 [260517,265317) 共 4800 codepoint，产出候选 JSON。本轮是**接手重做**：进入时 loop/state/out/read_sanguo_L0_0052.candidate.json 已存在（14:08 写出，无 submit 记录，租约在 14:14 由本 agent 重新领取）。我先独立复算了上一版（293 引文、17 项校验全 OK），确认引用层无误，但用两项新检查查出它**通过校验却仍存在的 5 处硬缺陷**，逐条修正后重建：①rejectedForeshadows[0] 把「军令状出现三次」的第三处写成「孔明对云长的类比」——原文三处「军令状」全在孔明对张飞的一句话和张飞立状里，**没有任何一处涉及云长**，这是可核的编造；②四处 prose 自称「本栏引的两句」「三句都是叙述层写出的」而该栏实际只有 1–2 条引文（tasks[1].result、tasks[7].result、tasks[10].action、tasks[12].action）；③5 处行内「…」引文无对应 quote 对象（含 unknowns[5] 把「李典擒戈定并后槽至。辽询得其情，立斩于马前」整句写在 what 里却只分开引了两段）；④reproduce.artifactsNote 缺失：上一版 buildCommand 指向的 $CL_ARTIFACTS 批次目录已被回收、路径不可达（我实测确认），未如实登记这一限制；⑤reverse.py 的地点/人物反查把柴桑、巴陵、汉阳、周瑜、甘宁、凌统等报为 MISS——即「本区间唯一一处兵力再分配设定」完全没有被处理。修正后：310 条引文逐字命中、单元内唯一、308/308 复算通过；audit.py 由 17 项扩为 19 项（新增「引证自述计数」与「行内引文覆盖」两项机器检查，并已验证这两项能抓出上一版的全部 4 处计数缺陷）；reverse 的人物/地点 MISS 清零，句级字符覆盖 73.7% → 82.3%。13 条任务五元组（13 个 cost 全部为 null 且各自带 costNote 说明为什么原文没有代价描写）、14 条 causeEdges、9 条 states、5 条 knowledgeGaps、4 条 foreshadows、16 条 worldSettings（place 9 / item 4 / rule 3）、2 条 themeReadings、10 条 unknowns、4 条 selfCritique。semanticReview 保持 not-performed，不声称语义已核验。",
+ "evidence": [
+  {"path": "loop/state/out/read_sanguo_L0_0052.candidate.json", "sha256": "52b5621162f4fe5f1d52a4852178831c0f4ec41bcb3e15fb32f61aca481670d6"},
+  {"path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/probe-sanguo-0052/build.py", "sha256": "dbe212cab80c6e077c3b5401fc001457bb33f59397d528d7318bb5627dbfa8dd"},
+  {"path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/probe-sanguo-0052/audit.py", "sha256": "9ceed05cc829a7194ac8cc35fef3271ffe92b3d383b4f59c262a4a4e63526b75"},
+  {"path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/probe-sanguo-0052/reverse.py", "sha256": "825fba6cbbf38e44653ec87e3576b119ca93308e58bacba9f2057a1fffa5d7ab"},
+  {"path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/probe-sanguo-0052/audit-output.txt", "sha256": "d0001676db60436ed4acfcac07f90b3451996b5a8c10f9b227af87e06a7b5639"},
+  {"path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/probe-sanguo-0052/reverse-output.txt", "sha256": "1c90fffd74823ed4c65ad82118b977cfaf25a4d07fdc93ca183a623f010ac672"}
+ ],
+ "assertions": [
+  {"text": "偏移口径自检：任务声明的切片起点确以本单元标题开头。命令 python3 -c \"import json;t=json.load(open('data/cache/fe42d01f3826fe8096f86614.docs.json'))[0]['text'];print(repr(t[260517:260540]))\" → '第五十三回　关云长义释黄汉升　孙仲谋大战张文远'（23 codepoint，与 candidate.source.titleQuote 及 titleQuoteOffsets[260517,260540] 一致）。切片 sha256=7168c9864abab2eb6645df52127a69c8209d43949dff92d27ca150a916203ade，全文 sha256=9d28638de0b0a89fa080cc2defb4a1f8de6adb1260c4545c04ef80f73cbb221e（均另起字段，未覆盖 sourceHash）。", "result": "pass"},
+  {"text": "sourceHash 口径核验（含任务声明与实际文件的差异，如实登记不掩盖）：提示词正文指定的 data/cache/fe42d01f3826fe8096f86614.docs.json 实测 sha256=8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2；任务 JSON 顶层 sourceHash=2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff 对应另两份文件。实测三份文件 docs[0].text 逐字相同（均 len=607191、text sha256 均为 9d28638de0b0a89f…、本单元切片逐字相同）。本候选按提示词正文口径记 sourceHash，任务声明值另记于 source.taskDeclaredSourceHash，差异登记为 U9。", "result": "pass"},
+  {"text": "引用层独立复算（不 import build.py）：probe-sanguo-0052/audit.py 只读候选 JSON＋docs.json＋任务 JSON，递归遍历凡含 quote/start/end 的字典，复算 text[start:end]==quote 并断言 260517<=start<end<=265317、sourceHash 一致，另独立重算 inUnitOccurrences/globalOccurrences。命令：python3 -B -s $CL_ARTIFACTS/probe-sanguo-0052/audit.py --root . loop/state/out/read_sanguo_L0_0052.candidate.json → 返回码 0，'OK 19 / WARN 0 / FAIL 0；引文复算 310 条'，310 条全部逐字命中、区间内、哈希一致、自报出现次数与复算一致。", "result": "pass"},
+  {"text": "引文唯一性（比「找得到」更严）：同一串在单元内出现多次时 str.find 的偏移不确定。audit.py 断言每条引文在切片内命中次数恰为 1。结果 310/310 唯一命中、0 歧义。全部引文的 inUnitOccurrences 均为 1。", "result": "pass"},
+  {"text": "**本轮新增检查 1 —— 引证自述计数**（针对上一版的真实缺陷）：形态是 prose 说「本栏引的两句都是人物语」「三句都是叙述层写出的结果」，把 N 句当作已引证集合自述，而同栏 quotes 只有 N-1 条。判定口径刻意保守，只对带引证指示词的短语生效（「本栏/引文/引的 N 句」或计数后紧跟「都是叙述层写出的/都是人物语」），**不**误报内容枚举（如「三条观察：不力战/马失/虚拽」「反证有四条：①②③④」——这些枚举句本身就在引文里）。报 WARN 而非 FAIL，因为少数措辞（如 states[4] 的「六个环节」是跨条目指代）需人判。**该检查的有效性已用上一版实测反证**：对 /tmp/cand_run1.json（修正前的 178965 字节版本）跑同一命令，报出 4 处 WARN(count)（tasks[1].result「本栏引的两句」=2 实际 1、tasks[7].result/tasks[10].action/tasks[12].action 的「三句」=3 实际 2）；对修正后的候选报 0 处。", "result": "pass"},
+  {"text": "**本轮新增检查 2 —— 行内引文覆盖**：prose 里的「…」若不落在任何 quote 对象里（或不由多条 quote 拼接、也不作为某条 quote 的子串），就是无引证的断言。上一版报 5 处（tasks[3].action 的「云长两日战黄忠不下，十分焦躁」、rejectedCauseEdges[3].why 的「权使张昭等问安」、worldSettings[2].explain/note 的「不敢逼城下寨」、unknowns[5].what 的整句「李典擒戈定并后槽至。辽询得其情，立斩于马前」），已逐条补上真实 quote 对象（新增 4 条引文，其中 U6 改为整句引用）。修正后报 0 处、OK。初版启发式曾把「子串」与「拼接」两种合法形态误判为 orphan（误报 139 处），已按两种形态重写判据，误报清零——这次修正我记在 selfCritique 的范围内。", "result": "pass"},
+  {"text": "**反向验证（不只查已写项）**：probe-sanguo-0052/reverse.py 独立做句级覆盖、人名反查、地名反查、数字/量词反查。修正前：正文出现的周瑜、甘宁、凌统「完全未提」，巴陵/汉阳/柴桑三地 MISS，二石/七八十合/辰时 MISS。逐条补录后：人物 token 全部被处理（0 MISS）、地点 0 MISS、数字仅余 0 项 MISS；句级未被引文覆盖由 92 句降到 66 句、字符覆盖由 3482/4725=73.7% 升到 3891/4725=82.3%。补录内容都有真实引文：新增 W_p_chaisang_baling_hanyang（记 mentioned 而非 arrived——原文只有「周瑜自回柴桑养病」的交代与两条调令，无任何到达动作，按「提及≠到达」纪律处理）、T5.action 补「辰时左右，军马行至半途，曹兵已到。」与「两将战有七八十合，不分胜负。」、T3.objective 补「原来黄忠能开二石力之弓，百发百中。」", "result": "pass"},
+  {"text": "**编造清除（本轮最重要的一处修正）**：上一版 rejectedForeshadows[0] 写「军令状在区间内出现三次（孔明要求、张飞立状、孔明对云长的类比）」。我实算：切片内「军令状」恰好出现 3 次，三处同属孔明对张飞的一句话（「前者子龙取桂阳郡时，责下军令状而去」「今日翼德要取武陵，必须也责下军令状」）与「张飞遂立军令状」，**没有任何一处与云长相关**——「孔明对云长的类比」在原文不存在。已改写为三处的真实出处，并把这次纠正如实写进 selfCritique 的 SC4_benlun_ziwojiuzheng（对象是我自己的上一版，不是原文）。", "result": "pass"},
+  {"text": "reproduce 命令可达性（上一版的第二个硬缺陷）：上一版 buildCommand 写 <CL_ARTIFACTS>/probe-sanguo-0052/build.py，但脚本实际留在 20261012-132915 批次目录，而该批次已不在当前 $CL_ARTIFACTS（20261012-120107）下——我实测 ls 该路径返回 No such file or directory。已把脚本复制进当前批次目录，使文档化的三条命令真实可执行（本轮全部复算就是用这些命令跑的），并新增 reproduce.scriptSha256 记录 build.py/audit.py 的实际哈希（已复核与文件一致）与 reproduce.artifactsNote 如实登记「跨批次不保证可解析」这一限制。", "result": "pass"},
+  {"text": "可重建性（确定性）：连续两次运行 python3 -B -s $CL_ARTIFACTS/probe-sanguo-0052/build.py --root . 产出字节相同的候选（diff 无差异），sha256=52b5621162f4fe5f1d52a4852178831c0f4ec41bcb3e15fb32f61aca481670d6。全部引文偏移由 build.py 的 q() 用 str.find 在切片内实测，命中数不等于 1 即中断构建（assert n_in==1），无手写偏移；候选内嵌的 scriptSha256 已与实际脚本文件复核一致。", "result": "pass"},
+  {"text": "任务五栏独立性（提示词点名的旧图谱缺陷：714/1664 个任务五栏共用一句）：build.py 的 task() 与 audit.py 各自独立断言同一任务内五栏引文**区间两两不重叠且无逐字同句**，双方都通过。13 条任务的 cost 栏全部为 null，且**每一条都带 costNote 写明为什么原文没有代价描写**（例如 T7「本区间未写张辽方的代价：他全胜、无折将、无失城，唯一的损失是两个内应……属于行动而非他付出的代价」），不存在未标注的 null。", "result": "pass"},
+  {"text": "分区齐全与纪律字段：tasks=13、causeEdges=14、states=9、knowledgeGaps=5、foreshadows=4、worldSettings=16（place 9 / item 4 / rule 3）、themeReadings=2、unknowns=10、selfCritique=4。worldSettings 的三条区分都写在字段里：place 用 placeState（襄阳记 mentioned 并写明只有调令无到达动作；柴桑/巴陵/汉阳记 mentioned）、item 用 itemStates 多选（印绶 transfer+use、军令状 hold+use 并写明不记 lose 的理由、画戟 use+lose「两枝戟齐断」、金盔金甲 hold+use）、rule 用 institution（将令不可违=misunderstood 因为是黄忠本人的理解、韩玄封口令=executed 因为紧接着就执行处刑、张辽夜间战备令=executed）。themeReadings 2 条全部 perspective/support/counter 三件齐全，未使用事件密度/死亡人数/篇幅中点/三幕/英雄旅程等被禁判据（audit.py 对 BANNED_HIGHLIGHT 逐词断言）。", "result": "pass"},
+  {"text": "未做的事没有被声称：semanticReview 字段保持 'not-performed'，且 semanticReviewNote 明确写「所有引文可用 TEXT[start:end] == quote 复算，但这只证明定位正确，不证明语义已核验」。audit.py 对此单独断言。outOfRangeQuotes 为空数组且附说明；全部 310 条引文经机器复算确在 [260517,265317) 内，无区间外引文。", "result": "pass"}
+ ],
+ "changes": [
+  {"path": "loop/state/out/read_sanguo_L0_0052.candidate.json", "kind": "append-only"},
+  {"path": "loop/state/out/read_sanguo_L0_0052.submit.json", "kind": "append-only"}
+ ],
+ "sourceHashes": {
+  "data/cache/fe42d01f3826fe8096f86614.docs.json": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+  "loop/state/runs/task-read_sanguo_L0_0052.json": "b4d6fdd09d39e8fbf040c6044193c385e9251bb78213ad59bb1ad9767c51818c",
+  "data/cache/f0b45e85aac6c95e584075a2.docs.json": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+  "data/cache/152e2a6eed94f1075e7e7070.docs.json": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff"
+ },
+ "remaining": [
+  "语义未核验：本候选只证明「引用定位正确 ＋ 每条引文在单元内唯一 ＋ 五栏各有独立依据 ＋ 分区齐全 ＋ 自述计数与行内引文都有引证」，不证明语义正确。semanticReview 保持 not-performed，语义复核留给 read-verify 通道。最需要复核者用原文反查的四处：(a) T3 的 cost=null 是否过严——黄忠在第三战只射盔缨、事后托病不出，我判定这属让步与表态而非已付代价，见该条 costNote 与 SC1（未单独写入 selfCritique，理由在其 costNote 里）；(b) 「张辽全胜」这个概括是否超出原文——原文只写「吴兵折其大半」「曹兵自回」「张辽收军自回合淝」，未用总括句，见 SC3；(c) 新增的 W_p_chaisang_baling_hanyang 记 mentioned 是否过严（周瑜「自回柴桑养病」是否算到达动作——我判定这是交代而非到达描写），这是本轮新写的条目，最需要独立复核；(d) CE12/CE13 把刘琦之死与孔明星象预言记为「预告—应验」而非因果，是否被认可。",
+  "反向验证的覆盖面：正文 4725 codepoint 里仍有 66/304 个句片段没有任何引文覆盖（字符覆盖率 82.3%），逐条清单留在 <CL_ARTIFACTS>/probe-sanguo-0052/reverse-output.txt。我逐句看过，绝大多数是对话往返（忠曰／玄曰的应酬语）、过场句（各叙礼毕、设宴相待）与仪注细节，不构成抽取项；但「我逐句看过」不可机器复算，不声称已穷尽，复核者可直接按清单反查。上一版此处是 73.7%，本轮补录后上升 8.6 个百分点，仍未穷尽。",
+  "本轮是接手重做（进入时已有上一版候选、无 submit 记录）。我未使用 git 回滚，上一版内容被我直接覆盖写在同一路径——因此**上一版的逐字内容只在本提交的 summary/assertions 与我留存的 /tmp/cand_run1.json 里有记录**，/tmp 是瞬态路径、不属留存产物，跨会话可能已被清理。如果后续需要审计「上一版到底写了什么」，可用 build.py.bak（136106 字节，留在 $CL_ARTIFACTS/probe-sanguo-0052/ 下）重建比对。这是我本轮没有做好的地方：覆盖前应先把它复制成带版本后缀的留存文件。",
+  "本单元在区间内确实读不出来的地方已全部写进 unknowns[]（10 条），不补值。最需要注意的三条：U5 太史慈死因（原文顺序是身中数箭→被救→随军南下→屯住时病重→问安时大叫而亡，未写箭伤是否致命、未写病重与箭伤的关系，故 RCE4 明确拒绝「中箭→死」这条边）；U7 鲁肃来意（他刚到场区间即结束，玄德「东吴必来讨荆州」是他的推测、未被叙述层确认，候选人一句话也没说）；U9 任务 JSON 顶层 sourceHash 与提示词正文指定的文件不一致（三份文件 text 逐字相同，已按提示词口径记 sourceHash 并另字段登记）。",
+  "上一轮的新增机器检查（引证自述计数、行内引文覆盖）已写进 $CL_ARTIFACTS/probe-sanguo-0052/audit.py，但它**只在本任务的探针脚本里**，不是 tests/ 下的正式责任测试——受保护路径本任务不能改。若这两类形态在其它单元也普遍存在（上一版实测 4 处计数不符 + 5 处无引证行内引用），建议由合并任务把它固化为正式检查；本候选不作这个声称，只提供已验证有效的实现。"
+ ],
+ "rollback": {
+  "kind": "append-only",
+  "strategy": "delete-added-files",
+  "files": [
+   "loop/state/out/read_sanguo_L0_0052.candidate.json",
+   "loop/state/out/read_sanguo_L0_0052.submit.json"
+  ],
+  "note": "候选与提交记录都是本任务路径下的产物；探针脚本（build.py/audit.py/reverse.py/build.py.bak/audit-output.txt/reverse-output.txt）在 $CL_ARTIFACTS/probe-sanguo-0052/ 下，属外置产物目录，不在共享树内、不入 Git。未修改任何受保护路径（js/ css/ index.html serve.py narrative.py scripts/ tests/ docs/ data/ 全部未动），无需回滚源码。注意：候选文件在进入本轮前已存在（上一版），删除即回到「无本任务产物」状态，但上一版内容不可由删除恢复——见 remaining 第 3 条。"
+ },
+ "reworkOf": "loop/state/out/read_sanguo_L0_0052.candidate.json",
+ "reworkReason": "进入本轮时该任务已有一个候选（14:08 写出、无 submit 记录、租约 14:14 重新领取）。我独立复算后确认其引用层无误（293 条全命中、17 项校验全 OK），但用两项新增检查查出 5 处「通过校验却仍然存在」的硬缺陷：1 处可核编造（军令状第三处写成不存在的「孔明对云长的类比」）、4 处引证自述计数与实际 quotes 不符、5 处行内引文无 quote 对象、reproduce 指向已回收的批次路径未登记、reverse 反查的地点/人物 MISS 未处理。逐条修正后按原路径重写，并把两类新检查固化进 audit.py（已用上一版实测反证其有效性）。"
+}

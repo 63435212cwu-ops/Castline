@@ -1,0 +1,279 @@
+{
+  "task": "read:sanguo:L0:0040",
+  "agent": "w-read-2",
+  "status": "done",
+  "summary": "逐段通读《三国演义》第四十一回原文区间 [203675,209822) 共 6147 codepoint（19 个非空行，正文止于 209765），产出候选 JSON：15 条任务五元组（10 个栏位为 null 且每栏都写了 <栏位>Note 说明为什么没有依据）、17 条 causeEdges（另 4 条 rejectedCauseEdges 记下我判定不连边的理由）、12 条 states、6 条 knowledgeGaps、6 条 foreshadows（2 resolved / 2 partial / 2 unresolved，另 4 条 rejectedForeshadows）、26 条 worldSettings（place 12 / item 8 / rule 6；arrived 6、mentioned 6；declared 2、executed 3、misunderstood 1，另 4 条 rejectedWorldSettings）、2 条 themeReadings（各带 perspective/support/counter 三件）、13 条 unknowns、6 条 selfCritique。全文件 266 条引用逐字命中 docs[0].text 且偏移全部落在本单元区间内，sourceHash 一律为 prompt 指定文件的 sha256。semanticReview 保持 not-performed。",
+  "evidence": [
+    {
+      "path": "loop/state/out/read_sanguo_L0_0040.candidate.json",
+      "sha256": "7de973f495fc5035349e0b94f20697d205c62f0dde697492060530dfa9c8d8a2"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "引用层：对候选文件做递归遍历，凡含 quote/start/end 的字典都用 json.load(open('data/cache/fe42d01f3826fe8096f86614.docs.json'))[0]['text'] 复算 text[start:end]==quote，并断言 S<=start<end<=E 且 sourceHash 等于 8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2。结果：266 条全部逐字命中、0 条失败、0 条越界。审计脚本（/tmp/c040/audit.py）与构建脚本（/tmp/c040/build.py）是两个独立实现，审计脚本不复用构建脚本的变量。",
+      "result": "pass"
+    },
+    {
+      "text": "偏移口径：断言 docs[0].text[203675:203696] == '第四十一回　刘玄德携民渡江　赵子龙单骑救主'（切片以本单元标题开头）；并复算下一单元起点：text[209822:209848] == '第四十二回　张翼德大闹长坂桥'，证明 209822 确为本单元上界。命令：python3 -c \"import json;t=json.load(open('data/cache/fe42d01f3826fe8096f86614.docs.json'))[0]['text'];print(t[203675:209696][:21]==t[203675:203696], repr(t[209822:209840]))\"",
+      "result": "pass"
+    },
+    {
+      "text": "sourceHash 口径：shasum -a 256 data/cache/fe42d01f3826fe8096f86614.docs.json == 8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2，与候选 source.sourceHash 一致。另给出 textSha256=9d28638de0b0a89fa080cc2defb4a1f8de6adb1260c4545c04ef80f73cbb221e（docs[0].text 全文，607191 codepoint）与 segmentSha256（text[203675:209822]）另起字段，未覆盖 sourceHash。",
+      "result": "pass"
+    },
+    {
+      "text": "任务 JSON 顶层 sourceHash=2988ce6e… 与 prompt 正文指定的 fe42d01f3826fe8096f86614.docs.json 不一致。我复算了另一份缓存 data/cache/152e2a6eed94f1075e7e7070.docs.json：其 sha256 正是 2988ce6e…，且两份文件 docs[0].text 长度同为 607191、text 的 sha256 同为 9d28638d…、[203675,209822) 切片逐字相同（ta[203675:209822]==tb[203675:209822] 为 True）。因此本候选全部偏移在两份文件里都成立；我按 prompt 指定文件计算 sourceHash，并把该不一致登记为 unknowns U13，未修改任何缓存文件。",
+      "result": "pass"
+    },
+    {
+      "text": "五元组分栏独立性：脚本检查每条任务的五个栏位，断言同一句引文不在同一任务的另一栏位出现。构建过程中该检查先后抓出 T0 的 objective/action 与 obstacle/action 两次复用，均已改为各栏引各自原句；最终 15 条任务 0 条违规。",
+      "result": "pass"
+    },
+    {
+      "text": "null 栏位标注：10 个 null 栏位（T2/T3? 等共 10 处）逐一检查存在同名 <栏位>Note 且内容非空串。审计脚本对 '为 null 但无 Note' 与 'Note 为空串' 分别报错，结果 0 条。",
+      "result": "pass"
+    },
+    {
+      "text": "世界设定三态字段：place 12 条全部有 placeState∈{arrived,mentioned}；item 8 条全部有 itemStates⊆{hold,transfer,use,lose} 非空且带 stateEvidence 单列该态的原文字样；rule 6 条全部有 institution∈{declared,executed,misunderstood} 且 explain 非空。'荆州' 记 mentioned 而非 arrived：区间内「荆州」5 处全为钱粮/官爵/图谋/所得感言，无「到荆州」「入荆州」的到达动作；真实的到达句（进屯襄阳城外、入城至府中坐定）已单列为襄阳的 arrived。",
+      "result": "pass"
+    },
+    {
+      "text": "伏笔：resolved-in-unit / partial-in-unit 必须有 payoff 引用，unresolved-in-unit 必须无 payoff。6 条中 FS3（张飞疑兵）与 FS4（江夏求救兵）标 unresolved 且 payoff=null；FS5、FS6 标 partial 并写明哪一半未兑现（糜夫人仍投井；赵云誓言的后半在本区间既未兑现也未取消）。另 4 条 rejectedForeshadows 记下不列为伏笔的理由（含 RFS4 更正了我最初把王威出现次数写成 2 次的错误）。",
+      "result": "pass"
+    },
+    {
+      "text": "metrics 自洽：审计脚本按候选文件实际重算 tasks/taskColumnsNull/causeEdges/states/knowledgeGaps/foreshadows/worldSettings/themeReadings/unknowns/selfCritique 各计数，与候选 metrics 自报值逐项相等（0 处不符）。",
+      "result": "pass"
+    },
+    {
+      "text": "红线自查：(1) semanticReview=not-performed，未声称语义已核验；(2) 无原文以外的人物或事件——区间内 44 个实名人物全部在候选中有落点（最初漏了许褚，反向覆盖检查抓出后补为 T0 与 CE0）；(3) result 栏对 T2/T13 写 null 并说明理由（江夏是否发兵本区间无交代；张飞疑兵是否奏效在下回），未把「结束」当「成功」；(4) 因果边均给 trigger+mechanism，另 4 条 rejectedCauseEdges 显式拒绝「时间相邻当因果」（占课→夜袭、占课→扎营、糜芳中箭→误报等）。",
+      "result": "pass"
+    },
+    {
+      "text": "受保护路径未改动：本轮只新增 loop/state/out/read_sanguo_L0_0040.candidate.json 一个文件（loop/ 属追加式可写前缀）。未运行任何 GPU/浏览器测试，未执行 git checkout -- . / git reset --hard / git stash。构建与审计脚本位于 /tmp/c040/，不入库。",
+      "result": "pass"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/read_sanguo_L0_0040.candidate.json",
+      "kind": "append-only"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/fe42d01f3826fe8096f86614.docs.json": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+    "data/cache/152e2a6eed94f1075e7e7070.docs.json": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+    "loop/state/runs/task-read_sanguo_L0_0040.json": "70d4b1b3f4d5d3a633ecb091b80121bdc3f639c5091ac69f531ccb0ee63d7349"
+  },
+  "remaining": [
+    "语义未核验：本候选只完成「引文逐字命中 + 全文绝对偏移自洽 + 区间逐段通读」这一层。人物动机强弱、因果强度、伏笔判定、世界设定三态归类（arrived/mentioned、hold/transfer/use/lose、declared/executed/misunderstood）一律待 read-verify 通道独立复核。",
+    "T9 的 cost（曹操对刘琮的承诺破产）与 T1 的 cost（派徐庶致军情外泄）都是跨段推导，basis=derived，是本轮最可能被复核推翻的两栏；已在 selfCritique SC1/SC2 主动写明。",
+    "青扛剑被拆成 4 条 item 条目（transfer/hold/transfer/use）而非 1 条多选 itemStates，与 prompt 对 itemStates「多选」的表述存在口径差异；已在 SC3 写明我不改的理由，若复核要求合并，请保留四态各自的引文。",
+    "「荆州」判 mentioned 与本区间曹操实际入襄阳城存在张力（他自称「吾不喜得荆州」）；已把到达句单列为襄阳的 arrived 并在 SC4 给出反方论据，两处都写全供复核改判。",
+    "任务 JSON 顶层 sourceHash 指向另一份缓存文件，与 prompt 正文不一致。我未修改任何缓存或任务文件，只登记为 unknowns U13；此口径是否统一需上游决定。",
+    "区间末尾（209653-209765）钟缙、钟绅拦路与「且听下回分解」属下一回的引子，本区间不写其结果；张飞疑兵、江夏救兵、赵云脱身三线的回收都在下一回，本候选按纪律标 unresolved。",
+    "本轮未做（也不应做）：未跑 GPU/浏览器测试，未产出页面或图谱写回，未发布新审阅版本。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/read_sanguo_L0_0040.candidate.json"
+    ]
+  },
+  "submittedAt": "2026-10-11T07:41:52Z",
+  "wallClockSeconds": 1788,
+  "wallClockFrom": "lease.startedAt",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-11T07:41:52Z"
+  },
+  "verifyState": "partial",
+  "reviews": [
+    {
+      "reviewer": "w-verify-3",
+      "at": "2026-10-11T19:04:42Z",
+      "verdict": "partial",
+      "notes": "总判 **partial**。这是我在本通道见过的**机器层最干净**的候选之一：266 条引文逐字全中、偏移 0 越界、sourceHash 全一致、切片内 0 不唯一、occurrences 自报 0 失配、metrics 12 项全对、10 个 null 栏全部配 Note、栏位独立性 0 违例、自检命令原样重放通过。它并且**主动声明 semanticReview=not-performed**，把语义判断留给本通道——这一点值得保留。\n\n判 partial 的依据是 4 条可指认的语义缺陷：**CE1 是唯一够得上『编造』的一条**（ST6.before 写『随曹仁退军』，本区间 0 句同时含蔡瑁/张允与曹仁/新野，全书唯一命中在 174393 是另一件事），它写在 basis=explicit 字段里、且候选的 ST6.quotes 两条都**没有**支撑该句；**CE2** 是同一文件内部自相矛盾（worldSettings 说『事实上没有抵达』，T9 objective 说『已迁往青州』）；CE3/CE4 是自报/理由层面的未复算。\n\n按 VERIFIER.md 我本可判 fail（有 counterExample 且逐字可查），但缺陷是**字段级**的：删掉 CE1 那半句、改掉 CE2 那四个字，两条就都成立；CE3/CE4 只改措辞。主干（引文层、因果层的拒绝理由、伏笔的铺设/回收判定、世界设定的归类、以及『结束≠成功』在 T2/T13/FS3 上的执行）经复核**成立**。把这些一起判死，会让下游丢掉 266 条已经全量验证过的引文与 16 条可用的因果边——那是把口径错误当成现实错误。\n\n**我没有做的事，如实记下**：① 我没有逐条复核 26 条 worldSettings 的 explain 是否**每条**都与原文一致（只全量核了 placeState/institution 的分布、引文的逐字性与其中 6 条的 explain）；② 我没有对 156 个不同引文跨度做**是否覆盖全部 19 段**的段落级复核（只做了字符级与 6-gram 级）；③ 我未核 T4/T5/T8/T11 等条目的 action 是否与原文**每一步**顺序一致（只核了其引文的逐字性与关键动作）；④ 本节所有『0 命中』结论都是在 data/cache/152e2a6eed94f1075e7e7070.docs.json 与 fe42d01f3826fe8096f86614.docs.json 两份 docs[0].text（我实测逐字相同，sha256 同为 9d28638d…）上算的，未读第三个缓存版本。\n\n一处**不确定**（不足以判 fail，按纪律记为存疑）：候选把『荆州』记 mentioned 而『襄阳』记 arrived（SC4 自己也承认可改判）。本区间『荆州』5 处全是钱粮/官爵/图谋（我复算 5 处偏移：203979、204951、205663、205826、206048），且没有『到荆州』；曹操实际进的是襄阳城。我倾向候选正确，但『实际控制荆州治所』这一读法也讲得通——这是**口径选择**，不是事实错误，故不计入 counterExamples。",
+      "counterExamples": [
+        {
+          "id": "CE1",
+          "claim": "ST6（蔡瑁、张允的状态条）before 写「新野失利后随曹仁退军……的荆州降将」，basis=explicit。",
+          "quote": {
+            "quote": "却说曹仁收拾残军，就新野屯住，使曹洪去见曹操，具言失利之事。",
+            "start": 203809,
+            "end": 203839,
+            "inSlice": true,
+            "inSliceOccurrences": 1,
+            "wholeBookOccurrences": 1
+          },
+          "corroboratingQuote": {
+            "quote": "蔡瑁、张允径来敌楼上，叱军士乱箭射下。",
+            "start": 204657,
+            "end": 204676,
+            "inSlice": true,
+            "inSliceOccurrences": 1,
+            "wholeBookOccurrences": 1
+          },
+          "why": "**原文里蔡瑁、张允从来没有随曹仁退军，也没有到过新野**。「新野失利→曹仁收拾残军，就新野屯住，使曹洪去见曹操」这一段（203809）讲的是曹仁与曹洪，句中无蔡瑁、张允；二人此前一直在襄阳（204657「蔡瑁、张允径来敌楼上，叱军士乱箭射下」），随后是「同至樊城，拜见曹操」（205633）——路径是襄阳→樊城。机器复算：本区间内**没有任何一句**同时含「蔡瑁/张允」与「曹仁/新野」（`re.finditer(r'[^。\\n]{0,90}(?:蔡瑁|张允)[^。\\n]{0,90}。')` 逐句筛，本区间命中 **0** 句；全书唯一命中在 174393，是第七回以前的另一件事「蔡瑁请曰：军士已点齐，可就往新野擒刘备」，与博望坡之后的新野失利无关）。这一句被标 basis=explicit 却无原文支持，属**编造**（把曹仁的动作挪给了蔡瑁、张允）。它不影响 ST6 的 after（加官，有原文），只影响 before。",
+          "severity": "fabrication-in-explicit-field",
+          "entryId": "ST6_caimao_zhangyun"
+        },
+        {
+          "id": "CE2",
+          "claim": "T9 的 objective 写「杀掉**已迁往青州**的刘琮母子」；同一候选 worldSettings「青州」条同时写 placeState=mentioned 并解释「只有起程……事实上没有抵达」。",
+          "quote": {
+            "quote": "琮只得与母蔡夫人同赴青州。",
+            "start": 206160,
+            "end": 206173,
+            "inSlice": true,
+            "inSliceOccurrences": 1,
+            "wholeBookOccurrences": 1
+          },
+          "corroboratingQuote": {
+            "quote": "军士杀死刘琮及蔡夫人，于禁回报曹操，操重赏于禁。",
+            "start": 206294,
+            "end": 206318,
+            "inSlice": true,
+            "inSliceOccurrences": 1,
+            "wholeBookOccurrences": 1
+          },
+          "why": "**同一份候选内部自相矛盾，且 objective 那一侧与原文相反**。原文只有「起程」与「同赴青州」（206160），追杀发生在**途中**（206294 杀于路上），从未到达青州；候选自己在 worldSettings 里把这条写对了（「事实上没有抵达」），却在 T9 objective 写成完成态「已迁往青州」。这不是引文定位问题（T9 引的是追杀令 206194，逐字对得上），是**语义层的越权完成态**：与红线「不许因为播放到结尾就写 result=成功／不许出现原文里没有的结局」同类。",
+          "severity": "self-contradiction-and-completed-state",
+          "entryId": "T9_caocao_sha_liucong"
+        },
+        {
+          "id": "CE3",
+          "claim": "U11（底本用字）写「『張颌』作『张颌』（非『张郃』）」，把一个不存在的字形当作底本特征报出来。",
+          "quote": {
+            "quote": "当先一员大将，旗号分明，大书河间张颌。",
+            "start": 209144,
+            "end": 209163,
+            "inSlice": true,
+            "inSliceOccurrences": 1,
+            "wholeBookOccurrences": 1
+          },
+          "why": "**「張颌」（繁体張）在本区间与全书都出现 0 次**（`sl.count('張颌')==0`、`src.count('張颌')==0`）；底本一律作简体的「张颌」（本区间 4 次、全书 184 次），且全书「张郃」「張郃」均 0 次。U11 其余各项（「青扛」非「青釭」、「印缓」非「印绶」、「夏侯敦」非「夏侯惇」）**经复算都成立**，只有这一条把简体字写成了繁体字。属自报证据里的一处**未复算**，不是内容编造——但它正是「声称强于验证」的形态。",
+          "severity": "unsupported-claim-in-unknowns",
+          "entryId": "U11_diben_yongzi"
+        },
+        {
+          "id": "CE4",
+          "claim": "RWS3 拒绝「填塞白河的工役令」的理由是「本区间既没写它的执行过程，也没写它对后续行动产生作用」。",
+          "quote": {
+            "quote": "曹操使庶来招降使君，乃假买民心也，今彼分兵八路，填白河而进。",
+            "start": 204177,
+            "end": 204207,
+            "inSlice": true,
+            "inSliceOccurrences": 1,
+            "wholeBookOccurrences": 1
+          },
+          "why": "**候选自己的 T1 cost 引文（204177-204220）里就有该令的作用证据**：徐庶向刘备交底的原话是「今彼**分兵八路，填白河而进**」——刘备据此「速作行计」（204215），这条工役令正是曹操行军方式的一部分，并且是徐庶用来判「樊城恐不可守」的依据之一。RWS3 说「没写它对后续行动产生作用」与同一份候选引的原文不符。按计划「没有依据就不扩」拒绝它是**方向保守**的（它确实没有独立执行动作），但给出的理由不成立，应改写为「有作用痕迹但无独立执行动作」。",
+          "severity": "unsupported-rejection-reason",
+          "entryId": "RWS3_baikou"
+        }
+      ],
+      "reverseChecks": [
+        {
+          "id": "R1",
+          "found": "刘备在刘表墓前的哭告（整段从未出现在候选任何入口：引文并集在此区间覆盖 **0 字符**）",
+          "quote": {
+            "quote": "玄德率众将拜于墓前，哭告曰：“辱弟备无德无才，负兄寄托之重，罪在备一身，与百姓无干。望兄英灵，垂救荆襄之民！”言甚悲切，军民无不下泪。",
+            "start": 205106,
+            "end": 205173,
+            "inSlice": true,
+            "inSliceOccurrences": 1,
+            "wholeBookOccurrences": 1
+          },
+          "why": "这是本回「携民渡江」的**道德动机场景**：刘备把「负兄寄托之重」全揽在自己身上，并求刘表英灵救「荆襄之民」。机器复算：我取候选全部 156 个不同引文跨度做并集，[205098,205173) 内被引文覆盖 **0/75** 字符；且 6-gram 探针（去空白后任取 6 字窗口）在候选**整份文件**（含元数据）里也找不到这段的任何 6 字片段。候选的 themeReadings TH1 用「民」轴解释本回，却把这条最直接的「民—己」自陈句整段漏掉；它不是衔接语，是完整的一个场景。」",
+          "coverage": "0 quote-chars in [205098,205173); no 6-gram anywhere in candidate"
+        },
+        {
+          "id": "R2",
+          "found": "赵云报姓名与曹洪回话的整整一段（曹操「真虎将也」的来路）——引文并集覆盖 **0 字符**",
+          "quote": {
+            "quote": "曹洪飞马下山大叫曰：“军中战将可留姓名！”云应声曰：“吾乃常山赵子龙也！”曹洪回报曹操。",
+            "start": 209458,
+            "end": 209502,
+            "inSlice": true,
+            "inSliceOccurrences": 1,
+            "wholeBookOccurrences": 1
+          },
+          "why": "候选 CE14 的引文**从「操曰：真虎将也」起**（209502），把「谁去问的、赵云怎么答的、谁回报的」全切掉了。机器复算：[209426,209502) 内引文覆盖 **0/76** 字符；「曹洪」（本区间 4 次）在候选的 **prose 层出现 0 次**（只在引文里作为 substring 出现过 2 次，且其中一次还是「曹洪部将晏明」——见 U8）。「常山赵子龙」这个自称（回目「赵子龙单骑救主」的名字落点）在候选全文出现 **0** 次。这是本回高潮的**记名节点**，不是装饰。",
+          "coverage": "0 quote-chars in [209426,209502); 曹洪 prose-count=0"
+        },
+        {
+          "id": "R3",
+          "found": "徐庶辞别与「老母已丧，抱恨终天」——整段未被引用（引文并集覆盖 0 字符），而这正是他「誓不为设一谋」的动机来路",
+          "quote": {
+            "quote": "玄德欲留徐庶。庶谢曰：“某若不还，恐惹人笑。今老母已丧，抱恨终天。身虽在彼，誓不为设一谋，公有卧龙辅佐，何愁大业不成。庶请辞。”玄德不敢强留。",
+            "start": 204221,
+            "end": 204292,
+            "inSlice": true,
+            "inSliceOccurrences": 1,
+            "wholeBookOccurrences": 1
+          },
+          "why": "候选 U2 专门讨论「徐庶泄密的完整动机」，列了旧交、母丧之恨两个可能，结论是「原文只用一句『共诉旧日之情』带过」——**但原文并不只这一句**：[204221,204292) 里徐庶亲口把「老母已丧，抱恨终天」说了出来，紧接着才是「誓不为设一谋」。机器复算：[204221,204292) 内引文覆盖 **0/71** 字符；候选引用的是 204254-204284（只取「身虽在彼，誓不为设一谋……」后半句，把母丧那半句切在引文之外）。也就是说 U2 的「读不出来」是在**自己切掉的区间**里推翻自己——「老母已丧」在候选 prose 层 0 命中（只在 U2 里以「母丧之恨」这种转述形式出现）。",
+          "coverage": "0 quote-chars in [204221,204292); 老母已丧 prose-count=0"
+        },
+        {
+          "id": "R4",
+          "found": "众将劝刘备「暂弃百姓，先行为上」的整段谏言——未引用（引文覆盖 0 字符），而它是本回「弃民与否」张力的第二次施压",
+          "quote": {
+            "quote": "众将皆曰：“江陵要地，足可拒守。今拥民众数万，日行十余里，似此几时得至江陵？倘曹兵到，如何迎敌？不如暂弃百姓，先行为上。”",
+            "start": 205205,
+            "end": 205266,
+            "inSlice": true,
+            "inSliceOccurrences": 1,
+            "wholeBookOccurrences": 1
+          },
+          "why": "候选 worldSettings「刘备的准则」条把这条准则记 executed，并说有两处执行证据——但**只引了第二次驳回（简雍，206776）**，把第一次（众将，205205）整段漏掉：机器复算 [205205,205266) 内引文覆盖 **0/61** 字符。这段还含一个候选没处理的**数字分歧**：同一区间里人口被写成三个数——「军民十余万」（205070）、「今拥民众数万」（205230）、「十数万百姓／十数万生灵」（206599、207131）。「民众数万」在候选所有引文里 0 命中。三个口径并存是可登记的 unknowns 材料，候选 13 条 unknowns 里没有这一条。",
+          "coverage": "0 quote-chars in [205205,205266); '今拥民众数万' in-any-quote=False"
+        },
+        {
+          "id": "R5",
+          "found": "曹操对江陵的利害判断（荀攸进言 + 「孤岂忘之」+ 选将开道）——引文只覆盖中间 25 字，两端全未被引用",
+          "quote": {
+            "quote": "襄阳既定，荀攸进言曰：“江陵乃荆襄重地，钱粮极广。刘备若据此地，急难动摇。”操曰：“孤岂忘之！”随命于襄阳诸将中，选一员引军开道。",
+            "start": 206360,
+            "end": 206425,
+            "inSlice": true,
+            "inSliceOccurrences": 1,
+            "wholeBookOccurrences": 1
+          },
+          "why": "候选 worldSettings「江陵」条引了 206372-206397（正好是荀攸那句话），但**把它的因（曹操为何要人开道）与果（选将开道→文聘受命→当阳拦阻）两端切在引文之外**：[206360,206425) 内被引文覆盖仅 **25/65** 字符，「孤岂忘之」（206397）与「随命于襄阳诸将中，选一员引军开道」（206407）在候选全文 0 命中。这正是 CE10（文聘开道→当阳拦阻，basis=derived）缺的那一环——原文其实**明写**了选将开道的命令，候选把它标成 derived 属于**把 explicit 降级**。",
+          "coverage": "25/65 quote-chars in [206360,206425); 孤岂忘之 count=0"
+        },
+        {
+          "id": "R6",
+          "found": "四首「后人有诗」的叙述者评语：三首完全未被引用，第四首（209256）只被切了后半用作 U6",
+          "quote": {
+            "quote": "后人有诗曰：“血染征袍透甲红，当阳谁敢与争锋！古来冲阵扶危主，只有常山赵子龙。”",
+            "start": 209612,
+            "end": 209652,
+            "inSlice": true,
+            "inSliceOccurrences": 1,
+            "wholeBookOccurrences": 1
+          },
+          "why": "机器复算：本区间 4 处「后人有诗」（205306／208979／209256／209612），引文并集在诗歌正文上的覆盖为 **0/0/32/0** 字符——第 1、2、4 首整首未被引用，第 3 首只取了「红光罩体困龙飞……」32 字作 U6 的红光材料。这不是要求把诗当事实层（诗歌是解释层），而是：候选 TH1/TH2 两条主题读法**都在没有引到这四首诗的情况下**判断本回的主题，而其中第 1 首（「临难仁心存百姓」）与第 4 首（「古来冲阵扶危主，只有常山赵子龙」）恰恰是叙述者对本回**两个回目**的正面评语——对「以民为轴」「以托付为轴」两条读法是最直接的对照材料。漏掉它们会让 themeReadings 的 support/counter 两侧都缺一块。",
+          "coverage": "poem char coverage 0/0/32/0 of 42/42/39/40"
+        },
+        {
+          "id": "R7",
+          "found": "叙述者的集体悲痛句群（8 处）全部未被引用或讨论",
+          "quote": {
+            "quote": "扶老携幼，将男带女，滚滚渡河，两岸哭声不绝。",
+            "start": 204477,
+            "end": 204499,
+            "inSlice": true,
+            "inSliceOccurrences": 1,
+            "wholeBookOccurrences": 1
+          },
+          "why": "机器复算，以下 8 句在本区间各出现 1 次、在候选**整份文件**里 0 命中：「扶老携幼，将男带女，滚滚渡河，两岸哭声不绝」(204477)、「闻者莫不痛哭」(204543)、「城外百姓，皆望敌楼而哭」(204676)、「军民无不下泪」(205160)、「百姓闻玄德此言，莫不伤感」(205292)、「号哭之声震天动地；中箭着枪抛男弃女而走者不计其数」(207582)、「两岸哭声」等。候选 TH1 用「对百姓的处置」为轴，却把这组**唯一直接写百姓遭遇**的句子整组留在引文之外——它的 support 五条全部是人物语或政治动作。这正是「引文覆盖率查不出来」的遗漏形态：覆盖率只看引文并集，而这里是**根本没引**。",
+          "coverage": "8 sentences, 0 hits book-wide in candidate"
+        }
+      ]
+    }
+  ]
+}

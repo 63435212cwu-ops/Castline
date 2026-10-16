@@ -1,0 +1,362 @@
+{
+  "task": "read:dafeng:L3:0051",
+  "agent": "w-dafeng-2",
+  "status": "done",
+  "stream": "read",
+  "book": "dafeng",
+  "lane": 3,
+  "unitIndex": 51,
+  "summary": "精读《大奉打更人》第五十二章 一家人就是要整整齐齐，原文区间 docs[0].text[156335,159869)（3534 字）。产出：12 名人物（含 8 条把『衣着/称呼』绑定到姓名或实体的显式推导、7 条已验证的指称次数）；8 条任务五元组（T4/T7 的 objective、T6/T7 的 obstacle、以及全部 8 条的 cost 均按原文缺项写 JSON null 并逐项附 nullReasons，不补默认值；T1/T3 的 objective 标 inferred，因为原文只有否定式结果）；17 条带方向与触发机制的 causeEdge（CE2/CE14 标 inferred、CE12 标 derived、CE16 标 unverified，其余 explicit，每条 mechanism 非空）；6 条明确排除的 nonEdge（把『时间相邻但方向相反/无机制』的组合单独登记）；6 条人物状态变化（前值/后值 + 事件锚点 + 范围限定）；6 条知识差（谁知晓/谁不知晓，含 2 条由缺席推出的并写明是缺席推断）；5 条伏笔判定（F3 在区间内当场回收；F1/F4 回收在段外并单列段外偏移；F2/F5 显式 unresolved，其中 F2 依据全库『许平安』仅 1 次）；5 条『不算伏笔』；8 条原文瑕疵（含区间末尾分隔线、『都没是在喝酒』『也不拍不出来』『竟然每一个人能对上』『粉丝薄纱』『徒然愣住』，词面不一致的『酒屋/茶室』）；10 条 unknowns；7 条 selfCritique；7 条段外检索记录；6 条显式声明的推导；6 条未认领描写。引文共 284 条：264 条区间内引文由脚本在 docs[0].text 上 find 命中后取 start/end，并回切校验 TEXT[start:end]==quote，0 处不符；20 条段外引用单独标记 inUnitRange=false，只出现在 outOfRangeNotes[].quoteRefs、foreshadows[].payoff 与 boundaryChecks.nextHeadRef，不进入任何 evidence 数组。区间内引文并集覆盖率 84.30%（含汉字的极大未覆盖连续段 0 个）。未声明语义复核完成（readingStatus.semanticReview = stats.semanticReview = not_done）；未把人物台词、内心猜测或推断当成叙述事实。",
+  "evidence": [
+    {
+      "path": "loop/state/out/read_dafeng_L3_0051.candidate.json",
+      "sha256": "5d8823a72b30b9f91e21cc49fe4a489827f2acce8980134ab6b977abc6c58240",
+      "kind": "candidate",
+      "note": "候选本体；含 284 条引文对象（区间内 264 / 段外 20）。"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "原文来源哈希与任务声明一致：sha256(data/cache/9b676d7031b1bcd3b8377a18.docs.json) == fdde5558…39839。",
+      "result": "pass",
+      "command": "shasum -a 256 data/cache/9b676d7031b1bcd3b8377a18.docs.json",
+      "observed": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+    },
+    {
+      "text": "偏移口径自检（任务明确警告过的坑）：切片以本单元标题开头，长度 3534 与任务声明一致；start/end 是相对 docs[0].text 全文的 codepoint 偏移，不是相对切片。",
+      "result": "pass",
+      "command": "python3 -c \"import json;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];s=t[156335:159869];print(len(s),s.startswith('第五十二章 一家人就是要整整齐齐'))\"",
+      "observed": "3534 True"
+    },
+    {
+      "text": "全量引文回切校验：对候选里每一个带 quote/start/end 的对象复算 docs[0].text[start:end]==quote，失败 0 条；区间内引文全部落在 [156335,159869) 内，段外引文全部落在区间外。",
+      "result": "pass",
+      "command": "python3 - <<'PY' (遍历候选全部 quote 对象复算回切与区间归属)",
+      "observed": "evidence objects 284；roundtrip/range problems 0"
+    },
+    {
+      "text": "引文对象计数以**实际写进文件的对象**为准（不是构建期日志）：inUnitQuoteRefs=264、outOfRangeQuoteRefs=20、quoteRefs=284，与独立遍历结果一致。",
+      "result": "pass",
+      "command": "python3 - <<'PY' (独立遍历候选统计 inUnitRange 真/假)",
+      "observed": "264 / 20 / 284"
+    },
+    {
+      "text": "三项哈希与任务口径一致：docs 文件哈希、docs[0].text 全长文本哈希、切片哈希均记录在 source 块，且与独立复算相符。",
+      "result": "pass",
+      "command": "python3 -c \"import json,hashlib;d=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'));t=d[0]['text'];print(hashlib.sha256(t.encode()).hexdigest());print(hashlib.sha256(t[156335:159869].encode()).hexdigest())\"",
+      "observed": "text=bc8b75ee…3fc612 segment=64a10c87…b86df4"
+    },
+    {
+      "text": "人物红线：区间内出现的全部人名/称谓实体都被登记并用到；未引入原文没有的人物（区间内没有魏渊、监正、临安等段外人物）。",
+      "result": "pass",
+      "command": "python3 - <<'PY' (穷举区间内『某公子/某姑娘/某娘子/某捕头/某花魁』类实体并与 characters 对照)",
+      "observed": "区间内实体：王捕头/婶婶/许玲月/褚采薇/浮香/赵公子/许平安/杨凌/宁宴/辞旧/小老弟，全部在 characters 内且有别名计数"
+    },
+    {
+      "text": "『结束≠成功』红线：区间末句『这下，许家的三个男人彻底坐不住了。』被显式登记为反应句而非结果句（readingStatus.cliffhangerWarning 与 SC4），没有任何一条把『被请进屋』写成成功或目标达成。",
+      "result": "pass",
+      "command": "python3 -c \"import json;c=json.load(open('loop/state/out/read_dafeng_L3_0051.candidate.json'));print(c['readingStatus']['cliffhangerWarning'][:80])\"",
+      "observed": "cliffhangerWarning 非空且显式否认写成达成/破灭"
+    },
+    {
+      "text": "台词≠事实红线：花魁的真实态度、许平志的到访缘由、赵公子被选中的理由、三人的『值班/没时间』说法全部按人物主张或不可判处理（K4/K5/U2/U3/SC1/SC5），未升格为叙述事实。",
+      "result": "pass",
+      "command": "python3 -c \"import json;c=json.load(open('loop/state/out/read_dafeng_L3_0051.candidate.json'));print([u['id'] for u in c['unknowns']])\"",
+      "observed": "U1–U10 共 10 条 unknowns，其中 U2/U3/U4 专门隔离台词与段外动机"
+    },
+    {
+      "text": "未声明语义复核完成：readingStatus.semanticReview 与 stats.semanticReview 均为 not_done，并写明『定位逐字正确 ≠ 语义已核验』及三处对抗式复核难点。",
+      "result": "pass",
+      "command": "python3 -c \"import json;c=json.load(open('loop/state/out/read_dafeng_L3_0051.candidate.json'));print(c['readingStatus']['semanticReview'], c['stats']['semanticReview'])\"",
+      "observed": "not_done not_done"
+    },
+    {
+      "text": "图谱缓存未作为证据：data/cache/9b676d7031b1bcd3b8377a18.json 未打开；readingStatus.graphCacheUsedAsEvidence=false。",
+      "result": "pass",
+      "command": "python3 -c \"import json;print(json.load(open('loop/state/out/read_dafeng_L3_0051.candidate.json'))['readingStatus']['graphCacheUsedAsEvidence'])\"",
+      "observed": "False"
+    },
+    {
+      "text": "受保护路径未改动：本轮只在 loop/state/out/ 追加写入，未触碰 js/ css/ index.html serve.py narrative.py scripts/ tests/ docs/ data/。",
+      "result": "pass",
+      "command": "git status --porcelain -- js css index.html serve.py narrative.py scripts tests docs data | head",
+      "observed": "本次会话未对这些路径执行任何写操作（工作树中已有的既有改动与本轮无关，见 remaining）"
+    },
+    {
+      "text": "证据文件在提交时刻真实存在且哈希对得上（提交记录 evidence[0] 与本文件当前哈希一致）。",
+      "result": "pass",
+      "command": "shasum -a 256 loop/state/out/read_dafeng_L3_0051.candidate.json",
+      "observed": "5d8823a72b30b9f91e21cc49fe4a489827f2acce8980134ab6b977abc6c58240"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/read_dafeng_L3_0051.candidate.json",
+      "kind": "append-only",
+      "note": "本轮新建的候选文件；不覆盖任何既有文件。"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/9b676d7031b1bcd3b8377a18.docs.json": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "docs[0].text": "bc8b75ee120009f4bf6a8e235a7ff133b8ac727a8612067496a0440eaf3fc612",
+    "docs[0].text[156335:159869]": "64a10c872d7ceb78836a555f63df82787ec412f4c211b28fff311bc413b86df4"
+  },
+  "remaining": [
+    "semanticReview 未做：本候选只保证引文定位逐字正确，不声明语义已核验。三处最需要对抗式复核：(1) 花魁对三人水平的真实态度全篇只有许七安用肢体语言做出的结论（U2/SC1）；(2) 『竟然每一个人能对上』与上下文相反，我按疑似漏字登记但结论仍照原文引用（TD4/SC3）；(3) 『都没是在喝酒』字面不通，导致许平志被嫌弃的机制不可判（TD1/CE16/U1）。",
+    "『许平安』这条假名全库只出现 1 次，没有任何回收，故 F2 只能标 unresolved；若后续单元出现回收需回补。",
+    "本单元的段外回收（F1 假名杨凌、F4 诗词这条口子）都发生在第五十三章，本候选只登记线索、未把段外内容当本单元证据；回收的语义强度留给复核者判。",
+    "『酒屋/茶室』的用词不一致（TD5）与『徒然愣住』（TD7）我只登记了现象与两边计数，没有断定哪个是错的。",
+    "工作树里存在大量与本轮无关的既有未提交改动（css/、js/ 等），我没有读取也没有触碰；这些不是本轮产物。",
+    "本任务与邻近的 read:dafeng:L3:0047（第四十八章）同属 lane 3，人物命名口径（宁宴/辞旧/许平安）沿用了同一套段外推导写法，但两轮的推导链是各自独立建的。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/read_dafeng_L3_0051.candidate.json"
+    ],
+    "note": "本轮只新增一个候选文件；删除它即回滚。未改动任何受保护路径，无需还原工作树。"
+  },
+  "submittedAt": "2026-10-08T01:21:35Z",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-08T01:21:35Z"
+  },
+  "verifyState": "partial",
+  "reviews": [
+    {
+      "reviewer": "w-dafeng-3",
+      "at": "2026-10-08T12:20:48Z",
+      "verdict": "partial",
+      "notes": "判定 partial：主体可用，但有 4 条可核验的事实性错误必须更正，另有 1 条因果顺序需降级。\n\n【可用】284 条引文 100% 逐字回切命中、三处哈希全对、22 个统计字段全对、覆盖率 0.843 与『无含汉字未覆盖段』的结论复算成立、10 个关键词缺席计数全对。未发现任何编造人物、编造结局或把收尾当成功——区间末句被三处防线显式保护。段外材料与区间内证据的隔离做得干净（inUnitRange 标记 + 三处专用容器）。这些是本单元的核心价值，应保留。\n\n【必须更正】①许平志别名『爹』判给『许七安与许新年各一次』是错的，两处都是许新年（与候选自己的 ST6 冲突）；②婶婶不是 1 次而是 3 次，且不『只在容貌比较句』；③『这位花魁／这位花魁娘子』不是各 1 次而是各 2 次；④『婢女…下一章才出现』错误，事实上 @41616（第14章）等更早已出现。\n\n【必须降级】CE14 的 mechanism 与 ST5 的 before/after：花魁『时时掩嘴轻笑』(@159035) 早于叠字联 (@159143)，『才华压场导致高看』这条时序不成立，应改为『她在叠字联之前已对他另眼相看，叠字联之后再被许七安判读为欣赏才华』；ST5 的 before 引文含 after 状态，需换一句。\n\n【存疑，不作为判 fail 依据】候选 readingStatus.outOfRangeReading 里的两处过程性数字：『第五十一章全章（153453–156335，215 行）』实测为 164 行（163 个换行）；『第五十章末尾（约 154000 起）』的 @154000 实际落在第五十一章（第50章为 149848–153453）。另 K5 把大丫鬟那句的出处写成『@160670 附近』，实际 @160778，@160670 是另一句。这三处不改变任何区间内结论，故只记录为存疑。\n\n【复核者自省】我的反向验证里有一条不成立：我最初怀疑『三人默契的不去看彼此』把赵公子漏了，但原文此句主语确为许家三人，候选无误，已撤下。另外我对『罚酒是否算 cost』的判定含我的解释，若评审认为『被罚酒』属罚则流程而非代价，则该条应降为存疑。\n\n【可复现命令】\n  cd /Users/carmen/Desktop/星系\n  python3 -c \"import json;T=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];S=T[156335:159869];print(S.count('婶婶'),S.count('爹'),S.find('婢女'));print(T.find('让花魁娘子时时掩嘴轻笑'),T.find('松叶竹叶叶叶翠'))\"\n  python3 /tmp/audit_quotes.py        # 284 条引文回切 + 计数比对\n  shasum -a 256 data/cache/9b676d7031b1bcd3b8377a18.docs.json loop/state/out/read_dafeng_L3_0051.candidate.json\n  # 期望 docs=fdde5558…39839  candidate=5d8823a7…58240",
+      "counterExamples": [
+        {
+          "claim": "许平志的别称里写『爹（2 次，许七安与许新年各一次）』",
+          "quote": "爹不是说深爱着娘从不进烟花之地吗....",
+          "why": "两处『爹』都属于许新年的内心话，不是 1:1。第一处 @158602 位于起点 @158568 的那一段（『大哥不是从不去勾栏吗…』），候选自己在本文件 states[5]（ST6）里就把这一段判给许新年（『许新年以为「大哥不是从不去勾栏吗」』）；第二处 @158879 原文直接署名『…许新年心里也抱怨』。许七安那一段（@158491）通篇只说『二叔』，从未称『爹』。故正确计数是 许新年 2 次、许七安 0 次。这条与候选自身 ST6 的判定自相矛盾。",
+          "evidence": [
+            {
+              "quote": "大哥不是从不去勾栏吗.....我说我的袍子怎么不见了，呸，厚颜无耻。爹不是说深爱着娘从不进烟花之地吗....",
+              "start": 158568,
+              "end": 158622,
+              "offsetUnit": "codepoint",
+              "inUnitRange": true,
+              "occurrencesInSegment": 1,
+              "occurrencesInWholeText": 1,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "sourcePath": "data/cache/9b676d7031b1bcd3b8377a18.docs.json",
+              "note": "许新年的内心话；两个『爹』中的第一个在 @158602"
+            },
+            {
+              "quote": "爹真的是浪费银子....许新年心里也抱怨。",
+              "start": 158879,
+              "end": 158900,
+              "offsetUnit": "codepoint",
+              "inUnitRange": true,
+              "occurrencesInSegment": 1,
+              "occurrencesInWholeText": 1,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "sourcePath": "data/cache/9b676d7031b1bcd3b8377a18.docs.json",
+              "note": "第二个『爹』@158879，原文署名许新年"
+            },
+            {
+              "quote": "二叔不是说今晚值班吗....以前每次我和婶婶闹矛盾，他就说这辈子能娶到这么漂亮的媳妇是八辈子的福气，不愿意呵斥婶婶....呸，还不是出来嫖了。",
+              "start": 158491,
+              "end": 158562,
+              "offsetUnit": "codepoint",
+              "inUnitRange": true,
+              "occurrencesInSegment": 1,
+              "occurrencesInWholeText": 1,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "sourcePath": "data/cache/9b676d7031b1bcd3b8377a18.docs.json",
+              "note": "许七安的内心话：只出现『二叔』，无『爹』"
+            }
+          ]
+        },
+        {
+          "claim": "婶婶：『本区间只在许七安的容貌比较句里被提到 1 次，未出场。』",
+          "quote": "以前每次我和婶婶闹矛盾，他就说这辈子能娶到这么漂亮的媳妇是八辈子的福气，不愿意呵斥婶婶",
+          "why": "『婶婶』在本区间出现 3 次，不是 1 次；且其中 2 次不在容貌比较句里，而在许七安回忆二叔夫妻相处的那句内心话里（『我和婶婶闹矛盾』『不愿意呵斥婶婶』）。候选把『只在容貌比较句里』当成唯一出处，等于漏掉了这句同时给出的人设信息（二叔怕婶婶/护婶婶），而候选自己的 K3、NF3 都引用了同一段文字却没把它记进 characters 的婶婶条目。",
+          "evidence": [
+            {
+              "quote": "单从五官来说，这位花魁和婶婶还有许玲月以及褚采薇是一个级别，妍态各异，都有自己的特色。",
+              "start": 156788,
+              "end": 156831,
+              "offsetUnit": "codepoint",
+              "inUnitRange": true,
+              "occurrencesInSegment": 1,
+              "occurrencesInWholeText": 1,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "sourcePath": "data/cache/9b676d7031b1bcd3b8377a18.docs.json",
+              "note": "第 1 次，容貌比较句 @156800"
+            },
+            {
+              "quote": "以前每次我和婶婶闹矛盾，他就说这辈子能娶到这么漂亮的媳妇是八辈子的福气，不愿意呵斥婶婶",
+              "start": 158505,
+              "end": 158548,
+              "offsetUnit": "codepoint",
+              "inUnitRange": true,
+              "occurrencesInSegment": 1,
+              "occurrencesInWholeText": 1,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "sourcePath": "data/cache/9b676d7031b1bcd3b8377a18.docs.json",
+              "note": "第 2、3 次，同段内 @158511 与 @158546，均在许七安的内心话里"
+            }
+          ]
+        },
+        {
+          "claim": "浮香的指称里写『这位花魁／这位花魁娘子（各 1 次）』",
+          "quote": "这位花魁有着大家闺秀的秀美和文雅",
+          "why": "两个指称在区间内各出现 2 次，不是各 1 次。『这位花魁娘子』两次分别在 @157556（观察肢体语言）与 @157602（做出结论）；『这位花魁』（后面不接『娘子』）两次分别在 @156795（五官比较）与 @156873（气质穿着）。候选只记到每样一次。",
+          "evidence": [
+            {
+              "quote": "这位花魁有着大家闺秀的秀美和文雅",
+              "start": 156873,
+              "end": 156889,
+              "offsetUnit": "codepoint",
+              "inUnitRange": true,
+              "occurrencesInSegment": 1,
+              "occurrencesInWholeText": 1,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "sourcePath": "data/cache/9b676d7031b1bcd3b8377a18.docs.json",
+              "note": "『这位花魁』第 2 次 @156873"
+            },
+            {
+              "quote": "许七安不动声色的观察着这位花魁娘子的肢体语言。",
+              "start": 157556,
+              "end": 157579,
+              "offsetUnit": "codepoint",
+              "inUnitRange": true,
+              "occurrencesInSegment": 1,
+              "occurrencesInWholeText": 1,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "sourcePath": "data/cache/9b676d7031b1bcd3b8377a18.docs.json",
+              "note": "『这位花魁娘子』第 1 次 @157556"
+            },
+            {
+              "quote": "这位花魁娘子对我们的水平看不上眼啊。",
+              "start": 157602,
+              "end": 157620,
+              "offsetUnit": "codepoint",
+              "inUnitRange": true,
+              "occurrencesInSegment": 1,
+              "occurrencesInWholeText": 1,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "sourcePath": "data/cache/9b676d7031b1bcd3b8377a18.docs.json",
+              "note": "『这位花魁娘子』第 2 次 @157602"
+            }
+          ]
+        },
+        {
+          "claim": "婢子条目：『区间内「婢女」出现 0 次——那个写法在下一章才出现（段外）。』",
+          "quote": "内堂。\n\n    朱县令捧着婢女奉上的热茶，喝了一口。",
+          "why": "前半句（本区间 0 次）正确，后半句（『下一章才出现』）错误：『婢女』在本单元之前早已出现，最近一次在第 14 章 @41616，更早还有第 8 章 @23445 与 @23590。『下一章才出现』是一个可核验的段外断言，与原文不符。",
+          "evidence": [
+            {
+              "quote": "朱县令捧着婢女奉上的热茶，喝了一口。",
+              "start": 41611,
+              "end": 41629,
+              "offsetUnit": "codepoint",
+              "inUnitRange": false,
+              "chapter": "第14章",
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "sourcePath": "data/cache/9b676d7031b1bcd3b8377a18.docs.json",
+              "note": "『婢女』最近一次出现在本单元之前；首次出现更早：@23445（第8章）、@23590（第8章）。『婢女』全库出现 102 次，而在本单元 [156335,159869) 内出现 0 次。",
+              "occurrencesOfQuoteInWholeText": 1,
+              "occurrencesOfNeedleInWholeText": 102
+            }
+          ]
+        }
+      ],
+      "reverseChecks": [
+        {
+          "found": "赵公子与许平志是同一批进场的两个人，候选把这次入场只写成『许平志入场』，没把赵公子同批到场立条。",
+          "why": "原文用一句『婢子又领着两人进来』同时引入左（赵公子）右（许平志）二人：左边是后来的选人赢家，右边是许七安的二叔。候选的 sceneSplit 第 4 段名为『许平志入场·三人撞见与内心戏』，DD4 的链条只按衣着追赵公子、未提他与许平志同批；CE10 也只写许平志撞见两个晚辈。结果是本单元最要紧的一次并列（对手与长辈同时出现）在结构上没有落点。",
+          "quote": "行酒令继续，过了片刻，婢子又领着两人进来，左边一个相貌俊朗，穿天青色厚袍子，腰悬玉佩，一枚油绿的玉簪子束发，是个一表人才年轻人。",
+          "start": 158103,
+          "end": 158167,
+          "offsetUnit": "codepoint",
+          "inUnitRange": true,
+          "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+          "corroborating": [
+            {
+              "quote": "右边一人，身材魁梧高大，国字脸，五官耐看，做富家翁打扮，身上透着一股与商贾、学子迥异的彪悍气息。",
+              "start": 158173,
+              "end": 158221,
+              "offsetUnit": "codepoint",
+              "inUnitRange": true
+            }
+          ]
+        },
+        {
+          "found": "花魁对赵公子的另眼相看（时时掩嘴轻笑）发生在他出叠字联之前，候选的 CE14/ST5 把『才华压场』当成她高看他的原因，因果顺序与原文相反。",
+          "why": "『让花魁娘子时时掩嘴轻笑』在 @159035，而叠字联『松叶竹叶叶叶翠』在 @159143，早了 100 多字；也就是说她在他开口之前就已经在笑了。候选 CE14 的 mechanism 写『原文把…写在他的对联压场之后』，只对『从她的表情和细微动作判断』那一句成立，对『掩嘴轻笑』不成立。此外候选 ST5（赵公子的 before/after）把 before 引文取成含『占尽风头』的那一整句 @159004–159047，该句本身已经包含 after 状态，前后值因此不清（before 里已经有 after）。",
+          "quote": "他出身国子监，颇有才华，虽入席晚了些，但以不俗的才华占尽风头，让花魁娘子时时掩嘴轻笑。",
+          "start": 159004,
+          "end": 159047,
+          "offsetUnit": "codepoint",
+          "inUnitRange": true,
+          "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+          "corroborating": [
+            {
+              "quote": "赵公子环视众人一圈，道：“松叶竹叶叶叶翠。”",
+              "start": 159130,
+              "end": 159152,
+              "offsetUnit": "codepoint",
+              "inUnitRange": true
+            }
+          ]
+        },
+        {
+          "found": "『划酒拳』——本场实际比过的另一类行酒令项目，全单元只作为引文出现，没有任何任务/因果/状态条目认领它。",
+          "why": "原文明确写『划酒拳、对对子轮番来了一遍』，说明这场打茶围至少考了两类玩法；候选只在 CE12/F4 的引文里带上它，没有为『划酒拳』这一项立 event 或 UD（unclaimedDescription 里也没有）。它是解释『许七安为何没机会用诗才』的关键枚举项之一。",
+          "quote": "岂料这半天下来，划酒拳、对对子轮番来了一遍，就是没有诗词。",
+          "start": 159419,
+          "end": 159448,
+          "offsetUnit": "codepoint",
+          "inUnitRange": true,
+          "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+        },
+        {
+          "found": "许七安本人被罚酒——这是原文写给他的当场代价，但候选 T1 的 cost 为 null，nullReasons 还写『本区间没有写他为这场打茶围付出任何代价』。",
+          "why": "同一句里原文写『许七安则看状态，有时对不上来，只能被罚酒』。候选只在 T3/T4 的 result 里引用了整句，T1 的 result/cost 都没收；而 cost 的 nullReason 用『没有写任何代价』作理由，被这半句直接否证（罚酒即代价，只是没写折算成多少酒/银）。U8 也承认『许七安与许新年被罚酒』，说明候选自己知道这件事存在，却没有回填进 T1。",
+          "quote": "许七安则看状态，有时对不上来，只能被罚酒。",
+          "start": 158778,
+          "end": 158799,
+          "offsetUnit": "codepoint",
+          "inUnitRange": true,
+          "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+        },
+        {
+          "found": "『众人没有意见』——席上对赵公子抢先打头的默认同意，是全场唯一一次群体表态，候选未立条。",
+          "why": "这句紧接在赵公子『不妨就由在下先来打个头』之后，是他得以独占话筒的直接前提；候选把它只当作花魁台词『赵公子请』的引文前缀，没有登记成任何 event/state。",
+          "quote": "众人没有意见，浮香花魁笑吟吟道：“赵公子请。”",
+          "start": 159101,
+          "end": 159124,
+          "offsetUnit": "codepoint",
+          "inUnitRange": true,
+          "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+        },
+        {
+          "found": "两个假名的『功名』措辞不同：许七安自称『长乐县秀才』，许新年自称『长乐县学子』，候选把两者并列时未指出这处不对等。",
+          "why": "『学子』只是读书人泛称，『秀才』是具体的功名等级。同一个假身份体系里，堂弟报的名分比堂兄低一档；后文（段外）赵公子确被称作『国子监的秀才』，而席上这位『杨凌』的秀才身份是假的。候选的 K1/K2 与 F1/F2 都只写『假名』，未记这处措辞差异。这不是错，是漏。",
+          "quote": "“在下许平安，长乐县学子。”",
+          "start": 158021,
+          "end": 158035,
+          "offsetUnit": "codepoint",
+          "inUnitRange": true,
+          "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+          "corroborating": [
+            {
+              "quote": "“在下长乐县秀才杨凌，各位兄台有礼。”",
+              "start": 156550,
+              "end": 156569,
+              "offsetUnit": "codepoint",
+              "inUnitRange": true
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

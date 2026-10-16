@@ -1,0 +1,608 @@
+{
+ "task": "adopt:P06-W05",
+ "agent": "w-ops",
+ "status": "done",
+ "generatedAt": "2026-10-09T21:55:00Z",
+ "kind": "plan100-open-item-adjudication",
+ "title": "P06-W05（rejected）如实处置：缺口今天仍在（且可在今天可达的参数上复现），但台账两组头条数字不可复算，且「塌黑由 dnaCarve 造成」被一个 carve 已 idle 的批次证伪",
+ "supersedes": {
+  "record": "loop/state/out/adopt_P06-W05.json（2026-10-08T04:33:55Z，agent=w-ops）",
+  "why": "该记录被机器判为 evidence 失效（loop.py stats 的 staleEvidence 含 adopt:P06-W05）",
+  "rootCause": "它把 js/sky/sky-tokens.js 的台账时刻哈希 b4f75823217e… 当证据锚定，而该文件在 2026-10-09T21:05:13Z 被并行写入者（merge:visual-animation:20261010，mainThreadOnly、已 done）合法改写为 060b73229050…（只加 DUR.panel:0.24）。js/ 属 GUARDED 且**不在** EVOLVING_PREFIXES 里 ⇒ 引用它的记录结构性必然转 stale。本版因此**不再**把 js/sky/sky-tokens.js 与 css/sky-deep-tokens.css 列为哈希锚定证据，改为在 commands 里给出「用 rollback.patch 逆向复原台账值」的可复现命令。",
+  "whatIsNotWrong": "上一版的**结论方向**（缺口仍在）经本轮独立重测成立；失效的是证据哈希，不是判断。"
+ },
+ "summary": "结论：**缺口今天仍然存在**，且我能在**今天可达的参数**上独立复现它（fix-on 相对 fix-off，三书九视图中心亮度比 0.161–0.307、中央近黑 0.18–0.50 → 0.83–0.93）。但本轮把台账里三处说法收紧了，其中一处是**新发现的反例**：\n① **塌黑不再是「未知」**：reports/dump/ 与 reports/probe2/ 两批归档里都有一个 `all-neutral` 臂，它的 `tokens.dna.fields` 是 fray=0/cut=0（真中性），同批 `shaders2/allneutral-splat.fs` 是 **idle 版**（1356 B = SPLAT_FS + `/* dna carve idle */`，对照 off 1335 B / on 1624 B，我本轮用出厂模块逐字符复算全部相同），**可它的中心亮度仍是 off 的 0.232 倍（0.1466→0.0340）**。同一批次的 cosmos 生效值（horizonDeg 27.00 / avoidDeg 26 / dustN 2000 / period 2400=DR）与 off 的默认**逐项相同** ⇒ 这次塌黑既不是 dnaCarve、也不是深空参数造成的。**这证伪了「中央塌黑由 dnaCarve 造成」这一主归因**（上一版记录的 F4 已指出，本轮独立复现并补上了「cosmos 参数全同」这半边）。\n② **台账两组头条数字不可复算**：`0.21→0.77` / `0.134→0.039`（knownGaps）与 `0.303/0.390/0.259` / `0.867/0.884/0.857`（decision.md §1）我在归档 PNG 上**扫了 19 种中心窗口定义**都复现不出；这些数字在归档里**只出现在 rollback.patch 的注释里**，没有量测脚本或 JSON 记录它们。我能复现的最接近一组是 box 0.45–0.55 的 off 近黑 0.2808/0.4143/0.2571（与 decision.md 差 0.047）。⇒ 结论方向被独立证实，**但被引用的具体数字不可复算**，属于可复现性缺口。\n③ **证据过期是分片的，不是整批**：bisect2 / final-on / candidate-dna6 带 avoidDeg=46/22/38.19，而今天 sky-cosmos.js:115 是 clampN(…,24,28,26)（我实测强制 46 只得 28）⇒ 那几批的「已排除」不作数；但 fix-on 带的 28/24/26.7 **全部落在今天的 clamp 区间内**，且九个视角的 DNA 参数与我今天用出厂模块重算的**逐字段相同** ⇒ **fix-on/fix-off 这一组今天仍然有效**，塌黑就在它上面复现。\n④ 「中性不可达」缺陷仍在，但机制要说准：仍在的是 **js/sky/sky-dna.js 的 RANGE.fray=[0.10,0.62] / RANGE.cut=[0.30,0.66]**（我在 rollback.patch 里确认台账时刻就已经是这个域，不是后来改小的）；而**令牌闸门 sky-tokens.js 已经能把显式 0 归 0**（DNA_LIMITS 是安全夹取、不是地板）⇒ 正确表述是「真实书目的**计算值**永不落在中性上，所以 all-neutral 只能用 URL 诊断覆盖构造」，而不是「摁不回中性」。这正是上面 ① 那批 all-neutral（overridden 长 11）的来历。\n⑤ 配色退步仍在，但台账数字口径不对：从 nine-view-metrics.json 的 9 对复算 hue 均值 0.954260→0.965937（+0.011678，文件自带 delta.hue=0.0116），台账写的 **0.9678 不在这 9 个 dnaOn 值里**。\n⑥ 生产不可达：`dna=on` 是白名单 opt-in（sky-dna.js:234-241），全仓库 `grep 'dna=on'` 只命中该文件自己的注释，没有任何 UI/配置入口 ⇒ 缺省画面不受影响（default-now 中心亮度 0.1376、无塌黑）。\n⑦ 归属：全队列 **2362** 条任务里能写 `js/sky/*` 的只有 **3** 条，其中 2 条 `mainThreadOnly=true`（merge:visual-master:20261009 仍 pending；merge:visual-animation:20261010 已 done），第 3 条已 done；而 `loop/bin/adopt_plan100.py:74-75` 把 (P06,W05) 指给的 `perf:baseline-matrix` **既不跑 A/B、也无权写 js/sky 或 artifacts/**（已 done，prompt 不含 A/B/DNA/相位任何字样）⇒ 沿用这张表会复制 P12-W05 已查出过的同一个错误：**指错了承接者**。",
+ "reworkOf": "loop/state/out/adopt_P06-W05.json",
+ "reworkReason": "上一版被机器判为 evidence 失效（它锚定了会被并行写入者合法改写的 js/sky/sky-tokens.js）。本轮按同一判据重做：结论方向未变，但更正了 4 处（机制描述、台账头条数字不可复算、证据过期是分片的、以及上一版自身的锚定自伤）。",
+ "notSelfSigned": {
+  "note": "本产物由 w-ops 提交。台账 owner=p06-agent、原 reviewer=p13-wave3-verifier，均非本 agent；本会话未做任何签收动作，未改台账状态。",
+  "owner": "p06-agent",
+  "originalReviewer": "p13-wave3-verifier",
+  "didNotChangeLedgerStatus": true
+ },
+ "whatIchecked": {
+  "method": "只读复算 + CPU 契约实跑 + 逆向复原。像素量测走**独立路径**（PIL 12.2.0 + numpy 2.5.0，自写 measure.py），**未使用**争议工具 tools/plan100/visual_metrics.py；着色器/DNA/夹取一律用 `vm` 载入**出厂模块**现算，不手抄；「台账时刻」的取值域用 rollback.patch 里的出厂全文逆向复原后逐字节比对。",
+  "notChecked": [
+   "未跑浏览器/GPU（任务未声明要跑，且 GPU 全局串行）⇒ 本产物**不含**任何新的渲染实测，全部像素数字来自归档 PNG 的只读复算",
+   "未重新生成 fix-on/final-on 图（会与并行 worker 争 GPU 槽位）",
+   "未判定「同相位」是否真的成立（nine-view 的 index.json 不记录任何相位字段；我只能证明字段未记录，不能证明像素实际同相位）",
+   "未复核台账 remaining 里「西游 compDist 偏弱定位为 fray=0.10 触底」这条（需要 compDist 的原始量测口径）",
+   "未复核 LAYER5 该补集成还是该删除（只确认零消费点今天仍成立）",
+   "未追溯台账两组头条数字（0.21/0.77、0.303/0.867 等）当初由哪个脚本、哪个窗口定义算出 —— 归档里找不到产出者"
+  ]
+ },
+ "commands": [
+  {
+   "label": "A1 ★ 台账今日状态（未被本任务改动）",
+   "cmd": "python3 -c \"import json;d=json.load(open('artifacts/plan100/20261007/P06-W05/ledger.json'));print(d['status'],d['reviewer'],d['decision'],d['owner'],len(d['knownGaps']),len(d['evidence']))\"",
+   "exit": 0,
+   "out": "rejected p13-wave3-verifier rejected p06-agent 7 12"
+  },
+  {
+   "label": "A2 台账/决定/回滚 三文件 sha256（动手前）",
+   "cmd": "shasum -a 256 artifacts/plan100/20261007/P06-W05/{ledger.json,decision.md,rollback.patch}",
+   "exit": 0,
+   "out": "e54ccab71d568e5962848be167deb5b1ca677d671d1dc1cf52457482b4f8d763  ledger.json\n00fa273cf3ca655f7ce1e0d541a27afe3d183d05bee7f323bc473db90039f8ed  decision.md\n5adaa6e4b0051cbb91d9a578494cba5283236a2598cbe339c8c45f555e7f9a50  rollback.patch\nmtime 三个都是 2026-10-07T04:18:49Z ⇒ 本轮未触碰（提交前复查仍同值）"
+  },
+  {
+   "label": "B1 ★ 复算台账全部 15 条 inputHashes",
+   "cmd": "python3 - <<'EOF'\nimport json,hashlib,os\nled=json.load(open('artifacts/plan100/20261007/P06-W05/ledger.json'))\nfor it in led['inputHashes']:\n p=it['path'];t=hashlib.sha256(open(p,'rb').read()).hexdigest()\n print(p,'SAME' if t==it['sha256'] else 'DIFF',it['bytes'],os.path.getsize(p))\nEOF",
+   "exit": 0,
+   "out": "SAME js/sky/sky-dna.js 16909/16909 | SAME js/sky/sky-nebula.js 29835 | SAME js/sky/sky-nebula-glsl.js 33867 | SAME js/sky/sky-cosmos.js 18898 | SAME js/sky/sky-cosmos-bake.js 7923 | SAME js/sky/sky-deep.js 32781 | SAME tests/sky_dna_carve_contract.js 9761 | SAME tests/sky_dna_browser.py 15525 | **DIFF js/sky/sky-tokens.js** b4f75823217e…(24671) → 060b73229050…(24998) | **DIFF css/sky-deep-tokens.css** 473a92a4877a…(6620) → 8d357a509d95…(6789) | **DIFF index.html** 5a7ef487c365…(76420) → cbcdaecaea9c…(78769) | **DIFF tests/script_manifest.json** d5fb863a0c8b…(37608) → 8fe1c63cddca…(36561) | **DIFF tests/sky_dna_contract.js** 1dd66ade075b…(19600) → ef74abe619e7…(23997) | **DIFF tests/sky_internal_review_shots.py** 94623251cba3…(15234) → dfa371dd5cd1…(16991) | **DIFF tools/plan100/dna_census.py** 525aa5947ec5…(8133) → 2f434f12ed84…(11739)\n⇒ 渲染路径 7 个 js 里 **6 个逐字节未变**；变的两个都是并行写入者打的 panel 令牌"
+  },
+  {
+   "label": "B2 ★ 变的两个文件是否只多了 panel（逆向复原到台账值）",
+   "cmd": "python3 - <<'EOF' 读今天的 sky-tokens.js/css，按 merge:visual-animation 的 diff 逆向移除 DUR.panel 与 --skd-dur-panel，比对台账 sha256 EOF",
+   "exit": 0,
+   "out": "sky-tokens.js  移除 3 处（注释块 + `panel: 0.24` + migrate 行尾逗号）后 = 24671 B, sha256 b4f75823217ecdb5217d7faf0487aa18164a25bddc599f6856fe3daaf8590ed4 ⇒ **MATCH 台账值**\nsky-deep-tokens.css 移除 3 处（时长注释里的 panel、--skd-dur-panel 声明、reduced-motion 里的覆盖）后 = 6620 B, sha256 473a92a4877affe84c505018e6b02557a035a02c0f542ac6d9eaf5a7fbde4f62 ⇒ **MATCH 台账值**\n⇒ 两个文件的差异**全部**来自 merge:visual-animation:20261010 的 panel 令牌，与 DNA/塌黑无关"
+  },
+  {
+   "label": "B3 谁在什么时候改的（写入足迹：mtime + 写入清单 + 提交记录）",
+   "cmd": "TZ=UTC stat -f '%N %Sm' -t '%Y-%m-%dT%H:%M:%SZ' js/sky/sky-tokens.js css/sky-deep-tokens.css; python3 -c \"import json;d=json.load(open('loop/state/out/merge_visual-animation_20261010.json'));print(d['agent'],d['status'],d['submittedAt'],[c['path'] for c in d['changes']])\"",
+   "exit": 0,
+   "out": "js/sky/sky-tokens.js 2026-10-09T21:05:13Z | css/sky-deep-tokens.css 2026-10-09T21:05:48Z\nvisual-animation-lead done 2026-10-09T21:29:52Z changes=['js/sky/sky-shell-player.js','js/sky/sky-shell.js','js/sky/sky-tokens.js','css/sky-deep-tokens.css','css/sky-reading.css','index.html']\n⇒ 归属有**写入清单 + 提交记录**两条独立证据（不是靠『文件里含某关键词』推断）"
+  },
+  {
+   "label": "C1 ★ 出厂模块现算：RANGE 下限与「中性是否可达」",
+   "cmd": "node /tmp/p06w05b/range_probe.js   # vm 载入 js/sky/{sky-tokens,sky-cloud-noise,sky-nebula-glsl,sky-dna,sky-nebula}.js",
+   "exit": 0,
+   "out": "RANGE_fray=[0.1,0.62]  RANGE_cut=[0.3,0.66]\nDNA_LIMITS_fray=[0.05,0.7]  DNA_LIMITS_cut=[0.24,0.72]\natMin_has_dnaCarve=true（取值域下限仍含 dnaCarve ⇒ 书目计算值永不中性）\nzero_is_idle_verbatim=true（显式 fray=0,cut=0 时 splatFrag 返回 SPLAT_FS + '/* dna carve idle */' 逐字符）\n三书真实计算值：dafeng fray=0.62/cut=0.60/avoidDeg=28/period=1925/bandTilt=24.68；xiyou fray=0.10/cut=0.345/avoidDeg=24/period=2275/bandTilt=19.36；sanguo fray=0.451/cut=0.551/avoidDeg=26.7/period=2225/bandTilt=30.11\n强制越界：applyDNA({avoidDeg:46,period:395,bandTilt:27}) → avoidDeg=28（被 clampN(24,28) 夹住）、period=1600"
+  },
+  {
+   "label": "C2 ★ 台账时刻的取值域（用 rollback.patch 逆向复原，不靠推测）",
+   "cmd": "python3 - <<'EOF' 按 '^diff --git a/… b/…' 分片、取 '+' 行重建每个新文件，与 ledger.inputHashes 比对 EOF",
+   "exit": 0,
+   "out": "重建 js/sky/sky-dna.js = 16908 B（+尾部换行 = 16909 B, sha256 8448d6ae…）⇒ **与台账值逐字节相同**\n⇒ 该补丁里的 sky-dna.js 就是台账时刻那一份 ⇒ 它里面的 RANGE.fray=[0.10,0.62] / RANGE.cut=[0.30,0.66] **在台账时刻就已如此**，不是后来被改小的。（补丁里 sky-tokens.js 片段只有 178 行/8662 B，是被截断的 diff 上下文，不足以复原；故改用 B2 的逆向法）"
+  },
+  {
+   "label": "C3 ★ 三书 DNA 普查产物 vs 今天复算（判据：dna 字段逐字段）",
+   "cmd": "node /tmp/p06w05b/census_cmp.js; python3 -c \"import json;print(json.load(open('artifacts/plan100/visual/dna-dafeng.json'))['generatedAt'])\"",
+   "exit": 0,
+   "out": "dafeng archived.dna vs today recompute -> IDENTICAL（generatedAt 2026-10-06T21:58:45Z, fingerprint 672cf5d13fc1d5a7）\nxiyou  IDENTICAL（f082e26540c9a57）\nsanguo IDENTICAL（f514fe4caf50189e）\n⇒ DNA 计算路径今天与台账时刻**同值**（输入图谱缓存未变）"
+  },
+  {
+   "label": "C4 ★ 令牌闸门是否改动真实书目的取值",
+   "cmd": "node /tmp/p06w05b/effective.js   # raw=DNA.of(g) 与 applied=applyDNA(raw).fields 逐键比对",
+   "exit": 0,
+   "out": "dafeng rawChangedByGate={} clamped=[]；xiyou rawChangedByGate={} clamped=[]；sanguo rawChangedByGate={} clamped=[]\n⇒ 对三书真实值，令牌闸门**一个键都没改**（既不夹取也不记账）⇒ 拿 DNA_LIMITS 的下限（0.05/0.24）来解释塌黑是**说错层**了，真正的下限是 sky-dna.js 的 RANGE（0.10/0.30）"
+  },
+  {
+   "label": "D1 ★ 两条 CPU 契约今天实跑",
+   "cmd": "node tests/sky_dna_contract.js; echo exit=$?; node tests/sky_dna_carve_contract.js; echo exit=$?",
+   "exit": 0,
+   "out": "sky_dna_contract.js → {\"ok\": true, \"checks\": 279, \"cpuOnly\": true}（含 C5 defect pin：断言该缺陷**仍存在**，通过=缺陷未修）\nsky_dna_carve_contract.js → {\"ok\": true, \"checks\": 2286161, \"cpuOnly\": true, \"meanDelta\": -0.00111, \"densityPeak\": 1.72, \"declaredPeak\": 1.72}\n两者 exit=0"
+  },
+  {
+   "label": "D2 ★ 归档着色器文本能否用今天的出厂模块逐字符复算",
+   "cmd": "node -e '<vm 载入出厂模块>; 比对 GL.SPLAT_FS / GL.SPLAT_FS+idle / GL.splatFrag({on,fray:d.fray,cut:d.cut}) 与 reports/shaders2/{off,allneutral,on}-splat.fs'",
+   "exit": 0,
+   "out": "off-splat.fs        archived=1335  today-recompute=1335  IDENTICAL=true\nallneutral-splat.fs archived=1356  today-recompute=1356  IDENTICAL=true   ← 1356 = SPLAT_FS + '/* dna carve idle */'\non-splat.fs         archived=1624  today-recompute=1624  IDENTICAL=true   ← 用三书真实 fray/cut 现算\noff-neb.fs vs allneutral-neb.fs identical=true (7199 B)\n⇒ 归档批次与今天的着色器代码路径一致，「已排除：着色器文本」这条今天仍成立"
+  },
+  {
+   "label": "E1 ★ G3 反例①：carve 已 idle 的批次仍然塌黑",
+   "cmd": "python3 /tmp/p06w05b/measure.py 的 dump 分支（PIL+numpy，独立解码）",
+   "exit": 0,
+   "out": "dump/off.png        1920×1080  centerLum=0.1466  cNB(<0.05)=0.2461  globMean=0.0871\ndump/allneutral.png 1920×1080  centerLum=0.0340  cNB=0.8848  globMean=0.0620\n⇒ allneutral/off 中心亮度比 = **0.232**，而该臂的 splat 着色器是 idle 版（D2）"
+  },
+  {
+   "label": "E2 ★ G3 反例①的对照：两臂的 cosmos 生效值逐项相同",
+   "cmd": "python3 - <<'EOF' 把 dump/{off,allneutral}.json 展平成叶子路径后逐条 diff EOF",
+   "exit": 0,
+   "out": "叶子差异 59 处。去掉 uTime/时间类后剩余全部属于「DNA 有没有注入」本身：\n  tokens.dna / deepDna / stats.cosmos.dna / stats.nebula.dna / tokens.hasDNA\n  stats.nebula.splats 180→159；stats.post.frames 660→513；stats.reveal.t 2.914→2.927\n  nebUniforms.uTime 9.1586→8.9009（差 0.2577s，非定相位）\n**关键**：allneutral 的 stats.cosmos.dna = {horizonDeg: 27, avoidDeg: 26, dustN: 2000, period: 2400, band:{0.09/0.32/0.075}}\n        而 off（dna=null）走的就是同一组默认常量 ⇒ **天球摆位 / 避让角 / 星尘数 / 进动周期四项逐项相同**\n⇒ 「塌黑来自深空参数」这一解释在这批数据上也被排除"
+  },
+  {
+   "label": "E3 ★ G3 反例②：probe2 的 all-neutral 臂同样塌黑",
+   "cmd": "python3 /tmp/p06w05b/measure.py 的 probe2 分支；并读 reports/probe2/result.json",
+   "exit": 0,
+   "out": "probe2/off.png         centerLum=0.1479  cNB=0.2382\nprobe2/all-neutral.png centerLum=0.0347  cNB=0.8837\nprobe2/on.png          centerLum=0.0349  cNB=0.8824\nresult.json: off volHash=7199/volBands=1/dna=false；all-neutral volHash=7199/volBands=1/**dna=true**；on volHash=7291/volBands=3\n⇒ 两条独立批次给出同一形态：**「全中性」与「全开」几乎一样亮（0.0347 vs 0.0349），两者都塌**"
+  },
+  {
+   "label": "E4 G3 反例的限度（如实登记）",
+   "cmd": "python3 -c \"import json;d=json.load(open('artifacts/plan100/20261007/P06-W05/reports/dump/allneutral.json'));print(sorted(d.keys()))\"",
+   "exit": 0,
+   "out": "['clear','cosmos','deepDna','nebGeo','nebOrder','nebUniforms','nebVisible','scene','stats','tokens']\n⇒ 这批 dump **只 dump uniform/场景图，不 dump RT 像素内容**，所以 off 与 allneutral 之间除 DNA 外是否严格单变量，我无法证明（splats 180→159、frames 660→513 说明两者帧数不同）。因此这是**强反例**而非最终归因。"
+  },
+  {
+   "label": "F1 ★ G1 塌黑在**今天可达**的参数上复现（fix-off → fix-on，3840×2160）",
+   "cmd": "python3 /tmp/p06w05b/measure.py fix-off fix-on final-off final-on default-now",
+   "exit": 0,
+   "out": "fix-off→fix-on 中心亮度比（三书×三视图）：\n  dafeng-panorama 0.1377→0.0222 (0.161)  cNB 0.2615→0.9168\n  dafeng-oblique  0.1412→0.0231 (0.164)  cNB 0.2162→0.9170\n  dafeng-rotation 0.1021→0.0293 (0.287)  cNB 0.4529→0.8535\n  xiyou-panorama  0.1141→0.0205 (0.180)  cNB 0.3366→0.9286\n  xiyou-oblique   0.1130→0.0200 (0.177)  cNB 0.3213→0.9317\n  xiyou-rotation  0.0798→0.0245 (0.307)  cNB 0.4966→0.8645\n  sanguo-panorama 0.1268→0.0219 (0.173)  cNB 0.2377→0.9194\n  sanguo-oblique  0.1348→0.0231 (0.171)  cNB 0.1813→0.9173\n  sanguo-rotation 0.1091→0.0323 (0.296)  cNB 0.3854→0.8296\nfinal-off→final-on 同形态（比值 0.164–0.301）"
+  },
+  {
+   "label": "F2 ★ fix-on 的参数全部落在今天的 clamp 区间内 ⇒ 这一组今天仍有效",
+   "cmd": "python3 -c \"<读 nine-view/fix-on/index.json 的 dna 块>\"；对照 node /tmp/p06w05b/census_cmp.js",
+   "exit": 0,
+   "out": "fix-on dafeng avoidDeg=28 / xiyou 24 / sanguo 26.7 —— 今天 clampN(…,24,28,26) 的区间就是 [24,28]，三者**全在区间内**\n且 fix-on 的 11 个 DNA 字段与我今天用出厂模块重算的**逐字段相同**（dafeng 3/1.326/0.62/0.6/0.1682/24.68/28/2575/1925/1.063/1.032 …）\n⇒ fix-on/fix-off 这一组 A/B 今天仍然有效"
+  },
+  {
+   "label": "F3 ★ G4 证据过期是**分片**的，不是整批",
+   "cmd": "python3 -c \"<遍历 nine-view/{final-on,candidate-dna6,fix-on}/index.json 的 dna.avoidDeg，与今天三书复算值比对>\"",
+   "exit": 0,
+   "out": "final-on       dafeng 46 / xiyou 22 / sanguo 38.19  → 今天应为 28 / 24 / 26.7  ⇒ DIFFERS（46/22/38.19 今天**不可达**）\ncandidate-dna6 同上 ⇒ DIFFERS\nfix-on         dafeng 28 / xiyou 24 / sanguo 26.7  → MATCHES today\nbisect2/result.json 的 on 臂带 avoidDeg=46（同上不可达）\n⇒ 上一版记录里「这批归因证据本身过期」的说法方向对，但**范围过宽**：过期的只是 bisect*/final-on/candidate-dna6，fix-on 这一组没过期"
+  },
+  {
+   "label": "F4 ★ G1 冻结时钟后仍复现（台账这一条今天成立）",
+   "cmd": "python3 /tmp/p06w05b/measure.py 的 phase 分支",
+   "exit": 0,
+   "out": "reports/phase/off.png 1920×1080 centerLum=0.1471 cNB=0.2461 globMean=0.0903\nreports/phase/on.png  1920×1080 centerLum=0.0342 cNB=0.8843 globMean=0.0667\n⇒ 冻结动画时钟后，on/off 中心亮度比 = 0.232，形态与未冻结时一致 ⇒ 「不是时间相位」这条今天仍成立"
+  },
+  {
+   "label": "G1 ★ G5 配色退步复算（9 对均值，与文件自带 delta 交叉核对）",
+   "cmd": "python3 -c \"<读 reports/nine-view-metrics.json，对 dnaOff/dnaOn 的 perViewPairs 求 hue 均值>\"",
+   "exit": 0,
+   "out": "dnaOff hue n=9 mean=0.954260（min 0.927873 / max 0.975370）\ndnaOn  hue n=9 mean=0.965937（min 0.938497 / max 0.990669）\ndelta = +0.011678；文件自带 delta.hue = 0.0116（一致）\n台账写的 0.9678 **不在这 9 个 dnaOn 值里**：['0.9587','0.9576','0.9385','0.9754','0.9907','0.9712','0.9554','0.9650','0.9810']\n（0.9686 反而出现在 dnaOff 的某个 oblique 对里）⇒ 0.9543→0.9678/+0.0135/+0.0251 不应作为前后对比引用，用 +0.0117"
+  },
+  {
+   "label": "H1 ★ 生产可达性：dna=on 是白名单 opt-in，无 UI 入口",
+   "cmd": "grep -rn 'dna=on' js/ index.html serve.py data/ ; grep -n 'function disabled' -A 10 js/sky/sky-dna.js",
+   "exit": 0,
+   "out": "唯一命中：js/sky/sky-dna.js:229/231/239（该文件自己的注释与正则）\ndisabled()：无 query → true；`dna=off` → true；否则要求 `dna=on` ⇒ 缺省一律历史路径\n⇒ 没有任何 UI/配置/服务端入口会把 dna=on 打开 ⇒ 缺省画面不受塌黑影响（default-now 中心亮度 0.1376、cNB 0.2613）"
+  },
+  {
+   "label": "H2 LAYER5 零消费点今天仍成立（但要说准是哪一半）",
+   "cmd": "grep -rn 'layer5|LAYER5' js/ index.html css/ --include='*' | grep -v '^js/sky/sky-tokens.js' | grep -v '^css/sky-deep-tokens.css'",
+   "exit": 1,
+   "out": "零命中（exit=1）\n`grep -rn -- '--skd-l5' css/ index.html js/ | grep -v css/sky-deep-tokens.css` 同样零命中\n⇒ **JS 侧**（T.layer5()/layer5Of）与 **CSS 侧**（6 个 --skd-l5-* 变量）在生产代码里都零消费点；仅 tests/ 与 artifacts/plan100/review/p13-wave3-checks.py 引用 ⇒ 上一版那条『只命中一句注释』的低估已更正"
+  },
+  {
+   "label": "I1 ★ G8/G9 台账两处「逐位一致」表述不成立（可复现反例）",
+   "cmd": "python3 - <<'EOF' 逐像素比对 nine-view 的三张 no-DNA 图与 race 的连拍 EOF",
+   "exit": 0,
+   "out": "default-now vs fix-off:  maxDiff=253  fracChanged=0.9104  meanDiff=2.1513\ndefault-now vs final-off: maxDiff=253  fracChanged=0.8799  meanDiff=1.1883\nfix-off    vs final-off: maxDiff=252  fracChanged=0.8902  meanDiff=1.6620\nrace/off s0 vs s1: maxDiff=224 fracChanged=0.9052 ; s0 vs s2: 243/0.8988 ; s1 vs s2: 250/0.8799\nrace/on  s0 vs s1: maxDiff=224 fracChanged=0.8336 …\n但指标稳定：race/off 中心亮度 spread=0.0021、近黑 spread=0.0055；race/on 分别 0.0006 / 0.0010\n⇒ 台账/decision 里的「逐位一致」「完全稳定」应改为「**指标级一致**」（这与上一版记录 F6 的发现相同，本轮独立复现）"
+  },
+  {
+   "label": "J1 ★ 台账两组头条数字不可复算（19 种中心窗口定义扫描）",
+   "cmd": "python3 - <<'EOF' 对 fix-off/fix-on/final-*/default-now/baseline-dna-off × 三书 × panorama，扫 box 0.10–0.90…0.50 与 circle r=0.10–0.50（近黑<0.05 的窗口内占比、窗口内均值）EOF",
+   "exit": 0,
+   "out": "target A（decision.md）: off nb 0.303/0.390/0.259 ; on nb 0.867/0.884/0.857\ntarget B（knownGaps）  : off nb 0.21 / 0.134(nb? lum?) ; on nb 0.77 / 0.039\n最接近的一组：final-off(box 0.45–0.55) nb=[0.282, 0.4141, 0.2606] 误差和 0.0467\n             final-on (box 0.25–0.75) nb=[0.8841, 0.8897, 0.9229] 误差和 0.0886\n**没有任何一种定义能同时命中 off≈0.303 与 on≈0.867**；0.77/0.039/0.134 在归档 PNG 上完全对不上\n`grep -rn '0\\.134|0\\.039' reports/` 只在 **rollback.patch 的注释**里命中，没有任何 JSON/脚本记录产出者\n⇒ 结论方向被独立证实（塌黑真实存在），但**被引用的具体数字不可复算** —— 这是可复现性缺口，已进 remaining"
+  },
+  {
+   "label": "J2 数字口径的诚实边界",
+   "cmd": "（同上，读 metrics 全表）",
+   "exit": 0,
+   "out": "box 0.30–0.70 是上一版记录采用的口径（fix-off 0.2615→fix-on 0.9168）。它在**方向与量级**上与台账一致，但数值不等于台账任何一个数。我**不声称**台账数字是错的或编的 —— 我声称：**用归档产物复算不出来**。"
+  },
+  {
+   "label": "K1 ★ G10 归属：全队列能写 js/sky 的任务只有 3 条",
+   "cmd": "python3 - <<'EOF' 遍历 loop/queue/*.jsonl 的全部 writes，筛出触及 js/sky|css|index.html|artifacts/ 的任务 EOF",
+   "exit": 0,
+   "out": "total tasks: 2362\nmerge:review-v1:20261009b  stream=expert mainThreadOnly=None  writes 含 js/sky/sky-shell-player.js + index.html + css/sky-reading.css（**已 done**）\nmerge:visual-master:20261009 stream=expert mainThreadOnly=True writes 含 js/sky/sky-tokens.js + css/sky-deep-tokens.css + index.html（**仍 pending**，requires merge:visual-production-plan 已满足）\nmerge:visual-animation:20261010 stream=expert mainThreadOnly=True writes=['js/sky/*.js','js/scene.js','css/*.css','docs/QUALITY.md']（**已 done**）\n⇒ 没有任何一条任务点名要处理塌黑；但**能**改这条路径的入口存在且只有这几个"
+  },
+  {
+   "label": "K2 ★ 被指名的承接者并不执行 A/B（沿用它会复制 P12-W05 已查出的同一个错误）",
+   "cmd": "python3 -c \"<读 loop/queue/env.jsonl 的 perf:baseline-matrix，检测 A/B 关键词>\"",
+   "exit": 0,
+   "out": "perf:baseline-matrix  gpu=True  writes=['loop/state/out/perf_baseline-matrix.artifact.json']（**不写 js/ 也不写 artifacts/**）\nprompt 内容 = docs/QUALITY.md Q6 的帧时矩阵（首帧/可交互/稳态 2 分钟/转场 20 次/质量切换/返回/30 分钟）\n检测 'DNA'/'dna'/'A/B'/'相位'/'塌黑'：**全部为 False**；且该任务**已 done**\n而 loop/bin/adopt_plan100.py:74-75 正是 (\"P06\",\"W05\") -> \"perf:baseline-matrix（A/B 需 GPU，串行）\"\n⇒ 这是**指错了承接者**，不是「只差一行登记」。与 P12-W05 处置里查出的 perf:baseline-matrix 问题同形"
+  },
+  {
+   "label": "L1 产品门禁本轮实跑",
+   "cmd": "python3 -B -s tests/version_stamp.py --check; echo exit=$?",
+   "exit": 0,
+   "out": "VERSION STAMP OK · 336 · 全部引用 100% 匹配 8 位内容哈希（exit=0）"
+  },
+  {
+   "label": "L2 受保护路径写入检查（本任务足迹）",
+   "cmd": "shasum -a 256 artifacts/plan100/20261007/P06-W05/{ledger.json,decision.md,rollback.patch}; TZ=UTC stat -f '%N %Sm' -t '%Y-%m-%dT%H:%M:%SZ' <同上>",
+   "exit": 0,
+   "out": "ledger.json   e54ccab71d568e5962848be167deb5b1ca677d671d1dc1cf52457482b4f8d763（与动手前一致）\ndecision.md   00fa273cf3ca655f7ce1e0d541a27afe3d183d05bee7f323bc473db90039f8ed\nrollback.patch 5adaa6e4b0051cbb91d9a578494cba5283236a2598cbe339c8c45f555e7f9a50\nmtime 三个都停在 2026-10-07T04:18:49Z\n本任务唯一写入 = loop/state/out/adopt_P06-W05.artifact.json；未跑 git checkout/reset/stash；未杀任何进程；临时脚本与中间产物写在仓库外 /tmp/p06w05b/"
+  }
+ ],
+ "keyFindings": [
+  {
+   "id": "G1",
+   "claim": "缺口今天仍然存在，且可在**今天可达**的参数上复现",
+   "verdict": "仍然存在",
+   "evidence": "fix-on 的 11 个 DNA 字段全部落在今天的 clamp 区间内且与今天复算逐字段相同；fix-off→fix-on 三书九视图中心亮度比 0.161–0.307、中央近黑 0.18–0.50 → 0.83–0.93；冻结时钟组（reports/phase）同样 0.1471→0.0342。像素量测走独立 PIL+numpy 路径。"
+  },
+  {
+   "id": "G2",
+   "claim": "「中性不可达」缺陷仍在，但台账/上一版把机制说错了一层",
+   "verdict": "仍在（描述需更正）",
+   "evidence": "仍在的是 js/sky/sky-dna.js 的 RANGE.fray=[0.10,0.62]/RANGE.cut=[0.30,0.66]（rollback.patch 逆向复原证明台账时刻就已如此）；而令牌闸门 sky-tokens.js 已能把**显式 0** 归 0（DNA_LIMITS 是安全夹取、不是地板），C4 实测对三书真实值**一个键都没改**。所以准确说法是「真实书目的**计算值**永不中性 ⇒ all-neutral 只能用 URL 诊断覆盖构造」，不是「摁不回中性」。C1 实测：applyDNA({fray:0,cut:0}) 返回 idle 版逐字符。"
+  },
+  {
+   "id": "G3",
+   "claim": "★ 新反例：carve 已 idle 的批次**仍然塌黑** ⇒ 证伪「塌黑由 dnaCarve 造成」",
+   "verdict": "主归因被证伪（或至少不充分）",
+   "evidence": "reports/dump/ 与 reports/probe2/ 两批归档各有一个 all-neutral 臂：fray=0/cut=0、overridden 长 11、同批 shaders2/allneutral-splat.fs 是 idle 版（1356 B，D2 逐字符复算相同），而中心亮度仍是 off 的 **0.232 倍**（0.1466→0.0340，1920×1080）。对照 diff（E2）显示该臂的 horizonDeg/avoidDeg/dustN/period 与 off 的默认**逐项相同** ⇒ carve 与深空参数都被排除。probe2 独立复现（0.1479→0.0347，与 on 的 0.0349 几乎相同）。",
+   "caveat": "两批 dump 都只记录 uniform/场景图，不记录 RT 像素内容，无法证明除 DNA 外严格单变量（splats 180→159、frames 660→513 说明帧数不同）。故这是强反例，不是最终归因。"
+  },
+  {
+   "id": "G4",
+   "claim": "证据过期是**分片**的，不是整批",
+   "verdict": "上一版范围过宽，本轮收窄",
+   "evidence": "bisect2/final-on/candidate-dna6 带 avoidDeg=46/22/38.19，今天 clampN(…,24,28,26) 下不可达（实测强制 46 只得 28）⇒ 那几批的『已排除』不作数；但 fix-on 带 28/24/26.7，全在今天的 clamp 区间内，且十一个字段与今天复算逐字段相同 ⇒ **fix-on/fix-off 这一组今天仍有效**，G1 就建立在它上面。"
+  },
+  {
+   "id": "G5",
+   "claim": "配色退步仍在，但台账数字口径不对",
+   "verdict": "仍在（数字需更正）",
+   "evidence": "nine-view-metrics.json 的 9 对 hue 均值 0.954260→0.965937（+0.011678），文件自带 delta.hue=0.0116 与之一致；台账写的 0.9678 不在这 9 个 dnaOn 值里（0.9686 反而在 dnaOff 的 oblique 对里）⇒ 不应引用 +0.0135/+0.0251 作为前后对比。"
+  },
+  {
+   "id": "G6",
+   "claim": "生产不可达：dna=on 是白名单 opt-in，无 UI/配置入口",
+   "verdict": "确认（这是本项未成为线上事故的原因）",
+   "evidence": "sky-dna.js:234-241 disabled()；全仓库 grep 'dna=on' 只命中该文件自身注释与正则；default-now 中心亮度 0.1376、近黑 0.2613，无塌黑。"
+  },
+  {
+   "id": "G7",
+   "claim": "台账两组头条数字在归档产物上**不可复算**",
+   "verdict": "可复现性缺口（不是「数字是假的」，是「算不出来」）",
+   "evidence": "扫 19 种中心窗口定义（box 0.10–0.90 … 0.50、circle r=0.10–0.50）都没命中 decision.md §1 的 0.303/0.390/0.259 与 0.867/0.884/0.857；0.21/0.77/0.134/0.039 更是完全对不上（grep 只在 rollback.patch 注释里命中）。最接近一组误差和 0.0467。**结论方向被独立证实，但被引用的具体数字不可复算。**"
+  },
+  {
+   "id": "G8",
+   "claim": "证据的**锚定策略**本身会让记录转 stale（本轮返工的真因）",
+   "verdict": "结构性（与 P12-W05 处置里查出的是同一形态）",
+   "evidence": "上一版把 js/sky/sky-tokens.js 的台账时刻哈希当证据锚定；该文件在 2026-10-09T21:05:13Z 被 merge:visual-animation:20261010（mainThreadOnly、done）合法改写。js/ 属 GUARDED 且**不在** EVOLVING_PREFIXES ⇒ 必然转 stale。stats 实测 staleEvidence=['adopt:P06-W05','adopt:P06-W06','verify:dafeng:L2:0022']，三者都是这一形态。本版因此不锚定 js/css。"
+  },
+  {
+   "id": "G9",
+   "claim": "台账两处「逐位一致 / 完全稳定」表述不成立",
+   "verdict": "表述过强（指标级成立，像素级不成立）",
+   "evidence": "default-now/fix-off/final-off 三图两两 maxDiff 252–253、fracChanged 0.88–0.91；race 同变体连拍也没有一对逐位相同（maxDiff 212–250，fracChanged 0.81–0.91）。但指标稳定：off 中心亮度 spread 0.0021、近黑 spread 0.0055；on 分别 0.0006 / 0.0010。应改为「指标级一致」。"
+  },
+  {
+   "id": "G10",
+   "claim": "归属：被指名的承接者不执行 A/B，且无权写该路径",
+   "verdict": "映射错（与 P12-W05 同形）",
+   "evidence": "全队列 2362 条里能写 js/sky/* 的只有 3 条，两条 mainThreadOnly；adopt_plan100.py:74-75 把 (P06,W05) 指给 perf:baseline-matrix，而它 writes 只有 loop/state/out/…、prompt 不含 A/B/DNA/相位任何字样、且已 done。⇒ 需要一条**有权写 js/sky（或 artifacts/ 视觉产物）且真的跑定相位 A/B**的任务才闭环。"
+  }
+ ],
+ "disposition": {
+  "ledgerStatusChanged": false,
+  "ledgerStatus": "rejected（保持原状；本任务明令禁止为让门禁变绿而改台账状态）",
+  "reviewer": "仍为 p13-wave3-verifier（未签收、未自签；owner=p06-agent ≠ 本 agent）",
+  "gapExistsToday": true,
+  "ownerStream": {
+   "primary": "plan100 P06（视觉/星云/深空与设计令牌）后续波次",
+   "carrierInLoop": "本队列 adopt 流：本产物即该未结项的处置记录。loop/state/PLAN100-ADOPTION.json 的 openLedgers 含 P06-W05，应据此标为「已复核 · 仍开 · 归因需重做」。",
+   "theRealEntryPoint": "**不是** adopt_plan100.py:74-75 指的 perf:baseline-matrix（K2 已证它不跑 A/B、也不写该路径），而是 loop/queue/visual-production-20261009.jsonl 里那两条 mainThreadOnly 的视觉任务：merge:visual-master:20261009（**仍 pending**，writes 明确含 js/sky/sky-tokens.js、css/sky-deep-tokens.css、index.html）与 merge:visual-animation:20261010（已 done）。塌黑若要修，只能从这条入口进。",
+   "blockedBy": "① GPU 串行槽位（重跑定相位 A/B 与浏览器 dump）；② 需要 dump **RT/立方体像素内容**而不只是 uniform；③ 若要真正做消融对照，得先把 RANGE.fray/cut 下限放开（否则『中性』只能靠 URL 覆盖构造，见 G2）。",
+   "suggestedNextTask": "ops:P06-blackening-reattribution —— 用今天可达的参数（avoidDeg≤28、period∈[1900,3000]、bandTilt 按 27+(bt-27)/31*1.5）重跑单变量 A/B，并 dump 立方体与 splatRT 的**像素内容**；同时把 RANGE.fray/cut 下限修为 0，让『中性』成为真实可达的对照（否则任何消融仍不是对照）。"
+  },
+  "whyNotMerged": "① 交付物本身今天不存在（缺一条能跑定相位 A/B 且有权写该路径的任务）；② 本产物是**判定**，不是签收；③ 台账 reviewer 仍是 p13-wave3-verifier，本 agent 不得自签。"
+ },
+ "assertions": [
+  {
+   "text": "**缺口今天仍然存在，且在今天可达的参数上复现**：fix-on 的 11 个 DNA 字段与今天用出厂模块重算的逐字段相同、且全部落在 sky-cosmos.js:115 的 clampN(…,24,28,26) 区间内；fix-off→fix-on 三书九视图中心亮度比 0.161–0.307、中央近黑 0.18–0.50 → 0.83–0.93（3840×2160，独立 PIL+numpy 复算，未用 visual_metrics.py）。命令见 commands[F1][F2]。",
+   "result": "pass"
+  },
+  {
+   "text": "**★ 新反例：塌黑不是 dnaCarve 造成的**。reports/dump/allneutral 的 tokens.dna.fields 为 fray=0/cut=0（overridden 长 11），同批 shaders2/allneutral-splat.fs 是 idle 版（1356 B = SPLAT_FS + '/* dna carve idle */'，与今天出厂模块复算逐字符相同），该臂中心亮度仍是 off 的 **0.232 倍**（0.1466→0.0340）；且该臂的 horizonDeg 27.00 / avoidDeg 26 / dustN 2000 / period 2400 与 off 的默认**逐项相同**。probe2 独立复现（0.1479→0.0347，与 on 的 0.0349 几乎相同）。命令见 commands[D2][E1][E2][E3]。",
+   "result": "pass"
+  },
+  {
+   "text": "**证据过期是分片的**：bisect2/final-on/candidate-dna6 带 avoidDeg=46/22/38.19，今天 clampN(…,24,28,26) 下不可达（强制 46 实测只得 28）；而 fix-on 带 28/24/26.7 全部落在区间内。⇒ 上一版「整批证据过期」的范围过宽，本轮收窄。命令见 commands[C1][F3]。",
+   "result": "pass"
+  },
+  {
+   "text": "**「中性不可达」缺陷仍在，但机制需更正**：仍在的是 sky-dna.js 的 RANGE.fray=[0.10,0.62]/RANGE.cut=[0.30,0.66]，且 rollback.patch 逆向复原证明台账时刻就已如此；而令牌闸门已能把显式 0 归 0（applyDNA({fray:0,cut:0}) → idle 版逐字符），C4 实测令牌闸门对三书真实值**一个键都没改**。命令见 commands[C1][C2][C4][D1]。",
+   "result": "pass"
+  },
+  {
+   "text": "**两条 CPU 契约今天实跑全绿**：node tests/sky_dna_contract.js → {\"ok\":true,\"checks\":279}（含 C5 defect pin，通过=缺陷未修）；node tests/sky_dna_carve_contract.js → {\"ok\":true,\"checks\":2286161,\"meanDelta\":-0.00111,\"densityPeak\":1.72=declaredPeak}。命令见 commands[D1]。",
+   "result": "pass"
+  },
+  {
+   "text": "**台账两组头条数字在归档产物上不可复算**：扫 19 种中心窗口定义均未命中 decision.md 的 0.303/0.390/0.259 与 0.867/0.884/0.857，0.21/0.77/0.134/0.039 完全对不上（grep 只在 rollback.patch 注释里命中，无 JSON/脚本记录产出者）。**结论方向被独立证实，但被引用的具体数字不可复算** —— 我没有声称它们是编的，我声称用归档产物算不出来。命令见 commands[J1][J2]。",
+   "result": "pass"
+  },
+  {
+   "text": "**配色退步仍在但口径需更正**：nine-view-metrics.json 的 9 对 hue 均值 0.954260→0.965937（+0.011678），文件自带 delta.hue=0.0116 一致；台账写的 0.9678 不在这 9 个 dnaOn 值里 ⇒ +0.0135/+0.0251 不应作为前后对比引用。命令见 commands[G1]。",
+   "result": "pass"
+  },
+  {
+   "text": "**生产不可达**：dna=on 是白名单 opt-in（sky-dna.js:234-241 disabled()），全仓库 grep 'dna=on' 只命中该文件自身；default-now 中心亮度 0.1376 / 近黑 0.2613，无塌黑。命令见 commands[H1]。",
+   "result": "pass"
+  },
+  {
+   "text": "**台账两处「逐位一致 / 完全稳定」不成立**：三张 no-DNA 图两两 maxDiff 252–253、fracChanged 0.88–0.91；race 同变体连拍无一对逐位相同（maxDiff 212–250）。但指标稳定（off spread 0.0021/0.0055，on 0.0006/0.0010）⇒ 应改为「指标级一致」。命令见 commands[I1]。",
+   "result": "pass"
+  },
+  {
+   "text": "**归属已查明且被指名的承接者不成立**：全队列 2362 条任务里能写 js/sky/* 的只有 3 条（2 条 mainThreadOnly）；adopt_plan100.py:74-75 把 (P06,W05) 指给 perf:baseline-matrix，而它 writes 只有 loop/state/out/…、prompt 不含 A/B/DNA/相位字样、且已 done。⇒ 与 P12-W05 处置里查出的是同一个错误形态。命令见 commands[K1][K2]。",
+   "result": "pass"
+  },
+  {
+   "text": "**台账未被改动、未自签**：ledger.json sha256 动手前后均为 e54ccab71d56…，status 仍 rejected、reviewer 仍 p13-wave3-verifier、decision 仍 rejected，三文件 mtime 都停在 2026-10-07T04:18:49Z；owner=p06-agent 非本 agent。命令见 commands[A1][A2][L2]。",
+   "result": "pass"
+  },
+  {
+   "text": "**未跑 GPU/浏览器、未动受保护路径、未执行 git checkout/reset/stash、未杀进程**：lease 自述 gpu=false；本会话对 js/ css/ index.html serve.py narrative.py scripts/ tests/ docs/ data/ 的写入为 **0**（全部只读取证，临时脚本写仓库外 /tmp/p06w05b/）；唯一仓库写入是本产物自身。命令见 commands[L1][L2]。",
+   "result": "pass"
+  },
+  {
+   "text": "**本轮被重做的原因已查清（不是内容错）**：上一版把 js/sky/sky-tokens.js 的台账时刻哈希当证据锚定，该文件于 2026-10-09T21:05:13Z 被 merge:visual-animation:20261010（mainThreadOnly、done）合法改写；js/ 属 GUARDED 且不在 EVOLVING_PREFIXES ⇒ 结构性必然转 stale。stats 实测 staleEvidence 三条同形。本版因此不锚定 js/css。命令见 commands[B2][B3]。",
+   "result": "pass"
+  }
+ ],
+ "evidence": [
+  {
+   "path": "artifacts/plan100/20261007/P06-W05/ledger.json",
+   "sha256": "e54ccab71d568e5962848be167deb5b1ca677d671d1dc1cf52457482b4f8d763",
+   "kind": "被处置的未结项台账（只读，未改）：status=rejected / reviewer=p13-wave3-verifier / decision=rejected；动手前后 sha256 一致"
+  },
+  {
+   "path": "artifacts/plan100/20261007/P06-W05/decision.md",
+   "sha256": "00fa273cf3ca655f7ce1e0d541a27afe3d183d05bee7f323bc473db90039f8ed",
+   "kind": "原撤回决定全文（只读，未改）"
+  },
+  {
+   "path": "artifacts/plan100/20261007/P06-W05/rollback.patch",
+   "sha256": "5adaa6e4b0051cbb91d9a578494cba5283236a2598cbe339c8c45f555e7f9a50",
+   "kind": "原回滚补丁（只读，0 行变更/纯 NEW FILE）。★ 内含 sky-tokens.js 出厂全文，可据此复算「台账时刻」的取值域"
+  },
+  {
+   "path": "artifacts/plan100/visual/dna-dafeng.json",
+   "sha256": "c2d92f8a8dd6dc081778b543c87a36d90d44c71ecc9593e212cdb7c76d4ef770",
+   "kind": "台账时刻三书 DNA 普查产物（generatedAt 2026-10-06T21:58:45Z）；本轮用出厂模块复算 dna 字段逐字段全等"
+  },
+  {
+   "path": "artifacts/plan100/visual/dna-xiyou.json",
+   "sha256": "e9157ec4a2fcfb7f78259f533c8423a74e6d996c722859e3dbd9f7042a23dc7a",
+   "kind": "同上（西游）：fray=0.10 触底的那一本"
+  },
+  {
+   "path": "artifacts/plan100/visual/dna-sanguo.json",
+   "sha256": "db95b246160d92d68572096e90c4d06ed0ac837fcdc4de62fb70267fc68bf595",
+   "kind": "同上（三国）"
+  },
+  {
+   "path": "artifacts/plan100/visual/nine-view/fix-off/dafeng-panorama.png",
+   "sha256": "b36fd21edb21b82030b7f57d49f4e3a865856781286749761d65bccb575662a8",
+   "kind": "★ G1 主证据 off：3840×2160，中心(0.30–0.70 box)亮度 0.1377 / 近黑 0.2615"
+  },
+  {
+   "path": "artifacts/plan100/visual/nine-view/fix-on/dafeng-panorama.png",
+   "sha256": "207fb42ced02f8bf8247ef7cff8b22a455d6621af4ab705be7fe669fc50dd8ee",
+   "kind": "★ G1 主证据 on：同尺寸，中心亮度 0.0222（0.161×off）/ 近黑 0.9168"
+  },
+  {
+   "path": "artifacts/plan100/visual/nine-view/final-off/dafeng-panorama.png",
+   "sha256": "65c4c349d3c68ac79c907082407f8335de28dea631d71af6c75932f259e58bb2",
+   "kind": "G1 第二组 off：中心亮度 0.1378 / 近黑 0.2616"
+  },
+  {
+   "path": "artifacts/plan100/visual/nine-view/final-on/dafeng-panorama.png",
+   "sha256": "59cbc695c6e710d64998b3dac5254f3679422d85abf9eb906a64e8e5ab7a9cf0",
+   "kind": "G1 第二组 on：中心亮度 0.0228（0.165×）/ 近黑 0.9151"
+  },
+  {
+   "path": "artifacts/plan100/visual/nine-view/default-now/dafeng-panorama.png",
+   "sha256": "caa4216fabe3873882e05611d5cf984557144b9b6b054bcf488082332a5f56a4",
+   "kind": "G6：缺省路径无塌黑（中心亮度 0.1376）；G9：与 fix-off 非逐位一致"
+  },
+  {
+   "path": "artifacts/plan100/20261007/P06-W05/reports/dump/off.png",
+   "sha256": "43f8e202952c05f6c1546553cabd15e932108155bda46832d95a88c5500fe66c",
+   "kind": "G3 off 臂：1920×1080，中心亮度 0.1466 / 近黑 0.2461"
+  },
+  {
+   "path": "artifacts/plan100/20261007/P06-W05/reports/dump/allneutral.png",
+   "sha256": "3ca02df2be79ffb234f3c709cba8b1f08dedb621fa3c2757b332415b49a98844",
+   "kind": "★ G3：全中性臂中心亮度 0.0340（0.232×off）/ 近黑 0.8848"
+  },
+  {
+   "path": "artifacts/plan100/20261007/P06-W05/reports/dump/off.json",
+   "sha256": "7034d5b3953fa3b5a2042c5bdaf354686237455116249b9856ec73a1359dce0d",
+   "kind": "★ G3 对照 dump：tokens.dna=null；与 allneutral 叶子差异 59 处"
+  },
+  {
+   "path": "artifacts/plan100/20261007/P06-W05/reports/dump/allneutral.json",
+   "sha256": "98db78111cf42b24cfb4586b221432c45b1485467acf8cd1bc9a1b158611977c",
+   "kind": "★ G3：tokens.dna.fields 全中性（fray=0/cut=0，overridden 长 11）；cosmos 生效值 bandTilt 27→horizonDeg 27.00、avoidDeg 26、dustN 2000、period 2400 —— 与 off 默认完全相同"
+  },
+  {
+   "path": "artifacts/plan100/20261007/P06-W05/reports/shaders2/off-splat.fs",
+   "sha256": "6132adae0ae5a09d68bd5707b70dc099e230569bddeec981229a8ab540a956db",
+   "kind": "1335 B = 历史 SPLAT_FS（本轮用出厂模块复算逐字符相同）"
+  },
+  {
+   "path": "artifacts/plan100/20261007/P06-W05/reports/shaders2/allneutral-splat.fs",
+   "sha256": "aa287d7a99c6e0e31abe0a6b890cda42d3eba7d5d421ae564f3d0ddd6f057839",
+   "kind": "★ 1356 B = SPLAT_FS + '/* dna carve idle */' ⇒ carve 确实未生效（本轮复算逐字符相同）"
+  },
+  {
+   "path": "artifacts/plan100/20261007/P06-W05/reports/shaders2/on-splat.fs",
+   "sha256": "b02d4c14e7316c8546a8e3d01e4e49529bf9374efd1e80300fddb9bd1b7b3759",
+   "kind": "1624 B = 用三书真实 fray/cut 复算的 dnaCarve 版，逐字符相同 ⇒ 着色器路径与台账时刻一致"
+  },
+  {
+   "path": "artifacts/plan100/20261007/P06-W05/reports/nine-view-metrics.json",
+   "sha256": "5f6c492195e621f4a691b1c08d4055881747ff63457b58ce9df8427619474bb1",
+   "kind": "★ G5：9 对 hue 均值 0.954260→0.965937（+0.011678），文件自带 delta.hue=0.0116；台账写的 0.9678 不在这 9 个值里"
+  },
+  {
+   "path": "artifacts/plan100/20261007/P06-W05/reports/probe2/result.json",
+   "sha256": "db21edc6ca03555a2ee00b069ae045e6481497add6f4cba3f5365b2169d29448",
+   "kind": "G3 第二条：off volHash=7199/BANDS 1，all-neutral 7199/BANDS 1 而 dna=true，on 7291/BANDS 3"
+  },
+  {
+   "path": "artifacts/plan100/20261007/P06-W05/reports/probe2/off.png",
+   "sha256": "fd5c4f7207f271b7b17e0a6d7f7f1d5ea5b564b5b85291e7243f00fce73d4e70",
+   "kind": "probe2 off 臂：中心亮度 0.1479 / 近黑 0.2382"
+  },
+  {
+   "path": "artifacts/plan100/20261007/P06-W05/reports/probe2/all-neutral.png",
+   "sha256": "e3e4be4a1cd9afc67dc11385ac542be45469136a27cf855c467fab673c496021",
+   "kind": "probe2 全中性臂：中心亮度 0.0347 / 近黑 0.8837（与 on 的 0.0349 几乎相同）"
+  },
+  {
+   "path": "artifacts/plan100/20261007/P06-W05/reports/phase/off.png",
+   "sha256": "48e682920c89e648250222c709ef25149ff33cbb905fe482160b4d22a7b56f44",
+   "kind": "G1 冻结时钟对照组 off：中心亮度 0.1471 / 近黑 0.2461"
+  },
+  {
+   "path": "artifacts/plan100/20261007/P06-W05/reports/phase/on.png",
+   "sha256": "7c4c5289a1d295ec5821a623b1212880e26377a2b5b778e09dbfd729c503c647",
+   "kind": "G1 冻结时钟对照组 on：中心亮度 0.0342 / 近黑 0.8843 ⇒ 冻结时钟后塌黑仍在，台账这一条今天成立"
+  },
+  {
+   "path": "artifacts/plan100/20261007/P06-W05/reports/bisect2/result.json",
+   "sha256": "86ce9c16a47299b5b73e88c4ad0fab1b6135e0c1c6e7299b3b29d86c6d212cee",
+   "kind": "G4：bisect2 的 on 臂带 avoidDeg=46，而今天 sky-cosmos.js:115 clampN(...,24,28,26) 使 46 不可达"
+  },
+  {
+   "path": "artifacts/plan100/20261007/P06-W05/reports/race/off-s0.png",
+   "sha256": "c3be889e88a8dc195c4706e59965b200d3414579ba0cb4aa3da84814da5dbac1",
+   "kind": "G9：off 连拍第 1 张"
+  },
+  {
+   "path": "artifacts/plan100/20261007/P06-W05/reports/race/off-s1.png",
+   "sha256": "dc4b3a20b6fd35742cfa264a6511221520fca0ae9a1bd965f57c1659eab30478",
+   "kind": "G9：off 连拍第 2 张，与 s0 非逐位一致（maxDiff 224 / fracChanged 0.9052），指标仅差 0.0021"
+  },
+  {
+   "path": "artifacts/plan100/20261007/P06-W05/reports/race/on-s0.png",
+   "sha256": "0fb3f908463790777dbf6c215ca612765f92d13a5096dc5f7a5d93bd10762cd5",
+   "kind": "G9：on 连拍第 1 张（中心亮度 0.0342）"
+  },
+  {
+   "path": "artifacts/plan100/20261007/P06-W05/reports/race/on-s1.png",
+   "sha256": "e33fae0a497fb5caaf5a0c8f81cc9cab9a7b195d55c517ba85f2e7cd1931aff2",
+   "kind": "G9：on 连拍第 2 张（0.0348），指标 spread 0.0006"
+  },
+  {
+   "path": "tests/sky_dna_contract.js",
+   "sha256": "ef74abe619e77b24a9512d6ff9279f406df7ffe074f3240b9694cfe47a0bf156",
+   "kind": "EVOLVING。本轮实跑 checks=279 全绿；含 C5 defect pin（断言『中性不可达』缺陷仍存在）"
+  },
+  {
+   "path": "tests/sky_dna_carve_contract.js",
+   "sha256": "0e7ee0b17a148c856f9a0ded14603892fe6ccc23bc0ff37ec6a3827e01e663b5",
+   "kind": "EVOLVING。本轮实跑 checks=2286161、meanDelta=-0.00111、densityPeak=1.72=declaredPeak"
+  },
+  {
+   "path": "tools/plan100/dna_census.py",
+   "sha256": "2f434f12ed84b4b565c8583be1b7feb9ee261d20501d9ae38b38072d46226b81",
+   "kind": "EVOLVING。三书 DNA 普查复算入口（本轮 today 复算直接调出厂模块，未走它）"
+  },
+  {
+   "path": "loop/bin/adopt_plan100.py",
+   "sha256": "589e09005e24f2d6e5f817e8e053272a946a4c98c70dfb1c8d5bd2902232e860",
+   "kind": "EVOLVING。★ G10：:74-75 把 (P06,W05) 指给 perf:baseline-matrix，而该任务不跑 A/B、也无权写 js/sky 或 artifacts/"
+  },
+  {
+   "path": "loop/queue/visual-production-20261009.jsonl",
+   "sha256": "e0da6491f21ad2b3bcdeeee0716bb879a19bd5d01b7ba7eb288cb50eea7cb8f0",
+   "kind": "EVOLVING。★ G10：目前唯一声明可写 js/sky/* 的活跃任务（merge:visual-master:20261009 仍 pending / merge:visual-animation:20261010 已 done，均 mainThreadOnly）"
+  },
+  {
+   "path": "loop/queue/plan100.jsonl",
+   "sha256": "b739b8ad6f120b2cc8e0b01e0c9e3cecba36a5bca2139b6a11cc17642cf40e2a",
+   "kind": "EVOLVING。本任务自身定义（writes 只有一条路径）"
+  }
+ ],
+ "sourceHashes": {
+  "js/sky/sky-dna.js": "8448d6aedb796e8a1e2fe0eaa216845b0628756c8762ef0fbb2905fe6bf740e8",
+  "js/sky/sky-nebula-glsl.js": "8efd54ddac36c2239378fbb9e4aff3b2401e6a5eb95ad582e98ea92dac508cbc",
+  "js/sky/sky-nebula.js": "2403c30059db4a57b02c503a6684649c9a94763ed943c5ab54e8d6708d5b62bc",
+  "js/sky/sky-cosmos.js": "d27b9ab4efd4406c91332915c214840526db970a733b8f6a50f0778fdcdbb148",
+  "js/sky/sky-cosmos-bake.js": "c579eb402ba5d458de6a36adfaf62f8fd0e20c517e8a8129b9b0faa4c79ebb27",
+  "js/sky/sky-deep.js": "b1d53da604214b242653e9a141d9467b99dc46925ae1a3cdcc3ae5bfe4f9d660",
+  "js/sky/sky-tokens.js": "060b73229050d7ed0969e7d8b30bd05ef092751fd7403bea5daa265c5a1f0b50",
+  "css/sky-deep-tokens.css": "8d357a509d95b0dbb18ff0b725bdec0d8878ab9e5027b8284ea2ba775fec8e7a",
+  "index.html": "9393928993e61baa7fe649dc5e306af0bc37ebd243255d13fe6da0b8e26fe62a",
+  "artifacts/plan100/20261007/P06-W05/ledger.json": "e54ccab71d568e5962848be167deb5b1ca677d671d1dc1cf52457482b4f8d763",
+  "_note": "本任务对以上全部文件**只读**（无一处写入）；唯一写入是本产物自身，见 changes。js/sky/sky-tokens.js 与 css/sky-deep-tokens.css 的今日值由并行写入者 merge:visual-animation:20261010 于 2026-10-09T21:05Z 写入（只加 DUR.panel，与 DNA 无关，已逐字节逆向确认）。",
+  "_today_vs_ledger_inputHashes": {
+   "js/sky/sky-dna.js": "SAME",
+   "js/sky/sky-nebula.js": "SAME",
+   "js/sky/sky-nebula-glsl.js": "SAME",
+   "js/sky/sky-cosmos.js": "SAME",
+   "js/sky/sky-cosmos-bake.js": "SAME",
+   "js/sky/sky-deep.js": "SAME",
+   "js/sky/sky-tokens.js": "DIFF（+327 B，全部来自 DUR.panel；逆向移除后逐字节复原台账值 b4f75823… / 24671 B）",
+   "css/sky-deep-tokens.css": "DIFF（+169 B，全部来自 --skd-dur-panel；逆向移除后逐字节复原台账值 473a92a4… / 6620 B）",
+   "index.html": "DIFF（并行写入者）",
+   "tests/script_manifest.json": "DIFF（并行写入者）",
+   "tests/sky_dna_contract.js": "DIFF（本队列后续批次扩到 279 项断言）",
+   "tests/sky_dna_browser.py": "SAME",
+   "tests/sky_internal_review_shots.py": "DIFF",
+   "tests/sky_dna_carve_contract.js": "SAME",
+   "tools/plan100/dna_census.py": "DIFF"
+  }
+ },
+ "changes": [
+  {
+   "path": "loop/state/out/adopt_P06-W05.artifact.json",
+   "kind": "append-only"
+  }
+ ],
+ "remaining": [
+  "**塌黑仍未定位到具体一行**。本轮把归因范围从「未知」收窄到「**既不是 dnaCarve、也不是深空四项参数**」（G3），但没有给出正因。要定位必须 dump 立方体与 splatRT 的**像素内容**（现有 reports/dump/ 只 dump uniform；E2 里 splats 180→159、frames 660→513 说明两者帧数不同）。",
+  "**台账两组头条数字不可复算**（G7/J1）。我扫了 19 种中心窗口定义都没命中；这些数字在归档里只出现在 rollback.patch 的注释里，没有量测脚本或 JSON 记录它们。**该口径需要重做并在重做时写清窗口定义**，否则下一轮还会有人复算不出来。",
+  "**我无法证明 dump 批次严格单变量**（E4）：那批 dump 不记录 RT 像素内容，off 与 allneutral 的 splats/frames 都不同 ⇒ G3 是强反例而非最终归因。",
+  "**未跑 GPU/浏览器**：本任务未声明要跑，且 GPU 全局串行。因此本产物**不含**任何新的渲染实测；上面所有像素数字都来自**归档 PNG 的只读复算**。哪些是「今天可达」是靠**参数区间**论证的（fix-on 的 avoidDeg ∈ [24,28]），不是靠重跑。",
+  "**「同相位」这半边不可核**：nine-view 的 index.json 顶层键并集为 {book,chars,data,dna,health,health0,health0Clean,healthClean,hero,native4k,ready,readyS,settle,shots,tag,title,viewSettles}，**没有任何时间相位字段**（无 tAnim/tAcc/clockFrozen）。我只能证明「字段未记录」，不能证明像素实际同相位。",
+  "**两处『逐位一致』表述需回改**（G9）：『三张 no-DNA 图逐位一致』与『同变体连拍 3 张完全稳定』都与像素实测不符（应为指标级一致）。我**没有**去改 decision.md/ledger.json（那会越界且属于改证据），仅在此登记，供后续波次回改。",
+  "**LAYER5 的处置未定**（H2）：JS 侧（T.layer5()/layer5Of）与 CSS 侧（6 个 --skd-l5-*）在生产代码里都零消费点，仅 tests/ 与 artifacts/plan100/review/p13-wave3-checks.py 引用。这属未完成的集成，本产物只确认「零消费点今天仍成立」，未提处置方案（补集成还是删除/标注）。",
+  "**未复核台账 remaining 里「西游 compDist 偏弱（0.026–0.034）定位为 fray=0.10 触底」**这条 —— 需要 compDist 的原始量测口径，本产物未判定真假。",
+  "**归属只做到「写明归属」，未新建队列任务**：本任务 writes 只允许 loop/state/out/adopt_P06-W05.artifact.json，新建 loop/queue/*.jsonl 会越界。G10 给出的入口（merge:visual-master:20261009，仍 pending）是既有任务，可直接复用。",
+  "**G8 的锚定问题是结构性的**：staleEvidence 实测三条（adopt:P06-W05 / adopt:P06-W06 / verify:dafeng:L2:0022）都是同一形态 —— 记录锚定了会被别人合法改写的**产品路径或共享状态**（js/sky/sky-shell-player.js、loop/state/out/*.candidate.json）。这不是本任务能修的范围（要改 loop/bin/loop.py 的 EVOLVING/锚定策略），如实登记。",
+  "**待独立复核**：本产物是自证，需要非同提交者复核 —— 尤其 G3 的「idle 版 splat 却仍塌黑」、G4 的「证据过期是分片的」、以及 G7 的「头条数字不可复算」三项，以及我据以判断的 clamp/窗口口径。"
+ ],
+ "rollback": {
+  "kind": "append-only",
+  "strategy": "delete-added-files",
+  "files": [
+   "loop/state/out/adopt_P06-W05.artifact.json"
+  ]
+ },
+ "verificationEnvironment": {
+  "session": "w-ops 常驻 worker 的本轮 agent（worker PID 36574，argv 含 --agent w-ops --stream ops,adopt,expert,env；本 agent 是其 dsh 子进程的后代）",
+  "gpu": "未使用。本会话未起浏览器、未杀任何进程、未借 GPU 槽位",
+  "browser": "未启动任何浏览器",
+  "protectedPathsWritten": [],
+  "tempDir": "/tmp/p06w05b/（仓库外；脚本见 sessionScripts）",
+  "toolchain": "node v22.22.2；Python 3.13.12；PIL 12.2.0；numpy 2.5.0"
+ },
+ "sessionScripts": {
+  "_why": "这些是本轮自写的复算脚本，位于仓库外临时目录。**刻意不列入 evidence[] 做哈希锚定**——macOS 会定期清理 /tmp，锚定它们会让本记录下次转 stale（G8 的同一形态）。每条命令都可用 commands[].cmd 原样重跑复现。",
+  "dir": "/tmp/p06w05b/",
+  "files": {
+   "measure.py": {
+    "sha256": "ddfb90944565200884f4a77900d0c644323778f2ecfa4b9bccfea9a911d1c21a",
+    "note": "独立 PNG 量测（PIL+numpy）：中心窗口亮度/近黑占比/全局均值 + sha256"
+   },
+   "census_cmp.js": {
+    "note": "vm 载入出厂模块，用三书图谱缓存复算 DNA 的 11 个字段",
+    "sha256": "678e8b4b9d041e4fb7c5a05b5bea7bc3fc2996b68353b0c1089fc123a3d65355"
+   },
+   "effective.js": {
+    "note": "比对 DNA.of 原始值与 applyDNA 闸门后的生效值（证明闸门对真实值不夹取）",
+    "sha256": "7577a82d48fae29ba7ab1065d249d10b8f6db99dde0dd3d8d20a836d837ca788"
+   },
+   "range_probe.js": {
+    "note": "RANGE/DNA_LIMITS/取值域下限是否仍含 dnaCarve/显式 0 是否逐字符 idle/越界夹取",
+    "sha256": "e2040fbfeeb7f04cf32fb1b17a7139e21ec83a996b1dc97e3dfd448409747a09"
+   },
+   "build.py": {
+    "note": "本产物的生成器（哈希一律从磁盘现算，不手抄）",
+    "sha256": "753ab67b7e36ea242b900fdffb0c464ea765eabd48293b4e6818fb428c5d512b"
+   }
+  }
+ }
+}

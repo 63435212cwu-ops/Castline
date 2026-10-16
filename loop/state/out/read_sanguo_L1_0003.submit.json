@@ -1,0 +1,111 @@
+{
+  "task": "read:sanguo:L1:0003",
+  "agent": "w-xiyou-1",
+  "status": "done",
+  "summary": "精读《三国演义》第四回「废汉帝陈留践位 谋董贼孟德献刀」docs[0].text[15829,20054)（4225 字，30 行）。产出 20 条 task 五元组（objective/obstacle/action/result/cost，缺项一律 null 并写明 null 理由）、35 条带触发机制的 causeEdge、22 条状态前后值、8 条具铺设+回收判定的伏笔（7 条 resolved_in_unit、1 条 unresolved_in_unit）、7 条明确排除的「不算伏笔」、10 条被拒因果边、14 条「人物话语只作线索不作事实」、18 条连词审计、5 条跨单元对照、18 条 unknowns、4 条 selfCritique。361 条 quoteRefs 全部由生成脚本在切片上 assert 全文唯一命中后取偏移，并回切校验 docs[0].text[start:end]==quote；另有 54 条不带偏移的 quote 字段同样逐字校验。0 处不符。",
+  "evidence": [
+    {
+      "path": "loop/state/out/read_sanguo_L1_0003.candidate.json",
+      "sha256": "b0820803f8c2844a9a0eab9859c7e0a6334513e1ccc89eec1f6fccfcef896a97",
+      "kind": "candidate"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "原文来源哈希：sha256(data/cache/152e2a6eed94f1075e7e7070.docs.json) == 2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff，与任务 sourceHash 逐字一致。",
+      "result": "pass",
+      "command": "shasum -a 256 data/cache/152e2a6eed94f1075e7e7070.docs.json",
+      "observed": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff"
+    },
+    {
+      "text": "偏移口径自检（任务点名的踩坑点）：start/end 是相对 docs[0].text 全文的 codepoint 偏移，不是相对切片。docs[0].text[15829:15848] == '第四回\\u3000废汉帝陈留践位\\u3000谋董贼孟德献刀'（19 字），即切片以本单元标题开头。",
+      "result": "pass",
+      "command": "python3 -c \"import json;t=json.load(open('data/cache/152e2a6eed94f1075e7e7070.docs.json'))[0]['text'];print(t[15829:15848]=='第四回\\u3000废汉帝陈留践位\\u3000谋董贼孟德献刀', repr(t[15829:15848]))\"",
+      "observed": "True '第四回\\u3000废汉帝陈留践位\\u3000谋董贼孟德献刀'（标题 19 字，15829+19=15848 为其结束偏移）"
+    },
+    {
+      "text": "区间两端都落在回目边界上：docs[0].text.find('第四回')==15829（==rangeStart），find('第五回')==20054（==rangeEnd）；切片内没有被截断的半句，切片 sha256 为 f83a5572c9760215d5087c5a7870c9141efa9e594607d00901450cb7b10c2676（另起字段记录，未覆盖 sourceHash）。",
+      "result": "pass",
+      "command": "python3 -c \"import json;t=json.load(open('data/cache/152e2a6eed94f1075e7e7070.docs.json'))[0]['text'];print(t.find('第四回'),t.find('第五回'))\"",
+      "observed": "15829 20054"
+    },
+    {
+      "text": "全部 361 条 quoteRefs 回切校验：递归取出候选 JSON 中所有含 quote/start/end 的对象，逐条断言 docs[0].text[start:end]==quote，mismatches=0；全部 start/end 落在 [15829,20054) 内；全部 sourceHash 字段都等于任务给的源哈希。",
+      "result": "pass",
+      "command": "python3 -B -s - <<'PY'\nimport json\nFULL=json.load(open('data/cache/152e2a6eed94f1075e7e7070.docs.json'))[0]['text']\nS,E=15829,20054\nc=json.load(open('loop/state/out/read_sanguo_L1_0003.candidate.json'))\nrefs=[]\ndef w(o):\n    if isinstance(o,dict):\n        if 'quote' in o and 'start' in o and 'end' in o: refs.append(o)\n        for v in o.values(): w(v)\n    elif isinstance(o,list):\n        for v in o: w(v)\nw(c)\nprint('refs',len(refs),'mismatch',len([r for r in refs if FULL[r['start']:r['end']]!=r['quote']]),'oob',len([r for r in refs if not(S<=r['start'] and r['end']<=E)]),'nonuniq',len([r for r in refs if FULL.count(r['quote'])!=1]))\nPY",
+      "observed": "refs 361 mismatch 0 oob 0 nonuniq 0"
+    },
+    {
+      "text": "引文唯一性：生成脚本对每条引文断言 FULL.count(quote)==1 且 S<=start、end<=E 之后才取偏移，命中不唯一或越界直接 assert 失败、不写文件。因此不存在「引文在别处也能命中、偏移却指向我想要的语义」这种错配（本单元「未敢轻动」「不见」等短串就因不唯一被脚本当场拒收并改写为完整句）。",
+      "result": "pass",
+      "command": "python3 -B -s /tmp/cl-sanguo-0003/gen_cand_0003.py",
+      "observed": "OK quotes=361 distinct=253 speech=86 covered=86"
+    },
+    {
+      "text": "不带偏移的 quote 字段（speechAsClueNotFact / notForeshadows / rejectedEdges / connectiveAudit / crossUnitRefs / unknowns 等共 54 条）也逐字命中且唯一：对候选里每一个名为 quote 的字符串做 count==1 校验，problems=0。这道闸真的抓到过 2 条手写时被截短又补上收尾引号的引文（周毖语、王允语），已改回完整原句——它们没有 start/end，round-trip 查不出来。",
+      "result": "pass",
+      "command": "python3 -B -s - <<'PY'\nimport json\nFULL=json.load(open('data/cache/152e2a6eed94f1075e7e7070.docs.json'))[0]['text']\nc=json.load(open('loop/state/out/read_sanguo_L1_0003.candidate.json'))\noq=[]\ndef w(o):\n    if isinstance(o,dict):\n        for k,v in o.items():\n            if k=='quote' and isinstance(v,str): oq.append(v)\n            else: w(v)\n    elif isinstance(o,list):\n        for v in o: w(v)\nw(c)\nbad=[(FULL.count(q),q[:40]) for q in oq if FULL.count(q)!=1]\nprint('quote strings',len(oq),'problems',len(bad),bad[:3])\nPY",
+      "observed": "quote strings 415 problems 0"
+    },
+    {
+      "text": "引语清单口径：本单元扫描出 86 个「…”」引语跨度，全部逐条人工判定说话人与类型（speech/inner_thought/inset_text），生成脚本断言扫描结果与人工判定表的偏移集合完全一致（条数与偏移都对齐，多一条少一条都失败）。避免用正则猜说话人而得出「李儒止之」「后人有诗叹之」「短刀白练于前」这类假归属。全部 86 条都被至少一条 quoteRef 覆盖（speechSpansUncovered 为空，且由独立脚本重算确认）。",
+      "result": "pass",
+      "command": "python3 -B -s - <<'PY'\nimport json\nFULL=json.load(open('data/cache/152e2a6eed94f1075e7e7070.docs.json'))[0]['text']\nc=json.load(open('loop/state/out/read_sanguo_L1_0003.candidate.json'))\nrefs=[]\ndef w(o):\n    if isinstance(o,dict):\n        if 'quote' in o and 'start' in o and 'end' in o: refs.append((o['start'],o['end']))\n        for v in o.values(): w(v)\n    elif isinstance(o,list):\n        for v in o: w(v)\nw(c)\nsp=[(s['start'],s['end']) for s in c['speechInventory']]\nunc=[s for s in sp if not any(not(s[1]<=a or b<=s[0]) for a,b in refs)]\nprint('spans',len(sp),'uncovered',len(unc),'kinds',sorted(set(x['kind'] for x in c['speechInventory'])))\nPY",
+      "observed": "spans 86 uncovered 0 kinds ['inner_thought', 'inset_text', 'speech']"
+    },
+    {
+      "text": "未把人物话语/猜测/诈称写成叙述事实：14 条 speechAsClueNotFact 逐条登记（吕布「似有行刺之状」与董卓「吾亦疑之」只是怀疑、李儒「行刺无疑矣」是推断、曹操「覆姓皇甫」是诈称、「宁教我负天下人」是自陈、曹操「发矫诏」是志愿而非已发生、陈宫「狼心之徒」是他自己的判断等），并在相关 task 字段、causeEdge 的 hedge、state 的 note 里同步标注。",
+      "result": "pass",
+      "command": "python3 -c \"import json;c=json.load(open('loop/state/out/read_sanguo_L1_0003.candidate.json'));print(len(c['speechAsClueNotFact']),len([e for e in c['causeEdges'] if e['hedge']]))\"",
+      "observed": "14 12"
+    },
+    {
+      "text": "未把「结束」当「成功」：T3（丁管）result 写明「但废立照常进行——目标未达成」；T10（唐妃）result 写明「求情不被接受……目标未达成」；T13（袁绍）result 写明「本单元内袁绍本人未出一兵一卒，目标未达成」；T15（曹操行刺）result 写明「刺杀未成」；T20（陈宫）result 为 null 并写明回末截断。",
+      "result": "pass",
+      "command": "python3 -c \"import json;c=json.load(open('loop/state/out/read_sanguo_L1_0003.candidate.json'));[print(t['id'],'result_null' if t['result'] is None else t['result']['text'][:46]) for t in c['tasks'] if t['id'] in ('T3','T10','T13','T15','T20')]\"",
+      "observed": "T3/T10/T13/T15 均写明未达成；T20 result_null"
+    },
+    {
+      "text": "缺项一律 null、不补默认值：15 个 null 字段被 coverage.nullFields 自动列出（T1.cost、T2.cost、T4.cost、T5.cost、T7.obstacle、T7.cost、T8.cost、T12.cost、T13.cost、T16.cost、T19.cost、T20.obstacle、T20.result、T20.cost、F7.payoff），每一处都在相邻的 costNote/obstacleNote/resultNote 或 unknowns 里写明「原文未写」而不是编一个像样的值。",
+      "result": "pass",
+      "command": "python3 -c \"import json;c=json.load(open('loop/state/out/read_sanguo_L1_0003.candidate.json'));print(c['coverage']['nullFields'])\"",
+      "observed": "T1.cost T2.cost T4.cost T5.cost T7.obstacle T7.cost T8.cost T12.cost T13.cost T16.cost T19.cost T20.obstacle T20.result T20.cost F7.payoff"
+    },
+    {
+      "text": "没有写 semanticReview 完成：semanticReview 与 claimVerification 都写 not_performed，并注明「本候选只保证引文逐字命中与偏移一致（定位层），不声称语义已核验」。",
+      "result": "pass",
+      "command": "python3 -c \"import json;c=json.load(open('loop/state/out/read_sanguo_L1_0003.candidate.json'));print(c['semanticReview'],c['claimVerification'])\"",
+      "observed": "not_performed not_performed"
+    },
+    {
+      "text": "只写了任务 writes 指定的一个路径：git status 显示 loop/state/out/read_sanguo_L1_0003.candidate.json 为未跟踪新增（??），本轮没有修改任何受保护路径（js/ css/ index.html serve.py narrative.py scripts/ tests/ docs/ data/ 的既有改动都是共享树里他人未提交的工作，非本 agent 所为）。",
+      "result": "pass",
+      "command": "git status --porcelain -- loop/state/out/read_sanguo_L1_0003.candidate.json",
+      "observed": "?? loop/state/out/read_sanguo_L1_0003.candidate.json"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/read_sanguo_L1_0003.candidate.json",
+      "kind": "append-only"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/152e2a6eed94f1075e7e7070.docs.json": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff"
+  },
+  "remaining": [
+    "语义未核验：本候选只做到「引文逐字命中 + 偏移一致」的定位层，语义正确性属 read-verify 通道，本 agent 未做也未声称。",
+    "F7（陈宫欲杀曹操）在本单元内 unresolved；其回收在第五回开头（区间外），本候选只在 externalPayoffNote 里以跨单元信息标注，未作为本单元证据。",
+    "E14（袁绍密书→王允设宴）、E29（伯奢离场→曹操起疑）、E32（杀伯奢→陈宫质问）、E35（授渤海太守→集兵练字）为 derived（推的那一步已写在 hedge 里），其中 E29 的「此去可疑」存在两种指代读法，复核可以据此推翻该边而不影响 F3。",
+    "本单元「衣镜」「象简」等只出现一次的对象被列入 notForeshadows 而非 foreshadows；F3（磨刀声）是短程误导线，与 F1/F2 那种跨场伏笔不同量级，已在 F3.caution 里自我限定。",
+    "何太后坠楼后是否当场死亡、陈宫当夜是否真的下手、曹操如何得知王允有七宝刀等问题，原文未写，已列入 unknowns，未替原文补答案。",
+    "本候选未做跨回一致性核对（如第三回末与第五回开头的衔接细节只用于 crossUnitRefs 说明关系，未逐条比对全书其他版本或异文）。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/read_sanguo_L1_0003.candidate.json"
+    ]
+  }
+}

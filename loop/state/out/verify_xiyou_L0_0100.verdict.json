@@ -1,0 +1,276 @@
+{
+  "schema": "castline/verify-verdict/1",
+  "task": "verify:xiyou:L0:0100",
+  "agent": "w-dafeng-3",
+  "role": "VERIFIER",
+  "roleFile": "loop/ROLES/VERIFIER.md",
+  "status": "done",
+  "reviewedTask": "read:xiyou:L0:0100",
+  "reviewedArtifact": "loop/state/out/read_xiyou_L0_0100.candidate.json",
+  "candidateAgent": "w-xiyou-1",
+  "candidateSha256": "9a845dd450f6ab5ee71f33d104e7c26aee5dadbc6d1a4315627ba17e797c10e3",
+  "candidateBytes": 230661,
+  "book": "xiyou",
+  "lane": 0,
+  "unitIndex": 100,
+  "unitHead": "第一百回　径回东土　五圣成真",
+  "sourceRange": [715935, 722176],
+  "segmentChars": 6241,
+  "segmentSha256": "3465efb0c6728e7dfb3ecaa6023191c80a2771b39298237654208c0499c1ab3f",
+  "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+  "source": {
+    "path": "data/cache/ee3430ef493546bbcd2e700b.docs.json",
+    "note": "候选声明的是 data/cache/a065244455cfb2221bcda94a.docs.json。两份文件逐字节相同（sha256 均为 c282cf39…a2a2），故候选的偏移口径与任务区间无分叉。我对两份都算了哈希。"
+  },
+  "independence": "被复核候选的 agent 为 w-xiyou-1；本次复核 agent 为 w-dafeng-3（其租约 loop/state/leases/verify:xiyou:L0:0100.d/lease.json 的 agent 字段即为 w-dafeng-3），非同一人。复核前未读候选结论，先通读原文区间全文再开候选。",
+
+  "method": [
+    "1. 先自己读原文：把 docs[0].text[715935:722176) 的 6241 码点完整读出（含回目、正文、回末佛号、收束语与水印行），不先看候选。",
+    "2. 抽取项核对：把候选里全部 155 个 quote 对象逐一做四项回切（text[start:end]==quote、find(quote)==start、区间含于本单元、sliceSha256 一致），并复算 occurrencesInFullText。",
+    "3. 反向验证：不问「他写的对不对」，改问「这段里他还漏了什么」——按句/小句切分原文 266 个 ≥8 字的子句，逐个在**剔除 reverseCoverage 之后**的断言语料里搜 12 字窗口，再对未命中项逐条人工判「是被主动登记排除，还是真的漏了」。",
+    "4. 误杀检查：对候选主动排除/降格的项（excludedSettings 8 条、notForeshadows 7 条、worldSettings 的降格声明）回原文核对是否排掉了合法内容。",
+    "5. 幻觉/越权检查：检索全书范围内候选使用的人物名/地名/结局词，确认无原文外实体，确认未把结束写成成功。",
+    "6. 引用核验：固定种子随机抽 5 条 quote 在原文 find 一次，报告逐字命中与偏移一致性。",
+    "7. 覆盖记账层证伪：对候选自称「已用于 X」「已在 Y 覆盖」的每一处，回到它自己指向的字段里搜该词；并区分「指针写错位置」与「文件里根本没有」。"
+  ],
+
+  "verdict": "partial",
+
+  "summary": "**抽取主体可用，但覆盖记账层有 4 处可逐字证伪的缺陷，故不能 pass。** 可用的是主体：155 条引文实例全部逐字回切成立、偏移一致、全在区间内（唯一一条 find≠start 的 sourceDefects.SD4 是候选**自己声明过**的，属如实登记而非错误）；8 条任务 / 12 条因果 / 9 条状态 / 4 条伏笔 / 20 条设定在原文中都有对应文字；**未发现编造**（无原文外人物、无原文外结局，「结束≠成功」「台词≠叙述事实」两条红线执行到位，F4 显式记 unresolved 正确）。覆盖率字段经我独立复算完全对上（101 区间 / 1780 码点 / 0.2852 / 40 块 ≥12 / 30 块 <12 / 96 码点，与候选声明逐项相等）。必须丢弃或修正的是四处「自称已覆盖、实际没覆盖」的主张，其中 [717067,717295) 那块把「无字空本」记为「已逐句用于 T3」是**最严重的一处**——它恰好是「人事→无字经→钵盂→有字真经」这条资源因果链的枢纽，被一句不实的覆盖声明关掉了。另有 10 条反向发现（含原文唯一的显式因果小句「只因道果完成，自然安静」在 12 条 causeEdges 里一次都没用上）。这些缺陷不触及抽取主体、不构成编造，故判 partial 而非 fail。",
+
+  "quoteIntegrity": {
+    "quoteObjects": 155,
+    "fourWaySliceBack": "154/155 通过（text[start:end]==quote 且 find(quote)==start 且 LO<=start<end<=HI 且 sliceSha256==3465efb0…ab3f）",
+    "onlyFailure": "sourceDefects[3].quote（水印行「爱奇电子书(www.i7wu.cn)全集TXT电子书免费下载网」，start=722145）：find 命中的是 offset 13（全书开头那处），不是 722145。**这不是缺陷**：该条 occurrencesInFullText=2、note 与 match 字段都逐字写明了「text.find 命中的是 offset 13（不在本单元），本引用取区间内的 offset 722145」，是候选主动披露的口径，属如实登记。",
+    "occurrencesRecomputed": "155/155 条 occurrencesInFullText 与实算一致",
+    "paragraphIndex": "155/155 条的 paragraphIndex1Based 与「空行分段、1-based」口径完全一致（本项我先误判过一次，见 notes.selfCorrections）"
+  },
+
+  "randomSample": {
+    "seed": 20261013,
+    "n": 5,
+    "allHit": true,
+    "items": [
+      {"path": "worldSettings[11].quote", "quote": "随召翰林院及中书科各官誉写真经。又建一寺，在城之东，名曰誊黄寺。", "start": 720076, "end": 720108, "len": 32, "find": 720076, "verbatim": true, "occurrences": "1/1"},
+      {"path": "causeEdges[2].triggerQuote", "quote": "但看松树枝头若是东向，我即回矣。", "start": 716881, "end": 716897, "len": 16, "find": 716881, "verbatim": true, "occurrences": "1/1"},
+      {"path": "themeReadings[1].quotes[0]", "quote": "我在霄汉中等你，与你一同缴旨。", "start": 716321, "end": 716336, "len": 15, "find": 716321, "verbatim": true, "occurrences": "1/1"},
+      {"path": "foreshadows[0].payoff.quote", "quote": "师父，这树头儿今早俱忽然向东。我们记得师父之言，遂出城来接，果然到了！", "start": 718517, "end": 718552, "len": 35, "find": 718517, "verbatim": true, "occurrences": "1/1"},
+      {"path": "worldSettings[11].extraQuotes[3]", "quote": "原本还当珍藏，不可轻亵。", "start": 720045, "end": 720057, "len": 12, "find": 720045, "verbatim": true, "occurrences": "1/1"}
+    ],
+    "note": "5/5 逐字命中、偏移一致、长度等于 end-start、occurrencesInFullText 与实算相符。"
+  },
+
+  "counterExamples": [
+    {
+      "id": "CE-1",
+      "severity": "high",
+      "claim": "reverseCoverage.gapBlocksGte12 中 [717067,717295) 的 disposition 写「答词里的关键句（需索人事／无字空本）已逐句用于 T3」——「无字空本」并不在 T3 里，也不在本文件任何字段里（连引文带条目都没有）。这一块是「二尊者需索人事 → 只得到无字空本 → 送紫金钵盂 → 方传有字真经」这条资源因果链，被一句不实的覆盖声明整块关掉。",
+      "quote": "因展看，皆是无字空本。",
+      "quoteStart": 717191,
+      "why": "在该 disposition 指向的 T3（含 objective/obstacle/action/result 的全文 JSON）里搜「无字空本」= 0 命中；在剔除 reverseCoverage 后的整份候选中搜「无字空本」= 0 命中（「无字」「空本」「抛掷散漫」「妖风」「抢了经去」「拜告恳求」「三斗三升」「赵长者」「舍卫国」「卖贱」亦全部 0 命中）。同一块里「需索人事」确实被收录，但收录处是 worldSettings[10].extraQuotes[0]（start=717295），**不是**该 disposition 自称的 T3 —— 即这一条主张里两个词一个指针写错、一个文件里根本没有。复现：python3 -B -s \"$CL_ARTIFACTS/verify-xiyou-L0-0100/audit.py\" 的 G 段（两行分别报 POINTER-ERR 与 NOWHERE）。"
+    },
+    {
+      "id": "CE-2",
+      "severity": "medium",
+      "claim": "excludedSettings[2] 写「末段佛号长名单…它作为场景（大众合掌皈依都念）已在 T4.result 的结算句与 states 中覆盖」——「大众合掌皈依」在 T4.result 里没有、在 states 里也没有，全文件除该主张自己那句以外没有任何字段收录它。",
+      "quote": "大众合掌皈依，都念：",
+      "quoteStart": 721543,
+      "why": "在 T4.result 的 JSON 与 states 的 JSON 里搜「大众合掌皈依」= 0 命中。该主张所在的字段（excludedSettings[2].why）是唯一提到它的地方，那是**描述**不是**引用**。复现：audit.py G 段对应行报 NOWHERE。"
+    },
+    {
+      "id": "CE-3",
+      "severity": "medium",
+      "claim": "excludedSettings[1] 写《圣教序》的「产生与交付动作（口占、念写、递与长老览遍）已记入 T2.action」——「递与长老览遍」不在 T2.action 里，全文件也只在 T2.action 的 note 文字里被提过一次（action 的 quotes 只有两句，都与序文无关）。",
+      "quote": "太宗传请上殿，将文字递与长老览遍。",
+      "quoteStart": 719653,
+      "why": "T2.action.quotes 实为两条：「太宗即令多官：把真经各虔捧几卷…」（719930）与「随召翰林院及中书科各官誉写真经…」（720076），均非序文交付句。「递与长老览遍」在整份候选里 0 次作为引文出现。另：「口占」在 T2.action 里命中，但那是 T2.action.note 提到 CE 段的「口占几句俚谈」——序文全文既被主动排除，其交付动作也就没有引文落点，与主张不符。复现：audit.py G 段对应行报 NOWHERE（引文字段扫描）。"
+    },
+    {
+      "id": "CE-4",
+      "severity": "low",
+      "claim": "knowledgeGaps[0].note 写「当晚众僧对三藏说…唐僧由此知道自己的留言被当作记号用了（他的反应『长老喜之不胜』见 states.S9 之外的引文）」——这条指针是空的：states.S9 里没有「喜之不胜」，全文件也没有任何引文收录它。tasks[6].result.note 同样以「另有其句」指向一个不存在的引文。",
+      "quote": "长老喜之不胜",
+      "quoteStart": 718553,
+      "why": "states[8]（即 S9）的 JSON 里搜「喜之不胜」= 0 命中；全文件引文对象（quote/beforeQuote/afterQuote/triggerQuote 等字段）中搜「喜之不胜」= 0 命中。两处 note 都把它当作「别处已引」来交代，实际那处引文不存在。复现：audit.py G 段对应行报 MENTION-ONLY。"
+    }
+  ],
+
+  "reverseChecks": [
+    {
+      "found": "原文唯一一处显式因果小句「只因道果完成，自然安静」未被任何 causeEdge 使用，而它解释的正是本回唯一一处人物性气的变化",
+      "quote": "此时八戒也不嚷茶饭，也不弄喧头，行者、沙僧个个稳重。只因道果完成，自然安静。",
+      "offset": 718565,
+      "why": "候选 12 条因果边没有一条以它为触发。它落在 [718552,719858) 那块 1306 码点的补集里，该块 disposition 说「①是场景收束，其中可核的状态变化另见 states」——但 9 条 states 里没有任何一条覆盖「八戒不嚷茶饭／个个稳重／自然安静」这组变化（S5 猪八戒 讲的是「望成佛→净坛使者」的名分变化，引文在 716445 与 720716，与本段无关）。候选自己在 nonEdges[2] 里**逐字引用过这句**来驳回一条错边，却没有把这条正向因果立起来——即它看见了这句话，只是没记。这是本回最干净的一条「因→果」陈述（有「只因」标记、两端都在区间内）。"
+    },
+    {
+      "found": "「人事 → 无字空本 → 紫金钵盂 → 有字真经」这条资源因果链，在候选里只剩结论句「有字真经」，前件全部缺失",
+      "quote": "那尊者需索人事，因未曾备得，不曾送他，他遂以经与了。当谢佛祖之恩东行，忽被妖风抢了经去，幸小徒有些神通赶夺，却俱抛掷散漫。因展看，皆是无字空本。",
+      "offset": 717130,
+      "why": "候选收录的只有「只得将钦赐紫金钵盂送他，方传了有字真经。」（worldSettings[10].quote）与「我等知二尊者需索人事，佛祖明知」（同条 extraQuote）。缺的是中间环节：为何要送钵盂（因为先得了无字空本）、无字本从何而来（妖风抢经又夺回）。这条链在本区间内是**三藏当殿自述的完整因果**，且与 CE6/CE7（誊录→布散）构成同一主题（经的取得与流传）的前半段。属该记未记，不是错误。"
+    },
+    {
+      "found": "太宗提出「演诵」的请求句未被引用，T2.obstacle 只引了三藏的答复，因果的前件缺失",
+      "quote": "太宗道：“御弟将真经演诵一番，何如？”",
+      "offset": 719834,
+      "why": "T2.obstacle 引的是「主公，若演真经，须寻佛地，宝殿非可诵之处。」（719858）——那是**答复**。CE5 的 from 也写成三藏那句话。但原文顺序是太宗先请、三藏才答；没有请求句，「宝藏非可诵之处」这条阻碍就没有被阻碍的对象。CE5 自己写「一条关于场所的条件把『在宝殿诵经』这条路封掉」——「在宝殿诵经」这个原方案正是太宗这句请求提出的，而它没被登记。这与该文件反复强调的「先有 A 才有 B」纪律同型。"
+    },
+    {
+      "found": "「大职正果／汝职正果」在原文里成系统分布（3+2），候选分别引用却从未登记这层对照；且它不是「佛/非佛」的二分（沙僧得「大职」却非佛）",
+      "quote": "加升大职正果，为金身罗汉。",
+      "offset": 720879,
+      "why": "五处授职：三藏/行者/沙僧用「加升大职正果」（720536/720610/720879），八戒/白马用「加升汝职正果」（720716/720967）。沙僧是金身罗汉、白马是八部天龙马，两人都不是佛，却分属两组 ⇒ 这组用词不能化简为「成佛＝大职」。候选在 TH1.support 里把五众果位并列讨论、并称「按途中之功定果位」，但没有任何一处写出这两组用语的存在。这是可逐字复核的原文规律，属漏记（也是 TH1 的一个反证素材：TH1 的 counter 列了 4 条，没列这条）。"
+    },
+    {
+      "found": "三藏自述的里程「十万八千里」与太宗的时间结算「今已贞观二十七年矣」均未被引用，本单元唯一的时空量度被丢掉",
+      "quote": "有十万八千里之远",
+      "offset": 717810,
+      "why": "同段还给出「一十四遍寒暑」（717831，候选在 excludedSettings[4] 里提过一次，是用来说明诗句「西宇周流十四年」同数，属**提及**而非收录）。里程与年数在 [717780,717876) 那 96 码点的补集块里，disposition 写「属对话，且这些数字是三藏转述菩萨之言（人物话语），本文件未据此另立条目」。理由本身合规（人物话语降格），但「贞观二十七年」这处不是人物转述的数字，而是太宗对全篇时间跨度的结算（与开篇贞观十三年对扣），性质不同，被同一句理由一并扫掉。"
+    },
+    {
+      "found": "《圣教序》的交付与传播动作（递与长老览遍、遍传内外）无引文；而序文本身是被**主动排除**的，排除理由却声称这些动作已被收录",
+      "quote": "当时多官齐贺，顶礼圣教御文，遍传内外。",
+      "offset": 719815,
+      "why": "这就是 CE-3 的反向面：excludedSettings[1] 排除序文全文是合规的（长篇骈文，不约束行动），但它用来兜底的「其动作已记入 T2.action」不成立，于是序文这一段在文件里**既没被收录、也没被真正登记为缺口**——覆盖记账上出现了一块真空，而账面上写着已覆盖。同类形态在最贵的教训里被点过名：记账本身不产生信息时，缺失就永久隐身。"
+    },
+    {
+      "found": "回末的叙述句「五圣果位之时…始初俱来听讲，至此各归方位」被并进 843 码点的大块按韵文/佛号排除，但它是散文叙述句",
+      "quote": "始初俱来听讲，至此各归方位。",
+      "offset": 721419,
+      "why": "该块 [721282,722125) 的 disposition 写「回末诗赞＋五圣果位之时诸众归位＋灵山景物铺陈＋佛号长名单：按 excludedSettings 的第 3、4 条主动排除」。excludedSettings[2] 管佛号、[3] 管灵山景物（灵鹫峰头聚霞彩…），都是合规排除；但「五圣果位之时，诸众佛祖、菩萨…一切得道的师仙，始初俱来听讲，至此各归方位。」（721356，77 字）是**散文叙述**，讲的是诸众的来去这一个可核事实，既不属诗赞也不属佛号，被同一个「主动排除」一并扫掉、且未单列登记。与 w-verify-3 在上一单元（L0:0098）查出的「以韵文为由整块丢弃实为散文」是同一形态的复发，规模较小（77 字），但形态相同。"
+    },
+    {
+      "found": "「一夜无寐」是太宗为酬谢而付出的唯一可逐字复核的支出，T2.cost 枚举「两个支出项」时没有它",
+      "quote": "朕思御弟之功，至深至大，无以为酬。一夜无寐，口占几句俚谈，权表谢意，但未曾写出。",
+      "offset": 718625,
+      "why": "T2.cost 记 null，理由是「本区间未写太宗付出任何代价」，随后枚举了两个「不是代价」的支出项（建望经楼、谈经未成）。原文另有一处更贴近代价的陈述：「一夜无寐」（为写序而失眠）与「无以为酬」。按候选自己确立的口径（「未达成≠付出代价」），「一夜无寐」属**实际付出的时间/精力**，比它枚举的两项都更接近 cost；即便最终仍判 null，也应在 costNote 里被枚举并说明为何不算。候选把「本区间未写」写成绝对判断，与原文有出入。注：本条是「可补/可议」而非硬错——「无寐」也可读作修辞，故我不据此判 fail，仅登记。"
+    },
+    {
+      "found": "八戒的自辩是对金刚点名的**当场回应**（相邻 15 字），这条「被怀疑→自辩」的因果两端都有引文，唯独没有连边",
+      "quote": "只怕八戒贪图富贵，误了期限。”八戒笑道：“师父成佛，我也望成佛，岂有贪图之理！",
+      "offset": 716424,
+      "why": "金刚说「只怕八戒贪图富贵，误了期限。」（716424）与八戒立刻笑答「师父成佛，我也望成佛，岂有贪图之理！」（716439）在原文里是同一段对话的紧邻，间隔 15 字。候选把前者收进 T1.obstacle（还写进 T1.obstacle.text 与 cost.note）、把后者收进 T8.objective/S5.before，两端都在，却没连成边；CE1 只连到「提醒八戒别误期」为止。按候选自己的连边标准（CE4「听说」二字即足以连边），这条至少应作为候选边登记并说明为何不连。属漏记。"
+    },
+    {
+      "found": "「恭敬/礼节往还」被系统性归为「未承载独立任务或因果」，但其中「太宗请御弟上马、同朕回朝」是太宗主动行动的一环，且 T2 的目标正是「接取经人回来」",
+      "quote": "太宗大喜，即命侍官：“将朕御车马扣背，请御弟上马，同朕回朝。”",
+      "offset": 716582,
+      "why": "该句落在 [716544,716645) 补集块里，disposition 写「属礼节性往还，未承载独立的任务栏或因果」。但它是太宗迎到人之后的**第一个处置动作**，直接实现 T2.objective（「接取经人回来」），与 T2.action 引的两句（雁塔寺、誊写）相比更靠近目标。把「实现目标的第一个动作」归入「礼节往还」而不收录，使 T2 的 objective→action 之间出现空档。属可议的口径问题，登记为反向发现而非硬错。"
+    }
+  ],
+
+  "falseKills": {
+    "verdict": "未发现误杀",
+    "checked": [
+      "excludedSettings 8 条：逐条回原文核对被排除对象（东阁菜单、圣教序全文、末段佛号、灵山景物、各处诗赞、金箍棒、十二处印信清单、程式化数字）。排除理由与对象**大体**相符（唯二问题见 CE-3 与 reverseChecks 第 7 条，都是「理由不实」而不是「排掉了该留的」）。",
+      "notForeshadows 7 条：通关文牒、紫金钵盂、金箍儿、化龙池、圣教序、誊黄寺、经数。逐条核对「一次出现当伏笔」的红线，判法一致；金箍儿虽是全文重要道具，但本区间内确实一场对话内闭合（问→答→摸→无之），不记为伏笔正确。",
+      "worldSettings 的降格声明：rule「净坛使者之职」记 declared 不记 executed（本区间确实只有宣布无执行场面）、rule「演真经须寻佛地」自陈降格条件、place「誊黄寺」记 mentioned（原文确实只写建寺无入住）、institution「旧徒所持佛口圣言」记 misunderstood（原文确实只给结果不给证实）。四处降格都与原文相符，没有把合法的 executed/arrived 误降。",
+      "nonEdges 4 条：①太宗出驾 vs 四众恰好到达（原文「恰好」二字确为巧合标记）②作序 vs 谈经（确实无因果）③八戒受职 vs 洪福寺当晚安静（时间方向确为相反，我复算：洪福寺 @718565 < 受职 @720450）④佛号 vs 回目（确实无作用关系）。四条驳回都成立，无合法边被误杀。"
+    ]
+  },
+
+  "hallucinationCheck": {
+    "verdict": "未发现编造",
+    "outsideUnitEntities": "候选使用的人物称谓没有一个在本区间内查无：太宗(28)/三藏(7)/唐僧(14)/长老(11)/行者/大圣(3)/八戒/呆子(1)/沙僧/如来(5)/八大金刚(1)/八金刚(1)/旧徒/萧瑀 全部在本区间切片内出现。actorNote 里写的「唐太宗（李世民）」中的「李世民」在本区间内 0 次（全书 3 次），但 actorNote 的用途是同一人的异名索引、并已在其中写明叙述用名，不构成「原文没有的人物」；同理「释迦牟尼」本区间 1 次、「玄奘」1 次，均在上文出现过。",
+    "outsideOutcome": "候选未写任何原文之外的结局。F4（八戒望成佛）显式记 unresolved 并在 selfCritique 第 3 条自陈风险；deliberatelyNotAsserted 12 条明确拒绝把回目「五圣成真」与回末佛号当作叙述确认；T4.result 只写「谢恩、正果本位、归真」，不写「五圣成真」为事件。",
+    "endNotSuccess": "T2.result 明确写「谈经没谈成：三藏登台『方欲讽诵』就被召回西去」，未把回末收束写成太宗达成所愿；T1.result 注明「本栏不写『任务成功』这类总评」。两条红线执行到位。",
+    "speechVsNarration": "候选对各栏 basis 的标注与其来源性质一致：T1.objective 引人物自述并说明「同单元另有叙述句支持同一件事」；K2 的「不知」一端显式标 derived 并写「原文没有一句写他们心里怎么想」；S4.before 标明「前值是他的自我认知」。未发现把台词当叙述事实。"
+  },
+
+  "internalConsistency": {
+    "metrics": "11 个分区的 metrics 计数与数组长度全部相符；resolvedForeshadows 3/unresolvedForeshadows 1、tasksWithCostNull 8、worldSettingsByKind {place:9,item:5,rule:6} 均与实算一致。",
+    "sameColumnReuse": "8 条任务各做五栏两两比对（按 start/end 区间），复用 = 0，与候选自述 noSharedQuoteAcrossFiveColumns 相符。",
+    "crossRefs": "抽查 worldSettings.rule3 / states.S9 / unknowns.U13 的指向目标均存在。",
+    "danglingPointers": "发现 2 处悬空指针，即 CE-4（K1.note 与 T7.result.note 都指向一个不存在的「长老喜之不胜」引文）。"
+  },
+
+  "usableVsDiscard": {
+    "usable": [
+      "tasks T1–T8 的五元组（含 8 条 cost=null 及其理由）：每条 objective/obstacle/action/result 都能在原文找到对应文字，未发现编造。T1.cost / T3.cost / T5.cost / T7.cost 的 null 判断经核对成立。",
+      "causeEdges CE1–CE12：方向与触发均有原文依据；CE2 自己标注了「原文没有一句写金刚同意」的叙述省略、CE1 自陈是「人物自述的理由」，两处自陈均属实。",
+      "states S1–S9、knowledgeGaps K1–K5、foreshadows F1–F4（F4 unresolved 正确）、notForeshadows 全部 7 条、nonEdges 全部 4 条、deliberatelyNotAsserted 全部 12 条、unknowns U1–U13、sourceDefects SD1–SD5。",
+      "worldSettings 全部 20 条（含 4 处降格声明，均与原文相符）与 excludedSettings 的排除方向（唯 CE-2/CE-3 的兜底理由不实，见下）。",
+      "全部 155 条引文及其 start/end/sourceHash/sliceSha256/occurrencesInFullText（逐字可查、偏移一致）。",
+      "reverseCoverage 的**数值**部分（101 区间 / 1780 码点 / 0.2852 / 40 块 / 30 块 / 96 码点）：经独立复算全部相等，可放心引用为覆盖率口径。"
+    ],
+    "discardOrDowngrade": [
+      "reverseCoverage.gapBlocksGte12 中 [717067,717295) 的 disposition「（需索人事／无字空本）已逐句用于 T3」必须改写：「需索人事」的实际落点是 worldSettings[10].extraQuotes[0]（不是 T3），「无字空本」全文件未收录，该块应改为「已知缺口」或补条。",
+      "excludedSettings[2] 的兜底理由「已在 T4.result 的结算句与 states 中覆盖」必须删掉或改为「未收录」，因为「大众合掌皈依」在这两处都不存在。",
+      "excludedSettings[1] 的兜底理由「其动作（口占、念写、递与长老览遍）已记入 T2.action」必须改写：「递与长老览遍」在 T2.action 及其引文中均不存在。",
+      "knowledgeGaps[0].note 与 tasks[6].result.note 里指向「长老喜之不胜」的引文指针必须删掉（该引文不存在），或补上该引文。",
+      "reverseCoverage.gapBlocksGte12 中 [721282,722125) 的 disposition 应把「五圣果位之时…始初俱来听讲，至此各归方位」这 77 字散文从「按第 3、4 条主动排除」里拆出，单列为叙述句并补条或明确登记为缺口。",
+      "T2.cost.note 的「本区间未写太宗付出任何代价」应改为不排除「一夜无寐」的相对说法（可仍判 null，但需枚举该句并说明为何不计）。"
+    ],
+    "shouldAdd": [
+      "causeEdge：人事/无字空本 → 送紫金钵盂 → 有字真经（本区间内三藏当殿自述的完整资源因果链）。",
+      "causeEdge（或 nonEdge 并说明）：金刚点名「只怕八戒贪图富贵」→ 八戒当场自辩「岂有贪图之理」（相邻 15 字，两端均已引用）。",
+      "causeEdge：只因道果完成 → 八戒不嚷茶饭、行者沙僧稳重、自然安静（原文有「只因」标记的显式因果）。",
+      "登记「大职正果／汝职正果」两组授职用语的系统分布（3+2），并注明不能化简为「成佛＝大职」（沙僧得大职而非佛）。",
+      "unknowns 或世界设定：三藏自述里程「十万八千里」与太宗的时间结算「贞观二十七年」——即便按人物话语降格，也不宜与「贞观十三年」同处一块被一句理由扫掉。"
+    ]
+  },
+
+  "notes": {
+    "overall": "总判 partial。可用的是抽取主体——零编造、155 条引文逐字可查、任务/因果/状态/伏笔四类均有原文对应文字，反越权纪律（结束≠成功、台词≠叙述事实）执行到位，F4 显式 unresolved 正确，覆盖率数值经独立复算完全对上。必须丢弃或修正的是**覆盖记账层**的 4 处不实主张（CE-1 至 CE-4）：它们的共同形态是「用一句『已用于 X』把一块原文关掉，而 X 处并没有它」——这正是本项目最贵的教训所指的失败形态（机制存在、有账目、但不产生信息：缺失被账面掩盖）。其中 CE-1 危害最大，因为它关掉的是本区间内一条完整的资源因果链。由于这些缺陷不触及抽取主体、不构成编造、也不改变任何一条已写结论的真伪，故判 partial 而非 fail。",
+    "onSeverity": "我把 4 条 counterExample 都控制在同一类：**主张与它自己指向的位置不符，且可用一条命令复现**。凡拿不出逐字反证的疑虑（如 T2.cost 是否该记「一夜无寐」、礼节往还是否该立条）我一律只写进 reverseChecks 与 shouldAdd，不据此判 fail，符合角色契约『拿不出原文引证的反对意见只能记为存疑』。",
+    "selfCorrections": [
+      "本复核中我自己出过一次错并已更正，如实记下：核验 paragraphIndex1Based 时，我第一版按「换行分段、非空行计数」复算，得到 155 条**全部**与候选差 3，一度准备把「段号口径全错」写成一条 counterExample。改用「空行分段（\\n\\s*\\n）、1-based」复算后，155/155 全部相符，候选的口径是自洽的，是我的断法错了。这条差一点成为一次凭错误仪器做出的误杀——与本项目 E7/E15/E23 同型（仪器不可信 ⇒ 结论不可信）。",
+      "我第一版把 section G 的「已在别处」判定写成全语料 substring 搜索，于是「大众合掌皈依」等词因为**主张自己那句话里含该词**而被判成 POINTER-ERR（指针写错）。改为排除主张所在字段、并区分「引文字段真实收录」与「仅在说明文字里被提到」之后，CE-2/CE-3 才正确定性为「文件里根本没有」。这一版修正影响了 counterExample 的定性，特此留痕。",
+      "第三处我自己犯错并已修：reverseChecks 里有 3 条的 offset 我第一版填的是**子串偏移**（该句里某个片段的起点），而不是整条 quote 的起点 ⇒ T.startswith(quote, offset) 为假。实测更正为：717133→717130、718631→718625、716566→716582。这正是我要求被复核方做到的事（引文必须逐字回切），我自己的产物也必须过同一道关；修后 4 条 counterExample + 10 条 reverseCheck **共 14 条引文全部逐字命中**（T[s:s+len(q)]==q 且 T.find(q)==s）。留痕是因为「复核者自己的引文不校验」会让整份复核的可信度归零。",
+      "candidateBytes 我按候选文件实际大小记录（230661 字节）。"
+    ],
+    "scope": "本次复核只覆盖原文区间 [715935,722176)。区间外的检索只在核验全书计数（清清 10 次、波罗密 2 次、爱奇电子书 2 次、之了 1 次）与偏移（580101/580105 第八十回、670337 第九十三回）时使用，未作为本区间证据写入任何结论。",
+    "environment": "候选声明的原文路径是 data/cache/a065244455cfb2221bcda94a.docs.json，任务与索引给的是 data/cache/ee3430ef493546bbcd2e700b.docs.json。两者 sha256 相同（c282cf39…a2a2，均已实算）且字节数相同，故非缺陷；我引用偏移时以两份共同的内容为准。"
+  },
+
+  "assertions": [
+    {"text": "候选与原文哈希、区间切片哈希与任务声明一致", "result": "pass", "cmd": "shasum -a 256 loop/state/out/read_xiyou_L0_0100.candidate.json data/cache/ee3430ef493546bbcd2e700b.docs.json data/cache/a065244455cfb2221bcda94a.docs.json ⇒ 9a845dd4…10e3 / c282cf39…a2a2 / c282cf39…a2a2（两份 docs 同哈希）"},
+    {"text": "155 条引文实例逐字回切（text[start:end]==quote、find==start、落在区间内、sliceSha256 一致、occurrencesInFullText 复算）", "result": "pass", "cmd": "python3 -B -s \"$CL_ARTIFACTS/verify-xiyou-L0-0100/audit.py\" → B 段 failures=1，唯一一条为候选自己披露口径的 SD4 水印行（occurrencesInFullText=2，note 写明 find 命中 offset 13）"},
+    {"text": "固定种子 20261013 随机抽 5 条 quote 在原文 find 一次", "result": "pass", "cmd": "同上 → randomSample 5/5 逐字命中、偏移一致、长度==end-start"},
+    {"text": "覆盖率字段独立复算（补集块由计算得到，不采信候选给的数）", "result": "pass", "cmd": "同上 → D 段：101 区间/1780 码点/0.2852/40 块 ≥12/30 块 <12/96 码点，与候选逐项相等；补集块集合与候选登记完全一致"},
+    {"text": "数字型自述复算（12 组 count 声明，含区间内与全书两种口径）", "result": "pass", "cmd": "同上 → E 段 12/12 OK（之了 1/1、之子 8/1、誉 6/2、誊 3/2、誊写 0/0、誉写 1/1、誉录 1/1、誊录 1/1、波罗密 2/1、波罗蜜 6/0、爱奇电子书 2/1、清清 10/1）"},
+    {"text": "偏移型自述复算（8 处声明偏移在原文是否真的落在该处）", "result": "pass", "cmd": "同上 → F 段 8/8 OK（含 717700 / 717706 / 722129 / 722145 / 716035 / 580105 / 670337 / 580101）"},
+    {"text": "「已用于 X」类覆盖主张证伪（4 处，区分指针写错与文件里根本没有）", "result": "fail", "cmd": "同上 → G 段：CE-1 的「无字空本」=NOWHERE、「需索人事」=POINTER-ERR(worldSettings[10].extraQuotes[0])；CE-2「大众合掌皈依」=NOWHERE；CE-3「递与长老览遍」=NOWHERE；CE-4「喜之不胜」=MENTION-ONLY。4 条即 counterExamples"},
+    {"text": "反向验证：对 266 个 ≥8 字子句做 12 字窗口覆盖扫描，再逐条人工判「主动登记排除」还是「真漏」", "result": "fail", "cmd": "同上 → H 段列出 10 条原文明确存在、候选断言语料中查无的事实（每条附 offsets）；另有 G 段/正文分析补充至 reverseChecks 共 10 条"},
+    {"text": "误杀检查：excludedSettings 8 条 / notForeshadows 7 条 / 4 处降格声明 / nonEdges 4 条逐条回原文", "result": "pass", "cmd": "同上 → I 段与 falseKills：未发现被排掉的合法内容；唯 CE-3 与回末散文块属「理由不实」而非误杀。大职/汝职成系统分布未被登记（notes 记可补）"},
+    {"text": "幻觉检查：候选使用的实体逐个回本区间切片核对；结局与回目使用方式核对", "result": "pass", "cmd": "同上及交互复算：本区间内 太宗28/三藏7/唐僧14/长老11/大圣3/呆子1/如来5/八大金刚1/八金刚1 均在；李世民本区间 0 次（仅作 actorNote 异名索引）；未发现原文外人物或结局"},
+    {"text": "内部一致性：metrics 计数、伏笔状态计数、五栏引文复用、交叉引用", "result": "pass", "cmd": "同上 → K 段：11 个分区计数全符、resolved3/unresolved1 相符、五栏复用 0、抽查交叉引用目标均存在；另发现 2 处悬空指针（即 CE-4）"},
+    {"text": "段号口径核验（我先误判过一次，已更正）", "result": "pass", "cmd": "同上 → J 段：按「空行分段、1-based」复算 155/155 相符（第一版按非空行计数得到全差 3，是我的断法错，已记入 notes.selfCorrections）"},
+    {"text": "**对我自己的产物施加同一道关**：4 条 counterExample + 10 条 reverseCheck 的引文逐字回切", "result": "pass", "cmd": "python3 -c 读 verdict json 后对每条断言 T[s:s+len(q)]==q 且 T.find(q)==s → 14/14 通过（第一版有 3 条填的是子串偏移，已更正 717133→717130 / 718631→718625 / 716566→716582，留痕于 notes.selfCorrections）"}
+  ],
+
+  "evidence": [
+    {"path": "/Users/carmen/Desktop/星系/loop/state/out/read_xiyou_L0_0100.candidate.json", "sha256": "9a845dd450f6ab5ee71f33d104e7c26aee5dadbc6d1a4315627ba17e797c10e3", "kind": "被复核候选（只读，未修改）", "note": "230661 字节；155 引文 / 8 任务 / 12 因果 / 9 状态 / 5 知识差 / 4 伏笔 / 20 设定 / 2 主题读法 / 13 unknowns / 5 sourceDefects"},
+    {"path": "/Users/carmen/Desktop/星系/data/cache/ee3430ef493546bbcd2e700b.docs.json", "sha256": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2", "kind": "原文（docs[0].text 即西游记全文 722176 码点）", "note": "区间 [715935,722176) 切片 sha256=3465efb0c6728e7dfb3ecaa6023191c80a2771b39298237654208c0499c1ab3f，6241 码点"},
+    {"path": "/Users/carmen/Desktop/星系/data/cache/a065244455cfb2221bcda94a.docs.json", "sha256": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2", "kind": "原文（候选声明的路径；与上一份逐字节相同）", "note": "两份同哈希同字节数 ⇒ 偏移口径无分叉，候选引用该路径不构成缺陷"},
+    {"path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/verify-xiyou-L0-0100/audit.py", "sha256": "9685b60d81b5abf22482cc19c8ca30cbe8929d3ac335fad74164ed341cd02c5b", "kind": "我的独立审计脚本（不 import 候选生成器；全部从磁盘重算；只读仓库）", "note": "A–K 十一段：哈希 / 全量引文回切 / 边界等式 / 覆盖率复算 / 数字自述 / 偏移自述 / 覆盖主张证伪 / 反向覆盖 / 误杀 / 段号口径 / 内部一致性"},
+    {"path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/verify-xiyou-L0-0100/audit-output.txt", "sha256": "15169c68d0d6f91550b7cf8a55a972a9d55247afce19739be84b0550cf09c2f0", "kind": "上述脚本的完整输出（90 行，含 G 段 5 条与 H 段 10 条逐条结论）", "note": "复现：cd /Users/carmen/Desktop/星系 && python3 -B -s \"$CL_ARTIFACTS/verify-xiyou-L0-0100/audit.py\""}
+  ],
+
+  "changes": [
+    {"path": "loop/state/out/verify_xiyou_L0_0100.verdict.json", "kind": "append-only", "note": "任务 writes 声明的唯一仓库内产出：本复核结论。"},
+    {"path": "loop/state/out/read_xiyou_L0_0100.json", "kind": "append-only", "note": "由环境工具 `loop.py verify` 追加一条 reviews[] 记录（工具行为，非手工改写）；该文件不在本任务 writes 内，此处如实登记。回滚见 rollback。"}
+  ],
+
+  "sourceHashes": {
+    "data/cache/ee3430ef493546bbcd2e700b.docs.json": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+    "data/cache/a065244455cfb2221bcda94a.docs.json": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+    "loop/state/out/read_xiyou_L0_0100.candidate.json": "9a845dd450f6ab5ee71f33d104e7c26aee5dadbc6d1a4315627ba17e797c10e3"
+  },
+
+  "remaining": [
+    "**语义正确性未独立复核**：本次做的是引用定位全量核验 + 反向覆盖 + 反向验证 + 误杀/幻觉/一致性检查，未对本回的主题读法（TH1「果位即结算」、TH2「口头之约的兑现」）成立与否做第二层语义判定。",
+    "反向发现只做了「子句级 12 字窗口」扫描 + 人工判读，未尝试第二种切分粒度（如按标点更细切、或按对话轮次切）做敏感性分析；可能仍有短句级遗漏未被这套仪器捕获。",
+    "40 块 ≥12 码点的补集块我逐块读了 disposition 并核对了其中自称有覆盖的那些（CE-1/2/3 及回末块），其余块只做了「排除理由与对象是否相符」的抽样核对，未逐块回原文判断该不该单独立条。",
+    "30 块 <12 码点的补集碎片（96 码点）未逐块核对，仅采信候选的合计并复算其总数与总字数（相符）。",
+    "罗马数字级的用字分歧（之了/之子、誉/誊、波罗密/波罗蜜）我只复核了候选的计数与偏移自述，未做版本学判断（原文该用哪个字不属本复核范围）。",
+    "本任务 writes 路径上前次是否有未提交产物：我落笔前该路径不存在（ls loop/state/out/ | grep verify_xiyou_L0_0100 无输出），故不存在覆写前人物品的问题。",
+    "**我自己造成的一处重复记录，如实登记**：`loop.py verify` 是**追加**语义，而我在修正 reverseChecks 的 3 处子串偏移**之前**先跑过一次，修完又跑了一次 ⇒ `loop/state/out/read_xiyou_L0_0100.json` 的 reviews[] 里现在有**两条** reviewer=w-dafeng-3 的记录（22:28:31Z 与 22:30:01Z）。**前一条（reviews[0]）是已被取代的旧版**，它那 3 条 reverseCheck 的 offset 是子串偏移（T.startswith 为假）；**后一条（reviews[1]）是更正版，14/14 引文逐字命中**。我没有手工去删 reviews[0]：该文件不在本任务 writes 内，`verify` 写它是环境工具行为，手改共享台账比留下一条可识别的重复更危险。下游请以 reviews[-1] 为准（发布桥 `to_candidate.py` 读的是 `verify_xiyou_L0_0100.json` 与 `.verdict.json` 两处，那两处都已是我修正后的版本，不受此重复影响）。"
+  ],
+
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files-and-review-entry",
+    "files": ["loop/state/out/verify_xiyou_L0_0100.verdict.json"],
+    "note": "删除该文件即回滚本复核的仓库内产出；本复核未修改被复核候选与原文（只读）。另：`loop.py verify` 会向 loop/state/out/read_xiyou_L0_0100.json 的 reviews[] 追加一条本复核记录，回滚时需从该数组移除 reviewer=w-dafeng-3 的那一条。"
+  }
+}

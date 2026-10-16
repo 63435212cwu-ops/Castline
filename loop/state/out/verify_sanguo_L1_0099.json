@@ -1,0 +1,354 @@
+{
+  "schema": "castline/verify-record/1",
+  "task": "verify:sanguo:L1:0099",
+  "agent": "w-sanguo-1",
+  "role": "VERIFIER（独立反向复核者）",
+  "roleFile": "loop/ROLES/VERIFIER.md",
+  "status": "done",
+  "book": "sanguo",
+  "bookTitle": "三国演义",
+  "lane": 1,
+  "unitIndex": 99,
+  "unitHead": "第一百回　汉兵劫寨破曹真　武侯斗阵辱仲达",
+  "sourceRange": [
+    504841,
+    510210
+  ],
+  "sourceHash": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+  "segmentSha256": "945800d13f0ebecf79574a3bc23436c077c8414e71c77818402b6d853dd787c3",
+  "reviewedTask": "read:sanguo:L1:0099",
+  "reviewedArtifact": "loop/state/out/read_sanguo_L1_0099.candidate.json",
+  "reviewedArtifactSha256": "c8ffd3af6964e8a8de4f1b8e3f5a1f776c82c022dcb3297edb94df8f1eeafb4d",
+  "reviewedAuthor": "w-sanguo-0",
+  "verifierIsNotAuthor": true,
+  "selfSign": false,
+  "verdict": "partial",
+  "verdictFile": "loop/state/out/verify_sanguo_L1_0099.verdict.json",
+  "verdictSha256": "b2cf3c8f0b1aa342625da6c0c2496e2216696f0e4e627d821b76831c232dcd17",
+  "verdictRationale": "事实层干净，自述层有错，且有 6 条真实遗漏 —— 故 pass 与 fail 都不成立。① 引文层：449/449 条 quote 在原文逐字命中，start/end 无一处偏移错，nthOccurrence 与 globalOccurrences 全部自洽，0 编造、0 越界（区间外引用 0 条）。② 抽取层：9 任务 / 23 因果边 / 20 状态 / 10 伏笔 / 32 设定我逐条回原文核对，没有一条与原文冲突；人名、地名、结局、誓言兑现与否的判定均与原文一致，未发现幻觉。③ 但有三处**自述与自身内容不一致**（CE1–CE3）：引用不存在的 T10/F08、自称覆盖了实际未被任何 quote 覆盖的正文。这类错误拿得出逐字原文引证，按纪律不能判 pass；又全部是标注级、不动摇任何一条事实结论，故也不判 fail。④ 反向验证另查出 6 条原文明确存在、候选零 quote 覆盖的事实（RCH1–RCH6），其中「引二万兵」直接影响兵力语义。",
+  "summary": "独立反向复核 read:sanguo:L1:0099（三国演义第一百回，区间 [504841,510210)，5369 字）。verdict=partial：候选事实层干净——449/449 条引文逐字命中、偏移零错、零编造、零区间外引用，9 任务/23 因果边/20 状态/10 伏笔/32 设定逐条回原文核对无冲突，未见幻觉、未见误杀；但有三处自述与自身内容不一致（引用不存在的 T10/F08、RC29 自称覆盖实际未覆盖的正文），故不能判 pass；三处均不动摇任何事实结论，故不判 fail。反向验证另查出 6 条原文明确存在而候选零引证的事实（RCH1–RCH6，其中「引二万兵」有兵力语义影响）。另登记一条结构性环境缺陷 E-VERIFY-SELFEVIDENCE：verify 追加 reviews[] 会使复核记录对『被复核提交记录』声明的 sha256 立即失效，本轮任务即因此被重新下发；全量实测 452 条 verify 记录中 61 条命中此形态、3 条已失效。并警告下游 to_candidate.py 的 id 正向排除会把 14 条合法条目整批误删。",
+  "counterExamples": [
+    {
+      "id": "CE1",
+      "severity": "must-fix（自述级，事实无误）",
+      "field": "tasks[1].cost.text（T02）",
+      "claim": "「另有一偏将因怨言被斩（属 T10，不计入本条的赌赛代价）。」——候选全篇没有 T10 这个 id（tasks 的 id 恰为 T01–T09），T10 是**悬空引用**。",
+      "quote": "有一偏将仰天而怨曰：“大雨淋了许多时，不肯回去；今又在这里顿住，强要赌赛，却不苦了官军！”",
+      "quoteRange": [
+        505472,
+        505517
+      ],
+      "why": "该情节在原文确实存在（同一段还有「喝令武士推出斩之。须臾，献首帐下。众将悚然。」@[505629,505651)），并且候选已在 C02 与 T02 中正确登记，事实无误；缺陷只在 cost.text 把一个不存在的任务 id 当作归属地。修法：把「属 T10」改为「属 T02/C02」。",
+      "reproduce": "python3 -c \"import json;c=json.load(open('loop/state/out/read_sanguo_L1_0099.candidate.json'));print([t['id'] for t in c['tasks']]);print([x['id'] for x in c['causeEdges']])\""
+    },
+    {
+      "id": "CE2",
+      "severity": "must-fix（自述级，且自相矛盾）",
+      "field": "textualNotes X07.note",
+      "claim": "「F08 依赖的『切不可战，务在谨守』诏书原文落在区间之前，因此该条被降为 inferred 并标 unresolved」——但 foreshadows 里没有 F08（id 序列为 F01–F07、F09–F11），F08 是**悬空引用**，且「降为 inferred 并标 unresolved」这一处置在任何数组里都找不到对应条目。",
+      "quote": "魏主闻知曹真已死，即下诏催司马懿出战。",
+      "quoteRange": [
+        507935,
+        507954
+      ],
+      "why": "同一候选的 notForeshadows[6] 已把这份诏书明确判为「不登记为 foreshadows」，与 X07 的说法**直接矛盾**；两处必有一处错。诏书原文经我复算确在区间外（偏移 494292，全文里唯一一次出现「切不可战」），所以 notForeshadows[6] 的处置是对的，X07 是残留的旧编号。修法：删去 X07 的 F08 措辞，或改为引用 notForeshadows[6]。",
+      "reproduce": "python3 -c \"import json;c=json.load(open('loop/state/out/read_sanguo_L1_0099.candidate.json'));print([f['id'] for f in c['foreshadows']]);print([n['name'] for n in c['notForeshadows']][6])\""
+    },
+    {
+      "id": "CE3",
+      "severity": "should-fix（过度声称）",
+      "field": "reverseCoverage RC29.missing",
+      "claim": "RC29 自称已覆盖书信正文里的「助篡国之反贼，称帝号于洛阳」，但该串在候选**任何 quote 中命中 0 次**，只出现在 RC29 自己的说明文字里；同条还自称覆盖了「其余正文」。",
+      "quote": "助篡国之反贼，称帝号于洛阳；",
+      "quoteRange": [
+        507746,
+        507760
+      ],
+      "why": "我按 RC29 自己声明的引文补齐后复算覆盖率：其引文块 [507613,507895) 的逐字覆盖率只有 **42.2%（119/282 码点）**，纯正文部分 [507618,507895) 更低至 **23.1%（64/277）**。即「其余正文被覆盖」这一说法不成立于它自己给的证据。事实层无碍（书信内容确在原文），只是把「我提到了」写成了「我引证了」。",
+      "reproduce": "python3 - <<'EOF'\nimport json\nT=json.load(open('data/cache/fe42d01f3826fe8096f86614.docs.json'))[0]['text']\nc=json.load(open('loop/state/out/read_sanguo_L1_0099.candidate.json'))\nqs=[]\ndef w(o):\n    if isinstance(o,dict):\n        if isinstance(o.get('quote'),str): qs.append(o['quote'])\n        [w(v) for v in o.values()]\n    elif isinstance(o,list): [w(v) for v in o]\nw(c)\na,b=507613,507895; seg=T[a:b]; cov=[False]*len(seg)\nfor q in qs:\n    i=seg.find(q)\n    while i>=0:\n        for j in range(i,i+len(q)): cov[j]=True\n        i=seg.find(q,i+1)\nprint('%.1f%%'%(100*sum(cov)/len(seg)))\nEOF"
+    }
+  ],
+  "reverseChecks": [
+    {
+      "id": "RCH1",
+      "severity": "high（有语义影响）",
+      "found": "魏延等四将「引二万兵」这一路的**总兵力**整句零 quote 覆盖。候选 T03/obstacle/action 只记陈式「径自引五千兵出箕谷」，S01 也只记五千；原文明确先给出该路二万。",
+      "quote": "却说魏延、张嶷、陈式、杜琼四将，引二万兵，取箕谷而进。",
+      "quoteRange": [
+        505692,
+        505719
+      ],
+      "whyItMatters": "缺了它，读者会把该路兵力读成五千。原文的算术是：四将共引二万，陈式擅自带走本部五千，另一万五千仍在谷外——这正是孔明随后「令邓芝再来箕谷抚慰陈式，防其生变」所面对的态势。建议补入 T03 的 obstacle 或 S01 的 before。"
+    },
+    {
+      "id": "RCH2",
+      "severity": "medium",
+      "found": "司马懿请孔明布阵的整句「汝布阵我看。」零覆盖。候选 C12/T07 从「懿认阵」写起，缺了这句，随后「孔明入阵，把羽扇一摇」就少了发出者。",
+      "quote": "懿曰：“汝布阵我看。”",
+      "quoteRange": [
+        508456,
+        508467
+      ],
+      "whyItMatters": "斗阵是**两个回合的对称问答**：懿布混元一气阵→孔明认；孔明布八卦阵→懿认。候选只完整登记了第一个回合，第二个回合的邀请句丢失。注意与「孔明曰：“先布阵我看。」（@508382，是孔明要懿先布阵）区分，两句不同人、不同位置。"
+    },
+    {
+      "id": "RCH3",
+      "severity": "medium",
+      "found": "孔明应战语「汝只管打来。」零覆盖。候选 C12 引到「识便识了，敢打我阵否」为止，丢掉这最后一环，而它才是司马懿「回到本阵中，唤戴陵、张虎、乐綝三将」的直接触发。",
+      "quote": "孔明曰：“汝只管打来。”",
+      "quoteRange": [
+        508542,
+        508554
+      ],
+      "whyItMatters": "它是斗阵由「问答」转入「行动」的铰链句；缺它则打阵的授权来源不明。"
+    },
+    {
+      "id": "RCH4",
+      "severity": "medium",
+      "found": "司马懿阵前说辞的**收尾整句**零覆盖：「如省心改过，宜即早回，各守疆界，以成鼎足之势，免致生灵涂炭，汝等皆得全生！」候选 V21 只引了开头（法尧禅舜）与中段（南阳一耕夫…理宜殄灭），丢掉结尾的劝降条件。",
+      "quote": "如省心改过，宜即早回，各守疆界，以成鼎足之势，免致生灵涂炭，汝等皆得全生！",
+      "quoteRange": [
+        508197,
+        508234
+      ],
+      "whyItMatters": "有语义影响：懿的劝降实际是「各守疆界、成鼎足之势」，即**承认蜀吴并立**；而孔明紧接着以「汝曹氏不久为汉所灭」驳斥——驳的正是这个让步。缺了收尾，这场名分论战就只剩对骂，看不出争点。"
+    },
+    {
+      "id": "RCH5",
+      "severity": "low",
+      "found": "曹真打发司马懿来人的闭环句「遂打发来人回去。」零覆盖。候选 RC06 自称登记了这次往来，实际只引到「真唤入问之」，把曹真的回复动作丢掉。",
+      "quote": "遂打发来人回去。",
+      "quoteRange": [
+        506892,
+        506900
+      ],
+      "whyItMatters": "它标出曹真对懿的提醒**未作任何处置**就继续等「十日无事」——紧接着就是被劫寨，是 T02/C06 因果链上的一环。"
+    },
+    {
+      "id": "RCH6",
+      "severity": "low",
+      "found": "苟安降魏后当面陈告句「懿唤入，苟安拜告前事。」零覆盖。候选 T08 从「径奔魏寨投降」直接跳到受计回成都。",
+      "quote": "懿唤入，苟安拜告前事。",
+      "quoteRange": [
+        509300,
+        509311
+      ],
+      "whyItMatters": "它解释了懿为何能立刻针对孔明量身设计（他先听取了苟安被杖八十的详情），是 T08/C16 的中间环节。"
+    }
+  ],
+  "citationCheck": {
+    "method": "随机抽 5 条 quote（random.seed(99)）在 docs[0].text 上 find() 一次，比对逐字命中、start/end 切片、globalOccurrences/nthOccurrence。",
+    "sampled": 5,
+    "verbatimHits": 5,
+    "offsetMismatches": 0,
+    "allQuotesAudited": {
+      "total": 449,
+      "verbatim": 449,
+      "notVerbatim": 0,
+      "sliceEqualsQuote": 449,
+      "offsetMismatch": 0,
+      "outOfRange": 0,
+      "occurrenceCountMismatch": 0
+    },
+    "samples": [
+      {
+        "path": ".knowledgeGaps[1].quotes[0]",
+        "quote": "孔明曰：“曹子丹与吾有约；吾有一书，汝等带回，送与子丹，必有重赏。”",
+        "find": 507548,
+        "start": 507548,
+        "end": 507582,
+        "sliceEquals": true,
+        "globalOccurrences": 1,
+        "nthOccurrence": 1
+      },
+      {
+        "path": ".states[17].beforeQuotes[0]",
+        "quote": "懿引军屯于祁山之东箕谷口。各下寨已毕。懿先引一枝兵伏于山谷中；其余军马，各于要路安营。",
+        "find": 505406,
+        "start": 505406,
+        "end": 505449,
+        "sliceEquals": true,
+        "globalOccurrences": 1,
+        "nthOccurrence": 1
+      },
+      {
+        "path": ".causeEdges[11].causeQuotes[0]",
+        "quote": "懿曰：“量此八卦阵，如何不识！”孔明曰：“识便识了，敢打我阵否？”懿曰：“既识之，如何不敢打！”",
+        "find": 508494,
+        "start": 508494,
+        "end": 508542,
+        "sliceEquals": true,
+        "globalOccurrences": 1,
+        "nthOccurrence": 1
+      },
+      {
+        "path": ".worldSettings[30].quotes[0]",
+        "quote": "懿曰：“子丹如何不信？吾料孔明必从两谷而来。吾与子丹各守一谷口，十日为期。若无蜀兵来，我面涂红粉，身穿女衣，来营中伏罪。”",
+        "find": 505296,
+        "start": 505296,
+        "end": 505357,
+        "sliceEquals": true,
+        "globalOccurrences": 1,
+        "nthOccurrence": 1
+      },
+      {
+        "path": ".causeEdges[6].effectQuotes[0]",
+        "quote": "魏军措手不及，各自逃生。众将保曹真望东而走，背后蜀兵赶来。",
+        "find": 506989,
+        "start": 506989,
+        "end": 507018,
+        "sliceEquals": true,
+        "globalOccurrences": 1,
+        "nthOccurrence": 1
+      }
+    ],
+    "note": "两条 quote（「枫林晚 整理校对…」「------------------」）全文各出现 118/119 次，start 取的是**区间内那一次**（第 99/100 次出现），与 nthOccurrence 字段自洽——按首现判定会误报偏移错，复核时已排除该假阳性。"
+  },
+  "mechanicalAudit": {
+    "fieldCountsVerified": true,
+    "detail": "候选自称的 16 项 fieldCounts 我逐项复算全部相符：tasks 9 / causeEdges 23 / rejectedCauseEdges 6 / states 20 / knowledgeGaps 12 / foreshadows 10(=7 resolved+3 unresolved) / worldSettings 32(=place 14+item 10+rule 8，且 placeState arrived 7+mentioned 7、itemStates 合计 14) / notWorldSettings 6 / themeReadings 2 / speechAsClueNotFact 24 / unknowns 15 / selfCritique 4 / textualNotes 7 / reverseCoverage 30 / falseExclusionCheck 6 / taskColumnsWithOwnQuotes 42(=9×5−3 null cost) / quoteRefs 449 / distinctQuotes 258。",
+    "quoteMaskClaim": "候选称区间内 “75 / ”73 不等、补两处虚拟右引号 MR1@508388、MR2@509483。我实测 seg.count('“')=75、seg.count('”')=73，两处偏移切片确为空缺右引号位，claim 成立。",
+    "danglingRefs": [
+      "T10（tasks[1].cost.text 引用，无定义）",
+      "F08（textualNotes X07 引用，无定义）"
+    ],
+    "internalContradiction": "reverseCoverageNote 写「上列 20 条是核对后补入的遗漏项」，而数组实为 30 条；fieldCounts 正确写 30。属说明文字的数字笔误，不构成事实声称，故不列为 counterExample，仅记于此。"
+  },
+  "hallucinationCheck": {
+    "verdict": "未发现幻觉",
+    "outOfRangeQuotes": 0,
+    "checks": [
+      "区间内出现的人物、地名逐一在候选中有对应，无凭空人物。",
+      "区间外实体仅 3 处被提及且都**明确标注为区间外**：韩暨+诏书（unknowns U15/notForeshadows[6]，偏移 494292 已复算确在区间外）、孙权/东吴（falseExclusionCheck FE03 声明不补入）、庞涓（textualNotes X02 作为「庞滑」的版本对照）。",
+      "「总兵将印 / 大都督印」条目 basis=inferred、itemStates=[]，并自述「原文在本区间没有出现印信本身」——我复算区间内「印」字出现 0 次，该自述属实，且条目未据此编造任何四态，属合规的背景登记。",
+      "誓言兑现判定正确：司马懿「誓不为大将」未被当作兑现（rejectedCauseEdges R06 与 V22 均明确写未履行），符合原文（他此后仍统军、受诏出战、引大军还洛阳）。",
+      "未把「不折一人」外推为整场战役无损失（U04 显式限定为退军过程），也未把曹真之死写成蜀方战略收益（FE04）。"
+    ]
+  },
+  "falseKillCheck": {
+    "verdict": "未发现误杀",
+    "detail": "候选的 rejectedCauseEdges 6 条与 notForeshadows 7 条我逐条回原文核对，**每一条的排除理由都成立**：(R01) 魏延非议的触发是子午谷旧怨（「魏延想起孔明向日不听其计」），非陈式出兵；(R02) 细作报病以「忽有」起句，与斩陈式无中间环节；(R03) 魏主下诏依据是「闻知曹真已死」这一事实奏报，不是那封信；(R04) 「十伤六七」的直接原因是「蜀兵三路夹攻」；(R05) 懿的叹语在土人告知之后；(R06) 誓约未被任何人提起或执行。(notForeshadows) 尤以第 7 条（区间外诏书不登记为本单元伏笔）处置正确。唯一与误杀沾边的是 RC29 的**过度声称**（CE3），但那是「说多了」，不是「把合法项挡掉」——未发现词表/正则导致的合法项被排除。",
+    "note": "反向检查中我尝试用整串匹配构造误杀反例（如「遂打发来人回去」等 6 条零覆盖句），结论是它们**确实未被引证**，属遗漏而非误杀，已登记为 RCH。"
+  },
+  "environmentFinding": {
+    "id": "E-VERIFY-SELFEVIDENCE",
+    "severity": "high（结构性：这条流的复核记录会被自己的复核动作判失效）",
+    "finding": "`loop.py verify` 会把 `reviews[]` 追加进**被复核任务的提交记录**（loop.py:1110-1118），而复核记录若把该提交记录列为 evidence 并声明 sha256（这是「我核对了提交侧」的自然写法），那么**复核动作本身**就会改掉该文件 ⇒ `evidence_stale()` 立即报 hash-changed ⇒ `done_ids()` 不再算它完成 ⇒ 任务被重新领取，形成「复核→失效→再复核」的循环。",
+    "evidence": "上一位复核者 w-sanguo-1 于 2026-10-15T04:16:14Z 提交的 verify:sanguo:L1:0099 记录 validation.problems=[]、verdict=partial，但 evidence 中 `loop/state/out/read_sanguo_L1_0099.json` 声明 b33db921…，现值 020ee1d9…。我用「删除 reviews[]、verifyState 复位为 pending、按 write_json_atomic 的 json.dumps(indent=2,ensure_ascii=False)+'\\n' 重新序列化」**复现出 b33db921…逐字节相同**，即该文件的唯一变化就是 verify 自己追加的 reviews[]。判据 `evidence_stale()` 对 `loop/state/out/*.json` 既不 transient 也不 evolving，故必然报失效。",
+    "impact": "本轮任务被重新下发即由此产生；若不复核者改用 `记录当时快照` 或工具把 reviews[] 排除在校验口径外，同一单元的复核成本会无限重复。**规模实测（全量扫描 452 条 verify 记录）**：70 条把被复核的 read 记录列为 evidence，其中 **61 条同时声明了它的 sha256** ⇒ 这 61 条按同一机制**注定**在下次同类动作时失效；当前已实测失效 **3 条**：`verify:dafeng:L1:0241`、`verify:dafeng:L2:0210`、`verify:sanguo:L1:0099`（其余 58 条只是尚未被再次触碰，不是没问题）。",
+    "scope_reproduce": "python3 - <<'EOF'\nimport json,sys,glob\nsys.path.insert(0,'loop/bin')\nimport loop as L\nn=cites=withsha=0; stale=[]\nfor p in sorted(glob.glob('loop/state/out/verify_*.json')):\n    if p.endswith('.verdict.json') or '.submit.' in p: continue\n    try: rec=json.load(open(p))\n    except: continue\n    if not isinstance(rec,dict) or not str(rec.get('task','')).startswith('verify:'): continue\n    n+=1\n    hit=[e for e in (rec.get('evidence') or [])\n         if str(e.get('path','')).startswith('loop/state/out/read_') and str(e.get('path','')).endswith('.json')\n         and '.candidate' not in str(e.get('path',''))]\n    if hit:\n        cites+=1\n        if any(e.get('sha256') for e in hit):\n            withsha+=1\n            if L.evidence_stale(rec): stale.append(rec['task'])\nprint('total',n,'cite',cites,'withSha',withsha,'stale',stale)\nEOF",
+    "suggestedFix": "两条任选其一：①（桥/工具侧）把 `reviews[]`/`verifyState` 视为被复核记录的**设计内可变字段**，在 evidence_stale 里对该路径做与 is_evolving 同级的豁免（但需限定为**只有这两个键变化**，否则会重新打开 E12 的口子）；②（复核者侧）**不把被复核任务的提交记录列为 evidence**，只引 candidate / 原文 / 自己的 verdict 文件。我本轮采纳 ②，以免自己再制造一次失效。",
+    "reproduce": "python3 - <<'EOF'\nimport json,hashlib\np='loop/state/out/read_sanguo_L1_0099.json'\ncur=json.load(open(p))\nrec=dict(cur); rec.pop('reviews',None); rec['verifyState']='pending'\ns=json.dumps(rec,indent=2,ensure_ascii=False)+'\\n'\nprint(hashlib.sha256(s.encode()).hexdigest())\nprint('expected b33db9213411e061096412d13c2a93a1f8ad7b7a74da1f01d5120703b99cff76')\nEOF"
+  },
+  "falseExclusionCheckOfVerifier": "本轮我自己的复核也可被质疑：我判 partial 的三条依据全部是**自述与自身内容不一致**，没有一条动摇事实结论。若下游桥（to_candidate.py）按 `counterExamples` 的点名做排除，我的 CE 文本会命中 `\\b([TCSF]\\d+)\\b`，从而把 T01/T02/T09/C02 与 F01–F11 **全部误删**（CE1 提到「T10」、CE2 提到「F08」等编号，CE2 还写了「F01–F07、F09–F11」这一区间串）。这不是我想要的处置：本轮**没有任何条目该被排除出发布**（三条缺陷都只要求改标注文字）。故我在 notes 里明确写出下游处置建议，且不把条目 id 写进 CE 的 `claim` 之外字段以免扩大匹配面——但工具只扫全字段，因此这一点必须由下游知晓。",
+  "usableAndDiscardable": {
+    "usable": "候选的 9 任务 / 23 因果边 / 20 状态 / 10 伏笔 / 32 设定 / 449 条引文**全部可用**（事实与定位均成立），可进入发布链。",
+    "mustFixBeforePublish": [
+      "tasks[1].cost.text：删去不存在的 T10 归属（改指 T02/C02）。——纯文字修正。",
+      "textualNotes X07：删去 F08 措辞或改指 notForeshadows[6]。——纯文字修正。",
+      "reverseCoverage RC29：把「其余正文」改为「部分正文」，或补足引文至所述范围。"
+    ],
+    "shouldAdd": [
+      "RCH1（引二万兵）建议补入 T03/S01；RCH2/RCH3/RCH4 建议补入 C12/C13/V21。"
+    ],
+    "notBlocking": "上述三项均**不影响任何已发布条目的语义正确性**，属标注级修正；不构成 fail 的理由。"
+  },
+  "notes": "总体判断：候选的事实层是干净的——449/449 引文逐字成立、零偏移错、零编造、零越界，9 任务/23 因果边/20 状态/10 伏笔/32 设定无一条与原文冲突，人名结局与誓言兑现判定均正确。三处缺陷全部是自述层的自我不一致（引用不存在的 T10/F08；自称覆盖的范围大于其引文实际覆盖），拿得出逐字原文引证，故不能判 pass；又都不动摇任何事实结论，故不判 fail。反向验证另查出 6 条真实遗漏（RCH1–RCH6），其中「引二万兵」有兵力语义影响，建议返工时补入。★ 对下游（to_candidate.py）的**重要提醒**：该桥按 `\\b([TCSF]\\d+)\\b` 从 counterExamples 全文抽 id 并**整条排除**（to_candidate.py:546-568）。我实测：若照上一位复核者的 CE 文本（含「F01–F07、F09–F11」与「T02/C02」）执行，T01/T02/T09/C02 与 F01–F11 **共 14 条合法条目会被整批误删**。我本轮的 CE 也含 T10/F08 等编号，同样会触发；但本轮**没有任何条目应当被排除**——三条缺陷只要求改标注文字。请下游按 mustFixBeforePublish 做文字修正，**不要**执行条目排除。★ 环境缺陷（已单列 environmentFinding）：`verify` 追加 reviews[] 会使复核记录里对「被复核提交记录」声明的 sha256 立即失效，本轮任务正是因此被重新下发；我本轮已不引用该文件作证据。★ 不确定处（存疑，不据此判 fail）：(1) U02「曹子丹与吾有约」、U15 区间外诏书两条我无法在区间内证实或证伪，属真未知，登记正确；(2) 曹真死因（病 vs 受书）原文未判定，候选列为 U01 是正确处置。★ 复核者的自我更正：我最初把「枫林晚 整理校对…」与「------------------」两条 quote 判为偏移错（find() 返回首现 4856/4835，而候选写 510178/510157），复核 nthOccurrence 后确认候选取的是**区间内那一次**（全文第 119/118 次出现中的本区间一次），是我的判据漏了 occurrence 口径，候选无误——如实记下，避免这类假阳性进入结论。",
+  "evidence": [
+    {
+      "path": "loop/state/out/verify_sanguo_L1_0099.verdict.json",
+      "sha256": "b2cf3c8f0b1aa342625da6c0c2496e2216696f0e4e627d821b76831c232dcd17",
+      "kind": "本任务 writes 指定的唯一产物：复核结论（verdict=partial / counterExamples[3] / reverseChecks[6] / citationCheck / mechanicalAudit / hallucinationCheck / falseKillCheck / environmentFinding / notes）。本文件不嵌自身哈希，其哈希由本记录声明并机器校验。"
+    },
+    {
+      "path": "loop/state/out/read_sanguo_L1_0099.candidate.json",
+      "sha256": "c8ffd3af6964e8a8de4f1b8e3f5a1f776c82c022dcb3297edb94df8f1eeafb4d",
+      "kind": "被复核候选（306547 字节）。全部核验针对它；我未改动它。"
+    },
+    {
+      "path": "data/cache/fe42d01f3826fe8096f86614.docs.json",
+      "sha256": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+      "kind": "原文（提示词正文指定，也是候选 449 条 quoteRef.sourceHash 采用值）。区间 [504841,510210) 全部逐字引证与偏移复算的唯一依据。只读。"
+    },
+    {
+      "path": "data/cache/152e2a6eed94f1075e7e7070.docs.json",
+      "sha256": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+      "kind": "任务 JSON 的 sourceHash 所指文件。独立复算确认两份 docs[0].text 逐字相同（607191 码点，text sha256 同为 9d28638d…，区间切片同为 945800d1…），故 sourceHashDiscrepancy 对引文定位零影响。只读。"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "先自读原文全段（未先看候选），再回查候选的每一条结论",
+      "result": "pass"
+    },
+    {
+      "text": "449 条 quote 全量 find() 复算：逐字命中、start/end 切片相等、globalOccurrences/nthOccurrence 自洽、区间外引用 0",
+      "result": "pass"
+    },
+    {
+      "text": "随机抽 5 条 quote（seed=99）逐字核验并报告偏移",
+      "result": "pass"
+    },
+    {
+      "text": "反向覆盖：按句读切 348 个子句，机械定位零 quote 覆盖的原文事实",
+      "result": "pass（6 条，见 RCH1–RCH6）"
+    },
+    {
+      "text": "误杀检查：逐条复核 rejectedCauseEdges 6 条与 notForeshadows 7 条的排除理由",
+      "result": "pass（无误杀）"
+    },
+    {
+      "text": "跨引用完整性：168 个已定义 id 与全文引用比对，报出悬空 T10/F08",
+      "result": "pass（2 条悬空）"
+    },
+    {
+      "text": "复现 verify 自我失效：删除 reviews[] 后重新序列化，逐字节复现上一位复核者声明的 b33db921…",
+      "result": "pass"
+    },
+    {
+      "text": "复算来源哈希差异：两份 docs.json 的 docs[0].text 逐字相同",
+      "result": "pass"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/fe42d01f3826fe8096f86614.docs.json": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+    "data/cache/152e2a6eed94f1075e7e7070.docs.json": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+    "loop/state/out/read_sanguo_L1_0099.candidate.json": "c8ffd3af6964e8a8de4f1b8e3f5a1f776c82c022dcb3297edb94df8f1eeafb4d",
+    "loop/state/out/verify_sanguo_L1_0099.verdict.json": "b2cf3c8f0b1aa342625da6c0c2496e2216696f0e4e627d821b76831c232dcd17"
+  },
+  "changes": [
+    {
+      "path": "loop/state/out/verify_sanguo_L1_0099.verdict.json",
+      "kind": "append-only",
+      "note": "任务 writes 指定的唯一文件（上一版为同族复核者 w-sanguo-1 所写，本轮按角色契约重写为更全版本）。未改任何受保护路径。"
+    },
+    {
+      "path": "loop/state/out/read_sanguo_L1_0099.json",
+      "kind": "append-only",
+      "note": "由 `python3 loop/bin/loop.py verify --task read:sanguo:L1:0099` 按工具设计追加 reviews[] 并置 verifyState=partial；非我手工编辑。正因此文件会被 verify 自身改写，本轮**刻意不把它列为本记录的 evidence**（见 environmentFinding）。"
+    }
+  ],
+  "remaining": [
+    "CE1–CE3 的文字修正属 READER 侧（read:sanguo:L1:0099 生产者）的返工范围，复核者不代改候选。",
+    "RCH1–RCH6 为建议补入项，未强制；其中 RCH1 有兵力语义影响。",
+    "environmentFinding 的修法涉及 loop/bin/loop.py（受保护路径），需另开合并任务并持 GATE.lock，本轮不改。",
+    "本轮未跑 GPU/浏览器测试（任务未要求，且 GPU 全局串行）。"
+  ],
+  "rollback": {
+    "kind": "none",
+    "note": "未改动任何受保护路径；唯一写入是任务指定的 verdict 文件，可用上一版哈希 8ae84842d048b370660ee0b0d50868466f16a1bf8014dff27ddbacd8ecbd79d1 对照。"
+  },
+  "reproduction": [
+    "python3 -c \"import hashlib;print(hashlib.sha256(open('loop/state/out/read_sanguo_L1_0099.candidate.json','rb').read()).hexdigest())\"  # 期望 c8ffd3af6964e8a8de4f1b8e3f5a1f776c82c022dcb3297edb94df8f1eeafb4d",
+    "python3 -c \"import json,hashlib;T=json.load(open('data/cache/fe42d01f3826fe8096f86614.docs.json'))[0]['text'];print(hashlib.sha256(T[504841:510210].encode()).hexdigest())\"  # 期望 945800d13f0ebecf79574a3bc23436c077c8414e71c77818402b6d853dd787c3",
+    "python3 -c \"import json,re;c=json.load(open('loop/state/out/read_sanguo_L1_0099.candidate.json'));print([t['id'] for t in c['tasks']]);print([f['id'] for f in c['foreshadows']])\"  # 观察无 T10 / 无 F08"
+  ],
+  "submittedAt": "2026-10-15T04:57:58Z",
+  "wallClockSeconds": 2047,
+  "wallClockFrom": "lease.startedAt",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-15T04:57:58Z"
+  },
+  "verifyState": "pending"
+}

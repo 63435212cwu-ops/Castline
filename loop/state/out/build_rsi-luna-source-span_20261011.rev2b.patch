@@ -1,0 +1,335 @@
+--- a/js/sky/sky-deconstruction.js
++++ b/js/sky/sky-deconstruction.js
+@@ -19,6 +19,7 @@
+   var personDetail = null;
+   var m84 = { open: false, selected: 'characters', request: 0, selectionProgress: 1,
+     returning: false, returnOpen: false, returnScroll: null, returnLayer: null, trigger: null, openScroll: null };
++  var m103 = { open: false, eventIndex: null, returnSnapshot: null, request: 0, tween: null };
+   var LAYERS = { tasks: '任务', relations: '人物关系', causeEdges: '因果', clues: '伏笔', characterStates: '状态', narrativeUnits: '剧情单元', reviewIssues: '核验批注' };
+   browse.mechanics = { query: '', filter: 'all', layer: 'tasks', page: 0, selected: null };
+   browse.mechanicQuotes = { page: 0 }; browse.references = { page: 0 }; browse.attributes = { page: 0 };
+@@ -157,6 +158,123 @@
+     return { text: (p.tone === 'located' ? '◆ ' : p.tone === 'bounded' ? '◇ ' : p.tone === 'conflict' ? '⚠ ' : '? ') + p.short,
+       label: p.label, hint: p.hint, code: p.code, tone: p.tone };
+   }
++  function eventIdentity(e) {
++    if (!e) return null;
++    var id = e.id != null && e.id !== '' ? str(e.id) : null;
++    var entityId = e.entityId != null && e.entityId !== '' ? str(e.entityId) : null;
++    /* id/entityId are both stable identities in the normalized graph. If both
++       exist they must agree, following the canonical identity contract. */
++    if (id && entityId && id !== entityId) return null;
++    return id || entityId;
++  }
++  function matchingSourcePosition(a, b) {
++    return !!(a && b && a.sourceId != null && a.sourceId !== '' && a.textHash &&
++      str(a.sourceId) === str(b.sourceId) && str(a.textHash) === str(b.textHash));
++  }
++  function positionBoundary(event, eventIndex, side) {
++    var sp = event && event.sourcePosition, key = side === 'before' ? 'beforeEventId' : 'afterEventId';
++    if (!sp || sp.kind !== 'legacy_interval') return { state: 'unavailable' };
++    var id = sp[key];
++    if (id == null || id === '') return { state: 'missing' };
++    var matches = [];
++    graph.events.forEach(function (candidate, i) { if (eventIdentity(candidate) === str(id)) matches.push({ event: candidate, index: i }); });
++    if (matches.length !== 1) return { state: matches.length ? 'ambiguous' : 'missing' };
++    var row = matches[0], bound = row.event.sourcePosition;
++    if (row.index === eventIndex) return { state: 'conflict' };
++    if (!matchingSourcePosition(sp, bound)) return { state: 'different-source' };
++    var raw = [sp.start, sp.end, bound && bound.start, bound && bound.end];
++    if (!raw.every(function (n) { return typeof n === 'number' && Number.isFinite(n); })) return { state: 'unavailable' };
++    var start = sp.start, end = sp.end, boundStart = bound.start, boundEnd = bound.end;
++    if (start < 0 || end < start || boundStart < 0 || boundEnd < boundStart) return { state: 'unavailable' };
++    /* atlas-source's legacy_interval is bounded by anchor starts: its start is
++       the preceding exact quote's start, and its end is the following quote's
++       start. Comparing quote ends would incorrectly reject a valid shared edge. */
++    if ((side === 'before' && boundStart > start) || (side === 'after' && boundStart < end)) return { state: 'conflict' };
++    return { state: 'matched', event: row.event, index: row.index };
++  }
++  function positionExplanationData(i) {
++    var event = graph && graph.events && graph.events[i], status = eventPosition(event), sp = event && event.sourcePosition;
++    var before = status.code === 'legacy_interval' ? positionBoundary(event, i, 'before') : { state: 'unavailable' };
++    var after = status.code === 'legacy_interval' ? positionBoundary(event, i, 'after') : { state: 'unavailable' };
++    if (before.state === 'matched' && after.state === 'matched' && before.index === after.index) {
++      before = { state: 'ambiguous' }; after = { state: 'ambiguous' };
++    }
++    return { event: event, index: i, status: status, sourcePosition: sp,
++      before: before, after: after };
++  }
++  function stopM103Tween() {
++    if (m103.tween && g.CLSkyMotion) g.CLSkyMotion.cancelAll('m103');
++    m103.tween = null; m103.request++;
++  }
++  function clearM103() {
++    stopM103Tween(); m103.open = false; m103.eventIndex = null; m103.returnSnapshot = null;
++  }
++  function positionBoundaryMarkup(boundary, side) {
++    var label = side === 'before' ? '前界' : '后界';
++    if (boundary && boundary.state === 'matched') {
++      return '<button type="button" class="sd-position-boundary" data-action="position-boundary" data-position-side="' + side + '" data-event-index="' + boundary.index + '"><small>原文' + label + '</small><b>' + esc(eventTitle(boundary.event)) + '</b><span>阅读此事件及其依据</span></button>';
++    }
++    var missing = !boundary || boundary.state === 'missing' ? label + '未提供' : boundary.state === 'ambiguous' ? label + '记录不唯一，未显示名称' : boundary.state === 'conflict' ? label + '顺序冲突，未显示名称' : boundary.state === 'unavailable' ? label + '位置数据不足，未显示名称' : label + '来源不匹配，未作比较';
++    return '<div class="sd-position-boundary is-missing"><small>原文' + label + '</small><b>' + esc(missing) + '</b></div>';
++  }
++  function renderPositionExplanation(eventIndex) {
++    var d = positionExplanationData(eventIndex), p = d.status, bounded = p.code === 'legacy_interval';
++    var detail = bounded
++      ? '<p class="sd-position-explanation-note">该记录由原文中的相邻边界限定。边界只在同一来源和文本版本中比较。</p><div class="sd-position-span' + (d.before.state === 'matched' ? '' : ' is-open-before') + (d.after.state === 'matched' ? '' : ' is-open-after') + '" aria-label="原文位置范围"><span class="sd-position-bracket" aria-hidden="true"></span>' +
++        positionBoundaryMarkup(d.before, 'before') +
++        '<div class="sd-position-range"><i class="sd-position-texture" aria-hidden="true"></i><b>具体位置未定</b></div>' +
++        positionBoundaryMarkup(d.after, 'after') + '</div><p class="sd-position-explanation-note">这只说明原文位置范围，不代表剧情持续时间；不推测范围中的精确落点。</p>'
++      : '<p class="sd-position-explanation-note"><b>' + esc(p.label) + '</b> · ' + esc(p.hint) + '</p>' +
++        (p.code === 'exact_quote' ? '<p class="sd-position-explanation-note">该记录有精确引句锚点；引句位置准确不代表事件结论已核实。</p>' : p.code === 'conflicted' ? '<p class="sd-position-explanation-note">来源之间无法排出唯一顺序，因此不展开边界名称。</p>' : '<p class="sd-position-explanation-note">当前没有可展开的可信位置边界。</p>');
++    return '<section class="sd-position-explanation" data-position-explanation data-position-event-index="' + eventIndex + '" data-position-kind="' + esc(p.code) + '"><div class="sd-position-explanation-head"><b>位置说明 · ' + esc(p.label) + '</b><button type="button" class="sd-detail-action" data-action="position-explain" data-event-index="' + eventIndex + '">收起位置说明</button></div>' + detail + '</section>';
++  }
++  function animatePositionExplanation() {
++    var stage = root && root.querySelector('[data-position-explanation]'); if (!stage) return;
++    stopM103Tween(); var request = ++m103.request;
++    function paint(v) { if (request !== m103.request || !stage.isConnected) return; stage.style.setProperty('--sd-position-progress', String(v)); stage.setAttribute('data-phase', v >= 1 ? 'settled' : 'opening'); }
++    if ((g.matchMedia && g.matchMedia('(prefers-reduced-motion: reduce)').matches) || !g.CLSkyMotion) { paint(1); return; }
++    paint(0);
++    m103.tween = g.CLSkyMotion.tween({ from: 0, to: 1, dur: .6, ease: function (v) { return v; }, tag: 'm103', onUpdate: paint, onDone: function () { if (request === m103.request) { paint(1); m103.tween = null; } } });
++  }
++  function openPositionExplanation(eventIndex) {
++    if (!graph || !graph.events[eventIndex]) return false;
++    clearM103(); m103.open = true; m103.eventIndex = eventIndex;
++    state.mode = 'evidence'; state.focus = 'e:' + eventIndex;
++    state.restore = { attr: 'data-event-index', value: String(eventIndex), action: 'position-explain' };
++    render(); animatePositionExplanation();
++    var stage = root && root.querySelector('[data-position-explanation]'); if (stage && stage.scrollIntoView) stage.scrollIntoView({ block: 'nearest' });
++    return true;
++  }
++  function readPositionBoundary(side) {
++    if (!m103.open || ['before', 'after'].indexOf(side) < 0) return false;
++    var sourceIndex = m103.eventIndex, d = positionExplanationData(sourceIndex), bound = d[side];
++    if (!bound || bound.state !== 'matched') return false;
++    var source = d.sourcePosition, body = doc.getElementById('skyDeconBody');
++    stopM103Tween();
++    m103.returnSnapshot = {
++      graph: graph, sourceIndex: sourceIndex, sourceId: str(source.sourceId), textHash: str(source.textHash),
++      boundaryIndex: bound.index, scrollTop: body ? body.scrollTop : 0,
++      page: browse.evidence.page, query: browse.evidence.query, filter: browse.evidence.filter,
++      kind: browse.evidence.kind, person: browse.evidence.person, order: browse.evidence.order, quotePage: browse.quotes.page
++    };
++    m103.open = false; m103.eventIndex = null;
++    browse.evidence.query = ''; browse.evidence.filter = 'all'; browse.evidence.kind = 'all'; browse.evidence.person = '';
++    var ordered = evidenceItems(), at = ordered.map(function (x) { return x.i; }).indexOf(bound.index);
++    browse.evidence.page = Math.floor(Math.max(0, at) / PAGE_SIZE); browse.quotes.page = 0;
++    state.mode = 'evidence'; selectEvent(bound.index);
++    return true;
++  }
++  function returnToPositionExplanation() {
++    var snap = m103.returnSnapshot;
++    if (!snap || snap.graph !== graph) { clearM103(); render(); return false; }
++    var event = graph.events[snap.sourceIndex], sp = event && event.sourcePosition;
++    if (!event || !sp || str(sp.sourceId) !== snap.sourceId || str(sp.textHash) !== snap.textHash) { clearM103(); render(); return false; }
++    browse.evidence.page = snap.page; browse.evidence.query = snap.query; browse.evidence.filter = snap.filter;
++    browse.evidence.kind = snap.kind; browse.evidence.person = snap.person; browse.evidence.order = snap.order; browse.quotes.page = snap.quotePage;
++    openPositionExplanation(snap.sourceIndex);
++    var body = doc.getElementById('skyDeconBody'); if (body) body.scrollTop = snap.scrollTop;
++    return true;
++  }
+   function basisClass(b) { return b === '原文已核验' ? 'is-source' : b === '推导' ? 'is-derived' : b === '有引文未核验' || b === '未核验' ? 'is-unknown' : 'is-summary'; }
+   function lineBasis(line) {
+     var meta = graph && graph.meta || {}, current = meta.storylines || {}, provenance;
+@@ -623,6 +741,7 @@
+   }
+   function close(refocus) {
+     cancelM84(true);
++    clearM103();
+     clearM84Return();
+     if (g.CLSky && g.CLSky.clearNeighborCompare) g.CLSky.clearNeighborCompare();
+     browse.neighbors.bId = ''; browse.neighbors.result = null; browse.neighbors.demoCounts = null; browse.neighbors.origin = null; browse.neighbors.returnAfterBasis = false;
+@@ -651,6 +770,14 @@
+     var action = b.getAttribute('data-action'), mode = b.getAttribute('data-mode');
+     var layer = b.getAttribute('data-layer');
+     if (m84.open && action !== 'structure-stage' && action !== 'structure-layer' && action !== 'structure-nav') cancelM84(true);
++    if (action === 'position-explain') {
++      var positionEventIndex = +b.getAttribute('data-event-index');
++      if (m103.open && m103.eventIndex === positionEventIndex) { clearM103(); state.restore = { attr: 'data-event-index', value: String(positionEventIndex), action: 'position-explain' }; render(); }
++      else openPositionExplanation(positionEventIndex);
++      return;
++    }
++    if (action === 'position-boundary') { readPositionBoundary(b.getAttribute('data-position-side')); return; }
++    if (action === 'position-return') { returnToPositionExplanation(); return; }
+     if (action === 'structure-stage') { if (m84.open) cancelM84(true, true); else if (structureReady()) openM84(); return; }
+     if (action === 'structure-layer') { selectM84Layer(b.getAttribute('data-structure-layer')); return; }
+     if (action === 'structure-return') { returnStructureOverview(); return; }
+@@ -822,6 +949,7 @@
+   }
+   function selectEvent(i) {
+     if (!graph.events[i]) return;
++    if ((m103.open && i !== m103.eventIndex) || (m103.returnSnapshot && i !== m103.returnSnapshot.boundaryIndex)) clearM103();
+     if (state.mode !== 'evidence') {
+       state.mode = 'evidence'; browse.evidence.query = ''; browse.evidence.filter = 'all'; browse.evidence.kind = 'all'; browse.evidence.person = '';
+       browse.evidence.page = Math.floor(Math.max(0, evidenceItems().map(function (x) { return x.i; }).indexOf(i)) / PAGE_SIZE);
+@@ -1425,6 +1553,10 @@
+     var detail = record && record.e, detailIndex = record && record.i;
+     var quotes = evidenceText(detail), ch = detailIndex != null ? chapterFor(detailIndex) : null, basis = eventBasis(detail);
+     var quoteView = pageWindow(quotes, browse.quotes);
++    var positionControl = detail ? '<button type="button" class="sd-detail-action sd-position-explain-action" data-action="position-explain" data-event-index="' + detailIndex + '">' + (m103.open && m103.eventIndex === detailIndex ? '收起位置说明' : '位置说明') + '</button>' : '';
++    var positionReturn = detail && m103.returnSnapshot && m103.returnSnapshot.graph === graph && m103.returnSnapshot.boundaryIndex === detailIndex
++      ? '<button type="button" class="sd-detail-action sd-position-return" data-action="position-return">返回位置说明</button>' : '';
++    var positionExplanation = detail && m103.open && m103.eventIndex === detailIndex ? renderPositionExplanation(detailIndex) : '';
+     var provenance = [{ value: 'all', label: '全部依据' }, { value: 'verified', label: '原文已核验' }, { value: 'quoted', label: '有引文未核验' }, { value: 'synthesis', label: '归纳' }, { value: 'inference', label: '推导' }, { value: 'unverified', label: '未核验' }];
+     var controls = '<div class="sd-controls">' + searchControl('evidence', '事件、章节、人物或引文') + '<label class="sd-filter"><span class="sd-control-label">依据</span><select data-filter="evidence" aria-label="按证据核验状态筛选">' + options(provenance, cfg.filter) + '</select></label><label class="sd-filter"><span class="sd-control-label">类型</span><select data-event-kind="evidence" aria-label="按剧情点类型筛选">' + options([{ value: 'all', label: '全部类型' }].concat(index.kinds), cfg.kind) + '</select></label><label class="sd-filter"><span class="sd-control-label">顺序</span><select data-order="evidence" aria-label="事件排序">' + options([{ value: 'time', label: '叙事顺序' }, { value: 'key', label: '关键事件优先' }], cfg.order) + '</select></label></div>';
+     if (cfg.person) controls += '<button type="button" class="sd-detail-action sd-filter-person" data-action="clear-person">' + esc(cfg.person) + ' 的事件 · 清除人物筛选 ×</button>';
+@@ -1433,7 +1565,7 @@
+          且明确写出它不是语义完成率。低档/小屏不隐藏（无 media query 依赖）。 */
+       (posProgress ? '<div class="sd-position-summary" aria-label="事件位置定位摘要"><div class="sd-evidence-summary-top"><b>' + esc(posProgress.title) + ' <em>' + esc(posProgress.locatedPercent == null ? '—' : posProgress.locatedPercent + '%') + '</em></b><span>' + esc(posProgress.summary) + '</span></div><div class="sd-evidence-meter is-position" aria-hidden="true"><i data-sd-w="' + (posProgress.locatedPercent == null ? 0 : posProgress.locatedPercent) + '"></i></div><div class="sd-evidence-counts"><span class="is-source">精确 ' + posProgress.exact + '</span><span class="is-summary">区间 ' + posProgress.bounded + '</span><span class="is-unknown">位置未知 ' + posProgress.unknown + '</span>' + (posProgress.conflict ? '<span class="is-derived">来源冲突 ' + posProgress.conflict + '</span>' : '') + '</div><p class="sd-evidence-note">' + esc(posProgress.semanticNote) + '位置未知的事件仍可阅读原文，但不应被当成发生在某个确定时间点。</p></div>' : '') + '</section>' +
+       '<section class="sd-section"><div class="sd-section-head"><b>事件档案</b><span>完整记录 · 每页 ' + PAGE_SIZE + ' 条</span></div>' + controls + '<div class="sd-event-list">' + (view.items.length ? view.items.map(function (x) { return eventRow(x.i, x.i === detailIndex); }).join('') : '<p class="sd-empty">没有匹配的事件；可清空搜索或调整筛选。</p>') + '</div>' + pager('evidence', view) + '</section>' +
+-      (detail ? (function () { var dpos = eventPosition(detail); return '<section class="sd-section"><div class="sd-evidence-detail ' + basisClass(basis) + ' pos-' + esc(dpos.tone) + '"><div class="sd-detail-top"><b>' + esc(detail.title || detail.summary || '未命名剧情点') + '</b><em>' + esc(basis) + '</em></div><p class="sd-detail-meta">' + esc((ch ? ch.name : detail.chapter || '章节未提供') + ' · ' + (detail.kind || '剧情点') + (arr(detail.characters).length ? ' · ' + detail.characters.join('、') : '')) + '</p><p class="sd-position-line" data-position="' + esc(dpos.code) + '"><span class="sd-position-tag">' + esc(positionBadge(detail).text) + '</span> ' + esc(dpos.label) + ' · ' + esc(dpos.hint) + '</p>' + (function () { var dc = eventClaim(detail); var cn2 = claimNote(detail); return '<p class="sd-claim-line" data-claim="' + esc(dc.code) + '"><span class="sd-claim-tag">' + esc(claimBadge(detail).text) + '</span> ' + esc(dc.label) + ' · ' + esc(dc.hint) + (cn2 ? ' —— ' + esc(cn2) : '') + '</p>'; })() + ''+ (detail.summary ? '<p class="sd-detail-summary">' + esc(detail.summary) + '</p>' : '') + reviewNotes(detail, 'event') + (quotes.length ? quoteView.items.map(function (q) { return quoteRow(detail, q); }).join('') + (quoteView.pages > 1 ? pager('quotes', quoteView) : '') : '<p class="sd-empty">该记录未提供原文引句。</p>') + '<button type="button" class="sd-detail-action" data-event-index="' + detailIndex + '">在星盘定位此事件</button></div></section>'; })() : '');
++      (detail ? (function () { var dpos = eventPosition(detail); return '<section class="sd-section"><div class="sd-evidence-detail ' + basisClass(basis) + ' pos-' + esc(dpos.tone) + '"><div class="sd-detail-top"><b>' + esc(detail.title || detail.summary || '未命名剧情点') + '</b><em>' + esc(basis) + '</em></div><p class="sd-detail-meta">' + esc((ch ? ch.name : detail.chapter || '章节未提供') + ' · ' + (detail.kind || '剧情点') + (arr(detail.characters).length ? ' · ' + detail.characters.join('、') : '')) + '</p><p class="sd-position-line" data-position="' + esc(dpos.code) + '"><span class="sd-position-tag">' + esc(positionBadge(detail).text) + '</span> ' + esc(dpos.label) + ' · ' + esc(dpos.hint) + '</p>' + positionControl + positionReturn + positionExplanation + (function () { var dc = eventClaim(detail); var cn2 = claimNote(detail); return '<p class="sd-claim-line" data-claim="' + esc(dc.code) + '"><span class="sd-claim-tag">' + esc(claimBadge(detail).text) + '</span> ' + esc(dc.label) + ' · ' + esc(dc.hint) + (cn2 ? ' —— ' + esc(cn2) : '') + '</p>'; })() + ''+ (detail.summary ? '<p class="sd-detail-summary">' + esc(detail.summary) + '</p>' : '') + reviewNotes(detail, 'event') + (quotes.length ? quoteView.items.map(function (q) { return quoteRow(detail, q); }).join('') + (quoteView.pages > 1 ? pager('quotes', quoteView) : '') : '<p class="sd-empty">该记录未提供原文引句。</p>') + '<button type="button" class="sd-detail-action" data-event-index="' + detailIndex + '">在星盘定位此事件</button></div></section>'; })() : '');
+   }
+   function stateReadingTitle(row) {
+     var item = row.raw;
+@@ -1623,6 +1755,9 @@
+   function render() {
+     if (!root || !state.ready) return;
+     if (state.mode !== 'overview' && m84.open) cancelM84(true);
++    var focusedEvent = state.mode === 'evidence' && state.focus && String(state.focus).indexOf('e:') === 0 ? +String(state.focus).slice(2) : null;
++    if ((m103.open && (state.mode !== 'evidence' || focusedEvent !== m103.eventIndex)) ||
++        (m103.returnSnapshot && (state.mode !== 'evidence' || focusedEvent !== m103.returnSnapshot.boundaryIndex))) clearM103();
+     var title = state.mode === 'lines' ? '故事线骨架' : state.mode === 'people' ? '人物弧线' : state.mode === 'evidence' ? '原文证据层' : state.mode === 'mechanics' ? '情节证据' : state.mode === 'causal' ? '因果网络' : state.mode === 'foreshadow' ? '伏笔生命周期' : state.mode === 'states' ? '状态与视野' : '全书叙事 DNA';
+     setText('skyDeconTitle', title);
+     setText('skyDeconSub', state.mode === 'overview' ? '从全书形状进入故事线、人物和证据' : state.mode === 'lines' ? '完整线名、章节跨度与目标声明；自动分段单独收纳' : state.mode === 'people' ? '完整人物表、材料给出的角色弧与出现事件' : state.mode === 'mechanics' ? '目标、障碍、代价与状态声明逐条回到事件证据' : state.mode === 'causal' ? '显式前因、后果、伏笔与未解析引用' : state.mode === 'foreshadow' ? '每条显式伏笔声明的埋伏、兑现、待回收与断裂' : state.mode === 'states' ? '状态、变化、知情范围与转折逐条回到原文' : '已核验引文、未核验引文、归纳与推导分别呈现');
+@@ -1671,6 +1806,7 @@
+     if (!nextGraph || !nextModel || !nextModel.ok) return false;
+     if (nextGraph !== graph) {
+       cancelM84(true);
++      clearM103();
+       clearM84Return();
+       if (searchTimer != null) { g.clearTimeout(searchTimer); searchTimer = null; }
+       Object.keys(browse).forEach(function (key) { browse[key].page = 0; if (browse[key].query != null) browse[key].query = ''; if (browse[key].filter != null) browse[key].filter = 'all'; });
+@@ -1683,7 +1819,7 @@
+   doc.addEventListener('cl:sky-deconstruct-toggle', toggle);
+   doc.addEventListener('cl:graph-loading', function (event) {
+     if (!event || !event.detail || event.detail.stage !== 'fetch') return;
+-    cancelM84(true); clearM84Return();
++    cancelM84(true); clearM84Return(); clearM103();
+     if (state.open) render();
+   });
+   doc.addEventListener('cl:sky-structure-state', function (event) {
+--- a/css/sky-reading.css
++++ b/css/sky-reading.css
+@@ -180,6 +180,28 @@
+ .sd-structure-actions { display: grid; gap: var(--abyss-space-xs); }
+ .sd-structure-return { margin: 0 0 var(--abyss-space-sm); }
+ .sd-structure-return button { min-height: 44px; }
++.sd-position-explain-action, .sd-position-return { min-height: 44px; }
++.sd-position-explanation { --sd-position-progress: 1; display: grid; gap: var(--abyss-space-sm); margin: var(--abyss-space-sm) 0 var(--abyss-space-md); padding: var(--abyss-space-md); border: 1px solid var(--skd-hair-brass); border-radius: var(--skd-radius-s); background: color-mix(in oklch, var(--skd-void-2) 62%, transparent); }
++.sd-position-explanation-head { display: flex; align-items: center; justify-content: space-between; gap: var(--abyss-space-sm); }
++.sd-position-explanation-head > b { color: var(--skd-ink); font: var(--skd-fs-sm)/1.5 var(--skd-font-sans); }
++.sd-position-explanation-note { margin: 0; color: var(--skd-ink-2); font: var(--skd-fs-sm)/1.65 var(--skd-font-sans); overflow-wrap: anywhere; }
++.sd-position-span { position: relative; display: grid; grid-template-columns: 18px minmax(0, 1fr); gap: var(--abyss-space-xs) var(--abyss-space-sm); align-items: stretch; }
++.sd-position-bracket { position: relative; grid-column: 1; grid-row: 1 / 4; align-self: stretch; min-height: 100%; margin: 4px 5px; border-left: 1px solid var(--skd-hair-brass); transform: scaleY(var(--sd-position-progress, 0)); transform-origin: top; }
++.sd-position-bracket::before, .sd-position-bracket::after { content: ""; position: absolute; left: 0; width: 8px; border-top: 1px solid var(--skd-hair-brass); }
++.sd-position-bracket::before { top: 0; }
++.sd-position-bracket::after { bottom: 0; }
++.sd-position-span.is-open-before .sd-position-bracket::before,
++.sd-position-span.is-open-after .sd-position-bracket::after { display: none; }
++.sd-position-boundary { grid-column: 2; display: grid; gap: 2px; align-content: center; min-width: 0; min-height: 54px; padding: var(--abyss-space-sm); border: 1px solid var(--skd-hair-2); border-radius: var(--skd-radius-s); background: var(--skd-void-1); color: var(--skd-ink); text-align: left; text-decoration: none; opacity: var(--sd-position-progress, 1); }
++.sd-position-boundary[data-action] { cursor: pointer; }
++.sd-position-boundary[data-action]:hover, .sd-position-boundary[data-action]:focus-visible { border-color: var(--skd-hair-brass); outline: 1px solid var(--skd-hair-brass); outline-offset: 1px; }
++.sd-position-boundary small { color: var(--skd-brass); font: var(--skd-fs-xs)/1.4 var(--skd-font-sans); }
++.sd-position-boundary b { color: var(--skd-ink); font: var(--skd-fs-sm)/1.5 var(--skd-font-sans); overflow-wrap: anywhere; }
++.sd-position-boundary span { color: var(--skd-ink-2); font: var(--skd-fs-xs)/1.45 var(--skd-font-sans); }
++.sd-position-boundary.is-missing { border-style: dashed; background: color-mix(in oklch, var(--skd-void-1) 75%, transparent); }
++.sd-position-range { position: relative; grid-column: 2; display: grid; place-items: center; min-height: 62px; padding: var(--abyss-space-xs) var(--abyss-space-sm); overflow: hidden; border-block: 1px dashed var(--skd-hair-2); }
++.sd-position-texture { position: absolute; inset: 0; opacity: .2; background: repeating-linear-gradient(180deg, color-mix(in oklch, var(--skd-ink-2) 16%, transparent) 0 1px, transparent 1px 7px); pointer-events: none; }
++.sd-position-range b { position: relative; color: var(--skd-ink-2); font: var(--skd-fs-sm)/1.5 var(--skd-font-sans); text-align: center; }
+ .sd-structure-layers { display: flex; flex-wrap: wrap; gap: var(--abyss-space-xs); }
+ .sd-structure-layer { min-height: 44px; padding: var(--abyss-space-xs) var(--abyss-space-sm); border: 1px solid var(--skd-hair-2); border-radius: var(--skd-radius-s); background: var(--skd-void-1); color: var(--skd-ink-2); font: var(--skd-fs-sm)/1.4 var(--skd-font-sans); cursor: pointer; }
+ .sd-structure-layer[aria-pressed="true"] { border-color: var(--skd-hair-brass); color: var(--skd-brass-hot); background: color-mix(in oklch, var(--skd-brass) 8%, var(--skd-void-1)); }
+--- a/tests/sky_story_browser.py
++++ b/tests/sky_story_browser.py
+@@ -220,6 +220,38 @@
+   check('narrow close returns focus and scroll to the original stage trigger','!document.querySelector(".sd-structure-stage")&&document.activeElement.getAttribute("data-action")==="structure-stage"')
+   ev('CLSky.setPlot(true)');click('#skyStructure');time.sleep(.9)
+   r.ws.call('Emulation.setDeviceMetricsOverride',width=1440,height=900,deviceScaleFactor=1,mobile=False);time.sleep(.5)
++  ev('CLSkyDeconstruction.setMode("evidence");window.__m103Index=CLApp.graph().events.findIndex(e=>e.id==="ev_53d99f31ca4d2d6c")')
++  check('frozen M103 event exists uniquely in the production graph','__m103Index>=0&&CLApp.graph().events.filter(e=>e.id==="ev_53d99f31ca4d2d6c").length===1')
++  click('#skyDeconBody input[data-search="evidence"]');r.ws.call('Input.insertText',text='拜师得名');time.sleep(.25)
++  ev('Array.from(document.querySelectorAll("#skyDeconBody [data-action=select-event]")).find(x=>x.getAttribute("data-event-index")===String(__m103Index)).scrollIntoView({block:"center"})')
++  click('#skyDeconBody [data-action="select-event"][data-event-index="'+str(ev('window.__m103Index'))+'"]')
++  check('the selected evidence detail is the frozen interval event','document.querySelector(".sd-evidence-detail .sd-detail-top b").textContent==="拜师得名"')
++  ev('document.querySelector(".sd-evidence-detail [data-action=position-explain]").scrollIntoView({block:"center"})')
++  click('.sd-evidence-detail [data-action="position-explain"]');time.sleep(.65)
++  check('M103 shows same-source before/after boundaries and no exact midpoint or interval length','(()=>{let s=document.querySelector("[data-position-explanation]");return !!s&&s.dataset.phase==="settled"&&s.dataset.positionKind==="legacy_interval"&&s.textContent.includes("樵夫指仙山")&&s.textContent.includes("学成大神通")&&s.textContent.includes("具体位置未定")&&!s.textContent.includes("5448")&&!s.querySelector(".sd-position-midpoint");})()')
++  ev('window.__m103Graph=CLApp.graph();window.__m103Position=window.__m103Graph.events[__m103Index].sourcePosition;window.__m103Before=__m103Position.beforeEventId;window.__m103After=__m103Position.afterEventId;__m103Position.beforeEventId=null;document.dispatchEvent(new CustomEvent("cl:graph-ready"))')
++  check('a missing before boundary stays open while the valid after boundary remains readable','(()=>{let s=document.querySelector("[data-position-explanation]"),bs=s&&s.querySelectorAll("[data-action=position-boundary]");return !!s&&s.textContent.includes("前界未提供")&&s.textContent.includes("学成大神通")&&bs.length===1;})()')
++  ev('__m103Position.beforeEventId=__m103Graph.events[__m103Index].id;document.dispatchEvent(new CustomEvent("cl:graph-ready"))')
++  check('a self-referencing boundary is reported as a conflict and never exposed as a boundary name','(()=>{let s=document.querySelector("[data-position-explanation]");return !!s&&s.textContent.includes("前界顺序冲突，未显示名称")&&!s.querySelector("[data-position-side=before]");})()')
++  ev('__m103Position.beforeEventId=__m103Before;__m103Position.afterEventId=__m103After;document.dispatchEvent(new CustomEvent("cl:graph-ready"))')
++  ev('window.__m103BeforeRow=__m103Graph.events.find(e=>e.id===__m103Before);window.__m103BeforeStart=__m103BeforeRow.sourcePosition.start;window.__m103BeforeEnd=__m103BeforeRow.sourcePosition.end;__m103BeforeRow.sourcePosition.start=__m103Position.end+1;__m103BeforeRow.sourcePosition.end=__m103Position.end+2;document.dispatchEvent(new CustomEvent("cl:graph-ready"))')
++  check('a same-source boundary after the interval is hidden as an ordering conflict','(()=>{let s=document.querySelector("[data-position-explanation]");return !!s&&s.textContent.includes("前界顺序冲突，未显示名称")&&!s.textContent.includes("樵夫指仙山");})()')
++  ev('__m103BeforeRow.sourcePosition.start=__m103BeforeStart;__m103BeforeRow.sourcePosition.end=__m103BeforeEnd;document.dispatchEvent(new CustomEvent("cl:graph-ready"))')
++  ev('document.querySelector("[data-action=position-boundary][data-position-side=before]").scrollIntoView({block:"center"})')
++  click('[data-action="position-boundary"][data-position-side="before"]')
++  check('reading the before boundary uses the existing event detail and offers a return to this range','document.querySelector(".sd-evidence-detail .sd-detail-top b").textContent==="樵夫指仙山"&&!!document.querySelector(".sd-evidence-detail [data-action=position-return]")')
++  click('.sd-evidence-detail [data-action="position-return"]')
++  check('return from the before boundary restores the original event and position explanation','document.querySelector(".sd-evidence-detail .sd-detail-top b").textContent==="拜师得名"&&!!document.querySelector("[data-position-explanation]")')
++  time.sleep(.65)
++  ev('document.querySelector("[data-action=position-boundary][data-position-side=after]").scrollIntoView({block:"center"})')
++  click('[data-action="position-boundary"][data-position-side="after"]')
++  check('reading the after boundary remains separate and returns to the same interval','document.querySelector(".sd-evidence-detail .sd-detail-top b").textContent==="学成大神通"&&!!document.querySelector(".sd-evidence-detail [data-action=position-return]")')
++  click('.sd-evidence-detail [data-action="position-return"]')
++  time.sleep(.65)
++  r.ws.call('Emulation.setDeviceMetricsOverride',width=390,height=844,deviceScaleFactor=1,mobile=False)
++  r.ws.call('Emulation.setEmulatedMedia',features=[{'name':'prefers-reduced-motion','value':'reduce'}]);time.sleep(.5)
++  check('390px reduced-motion M103 remains scrollable with full-size boundary actions','(()=>{let s=document.querySelector("[data-position-explanation]"),p=document.querySelector("#skyDeconPanel").getBoundingClientRect(),bs=s&&Array.from(s.querySelectorAll("[data-action=position-boundary]"));return !!s&&s.dataset.phase==="settled"&&s.getBoundingClientRect().width>0&&s.getBoundingClientRect().left>=p.left-1&&bs.length===2&&bs.every(b=>b.getBoundingClientRect().height>=44);})()')
++  r.ws.call('Emulation.setEmulatedMedia',features=[]);r.ws.call('Emulation.setDeviceMetricsOverride',width=1440,height=900,deviceScaleFactor=1,mobile=False);time.sleep(.3)
+   ev('CLSkyDeconstruction.close()')
+   r.navigate(args.base+'/?sky=1&data=data/cache/c84e8657afff87043c11ae57.json');ready()
+   ev('CLSkyDeconstruction.open();CLSkyDeconstruction.setMode("mechanics")');time.sleep(.3)
+--- a/tests/sky_position_label_contract.js
++++ b/tests/sky_position_label_contract.js
+@@ -17,6 +17,9 @@
+  *   ⑥ 缺字段的旧记录不得抛异常。
+  */
+ const assert = require('node:assert/strict');
++const fs = require('node:fs');
++const path = require('node:path');
++const vm = require('node:vm');
+ const P = require('../js/sky/sky-position-label.js');
+ 
+ let passed = 0;
+@@ -116,4 +119,38 @@
+   }
+ });
+ 
++test('固定 C2 输入的两端锚点在读层 CPU resolver 中都匹配', () => {
++  const ROOT = path.resolve(__dirname, '..');
++  const input = JSON.parse(fs.readFileSync(path.join(ROOT, 'loop/state/out/input_rsi-source-span_20261011.json'), 'utf8'));
++  const fakeDoc = { addEventListener() {}, getElementById() { return null; } };
++  const window = { document: fakeDoc, CLSkyPositionLabel: P, addEventListener() {} };
++  const context = vm.createContext({ window });
++  let source = fs.readFileSync(path.join(ROOT, 'js/sky/sky-deconstruction.js'), 'utf8');
++  source = source.replace('  g.CLSkyDeconstruction =', `
++    g.positionDataForTest = function (book, at) { graph = book; return positionExplanationData(at); };
++    g.positionMarkupForTest = function (book, at) { graph = book; return renderPositionExplanation(at); };
++    g.CLSkyDeconstruction =`);
++  vm.runInContext(source, context, { filename: 'sky-deconstruction.js' });
++  const graph = { events: [input.bounds[0], input.event, input.bounds[1]] };
++  const at = 1, d = window.positionDataForTest(graph, at);
++  assert.equal(d.before.state, 'matched', 'before exact_quote anchor must match by its start boundary');
++  assert.equal(d.after.state, 'matched', 'after exact_quote anchor must match by its start boundary');
++  assert.equal(d.before.event.id, input.event.sourcePosition.beforeEventId);
++  assert.equal(d.after.event.id, input.event.sourcePosition.afterEventId);
++  assert.equal(d.before.event.sourcePosition.start, input.event.sourcePosition.start);
++  assert.equal(d.after.event.sourcePosition.start, input.event.sourcePosition.end);
++  const entityGraph = JSON.parse(JSON.stringify(graph));
++  entityGraph.events[0].entityId = input.bounds[0].id; delete entityGraph.events[0].id;
++  assert.equal(window.positionDataForTest(entityGraph, at).before.state, 'matched', 'entityId alone is a stable identity');
++  entityGraph.events[0].id = input.bounds[0].id; entityGraph.events[0].entityId = 'conflicting-stable-id';
++  assert.notEqual(window.positionDataForTest(entityGraph, at).before.state, 'matched', 'conflicting id/entityId must not match');
++  const readingCSS = fs.readFileSync(path.join(ROOT, 'css/sky-reading.css'), 'utf8');
++  input.event.sourcePosition.beforeEventId = null;
++  const openMarkup = window.positionMarkupForTest(graph, at);
++  assert.match(openMarkup, /sd-position-span is-open-before/);
++  assert.match(openMarkup, /前界未提供/);
++  assert.doesNotMatch(openMarkup, /data-position-side="before"/);
++  assert.match(readingCSS, /is-open-before \.sd-position-bracket::before[\s\S]*display: none/);
++});
++
+ console.log('SKY POSITION LABEL ' + passed + '/' + passed);

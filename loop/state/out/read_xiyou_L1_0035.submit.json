@@ -1,0 +1,43 @@
+{
+ "task": "read:xiyou:L1:0035",
+ "agent": "w-dafeng-0",
+ "status": "done",
+ "summary": "精读《西游记》第三十五回「外道施威欺正性　心猿获宝伏邪魔」（docs[0].text codepoint [246881,253700)，6819 字）：产出 10 条任务五元组（其中 4 条 cost 为 null 并逐条写明为何不补：T4 取扇/T5 南逃被装/T9 沙僧出战/T10 老君讨宝）、18 条因果边（每条带方向+触发+机制，另列 6 条被拒边说明为何「时间相邻/同一场景/缺中介/方向相反」不连边）、10 条状态变化（前值→后值+事件锚点）、6 条伏笔（4 回收 / 2 显式 unresolved）、18 条世界设定（rule 7 / place 5 / item 6，place 分 arrived·mentioned、item 四态多选、rule 分 declared·executed·misunderstood）、2 条主题读法（每条 perspective+support+counter 三件齐全）、6 条知识差、12 条说法台账、5 条文本校勘注、3 条跨单元说明（区间外原文一律不引）、8 条 unknowns、5 条 openThreads、5 条 selfCritique，共 298 个引文节点。核心发现：① 本区间「金角」「银角」各只出现 1 次且均为行者叫名时所喊，叙述通篇只用「老魔」(25 次)/「二魔」(5 次)；② 「幌金绳」本区间只出现 1 次且是老魔台词，按「一次出现不叫伏笔」不写入 foreshadows；③ 「二魔化了没有」全区间无叙述确认，只有行者「想是」与八戒「已是死了」两句人物判断，故显式标 unresolved；④ 老魔先令蒸八戒、后令「照旧吊起」是改令而非矛盾，中间夹着小妖报「行者孙又骂上门来了」。",
+ "evidence": [
+  {"path": "loop/state/out/read_xiyou_L1_0035.candidate.json", "sha256": "6b2ee6cb35ab0857719fc1214c7c59e68b5d50a0dec8b34107ce815c178264b7", "kind": "candidate"}
+ ],
+ "assertions": [
+  {"text": "源文件哈希与任务声明一致：`shasum -a 256 data/cache/a065244455cfb2221bcda94a.docs.json` = c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2，与 task.sourceHash 及 candidate.source.sourceHash 三方逐字相同", "result": "pass"},
+  {"text": "区间口径自检：`docs[0].text[246881:246902]` == '第三十五回　外道施威欺正性　心猿获宝伏邪魔'（切片以本单元标题开头）；`len(docs[0].text[246881:253700])` == 6819；`T.find('第三十六回', 246881)` == 253700 == 区间终点。以上三条由候选里可执行的 reproduce.cmd_slice 复现", "result": "pass"},
+  {"text": "全部 298 个引文节点机械核验（独立脚本 /tmp/cl35/verify.py，不复用构建逻辑，只读 docs.json 与候选成品）：T[start:end]==quote 逐字成立（mismatch 0）、T.find(quote)==start（全书中首次出现即本处，not-first 0）、全部落在 [246881,253700) 内（out-of-range 0）、sourceHash 字段一致（bad 0）、无跨段拼接（quote 内不含空行）。", "result": "pass"},
+  {"text": "构建期断言（/tmp/cl35/build.py）：任一引文 NOTFOUND / 越界 / 非首次出现 / 逐字不符，或任一 null 槽缺 <栏位>Note、任一非 null 槽无引文、同一任务内跨栏共用同一引文，构建直接退出不产出候选。本次运行 0 问题。", "result": "pass"},
+  {"text": "五元组分栏独立性复核（独立脚本）：10 条任务 × 5 栏，null 槽 4 个且全部带同名 Note；同任务内跨栏共用同一引文的条数为 0（禁用的「五栏共用一句」形态未出现）。", "result": "pass"},
+  {"text": "内容分区齐备：required_sections(prompt) = ['tasks','causeEdges','states','foreshadows','worldSettings','themeReadings']，候选六个分区全部存在（10/18/10/6/18/2 条）。", "result": "pass"},
+  {"text": "worldSettings 三类区分写进字段：7 条 rule 全部有 institution ∈ {declared, executed, misunderstood}（executed 4 / misunderstood 2 / declared 1）；5 条 place 全部有 placeState ∈ {arrived, mentioned}（arrived 2 / mentioned 3）；6 条 item 全部有 itemStates 数组 ⊆ {hold,transfer,use,lose}，四态分开写、未合并成「物品链」。字段缺失数 0。", "result": "pass"},
+  {"text": "themeReadings 三件齐备：2 条均含非空 perspective + support + counter（counter 另有 counterEvidence 逐字引文），且未用事件密度/死亡人数/篇幅中点定义「高潮」，未套三幕或英雄旅程。semanticReview.performed=false，未声称语义核验完成。", "result": "pass"},
+  {"text": "内部交叉引用可解析：文中出现的 WS*/CE*/RE*/ST*/FS*/TH*/KD*/CL*/TX*/CU*/U*/OT*/SC* 引用全部唯一解析到本文件内对应条目（dangling 0）。曾发现一处假引用（正文写「见 worldSettings WS1」但当时条目无 id），已给 18 条 worldSettings 补稳定 id 并修正该处。", "result": "pass"},
+  {"text": "散文里的偏移声明逐条复核：候选正文中 26 处 [start,end) 数字声明逐一取出对应原文比对，曾发现 5 处与所述内容不符（TX1 的金角/银角位置、TX2 的幌金绳 span、TX4 的佇立位置、CU1 的第三十四回位置、T2 costNote 的错引「把云门外」），已全部改为由原文 find() 程序化计算出 span；复核后 25 处在区间内且取出的文字与所述一致，1 处（第三十四回 238725）是**故意**指向区间外的承接说明，已在字段名 externalNotQuoted 与正文中写明不引其原文。", "result": "pass"},
+  {"text": "未把人物话语当事实：CL2/CL5/CL8/CL10 分别把「宝贝怕老公（雌雄说）」「令弟已是死了」「幌金绳现拴着孙行者」「菩萨借了三次」标为人物说法/误信/无法核实；KD1/KD2/KD6 三条知识差显式写「未闭合」，未写成老魔已经明白。", "result": "pass"},
+  {"text": "「提及≠到达」纪律：压龙洞有「投奔」这一趋向动词且叙述随即「不题」，本文件记 mentioned 而非 arrived；平顶山只出现在阿七来路说明中、无到达动作，记 mentioned；后门口只出现在行者已被同段推翻的误判里，记 mentioned。有到达/驻留动作的莲花洞与压龙山记 arrived。", "result": "pass"},
+  {"text": "覆盖度复算：引文节点并集覆盖 3621/6819 codepoint = 0.531，与候选 coverage.coverageRatio 一致；唯一未被任何引文覆盖的「段落」是章节标题行本身（21 codepoint），正文段落全部至少被一条引文覆盖。未覆盖字符的语义说明缺口如实写进 remaining，未把覆盖率当语义完成度。", "result": "pass"}
+ ],
+ "changes": [
+  {"path": "loop/state/out/read_xiyou_L1_0035.candidate.json", "kind": "append-only"}
+ ],
+ "sourceHashes": {
+  "data/cache/a065244455cfb2221bcda94a.docs.json": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2"
+ },
+ "remaining": [
+  "语义未复核：本文件只做了引文逐字定位与 explicit/inferred/derived 分层。世界设定是否成立、两条主题读法是否站得住，需要独立复核者按 loop/ROLES/VERIFIER.md 读原文后判断（候选 semanticReview.performed=false）。引文定位正确 ≠ 语义已核验。",
+  "字符覆盖率 0.531：未覆盖的 3198 个 codepoint（韵文赞语、问答复述、景物铺陈）没有逐段写说明。段落级未覆盖为 1，且那一段就是标题行本身；但「段被引到」不等于「该段读完」，这是真实缺口。",
+  "T4/T5/T9/T10 四条任务 cost 写 null：这是本区间的真实空白（原文没有把这四处的动作写成损失或对价），不是我没读到；但 null 与「已确认无代价」的界限依赖复核者认可我给的 costNote 理由。",
+  "U1（二魔是否已化）、U3（老魔是否听懂八戒）、U5（假葫芦下落）、U7（师徒被吊时长）等 8 条 unknowns 未闭合：原文确实没有写，本文件不补。",
+  "FS5（二魔是否已化）、FS6（「看你师徒可有真心往西」这场考验的结果）两条伏笔显式标 unresolved：都在本区间内没有回收，本文件不预支下一回。",
+  "worldSettings 幌金绳条的 itemStates=[transfer] 是 derived 而非 explicit：老君说「绳子是我一根勒袍的带」把它纳入五件，再说「收得五件宝贝」但未逐件点名，两处合起来才推得到归还。已在 basis 与 caveat 写明。",
+  "本区间通篇用「老魔」「二魔」，名字（金角/银角）只在行者叫名时各出现一次、且是行者口中的称呼；若后续单元需要给两个魔头安名，须另找叙述性依据，不能沿用本文件的台词口径。",
+  "本次提交是重做：本轮任务此前有一次失败记录（loop/state/out/REJECTED__read_xiyou_L1_0035.json，summary「agent 未产出任务要求的文件，且未提交」，agent 记为 w-dafeng-0）。该次没有留下任何候选产物，原因无法从产物侧查明；本次为全新产出，未复用其任何内容。"
+ ],
+ "rollback": {"kind": "append-only", "strategy": "delete-added-files", "files": ["loop/state/out/read_xiyou_L1_0035.candidate.json"]},
+ "reworkOf": "loop/state/out/REJECTED__read_xiyou_L1_0035.json",
+ "reworkReason": "该轮的 REJECTED 记录显示 agent 未产出 writes 指定的文件也未提交（evidence.missing=true），属零产出失败；本轮重新精读原文并从头构建候选。"
+}

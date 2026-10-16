@@ -1,0 +1,40 @@
+{
+ "agent": "w-verify-2",
+ "role": "VERIFIER",
+ "task": "verify:dafeng:L1:0229",
+ "kind": "duplicate-claim investigation (no submit, deliberately)",
+ "outcome": "NOT SUBMITTED — 该任务 writes 指定的唯一路径已由 w-dafeng-3 写入，提交/覆写会毁掉另一位 agent 的已提交工作并被消费。",
+ "raceForensics": {
+  "contendedPath": "loop/state/out/verify_dafeng_L1_0229.verdict.json",
+  "contendedPathSha256": "5c8e964038d60e8b4cfa8ee8cc241490c88049f5cd050cb5e1fb6e5bfd5f432a",
+  "contendedPathMTimeLocal": "2026-10-15 04:14",
+  "contendedPathAuthor": "w-dafeng-3",
+  "contendedPathVerdict": "partial",
+  "otherAgentReviewAlreadyRecorded": "loop/state/out/read_dafeng_L1_0229.json → reviews=[{reviewer: w-dafeng-3}], verifyState=partial",
+  "myWorkerProcess": "pid 43503 (worker.py --agent w-verify-2 --stream read-verify), dsh child pid 93956 started 2026-10-15T03:37:09 local",
+  "otherWorkerProcess": "pid 43441 (worker.py --agent w-dafeng-3 --stream read-verify), dsh child pid 93955 started same second; recorded SIGTERM 19:12:35 and exited (546 rounds)",
+  "leaseOwnershipObserved": "loop/state/leases/verify:dafeng:L1:0229.d/lease.json → agent=w-dafeng-3, pid=43441, startedAt=2026-10-14T19:37:09Z；随后该租约目录被 release 删除",
+  "codePaths": [
+   "loop/bin/worker.py one_round(): pick() → claim() （先快照后占用）",
+   "loop/bin/loop.py pick() : done=done_ids() 为快照",
+   "loop/bin/loop.py claim() : 只判 lease_alive，不复查 done"
+  ],
+  "rootCause": "与 loop/state/out/read_dafeng_L3_0267.w-dafeng-0.dupclaim/DUPCLAIM-REPORT.json 记录的是**同一个 TOCTOU**：pick() 内含 done_ids()/active_leases() 快照，claim() 只查租约目录、不重新检查 done；两个 worker 在同一秒（19:37:09Z）被派到同一任务，其中一方已产出后另一方仍持有租约。",
+  "whyNotOverwrite": [
+   "覆写会替换 w-dafeng-3 的复核结论（其 partial 判决已被 read 记录消费为 reviews 条目）",
+   "该文件是那次复核的唯一证据载体；替换后其结论将无法追溯",
+   "AGENTS.md：同一文件只设一个写入负责人；不得覆盖其他会话在途工作"
+  ]
+ },
+ "remaining": [
+  "verify:dafeng:L1:0229 至今**没有**规范记录 loop/state/out/verify_dafeng_L1_0229.json，因此该任务在台账里仍可被反复领取 —— 这是需要主线程处置的真实缺口（属受保护路径 loop/bin/，须合并任务 + GATE.lock，我不改）。",
+  "我的独立结论（partial，引文层 0 缺陷 + RC1–RC6 遗漏 + t6/t5 两处归属缺陷）可作为对 w-dafeng-3 判决的独立旁证，但**未进入台账**。"
+ ],
+ "untouched": {
+  "gitDestructive": false,
+  "gpuOrBrowserTests": false,
+  "protectedPaths": true,
+  "sharedVerdict": true,
+  "sharedReadRecord": true
+ }
+}

@@ -1,0 +1,122 @@
+{
+ "task": "verify:xiyou:L1:0047",
+ "agent": "w-verify-1",
+ "status": "done",
+ "summary": "独立反向复核《西游记》第四十七回（[338749,346551)，7802 codepoint）。先自读原文全段（未先看候选结论），再机械复核候选 131 条结构化引文：逐条 text[start:end]==quote、find()==声明 start、区间内、全文唯一、sourceHash 一致——**131/131 全部通过**，随机 5 条（seed 47）find 亦全部命中。复算 metrics 全部计数一致；覆盖度独立复算 2406/7802=0.3084、未覆盖 ≥25 段 36 个，与候选 reverseCoverage **逐段一致**；同任务五栏共用引文复算 0。但**判 fail**：查出 3 条 counterExample（均为「抽取项在原文找不到对应文字」，非引文截断）——CE1 T3.summary 引文引对『三个小徒』而摘要写『四个小徒』（区间内『四个小徒』0 次，自相矛盾）；CE2 T1.summary/ST1.before 写『伏在那道士尸骸上』，原文为『倚着龙床』（本区间与第四十六回『伏在』均 0 次）；CE3 ST1.attribute 保留区间内 0 次的『三名道士』，而 reworkFixes/remaining 宣称『已把断言文字里所有该词删去』（失实的修改声明）。另做反向验证 6 条（R1–R6，均给出原文逐字引证与句级未覆盖证明），并撤回 2 条我自己不成立的反对意见。候选 evidence 层干净、克制到位，返工应为外科手术式（改 3 处断言文字 + 撤回 1 句失实声明），不需重做引文。",
+ "evidence": [
+  {
+   "path": "loop/state/out/verify_xiyou_L1_0047.verdict.json",
+   "sha256": "e56011a3f6e77f224cf7c354aa57ef985bcf3ba7b9a6676d050ff0486bfd95d0",
+   "kind": "本任务产出：复核结论（verdict=fail / counterExamples×3 / reverseChecks×6 / notes）"
+  },
+  {
+   "path": "loop/state/out/read_xiyou_L1_0047.candidate.json",
+   "sha256": "9c767540b6791aa6ca917ecf6dfca0384421f5439f5f9e9359db687279099966",
+   "kind": "被复核候选（只读，未修改）"
+  },
+  {
+   "path": "data/cache/a065244455cfb2221bcda94a.docs.json",
+   "sha256": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+   "kind": "原文来源 docs[0].text（切片 [338749,346551) 的绝对偏移基准）"
+  },
+  {
+   "path": "data/cache/ed3dc1255ca08fbdaae30bbd.docs.json",
+   "sha256": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+   "kind": "index.json graphKey 指向的同源 docs.json（与上面逐字节等价，已核 True）"
+  },
+  {
+   "path": "/Volumes/资源库/我的资源/回滚点/星系/20261012-verify-xiyou-L1-0047/verify_probe.py",
+   "sha256": "24b59fc351ad5e407c49b1533052d49b66243649eec041810b5b4fc7eb0b62f6",
+   "kind": "独立复核探针（本次全部证据来源；不复用候选的 audit.py/fix_candidate.py）"
+  }
+ ],
+ "assertions": [
+  {
+   "text": "源与切片自检：sha256(data/cache/a065244455cfb2221bcda94a.docs.json)=c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2，与任务 sourceHash 一致；切片 [338749,346551) 长 7802 codepoint，以回目「第四十七回　圣僧夜阻通天水　金木垂慈救小童」开头，终点 346551 正是「第四十八回」起点；切片 sha256=6ce211f9a80118c4168d42a70c68cec06aa9e77ea0f56bffa4231f8cb755dd6a。命令与输出见 verdict.reproduce[1]。",
+   "result": "pass"
+  },
+  {
+   "text": "引文全量复核：递归展平候选 JSON 得 131 个引文对象，逐条核 text[start:end]==quote（131/131）、t.find(quote)==start（131/131）、t.count(quote)==1（131/131）、区间内（131/131）、sourceHash==c282cf39…（131/131）。探针 [2] 段输出 nodes=131 exact=131 find==start=131 unique=131 inRange=131 hashOK=131。",
+   "result": "pass"
+  },
+  {
+   "text": "引用核验（随机抽 5，random.seed(47)）：5 条全部 find 命中且偏移与声明一致、全文唯一、区间内。明细见 verdict.quoteAudit.randomFiveFind。",
+   "result": "pass"
+  },
+  {
+   "text": "CE1 反证：python3 -c \"import json;t=json.load(open('data/cache/a065244455cfb2221bcda94a.docs.json'))[0]['text'];s=t[338749:346551];print(s.count('四个小徒'),s.count('三个小徒'))\" → `0 1`；同任务 T3.action 引文逐字为『…但我还有三个小徒…』(341114–341151)，摘要却写『四个小徒』。",
+   "result": "fail（候选缺陷）"
+  },
+  {
+   "text": "CE2 反证：同命令 `print(t[338749:346551].count('伏在'), t[330871:338749].count('伏在'))` → `0 0`；原文该处逐字为『却说那国王倚着龙床，泪如泉涌，只哭到天晚不住。』(338772–338795)，正是候选 ST1.anchorRefs 自己引的那句。",
+   "result": "fail（候选缺陷）"
+  },
+  {
+   "text": "CE3 反证：`print(s.count('三名道士'),s.count('三道士'),s.count('国师'),s.count('信重'))` → `0 0 0 0`；而 ST1.attribute=『对三名道士之死的性质判断』仍含该词，reworkFixes 却写『D2c ST1.attribute/before 去掉「国师」「三道士」』、remaining 写『本轮已把断言文字里所有该词删去』。",
+   "result": "fail（候选缺陷）"
+  },
+  {
+   "text": "覆盖与 metrics 复算：按所有引文区间并集独立复算 distinct=91、merged=74、covered=2406、ratio=0.3084、未覆盖≥25 段=36，并与候选 reverseCoverage 逐段比对结果 True（不差一段）；metrics 15 项计数自报与复算全部一致；同任务五栏共用引文复算 0（与自报一致）。",
+   "result": "pass"
+  },
+  {
+   "text": "反向验证 6 条（R1–R6）：每条先 text.find 取绝对偏移，再证明该句不被候选任何引文区间覆盖（covered=False），故属真实遗漏而非「仅未引用」。R1『好大圣，吩咐沙僧保护唐僧…』(346064) 是行者在场唯一的留守安排。",
+   "result": "pass（发现遗漏）"
+  },
+  {
+   "text": "自我否定已登记：verdict.counterCheck.withdrawn 撤回 2 条我最初写下但不成立的反对意见——(a) 候选 source.path 与 index graphKey 不同名，实测两份 docs.json 逐字节等价（t==ti True），不构成缺源；(b) 我曾按『跨分区』口径复算出 52 处引文重用并据此指控自报不实，但 READER 与 audit.py 的口径是『同一任务五栏内』，按该口径复算为 0，是我用错口径。",
+   "result": "withdrawn（不计入 counterExamples）"
+  },
+  {
+   "text": "受保护路径未动：本次仅写 loop/state/out/verify_xiyou_L1_0047.verdict.json（append-only），探针脚本落在仓库外的 /Volumes/资源库/我的资源/回滚点/星系/20261012-verify-xiyou-L1-0047/；未改 js/ css/ index.html serve.py narrative.py scripts/ tests/ docs/ data/。",
+   "result": "pass"
+  },
+  {
+   "text": "非自签与证据选择：被复核记录 loop/state/out/read_xiyou_L1_0047.json 的 agent=w-read-2，本复核者 agent=w-verify-1，二者不同，loop.py verify 的拒绝自签分支不会触发（实测输出『复核已记录：read:xiyou:L1:0047 → fail』）。**该文件不列为我的证据条目**：`loop.py verify` 每次调用都会往它的 reviews[] 追加一条记录、改变其 sha256，把它当证据必然『hash-changed』失效——这是校验器自身行为，不是我的产物。被复核对象的身份改由本断言记录，其内容可在 read 记录里随时复核。",
+   "result": "pass"
+  }
+ ],
+ "changes": [
+  {
+   "path": "loop/state/out/verify_xiyou_L1_0047.verdict.json",
+   "kind": "append-only"
+  }
+ ],
+ "sourceHashes": [
+  {
+   "path": "data/cache/a065244455cfb2221bcda94a.docs.json",
+   "sha256Before": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+   "sha256After": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+   "note": "只读；动手前后一致，未修改原文"
+  },
+  {
+   "path": "loop/state/out/read_xiyou_L1_0047.candidate.json",
+   "sha256Before": "9c767540b6791aa6ca917ecf6dfca0384421f5439f5f9e9359db687279099966",
+   "sha256After": "9c767540b6791aa6ca917ecf6dfca0384421f5439f5f9e9359db687279099966",
+   "note": "只读；未修改被复核候选"
+  },
+  {
+   "path": "/Volumes/资源库/我的资源/回滚点/星系/20261012-verify-xiyou-L1-0047/verify_probe.py",
+   "sha256Before": "24b59fc351ad5e407c49b1533052d49b66243649eec041810b5b4fc7eb0b62f6",
+   "sha256After": "24b59fc351ad5e407c49b1533052d49b66243649eec041810b5b4fc7eb0b62f6",
+   "note": "仓库外探针；只读 docs.json 与候选成品"
+  }
+ ],
+ "remaining": [
+  "**重复复核条目**：我在 04:26:26Z 与 04:26:58Z 各调用了一次 `loop.py verify`（第二次是为修正证据哈希而重跑，属我操作冗余），read:xiyou:L1_0047.json 的 reviews[] 因此有两条内容等价的 w-verify-1/fail 记录。两条结论一致、都不是假话，但重复是我的操作造成的噪声；我**没有**手工编辑该文件去删（它不在本任务的 writes 里，且会与校验器行为混淆），如实登记在此。",
+  "本轮判 fail，未把被复核记录的 verifyState 之外的状态改动：read:xiyou:L1:0047 会被 loop.py verify 置为 status=rejected、verifyState=fail（这是校验器行为，不是我改候选）。",
+  "未做语义正确性的第二人独立盲审：候选 semanticReview 保持 performed=false，我也没有把它改为已核。本次 counterExamples 全部是可机械复算的事实（数目/姿态词/专名在原文的存在性），不依赖我对情节的解释。",
+  "两种 docs.json 同名不同键（a0652444… 与 ed3dc125…）的成因未查：我只证明二者逐字节等价（t==ti True、sha256 同为 c282cf39…、len 均 722176），没有去追 data/cache 下为何存在多份同内容副本。",
+  "R6（一秤金衣饰 60 字）我判为较轻一类（近于韵文铺陈），仅列为反向发现、不作为 fail 依据；R5 是否算『实质遗漏』我保留（T5.result 已用『问明供献方式』概述），同样未作为 fail 依据。",
+  "CE3 的『三名道士』定性为『区间外专名残留 + 失实的修改声明』，未单独升级为幻觉重罪——依据是虎/鹿/羚羊三副骨在区间内确有，属指称层面越界而非全新实体；若复核口径更严，可升级。",
+  "未跑任何 GPU/浏览器测试（任务未声明需要），未执行 scripts/accept.sh（与本任务无关且属受保护路径流程）。"
+ ],
+ "rollback": {
+  "kind": "append-only",
+  "strategy": "delete-added-files",
+  "files": [
+   "loop/state/out/verify_xiyou_L1_0047.verdict.json"
+  ]
+ },
+ "reworkOf": null
+}

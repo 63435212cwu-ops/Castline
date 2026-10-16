@@ -1,0 +1,78 @@
+{
+  "task": "read:dafeng:L1:0101",
+  "agent": "w-xiyou-1",
+  "role": "READER",
+  "status": "done",
+  "summary": "精读《大奉打更人》第一百零二章 高于生命的东西（原文区间 [328572,332680)，4108 字，124 个非空段），产出候选 loop/state/out/read_dafeng_L1_0101.candidate.json（sha256 91cc4126…）。分区：tasks 8 条（五元组分列，每栏各自带逐字引文，同一条任务内五栏零共用——构建期按**区间是否重叠**机械断言）、causeEdges 11 条（其中 2 条标 inferred：CE6 出鞘触发、CE10「鬼使神差」后退）、rejectedEdges 5 条（含把「抬出魏公名头→朱银锣退让」主动否弃，原文写「他不怕」）、states 9 条（前值/后值＋事件锚点）、knowledgeDiffs 7 条、foreshadows 5 条（4 条区间外回收＋1 条显式标 unresolved-in-range 的金锣父亲线）、worldSettings 15 条（地点 4 / 物件 3 / 规则 8，placeState、itemStates、institution 三套区分全部写进字段，itemStates 按 hold/transfer/use/lose 分列不合成物品链）、themeReadings 2 条（各带 support 与 counter 两向引文）、unknowns 16 条、selfCritique 3 条。共 210 条证据引文（区间内 202 / 区间外 8），另有 selfCheck 派生的复用索引 54 条（不计入证据）。未声称 semanticReview 完成。",
+  "evidence": [
+    {
+      "path": "loop/state/out/read_dafeng_L1_0101.candidate.json",
+      "sha256": "91cc41264710d4e016858194d35901dd67097b20000be0b0a3d861215ee46dcd",
+      "kind": "candidate",
+      "note": "任务 writes 指定的唯一产物。"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "区间与标题自检（直接读源文件，不用摘要）：docs[0].text[328572:332680] 长度 4108，以『第一百零二章 高于生命的东西』开头；右边界 docs[0].text[332680:332689] == '第一百零三章 腰斩'。复现：python3 -c \"import json;T=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];print(len(T[328572:332680]),T[328572:328586],T[332680:332689])\" → 4108 第一百零二章 高于生命的东西 第一百零三章 腰斩",
+      "result": "pass"
+    },
+    {
+      "text": "sourceHash 口径：构建脚本开跑即重算**整个 docs.json** 的 sha256 并断言等于任务声明的 fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839，不等则整体失败、不写文件。实测 shasum -a 256 data/cache/1063b17ca65ec1b76f30e460.docs.json 命中该值。切片自身哈希另记 sliceSha256=e3934e76f8bd7b9b74163b3c81f2e9e39556b519c9b785da9414a1318408ae31，两个口径不互相冒充。",
+      "result": "pass"
+    },
+    {
+      "text": "引文逐字与偏移口径：我用一个**不 import 构建脚本**的独立审计程序遍历最终产物全部 210 条证据引文，断言 TEXT[start:end]==quote 逐字成立、sourceHash 命中、inRange 标志与「是否落在 [328572,332680)」一致、区间内引文的 chapterAtOffset 均为本单元标题。该审计脚本放在系统临时目录（不进仓库，符合 AGENTS.md「不把一次性探针放回项目」），因此这里给一条等价的内联复现命令，任何人都能跑：python3 -c \"import json;T=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];c=json.load(open('loop/state/out/read_dafeng_L1_0101.candidate.json'));S,E,H=328572,332680,'fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839';refs=[]\\nw=lambda o:[refs.append(o) if isinstance(o,dict) and 'quote' in o and 'start' in o and 'end' in o else ([w(v) for v in o.values()] if isinstance(o,dict) else ([w(v) for v in o] if isinstance(o,list) else None))]\\nw({k:v for k,v in c.items() if k!='selfCheck'})\\nprint(len(refs),sum(1 for r in refs if T[r['start']:r['end']]!=r['quote'] or r.get('sourceHash')!=H),sum(1 for r in refs if bool(r.get('inRange'))!=(S<=r['start'] and r['end']<=E)))\" → 输出 210 0 0（引文 210 条、切片不符 0 条、inRange 标志不符 0 条）。",
+      "result": "pass"
+    },
+    {
+      "text": "五栏共用专项（提示词点名的旧图谱缺陷 714/1664）：对 tasks[] 每条任务的 objective/obstacle/action/result/cost 收集带偏移引文，按**区间是否重叠**判同任务内跨栏共用（比字符串相等更严：相邻但不重叠算合格）。判据在构建期以 assert 执行，violations=[]；另跑独立审计复算，0 条。8 条任务中 5 条各有一个 null 栏，全部带 <栏位>Note 写明理由（T1/T3/T5/T7 的 cost、T2 的 result），无一处未标注的未知。",
+      "result": "pass"
+    },
+    {
+      "text": "项目自带契约测试口径自查：直接调用 tests/p3_task_five_fields_contract.py 的函数对候选复算——① 字段间共用同一条引句：8 条任务 duplicated 全为 0；② 空栏必须写理由：未写理由 0 条；③ cost 文本含待验证词 0 条；④ result 文本含法条词 0 条。（该测试全库 FAIL 的 3 项来自 read_dafeng_L0_0032/L0_0036/L2_0026 等**其它**候选及历史图谱 aee4c998，与本单元无关；产物 /tmp/castline-artifacts/p3-five-fields/task-five-fields.json 中不含 '0101'。）",
+      "result": "pass"
+    },
+    {
+      "text": "反向覆盖检查（计划100 的「还漏了什么」）：把切片切成 124 个非空段，逐段检查是否被任一条 inRange 引文触及（区间相交即算）。首轮 51 段未覆盖，据此补了 26 条新引文并挂进对应分区，最终降到 13 段；13 段**逐条**写明理由（标题行 1、分隔符 2、作者附言 8、说话人标记 1、拟声词 1），unclassifiedCount=0。判据与逐条理由都在产物的 coverageGaps 里，复核者可按 start/end 直接回查。首轮暴露的真实遗漏已补：朱广孝主张「就凭这个伤你就可以去告他」被宋廷风否掉（T2 obstacle）、宋廷风的伤情追问与「用气机了？」（ST1/KD7）、旁观同僚从围观到起哄（ST6b）、许七安怒到顶点却按住不动（ST6c）、朱银锣自我正当化的三条自辩（KD6）。",
+      "result": "pass"
+    },
+    {
+      "text": "自检计数必须来自最终产物：第一版 selfCheck 用构建期登记表计数，产物里另有 crossFieldReuse 索引条目与 extraQuotes，导致 allQuoteRefs 少报（182 vs 实际 250），被独立审计抓出。已改为写盘前遍历**将要写盘的那个对象**（排除 selfCheck 自身，因该索引是从真实条目派生的、不是新增证据）回填计数，并对每条重算切片/哈希/标志。现 selfCheck.allQuoteRefs=210、inRangeRefs=202、outOfRangeRefs=8，与独立审计逐一相符；三项失败清单均为空。",
+      "result": "pass"
+    },
+    {
+      "text": "未越界未自证：候选未改任何受保护路径（changes 只含 writes 指定的候选文件）；semanticReview 保持 null 并写明「引用定位正确 ≠ 语义已核验，语义核验由 read-verify 流的独立复核者完成」；伏笔 F5（金锣父亲）显式标 unresolved-in-range 而非假装回收；T6 的 result 只写「僵住/裂开/喷血/倒下」不写「杀死」，T8 不写「脱身成功」——结束≠成功。",
+      "result": "pass"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/read_dafeng_L1_0101.candidate.json",
+      "kind": "append-only"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/1063b17ca65ec1b76f30e460.docs.json": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+  },
+  "remaining": [
+    "本候选只做到「引文逐字可核 + 结构自洽」。**语义未核验**：我没有、也无权声称 semanticReview 完成；每条引文的语义是否支撑它所在的那一栏，需 read-verify 流的独立复核者判定。",
+    "CE6（出鞘一寸 → 朱银锣暴起抢先劈来）标 inferred 而非 explicit：原文「他早就准备着了」的主语在本区间无法确定（可能是朱银锣可能早就备好，也可能指许七安）。若复核者按「时间相邻当因果」判，应删掉这条边；其余结论不受影响。该歧义已登记为 unknowns 第 2 条。",
+    "CE7（许七安的动作 → 朱银锣胸口刀伤）标 derived：原文刻意写成看不清（「那柄略显笔直的刀，依旧在鞘中」「仿佛是幻听」），机制没有直写。本候选只断言「伤由这一刀造成」，不断言这一刀如何做到。",
+    "CE10（「松开！」的语气/表情 → 宋廷风后退一步）标 inferred：原文用「鬼使神差」自承机制说不清。",
+    "F3（向魏渊告状的威胁 → 区间外魏渊裁断）标 derived 而非 explicit：真正把事情送到魏渊面前的是宋廷风与李玉春的奔走，不是许七安本人去告状。严格口径下可降为 unresolved。",
+    "F2 的次要回收（第一百零四章李玉春做同构的「摘下腰牌和佩刀」动作）是我的平行读法；若复核者认为它不属同一条线，删掉该条 payoffQuote 即可，主回收（第一百零七章许七安本人取回）不受影响。",
+    "cost 栏的归属边界：T2 的 cost 主要是他**带着进入**这条任务的伤（手臂通红肿胀）而非该决定新付出的代价；我在 costNote 里写明是「既有代价」，但复核者若按严格口径认为应写 null，这是可争的一处。T1/T3/T5/T7 的 cost 写 null 并写明理由，不是漏填。",
+    "unknowns 16 条里，有几条是本区间**结构性读不出来**的，不会因为再读一遍而消失：朱银锣是否真的用了气机（只有宋廷风的问句＋一条通则）、朱银锣是否活下来（只到「没死」与「打算送回救治」）、那名少女与程府家眷的后续、许七安是否真的去告了状。",
+    "原文用字未代改：「接过被朱银锣一脚踢了回来」的「接过」（原文如此，疑为「结果」之误）、银锣朱成铸胸口的器物被写作「铜锣」、以及「练气境/炼神境」并置——均照原文引并登记进 unknowns，未代为改字或推断制度。",
+    "本区间尾部 8 段为作者附言（PS、成绩汇报、求月票与更新说明），已判定为非叙事、不从中提取任何故事事实；它们仍计入 coverageGaps 的未触及清单并逐条写明理由，没有被静默丢弃。",
+    "我没有跑 GPU/浏览器测试（任务未声明需要），没有改受保护路径，没有动其它 agent 的产物或租约。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/read_dafeng_L1_0101.candidate.json"
+    ]
+  }
+}

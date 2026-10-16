@@ -1,0 +1,258 @@
+{
+ "verdict": "partial",
+ "task": "verify:sanguo:L1:0007",
+ "reviewedTask": "read:sanguo:L1:0007",
+ "reviewedCandidate": "loop/state/out/read_sanguo_L1_0007.candidate.json",
+ "reviewedCandidateSha256": "07c09a1e312f6b8a9105d89709336ddbd87cb8da5415615e4b65c50e39ec3773",
+ "reviewerIdentityNote": "本会话未注入 DSH_AGENT_NAME，loop.py verify 的 --agent 落在了启动脚本给的默认值 verifier-sanguo-L1-0007；本任务的租约持有者名是 w-verify-3（loop/state/leases/verify:sanguo:L1:0007.d/lease.json，pid 2741 运行中）。两者是同一轮复核，但记录里的 reviewer 字段与租约名不一致 —— 如实登记，供审计对账。语义上不影响复核独立性：原提交者是 w-xiyou-1，与上述任一名都不同，不构成自签。",
+ "source": {
+  "path": "data/cache/152e2a6eed94f1075e7e7070.docs.json",
+  "sourceHash": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+  "range": [
+   34719,
+   39028
+  ],
+  "rangeChars": 4309,
+  "offsetUnit": "codepoint",
+  "sliceSha256": "773e76b70d6596cb81f4b450716c8c0d4c463e292db9f4ac544c586f5fba8120"
+ },
+ "readOriginalFirst": true,
+ "originalReadMethod": "先读 docs[0].text[34719:39028] 全文（4309 字 / 11 段），再打开候选；复核全程未使用图谱缓存 data/cache/...json 作为证据。",
+ "quoteSampling": {
+  "seed": 20261009,
+  "population": 579,
+  "sampleSize": 5,
+  "verbatimHits": 5,
+  "offsetEqualsFirstFind": 2,
+  "offsetEqualsLaterOccurrence": 3,
+  "note": "3 条 offset 指向全书后段而非首次出现：2 条是电子文本每回末尾的「------------------」「枫林晚 整理校对…」，1 条是同一分隔线变体。候选在 occurrencesInWholeText 里如实写了 119/118，偏移指向本单元内那一次，属正确而非错位。"
+ },
+ "counterExamples": [
+  {
+   "claim": "foreshadows[6].name 写作「董卓「事若泄漏，我灭门矣」的顾虑」——把王允的台词安到董卓头上。",
+   "quote": "允曰：“事若泄漏，我灭门矣。”",
+   "why": "原文该句紧接「貂蝉曰：『妾许大人万死不辞，望即献妾与彼。妾自有道理。』」之后，说话人是王允（允曰）。同一对象自己引的 setup.text 也写「王允把风险说给貂蝉」——即 name 字段与本条 setup 自相矛盾。这是人物归属错误：下游若只读 name 就会把王允的话当成董卓的顾虑。属真实缺陷，但不推翻该条其余内容（setup/payoff 引文均逐字正确）。",
+   "evidence": {
+    "quote": "允曰：“事若泄漏，我灭门矣。”",
+    "start": 36002,
+    "end": 36017,
+    "offsetUnit": "codepoint",
+    "sourceHash": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+    "occurrencesInSlice": 1,
+    "occurrencesInWholeText": 1
+   },
+   "counterEvidenceSameRecord": {
+    "quote": "貂蝉曰：“大人勿忧。妾若不报大义，死于万刃之下！”",
+    "start": 36017,
+    "end": 36042,
+    "offsetUnit": "codepoint",
+    "sourceHash": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+    "occurrencesInSlice": 1,
+    "occurrencesInWholeText": 1
+   },
+   "severity": "label_misattribution",
+   "reproduce": "python3 -c \"import json;t=json.load(open('data/cache/152e2a6eed94f1075e7e7070.docs.json'))[0]['text'];i=t.find('事若泄漏');print(repr(t[i-6:i+20]))\""
+  },
+  {
+   "claim": "coverage.charCoverageNote 自称「未覆盖 20 段…≤4 字…（significant_gaps=0，最长 9 字为「\\n　　却说蒯良曰：」这类段首连接语）」，同一句里既说 ≤4 字又说最长 9 字，且举的「9 字」例子并不是未覆盖段。",
+   "quote": "却说蒯良曰：",
+   "why": "我独立重算：区间 4309 字，被任一已登记引文覆盖 4242 字 = 98.45%（与候选自称一致），未覆盖恰 20 段，最长 4 字（与 coverage.longestUncoveredGap=4 一致）。而 note 里举为「最长 9 字」的 '\\n　　却说蒯良曰：' 实际被 coverageAnchors[1].quoteRefs[0] 覆盖（start=34743,end=34749），根本不是未覆盖段。故 longestUncoveredGap=4 是对的，note 那句话自相矛盾且举错例。属自述文字错误，不影响任何抽取项。",
+   "evidence": {
+    "quote": "却说蒯良曰：",
+    "start": 34743,
+    "end": 34749,
+    "offsetUnit": "codepoint",
+    "sourceHash": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+    "occurrencesInSlice": 1,
+    "occurrencesInWholeText": 1
+   },
+   "severity": "self_report_contradiction",
+   "reproduce": "见 reverseChecks[0].reproduce 的覆盖率重算脚本"
+  },
+  {
+   "claim": "foreshadows[8](F9) 的 setup 与 payoff 用的是同一个跨度：payoff.quoteRefs[0] 与 setup.quoteRefs[0] 逐字相同、start/end 都是 [34975,35000]。",
+   "quote": "问：“其子年几岁矣？”或答曰十七岁，卓遂不以为意。",
+   "why": "该条的「铺设」与「回收」落在同一句内、同一跨度，不构成两个文本端点；它同时与 notForeshadows[9] 冲突——后者把「十七岁」列为「一次性交代、本单元没有任何一处回头使用或应验它们，不因为是数字就当作伏笔」。同一位候选对同一个「十七岁」给出了相反的归类。建议：F9 降级为状态/因果项（T4/E5/E6 已完整承载），或按 NF[9] 的口径撤销该伏笔条。",
+   "evidence": {
+    "quote": "问：“其子年几岁矣？”或答曰十七岁，卓遂不以为意。",
+    "start": 34975,
+    "end": 35000,
+    "offsetUnit": "codepoint",
+    "sourceHash": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+    "occurrencesInSlice": 1,
+    "occurrencesInWholeText": 1
+   },
+   "counterEvidenceSameRecord": {
+    "quote": "自此愈加骄横，自号为“尚父”，出入僭天子仪仗；",
+    "start": 35000,
+    "end": 35023,
+    "offsetUnit": "codepoint",
+    "sourceHash": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+    "occurrencesInSlice": 1,
+    "occurrencesInWholeText": 1
+   },
+   "severity": "criterion_inconsistency"
+  },
+  {
+   "claim": "causeEdges[19](E20) 的 marker「卓见貂蝉颜色美丽，便问」不在该条自己的任何 quoteRefs 内。",
+   "quote": "卓见貂蝉颜色美丽，便问",
+   "why": "E20 的两条 quoteRefs 是 [37089,37153)（能唱否）与 [37160,37199)（青春几何），都不含 marker。marker 实际在 37059，被 tasks[9]/states[22] 引用。marker 字段的用途是标出触发词，指向本条引文之外会让「marker 可回查」这一自检失效。属引用卫生问题，非编造。",
+   "evidence": {
+    "quote": "卓见貂蝉颜色美丽，便问",
+    "start": 37059,
+    "end": 37070,
+    "offsetUnit": "codepoint",
+    "sourceHash": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+    "occurrencesInSlice": 1,
+    "occurrencesInWholeText": 1
+   },
+   "severity": "citation_hygiene"
+  }
+ ],
+ "reverseChecks": [
+  {
+   "found": "候选自称「字符级反向覆盖 98.45%、未覆盖 20 段全部为空白与 ≤4 字连接语」，我独立重算完全成立（覆盖 4242/4309，20 段，最长 4 字）。即：本区间没有任何一句对话或事件句未被登记。",
+   "quote": "封弟董晃为左将军、鄠侯，侄董璜为侍中，总领禁军。",
+   "note": "这一条是支持候选的发现（反向验证也要能确认对方没错）。重算脚本见 reproduce。",
+   "reproduce": "python3 - <<'PY'\nimport json\nd=json.load(open('loop/state/out/read_sanguo_L1_0007.candidate.json'))\nt=json.load(open('data/cache/152e2a6eed94f1075e7e7070.docs.json'))[0]['text']\nS,E=34719,39028;N=E-S;cov=[False]*N\nq=[]\ndef w(o):\n    if isinstance(o,dict):\n        if isinstance(o.get('quote'),str) and isinstance(o.get('start'),int) and S<=o['start'] and o['end']<=E:\n            for i in range(o['start']-S,o['end']-S): cov[i]=True\n        for v in o.values(): w(v)\n    elif isinstance(o,list):\n        for v in o: w(v)\nw(d)\ng=[];i=0\nwhile i<N:\n    if not cov[i]:\n        j=i\n        while j<N and not cov[j]: j+=1\n        g.append((i+S,j-i)); i=j\n    else: i+=1\nprint(sum(cov),N,round(100*sum(cov)/N,2),len(g),max(x[1] for x in g))\nPY"
+  },
+  {
+   "found": "候选把董卓宗族封赏的具体内容只留在引文里，分析字段（tasks/causeEdges/states/foreshadows）中完全没有：states[4](S5).after 只写「弟、侄、宗族不问长幼皆封」，而原文点名的「封弟董晃为左将军、鄠侯，侄董璜为侍中，总领禁军」——尤其「董璜…总领禁军」是董卓把禁军交给侄子的实质权力事实——在 analytic 文本中出现 0 次（我实测：董晃/董璜/侍中/总领禁军/左将军/鄠侯 在分析字段各 0 次，在切片各 1 次）。",
+   "quote": "封弟董晃为左将军、鄠侯，侄董璜为侍中，总领禁军。",
+   "whyItMatters": "这一段（34944-35426）是候选自己列为「愈加骄横」的整段证据，且它专门建了 S5 记录该状态变化；漏掉「禁军交侄」使 S5 只留下仪仗与坞堡这类排场，丢掉了同一句里的军事控制权。",
+   "evidence": {
+    "quote": "封弟董晃为左将军、鄠侯，侄董璜为侍中，总领禁军。",
+    "start": 35023,
+    "end": 35047,
+    "offsetUnit": "codepoint",
+    "sourceHash": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+    "occurrencesInSlice": 1,
+    "occurrencesInWholeText": 1
+   },
+   "followupSameSentence": {
+    "quote": "董氏宗族，不问长幼，皆封列侯。",
+    "start": 35047,
+    "end": 35062,
+    "offsetUnit": "codepoint",
+    "sourceHash": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+    "occurrencesInSlice": 1,
+    "occurrencesInWholeText": 1
+   }
+  },
+  {
+   "found": "「卓往来长安，或半月一回，或一月一回，公卿皆候送于横门外；卓常设帐于路，与公卿聚饮」只出现在 coverageAnchors，没有任何 tasks/states/causeEdges 使用它。候选分析了横门的一次性宴席（E7 降卒）与省台大会（E8/E9），却没有登记「公卿候送横门外、卓设帐聚饮」这套常态化的威权routine。",
+   "quote": "卓往来长安，或半月一回，或一月一回，公卿皆候送于横门外；卓常设帐于路，与公卿聚饮。",
+   "whyItMatters": "它是「公卿皆候送」这一君臣关系常态的直述（不是一次事件），与 S5 的排场状态、以及 E7「适北地招安降卒数百人到」的场合前提（卓出横门、卓留宴）是两件事：候选只收了后者。",
+   "evidence": {
+    "quote": "卓往来长安，或半月一回，或一月一回，公卿皆候送于横门外；卓常设帐于路，与公卿聚饮。",
+    "start": 35151,
+    "end": 35192,
+    "offsetUnit": "codepoint",
+    "sourceHash": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+    "occurrencesInSlice": 1,
+    "occurrencesInWholeText": 1
+   }
+  },
+  {
+   "found": "「吕布入内问安，正值卓睡」只出现在 coverageAnchors。这句是吕布得以在内堂看到貂蝉床后手势（E28 的动作）的场合前提，候选在 tasks[17]/states[?] 引了手势却没登记这个前提。",
+   "quote": "吕布入内问安，正值卓睡。",
+   "whyItMatters": "缺了它，E28 的「貂蝉于床后探半身望布」像是无场合的动作；补上后该动作的可见性条件（卓睡、布入内问安）才完整。属遗漏但影响小。",
+   "evidence": {
+    "quote": "吕布入内问安，正值卓睡。",
+    "start": 37959,
+    "end": 37971,
+    "offsetUnit": "codepoint",
+    "sourceHash": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+    "occurrencesInSlice": 1,
+    "occurrencesInWholeText": 1
+   }
+  },
+  {
+   "found": "貂蝉自述「我虽非王司徒亲女，然待之如已出」，与叙述的「允以亲女待之」、以及王允当众称她「小女貂蝉也」构成身份口径差；候选把「非王司徒亲女」只留在 speechInventory/connectiveAudit 的引文里，没有作为身份/知识差条目登记。",
+   "quote": "我虽非王司徒亲女，然待之如已出。",
+   "whyItMatters": "候选有一套完整的知识差/话语分层机制（K1-K6、speechAsClueNotFact、speechLayeringNote），且专门处理了「王允对吕布/对董卓两套说辞」（K6）；但「王允对外称小女、貂蝉自称非亲女、叙述只说以亲女待之」这组三方口径差没有进 K 系列。按候选自己的标准应可成条。",
+   "evidence": {
+    "quote": "我虽非王司徒亲女，然待之如已出。",
+    "start": 38346,
+    "end": 38362,
+    "offsetUnit": "codepoint",
+    "sourceHash": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+    "occurrencesInSlice": 1,
+    "occurrencesInWholeText": 1
+   },
+   "contrast": {
+    "quote": "小女貂蝉也",
+    "start": 36263,
+    "end": 36268,
+    "offsetUnit": "codepoint",
+    "sourceHash": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+    "occurrencesInSlice": 1,
+    "occurrencesInWholeText": 1
+   },
+   "narrationSide": {
+    "quote": "允以亲女待之",
+    "start": 35532,
+    "end": 35538,
+    "offsetUnit": "codepoint",
+    "sourceHash": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+    "occurrencesInSlice": 1,
+    "occurrencesInWholeText": 1
+   }
+  }
+ ],
+ "fabricationCheck": {
+  "inventedPersons": 0,
+  "inventedEndings": 0,
+  "inventedForeshadows": 0,
+  "resultClaims": 0,
+  "note": "未发现编造。反证：候选明确拒写区间外的已知答案——rejectedEdges[5] 拒绝把「董卓掷戟」连到「吕布杀董卓」；foreshadows[7] 把撞倒董卓者标 unresolved_in_unit，只在 externalPayoffNote 标注第九回有回收，未把李儒写进本单元结论（我核验第九回开头的『却说那撞倒董卓的人，正是李儒』确在 39052，区间外）。semanticReview/claimVerification 均写 not_performed，未越权声称语义已核验。"
+ },
+ "extractionAudit": {
+  "inSliceQuoteRefs": 579,
+  "verbatimHits": 579,
+  "verbatimRate": 1.0,
+  "offsetSelfConsistent": 579,
+  "occurrenceCountMismatches": 0,
+  "nullFieldsClaimed": 25,
+  "nullFieldsActual": 25,
+  "nullFieldsMatch": true,
+  "arrayCountsMatch": true,
+  "crossUnitOffsetsVerified": [
+   34312,
+   34466,
+   34586,
+   39052,
+   39222
+  ],
+  "boundaryVerified": {
+   "find('第八回')": 34719,
+   "find('第九回')": 39028,
+   "note": "切片以本回回目开头、右端恰为第九回回目起点，与任务 sourceRange 一致。"
+  },
+  "sliceSha256Verified": true,
+  "note": "抽取层几乎无瑕：579 条在区间内的 quoteRef 全部逐字命中且 start/end 自洽；候选自称的出现次数（含 occurrencesInWholeText=119/118 这类大数）零失配。缺陷只在标注层与自述层（见 counterExamples）。"
+ },
+ "falseKillCheck": [
+  {
+   "what": "rejectedEdges[1] 以「没有写报信者与他的情绪」为由拒绝连「吕布得知貂蝉入相府→吕布找王允问罪」。",
+   "concern": "原文在质问处写了动作与语气：「便勒住马，一把揪住衣襟，厉声问曰」——即情绪侧并非「没有写」。",
+   "quote": "乘马而行，不到半路，只见两行红灯照道，吕布骑马执戟而来，正与王允撞见，便勒住马，一把揪住衣襟，厉声问曰：",
+   "verdict": "存疑（不据此判 fail）",
+   "why": "拒绝连边这个结论本身仍可辩护（机制是婚约被违，不是告密），但给出的理由与原文有出入。候选在 E24 又接受了同类「情报→大怒→行动」的连法，两条口径不一致。"
+  },
+  {
+   "what": "rejectedEdges[7] 拒绝把「献貂蝉」连到「董卓不理政事」，理由是不该算到王允头上。",
+   "concern": "这是合法取舍而非误杀：E27 保留了「自纳貂蝉后→月余不出理事」的叙述归因，未把王允的意图当原因。",
+   "quote": "董卓自纳貂蝉后，为色所迷，月余不出理事。",
+   "verdict": "无误杀",
+   "why": "候选把取舍写在明面上，属正确克制。"
+  }
+ ],
+ "notes": "判定 partial。理由分三层。（1）抽取层几乎无瑕：579 条区间内 quoteRef 全部逐字命中、start/end 自洽（我用 docs[0].text[start:end]==quote 全量核过），零编造，零成功判定，25 个 null 字段与 12 个数组计数申报全对，5 条区间外 crossUnitRefs 偏移全部核实，边界（第八回回目起 / 第九回回目止）与切片哈希均对。这部分可以直接用。（2）必须丢弃或降级的条目：foreshadows[6].name 的说话人归属错误（王允的话写成董卓），必须改；foreshadows[8](F9) 与 notForeshadows[9] 对「十七岁」归类相反、且 F9 的 setup 与 payoff 是同一跨度，二者只能留一个，建议按 NF[9] 口径撤销 F9（其内容已由 T4/E5/E6/S4 承载）；coverage.charCoverageNote 那句自相矛盾的自述须改（数据字段 longestUncoveredGap=4 是对的）。（3）应补的真实遗漏（已列为 reverseChecks）：董卓封侄董璜「总领禁军」等宗族实职、公卿候送横门外的常态、吕布入内问安这一场合前提、貂蝉自称非王允亲女的身份口径差。这些遗漏不改变本单元主链，但按候选自己的标准（它有专门的 K 系列与 S 系列）应成条。\n\n自我纠错（按契约要求）：我最初写了一个用 4-gram 比对 causeEdges 的 from/to 标签与原文的脚本，报出 40 条『标签不在原文』——这个方法本身是错的：from/to 是归纳性摘要标签，本来就不该逐字出现在原文里，逐字要求只适用于 quoteRefs。该结果是假阳性，我作废了它，未写进 counterExamples。另外我起草的第一批引文里有两条不逐字（把「低讴」误写成「低讧」；把 candidate 的归纳标签「先许吕布、后献董卓」当成原文），写盘前用 text.find 全量自检时被挡下并已剔除——本文件里出现的每一条 quote 都经过 docs[0].text.find(q) 命中且 text[start:end]==q 断言。\n\n不确定处：F7 的 name 归属错误是否严重到应判 fail，我判为 partial——因为该条 setup.text、payoff 与全部引文都正确，错误只在一个标签字段，且属可局部修正；但它确实是「谁说了什么」这一类事实错误，不是措辞问题，所以在 partial 里点名为必改项而不降级为存疑。",
+ "remaining": [
+  "未做版本校勘：候选指出的「卓己坐于中堂」「我今愉空而来」「衠钢剑」三处用字，我只核实了「全书仅此一见」这一计数（卓己坐于中堂=1、愉空=1、衠=1、偷空=0，与候选一致），未判定哪个字为正。",
+  "未通读第七回、第九回全文：只按候选给的 5 个 crossUnitRefs 偏移各取了上下文，核实引文与偏移一致；未独立判断这两回里是否还有本单元应登记的关联事实。",
+  "未使用图谱缓存 data/cache/152e2a6eed94f1075e7e7070.json 作对照（任务与候选都声明它不是原文证据），因此无法评价候选结论与既有图谱摘要的一致性。",
+  "未核对候选 machineSelfCheck.notDone 之外的生成脚本行为（脚本本体不在本任务 writes 范围）。"
+ ]
+}

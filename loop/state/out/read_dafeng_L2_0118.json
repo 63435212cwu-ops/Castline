@@ -1,0 +1,233 @@
+{
+  "task": "read:dafeng:L2:0118",
+  "agent": "w-sanguo-0",
+  "role": "READER",
+  "status": "done",
+  "summary": "精读《大奉打更人》第一百一十九章「社交三要素」（docs[0].text 全文 codepoint [402669,406211)，3542 字）：产出 4 条任务五元组（每栏各自带逐字引文，五栏之间零共用引文；T1.cost 与 T4.cost 为 null 并各带 costNote 说明为什么没有）、6 条因果边（每条给 from/to/trigger/mechanism，其中 CE3/CE4 标 confidence=medium 并写明这是人物推理/她的推测）、4 条 rejectedEdges（拒掉「时间相邻当因果」「把守卫的推测当结果」等 4 组连边）、6 条状态变化（前值/后值/事件锚点；S4 记的是「他的判断」而不是「人宗是凶手」这个事实）、3 条知识差（写清谁知/不知，KD2 标 inferred）、3 条伏笔（F1/F2 显式标 resolved-out-of-range 并给章名与区间外回收端引文，F3 显式标 unresolved 并给出两次逐字检索的判据与一个 nearAnalogue 反例）、3 条 rejectedForeshadows、10 条 worldSettings（rule 3 / place 5 / item 2：place 严格区分 arrived 与 mentioned——宫城记 mentioned 因为原文写明「进不去」；item 四态分开写，金牌=hold+use、三钱银子=transfer）、2 条 excludedSettings、2 条主题解读（各带 perspective/support/counter，TH2 的 counter 指出他并非真「不动声色」）、6 条 characterClaims（narratorConfirmed 全 false）、4 条区间外对照、11 条 unknowns、5 条 selfCritique。全部 122 个引文节点由构建脚本在 docs[0].text 上现切（锚点限定在本区间内，避免全书别处的同句串位），再用**独立实现**的审计脚本从磁盘重读成品复算：逐字切片、sourceHash、offsetUnit/offsetBase、occurrencesInFullText/InUnit、inRange 标记、paragraphInUnit、chapterAtOffset、区间内引文首现即本处、五栏三把尺子（精确区间/互为子串/同一原文段落）零命中、null 必带 Note、枚举合法（basis/kind/placeState/itemStates/institution/foreshadows.status）、六个分区齐备、semanticReview 保持 not-performed —— problems=0。构建期另有一次真实拦截：T1.action 与 T1.result 起初落在同一原文段落（第 10 段），被三把尺子抓出后我删掉了 action 里那道命令的引文并在 actionNote 里写明这处取舍，而不是放宽校验。语义未核验。",
+  "evidence": [
+    {
+      "path": "loop/state/out/read_dafeng_L2_0118.candidate.json",
+      "sha256": "6ea03ed14c44dde32c88254bfae4773779a17d1597e30d567242c9512f60fb4d",
+      "kind": "candidate",
+      "note": "本轮唯一写入物，即任务 writes 指定路径"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "docs.json sha256 == 任务 sourceHash：shasum -a 256 data/cache/1063b17ca65ec1b76f30e460.docs.json",
+      "result": "pass",
+      "detail": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839（与任务 JSON sourceHash 逐字相同）"
+    },
+    {
+      "text": "切片边界自检：docs[0].text[402669:402682] == '第一百一十九章 社交三要素'，len(切片)==3542；右边界 docs[0].text[406211:406220] 起为「第一百二十章 即兴作诗」",
+      "result": "pass",
+      "detail": "切片 sha256 = 3fa02ec58bd0ae89439778ec82d87c2b44b474fcdf9fcbbce210d86aeaf28002（与候选 source.sliceSha256 相同）"
+    },
+    {
+      "text": "全部 122 个引文节点逐字回切：text[start:end]==quote；sourceHash 一致；标 inRange 的 111 条全部落在 [402669,406211) 内且无一条跨边界",
+      "result": "pass",
+      "detail": "独立审计脚本 /tmp/clb0118/audit_0118.py（不 import 构建脚本，从磁盘重读成品复算同一量）报 PROBLEMS: 0"
+    },
+    {
+      "text": "区间内引文 111 条全部满足 text.find(quote)==start（首次出现即本处），不会因全书别处有同句而落到错位置",
+      "result": "pass",
+      "detail": "构建期即把锚点搜索限定在 [402669,406211) 内：起初有两个锚点（「想到这里，许七安不再犹豫」「我进宫一趟」）因全书别处也有同句而报 not unique，改为区间内限定后通过；审计复算 find != start 的条数为 0"
+    },
+    {
+      "text": "候选自带的 reproduce 命令原样可跑：输出 docs sha256 相符、quotes 122 bad []、inRange 111 / outOfRange 11",
+      "result": "pass",
+      "detail": "已把候选 verification.reproduce 里的脚本原样复制执行一次，输出与声明一致；该命令只读 docs.json 与候选文件，不依赖 /tmp 产物"
+    },
+    {
+      "text": "任务五栏不共用引文：4 条任务 × 5 栏，用三把尺子（精确 (start,end) 相同／互为子串／落在同一原文段落）判重，0 命中",
+      "result": "pass",
+      "detail": "构建期断言命中即抛错终止；本项确实触发过一次并已按纪律修数据：T1.action 与 T1.result 同落第 10 段，我删除 action 中那道命令的引文、保留 result 的判断句，并在 T1.actionNote 里写明取舍，未放宽校验规则"
+    },
+    {
+      "text": "每个 null 栏位都带同名的 <栏位>Note 写明为什么没有依据（T1.cost、T4.cost 共 2 处）",
+      "result": "pass",
+      "detail": "T1.costNote 逐条排除「罚俸/受伤/夺权/倒贴财物」，并说明「陛下命我半月内查出真相」是任务期限（约束）而非已付代价、「线索断了」已记入 result；T4.costNote 说明她没有任何已支付的代价，疑问属障碍而非代价"
+    },
+    {
+      "text": "worldSettings 枚举合法且三态区分写进字段：kind ∈ {rule,place,item}；place.placeState ∈ {arrived,mentioned}；item.itemStates ⊆ {hold,transfer,use,lose}；rule.institution ∈ {declared,executed,misunderstood}",
+      "result": "pass",
+      "detail": "10 条逐条核对：宫城=mentioned（原文「宫城的话，许七安是进不去的」，无进入动作）、大黄山=mentioned、怀庆府/皇城/府衙=arrived；金牌=[hold,use]、三钱银子=[transfer] 四态分写；三条 rule 的 institution 分别 executed/executed/declared，declared 那条另带 institutionNote 标明「原文无诏令原文」的口径分歧"
+    },
+    {
+      "text": "foreshadows 状态合法：有铺设+回收的记 resolved-out-of-range，未回收的显式记 unresolved 且 payoff=null 并给判据",
+      "result": "pass",
+      "detail": "F1/F2 回收端均在区间外，逐条带 payoffWhere 章名与区间外逐字引文；F3 unresolved 的判据是两次逐字检索（「准时汇报」全书仅命中本区间 403698 一处；「司天监」与「小宦官」在区间后 ±200 字共存 0 处），并如实登记了一个形态相近但来源不同的 nearAnalogue（第二卷监督小宦官线）而不是拿它充回收端"
+    },
+    {
+      "text": "semanticReview.performed == false：本文件只做引文定位与分层，不声称语义已核验",
+      "result": "pass",
+      "detail": "候选 semanticReview 明确写「定位正确不等于语义已核验」；UNKNOWN U11 同样声明语义核验未完成"
+    },
+    {
+      "text": "受保护路径未在本轮被改动：本轮只在 loop/state/out/ 下新建 2 个文件（candidate + 本提交记录），未写 js/ css/ index.html serve.py narrative.py scripts/ tests/ docs/ data/",
+      "result": "pass",
+      "detail": "复核命令：git status --porcelain -- js css index.html serve.py narrative.py scripts tests docs data → 316 个已跟踪改动项，其中 mtime 晚于本会话开始时刻（2026-10-10 00:17:25 本地）的只有 2 个：docs/QUALITY.md（00:54:24）与 data/cache/index.json（00:18:41），均不是本 agent 写入（我本轮的写入只有 loop/state/out/ 下两个文件，候选文件 mtime 00:55:32），属其他并行 agent/守护轮的既有未提交改动；loop.py classify() 对本轮两个路径均判 append-only"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/read_dafeng_L2_0118.candidate.json",
+      "kind": "append-only"
+    },
+    {
+      "path": "loop/state/out/read_dafeng_L2_0118.submit.w-sanguo-0.json",
+      "kind": "append-only"
+    }
+  ],
+  "reworkOf": "loop/state/out/REJECTED__read_dafeng_L2_0118.json",
+  "reworkReason": "该任务此前有两次 rc=124 超时（FAILED-TASKS.json: consecutive=2，lastAgent=w-sanguo-0），机器记录为 rejected：agent 未产出 writes 路径文件。本轮从头重读原文切片并补齐全部分区。",
+  "sourceHashes": {
+    "data/cache/1063b17ca65ec1b76f30e460.docs.json": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+  },
+  "remaining": [
+    "未做语义核验：candidate.semanticReview.performed=false，只完成引文定位与 explicit/inferred/derived 分层。",
+    "F1、F2 的回收端全部在本区间之外，只核了关键词命中点与相邻章节原文，未逐章通读中间过程；F2 的人宗→巫师转向在第一百二十三章，我只读了该处上下文而未经由全书推理链复核。",
+    "F3（司天监小宦官要求准时汇报）标 unresolved，判据是两次逐字检索；「司天监今日来了个小宦官」是否与第二卷「元景帝派来监督的小宦官」是同一人，我无法确认，已登记 nearAnalogue 与 UNKNOWN U7 而不是裁决。",
+    "原文疑有三处讹字（「他如桑泊案」「不算大人物之间」「追求陈府尹」），我按可读义理解但未修补原文，全部照原文引用并登记 UNKNOWN U3；用字裁决不在本轮范围。",
+    "陈府尹「完全不见刚睡醒的模样」是否只是许七安的观察（他此前「得知陈府尹还在睡觉」是衙役通传的二手信息），我无法从区间内判定，已登记 UNKNOWN U10。",
+    "guard 一侧的确认缺失：第二辆马车是长公主的、太子/二皇子/二公主座次，全部只有守卫一人的说法（「估摸着」），本区间没有车队一侧的验证，已登记 UNKNOWN U8。",
+    "那三钱银子的最终归属（守卫是否收下）原文没写，已登记 UNKNOWN U4。",
+    "「司天监小宦官」这条义务与全书唯一的近似物（第二卷监督小宦官线）之间的形态相似性由我人工比对，未做全量自动化对齐。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/read_dafeng_L2_0118.candidate.json",
+      "loop/state/out/read_dafeng_L2_0118.submit.w-sanguo-0.json"
+    ]
+  },
+  "submittedAt": "2026-10-09T16:56:52Z",
+  "wallClockSeconds": 2367,
+  "wallClockFrom": "lease.startedAt",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-09T16:56:52Z"
+  },
+  "verifyState": "partial",
+  "reviews": [
+    {
+      "reviewer": "w-verify-3",
+      "at": "2026-10-09T18:49:32Z",
+      "verdict": "partial",
+      "notes": "总体判断：这是**引用层零编造**的候选，红线执行相当自觉（semanticReview=not-performed、6/6 narratorConfirmed=false、T1/T4 的 cost 记 null 且各带理由、F3 显式 unresolved、selfCritique 5 条主动给出可降级点与「若复核认为应改则改哪个字段」的处置建议）。判 partial 而非 pass 只因 CE1（自述自检等式按字面为 False）与 CE2（条件句被写成 explicit 的已执行结果）。判 partial 而非 fail：122/122 引文逐字命中、sourceHash 零失配、无原文外人物/结局/伏笔/成功判定，不存在编造级问题。\n\n反向验证的方法说明（含局限）：本区间**行级**覆盖不饱和——88 个非空段中 30 段没有任何候选引文（含章题行、分隔线、PS 行等非叙事内容，但也含吕青疲惫段、人宗品级段、武者定义段、府尹失态段等真叙事内容）。这与「行级已饱和」型单元有结构性差别：上面 5 条 reverseChecks 全部落在这些未覆盖段里，属**段落级遗漏**，而不是「引文在、事实没被记成断言」。\n\n关于下游（E11 口径，供发布方参考）：本文件的 counterExamples 会被 loop/bin/to_candidate.py 读取以决定排除哪些条目。CE1 里的 `docs[0]` 不是发布层名，不产生排除；**CE2 里的 `tasks[1]` 会使 tasks[1] 在修好前不发布** —— 这是有意的：result 那半句是原文未支撑的 explicit 断言。该条**只需改一个字段**即可恢复，其 objective/obstacle/action/cost 四栏均有逐字依据且未共用引文。\n\n不确定处（只记存疑，不据此判 fail）：\n① 人宗道首「是国师的身份」、地宗道首「是二品」是**许七安的心理活动**，叙述未确认品级真伪；补记时应标为人物判断而非硬设定。\n② CE2 的严重性有解释空间：T2.result 自带 resultNote 说明这是「许七安的对外定性」，读者可能据此把后半句读成推断；我仍按字面记账，因为 basis 是机器可读字段。**若发布方认为该 note 已足够，可只把 basis 改为 inferred 而不删文字。**\n③ 我未逐条核验 F1/F2 声明的**全部**区间外回收端（只抽验 @406256、@533290 两处），其余章名/偏移未独立复核；区间外材料不足以也不应当用来证伪区间内断言。\n\n自我纠错（契约允许，如实记）：我第一轮把「而且还未婚」判成未覆盖，复查发现它在 rejectedEdges[2].why 里出现过，已撤回；我又一度想以 T2.result 判 fail，复查后确认该条自带纠错说明且 CC2 已标 narratorConfirmed=false，属措辞越权而非编造，故降为 partial 依据。两处误报均未进入结论。\n\n未做的事：语义正确性未独立复核（本次只做引用定位全量核验＋反向覆盖＋误杀＋幻觉四类机器可复算检查，semanticReview 保持 not-performed），未判断候选对人物动机/世界观的文学解读是否最优；区间外内容只读了用于判定「章末求见」「守卫座次」是否已回收的相邻章段落，未把区间外内容当作本区间事实的证据；未跑任何 GPU/浏览器测试（本任务不需要）；未修改候选的任何字节（复核前后候选哈希一致 6ea03ed1…）。",
+      "counterExamples": [
+        {
+          "id": "CE1",
+          "claim": "候选 source.nextUnitHead 写下自检等式：「docs[0].text[406211:406220] == '第一百二十章 即兴作诗'」。按字面复算为 **False**：切片 [406211,406220) 只有 9 个 codepoint，而该标题是 11 个 codepoint，长度不等，永不可能相等；正确右端是 406222。同一文件对本单元自己的 unitHeadCheck 用的是正确长度（[402669:402682] 共 13 字），故不是口径分歧，是这条自检的字面错误。",
+          "quote": "第一百二十章 即兴作诗",
+          "start": 406211,
+          "end": 406222,
+          "why": "实测 T[406211:406220]='第一百二十章 即兴'（len 9）；T[406211:406222]='第一百二十章 即兴作诗'（len 11）与该标题相等为 True。**不影响任何抽取内容**：区间右端 406211 本身正确（任务给定），下一单元标题内容也正确，错的只是这条自检里写的右端偏移。修正为 406222 即可。",
+          "severity": "must-fix（自述自检等式字面不成立；不影响抽取内容）",
+          "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+          "inUnit": false
+        },
+        {
+          "id": "CE2",
+          "claim": "tasks[1]（陈汉光/陈府尹）的 result 以 basis=**explicit** 写成已发生的结果：「许七安当众把赵县令之死定成『无故死在大牢，是意外』——**把柄不再被公布，他的官位与京察风险被按住**。」但区间内「公布」只出现 1 次，且整句是**反事实条件句**：「这么大一个把柄，**如果**公布出去，陈府尹**恐怕**要降职了」；原文从未写「没有被公布」这一事态，也没写他的官位或京察风险已被消除，并且同段还写明这只是「说和不说的区别」（即处置**尚未定**）。把条件句的否定 + 推测（「恐怕」）写成 explicit 的既成结果，是可证伪的越权。",
+          "quote": "这么大一个把柄，如果公布出去，陈府尹恐怕要降职了",
+          "start": 403841,
+          "end": 403865,
+          "why": "原文 @403837 整段：'    这么大一个把柄，如果公布出去，陈府尹恐怕要降职了，而对许七安来说，人已经死了，追求陈府尹意义不大。也就说和不说的区别。\\n'。「如果公布出去」是条件、「恐怕」是推测、同段「也就说和不说的区别」指向未决；三处都**不支持**「不再被公布／风险被按住」。正确处置（**单字段可修**）：result 只保留已发生的那一半（许七安当众给出「是意外」的定性，@403765 有逐字引文），把后半句降级为 inferred 或移入 unknowns；**不要删除整条 tasks[1]** —— 它的 objective/obstacle/action/cost 四栏经核验均有逐字依据且未共用引文。",
+          "severity": "must-fix（条件句被写成 explicit 的已执行结果；限于 result 一栏，改 basis 或删后半句即可）",
+          "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+          "inUnit": true
+        }
+      ],
+      "reverseChecks": [
+        {
+          "found": "**吕青这条线整体缺记**：区间内她不止「被调派」——原文还写了她**疲惫**（「女子捕头俊俏的脸蛋隐约可见疲惫」）、许七安**主动关心**（「吕捕头，近来没有好好休息吧？」）、她的**回答**（「公务繁忙」）、以及叙述者给的外部身份（「年纪大概在25—30之间」「首都公安厅刑侦队大队长」「前途无量」）。这四处在候选的**任何 quote 里都没有出现**，也未进 states/knowledgeDiffs/unknowns。她的疲惫与「公务繁忙」这组对照是区间内唯一一处人物身体状态描写。",
+          "quotes": [
+            {
+              "quote": "许七安发现吕青在悄悄打量自己，女子捕头俊俏的脸蛋隐约可见疲惫。",
+              "start": 404561,
+              "end": 404592,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "inUnit": true
+            },
+            {
+              "quote": "“吕捕头，近来没有好好休息吧？”",
+              "start": 404598,
+              "end": 404614,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "inUnit": true
+            },
+            {
+              "quote": "吕青笑了笑：“公务繁忙。”",
+              "start": 404620,
+              "end": 404633,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "inUnit": true
+            },
+            {
+              "quote": "她年纪大概在25—30之间，年纪轻轻，就当上首都公安厅刑侦队大队长，前途无量。",
+              "start": 404738,
+              "end": 404777,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "inUnit": true
+            }
+          ],
+          "why": "候选只记了「被调派→猜是谍子→领命→确认府尹服软」；缺的这层正是「她已经知道陈府尹妥协的原因」能成立的前提（她是有年资、读得懂府内政治的捕头）。"
+        },
+        {
+          "found": "**人宗这条嫌疑线缺「为什么查不动」**：候选记了 S4/CC5「那就只有人宗了」与「现在不能过早下定论」，但漏掉紧接的阻力来源——**人宗道首是国师、地宗道首二品**，这正是他自问「人宗是我能调查的吗？」的依据，也是本区间他放弃正面深查、改走长公主路线的实际约束。",
+          "quotes": [
+            {
+              "quote": "人宗是我能调查的吗？且不说人宗道首是国师的身份，地宗道首是二品，人宗道首也不会差多少吧。",
+              "start": 404427,
+              "end": 404471,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "inUnit": true
+            }
+          ],
+          "why": "属 P3.10 口径中「影响行动/约束」的规则类设定，候选 worldSettings 10 条无一覆盖修行体系的品级/身份壁垒；也未在 unknowns 登记「品级是人物自述、叙述未确认」。"
+        },
+        {
+          "found": "**破案期限的后果被整段略过**：原文「半个月的时间说长不长，说短不短，破案要顺藤摸瓜，急不来」。候选在 T1.costNote 引了「陛下命我半月内查出真相」并正确判为「约束，不是代价」，但此后不再记录；同一事实的**行为后果**（据此不急、要顺藤摸瓜）在 tasks/states/unknowns 里均无落点。",
+          "quotes": [
+            {
+              "quote": "半个月的时间说长不长，说短不短，破案要顺藤摸瓜，急不来。",
+              "start": 404916,
+              "end": 404944,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "inUnit": true
+            }
+          ],
+          "why": "这是本区间解释「他为何先去见长公主而不是连夜查案」的直接依据；候选把期限当成 cost 栏的排除理由后，没有把它登记为任何 state/约束。"
+        },
+        {
+          "found": "**武者的定义句被漏掉，只剩否定结论**：候选 S4 引了「首先可以排除武者灭口了」与「暴力是武者的代名词……绝对做不到无声无息」，却漏掉夹在两句之间的定义「武者的本质可以用四个字形容：勥烎菿奣」——它既是排除推理的前提，也是本区间的用典/文风事实。",
+          "quotes": [
+            {
+              "quote": "武者的本质可以用四个字形容：勥烎菿奣。",
+              "start": 404213,
+              "end": 404232,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "inUnit": true
+            }
+          ],
+          "why": "属「引文在、但事实没被记成任何断言」的段落级遗漏：候选 S4.before 写「只有一个排除法的起点：不是武者」，未记录原文对武者本质的这句概括。"
+        },
+        {
+          "found": "**陈府尹的失态动作被漏记**：原文在他听到「灭口」时写了具体身体反应——「手颤抖一下，滚烫的茶水洒出来，他浑然不在意，瞪大眼睛」。候选 S1/T2 用「端起茶杯」「不觉得多大的事」写 before、用「作揖交权」写 after，中间这个**态度转折的物证动作**没有任何引文用到。",
+          "quotes": [
+            {
+              "quote": "陈府尹手颤抖一下，滚烫的茶水洒出来，他浑然不在意，瞪大眼睛：“灭口？”",
+              "start": 403442,
+              "end": 403477,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "inUnit": true
+            }
+          ],
+          "why": "S1 记的是态度前后变化，而这个动作正是变化的转折点（听到「灭口」的瞬间）；缺它使 before→after 之间没有可核对的中介事件。"
+        }
+      ]
+    }
+  ]
+}

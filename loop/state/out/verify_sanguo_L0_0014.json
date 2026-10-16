@@ -1,0 +1,326 @@
+{
+  "task": "verify:sanguo:L0:0014",
+  "agent": "w-verify-1",
+  "status": "done",
+  "verdict": "partial",
+  "candidateVerdict": "partial",
+  "reviewedTask": "read:sanguo:L0:0014",
+  "reviewedArtifact": {
+    "path": "loop/state/out/read_sanguo_L0_0014.candidate.json",
+    "sha256": "2bd9d365c0e763a64713885a1d81cd125b274f4f2c7008f48b479244a893fed8",
+    "bytes": 427585,
+    "producedBy": "w-xiyou-0",
+    "producedAt": "2026-10-07T21:43:25Z"
+  },
+  "source": {
+    "path": "data/cache/152e2a6eed94f1075e7e7070.docs.json",
+    "sha256": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+    "docIndex": 0,
+    "range": [
+      71677,
+      78957
+    ],
+    "codepoints": 7280,
+    "segmentSha256": "2437ff9349e6c55cbac77989d0872a8d6c0579e6fb5cbef79df3cdc2fe7e9009",
+    "offsetBase": "absolute-doc-codepoint",
+    "note": "任务 sourceHash 与候选 source.path 一致。索引当前 sanguo graphKey=fe42d01f3826fe8096f86614 的 docs.json sha256=8ab7298a… 与本文件字节不同，但两份 docs[0].text 长度均 607191 且 json.load 后相等，本单元切片逐字相同（实测）。"
+  },
+  "summary": "判 partial 而非 pass：候选确有三处可被自身产物或原文直接证伪的问题（CE1 自述字段名不存在、CE2 十条话语被标成叙述层、CE3 编号交叉引用错），按角色契约「判 partial 时要说清哪些可用、哪些必须丢弃或降级」逐条给了处置。判 partial 而非 fail：**无一条编造** —— 我用「区间内首次出现 == 声称偏移」「t[start:end]==quote」「find(quote)」「sourceHash」「occurrencesInWholeDoc」五项对 509 条引文全量核验，失败数全部为 0；固定种子抽 5 条 5/5 逐字命中且偏移一致；`姓X名Y` 人名集合与原文完全相同；无原文外结局、无把章末当成功、无把未回收伏笔写成已回收、semanticReview 未被冒称。反向验证（RC1–RC6）查出 6 处**遗漏**，其中 RC6（严舆被杀→白虎弃城这条最直接的因果链在 38 条边里 0 覆盖）是记账缝隙，RC2/RC4 是战术回合与人物出场被略去，RC1/RC5 是背景与宣示层未采 —— 这些是**覆盖不足**，不是编造，因此不足以判 fail，但足以否掉 pass。\n\n不确定处（存疑，不作为判据）：① 候选读的是 data/cache/152e2a6eed94f1075e7e7070.docs.json，而索引当前 sanguo 的 g",
+  "counterExamples": [
+    {
+      "id": "CE1",
+      "field": "voiceInventoryNote",
+      "claim": "voiceInventoryNote 声称「全部对话的逐句清单见 anchorLedger 与各 quoteRef 的 kind=speech 标记」。",
+      "quote": "全部对话的逐句清单见 anchorLedger 与各 quoteRef 的 kind=speech 标记。",
+      "quoteIsFromCandidate": true,
+      "why": "候选自身的 509 条 quoteRef **没有任何一条带 `kind` 键**（实测 `kind` 键出现 0 次）。候选实际用的是 `voice`（narration/speech/mixed）+ `speechSpans`。这是自述字段名与产物不符：读者按 note 去查 `kind=speech` 会一无所获。属**说明性文字写错**，不影响已抽取内容，降级而非作废。",
+      "severity": "low",
+      "reproduce": "python3 -B -s /tmp/verify-sanguo-L0-0014/audit.py 的 §3 末行输出 `quoteRef 上存在 kind 键的条数: 0`"
+    },
+    {
+      "id": "CE2",
+      "field": "quoteRefs[].voice（10 条，分散在 tasks/states/unknowns/causeEdges）",
+      "claim": "这 10 条引文被标为 `voice=narration`（且不带 speechSpans），但其中 100% 落在原文的引号话语跨度内，并以右引号 ” 结尾 —— 即它们**是人物话语**，被当成叙述层引用。",
+      "quote": "速往秣陵，会薛礼、笮融军马，急来接应。”",
+      "start": 75321,
+      "end": 75341,
+      "quoteIsFromCandidate": false,
+      "why": "原文该串前接「刘繇曰：“人报周瑜领军袭取曲阿……」，是刘繇的话；候选在 .tasks[9].obstacle.quoteRefs[0]、.unknowns[9].quoteRefs[0]、.unknowns[13].quoteRefs[1] 三处把它标成 narration。同类还有：「我表你为折冲校尉、殄寇将军，克日领兵便行。”」@73154（袁术语，标 narration ×3）、「莫若以兵先据其内：所谓攻其无备，出其不意也。”」@77801（孙静语）、「孙策借我军马起事……当以何策图之？”」@78758（袁术语）、「策敢借雄兵数千，渡江救难省亲。恐明公不信，有亡父遗下玉玺，权为质当。”」@73055（孙策语）。合计 36 条 narration 引文完全落在话语跨度内，其中 10 条以 ” 结尾。",
+      "mitigating": "候选另有 41 条标 `mixed` + `speechSpans`、111 条标 `speech`，说明它有分层机制且大体在用；且这 10 条所在条目的 `text` 多数已写明说话人（如 tasks[9].obstacle.text 写「刘繇军虽失曲阿……（「速往秣陵……」）」），**没有发现把话语当叙述事实下结论的实例**（逐条读过 CE2 涉及的全部 text 字段）。故这是 voice 字段的机械标注错误，不是「把说法当事实」的红线违反。",
+      "severity": "medium",
+      "reproduce": "python3 -B -s /tmp/verify-sanguo-L0-0014/audit.py 的 §3 输出 `标为 narration 但 100%% 落在话语跨度内: 36 （其中以 ” 结尾的: 10 ）`"
+    },
+    {
+      "id": "CE3",
+      "field": "rejectedEdges[8].whyNoEdge（R9）",
+      "claim": "R9 写「从求和到弃城之间还隔着严舆被斩（**C29 段**）」。",
+      "quote": "从求和到弃城之间还隔着严舆被斩（C29 段）",
+      "quoteIsFromCandidate": true,
+      "why": "C29 的实际内容是「孙静献『先据查渎』之策 => 孙策燃火张旗、设疑兵、连夜撤围南去」，与会稽城下严舆被斩无关；且「严舆」在全部 38 条 causeEdge 的 from/to 中**出现 0 次**（即根本没有覆盖严舆被斩的边）。这是一处**编号交叉引用错误**。（R9 的结论本身——不给「射中左手 => 白虎败亡」跨段直边——经核验成立：原文该段写的是白虎「大惊」→「遂商量求和」，与败亡之间确隔着严舆被杀与后续伏兵链条。）",
+      "severity": "low",
+      "reproduce": "python3 -B -s /tmp/verify-sanguo-L0-0014/audit.py 的 §6 输出 C29.from/C29.to 与「严舆」出现 0 次"
+    }
+  ],
+  "reverseChecks": [
+    {
+      "id": "RC1",
+      "found": "孙策投袁术前的出身背景整段未进任何断言字段：父丧后退居江南、礼贤下士、因陶谦与母舅吴景不和而移母及家属居曲阿。",
+      "quote": "原来孙策自父丧之后，退居江南，礼贤下士；后因陶谦与策母舅丹阳太守吴景不和，策乃移母并家属居于曲阿，自己却投袁术。",
+      "start": 72542,
+      "end": 72606,
+      "inUnitRange": true,
+      "whyItMatters": "「礼贤下士」是孙策招揽二张、蒋钦周泰来投、太史慈还众等一串事件的**前置条件**；候选把「因避乱隐居」的二张、来投的蒋钦周泰都写成独立事件，但这一句里叙述者给的动机线索（礼贤下士）没有被任何 tasks/states 采纳。陶谦—吴景—曲阿这条线只在 crossUnitRefs[4] 与 connectiveAudit 里被机械登记，未成为断言。",
+      "candidateCoverage": "陶谦/曲阿出现在 crossUnitRefs[4].mention，属登记而非断言；『礼贤下士』『父丧』『退居江南』在断言字段中出现 0 次。"
+    },
+    {
+      "id": "RC2",
+      "found": "神亭岭当日黄昏的收兵机制——周瑜领军来到、刘繇自引大军杀下岭来、风雨暴至——被合并成一句，且「周瑜领军来到」这一支未在断言中出现。",
+      "quote": "喊声起处，周瑜领军来到。刘繇自引大军杀下岭来。时近黄昏，风雨暴至，两下各自收军。",
+      "start": 75003,
+      "end": 75041,
+      "inUnitRange": true,
+      "whyItMatters": "causeEdges C19 把「策与慈方才放手」归因于「刘繇接应军与程普等十二骑同时冲到」，但原文在两者之间还写了周瑜领军来到与刘繇大军杀下岭，收兵的直接原因是「时近黄昏，风雨暴至」——候选在别处引了「风雨暴至」（states[7]/T9 相关），但 C19 的机制描述漏了周瑜这一路援军。这是一条**可补的因果细节**，非编造。",
+      "candidateCoverage": "『喊声起处』『周瑜领军来到』在候选断言字段中出现 0 次（『时近黄昏』『风雨暴至』『各自收军』则有）。"
+    },
+    {
+      "id": "RC3",
+      "found": "阵前互相羞辱的对称结构只写了一半：候选写了太史慈把孙策兜鍪挑于阵前（tasks[8].cost），但没写孙策把太史慈的小戟挑于阵前。",
+      "quote": "两阵圆处，孙策把枪挑太史慈的小戟于阵前，令军士大叫曰：“太史慈若不是走的快，已被刺死了！”太史慈亦将孙策兜鍪挑于阵前，也令军士大叫曰：“孙策头已在此！”",
+      "start": 75068,
+      "end": 75139,
+      "inUnitRange": true,
+      "whyItMatters": "原文是一组**对仗**（策挑慈戟 / 慈挑策兜鍪，两边各令军士叫喊），候选只在 task_taishici_zhuo_sunce 的 cost 里记了慈羞辱策这一侧，孙策羞辱太史慈的那一侧在小戟、『不是走的快』上均 0 命中。截取半边会读成「单方面受辱」。",
+      "candidateCoverage": "『小戟』『不是走的快』『两军呐喊』『夸胜』在断言字段中出现 0 次。"
+    },
+    {
+      "id": "RC4",
+      "found": "会稽城下决战的战术回合被整体略去：王朗拍马舞刀与太史慈交战、朗将周听杀出助战、黄盖飞马接住周听交锋、两下鼓声大震互相鏖战、直到王朗阵后先乱。",
+      "quote": "王朗拍马舞刀，与慈战不数合，朗将周听，杀出助战；孙策阵中黄盖，飞马接住周听交锋。两下鼓声大震，互相鏖战。忽王朗阵后先乱，一彪军从背后抄来。",
+      "start": 77492,
+      "end": 77556,
+      "inUnitRange": true,
+      "whyItMatters": "候选 states[9] 只写「前后夹攻下败走入城」，causeEdges 中周瑜/程普刺斜夹攻那一支（77571）与周听助战（77506）均 0 命中。周听这个人物在候选里只出现在**结局**（被孙策一枪刺死），他的出场与助战没有任何记录——人物的首次行动被省略，只留死亡。",
+      "candidateCoverage": "『拍马舞刀』『杀出助战』『飞马接住』『鼓声大震』『鏖战』『一彪军』『刺斜』在断言字段中出现 0 次（『前后夹攻』仅 1 次，在 states[9].after.text）。"
+    },
+    {
+      "id": "RC5",
+      "found": "孙策在会稽阵前对王朗的公开宣示（兴仁义之兵、来安浙江）完全未采；王朗回骂的三句（童心不足/强并吾界/与严氏雪仇）只采了「童心不足」「雪仇」的碎片。",
+      "quote": "两阵对圆，孙策出马，谓王朗曰：“吾兴仁义之兵，来安浙江，汝何故助贼？”朗骂曰：“汝童心不足！既得吴郡，而又强并吾界！今日特与严氏雪仇！”",
+      "start": 77406,
+      "end": 77480,
+      "inUnitRange": true,
+      "whyItMatters": "这是本单元**最后一次阵前对话**，也是孙策「仁义之师」自我定位的第二次明说（第一次在 T15「策以金帛答之……江南之民，无不仰颂」附近）。候选对孙策在江东的合法性叙事只记了行为（不掳掠、给赏归农），没记他自己说出口的口号；王朗一侧的宣战理由（强并吾界）也缺。",
+      "candidateCoverage": "『仁义之兵』『来安浙江』『强并吾界』在断言字段中出现 0 次。"
+    },
+    {
+      "id": "RC6",
+      "found": "严舆被杀 → 首级送入城中 → 白虎弃城，这一条最直接的因果链没有任何 causeEdge，且「严舆」在全部 38 条 causeEdge 中出现 0 次。",
+      "quote": "舆拨剑起身，策飞剑砍之，应手而倒，割下首级，令人送入城中。白虎料敌不过，弃城而走。",
+      "start": 77150,
+      "end": 77187,
+      "inUnitRange": true,
+      "whyItMatters": "候选 R9 自己承认「从求和到弃城之间还隔着严舆被斩」，却把这条边**既没建边、也没登记为 rejectedEdge**（R9 登记的是另一件事：射中左手→败亡）。tasks[13] 的 result 记了「严舆被杀」「弃城而走」两个事实，但两者之间的因果机制在全候选 38 条边里无一处落笔——这是**记账缝隙**：一个被自己识别出的关键中间环节掉在两处登记之外。",
+      "candidateCoverage": "『严舆』在 causeEdges 的 from/to 中出现 0 次；R9 声称该环节在「C29 段」，而 C29 实为孙静献查渎之策（见 CE3）。"
+    }
+  ],
+  "misKillCheck": {
+    "conclusion": "未发现候选因词表/正则误杀合法因果边——本候选是语义抽取，不含正则/词表过滤层；38 条 causeEdges 与 10 条 rejectedEdges 的理由均逐条读过原文核对。",
+    "detail": [
+      "R1（东取广陵被劫寨 → 回来遇吕布之使）：判「不给边」成立。原文两句之间只有「回来」这一行程相接，确无因果连接词；且「被袁术劫寨」发生在东取广陵途中，刘备回师目标另可能是吕布之召。**风险**：R1 的理由「他的回师可能出自败退，也可能出自别的打算」把两种可能并列，但候选 T5 的 result 又写 he「正遇吕布之使」后才「大喜」赴徐州——两处口径基本一致，未构成矛盾。",
+      "R4（孙策借兵 → 袁术伐刘备）：判「不给边」成立且**很有价值**：原文杨大将明确「未可图也」并改推先伐刘备，中间隔着一个被否掉的方案。这是本单元最容易连错的一条边，候选挡得对。",
+      "R5（周泰救出孙权 → 贼众退去）：判「不给边」成立。「会贼远重」四字文义不通（候选已在 states[10].anomaly 与 U4 双处登记，做法正确）。",
+      "R6（杨大将献计 → 袁术采纳）：判「不给边」成立。原文止于「某献一计，使备即日就擒」＋「不知其计若何，且听下文分解」，本单元**确实没有**「术从之」类采纳标记；对照同区间内的「布听其言」「朗依其议」「孙策然之」，这个否证是可靠的。",
+      "R10（策斩首级万余 → 安辑居民）：判「不给边」成立，且理由正确指出两句方向相反。",
+      "R3（周听判断对了 → 伏兵得手）：判「不给边」成立，理由（用一个人的正确判断去解释另一个人做出的行动）准确。"
+    ],
+    "falseExclusionRisk": "候选的 rejectedEdges 机制整体是**加分项**：10 条里 9 条的否证理由都能在原文找到直接支撑。唯一需要修正的是 R9 的编号引用（CE3）与它未登记的严舆链条（RC6）。"
+  },
+  "hallucinationCheck": {
+    "inventedCharacters": "无。区间内出现的全部人名/称谓（刘备、张飞、关羽、吕布、袁术、高顺、纪灵、陈宫、孙策、朱治、吕范、周瑜、张昭、张纮、程普、黄盖、韩当、蒋钦、周泰、刘繇、张英、太史慈、笮融、薛礼（薛札）、陈武、陈横、周听、严白虎、严舆、凌操、王朗、虞翻、孙静、董袭、华佗、孙权、杨大将、张勋、桥蕤、雷薄、陈芬）逐字可 find 命中；`姓X，名Y` 形态的 8 对（朱治/周瑜/吕范/蒋钦/周泰/虞翻/董袭/华佗）与原文完全一致，无新增一对。",
+    "inventedEnding": "无。全回以「不知其计若何，且听下文分解。」收束（@78886-78900），候选 objectiveStatusTally 为 achieved 15 / partial 1 / not_achieved 7 / undetermined 2，**没有把章末当成功**；task_yuanshu_tu_sunce 与 task_yanbaihu_qiuhe 等均标 not_achieved/undetermined。",
+    "inventedForeshadow": "无。5 条 foreshadows 的铺设与回收均在区间内可查（F1 玉玺、F3 刘繇不能用太史慈、F4 董袭旧医→华佗）；F2「暗有称帝之心」与 F5「重修庙宇、四时祭祀」两条显式标 unresolved_in_unit / unresolved_out_of_unit，未把未回收写成已回收。5 条 notForeshadows 的排除理由（单次出现、无回收动作）逐条核验成立。",
+    "overclaim": "semanticReview=not-performed、claimVerification=not-performed 保持未被覆盖，符合「定位≠语义」纪律。候选**未**声称语义已核验。"
+  },
+  "citationSample": {
+    "quoteRefsTotal": 509,
+    "t_start_end_equals_quote_failures": 0,
+    "find_quote_not_equal_start": 0,
+    "outsideUnitRange": 0,
+    "sourceHashMismatch": 0,
+    "occurrencesInWholeDocMismatch": 0,
+    "randomSample": {
+      "seed": 20261009,
+      "n": 5,
+      "allVerbatim": true,
+      "allOffsetsConsistent": true,
+      "items": [
+        {
+          "quote": "慈见策待之甚厚，遂请降。",
+          "claimedStart": 76309,
+          "findResult": 76309,
+          "exact": true
+        },
+        {
+          "quote": "人报周瑜领军袭取曲阿，有庐江松滋人陈武，字子烈，接应周瑜入去。",
+          "claimedStart": 75278,
+          "findResult": 75278,
+          "exact": true
+        },
+        {
+          "quote": "策曰：“子义乃信义之士，必不背我。”众皆未信。次日，立竿于营门以候日影。",
+          "claimedStart": 76467,
+          "findResult": 76467,
+          "exact": true
+        },
+        {
+          "quote": "孙策还兵复攻秣陵，亲到城壕边，招谕薛礼投降。",
+          "claimedStart": 75783,
+          "findResult": 75783,
+          "exact": true
+        },
+        {
+          "quote": "策曰：“虞翻莫非虞仲翔乎？”袭曰：“然。”策曰：“此贤士也。我当用之。”乃令张昭与董袭同往聘请虞翻。",
+          "claimedStart": 78471,
+          "findResult": 78471,
+          "exact": true
+        }
+      ],
+      "note": "两条 anchorLedger[2] 的站点样板引文（'------------------'、'枫林晚 整理校对…'）全文各出现 119/118 次，候选已显式登记 duplicateWarning 并取区间内首次，偏移 78904/78925 与 t[s:e] 逐字一致；若用全文 find() 会返回 4835/4856 —— 这是重复串的正确定位方式，不是缺陷。"
+    }
+  },
+  "coverage": {
+    "span": 7280,
+    "narrativeParagraphs": 14,
+    "candidateCoverage": "候选自带 paragraphLedger 14 段，paragraphsWithoutTask=[] —— 实测其分段边界与原文换行完全一致（16 个非空行：1 回目 + 14 段正文 + 2 段样板），登记属实。",
+    "reverseGapFinding": "段级「已覆盖」不等于事实级已覆盖：RC1–RC6 六条原文事实落在**已被登记为 covered 的段内**，却未进任何断言字段。这正是「只查已写项发现不了遗漏」的实例。"
+  },
+  "usableVsDiscard": {
+    "usable": [
+      "全部 509 条引文的定位层：逐字命中、偏移自洽、区间内、sourceHash 一致、occurrencesInWholeDoc 全部正确 —— 可直接使用。",
+      "tasks[0]–[24] 的五元组与引证（含 7 条 cost 写 null 并在 nullReasons 写明理由，符合「缺项写 null 且说明为什么」）。",
+      "causeEdges C1–C38 的方向/触发/机制（C7 标 derived、C9/C17 的副词机制分析尤佳）。",
+      "states S1–S21 的 before/after/anchor（S11 把「原文未载伤情」写成前值而非「无伤」，S15–S18 的知识差写清了谁知/谁不知）。",
+      "foreshadows F1–F5 与 notForeshadows N1–N5、rejectedEdges R1–R10（除 R9 编号外）、unknowns U1–U22、selfCritique SC1–SC10、textVariants（孙信符/薛札/诸终/攻曹/零陵城等异文逐条登记，做法正确）。"
+    ],
+    "mustFixOrDowngrade": [
+      "CE1：voiceInventoryNote 里的 `kind=speech` 改为实际的 `voice=speech` + `speechSpans`（或补上 kind 字段）。",
+      "CE2：把 10 条以 ” 结尾、100% 落在话语跨度内的引文从 `voice=narration` 改为 `speech` 或 `mixed`（涉及 tasks[5]/[9]/[14]/[21]/[24]、states[4]/[6]/[13]/[15]/[20]、unknowns[8]/[9]/[13]、causeEdges[19]、crossUnitRefs[0]、speechInventory[1]）。",
+      "CE3：R9 的「（C29 段）」改为实际承载该环节的字段或删除括注。"
+    ],
+    "optional": [
+      "RC1–RC6 六条反向发现建议补入 tasks/states/causeEdges 或显式登记为 unknowns/rejectedEdges；其中 RC6（严舆被杀→弃城）与 RC2（周瑜领军来到）是两条真实的因果缺口。"
+    ],
+    "publishBridgeImpact": "按 loop/bin/to_candidate.py 的双来源读取（提交记录 + .verdict.json sidecar，不一致时取更严），本 verdict=partial 会使该单元进入 partial 分支：counterExamples 的三条点名会被纳入 must_fix 并从候选里排除/降级。由于三条缺陷都落在**说明性字段与分层标注**（voiceInventoryNote、voice 标记、R9 括注）而非抽取内容本身，排除后该单元的主体（tasks/causeEdges/states/foreshadows）仍可用。"
+  },
+  "sourceHashCheck": {
+    "countsAllMatch": true,
+    "detail": "tasks 25/25、causeEdges 38/38、states 21/21、foreshadows 5/5、notForeshadows 5/5、rejectedEdges 10/10、unknowns 22/22、selfCritique 10/10、speechInventory 18/18、textVariants 10/10、connectiveAudit 84/84；voiceTally 声称 {mixed:41, narration:357, speech:111} 与实测逐字相同。",
+    "boundaryClaimsVerified": "anchorLedger[0].boundaryEvidenceOutsideUnit 声称 t[71571:71587]=='张飞闻言，惶恐无地，掣剑欲自刎。' —— 实测 find()==71571、切片逐字一致（区间外，已刻意用 boundaryQuote/boundaryStart 字段名与本单元 quoteRef 区分）。anchorLedger[2].boilerplate 声称 78902 起为站点样板 —— 实测 t[78902:78922] 与 t[78925:78957] 逐字一致。"
+  },
+  "publishBridgeImpact": "按 loop/bin/to_candidate.py 的双来源读取（提交记录 + .verdict.json sidecar，不一致时取更严），本 verdict=partial 会使该单元进入 partial 分支：counterExamples 的三条点名会被纳入 must_fix 并从候选里排除/降级。由于三条缺陷都落在**说明性字段与分层标注**（voiceInventoryNote、voice 标记、R9 括注）而非抽取内容本身，排除后该单元的主体（tasks/causeEdges/states/foreshadows）仍可用。",
+  "notes": "判 partial 而非 pass：候选确有三处可被自身产物或原文直接证伪的问题（CE1 自述字段名不存在、CE2 十条话语被标成叙述层、CE3 编号交叉引用错），按角色契约「判 partial 时要说清哪些可用、哪些必须丢弃或降级」逐条给了处置。判 partial 而非 fail：**无一条编造** —— 我用「区间内首次出现 == 声称偏移」「t[start:end]==quote」「find(quote)」「sourceHash」「occurrencesInWholeDoc」五项对 509 条引文全量核验，失败数全部为 0；固定种子抽 5 条 5/5 逐字命中且偏移一致；`姓X名Y` 人名集合与原文完全相同；无原文外结局、无把章末当成功、无把未回收伏笔写成已回收、semanticReview 未被冒称。反向验证（RC1–RC6）查出 6 处**遗漏**，其中 RC6（严舆被杀→白虎弃城这条最直接的因果链在 38 条边里 0 覆盖）是记账缝隙，RC2/RC4 是战术回合与人物出场被略去，RC1/RC5 是背景与宣示层未采 —— 这些是**覆盖不足**，不是编造，因此不足以判 fail，但足以否掉 pass。\n\n不确定处（存疑，不作为判据）：① 候选读的是 data/cache/152e2a6eed94f1075e7e7070.docs.json，而索引当前 sanguo 的 graphKey 是 fe42d01f3826fe8096f86614 —— 两者文件 sha256 不同（2988ce6e… vs 8ab7298a…），但我实测两份 docs[0].text 长度都是 607191 且 json.load 后完全相等，本单元切片逐字相同，故**不影响本次复核的任何结论**；只是这个「同一本书两份等价缓存、任务哈希指向旧的那份」的现象值得环境侧留意（不在本任务 writes 范围内，仅记录）。② CE2 的 36 条中，有 26 条不含右引号 ” 且与叙述混排（例如「衣服破，尚可缝；手足断，安可续？」夹在叙述句中间），把它们一律改判 speech 未必更准确；**确定应改的是那 10 条以 ” 结尾的纯话语**，其余仅记为存疑。③ 我自己第一版审计脚本报出「2 条 find(quote)!=start」与「1 条句子找不到」，核对后确认**是我的脚本错**（重复串未取区间内首次；FACTS 里一条把两句合成一句而原文中间隔着「朗大惊，急回马来迎：」）—— 已修正脚本，候选在这两点上是干净的。这条如实记下：反向验证本身也会误报，必须先自证再据以判人。\n\n复跑命令：`cd /Users/carmen/Desktop/星系 && python3 -B -s /tmp/verify-sanguo-L0-0014/audit.py`（只读，不写仓库）。",
+  "evidence": [
+    {
+      "path": "loop/state/out/verify_sanguo_L0_0014.verdict.json",
+      "sha256": "fe10adc39724e98ef40b63d12437da39f163d97431fb7f035bb5e4492043d4bb",
+      "kind": "本复核结论（任务 writes 声明的产出）"
+    },
+    {
+      "path": "loop/state/out/read_sanguo_L0_0014.candidate.json",
+      "sha256": "2bd9d365c0e763a64713885a1d81cd125b274f4f2c7008f48b479244a893fed8",
+      "kind": "被复核候选（只读，未修改）"
+    },
+    {
+      "path": "data/cache/152e2a6eed94f1075e7e7070.docs.json",
+      "sha256": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+      "kind": "原文 docs.json（只读引用，未修改）"
+    },
+    {
+      "path": "/tmp/verify-sanguo-L0-0014/audit.py",
+      "sha256": "2016e623558083b15ab51330064eb20a544d0b7e27fc5764d232c3205c7044cf",
+      "kind": "可复跑审计脚本（只读，不写仓库）"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/152e2a6eed94f1075e7e7070.docs.json": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+    "loop/state/out/read_sanguo_L0_0014.candidate.json": "2bd9d365c0e763a64713885a1d81cd125b274f4f2c7008f48b479244a893fed8"
+  },
+  "assertions": [
+    {
+      "text": "引文定位全量核验：509 条 quoteRef 的 t[start:end]==quote / 区间内首次出现==start / 落在 [71677,78957) / sourceHash==整文件 sha256 / occurrencesInWholeDoc==实际计数，五项失败数全部为 0",
+      "result": "pass",
+      "cmd": "python3 -B -s /tmp/verify-sanguo-L0-0014/audit.py §1"
+    },
+    {
+      "text": "固定种子 20261009 随机抽 5 条 quote 在原文 find 一次：5/5 逐字命中、偏移一致、区间内",
+      "result": "pass",
+      "cmd": "audit.py §4"
+    },
+    {
+      "text": "自述计数与产物逐项比对：tasks/causeEdges/states/foreshadows/notForeshadows/rejectedEdges/unknowns/selfCritique/speechInventory/textVariants/connectiveAudit 与 voiceTally 全部相符",
+      "result": "pass",
+      "cmd": "audit.py §5"
+    },
+    {
+      "text": "边界自称核验：anchorLedger[0] 的区间外接缝 t[71571:71587]=='张飞闻言，惶恐无地，掣剑欲自刎。'；anchorLedger[2] 站点样板 78902/78925 逐字一致",
+      "result": "pass",
+      "cmd": "audit.py §0/§5"
+    },
+    {
+      "text": "反向验证：列出 6 条候选断言字段未覆盖但原文明确存在的事实（RC1-RC6），全部给出区间内偏移与逐字引文",
+      "result": "pass",
+      "cmd": "audit.py §2"
+    },
+    {
+      "text": "幻觉检查：区间内人名/称谓全部逐字 find 命中，姓X名Y 形态 8 对与原文完全一致（无新增）；无原文外结局；无把未回收伏笔写成已回收；semanticReview 未被冒称",
+      "result": "pass",
+      "cmd": "audit.py §2 + 人工逐条核对"
+    },
+    {
+      "text": "反例自证：初版脚本报出的 2 条 find!=start 与 1 条句子缺失，经核对均为**我的脚本错**（重复样板串未取区间内首次；FACTS 合成句跨越了原文的插入句），已修正，候选在该两点上无缺陷",
+      "result": "pass",
+      "cmd": "audit.py 修正前后对照"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/verify_sanguo_L0_0014.verdict.json",
+      "kind": "append-only",
+      "note": "任务 writes 声明的产出：本复核结论。"
+    },
+    {
+      "path": "loop/state/out/verify_sanguo_L0_0014.json",
+      "kind": "append-only",
+      "note": "由 `python3 loop/bin/loop.py verify --task read:sanguo:L0:0014 --file loop/state/out/verify_sanguo_L0_0014.verdict.json --agent w-verify-1` 生成的复核提交记录。"
+    },
+    {
+      "path": "loop/state/out/read_sanguo_L0_0014.json",
+      "kind": "append-only",
+      "note": "注册复核结论：仅 reviews[] 追加一条、verifyState pass→partial；status 仍为 done，抽取内容字段逐键比对未变（前后 sha256 99bd9a1a…→b79ed17f…，差异仅此两键）。"
+    }
+  ],
+  "remaining": [
+    "语义正确性未独立复核：本次只做引用定位全量核验 + 反向覆盖检查，semanticReview 保持 not-performed。",
+    "复核只覆盖原文区间 [71677,78957)；区间外内容（第十四回末 @71571、第十六回开头 @78957 起）只在核实接缝与边界自称时检索，未作为本区间证据写入任何断言。",
+    "CE2 的 36 条中仅 10 条（以 ” 结尾）确证应改判，其余 26 条与叙述混排，是否改判记为存疑而未计入反例（见 notes ②）。",
+    "RC1-RC6 六条遗漏只给了原文引证与偏移，未代候选补写字段（复核者不改被复核产物）。",
+    "「同一本书两份等价 docs.json 缓存、任务 sourceHash 指向非当前索引 graphKey 的那份」这一现象已如实记录，未在本任务 writes 范围内处置。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/verify_sanguo_L0_0014.verdict.json"
+    ],
+    "note": "删除本复核结论即可；深回滚可用 `python3 loop/bin/loop.py verify` 覆盖 read 记录 reviews[] 中本条。本复核全程只读候选与原文，未修改任何被复核文件。"
+  },
+  "auditCmd": "cd /Users/carmen/Desktop/星系 && python3 -B -s /tmp/verify-sanguo-L0-0014/audit.py",
+  "submittedAt": "2026-10-09T13:51:09Z",
+  "wallClockSeconds": 1435,
+  "wallClockFrom": "lease.startedAt",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-09T13:51:09Z"
+  },
+  "verifyState": "pending"
+}

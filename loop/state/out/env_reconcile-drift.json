@@ -1,0 +1,105 @@
+{
+  "task": "env:reconcile-drift",
+  "agent": "w-ops",
+  "status": "done",
+  "summary": "两项门禁当前真实通过（version_stamp --check=316/316；script_load_audit=[PASS] 250/250；accept 103/103），并用正负对照证明非空转。本轮**当场抓到漂移全过程**：12:35 全绿(315) → 13:01-13:02 写者改 3 个 js/新增 1 个 → 13:02:49 index.html→224b17ee → 13:03:17 清单 249→250 → 13:03:35 自行恢复；并实测写者**会自行补戳**（13:18:36 改 atlas-source.js、13:18:50 重写 index.html，约 14 秒，全程为绿）⇒ 漂移是「改 js→补戳」之间的**瞬态窗口**，不是长期破窗（这是对首轮「互相追逐」判断的修正）。归因：2341 条队列任务 writes 触及受保护路径者=0，属第 1 类并行写入者。**未运行 --write**：0 处漂移，且 index.html 已是 --write 不动点（316/316、0 变更、逐字节相同；HEAD 则会改 72 处），它又是受保护路径且不在本任务 writes 内。另定位首轮记录消失的两条机制：(1) selftest.py:429 无条件 unlink「队列第一个未完成任务」的规范记录（我用 /tmp 重定向隔离复现了删除语义；实测 _probe_tid 曾等于本任务），且 12n 夹具能通过机器校验(validated=True/done_ids 收下)；(2) evidence 锚定 index.html(is_evolving=False) 会随写者失效（实测 evidence_stale 返回 hash-changed）。本产物因此**只锚定 evolving 路径**并内联全部原始输出。**并如实登记本轮事故：本任务被重复执行** —— 我的父 worker 85585 死亡后我被孤儿化(ppid=1)仍继续跑，sentinel 12:55:24 拉起替代 worker，其 agent 88195 于 12:55:29 起了第二个 agent 跑同一任务、写同一 writes 路径，对方 13:26:33 先提交成功并覆盖了我的 artifact 快照(07f9a804→288149e4→5242d3ef)；根因是租约锚定 worker pid（loop.py:437），worker 一死即被 reap 回收(loop.py:509-513)而 dsh 子进程仍活着。对方的产物与规范记录已**逐字节内联**在本产物中，确保我的写入不丢失任何已完成工作；其记录只锚定 evolving 路径，故不受影响。",
+  "evidence": [
+    {
+      "path": "tests/version_stamp.py",
+      "sha256": "574ebfdf0f963d0729264540320d7f3c8933e94e95b3131c9ae7bb7500207bd9",
+      "kind": "门禁本体（evolving，漂移被 is_evolving 容忍）"
+    },
+    {
+      "path": "tests/script_load_audit.py",
+      "sha256": "38f12bddb17403d5d9ae1bf9d91b4e74d269e7f4abcd3fdfaabbed97e11d4642",
+      "kind": "门禁本体（evolving）"
+    },
+    {
+      "path": "tests/script_manifest.json",
+      "sha256": "4fed52e666eea24ed247cbaa474009cda3f9d1ac311a5d87f3297a6c0837b7d9",
+      "kind": "清单基准（evolving）"
+    },
+    {
+      "path": "scripts/accept.sh",
+      "sha256": "981e4bed358ee9d7d190937c04e0adc9083320383e376eac0d684007334c83dc",
+      "kind": "产品门禁本体（evolving）"
+    },
+    {
+      "path": "loop/state/out/env_reconcile-drift.artifact.json",
+      "sha256": "0ec97ce978c6ba7e2e0c9174dd26a0102bf14c049b85219967d27de8d68b0594",
+      "kind": "本任务产出：命令、原始输出、归因、处置、残余风险；并逐字节内联了另一位 agent 已提交的产物与规范记录，以及全部 /tmp 原始输出（它们只内联、不进本记录 evidence，以免 /tmp 被清理时记录失效）"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "两项门禁真实通过并用正/负对照证明非空转（改坏一个 ?v= → drift=1；--self-test 报 positive + 9 负门通过）。",
+      "result": "pass"
+    },
+    {
+      "text": "当场抓到漂移全过程（12:35 全绿 → 13:02:49 index.html 改写 → 13:03:35 自行恢复），并实测写者会在约 14 秒内自行补戳。",
+      "result": "pass"
+    },
+    {
+      "text": "首轮记录消失两条机制均已核实：selftest.py:429 无条件 unlink 第一个未完成任务的规范记录（/tmp 隔离复现删除语义）；evidence 锚定 index.html 会失效（实测 hash-changed）。",
+      "result": "pass"
+    },
+    {
+      "text": "发现并核实本任务正被重复执行：我(42684, ppid=1 孤儿) 与替代 worker 的 agent(88195) 跑同一任务、写同一路径，对方先提交成功。",
+      "result": "pass"
+    },
+    {
+      "text": "我的写入不丢失对方工作：其产物与记录逐字节内联并记录捕获哈希；其记录不以本产物为证据，不受影响。",
+      "result": "pass"
+    },
+    {
+      "text": "未运行 --write（0 处漂移；index.html 已是不动点；且属受保护路径、不在本任务 writes 内）。",
+      "result": "pass"
+    },
+    {
+      "text": "未跑 GPU/浏览器测试；accept.sh 未加 --browser。",
+      "result": "pass"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/env_reconcile-drift.artifact.json",
+      "kind": "append-only"
+    }
+  ],
+  "sourceHashes": {
+    "index.html": "f4243bd7095f588dfd7998b891004269e0bca066e6816ad80be08fcb3fd892ad",
+    "tests/version_stamp.py": "574ebfdf0f963d0729264540320d7f3c8933e94e95b3131c9ae7bb7500207bd9",
+    "tests/script_load_audit.py": "38f12bddb17403d5d9ae1bf9d91b4e74d269e7f4abcd3fdfaabbed97e11d4642",
+    "tests/script_manifest.json": "4fed52e666eea24ed247cbaa474009cda3f9d1ac311a5d87f3297a6c0837b7d9",
+    "scripts/accept.sh": "981e4bed358ee9d7d190937c04e0adc9083320383e376eac0d684007334c83dc",
+    "loop/bin/selftest.py": "0c0532acc12a3505afcaf511dfa1e9647ca485746628a4b708a233466023a907",
+    "loop/bin/loop.py": "6a1d68ef4c263de923daaaf911a5527d0541108949f5a00491daaeb50e5dd8ac",
+    "loop/bin/worker.py": "b0aef63350e4053b1492e322f9c69557d17f4db5b18d8a8faf4286e270130a39",
+    "loop/state/GUARD-LOG.md": "43156ff96fa3a060819fc4cc1e9cab2b4b236634d0324268515ab77f446427b6",
+    "loop/state/out/env_reconcile-drift.artifact.json": "0ec97ce978c6ba7e2e0c9174dd26a0102bf14c049b85219967d27de8d68b0594",
+    "loop/state/out/env_reconcile-drift.json": "6127d57fc95af7a1d7064e40d9314f64ff5426fb2bf91767c3d17c911a3429c0"
+  },
+  "remaining": [
+    "**重复执行未修**：租约锚定 worker pid，worker 死后即被 reap，dsh 子 agent 仍活着 ⇒ 同一 writes 路径可被两个 agent 同时写。",
+    "**孤儿 agent 不可见**：doctor.dshAgentProcesses 只做子串计数（实测 14 vs roster 13），strayWorkers 只比对 worker 名字。",
+    "**selftest.py:429 删除真实记录未修**：受害者现为 env:index-owner。",
+    "**12n 夹具可通过机器校验**，测试负例与真实完成不可区分。",
+    "**无法定位写入者身份、无法确认 85585 死因、无法证明重复执行只发生过一次**。",
+    "**13:02 瞬态的 4 处漂移未被逐字节复现**（只反演了 02:16 的 3 处）。",
+    "**门禁只证一致性不证语义正确性**；未跑浏览器/GPU 段。",
+    "**待独立复核**：本产物为自证。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/env_reconcile-drift.artifact.json"
+    ]
+  },
+  "submittedAt": "2026-10-08T05:40:54Z",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-08T05:40:54Z"
+  },
+  "verifyState": "pending"
+}

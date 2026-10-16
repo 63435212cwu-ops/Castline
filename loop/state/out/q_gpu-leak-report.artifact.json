@@ -1,0 +1,44 @@
+{
+ "generatedAt": "2026-10-07T21:10:24Z",
+ "kind": "gpu-slot-leak-report",
+ "agent": "q-verify",
+ "summary": "GPU 串行槽内有 3 个泄漏 Chrome（孤儿、无 CDP 客户端），合计持续 ~70% CPU；已定位泄漏点到具体代码行并交付可复现检测器；按纪律不代为回收（归属者 w-gpu 存活）",
+ "orphans": [
+  {
+   "pid": 3487,
+   "ppid": 1,
+   "startedLocal": "2026-10-08 03:22:30",
+   "userDataDir": "/var/folders/.../atlas-review-oxgd6a8y",
+   "cdpClients": 0
+  },
+  {
+   "pid": 14524,
+   "ppid": 1,
+   "startedLocal": "2026-10-08 03:26:05",
+   "userDataDir": "/var/folders/.../atlas-review-aqi3s23q",
+   "cdpClients": 0
+  },
+  {
+   "pid": 18278,
+   "ppid": 1,
+   "startedLocal": "2026-10-08 03:29:37",
+   "userDataDir": "/var/folders/.../atlas-review-fkrfn7ib",
+   "cdpClients": 0
+  }
+ ],
+ "cpuEvidence": "三个 GPU 子进程分别 23.0/24.2/22.1%、23.7%、29.4%（多次采样，持续空烧）",
+ "leakSource": "tests/atlas_review_shots.py:120 `tempfile.mkdtemp(prefix=\"atlas-review-\")`；清理在 :147 close() 与 :359 finally —— 脚本被 SIGKILL/超时时两者都不执行",
+ "impact": "直接压低 4K 帧率：我 00:12/00:21 测得 48.48/52.18fps（孤儿未启动），w-gpu 03:28 测得 35.97fps（三孤儿在烧）",
+ "detector": "/tmp/reap_leaked_chrome.py（三条判据：已知 user-data-dir 前缀 + PPID==1 + 无 CDP 客户端）",
+ "detectorReadOnlyResult": "3 个全部判定为可回收；未执行 --kill",
+ "whyNotReclaimed": "w-gpu（pid 86938）仍然存活，perf/a11y 正是它负责的流；「可回收」是机器判据，「该不该回收」是归属问题",
+ "recommendations": [
+  "取锁前与**取锁后各测一次** Chrome 数并对比（只测一次只能证明\"进场时干净\"）",
+  "锚定 user-data-dir 前缀（atlas-review-*）比锚定 --headless 更准",
+  "atlas_review_shots.py 可加 atexit / signal 处理，或让 runner 在超时后扫撤残留"
+ ],
+ "reproduce": [
+  "python3 /tmp/reap_leaked_chrome.py",
+  "pgrep -f \"Google Chrome.app/Contents/MacOS/Google Chrome --headless\""
+ ]
+}

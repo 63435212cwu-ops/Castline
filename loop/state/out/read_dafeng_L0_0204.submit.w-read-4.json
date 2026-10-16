@@ -1,0 +1,102 @@
+{
+  "task": "read:dafeng:L0:0204",
+  "agent": "w-read-4",
+  "status": "done",
+  "summary": "精读《大奉打更人》第两百零三章 碑文余波（docs[0].text[750897,755031)，4134 codepoint）：产出 6 条任务五元组（20 非 null / 10 null，每个 null 带同名 Note 说明为什么没有）、10 条因果边 + 7 条明确不连的边、8 条状态（6 状态变化 + 2 知识差）、3 条伏笔（全部 unresolved，payoff 为 null）、14 条世界设定（rule 6 / place 6 / item 2，含 6 条排除项）、2 条主题读法（各带反例）、13 条 unknowns、8 条明确未断言项、4 条 selfCritique。全部 211 处引文逐字回切通过且全文唯一。",
+  "evidence": [
+    {
+      "path": "loop/state/out/read_dafeng_L0_0204.candidate.json",
+      "sha256": "11e9944dc9f8365782502dd07e8fe20c1a4e1bef5ac9c9b6a7be6201cbbe2718"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-read-dafeng-L0-0204-w-read-4/测试产物/build_0204.py",
+      "sha256": "4bfc7ebbe5931a6b4a843077b40f8337cefbf32fc5a2714421557314fcdfa361"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "源文件哈希核对：data/cache/1063b17ca65ec1b76f30e460.docs.json 的 sha256 == fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839（任务 sourceHash + 候选 sourceHash 一致）",
+      "result": "pass",
+      "cmd": "shasum -a 256 data/cache/1063b17ca65ec1b76f30e460.docs.json"
+    },
+    {
+      "text": "偏移口径核对：docs[0].text[750897:755031] 长度 4134，且 startswith('第两百零三章 碑文余波') —— 自检式成立，说明 start/end 是全文 codepoint 偏移而非切片偏移",
+      "result": "pass",
+      "cmd": "python3 -c \"import json;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];print(len(t[750897:755031]), t[750897:750908]=='第两百零三章 碑文余波')\""
+    },
+    {
+      "text": "逐字回切：候选内全部 211 处 quote 均满足 docs[0].text[start:end]==quote，且 start/end 落在 [750897,755031) 内，且 sourceHash 全部等于源文件哈希 —— 0 处失败（构建期 assert + 独立复核脚本各跑一次）",
+      "result": "pass",
+      "cmd": "python3 -c \"import json;d=json.load(open('loop/state/out/read_dafeng_L0_0204.candidate.json'));exec(d['reproduce']['verifySnippet'])\"  # 输出 OK quotes= 211"
+    },
+    {
+      "text": "引文定位力：候选内 100 条互异引文在**全书 4760263 codepoint 全文**中出现次数均为 1（构建期护栏 assert len(occ_all)==1）。此护栏是为修掉一个实测缺陷：初版曾用 '.......'（全书中出现 11307 次）做引文，虽能通过回切断言却毫无定位力，已替换为唯一的章节结尾 PS",
+      "result": "pass",
+      "cmd": "python3 -c \"import json;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];print(t.count('.......'), t.count('PS：书评区有活动'))\"  # 11307 1"
+    },
+    {
+      "text": "同一任务内禁止跨栏复用引文：6 条任务全部 reusedAcrossColumns=0（构建期 assert，逐任务检查五栏引文不重复）",
+      "result": "pass",
+      "cmd": "python3 -c \"import json;print(json.load(open('loop/state/out/read_dafeng_L0_0204.candidate.json'))['crossColumnReuseWithinTask'])\""
+    },
+    {
+      "text": "每个 null 栏都有同名 <栏位>Note 写明「为什么没有」：10 个 null 全部有对应 Note，0 处缺失（脚本检查）",
+      "result": "pass",
+      "cmd": "python3 -c \"import json;c=json.load(open('loop/state/out/read_dafeng_L0_0204.candidate.json'));print([(x['id'],k) for x in c['tasks'] for k in ('objective','obstacle','action','result','cost') if x.get(k) is None and (k+'Note') not in x])\"  # 输出 []"
+    },
+    {
+      "text": "结束≠成功：本单元在「陛下容禀！」处被截断，T5.result 记为 null 并在 resultNote 写明理由；F1 的 payoff 记为 null、status=unresolved，未把「他说了」当成「他说成了」",
+      "result": "pass",
+      "cmd": "python3 -c \"import json;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];print(repr(t[754936:754962]))\"  # 截断处：'陛下容禀！\\n\\n    .......'"
+    },
+    {
+      "text": "未把人物推测当叙述事实：E10（吏员可能刻意忽略原作者）的 epistemic 记为 characterAsserted，basis 记为 inferred，并在 note 与 unknowns.U6 写明原文用「可能存在」、本区间从未确认它发生过",
+      "result": "pass",
+      "cmd": "python3 -c \"import json;c=json.load(open('loop/state/out/read_dafeng_L0_0204.candidate.json'));print([(e['id'],e['basis'],e.get('epistemic')) for e in c['causeEdges']])\""
+    },
+    {
+      "text": "未把提及当到达 / 未把宣示当执行：place 6 条中 5 条 placeState=mentioned、仅御书房 arrived；rule 中唯一一条 institution=declared 是元景帝的立碑旨意（本区间无任何立碑或拓印执行动作），其余 5 条 executed",
+      "result": "pass",
+      "cmd": "python3 -c \"import json,collections;c=json.load(open('loop/state/out/read_dafeng_L0_0204.candidate.json'));print(collections.Counter(w['placeState'] for w in c['worldSettings'] if w['kind']=='place'), collections.Counter(w['institution'] for w in c['worldSettings'] if w['kind']=='rule'))\""
+    },
+    {
+      "text": "未写 semanticReview 完成：semanticReview.status == 'not_performed'，并写明引用定位正确 ≠ 语义已核验，须由 read-verify 独立复核",
+      "result": "pass",
+      "cmd": "python3 -c \"import json;print(json.load(open('loop/state/out/read_dafeng_L0_0204.candidate.json'))['semanticReview']['status'])\""
+    },
+    {
+      "text": "未改受保护路径：本轮只写 loop/state/out/read_dafeng_L0_0204.candidate.json 一个仓库内文件（任务 writes 指定的路径），构建脚本放在仓库外的回滚点目录",
+      "result": "pass",
+      "cmd": "cat loop/state/runs/task-read_dafeng_L0_0204.json | python3 -c \"import json,sys;print(json.load(sys.stdin)['writes'])\""
+    },
+    {
+      "text": "独立交叉核对：另起独立上下文的子代理只拿原文区间（不含我的结论）独立提取事实清单，在四个关键判断上与本候选独立一致（截断位置、晋升仅由魏渊说出且带「应该」、碑文作者两种说法未裁决、漕运以「不查」收束），并独立把绝大多数 cost 记为 null。其清单未作为本候选任何断言的证据来源，引文全部由我重取",
+      "result": "pass"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/read_dafeng_L0_0204.candidate.json",
+      "kind": "append-only"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/1063b17ca65ec1b76f30e460.docs.json": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+  },
+  "remaining": [
+    "语义评审未做：本候选只完成引用定位与逐字回切核验（脚本可复现），每条结论是否成立仍须由 read-verify 通道的独立复核者对着原文判断。",
+    "T5.objective 是 derived（从魏渊的疑惑与叹息反推他要进言什么），原文在「陛下容禀！」处截断、并未写出他的诉求；若复核者要求最严口径，此栏应改判 null。",
+    "六条任务的 cost 栏全部记 null，理由逐条写在各 costNote 里（本章是反应章，许七安全程不在场，两场戏只是听消息与朝堂表态）。这是判断而非遗漏；若复核者认为「张开泰放弃招揽＝错失」算代价，T6.cost 应改判。",
+    "ST8（金锣们「怕是最坏消息→震惊欣喜」的预期反转）basis 记 derived：两端都有逐字直写，但「同一条消息让预期反转」这一步是跨段推断，原文没有一句把两者直接接起来。",
+    "worldSettings 中青州那条 placeState=mentioned 是本候选口径最可争议的一处（若按「杨恭在青州完成了立碑动作」判，也可能应记 arrived）；判断理由已写在该条 explain 里备复核者推翻。",
+    "段落覆盖 92/103：未覆盖的 11 段已逐条在 coverage.uncoveredNote 里说明原因（标题、排版符、叙述评注、重复提问句等）。我没有为了拉高覆盖率给这些段落硬配断言。",
+    "本次未做语义/审美层面的评估，也不产生任何质量分；测试通过数与篇幅都不换算成质量。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/read_dafeng_L0_0204.candidate.json"
+    ]
+  }
+}

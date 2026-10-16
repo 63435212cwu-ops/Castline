@@ -1,0 +1,89 @@
+{
+ "task": "read:dafeng:L0:0224",
+ "agent": "w-xiyou-0",
+ "outcome": "NOT SUBMITTED — duplicate claim (TOCTOU); 覆写会降级一条已通过机器校验的产物",
+ "myLease": {
+  "task": "read:dafeng:L0:0224",
+  "agent": "w-xiyou-0",
+  "host": "carmendeMac-mini.local",
+  "pid": 43457,
+  "startedAt": "2026-10-15T01:06:05Z",
+  "heartbeatAt": "2026-10-15T01:40:06Z",
+  "gpu": false,
+  "writes": [
+   "loop/state/out/read_dafeng_L0_0224.candidate.json"
+  ],
+  "worktree": "/Users/carmen/Desktop/星系/.workbuddy/wt-w-xiyou-0",
+  "branch": "loop/read:dafeng:L0:0224",
+  "note": "启动"
+ },
+ "priorSubmission": {
+  "agent": "w-sanguo-0",
+  "status": "done",
+  "submittedAt": "2026-10-15T01:05:06Z",
+  "validationProblems": [],
+  "verifyState": "pending",
+  "recordPath": "loop/state/out/read_dafeng_L0_0224.json"
+ },
+ "secondsBetweenSubmitAndMyLease": 59,
+ "overwriteHazard": {
+  "isEvolving": false,
+  "why": "loop/state/out/ 属 MUTABLE_EXCEPTIONS；覆写证据文件 ⇒ evidence_stale() 报 hash-changed ⇒ done_ids() 剔除 ⇒ 已通过校验的产物被降级",
+  "staleAfterSimulatedOverwrite": [
+   {
+    "path": "loop/state/out/read_dafeng_L0_0224.candidate.json",
+    "why": "hash-changed"
+   }
+  ],
+  "safeBecauseWorkerTakesAlreadySubmittedBranch": true
+ },
+ "sources": {
+  "docsJsonSha256": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+  "taskSourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+  "sliceCodepoints": 3937
+ },
+ "artifacts": {
+  "DUPCLAIM-REPORT.md": "ee62a9741032d14e70edc86f0737585b2d6a282a029d00b7a68820bcdb959e76",
+  "audit_dupclaim.py": "7b819363cf075f70e9edc83ec8042a83a60b7c2558010f703d4e02e374127b56",
+  "audit_dupclaim_report.json": "6b10d3af34d20873bd51a6270c67778ee74541bd4dfd81db63387767fae9a60b",
+  "check_para_numbering.py": "d07c02bf57fd3c739d5e93a16f03272c4a4b950886d07d00a1b6088954a1dd70",
+  "check_para_numbering_targeted.py": "5148cb84526429ad1abaf20af682a3d3e11348880c4a4709a779d0470e10c1de",
+  "leases_on_done_report.json": "ad7f7afcabfca28f4b7f88923569725f0bc9d04a269e31c003f780d7210411b7",
+  "leases_on_done_tasks.py": "65958790fc5f2e46af62e9e09ba2c5cf6e2380a52bd986226923e54a826e176d",
+  "para_numbering_report.json": "e6127f20e889f6712f43822a5106cacaf36ed0a8cbebd29ccf98c61caaf762d7",
+  "reverse_check.py": "15682e17ab703ff358eb5c94ea65a60b91b2b234e13441484b3c2c4de352b87a",
+  "reverse_check_report.json": "a92e15d50de4d9c1776e9925846057fcb54ded9838e942e7be752be86203de0e",
+  "verify_zero_and_entities.py": "d7694312947e043460a387da5dfa6593e9c3c0c062699967e1c77a2ff162a133",
+  "zero_and_entities_report.json": "cc2ff8b067f176321b7f4d9f99c9d14985f95e95902424d88cff2080790990ac"
+ },
+ "determinism": {
+  "scriptsVerifiedByteIdenticalAcrossTwoRuns": [
+   "audit_dupclaim.py",
+   "reverse_check.py",
+   "verify_zero_and_entities.py",
+   "check_para_numbering_targeted.py"
+  ],
+  "timeVarying": {
+   "leases_on_done_tasks.py": "读活租约表，数字随运行时刻变化；引用时须附运行时刻"
+  }
+ },
+ "myDefectsCaughtInMyOwnScripts": [
+  "check_para_numbering.py 初版只扫 text 字段 ⇒ 内联引用命中 0 条，险些写下「证据不足」的假结论",
+  "check_para_numbering_targeted.py 初版判定分支漏了「inline=正文口径 / zeroCoverage=标题口径」这一支 ⇒ 实测恰好落在该支、掉进 else 打出「证据不足」",
+  "reverse_check.py 初版用 sorted({...}) 从 set 出发 ⇒ 输出不可复现（两次 --json diff 176 行）"
+ ],
+ "defectsFoundInPriorCandidate": [
+  {
+   "id": "para-numbering-mismatch",
+   "severity": "documentation-consistency",
+   "what": "内联 P### 用正文起算、coverage.zeroCoverageList[].para 用标题算 P001，两套差 1；候选全文未定义编号口径",
+   "evidence": "para_numbering_report.json（inline 7/7 body-counted；zeroList 27/27 title-counted）"
+  },
+  {
+   "id": "sliceNote-scene-split",
+   "severity": "documentation-consistency",
+   "what": "sliceNote 自称三场景 P001-P040/P041-P072/P073-P103，但原文独立成段的作者分隔符只有 body P021/P101/P103；P021 落在自称第一场内部，且 P040|P041 之间无任何分隔符",
+   "evidence": "原文逐段核读（见 DUPCLAIM-REPORT.md §5.2）"
+  }
+ ]
+}

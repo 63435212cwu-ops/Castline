@@ -1,0 +1,451 @@
+{
+ "task": "verify:dafeng:L0:0092",
+ "reviewer": "w-verify-1",
+ "roleFile": "loop/ROLES/VERIFIER.md",
+ "candidateUnderReview": "loop/state/out/read_dafeng_L0_0092.candidate.json",
+ "candidateAgent": "w-dafeng-1",
+ "candidateSha256": "704819aafcee3a2b14dab619e92b01c6f0f3128355196a440f6eb001985a6630",
+ "candidateBytes": 87665,
+ "source": {
+  "path": "data/cache/1063b17ca65ec1b76f30e460.docs.json",
+  "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+  "range": [
+   294547,
+   297902
+  ],
+  "sliceSha256": "72a35f44c1b660b3ee5263fc1055595c3ce247ce64746483ec00bb737f2e3ccf",
+  "boundaryCheck": "复核者独立复算：docs[0].text[294547:294561] == '第九十三章 三号不愧是读书人'（逐字），切片长 3355 codepoint，右界 docs[0].text[297902:297915] == '第九十四章 凶杀案'；整个 docs.json 的 sha256 == task.sourceHash。"
+ },
+ "method": "先读原文后看候选；机器侧独立复算 79 条引文 + 4 条 reproduce + 随机 5 条 find + 13 处散文偏移 + 人物计数；反向验证用「按行求未覆盖段」（42/98 行未覆盖）逐行判定。",
+ "verdict": "partial",
+ "counterExamples": [
+  {
+   "id": "ce_invented_participant_sihao",
+   "claim": "states[S3].who =「天地会群成员（一号、二号、四号等在场者）」，把**四号**写成本区间群聊的在场者。",
+   "quote": {
+    "quote": "【九：发生了什么。】",
+    "start": 297009,
+    "end": 297019,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "offsetUnit": "codepoint",
+    "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+    "verbatim": true,
+    "findHits": 1,
+    "inRange": true
+   },
+   "counterQuote": {
+    "quote": "金莲道长冒泡了，提醒天地会成员，六号肯定是遇到了什么事儿。",
+    "start": 297025,
+    "end": 297054,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "offsetUnit": "codepoint",
+    "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+    "verbatim": true,
+    "findHits": 1,
+    "inRange": true
+   },
+   "why": "复算：**「四号」在本区间 [294547,297902) 出现 0 次**（全书 151 次，最近一次在 305998，远在区间外）。本区间群聊实际出现的发言标签只有 一 / 二 / 六 / 九 四个（`re.findall(r'【(.+?)：', u)` 可直接复算），而其中的「九」由区间内紧接着的叙述句「金莲道长冒泡了」当场绑定为**金莲道长**——即真正在场且被叙述点名的是九号/金莲道长，候选一个都没写，反而填了不在场的四号。这是「用背景知识里的常规阵容补区间内未出现的人物」，与同书 0088 单元被判 policy-violation 的形态同类（该案把区间内 0 次的「指挥使」「百户」写进 who 栏）。四号在全书确实是天地会成员（如 306035「【四：嗯。】」），但那一段在本区间之外 8 千余字，恰恰印证这是把**全书阵容**当成了**本区间在场者**。",
+   "severity": "must-fix（区间内 0 次的人物被写成在场者）",
+   "fix": "who 改为区间内可证的在场者：「天地会群成员（一号、二号、六号、九号金莲道长；许七安=三号）」，把四号移出或标 outOfRange。",
+   "reproduce": "python3 -c \"import json;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];u=t[294547:297902];print({k:(u.count(k),t.count(k)) for k in ['四号', '九号', '金莲', '一号', '二号', '六号']})\""
+  },
+  {
+   "id": "ce_asterisk_offset_wrong",
+   "claim": "notForeshadows[0].why 写「原文此处就是四个星号（第 **295652** 处，全书另有 3 处同类屏蔽）」。",
+   "quote": {
+    "quote": "许七安露出笑容：“****。”",
+    "start": 295601,
+    "end": 295616,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "offsetUnit": "codepoint",
+    "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+    "verbatim": true,
+    "findHits": 1,
+    "inRange": true
+   },
+   "counterQuote": {
+    "quote": "许七安抬头看了一眼，恰好看见长公主在俯视他。",
+    "start": 295648,
+    "end": 295670,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "offsetUnit": "codepoint",
+    "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+    "verbatim": true,
+    "findHits": 1,
+    "inRange": true,
+    "note": "这是 295652 处真正的原文——不是星号。"
+   },
+   "why": "复算：全书的 `****` 出现在 [121983, **295610**, 1089610, 1089618]，本区间内的星号在 **295610**，不是 295652，偏差 42 个 codepoint。295652 处的原文是「头看了一眼，恰好看见长公主在俯视他。」。更关键的是**候选自相矛盾**：它自己为这一项登记的引文节点是 [295601,295616)（`许七安露出笑容：“****。”`，逐字成立），星号就在该节点内部；正文散文里的 295652 与它自己的字段对不上。「全书另有 3 处同类屏蔽」这一半经复算**是对的**（总数 4）。",
+   "severity": "must-fix（自报偏移与自身引文字段矛盾，且可一条命令复算）",
+   "fix": "把 295652 改为 295610。",
+   "reproduce": "python3 -c \"import json,re;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];print('asterisks',[m.start() for m in re.finditer(re.escape('****'),t)]);print('at295652',repr(t[295652:295676]))\""
+  },
+  {
+   "id": "ce_offset_272201_wrong",
+   "claim": "tasks[T3].obstacleNote 与 unknowns[0].why 两处写「区间外的旁证：偏移 **272201** 处他确实向魏渊复述过平远伯牙子组织的内情（「他把六号的解释，复述了一遍」）」。",
+   "quote": {
+    "quote": "他把六号的解释，复述了一遍，言语间，并不掩饰自己对平远伯的憎恶。",
+    "start": 272262,
+    "end": 272294,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "offsetUnit": "codepoint",
+    "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+    "verbatim": true,
+    "findHits": 1,
+    "inRange": false
+   },
+   "counterQuote": {
+    "quote": "卖人口，牟取暴利。牙子们拐骗孩子和女人，卖去青楼、卖去黑作坊、培养成窃贼，甚至斩断手脚掌，裹上黑狗皮",
+    "start": 272201,
+    "end": 272251,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "offsetUnit": "codepoint",
+    "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+    "verbatim": true,
+    "findHits": 1,
+    "inRange": false
+   },
+   "why": "复算：`t.find('他把六号的解释，复述了一遍')` = **272262**，不是 272201，偏差 61 个 codepoint；272201 处是「卖人口，牟取暴利。牙子们拐骗孩子和女人…」，属同一场景的前一段，但**不是候选所指的那一句**。引用内容本身在全书逐字可查（命中 1 次），错的只是偏移。两处（obstacleNote 与 unknowns）写的是同一个错值。",
+   "severity": "must-fix（自报偏移错，可一条命令复算；引文内容本身成立）",
+   "fix": "把两处 272201 改为 272262。",
+   "reproduce": "python3 -c \"import json;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];s='他把六号的解释，复述了一遍';print('true offset',t.find(s));print('at272201',repr(t[272201:272240]))\""
+  },
+  {
+   "id": "ce_piezui_attribution_wrong",
+   "claim": "unknowns[9].why 写「下一章及以后我只核到另 2 处「撇了一下嘴」**均为婶婶的不同场景**，未见回收」，并据此把长公主「轻轻撇了一下嘴」的含义判为不可解。",
+   "quote": {
+    "quote": "低头时，轻轻撇了一下嘴角。",
+    "start": 990479,
+    "end": 990492,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "offsetUnit": "codepoint",
+    "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+    "verbatim": true,
+    "findHits": 1,
+    "inRange": false
+   },
+   "counterQuote": {
+    "quote": "婶婶撇了一下嘴，与许玲月进了私塾。",
+    "start": 969898,
+    "end": 969915,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "offsetUnit": "codepoint",
+    "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+    "verbatim": true,
+    "findHits": 1,
+    "inRange": false
+   },
+   "why": "复算 `t.count('撇了一下嘴')` = **3**，除本区间 295714 那一处外只有两处：(a) 969900「婶婶撇了一下嘴，与许玲月进了私塾。」；(b) **990485「低头时，轻轻撇了一下嘴角。」——说话人/视角人物是长公主**（其上一段：「说完，清丽脱俗的长公主下意识的看向许七安。\n\n    见他面无表情，不做回复，公主殿下心里有些不开心，低头时，轻轻撇了一下嘴角。」）。即「另 2 处」中只有 1 处是婶婶，另 1 处**仍是长公主**，而且这一处的语境是**心里不开心**——这恰好是候选自己列进 unknowns 的那个问题的**同人物、同表情**的旁证，方向指向「撇嘴≈不悦」而不是「不可判定」。候选把 2/2 说成「均为婶婶」，与它自己的检索结果相反。（该处写的是「嘴角」不是「嘴」，`t.count('撇了一下嘴角')`=1，用子串「撇了一下嘴」计数会把两处都数进来。）",
+   "severity": "must-fix（把 1/2 说成 2/2，且漏掉同人物同表情的旁证，直接影响 unknowns 的判定）",
+   "fix": "改为「另 2 处中 1 处为婶婶（969900）、1 处仍为长公主（990485，语境为心里不开心）」，并据此下调该条 unknowns 的不确定性。",
+   "reproduce": "python3 -c \"import json,re;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];print('count',t.count('撇了一下嘴'));[print(m.start(),repr(t[max(0,m.start()-110):m.start()+16])) for m in re.finditer('撇了一下嘴',t)]\""
+  }
+ ],
+ "reverseChecks": [
+  {
+   "id": "rc_princess_asks_about_xu",
+   "found": "**长公主向褚采薇打听许七安的整段对话**（本区间 296286–296357）：长公主主动换话题问「你和那个铜锣很熟？」，褚采薇当面夸「许宁宴是个人才，说话又好听，我觉得他挺有趣的」。候选**整段未覆盖**（`'许宁宴' in candidate` = False，`'你和那个铜锣很熟' in candidate` = False）。",
+   "quote": {
+    "quote": "“你和那个铜锣很熟？”长公主换了个话题。",
+    "start": 296286,
+    "end": 296306,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "offsetUnit": "codepoint",
+    "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+    "verbatim": true,
+    "findHits": 1,
+    "inRange": true
+   },
+   "supportQuote": {
+    "quote": "“嗯呐，”褚采薇眯眼笑，月牙儿似的眸子：“许宁宴是个人才，说话又好听，我觉得他挺有趣的。”",
+    "start": 296312,
+    "end": 296357,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "offsetUnit": "codepoint",
+    "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+    "verbatim": true,
+    "findHits": 1,
+    "inRange": true
+   },
+   "why": "这条与候选自己的结论直接相关：S5 把长公主「面无表情→撇嘴」记为 inferred，并在 unknowns[9] 里说含义不可判定。但区间内紧邻的下文就给了她**主动打听**许七安、并从褚采薇处听到正面评价的对话——即「撇嘴」前她刚获得一条关于许七安的第三方评价，这是判断该表情的区间内依据，不是只能靠区间外。此外「那个铜锣」是长公主对许七安的称呼，属候选 excludedSettings[3] 排除掉的「铜锣」称谓，但此处它并非装饰性术语，而是**指代关系**本身（谁在说谁），排除它是误杀（见 falseKills）。",
+   "severity": "medium（影响 S5 与 unknowns[9] 的判定，非编造）"
+  },
+  {
+   "id": "rc_groupchat_staging",
+   "found": "**群聊的调度事实被整段漏掉**：九号冒泡并提示（297009/297025）、一号「应该又在窥屏」（297060）、**许七安在二号发问之前就已沉默**（297080「许七安摸不清状况，同样没有开口」）、二号被吵醒（296988）。候选的 S3/T3 只从二号的点名追问（297506）起算他的沉默。",
+   "quote": {
+    "quote": "许七安摸不清状况，同样没有开口。",
+    "start": 297080,
+    "end": 297096,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "offsetUnit": "codepoint",
+    "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+    "verbatim": true,
+    "findHits": 1,
+    "inRange": true
+   },
+   "supportQuote": {
+    "quote": "一号没有说话，应该又在窥屏。",
+    "start": 297060,
+    "end": 297074,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "offsetUnit": "codepoint",
+    "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+    "verbatim": true,
+    "findHits": 1,
+    "inRange": true
+   },
+   "why": "候选 T3.action 写「二号点名追问时，他保持沉默」，把沉默描述成**对二号追问的回应**；原文的次序是：六号发问（296931）→ 二号骂（296962）→ 九号问（297009）→ 一号窥屏（297060）→ **许七安也没开口（297080）**→ … → 一号否认（297351）→ 群内归因（297378）→ **二号点名追问（297506）**→ 他仍沉默（297524）。即他的沉默**早于**二号追问，是全程未表态，而不是被点名后才不答——这影响 T3 的 action 与 CE5 的因果方向。（同一个「未开口」在 297080 与 297524 出现两次，候选只取了后者。）",
+   "severity": "medium（改变了 T3.action 与 CE5 的因果起点）"
+  },
+  {
+   "id": "rc_luzhishen_expectation",
+   "found": "**恒远大师（六号）的预期模型被漏掉**：原文用「鲁智深」这个别名两次写他的心理——296604 独自站在院里沉默许久；297299「如果是打更人找过来，六号不会吃惊。但一号和三号能这么快查出他的藏身之地，让鲁智深大吃了一惊。」候选全文 `'鲁智深' in candidate` = False。",
+   "quote": {
+    "quote": "如果是打更人找过来，六号不会吃惊。但一号和三号能这么快查出他的藏身之地，让鲁智深大吃了一惊。",
+    "start": 297299,
+    "end": 297345,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "offsetUnit": "codepoint",
+    "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+    "verbatim": true,
+    "findHits": 1,
+    "inRange": true
+   },
+   "supportQuote": {
+    "quote": "身材魁梧的“鲁智深”站在院子里，沉默了许久。",
+    "start": 296604,
+    "end": 296626,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "offsetUnit": "codepoint",
+    "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+    "verbatim": true,
+    "findHits": 1,
+    "inRange": true
+   },
+   "why": "这条给出了候选 S4 缺失的一半：S4 只记「他判断藏身处已暴露」，但原文区分了**两种暴露来源**——打更人找来他不吃惊，让他吃惊的是**天地会内部（一号/三号）**能查到他。这正是他随后在群里自曝地址（297102）并直接向一号、三号发问（296931）的动机。少了这条，六号的行为在候选里只剩「暴露了」这一个平面原因。别名方面：本区间用「鲁智深」指六号 2 次、「恒远大师」4 次，二者同指在区间内可互证（296604 与 297299 都在养生堂场景，而 296665 老吏员称他「恒远大师」）。",
+   "severity": "medium（S4 的动机缺一半）"
+  },
+  {
+   "id": "rc_xu_elimination_chain",
+   "found": "**许七安自己的五步排除推理被漏掉**（297656–297806，约 150 字）：①六号救了那么多孩子如何安置 → ②换成他第一选择是查京城各处养生堂 → ③除了魏渊谁能使唤得动朝廷的人 → ④一号也有这个能耐但他刚才否认了 → ⑤查出了杀死平远伯的凶手却没有缉拿，反而弥补了拖欠养生堂的银两、遣人修葺了院子。候选只引到第 ⑤ 步（在 TH1.counter 里），前四步 `in candidate` 全为 False。",
+   "quote": {
+    "quote": "换成许七安，第一选择肯定是查京城各处的养生堂。",
+    "start": 297677,
+    "end": 297700,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "offsetUnit": "codepoint",
+    "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+    "verbatim": true,
+    "findHits": 1,
+    "inRange": true
+   },
+   "supportQuote": {
+    "quote": "当然，一号也有这个能耐，但他（她）刚才否认了。",
+    "start": 297737,
+    "end": 297760,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "offsetUnit": "codepoint",
+    "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+    "verbatim": true,
+    "findHits": 1,
+    "inRange": true
+   },
+   "why": "这段是本区间**唯一一处把「群里的误认」与「魏渊真的出了钱」接起来的论证**，也是候选自己 unknowns[0]（「前天他把六号卖给魏渊了」是否属实）在区间内的最强证据：第③④步明写「除了魏渊，谁能使唤得动朝廷的人」且排除了一号，第⑤步直指魏渊所为。候选把 unknowns[0] 的判据主要挂在区间外（272262/273485），而区间内 297706–297806 这段自证没被用上。",
+   "severity": "medium（候选自己标注的 unknowns 有区间内判据未被使用）"
+  },
+  {
+   "id": "rc_f2_payoff_registered_too_early",
+   "found": "**F2 的回收点注册得过早/过窄**：候选把 F2（皇帝祭祖、打更人安保）判为 resolved，回收点取 299002「我们只要守着桑泊边缘就行了，祭祖大典在桑泊举行」——那只是**地点安排**。seed 的实质内容（「打更人要负责安保工作」）真正落地在更后面：303532「很快，皇室祭祖的日子来临」、304420「第九十六章 祭祖大典」、316279「这次祭祖有惊无险，任务圆满完成」。",
+   "quote": {
+    "quote": "很快，皇室祭祖的日子来临。许七安对此并不陌生，每年的这个时候，内城的城",
+    "start": 303532,
+    "end": 303567,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "offsetUnit": "codepoint",
+    "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+    "verbatim": true,
+    "findHits": 1,
+    "inRange": false
+   },
+   "supportQuote": {
+    "quote": "这次祭祖有惊无险，任务圆满完成，铜锣们商量着夜里去教坊司或哪个熟",
+    "start": 316279,
+    "end": 316311,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "offsetUnit": "codepoint",
+    "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+    "verbatim": true,
+    "findHits": 1,
+    "inRange": false
+   },
+   "why": "候选 remaining[1] 自己声明「只核了关键词命中点」，所以这是**已披露的收敛**而非隐瞒；但 status=resolved 的判定建立在只到第 94 章的地点句上，而 seed 说的是「安保工作」，其兑现（含「任务圆满完成」）在第 96 章，两者相距约 1700 字。按「结束≠成功」的同一纪律，F2 的回收点应后移到 304420/316279，或至少把 299002 标为「安排披露」而非「伏笔回收」。",
+   "severity": "low-medium（判定口径偏松，候选已自曝检索范围）"
+  },
+  {
+   "id": "rc_six_warning_actually_exists",
+   "found": "**候选把六号的处境只写成「暴露」，漏掉了他已收到具体示警这一环**：区间外紧邻的 273232 有许七安发出的「“六号，我得到消息，打更人已经掌握了来历不明的线索，很可能对你不利，你要做好准备，及时撤离。”」，而 273363 处六号「心有悸动，摸出地书碎片」正对应这次的「信息传入，持有者会有所察觉」。候选 unknowns[0].why 提到了 273363，但把它描述成「他给六号发出的示警」而未引出这句本体。",
+   "quote": {
+    "quote": "“六号，我得到消息，打更人已经掌握了来历不明的线索，很可能对你不利，你要做好准备，及时撤离。”",
+    "start": 273232,
+    "end": 273279,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "offsetUnit": "codepoint",
+    "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+    "verbatim": true,
+    "findHits": 1,
+    "inRange": false
+   },
+   "supportQuote": {
+    "quote": "地书传讯没有延迟，它与主人存在莫名的联系，但信息传入，持有者会有所察觉。",
+    "start": 273285,
+    "end": 273321,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "offsetUnit": "codepoint",
+    "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+    "verbatim": true,
+    "findHits": 1,
+    "inRange": false
+   },
+   "why": "这条对候选的 S4/CE6 有实质影响：六号「藏身之处这么快暴露了」的判断，发生在他**已收到点名示警**之后；即他的自曝（297102）不是单纯从「拨款异常」推出的，而是在已被提醒「做好准备，及时撤离」的情况下做的选择。候选 CE6 的机制只写了「异常的官方拨款/修葺 → 暴露判断」，漏了示警这一前置事件。该句在全书逐字命中 1 次、偏移 273232，复核者可一条命令复算。",
+   "severity": "medium（CE6 的动机链缺一个前置事件；顺带说明候选 unknowns[0] 引的 273363 指的是哪一句）"
+  }
+ ],
+ "falseKills": [
+  {
+   "what": "excludedSettings[0] 以「本区间没有出现「地书」「玉石小镜」「传书」等词（区间内计数为 0）」为由，**整条排除**了天地会传书机制。",
+   "why": "词级计数**是对的**（地书 0、玉石小镜 0、传书 0，可复算），但排除结论**不成立**：本区间 296898 明写「他抽出枕头底下的镜子，走到桌边点亮蜡烛，看了一眼信息。」——那面「镜子」就是地书碎片/玉石小镜，是群聊信息在本区间得以呈现的**物质载体**，且它 preceded 了整段群聊（296931 起）。即机制在本区间**正在运行**，只是没有用那三个词来称呼它。这是「词表/正则命中为 0 ⇒ 判定事实不存在」的误杀，正是 VERIFIER.md 引计划100「遂行」被整词判定挡掉那条合法因果边的同一形态。另一处佐证：候选自己在 S1.before 引了 294567 的「您不会也掏出一面镜子」——那是**监正玩笑里的镜子**（另一义），同一份候选里「镜子」两义并存，却没有把 296898 那一义收进来。",
+   "quote": {
+    "quote": "他抽出枕头底下的镜子，走到桌边点亮蜡烛，看了一眼信息。",
+    "start": 296898,
+    "end": 296925,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "offsetUnit": "codepoint",
+    "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+    "verbatim": true,
+    "findHits": 1,
+    "inRange": true
+   },
+   "reproduce": "python3 -c \"import json;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];u=t[294547:297902];print({k:(u.count(k),t.count(k)) for k in ['地书', '玉石小镜', '传书', '镜子']})\"",
+   "severity": "medium（把在区间内运行的机制整条排除）"
+  },
+  {
+   "what": "excludedSettings[3] 把「铜锣」等品级称谓作为「只用来标识出场者身份」的装饰性术语排除。",
+   "why": "在本区间「那个铜锣」不是装饰：296286 长公主问「你和那个铜锣很熟？」——「铜锣」在此是**指代关系本身**（她指的是许七安），排除后 RC1 那段对话在候选里就没有落点。「金锣」在本区间也确实只是在场标识（294656/294897），所以这一条是**部分误杀**：金锣可排除，铜锣应保留。",
+   "quote": {
+    "quote": "“你和那个铜锣很熟？”长公主换了个话题。",
+    "start": 296286,
+    "end": 296306,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "offsetUnit": "codepoint",
+    "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+    "verbatim": true,
+    "findHits": 1,
+    "inRange": true
+   },
+   "reproduce": "python3 -c \"import json;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];u=t[294547:297902];print({k:(u.count(k),t.count(k)) for k in ['铜锣', '金锣', '银锣']})\"",
+   "severity": "low（部分误杀）"
+  }
+ ],
+ "verifiedOk": {
+  "quoteDiscipline": "79 个引文节点全部 `t[start:end]==quote` 逐字成立；sourceHash 全部等于 task.sourceHash；inUnit 标记与实际区间一致（74 in-range / 5 out-of-range，越界 5 条也逐字成立）；occurrencesInFullText 全部复算一致；segmentSha256 与 unitHead 自检一致（切片 3355 codepoints，sha256=72a35f44…，右界 297902 恰为「第九十四章 凶杀案」）。",
+  "candidateMetrics": "metrics.quoteNodes=79、distinctQuotes=62 独立复算**正确**；候选自带的 4 条 reproduce 命令复核者逐条实跑，全部通过（第 1/2/3/4 条；第 4 条的「五栏零共用」与「null 栏位均有 Note」成立）。",
+  "paragraphIndexConvention": "候选的 paragraphIndex1Based 用的是**原文原始行号（含空行）1-based**，79 条里凡带该字段者 79/79 自洽（用「空行分块」口径会 74 条不符，故口径唯一确定为行号）。这不是缺陷，但候选未写明口径。",
+  "noFabricatedText": "未发现**引文层面**的编造：没有任何一条 quote 在原文找不到，也没有把区间外句子标成 inUnit。CE1 的编造发生在 who 字段的**人物**上，不是引文上。",
+  "negativeEdgeVerified": "CE5 的反事实负边可核验：区间内「怀疑/识破/看出/拆穿/猜到」计数**均为 0**，即「群成员没有识破」这一否定事实有区间内依据，不是感觉。该边可保留。",
+  "endingNotSuccessDiscipline": "候选在 S2.note/T2.result.note 明写「结束≠成功」，拒绝把「她点头」写成饭局办成；deliberatelyNotAsserted 6 条逐条与原文相符，未发现把结束当成功。"
+ },
+ "machineRecheck": {
+  "quoteNodes": 79,
+  "verbatimOK": 79,
+  "badVerbatim": [],
+  "badSourceHash": [],
+  "inUnitFlagMismatch": [],
+  "outOfRangeNodes": 5,
+  "outOfRangeVerbatimBad": [],
+  "occurrencesMismatch": [],
+  "paragraphIndexMismatchUnderLineConvention": [],
+  "metricsClaimed": {
+   "quoteNodes": 79,
+   "inRangeQuoteNodes": 74,
+   "outOfRangeQuoteNodes": 5,
+   "distinctQuotes": 62
+  },
+  "metricsActual": {
+   "quoteNodes": 79,
+   "distinctQuotes": 62,
+   "inRange": 74,
+   "outOfRange": 5
+  },
+  "reproduceCommandsAllPass": true,
+  "spotCheck5": [
+   {
+    "quote": "“你不用去化缘了，朝廷刚刚拨了款，弥补了往年拖欠的银两，下午还派工匠…",
+    "declaredRange": [
+     296699,
+     296740
+    ],
+    "findOffset": 296699,
+    "verbatim": true,
+    "findEqualsDeclared": true,
+    "occurrencesInFullText": 1,
+    "inRange": true
+   },
+   {
+    "quote": "按捺住心头的喜悦，许七安脱下袍子，裹住刀身，提在手里。",
+    "declaredRange": [
+     295166,
+     295193
+    ],
+    "findOffset": 295166,
+    "verbatim": true,
+    "findEqualsDeclared": true,
+    "occurrencesInFullText": 1,
+    "inRange": true
+   },
+   {
+    "quote": "这样啊....明后两天要值夜，大后天是皇帝祭祖的日子，打更人要负责安…",
+    "declaredRange": [
+     295441,
+     295509
+    ],
+    "findOffset": 295441,
+    "verbatim": true,
+    "findEqualsDeclared": true,
+    "occurrencesInFullText": 1,
+    "inRange": true
+   },
+   {
+    "quote": "许七安抬头看了一眼，恰好看见长公主在俯视他。",
+    "declaredRange": [
+     295648,
+     295670
+    ],
+    "findOffset": 295648,
+    "verbatim": true,
+    "findEqualsDeclared": true,
+    "occurrencesInFullText": 1,
+    "inRange": true
+   },
+   {
+    "quote": "....不是我，我没有，你别抬举我。许七安保持沉默。",
+    "declaredRange": [
+     297524,
+     297550
+    ],
+    "findOffset": 297524,
+    "verbatim": true,
+    "findEqualsDeclared": true,
+    "occurrencesInFullText": 1,
+    "inRange": true
+   }
+  ]
+ },
+ "uncoveredLines": {
+  "nonEmptyLines": 98,
+  "covered": 56,
+  "uncovered": 42,
+  "note": "「covered」= 该行整行或其主要子串出现在候选任一 quote 中（含互为子串）。未覆盖行里剔除标点行/分节符/作者 PS 后的实质事实见 reverseChecks。"
+ },
+ "notes": "【复核独立性】本复核由 w-verify-1 执行（租约 loop/state/leases/verify:dafeng:L0:0092.d/lease.json 的 agent=w-verify-1），被复核候选 read_dafeng_L0_0092.candidate.json 的 agent=w-dafeng-1，两者不同名，不构成自签。\n\n【方法】按 VERIFIER.md 的顺序：先把 [294547,297902) 原文整片逐行读完（204 行）并自行抽取要点，**之后再打开候选**。机器侧不 import 任何构建脚本，独立从磁盘复算：79 条引文的逐字回切/hash/inUnit/occurrences/段落索引、候选 4 条 reproduce 命令逐条实跑、随机种子 20261009 抽 5 条 in-range 引文独立 find、候选散文里 13 处「偏移 N」逐个回原文切片（其中 1 处经复核者自查后撤回，见下）、人物名在区间内与全书的计数对比（含反面：只出现在区间外的人名）。反向验证另做了「按行切分求未覆盖段」：98 个非空行里候选引文覆盖 56 行、未覆盖 42 行，逐行判是否有可登记事实，从中提炼 rc_* 六条。\n\n【判 partial 而不是 fail 的依据】判 fail 需要 counterExample 且 quote 逐字可查——本轮 4 条 CE 都满足这个门槛（CE1 是区间内 0 次的人物被写成在场者；CE2/CE3 是自报偏移与原文不符，其中 CE2 与候选自己的字段直接矛盾；CE4 是自报检索结论与原文相反）。**但没有判 fail**，理由是：候选最核心的契约面——引文逐字命中、哈希、区间标记、occurrences、reproduce 命令——经独立复算**全部成立**（79/79），没有一条引文是编造的，也没有把区间外句子冒充区间内；CE1–CE4 都是**元数据/散文层**的错误，可用局部改写修掉，不影响其引文语料的可复用性。同书 0088 单元对同类「who 栏写了区间内 0 次的称谓」判的也是 partial，本轮沿用同一口径。\n\n【我撤回了自己的一条 counterExample（如实记录）】初判时我把 unknowns[0].why 的「偏移 273363 他给六号发出的示警」列为「偏移错位＋把『提醒』升级成『示警』」。复核者随后在原文 **273232** 找到了该示警的本体逐字句「“六号，我得到消息，打更人已经掌握了来历不明的线索，很可能对你不利，你要做好准备，及时撤离。”」——它就在 273363 之前 131 个 codepoint、属同一场景的紧邻上一段（许七安发出 → 273363 六号收到并变色），且「示警」正是对该句内容的准确概括而非升级措辞。故候选的实质描述**成立**，偏移属可接受的同场景指代，我已把该条从 counterExamples 中**删除**（本文件不含该条），并改写成 reverseChecks 里的 rc_six_warning_actually_exists（指出候选未引出这句本体）。这正是 VERIFIER.md 允许的「判自己错」。删除前本文件有 5 条 CE，现为 4 条。\n\n【必须丢弃或降级的条目】① states[S3].who 中的「四号」必须删（区间内 0 次），并补上真正在场的九号/金莲道长；② notForeshadows[0].why 与 T3.obstacleNote/unknowns[0].why 的 2 个偏移值（295652→295610、272201→272262）必须改；③ unknowns[9] 关于「另 2 处均为婶婶」的结论必须改，并据此**下调**该条 unknowns 的不确定性（990485 是同人物同表情的旁证）；④ excludedSettings[0] 的整条排除应撤回，改为「机制以『镜子』一词在本区间运行」。其余条目（tasks/causeEdges/states 的引文与 basis 分层、worldSettings、themeReadings、deliberatelyNotAsserted）**可以用**。\n\n【只作存疑、未用于判 partial 的事项】(a) causeEdges 里那条 counterfactual-negative 边是否该进 causeEdges（其 to 是「没有发生的事」，无法用引文直接指称；但其否定事实可复算为真，故我不据此判缺陷）；(b) F5/F6 两条 unresolved 是否算伏笔——候选自己在 F6.note 里已写明「只出现一次的东西不叫伏笔…若复核认为这不该列进 foreshadows，应移到观察项」，这是候选主动披露的口径风险，我按「存疑」记录；(c) 候选 foreshadows 的 `range` 辅助字段语义不统一（F2 的 range 含住自己的 quote，F3 的 range=[605969,606012) 却**不含**自己的 quote [605917,605955)，F1/F4 各差 1–3 字），因该字段不是引文定位字段、且不影响任何 quote 的可核验性，我只在 notes 里记录，不列为 CE。\n\n【我自己可能的错】① 我把「镜子」认定为地书碎片/玉石小镜，依据是它在区间内紧接群聊信息（296898→296931）以及全书「掏出玉石小镜」的同型动作（273219 即为「掏出玉石小镜，输入信息」），但**本区间内没有「玉石小镜」字样**，若复核要求区间内必须出现该词，则 fk[0] 的力度应降为「存疑」；② 我用原始行号口径复算段落索引并判定 79/79 自洽，若项目的既定口径是「空行分块」，则该结论反转（会变成 74 条不符）——我未在候选或 READER.md 里找到口径定义，故按唯一能自洽的口径记录；③ CE1 判「四号」为编造，是指它在**本区间** 0 次，不是说全书没有这个人（全书 151 次，最近 305998）；若项目的 who 栏允许填全书阵容并标注，则该条应降为「应标注」而非「必须删」。\n\n【未做】未做语义核验（不主张候选的 themeReadings 成立与否）；未逐章通读 F1–F4 回收点之间的过程；未跑 GPU/浏览器测试（任务未要求，且全局串行）。"
+}

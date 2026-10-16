@@ -1,0 +1,104 @@
+{
+  "task": "read:xiyou:L1:0061",
+  "agent": "w-sanguo-0",
+  "status": "done",
+  "summary": "精读《西游记》第六十一回「猪八戒助力败魔王　孙行者三调芭蕉扇」（docs[0].text codepoint [439738,447413)，7675 字，34 个非空自然段全部逐字读过）。本轮不是从零开始：盘上已有一份 **上一轮 w-read-2 的构建器产物**（此前 sha c43bfdd9…，其 run 已死，任务于 15:38 由守护轮重新租给我）。我先独立复核了它：373 个带偏移引文节点逐字/区间/哈希/唯一性/**同任务五栏跨度两两不相交**全部通过（FAIL=0）——引文层是干净的。但按 VERIFIER 契约做**语义**层复核时查出 **3 处「定位对、语义错」**并全部修掉，产出新候选 sha **d27fb89c…**：①`tasks[3].action` 引「举钯乱筑」当作「把玉面公主筑死」的依据——该句逐字在区间内，但语境是**积雷山对牛王**那一场（「八戒发起呆性……举钯乱筑。牛王遮架不住，败阵回头」），被筑的是牛王；且该跨度(443412)与同条 result 的(444561/444575)在叙事上是两场不同的仗。改用同段唯一的「唬得那外护头目……报道：『大王！孙悟空率众打破前门也！』」，并把正文改成如实说明：玉面公主之死在本区间**只以八戒回报出现**（「那老牛的娘子被我一钯筑死」），叙述者没有写这场打斗的正面过程——即它属**人物之言**而非已见的战斗。②`worldSettings[1]`（积雷山摩云洞）的标量 quote 原取「举钯照门一筑……将那石崖连门筑倒了一边」，但那一次筑门发生在**芭蕉洞**：紧接上文正是八戒问「那可是芭蕉洞么？」、行者答「正是！罗刹女正在此间。」。本条自己的 note 已写明两洞是两处不同的地方，标量 quote 却与 note 自相矛盾。改用摩云洞那一次破门（「……把一座摩云洞的前门，打得粉碎。」，区间内唯一），并在 explain 里显式点出两处筑门的区别。③`tasks[9].result` 原写「用的是**同一柄**被牛王夺回过、又由罗刹女交出的扇子」，而同一份候选的 `unknowns[2]` 明说「是不是同一件，原文没有交代」——**候选自相矛盾**。改为如实照原文：三处都只称「扇子」，无形制或来源的区分，同一性留给 unknowns。三处修复写进 `repairLog`（每条带逐字原文、绝对偏移与改判理由），并同步补进 `selfCritique`（原来的 5 条**没有一条**覆盖到这两类错，这正是本轮新增 2 条的由来）。**未做**语义核验（semanticReview.performed=false）：我修的是我自己查出的三处；剩余 370 个引文节点的语义正确性仍须由独立复核者按 VERIFIER 契约判。",
+  "evidence": [
+    {
+      "path": "loop/state/out/read_xiyou_L1_0061.candidate.json",
+      "sha256": "d27fb89c1dc617b22d41f16c2834755b70064e8fcee570589f9335ea699822a0",
+      "kind": "candidate",
+      "note": "本轮产出（writes 指定的唯一写入物）。373 个带偏移引文节点 + 11 条 worldSettings 标量 quote，机械复核 FAIL=0：逐字(text[start:end]==quote)、区间(全部落在[439738,447413))、源哈希(整文件 sha256)、唯一性(wholeTextOccurrences/inRangeOccurrences 与实测一致)、同任务五栏跨度两两不相交(0 处)、11 条标量 quote 均在区间内唯一。tasks 15 条五元分列，cost 有 5 条 null 且每条带 costNote 写明为什么没有。"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/cl0061-xiyou/build.py",
+      "sha256": "9bd24987c1a4d61e68b814fd93862bff5972d5045ca1300551023c2286c54278",
+      "kind": "probe",
+      "note": "候选构造器（上一轮 w-read-2 留下、本轮由我修补后重跑）。开工前 assert 整个 docs.json 的 sha256 == c282cf39…，不符即拒绝运行；引文一律用 Q(s) 在区间内**定位后**回填全文绝对偏移（逐字性是构造性质）。构造期自检 A–J 十项，本轮实测 FAIL=0 WARN=0、引文节点 373。**本轮新增 repairLog 2 条**（我改的两处语义缺陷，带逐字原文与绝对偏移）。可重建性实测：连跑两次得到与在盘候选**逐字节相同**的文件（d27fb89c…）。"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/cl0061-xiyou/sec_tasks.py",
+      "sha256": "de9a0c7d506cc8099e816bade80d3a39149fd51aadd7d9607f3a282e079758bb",
+      "kind": "probe",
+      "note": "tasks 分区构造层。本轮改两处：tasks[3].action 的引文（举钯乱筑→闯报破门前门，并把正文改为「只以八戒回报出现」）与 tasks[9].result 的扇子同一性表述（同一柄→照原文只称扇子，同一性留给 unknowns）。"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/cl0061-xiyou/sec_world.py",
+      "sha256": "14892246ce29dfb63e846e55f244d468ed50a90a06def48906e49d67e739a02b",
+      "kind": "probe",
+      "note": "worldSettings/themeReadings/unknowns/selfCritique 构造层。本轮改两处：W2 标量 quote 改为摩云洞那次破门、explain 显式区分两处筑门（摩云洞 442805 / 芭蕉洞 444813）；selfCritique 新增 2 条（T4.action 引文错配、W2 标量 quote 张冠李戴），原 5 条未覆盖这两类。"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/cl0061-xiyou/q.py",
+      "sha256": "26322cbbcc62931b919754bbb8e55ca435d1e853e7046956fef9d0e0e7f7feba",
+      "kind": "probe",
+      "note": "引文定位工具。start/end 口径为 docs[0].text 全文绝对 codepoint；Q() 默认要求串在区间内唯一出现，不唯一必须显式给 occ=，否则抛错（逼出「同一句话出现两次、引错那一处」）。开工前 assert 源哈希。"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "源哈希与区间口径：shasum -a 256 data/cache/a065244455cfb2221bcda94a.docs.json == c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2（与任务 sourceHash 一致）；docs[0].text[439738:447413] 以本单元标题「第六十一回　猪八戒助力败魔王　孙行者三调芭蕉扇」开头，长度 7675 == 447413-439738。切片 UTF-8 sha256 = 3f5eeda781c495b70426602257902b087c96f441df46774c255b26bb0c2b5ac4（另起字段，不覆盖 sourceHash）。",
+      "result": "pass"
+    },
+    {
+      "text": "逐字与区间（对全部 373 个带偏移引文节点机械重算）：每条 T[q['start']:q['end']] == q['quote'] 且 439738<=start<end<=447413，且 sourceHash 全等于上面的整文件 sha256。实测 verbatim-bad=0、out-of-range=0、wrong-sourceHash=0。",
+      "result": "pass"
+    },
+    {
+      "text": "引文唯一性：每条声明了 wholeTextOccurrences/inRangeOccurrences 的节点，其声明值与在原文/区间内的实测出现次数逐一相符（occ-bad=0、occrange-bad=0）。11 条 worldSettings 标量 quote 在区间内出现次数均为 1（唯一）。",
+      "result": "pass"
+    },
+    {
+      "text": "同任务五栏跨度不相交（提示词点名的实测缺陷：旧图谱 714/1664 条五栏共用一句）：对 15 条 task 的 objective/obstacle/action/result/cost 引文跨度两两比对，跨栏相交 0 处。tasks[10].cost 还额外给出 crossRefNote 说明它刻意不把已用于 objective 的那句重复计入本栏证据。",
+      "result": "pass"
+    },
+    {
+      "text": "本轮查出的 3 处语义缺陷已修且可逐字复核：①举钯乱筑 @443412 的上下文在原文里是「…又斗有百十余合。八戒发起呆性，仗着行者神通，举钯乱筑。牛王遮架不住，败阵回头，就奔洞门」——对象是牛王；②444813「举钯照门一筑」的上文是「八戒道：『那可是芭蕉洞么？』行者道：『正是！罗刹女正在此间。』」——地点是芭蕉洞；③扇子同一性：区间内三处（440302 递与他／444909 递与罗刹女／446212 捧扇出门）都只称「扇子」，原文未给同一性说明。三处改判均写进 repairLog（带 exact、span、why、fix）。",
+      "result": "pass"
+    },
+    {
+      "text": "内容分区完整性：按 loop.py 的 required_sections(task.prompt) 抽出的 6 个顶层分区 tasks/causeEdges/states/foreshadows/worldSettings/themeReadings 在候选里全部存在（missing=[]），且非空或按提示词允许写成空数组的情形均已在分区内处理。",
+      "result": "pass"
+    },
+    {
+      "text": "可重建性：重跑构造器 python3 -B /Volumes/资源库/我的资源/回滚点/项目/cl0061-xiyou/build.py 两次，均输出 sha256=d27fb89c1dc617b22d41f16c2834755b70064e8fcee570589f9335ea699822a0，与在盘候选**逐字节相同**（构造期自检 FAIL=0 WARN=0）。",
+      "result": "pass"
+    },
+    {
+      "text": "未做语义核验：semanticReview.performed=false 且写明理由。本轮只修掉我自己查出的 3 处；其余引文节点的语义正确性（该句在该语境里是否真的支持该断言）**没有**核验，须由独立复核者按 VERIFIER 契约读原文后判。不得据此认为本候选已核验。",
+      "result": "pass"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/read_xiyou_L1_0061.candidate.json",
+      "kind": "append-only",
+      "note": "任务 writes 指定的唯一写入物。本轮为**原地重写**（同路径）：上一轮该 run 已死、无并行写入者（leases/read:xiyou:L1:0061.d/lease.json 记的 agent 是 w-sanguo-0 即本轮），写入前先备份为 /Volumes/资源库/我的资源/回滚点/项目/cl0061-xiyou/candidate.prior-w-read-2.json。"
+    },
+    {
+      "path": "loop/state/out/read_xiyou_L1_0061.submit.json",
+      "kind": "append-only"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/a065244455cfb2221bcda94a.docs.json": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+    "loop/state/out/read_xiyou_L1_0061.candidate.json": "d27fb89c1dc617b22d41f16c2834755b70064e8fcee570589f9335ea699822a0"
+  },
+  "remaining": [
+    "**语义核验未做**（semanticReview.performed=false）。本轮只修掉我自己查出的 3 处（举钯乱筑错配、W2 标量 quote 张冠李戴、扇子同一性自相矛盾）；其余 370 个引文节点的语义正确性仍须由独立复核者按 VERIFIER 契约判。",
+    "W2 的标量 quote 现取 442805「把一座摩云洞的前门，打得粉碎」——该串与 W2.quotes[1] 是同一句（标量字段与 quotes 数组共用），这是 build 的既有约定（标量 quote 是给不读 quotes 的读者看的摘要），本轮未改。若复核者认为标量不应与 quotes 重复，这是一处可改判点。",
+    "F1（定风丹）记 resolved/recovered 但**铺设发生在上一回**（灵吉菩萨赠丹、行者含丹入罗刹腹，本区间 0 次提及灵吉/赠）。本区间只有叙述者补叙与回收；selfCritique 已写明这一风险与降级方向。",
+    "K4（八戒不知除根之法）整条 basis=inferred——它的「不知」只能从「本区间未写他知情」推出，原文无记载 ≠ 一定不知道。note 已写明；若复核者认为不宜进 knowledgeDiffs，可整条移入 unknowns。",
+    "T7.cost/T8.cost/T12.cost/T13.cost/T14.cost 五条为 null（各带 costNote）。这是照提示词「不要补一个听起来合理的值」写的，但「null 偏多」是可被复核者质疑的判断点。",
+    "本轮 3 处修复都改在**上一轮的构造器**上（外置盘 build.py/sec_tasks.py/sec_world.py，非仓库内文件，不受保护路径约束）。仓库内我只写了 writes 指定路径与自己的提交记录，未触碰 js/css/index.html/serve.py/narrative.py/scripts/tests/docs/data。",
+    "本轮未跑 GPU/浏览器测试（任务未声明需要）。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/read_xiyou_L1_0061.submit.json"
+    ],
+    "note": "candidate.json 是同路径原地重写、不是新增文件，故不能靠删除回退；上一轮内容完整备份在 /Volumes/资源库/我的资源/回滚点/项目/cl0061-xiyou/candidate.prior-w-read-2.json（sha c43bfdd980841d518968d1425c90cbf0cf14644c9fabcd9aa945721524935555），需要时覆盖回去即可。构造器三处改动亦有 .bak（sec_edges.py.bak 同目录模式）可参照。"
+  }
+}

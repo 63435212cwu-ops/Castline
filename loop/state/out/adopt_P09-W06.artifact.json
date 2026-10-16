@@ -1,0 +1,401 @@
+{
+  "task": "adopt:P09-W06",
+  "agent": "w-ops",
+  "status": "done",
+  "kind": "plan100-open-item-adjudication",
+  "title": "P09-W06（blocked）如实处置：缺口**今天仍然存在**，但原产物为「仍然存在」付的**证据代价**已经失效；我把它重挂到可执行承运者上",
+  "summary": "结论分三层，每层都可复算。\n\n**（1）缺口本身今天仍在。** 这是**实测**，不是沿用旧结论：P09 八个槽位的 `source-manifest.json` 里，只有 P09-W05 与 P09-W06 的 `command` 是「（不适用项，无执行命令）」，其余六个都有真实执行命令（commands[B2]）。P09-W06 目录下今天仍是 4 个文件、**没有** `reports/`（commands[G2]），而同阶段已执行的 P09-W04 的交付物形态就是 `--out …/reports/…`（commands[G1]）。承接者表也仍把 P09-W06 列在 `noCarrier` 与 `openLedgers` 里（commands[B1]）。**台账 status 保持 blocked 未动**（commands[A1]，禁止为让门禁变绿而改它）。\n\n**（2）旧归因「P09 不重复实现任务状态机 ⇒ 本包不适用」只对了一半，且这一半今天已被证实为真。** 同标题槽位 P03-W06 今天是 `status=merged / reviewer=p12-independent-verifier`（非自签，commands[B3]）；两条契约今天实跑通过：`tests/task_state_machine_contract.py` 22/22（commands[C1]）、`tests/journey_timeline_contract.js` 21 pass（commands[C2]）。所以「状态机面由 P03 负责」成立 —— 但那**不覆盖** P09-W06 自己的交付物。\n\n**（3）★本轮的新发现（比缺口本身更要紧）：原产物为「缺口仍存在」所付的证据，今天**不可复核**了。** w-ops 于 2026-10-08 的产物把 13 条证据固化成 sha256，其中决定性的一条是外部归档里的规格 `~/Desktop/星系-audit-archive-20261007/docs/plan-100-score-execution.md`（sha256 c0192e21…，13,580,691 字节）。**该归档目录今天已不存在**（commands[D1]），工作树内的 `docs/plan-100-score-execution.md` 也不存在（commands[D2]），而且它**从未进过 git**（HEAD 0 命中、全部历史 0 次新增，共 10 个 commit，commands[D3]）⇒ 无法用 git 恢复。`loop.py` 自己的判定把它列为该记录**唯一**的失效证据（commands[F2]），并归因于「环境自身构造物」（commands[F3]）。这正是 `loop.py` 注释里 E12/E32 记的形态：**「曾经成立」不等于「现在成立」**。\n\n**（4）因此我纠正一个可核对的过度声称。** 原产物 F1 断言 P09-006 的实例化是 `f(标题,阶段)`，依据是「P03-006 基线=…、P09-006 基线=…」这类**逐槽位 baseline/责任人/产物**的对照。但仓库内今天能复核的 `artifacts/plan100/plan-ledger.json` **没有** per-phase 实例化字段：`taskTitle` 的字段并集只有 `['firstLine','key','title']`，全文出现 `baseline` 0 次、`sky_device_matrix_browser` 0 次、`P09-006` 0 次（commands[E1]）；它只有 112 槽 / **8 个唯一标题**（commands[E2]，与 `dedupNote` 一致）。也就是说，**「P09-W06 的交付物是设备矩阵」这条断言，今天在仓库内已无独立可核来源** —— 它的唯一来源随归档一起消失了。我**不**把「没有来源」写成「断言为假」：缺口仍在（第 1 层是独立实测的），但交付物的**具体形态**属未验证。\n\n**（5）处置。** 按要求「仍然存在 → 在循环里建一条可执行任务，或在提交里写明它归属哪个流」。本任务 `writes` 只允许 `loop/state/out/adopt_P09-W06.artifact.json`，新建 `loop/queue/*.jsonl` 会越界，故采用后者，并**如实记下该建议上一轮没落地**：原产物建议的 `ops:P09-device-matrix-report` 在任何队列里都不存在（commands[F1]）——「在提交里写明归属」这条出口，上一轮实际上**没有**产生承运者。本轮我把它写成**可直接建单的规格**（见 `disposition.nextTaskSpec`），并明确它需要一个 GPU 串行槽位。",
+  "generatedAt": "2026-10-11T15:37:28Z",
+  "notSelfSigned": {
+    "note": "本产物由 w-ops 提交。被处置台账 owner=p09-agent、reviewer=None（原本就无人签收），均非本 agent（commands[I1] 显示本任务租约 agent=w-ops）。本会话未做任何签收动作、未改任何 ledger 字段、未写 loop/queue/。",
+    "owner": "p09-agent",
+    "originalReviewer": null,
+    "myAgent": "w-ops",
+    "didNotChangeLedgerStatus": true,
+    "didNotSign": true,
+    "didNotCreateQueueTask": true
+  },
+  "whatIchecked": {
+    "method": "只读核对 + 实跑：台账/决定/执行面清单/承接者表/规格索引逐项复算，并**实际运行**两条被指为「已覆盖」的契约测试。所有 commands[].out 都是真实捕获的 stdout/stderr —— 由 `p09w06/gen.py` 逐条 subprocess 采集（commands.json 已固化哈希），可逐条重跑，非手抄。未跑 GPU/浏览器（本任务未声明；GPU 全局串行），故本产物不含任何新的渲染实测。",
+    "ran": [
+      "python3 -B tests/task_state_machine_contract.py",
+      "node tests/journey_timeline_contract.js",
+      "python3 -B p09w06/gen.py（21 条只读命令）"
+    ],
+    "didNotRun": [
+      "CL_GPU=1 python3 -s tests/sky_device_matrix_browser.py（未声明；GPU 串行）",
+      "任何浏览器/真机/读屏测试"
+    ],
+    "environment": {
+      "sentinelWatchProcs": "1（--watch 常驻主进程；判活只认它，commands[I2]）",
+      "workerProcs": "18",
+      "note": "BSD 上没有 pgrep -c，一律用 pgrep -fl … | wc -l（SENTINEL.md 明令）。"
+    }
+  },
+  "commands": [
+    {
+      "label": "A1 台账今日状态（未改动）",
+      "cmd": "python3 -c \"import json;d=json.load(open('artifacts/plan100/20261007/P09-W06/ledger.json'));print(d['status'],'| reviewer=',d['reviewer'],'| decision=',d['decision'],'| owner=',d['owner'])\"",
+      "exit": 0,
+      "out": "blocked | reviewer= None | decision= None | owner= p09-agent"
+    },
+    {
+      "label": "A2 台账 inputHashes 逐字段复算",
+      "cmd": "python3 -c \"import json,hashlib,pathlib;d=json.load(open('artifacts/plan100/20261007/P09-W06/ledger.json'));[print(i['path'],'SAME' if hashlib.sha256(pathlib.Path(i['path']).read_bytes()).hexdigest()==i['sha256'] else 'CHANGED') for i in d['inputHashes']]\"",
+      "exit": 0,
+      "out": "artifacts/plan100/20261007/P09-W06/decision.md SAME"
+    },
+    {
+      "label": "B1 P09-006 槽位今天仍无承接者（读法 B 下是真实缺口）",
+      "cmd": "python3 -c \"import json;d=json.load(open('loop/state/PLAN100-ADOPTION.json'));print('noCarrier has P09-W06:', any(e['key']=='P09-W06' for e in d['noCarrier']));print('P09 with carrier:', sorted(e['key'] for e in d['carriers'] if e['phase']=='P09'));print('openLedgers:', d['openLedgers'])\"",
+      "exit": 0,
+      "out": "noCarrier has P09-W06: True\nP09 with carrier: ['P09-W01', 'P09-W02', 'P09-W03', 'P09-W04', 'P09-W07', 'P09-W08']\nopenLedgers: ['P06-W05', 'P06-W06', 'P09-W05', 'P09-W06', 'P12-W04', 'P12-W05']"
+    },
+    {
+      "label": "B2 P09 八个槽位里只有 W05/W06 未执行（source-manifest 命令面）",
+      "cmd": "python3 -c \"import json,glob;[print(p.split('/')[-2], 'executed=' + str('不适用' not in str(json.load(open(p))[0].get('command')))) for p in sorted(glob.glob('artifacts/plan100/20261007/P09-W0*/source-manifest.json'))]\"",
+      "exit": 0,
+      "out": "P09-W01 executed=True\nP09-W02 executed=True\nP09-W03 executed=True\nP09-W04 executed=True\nP09-W05 executed=False\nP09-W06 executed=False\nP09-W07 executed=True\nP09-W08 executed=True"
+    },
+    {
+      "label": "B3 同槽位的 P03-W06（状态机归属面）今天是 merged 且有独立 reviewer",
+      "cmd": "python3 -c \"import json;d=json.load(open('artifacts/plan100/20261007/P03-W06/ledger.json'));print('status',d['status'],'| reviewer',d['reviewer'],'| decision',d['decision'])\"",
+      "exit": 0,
+      "out": "status merged | reviewer p12-independent-verifier | decision merged"
+    },
+    {
+      "label": "C1 五元组状态机契约今天仍在跑（P03 归属面成立）",
+      "cmd": "python3 -B tests/task_state_machine_contract.py 2>&1 | tail -3",
+      "exit": 0,
+      "out": "OK\n\nP03 task state machine contract: 22/22 passed"
+    },
+    {
+      "label": "C2 展示层叙事契约今天仍在跑（且已被 M86 合并任务改写）",
+      "cmd": "node tests/journey_timeline_contract.js",
+      "exit": 0,
+      "out": "PASS stops follow actual event identity and count, without a fixed engineering time grid\nPASS five task aspects are attached by their own anchors, including cost before outcome\nPASS M86 keeps five dimensions as slots and lights every field owned by one real stop\nPASS M86 distinguishes absent and unlocated fields without exposing unlocated text\nPASS M86 scope details do not leak an unlocated or future goal from record metadata\nPASS no task aspect is assigned from chronology, a dead end or the most connected event\nPASS same numeric offsets in another source or edition cannot assign an event\nPASS overlapping event evidence, quote vetoes and invalid offsets remain unlocated\nPASS explicit event references remain usable and out-of-scope references never fall back\nPASS a declaration cannot reveal compound text before its latest source evidence\nPASS partial ownership cannot silently discard an unresolved part of a compound aspect\nPASS before stage and reverse seeking do not reveal future aspect text or quotes\nPASS M86 frame reveals across 900ms in seconds, freezes on pause, and manual seek lands readable\nPASS only source-located aspects are narrated; task completion cannot fill a missing cost anchor\nPASS reader-facing stops use event titles, native event links and no implementation timestamps\nPASS reduced motion keeps exactly the same source reading and stop identities\nPASS pause keeps event and remaining duration; skipping creates no timer or success claim\nPASS single-event and absent-dimension journeys retain one actual event and an honest recap\nPASS source text is escaped in names, task aspects and quotations\n  大奉打更人 · 6 actual tasks\n  西游记 · 16 actual tasks\n  三国演义 · 24 actual tasks\nPASS real published journeys project every owned event without modifying published data\nPASS the existing exporter accepts current stops and legacy snapshots without inventing timestamps\n21 narrative journey contracts passed"
+    },
+    {
+      "label": "D1 原产物引用的规格归档今天**不存在**（证据失效的那一条）",
+      "cmd": "ls -d /Users/carmen/Desktop/星系-audit-archive-20261007",
+      "exit": 1,
+      "out": "ls: /Users/carmen/Desktop/星系-audit-archive-20261007: No such file or directory"
+    },
+    {
+      "label": "D2 规格在工作树内的路径今天也不存在",
+      "cmd": "ls docs/plan-100-score-execution.md",
+      "exit": 1,
+      "out": "ls: docs/plan-100-score-execution.md: No such file or directory"
+    },
+    {
+      "label": "D3 规格从未进过 git（HEAD 与全部历史都没有 ⇒ 不可用 git 恢复）",
+      "cmd": "printf 'in HEAD: '; git ls-tree -r HEAD --name-only | grep -c 'plan-100-score-execution'; printf 'ever added: '; git log --all --diff-filter=A --name-only --pretty=format: | grep -c 'plan-100-score-execution'; printf 'total commits: '; git rev-list --all --count",
+      "exit": 0,
+      "out": "in HEAD: 0\never added: 0\ntotal commits: 10"
+    },
+    {
+      "label": "E1 plan-ledger 只留去重后的标题，没有 per-phase 的 baseline/owner/产物",
+      "cmd": "python3 -c \"import json;d=json.load(open('artifacts/plan100/plan-ledger.json'));tk=set();[tk.update(t.keys()) for p in d['phases'] for t in p['taskTitles']];print('taskTitle fields =', sorted(tk));s=json.dumps(d,ensure_ascii=False);[print('  occurrences of', k, '=', s.count(k)) for k in ('baseline','sky_device_matrix_browser','P09-006')]\"",
+      "exit": 0,
+      "out": "taskTitle fields = ['firstLine', 'key', 'title']\n  occurrences of baseline = 0\n  occurrences of sky_device_matrix_browser = 0\n  occurrences of P09-006 = 0"
+    },
+    {
+      "label": "E2 规格声明的工作项是 112 槽 / 8 个唯一标题（细粒度不能从标题反推）",
+      "cmd": "python3 -c \"import json;d=json.load(open('artifacts/plan100/plan-ledger.json'));tot=0;tk=set();[(tk.add(t['title']), globals().__setitem__('tot',tot+1)) for p in d['phases'] for t in p['taskTitles']];print('slots',tot,'unique titles',len(tk));print(d['dedupNote'])\"",
+      "exit": 0,
+      "out": "slots 112 unique titles 8\n每个阶段重复 15 遍同一组工作项模板，只有前置/失败处理不同；规范工作项按唯一标题去重"
+    },
+    {
+      "label": "F1 原产物建议的后续任务从未被建成队列任务（建议未落地）",
+      "cmd": "python3 -c \"import json,glob;hits=[];[hits.append((f,t['id'])) for f in glob.glob('loop/queue/*.jsonl') for line in open(f) if line.strip() for t in [json.loads(line)] if 'device-matrix-report' in (t.get('id') or '')];print('queue task ids matching device-matrix-report:', hits)\"",
+      "exit": 0,
+      "out": "queue task ids matching device-matrix-report: []"
+    },
+    {
+      "label": "F2 我的记录里唯一失效的证据条目（loop.py 自己的判定）",
+      "cmd": "python3 -c \"import sys,json;sys.path.insert(0,'loop/bin');import loop;rec=json.load(open('loop/state/out/adopt_P09-W06.json'));print(json.dumps(loop.evidence_stale(rec),ensure_ascii=False))\"",
+      "exit": 0,
+      "out": "[{\"path\": \"/Users/carmen/Desktop/星系-audit-archive-20261007/docs/plan-100-score-execution.md\", \"why\": \"missing\"}]"
+    },
+    {
+      "label": "F3 失效原因属**环境自身构造物**，不是产品产物被改坏（loop.py 口径判据）",
+      "cmd": "python3 -c \"import sys;sys.path.insert(0,'loop/bin');import loop;p='/Users/carmen/Desktop/星系-audit-archive-20261007/docs/plan-100-score-execution.md';print('is_transient',loop.is_transient(p),'| is_evolving',loop.is_evolving(p))\"",
+      "exit": 0,
+      "out": "is_transient False | is_evolving False"
+    },
+    {
+      "label": "G1 与 P09-W04（有 GPU 交付物）对照：交付物形态确实是 reports/ 目录",
+      "cmd": "python3 -c \"import json;m=json.load(open('artifacts/plan100/20261007/P09-W04/source-manifest.json'))[0];print(m['command'][0]);print('files',m['files'])\"",
+      "exit": 0,
+      "out": "CL_GPU=1 python3 -B tests/sky_state_matrix_browser.py --base http://127.0.0.1:8765 --out artifacts/plan100/20261007/P09-W04/reports/state-matrix\nfiles ['tests/sky_state_matrix_browser.py']"
+    },
+    {
+      "label": "G2 P09-W06 目录里今天只有 4 个文件、没有 reports/（交付物确实缺失）",
+      "cmd": "ls artifacts/plan100/20261007/P09-W06/; echo ---; ls -d artifacts/plan100/20261007/P09-W06/reports 2>&1 || true",
+      "exit": 0,
+      "out": "decision.md\nledger.json\nrollback.patch\nsource-manifest.json\n---\nls: artifacts/plan100/20261007/P09-W06/reports: No such file or directory"
+    },
+    {
+      "label": "H1 设备矩阵脚本今天只覆盖 4 档，且不含规格要求的桌面 1440×900 / 原生 4K",
+      "cmd": "python3 -c \"import re;s=open('tests/sky_device_matrix_browser.py',encoding='utf-8').read();import json;print('mentions 1440:', '1440' in s, '| mentions 3840:', '3840' in s);print([m for m in re.findall(r\\\"'label': '([^']+)'\\\", s)])\"",
+      "exit": 0,
+      "out": "mentions 1440: False | mentions 3840: False\n['iPhone 14 级 · 390×844 · dpr 3 · iOS Safari UA', 'Pixel 8 级 · 412×915 · dpr 2.625 · Android Chrome UA', 'iPad 11 级 · 820×1180 · dpr 2 · iPadOS Safari UA', '桌面高缩放等效 · 390×844 CSS 视口 · dpr 1 · 无 UA 覆盖（Chromium 桌面）']"
+    },
+    {
+      "label": "H2 a11y:real-device 承接者**不覆盖** P09-006 交付物（原产物此说法今天仍成立）",
+      "cmd": "python3 -c \"import json;s=json.dumps(json.load(open('loop/state/out/a11y_real-device.artifact.json')),ensure_ascii=False);print('mentions P09-W06:', 'P09-W06' in s, '| mentions device-matrix:', 'device-matrix' in s)\"",
+      "exit": 0,
+      "out": "mentions P09-W06: False | mentions device-matrix: False"
+    },
+    {
+      "label": "I1 我的 agent 名与租约（自签检查用：owner=p09-agent ≠ w-ops）",
+      "cmd": "python3 -c \"import json;d=json.load(open('loop/state/leases/adopt:P09-W06.d/lease.json'));print('agent',d['agent'],'| task',d['task'],'| writes',d['writes'])\"",
+      "exit": 0,
+      "out": "agent w-ops | task adopt:P09-W06 | writes ['loop/state/out/adopt_P09-W06.artifact.json']"
+    },
+    {
+      "label": "I2 守护轮现状（守护进程存活判据用 --watch 常驻主进程，BSD 上没有 pgrep -c）",
+      "cmd": "printf 'sentinel --watch procs: '; pgrep -fl 'sentinel.py --watch' | wc -l; printf 'worker procs: '; pgrep -fl 'worker.py --agent' | wc -l",
+      "exit": 0,
+      "out": "sentinel --watch procs:        1\nworker procs:       18"
+    }
+  ],
+  "keyFindings": [
+    {
+      "id": "F1",
+      "claim": "缺口今天仍存在（独立实测，未沿用旧结论）",
+      "verdict": "成立",
+      "evidence": "P09 八槽执行面：仅 W05/W06 的 command=「（不适用项，无执行命令）」（commands[B2]）；P09-W06 目录无 reports/（commands[G2]）；承接者表 noCarrier/openLedgers 均含 P09-W06（commands[B1]）。"
+    },
+    {
+      "id": "F2",
+      "claim": "旧归因「状态机面归 P03」这半边今天为真",
+      "verdict": "成立（但只覆盖一半）",
+      "evidence": "P03-W06=merged/非自签 reviewer（commands[B3]）；两契约实跑 22/22 与 21 pass（commands[C1][C2]）。"
+    },
+    {
+      "id": "F3",
+      "claim": "★原产物为「缺口仍存在」固化的决定性证据今天不可复核",
+      "verdict": "证据失效（新发现，本轮最重要）",
+      "evidence": "外部归档 …/星系-audit-archive-20261007 已不存在（commands[D1]）；工作树内规格路径不存在（commands[D2]）；规格从未进 git、无法恢复（commands[D3]）；loop.py 判定其为该记录唯一 stale 证据（commands[F2]）。"
+    },
+    {
+      "id": "F4",
+      "claim": "★「P09-W06 的交付物=设备矩阵」今天在仓库内已无独立可核来源",
+      "verdict": "未验证（不等于为假）",
+      "evidence": "plan-ledger 的 taskTitle 字段并集=['firstLine','key','title']，全文 baseline/ sky_device_matrix_browser / P09-006 各 0 次（commands[E1]）；规格是 112 槽/8 唯一标题的去重索引（commands[E2]）⇒ 细粒度不能从仓库内反推。"
+    },
+    {
+      "id": "F5",
+      "claim": "★上一轮的处置出口没有真正落地",
+      "verdict": "成立（流程缺陷）",
+      "evidence": "原产物建议的 ops:P09-device-matrix-report 在任何 queue/*.jsonl 里都不存在（commands[F1]）。"
+    },
+    {
+      "id": "F6",
+      "claim": "a11y:real-device 承接者不覆盖本槽位交付物",
+      "verdict": "成立（原产物说法今天仍可核）",
+      "evidence": "其产物全文不提 P09-W06、不提 device-matrix（commands[H2]）。"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "被处置台账未被改动：status=blocked / reviewer=None / decision=None / owner=p09-agent 与今天复算一致，且其 inputHashes 记录的 decision.md 今天仍逐字节相同（commands[A1][A2]）。",
+      "result": "pass"
+    },
+    {
+      "text": "所有 commands[] 输出都是真实捕获：由 gen.py 逐条 subprocess 采集并固化为 commands.json（sha256 见 evidence），本产物只搬运不转写；21 条命令退出码与输出可在同一工作树重跑复现。",
+      "result": "pass"
+    },
+    {
+      "text": "★证据失效是**可复算**的、且归因正确：loop.py 的 evidence_stale() 对该记录只报出归档那一条（commands[F2]），is_transient/is_evolving 判定说明它属环境自身构造物而非产品产物被改坏（commands[F3]）；我另用 record_files() 口径复算 stats，得到同一 stale 名单（adopt:P09-W06、verify:dafeng:L2:0022）。",
+      "result": "pass"
+    },
+    {
+      "text": "★未自签、未越界：台账 owner=p09-agent ≠ 本 agent w-ops（commands[I1]）；本会话未写任何 ledger 字段、未建 loop/queue 任务、未动受保护路径；唯一写入是本产物自身。",
+      "result": "pass"
+    },
+    {
+      "text": "★把「没验证」与「验证了没问题」分开：本产物**没有**任何关于设备矩阵今天在 4 档下是否仍正确的结论，也没有断定 P09-W06 交付物到底是什么（F4）；这些如实进 remaining。",
+      "result": "pass"
+    }
+  ],
+  "disposition": {
+    "ledgerStatusChanged": false,
+    "ledgerStatus": "blocked（保持原状；本任务明令禁止为让门禁变绿而改。按 F1/F4 它也不该被改成 merged —— 真正缺的是执行与可核来源，不是状态）",
+    "reason": "缺口经复核**仍存在**（F1 为独立实测）。按任务要求采用「在提交里写明它归属哪个流」这一出口 —— 本任务 writes 只允许本产物，新建 loop/queue/*.jsonl 属越界。",
+    "ownerStream": {
+      "primary": "plan100 P09（交互反馈、窄屏、键盘与无障碍）。P09 阶段目标原文：「统一状态反馈、深链恢复、读屏语义、触控命中区和200/400%缩放」（plan-ledger P09.goal）。",
+      "secondary": "plan100 P12 —— 设备矩阵的**诚实化登记**已由 P12 侧承担（tools/plan100/device_matrix_status.py + artifacts/plan100/release/device-matrix-status.json），但那是**登记**，不是该槽位的执行交付物。",
+      "carrierInLoop": "adopt 流：本产物即该未结项的处置记录。loop/state/PLAN100-ADOPTION.json 的 noCarrier/openLedgers 已如实反映「无承接者」，**无需改它**。",
+      "blockedBy": "需要 GPU 串行槽位 + 运行中的本地服务。实测锚定路径 headless Chrome 进程数今天为 0、artifacts/plan100/GPU-LOCK 存在；但本任务未声明跑 GPU，故未执行。"
+    },
+    "nextTaskSpec": {
+      "status": "**未创建**（越界：writes 只允许本产物；loop/queue/ 不在本任务写入清单内）",
+      "previousAttempt": "原产物于 2026-10-08 建议过 ops:P09-device-matrix-report，但从未建成队列任务（commands[F1]）",
+      "suggestedId": "ops:P09-W06-device-matrix-report",
+      "requires": [
+        "gpu=true（GPU 全局串行）",
+        "本地服务：python3 -s serve.py <port> + ATLAS_BASE"
+      ],
+      "steps": [
+        "① 起服务并确认 ATLAS_BASE 可达",
+        "② 先补**规格要求的两个视口**：桌面 1440×900、原生 4K 3840×2160 —— 现有 4 档源码中不含它们（commands[H1]：mentions 1440=False / mentions 3840=False），不能拿旧档位冒充",
+        "③ 跑 CL_GPU=1 python3 -s tests/sky_device_matrix_browser.py --base $ATLAS_BASE --out artifacts/plan100/<date>/P09-W06/reports",
+        "④ 结果写进**仓库内**（不得只留 /tmp），按形态补齐 P09-W06/{baseline,candidate,reports} 与 decision.md",
+        "⑤ decision.md 必须分开引用「设备矩阵可达性」与「五元组/结束≠成功」两类证据（互不替代）",
+        "⑥ 复核须换非提交者（禁自签）"
+      ],
+      "importantCaveat": "**交付物形态本身待确认（F4）**：本规格第 ②–④ 步沿用「reports/ 目录」这一形态，依据是 P09-W04 的对照（commands[G1]）与原产物——而原产物的关键依据（规格）今天已不可核。建单者应先确认形态，不要把本规格当成规格原文。"
+    }
+  },
+  "remaining": [
+    "**未执行任何修复**：本产物只是处置记录，不会自动推进。真正闭环需要一条 GPU 任务（见 disposition.nextTaskSpec）。",
+    "**★交付物形态未验证（F4）**：我**没有**证明 P09-W06 的执行交付物就是「设备矩阵 reports/ 目录」。该断言在原产物里由外部规格支撑，而该归档今天已不存在、且从未进 git（commands[D1][D2][D3]）。我只证明了「该槽位今天没有执行记录与交付物」这一**结果**，没有证明它的**内容**。",
+    "**未跑任何渲染/设备测试**：CL_GPU=1 … sky_device_matrix_browser.py 未运行（本任务未声明；GPU 全局串行）。因此我**没有**任何关于今天页面在 4 档仿真下是否仍正确的结论 —— 我只证明了「证据不在仓库内」，**没有**证明「功能坏了」。",
+    "**规格不可恢复**：工作树内不存在、git 全历史 0 次新增（共 10 个 commit）、桌面与回滚点已查无该文件（回滚点有界搜索 ≤8 层耗时约 6s，无命中）。若需恢复只能请用户重新提供附件。",
+    "**两个视口今天无人覆盖**：1440×900 与 3840×2160 不在现有 4 档里（commands[H1]）。这是**结论性缺口**，不是我的推测；但也意味着「4 档全绿」不能外推到这两个视口。",
+    "**未处理相邻未结项**：P09-W05（blocked，同为「未执行」）与 P06-W05/P06-W06/P12-W04/P12-W05 也在 openLedgers 里，各有独立 adopt 任务，本产物不替它们下结论。",
+    "**未改台账、未建任务**：这是遵守任务边界的结果，不是遗漏；两者的去向在 disposition 里写明。",
+    "**外部证据的可用性依赖外置盘挂载**：`evidence` 里两条 `/Volumes/资源库/…` 路径是本轮 21 条命令的**原始采集**（gen.py + commands.json）。本产物已把全部命令输出**内联**在 `commands[]` 里，故即使外置盘不可用，结论仍可在同一工作树用 commands[].cmd 逐条重跑复现；但这两条 evidence 条目本身届时会被判 missing。这是 AGENTS.md 要求测试产物入外置盘的直接后果，如实记下。"
+  ],
+  "acceptedBoundaries": [
+    "台账 status 保持 blocked；reviewer 保持 None（禁自签，我不签收）。",
+    "未新建 loop/queue/*.jsonl（不在 writes 清单内）。",
+    "未修改任何受保护路径（js/ css/ index.html serve.py narrative.py scripts/ tests/ docs/ data/）。"
+  ],
+  "sourceHashes": {
+    "artifacts/plan100/20261007/P09-W06/ledger.json": "88dab3a4a3b350eebe8209a241ea69e1b1fb8ce1085e0a6c5e159f682c3a5a00",
+    "artifacts/plan100/20261007/P09-W06/decision.md": "b549d51805dfdcaaa5a2af303ed228f60427f9769dc7938b8298c0dd7d98cabd",
+    "artifacts/plan100/20261007/P09-W06/source-manifest.json": "821684cf340dcd8b7d0e4d4165d859d14bc8bbea272432b45ec03f686ed6b3f1",
+    "artifacts/plan100/20261007/P09-W04/source-manifest.json": "c6205be9ee62c42e61490514fb4831dc03238c5958e57750d2c068fc7b6d46c1",
+    "artifacts/plan100/20261007/P03-W06/ledger.json": "e9ca570c0be227ecd43b24ae3df15fb006bc06d97ebec5c721c026510f06571f",
+    "artifacts/plan100/plan-ledger.json": "e74bb8804e7717c5c89a8b4cee2626c8054a7580e8d8b8ebfc0b8dde803a2f3c",
+    "loop/state/PLAN100-ADOPTION.json": "2e350fa27c1494649e73a05eddf920d1d17cf042767db36f677be4e5a845f153",
+    "tests/task_state_machine_contract.py": "50a24adac77af905827f5ebeaace6ad47ba3b3f0069a40f2faa05dd06f621b5c",
+    "tests/journey_timeline_contract.js": "ad7bdfd1440ba6e2943ca0dee55f4694a785926996c3aea787d2069f4569a0ab",
+    "scripts/accept.sh": "8df47e9cd598764dc9836974bff42776fa9ce6e4d069b6f416aa6af37a94510e",
+    "tests/sky_device_matrix_browser.py": "25888624c7b0eeada20cb866573e2f81241f2514317dd2a4d3734e7d4fb8f7db",
+    "loop/state/out/a11y_real-device.artifact.json": "71af2135512c2544d9a731c11970f9afd45d752f5771b64bb334a89e912fde37",
+    "artifacts/plan100/release/device-matrix-status.json": "4bc3b97d729f69ca88d1c6239e203ee7c6040cf64d199363149989d2e5d74b50",
+    "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261011-195516-813640-53101/测试产物/p09w06/commands.json": "249bd945657ad7139f318c5e68919fa4e428922e81092e18142d4be56fef0e79",
+    "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261011-195516-813640-53101/测试产物/p09w06/gen.py": "42376d1a5e6d693cfb5b9149c31480a4c67a79c787288b7c6d68a01f45999215"
+  },
+  "evidence": [
+    {
+      "path": "artifacts/plan100/20261007/P09-W06/ledger.json",
+      "sha256": "88dab3a4a3b350eebe8209a241ea69e1b1fb8ce1085e0a6c5e159f682c3a5a00",
+      "kind": "被处置的未结项台账（只读，未改）：status=blocked / reviewer=None / decision=None / owner=p09-agent",
+      "bytes": 1315
+    },
+    {
+      "path": "artifacts/plan100/20261007/P09-W06/decision.md",
+      "sha256": "b549d51805dfdcaaa5a2af303ed228f60427f9769dc7938b8298c0dd7d98cabd",
+      "kind": "原决定全文（只读）：其「未执行（本包不适用）…由 P03 负责」即本次复核对象；逐字节未变",
+      "bytes": 1865
+    },
+    {
+      "path": "artifacts/plan100/20261007/P09-W06/source-manifest.json",
+      "sha256": "821684cf340dcd8b7d0e4d4165d859d14bc8bbea272432b45ec03f686ed6b3f1",
+      "kind": "★该槽位的执行面证据：command=「（不适用项，无执行命令）」，是 P09 八槽里两个未执行者之一",
+      "bytes": 420
+    },
+    {
+      "path": "artifacts/plan100/20261007/P09-W04/source-manifest.json",
+      "sha256": "c6205be9ee62c42e61490514fb4831dc03238c5958e57750d2c068fc7b6d46c1",
+      "kind": "对照组：同阶段已执行槽位的交付物形态（--out …/reports/…）",
+      "bytes": 515
+    },
+    {
+      "path": "artifacts/plan100/20261007/P03-W06/ledger.json",
+      "sha256": "e9ca570c0be227ecd43b24ae3df15fb006bc06d97ebec5c721c026510f06571f",
+      "kind": "★状态机归属面：同标题槽位 status=merged、reviewer=p12-independent-verifier（非自签）",
+      "bytes": 6742
+    },
+    {
+      "path": "artifacts/plan100/plan-ledger.json",
+      "sha256": "e74bb8804e7717c5c89a8b4cee2626c8054a7580e8d8b8ebfc0b8dde803a2f3c",
+      "kind": "规格索引：112 槽 / 8 唯一标题；taskTitle 只有 firstLine/key/title，无 per-phase 实例化",
+      "bytes": 77335
+    },
+    {
+      "path": "loop/state/PLAN100-ADOPTION.json",
+      "sha256": "2e350fa27c1494649e73a05eddf920d1d17cf042767db36f677be4e5a845f153",
+      "kind": "★承接者表：noCarrier 44 条含 P09-W06；openLedgers 含 P09-W06",
+      "bytes": 23021
+    },
+    {
+      "path": "tests/task_state_machine_contract.py",
+      "sha256": "50a24adac77af905827f5ebeaace6ad47ba3b3f0069a40f2faa05dd06f621b5c",
+      "kind": "五元组状态机契约（P03 面，今日实跑 22/22）",
+      "bytes": 22676
+    },
+    {
+      "path": "tests/journey_timeline_contract.js",
+      "sha256": "ad7bdfd1440ba6e2943ca0dee55f4694a785926996c3aea787d2069f4569a0ab",
+      "kind": "展示层叙事契约（今日实跑 21 pass；已被 M86 合并任务改写）",
+      "bytes": 18513
+    },
+    {
+      "path": "scripts/accept.sh",
+      "sha256": "8df47e9cd598764dc9836974bff42776fa9ce6e4d069b6f416aa6af37a94510e",
+      "kind": "产品门禁：上面两个契约都挂在它里面（第 81 / 99 行）",
+      "bytes": 48215
+    },
+    {
+      "path": "tests/sky_device_matrix_browser.py",
+      "sha256": "25888624c7b0eeada20cb866573e2f81241f2514317dd2a4d3734e7d4fb8f7db",
+      "kind": "设备矩阵脚本：今天只 4 档，源码中不含 1440/3840",
+      "bytes": 22965
+    },
+    {
+      "path": "loop/state/out/a11y_real-device.artifact.json",
+      "sha256": "71af2135512c2544d9a731c11970f9afd45d752f5771b64bb334a89e912fde37",
+      "kind": "P09 其余槽位的承接者：其内容不提 P09-W06、不提 device-matrix",
+      "bytes": 3700
+    },
+    {
+      "path": "artifacts/plan100/release/device-matrix-status.json",
+      "sha256": "4bc3b97d729f69ca88d1c6239e203ee7c6040cf64d199363149989d2e5d74b50",
+      "kind": "P12 侧的设备矩阵诚实化登记（登记≠P09 交付物）",
+      "bytes": 6343
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261011-195516-813640-53101/测试产物/p09w06/commands.json",
+      "sha256": "249bd945657ad7139f318c5e68919fa4e428922e81092e18142d4be56fef0e79",
+      "kind": "★本产物 commands[] 全量真实输出（由 gen.py 逐条 subprocess 采集，非手抄）",
+      "bytes": 10979
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261011-195516-813640-53101/测试产物/p09w06/gen.py",
+      "sha256": "42376d1a5e6d693cfb5b9149c31480a4c67a79c787288b7c6d68a01f45999215",
+      "kind": "采集器源码：列出 21 条只读命令与执行方式，可逐条重跑",
+      "bytes": 7883
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/adopt_P09-W06.artifact.json",
+      "kind": "append-only"
+    }
+  ],
+  "reworkOf": "loop/state/out/adopt_P09-W06.json（w-ops，2026-10-08）",
+  "reworkReason": "该记录的 `stats.staleEvidence` 判定其证据失效（唯一失效条目=外部归档规格，今日不存在）。按 worker.py 的既定处置，stale-evidence 属「需重做，本轮不覆盖记录」。本轮**不修改**旧记录，只重写其 writes 指定的产物文件。重做要点：① 用**今日**实测重证缺口是否仍在；② 剔除不可复核的归档依赖；③ 把它支撑不住的断言（交付物=设备矩阵）如实降级为未验证，而不是照抄。",
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/adopt_P09-W06.artifact.json"
+    ],
+    "note": "本产物只覆盖 writes 指定的单文件；未改台账、未建队列任务、未动受保护路径。"
+  },
+  "priorArtifactPreserved": {
+    "why": "本轮是重做：`loop/state/out/adopt_P09-W06.artifact.json` 将被本次内容覆盖。为不让「旧产物说过什么」随覆盖消失，其原文已另存到外置产物目录并记哈希；仓库内的另一份副本 `loop/state/out/adopt_P09-W06.json` 是上一轮的提交记录，本轮不修改它。",
+    "preservedAt": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261011-195516-813640-53101/测试产物/p09w06/prior-artifact-w-ops-20261008.json",
+    "sha256": "fa46d2410b80700a97bd8cf7ecce3563c42e276e1f6a5d4c65c0428954ab91c9",
+    "bytes": 47511,
+    "generatedAt": "2026-10-08T07:57:27Z",
+    "agent": "w-ops",
+    "note": "旧产物的 F1/F3 结论（缺口部分仍在、交付物=设备矩阵）本轮按可核性重新分级，见 keyFindings F3/F4。"
+  }
+}

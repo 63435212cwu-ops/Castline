@@ -1,0 +1,591 @@
+{
+  "task": "adopt:P09-W05",
+  "agent": "w-ops",
+  "status": "done",
+  "generatedAt": "2026-10-11T14:05:00Z",
+  "kind": "plan100-open-item-adjudication",
+  "title": "P09-W05（blocked）第 4 轮如实处置：缺口今天仍在；本轮查明**上一轮根本没提交**——它写出产物后 22 秒被 2700s 超时杀掉（rc=124），所以任务回来了，与前三轮诊断的「证据时效」无关。并查明上一轮那份产物**即使提交也会被判拒**（自指证据缺 sha256）",
+  "summary": "本轮是**第 4 轮**（第 1 轮 2026-10-08T07:39Z、第 2 轮 2026-10-08T18:50Z 均在 `adopt_P09-W05.json`；第 3 轮 2026-10-11T13:29Z 只写了产物、未提交）。\n\n**① 为什么又回来（本轮主结论，与前三轮不同）**：不是证据失效，是**上一轮没有提交**。决定性证据是一条时间线，全部可复算：第 3 轮把产物写到 `loop/state/out/adopt_P09-W05.artifact.json`，**mtime = 2026-10-11T13:29:06Z**；22 秒后 **13:29:28Z** 守护进程按 2700s 上限把它杀掉（`rc=124`）。`submit` 因此**一次都没跑过**：该产物的 `submittedAt`/`validation` 两个键都不存在，`loop/state/out/` 下也**没有** `REJECTED__adopt_P09-W05.json`（若有提交尝试，无论是接收还是拒绝，都会留下痕迹）。前两轮把重发归因于「证据被重写/被删除」（hash-changed / missing），那两条诊断对第 2 轮成立；**但对本轮的重发不成立** —— 第 3 轮从未产出规范记录，任务只是回到待领。我沿用旧结论会归错因，所以单独查明。\n\n**② 一个更坏的消息（上一轮即使提交也会被拒）**：第 3 轮产物含一条**自指**证据条目 `loop/state/out/adopt_P09-W05.artifact.json`（`kind` 自述「本产物（自指，不声明 sha256）」）。我把它原样喂给校验器：`loop.validate()` 返回 **恰好 1 个 problem** —— `证据缺 sha256`。这是 E32 规则（2026-10-09 22:5x 起，`status=done` 的新提交缺 sha256 **直接拒绝**）。第 2 轮同一条目当年能过（`problems=[]`），是因为 E32 比它晚一天生效；今天它让第 2 轮记录进了 `stats.weakEvidence` 名单（实测）。**本轮纠正：我的 evidence 不含任何自指条目**，产物只出现在 `changes` 与 `sourceHashes._self` 的说明里。\n\n**③ 缺口今天仍然存在**（全部用**仓内**证据，不引用已消失的规格原件）：`artifacts/plan100/20261007/P09-W05/` 仍只有 4 个文件（decision.md / ledger.json / rollback.patch / source-manifest.json），**无** baseline/candidate/reports；对照同批 P10-W05 有 `candidate/`（4 个文件：perf-report.json/.md + resource-audit.json + structure-preservation.json）、P06-W05 有 `reports/`（**184 个文件**，含 88 张 png）、P09 家族内只有 W04/W07/W08 建了 `reports/`，W05 没有；`artifacts/` 下 **P09-W05 只有 20261007 一个日期分区**（20261008/20261009 整个不存在）。`artifacts/plan100/coverage-map.json` 的 P09/W05 条目**自身**即写 `state=blocked, reviewer=null`；`plan-ledger.json` 14/14 阶段各有自己的 W05 槽位、P09-W05 在册且 firstLine=33714。\n\n**④ 规格原件今天已彻底不可达（比上一轮更彻底）**：第 2 轮据以取证的仓库外归档 `/Users/carmen/Desktop/星系-audit-archive-20261007/`（规格 `plan-100-score-execution.md`，sha256=c0192e21…）**整个目录已不存在**；跨 `~/Desktop` 与 `/Volumes/资源库` 搜 `plan-100-score-execution*` / `plan-100-*.md` **0 命中**，搜该 planSha256 字符串也 **0 命中**，`git log --all` 显示它从未被跟踪。⇒ 上一轮据规格原文做的引述（含「P09 的基线脚本/产物按阶段实例化」那条）**本轮无法独立复核**。我改用**仓内**代理锚点支撑同一结论：`coverage-map.json` 与 `plan-ledger.json` 两个独立文件声明**同一** planSha256 且都按阶段列 14 个 W05 槽位；同标题的 W05 槽位在仓内的 `decision.md` 里**确实各自交付不同东西**（P03-W05 做命令级 A/B、P08-W05 做 DOM 写入序列单变量、P10-W05 交性能报告框架）⇒ 「同标题 ≠ 同交付面」在仓内可自证，不必依赖已消失的原件。\n\n**⑤ 承接者今天仍然缺**：`loop/bin/adopt_plan100.py` 的 CARRIED 表 68 行里 P09 只有 W01/W02/W03/W04/W07/W08，**仍缺 W05/W06**（同表已给 P06-W05/P07-W05 登记 `perf:baseline-matrix`）。而那个被指名的承接者 `perf:baseline-matrix` 其实**早已 done**（w-gpu，2026-10-07T19:42:48Z），但它的产物里 `P09`/`相机`/`camera`/`A/B`/`W05` 出现次数**全部为 0** —— 它是性能基线报告，**不产出** P09-W05 规格要求的相机 A/B 交付物。队列里承接它的任务数仍为 **0**；`PLAN100-ADOPTION.json` 的 noCarrier 已如实含 (P09, P09-W05)。\n\n**⑥ 台账未被改动、未自签**：`P09-W05/ledger.json` 动手前后 sha256 均为 `07ee113f…`，status 仍 `blocked`、reviewer 仍 `None`、decision 仍 `None`、owner 仍 `p09-agent`（非本 agent）。\n\n**⑦ 顺带纠正一处前三轮都写错的字段**：前三轮记录的 `mtimeUTC: 2026-10-07T12:18:49Z` 其实是**本地时间被贴了个 Z**。`stat -f '%Sm' -t '%Y-%m-%dT%H:%M:%SZ'` 打印的是本地时间（本机 CST+0800），真正的 UTC 是 **04:18:49Z**。用 python 的 `timezone.utc` 复算可证。这条不影响任何结论，但它说明「取证命令本身没被核对过」。\n\n**⑧ 新登记一个真实环境缺陷（不是本任务的阻塞原因，我没修）**：`loop/bin/worker.py:291` 用 `str(logf.relative_to(ROOT))` 记运行记录，而当前守护布局把 `LOGS` 指向仓库**外**的 `guard-logs/` ⇒ 该行抛 `ValueError: ... is not in the subpath of ...`。它发生在**写 run 记录与失败分账之前**，所以后果是双重的：这一轮的 run 记录**根本不落盘**、超时也**不进** `FAILED-TASKS.json`（实测本任务今天在 `runs/*.jsonl` 里 0 条、`FAILED-TASKS.json` 里无此项），并且**整轮 worker 循环被打断**。实测今天 **17 个 daemon 日志共 98 次**，w-ops 自己 6 次（其中一次紧跟在第 3 轮超时之后）。`loop/bin/selftest.py:1098` 的注释**早就写明**这个 hazard（「夹具放到系统临时目录会直接抛 ValueError」），但只在测试夹具里规避，生产 wrappers 里没有。修它要改 `loop/bin/`，非本任务 writes，只登记。\n\n处置：不改台账（保持 blocked，且它也不该被标 merged —— 真正缺的是执行）；按任务要求「或在提交里写明它归属哪个流」，写明归属 P09 自身与建议的下一步任务；未自签。未跑 GPU/浏览器。",
+  "roundContext": {
+    "thisIsRound": 4,
+    "previousSubmissions": [
+      {
+        "record": "loop/state/out/adopt_P09-W05.json",
+        "round": 1,
+        "submittedAt": "2026-10-08T07:39:47Z",
+        "agent": "w-ops",
+        "outcome": "被 evidence_stale 判回（引用了滚动重写的 ops_accept-full.artifact.json）"
+      },
+      {
+        "record": "loop/state/out/adopt_P09-W05.json",
+        "round": 2,
+        "submittedAt": "2026-10-08T18:51:04Z",
+        "agent": "w-ops",
+        "validation": "problems=[]（通过机器校验）",
+        "outcome": "后被 evidence_stale 判回（引用了仓库外归档 plan-100-score-execution.md，该文件已消失 ⇒ missing）"
+      },
+      {
+        "record": "(无规范记录)",
+        "round": 3,
+        "artifactPath": "loop/state/out/adopt_P09-W05.artifact.json",
+        "artifactSha256": "3d94e35f3a0956246429bd2a9233f5d4a8f080d2be390a6fe7c4bac527728e4e",
+        "artifactMtimeUTC": "2026-10-11T13:29:06Z",
+        "terminatedAtUTC": "2026-10-11T13:29:28Z",
+        "outcome": "**写出产物后 22 秒被 2700s 超时杀掉（rc=124），submit 从未执行** ⇒ 本任务被重新派发。与证据时效无关。"
+      }
+    ],
+    "whyReissuedThisRound": "上一轮**没有提交**（不是提交后失效）：产物 mtime 13:29:06Z → 超时 13:29:28Z，rc=124；产物的 submittedAt/validation 两键均不存在；无 REJECTED__ 文件。",
+    "notSelfSigned": "台账 owner=p09-agent、reviewer=None，均非本 agent；本会话未做任何签收动作、未改任何 ledger 字段、未给 reviewer 填值。"
+  },
+  "whatIchecked": {
+    "method": "只读核对：台账 / 规格代理锚点 / 队列 / 采纳表 / 同批对照槽位 / 守护日志，逐项现场复算。所有 commands[].out 均为真实捕获（多为逐字粘贴）。**未跑 GPU、未起浏览器、未杀任何进程**（任务未声明；角色契约要求 GPU 全局串行）。本轮唯一写入是本产物。",
+    "notChecked": [
+      "未跑规格基线 `CL_GPU=1 python3 -s tests/sky_reading_reflow_browser.py`（任务未声明；且注意该脚本自身强制 CL_GPU=1）",
+      "未证明今天窄屏/阅读重排页**真的坏了** —— 只证明规格要求的产物形态不存在（两者处置不同）",
+      "未逐条核对 `artifacts/plan100/coverage/` 三份 bookKey JSON 是否在语义上覆盖 P09 的验收面（只核了它们的 provenance：`generatedFrom=tools/plan100/build_source_index.py`、schema=`castline/plan100-coverage/v1`、按 bookKey/textHash ⇒ 与 P09 验收面不是同一种东西）",
+      "未复核 P09-W01–W04/W06–W08 的 knownGaps 今天是否仍成立",
+      "未修 CARRIED 表缺行、未建承接任务、未修 worker.py/sentinel.py 的 relative_to 缺陷（两者都非本任务 writes）",
+      "未验证 /tmp 下那些 reading-reflow result.json 的 87/87 在今天是否仍成立（未跑）"
+    ]
+  },
+  "commands": [
+    {
+      "label": "★ A1 本轮重发的真正原因：产物写出 22 秒后被超时杀掉，submit 从未执行",
+      "cmd": "python3 -c \"import os,datetime;print('artifact mtimeUTC =',datetime.datetime.fromtimestamp(os.stat('loop/state/out/adopt_P09-W05.artifact.json').st_mtime,datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'))\"; grep -n 'adopt:P09-W05' <guard-logs>/w-ops.daemon.log | tail -3",
+      "exit": 0,
+      "out": "artifact mtimeUTC = 2026-10-11T13:29:06Z\n[21:29:28] 任务 adopt:P09-W05 超时（2700s），日志 /Volumes/.../guard-logs/w-ops-adopt-P09-W05-20261011-204428.log\n[21:29:28] 任务 adopt:P09-W05 结束 rc=124 用时 2700.1s 日志 w-ops-adopt-P09-W05-20261011-204428.log\n[21:29:28] 轮次异常：error: ValueError(\"'/Volumes/.../guard-logs/w-ops-adopt-P09-W05-20261011-204428.log' is not in the subpath of '/Users/carmen/Desktop/星系'\")\n⇒ 13:29:06Z 写产物 → 13:29:28Z 被杀（本地 21:29:28 = UTC 13:29:28；日志起点 20:44:28 本地 + 2700s = 21:29:28 本地，自洽）。22 秒窗口内没有 submit。"
+    },
+    {
+      "label": "★ A2 三重指纹确认「没提交过」：无 submittedAt / 无 validation / 无 REJECTED__",
+      "cmd": "python3 -c \"import json;a=json.load(open('loop/state/out/adopt_P09-W05.artifact.json'));print('has submittedAt=', 'submittedAt' in a);print('has validation=', 'validation' in a)\"; ls loop/state/out/ | grep -i 'adopt_P09-W05'",
+      "exit": 0,
+      "out": "has submittedAt= False\nhas validation= False\nadopt_P09-W05.artifact.json\nadopt_P09-W05.json\n（没有 REJECTED__adopt_P09-W05.json ⇒ 连一次被拒的提交都没有过。若有提交尝试，无论接收或拒绝都会落文件：loop.py:1034 写 REJECTED__，loop.py:1042 写规范记录。）"
+    },
+    {
+      "label": "★ A3 上一轮那份产物**即使提交也会被拒**：自指证据缺 sha256（E32 规则）",
+      "cmd": "python3 -c \"import sys,json;sys.path.insert(0,'loop/bin');import loop;rec=json.load(open('loop/state/out/adopt_P09-W05.artifact.json'));rec.setdefault('agent','w-ops');[print(' -',p) for p in loop.validate(rec)]\"",
+      "exit": 0,
+      "out": " - 证据缺 sha256：loop/state/out/adopt_P09-W05.artifact.json（声明过的证据必须可复核；补上真实哈希再提交）\n⇒ 恰好 1 个 problem，来自那条自指条目（kind 自述「本产物（自指，不声明 sha256）」）。E32 规则见 loop.py:950-968，生效时间 2026-10-09，晚于第 2 轮提交，所以第 2 轮当年能过。"
+    },
+    {
+      "label": "A4 第 2 轮记录今天的确切状态（validated 仍 True，但不再算 done）",
+      "cmd": "python3 -c \"import sys,json;sys.path.insert(0,'loop/bin');import loop;rec=json.load(open('loop/state/out/adopt_P09-W05.json'));print('validated',loop.validated(rec));print('stale',loop.evidence_stale(rec));print('in done_ids',('adopt:P09-W05' in loop.done_ids()))\"",
+      "exit": 0,
+      "out": "validated True\nstale [{'path': '/Users/carmen/Desktop/星系-audit-archive-20261007/docs/plan-100-score-execution.md', 'why': 'missing'}]\nin done_ids False\n⇒ 记录本身没坏；坏的是它引用的仓外规格副本。这条诊断对第 2 轮成立，对本轮的重发不成立（见 A1/A2）。"
+    },
+    {
+      "label": "★ B1 规格原件今天彻底不可达（目录整体不存在 + 两种搜索都 0 命中 + 从未入 git）",
+      "cmd": "ls -d /Users/carmen/Desktop/星系-audit-archive-* ; find /Users/carmen/Desktop /Volumes/资源库 -maxdepth 8 -name 'plan-100-score-execution*' -o -maxdepth 8 -name 'plan-100-*.md' | head; grep -rl 'c0192e21f02650614efe7aed57182917c783277898c03a8f29dd502c72dc6f4b' /Users/carmen/Desktop /Volumes/资源库 --include='*.json' --include='*.md' | head; git log --all --oneline -- docs/plan-100-score-execution.md",
+      "exit": 1,
+      "out": "ls: /Users/carmen/Desktop/星系-audit-archive-*: No such file or directory\n（find 0 命中；grep planSha256 字符串 0 命中；git log 空 = 从未被跟踪）\n⇒ 第 3 轮据以取证的归档目录整体消失。本轮**不引用**该规格原件，改用 B2/B3 的仓内代理锚点。"
+    },
+    {
+      "label": "★ B2 仓内代理锚点：两个独立文件声明同一 planSha256，且都按阶段列 14 个 W05 槽位",
+      "cmd": "python3 -c \"import json;print(json.load(open('artifacts/plan100/coverage-map.json'))['planSha256']);print(json.load(open('artifacts/plan100/plan-ledger.json'))['planSha256'])\"; python3 -c \"import json;d=json.load(open('artifacts/plan100/coverage-map.json'));w=[i for i in d['items'] if i['w']=='W05'];print('W05 slots:',len(w));[print(' ',i['phase'],i['state'],i['reviewer']) for i in w]\"",
+      "exit": 0,
+      "out": "c0192e21f02650614efe7aed57182917c783277898c03a8f29dd502c72dc6f4b\nc0192e21f02650614efe7aed57182917c783277898c03a8f29dd502c72dc6f4b\nW05 slots: 14\n  P03 merged p12-independent-verifier\n  P06 rejected p13-wave3-verifier\n  P07 cpu-verified None\n  P08 cpu-verified None\n  P09 blocked None\n  P10 cpu-verified None\n  P12 blocked None\n  （P00/P01/P02/P04/P05/P11/P13 = 未建台账）\n⇒ P09/W05 条目自身即写 state=blocked / reviewer=null。"
+    },
+    {
+      "label": "★ B3 「同标题 ≠ 同交付面」在仓内可自证（无需已消失的规格原件）",
+      "cmd": "python3 -c \"import json;d=json.load(open('artifacts/plan100/plan-ledger.json'));[print(p['id'],p['goal']) for p in d['phases'] if p['id'] in ('P03','P06','P07','P08','P09','P10')]\"; for t in P03-W05 P08-W05 P10-W05; do echo \"--- $t\"; head -8 artifacts/plan100/20261007/$t/decision.md; done",
+      "exit": 0,
+      "out": "P03 goal=把故事线和任务从条目变成可验证的状态机，禁止以时间相邻替代因果\nP06 goal=解决三书视觉趋同、云团鼓包、主次层级和背景抢焦，形成可审计的电影级美术系统\nP07 goal=隔离晶体体积/表面/透射/反射/加性层和星盘光环截面，逐项同帧A/B\nP08 goal=从目标到代价制作可暂停、可跳过、reduced 等价的连续叙事动画\nP09 goal=统一状态反馈、深链恢复、读屏语义、触控命中区和200/400%缩放\nP10 goal=区分主线程、上传、RT/bloom、shader、DOM重排，守住原生4K与自适应真实性\n--- P03-W05  **决定**：merged  「本阶段**无视觉改动**…A/B 做在验收命令层」\n--- P08-W05  **决定**：**cpu-verified**  「本项焦点：候选 A/B 与单变量」…「**固定相机 / 相同画布 / 相同时间相位的像素级 A/B 未做**」\n--- P10-W05  - **决定**：**合入（merged）** 「交付**分场景性能报告框架**」\n⇒ 同一个 W05 标题，三个阶段交出三种不同东西（命令级 A/B / DOM 写入序列 / 性能报告框架）⇒ 按标题判定归属不成立，但这一点现在**由仓内文件自证**。"
+    },
+    {
+      "label": "★ C1 缺口今天仍存在：P09-W05 仍只有 4 个文件，无 baseline/candidate/reports",
+      "cmd": "find artifacts/plan100/20261007/P09-W05 -mindepth 1 -maxdepth 1 | sed 's|.*/||' | sort | tr '\\n' ' '; echo; for d in P09-W05 P10-W05 P06-W05 P07-W05 P12-W05; do printf '%-10s dirs=[%s]\\n' \"$d\" \"$(find artifacts/plan100/20261007/$d -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sed 's|.*/||' | sort | tr '\\n' ',')\"; done",
+      "exit": 0,
+      "out": "decision.md ledger.json rollback.patch source-manifest.json\nP09-W05    dirs=[]\nP10-W05    dirs=[candidate,]\nP06-W05    dirs=[reports,]\nP07-W05    dirs=[]\nP12-W05    dirs=[]\n⇒ 同批已交付的 W05 槽位有产物目录形态可对照，P09-W05 没有。"
+    },
+    {
+      "label": "C2 对照槽位里的产物是**实的**（不是空目录占位）",
+      "cmd": "ls artifacts/plan100/20261007/P10-W05/candidate/; find artifacts/plan100/20261007/P06-W05/reports -type f | wc -l; find artifacts/plan100/20261007/P06-W05/reports -type f | sed 's/.*\\.//' | sort | uniq -c",
+      "exit": 0,
+      "out": "perf-report.json\nperf-report.md\nresource-audit.json\nstructure-preservation.json\n184\n  36 fs\n  19 json\n  17 log\n  88 png\n  24 vs\n⇒ P10-W05 交了 4 份报告，P06-W05 交了 184 个文件（含 88 张 png）。P09-W05 是 0。"
+    },
+    {
+      "label": "C3 缺口不是「所有阶段的 W05 都没做」：P09 家族内只有 W05 没有 reports/",
+      "cmd": "for w in 01 02 03 04 05 06 07 08; do d=artifacts/plan100/20261007/P09-W$w; printf 'P09-W%s dirs=[%s]\\n' \"$w\" \"$(find \"$d\" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sed 's|.*/||' | sort | tr '\\n' ',')\"; done",
+      "exit": 0,
+      "out": "P09-W01 dirs=[]\nP09-W02 dirs=[]\nP09-W03 dirs=[]\nP09-W04 dirs=[reports]\nP09-W05 dirs=[]\nP09-W06 dirs=[]\nP09-W07 dirs=[reports]\nP09-W08 dirs=[reports]\n⇒ W04/W07/W08 都建了 reports/（含 state-matrix、zoom-reflow、narrow-hit-targets 子目录），W05 没有。"
+    },
+    {
+      "label": "C4 只有 20261007 一个日期分区；P09-W05 在任何日期下都没有产物目录",
+      "cmd": "ls artifacts/plan100/ | grep '^2026'; find artifacts -maxdepth 4 -type d -name 'P09-W05'; find artifacts -path '*P09-W05*' -type d",
+      "exit": 0,
+      "out": "20261007\nartifacts/plan100/20261007/P09-W05\nartifacts/plan100/20261007/P09-W05\n⇒ 20261008/20261009 分区整个不存在；P09-W05 下**没有任何子目录**（连 baseline/ 都没有）。"
+    },
+    {
+      "label": "★ D1 承接者今天仍缺：CARRIED 表 P09 无 W05/W06（而同表已给 P06/P07 登记）",
+      "cmd": "python3 -c \"import re;src=open('loop/bin/adopt_plan100.py').read();c=sorted(set((m.group(1),m.group(2)) for m in re.finditer(r'\\(\\\"(P\\d\\d)\\\",\\s*\\\"(W\\d\\d)\\\"\\)',src)));print('rows',len(c));print('P09 rows',[w for p,w in c if p=='P09']);print('P09 W05 present',('P09','W05') in c);print('P06 W05',('P06','W05') in c,'P07 W05',('P07','W05') in c)\"",
+      "exit": 0,
+      "out": "rows 68\nP09 rows ['W01', 'W02', 'W03', 'W04', 'W07', 'W08']\nP09 W05 present False\nP06 W05 True P07 W05 True\n⇒ 68 行里 P09 仍缺 W05/W06 两行。这是「无承接者」的机制所在（补它要改 loop/bin/，非本任务 writes）。"
+    },
+    {
+      "label": "★ D2 被指名的承接者早已 done，但它**不覆盖** P09 的相机 A/B（出现次数 0）",
+      "cmd": "python3 -c \"import sys,json;sys.path.insert(0,'loop/bin');import loop;r=loop.done_ids()['perf:baseline-matrix'];print(r['status'],r['agent'],r['submittedAt']);d=json.load(open('loop/state/out/perf_baseline-matrix.artifact.json'));s=json.dumps(d,ensure_ascii=False);[print(k,s.count(k)) for k in ['P09','固定相机','相机','camera','A/B','W05']]\"",
+      "exit": 0,
+      "out": "done w-gpu 2026-10-07T19:42:48Z\nP09 0\n固定相机 0\n相机 0\ncamera 0\nA/B 0\nW05 0\n⇒ perf:baseline-matrix 是性能基线报告（自述测量三书启动/稳态/转场/长时帧率），与 P09-W05 规格要求的固定相机 A/B 交付物**不是同一件东西**。所以「照 CARRIED 表口径补 P09-W05 一行」并不能凭空产生该证据 —— 它需要真跑。"
+    },
+    {
+      "label": "D3 队列里承接它的任务数仍为 0；采纳表已如实记为无承接者",
+      "cmd": "echo \"matches=$(grep -l 'reading_reflow\\|P09-005\\|固定相机' loop/queue/*.jsonl 2>/dev/null | wc -l | tr -d ' ')\"; python3 -c \"import json;d=json.load(open('loop/state/PLAN100-ADOPTION.json'));nc={(x['phase'],x['key']) for x in d['noCarrier']};print('specSlots',d['specSlots'],'withCarrier',d['slotsWithCarrier'],'withoutCarrier',d['slotsWithoutCarrier']);print('P09-W05 in noCarrier',('P09','P09-W05') in nc);print('openLedgers',d['openLedgers'])\"",
+      "exit": 0,
+      "out": "matches=0\nspecSlots 112 withCarrier 68 withoutCarrier 44\nP09-W05 in noCarrier True\nopenLedgers ['P06-W05', 'P06-W06', 'P09-W05', 'P09-W06', 'P12-W04', 'P12-W05']\n⇒ 采纳表已如实反映「无承接者」，**无需改它**。"
+    },
+    {
+      "label": "★ E1 「向 P06/P07 索取 A/B」这条出路今天仍不可兑现",
+      "cmd": "python3 -c \"import json;[print(t, json.load(open('artifacts/plan100/20261007/%s/ledger.json'%t))['status'], json.load(open('artifacts/plan100/20261007/%s/ledger.json'%t))['reviewer']) for t in ('P06-W05','P07-W05')]\"; python3 -c \"import json;[print(p, json.load(open(p)).get('ok'), json.load(open(p)).get('rollbackIdenticalPng')) for p in ('artifacts/plan100/material/ab-gpu/report.json','artifacts/plan100/material/ab-gpu2/report.json')]\"",
+      "exit": 0,
+      "out": "P06-W05 rejected p13-wave3-verifier\nP07-W05 cpu-verified None\nartifacts/plan100/material/ab-gpu/report.json False False\nartifacts/plan100/material/ab-gpu2/report.json False False\n⇒ P06-W05 是**撤回**（decision=rejected），不是交付；P07-W05 仍 cpu-verified 且 reviewer=None（无签收）。两份 material A/B report 均 ok=False、books 为空、rollbackIdenticalPng=False ⇒ 不能当 P09-W05 的签收依据。"
+    },
+    {
+      "label": "E2 P09 自己的文档把该脚本列为 P09 证据，且 P09 侧确实没做 A/B",
+      "cmd": "grep -n 'sky_reading_reflow_browser' artifacts/plan100/interaction/P09-REPRODUCE.md; grep -c 'A/B' artifacts/plan100/interaction/P09-METHOD.md artifacts/plan100/interaction/P09-REPRODUCE.md",
+      "exit": 0,
+      "out": "106:python3 -B tests/sky_reading_reflow_browser.py --base \"$ATLAS_BASE\" --out /tmp/p09/reading-reflow\nartifacts/plan100/interaction/P09-METHOD.md:0\nartifacts/plan100/interaction/P09-REPRODUCE.md:0\n⇒ P09 自己的复现手册把该脚本列为 P09 点名的证据脚本（B6 节），但 P09 的 METHOD/REPRODUCE 两份文档里 `A/B` 出现 **0 次** ⇒ 「P09 不产出相机 A/B」这一事实在 P09 侧文件里也成立，不是只有台账的自述。"
+    },
+    {
+      "label": "E3 该脚本今天仍强制 CL_GPU=1（属 GPU 串行，本任务未跑）",
+      "cmd": "grep -n 'CL_GPU' tests/sky_reading_reflow_browser.py | head -3",
+      "exit": 0,
+      "out": "27:    if os.environ.get('CL_GPU') != '1':\n28:        raise SystemExit('CL_GPU=1 required; use serial GPU slot')\n⇒ 与哈希一同确认该脚本自第 2 轮起未变（1c88054a…）。本会话 CL_GPU=1 命令数 = 0。"
+    },
+    {
+      "label": "E4 唯一同类证据在仓库外且不绑定源码指纹（不能作今天签收依据）",
+      "cmd": "for d in reading-reflow-20261006-b reflow-fixed reflow-regress-a11y; do f=/tmp/castline-shots/$d/result.json; [ -f \"$f\" ] && python3 -c \"import json;d=json.load(open('$f'));print('$d', d.get('ok'), len(d.get('checks') or []), 'sourceHashes' in d, d.get('finishedAt'))\"; done",
+      "exit": 0,
+      "out": "reading-reflow-20261006-b False 21 False None\nreflow-fixed True 87 False None\nreflow-regress-a11y True 83 False None\n⇒ 有 ok=true/87 的结果（2026-10-08T18:57:31Z），但键里**没有** sourceHashes/finishedAt ⇒ 不绑定源码。且它在 /tmp（操作系统会清理），故**不列为 evidence**，只以命令+输出形式登记。对照：仓内 `artifacts/plan100/20261007/P09-W07/reports/zoom-reflow/zoom-reflow.json` 有 sourceHashes ⇒ 仓内已有更好的口径可循。"
+    },
+    {
+      "label": "★ F1 环境缺陷：日志在 ROOT 之外 ⇒ relative_to 抛错，run 记录与超时分账都写不进",
+      "cmd": "grep -n 'relative_to(ROOT)' loop/bin/worker.py loop/bin/sentinel.py; sed -n '288,293p' loop/bin/worker.py; sed -n '1096,1100p' loop/bin/selftest.py",
+      "exit": 0,
+      "out": "loop/bin/worker.py:291:           \"log\": str(logf.relative_to(ROOT)), \"at\": now()}\nloop/bin/sentinel.py:392:    return str(logf.relative_to(ROOT))\n（worker.py:288-292 的顺序：classify_failure → 构造 rec（此处抛错）→ 写 RUNS + _note_failure。抛错点在两者**之前**。）\nselftest.py:1098:  # 注意 **必须建在 ROOT 之内**：`run_agent` 用 `logf.relative_to(ROOT)` 记录日志路径，夹具放到系统临时目录会直接抛 ValueError（我第一版就这么写的，实测报错）\n⇒ hazard 早已被写下，但只在测试夹具里规避。"
+    },
+    {
+      "label": "F2 该缺陷今天的实测规模：17 个 daemon 日志 98 次；后果是 run 记录根本没落盘",
+      "cmd": "grep -h 'is not in the subpath' <guard-logs>/*.daemon.log | wc -l; grep -l 'is not in the subpath' <guard-logs>/*.daemon.log | wc -l; grep -c 'adopt:P09-W05' loop/state/runs/*.jsonl; python3 -c \"import json;d=json.load(open('loop/state/FAILED-TASKS.json'));print('failed tasks',len(d));print('P09-W05 in it:', any('P09-W05' in str(k) for k in d))\"",
+      "exit": 0,
+      "out": "98\n17\n（runs/*.jsonl 里 adopt:P09-W05 = 0 条）\nfailed tasks 27\nP09-W05 in it: False\n⇒ 本任务今天的超时（rc=124）**既没进 runs/*.jsonl，也没进 FAILED-TASKS.json** —— 因为写这两处的代码都在抛错点之后。这解释了「为什么一次 45 分钟的超时在账面上看不见」。"
+    },
+    {
+      "label": "G1 GPU 实测：锚定路径 headless Chrome = 0（今天 GPU 空闲，但仍未跑）",
+      "cmd": "ps -eo pid,command | grep 'Google Chrome.app/Contents/MacOS/Google Chrome --headless' | grep -v grep | wc -l; pgrep -fl 'Google Chrome.app/Contents/MacOS/Google Chrome --headless' | wc -l; pgrep -fl 'Google Chrome' | wc -l",
+      "exit": 0,
+      "out": "0\n0\n10\n⇒ ps 与 pgrep 两条路一致为 0（符合 GPU-LOCK 要求的锚定路径）；宽松的 10 个是桌面 Chrome。据 AGENTS.md「GPU 全局串行」与任务未声明，本轮**仍未**跑任何 CL_GPU=1 命令 —— 空闲不等于获准。"
+    },
+    {
+      "label": "H1 未改台账、未自签、未动受保护路径（动手前后各一次）",
+      "cmd": "shasum -a 256 artifacts/plan100/20261007/P09-W05/ledger.json artifacts/plan100/20261007/P09-W05/decision.md; python3 -c \"import json;d=json.load(open('artifacts/plan100/20261007/P09-W05/ledger.json'));print(d['status'],d['reviewer'],d['decision'],d['owner'])\"",
+      "exit": 0,
+      "out": "07ee113f94fba45222deb5611087b8f758c094ef90a9a9c5fe0af65d60831183  artifacts/plan100/20261007/P09-W05/ledger.json\n02b29e8caff0b042285a628e00c7aeb99bdd8893a410f0154ede8c35fd92c7b4  artifacts/plan100/20261007/P09-W05/decision.md\nblocked None None p09-agent\n⇒ 与动手前读数逐字节一致；status 仍 blocked、reviewer 仍 None、decision 仍 None、owner=p09-agent（非本 agent）。本会话对该目录的写入 = 0。"
+    },
+    {
+      "label": "★ H2 纠正前三轮都写错的 mtime 字段：那是本地时间贴了个 Z",
+      "cmd": "stat -f '%Sm' -t '%Y-%m-%dT%H:%M:%SZ' artifacts/plan100/20261007/P09-W05/ledger.json; python3 -c \"import os,datetime;p='artifacts/plan100/20261007/P09-W05/ledger.json';print(datetime.datetime.fromtimestamp(os.stat(p).st_mtime,datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'))\"; date +%Z%z",
+      "exit": 0,
+      "out": "2026-10-07T12:18:49Z\n2026-10-07T04:18:49Z\nCST+0800\n⇒ 同一个文件：`stat -f %Sm -t ...Z` 给 12:18:49Z（本地 12:18:49 被贴了字面 Z），真 UTC 是 04:18:49Z。前三轮 records 里的 mtimeUTC 12:18:49Z 因此偏了 8 小时。不影响任何结论，但说明取证命令本身也没被核对过。"
+    },
+    {
+      "label": "★ H3 稳定性自查：我选的 evidence 全在仓内，且实测 3 天未漂移",
+      "cmd": "python3 -c \"import json,hashlib,pathlib,sys;sys.path.insert(0,'loop/bin');import loop;rec=json.load(open('loop/state/out/adopt_P09-W05.json'));[print('STABLE' if hashlib.sha256((loop.ROOT/e['path']).read_bytes()).hexdigest()==e['sha256'] else 'DRIFT', e['path']) for e in rec['evidence'] if e.get('sha256')]\"",
+      "exit": 0,
+      "out": "STABLE artifacts/plan100/20261007/P09-W05/ledger.json\nSTABLE artifacts/plan100/20261007/P09-W05/decision.md\nSTABLE artifacts/plan100/plan-ledger.json\nSTABLE loop/bin/adopt_plan100.py\nDRIFT  loop/bin/worker.py\nSTABLE loop/queue/plan100.jsonl\nSTABLE tests/sky_reading_reflow_browser.py\nSTABLE artifacts/plan100/20261007/P10-W05/ledger.json\n（其余：plan-ledger/coverage-map/对照 ledger 全部 STABLE；唯一 DRIFT 的 loop/bin/worker.py 属 EVOLVING，按设计不判 stale）\n⇒ 第 2 轮记的哈希 3 天后仍逐字相同 ⇒ 本轮沿用同一批**仓内、非工具再生成**的路径是安全的。"
+    },
+    {
+      "label": "★ H4 本轮提交前的自检：validate / evidence_stale / weak_evidence 三关都过",
+      "cmd": "python3 -c \"import sys,json;sys.path.insert(0,'loop/bin');import loop;rec=json.load(open('loop/state/out/adopt_P09-W05.artifact.json'));print('validate',loop.validate(rec));print('stale',loop.evidence_stale(rec));print('weak',loop.weak_evidence(rec))\"",
+      "exit": 0,
+      "out": "validate []\nstale []\nweak []\n⇒ 三关全空。特别地：**不含任何自指条目**（A3 那个坑）、不含 .pyc、不含 /tmp、不含仓外绝对路径、不含瞬态路径。"
+    }
+  ],
+  "keyFindings": [
+    {
+      "id": "R0",
+      "claim": "★ 本轮重发的原因与前三轮诊断的「证据时效」无关：上一轮**根本没提交**",
+      "verdict": "已定位（第 3 种形态：超时截断）",
+      "evidence": "commands[A1]：产物 mtime UTC=2026-10-11T13:29:06Z；daemon 日志 `[21:29:28] 超时（2700s）`、`结束 rc=124 用时 2700.1s`（本地 21:29:28 = UTC 13:29:28）。commands[A2]：产物缺 submittedAt/validation 两键，且无 REJECTED__ 文件 ⇒ 提交一次都没发生过。commands[A4]：第 2 轮记录 validated 仍 True。",
+      "implication": "前两轮的重发是「提交后失效」，这次是「提交前被杀」。两者处置不同：前者要换证据，后者要**控制收尾时间**。本轮的 evidence 选型同时满足两者（H3 实测 3 天未漂移 + H4 三关全过）。"
+    },
+    {
+      "id": "R0b",
+      "claim": "★ 上一轮那份产物即使提交也会被判拒：含一条自指证据、缺 sha256（E32 规则）",
+      "verdict": "已复现（1 个 problem）",
+      "evidence": "commands[A3]：`loop.validate(第3轮产物)` → `证据缺 sha256：loop/state/out/adopt_P09-W05.artifact.json`。该条目 kind 自述「本产物（自指，不声明 sha256）」。规则见 loop.py:950-968（E32，2026-10-09 生效，晚于第 2 轮提交 ⇒ 第 2 轮当年过得了）。副作用实测：第 2 轮记录今天出现在 `stats.weakEvidence` 名单里。",
+      "implication": "「把产物自己写进 evidence」在本仓库是**结构性错误**：产物路径每次提交都被重写，哈希不可能自洽，且缺哈希会被直接拒。本轮已剔除。"
+    },
+    {
+      "id": "S",
+      "claim": "★ 规格原件今天彻底不可达，且比上一轮更彻底（整个归档目录消失）",
+      "verdict": "不可达（已如实登记为限制）",
+      "evidence": "commands[B1]：`/Users/carmen/Desktop/星系-audit-archive-*` 不存在；跨 ~/Desktop 与 /Volumes/资源库 搜 `plan-100-score-execution*`、`plan-100-*.md` 均 0 命中；搜 planSha256=c0192e21… 字符串也 0 命中；`git log --all` 空（从未跟踪）。",
+      "implication": "上一轮据规格原文做的引述本轮**无法独立复核**。按 AGENTS.md「不恢复已移出的旧计划」，我没有去找回或重建它，改用 commands[B2][B3] 的**仓内**代理锚点支撑同一结论（映射与阶段实例化）。**这不等于复核了上一轮的原文引述** —— 那一层证据今天不存在。"
+    },
+    {
+      "id": "F1",
+      "claim": "任务问的缺口今天仍然存在：P09-W05 缺规格要求的产物形态",
+      "verdict": "仍然存在",
+      "evidence": "commands[C1]：P09-W05 只有 4 个文件，无 baseline/candidate/reports；对照 P10-W05 有 `candidate/`、P06-W05 有 `reports/`。commands[C2]：那两个目录是**实的**（P10 交 4 份报告；P06 交 184 个文件含 88 png）。commands[C3]：P09 家族内 W04/W07/W08 都建了 reports/，唯独 W05 没有。commands[C4]：只有 20261007 一个日期分区，P09-W05 下无任何子目录。commands[B2]：`coverage-map.json` 的 P09/W05 条目自身即写 state=blocked/reviewer=null。",
+      "caveat": "这只证明**规格要求的产物形态不存在**（目录/文件层面），**不证明功能坏了** —— 今天页面可能完全正常，只是没人按规格留档。两者处置不同，我不把前者写成后者。"
+    },
+    {
+      "id": "F2",
+      "claim": "台账原「不适用、属 P06/P07」的归因今天仍不成立；但这一点现在**由仓内文件自证**",
+      "verdict": "归因不成立（结论维持，证据换成仓内）",
+      "evidence": "commands[B2]：`coverage-map.json` 与 `plan-ledger.json` 两个独立仓内文件声明**同一** planSha256，且 14/14 阶段各有自己的 W05 槽位（不是 8 个模板合并）。commands[B3]：同标题的 W05 在仓内 `decision.md` 里确实各自交付不同东西 —— P03-W05 做**命令级** A/B（自述「本阶段无视觉改动」）、P08-W05 做 **DOM 写入序列**单变量（并自述「固定相机/相同画布/相同时间相位的像素级 A/B **未做**」）、P10-W05 交**性能报告框架**。commands[E2]：P09 自己的 METHOD/REPRODUCE 两份文档里 `A/B` 出现 **0 次**。",
+      "implication": "「P09 侧确实不产出相机 A/B」为真，但**不能**推出「P09-W05 不适用」—— P09-005 有自己的基线脚本（P09 自己的复现手册 B6 节点名了它，commands[E2]）与产物（coverage ledger）。据旧结论保持 blocked，会让一个 P09 自己的、有明确可执行基线的槽位永远无人承接。"
+    },
+    {
+      "id": "F3",
+      "claim": "「向 P06/P07 索取 A/B」这条出路今天仍不可兑现",
+      "verdict": "不可兑现",
+      "evidence": "commands[E1]：P06-W05 status=**rejected**（decision=rejected，reviewer=p13-wave3-verifier）⇒ 是撤回不是交付；P07-W05 status=cpu-verified、reviewer=None ⇒ 无签收。P07 的两份 material A/B report **均 ok=False**、`books` 为空、`rollbackIdenticalPng=False`。",
+      "implication": "task prompt 里「如需该证据请向 P06/P07 索取」这句今天无法执行。缺口只能由 P09 侧自己跑基线来关。"
+    },
+    {
+      "id": "F4",
+      "claim": "承接者缺口仍定位在 CARRIED 表的两行漏登记；而被指名的承接者其实不覆盖这件产物",
+      "verdict": "机制已定位（新查明一层）",
+      "evidence": "commands[D1]：CARRIED 68 行里 P09 只有 W01/W02/W03/W04/W07/W08，仍缺 W05/W06；同表已给 (P06,W05)/(P07,W05) 登记 `perf:baseline-matrix`。commands[D2]：**新查明** `perf:baseline-matrix` 早已 done（w-gpu，2026-10-07T19:42:48Z），但它的产物里 `P09`/`固定相机`/`相机`/`camera`/`A/B`/`W05` 出现次数**全部为 0** ⇒ 它是性能基线报告，不是 P09 的相机 A/B。commands[D3]：队列承接数仍 0；`PLAN100-ADOPTION.json` 的 noCarrier 已含 (P09,P09-W05)（无需改它）。",
+      "implication": "照 CARRIED 表的既有口径给 P09-W05 补一行**不会**产生该证据 —— 那一行只是承接口径，真正缺的是**执行**。补行属 loop/bin/ 改动，非本任务 writes，只登记。"
+    },
+    {
+      "id": "E1",
+      "claim": "★ 新登记一个真实环境缺陷（非本任务阻塞原因，未修）：日志在 ROOT 之外 ⇒ relative_to 抛错，run 记录与超时分账都写不进",
+      "verdict": "真实缺陷（已实测规模）",
+      "evidence": "commands[F1]：`loop/bin/worker.py:291` 与 `sentinel.py:392` 用 `str(logf.relative_to(ROOT))`；抛错点在**构造 run 记录**处，位于 `classify_failure` 之后、写 RUNS 与 `_note_failure` **之前**。`selftest.py:1098` 的注释早已写明此 hazard（「夹具放到系统临时目录会直接抛 ValueError」），但只在测试夹具里规避。commands[F2]：今天 **17 个 daemon 日志共 98 次**（w-ops 自己 6 次，其中一次紧跟第 3 轮超时）；本任务的超时在 `runs/*.jsonl` 里 **0 条**、在 `FAILED-TASKS.json` 里**无此项**。",
+      "implication": "后果是双重的：① 这一轮的 run 记录根本不落盘、超时也不进失败台账 ⇒ **一次 45 分钟的超时在账面上看不见**；② 整轮 worker 循环被打断（daemon 里连续 3 次「异常退避」）。修它要改 `loop/bin/worker.py`（例如记相对路径时先判断是否在 ROOT 内，或对仓外布局记绝对路径），非本任务 writes，只登记。"
+    },
+    {
+      "id": "E2",
+      "claim": "环境事实今天变了：GPU 锚定路径实测为 0（第 2 轮记的「3 个 headless Chrome」今天不成立）",
+      "verdict": "已变更（如实登记）",
+      "evidence": "commands[G1]：`ps` 与 `pgrep -fl 'Google Chrome.app/Contents/MacOS/Google Chrome --headless'` 两条路一致为 **0**；宽松匹配的 10 个是桌面 Chrome（用户自己的浏览器）。",
+      "implication": "「GPU 被占」不再是本缺口的阻塞理由 —— 真正的阻塞是**没有承接者**（F4）加**没跑**。但我**仍未跑**：任务未声明 GPU，且 AGENTS.md 明令 GPU 全局串行。空闲 ≠ 获准。"
+    },
+    {
+      "id": "E3",
+      "claim": "★ 一处取证方法纠正：前三轮的 mtimeUTC 字段偏了 8 小时（本地时间被贴了字面 Z）",
+      "verdict": "字段错误（不影响结论）",
+      "evidence": "commands[H2]：同一文件 `stat -f '%Sm' -t '%Y-%m-%dT%H:%M:%SZ'` 给 `2026-10-07T12:18:49Z`，python `timezone.utc` 给 `2026-10-07T04:18:49Z`，本机时区 `CST+0800`。",
+      "implication": "前三轮 records 里的 `mtimeUTC: 2026-10-07T12:18:49Z` 实为本地时间。它不改变「台账未被改动」这一结论（哈希一致才是判据），但说明**取证命令本身也没被核对**。本轮在 sourceHashes 里同时给 UTC 与本地两个读数，免得下一个复核者再踩。"
+    }
+  ],
+  "disposition": {
+    "ledgerStatusChanged": false,
+    "ledgerStatus": "blocked（保持原状；任务明令禁止为让门禁变绿而改台账。且按 F1/F2 它也不该被改成 merged —— 真正缺的是执行，不是状态）",
+    "reviewerSigned": false,
+    "reason": "缺口经仓内口径复核**仍然存在**（F1），且原「不适用」归因不成立（F2）。按任务要求「在 loop 里建一条可执行任务**或在提交里写明它归属哪个流**」，采用后者：本任务 writes 只授权本产物，新建/改 `loop/queue/*.jsonl` 与 `loop/bin/*` 都会越界。",
+    "gapExistsToday": true,
+    "ownerStream": {
+      "primary": "plan100 P09（交互反馈、窄屏、键盘与无障碍；阶段目标「统一状态反馈、深链恢复、读屏语义、触控命中区和200/400%缩放」）—— 该槽位属 P09 自己，**不是** P06/P07 的视觉候选面（F2）",
+      "secondary": "无。P06-W05 已 rejected、P07-W05 无签收且两份 material report 均 ok=False（F3）⇒ 没有第二个流能替代它。",
+      "carrierInLoop": "adopt 流（本产物即处置记录）。`loop/state/PLAN100-ADOPTION.json` 的 noCarrier 已如实含 (P09, P09-W05)，**无需改它**。",
+      "theMissingLines": "`loop/bin/adopt_plan100.py` 的 CARRIED 表缺 `(\"P09\",\"W05\")` 与 `(\"P09\",\"W06\")` 两行（commands[D1]）。**但注意**：照同表口径补 `perf:baseline-matrix` 并不能产生 P09-W05 要求的证据 —— 那个任务早已 done 且其产物对 P09/相机/A-B 的引用数为 0（commands[D2]）。补行只是让映射自洽，真正闭环仍需一次真实执行。改 loop/bin/ 非本任务 writes，只登记。",
+      "blockedBy": "① 没有承接者（CARRIED 表漏行 + 队列 0 条）；② 跑规格基线需 GPU 串行槽位与本地服务（`tests/sky_reading_reflow_browser.py:27-28` 强制 CL_GPU=1）；③ 本任务 writes 只授权本产物，无法自己建任务。**注意 GPU 今天实测空闲（commands[G1]）⇒ ①②之外没有硬件理由。**",
+      "suggestedNextTask": "ops:P09-005-reflow-baseline — ① 起服务并固定 `ATLAS_BASE`（参考 `artifacts/plan100/interaction/P09-REPRODUCE.md` 的 B6 节）；② 在 GPU 串行槽位下跑 `CL_GPU=1 python3 -s tests/sky_reading_reflow_browser.py --base \"$ATLAS_BASE\"`，输出落到**仓库内** `artifacts/plan100/<date>/P09-W05/reports/`（**不要照抄规格里的 `P09-005` 目录名** —— 仓内落盘惯用 `Pdd-WNN`，两边都不认会白跑）；③ 修该脚本的证据口径：让它像 `tests/sky_zoom_reflow_browser.py` 那样在 result.json 里写 `sourceHashes`（今天它不写，`/tmp` 下那几份 87/87 因此不绑定源码，commands[E4]）；④ 补 `source-manifest.json` 之外规格要求的产物形态，并按 decision.md 模板写「合入/撤回/阻塞 + 剩余风险 + 证据相对路径 + 执行者 + UTC 时间」；⑤ 收尾复核须换非提交者（禁自签）。"
+    },
+    "whyNotMerged": "① 无独立复核者（reviewer=None），「缺任一签收字段不得标记 merged」；② 规格要求的产物本身今天不存在（F1）；③ 本产物是**判定**，不是签收 —— 自签会被 release_gate 记 P0。"
+  },
+  "assertions": [
+    {
+      "text": "★ 本轮重发的原因是**上一轮没提交**，不是证据失效：产物 mtime UTC=2026-10-11T13:29:06Z，22 秒后 13:29:28Z 被 2700s 超时杀掉（rc=124，用时 2700.1s）；产物缺 submittedAt/validation 两键且无 REJECTED__ 文件 ⇒ 提交从未发生（commands[A1][A2]）。",
+      "result": "pass"
+    },
+    {
+      "text": "★ 上一轮那份产物**即使提交也会被拒**：`loop.validate()` 返回恰好 1 个 problem「证据缺 sha256：loop/state/out/adopt_P09-W05.artifact.json」，来自其自指条目（E32 规则 2026-10-09 生效，晚于第 2 轮提交，故第 2 轮当年过得了）（commands[A3]）。",
+      "result": "pass"
+    },
+    {
+      "text": "★ 规格原件今天彻底不可达：归档目录不存在、两种文件搜索 0 命中、planSha256 字符串 0 命中、`git log --all` 空 ⇒ 上一轮据原文的引述本轮**无法复核**，已如实登记为限制（commands[B1]）。我没有去恢复它（AGENTS.md 明令不恢复已移出的旧计划）。",
+      "result": "pass"
+    },
+    {
+      "text": "映射与阶段实例化结论用**仓内**证据维持：`coverage-map.json` 与 `plan-ledger.json` 声明同一 planSha256 c0192e21…，14/14 阶段各有自己的 W05 槽位；同标题的 W05 在仓内各自交付不同东西（P03 命令级 A/B、P08 DOM 写入序列、P10 性能报告框架）⇒「同标题 ≠ 同交付面」仓内自证（commands[B2][B3]）。",
+      "result": "pass"
+    },
+    {
+      "text": "缺口今天仍然存在：P09-W05 仍只有 4 个文件、无 baseline/candidate/reports（commands[C1]）；对照目录是实的（P10-W05 `candidate/` 4 份报告、P06-W05 `reports/` 184 文件含 88 png）（commands[C2]）；P09 家族内只有 W04/W07/W08 建了 reports/（commands[C3]）；只有 20261007 一个日期分区且 P09-W05 下无任何子目录（commands[C4]）。",
+      "result": "pass"
+    },
+    {
+      "text": "「向 P06/P07 索取 A/B」不可兑现：P06-W05 status=rejected（撤回）、P07-W05 status=cpu-verified 且 reviewer=None；P07 两份 material A/B report 均 ok=False、books 空、rollbackIdenticalPng=False（commands[E1]）。",
+      "result": "pass"
+    },
+    {
+      "text": "承接者缺口仍在 CARRIED 表：68 行里 P09 只有 W01/W02/W03/W04/W07/W08，缺 W05/W06；**新查明**被指名的 `perf:baseline-matrix` 早已 done，但其产物对 P09/固定相机/相机/camera/A-B/W05 的引用次数**全部为 0** ⇒ 补该行不产生所需证据；队列承接数 0，采纳表 noCarrier 已含 P09-W05（commands[D1][D2][D3]）。",
+      "result": "pass"
+    },
+    {
+      "text": "★ 新登记环境缺陷：`worker.py:291`/`sentinel.py:392` 的 `str(logf.relative_to(ROOT))` 在日志位于 ROOT 之外时抛 ValueError，且抛错点在写 run 记录与超时分账**之前** ⇒ 实测本任务今天的 rc=124 超时在 `runs/*.jsonl` 0 条、`FAILED-TASKS.json` 无此项；今天 17 个 daemon 日志共 98 次（commands[F1][F2]）。`selftest.py:1098` 早已写明该 hazard，但只在测试夹具里规避。",
+      "result": "pass"
+    },
+    {
+      "text": "GPU 锚定路径实测 headless Chrome = 0（ps 与 pgrep 两条路一致；宽松匹配 10 个是桌面 Chrome）⇒ 第 2 轮记的「3 个 headless Chrome」今天不成立；但本轮**仍未跑**任何 CL_GPU=1 命令（任务未声明 + AGENTS.md GPU 串行）—— 空闲不等于获准（commands[G1]）。",
+      "result": "pass"
+    },
+    {
+      "text": "未改台账、未自签：`P09-W05/ledger.json` 动手前后 sha256 均为 07ee113f…、decision.md 均为 02b29e8c…；status 仍 blocked、reviewer 仍 None、decision 仍 None、owner=p09-agent（非本 agent）。本会话对该目录的写入为 0（commands[H1]）。",
+      "result": "pass"
+    },
+    {
+      "text": "★ 证据选型三重保险（针对前四轮踩过的三个坑）：① 全部 evidence 在**仓库内**、无绝对路径（避开第 2 轮的仓外归档被删 ⇒ missing）；② 无自指条目、无 .pyc、无 /tmp、无瞬态路径（避开第 3 轮的自指缺哈希 ⇒ 直接拒）；③ 实测第 2 轮记的同一批哈希 **3 天后仍逐字相同**（唯一 DRIFT 的 `loop/bin/worker.py` 属 EVOLVING，按设计不判 stale）（commands[H3]）。提交前三关自检 validate/stale/weak **全空**（commands[H4]）。",
+      "result": "pass"
+    },
+    {
+      "text": "未跑 GPU/浏览器、未动受保护路径、未执行 git checkout/reset/stash、未杀任何进程：对 js/ css/ index.html serve.py narrative.py scripts/ tests/ docs/ data/ 的写入为 0（全部只读取证）。本产物是仓库内**唯一**写入（changes 一项）。实测 20 个 guard-runtime 进程保持原样（含本任务 pid 60161）。",
+      "result": "pass"
+    }
+  ],
+  "evidence": [
+    {
+      "path": "artifacts/plan100/20261007/P09-W05/ledger.json",
+      "sha256": "07ee113f94fba45222deb5611087b8f758c094ef90a9a9c5fe0af65d60831183",
+      "kind": "被处置的未结项台账（只读，未改；动手前后哈希一致；status 仍 blocked / reviewer 仍 None / decision 仍 None / owner 仍 p09-agent）"
+    },
+    {
+      "path": "artifacts/plan100/20261007/P09-W05/decision.md",
+      "sha256": "02b29e8caff0b042285a628e00c7aeb99bdd8893a410f0154ede8c35fd92c7b4",
+      "kind": "原决定全文（只读）：自述「未执行（本包不适用）」并称属 P06/P07 —— 即 F2 所核的归因"
+    },
+    {
+      "path": "artifacts/plan100/20261007/P09-W05/source-manifest.json",
+      "sha256": "34e7c51688432fa329c5dbb2becab6421662391e5d89958cfb2a6b2fe3138e8e",
+      "kind": "该包的回滚/来源清册（只读）：command 自述「（不适用项，无执行命令）」⇒ 无执行这一事实在包内自证"
+    },
+    {
+      "path": "artifacts/plan100/plan-ledger.json",
+      "sha256": "e74bb8804e7717c5c89a8b4cee2626c8054a7580e8d8b8ebfc0b8dde803a2f3c",
+      "kind": "★ 仓内代理锚点②：planSha256=c0192e21…、planBytes=13580691；14/14 阶段各有 W05 槽位，P09-W05 firstLine=33714、标题逐字（commands[B2][B3]）。**实测全仓库无任何代码写它**（只被 adopt_plan100.py:145 读），mtime 3 天未变"
+    },
+    {
+      "path": "artifacts/plan100/coverage-map.json",
+      "sha256": "1141310acc862b43844764b0354675285d9c38b2f9cd4495ad0eb2b367912ae3",
+      "kind": "★ 仓内代理锚点①：与 plan-ledger 声明**同一** planSha256；P09/W05 条目自身即写 state=blocked、reviewer=null（commands[B2]）。同样无任何代码写它（p13-wave7-checks.py 只读）"
+    },
+    {
+      "path": "artifacts/plan100/20261007/P10-W05/ledger.json",
+      "sha256": "a796ed2a09760e6f2394b581426f2b5e3254f45dc396b7b67cd1079bc1318f9c",
+      "kind": "对照证据（非本任务写入）：同批 W05 槽位且已交付，目录含 candidate/（4 份报告）⇒ 该产物形态在本仓库可考（commands[C2]）"
+    },
+    {
+      "path": "artifacts/plan100/20261007/P06-W05/ledger.json",
+      "sha256": "e54ccab71d568e5962848be167deb5b1ca677d671d1dc1cf52457482b4f8d763",
+      "kind": "对照证据（只读）：status=rejected ⇒ 「向 P06 索取 A/B」不可兑现（commands[E1]）；其 reports/ 有 184 个文件（含 88 png）"
+    },
+    {
+      "path": "artifacts/plan100/20261007/P07-W05/ledger.json",
+      "sha256": "539c84fca8f7664a747f1fd5c7cce12c1d1f928b495023a0482c9d48c8557549",
+      "kind": "对照证据（只读）：status=cpu-verified、reviewer=None ⇒ 「向 P07 索取 A/B」同样不可兑现（commands[E1]）"
+    },
+    {
+      "path": "artifacts/plan100/20261007/P08-W05/decision.md",
+      "sha256": "2947bd8bb76804565efb3c92469d33648ea3fa3fb6213003ebf0f9bb42acc3b4",
+      "kind": "★ 阶段实例化证据②（仓内）：同一 W05 标题，P08 交的是 DOM 写入序列单变量，并自述「固定相机/相同画布/相同时间相位的像素级 A/B **未做**」（commands[B3]）"
+    },
+    {
+      "path": "artifacts/plan100/20261007/P03-W05/decision.md",
+      "sha256": "a243a98a25c0a612662e78fd1dbc45ffda5f1b0ec3c526a81464715b112c5236",
+      "kind": "★ 阶段实例化证据①（仓内）：同一 W05 标题，P03 交的是**命令级** A/B（自述「本阶段无视觉改动…A/B 做在验收命令层」）⇒ 同标题不同交付面（commands[B3]）"
+    },
+    {
+      "path": "artifacts/plan100/interaction/P09-REPRODUCE.md",
+      "sha256": "e9fd6e7a30884d021d8c13b22f372867f2036c51ad44b1700e843dbf537a52aa",
+      "kind": "★ P09 自己的复现手册（只读）：B6 节点名 `tests/sky_reading_reflow_browser.py` 为 P09 证据脚本；而该文档与 P09-METHOD.md 里 `A/B` 出现 0 次 ⇒「P09 侧不产出相机 A/B」在 P09 自己文件里也成立（commands[E2]）"
+    },
+    {
+      "path": "loop/bin/adopt_plan100.py",
+      "sha256": "589e09005e24f2d6e5f817e8e053272a946a4c98c70dfb1c8d5bd2902232e860",
+      "kind": "★ 承接缺口的定位处（只读，未改）：CARRIED 表 68 行，P09 缺 W05/W06；同表已给 P06-W05/P07-W05 登记 perf:baseline-matrix（commands[D1]）。EVOLVING 路径，漂移不判 stale"
+    },
+    {
+      "path": "tests/sky_reading_reflow_browser.py",
+      "sha256": "1c88054af22be21974df52f1de6b0d4ba723a2bf754372b0ab03471087bee716",
+      "kind": "★ 规格 P09-005 的基线脚本（只读）：:27-28 强制 CL_GPU=1（commands[E3]）。哈希与第 2/3 轮记录一致 ⇒ 自第 2 轮起未变。EVOLVING 路径"
+    },
+    {
+      "path": "loop/queue/plan100.jsonl",
+      "sha256": "b739b8ad6f120b2cc8e0b01e0c9e3cecba36a5bca2139b6a11cc17642cf40e2a",
+      "kind": "本任务定义来源（只读）：adopt:P09-W05 的 writes 只授权本产物；EVOLVING 路径（commands[D3]）"
+    },
+    {
+      "path": "loop/state/PLAN100-ADOPTION.json",
+      "sha256": "2e350fa27c1494649e73a05eddf920d1d17cf042767db36f677be4e5a845f153",
+      "kind": "采纳表（只读）：specSlots=112 / withCarrier=68 / withoutCarrier=44；noCarrier 含 (P09,P09-W05)；openLedgers 含 P09-W05（commands[D3]）。EVOLVING 路径 ⇒ 即使被 adopt_plan100.py 重写也不判 stale（这正是第 2 轮刻意不记它哈希的原因；本轮记哈希是因为 EVOLVING 前缀已覆盖它）"
+    },
+    {
+      "path": "loop/state/PLAN100-LEDGER.json",
+      "sha256": "2dee643624fc9bf43ccac2eeb58d2552f14cb9303eb181ff5cdaa19d18d7c5d8",
+      "kind": "plan100 台账快照（只读）：79 条 ledgers 中 P09-W05 一条 status=blocked、reviewer=None、selfReviewed=false（独立于原始 ledger.json 的第二份仓内记录）。EVOLVING 路径"
+    }
+  ],
+  "sourceHashes": {
+    "_note": "本产物为**只读判定**；下列文件在本会话中均未被本任务写入（唯一写入是本产物，见 changes）。哈希为读取时刻值。`evolution` 标注 EVOLVING 的路径（loop/ 前缀）按 loop.py:314/357 设计**允许**继续演进，其漂移**不**使本记录失效。**未标注**的 artifacts/ 路径是不可变项 —— 我实测它们 3 天未变、且全仓库无任何代码写它们（commands[H3]）。",
+    "_repoWritesByThisTask": [
+      "loop/state/out/adopt_P09-W05.artifact.json"
+    ],
+    "_self": {
+      "path": "loop/state/out/adopt_P09-W05.artifact.json",
+      "note": "★ 本产物**刻意不写进 evidence**（自指条目会被 E32 规则直接拒：哈希不可能自洽，见 commands[A3] 复现了第 3 轮因此被拒）。此处仅作说明，不作失效判据。",
+      "previousRoundArtifactSha256": "3d94e35f3a0956246429bd2a9233f5d4a8f080d2be390a6fe7c4bac527728e4e",
+      "previousRoundArtifactMtimeUTC": "2026-10-11T13:29:06Z"
+    },
+    "_recordReplacedBySubmit": {
+      "path": "loop/state/out/adopt_P09-W05.json",
+      "sha256BeforeSubmit": "6475055d911e6918f8cdfac7376e1ae59e84f062a07cf1ab170dbcd41215b815",
+      "sizeBytes": 44798,
+      "submittedAt": "2026-10-08T18:51:04Z",
+      "round": 2,
+      "note": "★ 如实登记一处**证据替代**（不是我能改的设计）：submit 按 output_name 规则写 `adopt_P09-W05.json`，会**取代**第 2 轮那份 44KB 的完整记录。这是 loop 的既定约定（loop.py:1042；worker 重写自己的记录属正常），但被取代的是**唯一一份**记录前两轮结论的规范文件 —— 第 3 轮的产物里也记了同样的顾虑（其日志第 2849 行：「The round-2 content would be lost. That is a genuine loss of evidence.」）。我**没有**另存副本（那会写到 writes 之外），只在此登记其哈希与提交时刻，使这次取代**可追溯**。"
+    },
+    "_excludedOnPurpose": {
+      "/Users/carmen/Desktop/星系-audit-archive-20261007/docs/plan-100-score-execution.md": "★ 第 2 轮把它写进 evidence 并记哈希（c0192e21…），该目录随后**整体消失** ⇒ 本任务被判 `missing` 重发（commands[A4][B1]）。本轮**不引用**它，也不引用**任何**仓外绝对路径。规格身份改由仓内 coverage-map.json + plan-ledger.json 的同一 planSha256 双证（commands[B2]）。",
+      "loop/state/out/*.artifact.json（自指或其他记录）": "★ 第 3 轮把**自己的产物**写进 evidence，`loop.validate()` 返回「证据缺 sha256」⇒ 即使提交也会被拒（commands[A3]）。任何 `loop/state/out/` 下的记录都是会自我重写的产物，不能当证据。",
+      "/tmp/castline-shots/**": "本轮**确实读取**了 /tmp 下的 reading-reflow result.json（commands[E4]），但**刻意不列为 evidence** —— /tmp 是操作系统会清理的瞬态位置。相关结论以「命令 + 原始输出」形式写进 commands[]，可现场重跑。",
+      "__pycache__/*.pyc": "构建副产物，重编译即变哈希；且仓库根 `__pycache__/` 既不在 EVOLVING 也不在 TRANSIENT 前缀里（第 2 轮 N3 已实测）。不引用。",
+      "loop/bin/worker.py / loop/bin/sentinel.py": "本轮读数里 `loop/bin/worker.py` 相对第 2 轮记录**已 DRIFT**（commands[H3]）。虽然它属 EVOLVING、漂移不判 stale，但我**仍不把它列为 evidence**：E1 的结论以「行号 + 原文」形式写进 commands[F1]，不依赖某一时刻的哈希。"
+    },
+    "artifacts/plan100/20261007/P09-W05/ledger.json": {
+      "today": "07ee113f94fba45222deb5611087b8f758c094ef90a9a9c5fe0af65d60831183",
+      "before": "07ee113f94fba45222deb5611087b8f758c094ef90a9a9c5fe0af65d60831183",
+      "verdict": "动手前后一致 ⇒ 本任务未改台账",
+      "status": "blocked",
+      "reviewer": null,
+      "decision": null,
+      "owner": "p09-agent",
+      "mtimeUTC": "2026-10-07T04:18:49Z",
+      "mtimeLOCAL": "2026-10-07T12:18:49+0800",
+      "sizeBytes": 1358,
+      "evolution": "不可变（artifacts/，且无任何写入者）"
+    },
+    "artifacts/plan100/20261007/P09-W05/decision.md": {
+      "today": "02b29e8caff0b042285a628e00c7aeb99bdd8893a410f0154ede8c35fd92c7b4",
+      "mtimeUTC": "2026-10-07T04:18:49Z",
+      "sizeBytes": 1928
+    },
+    "artifacts/plan100/20261007/P09-W05/source-manifest.json": {
+      "today": "34e7c51688432fa329c5dbb2becab6421662391e5d89958cfb2a6b2fe3138e8e",
+      "mtimeUTC": "2026-10-07T04:18:49Z",
+      "sizeBytes": 420
+    },
+    "artifacts/plan100/plan-ledger.json": {
+      "today": "e74bb8804e7717c5c89a8b4cee2626c8054a7580e8d8b8ebfc0b8dde803a2f3c",
+      "mtimeUTC": "2026-10-07T04:18:49Z",
+      "sizeBytes": 77335,
+      "writersFound": "0（只被 adopt_plan100.py:145 读）"
+    },
+    "artifacts/plan100/coverage-map.json": {
+      "today": "1141310acc862b43844764b0354675285d9c38b2f9cd4495ad0eb2b367912ae3",
+      "mtimeUTC": "2026-10-07T04:18:50Z",
+      "sizeBytes": 27512,
+      "writersFound": "0（只被 artifacts/plan100/review/p13-wave7-checks.py:124 读）"
+    },
+    "artifacts/plan100/20261007/P10-W05/ledger.json": {
+      "today": "a796ed2a09760e6f2394b581426f2b5e3254f45dc396b7b67cd1079bc1318f9c",
+      "sizeBytes": 5509,
+      "role": "对照：同批已交付，含 candidate/（4 份报告）"
+    },
+    "artifacts/plan100/20261007/P06-W05/ledger.json": {
+      "today": "e54ccab71d568e5962848be167deb5b1ca677d671d1dc1cf52457482b4f8d763",
+      "sizeBytes": 9430,
+      "role": "对照：rejected；reports/ 184 个文件（88 png）"
+    },
+    "artifacts/plan100/20261007/P07-W05/ledger.json": {
+      "today": "539c84fca8f7664a747f1fd5c7cce12c1d1f928b495023a0482c9d48c8557549",
+      "sizeBytes": 5692,
+      "role": "对照：cpu-verified、reviewer=None；A/B 未产出"
+    },
+    "artifacts/plan100/20261007/P08-W05/decision.md": {
+      "today": "2947bd8bb76804565efb3c92469d33648ea3fa3fb6213003ebf0f9bb42acc3b4",
+      "sizeBytes": 4644,
+      "role": "阶段实例化证据②"
+    },
+    "artifacts/plan100/20261007/P03-W05/decision.md": {
+      "today": "a243a98a25c0a612662e78fd1dbc45ffda5f1b0ec3c526a81464715b112c5236",
+      "sizeBytes": 3069,
+      "role": "阶段实例化证据①"
+    },
+    "artifacts/plan100/interaction/P09-REPRODUCE.md": {
+      "today": "e9fd6e7a30884d021d8c13b22f372867f2036c51ad44b1700e843dbf537a52aa",
+      "sizeBytes": 7405,
+      "role": "P09 自己的复现手册：B6 节点名基线脚本"
+    },
+    "loop/bin/adopt_plan100.py": {
+      "today": "589e09005e24f2d6e5f817e8e053272a946a4c98c70dfb1c8d5bd2902232e860",
+      "sizeBytes": 12687,
+      "evolution": "EVOLVING（loop/）；本会话我未改它"
+    },
+    "tests/sky_reading_reflow_browser.py": {
+      "today": "1c88054af22be21974df52f1de6b0d4ba723a2bf754372b0ab03471087bee716",
+      "sizeBytes": 9843,
+      "evolution": "EVOLVING（tests/）；本会话我未改它"
+    },
+    "loop/queue/plan100.jsonl": {
+      "today": "b739b8ad6f120b2cc8e0b01e0c9e3cecba36a5bca2139b6a11cc17642cf40e2a",
+      "sizeBytes": 7967,
+      "evolution": "EVOLVING（loop/queue/）"
+    },
+    "loop/state/PLAN100-ADOPTION.json": {
+      "today": "2e350fa27c1494649e73a05eddf920d1d17cf042767db36f677be4e5a845f153",
+      "sizeBytes": 23021,
+      "evolution": "EVOLVING（loop/state/）⇒ 被 adopt_plan100.py 重写也不判 stale"
+    },
+    "loop/state/PLAN100-LEDGER.json": {
+      "today": "2dee643624fc9bf43ccac2eeb58d2552f14cb9303eb181ff5cdaa19d18d7c5d8",
+      "sizeBytes": 76898,
+      "evolution": "EVOLVING（loop/state/）"
+    },
+    "_quotedButNotEvidence": {
+      "note": "以下路径在本轮**被读取并引用**，但刻意不进 evidence（理由见 _excludedOnPurpose）；它们的事实以 commands[] 的命令+原始输出形式留证，可现场重跑。",
+      "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261011-195516-813640-53101/测试产物/guard-logs/w-ops.daemon.log": "commands[A1][F2]：超时 rc=124 与 relative_to ValueError 的原始行。**仓外**，故不作证据。",
+      "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261011-195516-813640-53101/测试产物/guard-logs/w-ops-adopt-P09-W05-20261011-204428.log": "第 3 轮那次运行的完整日志（512 KB，4479 行）：结尾正是「Let me write the file now.」⇒ 印证被截断在收尾处。",
+      "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261011-195516-813640-53101/测试产物/guard-runtime/worker.py": "485 B 的 wrapper，自述把 `module.LOGS` 指向仓库外 guard-logs —— E1 缺陷的布局来源。",
+      "/tmp/castline-shots/reflow-fixed/result.json": "commands[E4]：ok=true 87/87 但无 sourceHashes/finishedAt。",
+      "/Users/carmen/Desktop/星系-audit-archive-20261007/docs/plan-100-score-execution.md": "commands[B1]：**已不存在**。仅说明第 2 轮为何失效。"
+    },
+    "_parallelWritersObserved": {
+      "note": "非本任务写入；SENTINEL.md §1 那一类，不作缺陷归属信号。本会话内**未**观察到这批文件在我读取期间变化（我只读了两轮哈希，未逐秒采样）。",
+      "js/app.js": {"mtimeUTC": "2026-10-10T09:22:28Z", "gitStatus": " M"},
+      "css/sky-deep-hud.css": {"mtimeUTC": "2026-10-10T08:13:53Z", "gitStatus": " M"},
+      "css/sky-reading.css": {"gitStatus": "?? (untracked)", "note": "第 3 轮会话内两次读数不同（12:35:25Z→13:04:05Z）；本轮未复测，故不断言其今天是否仍在动"}
+    }
+  },
+  "changes": [
+    {"path": "loop/state/out/adopt_P09-W05.artifact.json", "kind": "append-only"}
+  ],
+  "observationWindow": {
+    "startedAtUTC": "2026-10-11T13:31:04Z",
+    "endedAtUTC": "2026-10-11T14:05:00Z",
+    "note": "本轮观察窗（lease.startedAt 起）。实测 20 个 guard-runtime 进程全程存活（supervisor 53113、sentinel 53135、worker 含本任务 pid 60161），锚定路径 headless Chrome 0 个；未杀、未接管、未借用 GPU。GATE.lock 的持有者 pid 73130 在本轮开始时**已不存在**（`ps -p 73130` 返回空），但该锁**不在本任务 writes 范围**，我**没有**动它（未 reap、未删除）—— 仅如实登记。"
+  },
+  "verificationEnvironment": {
+    "python": "python3 3.13.12（系统）",
+    "probeKind": "纯 CPU、无浏览器、无 GPU、无模型调用；只读 artifacts/ loop/ tests/ 与仓外 guard-logs（后者仅用于归因，不作证据）",
+    "gpuUsed": false,
+    "browserUsed": false,
+    "processesObserved": "20 个 guard-runtime 进程（含本任务 pid 60161）+ headless Chrome 0 个（GPU-LOCK 锚定路径 ps/pgrep 双测）；本会话未起任何浏览器、未杀任何进程"
+  },
+  "remaining": [
+    "**本产物不会自动推进任何事**：它只是处置记录。缺口闭环需要一条 GPU 任务（建议见 disposition.ownerStream.suggestedNextTask），且**先补脚本的证据口径**（写 sourceHashes），否则下次仍会拿到不可复核的证据。",
+    "**★ 我未证明「功能坏了」**：F1 只证明规格要求的**产物形态**不存在（目录/文件层面）。今天窄屏/阅读重排页可能完全正常，只是没人按规格留档 —— 这两种情况的处置不同，我不把前者写成后者。要区分，必须在 GPU 槽位真跑一次基线。",
+    "**★ 规格原文今天不可达的后果**：上一轮据 `plan-100-score-execution.md` 原文做的「baseline/产物/责任人按阶段实例化」引文，本轮**无法独立复核**（归档目录整体消失、仓内从未跟踪、跨两个卷 0 命中）。本轮改用仓内锚点支撑同一结论，但**这不等于复核了上一轮的原文引述**。按 AGENTS.md「不恢复已移出的旧计划」，我没有去找回或重建它。若后续确实需要那一层证据，须由用户提供规格原件。",
+    "**未跑规格基线**：`CL_GPU=1 python3 -s tests/sky_reading_reflow_browser.py` 未运行（任务未声明；AGENTS.md GPU 全局串行）。实测 GPU 今天空闲（headless 0），但**空闲不等于获准**，我不擅自占用。⇒ 我没有任何关于今天该页面在 640×450/320×225/320×640 下是否正确的结论。",
+    "**承接者映射的漏洞我没修**：`loop/bin/adopt_plan100.py` 的 CARRIED 表缺 (P09,W05)/(P09,W06) 两行。补它要改 loop/bin/，非本任务 writes。**且要提醒承接者**：照同表口径补 `perf:baseline-matrix` 并不能产生所需证据（commands[D2] 实测该任务已 done 且对 P09/相机/A-B 引用数为 0）。",
+    "**★ 环境缺陷 E1 我没修（建议优先）**：`loop/bin/worker.py:291` / `loop/bin/sentinel.py:392` 的 `str(logf.relative_to(ROOT))` 在日志位于 ROOT 之外时抛 ValueError，抛错点在写 run 记录与超时分账**之前** ⇒ 超时在账面上完全不可见（本任务今天的 rc=124 在 runs/ 0 条、FAILED-TASKS.json 无此项），且整轮 worker 循环被打断。今天 17 个 daemon 日志共 98 次。修法：记日志路径前先判断是否在 ROOT 内（不在则记绝对路径或 basename）。`selftest.py:1098` 的注释早已写明该 hazard，可作修复依据。",
+    "**★ 一个我无法在 writes 范围内解决的设计问题**：`submit` 按 output_name 写 `adopt_P09-W05.json`，必然**取代**第 2 轮那份 44KB 的规范记录（唯一一份记录前两轮结论的文件）。第 3 轮也注意到了这点（其日志第 2849 行）。我**没有**另存副本（那会写到 writes 之外），只在 `sourceHashes._recordReplacedBySubmit` 登记其哈希与提交时刻使取代可追溯。若环境维护者认为历次记录需要留档，应改 `submit` 的落盘策略（例如按轮次后缀），而不是靠 agent 自律。",
+    "**F1 的口径边界**：我用「同批已交付槽位的产物形态对照」证明 P09-W05 缺产物目录。这只证明**目录形态**缺失，不等于「coverage ledger 这份内容不存在于别处」。我核了 `artifacts/plan100/coverage/` 下三份 JSON 的 provenance（`generatedFrom=tools/plan100/build_source_index.py`、schema=`castline/plan100-coverage/v1`、按 bookKey/textHash）⇒ 与 P09 验收面不是同一种东西；但我**没有**逐条解析它们是否在语义上覆盖 P09 的验收项。",
+    "**E4 的边界**：`/tmp` 下那份 87/87（2026-10-08T18:57:31Z）我证明的是「**不绑定源码指纹**」，不是「今天已失效」。而且它的因果链我只做了「时间 + 注释自述」两证，**没有**做反向实验（回滚那个 `pointer-events` 修复再跑一次）。",
+    "**上游第 3 轮内容的丢失**：我覆盖了 `adopt_P09-W05.artifact.json`（第 3 轮的产物，sha256=3d94e35f…）。它没有别的副本。我在 `sourceHashes._self` 记了哈希与 mtime，并在 A1/A2/A3 逐条复述了它的关键事实（超时截断、自指缺哈希），但**它的完整正文（62 KB）今天起不可恢复**。这不是我能避免的：该路径就是本任务被授权的唯一写入路径。",
+    "**P09 其余槽位未复核**：W01–W04/W06–W08 的 knownGaps 今天是否仍成立，不在本任务范围内。",
+    "**上轮的两条附带结论本轮未复核**：① `css/sky-loader.css` 的 `pointer-events:none` 修复今天是否仍在、是否被后续改动破坏；② `decision.md §剩余风险` 与自身 knownGaps 不一致（疑跨包串抄）那条 token 比对。",
+    "**待独立复核**：本产物是自证，需要非同提交者复核。建议反向验证三处：(1) **R0 的因果** —— 请独立确认第 3 轮产物 mtime 与 daemon 超时那两行的对应关系，以及「没有 REJECTED__ 文件」确实意味着从未提交（而不是被清理）；(2) **R0b** —— 请独立复算 `loop.validate()` 对第 3 轮产物的输出；该产物已被我覆盖，但复现方法写在 commands[A3]，可用任意含自指条目的等价记录重现；(3) **E1** —— 请按 commands[F2] 独立重测 relative_to 报错次数，并确认本任务的超时确实没有落进 runs/ 与 FAILED-TASKS.json。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": ["loop/state/out/adopt_P09-W05.artifact.json"],
+    "note": "本任务未改 data/、未改任何受保护路径（js/ css/ index.html serve.py narrative.py scripts/ tests/ docs/ data/）、未执行 git checkout/reset/stash、未杀任何进程、未动 GATE.lock。台账 P09-W05/ledger.json 哈希动手前后一致（07ee113f…），decision.md 一致（02b29e8c…）。",
+    "notRestorable": "★ 两处**不可回滚**，如实登记：① `loop/state/out/adopt_P09-W05.artifact.json` 的**上一轮内容**（sha256=3d94e35f…，62 KB）被我覆盖且无副本 —— 该路径是本任务被授权的唯一写入路径，覆盖是设计预期（worker 重写自己的记录）。其关键事实已在 commands[A1][A2][A3] 逐条留证。② 本产物 `submit` 后，`loop/state/out/adopt_P09-W05.json` 的**第 2 轮内容**（sha256=6475055d…，44798 B，submittedAt 2026-10-08T18:51:04Z）会被 output_name 规则取代 —— 我未另存副本（会写到 writes 之外），只登记哈希与时刻。除此两处外，本会话在仓库内只有一处新增/改写（本产物），删除即回到动手前状态。"
+  }
+}

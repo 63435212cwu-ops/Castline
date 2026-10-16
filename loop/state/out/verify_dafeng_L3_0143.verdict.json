@@ -1,0 +1,392 @@
+{
+ "schemaVersion": "castline/loop-read-verdict/1",
+ "task": "verify:dafeng:L3:0143",
+ "verifies": "read:dafeng:L3:0143",
+ "reviewer": "w-dafeng-3",
+ "submitterUnderReview": "w-xiyou-1",
+ "selfSign": false,
+ "verdict": "partial",
+ "reviewedCandidate": {
+  "path": "loop/state/out/read_dafeng_L3_0143.candidate.json",
+  "sha256": "c77b0800ddb6d7c3b51721dcd020d0bbce437de2aee061d65ff4c4f6a094927a"
+ },
+ "sourceEvidence": {
+  "path": "data/cache/1063b17ca65ec1b76f30e460.docs.json",
+  "sha256": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+  "range": [
+   502903,
+   506640
+  ],
+  "sliceSha256": "d4fd22fa89020f065b38ef108f0a2b7e4921a848b4a6ded5bede17963ef26737",
+  "sliceHead": "第一百四十三章 女妖\n\n    许七安喝了口酒，放下酒杯，环",
+  "sliceTail": "夜是否歇在我家娘子这里？”\n\n\n------------\n\n",
+  "offsetUnit": "codepoint-absolute-in-docs[0].text",
+  "reproduce": "python3 -c \"import json;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];print(t[502903:506640])\""
+ },
+ "passedChecks": [
+  {
+   "check": "sourceHash 与任务声明一致",
+   "result": "pass",
+   "detail": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+  },
+  {
+   "check": "切片口径：docs[0].text[502903:506640] 以章标题开头、以分隔符结尾，且该切片在全文唯一",
+   "result": "pass",
+   "detail": "head='第一百四十三章 女妖'；find(slice)==502903；E 处紧接 '第一百四十四章'"
+  },
+  {
+   "check": "全部 139 条 quoteRef 逐字回切",
+   "result": "pass",
+   "detail": "text[start:end]==quote 全部成立；find(quote)==start 全部成立；sourceHash 全部等于文件哈希；139/139 落在 [502903,506640) 内"
+  },
+  {
+   "check": "随机抽 5 条 quote 核验（seed=143，可复现）",
+   "result": "pass",
+   "detail": "5/5 逐字命中且偏移一致：505681 / 506224 / 505353 / 503029 / 504507"
+  },
+  {
+   "check": "编造检查：候选出现的专名均见于原文",
+   "result": "pass",
+   "detail": "许七安/浮香/阿雅/明砚/宋廷风/朱广孝/恒慧/怀庆公主/老鸨/小青衣/金锣/宋卿/女妖/小雅 均在切片内；无原文以外人物"
+  },
+  {
+   "check": "越权检查：未把结束当成功（T2 目标仍记 unresolved；FS2/FS3 显式 unresolved）",
+   "result": "pass",
+   "detail": "未出现『搬兵成功』『金锣到场』等原文没有的结局断言"
+  },
+  {
+   "check": "人物话语未被当成叙述事实（speechAsClueNotFact 10 条覆盖主要话语）",
+   "result": "pass",
+   "detail": "许七安的推理/猜疑、老鸨内心、客人议论均已单列并标注"
+  },
+  {
+   "check": "coverage.uncoveredParagraphs 与实测未覆盖行一致",
+   "result": "pass",
+   "detail": "候选 43 条；我按『任意 quote 是否与该行区间重叠』独立算出 43 条，集合一致（该栏诚实且准确）"
+  },
+  {
+   "check": "引文自带定位字段均在本区间内",
+   "result": "pass",
+   "detail": "min start=502953, max end=506623"
+  }
+ ],
+ "failedChecks": [
+  {
+   "check": "同一任务五栏禁止共用同一句引文",
+   "result": "fail",
+   "detail": "声明 sameQuoteAcrossTaskFields=0，但该检查只比字符串全等；T2 存在 2 对包含关系（见 CE1）"
+  },
+  {
+   "check": "states 前值/后值与事件锚点的时序",
+   "result": "fail",
+   "detail": "ST1 的 before 晚于 anchor 与 after（见 CE2）"
+  },
+  {
+   "check": "T2 result/objectiveStatusNote 对区间的描述与原文一致",
+   "result": "fail",
+   "detail": "原文在本区间内显式写了『一个小时过去了，宋廷风还没有返回』（见 CE3）"
+  },
+  {
+   "check": "punctuationAudit 计数自洽",
+   "result": "fail",
+   "detail": "『....』声明两处，实测 21 处；asteriskPairs=0 与自身 note 矛盾（见 CE4）"
+  },
+  {
+   "check": "cost 判定方法（关键词计数）不误杀",
+   "result": "fail",
+   "detail": "望气术被撕下并引燃（消耗），未进 costNearMissesRejected，且候选自己在 WS11 记为 hold+use（见 CE5）"
+  }
+ ],
+ "counterExamples": [
+  {
+   "id": "CE1",
+   "claim": "T2 五栏之间『禁止共用同一句引文』且自检 sameQuoteAcrossTaskFields=0 —— 实际用包含关系复用了同一句：action 的两条引文分别被 result 与 cost 的引文整句包含。",
+   "quote": "回屋子取了佩刀、铜锣，一边绑法器，一边冲出院子。",
+   "quoteRef": {
+    "quote": "回屋子取了佩刀、铜锣，一边绑法器，一边冲出院子。",
+    "start": 506248,
+    "end": 506272,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "offsetUnit": "codepoint-absolute-in-docs[0].text",
+    "findOccurrencesInWholeText": 1,
+    "firstOccurrenceIsThisOffset": true
+   },
+   "why": "该串（506248-506272）是 T2.result 引文『宋廷风脸色越来越凝重，刚才的不满和恼火烟消云散，回屋子取了佩刀、铜锣，一边绑法器，一边冲出院子。』(506224-506272) 的严格子串 —— 同一句同时充当 action 与 result 的依据。另一对：action 的『宋廷风骂了声脏』(505995-506002) 是 cost 引文『宋廷风骂了声脏，接着是“窸窸窣窣”的穿衣声，俄顷，衣冠不整的开门出来。』(505995-506030) 的严格子串。可复现：python3 断言 a1 in r1 and a2 in c2 → True。候选的机器自检用全等比较，因此报 0；这正是任务提示点名要防的形态（旧图谱 714/1664 个任务五栏共用一句）。",
+   "severity": "high",
+   "reproduce": "python3 -c \"r='宋廷风脸色越来越凝重，刚才的不满和恼火烟消云散，回屋子取了佩刀、铜锣，一边绑法器，一边冲出院子。';a='回屋子取了佩刀、铜锣，一边绑法器，一边冲出院子。';print(a in r)\""
+  },
+  {
+   "id": "CE2",
+   "claim": "ST1（kind=emotion）的 before 被取在 anchor 之后约 925 字处，前值/后值时序与锚点相反；其 note 自述『前值/后值分别是他在「返席时」与「看见妖气后」的状态』，等于承认前值取自更晚的时刻。",
+   "quote": "许七安快速返回青池院，嘴角勾起轻佻的笑容，一副玩嗨了的表情",
+   "quoteRef": {
+    "quote": "许七安快速返回青池院，嘴角勾起轻佻的笑容，一副玩嗨了的表情",
+    "start": 506278,
+    "end": 506307,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "offsetUnit": "codepoint-absolute-in-docs[0].text",
+    "findOccurrencesInWholeText": 1,
+    "firstOccurrenceIsThisOffset": true
+   },
+   "why": "原文顺序为 anchor『一缕碧绿色的妖气…』@505353 < after『艹.....许七安差点没忍住爆粗口，心里突然一凉，背后沁出了冷汗。』@505378 < before『许七安快速返回青池院…』@506278。即 before 出现在 after 之后 900 字。任务要求 states 必须有『前值/后值 + 事件锚点』，本条的 before 不满足『锚点之前』这一语义。若作者本意是『外显面具 vs 内在惊惧』的对照而非时序转变，则应改锚点（真正的面具句在 504937）或改写字段语义，不能保留现有 before/after 命名与锚点。",
+   "severity": "high",
+   "reproduce": "python3 -c \"import json;c=json.load(open('loop/state/out/read_dafeng_L3_0143.candidate.json'));s=[x for x in c['states'] if x['id']=='ST1'][0];print(s['before']['quotes'][0]['start'],s['anchor'][0]['start'],s['after']['quotes'][0]['start'])\""
+  },
+  {
+   "id": "CE3",
+   "claim": "T2.result.text 写『本区间到此为止，**没有**写他是否送达衙门、金锣是否到场』，objectiveStatusNote 写『本区间以他「冲出院子」结束』—— 两句都与原文冲突：本区间在 506526 显式交代了这趟差事的进展（一小时后仍未返回），区间也并非结束于『冲出院子』。",
+   "quote": "但许七安并不高兴，反而有些焦急，左等右等，一个小时过去了，宋廷风还没有返回。",
+   "quoteRef": {
+    "quote": "但许七安并不高兴，反而有些焦急，左等右等，一个小时过去了，宋廷风还没有返回。",
+    "start": 506526,
+    "end": 506564,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "offsetUnit": "codepoint-absolute-in-docs[0].text",
+    "findOccurrencesInWholeText": 1,
+    "firstOccurrenceIsThisOffset": true
+   },
+   "why": "该句在 [502903,506640) 内（@506526-506564），且候选自己的 coverage.uncoveredParagraphs 就列出了这一行的（截断）head『但许七安并不高兴，反而有些焦急，左等右等，一个小时过去了，宋廷风』，说明它扫到过此行；同时候选在别处引用了更靠后的 506570（FS3/RE1）与 506427/506338，『本区间到此为止』自相矛盾。后果不只是措辞：原文的显式信息比『没有写』更强 —— 目标在区间内已被交代为『一小时后未完成』，因此 T2.objectiveStatus 的判据应由『未写是否送达』改为『显式停在未完成』（unresolved/blocked 仍可成立，但理由必须改）。",
+   "severity": "high",
+   "reproduce": "python3 -c \"import json;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];i=t.find('但许七安并不高兴');print(i,502903<=i and i+38<=506640)\""
+  },
+  {
+   "id": "CE4",
+   "claim": "punctuationAudit 声明『两处「....」四点省略』，实测切片内『....』出现 21 次；同栏 asteriskPairs=0 与其自身 note『原文本区间存在 ** 成对标记』互相矛盾。",
+   "quote": "他再次**离开青池院，直奔宋廷风所在的小院。",
+   "quoteRef": {
+    "quote": "他再次**离开青池院，直奔宋廷风所在的小院。",
+    "start": 505824,
+    "end": 505846,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "offsetUnit": "codepoint-absolute-in-docs[0].text",
+    "findOccurrencesInWholeText": 1,
+    "firstOccurrenceIsThisOffset": true
+   },
+   "why": "可复现计数：docs[0].text[502903:506640].count('....') == 21（其中『....』14 次、『.....』6 次、『......』1 次），而候选写『两处』。asteriskPairs 写 0，但同一条 note 又正确指出 505827 处存在 '**' —— 字段值与自身说明不一致。这两个字段属于自审元数据，错了不会污染引文，但属于本项目反复出现的『机制在、数字不对、不产生信息』形态：一个恒为 0/两处的自审栏无法在下次真的出错时报警。",
+   "severity": "medium",
+   "reproduce": "python3 -c \"import json;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'][502903:506640];print(t.count('....'),t.count('**'))\""
+  },
+  {
+   "id": "CE5",
+   "claim": "T1.cost 判 null，理由建立在『关键词计数为 0』上（『本区间未出现「付出/损失」意义上的代价描写。可复现检索：…代价=0、损失=0…』），并列出 2 条 costNearMissesRejected。但原文中望气术被撕下一页并以气机引燃（消耗掉一件实物），既未进 near-misses，也与候选自己在 WS11 把它记为 itemStates=[hold,use] 相矛盾。",
+   "quote": "撕下一页望气术，以气机引燃。",
+   "quoteRef": {
+    "quote": "撕下一页望气术，以气机引燃。",
+    "start": 505007,
+    "end": 505021,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "offsetUnit": "codepoint-absolute-in-docs[0].text",
+    "findOccurrencesInWholeText": 1,
+    "firstOccurrenceIsThisOffset": true
+   },
+   "why": "这是一次误杀：以『词表命中数』证明『无代价』在方法上不成立 —— 代价可以只用动作表达（撕下、引燃），不必出现『代价/损失』等词。候选自身在 WS11『望气术（一页）』写 itemStates=[hold,use]、explain 写『撕下一页、以气机引燃施术』，即它已认定该物件被消耗，却在 T1.cost 的 near-miss 清单里没有它。我不据此断言 T1.cost 必须非 null（『用掉一页术法』是否算 cost 属解释分歧，按纪律记为存疑），但 costNote 里那套『str.count 命中为 0 ⇒ 无代价』的论证必须撤回，且该条应进 near-misses 供下游判断。",
+   "severity": "medium",
+   "reproduce": "python3 -c \"import json;c=json.load(open('loop/state/out/read_dafeng_L3_0143.candidate.json'));print([w for w in c['worldSettings'] if w['id']=='WS11'][0]['itemStates']);print([t for t in c['tasks'] if t['id']=='T1'][0]['cost'])\""
+  }
+ ],
+ "reverseChecks": [
+  {
+   "id": "R1",
+   "found": "他直奔宋廷风小院的依据 —— 事前用望气术记下了宋廷风与朱广孝两人的位置；这条把『施术』与『去找谁』连成因果，也解释了后文为何有条件分支『如果值守的是姓朱的』。候选在 T2.obstacle 引用了『姓朱的』那一句，却从未把 505852 作为证据引用（仅在 coverage 未覆盖行里出现）。",
+   "quote": "刚才施展望气术观测时，他记下了宋廷风和朱广孝的位置。",
+   "quoteRef": {
+    "quote": "刚才施展望气术观测时，他记下了宋廷风和朱广孝的位置。",
+    "start": 505852,
+    "end": 505878,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "offsetUnit": "codepoint-absolute-in-docs[0].text",
+    "findOccurrencesInWholeText": 1,
+    "firstOccurrenceIsThisOffset": true
+   },
+   "why": "候选全文未把『朱广孝』与『姓朱的』建立联系；这属于本区间内一条可用的人物/因果信息被漏掉。"
+  },
+  {
+   "id": "R2",
+   "found": "他真正摘下浮夸面具的那一刻（出屋、门关上、寒风、收敛表情、吐浊气）—— 这是 TH2『热闹表象是被他主动演出来的』与 ST1『外显与内在分离』最直接的原文依据，候选从未把它作为引文引用（我核对 139 条 quoteRef，无此句；整句在候选中完全不存在）。",
+   "quote": "出了屋子，门关上，冷冽的寒风扑面而来，许七安收敛了浮夸的表情，轻轻吐出一口浊气。",
+   "quoteRef": {
+    "quote": "出了屋子，门关上，冷冽的寒风扑面而来，许七安收敛了浮夸的表情，轻轻吐出一口浊气。",
+    "start": 504937,
+    "end": 504977,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "offsetUnit": "codepoint-absolute-in-docs[0].text",
+    "findOccurrencesInWholeText": 1,
+    "firstOccurrenceIsThisOffset": true
+   },
+   "why": "候选用来支撑 TH2 的是 506338（余光瞥女妖）与 506278（返席装嗨），缺了『何时开始装』这一半；补上后 TH2 的 support 才完整。"
+  },
+  {
+   "id": "R3",
+   "found": "阿雅能猜中的前提条件被整段跳过：大奉无诗才、怀庆公主以前没有佳作流传，忽然多一首佳作本身反常 —— 正因为反常才值得大胆试探。候选 ST3 只引了『只是听到消息时，实在无法与许七安联系在一起』与『大胆试探一下，没想到真的猜中了』，跳过了中间的反常推理。",
+   "quote": "大奉无诗才依旧，怀庆公主以前没有佳作流传，忽然多一首佳作，本来就反常。",
+   "quoteRef": {
+    "quote": "大奉无诗才依旧，怀庆公主以前没有佳作流传，忽然多一首佳作，本来就反常。",
+    "start": 503073,
+    "end": 503108,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "offsetUnit": "codepoint-absolute-in-docs[0].text",
+    "findOccurrencesInWholeText": 1,
+    "firstOccurrenceIsThisOffset": true
+   },
+   "why": "缺这一句，ST3 的 before→after 会显得像无来由的猜测；补上后知识差链条（反常 → 试探 → 证实）才闭合。"
+  },
+  {
+   "id": "R4",
+   "found": "花魁们豪放划拳的显式因果句：是许七安的『不介意』给了她们胆气。候选在 T3.cost 引用了紧邻的场景句，但从未引出这条给出的原因。",
+   "quote": "主要是许七安不介意，给了她们胆气。",
+   "quoteRef": {
+    "quote": "主要是许七安不介意，给了她们胆气。",
+    "start": 503736,
+    "end": 503753,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "offsetUnit": "codepoint-absolute-in-docs[0].text",
+    "findOccurrencesInWholeText": 1,
+    "firstOccurrenceIsThisOffset": true
+   },
+   "why": "这是原文显式写出的因果（不是相邻推断），可直接支撑 T3.action 与 CE 类边；漏掉它使 T3 的 action 失去动机侧依据。"
+  },
+  {
+   "id": "R5",
+   "found": "客人察觉异常的起点句（天黑了、客人多了、察觉一件很奇怪的事儿），是 CE4 整条链条的第一步。候选 CE4 从『今日许多花魁都闭门谢客』直接跳到打听，缺了这一触发句。",
+   "quote": "天渐渐黑了，教坊司的客人多了起来，然后察觉到一件很奇怪的事儿。",
+   "quoteRef": {
+    "quote": "天渐渐黑了，教坊司的客人多了起来，然后察觉到一件很奇怪的事儿。",
+    "start": 503770,
+    "end": 503801,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "offsetUnit": "codepoint-absolute-in-docs[0].text",
+    "findOccurrencesInWholeText": 1,
+    "firstOccurrenceIsThisOffset": true
+   },
+   "why": "CE4 的机制叙述（『客人察觉「很奇怪的事儿」→ 不忿地找老鸨』）在机制文本里写到了这一步，但 quoteRefs 里没有它，属引证缺口。"
+  },
+  {
+   "id": "R6",
+   "found": "旁观者对九位花魁排场与『状元郎』的议论 —— 与 WS1 的京察约束、TH1 的『价值被重新估算』直接相关，候选引了『京察期间哪位大人物敢这么玩』却没有引这两句对照。",
+   "quote": "“九位花魁伺候，何等的风采啊，历届状元郎都没这种待遇吧。”",
+   "quoteRef": {
+    "quote": "“九位花魁伺候，何等的风采啊，历届状元郎都没这种待遇吧。”",
+    "start": 504591,
+    "end": 504620,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "offsetUnit": "codepoint-absolute-in-docs[0].text",
+    "findOccurrencesInWholeText": 1,
+    "firstOccurrenceIsThisOffset": true
+   },
+   "why": "TH1 的 counter 里用到『名气即价值』的对照，但支撑该对照的原文两句未进引文，读者无法从候选直接核验。"
+  },
+  {
+   "id": "R7",
+   "found": "读书人『眼睛绽放光明』 —— 场外者态度由怒转期待的显式身体反应，是 CE5『态度反转』最直接的证据，候选未引用（只在未覆盖行里出现）。",
+   "quote": "在场，就有几个读书人眼睛绽放光明。",
+   "quoteRef": {
+    "quote": "在场，就有几个读书人眼睛绽放光明。",
+    "start": 504484,
+    "end": 504501,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "offsetUnit": "codepoint-absolute-in-docs[0].text",
+    "findOccurrencesInWholeText": 1,
+    "firstOccurrenceIsThisOffset": true
+   },
+   "why": "CE5 的 trigger 写『名字被报出』，notMereAdjacency 写『前一段门外还是寂静与怒气』，但反应侧的显式动作句缺席。"
+  },
+  {
+   "id": "R8",
+   "found": "他离席用的是『去厕所』的掩护说辞（摸肚子表示要去厕所）—— 与 504937 的『收敛浮夸表情』一起构成他主动做戏的证据链，候选未引用。",
+   "quote": "他摸了摸肚子，表示自己要去厕所。",
+   "quoteRef": {
+    "quote": "他摸了摸肚子，表示自己要去厕所。",
+    "start": 504892,
+    "end": 504908,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "offsetUnit": "codepoint-absolute-in-docs[0].text",
+    "findOccurrencesInWholeText": 1,
+    "firstOccurrenceIsThisOffset": true
+   },
+   "why": "T1 的 action 从『四下张望，见没人注意到自己』起引，跳过了他向花魁们告退时编的理由；补上后『掩护』这一层才有原文依据。"
+  }
+ ],
+ "falseKillCheck": {
+  "summary": "发现 1 处结构性误杀（CE5）：以关键词计数否定『存在代价』，把只用动作表达的消耗挡在门外；该误杀由候选自身的 WS11 分类反证。未发现因正则/词表把合法因果边挡掉的其它情形 —— CE1–CE5 与 RE1–RE5 的取舍理由均能在原文中找到直接文字。",
+  "note": "候选的 rejectedEdges（RE1–RE5）经核对全部成立：RE2（明砚同党）确为『说不定/这么想来』标记的猜疑；RE4（受害）原文确无伤害事件；RE3（花魁勾搭→写诗）确无新诗，本区间只提到旧作。这几条属于『正确地没有连边』，不是误杀。"
+ },
+ "quoteAuditRandom5": {
+  "method": "random.seed(143); random.sample(allQuoteRefs,5) —— 可复现",
+  "results": [
+   {
+    "start": 505681,
+    "end": 505710,
+    "quote": "为什么上次领着宋廷风等人玩多人运动，他观测妖气时没有发现？",
+    "verbatim": true,
+    "offsetConsistent": true
+   },
+   {
+    "start": 506224,
+    "end": 506272,
+    "quote": "宋廷风脸色越来越凝重，刚才的不满和恼火烟消云散，回屋子取了佩刀、铜锣，一边绑法器，一边冲出院子。",
+    "verbatim": true,
+    "offsetConsistent": true
+   },
+   {
+    "start": 505353,
+    "end": 505372,
+    "quote": "一缕碧绿色的妖气，袅袅娜娜，宛如青烟。",
+    "verbatim": true,
+    "offsetConsistent": true
+   },
+   {
+    "start": 503029,
+    "end": 503067,
+    "quote": "是他....猜测得到证实的阿雅，此时此刻竟有种水到渠成的感觉，似乎就该如此。",
+    "verbatim": true,
+    "offsetConsistent": true
+   },
+   {
+    "start": 504507,
+    "end": 504530,
+    "quote": "“我们在这里等等，没准能等到一首传世诗问世。”",
+    "verbatim": true,
+    "offsetConsistent": true
+   }
+  ],
+  "conclusion": "5/5 逐字命中、偏移一致；未发现定位层错误。"
+ },
+ "metaClaimAudit": {
+  "sourceHash": "声明 fdde5558…39839 = 实测，成立",
+  "sliceSha256": "声明 d4fd22fa89020f065b38ef108f0a2b7e4921a848b4a6ded5bede17963ef26737 = 实测，成立",
+  "replacedArtifactSha256": "声明 b6ead5382fd8ebd7c34ae632f9a6bc52042a82ab8bc17ba0a022c155c3c99cbb = REJECTED__read_dafeng_L3_0143.json 的 evidence[0].sha256，成立；/tmp/l3_0143/prior_candidate.json 实测 186388 字节、同哈希，成立",
+  "agentExitRc": "声明 124 = REJECTED 记录 agentExitRc，成立",
+  "graphCacheSha256": "声明 98370a39df4f8105063004d6bc8194e50aa8008e111a584ffec32f7ad14a14df = 实测，成立",
+  "reworkDisclosureFailureCount": "声明『本任务此前 17 次失败（rc=1 十五次、rc=124 两次）』：FAILED-TASKS.json 中 read:dafeng:L3:0143 条目不存在，无法据此核对（该表只保留当前条目）。此项记为『未能核实』，不作 counterExample。",
+  "costNoteStrCounts": "costNote 列出的 16 个关键词计数逐项复算全部一致（代价0/损失0/赔偿0/赔0/罚0/受伤0/流血0/伤1/死0/牺牲0/付出0/银子2/银两0/钱1/费1/损0），数字本身没写错；错的是由它推出『无代价』的方法（见 CE5）。",
+  "metrics": "quoteRefs 139、uniqueQuotes 67、tasks3/causeEdges5/rejectedEdges5/states6/foreshadows3/notForeshadows6/worldSettings15/themeReadings2/speechAsClueNotFact10/unknowns12/selfCritique5、basis explicit66+inferred9+unverified2 —— 逐项复算全部一致。",
+  "coverage": "rangeCodepoints 3737、nonBlankParagraphs 94、uncoveredParagraphs 43 条 —— 逐项复算一致（uncoveredParagraphs 集合与我的独立算法完全吻合）。paragraphCount=190 实为按 '\\n' 切分的行数而非段数（按 '\\n\\n' 为 95），属命名口径问题，不计为错误。"
+ },
+ "usable": {
+  "asIs": [
+   "全部 139 条 quote 的定位与哈希（逐字回切 139/139）",
+   "tasks T1（除 cost 的论证方法与 costNote 结论）、T3 全栏",
+   "causeEdges CE1–CE5（机制与 notMereAdjacency 均可在原文核到）",
+   "rejectedEdges RE1–RE5（拒绝连边的理由均成立）",
+   "states ST2–ST6",
+   "foreshadows FS1–FS3（含 unresolved 显式标注）与 notForeshadows NF1–NF6",
+   "worldSettings WS1–WS15（含 placeState/itemStates 分型）",
+   "themeReadings TH1–TH2（均带 counter）",
+   "speechAsClueNotFact SP1–SP10、unknowns U1–U12、selfCritique SC1–SC5",
+   "coverage 栏（uncoveredParagraphs 经独立复算一致）"
+  ],
+  "mustFixBeforePublish": [
+   "CE1：T2 的 action 与 result/cost 引文去重 —— 删除被整句包含的窄引文，改引各自独立的依据",
+   "CE2：ST1 重锚 —— 若保留 before/after 时序语义，应把 before 移到锚点之前（可用 504937），否则改写该状态的字段语义并说明它不是时序转变",
+   "CE3：改写 T2.result.text 与 objectiveStatusNote，承认 506526『一个小时过去了，宋廷风还没有返回』；objectiveStatus 的判据改为『显式停在未完成』",
+   "CE4：重算 punctuationAudit（'....'=21；asteriskPairs 与自身 note 一致）",
+   "CE5：撤回『str.count 命中为 0 ⇒ 无代价』的论证；把望气术一页（撕下+引燃）加入 costNearMissesRejected 或改判 cost"
+  ],
+  "downgradeToUnknowns": [
+   "T2.objectiveStatus 的依据（在 CE3 修正前，其理由不成立；结论 unresolved 可保留但需换理由）",
+   "T1.cost 的 null 结论（在 CE5 修正前应降级为『未定：消耗一页望气术是否计为代价』）"
+  ]
+ },
+ "notes": "总体判断：这是一份定位层近乎完美、语义层有局部硬伤的候选，故判 partial 而非 fail 或 pass。\n\n（1）定位层无懈可击：139 条 quote 全部 text[start:end]==quote 且 find(quote)==start，sourceHash 全对，随机 5 条复验 5/5 命中；切片边界、切片哈希、被取代产物哈希、graphCache 哈希、REJECTED 记录的 rc=124 全部与磁盘实测一致。没有发现任何编造：候选出现的专名都在原文里，没有原文之外的人物、结局或成功判定；T2 明确拒绝写『搬兵成功』，FS2/FS3 显式 unresolved 并给 payoffNote，这些正是任务红线要求做到的事。\n\n（2）硬伤集中在四个可机器复算的点：T2 五栏之间用『整句包含』复用了同一句引文，而候选的全等自检因此报 0（CE1）；ST1 的 before 取自锚点之后 925 字，前值/后值时序与锚点相反，其 note 自述也承认这一点（CE2）；T2 声称『本区间到此为止/没有写他是否送达』，而原文在本区间内显式写了一小时后宋廷风仍未返回，且候选自己的未覆盖行清单里就有这一行（CE3）；punctuationAudit 把 21 处『....』写成『两处』，asteriskPairs=0 与其自身 note 矛盾（CE4）。这四点都可以用一行 python3 复现。\n\n（3）一处结构性误杀（CE5）：costNote 用『关键词计数为 0』证明『无代价』，而望气术被撕下一页并引燃（候选自己在 WS11 记为 hold+use）却没进 near-misses。我不断言 T1.cost 必须非 null —— 『用掉一页术法算不算 cost』是解释分歧，按角色纪律只记为存疑；但支撑 null 的那套方法论证必须撤回，因为它会在下一个『只用动作表达代价』的段落上同样失效。\n\n（4）我对自己反向验证的自我修正（角色契约要求如实写）：我最初把 9 条『候选未覆盖的事实』都当作遗漏，但复查后发现其中 7 条（R1、R4–R8 所涉句）其实逐字出现在候选 coverage.uncoveredParagraphs 的 head 里 —— 候选**主动披露**了这些行没被覆盖，这不是隐瞒。因此我把这几条改记为『引证缺口/可用于补强』而非『漏掉』；真正意义上被漏掉的是 R2（504937 收敛浮夸表情，整句在候选中完全不存在）与 R3（503073 反常前提，整句不存在），而这两句恰恰是 TH2 与 ST3 的关键前提。反向验证本身成立，但对『漏掉』的措辞我作了下调。\n\n（5）未能核实项：reworkDisclosure 声称本任务此前 17 次失败（rc=1×15、rc=124×2），但 FAILED-TASKS.json 中该任务条目已不存在，我无法核对，按纪律记为『未能核实』，不据此判 fail。另：候选 coverage 把按 '\\n' 切分的 190 行称作 paragraphCount（按 '\\n\\n' 实为 95 段），属命名口径问题，不计为错误。\n\n（6）给下游的具体处置见 usable.mustFixBeforePublish 与 usable.downgradeToUnknowns：CE1–CE5 修好前，T2.result/objectiveStatusNote、ST1、T1.costNote、punctuationAudit 四处不应原样进入发布；其余条目可以直接使用。",
+ "producedAt": "2026-10-09T11:36:00Z"
+}

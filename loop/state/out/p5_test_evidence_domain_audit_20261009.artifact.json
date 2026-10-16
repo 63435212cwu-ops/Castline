@@ -1,0 +1,98 @@
+{
+ "task": "p5:test-evidence-domain-audit:20261009",
+ "agent": "reform-lead",
+ "at": "2026-10-08T20:26:24Z",
+ "why": "P5 要求『同版终审』：证据必须描述**当前成品**。计划也明令『不允许代码A、数据B、截图C、评分D的拼接交付』。本轮检查门禁与浏览器探针**实际跑的是哪个图谱版本**。",
+ "finding": {
+  "id": "P5-TEST-KEY-PINNING",
+  "fact": "65 个测试文件把图谱键**写死**（共 9 个不同键、104 处引用）。其中 80 处（77%）指向 **tasks=0** 的版本 —— 那些版本没有任何审阅内容，因此这些测试**结构上无法验证审阅数据**；只有 2 处（2%）指向读者默认版本。",
+  "topKeys": [
+   {
+    "key": "2ef47b2ecaa99a67352091d5",
+    "refs": 28,
+    "tasks": 0,
+    "isReaderDefault": false
+   },
+   {
+    "key": "d16db79a529a1727352091d5",
+    "refs": 27,
+    "tasks": 0,
+    "isReaderDefault": false
+   },
+   {
+    "key": "a935953b2678a80b352091d5",
+    "refs": 25,
+    "tasks": 0,
+    "isReaderDefault": false
+   },
+   {
+    "key": "c84e8657afff87043c11ae57",
+    "refs": 11,
+    "tasks": 16,
+    "isReaderDefault": false
+   },
+   {
+    "key": "f0b45e85aac6c95e584075a2",
+    "refs": 8,
+    "tasks": 24,
+    "isReaderDefault": false
+   },
+   {
+    "key": "aee4c99808674e4220ab0104",
+    "refs": 2,
+    "tasks": 1664,
+    "isReaderDefault": false
+   },
+   {
+    "key": "d7ba6cb2e3aae25af0f6547e",
+    "refs": 1,
+    "tasks": 16,
+    "isReaderDefault": false
+   },
+   {
+    "key": "fe42d01f3826fe8096f86614",
+    "refs": 1,
+    "tasks": 178,
+    "isReaderDefault": true
+   },
+   {
+    "key": "a065244455cfb2221bcda94a",
+    "refs": 1,
+    "tasks": 120,
+    "isReaderDefault": true
+   }
+  ],
+  "examples": [
+   "tests/sky_contrast_runtime_browser.py：三书写死 2ef47b2e(dafeng,tasks=0) / a935953b(sanguo,434事件,tasks=0) / d16db79a(xiyou,481事件,tasks=0)，而读者默认是 3af17a8d(tasks=224) / fe42d01f(1286事件,tasks=178) / a0652444(798事件,tasks=120)。",
+   "tests/sky_story_browser.py 用 c84e8657(tasks=16) 与 f0b45e85(434事件,tasks=24)，而它宣称检的是『reviewed-data UI journeys』。",
+   "tests/sky_device_matrix_browser.py 用 c84e8657(tasks=16)。"
+  ],
+  "whatItIsNot": "这**不是**说这些测试全错：多数测的是渲染/材质/交互的**机制**，机制与版本键无关。问题是它们的结论被当成『当前成品的证据』时**不成立** —— 尤其按计划 §19.4『产品候选再跑对应真实页面』。",
+  "gateScope": "这些写死键的浏览器探针**不在离线门禁**（accept.sh 默认段）里；accept.sh --browser 段里 sky_story_browser 仍用旧键。所以离线 132/132 全绿与它们无关。"
+ },
+ "severity": "high（证据口径，不是产品缺陷）",
+ "whyItMatters": "计划反复出现的最贵教训是『机制存在、有产出、但不产生信息』。一个跑绿了的对比度/设备探针，如果跑的是 tasks=0 的旧版本，它产出的『通过』对『读者实际看到的版本』**没有信息量**。这正是 P5 要防的拼接交付。",
+ "recommendation": [
+  "① 探针的图谱键改为**从 data/cache/index.json 取该书默认**（或显式参数化），与 to_candidate 的 graph_target 同一口径；",
+  "② 保留少量显式写死的『兼容/回归样本』（如大数据支路 aee4c998 用于规模与性能），并在测试名/输出里标明它**不是**默认版本；",
+  "③ 在门禁输出里打印每项实际使用的键，使『跑的是哪一版』可核对（现在是隐含的）。"
+ ],
+ "assertions": [
+  {
+   "text": "引用统计可复现",
+   "command": "正则扫 tests/*.py 的 data/cache/<hex>.json 并与磁盘对照",
+   "result": "pass"
+  },
+  {
+   "text": "结论区分『机制测试』与『成品证据』，不夸大",
+   "command": "whatItIsNot 明确说明多数测试仍有效",
+   "result": "pass"
+  },
+  {
+   "text": "门禁范围如实界定",
+   "command": "这些探针不在离线 accept.sh 默认段",
+   "result": "pass"
+  }
+ ],
+ "notDone": "本轮只做**审计与登记**（GATE 由 p48 持有）。键的参数化改动属 tests/ 受保护路径，需在合并任务里做。"
+}

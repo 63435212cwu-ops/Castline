@@ -1,0 +1,290 @@
+{
+  "task": "verify:sanguo:L1:0105",
+  "verifier": "w-verify-1",
+  "role": "VERIFIER（独立反向复核者）",
+  "candidateReviewed": {
+    "path": "loop/state/out/read_sanguo_L1_0105.candidate.json",
+    "sha256": "031201f9e0aef4355ae088562c98cca1393d24af196ff91ba29ac06243278118",
+    "author": "w-read-4",
+    "roleOfAuthor": "READER"
+  },
+  "source": {
+    "path": "data/cache/fe42d01f3826fe8096f86614.docs.json",
+    "fileSha256": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+    "range": [537888, 543089],
+    "rangeSha256": "9a51ca54db6c593cfd9d02d3ff0a997339d90994e8748f96847d33feb8da0842",
+    "rangeCodepoints": 5201,
+    "boundaryConfirmed": "docs[0].text[537888:543089] 以「第一百六回　公孙渊兵败死襄平　司马懿诈病赚曹爽」开头，末尾接整理者标记，下一单元「第一百七回」紧随区间终点之后 ⇒ 区间无错位",
+    "taskJsonSourceHashNote": "任务 JSON 的 sourceHash=2988ce6e… 实测等于 data/cache/f0b45e85aac6c95e584075a2.docs.json 与 data/cache/152e2a6eed94f1075e7e7070.docs.json 的文件哈希，两者 docs[0].text 与本次所读文件逐字相同（607191 codepoints，textSha256=9d28638de0b0a89fa080cc2defb4a1f8de6adb1260c4545c04ef80f73cbb221e）。候选把这一差异写进了 sourceHashDiscrepancy 并全程采用实测哈希 —— 复核实测确认候选的处置正确，此项**不是缺陷**。"
+  },
+
+  "verdict": "partial",
+
+  "verdictSummary": "抽取主体可靠：548 条引文全部逐字往返、区间内偏移一致、globalOccurrences 计数 548/548 无误（我独立重算，非采信候选自述）；15 个任务五栏无完全同句复用；未见原文之外的人物、结局或把结束当成功（T15 明确拒写 result）。判 partial 的原因是三类可复现缺陷：①**世界设定层出现原文没有的物件**（「公孙渊之印」「旄节」，原文无「印」「玺」「旄节」三词任一处）；②**审计脚本的反向覆盖判据有结构漏洞**，把 4 条真实未被覆盖的句子排除在分母外，因而「250 句 0 未覆盖」的结论**强于其证据**；③**cost 栏在 4 个任务里以子串方式复用同栏依据句**，「同句不得作多栏依据」的纪律被降格执行。另有 1 处因果边交叉引用指错（T06/R03 指向 C09，而 C09 讲的是刘放孙资保奏曹爽，与补给线无关）。以上缺陷均为**可定点修复**，不涉及编造人物或伪造引文，故不判 fail。",
+
+  "checksPerformed": [
+    {
+      "id": "V0",
+      "what": "先自己通读原文区间（不先看候选结论），再逐项核对",
+      "how": "python3 -B -c \"import json;print(json.load(open('data/cache/fe42d01f3826fe8096f86614.docs.json'))[0]['text'][537888:543089])\"",
+      "result": "已完成；全文 5201 字分三段读完，再开始读候选"
+    },
+    {
+      "id": "V1",
+      "what": "全部 548 条 quote 逐字往返 + start/end 即全文 codepoint + 区间内 + globalOccurrences 计数独立重算",
+      "how": "见 evidence.CMD1",
+      "result": "refs=548 roundtrip/range_fail=0 occ_fail=0 —— 全部通过（此结果由我独立脚本得出，与候选自审口径一致但非采信其报告）"
+    },
+    {
+      "id": "V2",
+      "what": "候选自带审计脚本可复现性",
+      "how": "python3 -B -s loop/state/out/read_sanguo_L1_0105.w-read-4.audit/verify_candidate.py",
+      "result": "exit 0 / RESULT: PASS / quote refs checked: 548 / sentences uncovered: 0 —— 脚本本身可复现，但见 counterExamples CE2 指出的判据漏洞"
+    },
+    {
+      "id": "V3",
+      "what": "任务五栏内部不得共用同一引文（完全同句）",
+      "how": "见 evidence.CMD2 的加强版（含子串判定）",
+      "result": "完全同句复用 0 处；但**子串复用 4 处**（见 counterExamples CE3）"
+    },
+    {
+      "id": "V4",
+      "what": "引用核验：随机抽 5 条 quote 在原文 find 一次，报告逐字命中与偏移一致性",
+      "how": "random.seed(20261015) 从 548 条中抽 5 条，逐条 T.find(quote) 与 T[start:end] 比对",
+      "result": "5/5 全部逐字命中、find() 返回值与 start 完全相等、T[start:end]==quote 成立、globalOccurrences=1 与实测一致（抽样明细见 quoteSpotCheck）"
+    },
+    {
+      "id": "V5",
+      "what": "幻觉/越权检查：原文之外的人物、事件、结局、伏笔、成功判定",
+      "how": "对所有 prose 字段做说话人抽取（X曰/谏曰/问曰/告曰/奏曰/叱曰/答曰）并与原文比对；对全部「」引语做逐字回查",
+      "result": "说话人 12/12 全部在原文中；无原文不见的人物或事件。未发现「结束=成功」的判定（T15.result 明确写「结果未写…不接受『起兵＝成功』的读法」，正确）。**唯一实质幻觉在 worldSettings 层的物件命名**（CE1）"
+    },
+    {
+      "id": "V6",
+      "what": "内部交叉引用完整性（C/R/F/S/K/U/T/TH/SC 编号是否悬空）",
+      "how": "抽取全部 prose 中的编号引用，与已定义 id 集合比对",
+      "result": "无悬空编号；但存在**指向内容不匹配**的引用（见 CE4）"
+    },
+    {
+      "id": "V7",
+      "what": "fieldCounts 自报数与实际内容一致性（逐项重算）",
+      "how": "python3 -B -c 重算各分区长度、worldSettings 的 kind/placeState/itemStates/institution 枚举分布、foreshadows resolved/unresolved 分布",
+      "result": "全部一致：tasks 15 / causeEdges 14 / rejectedCauseEdges 7 / states 13 / knowledgeGaps 10 / foreshadows 8(6+2) / notForeshadows 5 / worldSettings 29(place8+item11+rule10) / notWorldSettings 6 / themeReadings 2 / speechAsClueNotFact 15 / unknowns 12 / selfCritique 5 / textualNotes 6；placeState arrived7+mentioned1；itemStates transfer7+use7+lose2(hold0)；institution declared3+executed4+misunderstood3。quoteReuseReport 自报 distinctQuotes=274 / total=548 / reused>1=125 / max=8，我独立重算完全相同"
+    },
+    {
+      "id": "V8",
+      "what": "反向验证：问「这一段里他还漏了什么」（不查已写项）",
+      "how": "把区间按句读切分，对每个字符位置建立「是否被任一引文覆盖」的掩码，找完全未被覆盖的句子与最长未覆盖字符段",
+      "result": "见 reverseChecks：找到 8 条原文明确存在、候选未覆盖的事实（其中 1 条为整句零覆盖，7 条为候选人名/动作层面的空白）"
+    }
+  ],
+
+  "quoteSpotCheck": {
+    "method": "random.seed(20261015); random.sample(548 条 quoteRef, 5)；对每条做 T.find(quote) 与 T[start:end] 双向比对",
+    "sampled": 5,
+    "verbatimHits": 5,
+    "offsetConsistent": 5,
+    "detail": [
+      {"path": "causeEdges[8].causeQuotes[1]", "quote": "二人久得曹真之惠，乃保奏曰：“惟曹子丹之子曹爽可也。”", "start": 540753, "end": 540780, "find": 540753, "verdict": "逐字命中，偏移一致"},
+      {"path": "causeEdges[5].effectQuotes[1]", "quote": "行不到十里，忽听得山上一声炮响，鼓角齐鸣", "start": 540296, "end": 540316, "find": 540296, "verdict": "逐字命中，偏移一致"},
+      {"path": "worldSettings[27].quotes[0]", "quote": "夫善《易》者，不言《易》也。", "start": 541886, "end": 541900, "find": 541886, "verdict": "逐字命中，偏移一致"},
+      {"path": "speechAsClueNotFact[6].quotes[1]", "quote": "谁敢为变！", "start": 542940, "end": 542945, "find": 542940, "verdict": "逐字命中，偏移一致"},
+      {"path": "tasks[0].result.quotes[2]", "quote": "将公孙渊宗族，并同谋官僚人等，俱杀之，计首级七十余颗。", "start": 540528, "end": 540555, "find": 540528, "verdict": "逐字命中，偏移一致"}
+    ]
+  },
+
+  "counterExamples": [
+    {
+      "id": "CE1",
+      "claim": "worldSettings 收录了两件**原文不存在**的物件：「公孙渊之印与所改年号『绍汉元年』」（item）与「旄节（使持节诏司马懿还朝的凭信）」（item）",
+      "quote": "渊心不足，与众商议，自号为燕王，改元绍汉元年。",
+      "quoteOffsets": [538108, 538131],
+      "why": "这两条的引文本身逐字成立，但引文**不含**其命名所指的物件。实测原文区间内「印」出现 0 次、「玺」出现 0 次、「旄节」出现 0 次（原文只有「急令使持节诏司马懿还朝」中的「持节」二字）。原文写的是「自号为燕王，改元绍汉元年」——自号与改元是名号行为，不能推出一枚「印」；「使持节」是差遣方式，不能推出一件名为「旄节」的物件。这与任务提示第 4b 条明令「没有依据就不扩出地图、物品链或术语装饰层」直接冲突，也与本候选自己在 notWorldSettings 里对「一块肉」「守御之策」所坚持的标准不自洽（它在那里拒绝为无行动后果的东西立条目，在这里却为无实物依据的命名立条目）。可复现：python3 -B -c \"import json;t=json.load(open('data/cache/fe42d01f3826fe8096f86614.docs.json'))[0]['text'][537888:543089];print(t.count('印'),t.count('玺'),t.count('旄节'))\" → 0 0 0。处置：这两条应删除，或把 name 改为照原文的名号行为表述（如「燕王名号与绍汉年号」/「持节传诏」）并去掉 item 归属。"
+    },
+    {
+      "id": "CE2",
+      "claim": "候选与自审报告声称的「250 句 0 未覆盖」**强于其证据**：审计脚本的判据把 4 条真实未被覆盖的句子排除在分母之外，其中 2 条是原文明确的君权动作",
+      "quote": "睿从之。",
+      "quoteOffsets": [540780, 540784],
+      "why": "verify_candidate.py 第 147 行以 `if len(b) < 6 ... : continue` 跳过归一化后长度不足 6 字的句子。实测被这一条排除的 13 个片段里，有 4 条在候选全文（引文与散文一并计）中出现次数为 **0**，即真实未被覆盖：「睿从之。」(len=4, @540780)、「睿然其言。」(len=5, @540804)、「舅问其故。」(len=5, @542182)，以及被标题前缀连带排除的「却说公孙渊乃辽东公孙度之孙，公孙康之子也。」。前两条不是可有可无的虚字——它们是刘放、孙资两步奏请**得到魏主批准**的叙述判定，正是 C09 因果边的第二步所必需的一环；候选全文 0 次出现。因此「0 未覆盖」只在「≥6 字的句子」这一缩小的分母上成立。可复现：python3 -B -c \"import json;c=open('loop/state/out/read_sanguo_L1_0105.candidate.json',encoding='utf-8').read();print([(s,s in c) for s in ['睿从之。','睿然其言。','舅问其故。']])\" → 全部 False。注意：这条**不指控编造**，是指控**自证口径过宽**——候选的 reverseCoverage.boundary 已自我限定为「引文层面」，但 assertions 与 AUDIT-REPORT 把它当成通过项呈现，下游（发布闸门）会读成「已做过反向覆盖且为零遗漏」。"
+    },
+    {
+      "id": "CE3",
+      "claim": "「同一句话不得同时当作多栏依据」在 4 个任务里被以**子串**方式绕过；脚本只查完全相等，因此全部判 pass",
+      "quote": "被夏侯霸一刀斩卑衍于马下，辽兵大乱。",
+      "quoteOffsets": [539203, 539221],
+      "why": "T03.cost 的这条引文是 T03.result 引文「战不数合，被夏侯霸一刀斩卑衍于马下，辽兵大乱。」(539198-539221) 的后缀子串；同型 4 处：T04.cost「纵城内军民出城樵采柴薪，牧放牛马。」(539458-539475) ⊂ T04.objective(539446-539475)；T05.cost「悬首于辕门外。」(539428-539435) ⊂ T05.action(539421-539435)；T08.cost「公孙渊父子对面受戳。」(540470-540480) ⊂ T08.result(540464-540480)。这 4 个 cost 栏各自只有 1 条引文，即 cost 栏的**全部**依据都来自另一栏依据句的子串，等于该栏没有独立依据——而 verify_candidate.py 第 92 行只做 `if qq['quote'] in seen`（字典键完全相等），子串一律漏过，所以 Q5 自报「0 复用」。候选自身在 T04.costNote/T15.costNote 里已诚实写明「按严格口径本区间对此项没有依据」，说明作者知道边界，但机器判据没跟上，导致「五栏各有独立原文依据」这句在 assertions 里被写成无条件 pass。可复现：见 evidence.CMD2。处置：把这 4 栏按候选自己的 costNote 结论改为 null + costNote，或补一条真正独立的引文。"
+    },
+    {
+      "id": "CE4",
+      "claim": "两处交叉引用指向的因果边与所指内容不符（T06.result 与 R03.why 指向 C09，而 C09 与补给线无关）",
+      "quote": "遂不听群臣之谏，使人运粮解至司马懿军前。",
+      "quoteOffsets": [539771, 539791],
+      "why": "T06.result.text 写「…（见 causeEdges C09）」，R03.why 写「可保留的部分是『拒罢兵→继续运粮→前线得以维持』（C09 之外的补给线）」。但 C09 的实际内容是「曹睿病重时召刘放、孙资问『宗族之内，何人可任』，而二人『久得曹真之惠』」→「保奏曹爽；燕王曹宇被遣归国」——讲的是魏廷人事，与辽东补给线无关。我独立扫描全部 14 条 causeEdges，**没有任何一条**覆盖「拒罢兵→运粮→前线维持」：python3 -B -c \"import json;C=json.load(open('loop/state/out/read_sanguo_L1_0105.candidate.json'));print([e['id'] for e in C['causeEdges'] if any(k in json.dumps(e,ensure_ascii=False) for k in ['不听群臣','罢兵','运粮','催粮'])])\" → []。R03 用「C09 之外的补给线」措辞暗示该边存在，实际不存在（T06.action 记了这个动作，但没有作为因果边）。处置：把 T06.result 与 R03.why 的 C09 改为不指编号、或补一条真正的补给边；「C09 之外」应改为「本候选未建此边」。此条属引用正确性问题，不是编造。"
+    },
+    {
+      "id": "CE5",
+      "claim": "审计脚本对判据 10 的失败模式是**静默缩小分母**，且报告未披露被排除项",
+      "quote": "睿然其言。",
+      "quoteOffsets": [540804, 540809],
+      "why": "与 CE2 同一根因，单列是因为它属于「检查本身不会失败」这一本项目反复出现的形态：`len(b)<6` 与 `b.startswith('第一百六回')` 两个 continue 直接跳过而不计数，AUDIT-REPORT 的 Q10 因此只能报 pass，无法暴露分母从 264 降到 250。另注意 AUTH 过滤合法（剔整理者标记正确），`norm()` 剥离说话人前缀后「睿从之。」「睿然其言。」并未被剥离（它们不含「曰」），是纯粹被长度阈值丢弃。可复现：`python3 -B -c` 复算 AUTH 段 1、len<6 段 12、标题段 1、受检 250，与脚本自报一致。处置：把 continue 改为「记录为 excluded 并打印」，或对短句改用「其前置说话人整段」为单位判定。"
+    }
+  ],
+
+  "reverseChecks": [
+    {
+      "found": "公孙渊的家世溯源：原文开篇点明他是「辽东公孙度之孙，公孙康之子」，这是本单元为其封爵序列与承袭关系（康→恭→渊）立的第一句依据；候选的 S01「名位」状态从「后康死」开始，**整句零覆盖**，全文 0 次出现「公孙度」",
+      "quote": "却说公孙渊乃辽东公孙度之孙，公孙康之子也。",
+      "quoteOffsets": [537914, 537935],
+      "why": "这是全区间唯一在引文层面完全未被触及的句子（按 。！？；换行 切分，逐字符覆盖掩码实测），也因此使它成为 CE2 的实例：审计脚本的标题前缀 `b.startswith('第一百六回')` 把该句连同标题一起丢弃。它承载的事实（公孙度的孙、公孙康的子）是候选 S01.before 所依赖的前提之一。",
+      "severity": "medium",
+      "suggestedDisposition": "补进 S01.beforeQuotes 或作为 T01 的世系前提引文；并把审计脚本的标题过滤从「整段丢弃」改为「剥掉标题后继续判定」"
+    },
+    {
+      "found": "魏主对刘放、孙资两次奏请的**批准动作**（「睿从之。」「睿然其言。」）在候选全文 0 次出现；C09 的 effect 只写「二人保奏曹爽；燕王曹宇被一道手诏遣归国」，跳过了「皇帝同意」这一环",
+      "quote": "睿从之。",
+      "quoteOffsets": [540780, 540784],
+      "why": "因果边 C09 的机制叙述是「皇帝在病中向身边近臣咨询人选；二人既有私惠于曹真，又在同一次奏对里同时给出人选与排挤方案」，但「人选被采纳」「排挤方案被采纳」这两个叙述判定没有引文支撑。第二条「睿然其言。」@540804 同理。这不是编造——结论方向与原文一致——但 C09 的 effect 少了一层可引证的批准动作，使「保奏→封曹爽为大将军」之间缺了一环显式证据。",
+      "severity": "medium",
+      "suggestedDisposition": "把这两句补进 C09.effectQuotes（它们各自在全文唯一出现，无同句歧义）"
+    },
+    {
+      "found": "请降使者是**从城墙上缒下来的**（「二人自城上系下」）——这是「被围而无法开门」的直接证据，候选 T07 只写「由王建、柳甫传话」，未收录缒城这一动作",
+      "quote": "二人自城上系下，来告司马懿曰：“请太尉退二十里，我君臣自来投降。”",
+      "quoteOffsets": [540017, 540050],
+      "why": "同一句的对话部分被引用了（「请太尉退二十里，我君臣自来投降。」），但承载围城状态的动作部分未进入任何条目。「系下」在候选全文出现 0 次。它影响对「公孙渊此时处境」的判断：使者不能走城门，说明围困已成事实，这恰是 T07 的 obstacle 所依赖的前提。候选引了半句，丢了另半句的事实。",
+      "severity": "low",
+      "suggestedDisposition": "T07.obstacle 或 S12 补引完整句"
+    },
+    {
+      "found": "司马懿入城后**升衙坐堂**受告（「懿坐于衙上」）——这是处置善后（族诛、出榜安民、封墓）得以进行的程序性动作，候选 T09 直接从「族诛」写起，无升衙这一环；「衙上」全文 0 次出现",
+      "quote": "懿坐于衙上，将公孙渊宗族，并同谋官僚人等，俱杀之，计首级七十余颗。",
+      "quoteOffsets": [540522, 540555],
+      "why": "候选 T09.result 引了该句的后半「将公孙渊宗族…七十余颗。」，前半「懿坐于衙上」未引。同 CE2/CE3 形态：引用了句子的一部分，动作的主语场景被丢掉。影响轻微（不改结论），但属反向覆盖应记的遗漏。",
+      "severity": "low",
+      "suggestedDisposition": "T09.action 补引或注明"
+    },
+    {
+      "found": "「魏主曹睿设朝」——群臣请罢兵这一场**朝议的场合**本身；候选 T06 只引群臣之语与曹睿之答，未引设朝句（该串在区间内 @539687 出现 1 次、全文 3 次，候选 0 次引用）",
+      "quote": "魏主曹睿设朝，群臣皆奏曰：“近日秋雨连绵，一月不止，人马疲劳，可召回司马懿，权且罢兵。”",
+      "quoteOffsets": [539687, 539731],
+      "why": "与上两条同型（引半句）。此句是 T06 得以成立的场景条件（决策发生在朝堂而非军中），价值中等偏低。单列是为了让「引半句」这一形态的规模可见：本区间共 97 句为部分覆盖，其中 4 处属这一类「动作/场景半边被丢弃」。",
+      "severity": "low",
+      "suggestedDisposition": "T06.obstacle 或 action 补引完整句"
+    },
+    {
+      "found": "管辂之舅**追问缘由**（「舅问其故。」）是管辂说出「鬼躁」「鬼幽」判语与「二人早晚必有杀身之祸」的直接触发；候选 T10.result 与 S10 只记舅舅「大惊」责问与「大骂辂为狂子而去」，未记这句追问（候选全文 0 次出现）",
+      "quote": "舅问其故。辂曰：“邓飏行步，筋不束骨，脉不制肉，起立倾倚，若无手足：此为鬼躁之相。",
+      "quoteOffsets": [542182, 542223],
+      "why": "候选引了辂的答语（鬼躁之相、鬼幽之相、杀身之祸），但把引发答语的问句丢了，因此 F06 的 setup 少了一环「因问而答」的结构。这是本回第二处「以对话为结构」的段落（第一处是李胜探病），漏掉问句会削弱该段的问答结构。",
+      "severity": "low",
+      "suggestedDisposition": "F06.setupQuotes 或 T10.action 补引「舅问其故。」"
+    },
+    {
+      "found": "司马懿在两军阵前**当着众将自证星象**（「懿在马上顾诸将曰」）——候选 C07 引了自证的话（「吾前夜丙寅日…今夜壬申日应矣。」）但未引这句交代说话场合的叙述，「在马上顾诸将」候选 0 次出现",
+      "quote": "懿在马上顾诸将曰：“吾前夜丙寅日，见大星落于此处，今夜壬申日应矣。”",
+      "quoteOffsets": [540415, 540449],
+      "why": "同「引半句」形态。此句对 C07 的机制（「向众将公开承诺」）有支撑作用：候选 C07.mechanism 写「并向众将公开承诺」，而「顾诸将」正是这个「公开」的原文依据，却被漏引，导致该机制表述缺直接引证。",
+      "severity": "low",
+      "suggestedDisposition": "C07.effectQuotes 补引完整句"
+    },
+    {
+      "found": "整理者标记段「------------------」未被任何引文覆盖（正确，属非正文）；单列以说明我的掩码方法确实把边界段识别出来，不是漏检",
+      "quote": "------------------",
+      "quoteOffsets": [543036, 543054],
+      "why": "候选 textualNotes 第 6 条已正确声明该段为非原文正文、不纳入抽取项。我复核同意：这不是遗漏。列出它是为了让反向验证的**假阳性**可见（避免把合法的排除读成遗漏），符合角色契约第 4 条误杀检查的要求。",
+      "severity": "none",
+      "suggestedDisposition": "无需处理"
+    }
+  ],
+
+  "misKillCheck": {
+    "what": "候选把什么**合法**的东西排除掉了（误杀检查）",
+    "findings": [
+      {
+        "item": "「一块肉」（襄平北市中地陷出的无手足之物）未收录为 worldSettings item",
+        "verdict": "排除**正确**。它虽被写成发生了的怪事，但无人据它行动、无移动/查验/转手，区间内不再出现；候选已把它记入 F01/F02 伏笔与 notWorldSettings 并写明理由。我核对原文后同意：硬把它立为 item 会凭空造出一条物品链（无人持有、无转手、无丢失），正是提示词第 4b 条禁止的「没有依据就扩出物品链」。候选在此处的克制与 CE1 的越界形成对照。"
+      },
+      {
+        "item": "司马懿「臣已定下守御之策」未展开为 worldSettings rule",
+        "verdict": "排除**正确**。原文只有存在性声明（@538669-538683），内容一字未写；候选记入 K09 知识差与 notWorldSettings，处置恰当。"
+      },
+      {
+        "item": "「元、恺辅舜，周公佐周」与「老生者见不生，常谈者见不谈」未收录为 worldSettings",
+        "verdict": "排除**正确**，属装饰性引证与修辞机锋，不改变人物能做/不能做之事，符合「不扩术语装饰层」。"
+      },
+      {
+        "item": "「兵不在多，在能设奇用智耳」未算作伏笔（列入 notForeshadows）",
+        "verdict": "排除**正确**。区间内仅出现一次且其后无叙事呼应，符合「只出现一次的东西不叫伏笔」。"
+      },
+      {
+        "item": "回末诗与「且看下文分解」未算作伏笔",
+        "verdict": "排除**正确**；候选同时把它们用作「本区间无 result」的正面证据（T15.resultNote），是把套语用对了地方。"
+      },
+      {
+        "item": "星象→公孙渊之死被拒为 causeEdge（R01）",
+        "verdict": "拒绝**正确**且是本候选最见功力的判断。我复核确认：区间内与星象相关的三句（见星、断期、应验自陈）主语都是司马懿，「神机」一句主语是众将，无一句是叙述判定；且「应矣」是**事后**追认。符合硬性红线「不许把人物说的话当成叙述事实」。同时候选保留了 C07（星象→司马懿的决策与断言）这一**合法**半边，未因拒绝而误杀——这一点符合角色契约第 4 条所警示的「整词判定误杀合法因果边」。"
+      },
+      {
+        "item": "「群臣请罢兵被拒→魏军获胜」被拒为 causeEdge（R03）",
+        "verdict": "拒绝**正确**（中间隔着雨止天晴、攻城、粮尽、两次拒降、夜遁被截多道环节，原文无一句归因）。**但** R03 用「C09 之外的补给线」措辞暗示存在一条未建的补给边，构成 CE4 的引用缺陷。"
+      },
+      {
+        "item": "「曹爽多次畋猎未遇险→此次出行亦安全」被拒（R06）",
+        "verdict": "拒绝**正确**：那是曹爽的推断且与区间结尾的实际发展相反。"
+      }
+    ],
+    "conclusion": "未发现因词表/正则而误杀合法因果边的情形。候选在因果层的克制是过硬的：7 条 rejectedCauseEdges 逐条给出可查引文与理由，且每条都指明了被**保留**的合法半边。CE1 的问题方向相反——不是误杀，是无据扩张。"
+  },
+
+  "notes": "总体判断：这是一份**抽取质量高、边界意识到位、但自证口径有两处系统性放宽**的候选。\n\n值得肯定的（均有我独立复算的证据，非采信自述）：①548 条引文逐字往返 0 失败、区间内偏移 0 失败、globalOccurrences 计数 0 失败——我用自己的脚本重算，不是读它的报告；②fieldCounts 每一项自报数都与我重算一致，包括最易造假的 quoteReuseReport（274 distinct / 548 total / 125 reused / max 8）；③因果层纪律强：星象→死亡、暗喜→脱逃、拒罢兵→获胜三条最诱人的伪因果全部拒掉并给出理由，同时又都保留了合法的另一半（C07 记星象→决策），这正是角色契约第 4 条要防的误杀，候选没犯；④T15 明确拒绝把「起兵」读成「成功」，红线遵守；⑤sourceHashDiscrepancy 主动暴露任务 JSON 与实测哈希不一致并全程采用实测值——我实测确认 2988ce6e… 对应另两个 docs.json（text 逐字相同），候选处置正确，此项**不是**缺陷；⑥speechAsClueNotFact 15 条把「此老若死」「吾今衰老病笃」「太傅耳聋」等人物的假话/误判与叙述事实分开，正是本回（诈病主题）最容易翻车处。\n\n判 partial（而非 pass）的三条实据：CE1 世界设定层出现原文没有的「印」「旄节」（原文三词计数 0/0/0）；CE2+CE5 审计脚本以 `len(b)<6` 静默缩小分母，使「250 句 0 未覆盖」强于证据，且掩盖了「睿从之。」「睿然其言。」「舅问其故。」等真实空白；CE3 cost 栏以子串复用同栏依据句，机器判据只查完全相等故全判 pass。另有 CE4 一处交叉引用指错（C09 与补给线无关，且该补给边根本不存在）。\n\n判 partial 而非 fail 的理由：没有任何一条 counterExample 指向**编造人物、伪造引文或把结束当成功**——CE1 是无据**扩张**（引文真实但命名超出引文），CE3/CE4 是复用与引用瑕疵，CE2/CE5 是自证工具的口径问题。这些都能定点修复且不推翻抽取主体。按角色契约「判 fail 必须有 counterExample，且 quote 逐字可查」——我的 5 条 counterExamples 引文全部逐字可查（已 find 验证），但它们的性质是**越界与口径**而非伪造，故按纪律落在 partial。\n\n可用的部分：tasks/causeEdges/states/knowledgeGaps/foreshadows（除 F01 的 resolved 判定见下）/themeReadings/speechAsClueNotFact/unknowns 的实体结论可以采信并使用；548 条引文可直接作为引用定位使用（0 定位失败）。必须丢弃或降级的：worldSettings 的「公孙渊之印…」与「旄节…」两条 item 必须删除或改写 name 并去掉 item 归属（CE1）；T03/T04/T05/T08 四条 cost 栏应按候选自己的 costNote 结论降级为 null+costNote 或补独立引文（CE3）；T06.result 与 R03.why 的 C09 引用必须改正（CE4）；`reverseCoverage`「0 未覆盖」必须重述为「≥6 字句 0 未覆盖，短句与标题句未判」（CE2）。\n\n不确定与存疑（按纪律只记为存疑，不据此判 fail）：①F01 记 resolved 我倾向**降级**——候选自己在 SC02 里已指出「这实际上是主题性呼应而非情节回收，原文没有让任何一件怪事再次出现或参与事件」。我核对原文后同意：三件怪事在区间内再无出现，卜者占辞也无人再引，「国家亡灭」的应验是主题层的，不是情节回收动作。但这一条候选已用 SC02 主动披露并把边界写进 inRangeEcho，属**已标注的口径分歧**而非隐瞒，故记为存疑并建议降为 unresolved 或改写为主题层观察，不构成 fail 依据。②F04「只待他出城畋猎之时」→实际是「谒高平陵」而非畋猎，字面未严格兑现；候选 SC04 已主动披露并说明判 resolved 的理由（条件「出城」被满足且司马懿据此起兵），我认可其披露；是否降级属口径选择，记为存疑。③T11 的「曹宇坚辞不受」被列在 obstacle 栏，严格说「他自己辞掉」不是刘放孙资的障碍而是其机会；候选已在 obstacle.text 里点明「这一步没有被刘放、孙资推动，是曹宇自己辞掉的」，披露充分，不构成缺陷。④本回跨辽东战事与魏廷内争两条线、含建安十二年与太和二年两处回溯，区间内明确纪年仅三处；候选 U12 拒绝推时间轴，处置正确，我未独立复核其时间跨度结论（无外部锚点可核）。\n\n我自己的错（按角色契约「你可以判自己错」如实记下）：我第一版交出的 verdict 里有 **3 条 quoteOffsets 写错**（RC5 魏主曹睿设朝… 写成 [539687,539730]、RC7 懿在马上顾诸将曰… 写成 [540415,540448]、RC8 分隔线写成 [543033,543051]）。三条的**引文本身都逐字可查**（find 全部命中），错的是我手填的 end 偏移。发现方式是我在提交前对自己写的 verdict 跑了一遍「T[a:b]==quote」自检（与我对候选施加的同一判据），3 条全部报 False，遂逐条重算并改正。这件事本身就是本次复核方法的一个注脚：**引文对 ≠ 偏移对**，而只 find 引文、不校验偏移，就会把这种错放过去——这与我发现候选 CE3（只查完全相等、漏掉子串）是同一类判据不足。我未因此改动对候选的任何判定。我自己的复核局限（如实记录）：①我用于反向覆盖的掩码法以「字符是否落在任一引文内」为判据，因此会把「引了半句」的句子计入部分覆盖而非零覆盖——这正是我能发现 97 句部分覆盖、却只报 1 句零覆盖的原因；若改用「动作/场景是否被引」的语义单位，遗漏数会高于我报的 8 条。②我只做了 5 条随机引文抽查（角色契约要求的下限），未逐条重跑 548 条的 find（但 CMD1 的往返+计数校验覆盖了全部 548 条，两者口径不同、互补）。③我未评估候选的文学解读质量（TH01/TH02 的读法是否最优），那属艺术评审，不在反向复核职责内；我只核验了 TH01/TH02 各自的 support/counter 引文逐字成立、且 3 条 counter 确实构成**不利**证据（不是伪反证），这一点通过。\n\n复核者身份声明：我 w-verify-1 非本候选提交者（提交者为 w-read-4），租约 loop/state/leases/verify:sanguo:L1:0105.d 可查。"
+,
+  "evidence": {
+    "CMD1": "python3 -B -c \"import json;T=json.load(open('data/cache/fe42d01f3826fe8096f86614.docs.json'))[0]['text'];S,E=537888,543089;C=json.load(open('loop/state/out/read_sanguo_L1_0105.candidate.json'))\\ndef w(o):\\n    if isinstance(o,dict):\\n        if isinstance(o.get('quote'),str): yield o\\n        for k,v in o.items():\\n            if k!='quote': yield from w(v)\\n    elif isinstance(o,list):\\n        for v in o: yield from w(v)\\nn=bad=occ=0\\nfor it in w(C):\\n    n+=1;q=it['quote'];a,b=it['start'],it['end']\\n    if T[a:b]!=q or not(S<=a and b<=E): bad+=1\\n    if it.get('globalOccurrences')!=T.count(q): occ+=1\\nprint('refs=%d roundtrip/range_fail=%d occ_fail=%d'%(n,bad,occ))\"  →  refs=548 roundtrip/range_fail=0 occ_fail=0",
+    "CMD2": "python3 -B -c \"import json;C=json.load(open('loop/state/out/read_sanguo_L1_0105.candidate.json'));TC=('objective','obstacle','action','result','cost')\\nfor t in C['tasks']:\\n    cols={k:v['quotes'] for k,v in t.items() if k in TC and isinstance(v,dict)}\\n    for i in cols:\\n        for j in cols:\\n            if i>=j: continue\\n            for a in cols[i]:\\n                for b in cols[j]:\\n                    if a['quote']!=b['quote'] and (a['quote'] in b['quote'] or b['quote'] in a['quote']): print('%s %s@%d-%d <> %s@%d-%d'%(t['id'],i,a['start'],a['end'],j,b['start'],b['end']))\"  →  T03 cost@539203-539221 <> result@539198-539221 / T04 cost@539458-539475 <> objective@539446-539475 / T05 action@539421-539435 <> cost@539428-539435 / T08 cost@540470-540480 <> result@540464-540480",
+    "CMD3_印玺旄节": "python3 -B -c \"import json;t=json.load(open('data/cache/fe42d01f3826fe8096f86614.docs.json'))[0]['text'][537888:543089];print(t.count('印'),t.count('玺'),t.count('旄节'))\"  →  0 0 0",
+    "CMD4_短句缺失": "python3 -B -c \"import json;c=open('loop/state/out/read_sanguo_L1_0105.candidate.json',encoding='utf-8').read();print([(s,s in c) for s in ['睿从之。','睿然其言。','舅问其故。','公孙度']])\"  →  [('睿从之。', False), ('睿然其言。', False), ('舅问其故。', False), ('公孙度', False)]",
+    "CMD5_补给边不存在": "python3 -B -c \"import json;C=json.load(open('loop/state/out/read_sanguo_L1_0105.candidate.json'));print([e['id'] for e in C['causeEdges'] if any(k in json.dumps(e,ensure_ascii=False) for k in ['不听群臣','罢兵','运粮','催粮'])])\"  →  []",
+    "CMD6_复现候选自审": "python3 -B -s loop/state/out/read_sanguo_L1_0105.w-read-4.audit/verify_candidate.py  →  exit 0 / RESULT: PASS / quote refs checked: 548 / sentences checked: 250 / sentences uncovered: 0",
+    "CMD7_分母拆解": "复算候选判据的分母：raw split 264 段；剔 AUTH 段 1、剔 norm 后 len<6 段 12、剔标题起首段 1 ⇒ 受检 250（与脚本自报一致）；13 个被排除片段中 4 个在候选全文出现 0 次（睿从之。/睿然其言。/舅问其故。/却说公孙渊乃辽东公孙度之孙…）",
+    "hashes": {
+      "candidate": "031201f9e0aef4355ae088562c98cca1393d24af196ff91ba29ac06243278118",
+      "sourceDocsJson": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+      "sourceRange": "9a51ca54db6c593cfd9d02d3ff0a997339d90994e8748f96847d33feb8da0842",
+      "candidateAuditScript": "d3528422a9699beab7956f7091143341218d02e7ab92d6ad507ab613654289e3",
+      "candidateAuditReport": "7f3b86d241f00e18535beb073cf2da15c6e970a47429ccb10e27f9d46cfa236b"
+    }
+  },
+
+  "used": {
+    "usableAsIs": [
+      "tasks[0..14] 的 objective/obstacle/action/result 四栏（除 T03/T04/T05/T08 的 cost 栏，见 CE3）",
+      "causeEdges C01-C14 的实体因果结论（除 C07 的公开场合引证偏薄、C09 的批准环节缺引，见 reverseChecks）",
+      "states S01-S13（S01 建议补家世前提引文）",
+      "knowledgeGaps K01-K10",
+      "foreshadows F02-F08（F01 建议降级，见 notes 存疑①）",
+      "notForeshadows 5 条 / notWorldSettings 6 条",
+      "themeReadings TH01-TH02（含各自 counter，我核验 3 条 counter 均为真实不利证据）",
+      "speechAsClueNotFact 15 条",
+      "unknowns U01-U12",
+      "selfCritique SC01-SC05",
+      "textualNotes 6 条（异文与整理者标记的处置正确）",
+      "全部 548 条引文的定位（start/end/sourceHash 可直接使用）"
+    ],
+    "mustDiscardOrDowngrade": [
+      "worldSettings 中 item「公孙渊之印与所改年号『绍汉元年』（自立为燕王的具象）」→ 删除，或改名为名号行为并去掉 item 归属 (CE1)",
+      "worldSettings 中 item「旄节（使持节诏司马懿还朝的凭信）」→ 删除，或改为 rule/差遣表述 (CE1)",
+      "T03.cost / T04.cost / T05.cost / T08.cost → 按候选自身 costNote 结论降为 null+costNote，或补独立引文 (CE3)",
+      "T06.result.text 中的「（见 causeEdges C09）」与 R03.why 中的「（C09 之外的补给线）」→ 必须改正 (CE4)",
+      "reverseCoverage 与 assertions 中「250 句 0 未覆盖」→ 重述为「≥6 字句 0 未覆盖；短句与标题句未判」，并补 4 条实测空白 (CE2/CE5)"
+    ]
+  },
+
+  "remaining": [
+    "未逐条重跑 548 条引文的 find（角色契约要求随机 5 条，已做 5/5 通过）；全部 548 条做了 T[start:end]==quote 与 globalOccurrences 重算，两者口径互补但不等同。",
+    "未评估 TH01/TH02 两条主题解读的文学质量与读法优劣（属艺术评审范围，非反向复核职责）；只核验了其引文逐字成立且 counter 构成真实不利证据。",
+    "F01 的 resolved 判定与 F04 的字面兑现程度记为存疑（候选已在 SC02/SC04 主动披露），我倾向降级但未据此判 fail；最终口径由发布环节或作者决定。",
+    "反向覆盖采用字符级掩码法，会把「引半句」计为部分覆盖；若改以动作/场景为语义单位，遗漏数将高于我报的 8 条（本区间部分覆盖句共 97 句）。",
+    "未核验候选 U12 关于本回时间跨度的结论（区间内明确纪年仅三处，无外部锚点可独立复算）。"
+  ]
+}

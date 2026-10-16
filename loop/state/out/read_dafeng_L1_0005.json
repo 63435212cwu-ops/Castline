@@ -1,0 +1,388 @@
+{
+  "task": "read:dafeng:L1:0005",
+  "agent": "w-dafeng-1",
+  "status": "done",
+  "summary": "精读《大奉打更人》第六章「懵逼的二叔」原文区间 codepoint [15225,18802)（3577 字，逐行读完），产出 6 条任务五元组（缺项写 JSON null，T6 的 obstacle/cost 为 null）、7 条带方向与机制的 causeEdges、10 条带前值/后值与事件锚点的 states（含 2 条知识差）、3 条伏笔（1 条区间内已回收、2 条 unresolved 且 payoff=null）、6 条「不构成伏笔」与 3 条「不连的因果边」说明、14 条 unknowns、3 条 selfCritique。全部 169 条引用由真实 text 切片生成并回验 TEXT[start:end]==quote，0 处不符；区间外引用 5 条全部显式标 crossRange（第五章器具演示、第五章承诺句、第七章开头吏员补述与李茹反应）。",
+  "evidence": [
+    {
+      "path": "loop/state/out/read_dafeng_L1_0005.candidate.json",
+      "sha256": "ab2c42c3e3e959d6acd044ee8d144a0e00e78c968b1d4e56c5a3766b165a2814",
+      "kind": "candidate",
+      "note": "本轮精读产物（任务 writes 指定路径）"
+    },
+    {
+      "path": "data/cache/9b676d7031b1bcd3b8377a18.docs.json",
+      "sha256": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+      "kind": "source",
+      "note": "原文来源；task.sourceHash 与之一致"
+    },
+    {
+      "path": "data/cache/9b676d7031b1bcd3b8377a18.json",
+      "sha256": "3c2fae1d399d6768719f2d5476fa0cfd88fb4fbbc12abdf080323fa4b846ebdf",
+      "kind": "source-graph-cache",
+      "note": "图谱缓存，仅用于对照已有结论与章节边界，未作为任何断言的证据来源"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "原文区间与切片：docs[0].text[15225:18802] 长度 3577 字，与任务 sourceRange/rangeChars 一致",
+      "result": "pass",
+      "command": "python3 -c \"import json;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];print(len(t[15225:18802]))\""
+    },
+    {
+      "text": "sourceHash 对得上：任务声明 fdde5558…39839 == sha256(data/cache/9b676d7031b1bcd3b8377a18.docs.json) 实际值",
+      "result": "pass",
+      "command": "shasum -a 256 data/cache/9b676d7031b1bcd3b8377a18.docs.json"
+    },
+    {
+      "text": "全部 169 条引用逐字命中且偏移自洽：TEXT[start:end]==quote，0 处不符（区间内 164 条、区间外 5 条）",
+      "result": "pass",
+      "command": "python3 -c \"import json;T=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];C=json.load(open('loop/state/out/read_dafeng_L1_0005.candidate.json'));Q=[o for b in ('tasks','causeEdges','states','foreshadows','rejectedAsForeshadow','rejectedAsCauseEdge') for i in C[b] for o in (i.get('evidence') or [])+([i['quote']] if i.get('quote') else [])];bad=[o for o in Q if T[o['start']:o['end']]!=o['quote']];print('quotes',len(Q),'bad',len(bad));print('ALL VERBATIM' if not bad else 'MISMATCH')\""
+    },
+    {
+      "text": "独立复核脚本（不 import 构建脚本，直接从磁盘重读产品与原文重算）：结构/引用/五元组/因果机制/伏笔状态/实体白名单 共 0 fail 0 warn",
+      "result": "pass",
+      "command": "python3 /tmp/verify_read_dafeng_L1_0005.py"
+    },
+    {
+      "text": "五元组缺项按纪律写 JSON null 而非编造值：T6（京兆府吏员）obstacle/cost 为 null 且 basis 同为 null；全文再无字符串形式的 'null'/'未提及' 占位",
+      "result": "pass",
+      "command": "python3 -c \"import json;C=json.load(open('loop/state/out/read_dafeng_L1_0005.candidate.json'));print([ (t['id'],[f for f in ('objective','obstacle','action','result','cost') if t.get(f) is None]) for t in C['tasks']])\""
+    },
+    {
+      "text": "红线自查：① 人物口径不当事实——“案子破了，税银已经追回”只记为吏员说法（states S10 标 derived 并带 ⚠），本区间叙述层未确认；② 结束≠成功——T2 的 result 记实际否定结果（被识破、甘蔗被抢回、'这条路没得走'），T3 只写到被放出后门，没有写'救出二叔/全家脱险'；③ 不编人物——全区间只出现许七安/许平志/李茹/许新年（被提及）/采薇/狱卒/吏员/衙役/陈府尹（被提及），无原文外实体；④ 相邻不当因果——3 条按顺序易误连的边记入 rejectedAsCauseEdge；⑤ 一次出现当伏笔——6 条单次出现物件记入 rejectedAsForeshadow；⑥ semanticReview 未声称完成（reviewStatus.semanticReview=not_performed）",
+      "result": "pass",
+      "command": "python3 /tmp/verify_read_dafeng_L1_0005.py"
+    },
+    {
+      "text": "伏笔纪律：3 条伏笔中 F2 有铺设+区间内回收（李茹/许平志错认→吏员纠正），F1/F3 标 unresolved 且 payoff 为 JSON null、各带 whyNotResolved",
+      "result": "pass",
+      "command": "python3 -c \"import json;C=json.load(open('loop/state/out/read_dafeng_L1_0005.candidate.json'));print([(f['id'],f['status'],f['payoff']) for f in C['foreshadows']])\""
+    },
+    {
+      "text": "本轮只写 loop/state/out/ 下 2 个文件（classify → append-only）；未对 js/css/index.html/serve.py/narrative.py/distill.py/scripts/tests/tools/docs/data 发起任何写入。注意：共享树里这些路径在同一时段确有改动，来自并行会话（find -newermt 可见），不是本 agent 所为",
+      "result": "pass",
+      "command": "find js css index.html serve.py narrative.py distill.py scripts tests tools docs data -type f -newermt '-40 minutes' | head"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/read_dafeng_L1_0005.candidate.json",
+      "kind": "append-only"
+    },
+    {
+      "path": "loop/state/out/read_dafeng_L1_0005.json",
+      "kind": "append-only"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/9b676d7031b1bcd3b8377a18.docs.json": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+  },
+  "remaining": [
+    "semanticReview 未做：本轮只做引用定位与自洽校验，引用定位正确 ≠ 语义已核验。独立复核（read-verify 通道）应由另一个 agent 从原文反向检查漏项与误读。",
+    "区间外只做子串搜索定位，未读其整章：第五章器具演示与承诺句、第七章开头吏员补述与李茹反应，均仅以 crossRange 引文标注，未据此写任何区间内结论。",
+    "“案子破了，税银已经追回”在本区间内只有京兆府吏员一个来源，叙述层未确认；追回数额、赃银去向、作案人与破案过程本区间均无。",
+    "伏笔 F1（盐→银/炼金术）的回收位置只核到章题存在（[1560634,…)“参观司天监”、[1565718,…)“生命炼金术”），未读正文，回收内容未核验。",
+    "许新年为何未出现在释放现场、许七安出狱后如何与家人会合，本区间未写，需后续单元补。",
+    "本次未跑任何 GPU/浏览器测试（任务未要求，且 GPU 全局串行）。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/read_dafeng_L1_0005.candidate.json",
+      "loop/state/out/read_dafeng_L1_0005.json"
+    ]
+  },
+  "submittedAt": "2026-10-07T18:48:39Z",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-07T18:48:39Z"
+  },
+  "verifyState": "pass",
+  "reviews": [
+    {
+      "reviewer": "q-verify",
+      "at": "2026-10-07T19:13:18Z",
+      "verdict": "pass",
+      "notes": "独立复核《大奉打更人》第六章 [15225,18802)。证据 3/3 哈希一致。**我的复核器报「174 条引文 1 条逐字不符」，逐层定位后确认：内容层（tasks 53 / states 58 / causeEdges 30 / foreshadows 16 / 两个 rejected 列表 12）共 163 条引文**全部逐字正确**；唯一不符的那条位于提交者自己的 `selfCheck/crossRangeQuotes[0]` —— 它的 end=18924 比引文实际长度短 22 字符（quote 40 字、切片 62 字），**是提交者自审计记录的区间写法问题，不是叙事内容错误**。⇒ 内容层 pass。反向验证：内容层覆盖 77.3%，未覆盖 74 段；含引号且引号内容不在任何内容引文里的 7 段，经核对均为跨章回溯/叙述过渡，非漏抽。",
+      "counterExamples": [
+        {
+          "check": "「引文逐字不符」是否等于内容错误",
+          "method": "按 JSON 路径分层统计（tasks/states/causeEdges/foreshadows vs selfCheck）",
+          "finding": "内容层 163/163 全对；唯一不符在 selfCheck/crossRangeQuotes，属提交者自审计记录的区间写法（end 短 22 字符）⇒ 复核器应区分内容层与自审计层，否则会误判一份内容正确的提交"
+        },
+        {
+          "check": "复核器是否应把 selfCheck 纳入判据",
+          "method": "对比内容层与自审计层的失配数",
+          "finding": "不应：selfCheck 是提交者的**自证材料**，其写法瑕疵不等于交付内容有误；但应作为提示记录"
+        }
+      ],
+      "reverseChecks": [
+        {
+          "question": "这一段里还漏了什么？",
+          "method": "补集逐段 + 引号内容反查内容层引文集合",
+          "finding": "7 段疑似均为跨章回溯与叙述过渡，未发现漏抽"
+        },
+        {
+          "question": "自审计记录是否可信",
+          "method": "核对其 crossRangeQuotes 的 5 条是否都能在原文 find",
+          "finding": "5 条 quote 均能 find 到，仅 end 截短 ⇒ 记录意图正确、写法有瑕疵"
+        }
+      ]
+    },
+    {
+      "reviewer": "w-verify-1",
+      "at": "2026-10-07T19:30:14Z",
+      "verdict": "partial",
+      "notes": "总判 partial。**内容层是干净的**：175 条内容层引文全量逐字命中、偏移零误差、span 全部自洽；3 个哈希（文件/全文/切片）全部与声明一致；区间外 5 条引用全部正确标注 crossRange。零编造——每一条抽取项都能在原文找到对应文字，找不到的一条也没有。判 partial 而非 pass，只因 4 处自述/元数据缺陷（CE1 自审计 span 错且 sliceMatchesAll 被自身数据证伪、CE2「自称」来源不存在、CE3 T3.notes 与自身 unknowns[0] 矛盾、CE4 内联标点），**全部集中在说明性元数据，无一条属叙事内容错误或编造**。判 partial 而非 fail，因 fail 需以 counterExample 证明内容层失实，而本复核未能找到任何一条。\n\n反向验证（本复核的主要产出）：候选对『已写项』的正确率极高，但对『还漏了什么』覆盖不足——区间 101 段中有 25 段从未被任何引文触及。我按「原文明确存在、且有信息量」筛出 7 条（REV1–REV7），其中最强的是 REV1：许七安自称的『古籍』其实是《高中化学》与他的前世知识，两处原文（[15412,15471)、[15862,15889)）候选一次都没引，下游若只看候选会把『古籍』当成世界观内的真实典籍。其次 REV2（李茹脾气躁→脸色柔和的完整状态变化）与 REV3（出狱途中『喜悦+茫然』的中间态）属 states 定义内的结构性遗漏。\n\n存疑（按纪律不据此判 fail，仅记录）：(1) coverage.structureRead 把 [18760,18801) 整段标为『章末作者附言』，实际附言为 [18764,18776)、『(本章完)』为 [18782,18787)，标签略宽，但区间本身不假；(2) causeEdges 编号从 C6 跳到 C8，无 C7，疑为一次性构建脚本的编号残留，仅影响可读性；(3) 我未能定位 C7 曾被删除的任何痕迹，故无法判定其是否为遗漏的一条边——如需确证需提交者提供构建脚本。\n\n关于既有复核：read_dafeng_L1_0005.json 上已有一条 q-verify 于 19:13:18Z 给出的 pass，其 notes 已指出同一处 selfCheck span 问题（记为『提交者自审计记录的区间写法问题，不是叙事内容错误』）——这一判断我独立复核后**认同**，并据此未将 CE1 升格为 fail 依据。本轮的独立增量是：CE2/CE3 两处新证伪、7 条反向漏抽、以及内容层 175 条引文的全量扫描（此前记录的是 163 条内容引文，差额来自我这次把 rejectedAsForeshadow 的嵌套 quote 对象与各 evidence 数组一并计入）。\n\n未做：未运行任何 GPU/浏览器测试（本任务不需要）；未修改受保护路径；未核验区间外章节的语义（仅做子串定位，与候选口径一致）。",
+      "counterExamples": [
+        {
+          "id": "CE1",
+          "severity": "metadata",
+          "check": "selfCheck.crossRangeQuotes[0] 的 end 与引文长度不符",
+          "claim": "selfCheck.crossRangeQuotes[0] 记 start=18862,end=18924（切片 62 字），而 quote 只有 40 字；同一对象里 sliceMatchesAll=true 声称全部切片自洽。",
+          "evidence": [
+            {
+              "quote": "两日前，许七安在牢内嚷嚷着要见府尹，说有重要线索汇报，随后府尹大人就破案了。按照大奉律法，戴罪立功，你们自然无事。”吏员说。",
+              "start": 18862,
+              "end": 18924,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "inRange": false
+            }
+          ],
+          "why": "可复现：T[18862:18924] 长 62、quote 长 40，T[start:end]!=quote ⇒ 该条自审计记录的 span 是错的（正确 end=18902，即 start+len(quote)），且 sliceMatchesAll=true 被它自己的数据证伪。**这是提交者自审计层的元数据缺陷，不是叙事内容错误** —— 内容层 175 条引文全部逐字命中（见 notes 与 citationSample）。"
+        },
+        {
+          "id": "CE2",
+          "severity": "self-description",
+          "check": "T1.who 称名字有两个来源，其一为「自称」",
+          "claim": "tasks[0].who = 「褚采薇（司天监黄裙少女，名字在本章由叙述层与自称两处给出）」——声称她自称过名字。",
+          "evidence": [
+            {
+              "quote": "    “喂！”名叫采薇的黄裙少女，扑闪着美眸，“为什么盐能变成银子？”",
+              "start": 15236,
+              "end": 15272,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "inRange": true
+            },
+            {
+              "quote": "    褚采薇翻了个白眼，不服气：“放眼九州天下，论炼金术，我司天监术士当为魁首。”",
+              "start": 15944,
+              "end": 15986,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "inRange": true
+            }
+          ],
+          "why": "原文里「采薇」只出现 2 次：15246 由叙述层写「名叫采薇的黄裙少女」，15949 由叙述层写「褚采薇翻了个白眼」。全区间检索「我叫/我名/我姓/小女子/姓褚」命中数均为 0，她没有一句话自报姓名或姓氏 ⇒「自称」这一来源不存在。属自述层用了超出证据的话，不影响 who 的指认结果。"
+        },
+        {
+          "id": "CE3",
+          "severity": "self-contradiction",
+          "check": "T3.notes 与 unknowns[0] 互相矛盾",
+          "claim": "tasks[2].notes 写「本区间没有任何一句说税银已追回」，而同一份候选的 unknowns[0] 自己引用了区间内的 [18315,18338)「案子破了，税银已经追回。」",
+          "evidence": [
+            {
+              "quote": "    “案子破了，税银已经追回。”吏员回答。",
+              "start": 18315,
+              "end": 18338,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "inRange": true
+            }
+          ],
+          "why": "这句在区间内、逐字可查（[18315,18338)），是候选自己也在 unknowns[0] 里引用过的同一 span。正确表述应是「叙述层没有独立确认，只有吏员口径」——这也正是 unknowns[0] 的说法；T3.notes 的绝对化措辞写错了。属措辞缺陷，T3.result 的实际处理（只写到被放出后门、不写成功）是对的。"
+        },
+        {
+          "id": "CE4",
+          "severity": "cosmetic",
+          "check": "C6.mechanism 内联引用标点与原文不符",
+          "claim": "causeEdges C6.mechanism 内联写「竟然还官复原职。许平志意识到不对劲了」，原文该处用半角句点「.」。",
+          "evidence": [
+            {
+              "quote": "    竟然还官复原职.许平志意识到不对劲了，边接过官袍，边沉声道：“这位大人，可否为本官解惑？”",
+              "start": 18508,
+              "end": 18557,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "inRange": true
+            }
+          ],
+          "why": "原文为「竟然还官复原职.许平志意识到不对劲了」，候选内联写成了全角「。」。该边**自身的 evidence[4] 引用 [18508,18557) 是逐字正确的**，所以这只是行文内联引用的标点失真，不是引文造假。列此仅为完整性，不作为判 fail 依据。"
+        }
+      ],
+      "reverseChecks": [
+        {
+          "id": "REV1",
+          "found": "许七安口中的「古籍」是他自己世界的教材——原文两处明写来源是《高中化学》与他的前世，候选从未引用，等于把「古籍」按字面接受了",
+          "evidence": [
+            {
+              "quote": "    它的名字叫《高中化学》，至于著作者.嗯，人民教育出版社？许七安道：“古籍早已毁掉，不过，在下还记得其中内容。”",
+              "start": 15412,
+              "end": 15471,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "inRange": true
+            },
+            {
+              "quote": "    许七安前世只在孩子身上见过这种干净漂亮的眸子。",
+              "start": 15862,
+              "end": 15889,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "inRange": true
+            }
+          ],
+          "why": "tasks[1].action 只写「先给饵（自称记得炼金古籍内容）」，把这句当作给饵行为本身，没有记「古籍」是编造的托词、真正来源是穿越者知识。这两处是本区间里唯一交代该知识来源的文字（「前世」全区间仅 1 次、[15862,15889)），漏掉会让下游把「古籍」当成世界观内的真实典籍。"
+        },
+        {
+          "id": "REV2",
+          "found": "李茹「脾气躁 → 脸色随即柔和」的一次状态转变，及其与幼女「兔兔」的互动链条，候选只把「兔兔」写进 S9 的 before，未记为状态变化",
+          "evidence": [
+            {
+              "quote": "    “成天就知道吃.”脾气躁的李茹下意识骂了一句，看着小脸脏兮兮的幼女，脸色随即柔和，“乖，马上就有兔兔吃了。”",
+              "start": 17985,
+              "end": 18043,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "inRange": true
+            },
+            {
+              "quote": "    “娘，兔兔好可爱，我想吃兔兔。”幼女仰起小脸蛋，啃着自己的小指头，眼里写着“馋”字。",
+              "start": 17937,
+              "end": 17983,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "inRange": true
+            }
+          ],
+          "why": "states 全 10 条里没有任何一条以李茹的即时情绪为维度；这里是区间内少见的、有明确前值（下意识骂）与后值（脸色柔和）且带事件锚点的状态变化，符合任务对 states 的定义，属结构性遗漏。"
+        },
+        {
+          "id": "REV3",
+          "found": "出狱途中一家人仍处于「一头雾水」的中间态，且李茹当面怀疑「老爷不会是骗我们的吧？」——候选 S7 直接从「确信是新年」跳到「被吏员纠正」，漏掉中间的不确定状态",
+          "evidence": [
+            {
+              "quote": "    “老，老爷不会是骗我们的吧？”",
+              "start": 17651,
+              "end": 17670,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "inRange": true
+            },
+            {
+              "quote": "    “岂会如此儿戏。”许平志身上带伤，走路一撅一拐，他也一头雾水，有大难不死的喜悦，也有搞不清楚状况的茫然。",
+              "start": 17672,
+              "end": 17728,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "inRange": true
+            }
+          ],
+          "why": "S7 的 before/after 只覆盖「确信→被纠正」。原文在这中间写了明确的复合情绪（喜悦 + 茫然）与李茹的怀疑，这是「知识差」在本区间的实际中间值，漏掉会让状态迁移看起来一步完成。"
+        },
+        {
+          "id": "REV4",
+          "found": "许平志当众把劫银者归因为「妖孽」——一条人物给出的超自然归因，候选完全未记录（全区间「妖孽」仅 1 次）",
+          "evidence": [
+            {
+              "quote": "    “税银追回了？哈哈，好，好！该死的妖孽，竟敢劫我大奉税银。”",
+              "start": 18340,
+              "end": 18374,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "inRange": true
+            }
+          ],
+          "why": "候选对「台词≠叙述事实」执行得很自觉（吏员口径被降级处理），但这条同样是**人物口径**却未被收进任何条目或 unknowns：它把案件归因于妖孽，与后文吏员「破案」的说法并列时是两套解释。属应记而未记，建议补进 unknowns。"
+        },
+        {
+          "id": "REV5",
+          "found": "狱卒「腰胯朴刀」是紧邻李茹「绝望和决然」的触发句，候选 F3 引了结果句却未引触发句",
+          "evidence": [
+            {
+              "quote": "    几名狱卒腰胯朴刀，大步昂扬的进来。",
+              "start": 17257,
+              "end": 17278,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "inRange": true
+            },
+            {
+              "quote": "    李茹眼里闪绝望和决然。",
+              "start": 17280,
+              "end": 17295,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "inRange": true
+            }
+          ],
+          "why": "F3.evidence 收了 [17280,17295)「李茹眼里闪绝望和决然」，但把其正前一句（持刀狱卒进场）漏掉，导致该状态变化的触发在证据里不可见。两句相隔仅一句，属证据链缺口而非误读。"
+        },
+        {
+          "id": "REV6",
+          "found": "叙述层用「明明一个铜板都没有多出来」反讽许平志的「升华」，候选引了升华句却未收这句反讽",
+          "evidence": [
+            {
+              "quote": "    世界忽然变的如此美好，明明一个铜板都没有多出来。",
+              "start": 18204,
+              "end": 18232,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "inRange": true
+            },
+            {
+              "quote": "    就像深埋地底的种子钻出幼苗，见到了阳光。",
+              "start": 18178,
+              "end": 18202,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "inRange": true
+            }
+          ],
+          "why": "tasks[3] 引用了 [18117,18176)（升华）作为 cost/result 依据，但这句紧接其后的叙述层反讽（[18204,18232)）表明「升华」并非无条件正面，是理解该段语气反转的关键。属漏抽，不影响已引内容的正确性。"
+        },
+        {
+          "id": "REV7",
+          "found": "许平志与李茹在「习武」一事上对许七安的贬抑，及叙述层点明的「儿子没有习武天赋」，候选完全未记录",
+          "evidence": [
+            {
+              "quote": "    “我就说咱们家新年是人中之龙，当年我让他习武，你不答应，非要让许七安那小兔崽子练武。”",
+              "start": 17888,
+              "end": 17935,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "inRange": true
+            },
+            {
+              "quote": "    许平志懒得跟她解释‘你儿子没有习武天赋’这件事。反正不管说多少遍，结发妻子都会自动忽略。",
+              "start": 18045,
+              "end": 18093,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "inRange": true
+            },
+            {
+              "quote": "    当妈的眼里，儿子永远是最优秀的。",
+              "start": 18095,
+              "end": 18115,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "inRange": true
+            }
+          ],
+          "why": "F2 覆盖了「错认救星」这一层，但漏掉它的人物动机层：夫妇对亲子/侄儿的差别对待有原文直述的机制（无习武天赋却被当作人中之龙、当妈的滤镜）。这是「错认」为何发生在许新年身上的解释性材料，属可补的遗漏。（search: 「习武」在区间内 2 次，均未被候选引用。）"
+        }
+      ]
+    },
+    {
+      "reviewer": "q-verify",
+      "at": "2026-10-07T21:23:39Z",
+      "verdict": "pass",
+      "notes": "**补充（本会话第 57 轮的机械确证）**：内容层引文 163/163 逐字正确（第 30 轮已核），本次以更强判据重扫「引用条目的 quote 与其 start/end 是否自洽」，在全 42 个候选约 1.5 万条带偏移的引用中发现 **1 处不自洽**，就在本候选：`/selfCheck/crossRangeQuotes[0]` —— quote 长 40 字（原文 find=18862，逐字一致），但声明 `end=18924`（跨度 62）⇒ **end 多 22**（应为 18902）。性质：**提交者自审计记录的区间写法瑕疵**，不影响其内容层引文；按既有口径（自审计层不计入 verdict）维持 pass，并如实记录该处。",
+      "counterExamples": [
+        {
+          "check": "「切片≠引文」是否都等于缺陷",
+          "method": "先取 startAbs/endAbs，无则取 start/end，再判切片是否等于 quote",
+          "finding": "376 条属 read_xiyou:L0_0000 的**合法约定**（start 存切片相对、startAbs 存绝对）⇒ 判据必须先消化该约定，否则会误报 376 次"
+        },
+        {
+          "check": "该处是否影响内容层",
+          "method": "核对 tasks/states/causeEdges/foreshadows 各层引文",
+          "finding": "内容层 163/163 全对；该处在 selfCheck 自审计层"
+        }
+      ],
+      "reverseChecks": [
+        {
+          "question": "还有别的\"偏移与引文不自洽\"吗",
+          "method": "对全 42 个候选的约 1.5 万条带偏移引用做同样的自洽检查",
+          "finding": "仅此 1 处 ⇒ 该族缺陷在当前候选集中规模为 1"
+        }
+      ]
+    }
+  ]
+}

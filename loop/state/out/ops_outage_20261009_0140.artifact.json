@@ -1,0 +1,73 @@
+{
+ "task": "ops:outage-20261009-0140",
+ "agent": "reform-lead",
+ "at": "2026-10-08T18:24:36Z",
+ "scope": "运行期故障的诊断、即时恢复与耐久修复（不改共享树代码；修复候选在项目外）。",
+ "symptom": {
+  "what": "13 个 worker 全部「活着」，但每个任务 0.0s 结束、rc=127，每轮刷一条日志。",
+  "evidence": [
+   "loop/state/logs/w-dafeng-0.daemon.log: 第 225–227 轮 rc=127 no-output(rejected)",
+   "loop/state/logs/*L0-0080*.log: `env: node: No such file or directory`"
+  ],
+  "why_invisible": "doctor 按「进程活着 + 心跳新鲜」判活 ⇒ 13/13 正常；完成数增长来自别的通道，看板不报错。"
+ },
+ "rootCause": [
+  {
+   "cause": "node 被自动升级并删除旧目录",
+   "detail": "01:40 workbuddy 把 node 由 22.22.2-3 换成 22.22.2-6 并删除 22.22.2-3；常驻 sentinel 的 PATH 仍指向被删目录 ⇒ 它拉起的 worker 找不到 node ⇒ rc=127。",
+   "evidence": "cat ~/.workbuddy/binaries/node/versions/current → 22.22.2-6；ps eww -p 90610 的 PATH 仍含 22.22.2-3/bin（已不存在）"
+  },
+  {
+   "cause": "DSH_HOME 丢失导致 castline profile 解析失败",
+   "detail": "node 修好后错误变成 `dsh: profile \"castline\" does not exist` —— worker 用 `dsh --profile castline`，而 profile 依赖 DSH_HOME；手工/常驻重启的 sentinel 没有 Mirasim 注入的 DSH_HOME。",
+   "evidence": "loop/state/logs/w-dafeng-1-read-dafeng-L0-0080-*.log 的 Node 堆栈；正确 home 为 21b549e9…-cabbf7c1836d（profiles/castline 存在）"
+  }
+ ],
+ "immediateRecovery": {
+  "actions": [
+   "SIGTERM 全部 worker 与旧 sentinel(41120)",
+   "loop.py reap 回收死租约",
+   "以正确 PATH(node 22.22.2-6)+DSH_HOME 重启 sentinel --watch"
+  ],
+  "result": "13 worker 重新拉起；doctor: 干活 11 / 卡住 0 / 空闲 2，子进程 11 个",
+  "note": "恢复期间出现过短暂 lease-lost 竞争（多个 worker 同时领同一任务），随租约稳定自行消失。"
+ },
+ "durableFix": {
+  "file": "loop/bin/sentinel.py（修复候选：/tmp/castline-artifacts/r0-20261009/sentinel.fixed.py）",
+  "candidateSha256": "ba996abbf903d4a078f1cf6995babef7a27c75a7ef4303b1d9bfcd635cebbbb8",
+  "baseSha256": "ec29d7eba6579f68753a1c01fdc0c00a22241fd7f03d2a48de4a0a78973a14f8",
+  "changes": [
+   "repair_path()：剔除 PATH 里指向已删除目录的 node 条目，并把现存 node 放到最前",
+   "discover_dsh_home()：从运行中的 dsh web 进程读回带 castline profile 的 DSH_HOME",
+   "spawn_worker()：拉起前做上述自愈，并把实际使用的 DSH_HOME / node 路径写进 daemon.log 首行"
+  ],
+  "whyThisShape": "本项目反复出现的形态是「机制存在、有产出、但不产生信息」；这一次是「worker 存在、心跳新鲜、但产出为 0」。所以修的不只是「重启一次」，是让**下一次 node 升级不再静默停摆**，并把实际环境写进日志以便下一次能一眼看出。"
+ },
+ "assertions": [
+  {
+   "text": "repair_path 能剔除失效 node 目录并让 node 可解析",
+   "command": "repair_path(旧PATH) → node 可执行存在",
+   "result": "pass"
+  },
+  {
+   "text": "discover_dsh_home 找到的 home 真的有 castline profile",
+   "command": "(home/profiles/castline).is_dir() == True",
+   "result": "pass"
+  },
+  {
+   "text": "恢复后 worker 真正在干活（不是只看进程数）",
+   "command": "doctor.py → 干活 11 / 卡住 0，子进程 11",
+   "result": "pass"
+  },
+  {
+   "text": "共享树代码未被本次修复改动",
+   "command": "loop/bin/sentinel.py sha 未变",
+   "result": "pass"
+  }
+ ],
+ "remaining": [
+  "耐久修复待合入（受保护路径，需 GATE.lock；当前被 p16 持有）",
+  "根因在**外部**（node 自动升级）未被消除，只能靠启动前自愈缓解",
+  "postmortem 建议：doctor 应把「连续 rc≠0 且耗时≈0」判为故障，而不是只看进程与心跳"
+ ]
+}

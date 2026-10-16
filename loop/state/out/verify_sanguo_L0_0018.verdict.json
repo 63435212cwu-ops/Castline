@@ -1,0 +1,205 @@
+{
+ "task": "verify:sanguo:L0:0018",
+ "agent": "w-sanguo-1",
+ "role": "VERIFIER",
+ "status": "done",
+ "verdict": "partial",
+ "candidateVerdict": "partial",
+ "reviewedTask": "read:sanguo:L0:0018",
+ "reviewedArtifact": {
+  "path": "loop/state/out/read_sanguo_L0_0018.candidate.json",
+  "sha256": "e275996188f2c704c803c5d56198afbe0447a9f5333a602cca434a1f62332152",
+  "producedBy": "w-xiyou-1",
+  "note": "只读复核，未修改；复核开始与结束时哈希一致。"
+ },
+ "source": {
+  "path": "data/cache/152e2a6eed94f1075e7e7070.docs.json",
+  "sha256": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+  "docIndex": 0,
+  "docName": "0014《三国演义》-罗贯中 著",
+  "range": [
+   94038,
+   100577
+  ],
+  "codepoints": 6539,
+  "segmentSha256": "0d34c069e7977a4141f83e37c1e56418191af2b49d943c723f974f72c8adbc77",
+  "offsetBase": "absolute-doc-codepoint",
+  "boundaryHead": "第十九回　下邳城曹操鏖兵　白门楼吕布殒命",
+  "boundaryNote": "text.find('第十九回')==94038；TEXT[94038:94058] 即本单元回目；切片长 6539，与任务声明一致。"
+ },
+ "summary": "独立反向复核《三国演义》第十九回 [94038,100577)（6539 码点）。**先自己通读原文全文，再看候选**，顺序未换。结论 partial。①引用层零编造：368 条结构化 quoteRef 逐条 TEXT[start:end]==quote、find(quote)==start、落在区间内、sourceHash 一致，失败 0；固定种子 20261009 抽 5 条 5/5 逐字命中且偏移一致。②抽取项零编造：19 条任务五元组、28 条因果边、12 条被拒边、14 条状态/知识差、6 条伏笔+7 条非伏笔、23 条 unknowns 的每一处断言都能在切片内找到对应文字，找不到者 0 条；无原文没有的人物、结局、伏笔。③结束≠成功守住了：张辽写 undetermined_in_unit、吕布写 not_achieved_in_unit，回末套语「骂贼张辽反得生」未被当结果。④但辅助审计层有 5 处可复算错误（区间外句子被算进本单元、两处计数越界、边注数目自相矛盾、两条接缝证据偏移与引文不符），另有 5 处低显著性原文事实未覆盖，以及 1 处一刀切否决把原文直述的合法因果一起挡掉（高顺、张辽「水围难出，为曹兵所擒」）。以上均不构成编造，故不判 fail；但辅助层是后续复核对账的依据，亦不能判 pass。",
+ "counterExamples": [
+  {
+   "id": "CE-A",
+   "claim": "connectiveAudit 的「故」条注把区间外（第二十回）的一句当成「本单元四处全在话语内」的枚举项，同时漏掉本单元真实存在的「吾故领兵至此」。",
+   "quote": "我亦知文远忠义，故戏之耳。",
+   "quoteStart": 100674,
+   "quoteEnd": 100687,
+   "why": "该串全文偏移 100674，落在第二十回（回目起点 100577），不在本单元 [94038,100577) 内。本单元「故」的实际四处为 96090「故来至此」、96594「吾故领兵至此」、98809「故犯吾令」、99641「吾故弃汝」。countInSlice=4 与 items 列表都对，错的只是这条注：它把区间外的「故戏之耳」补进来、把区间内的「吾故领兵至此」挤出去。复现：python3 -c \"import json;t=json.load(open('data/cache/152e2a6eed94f1075e7e7070.docs.json'))[0]['text'];print(t.find('我亦知文远忠义，故戏之耳。'))\" → 100674（>100577）。同一候选在「乃」条注里对区间外的「乃亲释其缚」标了 [下一回]，说明此处是漏标而非口径不同。"
+  },
+  {
+   "id": "CE-B",
+   "claim": "crossUnitRefs 关于臧霸的一条把本单元出现次数写成 1 次，实际为 2 次，并因此把「程昱把臧霸列为山东未归顺势力」这一处并吞掉。",
+   "quote": "况今山东尚有臧霸、孙观之徒未曾归顺，防之亦不可忽也。",
+   "quoteStart": 96337,
+   "quoteEnd": 96363,
+   "why": "原文声明「臧霸」本单元 1 次，实测 2 次：94871（探马回报「吕布与陈宫、臧霸结连泰山贼寇」）与 96343（程昱劝曹操「况今山东尚有臧霸、孙观之徒未曾归顺」）。复现：python3 -c \"import json;t=json.load(open('data/cache/152e2a6eed94f1075e7e7070.docs.json'))[0]['text'];s=t[94038:100577];print(s.count('臧霸'),[94038+i for i in range(len(s)) if s.startswith('臧霸',i)])\" → (2, [94871, 96343])。后一处是曹操决定「自当山东诸路」的直接理由之一，被这条计数连同旁注「只有这一句转述，他本人没有出场」一起压掉了。"
+  },
+  {
+   "id": "CE-C",
+   "claim": "connectiveAudit 的「先」条注称「奉先」人名在本单元出现四处，实际为两处。",
+   "quote": "操谓布曰：“闻奉先又欲结婚袁术，吾故领兵至此。",
+   "quoteStart": 96577,
+   "quoteEnd": 96600,
+   "why": "本单元「奉先」实测 2 次（96584、97551），不是四处；四处是把区间外多回的「奉先」（全文 17 次）算了进来。复现：python3 -c \"import json;t=json.load(open('data/cache/152e2a6eed94f1075e7e7070.docs.json'))[0]['text'];print([i for i in range(94038,100577) if t.startswith('奉先',i)])\" → [96584, 97551]。同一注称「先：十七处」，切片实测确为 17，说明其计数基准可复算，只是「奉先四处」越了区间。"
+  },
+  {
+   "id": "CE-D",
+   "claim": "connectiveAudit 的「便」条注自相矛盾：先说「归边的三处」，随后列出四个边号；且注与 items 的 modeledAs 分类互相矛盾。",
+   "quote": "宋宪赶退左右，先盗其画戟，便与魏续一齐动手，将吕布绳缠索绑，紧紧缚住。",
+   "quoteStart": 99278,
+   "quoteEnd": 99313,
+   "why": "原注文字先说「归边的三处」，紧接着却**枚举了四个**边号（分别指「便令糜竺引玄德妻小」「便请糜竺一同守城」「便押榜数十张射入城去」「便与魏续一齐动手」四处）——数目与枚举不一致（3 vs 4）。我在这里**刻意不复写那四个边号**：发布桥会扫描 counterExamples 里的字母+数字条目号，把它当作「复核者点名须修正」并把对应节点整个排除；而本条要修的是注里的数目与分类，不是那四条因果边，复写边号会造成误删。另：九处 items 的 modeledAs 一律为 causal_or_consequence，而注把「便教陈登飞骑先至关」「便开门放出」称为「普通承接」，「便随操入徐州」未被列入任何一类，字段与注互相打脸。items 的九个 offset 与切片实际九处逐一对齐（已复算），故这是注与分类字段的问题，不是漏项。"
+  },
+  {
+   "id": "CE-E",
+   "claim": "anchorLedger 两条接缝证据声明的偏移与所引原文不符：TEXT[boundaryStart:boundaryEnd] 切不出 boundaryQuote。",
+   "quote": "恰好吕布大军亦至，布与张辽、高顺分兵三路，来攻玄德、关、张三寨，正是：啖睛猛将虽能战，中箭先锋难久持。",
+   "quoteStart": 93914,
+   "quoteEnd": 93965,
+   "why": "boundary_in 声明 [93963,94019)（跨度 56），该串 find 得 93914、长度 51；声明区间切出的是「持。未知玄德胜负如何，且听下文分解。\\n\\n　　------------------\\n　　枫林晚 整理校对后一页前一」，即区间末尾的站点样板，不是所引句子，起点差 49。boundary_out 同样：声明 [100577,100628)（跨度 51），引文长度 48、find=100577，跨度多 3。两处都满足不了 TEXT[start:end]==quote。该字段自称「不参与本候选的任何断言」，且 368 条 quoteRef 的同名不变量确实全部通过（我独立复算），所以这是接缝证据自身的偏移缺陷，不影响已发布层引文，但它正是后续复核者拿来对账的字段。"
+  }
+ ],
+ "reverseChecks": [
+  {
+   "id": "RC-1",
+   "found": "破沛城后吕布招军占据入城这一步（该串在候选全篇 0 次命中）",
+   "quote": "吕布招军入城。",
+   "quoteStart": 94192,
+   "quoteEnd": 94199,
+   "why": "紧接「被吕布乘势杀入城门，把门将士，抵敌不住，都四散奔避」之后。候选的该条因果链收在「乘势杀入城门」，没有这一步，等于把「入城」写成瞬间完成而非招军占据。"
+  },
+  {
+   "id": "RC-2",
+   "found": "侯成在本单元的首次露面是接应吕布退往下邳（候选首次提到侯成已在盗马一段）",
+   "quote": "侯成引兵接应去了。",
+   "quoteStart": 96043,
+   "quoteEnd": 96052,
+   "why": "侯成是全章反水的关键人物（本单元十二处），他第一次出现却是替吕布接应退兵。候选从其「有马十五匹被盗」起写，缺了这一步，读者无法解释他为何在下邳，也无法与后文「我因追马受责」的处境对上。"
+  },
+  {
+   "id": "RC-3",
+   "found": "白门楼上吕布被缚的体貌对照（「长大」与「捆作一团」）",
+   "quote": "吕布虽然长大，却被绳索捆作一团，布叫曰：“缚太急，乞缓之！”",
+   "quoteStart": 99479,
+   "quoteEnd": 99509,
+   "why": "候选该条只从「缚太急，乞缓之」起引，漏掉同一句里的「虽然长大，却被绳索捆作一团」——这是原文对吕布此刻处境唯一的外形描写，也是「缚虎不得不急」那句回话的对照面。"
+  },
+  {
+   "id": "RC-4",
+   "found": "高顺、张辽向吕布说明他们离开小沛的原因（陈登假消息链的最后一环）",
+   "quote": "陈登来报说主公被围，令某等急来救解。",
+   "quoteStart": 95753,
+   "quoteEnd": 95771,
+   "why": "这句是陈登献城链的落点：陈登不只骗了陈宫与吕布，也把高顺、张辽从守地调走，小沛因此空虚而被曹仁袭取。候选把它夹在一条长引文里，但在分析文字中没有点出，「小沛为何丢」在候选里没有交待。"
+  },
+  {
+   "id": "RC-5",
+   "found": "沛城陷落中「放吊桥」这一拍（候选只引了「城上欲待放箭，又恐射了玄德」）",
+   "quote": "玄德急唤城上军士放下吊桥。",
+   "quoteStart": 94132,
+   "quoteEnd": 94145,
+   "why": "原文三拍是「玄德急唤城上军士放下吊桥」→「吕布随后也到」→「城上欲待放箭，又恐射了玄德」。候选引了第三拍，但没有前两拍，于是「城上为何迟疑」缺少物理场景（吊桥已放、吕布已到城下）。"
+  },
+  {
+   "id": "RC-6",
+   "found": "误杀：被整体否决的「决水→擒获」里，有一段原文明确写出水为直接原因的因果（高顺、张辽）",
+   "quote": "高顺、张辽在西门，水围难出，为曹兵所擒。",
+   "quoteStart": 99393,
+   "quoteEnd": 99413,
+   "why": "候选以「原文没有一句写因为水淹所以城破」为由把「决水→擒获」整条否决，理由段落枚举后续环节时完全没提这一句。但原文对高顺、张辽写明「水围难出，为曹兵所擒」——水是这两人无法突围并被擒的直接原因。这不是要求恢复「决水→吕布被缚」（那确实该拒），而是说这一刀切把一条原文直述的合法因果一起挡掉了；正确做法是拆两条：吕布一线维持拒绝，高顺、张辽一线补为因果边。候选在高顺那条任务的动作栏引到了这句，却在因果层没有登记，属结构性遗漏。"
+  }
+ ],
+ "notes": "【判定依据】按角色契约第 2 条，判 fail 需要「抽取项在原文找不到对应文字」即编造。我逐层核对全部抽取项，**找不到者 0 条**，因此不能判 fail；\n我发现的全部问题都在辅助审计层与遗漏侧，故判 partial。\n\n【可以用的（建议原样进入发布桥）】tasks 19 条、causeEdges 28 条、states 14 条、foreshadows 6 条、notForeshadows 7 条、unknowns 23 条：每条断言都能在切片内定位，368 条引文全部逐字命中且偏移自洽。\n三处最易读错的地方候选判对了，我独立验证成立，应保留：①张辽结果写 undetermined_in_unit，未把回末套语当已发生事实；②「玄德点头」只写成伏笔并标 derived，未写成承诺或因果边；\n③拒绝「射榜→反水」的时序（三人先「商议定了」，曹操才射榜），我按原文复核顺序确实如此。\n\n【必须修正，但**不应据此丢弃任何已发布节点**】五条 counterExample 全部落在不进入发布映射的字段（connectiveAudit、crossUnitRefs、anchorLedger），它们不进作品库，\n却会被后续复核与审计当作对账依据：CE-A（「故」条注混入区间外第二十回的句子、漏掉本单元「吾故领兵至此」）、CE-B（臧霸 1 次→实为 2 次）、CE-C（奉先四处→实为 2 次）、\nCE-D（「便」条注说三处却列四个边号，注与 modeledAs 亦互相矛盾）、CE-E（两条接缝证据 TEXT[start:end]!=quote）。\n我在 counterExamples 里用名称与引文指认，**刻意不写 T/C/S/F 加数字的条目号、也不写层名加下标**，因为发布桥会把这种记号当成「点名须修正」并把对应节点整个排除；\n而这些字段错误不该连坐任何一条任务、因果、状态或伏笔。\n\n【必须补的】「决水→擒获」的否决范围过宽，属误杀（角色契约第 4 条）：原文「高顺、张辽在西门，水围难出，为曹兵所擒」把水写成这两人被擒的直接原因。\n应拆分为「决水→吕布被缚」维持拒绝、「决水→高顺张辽水围难出被擒」补为 causeEdge。这是本轮唯一影响因果层完备性的发现。\n\n【降级为 unknowns 的】RC-1..RC-5 五处事实（吕布招军入城、侯成引兵接应、缚布体貌、高顺张辽说明离守原因、放下吊桥）在原文明确存在、候选未覆盖。\n它们是低显著性动作，不足以翻案整条任务，但应在 unknowns 或对应条目 note 里登记，否则「本段已读全」这一印象是虚的。\n\n【我的方法可被反驳之处（如实写）】①我的遗漏扫描是**子串级机械判定**：以 5–14 字 n-gram 是否出现在候选全文中判「覆盖」。\n若某事实只被候选用自己的措辞转述而完全不含原文 5 字以上连续串，我会误报为遗漏——我逐条回看 RC-1..RC-5，五处原文串在候选里都是 0 次出现，不是转述型误报，但同类扫描仍有此上限。\n②我未回溯区间外原文（除两条接缝与候选自己登记的跨单元引用），所以「跨单元前情是否被说错」不在本次核验范围。\n③候选自称 machineSelfCheck 19 项全过，我复核了其中与引文/偏移/计数有关的部分（368 条引文、188 条连接词 items、48 个标记计数、objectiveStatus 分布），结果一致；\n**其余项我没有逐条重跑**，不声称它整份自检成立。④工具限制：read 工具按行号显示，我另用 python 逐字节复算全部偏移与哈希（docs.json sha256=2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff，切片 sha256=0d34c069e7977a4141f83e37c1e56418191af2b49d943c723f974f72c8adbc77）。\n\n【未做】未做语义层（人物动机与因果读法）的最终认证，未声称 semanticReview 完成；未改任何受保护路径。",
+ "evidence": [
+  {
+   "path": "loop/state/out/read_sanguo_L0_0018.candidate.json",
+   "sha256": "e275996188f2c704c803c5d56198afbe0447a9f5333a602cca434a1f62332152",
+   "kind": "被复核候选（只读，未修改）"
+  },
+  {
+   "path": "data/cache/152e2a6eed94f1075e7e7070.docs.json",
+   "sha256": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+   "kind": "原文（只读引用，未修改）"
+  },
+  {
+   "path": "data/cache/fe42d01f3826fe8096f86614.json",
+   "sha256": "04802afa6910e056b797a1586eb03c06820036907d248b17d7e05d388ad4b489",
+   "kind": "图谱缓存（只读引用，未修改）"
+  }
+ ],
+ "sourceHashes": {
+  "data/cache/152e2a6eed94f1075e7e7070.docs.json": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+  "data/cache/fe42d01f3826fe8096f86614.json": "04802afa6910e056b797a1586eb03c06820036907d248b17d7e05d388ad4b489",
+  "loop/state/out/read_sanguo_L0_0018.candidate.json": "e275996188f2c704c803c5d56198afbe0447a9f5333a602cca434a1f62332152"
+ },
+ "assertions": [
+  {
+   "text": "源文件哈希与任务 sourceHash 一致：python3 -c \"import hashlib;print(hashlib.sha256(open('data/cache/152e2a6eed94f1075e7e7070.docs.json','rb').read()).hexdigest())\" → 2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff（与任务 JSON 的 sourceHash 逐字相同）",
+   "result": "pass"
+  },
+  {
+   "text": "偏移口径：python3 -c \"import json;t=json.load(open('data/cache/152e2a6eed94f1075e7e7070.docs.json'))[0]['text'];print(repr(t[94038:94058]),len(t[94038:100577]))\" → 回目串 + 6539，与 unitHead 及任务声明一致",
+   "result": "pass"
+  },
+  {
+   "text": "遍历候选全部嵌套引文（368 条 quoteRef）：逐条满足 TEXT[start:end]==quote、94038<=start 且 end<=100577、quote in TEXT、sourceHash 一致，失败 0；另按固定种子 20261009 抽 5 条复核，5/5 命中且偏移一致",
+   "result": "pass"
+  },
+  {
+   "text": "抽取项核对：19 任务 + 28 因果边 + 12 被拒边 + 14 状态/知识差 + 6 伏笔 + 7 非伏笔 + 23 unknowns 逐条在切片内定位，找不到对应文字者 0 条",
+   "result": "pass"
+  },
+  {
+   "text": "反向验证（遗漏侧）：子串级扫描找候选未覆盖的原文事实，得 RC-1..RC-5；复现 python3 -c \"import json;t=json.load(open('data/cache/152e2a6eed94f1075e7e7070.docs.json'))[0]['text'];raw=open('loop/state/out/read_sanguo_L0_0018.candidate.json',encoding='utf-8').read();print([(q,raw.count(q)) for q in ['吕布招军入城。','侯成引兵接应去了。','吕布虽然长大','陈登来报说主公被围','玄德急唤城上军士放下吊桥']])\" → 全部为 0",
+   "result": "pass"
+  },
+  {
+   "text": "误杀检查：R4 整体否决「决水→擒获」，但原文「高顺、张辽在西门，水围难出，为曹兵所擒」（偏移 99393）直述水为二人被擒之因 ⇒ 该否决范围过宽（RC-6）",
+   "result": "fail"
+  },
+  {
+   "text": "计数复算：臧霸本单元 2 次（候选声明 1）、奉先本单元 2 次（候选声明 4）、故本单元 4 处（注内枚举含区间外一句）；machineSelfCheck 声称的 188 条连接词 items 与 48 个标记计数复算一致",
+   "result": "fail"
+  },
+  {
+   "text": "接缝证据偏移核验：boundary_in 声明 [93963,94019) 但引文 find=93914/长 51；boundary_out 声明 [100577,100628) 但引文长 48 ⇒ 两处 TEXT[start:end]!=quote",
+   "result": "fail"
+  },
+  {
+   "text": "未越权：本次仅在 loop/state/out/verify_sanguo_L0_0018.verdict.json 写入；未改 js/ css/ index.html serve.py narrative.py scripts/ tests/ docs/ data/",
+   "result": "pass"
+  }
+ ],
+ "changes": [
+  {
+   "path": "loop/state/out/verify_sanguo_L0_0018.verdict.json",
+   "kind": "append-only"
+  }
+ ],
+ "protectedPaths": [],
+ "remaining": [
+  "未做语义层认证：人物动机与因果读法是否正确不在本次核验范围（semanticReview 保持 not-performed）。",
+  "未回溯区间外原文：除两条接缝与候选自报的跨单元引用外，跨单元前情是否被误述未核。",
+  "候选 machineSelfCheck 的 19 项我复核了引文/偏移/计数相关部分，其余未逐条重跑，不声称其整份自检成立。",
+  "我的遗漏扫描是子串级机械判定（5–14 字 n-gram），对「只用自己的措辞转述」的情形会误报遗漏；RC-1..RC-5 已逐条回看确认是真实遗漏而非误报，但该上限仍在。",
+  "RC-1..RC-5 五处遗漏与 CE-A..CE-E 五处辅助层错误尚未在候选侧修正（本轮只读复核，未改候选文件）。"
+ ],
+ "rollback": {
+  "kind": "append-only",
+  "strategy": "delete-added-files",
+  "files": [
+   "loop/state/out/verify_sanguo_L0_0018.verdict.json"
+  ]
+ }
+}

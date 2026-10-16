@@ -1,0 +1,251 @@
+{
+  "task": "verify:sanguo:L1:0067",
+  "agent": "w-verify-2",
+  "role": "VERIFIER",
+  "status": "done",
+  "verdict": "partial",
+  "candidateVerdict": "pass-with-one-defect rejected",
+  "reviewedTask": "read:sanguo:L1:0067",
+  "reviewedArtifact": {
+    "path": "loop/state/out/read_sanguo_L1_0067.candidate.json",
+    "sha256": "c36afac7d53274ec65a69963995180d62cdb28bff83a8ca1ce615f7f7b87b93e",
+    "bytes": 234101,
+    "producedBy": "w-dafeng-1"
+  },
+  "source": {
+    "path": "data/cache/fe42d01f3826fe8096f86614.docs.json",
+    "sha256": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+    "textCodepoints": 607191,
+    "range": [342369, 347496],
+    "rangeCodepoints": 5127,
+    "segmentSha256": "04d9e20e0b37f34a7b5730bee1afe962309af4eba4ee3ba024be16ba9ebb2eec",
+    "selfCheck": "docs[0].text[342369:347496] 逐字以回目『第六十八回　甘宁百骑劫魏营　左慈掷杯戏曹操』开头"
+  },
+  "method": "按 VERIFIER 契约的**固定顺序**执行：①先自己通读原文区间 [342369,347496)（5127 codepoint，分 3 段通读完毕）并逐段自行记事实；②读完原文之后才打开候选 `loop/state/out/read_sanguo_L1_0067.candidate.json`；③抽取项逐条回原文核对；④反向验证（不问『他写的对不对』，问『这一段里他还漏了什么』）；⑤误杀检查；⑥幻觉/越权检查；⑦固定种子抽 5 条 quote 做 find 核验。全部数字由 `audit.py` 机器复算（A–I 段），非目测。",
+  "summary": "这是一份**引用层零缺陷、抽取密度极高**的候选：476 个引文实例（393 个标量 quote 字段 + 83 个 *Quotes[] 条目）全部满足 T[start:end]==quote、落在 [342369,347496) 内、sourceHash 与实测文件一致；globalOccurrences/nthOccurrence/inRange 三项元数据全量复算 0 处不符；23 个任务的五栏引文区间两两相交数 = 0（READER 红线「禁止同一句同时充当多栏依据」实测未被触碰，各栏 text=null 的 17 处**全部**带同名 Note 说明理由）；正文 bodyRange 覆盖 4100/4100 汉字 = 100%，全切片口径 4119/4150 = 99.253%，bodyRange 内 >=20 codepoint 的未覆盖空档 0 处；固定种子 68 抽 5 条 quote 5/5 逐字命中且偏移一致；无原文没有的人物（含全书口径）、无原文没有的结局、未把结束当成功（4 处「成功」均为显式否定式，如「故不写『守船成功』」）、semanticReview 正确保持 not-performed。判 partial 而非 pass 的理由只有一条且可被原文直接证伪：states[14]（S15）.after 把陈武之死的地点写成『江边』，而原文写他死于**峪口**，且候选自身 T08 标题与 worldSettings/峪口 条都记的是峪口 ⇒ **候选内部自相矛盾**。另有 4 条属覆盖取舍（未建因果边、未登记数字自相矛盾、未收录条件句伏笔、无献帝状态），按契约记为反向发现与建议，不据此判 fail。",
+  "counterExamples": [
+    {
+      "id": "CEX01",
+      "claim": "states[14]（id=S15，subject=「濡须口的防线布置」，basis=derived）的 after 写：「董袭在楼船遇风覆舟溺死，陈武在江边被庞德所杀——两处部署位置都成了丧命之处。」即断言陈武死于**江边**，并据此推出『部署位置成了丧命之处』。",
+      "quote": "被庞德赶到峪口，树林丛密；陈武再欲回身交战，被树株抓往袍袖，不能迎敌，为庞德所杀。",
+      "start": 344314,
+      "end": 344355,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+      "inRange": true,
+      "verbatimInSource": true,
+      "findOffset": 344314,
+      "why": "原文把陈武的**入场**与**死亡地点**分写两处：入场是「却说陈武听得江边厮杀，引一军来」（343847–343875，他是*听到*江边厮杀才引军前来），死亡是「被庞德赶到峪口…为庞德所杀」（344314–344355）。字面串「陈武在江边被庞德所杀」在原文区间内 `find` 为 **-1**（实测该串在整篇 607191 codepoint 内 0 次出现）。S15 的 afterQuotes 只引了「为庞德所杀。」（344349–344355）这一**截断片段**——它恰好只剩结果、把地点留在片段之外，因此引文本身逐字可核，却支撑不了加了地点的结论句。更关键的是**候选自证其误**：同一产物的 tasks[7]（T08）标题为「陈武战死峪口」，worldSettings『峪口』条的 explain 写「陈武被追至并战死的地形」——两处都对，只有 S15.after 写成江边。性质判定：**不是编造**（陈武确在江边入场、且孙权确曾「知陈武已亡」），是 derived 状态条目里的一处**地点误述**，但它是候选内部可机器检出的自相矛盾，且 S15 的结论句（『两处部署位置都成了丧命之处』）正建立在这个错地点上——陈武受命的是『往来江岸巡哨』，死于峪口，部署位置与丧命之处并不重合，推论随之不成立。",
+      "offset": 344314,
+      "severity": "medium",
+      "kind": "候选内自相矛盾 + derived 结论建立在错误地点上"
+    }
+  ],
+  "reverseChecks": [
+    {
+      "id": "R1",
+      "found": "候选 S15（states[14]，derived）的结论句把陈武之死定位到「江边」——这是**反向验证**查出的条目：只查「已写项对不对」不会发现，因为它的引文「为庞德所杀。」逐字为真，错的是引文之外的结论措辞。已同时登记为 CEX01（本复核唯一的 counterExample）。",
+      "quote": "却说陈武听得江边厮杀，引一军来，正与庞德相遇，两军混战。",
+      "start": 343847,
+      "end": 343875,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+      "inRange": true,
+      "verbatimInSource": true,
+      "findOffset": 343847,
+      "evidence": "候选内对照：T08 标题「陈武战死峪口」；worldSettings/峪口 explain「陈武被追至并战死的地形」。同产物三个落点，两对一错。"
+    },
+    {
+      "id": "R2",
+      "found": "原文同区间内对周泰救主的次数存在**原文自身的数字矛盾**：孙权先说「吾亏周泰三番冲杀」，后又说「卿两番相救」。候选 TX01 专门登记了同一性质的用字差异（「许褚」/「许诸」并存），却**未登记**这处数字矛盾——两条引文（344215–344229、344542–344562）分别被用作 T07.result 与 T07.cost 的依据，无一字说明二者冲突。这是「登记了 A 类文本瑕疵、漏了同类的 B 类」的覆盖缺口。",
+      "quote": "吾亏周泰三番冲杀，得脱重围。",
+      "start": 344215,
+      "end": 344229,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+      "inRange": true,
+      "verbatimInSource": true,
+      "findOffset": 344215,
+      "evidence": "对照引文『卿两番相救，不惜性命，被枪数十，肤如刻画』(344542–344562)。机器判据：'三番' in textualNotes 序列化结果 == False（见 audit.py G2 段）。同一段落内周泰的冲杀动作实为 3 次（344098 复翻身杀入、344253 再救徐盛），数字取舍属原文问题，但候选应如 TX01 一样登记。"
+    },
+    {
+      "id": "R3",
+      "found": "原文有一条**铺设与回收都在区间内**的条件句伏笔被两条台账同时漏收：「操见江南急未可下，乃从之，令：『孙权先撤人马，吾然后班师。』」——铺设是曹操的先撤后班条件，回收是紧接着「权只留蒋钦、周泰守濡须口，尽发大兵上船回秣陵。操留曹仁、张辽屯合淝，班师回许昌。」候选引用了这两句（作 T10.action / T10.anchor），却**未**把它登记进 foreshadows 或 notForeshadows 任一台账。判据上它与候选已收的 F02（甘宁自设结算条件『折了一人一骑也不算功』→ 归营逐字兑现）**结构同型**：都是事前设条件、事后被原文核对。这是反向验证查出的『他有同类先例、却漏了这一条』。",
+      "quote": "操见江南急未可下，乃从之，令：“孙权先撤人马，吾然后班师。”",
+      "start": 344771,
+      "end": 344801,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+      "inRange": true,
+      "verbatimInSource": true,
+      "findOffset": 344771,
+      "evidence": "回收句：『权只留蒋钦、周泰守濡须口，尽发大兵上船回秣陵。操留曹仁、张辽屯合淝，班师回许昌。』(344806–344846)。机器判据：'先撤人马' in json(foreshadows+notForeshadows) == False（见 audit.py G5 段）。"
+    },
+    {
+      "id": "R4",
+      "found": "原文「曹操闻知，亲自策马到门旗下来看，见二将酣斗，**乃令曹休暗放冷箭**。曹休便闪在张辽背后，开弓一箭，**正中凌统坐下马**」是明写的人物—动作—后果因果链，候选 **37 条 causeEdges 中无一条**承接（含「曹休」的 causeEdge = 0 条）。该事实被抽取了，但落在 T03.cost（「凌统付出的代价是坐骑被冷箭射中」）而非因果边。与之对照，候选为「不明来源的一箭射中乐进面门 → 凌统得救」专门建了 C08——即**同一回内两支箭，明写来源的那支未建边、未明写来源的那支建了边**。属抽取粒度取舍（cost 栏确已承接事实），登记为覆盖建议，不判 fail。",
+      "quote": "曹操闻知，亲自策马到门旗下来看，见二将酣斗，乃令曹休暗放冷箭。曹休便闪在张辽背后，开弓一箭，正中凌统坐下马，那马直立起来，把凌统掀翻在地。",
+      "start": 343395,
+      "end": 343464,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+      "inRange": true,
+      "verbatimInSource": true,
+      "findOffset": 343395,
+      "evidence": "机器判据：含「曹休」的 causeEdge 数 = 0（见 audit.py G4 段）；同时 '曹休' in tasks[2].cost.text == True。"
+    },
+    {
+      "id": "R5",
+      "found": "本回唯一一处**皇权被迫执行**的动作没有状态记录：原文「献帝即令钟繇草诏，册立曹操为魏王。」候选 16 条 states 无一以献帝（或钟繇）为主体——S06 只记曹操一方的爵位与服用规格变化。献帝名义上是册立行为的发出者，此处却是被群臣表奏推动的执行方，其状态（从『可自主册封』到『受表奏即草诏』）在原文有明确落点却无对应条目。属覆盖取舍，登记为建议。",
+      "quote": "献帝即令钟繇草诏，册立曹操为魏王。",
+      "start": 345053,
+      "end": 345070,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+      "inRange": true,
+      "verbatimInSource": true,
+      "findOffset": 345053,
+      "evidence": "机器判据：any('献帝' in s['subject'] for s in states) == False（见 audit.py G3 段）。"
+    },
+    {
+      "id": "R6",
+      "found": "（主动登记的「反向检查里成立的一条」，以免反向验证退化为只报缺陷）候选的**正向**判断在多处经受住了攻击性复核：①T02.result 拒绝把「劫营」写成成功，理由（『原来中军人马，以车仗伏路穿连，围得铁桶相似，不能得进』）在原文有独立一句因果说明支撑，且同时保留了『不折一人一骑』这一被兑现的结果——不是把话说反；②T04.objective 记 null 的处理正确：叙述层确实『未点放射箭者』，孙权那句「放箭救你者，甘宁也」是人物语，候选把它放进 speechAsClueNotFact SA02 而非升格为叙述事实，符合 READER 红线；③rejectedCauseEdges 的 5 条拒绝理由我逐条回原文核对，**全部成立**（尤其 R02 拒绝把左慈掷杯连到『曹操之死』——本区间末明写『未知曹操性命如何』，未给结局）；④sourceHashDiscrepancy 一节经独立复算成立。",
+      "quote": "原来中军人马，以车仗伏路穿连，围得铁桶相似，不能得进。",
+      "start": 342965,
+      "end": 342992,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+      "inRange": true,
+      "verbatimInSource": true,
+      "findOffset": 342965,
+      "evidence": "机器判据：'成功' 出现 4 处，全部为否定式／引用式（『故不写「挫锐气成功」』『故不写「守船成功」』『不写「劫营成功」』），无一处把结束当成功（见 audit.py H 段）。"
+    },
+    {
+      "id": "R7",
+      "found": "候选 sourceHashDiscrepancy 的 finding **成立**，且实测比候选写的更强：任务 JSON 的 sourceHash 2988ce6e… 在 data/cache 下命中**两个**文件（f0b45e85aac6c95e584075a2.docs.json 与 152e2a6eed94f1075e7e7070.docs.json），候选只写了一个。两文件的 docs[0].text 与 fe42d01f 版本**逐字相同**（长度同为 607191，本单元切片 [342369,347496) 逐字相同、sha256 同为 04d9e20e…），故偏移口径与全部引文证据不受影响。候选登记为『说少不说多』，不构成错误。",
+      "quote": "第六十八回　甘宁百骑劫魏营　左慈掷杯戏曹操",
+      "start": 342369,
+      "end": 342390,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+      "inRange": true,
+      "verbatimInSource": true,
+      "findOffset": 342369,
+      "evidence": "复算命令见 audit.py F 段：对 data/cache/* 逐个 sha256，命中 2 个；并对两文件做 text 与 slice 的逐字相等比较，均 True。"
+    }
+  ],
+  "coverage": {
+    "quoteInstances": 476,
+    "scalarQuoteFields": 393,
+    "quoteArrayEntries": 83,
+    "distinctSpans": 254,
+    "mergedIntervals": 27,
+    "bodyRange": [342393, 347439],
+    "bodyCJK": 4100,
+    "coveredCJK": 4100,
+    "coveredPct": 100.0,
+    "wholeSliceCJK": 4150,
+    "wholeSliceCoveredCJK": 4119,
+    "wholeSliceCoveredPct": 99.253,
+    "uncoveredRunsInBodyRange": 24,
+    "uncoveredRunsOver20Codepoints": 0,
+    "note": "bodyRange 内未覆盖的 24 处**全部**是纯标点（，。」“）或换行缩进（\\n\\u3000\\u3000），最长 4 codepoint；不含任何汉字。唯一 >20 codepoint 的未覆盖片段是切片末尾的电子整理页脚与回目行，候选已在 coverageDeclaration.wholeSliceResidualNote 与 textualNotes TX06 显式登记。两种独立实现（区间交集 / 逐字符布尔掩码）复算结果一致，且与候选自述的 4100/4100/4119 完全相同。"
+  },
+  "quoteIndexCheck": {
+    "instances": 476,
+    "exactSliceMatch": 476,
+    "findEqualsStart": 475,
+    "inRange": 476,
+    "sourceHashMatch": 476,
+    "globalOccurrencesMismatch": 0,
+    "nthOccurrenceMismatch": 0,
+    "inRangeFlagMismatch": 0,
+    "failures": 0,
+    "findEqualsStartException": {
+      "path": "textualNotes.quotes（TX06）",
+      "quote": "------------------",
+      "declared": 347443,
+      "firstFind": 4835,
+      "globalOccurrences": 119,
+      "nthOccurrence": 68,
+      "explanation": "该 quote 是纯 ASCII 分隔线，全文出现 119 次，首个出现在 4835（另一回）。候选用 nthOccurrence=68 精确消歧到 347443，T[347443:347461] 逐字等于 quote。**这是正确做法，非缺陷**——复核者若只用 find() 而忽略 nthOccurrence，会把它误判为偏移错误（本复核第一版仪器就误判了 1 处，已自查更正，见 notes）。"
+    }
+  },
+  "citationSample": {
+    "seed": 68,
+    "n": 5,
+    "hits": 5,
+    "detail": [
+      {"path": "foreshadows[6].payoffQuotes[0]", "quote": "操欲立后嗣，踌躇不定，乃问贾诩曰：“孤欲立后嗣，当立谁？”", "start": 345330, "end": 345359, "verbatim": true, "findEqualsStart": true},
+      {"path": "states[1].beforeQuotes[0]", "quote": "众人闻言，面面相觑。甘宁见众人有难色", "start": 342826, "end": 342844, "verbatim": true, "findEqualsStart": true},
+      {"path": "foreshadows[0].setupQuotes[0]", "quote": "约至二更时候取白鹅翎一百根，插于盔上为号", "start": 342907, "end": 342927, "verbatim": true, "findEqualsStart": true},
+      {"path": "foreshadows[7].payoffQuotes[0]", "quote": "化成一个左慈，向空招白鹤一只骑坐", "start": 347305, "end": 347321, "verbatim": true, "findEqualsStart": true},
+      {"path": "worldSettings[31].quote", "quote": "慈取桌上玉杯，满斟佳酿进操曰：“大王可饮此酒，寿有千年。”", "start": 346795, "end": 346824, "verbatim": true, "findEqualsStart": true}
+    ]
+  },
+  "misKillCheck": {
+    "verdict": "未发现误杀",
+    "detail": "逐条复核候选主动排除的 5 条 rejectedCauseEdges、7 条 notForeshadows、5 条 notWorldSettings：①R01（董袭之死 → 孙权求和）拒绝理由成立——原文给求和的理由另有明文（「权在濡须，与操相拒月余，不能取胜」+ 张昭顾雍「曹操势大，不可力取；若与久战，大损士卒」），全集确无一句把两者相连；②R02（掷杯 → 曹操之死）拒绝成立，回末明写「未知曹操性命如何」；③R03（张辽搦战 → 甘宁劫营）方向确实相反（搦战在劫营之后）；④R04（崔琰被杖杀 → 立魏王）拒绝成立且是**从紧**——受爵依据（表奏/颂功德/诏三书册立/三辞三报不许）写得极具体，无一句连到崔琰；⑤R05（乐进中箭 → 次日五路来袭）拒绝成立，原文以「次日」标记时间推进而非因果。notForeshadows 的 7 条（紫芽姜与金盆、《孟德新书》、青罗伞、白鸠、「土鼠随金虎」、牧羊小童、树株抓袍袖）我逐条回原文确认**均只出现一次、无回收**，排除正确；notWorldSettings 的 5 条（宴席排场、舆服术语层、垓心、猪羊血厌胜、回目「掷杯」）同属防止「术语装饰层膨胀」的正当排除。唯一近于误杀形态的是 R2（『三番/两番』数字矛盾未登记）与 R3（条件句伏笔未收录），但二者是**遗漏**而非有理由的排除，且不构成把合法因果挡掉。"
+  },
+  "hallucinationCheck": {
+    "verdict": "未发现幻觉或越权",
+    "detail": "①人物全集核对：候选出现的全部人物名逐一在区间原文中 `find`；唯一在切片内 0 次出现的是「荀彧」（2 处，均在 T11.obstacle 与 C15 的**说明文字**里，作为「荀文若」的同人异名注解——原文用「荀文若」，二者确为同一人），且属于**释义性行文**而非引文，不计为编造；另核对「许褚/许诸」（原文同区间两写并存，候选 TX01 已如实登记，未统一改写）、「袁本初/刘景升」（原文用字号，候选照原文引用而未替换为袁绍/刘表）。②全书口径反查：候选无任何一个**全书也无**的人物名（关羽/张飞/诸葛亮/司马懿/华佗/管辂/于吉等均未出现）。③结局未倒填：本回以「未知曹操性命如何，且看下文分解」收束，候选 K11/U05 与 R02 一致保留空白，未写曹操受伤或死亡。④未把结束当成功：'成功' 4 处全为否定式（『故不写「守船成功」』等），'达成' 的使用是「未达成」与「自设条件达成」的分列，未把播放到结尾当作成功。⑤未把人物语升格为叙述事实：14 条 speechAsClueNotFact 逐条检查，SA02（放箭者）、SA04（土鼠随金虎）、SA05（刘备细作）、SA09（贾诩之对）、SA14（吾池中原有此鱼）均明确标注『叙述层只确认…』并限定用途，与 T04.objective=null 的处理一致。⑥semanticReview 保持 'not-performed'，未声称语义已核验。"
+  },
+  "usableVsDiscard": {
+    "usableAsIs": [
+      "全部 23 条任务（T01–T23）的五元组事实内容与引文——476 条引文逐字可核、偏移一致、无跨栏共用",
+      "causeEdges C01–C37 的因果方向与机制（机制措辞均能在原文找到落点）",
+      "rejectedCauseEdges R01–R05、notForeshadows NF01–NF07、notWorldSettings 5 条的排除理由",
+      "states S01–S13、S16 共 15 条（S15 除外，见 mustFix）",
+      "knowledgeGaps K01–K11、foreshadows F01–F08（含 F08 partially-resolved、F04 unresolved）、worldSettings 33 条与 placeState/itemStates/institution 三类字段的使用",
+      "speechAsClueNotFact SA01–SA14、unknowns U01–U21、selfCritique SC1–SC5、textualNotes TX01–TX07",
+      "themeReadings TH1/TH2——两者都给了 perspective + support + counter 三件，且 counter 均为**实质反例**（TH1 用『曹操实权扩张』反驳『验证失效=左慈胜利』；TH2 用『甘宁代价为零』反驳『打这一仗必有代价』），未使用事件密度/死亡人数/篇幅中点定义高潮",
+      "sourceHashDiscrepancy 一节（经独立复算成立）",
+      "coverageDeclaration 的三个数字（4100/4100/4119）与 wholeSlice 分数 0.99253（逐项复算完全一致）"
+    ],
+    "mustFix": [
+      "states[14]（S15）.after：把「陈武在江边被庞德所杀」改为「陈武在峪口被庞德所杀」（或删去地点、只写『为庞德所杀』），并复核结论句『两处部署位置都成了丧命之处』——陈武受命『往来江岸巡哨』而死於峪口，部署位置与丧命之处并不重合，该推论需改写或补引 344314–344355 作为 afterQuotes。"
+    ],
+    "suggested": [
+      "textualNotes 增补一条：登记同区间内「三番冲杀」（344215）与「两番相救」（344542）的**数字矛盾**，与已登记的 TX01（许褚/许诸）同类处理。",
+      "foreshadows 或 notForeshadows 增补「孙权先撤人马，吾然后班师」（344771–344801）→（344806–344846）的铺设/回收，与 F02 同型。",
+      "考虑为「曹操令曹休暗放冷箭 → 凌统马中箭被掀翻」（343395–343464）建一条 causeEdge，与 C08（乐进中箭）对称。",
+      "考虑为献帝/钟繇的册立执行（345053–345070）补一条 state，以覆盖皇权被迫执行方。"
+    ]
+  },
+  "notes": "总体判断：**引用层无可挑剔，抽取密度罕见地高**（476 条引文零失败、bodyRange 汉字覆盖 100%、五栏零共用、17 处 null 全部带 Note），判 partial 的唯一实质理由是 states[14]（S15）的一处**地点误述**——它可被原文直接证伪（『陈武在江边被庞德所杀』全文 find=-1），且候选**自身**在 T08 标题与 worldSettings/峪口 条里记的是「峪口」，构成机器可检的内部自相矛盾，故不能判 pass。为什么不判 fail：按 VERIFIER 契约「判 fail 必须有 counterExample，且 quote 逐字可查」——CEX01 的 quote 逐字可查，但其性质是 derived 状态条目的措辞错误，**不是编造**（陈武确在江边入场，原文另有『孙权知陈武已亡』），全部 476 条引文与所有抽取内容经原文核验为真，无原文外人物、无原文外结局、未把结束当成功。\n\n**我自己的一个错误，如实登记（重要）**：本复核第一版仪器把绝对偏移拿去索引**切片**（`SL[st:en]` 而非 `T[st:en]`），当场报出「476/476 全部偏移不符」——一个把**零缺陷**读成**全盘崩坏**的假阳性。若我停在那一版，会据此判 fail 并诬告一份高质量候选。根因是仪器错误而非被测对象错误；已改为全文索引后 476/476 全部命中。同一版仪器还把 TX06 的分隔线误判为「越界」，实际是 find() 返回首现（4835）而候选用 nthOccurrence=68 精确消歧到 347443——**候选是对的，我的检查是错的**。这两处都写进 notes 而不是藏起来，因为本项目反复出现的失败形态正是「仪器不可信 ⇒ 结论不可信」。\n\n不确定处（如实记为存疑，未据此判 fail）：①R2 的「三番/两番」是否**必须**登记为 textNote，取决于项目对文本瑕疵登记范围的口径——我按 TX01 的既有先例认为应当登记，但原文本身矛盾，登记与否不改变事实；②R3 的条件句是否够格称「伏笔」（它跨越不足 40 个 codepoint 就被回收），若项目要求伏笔有足够跨度，则可降为建议；③R4/R5 属抽取粒度取舍，若项目口径不要求穷尽因果边与状态主体，可全部降为建议；④fieldCounts.quotes=393 只计标量 quote 字段、未计 *Quotes[] 的 83 条（合计 476）；经核 393 与标量字段数**精确相等**，属口径说明而非计数错误，但字段名容易被读成「引文总数」，建议改名或加注。\n\n范围声明：本轮只按任务给定的 [342369,347496) 复核，未做跨回目追查（左慈来历、土鼠随金虎所指、曹操结局等 unknowns 是否在别回被回收）；未与图谱缓存 data/cache/fe42d01f3826fe8096f86614.json 逐条对照（按提示词不算原文证据）；未运行任何 GPU/浏览器测试（本任务不需要）。"
+  ,
+  "evidence": [
+    {
+      "cmd": "shasum -a 256 data/cache/fe42d01f3826fe8096f86614.docs.json loop/state/out/read_sanguo_L1_0067.candidate.json",
+      "result": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2 / c36afac7d53274ec65a69963995180d62cdb28bff83a8ca1ce615f7f7b87b93e",
+      "meaning": "原文与被复核候选的哈希（动手前后一致，未修改）"
+    },
+    {
+      "cmd": "python3 -B -s \"$CL_ARTIFACTS/verify-sanguo-L1-0067/audit.py\"",
+      "result": "A 段：text 607191、切片 5127、slice sha256 04d9e20e…、以回目开头 True；B 段：476 引文 T[s:e]==q 失败 0、偏移不符 0、越界 0、sourceHash 不符 0、globalOccurrences/nthOccurrence/inRange 不符各 0；C 段：种子 68 抽 5 条 5/5 逐字且偏移一致；D 段：跨栏相交 0、null 计数 objective 3/cost 14；E 段：merged 27、4100/4100/4119 两实现一致；F 段：2988ce 命中 2 文件且文本逐字相同；G 段：S15 地点误述等 5 项反向发现；H 段：无编造人物、成功语 4 处全为否定式、semanticReview=not-performed；I 段：fieldCounts 14 项全符",
+      "meaning": "全部数字的机器复算（本复核的证据基座）"
+    },
+    {
+      "cmd": "python3 -c \"import json;t=json.load(open('data/cache/fe42d01f3826fe8096f86614.docs.json'))[0]['text'];print(t.find('陈武在江边被庞德所杀'))\"",
+      "result": "-1",
+      "meaning": "CEX01 的核心反证：候选 S15 的结论串在原文中不存在；原文的死亡地点是『峪口』(344314–344355)"
+    }
+  ],
+  "remaining": [
+    "未做跨回目追查（左慈来历、『土鼠随金虎』所指、曹操结局、贾诩所教内容等 21 条 unknowns 是否在别回被回收）——本轮只按任务给定的 [342369,347496) 复核。",
+    "未与图谱缓存 data/cache/fe42d01f3826fe8096f86614.json 逐条对照（按提示词明确『不算原文证据』）。",
+    "未判定 2988ce6e 与 8ab7298a 两个哈希口径哪个是任务生成器的预期值——本轮只证明两文件正文逐字相同、引文证据不受影响。",
+    "未运行任何 GPU/浏览器测试（本任务不需要）。"
+  ],
+  "changes": [],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/verify_sanguo_L1_0067.verdict.json"
+    ]
+  },
+  "auditCmd": "python3 -B -s \"$CL_ARTIFACTS/verify-sanguo-L1-0067/audit.py\"",
+  "auditScriptPath": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/verify-sanguo-L1-0067/audit.py",
+  "auditScriptSha256": "ea69b484413b63507a052322251abd19e520be478bccc3daeb1e7fc759d240ed",
+  "auditOutputPath": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/verify-sanguo-L1-0067/audit-output.txt",
+  "auditOutputSha256": "34909e5ff28033e533bb42ab18e2cc1b0e503979643a044d9b8257fd5ebc2c2f",
+  "sourceHashes": {
+    "data/cache/fe42d01f3826fe8096f86614.docs.json": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+    "loop/state/out/read_sanguo_L1_0067.candidate.json": "c36afac7d53274ec65a69963995180d62cdb28bff83a8ca1ce615f7f7b87b93e"
+  },
+  "sourceHashesNote": "两文件均在复核全程保持上述哈希（动手前与提交前各测一次，一致）；本轮**未修改**候选与原文，唯一写入物是本文件。"
+}

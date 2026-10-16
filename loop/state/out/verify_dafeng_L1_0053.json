@@ -1,0 +1,106 @@
+{
+  "task": "verify:dafeng:L1:0053",
+  "agent": "w-dafeng-2",
+  "status": "done",
+  "summary": "独立反向复核《大奉打更人》第五十四章 截胡（docs[0].text codepoint [162939,165570)，2631 字）→ 判定 partial。先自己逐行读原文（156 行）再看候选，不复用候选的 build 脚本，另写独立复算：112/112 条引文 text[start:end]==quote 且 find()==start、计数/inRange/章头/sourceHash 零失配；183 处「」内文本全部逐字可查；随机抽 5 条 quote 逐条 find() 核验全中；候选 selfCheck 的机器数字全部复现。3 条反例全部是区间外的回收元数据（F2 官银章节枚举点名了零命中的第一百九十九章、漏掉真正含 1 处的第两百一十章；F5「19 处」实为 28 处；F4「第二百七十一章」全书不存在、实为第七十一章），不推翻任何一条 unresolved 的结论方向，故判 partial 而非 fail。另给出 7 条反向发现（候选未覆盖但原文明确存在的事实）与 4 条误杀检查。",
+  "evidence": [
+    {
+      "path": "loop/state/out/verify_dafeng_L1_0053.verdict.json",
+      "sha256": "b13b2e607d15ef2ae8aa4f195187ca0746c90bc1b284b2df00211ca6f165f093",
+      "kind": "verdict",
+      "note": "本轮复核结论（任务 writes 指定路径）；VERIFIER.md 规定格式：verdict/counterExamples/reverseChecks/notes，另附 citationAudit/method/reverseChecks 明细"
+    },
+    {
+      "path": "loop/state/out/read_dafeng_L1_0053.candidate.json",
+      "sha256": "184c3722cf379a84f79304692ad3d1410361ddcac79930c226d3517bc256ccc1",
+      "kind": "被复核候选（只读，未修改）"
+    },
+    {
+      "path": "data/cache/9b676d7031b1bcd3b8377a18.docs.json",
+      "sha256": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+      "kind": "原文来源（只读）"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "偏移口径与源哈希：docs[0].text[162939:165570] 以「第五十四章 截胡」开头、长度 2631、sha256 7ed8192f9a4a464f2c8222e0a10def8dc4c82f97dfce31ec21ebe61b37e759d5；docs.json sha256 == fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839，与任务 sourceHash 一致。复现：python3 -c \"import json,hashlib;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];s=t[162939:165570];print(repr(s[:12]),len(s),hashlib.sha256(s.encode()).hexdigest())\"",
+      "result": "pass"
+    },
+    {
+      "text": "引文全量复算（非抽查）：独立递归收集候选 112 条 {quote,start,end}，逐条断言 text[start:end]==quote、text.find(quote)==start、end-start==len(quote)、occurrencesInFullText==text.count(quote)、inRange 与偏移实际落点一致、chapterAtOffset 与机器定位章头一致、sourceHash 一致 —— 全部 112 条零失败。",
+      "result": "pass"
+    },
+    {
+      "text": "引用核验随机抽 5 条：/states[4]/evidence[7] 165417、/rejectedAsForeshadow[1]/quote 163981、/tasks[4]/evidence[5] 165089、/states[0]/evidence[0] 163658、/states[2]/evidence[0] 163549 —— 5 条 find() 命中偏移与声明 start 完全一致、逐字命中、occurrences 声明=实际=1。",
+      "result": "pass"
+    },
+    {
+      "text": "「」引号纪律：候选文件内 183 处「」内文本逐条 find() 在原文命中，零失败；7 条区间外引文全部标 inRange=false。",
+      "result": "pass"
+    },
+    {
+      "text": "候选 selfCheck 机器数字复现：identityTermScan 许七安=4/杨公子=2/杨凌=0/长乐县=0；sourceQuoteBalance “=29/”=28 且唯一失衡行确为切片第 18 行；dialogueAuthorScan 4 处「许七安」逐行判定全部落在引号外，行号 48/66/72/76（0-based，与候选一致）。",
+      "result": "pass"
+    },
+    {
+      "text": "反例 1（F2 官银枚举）：官银全书 10 处，按章头归集为 第五十四章 2／第一百九十章 1／第两百一十章 1／第十章 4／第一百零八章 1／第一百一十一章 1。候选点名的「第一百九十九章」在两处同名章（offset 732250 与 2097874）内官银均为 0 次，而真正含 1 处的「第两百一十章 王思慕的震惊」（offset 2164125「官银、金锭，以及曹国公珍藏的宝贝，足够堆起一座小小的宝山。」）被漏掉；「第十章」实为 4 处。",
+      "result": "fail"
+    },
+    {
+      "text": "反例 2（F5 计数）：按 index.json chapterUnits 章边界复算「赵公子」为 第五十二章 7／第五十三章 7／第五十四章 14 = 28 处（全书 33），非候选所称 19 处；出现次数/含该串行数/段数/台词内外四种口径分别 28/28/28/22，无一为 19。",
+      "result": "fail"
+    },
+    {
+      "text": "反例 3（F4 章号）：「第二百七十一章」在本书不存在（text.count('第二百七十一章')==0、'第两百七十一章'==0、chapterUnits max(no)==265 且无 no==270/271）。候选所引「一千两，少一文就是蓄意谋杀」真实位置 offset 1323693，章头为「第七十一章 勾心斗角（大章）」（章头起点 1316296，全书章单元序数第 301）。同条前半「第一百零四章 许辞旧：卖身也要救大哥」复算正确（offset 342369），属单点错非整轴偏移。",
+      "result": "fail"
+    },
+    {
+      "text": "反向验证（≥3 条，全部带区间内逐字引证与偏移）：①花魁先发问「公子？」花魁痴痴笑道：「公子何故如此看着奴家。」164231；②宣纸落地「他原地呆了许久，手指一松，宣纸徐徐飘落。」164872；③中年人收束「他这样的态度，让问话的中年人一阵恼怒、尴尬，拂袖回了原位。」163107；④主卧陈设整段未引（163860/163914/163939/163970）；⑤内心浮诗 164114；⑥浮香两副面目 164158；⑦客人第三条台词 165129。",
+      "result": "pass"
+    },
+    {
+      "text": "误杀检查：候选 rejectedAsForeshadow 的 4 条排除逐条复算成立——雨打芭蕉=1、青色莲花=1、影梅小阁=73（本区间 2 处，offset 163173/163305）、萍儿=2（164695/282523），未发现把合法项挡掉。另如实记录 1 条存疑（魅功排除可辩护，但第一百九十八章 offset 2094533 显示浮香实为夜姬、叙述层归因被后文反证）。",
+      "result": "pass"
+    },
+    {
+      "text": "幻觉/越权检查：未发现原文没有的人物、事件、结局；结尾未被写成成功（T7.result 与 F1 明确传播结果在区间外）；7 处 null 未用默认值填；reviewStatus.semanticReview 显式为 null。",
+      "result": "pass"
+    },
+    {
+      "text": "受保护路径未改：本轮只写任务 writes 指定的 loop/state/out/verify_dafeng_L1_0053.verdict.json 一个文件；未改动候选、未触碰 js/ css/ index.html serve.py narrative.py distill.py scripts/ tests/ tools/ docs/ data/。git status 中这些路径的改动均为并行 agent 的既有未提交工作。",
+      "result": "pass"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/verify_dafeng_L1_0053.verdict.json",
+      "kind": "append-only",
+      "note": "本任务唯一写入路径（新建复核结论文件）；未改动候选与任何受保护路径"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/9b676d7031b1bcd3b8377a18.docs.json": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "data/cache/9b676d7031b1bcd3b8377a18.json": "3c2fae1d399d6768719f2d5476fa0cfd88fb4fbbc12abdf080323fa4b846ebdf",
+    "loop/state/out/read_dafeng_L1_0053.candidate.json": "184c3722cf379a84f79304692ad3d1410361ddcac79930c226d3517bc256ccc1",
+    "note": "动手前/收尾各测一次，两次一致，说明复核期间无并行写入干扰；原文与被复核候选均未被本轮修改。"
+  },
+  "remaining": [
+    "未做语义层评价：只覆盖「抽取项是否有原文对应」「反向遗漏」「误杀」「幻觉」「引用核验」五项，未评价候选对人物动机的解读是否妥帖。",
+    "未逐条复核 unknowns 的 16 条是否穷尽。",
+    "未核对 coverage.namedEntitiesInRange 与区间实体全集是否一致。",
+    "候选的 3 条反例（F2/F4/F5 的区间外回收元数据）需原 worker 修正后重新提交；本复核不代改候选。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/verify_dafeng_L1_0053.verdict.json"
+    ]
+  },
+  "submittedAt": "2026-10-08T12:03:08Z",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-08T12:03:08Z"
+  },
+  "verifyState": "pending"
+}

@@ -1,0 +1,42 @@
+{
+  "task": "build:rsi-luna-overview:20261011",
+  "agent": "rsi-luna-overview-20261011",
+  "revision": 3,
+  "reworkOf": "loop/state/out/build_rsi-luna-overview_20261011.json",
+  "reworkReason": "主线程真实页面复现出M83在读板打开后完成时不会刷新M84入口；此次补宿主状态事件同步并加真实路径责任断言。",
+  "baseline": "当前主线程已合入/盖戳源码（提交时哈希见beforeHashes）",
+  "candidate": "/tmp/castline-artifacts/rsi-overview-20261011T065127Z/luna-v2",
+  "beforeHashes": {
+    "js/sky/sky-deep.js": "6f0c1241dd609bc0badc26068d03fba3008fa989ec0ff4a19de52713018eac61",
+    "js/sky/sky-deconstruction.js": "e69925fd4e705b65108cbf64c443431716e3482fe0e83eb805cf2e3beebb4216",
+    "tests/sky_story_browser.py": "eef14750761b1a987814dab0496be09a4b309bd6a8f4b3ffbfb7c6e157e10af2"
+  },
+  "candidateHashes": {
+    "js/sky/sky-deep.js": "a8158dcc720c8e4a34870ac2e9db1fccd121c2f810b7395ff1e25581bef5af41",
+    "js/sky/sky-deconstruction.js": "12208e1f7fd75fac6ebf8e8995d86d929363a76331ac68892ac31367d597a210",
+    "tests/sky_story_browser.py": "b95f416a0e299d05984585d240de23b742fb71bf11e7ac1aa63dee814bceb2f6"
+  },
+  "patch": "/Users/carmen/Desktop/星系/loop/state/out/build_rsi-luna-overview_20261011_rev3.patch",
+  "patchSha256": "1163b575b14b8d7a99f386e66ebca22a397921438deee0fb529f3e72f5efbf0d",
+  "implementation": [
+    "sky-deep只在M83终态完成与退出时派发结构状态事件；动画每帧不派事件。",
+    "解构读板在已打开总览时响应M83状态：完成后出现分层解释入口；退出时移除入口并撤销打开的M84副本。",
+    "在现有sky_story_browser真实西游路径中覆盖先开总览、再完成M83、再打开M84、退出M83后撤销入口和舞台。"
+  ],
+  "validation": {
+    "cpuContract": "node tests/sky_legend_parity_contract.js: 16/16",
+    "syntax": [
+      "node --check js/sky/sky-deep.js",
+      "node --check js/sky/sky-deconstruction.js",
+      "python3 -B -s AST parse tests/sky_story_browser.py"
+    ],
+    "browser": "主线程review已复现原问题；施工者未运行GPU/页面路径，待主线程按新增路径复验"
+  },
+  "remaining": [
+    "主线程重新跑真实页面入口/退出路径及命中目标检查。",
+    "候选仍需重新合入并盖版本戳、accept；本候选仅追加sky-deep状态事件接线、deconstruction监听和既有浏览器路径断言。"
+  ],
+  "limits": [
+    "不声称真实浏览器/ GPU / accept已通过。"
+  ]
+}

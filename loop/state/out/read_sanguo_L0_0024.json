@@ -1,0 +1,229 @@
+{
+  "task": "read:sanguo:L0:0024",
+  "agent": "w-xiyou-1",
+  "status": "done",
+  "summary": "精读《三国演义》第二十五回 [124400,129505) 全 5105 codepoint：12 条任务五元组（3 achieved／3 partial／5 not_achieved／1 undetermined；其中 2 条 cost 写 null、3 条 cost 的取值只记原文写出的部分，不补编造值）、38 条带方向+触发+机制的因果边、16 条被拒边、12 条状态变化、5 条知识差（逐条分列 whoKnows／whoDoesNotKnow）、6 条伏笔（1 条区间内反向回收 resolved、5 条显式 unresolved 并写明回收在区间外）+ 11 条非伏笔、20 条 unknowns、5 条 selfCritique、8 条用字异文、2 条插入韵语、7 条跨单元对照、7 个连接词 45 处逐处偏移台账，共 360 条结构化逐字引文（落在 130 个互异原文跨度上，另有 130 条锚串目录条目**不计入**引文数），实测正文覆盖率 98.99%（4999/5050），剩余 9 段未覆盖片段全部是纯空白分隔（'\\n\\n\\u3000\\u3000'，合计 51 字符），已逐条列出。semanticReview 未做。四项机械发现：一是引号层，本单元 116/116 双引号完全配平、单引号 0 次、深度最大 1、无负深度点，因此**无需任何修复**即可判定 voice——这一点与前一个单元 0022 的引号错位结论不同，未照搬；二是被拒边 R2 与因果边 C6 处理了本段最易读错的一处：下邳「火光冲天」不是失火，原文「却是那诈降兵卒偷开城门……只教举火以惑关公之心」把它重新定性为曹操惑敌的手段；三是覆盖率口径修正：构建期我最初按锚串目录统计（覆盖了未被任何断言引用的草稿锚串），verify.py 的 coverage_recomputed 检查报 fail（声明 0.8978 vs 重算 0.8000），已改为在装配后只统计实际写进候选的 quoteRef，并由独立复核脚本从已写盘文件第三次重算确认 0.9899。四是 anchorCatalog 的空洞通过：verify.py 最初忘了 import catalog 模块，导致 Q/R 为空、锚串唯一性检查在 0 条上「通过」；修正后该检查立刻抓出真实缺陷——第一批草稿锚串中有被细化版本取代、从未被任何断言引用的重复引文。现已改为从实际发出的 quoteRef 构建目录（130 条）并加非空洞断言（len>=100）。这两个都是**检查本身失效**而非产出出错，已在 recheck.py 里各加一条防回归断言。",
+  "evidence": [
+    {
+      "path": "loop/state/out/read_sanguo_L0_0024.candidate.json",
+      "sha256": "b8bd54d85cd7d8c20f3a19ffc59877d928bca7f400233e5a236159b3830b6dcf",
+      "kind": "worker-output"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "源文件 sha256 == 任务 sourceHash：python3 -c \"import hashlib;print(hashlib.sha256(open('data/cache/152e2a6eed94f1075e7e7070.docs.json','rb').read()).hexdigest())\" → 2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff，与任务 JSON 的 sourceHash 逐字相同；源文件 mtime 为 Oct 5 18:15（未被我改动）",
+      "result": "pass"
+    },
+    {
+      "text": "偏移口径自检：python3 -c \"import json;t=json.load(open('data/cache/152e2a6eed94f1075e7e7070.docs.json',encoding='utf-8'))[0]['text'];print(repr(t[124400:124423]))\" → '第二十五回\\u3000屯土山关公约三事\\u3000救白马曹操解重围'，与本单元 unitHead 逐字相同；并按 t[129505:129528]=='第二十六回　袁本初败兵折将　关云长挂印封金' 确认切片右端点正确。证实 start/end 是相对 docs[0].text 全文的绝对 codepoint 偏移，不是相对切片",
+      "result": "pass"
+    },
+    {
+      "text": "切片长度与哈希（另起字段 segmentSha256，未覆盖 sourceHash）：len(TEXT[124400:129505]) == 5105 == 任务声明的 5105 字；sha256(切片) = 030ac0229e4f9fb0ef91d9a25306aae22563bad4392791086658c6b4c77c309c",
+      "result": "pass"
+    },
+    {
+      "text": "引文可靠性由构建期锚串强制保证，不靠手抄：全部 360 条引文由「切片内 head 锚串出现且仅出现 1 次」定位、按可选的「head 之后唯一的 tail 锚串」结尾截取；core.q() 在构建期对唯一性做断言，任何手抄错字会抛 LocateError 而不是产出错引文。构建期 checkkeys.py 逐行扫描构建脚本，把 27 个笔误 key（如 f_cao_e_ran / f_tui_chu / f_ranshin）在写盘前全部拦下改正",
+      "result": "pass"
+    },
+    {
+      "text": "独立复核（读**已写盘**的候选文件，不复用构建期内存对象）：python3 -B -s /tmp/s24/recheck.py → 「独立复核：44 项，通过 44，失败 0」，退出码 0。44 项含：360 条引文逐条 TEXT[start:end]==quote、全部落在 [124400,129505) 内、sourceHash 一致、occurrencesInSlice 与实算一致、voice 与 insideQuotedSpan 与引号深度逐一相符、basis 取值合法（共 186 个带 basis 的节点）、结构字段齐全、覆盖率从已写盘文件重算一致、锚串目录 130 条逐条 verbatim、且每个 quoteKey 都真的出现在某个已发出的 quoteRef 中",
+      "result": "pass"
+    },
+    {
+      "text": "覆盖率口径修正的证据：构建期我最初把 coverage 写成按锚串目录统计（覆盖了未被任何断言引用的锚串），verify.py 的 coverage_recomputed 检查报 fail（0.8000 vs 声明值）。已把 coverage 改为在装配后由 _recompute_coverage() 只统计实际出现在候选 JSON 里的 quoteRef，并在 recheck.py 里从已写盘文件第三次独立重算：0.9899（4999/5050），与文件内声明一致；9 段未覆盖片段经机械判定全部是纯空白（字符集 ⊆ {换行, U+3000}）",
+      "result": "pass"
+    },
+    {
+      "text": "引号流机械核验：本单元左/右双引号 116/116（净 0）、左/右单引号 0/0、深度最大值 1、终值 0、负深度点 0 个、深度 ≥2 的点 0 个。因此 punctuationAudit.defect 为 null、textModified 为 false，voice 判定未做任何修复。这与前一个单元 0022（单引号净 -1、存在错位）结论不同，未照搬其修复方案",
+      "result": "pass"
+    },
+    {
+      "text": "被拒边与因果边的分层抽查（本段最易读错处）：R2「下邳城中火光冲天 → 下邳城真的失火了」被拒，依据原文 124806 处「却是那诈降兵卒偷开城门，曹操自提大军杀入城中，只教举火以惑关公之心」；相应地 C6 把「内应开城门 → 关羽惊惶」的机制写成「曹操主动用火传递假信息（惑其心）」，不写成「城破了所以关羽慌」。两处的引文均经 TEXT[start:end] 逐字核验",
+      "result": "pass"
+    },
+    {
+      "text": "「结束≠成功」的落实：taskLedger 12 条与 12 条 tasks 的 id 集合完全一致（集合相等，非计数相等），取值全部落在 {achieved, partial, not_achieved, undetermined}。T12（刘备）判 undetermined 而非任一生死结论，依据原文止于「唤刀斧手推出玄德斩之」+「未知玄德性命如何，且听下文分解」；S12 同此。F1/F3/F4/F5 四条伏笔显式标 resolved=false 并写明回收点在本单元之外（133196/210592/150176 等）",
+      "result": "pass"
+    },
+    {
+      "text": "「把说法当事实」的分层抽查：K3 记录了两级推断——沮授「此必是刘玄德之弟关云长也」（推断词「必是」）被袁绍升级为「汝必通谋」定罪，原文无任何通谋的证据环节；本候选既不写「刘备通谋」也不写「刘备无辜」（后者同样未经原文裁定，见 U10）。R11 单独被拒「沮授说颜良性狭 → 颜良确实性格狭隘」，因该评价只出现在谏言话语层",
+      "result": "pass"
+    },
+    {
+      "text": "未覆盖片段逐条登记：coverage.uncoveredSpans 9 段，全部为 '\\n\\n\\u3000\\u3000'（段落分隔，每段 4 字符，合计 51 字符 = 5050 − 4999）。正文覆盖区间取 [124400,129450)，129450 起为分隔线与「枫林晚 整理校对…」站点样板，非叙事正文（U20 登记）",
+      "result": "pass"
+    },
+    {
+      "text": "写入范围核验：git status --porcelain -- loop/ 在写入前后均为 '?? loop/'（loop 整体未入 Git 跟踪）；find loop data js css scripts tests docs -newermt '2026-10-08 08:30' -type f 显示我本轮新增/修改的只有 loop/state/out/read_sanguo_L0_0024.candidate.json 与该任务的租约心跳 loop/state/leases/read:sanguo:L0:0024.d/lease.json，其余命中项属并行 worker。未触碰 js/ css/ index.html serve.py narrative.py scripts/ tests/ docs/ data/",
+      "result": "pass"
+    },
+    {
+      "text": "未做 GPU/浏览器测试：任务未声明需要，工作内容为纯文本精读，未调用任何浏览器或 GPU 资源",
+      "result": "pass"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/read_sanguo_L0_0024.candidate.json",
+      "kind": "append-only"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/152e2a6eed94f1075e7e7070.docs.json": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff"
+  },
+  "remaining": [
+    "semanticReview 未做、claimVerification 未做：本候选只完成引文定位与结构分层，「引用定位正确」不等于「语义已核验」。人物动机与因果读法必须由 read-verify 通道独立反向复核。",
+    "T6（曹操厚待关羽）的 objective 是我由一串叙述层动作合成的，原文没有一处曹操自己声明的目标；该条 result=not_achieved 的判断依赖「愈加敬服 / 心实不悦 / 愕然而悔」三处内心描写的权重，这个权重原文没有裁决。",
+    "C20（曹操问髯 → 赠纱锦囊）与 R8：原文把关羽醉言与问髯连写但未写曹操意图，我按 derived 连边并在 U6 标存疑；这一处的读法我把握最低。",
+    "C23（关羽说赠马可一日见兄 → 操愕然而悔）：「悔」的对象原文未写明，U7 登记；跨单元对照显示此马后来确实用于寻兄（134027），但那是叙述层的话，与本单元关羽话语层级不同。",
+    "F2（荀彧「不教彼立功」）我判为区间内反向回收（对策被现实推翻），而非「伏笔被应验」；这是读法判断，非原文直述。",
+    "S3（关羽身份：守将 → 降将）在本单元内**未完成**：原文只写到「然后投降」这一步，没有投降仪式的文字。若复核认为「曹操允三事 + 关羽入城」已构成降，则该状态应改为已完成——此处有解释空间，已在 U2 登记。",
+    "颜良的「性狭」（沮授语）与关羽的「如插标卖首」（关羽语）都是话语层，本单元内没有任何叙述层证据可以证实或否证；我没有据此给人物性格下结论。",
+    "跨单元回收（F1/F3/F4/F5）只做了锚点定位与摘句，未逐字核验那些区间内部的结构；那些单元属其他任务范围。",
+    "本单元无 GPU/浏览器相关工作，未做真机或读屏核验。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/read_sanguo_L0_0024.candidate.json"
+    ]
+  },
+  "submittedAt": "2026-10-08T00:44:57Z",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-08T00:44:57Z"
+  },
+  "verifyState": "partial",
+  "reviews": [
+    {
+      "reviewer": "w-verify-2",
+      "at": "2026-10-12T05:19:06Z",
+      "verdict": "partial",
+      "notes": "总判断：候选的**抽取内容经得起对抗性复核**（零编造、零错位、无误杀、无幻觉），但存在 7 条可机器证伪的实体/自述不一致与元数据错误，因此判 **partial**，不判 pass。\n\n【§1 · 为什么不是 fail】内容层 130/130 引文逐字命中、偏移精确、全库唯一；490 处 quoteRef 无一例外；16 条被拒边无误杀；未发现原文没有的人物/结局/伏笔；刘备生死按「悬置」处理、颜良按「方欲问时+措手不及+马快」处理、下邳火按「惑关公之心」处理——这三处正是本单元最易出错的地方，候选全部挡对。按 VERIFIER.md 第 36/37 行，没有逐字可查的 counterExample 就不能判 fail，而我的 CE1–CE7 全部是「实体与自述不一致」类，不是伪造原文。\n\n【§2 · 为什么不是 pass】CE1–CE5 与 CE7 是**下游会真实消费**的缺陷：① CE1/CE2 的字段自称写 null 却实为对象，而 to_candidate._txt() 会把这段自述当正文搬走（T12 的 goal 会变成「保住性命。原文没有写他的目标……」）；② CE1 的「保住性命」全库 0 次却挂 explicit，触碰 READER.md 第 23 行红线；③ CE7 会让 12 条 tasks 里的 2 条静默丢弃；④ CE4 章号错、CE3 悬空 ID 使跨单元回指失效；⑤ CE5 时间线倒置并引入原文没有的动机词（且与本文件 R5 自相矛盾）。这些不改写抽取内容，但足以让「已自证一致」的盖章不成立。\n\n【§3 · 我的独立复算（可粘贴复现，只依赖仓库内文件）】\n· 全量引文：python3 -c \"import json;t=json.load(open('data/cache/152e2a6eed94f1075e7e7070.docs.json',encoding='utf-8'))[0]['text'];c=json.load(open('loop/state/out/read_sanguo_L0_0024.candidate.json',encoding='utf-8'));R=[]\ndef w(o):\n  if isinstance(o,dict):\n    if {'quote','start','end'}<=set(o): R.append(o)\n    [w(v) for v in o.values()]\n  elif isinstance(o,list): [w(v) for v in o]\nw(c);U={(r['start'],r['end'],r['quote']) for r in R};print(len(R),len(U),sum(1 for s,e,q in U if t.find(q)!=s or s+len(q)!=e or t.count(q)!=1))\" → 490 130 0\n· 覆盖率：body 5050、covered 4999、0.9899（与候选一致）\n· 引号：116/116、单引号 0/0、maxDepth 1\n· 连接词 7 组：count 与 offsets 全部一致\n· 图谱口径：507 人物 / 843 索引键，resolve_character 对 T1、T8 返回 None，其余 10 条 tasks 与 12 条 states 正常\n\n【§4 · 反向验证】RC1–RC10，其中 RC1/RC2/RC3/RC4/RC5 经机械确认在候选全部分析性散文中 **0 次**出现。最关键的是 RC2（关羽「愿从于地下」的殉死答复）——它使 T7/S7/K1 对关羽离心的**强度刻画偏低**；RC3/RC5 则把两条「他人→关羽」的信息流漏在 knowledgeGaps 之外；RC10 是我唯一一条方向性发现（S7 的「承认留不住」强于原文），但因与 U8 并存且不严格互斥，按纪律只记存疑。RC11 如实登记被我推翻的反向发现，避免虚报遗漏数。\n\n【§5 · 我自己的错，如实登记】① 我最初用裸子串在**全库**检索「手足无措」「粮草」并误报候选遗漏，复算发现两者在本单元 [124400,129505) 内**根本不出现**（「手足无措」在 341603/525698；「粮草」最近在 130088+）——反向验证必须**先按切片判定**再判遗漏，这是我的口径错误。② 我第一版引文手抄成「平旷」，原文为「平川旷野」，已更正。③ 我第一版给 RC4 写的 offset 是 127577（那是「礼毕，辽曰：」的起点），而该 quote 「辽曰：“我荐兄在丞相处，不曾落后？”」实际起于 **127580**；我在提交前的自检里用逐条 t.find(q)==claimed 的机检抓到并已改正。这三处都是**我的**错，不是候选的缺陷——我把它们都留在记录里，因为「复核者自己的锚也会漂」正是我在 CE5/CE4 里指控候选的同一形态。\n\n【§6 · 对写盘路径上那份旧草稿（未提交，w-verify-3，mtime 2026-10-11 20:52）的独立复验】我把它当作另一位复核者的意见逐条复算，结论分三类：\n① **成立并采纳**：CE1（保住性命 全库 0 次 + explicit + 自称 null）、CE3（E21 悬空 ID，E 前缀 0 条）、CE4（275649 属第五十六回，非第六十五回）、CE5（原文顺序共处一室→赠袍→赠马，候选倒置；「试探」全库 1 次且不在本单元）、CE6（/tmp/s24 不在仓库内；但它在 core.py:12 绑定 S,E=124400,129505，确是本单元、**非伪造**，故只作程序性存疑）。另其 RC1–RC9 我逐条复算**全部成立**（11 个短语在散文层均 0 次），已并入我的 reverseChecks。\n② **我驳回它的 CE2 根因诊断**：旧草稿称 causeEdges 第 38 条 C38「会被当作一条正常因果边参与搬运」，理由是 to_candidate.py:620 只查事件锚定、不读 mechanism 的自我否认。**实测不成立**：桥的主循环在进入 causeEdges 分支**之前**先做 `refs=collect_refs(item,...)`,`if not refs: dropped('no_verbatim_quote'); continue`（to_candidate.py:568–573），而 C38 的 quoteRefs 为空 ⇒ collect_refs 返回 **0** ⇒ 它在到达 causeEdges 分支前就已被 `no_verbatim_quote` 丢弃。复现：python3 -c \"import json,sys;sys.path.insert(0,'loop/bin');import to_candidate as tc;c=json.load(open('loop/state/out/read_sanguo_L0_0024.candidate.json',encoding='utf-8'));t=json.load(open('data/cache/152e2a6eed94f1075e7e7070.docs.json',encoding='utf-8'))[0]['text'];print(len(tc.collect_refs(c['causeEdges'][-1],t,'s','p','h')))\" → 0。**故 C38 的实际缺陷只是「不该出现在 causeEdges 数组里」（表达层），不是我最初以为的下游污染；我据实降低其严重度，不作为 counterExample。**\n③ **我驳回它的 CE7 根因诊断**：旧草稿称「全角『／』导致 _character_candidates 切不开，改成 ASCII '/' 就能切出 ['曹操','程昱']」。**实测不成立**：ASCII 版本同样返回 None —— `'曹操/荀彧'`、`'曹操/程昱'`、`'曹操、程昱'` 全部为 None。真实根因是 `resolve_character()` 的**设计意图**：候选名解析到 ≥2 个不同 id（真·多人条目）时**一律返回 None**（源码注释明写「解析到 0 个或 ≥2 个不同 id（真·多人条目）一律返回 None —— 把多人条目硬塞给其中一人，就是身份错并，本计划明令禁止」）。复现：`'曹操/荀彧'` 的候选名分别命中 ch_c15ecd953f7ed54a 与 ch_6a1107e4d5990452，并集大小 2 ⇒ None。**所以这不是「解析器的全角缺口」（误杀），而是「候选写了多人条目」与「桥禁止身份错并」之间的既定冲突**——正确处置是候选改写成唯一人物，而不是改桥的分隔符正则。我把 CE7 的**结论**（这两条会丢）保留为 counterExample，但把**根因与建议**按实测改写。\n\n【§7 · 不确定处】① 我无法核验候选「readWholeSlice / 未用图谱缓存摘要代替原文」的自述，只能确认其引文与原文逐字一致；② RC5 出自张辽转述（voice=mixed），若要采用须与叙述层分开标注；③ CE6 的 /tmp/s24 我确认存在且绑定本单元，但它不可持久复现——若项目要求证据必须落在仓库内，应补一份仓内脚本；④ 490 vs 360 的 quoteRef 计数口径差我按「候选已自述」宽容处理，若审计要求两者必须同口径，需统一。",
+      "counterExamples": [
+        {
+          "claim": "CE1 · tasks[11]（T12_liu_bei_endangered）.objective 的第一句「保住性命。」被标 basis=\"explicit\"（原文直述），但该四字在 607191 字的全库中**出现 0 次**；且同字段自己的 note 写「objective 写 null」，而该字段实际是**非 null 的对象**（含 text/basis/quoteRefs/note）。断言、依据、备注三者互斥。",
+          "candidateQuote": "保住性命。原文没有写他的目标，只写他被指认后的处境；因此这里不填 objective。",
+          "quote": "唤刀斧手推出玄德斩之。",
+          "sourceOffset": 129402,
+          "why": "复现：python3 -c \"import json;t=json.load(open('data/cache/152e2a6eed94f1075e7e7070.docs.json',encoding='utf-8'))[0]['text'];print(t.count('保住性命'))\" → 0。又 python3 -c \"import json;c=json.load(open('loop/state/out/read_sanguo_L0_0024.candidate.json',encoding='utf-8'));o=c['tasks'][11]['objective'];print(o is None, o['basis'], o['note'])\" → False explicit '刘备在本单元内没有为自己的处境说过一句话；objective 写 null.'\n原文对刘备本单元的最后动作止于「推出」，结果未写（下一句即「未知玄德性命如何，且听下文分解」）。**方向判断候选是对的**（T12.result 写 undetermined 正确），错的是 objective 用了一个原文没有的目标陈述并挂 explicit —— 这是 READER.md 第 23 行红线「缺字段写 null，不要写 0 / 0.5 /『未提及』以外的编造值」的轻量形态。"
+        },
+        {
+          "claim": "CE2 · tasks[2]（T3）.cost、tasks[10]（T11）.objective、tasks[11]（T12）.objective、tasks[11]（T12）.cost 四处 note 都自称「写 null」，但四个字段**全部是非 null 的对象**；同一候选里 tasks[0]（T1）.cost 用完全相同语义（「曹操此计的代价原文未写，故本项不填」）却**没有**声称写 null —— 两种口径互相矛盾。",
+          "candidateQuote": "cost 缺项 → 写 null，不补听起来合理的值。",
+          "quote": "绍遣大将颜良作先锋，进攻白马。",
+          "sourceOffset": 128173,
+          "why": "复现：python3 -c \"import json;c=json.load(open('loop/state/out/read_sanguo_L0_0024.candidate.json',encoding='utf-8'));\nfor i,f in [(2,'cost'),(10,'objective'),(11,'objective'),(11,'cost')]:\n v=c['tasks'][i][f];print(i,f,v is None,(v or {}).get('note'))\"\n→ 四行均为 `False <含 null 的 note>`。按 READER.md 第 23 行，缺项应**真写 null**；若作者选择「以文字声明缺项」也应统一（T1.cost 的做法）。现在是自述与实体不一致，且下游 to_candidate 的 _txt() 会把这段自述当作 goal/cost 正文搬走（见 CE1 的说明）。"
+        },
+        {
+          "claim": "CE3 · crossUnitRefs[6]（X7）引用了一个**不存在的 ID**「E21」。该候选定义的 ID 前缀只有 C/F/IV/K/NF/R/S/SC/T/U/V/X 十二类，**E 前缀 0 条**；同文件另有 5 处 ID 互引（selfCritique 引 T3/T4/T6/T9/T12、unknowns 引 T1/T5）全部能对上，E21 是唯一悬空项。",
+          "candidateQuote": "本单元赠纱锦囊护髯（E21）的后续使用：「公乃停刀立马，解开须囊，出长髯令视之」——囊被用来验明身份。",
+          "quote": "操以纱锦作囊，与关公护髯。",
+          "sourceOffset": 127176,
+          "why": "复现：python3 -c \"import json,re;c=json.load(open('loop/state/out/read_sanguo_L0_0024.candidate.json',encoding='utf-8'));ids=set()\ndef w(o):\n  if isinstance(o,dict):\n    if isinstance(o.get('id'),str): ids.add(o['id'])\n    [w(v) for v in o.values()]\n  elif isinstance(o,list): [w(v) for v in o]\nw(c);print(sorted({re.match(r'^[A-Za-z]+',i).group(0) for i in ids if re.match(r'^[A-Za-z]+',i)}));print([i for i in ids if re.match(r'^E\\\\d',i)])\"\n→ 前缀无 E，E21 列表为空；raw.count('E21') == 1，即 X7 这一处。引用**意图**（赠囊护髯）正确，错的是 ID 不存在，下游无法回指。"
+        },
+        {
+          "claim": "CE4 · notForeshadows[0]（NF1）把偏移 275649 标注为「第六十五回」，实际属于**第五十六回**。同句「全库只出现 2 次」的计数是对的，只有章号错。",
+          "candidateQuote": "「绿锦」全库只出现 2 次（126776 本单元、275649 第六十五回曹操自己「身穿绿锦罗袍」），后一次是曹操的袍子不是关羽那件，中间没有承接关系。不构成铺设+回收。",
+          "quote": "第五十六回　曹操大宴铜雀台　孔明三气周公瑾",
+          "sourceOffset": 275007,
+          "why": "复现：python3 -c \"import json,re;t=json.load(open('data/cache/152e2a6eed94f1075e7e7070.docs.json',encoding='utf-8'))[0]['text'];hs=[(m.start(),m.group(0)) for m in re.finditer(r'第[一二三四五六七八九十百]+回\\u3000',t)];print([h for h in hs if h[0]<=275649][-1]);print(t.find('第六十五回'))\"\n→ (275007, '第五十六回　…')；第六十五回起点 325247。被引的「身穿绿锦罗袍」本身逐字可查（275649）。**这是「引文真、归属假」的元数据错**，NF1 的结论（第二次不是关羽那件、不构成回收）不受影响。"
+        },
+        {
+          "claim": "CE5 · tasks[5]（T6_cao_cao_treat_guan_yu）.action 用「**先是**当面笑问……**再**赠赤兔马，并**故意**安排『使关公与二嫂共处一室』来**试探**」叙述，把「共处一室」排在赠马**之后**；原文顺序恰好相反，且「试探」「故意」是候选自加的动机词。",
+          "candidateQuote": "曹操继续加码：先是当面笑问「云长何如此之俭乎？」，再赠赤兔马，并故意安排「使关公与二嫂共处一室」来试探。",
+          "quote": "操欲乱其君臣之礼，使关公与二嫂共处一室。",
+          "sourceOffset": 126488,
+          "why": "复现：python3 -c \"import json;t=json.load(open('data/cache/152e2a6eed94f1075e7e7070.docs.json',encoding='utf-8'))[0]['text'];\nfor q in ['操欲乱其君臣之礼，使关公与二嫂共处一室。','取异锦作战袍一领相赠','遂并鞍辔送与关公。']: print(t.find(q),q)\"\n→ 126488 / 126789 / 127390，单调递增 ⇒ 原文顺序是「共处一室 → 赠袍 → 赠马」，候选的「先…再赠赤兔马…并…共处一室」把**末项提到首项**（时间线倒置）。另 python3 -c \"import json;t=json.load(open('data/cache/152e2a6eed94f1075e7e7070.docs.json',encoding='utf-8'))[0]['text'];print(t.count('试探'),t[124400:129505].count('试探'))\" → 1 0：全库仅 1 次且**不在本单元**，属原文未写的动机词。注：候选在别处（R5）已正确拒绝把「乱其君臣之礼」读成羞辱，此处 action 却用了「试探/故意」，**同一文件内部口径不一致**。"
+        },
+        {
+          "claim": "CE6 · coverage.recomputeCommand 指向 `/tmp/s24/verify.py`（依赖同目录 build.py/core.py/catalog*.py/doc_partial.json 等一次性脚手架）。该路径**不在仓库工作树内**（git ls-files 报 'is outside repository'），也不在 AGENTS.md 允许的产物目录（/Volumes/资源库/…）下 ⇒ 不构成可持久复现的证据。",
+          "candidateQuote": "python3 -B -s /tmp/s24/verify.py",
+          "quote": "python3 -B -s /tmp/s24/verify.py",
+          "hasSourceCitation": false,
+          "citationNote": "本条**没有原文引证**（它指控的是候选自述的命令串指向仓库外路径这一程序事实，原文里不存在可引文字）。按 VERIFIER.md 第 36 行「拿不出原文引证的反对意见只能记为存疑」，**本条不构成判 fail 的依据**，仅作程序性存疑登记。",
+          "why": "复现：ls /tmp/s24/ → 存在（build.py/core.py/catalog{,2,3}.py/doc_partial.json 等）；但 `git -C /Users/carmen/Desktop/星系 ls-files /tmp/s24` → fatal: '/tmp/s24' is outside repository。该脚本绑定 S,E=124400,129505 确是本单元、**并非伪造**（我核过 core.py:12），所以这是「证据不可持久复现」而非「数字造假」。我已独立重算它产出的全部关键量，结论一致（见 notes §3）。"
+        },
+        {
+          "claim": "CE7 · tasks[0]（T1）与 tasks[7]（T8）的 character 写成多人串（含全角「／」），经 loop/bin/to_candidate.py 的 resolve_character() 解析后返回 **None** ⇒ 这两条会被丢弃（no_resolvable_character），即 12 条 tasks 里有 2 条发布不出去。",
+          "candidateQuote": "曹操（执行者）／程昱（献计者）",
+          "quote": "却说程昱献计曰",
+          "sourceOffset": 124426,
+          "why": "复现（用真实图谱，与桥同一口径）：python3 -c \"import json,sys;sys.path.insert(0,'loop/bin');import to_candidate as tc;idx=json.load(open('loop/state/index.json',encoding='utf-8'));g=json.load(open(tc.graph_target('sanguo',idx)['graph'],encoding='utf-8'));cidx=tc.char_index(g);\nfor s in ['曹操（执行者）／程昱（献计者）','曹操／荀彧','曹操','程昱']: print(repr(s),tc.resolve_character({'character':s},cidx))\"\n→ None / None / '曹操' / '程昱'（图谱 507 人物、843 索引键）。另外 10 条 tasks 与全部 12 条 states.who 解析正常。\n【我驳回旧草稿对此条的根因诊断，见 notes §6②】——但**结论（这两条会丢）成立**，故仍作为 counterExample 登记。"
+        }
+      ],
+      "reverseChecks": [
+        {
+          "found": "RC1 · 双方兵力与编队从未被任何断言解释：曹操「引兵十五万，分三队而行」「先提五万军亲临白马」，颜良「前部精兵十万，排成阵势」。这是本单元唯一一次给出双方规模，也是「曹操以绝对优势兵力仍先折二将、被迫请关羽」这一层的量级前提。",
+          "quote": "操引兵十五万，分三队而行。",
+          "offset": 128310,
+          "precision": "该句所在整段为「操引兵十五万，分三队而行。于路又连接刘延告急文书，操先提五万军亲临白马，靠土山扎住。遥望山前平川旷野之地，颜良前部精兵十万，排成阵势。」（offset 128310）。",
+          "why": "「十五万」「十万」「三队」在候选**分析性散文层 0 次出现**（仅作为 quoteRef 的引文子串被机械覆盖）。判据：剔除所有 'quote' 键后对全文散文中检索。"
+        },
+        {
+          "found": "RC2 · 关羽对「若刘备已死」的终极答复未被登记：张辽追问后关羽答「愿从于地下」——这是关羽把「去心」推到**殉死**上限的唯一正面回答，也是原文紧接「辽知公终不可留」的直接触发句。",
+          "quote": "辽曰：“倘玄德已弃世，公何所归乎？”公曰：“愿从于地下。”",
+          "offset": 127724,
+          "why": "候选 T7 只用「吾终不留此。要必立效以报曹公，然后去耳」与「辽知公终不可留」，据此判 not_achieved；S7/K1 亦未收此句。该 quote 落在 C24 的大引文（127533–127775）**内部**，故覆盖率算它已覆盖，但散文层「愿从于地下」0 次 ⇒ 关羽立场的**强度被刻画偏低**。"
+        },
+        {
+          "found": "RC3 · 二嫂交付的寻兄任务未被登记：「叔今此去，可打听皇叔消息。」原文中「打听刘备消息」不只是关羽的单方意志，也是**家眷的指令**，且发生在关羽赴白马之前。",
+          "quote": "关公即入辞二嫂。二嫂曰：“叔今此去，可打听皇叔消息。”",
+          "offset": 128712,
+          "why": "候选 K2 只写「二嫂知道三事」（单向：关羽→二嫂），漏掉这条**反向**信息流（二嫂→关羽）。散文层「打听/消息/音信」0 次。"
+        },
+        {
+          "found": "RC4 · 张辽自陈举荐之功未被登记：「我荐兄在丞相处，不曾落后？」显示张辽把自己在曹营的立场与「荐关羽」绑定，是他上山劝降的**自身动机**（候选 U18 只写「非曹操授权」，方向正确但缺此动机）。",
+          "quote": "辽曰：“我荐兄在丞相处，不曾落后？”",
+          "offset": 127580,
+          "why": "散文层「荐兄/不曾落后」0 次；两次「荐」均指程昱举荐关公（causeEdges[29]）与 F3 名称。"
+        },
+        {
+          "found": "RC5 · 曹操在劝降阶段即下的护家眷军令未被登记：「差人护卫玄德家眷，不许惊忧。」这是后文「一军不敢入门」（甘夫人语）与「人民安妥不动」的**因**，比候选 C14 所连的「退军三十里」更早。",
+          "quote": "差人护卫玄德家眷，不许惊忧。",
+          "offset": 125070,
+          "why": "⚠ 分层证据：此语出自**张辽转述**（voice=mixed），若要采用必须与叙述层分开标注——候选自己在别处严守此纪律。散文层「不许惊忧」0 次。"
+        },
+        {
+          "found": "RC6 · 曹操的礼遇与表态被整段略过：「操自出辕门相接」「操慌忙答礼」「素慕云长忠义……足慰平生之望」。S5 把这一场压缩成状态转移的端点，未读「答礼」这个动作（汉末礼制下「慌忙答礼」与「以客礼待」「延之上座」构成同一条「待以客礼而非降将」的线）。",
+          "quote": "关公辞退，遂引数十骑来见曹操。操自出辕门相接。关公下马入拜，操慌忙答礼。",
+          "offset": 126252,
+          "why": "散文层「操慌忙答礼/足慰平生」0 次；S5.before 只引了同段后半「败兵之将，深荷不杀之恩」。"
+        },
+        {
+          "found": "RC7 · 曹操安抚关羽的动作未被登记：「操笑而宽解之，频以酒相劝」是关羽醉后失言的前因。候选 R8/U6 把「曹操是否有安抚意图」整体写成「最没把握」，但原文在同一段**更前面**已直述「笑而宽解之」——存疑范围被写得比实际更大。",
+          "quote": "公曰：“二嫂思兄痛哭，不由某心不悲。”操笑而宽解之，频以酒相劝。",
+          "offset": 127067,
+          "why": "散文层「宽解」0 次。这条与 R8 的自我怀疑直接相关：要说清的是「问髯是否属于安抚」，而不是「曹操有没有安抚」。"
+        },
+        {
+          "found": "RC8 · 关羽见嫂的礼节动作未被登记：「关公乃整衣跪于内门外」——在二夫人哭倒的紧急情境下关羽仍先整衣跪门外，比 C17 所用的「躬身施礼」是更强的「守礼」证据。",
+          "quote": "关公乃整衣跪于内门外，问二嫂为何悲泣。",
+          "offset": 126937,
+          "why": "落在 S4 引文（126903 起）内部，散文层「整衣跪」0 次。"
+        },
+        {
+          "found": "RC9 · 颜良的收场处置未被登记：「曹操收军，良亦引军退去。」它把白马首战定性为**双方脱离接触的收兵**而非曹军溃败，是后文曹操「心中忧闷」却仍能从容议请关羽的军事前提。",
+          "quote": "曹操收军，良亦引军退去。",
+          "offset": 128580,
+          "why": "散文层 0 次；该句落在 C30 引文段的边界处。"
+        },
+        {
+          "found": "RC10 · 曹操本人对「关羽终将离去」的态度未被登记：「操叹曰：『事主不忘其本，乃天下之义士也！』」被 S7.after 引用，但候选把它读成「从『用』转为『义士』的评价」——原文此处**没有**任何「放弃留用」的表述，紧接的荀彧献策与曹操在白马仍说「吾恐他立了功便去」都证明他**仍在设法留人**。候选 S7 的 attribute 写「承认留不住」，比原文更强。",
+          "quote": "操叹曰：“事主不忘其本，乃天下之义士也！”",
+          "offset": 127775,
+          "why": "这是本复核里唯一一条**方向性**的反向发现（其余是遗漏）：S7 的 after 侧结论强于原文。但因为「承认留不住」与「仍在留人」并非严格互斥（可以边敬服边挽留），且候选在 U8 已如实登记「曹操是否已确知关羽必去：原文没有写他确知」，故按纪律**记为存疑，不据此判 fail**。"
+        },
+        {
+          "found": "RC11 · 我为校准命中率而登记的「反向发现中被我自己推翻的项」：候选**已正确覆盖**「操骇然」「凤目圆睁/蚕眉直竖」「毫发不动/一军不敢入门」「非关公不可」「颜良首级拴于马项」「如入无人之境」「不战自乱」等 7 处细节（分别见 S8/T9/T5/C30/T11/C34）。",
+          "quote": "颜良前部精兵十万，排成阵势。操骇然",
+          "offset": 128363,
+          "why": "按 VERIFIER.md 第 40 行「你可以判自己错」，我如实登记这些**不算遗漏**，以免把命中率虚报成遗漏数。「骇然」虽不在散文层，但它落在 S8.before 引文内且 S8 记录了曹操派宋宪应战的反应链，不另计为遗漏（与 RC6/RC8 不同：那两条的对应断言确实不存在）。"
+        }
+      ]
+    }
+  ]
+}

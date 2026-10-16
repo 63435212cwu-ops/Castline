@@ -1,0 +1,164 @@
+{
+  "kind": "duplicate-claim investigation (no submit, deliberately)",
+  "task": "read:dafeng:L3:0283",
+  "agent": "w-read-4",
+  "role": "READER",
+  "outcome": "NOT SUBMITTED — 本任务在我领取前 91 秒已由 w-read-3 提交并通过机器校验；task.writes[0] 正是那条记录的第 1 条证据路径，覆写它会把该任务从 done_ids() 剔除。",
+  "situation": {
+    "priorRecordAgent": "w-read-3",
+    "priorRecordSubmittedAt": "2026-10-14T23:04:14Z",
+    "priorRecordStatus": "done",
+    "priorRecordValidationProblems": [],
+    "myLeaseAgent": "w-read-4",
+    "myLeaseStartedAt": "2026-10-14T23:05:45Z",
+    "deltaSeconds": 91,
+    "whoAmI": "本会话即 w-read-4（租约 pid 43553 的 worker 起的 dsh agent）",
+    "reproduce": "python3 -B -c \"import json;r=json.load(open('loop/state/out/read_dafeng_L3_0283.json'));l=json.load(open('loop/state/leases/read:dafeng:L3:0283.d/lease.json'));print(r['agent'],r['submittedAt'],l['agent'],l['startedAt'])\" → w-read-3 2026-10-14T23:04:14Z w-read-4 2026-10-14T23:05:45Z"
+  },
+  "raceForensics": {
+    "rootCause": "pick() 与 claim() 之间的 TOCTOU：worker.one_round 先 pick()（loop/bin/worker.py:519，其内部 loop/bin/loop.py:653 取 done=done_ids() 的**快照**），再 claim()（worker.py:525）。claim() 只判 lease_alive，**不复查 done**（loop.py:715 起）。done_ids() 要扫 960+ 个记录文件，实测单次 40–202 秒，窗口足够长。",
+    "evidence": [
+      "loop/bin/worker.py:519 `task, why = loopmod.pick(tasks, agent, streams)`",
+      "loop/bin/worker.py:525 `if loopmod.claim(task, agent) != 0:`",
+      "loop/bin/loop.py:653 `done = done_ids()`（pick 内的一次性快照）",
+      "loop/bin/loop.py:715 `def claim(...)` → `d.mkdir(parents=True)`，无 done 复查"
+    ],
+    "evictionProof": {
+      "writePath": "loop/state/out/read_dafeng_L3_0283.candidate.json",
+      "writePathIsAlsoCitedEvidence": true,
+      "evidenceIndex": 0,
+      "isEvolvingOfThatPath": false,
+      "whyIsEvolvingFalse": "loop/state/out/ 命中 MUTABLE_EXCEPTIONS（loop.py:369）⇒ is_evolving() 返回 False ⇒ 哈希变化被 evidence_stale() 记为 hash-changed（不是可容忍的演进）",
+      "consequence": "覆写 ⇒ evidence_stale() 非空 ⇒ read:dafeng:L3:0283 从 done_ids() 剔除；且 loop/state/out/ 是受保护审阅产物，改它超出 READER 的追加式写入权限。",
+      "reproduce": "python3 -B -s -c \"import importlib.util;s=importlib.util.spec_from_file_location('m','loop/bin/loop.py');m=importlib.util.module_from_spec(s);s.loader.exec_module(m);print(m.is_transient('loop/state/out/read_dafeng_L3_0283.candidate.json'),m.is_evolving('loop/state/out/read_dafeng_L3_0283.candidate.json'),m.evidence_stale(__import__('json').load(open('loop/state/out/read_dafeng_L3_0283.json'))))\" → False False []（当前为空；一旦覆写即非空）"
+    },
+    "precedent": [
+      "loop/state/out/read_dafeng_L3_0267.w-dafeng-0.dupclaim/（同样裁决：'NOT SUBMITTED — submitting would have destroyed another agent's committed work'）",
+      "loop/state/out/read_sanguo_L0_0108.w-xiyou-1.dupclaim/",
+      "loop/state/out/read_dafeng_L0_0216.w-xiyou-0.dupclaim/",
+      "loop/state/runs/*.jsonl 中 w-read-3 task=read:xiyou:L1:0071 event=stand-down：同样只做只读核验、不写仓库路径"
+    ]
+  },
+  "hashes": {
+    "docsJson": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "candidate(read_dafeng_L3_0283.candidate.json)": "1fcede3b32e4ca9af26ccfa8ce57197462d41872fe12b6bca14a1019d4b013cd",
+    "record(read_dafeng_L3_0283.json)": "见 report 生成时的自算值（本文件不硬编码，避免自引用）",
+    "auditScript": "loop/state/out/read_dafeng_L3_0283.w-read-4.dupclaim/audit_dupclaim.py",
+    "auditReport": "loop/state/out/read_dafeng_L3_0283.w-read-4.dupclaim/audit_dupclaim_report.json"
+  },
+  "offsetCaliber": {
+    "declaredRange": [1206041, 1212202],
+    "sliceStartsWithUnitHead": "第五十四章 问答",
+    "sliceCodepoints": 6161,
+    "sourceHashIsWholeDocsJsonSha256": true,
+    "authorRegion": [[1211985, 1212200]]
+  },
+  "independentAudit": {
+    "script": "audit_dupclaim.py（不 import w-read-3 的任何构建/审计脚本）",
+    "quoteObjects": 431,
+    "badLiteral": 0,
+    "badRange": 0,
+    "badSourceHash": 0,
+    "badSelfReportedMetadata": 0,
+    "uniqueIntervals": 169,
+    "taskFieldIntervalOverlaps": 0,
+    "crossColumnSharedQuotes": 0,
+    "crossTaskReusedIntervals": 0,
+    "nullFields": 10,
+    "nullFieldsWithNotes": 10,
+    "nullFieldsWithPlaceholderNote": 0,
+    "worldSettingKinds": { "rule": 8, "place": 6, "item": 2 },
+    "worldSettingBadQuotes": 0,
+    "worldSettingEnumViolations": 0,
+    "reverseCheck": {
+      "caliber": "段级（非空行）+ 句级（>=6 字、排除作者区域）；候选自建自检只做到段级",
+      "paragraphs": 171,
+      "uncoveredParagraphs": 8,
+      "uncoveredParagraphsOutsideAuthorRegion": 0,
+      "sentences": 196,
+      "uncoveredSentencesOutsideAuthorRegion": 3
+    }
+  },
+  "myOwnErrorsCaught": [
+    {
+      "what": "第一版把 5 个自述字段与「str.count + 全文 find + 区间包含」对账，报出 29 条「元数据不符」。",
+      "wrongCaliberBreakdown": {
+        "wholeTextOccurrences": 4,
+        "occurrencesInRange": 2,
+        "firstOccurrenceAt": 12,
+        "startIsFirstOccurrence": 11,
+        "inAuthorRegion": 0,
+        "total": 29
+      },
+      "why": "口径错在我：① 候选的计数是**自重叠**计数（build_candidate.py:87-94 的 while/find(j+1)），不是 str.count —— 分隔行 `.............` 自重叠，str.count 给 244、逐位 find 给 357；② firstOccurrenceAt / startIsFirstOccurrence 是 **range-scoped**（hits[0]，build_candidate.py:104-105），不是全文 find ——「当！」「轰！」在区间外先出现过。",
+      "fix": "按实测口径（自重叠计数 + 区间内首次出现）重算：431 条全部一致，0 处不符。已把两个口径写进审计脚本注释与 range_first() 的 docstring，避免复核者重踩。",
+      "reproduce": "python3 -B -s loop/state/out/read_dafeng_L3_0283.w-read-4.dupclaim/audit_dupclaim.py → badSelfReportedMetadata: 0",
+      "lesson": "「机器全绿」也要先确认自己量的是同一把尺子；这 29 条是我脚本的缺陷，不是产物的缺陷。错误口径本身留在 breakdown 里，便于复核者判断我有没有把口径差当成产物缺陷。"
+    },
+    {
+      "what": "第一版按「引文是否触及该段」统计覆盖，得到 0 段未覆盖，看似完美。",
+      "why": "段级口径太粗：一段内只要有一句被引，整段就算触达。",
+      "fix": "补做句级（>=6 字）口径，查出 3 句未被任何引文触及。"
+    }
+  ],
+  "findings": [
+    {
+      "id": "G1",
+      "severity": "medium",
+      "kind": "证据覆盖缺口（叙述有、引文没有）",
+      "where": "T06.actionQuotes",
+      "sentenceAt": 1210639,
+      "sentence": "永镇山河庙炸毁，邪物脱困后，本官亲自下水勘察，发现残留的阵法石柱上，刻有佛文。",
+      "what": "T06.action 的**文本**写了他「下水勘察发现石柱刻有佛文」，但该句不在 T06 的 actionQuotes 里，也没有被候选里任何一条引文引用（全候选「佛文」只出现 1 次，就在 action 的文本里）。",
+      "notAFabrication": "该句在原文逐字存在（@1210639），所以不是编造，是**引用未覆盖断言**。",
+      "reproduce": "python3 -B -c \"import json;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];c=json.load(open('loop/state/out/read_dafeng_L3_0283.candidate.json'));print(t.count('佛文',1206041,1212202), json.dumps(c,ensure_ascii=False).count('佛文'))\" → 1 1",
+      "action": "留给复核判定是否补引；本 agent 不改候选（见 raceForensics.evictionProof）。"
+    },
+    {
+      "id": "G2",
+      "severity": "low",
+      "kind": "句级未覆盖",
+      "items": [
+        { "at": 1207026, "text": "忍不住喝道：“速速拿下！" },
+        { "at": 1208133, "text": "这么窝火的情况下，这个小和尚还特么出来装逼，好像他恒远是土鸡瓦狗似的，一掌就随便打飞。" },
+        { "at": 1210639, "text": "永镇山河庙炸毁，邪物脱困后，本官亲自下水勘察，发现残留的阵法石柱上，刻有佛文。" }
+      ],
+      "note": "第 1 句是净尘的第二次下令（与 p042 的「拿下！」是两个动作），第 2 句是叙述对恒远心态的直写，第 3 句同 G1。三者都在原文里逐字存在，属「可补引」而非「读错」。"
+    },
+    {
+      "id": "G3",
+      "severity": "info",
+      "kind": "环境缺陷（非我 writes，未修）",
+      "what": "pick→claim 不复查 done 的 TOCTOU 仍在（loop/bin/loop.py 属受保护路径，只能在合并任务里改）。本轮它是这条重复领取的直接成因。",
+      "impact": "每个被陈旧快照放进来的 worker 都会对同一任务起一个 agent；若该 agent 选择「照做」，就会覆写已验收产物。"
+    }
+  ],
+  "redLineProbe": {
+    "semanticReview": "not-performed",
+    "semanticReviewStillNotDone": true,
+    "speechAsClueNotFactEntries": 9,
+    "unknowns": 16,
+    "selfCritique": 5,
+    "themeReadings": 2,
+    "themeReadingsWithCounter": 2,
+    "note": "候选自己标了 semanticReview=not-performed，并且把「人物说法≠叙述事实」单列 9 条（例：净思「并没有受伤」只记净尘的说法）。这两点与 READER 红线一致，我没有把它记成语义已核验。"
+  },
+  "untouched": {
+    "protectedPaths": true,
+    "gitDestructiveCommands": false,
+    "gpuOrBrowserTests": false,
+    "sharedCandidateOverwritten": false,
+    "onlyWrote": [
+      "loop/state/out/read_dafeng_L3_0283.w-read-4.dupclaim/audit_dupclaim.py",
+      "loop/state/out/read_dafeng_L3_0283.w-read-4.dupclaim/audit_dupclaim_report.json",
+      "loop/state/out/read_dafeng_L3_0283.w-read-4.dupclaim/DUPCLAIM-REPORT.json"
+    ]
+  },
+  "remaining": [
+    "本任务**未由我提交**（如上）。若复查要求补一条我方记录，请先确认 loop.py 的 submit 会不会覆写 w-read-3 的规范记录（cmd_submit 写 OUT/<output_name>.json，正是那条记录本身），以及是否该合并 reviews 而不是替换。",
+    "G1 的证据缺口未修：候选与记录属 w-read-3，改它要走合并任务 + GATE.lock，不是 READER 的追加式写入。",
+    "G3 的竞态根因未修：loop/bin/loop.py 属受保护路径。",
+    "语义层未核验：本脚本只做构造性与结构判据；「56 条因果边的机制是否成立」「11 条状态该不该记」「4 条伏笔里 F02 算不算伏笔」需要复核者先自己读第五十四章原文再判。",
+    "我自己的两条口径错误（自重叠计数、range-scoped firstOccurrenceAt）已登记在 myOwnErrorsCaught；不排除还有同类口径差未被发现。"
+  ]
+}

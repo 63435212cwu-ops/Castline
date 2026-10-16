@@ -1,0 +1,286 @@
+{
+  "task": "verify:dafeng:L2:0006",
+  "agent": "w-verify-1",
+  "status": "done",
+  "book": "dafeng",
+  "lane": 2,
+  "unitIndex": 6,
+  "verdict": "partial",
+  "verdictReason": "内容层零编造、零错位：290 个 quote 对象全量机器复算（text[start:end]==quote、find(quote)==start、occurrencesInSource、inSourceRange、sourceHash/sourceId/offsetUnit）零失败；哈希三项全中；覆盖率 0.8305 独立复现一致；无原文没有的人物/结局/成功判定。但发现 1 处**字段级事实错误**（Q00 自检点断言 18802:18819==标题，实为 18802:18813）、2 条 causeEdge 的**文本绑定/方向被高估为 explicit**（CE2 的果早于因、CE6 的“所以”不指向关门），以及 T1.result 与 S3.anchorEvent 的**自相矛盾**。故不能 pass；上述条目须修正或降级，其余 8 条 causeEdge、6 个任务、9 个状态、7 条知识差、6 条伏笔可用。",
+  "method": "按 VERIFIER.md 顺序：先独立读 docs[0].text[18802,21728) 全片（80 非空段）并逐段标注偏移，之后才打开候选；再做全量引文机器复算、反向扫描（未被覆盖的原文事实）、误杀检查、幻觉/越权检查、随机 5 条 find 核验。",
+  "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+  "candidateSha256": "81244959bd87983dc808420a2b62550556d2342a0fd29bdf24f172895986a806",
+  "docsTextSha256": "bc8b75ee120009f4bf6a8e235a7ff133b8ac727a8612067496a0440eaf3fc612",
+  "sliceSha256": "1713de539bb6687285b313c5f1a538dc8ec32879fe0b8a979f789ffa99598fa1",
+  "counterExamples": [
+    {
+      "claim": "Q00.note（及 offsetCaliber）断言自检点 docs[0].text[18802:18819] == “第七章 这个妹妹好漂亮”",
+      "quote": "第七章 这个妹妹好漂亮",
+      "why": "该断言为**假**。docs[0].text[18802:18819] 实际是 '第七章 这个妹妹好漂亮\\n\\n    '（标题 + 两个换行 + 4 空格缩进），只有 text[18802:18813] 才逐字等于标题。引文对象自身记录的 start=18802/end=18813 与 occurrencesInSource=1 是**正确**的，错的是这条被标为“偏移口径自检点”的 note 文字本身；同样错误的表述在 offsetCaliber 字段里重复了一次。任何照该 note 逐字复核的机器都会得到 False，从而误判整个偏移口径不可信。属字段级事实错误，须把 18819 改为 18813。",
+      "evidence": "python3 -c \"import json;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];print(repr(t[18802:18819]));print(repr(t[18802:18813]))\"",
+      "severity": "field-level factual error（不影响任何 quote 数据）"
+    },
+    {
+      "claim": "CE6 标 basis=explicit，notMereAdjacency 称“动机句与动作句由叙述层直接绑定（‘所以’‘要脸’）”，方向为“体面观 → 已踹开的门被折回关上”",
+      "quote": "许新年一脚踹开大门，迈过门槛，摇摇晃晃往里走了几步后，又折回来把门关上。",
+      "why": "绑定关系不成立。(1) 动作句 @20428-20464 在文本上**早于**动机句 @20470-20510，方向被逆写且未加 orderingNote（对照：候选在 CE8 对同类顺序问题主动加了 orderingNote，此处标准不一致）。(2) 被引为绑定证据的“所以”在 @20497，它管的是同句内的“不能召来官府的注意”（'所以，不能召来官府的注意。'），与 40 余字前、且属另一段的“把门关上”并无连接词关联——原文并无任何连接词把动机句接到关门动作上。故该边至多是“事后追述式”推断，basis 应降为 inferred/derived（或删除），不能记 explicit。",
+      "evidence": "python3 -c \"import json;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];print(repr(t[20428:20464]));print(repr(t[20470:20510]));i=t.find('所以',20470,20510);print(i,repr(t[i:i+22]))\"",
+      "severity": "causal-edge over-claim（basis 高估 + 方向逆写）",
+      "counterQuote": "悬梁自尽不是啥光彩的事，更不是他这种读书人该有的体面，所以，不能召来官府的注意。"
+    },
+    {
+      "claim": "CE2 标 basis=explicit，方向“吏员告知… → 李茹信念被否证 → 表情凝固／花容失色／困惑”，to 的首条引文为 Q02“李茹眼泪还挂在脸上，欢喜的表情凝固。”",
+      "quote": "李茹眼泪还挂在脸上，欢喜的表情凝固。",
+      "why": "方向与文本顺序冲突：Q02 @18837-18855 **早于**其 from 的三条引文（Q03 @18862、Q04 @18900、Q78 @18889），即被归为“果”的表情凝固出现在“因”的告知之前，且未加 orderingNote。候选自己在 U6 里已经意识到“家人是何时、第几次得知真相有两种读法”、并注明第六章末吏员已当面告知过，但在 CE2 里仍以 explicit 写死单向因果，未与 U6 的不确定性对齐。（候选对 to 的第二条 Q07“花容失色”@19019 用“随后”连接，处理正确；问题只在 Q02 这一半。）须降级为 inferred 或加 orderingNote。",
+      "evidence": "python3 -c \"import json;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];print(t.find('李茹眼泪还挂在脸上'),t.find('两日前，许七安在牢内嚷嚷着'))\"",
+      "severity": "causal-edge over-claim（方向未标注）"
+    },
+    {
+      "claim": "T3.obstacle.value 断言“…而最终打断他的是意外归来的家人”，basis=explicit",
+      "quote": "许新年看着意外归来的家人，觉得自己还是死迟了一步。",
+      "why": "“打断”在区间内无任何文字依据：区间内“打断/中止/阻止/停下/拦”出现次数均为 0；原文只写到“他把脑袋往绳圈里一套，于是看到了…家人”，随即是人物感受句“觉得自己还是死迟了一步”。更关键的是**候选自相矛盾**：同一任务 T3.result.notSuccess 明写“本区间以‘他看见家人’收束，未写死亡、获救或中止”。故 obstacle 里这句“打断”是越权结论，必须删除或降级为 unknowns（并入 U4）。",
+      "evidence": "python3 -c \"import json;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'][18802:21728];print([ (w,t.count(w)) for w in ['打断','中止','阻止','停下','拦'] ])\"",
+      "severity": "unsupported outcome claim + internal contradiction"
+    },
+    {
+      "claim": "T1.result.value 断言“一家人动身回家（本区间未写到家）”",
+      "quote": "边说边往里走。",
+      "why": "与候选自身及原文冲突。区间内 @21126 已写全家站在自家大院前（“徐府大院三进三出…大门紧锁，人去楼空”）、@21173 婶婶望着大门上的匾额说话、@21236 紧接着“边说边往里走。”——即一家人已抵达自家门前并向内走。候选自己的 S3.anchorEvent 也写作“回到被锁的自家大院门前”。因此 T1.result 的括注“本区间未写到家”既不准确，也与 S3 自相矛盾，应更正为“已回到自家大院门前并向内走”。",
+      "evidence": "python3 -c \"import json;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];print(repr(t[21126:21167]));print(repr(t[21236:21243]))\"",
+      "severity": "internal inconsistency + under-claim"
+    }
+  ],
+  "reverseChecks": [
+    {
+      "found": "封条被踹开与自己“不能召来官府注意”的立意冲突（候选逐条引了这三句，却从未把它们连起来）",
+      "quote": "许新年拎着酒壶，步履踉跄的回到许府，生活了十九年的家，而今大门贴着封条，人去楼空，甚是凄凉。",
+      "supportingQuotes": [
+        "许新年一脚踹开大门，迈过门槛，摇摇晃晃往里走了几步后，又折回来把门关上。",
+        "悬梁自尽不是啥光彩的事，更不是他这种读书人该有的体面，所以，不能召来官府的注意。"
+      ],
+      "why": "@20405 明写大门“贴着封条”，@20431 他“一脚踹开大门”——踹开官府封条本身就是惊动官府的举动，恰与他 @20503 自述的“不能召来官府的注意”直接相反。候选的 blob 中“踹开封条/破了封条/毁封条/撕”命中数均为 0：三句被分别登记为 Q39/Q40/Q41，但这一层可逐字坐实的反讽/矛盾从未被指出，属结构性遗漏（正是“还漏了什么”型发现）。"
+    },
+    {
+      "found": "结尾的“压缩复述”实际改写了台词：复述句首句在原区间根本没有说过",
+      "quote": "我许新年一声放浪不羁爱自由....许新年才华横溢天道不公....天不生我许新年，大奉万古如长夜....",
+      "why": "候选 F5.inRangePayoff 把这段称作三句狂言“被叙述层压缩复述一次”。但第一句“我许新年一声放浪不羁爱自由”在全书中**仅出现 1 次**（即此处），并不等于它声称复述的 A1“哈哈哈哈，我许新年，生是逍遥人，死是桀骜鬼。”；A2“许新年，才华横溢，奈何天道不公。”→“许新年才华横溢天道不公”是删字压缩（成立），A3 逐字。故 3 句中 1 句是**换写**而非压缩，候选的“压缩复述”描述对首句不成立，且未指出该差异（“放浪不羁爱自由”另与 @21590“他放浪不羁”呼应）。"
+    },
+    {
+      "found": "许七安本人“宁宴”身份与婶婶旧怨的经济根因之外，还有一条**在场者仍着囚服**的物理事实，未被任何抽取项承载",
+      "quote": "少女穿着宽松的囚服，散乱的鬓发垂在古典精致的瓜子脸边，高挺的琼鼻，乍一看去，有几分混血美人的立体感。",
+      "why": "“囚服”在区间内出现 1 次（@19403），是全区间唯一说明**一家人是穿着囚服走出大牢**的物理证据；它同时解释了婶婶 @20021 道谢时的僵硬与 @21173 望匾额的百感交集。候选有 5 处含“囚服”，但全部落在 Q17 的引文本体与“少女→许玲月指代”自评里，6 个任务、9 个状态中无一条登记“家人仍着囚服”（T2.obj/action 命中为 False）。"
+    },
+    {
+      "found": "许铃音不知道牢房是什么——一条明写的知识落差，未被登记进候选自己维护的 knowledgeGaps 类别",
+      "quote": "“牢房是什么。”",
+      "why": "区间内有 7 条 knowledgeGaps（KG1–KG7），其中 KG3 覆盖的是许铃音分不清堂哥/亲哥，但没有一条覆盖“五岁的许铃音不知道牢房是什么”这一更直白的知识落差（此问由刚出狱的许七安回答“就是你这几天睡觉的地方。”）。候选只把 Q65 放进了 singleAppearanceNotForeshadow，未进 knowledgeGaps。"
+    },
+    {
+      "found": "许新年的年龄信息未被显式登记（“生活了十九年的家”与“十八岁的举人”并存）",
+      "quote": "许新年拎着酒壶，步履踉跄的回到许府，生活了十九年的家，而今大门贴着封条，人去楼空，甚是凄凉。",
+      "why": "候选 blob 中“十九岁/19岁”命中均为 0；“生活了十九年的家”（@20394）与“十八岁的举人”（@20584）合起来给出可推算的年龄，候选只把成长史当作“单次背景铺陈”。属次要遗漏，但确为原文明确存在的事实。"
+    },
+    {
+      "found": "候选取材顺序上的一处顺序更替：Q69（大步上前…）在 charactersInRange 里被列为许平志的第 3 条引文，晚于 Q13，但其文本偏移（19157）早于 Q13（19246）",
+      "quote": "武夫出身的汉子心里涌起暖流，眼眶发红，大步上前",
+      "why": "这不是错误（quoteId 非按偏移排序），仅提示：若下游按 quoteId 顺序重建时间线会得到错序，须按 start 排序。"
+    }
+  ],
+  "falseKillCheck": [
+    {
+      "item": "被候选主动删除的因果边“李茹道谢（Q30 @20021）→ 许七安脑中浮现原主旧事（Q82 @20052）”",
+      "verdict": "存疑（不构成 fail 依据）",
+      "why": "候选在 notCategorizedFacts.whyNotCauseEdge 里留痕说明：原文只用“适时的”这一时机标记，故拒绝连边。这个判断是保守而非误杀——“适时的”确实只标时机。但原主被逐出小院这段记忆正是被她当面道谢所触动（叙述顺序紧邻且语义相关），把它完全移出因果层、且只降为 notCategorizedFacts，可能损失一条合理边。按 VERIFIER 纪律，此处我拿不出“原文把二者写成因果”的逐字证据，故只记存疑，不据此判 fail。"
+    },
+    {
+      "item": "“吏员”的 graphIdHint 写 null",
+      "verdict": "不是误杀（核对通过）",
+      "why": "独立遍历图谱缓存 453 个 ch_ 实体，无任何实体名为“吏员”，亦无含“吏/差役/衙役”的名字。故 null 是正确处置，未编造 id。"
+    },
+    {
+      "item": "CE9 拒绝“许平志宽慰句（Q56）→ 许七安脸色一变”这条相邻边，并列 adjacentButNotCause",
+      "verdict": "不是误杀（处置正确）",
+      "why": "原文在 @21383 直接写“他是知道许新年打算自寻短见的”，把原因归到许七安自身知识；候选拒绝以相邻立因，符合原文，且正是最该防的相邻陷阱。"
+    },
+    {
+      "item": "T5.cost / T6.objective、obstacle、cost 写 null",
+      "verdict": "不是误杀（处置正确）",
+      "why": "区间内确无对应文字（许铃音未付出代价；许玲月只有“怯生生喊了一句‘大哥’”），写 null 并给 why，优于补零或补 0.5。"
+    }
+  ],
+  "hallucinationCheck": {
+    "result": "pass",
+    "detail": "候选声称的 7 个在场人物全部在区间内可查（许七安18次/许平志6次/李茹4次/许玲月1次/许铃音1次/许新年13次，另加未具名“吏员”）——无原文没有的人物。无任何“许新年已死/已获救/被中止”的结局判定：T3.result 显式写 notSuccess，U4 单列“自尽结果未交代”。未把区间外情节（第八章抢救 X05、第六章 X07/X12）回填为本区间结论，全部 13 条 X 引文均标 inSourceRange=false 并附 crossRangeNote。图谱 id 6 个全部核验为正确人名，无编造。"
+  },
+  "quoteVerification": {
+    "randomSample": [
+      {
+        "quoteId": "Q29",
+        "start": 19958,
+        "end": 20015,
+        "findHit": true,
+        "exact": true,
+        "occurrences": 1,
+        "claimedOccurrences": 1
+      },
+      {
+        "quoteId": "Q45",
+        "start": 20747,
+        "end": 20780,
+        "findHit": true,
+        "exact": true,
+        "occurrences": 1,
+        "claimedOccurrences": 1
+      },
+      {
+        "quoteId": "Q09",
+        "start": 19084,
+        "end": 19128,
+        "findHit": true,
+        "exact": true,
+        "occurrences": 1,
+        "claimedOccurrences": 1
+      },
+      {
+        "quoteId": "Q37",
+        "start": 20311,
+        "end": 20334,
+        "findHit": true,
+        "exact": true,
+        "occurrences": 1,
+        "claimedOccurrences": 1
+      },
+      {
+        "quoteId": "Q77",
+        "start": 20470,
+        "end": 20519,
+        "findHit": true,
+        "exact": true,
+        "occurrences": 1,
+        "claimedOccurrences": 1
+      }
+    ],
+    "fullSweep": "不限于抽样：对候选全部 290 个 quote 对象（104 个唯一 quoteId，含嵌套与 X 跨区引文）做全量复算——text[start:end]==quote 失败 0；occurrencesInSource 不符 0；inSourceRange 标志不符 0；sourceHash/sourceId/offsetUnit 不符 0。另核验 sourceHash 文件字节哈希、docsTextSha256、graphCacheSha256 三项全部一致；coverageRatio 0.8305 独立复现完全一致（残余 79 段经我独立扫描确认全部为空白/缩进/省略号“......”/分隔线“------------”/被引文切开的标点，无未引整句）。",
+    "counterCheckOnNotes": "同时对候选 notes 里的**数字型断言**逐条复核，全部命中：吏员 288 次、徐府 1 次、许府 314 次、“要脸。”9 次、“天不生我”19 处、“万古如长夜”21 处、“道谢”14 处、非空段 80 个、“宁宴”区间内 3 次。唯一失败的自检断言是上文 counterExample 1（18802:18819）。"
+  },
+  "usableItems": {
+    "keepAsIs": "T1–T6（除 T1.result 括注、T3.obstacle 末句）、S1–S9、CE1/CE3/CE4/CE5/CE7/CE8/CE9/CE10、F1–F6（F5 描述须改）、KG1–KG7、U1–U10、singleAppearanceNotForeshadow 15 组、notCategorizedFacts 12 条、redLines 全部、全部 290 条引文与哈希",
+    "mustFix": "Q00.note 与 offsetCaliber 的 18819→18813；T3.obstacle 删除或降级“打断”句；T1.result 括注改为“已回到自家大院门前并向内走”",
+    "mustDowngrade": "CE6 basis explicit→inferred（并补 orderingNote：动作句 @20428 早于动机句 @20470；所引“所以”@20497 只管“不能召来官府的注意”）；CE2 basis explicit→inferred 或补 orderingNote（Q02 @18837 早于 Q03 @18862）；F5.inRangePayoff 的“压缩复述”须注明首句为换写（“我许新年一声放浪不羁爱自由”全书仅 1 次，非 A1 的压缩）",
+    "mustAdd": "把“踹开贴封条的大门 ↔ 不能召来官府注意”的冲突记为独立事实；把“家人仍着囚服”登记为物理事实；把“许铃音不知牢房为何物”补入 knowledgeGaps；登记许新年年龄线索（十九年的家 / 十八岁的举人）"
+  },
+  "notes": "裁决 partial。这是本项目少见的高质量抽取：290/290 引文逐字且偏移精确，三项哈希全中，覆盖率 0.8305 独立复现一致，无编造人物、无越权结局、无把“结束当成功”，并且主动做了相邻因果拒绝（CE9）、单次出现不立伏笔（15 组）、缺项写 null、区间外引文一律标 inSourceRange=false 等四项自律。判 partial 而不是 pass，只因存在 1 处字段级事实错误（Q00 自检点把 18813 写成 18819，且 offsetCaliber 重复了同一错误——这是“自检点本身不自检”）与 2 条 causeEdge 的 explicit 高估（CE2 果早于因；CE6 的“所以”并不指向关门动作，且方向逆写未加 orderingNote，而候选对 CE8 的同类问题却加了 orderingNote，标准不一致），另有 T3.obstacle“打断”这一无文字依据且与自身 notSuccess 冲突的表述。这些都不是编造，故按契约不判 fail，但必须修正或降级后方可用于下游。\n\n我对自己反向验证的诚实交代：本轮我做的“反向扫描”只找到 2 条真正的结构性遗漏（封条↔踹开的冲突、复述首句为换写）与 2 条类别归属遗漏（囚服、牢房是什么），另有 2 条属次要（年龄线索、quoteId 排序提示）。原因是候选的逐段覆盖确实近乎完整——我用 n-gram 全扫（3–6 字窗口）验证区间内已无“未被任何引文覆盖的整句”，残余 79 段全部是空白与标点。所以我的反向发现主要落在**引文之间的关系（矛盾、换写、类别归属）**而非“漏掉的句子”上；若下游期望的是后者，本段确实没什么可补，这一点我不夸大。\n\n另有一处我判自己不能确定的：CE2 的时间顺序问题，可能被候选自己的 U6（“家人是何时、第几次得知真相有两种读法”，并指出第六章末吏员已当面告知过）部分抵消——即在“吏员在本章开头说的话只是复述”这一读法下，李茹的表情凝固仍可能确实由更早的告知引起。但 CE2 把 from 写成本章 Q03/Q04 并把 basis 记 explicit，与该读法不自洽，故仍应降级或补注，只是这一条我认为严重度低于 CE6。\n\n未做的事（据实登记）：未跑 GPU/浏览器测试（任务未要求）；未跨章检索“诀别诗”内容与“等回家吃了饭再说一次”是否在后续回收（候选 F2/F4 已如实标 unresolved/payoff-out-of-range，我沿用其不确定性，未自行断言）。",
+  "summary": "独立反向复核《大奉打更人》第七章 这个妹妹好漂亮 [18802,21728)（2926 codepoint / 80 非空段）。按 VERIFIER 契约顺序执行：先独立读 docs[0].text 切片并逐段标注偏移，之后才打开候选。**裁决 partial**：内容层零编造、零错位——290 个 quote 对象全量机器复算（text[start:end]==quote、find(quote)==start、occurrencesInSource、inSourceRange、sourceHash/sourceId/offsetUnit）零失败；文件哈希/全文哈希/图谱哈希三项全中；覆盖率 0.8305 独立复现完全一致；6 个 graphIdHint 全部核验为正确人名；无原文没有的人物、无越权结局（T3.result 显式 notSuccess）、13 条区间外引文全部标 inSourceRange=false。判 partial 的依据是 5 条 counterExample（均逐字可查）：(1) Q00.note 与 offsetCaliber 的自检断言 text[18802:18819]==标题为假（实为 18802:18813，多含两个换行+4 空格）；(2) CE6 标 explicit 但动作句 @20428 早于动机句 @20470 且方向逆写未加 orderingNote，所引“所以”@20497 只管“不能召来官府的注意”；(3) CE2 的果 Q02 @18837 早于因 Q03 @18862；(4) T3.obstacle“最终打断他的是意外归来的家人”无文字依据（区间内 打断/中止/阻止/停下/拦 均为 0 次）且与自身 notSuccess 冲突；(5) T1.result“本区间未写到家”与自身 S3.anchorEvent 及 @21236“边说边往里走。”冲突。反向验证另得 4 条结构性遗漏：踹开贴封条的大门 ↔“不能召来官府注意”的冲突从未被连起来、F5“压缩复述”首句实为换写（“我许新年一声放浪不羁爱自由”全书仅 1 次）、“家人仍着囚服”未被任何抽取项承载、“许铃音不知牢房为何物”未进 knowledgeGaps。",
+  "evidence": [
+    {
+      "path": "loop/state/out/read_dafeng_L2_0006.candidate.json",
+      "sha256": "81244959bd87983dc808420a2b62550556d2342a0fd29bdf24f172895986a806",
+      "kind": "被复核候选（只读，未修改）"
+    },
+    {
+      "path": "data/cache/9b676d7031b1bcd3b8377a18.docs.json",
+      "sha256": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+      "kind": "原文 docs 缓存（与任务 sourceHash 一致）"
+    },
+    {
+      "path": "data/cache/9b676d7031b1bcd3b8377a18.json",
+      "sha256": "3c2fae1d399d6768719f2d5476fa0cfd88fb4fbbc12abdf080323fa4b846ebdf",
+      "kind": "图谱缓存（仅用于核验 graphIdHint，非原文证据）"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "先自读原文再读候选：独立读出 [18802,21728) 共 2926 codepoint / 80 个非空段并逐段标注偏移，读完后才打开候选",
+      "result": "pass",
+      "command": "python3 -c \"import json;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];print(len(t[18802:21728]),len([x for x in t[18802:21728].split(chr(10)) if x.strip()]))\""
+    },
+    {
+      "text": "全量引文复算：290 个 quote 对象 text[start:end]==quote 失败 0、occurrencesInSource 不符 0、inSourceRange 不符 0、sourceHash/sourceId/offsetUnit 不符 0",
+      "result": "pass",
+      "command": "python3 - <<'EOF'\nimport json\nd=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'));T=d[0]['text']\nc=json.load(open('loop/state/out/read_dafeng_L2_0006.candidate.json'))\nqs=[]\ndef w(o):\n  if isinstance(o,dict):\n    if 'quote' in o and 'start' in o: qs.append(o)\n    [w(v) for v in o.values()]\n  elif isinstance(o,list): [w(v) for v in o]\nw(c)\nprint('n=',len(qs),'bad=',sum(1 for q in qs if T[q['start']:q['end']]!=q['quote']),sum(1 for q in qs if T.count(q['quote'])!=q['occurrencesInSource']))\nEOF"
+    },
+    {
+      "text": "三项哈希全部核验一致：文件 fdde5558…（=任务 sourceHash）、docs[0].text bc8b75ee…、图谱缓存 3c2fae1d…",
+      "result": "pass",
+      "command": "shasum -a 256 data/cache/9b676d7031b1bcd3b8377a18.docs.json data/cache/9b676d7031b1bcd3b8377a18.json"
+    },
+    {
+      "text": "覆盖率独立复现：把区间内全部引文 [start,end) 取并集与 [18802,21728) 求差，得 0.8305，与候选 coverageRatio 完全一致；残余片段经 n-gram 全扫（3–6 字窗口）确认全部为空白/缩进/“......”/“------------”/被引文切开的标点，无未引整句",
+      "result": "pass",
+      "command": "python3 -c \"import json;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];print(t[18802:21728].count('打断'),t[18802:21728].count('中止'))\""
+    },
+    {
+      "text": "5 条随机 quote（Q29/Q45/Q09/Q37/Q77）独立 find 核验：全部 find(quote)==start 且逐字命中、偏移一致、occurrencesInSource 相符",
+      "result": "pass",
+      "command": "python3 -c \"import json;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];[print(q,t.find(q)) for q in ['最后，他看向了婶婶李茹，这位向来在许七安面前耀武扬威的女人，大概一辈子都没想到有一天需要低声下气的向倒霉侄儿道谢。','借着一股酒意，他冲入房间，磨墨，提笔，写下了人生中最巅峰的诀别诗。','悬梁自尽不是啥光彩的事，更不是他这种读书人该有的体面，所以，不能召来官府的注意。\\n\\n    要脸。']]\""
+    },
+    {
+      "text": "反向验证（契约第 3 步）：不限于抽样，对候选 notes 的数字型断言逐条复算（吏员 288、徐府 1、许府 314、“要脸。”9、“天不生我”19、“万古如长夜”21、“道谢”14、非空段 80、“宁宴”3），全部命中；唯 Q00.note 的 18802:18819 自检断言为假",
+      "result": "pass",
+      "command": "python3 -c \"import json;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];print(repr(t[18802:18819]),repr(t[18802:18813]))\""
+    },
+    {
+      "text": "幻觉/越权检查：6 个 graphIdHint 全部核验为正确人名（许新年/李茹/许铃音/许玲月/许七安/许平志）；遍历图谱 453 个 ch_ 实体确认无“吏员”实体，故候选写 null 正确、未编造 id；无原文没有的人物，无死亡/获救/中止的结局判定",
+      "result": "pass",
+      "command": "python3 -c \"import json;g=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.json'));a={};f=lambda o:[a.__setitem__(o['id'],o.get('name')) if isinstance(o,dict) and isinstance(o.get('id'),str) and o['id'].startswith('ch_') else None,f(v) for v in (o.values() if isinstance(o,dict) else o)] if isinstance(o,(dict,list)) else None;f(g);print(len(a),[a.get(k) for k in ['ch_118871ddd0334ab4','ch_514930b0ac1c8040','ch_543147db1e7fc624','ch_561390b2e24a7578','ch_bdf0741c9b89fe3b','ch_c1c19ba118eaae20']])\""
+    },
+    {
+      "text": "未跑 GPU/浏览器测试（任务未声明需要，且 GPU 全局串行）；未跨章检索“诀别诗”内容与“等回家吃了饭再说一次”的后续回收，沿用候选 unresolved 标注，未自行断言",
+      "result": "pass",
+      "command": "—"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/verify_dafeng_L2_0006.verdict.json",
+      "kind": "append-only",
+      "note": "新增复核产出，未修改任何受保护路径，未改动候选与原文件"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/9b676d7031b1bcd3b8377a18.docs.json": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "loop/state/out/read_dafeng_L2_0006.candidate.json": "81244959bd87983dc808420a2b62550556d2342a0fd29bdf24f172895986a806"
+  },
+  "remaining": [
+    "候选须修正后方可用于下游：Q00.note 与 offsetCaliber 的 18813/18819 笔误；T3.obstacle 删除或降级“打断”句；T1.result 括注改为“已回到自家大院门前并向内走”。",
+    "须降级：CE6 basis explicit→inferred（并补 orderingNote）；CE2 basis explicit→inferred 或补 orderingNote；F5.inRangePayoff 的“压缩复述”须注明首句为换写。",
+    "须补入：踹开贴封条大门 ↔“不能召来官府注意”的冲突；“家人仍着囚服”的物理事实；“许铃音不知牢房为何物”补进 knowledgeGaps；许新年年龄线索（十九年的家 / 十八岁的举人）。",
+    "我未做的：跨章检索“诀别诗”与“第二次道谢”是否回收；CUDA/浏览器路径未跑。",
+    "存疑未判 fail 的一条：候选曾主动删除“道谢→回忆浮现”因果边（理由是只有“适时的”这一时机标记）——我拿不出原文把二者写成因果的逐字证据，故只记存疑。",
+    "本复核产出 verify_dafeng_L2_0006.verdict.json 未列入自身 evidence：把文件自身哈希写进文件内部是自指固定点（前例 verify_dafeng_L1_0005.verdict.json 声明 20c84a9e… 与现值相同属巧合，不可依赖）。该产出的存在性与内容以 read_dafeng_L2_0006.json 的 reviews 条目为凭。"
+  ],
+  "rollback": "仅新增 loop/state/out/verify_dafeng_L2_0006.verdict.json；回滚=删除该文件与 loop/state/out/verify_dafeng_L2_0006.json 中的 reviews 记录。未触碰候选、原文缓存或任何受保护路径。",
+  "submittedAt": "2026-10-07T20:54:07Z",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-07T20:54:07Z"
+  },
+  "verifyState": "pass",
+  "reviews": [
+    {
+      "reviewer": "q-verify",
+      "at": "2026-10-07T21:36:48Z",
+      "verdict": "pass",
+      "notes": "**元复核（复核\"二级复核\"本身）**。我独立重算它所依据候选的三条同层可确证项：① 内容层引文逐字（含 `startAbs` 相对偏移约定）② 偏移与引文自洽（**已排除按设计不带偏移的 `quoteWarnings`**）③ 悬空「见 X」引用（含前缀匹配、排除自设跨区间编号）。实测：带偏移引文 **290** 条，逐字/自洽失败 **0**；悬空引用 **[]**，（其余 0 条为无偏移条目，按设计如此）。⇒ 三条**全部干净** ⇒ 它的 `partial` 裁决**不是**由这三条引起，而是由覆盖记账/动作归属一类**只能人工判读**的项引起 —— 与它自述一致。我**接受它的裁决**，并补上它未给出的\"三条机械项的实际数字\"。",
+      "counterExamples": [
+        {
+          "check": "我初版判据报出 5 处\"不自洽\"是否为真",
+          "method": "逐条打印路径与 start/end",
+          "finding": "**全部位于 /quoteWarnings[] 且 start/end 皆 None** ⇒ 该字段按设计不带偏移 ⇒ 我的判据未排除该形态，已修正"
+        },
+        {
+          "check": "悬空「见 X」是否总是缺陷",
+          "method": "精确 id + 前缀匹配，再逐个读上下文",
+          "finding": "前缀引用（见 T9 ↔ T9_yudi_dispose）与自设跨区间编号（X1）均非缺陷"
+        }
+      ],
+      "reverseChecks": [
+        {
+          "question": "这三条机械项还漏了什么形态",
+          "method": "枚举候选内所有带 quote 的条目形态并计数",
+          "finding": "共四种形态：绝对偏移 / 相对+绝对 / 无偏移（警告）/ 自设编号；判据已按四种分别处理"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,225 @@
+{
+  "task": "read:sanguo:L0:0090",
+  "agent": "w-xiyou-0",
+  "role": "READER",
+  "roleFile": "loop/ROLES/READER.md",
+  "status": "done",
+  "summary": "精读《三国演义》第九十一回 祭泸水汉相班师 伐中原武侯上表（docs[0].text[456597,462203)，5606 码点）。本任务是**被重新领取**的：上一会话（w-dafeng-1）于 2026-10-14T15:05 落盘了一份候选后随会话终止，未提交、也未做独立复算。本会话先独立通读原文、把那份候选冻结备份并核对哈希，再用不 import 构建脚本的独立审计从磁盘重算（261 条引文逐字往返/find/区间/sourceHash/globalOccurrences/occurrenceIndex 全零失败，52 项检查最终全通过），查出 4 类可复现缺陷并定点修复：R1 覆盖自述 186/36 与其自身声明的判据不自洽（写盘前改为按声明判据重算，并把判据写进 criterion）、R2 13 处「」把改写文字/被篡改标点当逐字引文（典型：「不可付之兵权，可即罢归田里」原文作句号；另有压缩改写、斜杠并句、删原文引号）、R3 RCE01 把「遂封睿为平原王」的施动者写成曹睿（与候选自己的 T08 矛盾，应为曹丕）、R4 反向覆盖查出的 3 处实质缺口（新增 CE15「休备言前事」这条信息传递机制、S04 补曹睿出身引文、T01.action 补「用何物祭享？」）。修复后引文 265 条、13 任务、15 因果边、11 状态、6 伏笔、21 设定、2 主题、13 未知项、9 自省项。semanticReview 仍为 not-performed。",
+  "reworkOf": "loop/state/out/read_sanguo_L0_0090.candidate.json（上一会话 w-dafeng-1 于 2026-10-14T15:05 落盘、未提交）",
+  "reworkReason": "该候选的引用定位层干净（261 条引文往返零失败、globalOccurrences/occurrenceIndex/inSlice 零不符），但存在 4 类可复现缺陷（覆盖自述与自身判据不自洽、13 处「」以改写文字冒充逐字引文、RCE01 施动者笔误、3 处反向覆盖实质缺口）。故在冻结基线上定点修复而非重写，改动范围与基线来源全部登记在候选的 provenance 字段与 unknowns U13。",
+  "evidence": [
+    {
+      "path": "loop/state/out/read_sanguo_L0_0090.candidate.json",
+      "sha256": "136b967c73def7c77005d86de7b81eda2289030b85eaa500b30d3211ef3b5ab5",
+      "note": "本任务 writes 指定的唯一路径：本轮产出（在冻结基线上定点修复 4 类缺陷后）。全 265 条引文满足 docs[0].text[start:end]==quote。"
+    },
+    {
+      "path": "data/cache/fe42d01f3826fe8096f86614.docs.json",
+      "sha256": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+      "note": "原文（docs[0].text 即引文来源）；哈希与 prompt 正文指定的 sourceHash 一致。任务 JSON 的 sourceHash 字段是另一个值（2988ce6e…），实测那是 data/cache/152e2a6eed94f1075e7e7070.docs.json 的 sha256，两份文件 docs[0].text 逐字符相同 —— 已登记为候选 unknowns U01。"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-cl0090-w-xiyou-0/BASE-presession.candidate.json",
+      "sha256": "270ca81975b0007eb409b91c2107ad8f8dd42179dd9f71b8269b164acae5ed82",
+      "note": "返工基线快照（= 上一会话候选，逐字备份，本轮未改动它）。回退方式：复制回 writes 路径即恢复返工前状态。"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-cl0090-w-xiyou-0/build_0090.py",
+      "sha256": "6b3a7784e3e48fa8e3ec125bf59ed539a9df5ede24ee620c5ad7b5d57f7a78b4",
+      "note": "本轮构建脚本（外置回滚点，AGENTS.md 要求运行产物不入源目录）。从冻结基线确定性重放 R1–R6 修复；每条引文由 TEXT.find 解析并即时断言 TEXT[start:end]==quote，写盘前跑自检，任一失败即拒绝写盘（本轮实际拦下 2 次：一次 R2 待修串顺序错、一次 counts 先算后加条目）。用法：python3 -B -s <该路径> [--write]；幂等（连跑 3 次 sha256 不变 = 136b967c…）。"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-cl0090-w-xiyou-0/verify_0090.py",
+      "sha256": "142f092ea10102b3134f3ec9cdb88e8027f5993c188ac337fea17eae5a6621df",
+      "note": "独立复验脚本：不 import build_0090.py、不复用其任何函数，只用不同代码路径从磁盘重算（A 源/切片、B 引文全量、C 五栏结构、D 因果/状态/伏笔/设定/主题、E 反向覆盖独立重算、F 散文字段「」逐字性分档、G 本轮修复项逐条生效、H 红线）。退出码 0，52 项 PASS / 0 FAIL。"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-cl0090-w-xiyou-0/verify_0090.out.txt",
+      "sha256": "c35ae64b2e6c3a6183a17a0c87ffdb894ded5b780966c74b144ab72b2a8a5469",
+      "note": "复验脚本的完整输出（52 PASS / 0 FAIL，末行为候选 sha256 136b967c…）。"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "引文定位（全量而非抽样）：候选内全部 265 个带 quote/start/end 的节点满足 docs[0].text[start:end]==quote、且 docs[0].text.find(quote)==start、且落在 [456597,462203) 内、且 sourceHash 全等于 8ab7298a…。复现：python3 -B -s /Volumes/资源库/我的资源/回滚点/项目/星系-cl0090-w-xiyou-0/verify_0090.py（见 B2/B3/B4/B5 四行 PASS）。",
+      "result": "pass"
+    },
+    {
+      "text": "引文元数据：全部 265 条的 globalOccurrences 等于 text.count(quote)、occurrenceIndex 等于 text.find(quote)、inSlice 恒为 True —— 零不符。复现：同上脚本 B6/B7/B8。",
+      "result": "pass"
+    },
+    {
+      "text": "反向覆盖（计划100 的核心教训）：我不采信候选自述，按它声明的分块规则自己实现（按换行切段→段内按 。！？ 断句→去空白），独立重算得 chunks=222、uncovered=36，与自述的数组**逐条集合相同**（E1/E2/E3）。修复前实测为 39：差异的 3 块（「用何物祭享？」「后生一子，名睿，字元仲…」「休备言前事。」）已由 R4 用真实引文覆盖，另 1 块（「却说魏主曹丕，在位七年，即蜀汉建兴四年也。」）如实留在未覆盖清单里。复现：verify_0090.py 的 E1–E5。",
+      "result": "pass"
+    },
+    {
+      "text": "上一版覆盖自述不自洽的复现（R1 的根据）：按它声明判据重算得 covered=183/uncovered=39；即使改用最宽的闭区间（端点相接即算覆盖）口径也只得 200/22；穷举「排除/只保留某些分区」「排除退化引文」等口径无一能复现 186。其 uncovered[] 数组 36 条里只有 35 个不同串（单独一个「”」重复两次，而切片里那两个位置分处不同引号）。复现：cover_criterion.py 与 cover_subset_test.py（同目录）。",
+      "result": "pass"
+    },
+    {
+      "text": "散文字段里的「」逐字性（0084 被独立复核点名过的形态）：对 summary/text/frm/to/trigger/character/setup/payoff/before/after/anchor 这些**叙述性**字段，把每个「」片段拿去 text.find，凡与原文相似度 ≥0.45 却不逐字的即判缺陷。修复前 13 处命中（典型：「不可付之兵权，可即罢归田里」原文作「不可付之兵权。可即罢归田里。」；另有压缩改写、斜杠并句、删去原文自带引号）；修复后为 0 处。与原文毫无相似度的「」是概念着重号（如「代价」「受阻→求因」）不判缺陷 —— 这条口径写进了 verify_0090.py 的 F1/F2 分档，避免误杀正常中文写法。复现：verify_0090.py 的 F1/F2。",
+      "result": "pass"
+    },
+    {
+      "text": "RCE01 施动者笔误：上一版 pair 写「曹睿封曹睿（原文作「遂封睿为平原王」）」，而候选自己的 T08.result 写的是曹丕掷弓而封，原文该句主语承前亦为曹丕 —— 属候选**内部自相矛盾**，且这类缺陷引文复算脚本结构性地查不出。已改为「曹丕封曹睿为平原王（原文作「遂封睿为平原王」）」并加 fixNote。复现：verify_0090.py 的 G1/G2。",
+      "result": "pass"
+    },
+    {
+      "text": "反向覆盖查出的实质缺口已补（R4）：①新增 CE15 —— 「曹休出曰：仲达受先帝托孤之重，何故反耶？」→「懿大惊失色，汗流遍体，乃问其故」→「休备言前事」→ 针对性质辩；方向由「乃问其故」「休备言前事」两个连接动作明写，不是同场景相邻。②states S04 补入「后生一子，名睿，字元仲，自幼聪明，不甚爱之。」作为前值。③T01.action 补入「孔明曰：“用何物祭享？”」。复现：verify_0090.py 的 G5–G8。",
+      "result": "pass"
+    },
+    {
+      "text": "自述计数不得强于数据（本轮自查抓到的自身缺陷）：build_0090.py 第一版把 buildSelfCheck.counts 放在 R5b 之前算，于是 R5b 追加的 SC07–SC09/U13 未被计入（自述 selfCritique=6/unknowns=12，实测 9/13）—— 与上一版同一形态。已改为「所有改动完成后再算」，并在构建脚本与复验脚本各加一条断言互相钉死：counts 每项必须等于 len(数组)。复现：verify_0090.py 的 G9；构建脚本自检亦会在不符时拒绝写盘。",
+      "result": "pass"
+    },
+    {
+      "text": "硬红线自查：semanticReview 保持 not-performed（未声称语义已核验）；无原文之外的人物/事件/结局；人物语一律标 evidenceType=speech/mixed 且不写成叙述事实（如泸水鬼神、马超病故、曹睿素怀疑忌均登记为人物说法，见 unknowns U02/U07/U10）；未回收伏笔（F03/F04）显式标 resolved=false 并写 unresolvedReason；不以「播放到结尾/回目结束」写 result=成功。复现：verify_0090.py 的 D5/H1。",
+      "result": "pass"
+    },
+    {
+      "text": "构建幂等且基线可回退：build_0090.py 连跑 3 次，候选 sha256 恒为 136b967c73def7c77005d86de7b81eda2289030b85eaa500b30d3211ef3b5ab5；冻结基线 BASE-presession.candidate.json 的 sha256 仍为 270ca819…（本轮未改动它，可直接复制回 writes 路径回退）。复现：shasum -a 256 上述两文件。",
+      "result": "pass"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/read_sanguo_L0_0090.candidate.json",
+      "kind": "append-only",
+      "note": "本任务 writes 指定的唯一路径；覆盖式重写同一路径（在冻结基线上确定性重放，幂等）。"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/fe42d01f3826fe8096f86614.docs.json": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+  },
+  "remaining": [
+    "semanticReview 未做（保持 not-performed）：本候选只做〔引用定位 + 五栏各自取证 + 任务内五栏不共用 + 六个分区产出 + 地点/物件/规则三条区分字段化 + 人物语与叙述语分栏标注 + 反向覆盖独立复算〕。语义、任务边界、因果方向与主题判断**均未被独立核验**，留给 read-verify（verify:sanguo:L0:0090）。",
+    "候选中 36/222 个分块未被任何引文触及，主要是《出师表》与祭文的骈体修辞、转场句、分拨诸将名册、回末套语与卷末校对页脚。其中「却说魏主曹丕，在位七年，即蜀汉建兴四年也。」（457856–457877）是纪年转场句，我判为不含行动信息故未建条目 —— 但这是**我的判断**，复核者可能认为纪年本身值得建条目。复现：verify_0090.py 会打印全部未覆盖且含行动词的句子。",
+    "任务 JSON 的 sourceHash 字段（2988ce6e…）与 prompt 正文指定值（8ab7298a…）不一致。我按 prompt 指定值出引文，并把差异登记为 unknowns U01；两份 docs.json 的 docs[0].text 实测逐字符相同（均 607191 码点）。这是环境侧的口径问题，未在共享树改任何东西。",
+    "未做 GPU/浏览器/accept 测试（本任务未声明要跑，且 READER 角色契约禁止）。未跑 loop.py 之外的任何环境脚本。",
+    "本轮未做独立的第二人盲审；上面的对抗性复核是同一 agent 会话内的自查，不等于独立复核。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "restore-from-snapshot",
+    "files": [
+      "loop/state/out/read_sanguo_L0_0090.candidate.json"
+    ],
+    "howTo": "cp \"/Volumes/资源库/我的资源/回滚点/项目/星系-cl0090-w-xiyou-0/BASE-presession.candidate.json\" loop/state/out/read_sanguo_L0_0090.candidate.json   # 恢复到本轮返工前的上一会话状态（sha256 270ca819…）"
+  },
+  "submittedAt": "2026-10-14T07:51:36Z",
+  "wallClockSeconds": 2180,
+  "wallClockFrom": "lease.startedAt",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-14T07:51:36Z"
+  },
+  "verifyState": "partial",
+  "reviews": [
+    {
+      "reviewer": "w-dafeng-2",
+      "at": "2026-10-14T08:38:14Z",
+      "verdict": "partial",
+      "notes": "**总判 partial（可用，但须修 3 处并补 3 条）。**\n\n【一、机械层：优秀，可放心使用】265 条引文逐字往返零失败、偏移全部落在切片内、globalOccurrences 全篇重算零不符、occurrenceIndex 4/4 正确、sourceHash 全一致、任务内五栏**零同句**（硬红线通过）、内容分区 6/6 齐全、10 个自述计数全部与实际 len() 一致、跨任务复用登记集合无缺。随机 5 条 quote 的 find 全部命中且 find 位置==声明 start。**我没有找到任何一条编造**：无原文所无的人物/事件/结局/伏笔，未把人物话语当叙述事实，未把结束当成功。这一层比本项目多数候选扎实。\n\n【二、不判 fail 的理由】按 VERIFIER.md「判 fail 必须有 counterExample，且 quote 逐字可查」—— 我确实找到 3 条带逐字引证的反例（CE-C1 记账、CE-C2/CE-C3 散文引文标点改写）。但它们**全部是低严重度**：不改变任何任务/因果/状态/伏笔的语义，且 CE-C2/CE-C3 涉及的「压缩改写加「」」这一形态，候选自己在 SC08 里已识别并声称修过（本轮 7+6 处中漏掉这 3 处）。缺陷形态是**边界未收干净**，不是系统性失守，故判 partial 而非 fail。\n\n【三、必须修的（可用清单）】① reverseCoverage 的 covered 应为 185（或改判据为闭区间并把两个孤立『”』chunk 计入 uncovered，则 201/21），现 186/36 与它自己声明的 strict-half-open 判据差 1 格；② T11.objectiveNote 的两个「」必须补成原文「宫中之事，事无大小，悉以咨之」「营中之事，事无大小，悉以咨之」或去掉引号；③ CE09.mechanism 的「素有大志，若不早除，久必为祸」须还原分号。\n\n【四、建议补的（不影响可用性）】RC1 孟获「此水原有猖神作祸」、RC2 曹睿「若果谋反将奈何」、RC3「故五月渡泸，深入不毛」这三条我判为实质缺口（都含行动/因果信息且在因果链上），值得补成引文节点；RC4（向宠理由句、后主自谋句）与 RC7（柱石之臣原话）为次一级，补则更完整。RC5（祭文收束语）与 RC6（建兴四年纪年锚）属修辞/锚点层，列为 informational，不补也可接受。\n\n【五、我的自我纠错（如实记录）】我在反向验证中先后把 3 处列为缺口后**自行撤销**：① 伪告示正文 —— 实测已在 worldSettings[10].quotes[2] 收录（@458879）；② 魏廷封赠/大赦名单 —— 印象中缺失，实测以 notModeled 引文收录（@458490、@458539）；③ 「张韬诈称桐木偶人/魇镇/郭贵妃谋后」整条链 —— 我一度判它被完全丢弃，实测 T04 与 S05/S06 已完整承载（引文 @457969、@458000），只是未连 causeEdge（对此我的判断是**拒连合理**：郭贵妃→赐死之间原文确有「丕大怒」作机制，但赐死的直接触发是魇镇指控而非郭氏意图，评分标准下可不连）。这三条撤销说明反向验证本身需要逐条证伪，不能只凭「没在 causeEdges 里看到」就记缺口。\n\n【六、我无法核验的】候选 provenance 声称上一版由 w-dafeng-1 产出并冻结在 /Volumes/资源库/我的资源/回滚点/项目/星系-cl0090-w-xiyou-0/BASE-presession.candidate.json（sha256=270ca819…）。我**实测该文件存在且 sha256 逐位相符**，FINAL-candidate.snapshot.json 与 loop/state/out 的正式候选哈希也一致（136b967c…）。但「该基线确由 w-dafeng-1 在原会话产出」这一事实我无法从本机独立证实（无该会话的签名字段），只能记录为候选自述。其余无法核验项见候选自己的 unknowns（U01-U13），我抽查 U01/U02/U06/U08/U09 五条，其引文与推理均与原文相符。\n\n【七、口径声明】本复核所有「逐字」判定以 docs[0].text 为准（data/cache/fe42d01f3826fe8096f86614.docs.json，sha256=8ab7298a…）。我按任务 prompt 执行，未采用任务 JSON 的 sourceHash=2988ce6e…（该值实测指向另一份 text 逐字符相同的 docs.json，候选 U01 已如实登记）。我未修改被复核候选分毫（同一文件只设一个写入负责人）；复核前后各重算一次候选 sha256，均为 136b967c73def7c77005d86de7b81eda2289030b85eaa500b30d3211ef3b5ab5。",
+      "counterExamples": [
+        {
+          "id": "CE-C1",
+          "claim": "candidate.reverseCoverage 声明 chunks=222、covered=186、uncoveredCount=36，并声明判据 criterion=\"strict-half-open-intersection\"、recomputedFrom=\"docs[0].text[456597,462203) 与候选内全部带 start/end 的引文节点\"。",
+          "why": "按它**自己声明的判据**（严格半开：quote.start < chunk.end 且 chunk.start < quote.end，端点相接不算覆盖）独立重算，结果与自述不符：chunks=222（一致）、covered=**185**、未覆盖 occurrence=**37**。差额来自切片内有**两个内容相同的孤立右引号 chunk**『”』（@[459018,459019) 与 @[460495,460496)）：候选的 uncovered 列表按字符串去重后只剩 1 个『”』（len=36、unique=36），于是 covered+uncoveredCount = 186+36 = 222 表面上自洽，实际是把一个未被覆盖的 chunk 计成了已覆盖。这是**自述数字与实际判据的 1 格偏差**，属可复现的记账错误，不是引文定位错误（265 条引文本身零缺陷）。",
+          "quote": "聊表丹诚，敬陈祭祀。呜呼，哀哉！伏惟尚飨！”",
+          "quoteStart": 457515,
+          "quoteEnd": 457536,
+          "offsetNote": "该句尾的右引号即未被任何引文覆盖的第二个『”』chunk（@[460495,460496) 是出师表末尾的同类 chunk）；两个『”』字符串相同，去重后候选列表只留下 1 个。",
+          "reproduce": "python3 -B -s /Volumes/资源库/我的资源/回滚点/项目/星系-cl0090-w-dafeng-2/verify_0090_audit.py  →  covered_strict=185, uncovered_occurrences=37, uncovered_unique=36, candidate_declared.covered=186",
+          "severity": "low（记账层；不影响任何引文、任务、因果边的内容正确性）",
+          "candidateSelfAware": "候选 SC07 自己承认上一版此数字不自洽并声称本轮已改为写盘前重算；实测**本轮仍未与声明判据逐位对齐**，方向相反（它上一版自述 186/36 也报同一对数字）。"
+        },
+        {
+          "id": "CE-C2",
+          "claim": "candidate.tasks[10].objectiveNote 写：《出师表》里「宫中之事悉以咨之」「营中之事悉以咨之」相应。两个「」片段被当作逐字引文使用。",
+          "why": "该串**不是原文的逐字子串**：原文在「宫中之事」与「悉以咨之」之间还有「，事无大小，」（营中句同）。逐字 find 失败；连去掉标点后仍不命中（因为中间夹着实词「事无大小」而不只是标点）。这与候选 SC08 自己声明的判据「把引用性字段里每个「」片段拿去 text.find」冲突 —— 它声称修掉了这类缺陷，但这两处仍在。",
+          "quote": "愚以为宫中之事，事无大小，悉以咨之，然后施行，必得裨补阙漏，有所广益。",
+          "quoteStart": 459918,
+          "quoteEnd": 459955,
+          "secondQuote": "愚以为营中之事，事无大小，悉以咨之，必能使行阵和穆，优劣得所也。",
+          "secondQuoteStart": 460029,
+          "secondQuoteEnd": 460061,
+          "reproduce": "python3 -c \"import json;t=json.load(open('data/cache/fe42d01f3826fe8096f86614.docs.json'))[0]['text'];print('宫中之事悉以咨之' in t)\"  →  False",
+          "severity": "low（语义无损：它说的是同一件事；但形式上违反候选自己声明的逐字纪律）"
+        },
+        {
+          "id": "CE-C3",
+          "claim": "candidate.causeEdges[8].mechanism（CE09，伪告示 → 曹睿大惊、华歆王朗主张速诛）写：王朗补「素有大志，若不早除，久必为祸」。",
+          "why": "原文该处用的是**分号**（「司马懿深明韬略，善晓兵机，素有大志；若不早除，久必为祸。」），候选把分号改成逗号后放进「」。逐字 find 失败；去标点后命中，说明是**仅标点层**的改写。按候选 SC08 自定判据（F1/F2 分档）应属 F2，但仍被计为逐字引文。",
+          "quote": "王朗奏曰：“司马懿深明韬略，善晓兵机，素有大志；若不早除，久必为祸。”",
+          "quoteStart": 459109,
+          "quoteEnd": 459156,
+          "reproduce": "python3 -c \"import json;t=json.load(open('data/cache/fe42d01f3826fe8096f86614.docs.json'))[0]['text'];print('素有大志，若不早除，久必为祸' in t)\"  →  False",
+          "severity": "low"
+        }
+      ],
+      "reverseChecks": [
+        {
+          "found": "孟获对水患缘由的**正面回答**（水有猖神作祸、往来者必须祭之）在候选内零引文触及。候选 T01.action 只引了孔明的问句「孔明遂问孟获」与孔明自己的归因，CE02 的 trigger 只引「用七七四十九颗人头并黑牛白羊祭之」那半句；孟获这句「此水原有猖神作祸」是对**祸源性质**的首次陈述，也是后文「旧例」得以成立的前提。",
+          "quote": "，获曰：“此水原有猖神作祸，往来者必须祭之。”",
+          "quoteStart": 456691,
+          "quoteEnd": 456714,
+          "whyItMatters": "候选在 U02 专门讨论了「鬼神是叙述事实还是人物说法」，并在 unknown 里引了孟获的「此水原有猖神作祸」，但那是**散文提及**，没有作为引文节点登记；CE01（受阻→求因）的机制叙述因此缺了「孟获给出祸源解释」这一环。",
+          "checkedProse": "「此水原有猖神作祸」在候选散文里出现（unknowns U02.detail），故不是完全遗漏，属**引文层**缺口。"
+        },
+        {
+          "found": "曹睿在听到曹真「伪游云梦」之计前的**追问**「司马懿若果谋反，将奈何？」在候选内零引文、零散文命中。CE10 直接从「曹真献计」连到「幸安邑」，跳过了这道追问 —— 而正是这道追问逼出了「先验证后处置」的方案。",
+          "quote": "睿曰：“司马懿若果谋反，将奈何？”",
+          "quoteStart": 459254,
+          "quoteEnd": 459271,
+          "whyItMatters": "CE11 的机制写「名分约束 → 处置降级」，但缺了最直接的一步：皇帝问「若真反怎么办」→ 曹真才提出既能验证又不动兵的方案。这是**因果链上的一环**，不只是转场句。"
+        },
+        {
+          "found": "《出师表》中「故五月渡泸，深入不毛」—— 孔明把南征（正是本回前半段）当作北伐的**既成前提**来论证。候选零引文触及（散文里也只出现「五月渡泸/深入不毛」于 notModeled 之外无实质讨论）。",
+          "quote": "受命以来，夙夜忧虑，恐付托不效，以伤先帝之明；故五月渡泸，深入不毛。",
+          "quoteStart": 460280,
+          "quoteEnd": 460314,
+          "whyItMatters": "这是把本回前后两半（祭泸水班师 / 伐中原上表）在**文本内部**扣起来的一句：前半段的南征被后半段的表文引为北伐的资格依据。候选把两个半段分别建成 T01-T03 与 T10，未连这条**原文自己写明**的联系（对比：候选肯为「祭文承诺→奏准优恤」连 CE05，标准应一致）。"
+        },
+        {
+          "found": "《出师表》里向宠被举的**理由**（先帝称之曰能、众议举宠以为督）与「陛下亦宜自谋，以谘诹善道，察纳雅言，深追先帝遗诏」两句，候选零引文触及。前者是 WS-RULE-05 那条规则的原文依据之一，后者是表文对君主提出的**要求**（与 WS-RULE-07 对臣的要求并列）。",
+          "quote": "将军向宠，性行淑均，晓畅军事，试用之于昔日，先帝称之曰能，是以众议举宠以为督。",
+          "quoteStart": 459990,
+          "quoteEnd": 460029,
+          "secondQuote": "陛下亦宜自谋，以谘诹善道，察纳雅言，深追先帝遗诏。",
+          "secondQuoteStart": 460447,
+          "secondQuoteEnd": 460472,
+          "whyItMatters": "候选 WS-RULE-05 用了「愚以为宫中之事…」「愚以为营中之事…」两处引文，却略过了向宠句 —— 而向宠句正是「营中之事悉以咨之」的**理由句**。同一段里取一半、舍一半，标准不齐。"
+        },
+        {
+          "found": "泸水祭文的**收束语**「聊表丹诚，敬陈祭祀。呜呼，哀哉！伏惟尚飨！」在候选内零引文触及。候选 WS-ITEM-05（泸水祭文）只引了「令董厥读祭文」与「至于本境土神…」两句，notModeled 也明确说祭文「其余不建条目」。",
+          "quote": "聊表丹诚，敬陈祭祀。呜呼，哀哉！伏惟尚飨！",
+          "quoteStart": 457515,
+          "quoteEnd": 457536,
+          "whyItMatters": "这属**可接受的取舍**（修辞层），我记为反向发现但不据此扣分：它不改变任何人的行动。列出是为了让复核可见「祭文被引到的边界在哪」。",
+          "severity": "informational"
+        },
+        {
+          "found": "「却说魏主曹丕，在位七年，即蜀汉建兴四年也」—— 候选零引文、零散文命中。这是原文给出的**纪年锚点**，且与后文「选定建兴五年春三月丙寅日，出师伐魏」构成时间对照（托孤在四年、出师在五年）。",
+          "quote": "却说魏主曹丕，在位七年，即蜀汉建兴四年也。",
+          "quoteStart": 457856,
+          "quoteEnd": 457877,
+          "whyItMatters": "候选 T05（曹丕之死）只引病程与「时年四十岁，在位七年」，未取这个把魏蜀两条线对齐到同一纪年的句子；对「跨线时间对齐」这类信息，候选整体没有承接面（states 里无时间字段）。"
+        },
+        {
+          "found": "曹丕对四人的**嘱托原话**里「卿等皆国家柱石之臣也，若能同心辅朕之子，朕死亦瞑目矣！」候选虽在 T05.action 的 text 里复述，但**未作为引文节点**登记（T05.action 的 quotes 只到「内侍奏征东大将军曹休入宫问安」为止的前半句）。",
+          "quote": "卿等皆国家柱石之臣也，若能同心辅朕之子，朕死亦瞑目矣！",
+          "quoteStart": 458392,
+          "quoteEnd": 458419,
+          "whyItMatters": "候选 WS-RULE-03（托孤之重）用三条引文支撑「托孤之名可作担保」，其中并不含这句**托孤内容的原话**，而它恰是后来曹真「文皇帝托孤于臣等数人」与司马懿「臣受先帝托孤之重」所引据的文本。"
+        },
+        {
+          "found": "魏方所见伪告示的**正文**（「骠骑大将军总领雍、凉等处兵马事司马懿，谨以信义布告天下：昔太祖武皇帝…」至「如不顺者，当灭九族」）—— 候选**已收**（worldSettings[10].quotes[2]，@458879 起），CE09 的机制也据此写。这是反向检查中的**反例**：我原以为此处漏了，实测未漏，如实记下。",
+          "quote": "骠骑大将军总领雍、凉等处兵马事司马懿，谨以信义布告天下：",
+          "quoteStart": 458879,
+          "quoteEnd": 458907,
+          "whyItMatters": "记下它是为了说明我的反向验证本身经过证伪：这一条原本在我的缺口候选名单里，核对后撤销。"
+        }
+      ]
+    }
+  ]
+}

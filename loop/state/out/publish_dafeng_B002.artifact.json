@@ -1,0 +1,230 @@
+{
+ "task": "publish:dafeng:B002",
+ "agent": "w-publish",
+ "status": "failed",
+ "decision": "NOT_WRITTEN_BRIDGE_ADMITS_TWO_VERIFIER_FLAGGED_NODES_AND_10_EMPTY_SHELLS",
+ "publishKey": null,
+ "parentKey": "9b676d7031b1bcd3b8377a18",
+ "publishedThisRound": false,
+ "summary": "【本轮**没有**执行 --write。这不是「跑不动」或「没时间」，是测出来的：桥产出的批次候选里含 2 个复核者**点名要求修正**、却因定位符写在 `why`/`target` 字段而漏排除的节点（见 D-A），以及 10 个 goal/obstacle/action/outcome/cost 全空的空壳 tasks（见 D-B）。发布它们会同时违反任务纪律 1（只提交通过独立复核的条目）与发布工具自己的候选契约精神（『有节点、有引文、但没有任何叙事内容』）。】\n\n按任务指定链路完整跑过：`to_candidate.py --batch publish:dafeng:B002` → `BATCH-publish-dafeng-B002.candidate.json`（units=20 / kept=27 / dropped=572，sha256 c177da52…，**两次重跑字节相同**）。`publish_reviewed.py --dry-run` → **ok:true、contractProblems:[]**、referencePrecision 62/62=100%、claimedVerifiedAnchorPrecision 283/283=100%。任务提示里写的另一种情形（'候选没有可发布的叙事层'）**没有**发生 —— 契约机检确实是过的。\n\n所以我没有卡在契约上，而是去查「机检过了」等不等于「该发」。查出来三件事，全部可复算：\n\n**D-A（阻断级）**：桥的点名排除只扫 `counterExample.claim` 一个字段，而复核者把定位符写在 `why`/`target` 里 ⇒ 2 个被点名条目**照样进了候选**：`task_review_1017624a4adc2baf6ea8`（L1:0041 tasks[3]，复核者以 `tasks[3]`/`T4_xu_qi_an_wen_guozijian_enyuan` 在 `why` 里点名）与 `task_review_d19a28d75843870ebc3b`（L2:0046 tasks[0]=T1，复核者以 `tasks.T1.cost.note` 在 `target` 里点名）。这两条正是 B000 台账里 `PUBLISHED-WITH-KNOWN-DEFECTS` 的同一形态（当时 7+7 条已发布、无法撤回）。**本批若发布，就是把同一个事故重演一次。**\n\n**D-B（阻断级）**：10/14 个 tasks 节点是空壳 —— `goal/obstacle/action/outcome/cost` 全为 null、name 落成占位符『（未命名任务）』。根因是桥的 `_t()` 只读子字段的 `.get('text')`，而 READER 对这些条目写的是 `{'value':…}`。**这不是「语义未经核验」，是内容根本没被搬运。** 这 10 条会让作品库里出现只有一句引文、没有任何叙事字段的『任务』节点。\n\n**D-C（量化级）**：桥的区间解析不认 `source.segmentSelector`（形如 `docs[0].text[131711:134604]`），也不认 L2:0058 那种连 range 都没有的写法 ⇒ 本批 6 个单元的 scope 退化成 `[0,1)`，**本批区间内一个事件都锚不到** ⇒ 75 条以『本章图谱零事件』为由丢弃，其中很多是本可发布的。本批 20 个单元里 13 个贡献 0 节点，与这个退化高度相关。\n\n我**没有**放宽任何过滤、没有改校验规则、没有改受保护路径。为了把「桥的问题」与「该不该发」分开，我在 /tmp 建了桥的副本（out/、data/cache、index.json 用符号链接指向真实仓库，**只读**）打三处最小补丁重跑：kept 27→60（tasks 14→43、clues 6→8、characterStates 7→9），空壳 0 个、被点名漏排除 0 个，真实发布工具 dry-run 仍 ok:true / contractProblems:[]、149/149 与 495/495 全 100%。**即卡点全在桥的过滤与取值，不在内容质量。** 因此本轮的正确动作是修桥（属受保护路径 loop/bin/to_candidate.py，须走合并任务），不是把有缺陷的候选发出去。\n\n**不声称全书完成**：本批只覆盖 20/912 单元 = 2.1930%、63424/4760263 码点 = 1.3324%。",
+ "scope": {
+  "sourceRangeRequired": [122388, 185812],
+  "unitsRequired": 20,
+  "unitsContributingNodes": 7,
+  "unitsWithZeroNodes": 13,
+  "zeroNodeUnits": ["read:dafeng:L3:0043", "read:dafeng:L0:0044", "read:dafeng:L1:0045", "read:dafeng:L3:0047", "read:dafeng:L1:0049", "read:dafeng:L2:0050", "read:dafeng:L3:0051", "read:dafeng:L0:0052", "read:dafeng:L1:0053", "read:dafeng:L2:0054", "read:dafeng:L3:0055", "read:dafeng:L2:0058", "read:dafeng:L3:0059"],
+  "unitHeads": ["第四十一章 一个胥吏的诗才", "第四十二章 亚圣和他的妻子", "第四十三章 题字", "第四十四章 逃之夭夭", "第四十五章 大哥真讨厌", "第四十六章 买首饰", "第四十七章 日常气婶婶", "第四十八章 婶婶：哼，小王八蛋还算有良心", "第四十九章 社会性死亡", "第五十章 投壶", "第五十一章 打茶围", "第五十二章 一家人就是要整整齐齐", "第五十三章 我抄诗是为了交易，才不是低俗的装逼", "第五十四章 截胡", "第五十五章 计划初成", "第五十六章 计划的核心", "第五十七章 绑架", "第五十八章 flag", "第五十九章 这个孩子太难了，我不会教", "第六十章 打更人上门"],
+  "sourceId": "src_3af1f8739d030d7a1a8b",
+  "textHash": "bc8b75ee120009f4bf6a8e235a7ff133b8ac727a8612067496a0440eaf3fc612",
+  "mergedScopeAsRecordedByBridge": {"start": 0, "end": 178842, "note": "**注意 start=0 是错的**：任务区间是 [122388,185812)，而桥因 6 个单元区间退化成 [0,1)（见 D-C）把批次 scope 起点拉到 0，且 end=178842 少了第六十章（应为 185812）。这个错误区间会随 --write 一起写进 meta.reviewHistory 与 meta.enrichment.scope —— 已发布的 B000 版本里留着同一个错误（start=0）。本轮未写，故未新增该缺陷。"},
+  "coverageOfWholeBook": {"codepoints": "63424/4760263 = 1.3324%", "units": "20/912 = 2.1930%", "books": "大奉 1/1 书的 1 批；西游、三国全部未覆盖"}
+ },
+ "counts": {
+  "batchCandidatePath": "loop/state/candidates/BATCH-publish-dafeng-B002.candidate.json",
+  "batchCandidateSha256": "c177da520b9e3d2dd08678e979901344af8e3e02e0f6a972fe19d21a073329fd",
+  "bridge": {"units": 20, "kept": 27, "dropped": 572, "digest": "2e89532a0a9b"},
+  "keptByLayer": {"tasks": 14, "clues": 6, "characterStates": 7},
+  "wouldBePublishedByLayer": {"tasks": 19, "clues": 6, "characterStates": 14, "note": "真实管线 write=false 分支跑出的**合并后**层计数（含父版本既有的 5 tasks/7 states 等），非本批新增量。"},
+  "addedByThisBatchFromMergedGraph": {"tasks": 14, "clues": 6, "characterStates": 7},
+  "dryRun": {"ok": true, "contractProblems": 0, "referencePrecision": "62/62 = 100%", "claimedVerifiedAnchorPrecision": "283/283 = 100%", "originalPreserved": true},
+  "verdictsAmong20Units": {"partial": 20, "fail": 0, "pass": 0},
+  "verdictSourceSplit": {"两来源都有verdict": 11, "仅sidecar有verdict": 9, "仅record有verdict": 0, "note": "9 个单元的复核裁决只写在 .verdict.json sidecar 里，提交记录 verdict=None。桥两个来源都读（E11/E-D1 修复的成果），故没有整份结论被无视。两来源不一致的单元：0 个。"}
+ },
+ "dropped": {
+  "total": 572,
+  "byReason": {
+   "no_anchored_event": 224,
+   "no_two_distinct_events": 202,
+   "unit_has_no_anchorable_event": 75,
+   "unresolvable_character": 43,
+   "verifier_flagged": 17,
+   "no_verbatim_quote": 11
+  },
+  "reasonMeaning": {
+   "no_anchored_event": "状态/伏笔锚不到图谱既有事件，无法机检",
+   "no_two_distinct_events": "因果边两端锚不到两个不同的真实事件",
+   "unit_has_no_anchorable_event": "本单元图谱零事件 —— **本批 75 条中至少 54 条属 D-C 误判**（6 个区间退化单元合计贡献 54 条）",
+   "unresolvable_character": "人物不在图谱 453 人人物表内，需先建人物身份（不改写成他人）",
+   "verifier_flagged": "复核者点名须修正的条目，桥按纪律排除",
+   "no_verbatim_quote": "引证无法在原文逐字切出"
+  },
+  "verifierFlaggedCorrectlyExcluded": 17,
+  "verifierFlaggedMissedByLocatorScan": 2,
+  "byReaderLayer": {"causeEdges": null, "note": "逐单元候选的 dropped 记账不带 layer 的有序分布；上面 byReason 为 20 单元汇总。"}
+ },
+ "leakedFlaggedItems": [
+  {
+   "unit": "read:dafeng:L1:0041",
+   "layer": "tasks", "rawIndex": 3, "rawId": "T4_xu_qi_an_wen_guozijian_enyuan",
+   "candidateNodeId": "task_review_1017624a4adc2baf6ea8",
+   "locatorField": "counterExample.why",
+   "verifierText": "同一份产物里 tasks[3]（T4_xu_qi_an_wen_guozijian_enyuan）的 evidence 数组第 9 项正是这条 PS 行，start=127760 / end=127777 / tag=ps_line / crossRange=false。该句**确实被用作了一条任务的证据**，与『未用作任何任务的证据』直接矛盾。",
+   "verifierImpact": "不影响任何叙事结论，属必须改掉的元数据自述。改法：『PS 行与分隔线不构成叙事断言，仅作为 T4 的区间边界证据登记』。",
+   "confirmedInCandidate": "该节点的 sourceRefs 里确实含 [127760,127777) 的 PS 行『PS：更新或许会迟到，但不会缺席。』"
+  },
+  {
+   "unit": "read:dafeng:L2:0046",
+   "layer": "tasks", "rawIndex": 0, "rawId": "T1",
+   "candidateNodeId": "task_review_d19a28d75843870ebc3b",
+   "locatorField": "counterExample.target",
+   "verifierText": "tasks.T1.cost.note（原文逐字：「区间内没有写他为这两支金步摇付出别的代价（没付足银、没受罚、没被追究）」）",
+   "verifierImpact": "severity=范围过宽 + 遗漏（非编造）；建议把 cost 的范围限定到「许七安本人」",
+   "confirmedInCandidate": "该节点即 L2:0046 的 T1，已作为 tasks 节点进入批次候选"
+  }
+ ],
+ "shellNodes": {
+  "count": 10,
+  "ofTasks": 14,
+  "nodeIds": ["task_review_2e75bf7cf54bb3b7a04b", "task_review_6cb55396123933f516b7", "task_review_b0297f2237c0ee479278", "task_review_dee5e17c8a05a521c106", "task_review_3b9243c63860f70a0f33", "task_review_d19a28d75843870ebc3b", "task_review_fef2e38370e81761be28", "task_review_057175306214454818de", "task_review_805811aa572805f58436", "task_review_d52518b56f3587eed78d"],
+  "symptom": "goal/obstacle/action/outcome/cost 全为 null，name = '（未命名任务）'，status=unknown",
+  "evidenceRawHasContent": "对应的 READER 候选里这些子字段都有完整文本，例如 loop/state/out/read_dafeng_L2_0042.candidate.json 的 T1.objective.value=『考校堂哥对「争国本」的见识……』"
+ },
+ "defectsFound": [
+  {
+   "id": "D-A-verifier-locator-scan-too-narrow",
+   "severity": "blocking",
+   "status": "未修复（属受保护路径 loop/bin/to_candidate.py，本轮按纪律未改）",
+   "what": "桥从复核结论提取点名定位符时只读 `ce.get('claim')` 一个字段（to_candidate.py 第 217–218 行），而复核者大量把定位符写在 `why`/`target`。定位符扫不到 ⇒ 该条目不被排除 ⇒ 复核者的点名在这条上等于没发生。",
+   "evidenceInThisBatch": "2 条（见 leakedFlaggedItems）；对照：桥按 claim 正确排除了 17 条。",
+   "corpusWideImpact": "67 个已复核单元中 52 个存在『claim 里没有、其他字段里有』的定位符；其中 4 个（L0:0036/L1:0057/L1:0065/L2:0046）补读 `target` 即可覆盖，另 48 个连补 target 也不够（定位符只在 why/impact）。",
+   "relationToKnownDefect": "PUBLISHED-WITH-KNOWN-DEFECTS 里 5b43c216 的 rootCause 记录了同一形态的**第一次**修法（索引写法 + 候选 id 两种都匹配），但那次只扩了『写法』，没扩『字段』。本批是同一根因的第二次现形 —— 且 5b43c216 的 7+7 条已发布、无法撤回。",
+   "suggestedFix": "把 `ces` 的来源从 `ce.get('claim')` 扩到 counterExample 全字段（claim/target/field/where/locator/path/nodeId/id/why/impact）；并在 selftest 加负例锁死『定位符只在 why 里也必须被排除』。"
+  },
+  {
+   "id": "D-B-bridge-subfield-key-loss",
+   "severity": "blocking",
+   "status": "未修复（同上，受保护路径）",
+   "what": "桥的 `_t()` 只读子字段的 `.get('text')`；READER 部分单元写 `{'value':…}` ⇒ 五个叙事子字段全取到 None ⇒ 空壳节点照样进入候选并可通过契约机检。",
+   "evidenceInThisBatch": "10/14 tasks 空壳（见 shellNodes）。",
+   "relationToKnownDefect": "与 B000 发布者记的 D2 是同一个键名缺陷（B000 台账写：全 20 单元中 5 个用 value 键，已发布版本里 10 个 tasks 的 5 个子字段全为 null）。**这是复发，不是新发现** —— 说明上次只记账未修。",
+   "suggestedFix": "`_t()` 改为 `v.get('text')` 缺失时取 `v.get('value')`；并加断言：tasks 节点若 goal/obstacle/action/outcome/cost 全空则丢弃并记账，不发布空壳。"
+  },
+  {
+   "id": "D-C-source-range-not-parsed",
+   "severity": "high",
+   "status": "未修复（同上，受保护路径）",
+   "what": "桥的区间解析只认 `source.range=[lo,hi]` 与 `source.start/end`，不认 `source.segmentSelector`（`docs[0].text[a:b]`），也不认 L2:0058 那种两者皆无的写法 ⇒ 区间退化成 [0,1) ⇒ 该单元在图谱里锚不到任何事件。",
+   "evidenceInThisBatch": "6 个单元区间退化为 [0,1)：L3:0043、L3:0047、L3:0051、L3:0055、L2:0058、L3:0059；它们合计丢弃 223 条，其中 54 条记的是『本章图谱零事件』。这 6 个单元本批**全部贡献 0 节点**。",
+   "corpusWideImpact": "67 个已复核单元中 19 个区间退化成 [0,1)。",
+   "publishedContamination": "已发布的 B000 版本里 reviewHistory 的 reviewed_publication 条目 scope 记着 start=0；B001 的 artifact 也记过同一问题（其 D3）。本轮**未新增**该缺陷（没有 --write）。",
+   "suggestedFix": "解析 `source.segmentSelector` 的 `docs[N].text[a:b]` 形式；两者皆无时**拒绝该单元并记账**，而不是静默退化成 [0,1)（静默退化会把『区间未知』伪装成『本章无事件』）。"
+  },
+  {
+   "id": "D-D-batch-scope-metadata-wrong",
+   "severity": "medium",
+   "status": "未修复（同上）",
+   "what": "合并批次时 scope 用 `min(start)/max(end)`，被 D-C 的 [0,1) 拉到 0；end=178842 又漏了最后一个单元（第六十章，到 185812）。",
+   "evidence": "批次候选 scope.start=0 / end=178842，而任务区间是 [122388,185812)。原文校验：text[178842:178862]='第五十九章 这个孩子太难了，我不会教\\n\\n'，text[185812:]='第六十一章 铁证如山…' ⇒ end 应为 185812。",
+   "impact": "该错误区间会随 --write 写进 meta.reviewHistory 与 meta.enrichment.scope，成为「这批审了哪里」的持久记录。"
+  },
+  {
+   "id": "D-E-unknowns-layer-not-carried",
+   "severity": "low",
+   "status": "设计现状，如实登记",
+   "what": "桥的 LAYER_MAP 不含 `unknowns`，故 READER 登记的 260 条 unknowns（20 单元合计）**一条都不进候选**。这些正是回答「原文没说什么」的诚实标记。",
+   "impact": "发布版本里读者看不到任何『此处未解决』的登记；不构成错误发布，但使覆盖度看起来比实际更完整。**不声称这些 unknowns 已发布。**"
+  }
+ ],
+ "fixVerification": {
+  "note": "为了让「桥的问题」与「该不该发」分开，我在 /tmp/b002audit/sim 做了受控实验：桥的**副本** + 符号链接（out/、index.json、data/cache 均指向真实仓库，只读），只改副本；写盘只落在 /tmp。**真实仓库的业务源文件一个字节都没动。**",
+  "sandbox": {
+   "path": "/tmp/b002audit/sim/loop/bin/to_candidate.py",
+   "patches": ["P1: 点名定位符来源由 claim 扩到 counterExample 全字段", "P2: 区间解析支持 segmentSelector 的 docs[N].text[a:b]", "P3: _t() 支持 value 键 + 全空 tasks 丢弃记账"],
+   "resultCandidate": "/tmp/b002audit/sim/loop/state/candidates/BATCH-publish-dafeng-B002.candidate.json",
+   "resultCandidateSha256": "ace8a29865cf02a4ac201122cd2150d70ff7d4132a17b3ab0e7c2994fad0a956"
+  },
+  "before": {"kept": 27, "dropped": 572, "tasks": 14, "clues": 6, "characterStates": 7, "shells": 10, "leakedFlagged": 2, "scope": [0, 178842]},
+  "after": {"kept": 60, "dropped": 539, "tasks": 43, "clues": 8, "characterStates": 9, "shells": 0, "leakedFlagged": 0, "scope": [0, 185812]},
+  "dryRunOnFixedCandidate": {"ok": true, "contractProblems": 0, "layers": {"tasks": 48, "clues": 8, "characterStates": 16}, "referencePrecision": "149/149 = 100%", "claimedVerifiedAnchorPrecision": "495/495 = 100%", "originalPreserved": true},
+  "conclusion": "内容侧引文质量在两种候选上都 100%；被卡住的从来不是引文，是过滤与取值。修桥后本批可发布节点 27→60（+122%），且不含被点名条目、不含空壳。",
+  "notDoneInSandbox": "scope.start 仍为 0 —— 因 L2:0058 连 range/segmentSelector 都没有（P2 无法解析）。这印证 D-C 的第三点：解析不出来时必须**拒绝并记账**，不能静默退化。"
+ },
+ "honestyMarkers": {
+  "claimVerified": false,
+  "provenance": "assistant-reviewed-source",
+  "semanticStatus": "assistant-reviewed-source",
+  "modelCalls": 0,
+  "automaticModelCalls": 0,
+  "semanticReview": "not_performed",
+  "scopeVerification": "declared_only",
+  "semanticCompleteness": "unverified",
+  "statement": "本批候选的 27 个节点全部 claimVerified=false / provenance=assistant-reviewed-source（逐节点核过，见 assertions）。引用定位与身份合同通过 ≠ 语义已核验：没有任何一条经过人工语义认证。任务纪律 4 要求的标记一个都没少 —— 而且本轮**没有写库**，作品库里没有新增任何节点。"
+ },
+ "lineage": {
+  "parentKey": "9b676d7031b1bcd3b8377a18",
+  "parentGraphSha256Before": "3c2fae1d399d6768719f2d5476fa0cfd88fb4fbbc12abdf080323fa4b846ebdf",
+  "parentGraphSha256After": "3c2fae1d399d6768719f2d5476fa0cfd88fb4fbbc12abdf080323fa4b846ebdf",
+  "parentDocsSha256": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+  "parentPreserved": true,
+  "childKey": null,
+  "childCreated": false,
+  "dataCacheFileCountBefore": 172,
+  "dataCacheFileCountAfter": 172,
+  "noNewGraphKeyWritten": true,
+  "verification": "发布前后各算一次父版本与父 docs 的 sha256，完全相同；data/cache/ 下文件数 172→172，无新键；--write 从未执行。"
+ },
+ "isolatedPredictionNotClaimed": {
+  "note": "我复刻了 _publish_graph_revision 的键摘要算法，并用**已发布的 B000** 验证过方法：从现有 B000 批次候选复算得到 1063b17ca65ec1b76f30e460，与 PUBLISH-LEDGER 台账键逐字符相同 ⇒ 方法可信。但**本批的预测键不作为证据**：它是预测值，不是已发生的事实，且依赖当时快照。",
+  "predictedKeyIfWritten": "9637d40997ffdf9b18885a43",
+  "predictedKeyStatus": "NOT_WRITTEN — 仅用于说明「若照原样发布会有新键」，不构成发布记录，不得据此认为本批已发布。"
+ },
+ "evidence": [
+  {"path": "loop/state/candidates/BATCH-publish-dafeng-B002.candidate.json", "sha256": "c177da520b9e3d2dd08678e979901344af8e3e02e0f6a972fe19d21a073329fd", "kind": "bridge-output"},
+  {"path": "loop/state/out/verify_dafeng_L1_0041.verdict.json", "sha256": "84fa76d878611bc2c21dcd7d3f9047c4dbae288b253e3f478ea47129e5cb7227", "kind": "verifier-sidecar-D-A"},
+  {"path": "loop/state/out/verify_dafeng_L2_0046.verdict.json", "sha256": "25bf50a5a9acc461fa998ae4ac0e616026baa1d33e95937eacef932d4b881290", "kind": "verifier-sidecar-D-A"},
+  {"path": "loop/state/out/read_dafeng_L1_0041.candidate.json", "sha256": "604e49589341f5b77fb29df0a512c335b61197fc7910242abc81a2e408f8d250", "kind": "reader-candidate-D-A"},
+  {"path": "loop/state/out/read_dafeng_L2_0042.candidate.json", "sha256": "abd3b2819af58cb7082ec249273862fbc129024b11abc9a58130301ca175f0b4", "kind": "reader-candidate-D-B（value 键）"},
+  {"path": "loop/state/out/read_dafeng_L2_0058.candidate.json", "sha256": "23031b4abbbcbf88b071af5c6bc6ac69f8b6d362e97b6fdaff87e3997a3f8c1d", "kind": "reader-candidate-D-C（无 range）"},
+  {"path": "/tmp/b002audit/sim/loop/state/candidates/BATCH-publish-dafeng-B002.candidate.json", "sha256": "ace8a29865cf02a4ac201122cd2150d70ff7d4132a17b3ab0e7c2994fad0a956", "kind": "sandbox-fixed-candidate"},
+  {"path": "/tmp/b002audit/audit.py", "sha256": "832f047424c7831519761fdc505176e36f80d9f128d349855452e14e9d0347c8", "kind": "audit-script（只读对账，可复现本 artifact 全部数字）"},
+  {"path": "/tmp/b002audit/would_write.py", "sha256": "d2cff90f3fa013ed22452b060321c4e986e71d23ab94bc0b68b9f26e607e7028", "kind": "audit-script（走真实管线 write=false 分支，拿合并后图）"},
+  {"path": "/tmp/b002audit/experiment.py", "sha256": "243f176b1a75d8d9eb96f1a0f447f835fc08eaa9df9088b5c5869756d88afd20", "kind": "audit-script（A/B/C 受控实验）"},
+  {"path": "/tmp/b002audit/corpus.py", "sha256": "5a77df0702c8bde6666be243e655d57e1c61c092b986467eb3011128d64ffa4e", "kind": "audit-script（全语料量化 D-A/D-C）"},
+  {"path": "tools/publish_reviewed.py", "sha256": "a1827ebdb6d89ea04e1addb8807fa79ca95d1f6251edcddf6886ae3f357af561", "kind": "publish-tool-readonly"}
+ ],
+ "assertions": [
+  {"text": "父版本字节在本次运行前后完全一致（本轮未 --write，已独立复算）", "result": "pass", "command": "shasum -a 256 data/cache/9b676d7031b1bcd3b8377a18.json → 3c2fae1d399d6768719f2d5476fa0cfd88fb4fbbc12abdf080323fa4b846ebdf（运行前后两次相同）"},
+  {"text": "未创建任何新图谱版本键（data/cache 无新文件）", "result": "pass", "command": "ls data/cache/*.json | wc -l → 172（运行前后相同）；find data/cache -maxdepth 1 -name '*.json' -newermt '2026-10-08 22:00' → 空"},
+  {"text": "任务指定的桥可运行并产出固定路径的批次候选，且**字节可重放**", "result": "pass", "command": "python3 -B -s loop/bin/to_candidate.py --batch publish:dafeng:B002 → batch=loop/state/candidates/BATCH-publish-dafeng-B002.candidate.json，_bridge={units:20,kept:27,dropped:572,digest:2e89532a0a9b}；连跑两次 sha256 均为 c177da52…（produced/skipped 逐字段相同）"},
+  {"text": "发布合同 dry-run **通过**（ok:true / contractProblems:[] / 双精度 100%）", "result": "pass", "command": "python3 -B -s tools/publish_reviewed.py --source-key 9b676d7031b1bcd3b8377a18 --candidate loop/state/candidates/BATCH-publish-dafeng-B002.candidate.json --dry-run → ok:true, contractProblems:[], referencePrecision 62/62=100%, claimedVerifiedAnchorPrecision 283/283=100%, originalPreserved:true"},
+  {"text": "候选里含 2 个被复核者点名、定位符却写在 claim 之外字段的条目（D-A 实证）", "result": "pass", "command": "python3 /tmp/b002audit/audit.py → LEAK read:dafeng:L1:0041 tasks[3] T4_xu_qi_an_wen_guozijian_enyuan；LEAK read:dafeng:L2:0046 tasks[0] T1；合计 2"},
+  {"text": "候选里 14 个 tasks 中 10 个五个叙事子字段全空（D-B 实证），而 READER 原文这些字段有完整 value 文本", "result": "pass", "command": "python3 /tmp/b002audit/audit.py 第 3 节 → tasks 总数=14 空壳=10；对照 python3 -c \"import json;print(json.load(open('loop/state/out/read_dafeng_L2_0042.candidate.json'))['tasks'][0]['objective']['value'][:40])\""},
+  {"text": "6 个单元的桥区间退化为 [0,1)，且这 6 个单元本批全部贡献 0 节点（D-C 实证）", "result": "pass", "command": "python3 -c \"import json;[print(u,(json.load(open('loop/state/candidates/read_dafeng_%s.candidate.json'%u))['scope']['start'],json.load(open('loop/state/candidates/read_dafeng_%s.candidate.json'%u))['scope']['end'])) for u in ['L3_0043','L3_0047','L3_0051','L3_0055','L2_0058','L3_0059']]\" → 全部 (0,1)"},
+  {"text": "逐节点诚实标记无违规", "result": "pass", "command": "python3 /tmp/b002audit/audit.py 第 4 节 → 违规: 无；批次 provenance=assistant-reviewed-source / modelCalls=0 / automaticModelCalls=0"},
+  {"text": "沙箱实验证明卡点在桥而非内容：修桥后 kept 27→60、空壳 0、漏排除 0，契约仍全绿", "result": "pass", "command": "cd /tmp/b002audit/sim && python3 -B -s loop/bin/to_candidate.py --batch publish:dafeng:B002 → kept=60；python3 -B -s tools/publish_reviewed.py --source-key 9b676d7031b1bcd3b8377a18 --candidate /tmp/b002audit/sim/loop/state/candidates/BATCH-publish-dafeng-B002.candidate.json --dry-run → ok:true, contractProblems:[], 149/149, 495/495"},
+  {"text": "沙箱实验没有污染真实仓库（沙箱 out/ 与 data/cache 均为只读符号链接，写盘只落 /tmp）", "result": "pass", "command": "ls -la /tmp/b002audit/sim/loop/state/ → out -> /Users/carmen/Desktop/星系/loop/state/out；find loop/state/candidates -newermt '2026-10-08 22:20' -name '*.json' → 空（除桥自身正常重写的 BATCH/read 候选）"},
+  {"text": "没有改动任何受保护路径（loop/bin/to_candidate.py 哈希未变）", "result": "pass", "command": "shasum -a 256 loop/bin/to_candidate.py → 4875e76edaab055dfd45275cc59e55973dd7c522d3ec5d9e33a6a1332b2a4caa（与 B001 记录时的值相同）"},
+  {"text": "本轮**没有**执行 --write（发布键为 null，作品库无新增）", "result": "pass", "command": "python3 -B -s tools/publish_reviewed.py … **--dry-run**（未跑 --write）；ls data/cache/9637d40997ffdf9b18885a43* → No such file"}
+ ],
+ "changes": [
+  {"path": "loop/state/out/publish_dafeng_B002.artifact.json", "kind": "append-only"},
+  {"path": "loop/state/candidates/BATCH-publish-dafeng-B002.candidate.json", "kind": "append-only", "note": "由任务指定的桥自身生成（固定输出路径）；本任务 prompt 明令使用该文件，非我另写。"},
+  {"path": "loop/state/candidates/read_dafeng_L*_00{40..59}.candidate.json", "kind": "append-only", "note": "同上，桥的逐单元产出（正常重写，内容确定，可重放）。"}
+ ],
+ "sourceHashes": {
+  "data/cache/9b676d7031b1bcd3b8377a18.json": "3c2fae1d399d6768719f2d5476fa0cfd88fb4fbbc12abdf080323fa4b846ebdf",
+  "data/cache/9b676d7031b1bcd3b8377a18.docs.json": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+  "loop/bin/to_candidate.py": "4875e76edaab055dfd45275cc59e55973dd7c522d3ec5d9e33a6a1332b2a4caa",
+  "loop/state/candidates/BATCH-publish-dafeng-B002.candidate.json": "c177da520b9e3d2dd08678e979901344af8e3e02e0f6a972fe19d21a073329fd",
+  "tools/publish_reviewed.py": "a1827ebdb6d89ea04e1addb8807fa79ca95d1f6251edcddf6886ae3f357af561"
+ },
+ "remaining": [
+  "**本批未发布**：publish:dafeng:B002 仍待做。发布键为 null —— 没有任何新版本写入作品库。",
+  "**D-A 必须先修**（受保护路径 loop/bin/to_candidate.py，须开合并任务并持 GATE.lock）：把点名定位符来源从 `ce.get('claim')` 扩到 counterExample 全字段（claim/target/field/where/locator/path/nodeId/id/why/impact）。不修则本批发布必然把 2 个被点名条目带进作品库，重演 5b43c216 的 7+7 条污染（那批已无法撤回）。全语料 52 个单元受此影响。",
+  "**D-B 必须先修**（同上）：`_t()` 支持 `value` 键，并对『五个叙事子字段全空』的 tasks 丢弃记账。不修则作品库会出现 10 个只有引文、没有叙事内容的『任务』节点。这是 B000 台账 D2 的**复发**（上次只记账未修）。",
+  "**D-C 必须先修**（同上）：解析 `source.segmentSelector` 的 `docs[N].text[a:b]`；两者皆无时**拒绝该单元并记账**，不要静默退化成 [0,1)。不修则本批 6 个单元恒为 0 节点、批次 scope 起点被拉到 0。全语料 19 个单元区间退化。",
+  "**D-D 建议一并修**：批次 scope 的 end 漏最后一个单元（记 178842，应为 185812）；错误区间会随 --write 写进 meta.reviewHistory。已发布的 B000 里留着同样的 start=0。",
+  "**D-E 如实登记**：260 条 READER unknowns 不进候选（桥不搬 unknowns 层）。若希望『此处未解决』对读者可见，需在桥里加一层或另立任务。",
+  "**本批未覆盖的原文区间**：任务区间 [122388,185812) 之外的全部原文（大奉 [0,122388) 与 [185812,4760263)），以及西游、三国两本书全部。本批只覆盖 20/912 单元 = 2.1930%、63424/4760263 码点 = 1.3324%。**不得据此声称全书完成。**",
+  "**仍为 unknowns 的条目数**：READER 在 20 单元里登记了 260 条 unknowns，本轮**一条都没发布**（桥不搬运该层）。它们未被丢弃、也未被核验，仍在各单元原始候选里。",
+  "**13 个单元本批贡献 0 节点**（其中 6 个因 D-C 区间退化）；这些单元的复核结论是 partial 而非 fail，问题在桥不在精读质量 —— 修桥后需重跑本批。",
+  "**本批所有 20 个单元的复核裁决都是 partial（0 个 pass）**，且 11 个单元的裁决只写在 .verdict.json sidecar 里。partial 的语义是『有需修正项』：本批目前只做到『把被点名的排除掉』，没有做到『按复核意见修正后重审』。",
+  "**同一批不要重复发布**：发布是追加式的，重发会再造一个同内容的新键（B000 已发生过两次）。修桥后重跑本批前，先看 PUBLISH-LEDGER.json 确认 B002 未发布。"
+ ],
+ "rollback": {
+  "kind": "append-only",
+  "strategy": "delete-added-files",
+  "files": ["loop/state/out/publish_dafeng_B002.artifact.json"],
+  "note": "本轮未写作品库（无新图谱键），故除本 artifact 外无任何需要回滚的写入。桥生成的候选文件是任务指定链路的正常产出（内容确定、可重放），删除会破坏发布链的可追溯性，故不列入回滚清单。/tmp/b002audit 下的审计脚本与沙箱实验产物是临时物，可随时删除，不属仓库改动。"
+ }
+}

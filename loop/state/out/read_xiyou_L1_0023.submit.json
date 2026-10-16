@@ -1,0 +1,101 @@
+{
+  "task": "read:xiyou:L1:0023",
+  "agent": "w-xiyou-1",
+  "role": "READER",
+  "status": "done",
+  "summary": "精读《西游记》第二十三回「三藏不忘本 四圣试禅心」（docs[0].text 全文 codepoint [156853,164172)，7319 字 / 57 个非空段落）：产出 tasks 6 条（五元组 + 逐格 basis；T2/T3/T6 的 resultIsSuccess=false，T6 明写「结束≠成功」——救援只走到「入林寻看」）、causeEdges 9 条（每条带 direction + mechanismKind + mechanismOwner + caveat，机制写成机制而非时间相邻：负担转成动议、示棒致马惧而失控、云气判断被自我压制、两套价值尺度对撞、断炊生怨、假差事掩盖私下交涉、两侧同时收紧、绳绷机关、帖上署名转成救人理由）、rejectedAsCauseEdge 8 条（主动否掉：求宿→妇人出现、惊马→庄院是陷阱、富实→offer可信、叫娘→婚约成立、关门→睡林中、生气→不救、颂子→预告下一难、发怒→汗衫机关）、states 7 条（含一条场景本体，已自标越界用法）、knowledgeDiffs 8 条（KD4 是全候选最需复核的一条：颂子上的四位名号只到「帖上这样写着」，不算叙述认定的身份；KD3/KD6 显式未解开）、foreshadows 5 条（FS1-FS3 resolved，FS4/FS5 显式 unresolved 且 payoff/payoffAnchor 为 null）、rejectedAsForeshadow 7 条、unknowns 16 条（U12 是站点水印污染：夹在引号内、会被任何引号机械判定算成 utterance）、gapAnchors 30 条（只登记位置，claim 与 basis 皆 null）、crossUnitReferences 6 条（刻意不用 quote/start 键名）。共 385 个引文节点（承担断言的 355 + gapAnchors 30；不同引文 247），逐个在构建期断言 TEXT.count(quote)==1、落在区间内、TEXT[start:end]==quote，任一不成立即中止不落盘。另写独立复核脚本 verify.py（显式路径栈遍历、不复用构建逻辑）重算 A1-A16 得 problems=0；负向对照 21/21 全被抓到、2 条合法改动被正确放过。未声明 semanticReview 完成。",
+  "evidence": [
+    {
+      "path": "loop/state/out/read_xiyou_L1_0023.candidate.json",
+      "sha256": "c3c57bff3e9fef25c8366da2614924f56c1939ba3338e8a473ff9c449160002e",
+      "kind": "candidate",
+      "note": "任务 writes 指定的唯一产物。"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "区间与标题自检：TEXT.find('第二十三回')==156853==区间起点；TEXT.find('第二十四回')==164172==区间终点；len(TEXT[156853:164172])==7319，与任务 prompt 声明的字数一致；切片以原文回目开头（含 U+3000 全角空格，本任务 unitHead 字段原样保留了全角空格，与第 21 回那条把全角空格写成普通空格的情况不同）。命令：python3 -B -s -c \"import json;t=json.load(open('data/cache/df959d743e53206f56db2f92.docs.json'))[0]['text'];print(t.find('第二十三回'),t.find('第二十四回'),len(t[156853:164172]))\" → 156853 164172 7319。",
+      "result": "pass"
+    },
+    {
+      "text": "sourceHash 口径：任务声明 c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2；实测 shasum -a 256 data/cache/df959d743e53206f56db2f92.docs.json == 该值（**整文件**哈希）。切片自身哈希另记在 source.sliceSha256=5382bcca9c152176b8f351989058b0b4586b9bd6cc67235e25385fe09f4e15d6，构建脚本断言两者是不同字段、不互相冒充。",
+      "result": "pass"
+    },
+    {
+      "text": "引文逐字校验：构建脚本对每条被引用的 quote 断言 TEXT.count(quote)==1（全文 722176 字内唯一）、完全落在 [156853,164172) 内、TEXT[start:end]==quote、sourceHash 正确、crossRange==false，任一不成立即抛异常、整体不落盘。命令：python3 -B -s /tmp/rd0023/build.py → 'WROTE … problems=0 quoteNodes(asserting)=355 gapAnchors=30 distinct=247'。**这条判据在本轮真抓到了 11 处转写错误**（见下一条）。",
+      "result": "pass"
+    },
+    {
+      "text": "构建期被 count(quote)==1 挡下的 11 处转写错误（全部是我的错，不是校验器过严）：(a) 5 处把「中途引语」当成整句——原文是『八戒道：\\n\\n“好！好！好！…』『悟净道：\\n\\n“我们已商议了…』『八戒道：\\n\\n“不用商量！…』，引号并不紧跟说话人，中间的换行不是引号内内容；(b) 1 处整字写错——我把『须是寻个人家』写成『须是要寻个人家』（多一个『要』字）；(c) 5 处引语起点不在引号处（如把『你们坐着，等老猪去放放马来。』写成『“你们坐着，…』，该句在原文里是长台词的末段，前面没有左引号）。修法一律是改成原文里真实存在的连续子串，不改校验规则。这类错误若不被机械挡下，会以「看起来对」的形态留在候选里。",
+      "result": "pass"
+    },
+    {
+      "text": "独立复核（不复用构建脚本逻辑，另写一套显式路径栈遍历）：/tmp/rd0023/verify.py 从磁盘读候选 JSON 与 docs.json，重算 A1 文件哈希/区间边界/unitHead、A2 全部 385 个引文节点的 count/find/偏移/sourceHash/crossRange/offsetUnit/factStatus、A3 全部 basis 合法性与「null 格 basis 也为 null」配对、A4 gapAnchors 不带断言、A5 覆盖率与节点计数从候选自身重算、A6 foreshadows 的 status/payoff/payoffAnchor 一致性 + setupAnchor/payoffAnchor 必须是全文唯一逐字子串且不含省略号、A7 causeEdges 结构（direction/mechanismKind/mechanism/mechanismOwner 齐全且 mechanism 有实质长度）、A8 rejectedAs* 必须各带 why_rejected 与 evidence、A9 各节 id 唯一与 semanticReview 必须为 not_performed、A10 散文引号卫生、A11 factStatus 计数与 boundaryNodes 双向对账、A12 nullFieldsRule 自述与磁盘双向对账、A13 selfCritique 三节各 >=3 条、A14 utterance 不得当事实、A15 crossUnitReferences 不得用 quote 键、A16 「」计数与磁盘重算对账。实跑 'problems=0  RESULT: PASS'。命令：python3 -B -s /tmp/rd0023/verify.py。",
+      "result": "pass"
+    },
+    {
+      "text": "负向对照（本轮最关键的一步，照 0021 的教训做）：/tmp/rd0023/negative_control.py 往候选里注入 19 种已知缺陷 + 2 种**应当被放过的合法改动**，看 verify.py 是否抓得到。结果 21/21 符合预期：引文少一对引号、引文换成他处文字、偏移 +3、factStatus 被改、basis 非法值、unresolved 却给 payoff、gapAnchors 带断言、覆盖率被夸大、factStatus 计数漂移、boundaryNodes 被清空、『』里塞逐字引文、semanticReview 被声称完成、crossUnitReferences 用 quote 键、mechanism 过短、id 重复、null 自述漂移、sourceHash 被改、「」计数被改 —— 全部 rc=1 并报出对应条目；两条合法改动 rc=0 被放过。命令：python3 -B -s /tmp/rd0023/negative_control.py。**这一步抓出了我自己的两处判据缺陷**（见后两条）。",
+      "result": "pass"
+    },
+    {
+      "text": "负向对照抓出的判据缺陷一（与 0021 的 A12 教训同型）：verify.py 的 A12 第一版把「gapAnchors 22 条 / 44 格」**硬编码**进判据。我按反向自查的结果把 gapAnchors 从 22 条扩到 30 条后，它反而报 FAIL——判据把旧数字当成了真理，而不是去读候选的自述。改成「从 nullFieldsRule 里正则解析出声明值，再与磁盘重算比对」后才正确，并且补了反向检查（磁盘上真实存在的 null 格必须被自述点名）。",
+      "result": "pass"
+    },
+    {
+      "text": "负向对照/散文审计抓出的判据缺陷二：prose_audit.py 第一版用 TEXT.find(片段) 判「是否落在区间内」，只检查**首次**出现，于是『娘』『商量』『顶礼』『画栋雕梁』这类在本单元内多次出现、但首次出现在别处的词被误报越界。改成「片段必须在本单元切片内至少出现一次」后误报归零（『』里的自造措辞按约定不要求逐字）。同一类错误我在构建脚本里也犯过一次：把『』转「」的判据用了**全书的** TEXT.count，导致第二十四回回目、上一回收句这些**单元外**文字被转成 「」；第二次由散文审计抓出，判据改成 inner in SEG。",
+      "result": "pass"
+    },
+    {
+      "text": "事实归属机械对账：factStatus **不是**我口头贴的标签，而是构建期从原文 “ ” 配对（111 对，无未闭合、无多余右引号）建出 INSIDE 位图后机械判定的——落在引号内比例 >=0.9 ⇒ utterance、<=0.1 ⇒ narration、其间 ⇒ mixed；凡我预标 U/N 而机械判定不符者，构建期直接抛异常。这条判据本轮抓到 1 处：开篇八戒那段台词我预标 mixed，实为 utterance（frac=0.94）。最终分布 utterance 147 / narration 174 / mixed 64，64 个跨界节点全部登记在 quoteAttributionAudit.boundaryNodes 里供复核直接核对。全集实跑：python3 -B -s -c \"import json;c=json.load(open('loop/state/out/read_xiyou_L1_0023.candidate.json'));print(c['quoteAttributionAudit']['counts'])\"。",
+      "result": "pass"
+    },
+    {
+      "text": "反向自查（照 VERIFIER 契约的第 2 步，问「还漏了什么」而不是「我写的对不对」）：/tmp/rd0023/reverse_check.py 做了三件事——(a) 按段列出未被任何引文节点覆盖的 >=12 字片段；(b) 对 4 类共 90 个人物/地点/物件/数字实体做包含检查，列出「原文出现但候选一条都没提」的；(c) 列出整段无覆盖的段落。结果：人物、地点两类**零遗漏**；物件漏 3（红灯、提壶、围圜）、数字漏 4（丁亥年、三月初三日、酉时）。据此**真的改了候选**：补了 T2 的三女拜见、T3 的两句口头放肆、T5 的八戒自辩，并把 9 条叙事相关但未覆盖的片段补进 gapAnchors（G23-G30），未覆盖字数从 2967 降到 2748（40.5% → 37.5%）。命令：python3 -B -s /tmp/rd0023/reverse_check.py。",
+      "result": "pass"
+    },
+    {
+      "text": "散文引号约定与卫生（跨候选一致性）：本项目第 21 回候选的约定是 『』=自造术语、「」=逐字引文。我第一版写反了（把逐字引文放进 『』），构建期机械转换 466 处为 「」，151 处留在 『』。转换判据是「该片段在本单元切片内逐字存在」，不是全书——这一点我错了两次，第二次由散文审计抓出。final 校验：/tmp/rd0023/prose_audit.py 得出「散文里 「」 逐字命中：466；『』 自造措辞：159；RESULT: PASS (find 不到/越界/含省略号 = 0)」，且 verify.py 的 A16 把 verbatimMarkersTotal=466 与磁盘重算对账通过。约定与全部非逐字片段清单写在候选的 proseQuoteConvention 字段里，复核可直接照单核对。",
+      "result": "pass"
+    },
+    {
+      "text": "红线自检：(1) **不把人物之言当叙述事实**——147 个 utterance 节点全部由原文引号机械判定，只用于「某人说了这话」。最典型的是 KD4：颂子「黎山老母不思凡，南海菩萨请下山。普贤文殊皆是客，化成美女在林间」把设局者点名，但这段名号只出现在引号内、叙述层从头到尾没有一句认领，因此我**没有**把「这四位真的在场」写成事实，只写到「帖上这样写着」这一层；妇人自称的姓贾夫家姓莫、四十五岁、三百余顷田、三个女儿年庚，同样全部是她自己的话，我一条都没有当叙述事实用。(2) **结束≠成功**——T6 的 objective 是救出八戒，resultIsSuccess 显式 false 并写明「『引唐僧入林寻看』是出发，不是救出」；T2（招女婿）false、T3（做女婿）false；FS5 显式 unresolved 且 payoff/payoffAnchor 为 null。(3) **未编造人物/事件/结局**——nameUsageAudit 对 19 个名字逐个机械定位；韵文里的「楚娃」「西子」「月里嫦娥」「周公」「弥陀」等只作比喻出现，一个都没进 tasks/states。(4) **时间相邻不当因果**——rejectedAsCauseEdge 8 条主动否掉，保留的 9 条每条都有 mechanismKind + mechanism + mechanismOwner，其中 CE5 自标「这条边最容易读成因果而其实是时序」。(5) **一次出现当伏笔**——rejectedAsForeshadow 7 条；保留的 FS4 我主动标为 unresolved 并写明「按红线『一次出现当伏笔』，这条**不算伏笔**」，请复核判它进 rejectedAsForeshadow。(6) **不用未知填默认值**——本候选**没有**任何一格用编造值填补：unknowns 16 条、gapAnchors 30 条（claim/basis 皆 null）、FS4/FS5 的 payoff/payoffAnchor 为 null。(7) **定位≠语义**——semanticReview=not_performed，verify.py 的 A9 反向断言该字段必须为 not_performed。",
+      "result": "pass"
+    },
+    {
+      "text": "只写指定路径：本轮唯一写入的共享树文件是 loop/state/out/read_xiyou_L1_0023.candidate.json（任务 writes 指定路径）。可复现检查：find js css index.html serve.py narrative.py scripts tests docs data -newermt '-90 minutes' -type f | wc -l → 0（未在共享树触碰任何受保护路径；git status 里的 css/ 等改动是并行写入者的既有未提交工作，不是本 agent 写的）。构建、复核、负向对照、散文审计、反向自查五个脚本都放在 /tmp/rd0023/，不入库、不影响并行 agent。未运行 GPU/浏览器测试（任务未声明要跑）；未执行 git checkout/reset/stash。",
+      "result": "pass"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/read_xiyou_L1_0023.candidate.json",
+      "kind": "append-only",
+      "note": "任务 writes 指定的候选文件，本轮新增。"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/df959d743e53206f56db2f92.docs.json": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+    "loop/state/out/read_xiyou_L1_0023.candidate.json": "c3c57bff3e9fef25c8366da2614924f56c1939ba3338e8a473ff9c449160002e"
+  },
+  "remaining": [
+    "语义未独立复核：本文件只保证引文逐字可定位、字段结构可由脚本重算、计数与覆盖可复现、factStatus 与原文引号对得上、散文引号约定可机械核对，不保证引文被放在正确的条目下，也不保证语义读对。semanticReview=not_performed，需 read-verify 由别的 agent 反向复核。",
+    "最可能被推翻的三处已写进 selfCritique.mostLikelyMisread：(1) KD1 用「缺失证据 + 行者单向压制」判定三藏与沙僧不知庄院是点化；(2) KD4 把颂子上的四位名号只算到「帖上这样写着」；(3) ST5 把「庄院」当成 states 的一条（越出人物状态的用法）。复核可优先攻击这三条。",
+    "自标较弱的条目：CE1（「提议未被采纳」是从后文读出的）、CE3（行者为什么不阻止八戒原文没写，我只写机制不写动机）、CE9（basis=derived，颂子→顶礼→决定救这三步分属两段且中间有行者反对）、KD1（从行为反推认知）、KD7（basis=derived，从「三藏没有评论」推「他没看出来」，这条最弱，可整条删掉而不影响其余）、T1.obstacle（derived，本单元没有给三藏设置借宿障碍）、T5.objective（inferred，行者与沙僧从未说过「我不要留下」这个目标）。verify.py 对这些只校验结构，不校验语义强度。",
+    "cost 口径：本候选**没有任何一格 cost 为 null**（与第 21 回候选不同），因为本单元里连「什么都没得到」也有原文可引。T2 的 cost 标 unverified（原文没写妇人损失什么，「这些人早已不见了」是唯一可引的一句）；T1/T4/T6 的 cost 标 inferred（从原文动作读出的实际支出，不含原文未写的损失）。",
+    "FS4（珍珠篏锦汗衫儿）严格说**不构成伏笔**（只出现一次、立刻被用完），我按红线主动标 unresolved 并在 note 里写明「若复核判它应进 rejectedAsForeshadow，我同意」；FS5 是「未回收的显式标记」而不是一条成立的伏笔。两者若被判不成立，直接改动不影响其余条目。",
+    "unknowns 16 条多为原文自身的落差，本单元内无解：U1 八戒为什么用放马做由头、U2 妇人为什么恰在后门外、U3 简帖儿是谁何时挂的、U4 汗衫与「几条绳」是什么、U5 妇人「四位恰好」与「招得一个」两个口径不一致、U6 姓贾夫家姓莫的谐音、U7 行者为何连师父也不提醒、U8 沙僧说的「我们已商议了」是否真商议过、U9 被绷到天亮之间发生了什么、U10 庄院位置、U11 三个女儿是什么、U13 收束联与颂子判词的关系、U14 八戒是否真改过、U15 绳绷算不算惩罚、U16「大达辿步走」的断句。",
+    "U12 是**电子文本污染**：站点水印『(奇*书*网^.^整*理*提*供)』夹在八戒一句话的引号中间（『有劳仙子下降。』与『娘，请姐姐们去耶。』之间）。它落在引号内，会被任何按引号机械判定 factStatus 的流程算成 utterance 的一部分。我照实登记而不删掉（删掉就改动了原文）；本候选没有用它整段作断言引文。若它在全书里大量出现，本单元的 factStatus 机械判定需要先做水印清洗——那会改动原文，须另开任务。",
+    "覆盖率的局限：assertingCharCoverage=0.5557、加 gapAnchors=0.6064 是**位置覆盖**，不是分数，也不代表读懂了。剩余 37.5% 未覆盖里，相当一部分是韵文/景物/外貌赋（开篇诗、秋景、庄院赋、妇人外貌赋、三女外貌赋、行李清单韵文等），我按 RFS7 与 gapAnchors 的方式登记而未逐句引用。",
+    "64 个 mixed 引文节点（跨引号边界）的 factStatus 由多数决定，因此带说话人前缀的长引语会被记成 utterance——这只影响标签，不影响各条 caveat 里对「这是谁说的」的说明。全部逐条记在 quoteAttributionAudit.boundaryNodes 里。",
+    "verify.py 的 A2 与 A10/A16 已做负向对照（21/21 有效）；其余判据里，A5/A6/A7/A8/A9/A11/A12/A13/A14/A15 各自至少被一条注入验证过，但**没有做过多重注入或组合注入**。它们「跑出 PASS」现在有单点判别力证据，不等于在所有形态下都有效，这一点如实登记。",
+    "未做：不跑 GPU/浏览器测试（任务未声明要跑）；不写回任何受保护路径；不做语义评审（属 read-verify 流）；不解读开篇的丹道术语（「木母金公」「黄婆赤子」）与「般若波罗」等义理句；不推算庄院田产的规模；不引第二十四回原文来补本单元的悬置结局。",
+    "图谱缓存 data/cache/df959d743e53206f56db2f92.json 未用于任何断言，也未做与本单元的差异对照（任务要求它只能用来对照已有结论）。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/read_xiyou_L1_0023.candidate.json"
+    ]
+  }
+}

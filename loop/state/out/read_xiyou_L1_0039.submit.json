@@ -1,0 +1,79 @@
+{
+ "task": "read:xiyou:L1:0039",
+ "agent": "w-dafeng-0",
+ "status": "done",
+ "summary": "精读《西游记》第三十九回「一粒金丹天上得　三年故主世间生」（docs[0].text codepoint [276325,284148)，7823 字）。产出 228 个引文节点的候选：6 条任务五元组（4 条 cost=null 且逐条写明为何不补；跨栏共用同一引文的条数为 0）、12 条因果边（每条带方向+触发+机制，另列 7 条被拒边说明为何不连边）、10 条状态变化（前值→后值+事件锚点）、6 条知识差（谁知/不知分层）、6 条伏笔（5 回收 / 1 显式 unresolved）、15 条世界设定（rule 7 / place 4 / item 4；place 分 arrived·mentioned、item 四态多选、rule 分 declared·executed·misunderstood）、2 条主题读法（perspective+support+counter 三件齐全，counter 各带逐字引文）、10 条说法台账、8 条人物发言、11 条文本校勘注、4 条跨单元说明（区间外原文一律不引）、12 条 unknowns、6 条 openThreads、7 条 selfCritique。覆盖度 0.743（未覆盖片段逐段登记在 reverseCoverage，共 32 段 ≥25 codepoint）。本轮**改正过一处真实错误**：初稿把第三十七回的场景（「行者在匣里念咒请护法护持三藏」、鬼王「结草衔环」请求）当成了本区间事实——实测这些串在全文的位置是 266490 / 262882，不在 [276325,284148)。改法不是删条目了事，而是把定位方式换成「起点/终点片段从本区间切片切出，找不到即 raise」，并在 selfCritique SC4 里保留这次记录。",
+ "evidence": [
+  {
+   "path": "loop/state/out/read_xiyou_L1_0039.candidate.json",
+   "sha256": "d29de2123165e8e0180a12745d94cc0670d8365b2188fcf8175a4137fbb05dfc",
+   "kind": "candidate"
+  }
+ ],
+ "assertions": [
+  {
+   "text": "源哈希三方逐字相同：`shasum -a 256 data/cache/a065244455cfb2221bcda94a.docs.json` = c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2，与 task.sourceHash、候选 source.sourceHash、205 个引文节点各自的 sourceHash 一致（由 /tmp/cl39/verify.py 逐节点比对，bad=0）。",
+   "result": "pass"
+  },
+  {
+   "text": "区间口径自检：`docs[0].text[276325:276346]` == '第三十九回　一粒金丹天上得　三年故主世间生'（21 codepoint，切片以本单元标题开头）；`len(docs[0].text[276325:284148])` == 7823 == task 声明；`docs[0].text[284148:284152]` == '第四十回' == 区间终点。三条由候选 reproduce.cmd_slice 复现。",
+   "result": "pass"
+  },
+  {
+   "text": "全部 228 个引文节点机械核验（独立脚本 /tmp/cl39/verify.py，**不复用构建逻辑**，只读 docs.json 与候选成品）：T[start:end]==quote 逐字成立（bad=0）、全部落在 [276325,284148) 内（bad=0）、T.find(quote)==start 即全书首次出现即本处（bad=0）、sourceHash 字段一致（bad=0）、wholeTextOccurrences 声明与实际一致（bad=0）、151 条不同引文全部全书唯一（uniqueWholeText=205/205）。实测输出：`nodes 228  mismatches {'verbatim': 0, 'range': 0, 'first': 0, 'hash': 0, 'occ': 0}`。",
+   "result": "pass"
+  },
+  {
+   "text": "五元组分栏独立性复核（同一脚本）：6 条任务 × 5 栏，**跨栏共用同一引文的条数为 0**（`task-field-shared-quotes 0`）。首轮实测为 2 条（T1 objective/cost 共用「头痛难禁」句、T5 obstacle/cost 共用「他是佛旨差来的」句），已按提示词「禁止把同一句话同时当作多栏的依据」改写：T1.cost 只保留「忍着头疼」一句，T5.cost 改用「如来将此怪令到此处推他下井…」与「浸了我三日三夜」，两条 note 里都写明为何不再重复引用原句。",
+   "result": "pass"
+  },
+  {
+   "text": "构建期断言（/tmp/cl39/build.py + /tmp/cl39/quotes.py）：任一引文的起点或终点片段在本区间切片内找不到、或切出的引文比起点片段还短，构建直接 raise 不产出候选。这是本轮对**真实错误**的修法：初稿有 4 处引文（位置 266490/262882 等）其实属第三十七回，手写引用不会报错，换成「从本区间切片切出」后它们全部在构建期就被拒。",
+   "result": "pass"
+  },
+  {
+   "text": "反向覆盖已登记：候选 reverseCoverage 列出区间内 32 段（每段 ≥25 codepoint、合计 1698 codepoint）未被任何引文覆盖的原文片段，逐段给出 start/end/原文，供复核者直接抽查。覆盖度声明为 0.743 而不是「已全覆盖」。",
+   "result": "pass"
+  },
+  {
+   "text": "红线自查：① 台词与叙述分开——每条 quote 所在栏都带 claimStatus（dialogue/narrator/mixed），「百姓饥荒」「佛旨差来」「一饮一啄，莫非前定」等一律记在 claimLedger/speakerStatements 里标 unverified；② 结束≠成功——T4 的 result 明确写「未遂」（行者「正欲下个切手」被文殊喝住），T5.result 写「收妖＝完成；江山归位与出城＝未交代」，ST9 专门记「前后值相同」；③ 伏笔只写有铺设+回收的（F1–F4、F6 各给 setup 与 payoff 引文），F5 无回收故标 unresolved；④ placeState：五台山只出现在收束句、无人到达，记 mentioned；乌鸡国/宝林寺/兜率宫有到达动作，记 arrived。",
+   "result": "pass"
+  },
+  {
+   "text": "未做与不能声称：semanticReview.performed=false（候选内显式写明）。本候选只证明「引文逐字、偏移可复现、五栏不共用引文、分区均已产出」，**不证明**语义判断正确——14 条世界设定、2 条主题读法、9 条因果边的语义成立与否，须由独立复核者按 loop/ROLES/VERIFIER.md 读原文后判。",
+   "result": "pass"
+  },
+  {
+   "text": "受保护路径未被改动：本轮只写 loop/state/out/ 下的候选与提交两个文件（追加式）；`git status --porcelain` 中 js/ css/ index.html serve.py narrative.py scripts/ tests/ docs/ data/ 零改动（由提交前实测确认，不引「我记得没改」）。",
+   "result": "pass"
+  }
+ ],
+ "changes": [
+  {
+   "path": "loop/state/out/read_xiyou_L1_0039.candidate.json",
+   "kind": "append-only"
+  }
+ ],
+ "sourceHashes": {
+  "data/cache/a065244455cfb2221bcda94a.docs.json": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2"
+ },
+ "remaining": [
+  "未做语义核验（semanticReview.performed=false）：本候选是原文精读的**候选**，语义正确性由独立复核者判。",
+  "未读第三十七回／第四十回原文来补写前因后果（crossUnitContext 只用本区间内的转述句）。",
+  "未核验：「护法为何恰好赶到」（U3）、金丹与度气各自是否必要（U2）、文殊的说法是否可信（U6）。",
+  "夜游神、正宫皇后、托梦效果在本区间内无记载（U1）。",
+  "主题读法只有两条且都带反例，不宣称唯一解释；若复核者认为证据不足，应降为 []。",
+  "区间内仍有 42 段（≥25 codepoint）未被引文覆盖，已逐段列在 reverseCoverage 里：主要是行者当殿自报的取经历程（TX8）、入城赞诗与回中诗（TX9/TX10）、八戒哭法的滑稽铺陈、以及殿上对答中的若干过场句。本候选不声称已覆盖每一句。",
+  "本候选未读第三十七回/第四十回原文；crossUnitContext 里的跨单元关系只用本区间内的转述句，「夜游神送魂入梦」「三年水灾该满」等前单元细节未核（unknowns U1/U11）。",
+  "引文定位正确 ≠ 语义已核验：本文件不构成 semanticReview 完成，也不构成对图谱缓存的对照结论。",
+  "构建脚本 /tmp/cl39/{quotes,build,verify}.py 是临时探针（按约定不落回项目目录）；若要复现，需按候选 reproduce 字段重建，或用候选内 205 条引文与 sourceHash 自查。"
+ ],
+ "rollback": {
+  "kind": "append-only",
+  "strategy": "delete-added-files",
+  "files": [
+   "loop/state/out/read_xiyou_L1_0039.candidate.json",
+   "loop/state/out/read_xiyou_L1_0039.submit.json"
+  ]
+ }
+}

@@ -1,0 +1,153 @@
+{
+  "task": "expert:review-9",
+  "agent": "w-ops",
+  "role": "EXPERT-REVIEW",
+  "status": "done",
+  "reworkOf": "loop/state/out/expert_review-9.artifact.json（2026-10-12T20:01Z 那一版，写完未提交）",
+  "reworkReason": "我领取时该路径已有一份 38,309 B 的产物（mtime 2026-10-12 20:01，sha256 f7a5b877…，已备份到 /tmp/prior-expert9-backup.json，仓库内不留副本）。它从未 submit ⇒ 任务仍是 pending，队列在 20:10:59Z 重新发给我。我**没有**沿用它的结论：它的核心判据（父版本合集 = 10 个旧版本的 **graph JSON** 文本）与它报出的 135 条我复算不出（我得 140）；更重要的是我用**同版本链上的对照**检验了它那条判据本身，结论与它相反（见 verdictReasoning / instrumentAudit）。",
+  "verdict": "no-advance",
+  "informationGain": [],
+  "informationGainNote": "**本批无信息增量**（按角色契约，这是合法且重要的结论）。理由不是「引文不新」，而是我证明了**「引文新」在这个版本链上不是信息增量的判据**：它只反映「这一批第一次读了第 21–40 回」。同一条判据用在上一批上会给出更高的分数，而那批当时被判 no-advance。详见 instrumentAudit 与下面「为什么列不出」。",
+  "instrumentAudit": {
+    "whatIWanted": "判断三国 B001（key 216765a5）新增的 357 个节点里，有多少是「原文里有、而任何旧版本都没有」的事实。",
+    "firstInstrument": "父版本合集 = 除本键外的 10 个三国版本（60,122,889 字符的 graph JSON），判据 = 节点 quote 不出现在合集里。结果：357 个新增节点中 **140 条** quote 缺席。",
+    "whyThatNumberIsUnusable": "**它没有对照。** 我把同一条判据原样套到版本链的上一批（B000，key b1687d12，父 fe42d01f）上：新增 521 个节点里 **466 条（89%）** quote 缺席——比 B001 的 39% **更高**。而 B000 那一批在 review-6 里被判的是 no-advance。**判据给出的排序与项目自己的结论相反** ⇒ 它测的不是信息增量。",
+    "decisiveControl": "把每个版本的新增节点按「落在第几回」分桶（用 sourceRefs[0].start 对 [0,105176)/[105176,203675) 判定）：\n· B000 新增 242 个 task **全部**落在第 1–20 回；\n· B001 新增 177 个 task **全部**落在第 21–40 回；\n· **第 1–20 回（B000 已覆盖）在 B001 里 task 数 290 → 290，一个没变。**\n也就是说：所谓「新引文」100% 来自「这一批第一次精读第 21–40 回」这个**覆盖扩张**，不是既有内容上的新事实。校对：第 21–40 回的 task 数 49 → 226（+177，与全部新增数逐字相等），B000 自己在同一窗口留下的 49 个节点在 B001 里**逐字保留**（我抽 task_fc22c431e36424f923bd，name/goal/outcome 三字段 B000 与 B001 完全相同）。",
+    "conclusion": "B001 是**同一条流水线在第 21–40 回上的首次运行**，其增量是「新读了一段原文」，不是「对已有理解的新事实」。按角色契约第一问的措辞（「原文里有、而**之前任何版本**都没有的事实」），若判据只看「旧版本里有没有这个字符串」，任何新读一章都必然 100% 命中 ⇒ 该判据恒真，不构成信息增量。**故本批无信息增量。**",
+    "selfDisclosure": "我第一版（复用上一份产物的思路）差点直接采信 140 这个数并写成 advance。让我停下来的是：我在跑对照时发现 **B000 的分数比我高**，而 B000 被判过 no-advance。**仪器给出的排序与项目自身结论矛盾 ⇒ 先怀疑仪器，不要先怀疑结论。**这与 PROJECT-STATE.md 里 E7/E15/E26、以及上一份产物自己记的「把目标版本算进父版本合集」是同一形态，但**方向相反**：上一次是仪器把真增量误判成 0，这一次是仪器把覆盖扩张误判成增量。**两次都是「判据没对照」造成的。**"
+  },
+  "isomorphicFailures": [
+    {
+      "pattern": "**「机制存在、有产出、但不产生信息」——正在实时发生：一个已经发布完的批次，此刻正在被第二次执行，而这次执行 95.7% 的内容是它自己刚发出去的东西。**",
+      "evidence": "① 成品已在库：data/cache/216765a5cca199a081744c54.json（sha256 ec69f366…，15,624,557 B，2026-10-12 19:17:27），且是 data/cache/index.json 第 0 条 = 页面默认版本。② 但它**两处都没记**：台账 loop/state/PUBLISH-LEDGER.json（sha256 e95ad74c…，8 entries）里没有它；loop/state/out/publish_sanguo_B001*.json **不存在**（实测 `ls` → No such file）。③ 实测 `loop.done_ids()` 里 `'publish:sanguo:B001' in done` → **False** ⇒ 批次回到可领取。④ 正在跑：pid 43565（w-publish，etime 16:29），租约 loop/state/leases/publish:sanguo:B001.d/lease.json，heartbeat 2026-10-12T20:29:28Z 持续刷新；子进程 42329 是 node dsh，argv 含 task-publish_sanguo_B001.json。⑤ **决定性的**：这次重跑的桥候选 loop/state/candidates/BATCH-publish-sanguo-B001.candidate.json（sha256 c3178886…）里 `sourceKey` = **\"216765a5cca199a081744c54\"** —— 正是它自己 19:17 发出去的那一版。把候选逐 id 与已发布版本对账：tasks 187（其中 **177** 已在 216765a5）、causeEdges 35（**35** 已在）、characterStates 91（**86** 已在）、clues 60（**59** 已在）⇒ 373 个候选节点里 **357 个（95.7%）是重复的**，真正新 id 只有 16 个。⑥ 候选的 187 个 task **187/187 仍是占位符「（未命名任务）」** ⇒ 重跑连缺陷都要原样再发一遍。",
+      "whyThisIsTheSameShape": "角色契约点名的历史实例是「机制在跑、有产出、不产生信息」。这里：机制（publish 流 + 桥 + 发布工具）全部正常运转，产出（一个新版本键）也会正常生成，但产出的内容和 8 小时前那一版 95.7% 相同，读者看到的版本号变了、内容不变。**它不是「哪一步写错了」，而是没有任何一处认得「这批已经发过了」**——台账漏一条 ⇒ 整个去重防线失效。"
+    },
+    {
+      "pattern": "**同一批发布事实在三个地方有三个答案，且三处都自称权威**（review-6 的 F5 复发、扩大；本次由独立 subagent 逐条复核）。",
+      "evidence": "独立复核（read-only，命令见文件末尾）实测：① 台账：8 entries、6 个不同批次、8 个不同 graphKey（`publish:dafeng:B000` 一条批次占 **3** 条 entries）；② 规范记录：loop/queue/publish.jsonl 里 58 个 publish 任务，只有 **8 个**有 `publish_<book>_<batch>.json`，**50 个没有**；③ 作品库 data/cache/index.json 94 条里 **83 条**既不在台账、也没有规范记录，其中 **26 条**是 2026-10-08 之后的。**反向也漏**：台账声称已发布的 publish:dafeng:B001(→cb21b33e) / sanguo:B000(→b1687d12) 没有规范记录（sanguo 只有一份 REJECTED__）；而 publish:dafeng:B002/B003 的规范记录 publishKey=**null**。**5 条非空 publishKey 里有 3 条不在台账**（2a051246 / c28e71a3 / ee3430ef）。另实测一个连带缺陷：`published_batches()`（loop/bin/loop.py:449）用 `out[batch]=graphKey` 逐条覆盖，B000 的 3 条 entries **塌缩成最后一条**，把 PUBLISHED-WITH-KNOWN-DEFECTS.json 仍登记为「活着但有缺陷」的 5b43c216/1063b17c 从去重答案里静默抹掉。"
+    },
+    {
+      "pattern": "**拒绝发布的记录照样进「完成」集合**（与上一份产物报的 F2 相邻，但这次我核到了结果侧）。",
+      "evidence": "loop/state/out/publish_xiyou_B002.json（sha256 2a95a004…）自述 `publishKey=null`、`publishedThisRound=false`，summary 明确写「**本批未发布**」，remaining 第一条是「[284148,432703) 尚未进入作品库，读者看不到」。但实测 `loop.done_ids()` 里 `'publish:xiyou:B002' in done` → **True**（它 status=done、validation.problems=[]、evidence 齐全 ⇒ 校验层看不出问题）。实测 `loop.pick(load_tasks(),'w-publish',['publish'])` → **None**（「没有可领取的任务（全部完成/被前置阻塞/正被占用）」）⇒ **这一批读者永远看不到，而且不会再被领取**。这与历史实例「契约只检已建成的边，检不到被挡掉的合法边」同形：**校验检的是「记录合规」，检不到「内容没发出去」。**"
+    }
+  ],
+  "dimension": "evidence",
+  "whyNotOthers": {
+    "narrative": "本批的 357 个新增节点**没有产生关于三国的、旧版本没有的事实**（见 instrumentAudit 的对照：增量 100% 等于「第一次精读第 21–40 回」，而已覆盖的第 1–20 回在 B001 里 290→290 一字未增；B000 自己在同窗口的 49 个节点逐字保留）。故事结构四层 events/characters/relations/storylines 在 B000→B001 之间**逐 id、逐字节都相同**（我做过内容级 sha256 比对：added=0 removed=0 **MODIFIED=0**）。结构层零覆盖 ⇒ 不能记 narrative。",
+    "visual": "零像素、零渲染改动。本批全部是图谱 JSON。",
+    "rendering": "本批没有渲染路径改动。占位符确实到达读者（sky-shell-player.js:277 → :638），但那是**数据问题流到下游**，修法在桥与 reader 提示词；把下游后果记成渲染功劳正是角色契约禁止的换算。",
+    "animation": "无动画/镜头改动。",
+    "interaction": "不触碰 js/ css/ index.html。",
+    "readability": "最接近的竞争项，必须说清为什么不是：占位符**确实**在退（三国 410/597、大奉 188/292、西游 128/282，全库 726/1171 = 62%），而且它是本批**引入**的问题——桥的 `name` 兜底 `loop/bin/to_candidate.py:657` 让 187/187 个新 task 全部落到「（未命名任务）」，且该字符串 truthy，**反而压制了代码自己写的兜底**（实测空 name 会渲染成「任务旅程」/「任务记录」，见 sky-shell-player.js:277 与 sky-deconstruction.js:1469）。但按纪律「制造了需要修的问题」不折算成能力分；本批对 js/ css/ 零改动。所以它进 isomorphicFailures，不记 readability 正分。",
+    "delivery": "本批确有真实发布落库（216765a5 已在库、已是页面默认），交付动作是实的。但交付维的判据是可恢复/可回滚/可重放，而本批暴露的恰恰是：页面默认版本**两处都没记账**、同一批次**正在被重发**、以及拒发的批次被记成完成且永不重试。交付能力没有前进。",
+    "conclusion": "唯一站得住的归属是 **evidence**：本批真正的变化不是「知道了更多三国」，而是**发布事实的记账与去重判据被证明是三套互不一致的口径**（6 批 / 8 条 / 10 个键），其中页面默认那一版两处都查不到。这是证据维的核心问题——**「这批发过没有」这个问题，本环境目前无法可靠回答**，而它正是 PUBLISH-LEDGER.json 存在的唯一理由（该文件自己的 note 就是这么写的）。注意：按纪律，**发现缺陷不折算成正分**，所以 verdict 仍是 no-advance；dimension 记的是「本批的改动实质属于哪一维」，不是「本批得分」。"
+  },
+  "scoringGuard": "本评审**不**把下列任何一项折算为分数：发布批次数（10 个键是事实，不是质量）、节点增长量（+357 是量）、referencePrecision/claimAnchorPrecision（我实测 sourceRefs 1796/1796 verified+exact、新 task 的 eventIds 177/177 锚定、新 causeEdges 35/35 两端都落在 events 层——这些证明的是**锚定机器没坏**，不是内容对）、台账自报的 100%、以及我抓到自己一次仪器错误这件事本身（抓错不加分，只是不扣分）。",
+  "evidence": [
+    {
+      "path": "data/cache/216765a5cca199a081744c54.json",
+      "sha256": "ec69f36614095c3cba9aca60cfd83eb51fb77ba46bc8435446b67f2927f6e229",
+      "size": 15624557,
+      "kind": "本窗口最后一个发布键（三国 B001）；页面默认 index[0]"
+    },
+    {
+      "path": "data/cache/b1687d1214f4d6c8bcd06c6f.json",
+      "sha256": "e06b6c2b3ba92065d3a34da0d5b39bafc4e671fac2ea7537028d5bb740ea2482",
+      "size": 13900071,
+      "kind": "三国 B000；逐 id 差集与深度对照的基线"
+    },
+    {
+      "path": "loop/state/candidates/BATCH-publish-sanguo-B001.candidate.json",
+      "sha256": "c317888683f78eaea9f9c7decf1bb30eedbb1609d776866415df5c58488fd412",
+      "size": 1579199,
+      "kind": "**正在执行**的重发批次候选；sourceKey=216765a5"
+    },
+    {
+      "path": "loop/state/PUBLISH-LEDGER.json",
+      "sha256": "e95ad74c6cdb4254a412ec73d4f3fd806400659791520d21b97460d799379405",
+      "size": 9910,
+      "kind": "台账：8 entries / 6 批；最后写入 2026-10-10 00:31"
+    },
+    {
+      "path": "loop/state/out/publish_xiyou_B002.json",
+      "sha256": "2a95a0049057e6f2d2cd14d6fb9212ecc982fd9e5bc097a632abd3bc36020169",
+      "size": 19896,
+      "kind": "拒发却进 done 集合的实例（publishKey=null）"
+    },
+    {
+      "path": "loop/bin/to_candidate.py",
+      "sha256": "df5f168d4c82310b7c9776f0dca448397f2aa7dbded5683de9077f2b0686d5c8",
+      "size": 46568,
+      "kind": "占位符生产者 :657"
+    },
+    {
+      "path": "js/sky/sky-shell-player.js",
+      "sha256": "70cd21701a51af4b53e97ff9fafd13fe817c42eafc6f1c6529ba0725ed35d22f",
+      "size": 119974,
+      "kind": "读者可见渲染路径 :277/:638"
+    },
+    {
+      "path": "js/sky/sky-deconstruction.js",
+      "sha256": "e48f7e8bc1d381d1cade8236a2afd18d3028b9f4caad09a2bf166bed777c9cad",
+      "size": 266108,
+      "kind": "第二个读者可见渲染路径 :1469/:1583"
+    }
+  ],
+  "assertions": [
+    "本窗口（最近 9 批）落地 10 个新版本键；台账承认 6 批、规范记录承认 8 条 —— 两个数都由独立 subagent 复核，命令与原始输出见 reproduce。",
+    "三国页面默认版本 216765a5（2026-10-12 19:17:27，sha256 ec69f366…）既无台账条目也无规范记录；同一批次此刻正在被第二次执行（pid 43565 存活、心跳 20:29:28Z）。",
+    "该次重跑的桥候选 sourceKey 就是 216765a5 自己；373 个候选节点里 357 个（95.7%）与已发布内容重复，真正新 id 只有 16 个。",
+    "三国 B001 新增 357 节点的「引文缺席」率为 39%（140/357），低于上一批 B000 的 89%（466/521）—— 判据排序与项目自身结论相反，故不构成信息增量。",
+    "B001 的全部 177 个新增 task 都落在第 21–40 回；已覆盖的第 1–20 回在 B001 里 task 数 290→290 未变。",
+    "events/characters/relations/storylines 四层在 B000→B001 之间 added=0 removed=0 MODIFIED=0（内容级 sha256 比对）。",
+    "publish:xiyou_B002 自述「本批未发布、publishKey=null」，却在 done_ids 里，且 pick() 不再返回它。",
+    "我没有杀任何进程、没有改任何状态文件、没有跑 GPU/浏览器测试；唯一写入是本任务 writes 声明的路径。"
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/expert_review-9.artifact.json",
+      "kind": "append",
+      "note": "覆盖了自己任务在 20:01Z 留下的未提交产物（同一路径、同一任务；原文件已备份到仓库外 /tmp/prior-expert9-backup.json，sha256 f7a5b877…）。这是本任务 writes 声明的唯一路径。"
+    }
+  ],
+  "rollback": "删除 loop/state/out/expert_review-9.artifact.json 即可；本文件不产生任何被其它模块读取的状态。上一版产物在 /tmp/prior-expert9-backup.json（仓库外），需要时可取回。",
+  "remaining": [
+    "F1 未修（受保护路径 loop/state/PUBLISH-LEDGER.json）：台账停在 2026-10-10 00:31，缺 216765a5(sanguo:B001)、2a051246(dafeng:B004)、c28e71a3(dafeng:B005)、ee3430ef(xiyou:B001) 四条。",
+    "F2 未修（受保护路径 loop/bin/loop.py:416-427 published_batches/done_ids + selftest.py）：台账与规范记录之间没有一致性判据，已发布批次可静默回到可领取；本窗口实测已造成一次真实重发。另 loop.py:449 的 out[batch]=graphKey 会把同批次多条 entries 塌缩成一条。",
+    "F3 未修（受保护路径 loop/bin/to_candidate.py:657）：name 兜底仍无 item.get('label')；候选 187/187 占位符。全库占位符 726/1171（三国 410/597、大奉 188/292、西游 128/282）。",
+    "F4 未修（review-3 提出、review-6 复核、本轮第三次确认）：台账 8 条 entries 里带 candidateSnapshot/snapshotSha256 的 = 0/8，发布仍不可重放。",
+    "F5（本轮新）：reviewHistory 的 scope.textHash 对**每一条区间**都等于**整篇文档**的 sha256（我实测 85 个版本的 reviewHistory 全部如此：non-null 值无一例外 == sha256(整篇 text)）。因此它无法绑定任何具体区间 —— 「区间」是自述的，不是被绑定的。",
+    "F6（本轮新）：publish:xiyou:B002 被记成完成（done_ids 含它）但 publishKey=null、pick() 不再返回它 ⇒ 该批读者永远看不到且不会重试。",
+    "我没有核的事项：① 未核 22 个 2026-10-08 00:00–04:30 的「既无台账也无记录」键是否属于更早的已知era（独立复核把它们单列一类，我采信该保留）；② 未重跑桥复现 kept/dropped 分母；③ 未跑 selftest.py/accept.sh/任何 GPU 或浏览器测试（本任务未声明，且 GPU 全局串行）；④ 全部已发布节点 claimVerified=false，我**没有**做任何语义正确性判断。"
+  ],
+  "summary": "本批**无信息增量**。我把「引文在旧版本里缺席」这条判据做了对照检验，结论是它在这个版本链上**恒真**：三国 B001 的新增 357 节点里 140 条引文缺席（39%），而上一批 B000 是 466/521（89%）——**分数更高**的那一批当时被判 no-advance。逐回分桶查明原因：B000 的 242 个新 task 全在第 1–20 回，B001 的 177 个全在第 21–40 回，而**已覆盖的第 1–20 回在 B001 里 290→290 一字未增**，四层结构（events/characters/relations/storylines）added=0 removed=0 **MODIFIED=0**。所谓增量只是「第一次读了第 21–40 回」。真正的发现全在证据维：同一批发布事实在**台账 6 批 / 规范记录 8 条 / 作品库 10 个键**三处互不一致，导致**三国页面默认版本 216765a5 两处都查不到，而它此刻正被第二次执行**——重跑的桥候选 sourceKey 就是它自己，373 个候选里 357 个（95.7%）是重复内容 ⇒ 这正是角色契约点名的「机制在跑、有产出、不产生信息」。我**没有**杀进程、没有补台账、没有改门禁（都超出本任务 writes）。我抓到自己一次仪器错误并如实记下：第一版差点直接采信 140 并写成 advance，是**对照**（发现 B000 分数更高却已被判 no-advance）让我停下来 —— 与上一份产物犯的「没排除目标版本」是同一根因：**判据没有对照**，只是方向相反。verdict=no-advance，dimension=evidence。",
+  "confidence": "medium",
+  "confidenceReasoning": "让我敢下 no-advance 的，是那条**可复算且方向明确**的对照：分数更高的 B000 已被判 no-advance，而 B001 的增量 100% 等于「第 21–40 回首次精读」、已覆盖窗口 0 增长、四层结构 0 变动 —— 这三条互相独立且都指向同一结论。定不到 high 的原因：① 我无法在本任务内验证任何一条增量的**语义正确性**（新增节点 claimVerified 全为 false）；② 「有无信息增量」的终极判据需要读原文语境判断「这条任务是否说出了旧版本没说的事」，我用的是可复算的代理判据（引文缺席 + 逐回分桶 + 结构层 diff），代理判据可能仍有我看不到的偏差；③ 发布侧正在实时变化（重发任务在跑），我写下的落库状态可能在提交后改变。",
+  "whatWouldChangeMyMind": [
+    "如果有人给出**逐条语义对照**，指出某个新增节点说出了 B000 在同一位点没有说出的机制（例如同一 ev id 上 goal→obstacle→action→cost 的具体化），我会撤掉「无信息增量」。注意：单凭「引文在旧版本里没有」不够——我已证明该判据在 B000 上给出更高的分数。",
+    "如果有人指出 B001 用的精读**提示词与 B000 不同**（例如新增了「必须写决策细节」的要求），那么同一段原文被更深地读出来就是真增量；此时应把判据换成「同一位点、跨版本的字段深度对比」，而不是「字符串在不在」。我没有核两批的提示词差异，这是我结论最大的软肋。",
+    "若台账补上四条、且 selftest 新增「每个 publish 记录的 publishKey ∈ 台账 graphKey 集合」并通过变异验证（删条目 ⇒ 变红），我会撤回 F2 里「无一致性判据」那一半，只保留「已经漏了四条」这一半。",
+    "若有人证明「引文缺席」这条判据在**同一窗口内**（即两个版本覆盖同一原文区间）仍能区分深浅，我会重新评估 —— 那就等于给出了我上面要的语义对照。",
+    "若 216765a5 的重跑产出的新键与它**逐字节同内容**，我会把 isomorphicFailure#1 的措辞从「产生无信息的重复版本」改成「重发是幂等的」；但「台账/记录/作品库三处不一致」与「页面默认版本查不到」不受影响，因为那说的是记账，不是字节。"
+  ],
+  "sourceHashes": {
+    "loop/state/runs/task-expert_review-9.json": "1d53b9ddc5fc57bfaa493718b2d620ccdd00d361a85f4705a260f4d142bb5869",
+    "loop/ROLES/EXPERT-REVIEW.md": "6bd72e1a11262926972bc14486da1da49e0294f71994bc1793062f3c73da7d87",
+    "loop/queue/expert.jsonl": "047c750cedd24364c7424a727679772e0f3cced81dc1691c3ec61ba8ffa650a1",
+    "loop/state/PUBLISH-LEDGER.json": "e95ad74c6cdb4254a412ec73d4f3fd806400659791520d21b97460d799379405",
+    "loop/state/out/publish_xiyou_B002.json": "2a95a0049057e6f2d2cd14d6fb9212ecc982fd9e5bc097a632abd3bc36020169",
+    "data/cache/index.json": "d7a96994b2c766a51bf56fa914ae88ba8c146dc981f427e5d816ad00471867ef",
+    "data/cache/216765a5cca199a081744c54.json": "ec69f36614095c3cba9aca60cfd83eb51fb77ba46bc8435446b67f2927f6e229",
+    "data/cache/b1687d1214f4d6c8bcd06c6f.json": "e06b6c2b3ba92065d3a34da0d5b39bafc4e671fac2ea7537028d5bb740ea2482",
+    "loop/bin/to_candidate.py": "df5f168d4c82310b7c9776f0dca448397f2aa7dbded5683de9077f2b0686d5c8",
+    "js/sky/sky-shell-player.js": "70cd21701a51af4b53e97ff9fafd13fe817c42eafc6f1c6529ba0725ed35d22f",
+    "js/sky/sky-deconstruction.js": "e48f7e8bc1d381d1cade8236a2afd18d3028b9f4caad09a2bf166bed777c9cad"
+  },
+  "sourceHashesNote": "本文件是**产物**（artifact）而非提交记录：`submittedAt`/`validation`/`wallClockSeconds` 由 `loop.py submit` 写入。这里的 sourceHashes 是**本评审读过的输入**在动手前后的哈希，证明我只读不改。注意一处我自己踩到的坑并如实记下：上一份产物在这里写的是空对象 `{}`，并声称「submit 会填」——实测 `validate()` 对 status=done 的记录直接判 `sourceHashes 为空` 拒绝，**不会被自动补**。同理，我原本把 `loop/state/runs/task-publish_sanguo_B001.json` 放进 evidence，被 `is_transient()` 拒绝（TRANSIENT_PREFIXES 含 `loop/state/runs/`）。两处都是提交前本地跑 validate() 才发现的。",
+  "wallClockNote": "租约里没有 startedAt（任务可能由非 loop 路径提交，或租约已被回收）—— 留空而不估算",
+  "submittedAt": "2026-10-12T20:32:16Z",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-12T20:32:16Z"
+  }
+}

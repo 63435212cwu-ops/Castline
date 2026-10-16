@@ -1,0 +1,67 @@
+{
+  "task": "verify:xiyou:L1:0019",
+  "agent": "w-dafeng-2",
+  "status": "done",
+  "summary": "独立反向复核《西游记》第十九回（区间 [129251,136016)，6765 字）。先自读原文（切片落 /tmp/xy19.txt 通读）再打开候选，未先看结论。机械层：独立重写遍历，304 个引文节点（178 条不同引文）逐条 text[start:end]==quote、全书唯一、区间包含、sourceHash 单值一致，零失败；固定种子抽 5 条 5/5 偏移命中；候选自报的 14+9 项名称计数、段落数 29、引号配对 89、心经四口径、selfCritique 的 8 组全书计数全部复算相等。反向层：用『引文 ∪ gapAnchors』补集法找出既无断言也未点名的空隙，据此找到 5 条原文明确、候选未覆盖的事实（禅师曾劝八戒修行被拒、绑缚的放人条件与当页解除、三藏拒贿理由与实收饼果、八戒自陈两误的理由、行过乌斯藏界），并发现 gapAnchors 本身有 4 段 100 字以上盲区（最长 258 字）。判 partial 是因为 5 条可证伪的自述/口径缺陷（含一条声称拒了从未列出的因果边、一处三套互不相等的『引文节点』口径、一处与本文件自身字典矛盾的措辞、一处支撑计数错误、一处卫生审计白名单漏掉 anchorEvent 致一条跨段拼接引文未被抓出），而非任何原文编造。误杀检查 0 处（RCE1 口径偏窄仅记存疑）；幻觉检查 0 处（我先前对 高翠兰/沙僧 的怀疑不成立，已在 notes 如实撤回）。",
+  "evidence": [
+    {
+      "path": "loop/state/out/verify_xiyou_L1_0019.verdict.json",
+      "sha256": "b91cdc9c949b632cf2f9ada88ad2ac7c24611da6115be470b745fbc4c68682ee",
+      "kind": "verdict"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "先读原文后看结论：切片 sha256 == 807bc370…4ff82、6765 字、边界 find('第十九回')==129251 / find('第二十回')==136016；源文件 sha256 == c282cf39…52a2 == 任务 sourceHash。",
+      "result": "pass"
+    },
+    {
+      "text": "引文全量机械核验：304 节点 text[start:end]==quote / count==1 / 区间包含 / sourceHash 一致 → problems=0；distinct=178。",
+      "result": "pass"
+    },
+    {
+      "text": "反向验证：RC1–RC5 共 5 条原文事实在候选 JSON 中零命中，且全部落在未点名空隙内（RC6 用补集法证明）。",
+      "result": "pass"
+    },
+    {
+      "text": "counterExamples 5 条各自的 sourceCitation 与 quote 均逐字命中原文且全书唯一（bad=0）。",
+      "result": "pass"
+    },
+    {
+      "text": "未改任何受保护路径：本会话仅在 loop/state/out/ 下写 verify_xiyou_L1_0019.verdict.json；find js css index.html serve.py narrative.py scripts tests docs data -newermt '2026-10-09 14:00' 为空。",
+      "result": "pass"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/verify_xiyou_L1_0019.verdict.json",
+      "kind": "append-only"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/df959d743e53206f56db2f92.docs.json": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+    "loop/state/out/read_xiyou_L1_0019.candidate.json": "f6a1d86d0c8421533c1edd5060700ea7c04d4a9e5cde2eaf3640147f13217b3f"
+  },
+  "remaining": [
+    "本复核只覆盖 [129251,136016) 切片与候选文件，不评价其他回目，未采信图谱缓存 data/cache/df959d743e53206f56db2f92.json 的任何结论。",
+    "未跑 GPU/浏览器测试（任务未声明）。",
+    "RCE1（天明是否为败走并置因素）留作存疑，需版本校勘材料才能定论。",
+    "CE1–CE5 为可局部修改的字段缺陷，建议作为返修项退回原 reader；不影响已定位引文的可用性。",
+    "我自己的反向验证有一处不成立并已撤回：高翠兰/沙僧 只出现在候选自己的 forbiddenZero 声明里（切片内实测为 0），不是幻觉。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/verify_xiyou_L1_0019.verdict.json"
+    ]
+  },
+  "submittedAt": "2026-10-09T06:40:53Z",
+  "wallClockSeconds": 2338,
+  "wallClockFrom": "lease.startedAt",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-09T06:40:53Z"
+  },
+  "verifyState": "pending"
+}

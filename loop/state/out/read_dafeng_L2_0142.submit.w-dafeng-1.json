@@ -1,0 +1,118 @@
+{
+  "task": "read:dafeng:L2:0142",
+  "agent": "w-dafeng-1",
+  "role": "READER",
+  "status": "done",
+  "summary": "精读《大奉打更人》第一百四十二章 九阴真经（docs[0].text[498216,502903)，4687 码点，122 非空段）：产出 tasks 7（每条五元组分列、每栏自带引文、同一条任务内跨栏共用同句 0、跨栏区间重叠 0）、causeEdges 8（每条给方向与触发机制）＋rejectedEdges 3、states 5（前值/后值＋事件锚点）＋knowledgeDiffs 5、foreshadows 2（均显式 unresolved，本区间无回收）＋notForeshadows 5、worldSettings 7（place 3 / item 1 / rule 3，placeState·itemStates·institution 三条区分已写进字段）＋notWorldSettings 6、themeReadings 2（各带 perspective/support/counter）、unquotedDialogue 22、unknowns 14、selfCritique 7 项、coverageDeclaration（60 个未引用段逐条给理由）。引文层由两套独立实现交叉核对：64 条证据引文逐字命中、偏移全落区间内、sourceHash 一致、start 为全文首次出现且全书唯一、同一任务跨栏同句 0／区间重叠 0、null 栏全部带同名 Note；审计脚本 FAILS=0。semanticReview=not-performed（引用定位正确 ≠ 语义已核验）。",
+  "evidence": [
+    {
+      "path": "loop/state/out/read_dafeng_L2_0142.candidate.json",
+      "sha256": "5b99de60571043c7c1bb1dffa26ea6903dacd3242f1e53643df4a01db3e73509",
+      "kind": "worker-output",
+      "note": "任务 writes 指定的唯一写入物"
+    },
+    {
+      "path": "data/cache/1063b17ca65ec1b76f30e460.docs.json",
+      "sha256": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+      "kind": "source",
+      "note": "原文来源（只读，未改动）；与任务声明的 sourceHash 一致"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/read_dafeng_L2_0142/build_candidate_v2.py",
+      "sha256": "adb0d511de8d21b45d86f71533a5da766a49331e07592e3429b7dc1646dc297a",
+      "kind": "probe",
+      "note": "候选生成脚本：所有偏移由脚本从原文现算，任何引文逐字不成立/全书不唯一/落在区间外即拒绝写盘；未覆盖段落缺理由同样拒绝写盘。位于外置盘产物目录，非仓库受保护路径"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/read_dafeng_L2_0142/audit_independent.py",
+      "sha256": "2e1776b600dad3ac10a7f86514aaacfbb25728efd2572151163836c97e37bb51",
+      "kind": "probe",
+      "note": "独立审计脚本（51 项检查全 ok、FAILS=0）。不复用生成脚本逻辑：它以**通用遍历**从写盘后的 JSON 抓取所有形如 {quote,start,end} 的对象再向原文反查，因此能覆盖生成脚本没预料到的引文字段"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "区间口径自检：docs[0].text[498216:502903) 以本章标题『第一百四十二章 九阴真经』开头，长度 4687",
+      "result": "pass",
+      "command": "python3 -c \"import json;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];print(repr(t[498216:498228]),len(t[498216:502903]))\""
+    },
+    {
+      "text": "sourceHash 是**整个 docs.json 文件**的 sha256，与任务声明一致（fdde5558…39839）；切片哈希另起字段 segmentSha256=83088532700d34db1e76c830051ae6ed2beb4b1d29c24bb57851bfbf6cab4ad7，未覆盖 sourceHash",
+      "result": "pass",
+      "command": "shasum -a 256 data/cache/1063b17ca65ec1b76f30e460.docs.json"
+    },
+    {
+      "text": "64 条证据引文全部 text[start:end]==quote 逐字成立、偏移落在 [498216,502903) 内、sourceHash 一致、start 为全文首次出现、在**整本书**内唯一（四项失败数均为 0）",
+      "result": "pass",
+      "command": "python3 -B \"$CL_ARTIFACTS/read_dafeng_L2_0142/audit_independent.py\" loop/state/out/read_dafeng_L2_0142.candidate.json"
+    },
+    {
+      "text": "任务五元组跨栏禁用同句：taskCrossFieldSameQuote=0、taskCrossFieldSpanOverlap=0（同一条任务内不同栏不共用同一句话、引文区间不重叠）",
+      "result": "pass",
+      "command": "python3 -B \"$CL_ARTIFACTS/read_dafeng_L2_0142/audit_independent.py\" | sed -n '/\\[2\\] 任务五元组/,/\\[3\\]/p'"
+    },
+    {
+      "text": "null 栏全部带同名 Note：T1/T2/T5/T6/T7 的 cost 各有 costNote（nullFieldsMissingNote=[]）；F1/F2 的 payoff 为 null 各有 payoffNote",
+      "result": "pass"
+    },
+    {
+      "text": "worldSettings 标签合法且分列：placeState∈{arrived,mentioned}（arrived 必须有 arrivalQuotes、mentioned 必须没有）、itemStates⊆{hold,transfer,use,lose}、institution∈{declared,executed,misunderstood}；非法 0 条。影梅小阁/青池院为 arrived（各有到达动作引文），宫中为 mentioned（区间内只有议论与推算，无任何到达）",
+      "result": "pass"
+    },
+    {
+      "text": "themeReadings 每条三件齐备（perspective/support/counter）共 2 条；未使用事件密度/死亡人数/篇幅中点定义高潮，未套三幕或英雄旅程",
+      "result": "pass"
+    },
+    {
+      "text": "覆盖：122 非空段中 62 段被引文覆盖、60 段未覆盖，未覆盖的 60 段**逐条**给出非空理由（缺理由 0 条、unresolvedCoverage=[]）。两张表的集合由审计脚本用独立实现复算，与候选自报完全一致",
+      "result": "pass",
+      "command": "python3 -B \"$CL_ARTIFACTS/read_dafeng_L2_0142/audit_independent.py\" | sed -n '/\\[8\\]/,/\\[9\\]/p'"
+    },
+    {
+      "text": "反向覆盖：独立复算区间内外层台词跨度 53 条，实质未覆盖 22 条，与候选 unquotedDialogue 登记的集合完全一致；每条都带 sourceHash 与理由",
+      "result": "pass"
+    },
+    {
+      "text": "编造检查：证据分区内不出现本区间没有的名字；候选用到的专名（许七安/浮香/明砚/阿雅/怀庆/紫阳居士/小门房）在区间切片里都能 find 到",
+      "result": "pass",
+      "command": "python3 -c \"import json;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'][498216:502903];print([(n,t.count(n)) for n in ['许七安','浮香','明砚','阿雅','怀庆','紫阳居士','小门房']])\""
+    },
+    {
+      "text": "本轮修掉了两个**由独立审计发现的真实缺陷**（不是自检自证）：① unquotedDialogue 登记表条目原先缺 sourceHash，复核者无法按同一口径核对；② 嵌套引号『“天下谁人不识君”』（诗句标题，全书出现 2 次）被误登记为区间内台词。两处都已修，并在 build_candidate_v2.py 的 build_unquoted_dialogue docstring 里记录了成因",
+      "result": "pass"
+    },
+    {
+      "text": "semanticReview=not-performed：引用定位正确 ≠ 语义已核验，候选未声称任何一条读法正确",
+      "result": "pass"
+    },
+    {
+      "text": "未改动任何受保护路径：本轮只写 loop/state/out/read_dafeng_L2_0142.candidate.json（任务 writes 指定的唯一路径），40 分钟内 js/css/scripts/tests/docs/data 下被改文件数为 0。共享树里另有 426 项改动，全部是并行 agent 的既有未提交工作，非本 agent 所为 —— 本 agent 未执行 git checkout/restore/reset/stash",
+      "result": "pass",
+      "command": "find js css scripts tests docs data -newermt '-40 minutes' -type f | wc -l; git status --porcelain | wc -l"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/read_dafeng_L2_0142.candidate.json",
+      "kind": "append-only"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/1063b17ca65ec1b76f30e460.docs.json": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+  },
+  "remaining": [
+    "语义未做独立人工核验（semanticReview=not-performed）：本候选只保证引文定位与自述分类可复算，不声称任何一条读法正确。",
+    "区间外上下文只用于判定『什么在本区间内没有写』（例如 F1 的回收点），未系统阅读前后单元。",
+    "图谱对照只做了本章相关事件条目与人物名，未做全量图谱 diff。已登记一处分歧：图谱把『当日陪着怀庆公主参加酒宴…』（偏移 502953）挂在第一百四十二章，而正文自身的章标题把它划在第一百四十三章。",
+    "F2（浮香邀约）是否够格算伏笔存在口径空间，已在候选里写明可降级为 ordinary thread。",
+    "五个 cost 栏写 null（T1/T2/T5/T6/T7）：这几处原文确实没有写出已发生的代价。这是口径判断（未发生的假设、结果、风险都不算代价），不是漏读，逐条理由写在同名字段里。",
+    "U7 那七位花魁中除阿雅外六人无名，本候选拒绝为她们编名字；U8 三个丫鬟是否为同一人原文未写。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/read_dafeng_L2_0142.candidate.json"
+    ]
+  }
+}

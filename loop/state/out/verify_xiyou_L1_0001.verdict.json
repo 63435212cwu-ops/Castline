@@ -1,0 +1,196 @@
+{
+  "task": "verify:xiyou:L1:0001",
+  "reviewer": "w-sanguo-1",
+  "reviewedCandidate": "loop/state/out/read_xiyou_L1_0001.candidate.json",
+  "reviewedSubmit": "loop/state/out/read_xiyou_L1_0001.json",
+  "book": "xiyou",
+  "unitHead": "第二回　悟彻菩提真妙理　断魔归本合元神",
+  "source": {
+    "docsPath": "data/cache/df959d743e53206f56db2f92.docs.json",
+    "docsSha256": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+    "aliasPath": "data/cache/a065244455cfb2221bcda94a.docs.json",
+    "aliasByteIdentical": true,
+    "textSha256": "ffcc680a63ca5180ced6e629fd3171ab2ed4dd4b92ddbf21c3a6fe80cfaef1aa",
+    "sliceRange": [7088, 14232],
+    "sliceSha256": "8e9f4253b43d3cdd9fb6c0f2201bf3dbf53a4f0a48f0f5f7831039f6d7071e9b",
+    "sliceChars": 7144,
+    "offsetUnit": "codepoint"
+  },
+  "method": "先自行通读 [7088,14232) 全文（未先看候选结论），再逐条核对候选的抽取项。引文核验一律用独立脚本 text.find(quote)==claimed_start 且 text[start:end]==quote 双向断言。",
+  "verdict": "partial",
+  "counterExamples": [
+    {
+      "id": "CE1",
+      "claim": "causeEdges[15](ce16).from 「祖师两次「附耳低言」」，以及 unknowns[0](U1).what 「祖师两次「附耳低言」所传口诀的具体内容」——断言祖师有两次「附耳低言」。",
+      "quote": "遂附耳低言，不知说了些甚么妙法",
+      "quoteStart": 10255,
+      "quoteEnd": 10270,
+      "why": "「附耳低言」在全切片只出现 1 次（偏移 10256，n=1），不存在「两次」。候选所数的第二处实为「前日师父拊耳低言，传与你的躲三灾变化之法，可都会么？」[10949,10975)：用字是「拊耳」不是「附耳」，且是大众对同一次传道的回指，不是第二次独立事件。原文侧可核：`python3 -c \"import json;T=json.load(open('data/cache/df959d743e53206f56db2f92.docs.json'))[0]['text'];S=T[7088:14232];print(S.count('附耳低言'),S.count('拊耳低言'))\"` → `1 1`。故 ce16.from 与 U1.what 的前提在原文中找不到对应文字。",
+      "severity": "事实错误（计数与用字均不成立）",
+      "fix": "ce16.from 改为「祖师一次「附耳低言」」；U1.what 改为只针对 [10255,10270) 这一次所传的七十二变口诀。"
+    },
+    {
+      "id": "CE2",
+      "claim": "causeEdges[15](ce16).to 「口诀内容不入叙述：读者与大众均无从得知」，basis 记为 explicit。",
+      "quote": "“显密圆通真妙诀，惜修生命无他说。",
+      "quoteStart": 9281,
+      "quoteEnd": 9298,
+      "why": "该断言作为全称命题为假：长生妙道口诀被原文完整直述，就在本切片内。祖师以「祖师云：」[9275,9279) 引出，随即整首八句韵文直陈于纸上，自 [9281,9298)「显密圆通真妙诀，惜修生命无他说。」起，至 [9408,9425)「攒簇五行颠倒用，功完随作佛和仙。”」止。筋斗云口诀同样公开直述：「祖师却又传个口诀道：“这朵云，捻着诀，念动真言，攒紧了拳，对身一抖，跳将起来，一筋斗就有十万八千里路哩！”」[10757,10810)。真正不入叙述的只有七十二变那一处口诀。可核：`python3 -c \"import json;T=json.load(open('data/cache/df959d743e53206f56db2f92.docs.json'))[0]['text'];print(T[9281:9298],T.find('这朵云，捻着诀'))\"`。反讽点：候选自己在 tasks[0].result 里引了「显密圆通真妙诀」，却在 ce16 断言口诀不入叙述，属自相矛盾。",
+      "severity": "事实错误（全称判断与原文矛盾），且构成对一条合法原文事实的误杀式排除",
+      "fix": "ce16.to 收窄为「七十二变口诀不入叙述（长生与筋斗云口诀均已直述）」；basis 由 explicit 降为 derived（因需跨段比较三处传道）。"
+    },
+    {
+      "id": "CE3",
+      "claim": "tasks[4](xiyou2-t05，character=花果山众猴).evidence[6] 以「大王！祸事了！」[12637,12644) 作为花果山众猴的行动证据。",
+      "quote": "那小妖听说，疾忙跑入洞里，报道：“大王！祸事了！”",
+      "quoteStart": 12620,
+      "quoteEnd": 12645,
+      "why": "该句说话人是小妖，受话人是混世魔王，场景在水脏洞内，与小妖向魔王报信同一段；而花果山众猴的最后一句是 [12269,12277)「我等不知有多少路」，两者相距 360 字，且中间已切换到悟空叫阵、小妖入报的水脏洞场景。把该句算作花果山众猴的证据，是行动者张冠李戴。引文本身逐字可查（定位正确），错在归属。",
+      "severity": "证据归属错误（引文真、主体假）",
+      "fix": "从 tasks[4].evidence 移除该条；若要保留此锚点，应归入 tasks[6]/tasks[7]（混世魔王侧）或另立「小妖」集合行动者。"
+    }
+  ],
+  "reverseChecks": [
+    {
+      "id": "RC1",
+      "found": "悟空先当众否认喧哗、大众随后如实坦白 —— 一条完整的「隐瞒→被同门说破」知识/诚信节拍，候选 0 覆盖。",
+      "quote": "启上尊师，我等在此会讲，更无外姓喧哗",
+      "quoteStart": 11237,
+      "quoteEnd": 11255,
+      "why": "同段落里叙述者先写「悟空也现了本相，杂在丛中」[11222,11234)，紧接悟空答「启上尊师，我等在此会讲，更无外姓喧哗」[11237,11255)——他在众人刚从树上现身的情况下当面否认。随后大众回话「不敢瞒师父」[11311,11316) 并供出「适才孙悟空演变化耍子」。候选记了嚷闹→怒斥→逐出（ce07/t03/t09），却没有记录悟空这一次否认与大众的说破。实测候选全文中「外姓」「本相」「瞒」三词各出现 0 次。该事实直接影响 st08 一类的知识状态判定（谁在当时知道什么、谁说了不实之词）。",
+      "usableAs": "可补一条 state（悟空/大众 关于『松树下喧哗由谁而起』的知情与陈述）与一条 causeEdge（悟空否认 → 大众说破）。"
+    },
+    {
+      "id": "RC2",
+      "found": "祖师在考验悟空之前先自吟一首『叹无堪传之人』的韵文，构成传道前的铺垫；候选在 [8956,9017) 区间内无任何锚点。",
+      "quote": "不遇至人传妙诀，空言口困舌头干！",
+      "quoteStart": 9000,
+      "quoteEnd": 9016,
+      "why": "祖师醒来先吟「难！难！难！道最玄，莫把金丹作等闲。」[8980,8998)，接「不遇至人传妙诀，空言口困舌头干！」[9000,9016)。这段自吟把『秘法须遇堪受之人』立为主题，紧接着才是悟空应声与盘中之谜的验证。它是 ce03（赴约 → 传道）之前的一个独立铺设层，候选仅从 [9017,9038)「悟空应声叫道」开始记，前一句主题铺垫被跳过。",
+      "usableAs": "可补入 foreshadows 或 causeEdges：『祖师叹无至人』→『验明悟空能破暗谜方传』。"
+    },
+    {
+      "id": "RC3",
+      "found": "祖师问『你从那里来，便从那里去就是了』才是悟空顿悟自家来历的直接触发；候选只引了结果句，未引触发句，故因果链缺一环。",
+      "quote": "你从那里来，便从那里去就是了",
+      "quoteStart": 11528,
+      "quoteEnd": 11542,
+      "why": "原文顺序为：祖师道「你从那里来，便从那里去就是了。」[11528,11542) → 「悟空顿然醒悟道：“我自东胜神洲傲来国花果山水帘洞来的。”」[11544,11572)。候选在 tasks[4] 的 evidence 里收录了 [11544,11572) 的结果句，全篇却没有 [11528,11542) 这一触发句（实测该串在候选中出现 0 次）。缺少触发句，ce08 之后的『归乡』起点就没有因果锚。",
+      "usableAs": "可补一条 causeEdge：祖师之问 → 悟空顿悟来历 → 起意归乡。"
+    },
+    {
+      "id": "RC4",
+      "found": "祖师以谚语「世上无难事，只怕有心人」激悟空，才是悟空叩头再求、进而得传筋斗云的触发；候选漏记。",
+      "quote": "世上无难事，只怕有心人",
+      "quoteStart": 10623,
+      "quoteEnd": 10634,
+      "why": "顺序为：祖师道「这个算不得腾云…」→ 悟空道「这个却难！却难！」→ 祖师道「世上无难事，只怕有心人。」[10623,10634) → 「悟空闻得此言，叩头礼拜」[10636,10647) → 悟空引「为人须为彻」求传腾云之法 [10652,10690)。候选 ce06 直接从『试飞失败 → 判为爬云 → 改传筋斗云』连边，跳过了祖师用谚语激励这一实际触发点；「世上无难事」「有心人」在候选中各出现 0 次。",
+      "usableAs": "可补一条 causeEdge：祖师谚语激励 → 悟空叩头恳求 → 得传筋斗云。"
+    },
+    {
+      "id": "RC5",
+      "found": "叙述者自己的回末收束联预指悟空日后『荣迁仙录箓名』，是一条明确的向前指涉（叙述层伏笔），候选 7 条 foreshadows 均未收录。",
+      "quote": "贯通一姓身归本，只待荣迁仙录箓名",
+      "quoteStart": 14189,
+      "quoteEnd": 14205,
+      "why": "回末以「咦！」引出「贯通一姓身归本，只待荣迁仙录箓名。」[14189,14205)，收在「毕竟不知怎生结果，居此界终始如何，且听下回分解。」之前。这是叙述者主动投向未来的句子（「只待」＝尚未发生），性质与 fs05「你这去，定生不良」同属未回收预告。候选未记，且全篇「贯通一姓」为 0 次。",
+      "usableAs": "可补入 foreshadows，status=unresolved（本单元内未兑现）。"
+    },
+    {
+      "id": "RC6",
+      "found": "原文给出混世魔王侵扰的明确时长『这两年』，是众猴处境唯一的量化时间锚；候选未记。",
+      "quote": "这两年",
+      "quoteStart": 13600,
+      "quoteEnd": 13603,
+      "why": "被掳小猴自述「我等因大王修仙去后，这两年被他争吵，把我们都摄将来」[13574,13603 区间内，关键词在 13600)。候选的 U5/U9 讨论了「许多子侄」与「约有三五十个」的数量口径，却没有任何时间跨度记录；「这两年」在候选中出现 0 次。它与 st05/st11 的处境与计时判定直接相关。",
+      "usableAs": "可补入 states 或 unknowns 的时间锚；亦可用于校核 U2（洞中年数）之外的『离家时长』口径。"
+    },
+    {
+      "id": "RC7",
+      "found": "原文在山景韵文中含一处替换字符（缺字符号），属源文本层面的字面异常，候选未登记。",
+      "quote": "幽禽□睆声",
+      "quoteStart": 12421,
+      "quoteEnd": 12426,
+      "why": "「幽禽□睆声，丹凤朝阳立。」[12421,12432) 中的「□」（U+25A1）是电子本缺字，通行本此处多作「睍睆」一类。「□」在全切片出现 1 次。这不影响候选任何结论，但按本项目「原文字面异常应登记且不作为断言证据」的既有做法（参见 read:xiyou:L0:0042 对引号失衡的登记），应进 unknowns 或 notes。",
+      "usableAs": "登记入 unknowns/notes，不改变任何现有条目。"
+    }
+  ],
+  "quoteSpotCheck": {
+    "requested": 5,
+    "method": "random.seed(20261009); random.sample(全部 304 个 {quote,start,end} 锚点, 5)，对每条做 text.find(quote)==claimed_start 与 text[start:end]==quote 双向断言",
+    "sampled": [
+      {"path": "tasks[11].evidence[7]", "quote": "我今只就你这个势，传你个‘筋斗云’罢", "findAt": 10729, "claimedStart": 10729, "spanExact": true, "verbatim": true},
+      {"path": "states[7].evidence[2]", "quote": "那大众还正睡哩，不知悟空已得了好事", "findAt": 9526, "claimedStart": 9526, "spanExact": true, "verbatim": true},
+      {"path": "tasks[8].evidence[2]", "quote": "就变棵松树罢", "findAt": 11077, "claimedStart": 11077, "spanExact": true, "verbatim": true},
+      {"path": "causeEdges[12].evidence[1]", "quote": "又见那收不上身者，却是那魔王在水帘洞中擒去的小猴", "findAt": 13539, "claimedStart": 13539, "spanExact": true, "verbatim": true},
+      {"path": "tasks[5].evidence[2]", "quote": "腰广十围，身高三丈，手执一口刀，锋刃多明亮", "findAt": 12935, "claimedStart": 12935, "spanExact": true, "verbatim": true}
+    ],
+    "result": "抽 5 条全部逐字命中、偏移一致。另做全量断言：304 个锚点全部满足 text[start:end]==quote、sourceHash 相符、且落在 [7088,14232) 内 —— 0 例失配。候选自报的 151 与实测 304 不符（见 notes.auditFieldDefect）。"
+  },
+  "hallucinationCheck": {
+    "inventedCharacters": "未发现。候选使用的行动者（孙悟空/菩提祖师/混世魔王/花果山众猴/大众（众师兄）/菩提祖师·孙悟空 等）均可回溯到原文集合称谓或悟空本人；牛魔王、唐僧、如来、观音、太白金星、龙王等本切片外人物出现次数均为 0。",
+    "namingDisclosure": "候选用「菩提祖师」而切片内「须菩提」出现 0 次、「菩提」仅 2 次（回目 + 「对菩提前作礼启谢」）、「祖师」56 次。候选在 notes 里主动披露了这一计数事实，属如实交代而非冒充原文用词，不判为幻觉。",
+    "endAsSuccess": "未发现。t05.result 明确写「未达成」；fs05/fs06 均标 unresolved，且 fs05.note 主动拒绝把剿灭混世魔王算作「定生不良」的兑现（该拒绝与原文一致：魔王是先来欺虐者）。此点纪律良好。",
+    "inventedEventsOrEndings": "未发现。所有 result 均可回溯到原文动作链（夺刀→砍为两段→剿灭→烧洞→携众归乡）。"
+  },
+  "falseNegativeCheck": {
+    "conclusion": "未发现规则/词表型误杀。候选不是词表抽取器，逐条读其 tasks/causeEdges/states/foreshadows 后，未见『因用词判定把一条合法因果挡掉』的情形。",
+    "relatedFinding": "唯一性质相近的问题是反向的：ce16 把「口诀内容不入叙述」当成全称结论，等于把原文已直述的长生口诀与筋斗云口诀排除在记录之外（见 CE2）。这属过度排除，已计入 counterExamples。",
+    "priorReviewNote": "上一轮 q-verify（2026-10-07）判 partial，理由之一是「祖师逐门（术/流/静/动）问悟空学哪一门…未被记录」、「傍门/三百六十/流字门/静字门/动字门 均出现 0 次」。就该复核针对的本候选文件（mtime 2026-10-08 02:38，晚于该复核的 19:36Z）实测：『术门/流门/静门/动门/术、流、静、动/壁里安柱/窑头土坯/水中捞月』均已出现，四门情节现已记入 t01.obstacle 与 t01.action —— 该项指摘已过时。但更窄的说法仍成立：『傍门』『三百六十』在候选中仍各为 0 次。我按当前文件下判，不继承旧结论。"
+  },
+  "coverage": {
+    "method": "取候选全部 127 个唯一 {start,end} 锚点，合并区间后对 [7088,14232) 求补集",
+    "anchorsTotal": 304,
+    "quotesUnique": 127,
+    "mergedIntervals": 123,
+    "coveredChars": 2712,
+    "sliceChars": 7144,
+    "coveredPct": 38.0,
+    "longestGaps": [
+      {"range": [12332, 12637], "len": 305, "content": "坎源山/水脏洞山景韵文与悟空叫阵"},
+      {"range": [7286, 7513], "len": 227, "content": "祖师登坛说法的四句韵文与悟空踊跃"},
+      {"range": [8118, 8329], "len": 211, "content": "静字门问答与窑头土坯喻"},
+      {"range": [7913, 8110], "len": 197, "content": "流字门与壁里安柱喻"},
+      {"range": [9256, 9427], "len": 171, "content": "长生妙道口诀全首韵文（见 CE2）"}
+    ],
+    "note": "低覆盖率本身不等于缺陷（引文短、叙述密），但上列 gap 中至少 RC2/RC4/RC5 三条对应真实漏抽，已单列。"
+  },
+  "auditFieldDefect": {
+    "field": "anchorReview.quoteCount",
+    "declared": 151,
+    "measured": {"anchorsTotal": 304, "uniqueQuotes": 127, "uniqueSpans": 127, "uniqueStarts": 127},
+    "why": "候选自报 151，与其自身 reproduce.quoteCheck 打印的 'quotes_checked' 同源。我实测遍历全文得 304 个 {quote,start,end} 锚点 / 127 个唯一引文。穷举 tasks/causeEdges/states/foreshadows/unknowns/selfCritique 的全部子集组合，均无法复现 151。该字段是自审计口径的关键数字，报小了会让『引文核验覆盖率』被低估。",
+    "scope": "仅此一个审计字段失准。同一 coverage 块内 tasks=12、causeEdges=17、states=12、foreshadows=7、unknowns=10、foreshadowsUnresolved=2、paragraphsInSlice=44、basisHistogram={explicit:42,inferred:2,derived:4,unverified:0} 经逐项重算全部与文件实际内容吻合。",
+    "fix": "quoteCount 改为 304（或 127 并注明口径），并在 hashNote/note 里写清是『锚点总数』还是『唯一引文数』。"
+  },
+  "usableItems": {
+    "keepAsIs": [
+      "全部 304 条引文的定位（逐字命中、偏移一致、区间正确）",
+      "tasks[0..3]、tasks[5..12] 的五元组（除 CE3 所指的单条证据外）",
+      "causeEdges[0..14]（ce01–ce15）",
+      "states[0..11] 全部 12 条",
+      "foreshadows[0..4]（fs01–fs05）与 [5]（fs06）",
+      "unknowns[1..9]（U2–U10）",
+      "selfCritique 三处自我怀疑（其判断与原文相容，且已自行标注 inferred）",
+      "coverage 块除 quoteCount 外的全部计数"
+    ],
+    "mustFixOrDowngrade": [
+      "causeEdges[15](ce16).from：删『两次』（CE1）",
+      "causeEdges[15](ce16).to：收窄为仅七十二变口诀；basis explicit → derived（CE2）",
+      "causeEdges[15](ce16).evidence[1]：所引 [9228,9256) 是长生传道的允诺句，用来支撑『口诀不入叙述』不对题，建议换成 [10255,10270) 单条",
+      "unknowns[0](U1).what：删『两次』，限定为 [10255,10270) 这一次（CE1）",
+      "tasks[4](xiyou2-t05).evidence[6]：移除或改挂到魔王侧行动者（CE3）",
+      "anchorReview.quoteCount：151 → 304/127（auditFieldDefect）"
+    ],
+    "addIfReworked": [
+      "RC1 悟空否认→大众说破（state + causeEdge）",
+      "RC2 祖师自吟叹无至人（foreshadow 或 causeEdge）",
+      "RC3 [11528,11542) 触发句 → 顿悟（causeEdge）",
+      "RC4 「世上无难事，只怕有心人」→ 叩头再求（causeEdge）",
+      "RC5 「贯通一姓身归本，只待荣迁仙录箓名」→ foreshadows，unresolved",
+      "RC6 「这两年」时间锚 → states/unknowns",
+      "RC7 「幽禽□睆声」缺字 → unknowns/notes"
+    ]
+  },
+  "notes": "总体判断：候选的**底座是可靠的** —— 304 个引文锚点全部逐字命中、偏移一致、区间正确，无幻觉人物、无『结束当成功』、未回收伏笔如实标 unresolved，并且主动披露了『菩提祖师』这一称谓并非切片原文用词。这些是实打实的优点，我逐项复核后确认成立。\n\n判 partial 而非 pass 的原因有三类：(1) 存在**原文中找不到对应文字的断言** —— ce16.from 与 U1.what 的『两次附耳低言』（原文只有一次「附耳低言」，第二处是『拊耳低言』的回指）；(2) 存在**与原文直接矛盾的全称断言** —— ce16.to『口诀内容不入叙述』，而长生妙道口诀以八句韵文完整直述于纸上、筋斗云口诀亦逐字直述，且候选自己在 tasks[0].result 引了该韵文标题，属自相矛盾；(3) 存在**引文真但主体假的归属错误** —— tasks[4] 把水脏洞小妖的『大王！祸事了！』算作花果山众猴的证据。此外锚点计数 151 与实测 304 不符。\n\n判 partial 而非 fail 的理由：上述错误都集中在**可点名的少数字段**上，删除或收窄后其余内容不受污染；我没有找到任何一条编造的人物、事件或结局。按角色契约『判 partial 时要说清哪些条目可以用、哪些必须丢弃或降级』，我已在 usableItems 中逐条列明。若复核口径要求『凡原文找不到对应文字的断言一律作废整包』，则本候选应升级为 fail —— 但我认为那会让 304 条已验证引文与 12 条 tasks 一并作废，代价与缺陷不成比例，故取 partial。\n\n关于我自己的反向验证：(a) RC6『这两年』与 RC7 缺字符号属边缘发现，价值低于 RC1–RC5，我不坚持它们必须回补；(b) 我最初用『取段落中段 14 字做探针』扫覆盖率，得出 31/44 段未覆盖，该数字**是我的探针方法太粗**（把候选的节引与转述误判为未覆盖），已废弃，改用锚点区间合并求补集得 38.0%，与上一轮 q-verify 的 38.0% 独立吻合；(c) quoteSpotCheck 的 5 条采样经重跑全部逐字命中、偏移一致，无异常 —— 我首轮草稿里曾把原文『身高三丈』误录成『三尺』，那是我的笔误，已在定稿中改正，与候选无关。\n\n存疑（无原文引证支持，故不作为判 fail 依据，仅记录）：ce01 把祖师『闻言』打三下判为由悟空四拒所触发，另一种读法是祖师早有传意、打三下只是择时择法；候选已在 selfCritique 自行标出此风险。原文『祖师听说，十分欢喜』『你今有缘，我亦喜说』确实更偏后者，但『闻言』是原文自标的触发词，两读皆与原文相容，我不据此扣分。\n\n复现命令（全部只读）：\n1) 源哈希：`shasum -a 256 data/cache/df959d743e53206f56db2f92.docs.json data/cache/a065244455cfb2221bcda94a.docs.json` → 两者同为 c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2（任务声明值），且两文件字节相同。\n2) 切片哈希：`python3 -c \"import json,hashlib;T=json.load(open('data/cache/df959d743e53206f56db2f92.docs.json'))[0]['text'];print(len(T[7088:14232]),hashlib.sha256(T[7088:14232].encode()).hexdigest())\"` → `7144 8e9f4253b43d3cdd9fb6c0f2201bf3dbf53a4f0a48f0f5f7831039f6d7071e9b`。\n3) 全量引文断言：见候选 reproduce.quoteCheck，实跑得 quotes_checked 304 / problems 0。\n4) 本文件每条 counterExample/reverseCheck 的 quote 均可 `T.find(quote)` 复核，偏移已逐条附在 quoteStart/quoteEnd。"
+}

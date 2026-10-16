@@ -1,0 +1,373 @@
+{
+  "task": "verify:sanguo:L0:0070",
+  "agent": "w-verify-2",
+  "role": "VERIFIER",
+  "verdict": "partial",
+  "reviewedCandidate": "loop/state/out/read_sanguo_L0_0070.candidate.json",
+  "reviewedCandidateSha256": "ddaba04085f496a3f84cdad21bd00e03261d169ee7ea0b47063184498971d844",
+  "reviewedSubmitter": "w-sanguo-0",
+  "source": {
+    "path": "data/cache/fe42d01f3826fe8096f86614.docs.json",
+    "range": [
+      357690,
+      363320
+    ],
+    "fileSha256": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+    "textSha256": "9d28638de0b0a89fa080cc2defb4a1f8de6adb1260c4545c04ef80f73cbb221e",
+    "sliceSha256": "146f0a39992236c6046bf7de2ff1af54d2e1e0a7703eb2e561940abf704ffc39"
+  },
+  "method": "先自读原文区间全段（未先看候选结论）→ 抽取项逐条回原文核对 → 反向覆盖扫描（按句切分，标记既无引文重叠、也无 6-gram 出现在候选里的句子）→ 误杀检查 → 机器复算全部 260 条引用偏移 → 随机抽 5 条独立 find()。",
+  "counterExamples": [
+    {
+      "id": "CE1",
+      "target": "causeEdges[16] C17 from/to 方向与先后",
+      "claim": "C17 断言 from=『王平指出韩信背水计的前提不成立』→ to=『徐晃仍令前军渡水列阵』，其 mechanism 更明写『…两次质疑 → 晃以…作答**并随即下令**』；T18.action.note 又把『不纳』与『渡水』的先后指给 C17。但原文的先后恰好相反：渡水令在最前，王平的两次质疑在其后。",
+      "quote": "晃令前军渡水列阵。平曰：“军若渡水，倘要急退，如之奈何？”",
+      "quoteRef": {
+        "quote": "晃令前军渡水列阵。平曰：“军若渡水，倘要急退，如之奈何？”",
+        "start": 363104,
+        "end": 363133,
+        "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+      },
+      "why": "TEXT.find('晃令前军渡水列阵。')=363104，TEXT.find('昔者韩信料敌人无谋而用此…')=363164；即候选自己的 to 引文（363104）早于自己的 from 引文（363157/363164），『并随即下令』与原文『令…→质疑→作答→搭浮桥过河』的次序不符。结论：C17 的方向/先后必须改正或降级，不能作为 T18.action.note 所指的先后依据。",
+      "severity": "edge-ordering (非编造：引文本身逐字为真)",
+      "supportingRefs": [
+        {
+          "quote": "晃令前军渡水列阵。",
+          "start": 363104,
+          "end": 363113,
+          "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+        },
+        {
+          "quote": "昔者韩信料敌人无谋而用此计；今将军能料赵云、黄忠之意否？",
+          "start": 363164,
+          "end": 363192,
+          "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+        }
+      ]
+    },
+    {
+      "id": "CE2",
+      "target": "states[9] S10 的 before 值",
+      "claim": "S10.before 写『赵云为翊军将军之属，未有「虎威」之号』并把整条 basis 标 explicit。『翊军将军』是原文里不存在的事实。",
+      "quote": "于是玄德号子龙为虎威将军",
+      "quoteRef": {
+        "quote": "于是玄德号子龙为虎威将军",
+        "start": 362919,
+        "end": 362931,
+        "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+      },
+      "why": "实测：TEXT.count('翊军将军')=0（整份 607191 codepoint 全文皆无），整个 docs.json 亦不含该词；候选自身出现 1 次（BLOB.count=1）。该衔仅见于《三国志》，不在本区间、也不在本书。候选在 U10 对同类情况（夏侯渊之字『妙才』出自《三国志》）明确写了『不把这层双关写入事实层』，此处标准不一致：先把外部事实写进 before，再在括号里注明『本区间未提其原号』。处理：该 before 值应删除或降级为 unknowns；basis 不可为 explicit。",
+      "severity": "外部事实进入事实层 + basis 误标"
+    },
+    {
+      "id": "CE3",
+      "target": "tasks[6] T07.obstacle",
+      "claim": "T07.obstacle 写『交换要在**互不信任**的条件下进行…**才敢**放到阵前』，note 进一步断言『不着甲是**为了**防止对方**趁机动手**』，整栏 basis=explicit。",
+      "quote": "各不与袍铠，只穿蔽体薄衣。",
+      "quoteRef": {
+        "quote": "各不与袍铠，只穿蔽体薄衣。",
+        "start": 359921,
+        "end": 359934,
+        "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+      },
+      "why": "原文只有一句叙述『各不与袍铠，只穿蔽体薄衣。』，未给任何动机。实测全文：『互不信任』=0、『趁机动手』=0、『防止对方』=0、『不着甲』=0（均在 607191 字全文内为 0），故动机是候选的归纳而非原文直述，basis 应为 inferred。候选在 rejectedEdges[1] 对同类『表面像因果』的连边明确拒连（『归因到手书是过度解释』），此处标准不一致。",
+      "severity": "归纳被标成 explicit（机制本身可成立，只是 basis 错）"
+    },
+    {
+      "id": "CE4",
+      "target": "tasks[13] T14.action.note 与 worldSettings 的交叉引用",
+      "claim": "T14.action.note 写『「见粮积如山」是环境描写，本栏不引，**留给 worldSettings**』，但 worldSettings 全 26 条里并不含该句，也未含『粮积如山』或『有些少军士看守』。",
+      "quote": "见粮积如山。有些少军士看守，见蜀兵到，尽弃而走。",
+      "quoteRef": {
+        "quote": "见粮积如山。有些少军士看守，见蜀兵到，尽弃而走。",
+        "start": 361689,
+        "end": 361713,
+        "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+      },
+      "why": "实测：'见粮积如山' 在 worldSettings 序列化结果中不出现（in worldSettings=False）；该串在整个候选里仅出现 1 次，就是这句 note 本身。即：证据被明确指派到一个从未落地的位置 —— 属于『承诺产出而未产出』，与计划100 的『机制存在、有产出，但不产生信息』同形。注意本条不否定 T14 其他引文，只指出该交叉引用悬空。",
+      "severity": "悬空交叉引用（承诺的分区未落地）"
+    }
+  ],
+  "reverseChecks": [
+    {
+      "found": "搦战：曹兵下山挑战是陈式出战的直接触发，候选全篇无此句",
+      "quote": "是日，忽报山上曹兵下来搦战。",
+      "quoteRef": {
+        "quote": "是日，忽报山上曹兵下来搦战。",
+        "start": 359474,
+        "end": 359488,
+        "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+      },
+      "allQuotes": [
+        {
+          "quote": "是日，忽报山上曹兵下来搦战。",
+          "start": 359474,
+          "end": 359488,
+          "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+        },
+        {
+          "quote": "牙将陈式曰：“将军休动，某愿当之。”",
+          "start": 359497,
+          "end": 359515,
+          "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+        }
+      ],
+      "why": "候选 T05/T07 直接写『夏侯尚兵至，遂与交锋』，跳过了触发事件。实测 '搦战' 在候选里出现 0 次；该句是把 T06.obstacle（『累次挑战，夏侯渊坚守不出』）与陈式主动请战连起来的那一环。"
+    },
+    {
+      "found": "陈式被擒的消息链：败军逃回报黄忠，才是法正献计的触发",
+      "quote": "有败军逃得性命，回报黄忠，说陈式被擒。",
+      "quoteRef": {
+        "quote": "有败军逃得性命，回报黄忠，说陈式被擒。",
+        "start": 359619,
+        "end": 359638,
+        "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+      },
+      "allQuotes": [
+        {
+          "quote": "有败军逃得性命，回报黄忠，说陈式被擒。",
+          "start": 359619,
+          "end": 359638,
+          "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+        },
+        {
+          "quote": "忠慌与法正商议，正曰：",
+          "start": 359638,
+          "end": 359649,
+          "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+        }
+      ],
+      "why": "候选 S02.anchor 直接写『陈式被擒 → 法正献反客为主之法』，省掉了传信人这一环。实测该句在候选里出现 0 次。这不是措辞问题：法正之计是针对**已知消息**的反应，信息如何到手决定了『慌』的时点。"
+    },
+    {
+      "found": "夜袭行军的具体执行与张著在队列中的位置",
+      "quote": "当夜黄忠领人马在前，张著在后，偷过汉水，直到北山之下。",
+      "quoteRef": {
+        "quote": "当夜黄忠领人马在前，张著在后，偷过汉水，直到北山之下。",
+        "start": 361657,
+        "end": 361684,
+        "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+      },
+      "allQuotes": [
+        {
+          "quote": "当夜黄忠领人马在前，张著在后，偷过汉水，直到北山之下。",
+          "start": 361657,
+          "end": 361684,
+          "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+        },
+        {
+          "quote": "有些少军士看守，见蜀兵到，尽弃而走。",
+          "start": 361695,
+          "end": 361713,
+          "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+        }
+      ],
+      "why": "候选 T14.action 从『教马军一齐下马，取柴堆于米粮之上』写起，略去偷渡汉水与守军弃粮而走。实测两句在候选里各出现 0 次。其中『张著在后』对候选自己登记的 U06（张著身份三种并存）是直接相关证据：它证明本区间里张著是随黄忠夜袭的副将，而非仅是葭萌关报事者。"
+    },
+    {
+      "found": "曹操进军的路线：兵出潼关",
+      "quote": "兵出潼关，操在马上望见一簇林木，极其茂盛，问近侍曰：“此何处也？”",
+      "quoteRef": {
+        "quote": "兵出潼关，操在马上望见一簇林木，极其茂盛，问近侍曰：“此何处也？”",
+        "start": 358273,
+        "end": 358306,
+        "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+      },
+      "allQuotes": [
+        {
+          "quote": "兵出潼关，操在马上望见一簇林木，极其茂盛，问近侍曰：“此何处也？”",
+          "start": 358273,
+          "end": 358306,
+          "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+        }
+      ],
+      "why": "候选 W_P07 只记『到庄门下马』这一到达动作，未记进入该地点的路线。实测 '潼关' 在候选里出现 0 次（全文 17 次）。该句是蔡邕庄插曲与前文『分三路而进』之间的空间衔接。"
+    },
+    {
+      "found": "护驾龙虎官军二万五千：本区间仅有的第三个明确兵力数，候选未登记",
+      "quote": "护驾龙虎官军二万五千，分为五队，每队五千，按青、黄、赤、白、黑五色，旗幡甲马，并依本色：光辉灿烂，极其雄壮。",
+      "quoteRef": {
+        "quote": "护驾龙虎官军二万五千，分为五队，每队五千，按青、黄、赤、白、黑五色，旗幡甲马，并依本色：光辉灿烂，极其雄壮。",
+        "start": 358219,
+        "end": 358273,
+        "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+      },
+      "allQuotes": [
+        {
+          "quote": "护驾龙虎官军二万五千，分为五队，每队五千，按青、黄、赤、白、黑五色，旗幡甲马，并依本色：光辉灿烂，极其雄壮。",
+          "start": 358219,
+          "end": 358273,
+          "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+        }
+      ],
+      "why": "候选 F10 专门并置登记了『四十万』与『二十万』两个不一致的兵力数，却漏了同一段里这个结构完整、五队各五千（合计二万五千，与总数自洽）的兵力数。实测该句在候选里出现 0 次。它属『影响行动、资源、约束』的明确设定，按 P3.10 口径应可作为 worldSettings 候选。"
+    },
+    {
+      "found": "曹娥碑的来历：度尚、邯郸淳与蔡邕摸碑书背",
+      "quote": "度尚令邯郸淳作文镌碑以记其事。",
+      "quoteRef": {
+        "quote": "度尚令邯郸淳作文镌碑以记其事。",
+        "start": 358634,
+        "end": 358649,
+        "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+      },
+      "allQuotes": [
+        {
+          "quote": "度尚令邯郸淳作文镌碑以记其事。",
+          "start": 358634,
+          "end": 358649,
+          "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+        },
+        {
+          "quote": "妾父蔡邕闻而往观，时日已暮，乃于暗中以手摸碑文而读之，索笔大书八字于其背。",
+          "start": 358679,
+          "end": 358716,
+          "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+        }
+      ],
+      "why": "T03、F09、W_I02 整条证据链都建立在『碑背八字』上，但候选未登记八字**为何在碑背**（蔡邕摸碑后大书于背、后人镌石）。实测两句在候选里各出现 0 次。缺此环则 W_I02 的 explain 里『八字是从碑上读出的文本』成立，但『在背』这一空间设定无来源。"
+    },
+    {
+      "found": "赵云所刺二将（慕容烈、焦炳）只有 summary 提及，无任何引文证据",
+      "quote": "迎头一将拦路，乃文聘部将慕容烈也，拍马舞刀来迎赵云；被云手起一枪刺死。",
+      "quoteRef": {
+        "quote": "迎头一将拦路，乃文聘部将慕容烈也，拍马舞刀来迎赵云；被云手起一枪刺死。",
+        "start": 361911,
+        "end": 361946,
+        "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+      },
+      "allQuotes": [
+        {
+          "quote": "迎头一将拦路，乃文聘部将慕容烈也，拍马舞刀来迎赵云；被云手起一枪刺死。",
+          "start": 361911,
+          "end": 361946,
+          "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+        },
+        {
+          "quote": "云喝问曰：“蜀兵何在？”炳曰：“已杀尽矣！”云大怒，骤马一枪，又刺死焦炳。",
+          "start": 361973,
+          "end": 362010,
+          "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+        }
+      ],
+      "why": "二人名在 T15.summary 出现各 1 次，但全候选不存在与之对应的引文（各 0 条 quoteRef）。即：事实层写进了名字，证据层为空。其中焦炳那句『蜀兵何在？』『已杀尽矣！』是赵云判断黄忠处境的直接情报，也是他此后行动的动因 —— 属人物语，不应只当装饰。"
+    }
+  ],
+  "falseNegativeChecks": {
+    "checked": "误杀检查（候选把什么合法的东西排除掉了）",
+    "items": [
+      {
+        "target": "rejectedEdges[1]：曹操手书『观卿之妙才』 → 夏侯渊决定出战（候选判为不连边）",
+        "verdict": "存疑（可能误杀）",
+        "why": "候选的理由是『原文把渊的动机写成功劳竞争，而不是因受手书鼓励』。但原文里渊商议出战的**第一句**就复述了手书所告知的事实（『今魏王率大兵屯于南郑，以讨刘备』），手书原文又是『欲观卿之妙才，勿辱二字可也』——『观卿之妙才/勿辱』与渊的『岂能建立功业』『有何面目见魏王』是同一套语汇。故『手书提供动机前提』有逐字文本支撑，直接判为不连边可能过严。",
+        "quotes": [
+          {
+            "quote": "今魏王率大兵屯于南郑，以讨刘备。吾与汝久守此地，岂能建立功业？来日吾出战，务要生擒黄忠。",
+            "start": 359226,
+            "end": 359270,
+            "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+          },
+          {
+            "quote": "吾今屯大军于南郑，欲观卿之妙才，勿辱二字可也。",
+            "start": 359178,
+            "end": 359201,
+            "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+          },
+          {
+            "quote": "夏侯渊览毕大喜。打发使命回讫，乃与张颌商议曰：",
+            "start": 359202,
+            "end": 359225,
+            "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+          }
+        ],
+        "discipline": "按角色契约：拿不出原文引证的反对意见只能记为存疑 —— 此处我**拿得出**引证，故记为『可能的误杀』；但候选是**显式拒连**并写了理由（属可复核的取舍），且候选 selfCritique 第 1 条主动把这一处交复核者判，故我不以此单独判 fail，只要求重判这一条边或明确降级为存疑。"
+      }
+    ],
+    "alsoNoted": "候选 F04/F07 显式标 unresolved、F10 标数字不一致、T11.result 与 T18.result 写 null，这几处是**正确的克制**，不属误杀：原文确实在本区间内没有回收或没有结果。rejectedEdges[0]/[2]/[3] 的拒连理由（同一次行军≠因果、事后追解≠因果、无结果不补结果）均成立。"
+  },
+  "quoteAudit": {
+    "method": "从 docs.json 重算偏移：对候选全部 260 条带 start/end 的引用逐条复算 TEXT[start:end]==quote 与 TEXT.find(quote)==start；另比对 inUnitOccurrences/globalOccurrences/occurrenceIndex 三项元数据。",
+    "totalRefs": 260,
+    "textSliceMismatch": 0,
+    "findOffsetMismatch": 0,
+    "metadataMismatch": 0,
+    "noteOnOnlyAnomaly": "唯一 find()!=start 的是 reverseFindings[8].quoteRef 『后人有诗赞黄忠曰：』：start=360589（正确的本区间出现处），而 find()=262873（第53回那首赞黄忠诗之前）。候选在此如实写了 globalOccurrences=2、occurrenceIndex=0，且 inUnitOccurrences=1 —— 即它声明的是『全文第 0 次出现』。按 occurrenceIndex 的定义 this is self-consistent，但按『quoteRef.start/end 用全文偏移、应指本区间实例』的提示词口径，该条的 start 与 occurrenceIndex 相互矛盾（start 指第 1 次，index 写 0）。影响极小（该处是叙述者分节标记，不承载事实断言），记为提醒，不据此判 fail。",
+    "randomSample": [
+      {
+        "start": 359067,
+        "end": 359077,
+        "quote": "若不出战，是示懦也。",
+        "verbatim": true,
+        "findMatches": true
+      },
+      {
+        "start": 360243,
+        "end": 360257,
+        "quote": "忠得了山顶，正与定军山相对。",
+        "verbatim": true,
+        "findMatches": true
+      },
+      {
+        "start": 361355,
+        "end": 361370,
+        "quote": "我是主将，你是副将，如何先争？",
+        "verbatim": true,
+        "findMatches": true
+      },
+      {
+        "start": 361284,
+        "end": 361328,
+        "quote": "云谓忠曰：“今操引二十万众，分屯十营，将军在主公前要去夺粮，非小可之事。将军当用何策？”",
+        "verbatim": true,
+        "findMatches": true
+      },
+      {
+        "start": 359112,
+        "end": 359120,
+        "quote": "操乃作手书与之。",
+        "verbatim": true,
+        "findMatches": true
+      }
+    ],
+    "conventionCheck": "候选自称的 bracketConvention 是『「」内必须是原文里 find 得到的逐字子串』。实测：原文区间内『』『」』出现次数均为 0，候选的『』计数为 434/434 配平；候选里仅有的 3 处「」是空串（原始 JSON 中为转义残留），未承载任何被当作引文的文本。该约定**未被违反**，但其字面表述与实际用法（「」仅用于空串）不符，属表述瑕疵。",
+    "hashes": {
+      "sourceFileSha256": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+      "sourceTextSha256": "9d28638de0b0a89fa080cc2defb4a1f8de6adb1260c4545c04ef80f73cbb221e",
+      "candidateSha256": "ddaba04085f496a3f84cdad21bd00e03261d169ee7ea0b47063184498971d844",
+      "sliceSha256_357690_363320": "146f0a39992236c6046bf7de2ff1af54d2e1e0a7703eb2e561940abf704ffc39",
+      "sliceSha256Verified": true,
+      "taskJsonSourceHashNote": "任务 JSON 顶层 sourceHash=2988ce6e… 与实测文件 sha256=8ab7298a… 不一致；候选已在 source.taskJsonSourceHashNote 里如实登记，并指出 2988ce6e… 命中另外两份缓存。我已独立复现：该哈希命中 f0b45e85aac6c95e584075a2.docs.json 与 152e2a6eed94f1075e7e7070.docs.json，三份 docs[0].text 逐字相同（均 607191 codepoint、utf-8 sha256 均 9d28638d…），故偏移在三份上均可复算 —— 候选此处处理正确。"
+    }
+  },
+  "usable": {
+    "verdictOnSections": "tasks/causeEdges/states/foreshadows/worldSettings/themeReadings 六个分区整体可用，但须先改 CE1–CE4 四处；未改之前，C17 不得再被 T18.action.note 当作先后依据。",
+    "mustFix": [
+      "causeEdges[16] C17（方向/先后）",
+      "tasks[17] T18.action.note（对 C17 的指涉）",
+      "states[9] S10.before（翊军将军）",
+      "tasks[6] T07.obstacle（basis 应为 inferred）",
+      "tasks[13] T14.action.note（worldSettings 悬空引用）"
+    ],
+    "keepAsIs": [
+      "T11.result=null",
+      "T18.result=null",
+      "F04/F07 标 unresolved",
+      "F10 并置两数不调和",
+      "rejectedEdges[0]/[2]/[3]",
+      "unknowns 22 条",
+      "themeReadings 的 support/counter 配对",
+      "source.taskJsonSourceHashNote（我已独立复现其结论）"
+    ]
+  },
+  "discipline": {
+    "failBasis": "不以存疑判 fail；本判 partial 的三条 counterExample 均附逐字可查引文与偏移。",
+    "selfCorrection": "已如实写出我自身判断的可能错处（CE3 的两种读法、反向扫描 6-gram 判据的偏严风险）。",
+    "notDone": [
+      "semanticReview",
+      "GPU/浏览器测试",
+      "任何受保护路径的改动"
+    ]
+  },
+  "notes": "总判 partial。方法与顺序：先自己整段读完 [357690,363320)（含标题行、10 个正文段、回末钩子、站点样板），再读候选，然后做机器复算与反向覆盖扫描。 可用（占绝大多数）：tasks 18 条、causeEdges 17 条、states 12 条、foreshadows 10 条、worldSettings 26 条、themeReadings 2 条，事实骨架与原文相符；260 条引用**全部**逐字命中且偏移自洽（TEXT[start:end]==quote 与 find()==start 均 260/260），一条编造的引文都没有。 红线遵守情况（我逐条查过）：①未把人物语当叙述事实 —— 候选在每处人物语都写了来源标注；②『结束≠成功』守住了 —— T11.result 与 T18.result 均为 null 并写明理由，W_I05 明确写『原文没有写火最终烧成』；③无原文没有的人物/事件/结局 —— 除 CE2 的『翊军将军』这一处外部衔名外，其余人物全部可在本区间或本书内找到；④semanticReview 如实写 not-performed，未自称语义已核验；⑤null 栏位（11 个）全部带 absenceConfirmed 与理由，无未标注的未知。 必须修正的三处（有原文引证，见 counterExamples）：CE1 C17 方向/先后颠倒（候选自己的两条引文即可证伪）；CE2 S10.before 写入原文全无的『翊军将军』且整栏标 explicit；CE3 T07.obstacle 把归纳动机（互不信任/趁机动手）标成 explicit。三处都不是编造引文，而是**因果次序、外部事实、basis 标注**三类错，且都局限在单条条目内。 另有 CE4：T14.action.note 把『见粮积如山』指派给 worldSettings，而 worldSettings 里并没有它（悬空引用）。 反向验证（reverseChecks 7 条）：候选未覆盖的原文事实中，我认为最该补的是『搦战』这一触发环与『败军回报黄忠』这一传信环 —— 缺了它们，陈式出战与法正献计都成了无前因的跳变；另有护驾龙虎官军二万五千这一兵力数、兵出潼关这一路线、曹娥碑来历、夜袭行军与张著位置。 误杀检查：rejectedEdges[1]（手书→出战）我认为可能是误杀，已附逐字引证记为存疑并说明理由；但候选是显式拒连且写了理由，且自己主动交出该处待判，故不据此判 fail。 我自己的可能错处（如实写）：CE3 可以被辩解为『各不与袍铠』已隐含解除武装这一事实，若如此则该栏事实侧成立、只有 basis 应改为 inferred；我仍判它需改，因为『互不信任』与『为了…趁机动手』是原文完全没有的动机词，且被标为 explicit。此外我的反向覆盖扫描用 6-gram 判『候选是否提及』，对极短事实可能偏严（例如只以 1–2 字提及者），故 reverseChecks 我只列了我逐条人工确认过、在候选里确实找不到对应表述的项。 未做：semanticReview（本通道不做语义盖章）；未跑任何 GPU/浏览器测试；未改动 js/ css/ index.html serve.py narrative.py scripts/ tests/ docs/ data/ 下任何文件；本轮只写本复核文件。 remaining：①C17 与 T18.action.note 需在下一轮修正或降级；②S10.before 的外部衔名需删或降级为 unknowns；③T07.obstacle 的 basis 需改 inferred；④T14.action.note 与 worldSettings 的交叉引用需二选一落地；⑤reverseChecks 列出的 7 类事实建议补入（尤其搦战、败军回报、张著在后三项）。"
+}

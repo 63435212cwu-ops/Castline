@@ -1,0 +1,53 @@
+{
+ "task": "merge:publish-prompt-parent-key:20261009",
+ "agent": "reform-lead",
+ "at": "2026-10-08T19:30:07Z",
+ "gateLock": "持有 GATE.lock（agent=reform-lead）",
+ "defect": {
+  "what": "58 条已入队的发布任务提示词写着 `--source-key <原始图谱键>`，即让 worker 自己猜父版本；按历史习惯那就是写死的基线键 9b676d70。",
+  "why_it_matters": "这正是 IDENT-HARDCODED-KEY 的**输入端**：我已把桥的 graph_target 改为取页面默认版本，但只要 worker 按提示词写死旧键，批次又会分叉到旁支（内容不累积、读者看不到）。修桥而不修提示词，等于把同一缺陷留在了自动化的必经之路上。",
+  "alsoFound": "同一段模板里产物路径写成 `publish:<book>:B<n>.artifact.json`（冒号），而任务的 `writes` 是 `publish_<book>_B<n>.artifact.json`（下划线）—— 正是 E5/E9『agent 写 A、校验器找 B』的形态。"
+ },
+ "fix": {
+  "generator": "loop/bin/build_plan.py",
+  "sha256": "2178745505b1109efd0e8d310419d583cc37f6374901c729467b511bc8bfc9a0",
+  "queue": "loop/queue/publish.jsonl（58 条就地更新，原子写 tmp+os.replace；备份 /tmp/castline-artifacts/r0-20261009/publish.jsonl.premerge）",
+  "changes": [
+   "提示词改为：从批次候选的 sourceKey 字段读父版本（桥已算好），并说明写死旧键为何会分叉",
+   "产物路径占位符由 `pub` 改为 `pub.replace(':','_')`，与 writes 完全一致",
+   "去掉 `<原始图谱键>` 这一让 worker 猜的写法"
+  ]
+ },
+ "verification": {
+  "renderedPrompt": "B001 提示词含 `SRC=$(...['sourceKey'])` 且不再含 `<原始图谱键>`；产物路径 `publish_dafeng_B001.artifact.json` 与 writes 相同",
+  "queueScan": "`<原始图谱键>` 剩余 0 / 58",
+  "selftest": "113/113",
+  "productAccept": "132/132"
+ },
+ "assertions": [
+  {
+   "text": "提示词不再让 worker 猜父版本",
+   "command": "grep '<原始图谱键>' queue/publish.jsonl → 0",
+   "result": "pass"
+  },
+  {
+   "text": "产物路径与 writes 一致（E5/E9 形态）",
+   "command": "渲染 B001 比对 writes",
+   "result": "pass"
+  },
+  {
+   "text": "生成器与队列同步更新",
+   "command": "batch_tasks 重渲染后 58/58 一致",
+   "result": "pass"
+  },
+  {
+   "text": "门禁全绿",
+   "command": "accept 132/132；selftest 113/113",
+   "result": "pass"
+  }
+ ],
+ "remaining": [
+  "B004 仍缺 6 条复核前置；其提示词已是新版，发布时会自动叠到当时的默认链上。",
+  "技能：worker 仍需每批重跑桥（提示词已说明），发布是每批一次 --write。"
+ ]
+}

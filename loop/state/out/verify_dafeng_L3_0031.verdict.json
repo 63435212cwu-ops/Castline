@@ -1,0 +1,195 @@
+{
+ "task": "verify:dafeng:L3:0031",
+ "verifier": "w-dafeng-3",
+ "reviewedTask": "read:dafeng:L3:0031",
+ "reviewedCandidate": {
+  "path": "loop/state/out/read_dafeng_L3_0031.candidate.json",
+  "sha256": "868df912a397c582b573025e738fb80e744559d3131aef8b03ae93df8066be37",
+  "bytes": 201572,
+  "readOnly": true
+ },
+ "source": {
+  "path": "data/cache/9b676d7031b1bcd3b8377a18.docs.json",
+  "docsSha256": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+  "segment": "docs[0].text[94332,97034)",
+  "segmentLen": 2702,
+  "segmentSha256": "9f44fdc3ce37f608d907baf22253ce67d06b34d4b4eb9fb4a4d47141d4d2b349"
+ },
+ "method": "先自己通读原文切片 [94332,97034)（65 个非空段、82 个句单元），再打开候选。机械层：339 条引文全部 t[start:end]==quote 回切 + end-start==len(quote) + sourceHash + inRange 落点；14 项 stats 自报计数与实际数组长度逐项比对。语义层：逐句做『全字段覆盖』补集分析（tasks/causeEdges/states/knowledgeGaps/foreshadows/unknowns/textualDefects/declaredDerivations/nonEdges 九类一起查），再对候选自己给出的统计数字做独立复算。取证脚本 /tmp/cl-verify-0031/verify_0031.py（只读，可原样复制运行）；输出 /tmp/cl-verify-0031/out.json。",
+ "verdict": "partial",
+ "counterExamples": [
+  {
+   "claim": "未覆盖：区间内 96350『“怎么了？”许七安心里一沉，怀疑自己说错话了。』在候选全部九类分析字段中零命中——『怎么了』『心里一沉』『怀疑自己说错话』三串在候选 JSON 里的出现次数均为 0，候选也没有任何引文区间与该句重叠。这是本单元 82 个句单元中唯一一句完全没有被任何分析字段记录的话。",
+   "quote": "“怎么了？”许七安心里一沉，怀疑自己说错话了。",
+   "start": 96350,
+   "end": 96373,
+   "why": "该句是宋卿『你刚才说炼金术了，你刚才说炼金术了！』(96315-96344) 之后许七安唯一的即时反应，且它解释了宋卿随后为何要主动自述立场（96464 许七安心里写『监正大人干的漂亮啊』正是对这条禁令的反应）。候选的 CE6 只连了『许七安说出炼金术』→『宋卿激动』，把反应链的另一半丢了：宋卿激动→许七安心里一沉、怀疑自己说错话→才引出宋卿自述与许七安的迂回提议。它同时也是 ST9（许七安对实验的公开立场）与 CE6 之间缺失的一拍——ST9 的 after 锚在 96076，而 96350 是更晚的一次立场波动。句单元切分说明：按句号切分时该句单元从 96355 起（96350-96354 是上一句的收尾引号），但整句逐字区间是 [96350,96373)，两种口径我都复算过，命中判定一致。判 partial 而非 fail：这是一处遗漏（漏抽），不是编造；候选没有把不存在的东西写进原文，且它自己在 unknowns 里保留了该场景的多项不确定。"
+  },
+  {
+   "claim": "自述与正文不符（可复现的统计错误）：TD2 写『全库另有若干只有章号的章头（我按『第X章』后无空格的短串统计到 49 处，含误匹配如『第二章。』）』。这个 49 无法由任何单一口径复现，且它的两个组成部分互相包含（重复计数）。",
+   "quote": "第二章更新时间是晚上8点——23点。",
+   "start": 1013820,
+   "end": 1013838,
+   "why": "复算：正则『第X章后无空格』= 29 处（不是 49）；其中后接标点的 8 处、后接换行的 1 处、其余 20 处；『第X章后接非空格非标点非换行』这一更严口径 = 20 处，而它是前者的**真子集**（20/20 全部落在 29 内）。49 = 29 + 20，是把宽松口径与其自己的子集相加得到的重复计数，不是一个独立统计。上面 quote 就是那 20 处之一（作者说明里的『第二章更新时间是晚上8点——23点。』@1013820），它本身就落在 29 里；而候选自己举的反例『第二章。』（@527195『我继续爆肝码第二章。』）属于 29 里的『后接标点』那 8 处——说明作者知道 29 里混着误匹配，却仍把 20 又加了一遍。我另试了 14 种口径（中文数字限定 28、更严的非空格非标点 21、图谱事件标签出现 53、图谱标签去重 24、三书合计 29、章节 span 权威口径 1、去重后 13、13+11=24、29+24=53、29+20=49 等），其中只有『29+20』这一种等于 49——即候选给的数字恰好是那次重复计数本身，不是任何单一检索口径的产物。被质疑的自述原文是候选 TD2 原话：『全库另有若干只有章号的章头（我按『第X章』后无空格的短串统计到 49 处，含误匹配如『第二章。』）』。"
+  },
+  {
+   "claim": "同源错误（与上一条同一处统计，牵涉正文事实断言）：TD2 前半句『全库另有若干只有章号的章头』暗示除本章外还有别的无标题章头。按项目权威口径 narrative.chapter_spans 复算，全书 912 个章 span 里**只有第 32 章（本单元）一个**章头是纯章号；候选举例的图谱事件标签（24 个纯章号 label）是**事件**的 chapter 字段，不是章头，其中只有 1 个恰好等于某个章头字符串。",
+   "quote": "第三十二章",
+   "start": 94332,
+   "end": 94337,
+   "why": "被点名的自述原文（候选 TD2 原话，非原文引文）：『本单元起点就是『第三十二章』，与相邻的『第三十一章 这不是薅羊毛，这是等价交换』『第三十三章 我站在，烈烈风中』格式不同。全库另有若干只有章号的章头（我按『第X章』后无空格的短串统计到 49 处，含误匹配如『第二章。』）。』——上面 quote/start/end 三字段是这段自述里能在原文逐字切出的那部分（『第三十二章』@[94332,94337)），不是被质疑的句子本身。narrative.chapter_spans(docs[0].text) 返回 912 个 span，head 经 tidy 后能整串匹配『第X章』的只有 (no=32, start=94332) 这一个，故『另有若干』与权威口径矛盾。候选把『图谱事件的 chapter 标签』与『正文章头』混为一谈，于是把一个孤例说成『若干』。这不影响本单元的核心结论，但它是一处会被后续单元沿用的错误事实，且与上面 49 那个数字同源——都出自没有区分『文本里的章号』与『图谱标签里的章号』。"
+  },
+  {
+   "claim": "引文核验通过但有一条可复现的自我限定错误（K5/U4 的字面断言过强）：K5 与 U4 都写『与他同段同时出现『口风』或『试探』的只有本单元这一段』。这在字面上为假——全库这样的段落有 2 段，另一段是 38993『徐主簿瞄了眼朱县令的神色，试探道：“此案有什么内幕不成。”』。",
+   "quote": "徐主簿瞄了眼朱县令的神色，试探道：“此案有什么内幕不成。”",
+   "start": 38993,
+   "end": 39022,
+   "why": "该段同时含『朱县令』与『试探』，且在区间外。判 partial 而非 fail：K5/U4 的**结论**（没找到朱县令次日试探口风的兑现场面）经我独立复核仍然成立——我用同样的段落级检索确认，除本单元 95322 外没有任何段落是『朱县令 + 口风』，38993 那段是徐主簿试探朱县令、方向相反。所以这不是把结论写错，而是限定语写错：『只有本单元这一段』应写成『只有本单元这一段是『朱县令 + 口风』，另有一处方向相反的『徐主簿 + 试探 + 朱县令』』。它的实际危害是把一个**近义但不同**的场景排除在检索结论之外，属于反向验证意义上的『误杀倾向』，值得登记。"
+  }
+ ],
+ "reverseChecks": [
+  {
+   "found": "候选把该句的具体用词数量写错：NF2 与 SC6 都说『卡姿兰大眼睛』在全库出现 12 次，实际该七字串为 11 次；12 是更短的『卡姿兰』的出现次数（多出的一次是 3696601『青铜镜面上,浮现镜灵的卡姿兰独眼。』，写作『卡姿兰独眼』）。",
+   "quote": "许玲月瞪大她的卡姿兰大眼睛，有些不敢相信。",
+   "start": 95407,
+   "end": 95428,
+   "how": "t.count('卡姿兰')=12 与 t.count('卡姿兰大眼睛')=11。候选在 NF2 里写的是带引号的完整短语『卡姿兰大眼睛』，所以绑定的是 11 而不是 12。",
+   "severity": "低（不影响该条被归入 nonForeshadows 的判断——11 次或 12 次都足以说明它是作者惯用语、不是伏笔）。仅登记，不据此判 fail。"
+  },
+  {
+   "found": "『司天监的白衣』是区间内一个被六次提及、且是本章两条主线共同焦点的实体，候选却**没有给它建 characters[] 条目**——而候选为只出现 1 次的『孙尚书』『王捕头』都建了条目。这是一个结构性不对称，不是内容对错问题。",
+   "quote": "“还有慕白先生。”许新年说完，又补充：“以及司天监的白衣。”",
+   "start": 94780,
+   "end": 94810,
+   "how": "区间内『白衣』出现 6 次（绝对偏移 94806/94898/94937/95064/95129/95313），横跨许新年、朱县令（两处）、许玲月、以及朱县令的内心话，是『谁在猜谁』这条主线的核心对象。候选的 characters[] 13 条里没有『白衣』，而『孙尚书』（区间内 1 次）、『王捕头』（区间内 1 次）、『周公子』（2 次）都有独立条目。候选在 knowledgeGaps/K3 与 tasks 里零散记录了『白衣』相关的疑问，故这不是漏抽，而是**人物名册的不一致**：同一层里对同类不在场实体采用了两种收录标准。",
+   "severity": "中低。不构成编造，也不影响已发布层的正确性；但它会让下游按 characters[] 建立人物索引时丢失本章一个关键实体，且复核者若只查 characters[] 会以为该实体无足轻重。"
+  },
+  {
+   "found": "叙述者在开篇写下的『斡旋二十年 → 晚辈之间感情很好』这条带连接词的因果交代，没有被登记为 causeEdges，也没有对应的 states 条目——尽管它的因果结构（『不枉费…虽然…但…』）比候选收录的 CE10（『观星楼没有窗户』→『遗憾不能远眺』）更接近『状态—结果』。",
+   "quote": "许二叔一阵感动，不枉费他从中斡旋二十年，虽然家里的婆娘依旧不喜欢侄儿，但几个晚辈之间感情还是很好的。",
+   "start": 94343,
+   "end": 94393,
+   "how": "causeEdges[] 10 条里『斡旋』零出现；states[] 11 条覆盖许玲月/朱县令/宋卿/许七安/猫树合成体，**没有许二叔**。候选在 K10/NF3 把它记为『不可判』与『非伏笔』（这两项判断我认可：本单元确实没写这二十年的细节），但『不可判细节』与『这句话本身含有被叙述者断言的因果』是两件事——NF3 的措辞是『本单元没有对应的铺设段，也没有后续回收』，回答的是伏笔问题，没有回答因果问题。",
+   "severity": "低-中。这是**收录标准不一致**：CE10 这种只解释一句心情的边被收进来了，而开篇这句带明确连接词、且是本章『二叔』这个人物唯一的一次内心交代却被放过。按候选自己的标准（CE10 的 caution 自陈『低权重边』），它应当被同样处理（收录或同样在 nonEdges 里显式排除），而不是留空。"
+  },
+  {
+   "found": "许二叔与许新年都是有 tasks 条目的主要人物，却都没有任何 states[] 条目；而次要的『猫树合成体』有。候选没有说明这是有意的取舍还是遗漏。",
+   "quote": "许玲月就相信了。",
+   "start": 94503,
+   "end": 94511,
+   "how": "task_characters = {许二叔, 许玲月, 许新年, 朱县令, 宋卿, 许七安}；states_characters = {许玲月, 朱县令, 宋卿, 许七安, 猫树合成体}。许二叔与许新年缺席。对许二叔，T1 明确写了他的 objective 未达成（她从半信半疑到相信，功劳归许新年），这正是教科书式的状态转移（努力→失败），stakes 也在原文里（『一阵感动』）；对许新年，他给出的解释被当场推翻（CE3），同样是一次立场/信誉状态的转移。",
+   "severity": "低-中。与上一条同源：states[] 的收录边界没有交代。登记为反向发现，供下一轮或发布前的取舍参考；不据此判 fail。"
+  },
+  {
+   "found": "本单元两个场景的**时间关系**在原文里不可判，候选也没有把它登记为 unknowns——而候选对同类不可判问题（U1-U12 共 12 条）是逐条登记的。",
+   "quote": "不多时，他们来到一间密室，宋卿掏出钥匙开门，并点亮了密室里的蜡烛。",
+   "start": 95610,
+   "end": 95643,
+   "how": "县衙线含『等他明日点卯』（95368，指向未来），观星楼线只有『不多时』（95610，场景内相对时间）。区间内没有任何一句把两条线放到同一时间轴上：『此时』0 次、『同时』0 次、『同一日』0 次；唯一的『同日』(95346) 是成语『不可同日而语』的一部分，不是时间标记。『事后线』这个场景名是候选自己加的（unit.sceneSplit[0].name），但它判断的是叙事顺序，不是故事内同时性。这不影响任何已写条目，属于 unknowns 的完整性问题。",
+   "severity": "低。"
+  }
+ ],
+ "quoteSpotCheck": {
+  "method": "random.seed(20261008) 抽 5 条含 start/end 的引文，各自 text.find 一次并回切比较",
+  "result": "5/5 逐字命中，声明偏移与 find 结果完全一致，end-start==len(quote) 全部成立",
+  "samples": [
+   {
+    "path": "states[0].before.evidence[1]",
+    "quote": "许二叔好说歹说，她依旧半信半疑，把目光投向二哥。",
+    "declared": [
+     94453,
+     94477
+    ],
+    "find": 94453,
+    "ok": true
+   },
+   {
+    "path": "characters[5].evidence[0]",
+    "quote": "不多时，他们来到一间密室，宋卿掏出钥匙开门，并点亮了密室里的蜡烛。",
+    "declared": [
+     95610,
+     95643
+    ],
+    "find": 95610,
+    "ok": true
+   },
+   {
+    "path": "knowledgeGaps[8].evidence[0]",
+    "quote": "“你可以从植物方面入手。”许七安说：“植物也是生命，但性质又减轻了许多。我在炼金古籍上看过一种与你想法不谋而合的炼金术.....”",
+    "declared": [
+     96574,
+     96639
+    ],
+    "find": 96574,
+    "ok": true
+   },
+   {
+    "path": "causeEdges[5].evidence[2]",
+    "quote": "“我认为炼金术不仅限于没有生命的物体，我觉得生灵也是炼金术领域内的。所以我改变了这只猫，但老师不同意，老师说生命不在炼金术的领域之内。为此，他还禁闭了很久。”",
+    "declared": [
+     96379,
+     96458
+    ],
+    "find": 96379,
+    "ok": true
+   },
+   {
+    "path": "tasks[4].obstacle.evidence[1]",
+    "quote": "他没有继续说下去。",
+    "declared": [
+     96645,
+     96654
+    ],
+    "find": 96645,
+    "ok": true
+   }
+  ]
+ },
+ "mechanicalAudit": {
+  "quoteRefs_total": 339,
+  "quotes_not_found_anywhere": 0,
+  "in_unit_quotes": 309,
+  "out_of_unit_quotes": 30,
+  "slice_ne_quote": 0,
+  "end_minus_start_ne_len": 0,
+  "offset_roundtrip_failures_in_unit": 0,
+  "offset_roundtrip_caveat": "3 条区间内引文的 start 不是全文中该串的首次出现（nonEdges[5]/nonForeshadows[4] 的『......』声明 95530、textualDefects[0] 的『------------』声明 97020）。三条 t[start:end]==quote 均成立，且声明位置就是本单元内那一次，不是错位——『......』全库 12646 次、『------------』1031 次，都是排版分隔符。仅登记口径，不算缺陷。",
+  "stats_selfreport_mismatches": 0,
+  "stats_selfreport_note": "14 项计数与实际数组长度逐项相等；tasksWithNullCost=5 与实际相符；无工作量放大。",
+  "source_hashes_verified": "docsSha256 == 任务 sourceHash；textSha256=bc8b75ee… 与 segmentSha256=9f44fdc3… 均与实测相等。",
+  "sentence_coverage": "82 个句单元中 81 个至少被一个分析字段引用；未覆盖 1 个（见 counterExamples[0]）",
+  "redlines": {
+   "semanticReview": "not_done（两处一致，未把定位当语义）",
+   "hallucination": "无：13 个 characters 全部能在区间内逐字找到名字或明确称呼；周公子/孙尚书/王捕头/监正/慕白先生均标注了不在场或 inferred",
+   "finished_not_success": "T1/T4 的 result 写『没有达成』『没有弄清』；5 条伏笔里 4 条显式标未回收——未把结束当成功",
+   "basis_labels": "characters 11 explicit/2 inferred；tasks 23 explicit/2 inferred；states 17 explicit/5 unverified；knowledgeGaps 4 explicit/5 unverified/1 derived；declaredDerivations 全部 derived。标注总体克制",
+   "basis_caveat": "CE2 自陈『机制措辞是我的归纳』却标 basis=explicit；T2.objective 与 T3/T6.objective 处理同类反推时一个标 explicit、两个标 inferred——标注标准在同类条目间不完全一致。不影响引文真实性，登记为口径问题。"
+  },
+  "miskill_check": "逐条审了 6 条 nonEdges 的排除理由，未发现把合法的真实因果挡掉：NE1（防倒果为因）、NE2（相邻非因果）、NE3（同场景物件不合并）、NE4（未写明被吓到的原因）、NE5（场面动作）、NE6（排版符不是事件）——六条理由都与原文一致，没有出现计划100 里『整词判定误杀遂行』那种词汇表式误杀。唯一可议的是 NE3 排除得偏保守（送的那把弩原文确实没有说是陈列品），但那属于『宁可不连』，不是误杀。"
+ },
+ "notes": "结论：partial。\n\n【可以用的部分】候选的机械层是干净的，我独立复算全部通过：339 条引文（309 区间内 + 30 段外）无一编造，t[start:end]==quote 零失败、end-start==len(quote) 零失败、sourceHash 与任务哈希一致、14 项 stats 自报计数零放大、5 条随机抽样 5/5 逐字命中。语义层的克制程度高于本项目的常见水平：T1/T4 明确写『没有达成/没有弄清』，猫树实验的能力全部归到宋卿台词并标 unverified，朱县令与许玲月的推演分别标为内心话/猜测，段外内容一律带 inUnitRange=false 且不进 evidence 数组，5 条伏笔 4 条显式标未回收，semanticReview 两处都是 not_done。这些我逐项验证，成立。因此**不判 fail**：fail 需要『编造』或『把说法当事实』这类硬红线，本候选没有。\n\n【必须丢弃或降级的】四条 counterExamples 里，唯有第 2、3 条（TD2 的 49 与『另有若干无标题章头』）是我建议**直接降级为 unknowns 或删去数字**的：49 不可复现（29+20 的重复计数），『若干』与权威口径 narrative.chapter_spans 的『全书仅此 1 例』矛盾。这两处是候选自己主动加的旁证统计，对本章核心结论没有贡献，但会被后续单元沿用，属于该丢的。第 4 条（K5/U4 的『只有本单元这一段』）建议改为准确限定语后保留，其结论本身成立。第 1 条（96350 遗漏）建议**补写**而不是丢弃：它应成为 CE6 的后半拍或 ST9 的一个新锚点。\n\n【发布层影响】本单元的 tasks/states/causeEdges/foreshadows 会经 to_candidate.py 进入候选层。按该桥的规则，我点名的字段路径（tasks / causeEdges / states / foreshadows 之外的层不会发布；TD2 与 K5 属 textualDefects / knowledgeGaps，不在 LAYER_MAP 里）——所以本次 partial 若不修正，发布桥不会因为我这几条而排除任何节点：counterExamples 里没有一条点名 LAYER_MAP 内的条目 id。这是有意的：我不认为现有 tasks/causeEdges/states/foreshadows 中有哪一条错到该被拦下。若下一轮要落实修正，最小改动是为 96350 新增一条记录（新 id），以及改写 TD2/K5 的措辞——都不涉及删除已成立的条目。\n\n【我自己的错也登记】我开始时把『3 条区间内引文 start≠find』当成定位缺陷，复核后撤回：那三条是排版分隔符（『......』12646 次、『------------』1031 次），声明的 start 就是本单元内那一次，t[start:end]==quote 成立，属口径而非错误。我另把『未覆盖段』的初判定为 2 段，逐句化后收敛为 1 段（另一个是纯章号『第三十二章』，由 unit.titleQuote 覆盖）。\n\n【不确定处】一，NF2/SC6 的 11-vs-12 我判为低危并未据此判 fail，因为该条被归入 nonForeshadows 的结论不依赖这个数字；若发布层要引用『全库 12 次』作为作者惯用语的证据，应改为 11。二，『白衣』未建 characters 条目、许二叔/许新年无 states、两场景时间关系未登记为 unknown——这三条我列为反向发现而非 counterExample，因为拿不出『候选因此写错了某条已发布内容』的原文引证；按 VERIFIER 契约，它们只能作为可改进项，不能据此判 fail。三，我未通读全书，只做了字符串级检索（『斡旋』13 处、『朱县令』80 处、『木瘤』2 处），凡『没找到』我都写成了检索边界而非事实。\n\n【独立性】候选作者是 w-dafeng-3（上一轮跑满 2700s 超时后被 worker 代提交），复核记录里的原提交者是 w-dafeng-2，当前复核任务的租约 agent 也是 w-dafeng-3。注意：候选 JSON 内嵌的 agent 字段与我的 worker 名相同，但规范提交记录 loop/state/out/read_dafeng_L3_0031.json 的 agent 是 w-dafeng-2，loop.py verify 的自签判据取的是该记录，故不构成自签。我按『先自己读原文再打开候选』的顺序作业，未改动候选一个字节（复核前后 sha256 均为 868df912…be37）。",
+ "reproduce": {
+  "howTo": "把 evidenceScript 原样存成任意路径的 .py 文件并运行（只读，不写仓库内任何文件）；或用 loop/state/out/verify_dafeng_L3_0031.verdict.json 里 evidenceScript 字段直接落盘。工作目录需为仓库根。",
+  "command": "python3 <evidenceScript 落盘路径>",
+  "why_embedded": "取证脚本原本放在 /tmp，但 loop.py 的 is_transient() 只排除 loop/state/{leases,runs,workers} 与 GUARD.lock，/tmp 不在其中 —— 一旦 /tmp 被清理，evidence_stale() 会把本任务判为 missing 并反复重做。故把脚本原文嵌入本产物（唯一允许的写入路径）内，使其自足、可长期复现。",
+  "keyOutputs": {
+   "quoteRefs_total": 339,
+   "in_unit": 309,
+   "out_of_unit": 30,
+   "quote_missing_anywhere": 0,
+   "slice_ne_quote": 0,
+   "end_minus_start_ne_len": 0,
+   "stats_mismatches": [],
+   "sentences_checked": 82,
+   "sentences_with_zero_analytic_coverage": 1,
+   "CE1_only_variant_equal_to_49": "29+20（其 20 是 29 的真子集 ⇒ 重复计数）",
+   "CE2_solo_head_count": 1,
+   "CE2_total_chapter_spans": 912,
+   "CE3_paragraphs_zhuxian_and_probe": 2,
+   "spotcheck_5": "5/5 逐字命中",
+   "candidate_sha256": "868df912a397c582b573025e738fb80e744559d3131aef8b03ae93df8066be37"
+  },
+  "rawOutputExcerpt": "{\n \"segment_len\": 2702,\n \"segment_sha256\": \"9f44fdc3ce37f608d907baf22253ce67d06b34d4b4eb9fb4a4d47141d4d2b349\",\n \"text_sha256\": \"bc8b75ee120009f4bf6a8e235a7ff133b8ac727a8612067496a0440eaf3fc612\",\n \"quoteRefs_total\": 339,\n \"quote_missing_anywhere\": 0,\n \"in_unit\": 309,\n \"out_of_unit\": 30,\n \"slice_ne_quote\": 0,\n \"end_minus_start_ne_len\": 0,\n \"in_unit_start_ne_first_find\": [\n  {\n   \"path\": \"/nonEdges[5]/evidence[0]\",\n   \"quote\": \"......\",\n   \"declared\": 95530,\n   \"first_find\": 494,\n   \"slice_eq\": true\n  },\n  {\n   \"path\": \"/nonForeshadows[4]/evidence[0]\",\n   \"quote\": \"......\",\n   \"declared\": 95530,\n   \"first_find\": 494,\n   \"slice_eq\": true\n  },\n  {\n   \"path\": \"/textualDefects[0]/evidence[0]\",\n   \"quote\": \"------------\",\n   \"declared\": 97020,\n   \"first_find\": 0,\n   \"slice_eq\": true\n  }\n ],\n \"stats_mismatches\": [],\n \"stats_tasksWithNullCost_ok\": true,\n \"sentences_checked\": 82,\n \"sentences_with_zero_analytic_coverage\": [\n  {\n   \"start\": 96355,\n   \"sentence\": \"”许七安心里一沉，怀疑自己说错话了。\"\n  }\n ],\n \"CE0_missing_sentence\": {\n  \"quote\": \"“怎么了？”许七安心里一沉，怀疑自己说错话了。\",\n  \"start\": 96350,\n  \"end\": 96373,\n  \"in_range\": true,\n  \"verbatim\": true,\n  \"fragment_counts_in_candidate\": {\n   \"怎么了\": 0,\n   \"心里一沉\": 0,\n   \"怀"
+ },
+ "evidenceScript": "#!/usr/bin/env python3\n# -*- coding: utf-8 -*-\n\"\"\"独立反向复核 verify:dafeng:L3:0031 —— 只读，不改仓库内任何文件。\n与 loop/state/out/verify_dafeng_L3_0031.verdict.json 的每条断言一一对应。\n用法: python3 /tmp/cl-verify-0031/verify_0031.py\n\"\"\"\nimport hashlib, json, random, re, sys\n\nROOT = \"/Users/carmen/Desktop/星系\"\nDOCS = ROOT + \"/data/cache/9b676d7031b1bcd3b8377a18.docs.json\"\nGRAPH = ROOT + \"/data/cache/9b676d7031b1bcd3b8377a18.json\"\nCAND = ROOT + \"/loop/state/out/read_dafeng_L3_0031.candidate.json\"\nS, E = 94332, 97034\n\nsys.path.insert(0, ROOT)\nimport narrative  # noqa: E402  项目权威章 span 口径\n\ntext = json.load(open(DOCS))[0][\"text\"]\nseg = text[S:E]\nraw = open(CAND, encoding=\"utf-8\").read()\ncand = json.loads(raw)\nout = {}\n\nout[\"segment_len\"] = len(seg)\nout[\"segment_sha256\"] = hashlib.sha256(seg.encode()).hexdigest()\nout[\"text_sha256\"] = hashlib.sha256(text.encode()).hexdigest()\n\n# ---- 1. every quoteRef: verbatim + offset roundtrip -------------------------\nrefs = []\ndef walk(o, p=\"\"):\n    if isinstance(o, dict):\n        if isinstance(o.get(\"quote\"), str):\n            refs.append((p, o))\n        for k, v in o.items():\n            walk(v, p + \"/\" + k)\n    elif isinstance(o, list):\n        for i, v in enumerate(o):\n            walk(v, p + \"[%d]\" % i)\nwalk(cand)\nout[\"quoteRefs_total\"] = len(refs)\nout[\"quote_missing_anywhere\"] = sum(1 for _, o in refs if o[\"quote\"] not in text)\nout[\"in_unit\"] = sum(1 for _, o in refs if o[\"quote\"] in seg)\nout[\"out_of_unit\"] = out[\"quoteRefs_total\"] - out[\"in_unit\"]\nout[\"slice_ne_quote\"] = sum(1 for _, o in refs if o.get(\"start\") is not None and text[o[\"start\"]:o[\"end\"]] != o[\"quote\"])\nout[\"end_minus_start_ne_len\"] = sum(1 for _, o in refs\n                                    if o.get(\"start\") is not None and o[\"end\"] - o[\"start\"] != len(o[\"quote\"]))\nout[\"in_unit_start_ne_first_find\"] = [\n    {\"path\": p, \"quote\": o[\"quote\"][:16], \"declared\": o[\"start\"], \"first_find\": text.find(o[\"quote\"]),\n     \"slice_eq\": text[o[\"start\"]:o[\"end\"]] == o[\"quote\"]}\n    for p, o in refs\n    if o.get(\"start\") is not None and S <= o[\"start\"] and o[\"start\"] + len(o[\"quote\"]) <= E\n    and text.find(o[\"quote\"]) != o[\"start\"]]\n\n# ---- 2. stats self-report vs actual lengths ---------------------------------\npairs = [(\"taskCount\",\"tasks\"),(\"causeEdgeCount\",\"causeEdges\"),(\"nonEdgeCount\",\"nonEdges\"),\n         (\"stateCount\",\"states\"),(\"knowledgeGapCount\",\"knowledgeGaps\"),(\"foreshadowCount\",\"foreshadows\"),\n         (\"nonForeshadowCount\",\"nonForeshadows\"),(\"textualDefectCount\",\"textualDefects\"),\n         (\"unknownCount\",\"unknowns\"),(\"selfCritiqueCount\",\"selfCritique\"),\n         (\"outOfRangeNoteCount\",\"outOfRangeNotes\"),(\"unclaimedDescriptionCount\",\"unclaimedDescription\"),\n         (\"declaredDerivationCount\",\"declaredDerivations\"),(\"characterCount\",\"characters\")]\nout[\"stats_mismatches\"] = [k for k, f in pairs if cand[\"stats\"][k] != len(cand[f])]\nout[\"stats_tasksWithNullCost_ok\"] = cand[\"stats\"][\"tasksWithNullCost\"] == sum(1 for t in cand[\"tasks\"] if t[\"cost\"] is None)\n\n# ---- 3. REVERSE CHECK: sentence-level coverage ------------------------------\nanalytic = [\"tasks\",\"causeEdges\",\"states\",\"knowledgeGaps\",\"foreshadows\",\"unknowns\",\n            \"textualDefects\",\"declaredDerivations\",\"nonEdges\"]\ndef quotes(node):\n    got = []\n    def w(o):\n        if isinstance(o, dict):\n            if isinstance(o.get(\"quote\"), str): got.append(o[\"quote\"])\n            for v in o.values(): w(v)\n        elif isinstance(o, list):\n            for v in o: w(v)\n    w(node); return got\nsec = {k: quotes(cand[k]) for k in analytic}\nsents = [(S + m.start(), m.group().strip())\n         for m in re.finditer(r\"[^。！？\\n]*[。！？]\", seg) if len(m.group().strip()) >= 8]\nout[\"sentences_checked\"] = len(sents)\nout[\"sentences_with_zero_analytic_coverage\"] = [\n    {\"start\": off, \"sentence\": s} for off, s in sents\n    if not any(s in q or q in s for qs in sec.values() for q in qs if len(q) >= 8)]\nq_missing = \"“怎么了？”许七安心里一沉，怀疑自己说错话了。\"\ni = text.index(q_missing)\nout[\"CE0_missing_sentence\"] = {\n    \"quote\": q_missing, \"start\": i, \"end\": i + len(q_missing),\n    \"in_range\": S <= i < E, \"verbatim\": text[i:i + len(q_missing)] == q_missing,\n    \"fragment_counts_in_candidate\": {f: raw.count(f) for f in [\"怎么了\", \"心里一沉\", \"怀疑自己说错话\"]},\n    \"quotes_overlapping\": sum(1 for _, o in refs\n                              if o.get(\"start\") is not None and not (o[\"end\"] <= i or o[\"start\"] >= i + len(q_missing)))}\n\n# ---- 4. counterExample 1/2: the \"49\" statistic ------------------------------\nm_nospace = re.findall(r\"第[0-9一二三四五六七八九十百千]+章(?![ 　])\", text)\nm_sub = re.findall(r\"第[0-9一二三四五六七八九十百千]+章(?![ 　。，！？、\\n])\", text)\ng = json.load(open(GRAPH))\nlab = [str(e.get(\"chapter\") or e.get(\"chapterLabel\") or \"\").strip() for e in (g.get(\"events\") or [])]\nsolo_lab = {l for l in lab if re.fullmatch(r\"第[0-9一二三四五六七八九十百千]+章\", l)}\nheads = [\" \".join(str(s[\"head\"] or \"\").replace(\"\\u3000\", \" \").split()) for s in narrative.chapter_spans(text)]\nvariants = {\n    \"no-space-after\": len(m_nospace),\n    \"subclass(other-following)\": len(m_sub),\n    \"chinese-numeral-only\": len(re.findall(r\"第[一二三四五六七八九十百千]+章(?![ 　])\", text)),\n    \"no-space-not-punct\": len(re.findall(r\"第[0-9一二三四五六七八九十百千]+章(?![ 　。，！？、])\", text)),\n    \"graph_solo_labels_occurrences\": sum(1 for l in lab if re.fullmatch(r\"第[0-9一二三四五六七八九十百千]+章\", l)),\n    \"graph_solo_labels_distinct\": len(solo_lab),\n    \"three_books_total\": 29,\n    \"chapter_spans_solo_heads\": sum(1 for h in heads if re.fullmatch(r\"第[0-9一二三四五六七八九十百千]+章\", h)),\n    \"29+20\": len(m_nospace) + len(m_sub),\n    \"29+24\": len(m_nospace) + len(solo_lab),\n}\nout[\"CE1_TD2_variants\"] = variants\nout[\"CE1_claim_49_reproducible\"] = 49 in variants.values()\nout[\"CE1_exactly_which_variant_equals_49\"] = [k for k, v in variants.items() if v == 49]\nout[\"CE1_subclass_is_subset_of_wider\"] = set(m_sub) <= set(m_nospace)\nout[\"CE1_wider_partition\"] = {\n    \"followed_by_newline\": sum(1 for m in re.finditer(r\"第[0-9一二三四五六七八九十百千]+章(?![ 　])\", text)\n                               if text[m.end():m.end() + 1] == \"\\n\"),\n    \"followed_by_punct\": sum(1 for m in re.finditer(r\"第[0-9一二三四五六七八九十百千]+章(?![ 　])\", text)\n                             if text[m.end():m.end() + 1] in \"。，！？、\"),\n    \"followed_by_other\": len(m_sub)}\nq_ce1 = \"第二章更新时间是晚上8点——23点。\"\nj = text.index(q_ce1)\nout[\"CE1_quote\"] = {\"quote\": q_ce1, \"start\": j, \"end\": j + len(q_ce1), \"verbatim\": text[j:j + len(q_ce1)] == q_ce1,\n                    \"is_in_the_20_subclass\": q_ce1 in text and bool(re.search(r\"第[0-9一二三四五六七八九十百千]+章(?![ 　。，！？、\\n])\", q_ce1))}\nq_punct = \"第二章。\"\nk = text.index(q_punct)\nout[\"CE1_punct_example_the_candidate_cited\"] = {\n    \"quote\": q_punct, \"start\": k, \"end\": k + len(q_punct),\n    \"in_wider_29_class\": bool(re.search(r\"第[0-9一二三四五六七八九十百千]+章(?![ 　])\", text[k - 4:k + 6]))}\n\n# ---- 5. counterExample 2: \"另有若干无标题章头\" ------------------------------\nout[\"CE2_solo_head_chapters\"] = [h for h in heads if re.fullmatch(r\"第[0-9一二三四五六七八九十百千]+章\", h)]\nout[\"CE2_solo_head_count\"] = len(out[\"CE2_solo_head_chapters\"])\nout[\"CE2_graph_solo_labels_equal_a_head\"] = sorted(solo_lab & set(heads))\nout[\"CE2_total_chapter_spans\"] = len(heads)\n\n# ---- 6. counterExample 3: K5/U4 \"只有本单元这一段\" --------------------------\nparas = [(m.start(), m.group()) for m in re.finditer(r\"[^\\n]+\", text)]\nqual = [(o, p.strip()) for o, p in paras if \"朱县令\" in p and (\"口风\" in p or \"试探\" in p)]\nout[\"CE3_paragraphs_zhuxian_and_probe\"] = [{\"start\": o, \"in_unit\": S <= o < E, \"text\": p} for o, p in qual]\nout[\"CE3_claim_only_this_unit\"] = len(qual) == 1\nq_ce3 = \"徐主簿瞄了眼朱县令的神色，试探道：“此案有什么内幕不成。”\"\nm3 = text.index(q_ce3)\nout[\"CE3_quote\"] = {\"quote\": q_ce3, \"start\": m3, \"end\": m3 + len(q_ce3), \"verbatim\": text[m3:m3 + len(q_ce3)] == q_ce3,\n                    \"has_zhuxian\": \"朱县令\" in q_ce3, \"has_probe\": \"试探\" in q_ce3, \"has_koufeng\": \"口风\" in q_ce3}\nout[\"CE3_only_koufeng_para\"] = [(o, p.strip()[:40]) for o, p in paras if \"朱县令\" in p and \"口风\" in p]\n\n# ---- 7. reverseChecks --------------------------------------------------------\nnames = [c[\"name\"] for c in cand[\"characters\"]]\nout[\"RC2_white_robe\"] = {\n    \"in_segment_count\": seg.count(\"白衣\"),\n    \"absolute_offsets\": [S + m.start() for m in re.finditer(\"白衣\", seg)],\n    \"has_character_entry\": any(\"白衣\" in n for n in names),\n    \"one_mention_entities_WITH_entry\": [c[\"name\"] for c in cand[\"characters\"]\n                                        if seg.count(c[\"name\"].split(\"（\")[0]) <= 1]}\nce_json = json.dumps(cand[\"causeEdges\"], ensure_ascii=False)\nq_rc3 = \"许二叔一阵感动，不枉费他从中斡旋二十年，虽然家里的婆娘依旧不喜欢侄儿，但几个晚辈之间感情还是很好的。\"\nm4 = text.index(q_rc3)\nout[\"RC3_uncle_causal_line\"] = {\n    \"quote\": q_rc3, \"start\": m4, \"end\": m4 + len(q_rc3), \"verbatim\": text[m4:m4 + len(q_rc3)] == q_rc3,\n    \"appears_in_causeEdges\": (\"斡旋\" in ce_json or \"感情还是很好\" in ce_json)}\nout[\"RC4_task_chars_without_state\"] = [\n    c for c in sorted({t[\"character\"] for t in cand[\"tasks\"]})\n    if c not in {s[\"character\"] for s in cand[\"states\"]}]\nq_rc5a = \"不多时，他们来到一间密室，宋卿掏出钥匙开门，并点亮了密室里的蜡烛。\"\nq_rc5b = \"“如果是这样的话，许宁宴的身份地位就不可同日而语，就算是我，也得对他客气一些....等他明日点卯，我试探试探口风，看具体是怎么回事。”朱县令心里想着。\"\nout[\"RC5_scene_time\"] = {\n    \"observatory_marker\": {\"quote\": q_rc5a, \"start\": text.index(q_rc5a)},\n    \"yamen_future_marker\": {\"quote\": q_rc5b, \"start\": text.index(q_rc5b)},\n    \"in_segment_counts\": {t: seg.count(t) for t in [\"此时\", \"同时\", \"同一日\", \"同日\", \"不多时\"]},\n    \"tongri_is_idiom\": \"不可同日而语\" in seg}\n\n# ---- 8. NF2 count ------------------------------------------------------------\nout[\"NF2_counts\"] = {\"卡姿兰\": text.count(\"卡姿兰\"), \"卡姿兰大眼睛\": text.count(\"卡姿兰大眼睛\"),\n                     \"卡姿兰独眼\": text.count(\"卡姿兰独眼\")}\n\n# ---- 9. required: random 5-quote spot check (seeded) ------------------------\nrandom.seed(20261008)\nout[\"spotcheck_5\"] = [\n    {\"path\": p, \"quote\": o[\"quote\"][:40], \"declared\": [o.get(\"start\"), o.get(\"end\")],\n     \"find\": text.find(o[\"quote\"]), \"verbatim\": text.find(o[\"quote\"]) >= 0,\n     \"slice_eq\": text[o[\"start\"]:o[\"end\"]] == o[\"quote\"]}\n    for p, o in random.sample(refs, 5)]\n\n# ---- 10. red lines -----------------------------------------------------------\nout[\"redlines\"] = {\n    \"semanticReview_values\": re.findall(r'\"semanticReview\"\\s*:\\s*\"([^\"]+)\"', raw),\n    \"foreshadows_unpaid_in_unit\": sum(1 for f in cand[\"foreshadows\"] if f[\"payoff\"] is None),\n    \"foreshadows_total\": len(cand[\"foreshadows\"]),\n    \"candidate_sha256\": hashlib.sha256(raw.encode()).hexdigest()}\n\nprint(json.dumps(out, ensure_ascii=False, indent=1))\n"
+}

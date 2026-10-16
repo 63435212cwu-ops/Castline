@@ -1,0 +1,322 @@
+{
+  "task": "verify:loopfixes:20261009T231821",
+  "agent": "code-verifier",
+  "role": "独立对抗复核（复核者不是原提交者）",
+  "status": "rejected",
+  "summary": "对本轮三处改动做对抗复核，全部用可复算命令实测。(1) 17d 未被我击穿，但它的判据比改动前弱：只看 package.json 存在，不看内容/模型（我构造出零字节 package.json 仍 PASS）；它仍会在 DSH_HOME 未设/不可自愈时变红，所以不是恒真，但是一条弱检查。(2) classify_failure 我击穿了：内容失败日志里只要出现这些词就会被洗成基础设施失败——真实语料 loop/state/logs/w-xiyou-1-read-dafeng-L3-0143-...log（671KB、同一任务、结论是『内容做不出来』）现在被 classify_failure 判成 AUTH；另有 4 类合成反例。后果正是 E31 的反向形态：真做不出来的难任务被洗成网络问题。(3) 退避语义未被改坏：与前实现逐条对齐，NEW 从未短于 OLD；改后按 total 反而在 infra/consecutive 交错时更强。(4) 12q7c/12q7d 自持（live ledger 改名后仍 PASS，且实测审计钩子显示只开临时目录文件），12q7d 很浅（把指数退避改成恒定 30s 仍 PASS）；12q7c 能击穿 pre-change 语义（变异复现 FAIL）但不能击穿『把它 reset 为 0』。反向验证发现：FAILED-TASKS.json 里 infraConsecutive 没有任何消费点，呈现方式一字未改，现有 9 条台账里 7 条仍把基础设施失败混在 consecutive 里（旧数据不迁移）——E31 的原始症状在现有数据上依然可见；另发现 17d 的实际可击穿面因 discover_dsh_home 的兜底而几乎消失。",
+  "verdict": {
+    "17d_selfheal_assertion": "partial",
+    "classify_failure_infra_split": "fail",
+    "selftest_12q7_checks": "partial",
+    "backoff_semantics": "pass"
+  },
+  "counterExamples": [
+    {
+      "id": "CE-1",
+      "claim": "classify_failure() 只在失败来自基础设施时才返回标签（worker.py L479-496 docstring：『宁可漏判成「难任务」，也不能把真做不出来的单元洗成「网络问题」』）",
+      "field": "loop/bin/worker.py:492 `tail = txt[-8000:]` + L493 `if any(n in tail for n in needles)`；判据是『日志尾部 8000 字符里出现子串』，与这行是不是错误、失败到底由谁造成无关",
+      "quote": "真实语料 log 中，agent 在同一份日志里写：『**3. 17 次失败的根因是环境，不是阅读。** `FAILED-TASKS.json` 显示 rc=1×15、rc=124×2；日志里是 `RATE_LIMIT: 云端中转未在当前网络区域提供服务` 与 `AUTH: 设备验证没能完成`。』—— 该行的字符位于全文 504166 字符中的第 503296 位，落在最后 8000 字符内",
+      "why": "该 log 属于 read:dafeng:L3:0143，是那一次**成功**（rc=0）的阅读运行；agent 只是**引用**了历史基础设施报错来解释别人的失败。classify_failure(该 log) 实测返回 'AUTH'。只要这次运行 rc≠0，这次**内容失败**就会被记成基础设施失败、consecutive 不涨。命令：`python3 -B -c \"import importlib.util;spec=importlib.util.spec_from_file_location('w','loop/bin/worker.py');w=importlib.util.module_from_spec(spec);spec.loader.exec_module(w);print(w.classify_failure('loop/state/logs/w-xiyou-1-read-dafeng-L3-0143-20261009-155959.log'))\"` → AUTH；log sha256=b4073d074c74713cbdbd0d73b8063ee26d1da8b865869dbde1349dcc1858c0a0",
+      "severity": "high — 这就是 E31 的反向形态（真做不出来的单元被洗成网络问题、不再计入 consecutive）"
+    },
+    {
+      "id": "CE-2",
+      "claim": "只需要明确的错误串就足以判基础设施（docstring『只认**明确的错误串**，不做模糊判断』）",
+      "field": "loop/bin/worker.py:468-476 INFRA_FAILURE_PATTERNS：`(\"AUTH\", (\"AUTH: 本机到平台\", \"AUTH: \", \"not logged in\", \"Not logged in\"))`、`(\"RATE_LIMIT\", (\"RATE_LIMIT\",))`、`(\"SERVER\", (\"SERVER: Error\", \"502 Bad Gateway\", \"503 Service Unavailable\"))`、`(\"NETWORK\", (\"Client network socket disconnected\", \"ECONNRESET\", \"ETIMEDOUT\", \"ENOTFOUND\", \"socket hang up\"))`",
+      "quote": "A: `dsh: reasoning: 我需要 AUTH: token 校验后再重试；这一章引文对不上原文，本质做不出来` → AUTH\nB: `dsh: reasoning: 原文说限流策略 RATE_LIMIT 是网络层概念，与本章无关。结论：这一章无法抽取。` → RATE_LIMIT\nC: `dsh: 原文字符串含有 '502 Bad Gateway' 是网页错误页残留，无法定位引文，判定本章做不出来` → SERVER\nD: `dsh: 原文样例里有 ETIMEDOUT 字样，属于日志片段，不构成叙事，抽取失败` → NETWORK",
+      "why": "全部实测为误判（我构造并运行的 /tmp/verify-loopfixes/probe_classify.py）。其中 `AUTH: `（带空格，极宽）、`RATE_LIMIT`（裸词）、`ECONNRESET/ETIMEDOUT/ENOTFOUND/socket hang up` 是**原文/推理里正常会出现**的词；`502 Bad Gateway` 更是原文本里就可能存在的字符串。原因同上：判据落在『整段尾部』而不是『错误行』上，用的是裸 substring。",
+      "severity": "high"
+    },
+    {
+      "id": "CE-3",
+      "claim": "17d『本会话 DSH_HOME 能被自愈成 castline profile 就绪』（selftest.py L123-125）",
+      "field": "loop/bin/selftest.py:122 `prof_ready = bool(healed) and (Path(healed) / \"profiles\" / \"castline\" / \"package.json\").is_file()`",
+      "quote": "构造：临时 home 下建 `profiles/castline/package.json`（**0 字节**），并把复制源 `_find_existing_castline_profile` 打桩为 None；`sentinel.ensure_castline_profile(tmp)` 返回 **False（不完整）**，而 17d 的整套判据仍给出 PASS：`package.json size: 0 / ensure_castline_profile() usable: False / NEW 17d verdict: PASS`",
+      "why": "自愈的**成功判据**在 sentinel.py 里是 L282 `(prof/\"package.json\").is_file() and (prof/\"cordis.patch.yml\").is_file()`（文件齐 + 后面 17b 还查内容），而 17d 只查一个 `is_file()` 存在性，连能不能解析 JSON、是否定了模型（cordis.patch.yml）都不看。也就是说：改动确实把『恰好就绪』换成『能补就绪』是合理的，但**同时把就绪的定义放松了**；一个缺 cordis.patch.yml（模型没定）或内容为空的 profile 现在能让 17d 变绿。运行：`python3 -B -s /tmp/verify-loopfixes/probe_17d_incomplete2.py`、`python3 -B -s /tmp/verify-loopfixes/probe_17d_empty_pkg.py`",
+      "severity": "medium — 判据弱化，不是恒真（见 falsificationAttempts FA-1）"
+    },
+    {
+      "id": "CE-4",
+      "claim": "『判成基础设施的失败：consecutive 不加』（12q7c 检查名『不污染 consecutive』）",
+      "field": "loop/bin/selftest.py:950-953；断言只有 `_inf.get(\"consecutive\", 0) == 0`（外加 infraConsecutive==1、content 侧 consecutive==1）",
+      "quote": "变异：在加载的 worker 模块里把 infra 分支改成 `ent[\"consecutive\"] = 0`（**重置**而不是「保持不动」），12q7c 仍 PASS：`PASS 12q7c ... infra: consecutive=0 infraConsecutive=1；content: consecutive=1`",
+      "why": "`== 0` 无法区分『从没加过（=0）』与『被重置（=0）』。12q7c 钉住的是『不递增』，没有钉住『不破坏已有的内容失败连击』。当前实现（L539 只 +1，不重置）是对的，但这条检查不能阻止未来把它写成 reset。命令：`python3 -B -s /tmp/verify-loopfixes/probe_12q7c_reset.py`",
+      "severity": "low — 现状正确，只是锁的强度不足"
+    },
+    {
+      "id": "CE-5",
+      "claim": "『12q7c/12q7d 四条检查锁住上面第 2 条（E31 修复）』，以及改动说明『不改变退避语义』由检查背书",
+      "field": "loop/bin/selftest.py:955-958 12q7d 只断言 `isinstance(retryAfter,(int,float)) and retryAfter > time.time()`",
+      "quote": "变异①（把退避写成恒定 `min(base*2**0, cap)`，即热循环防护被完全拿掉）→ 12q7d 仍 PASS：`PASS 12q7d ... retryAfter=30（必须仍被设置）`\n变异②（保留 E31 分账、把指数改回旧口径 `consecutive-1`）→ 12q7c/12q7d 全 PASS",
+      "why": "12q7d 只证明『retryAfter 字段被写了』，不证明写的是退避值。`retryAfter=30` 那一行 detail 在各次变异里一模一样，说明它对返回值毫不敏感。命令：`python3 -B -s /tmp/verify-loopfixes/probe_12q7d_shallow.py`、`python3 -B -s /tmp/verify-loopfixes/probe_12q7d_exponent.py`",
+      "severity": "low-medium — 所声称的『锁住』覆盖不到退避语义这一半"
+    },
+    {
+      "id": "CE-6",
+      "claim": "改动说明③『日志与 remaining 如实写明归因，不把「网络不通」写成「这章做不出来」』（worker.py L467）；以及 E31 要修的可观测性",
+      "field": "loop/bin/worker.py:283-300 的 rc≠0 分支：reject.summary 写的是 `worker 未代提交为 done：agent 以非零码退出（rc=1）`、remaining 写 `本单元需重做；若长期超时…` —— 全分支没有一处用到 `_run_infra_label`/`infraFailure`",
+      "quote": "消费点全量检索：`grep -rn \"infraConsecutive\" --include=*.py --include=*.sh --include=*.js --include=*.md . | grep -v loop/state/` 只命中 worker.py 自身 3 处 + selftest.py 4 处；`grep -rn \"FAILED-TASKS|FAIL_LEDGER\" loop/bin/doctor.py loop/bin/sentinel.py loop/bin/verify_evidence.py` → **无输出**；`loop.py stats`（L1019-1066）字段里没有任何失败台账字段；GUARD-REPORT.json 无 infra 字段。",
+      "why": "『分账』目前只写进 JSON 字段，没有任何展示/消费端读出它。所以 E31 描述的『人和后续 agent 照 FAILED-TASKS.json 去查一个并不难的单元』这个症状，在**呈现层面一字未改**：新记录仍会显示 consecutive，只是那个数字不再累计网络失败而已；被写成 partial 的提交说明、doctor 汇总、stats 都不会告诉你这是网络问题。这不是我编的推断，是 grep 的零命中。",
+      "severity": "medium — 修复只完成『记账』，未完成『可观测性』"
+    },
+    {
+      "id": "CE-7",
+      "claim": "E31 的台账画像问题已解决",
+      "field": "loop/state/FAILED-TASKS.json 现存的 9 条记录（`consecutive` 有值、`infraConsecutive` 全为 None）",
+      "quote": "read:dafeng:L2:0110 consec=16 infra=None total=16（18 份日志中 **12 份**含基础设施串；该任务实际已在 done 里）；verify:dafeng:L1:0121 consec=6 infra=None（5/6 份含）；read:dafeng:L1:0125 consec=6 infra=None（5/7 份含）；read:xiyou:L1:0037 consec=6 infra=None（4/6 份含）",
+      "why": "先前的 consecutive 是旧实现累计的、无法拆分的历史数据，改动**只对新失败生效**，既不迁移也不标注『本行含未分类历史』。所以现在打开 FAILED-TASKS.json，最刺眼的那几条（16、6、6）依然是『连错 N 次』的难任务画像，而它们的日志大多带基础设施串。E31 说『会让难任务名单骗人』——现在仍然骗人，只是以后不再新增。改动说明与 12q7c 都没提这件事。复算：见 evidence 里的 probe 脚本 probe_ledger_rename.sh 同目录的统计命令（见 assertions 第 8 条命令）。",
+      "severity": "medium — 账本现状与文档口径不一致"
+    },
+    {
+      "id": "CE-8",
+      "claim": "『17d 覆盖真实 home 补完确实可用，与 17c 两个方向都不放宽』（selftest.py L118-119）",
+      "field": "loop/bin/sentinel.py:320-339 discover_dsh_home 的 own 分支只在 `has_profile(own) or ensure_castline_profile(own)` 时才返回 own，否则继续走到 L341-363 的 ps / 目录兜底",
+      "quote": "构造：DSH_HOME 指向只读父目录下的不存在路径 → 17d=False（好，能红）；构造：DSH_HOME 指向一个**只读目录**下的 home（profiles 已存在但不可写）→ healed 返回同一个路径、prof_ready=True、17d **PASS**；构造：DSH_HOME 指向普通**文件**路径 → healed 回落到别人的 home、17d=False",
+      "why": "『DSH_HOME 里没有 profile 就一定会红』这个直觉不成立：L337-339 只要 `has_profile(own)` 为真就直接返回（不管内容），而 has_profile 与 17d 是同一个 `package.json` 存在性判据（sentinel.py:333）；只读目录下离奇地能过，是因为 os.makedirs 不抛错且 `.is_file()` 为真。命令：`python3 -B -s /tmp/verify-loopfixes/probe_17d_red.py`。我在实测中**没能**构造出『DSH_HOME 未设或完全不可自愈时 17d 仍 PASS』的例子——它在那两种情况下都会红，所以我不说它是恒真。",
+      "severity": "low"
+    }
+  ],
+  "falsificationAttempts": [
+    {
+      "id": "FA-1",
+      "question": "17d 是否被削弱成恒真？改动前什么情况会红、改后还会不会红？",
+      "did": "在**真实** DSH_HOME（b7bb4e17…）上把 profiles/castline 用 os.rename 移走，然后 (a) 按改动前语义求值（只看当前 home 里有没有 package.json），(b) 真的调用 selftest._profile_and_fastfail_checks() 跑 17d；(c) 结束前逐字节还原并用 sha256 证明。",
+      "result": "renamed_away=true；**old17d_pass=false（改前会红）**；**new17d pass=true**；自愈把 4 个文件的哈希复原成与移走前完全一致（package.json 563c0b60…、cordis.patch.yml 1b1f2723…、cordis.yml c300dcf2…、pnpm-workspace.yaml ae7c5b68…）；restored_identical=true。随后又试了 4 种『能红』的构造：DSH_HOME 未设 → FAIL；只读父目录下不存在路径 → FAIL；普通文件当 DSH_HOME → FAIL；只读 home → 意外 PASS。",
+      "conclusion": "17d **不是恒真**，它在环境真的没救时会红；但『自愈成 castline 就绪』的就绪定义比 sentinel 自己的定义弱（只看 package.json 存在，不看 cordis.patch.yml/内容），我用 0 字节 package.json 让它 PASS 了。所以结论是 partial：改动合理但判据放松，且它现在主要在测 discover_dsh_home 的兜底而不是真实可用性。"
+    },
+    {
+      "id": "FA-2",
+      "question": "classify_failure 会不会把内容失败误判成基础设施？",
+      "did": "写 12 类合成日志（/tmp/verify-loopfixes/probe_classify.py），再用**真实语料**复算：对 412 份 run-*.json 里的 48 次失败重新跑 classify_failure（probe: 全历史重分类），并对 4379 份真实 agent 日志做尾部 8000 字符扫描。",
+      "result": "合成：A_content_talks_AUTH→AUTH、B_content_mentions_RATE_LIMIT→RATE_LIMIT、C_quotes_502→SERVER、D_quotes_ETIMEDOUT→NETWORK、E_quotes_not_logged_in→AUTH、H_quotes_profile_str→PROFILE、I_quotes_server_error→SERVER、J_quotes_ECONNRESET→NETWORK、K_quotes_socket_hang→NETWORK（全部误判）；只有『干净』的内容失败 F/L 返回 None。真实语料：48 次失败里 9 次判为 infra；其中 8 次的命中行**确实是 dsh 抛出的错误行**（`dsh: SERVER: Error: Client network socket disconnected…` / `Error: dsh: profile \"castline\" does not exist…`）——这 8 次判对了；另有 1 次 read:dafeng:L1:0065（rc=124，566KB 日志）把基础设施串**引用在推理里**（offset 2881，距尾部 563756 字符）→ 超出 8000 字符尾部，**漏判**。最强的反例是真实日志 w-xiyou-1-read-dafeng-L3-0143-…log：classify_failure 现在返回 AUTH，而该运行 rc=0、结论是『内容做不出来』。",
+      "conclusion": "**能击穿。** 判据同一份日志既会漏判（引用在尾部之外）又会误判（引用在尾部之内），且误判方向正是 E31 要修的反面。唯一挡住真实事故的是 run_agent L201 的 `if rc != 0` 前置条件，而不是 classify_failure 本身。"
+    },
+    {
+      "id": "FA-3",
+      "question": "退避语义（consecutive→total）有没有被改坏？有没有更短的情形？",
+      "did": "把 FAIL_LEDGER/RUNS 打桩到临时目录，对同一条任务跑 4 组序列，逐条打印 total/consec/OLD(pre-change，每失败都计入 consecutive)/NAIVE(分了账但沿用 consecutive-1)/NEW(total-1)。",
+      "result": "7 连 AUTH rc=1：OLD 30/60/120/240/480/900/900；NEW 与之**逐条相同**。7 连内容失败：两者**逐条相同**。infra/content 交错：OLD 30/60/120/240/480/900/900/900，NEW 30/60/120/240/480/900/900/900（相同）；而 NAIVE 移植只有 30/30/30/60/60/120/120/240。**NEW 从未在任何一步短于 OLD 或 NAIVE**。cap 正确生效（rc=1 在 900s 封顶，rc=127 在 3600s 封顶）。",
+      "conclusion": "等价或更强，**没有更短的情形**。『按 total 算』的注释与实测一致：热循环防护是安全属性，分账后仍以总失败次数为指数。三处改动里这一处是干净的 pass。"
+    },
+    {
+      "id": "FA-4",
+      "question": "12q7c/12q7d 是不是自持夹具？有没有偷偷读活环境（FAILED-TASKS.json / runs/）？",
+      "did": "(a) 用 sys.addaudithook 记录 selftest 全过程中所有 FAILED-TASKS / state/runs / profiles/castline 的文件访问；(b) 把**真实** loop/state/FAILED-TASKS.json 临时改名后跑完整 selftest 再还原名并比对哈希。",
+      "result": "(a) 与 12q7 相关的 6 次访问**全部**落在 /var/folders/.../selftest-infra-*/FAILED-TASKS.json（自持临时目录），没有任何一次触碰 loop/state/FAILED-TASKS.json；`.tmp-` 写入 + os.rename 是 write_json_atomic。(b) 改名后：12q7/12q7b/12q7c/12q7d 与 17d **结果与改名前一模一样**（全 PASS/同一 detail），自检 148/149，失败项仍是与我无关的 12k2b；还原前后 sha256 同为 cc589d6ce3e990d98e9cfc988de9240c78d5bde7baae2019bc26f66c5c6ddc17，restored_identical=true。",
+      "conclusion": "**自持**，不读活环境，E30 的形态没有在这一段复发。但『自持』只保证夹具不腐坏，不保证判据够强——见 CE-4/CE-5。另注意：12q7 段之后新增的 12q7e（L963-1008）把临时根建在 `loop/state/` 下（`dir=str(loopmod.STATE)`），虽然是一次性随机子目录 + finally 删除，但它在**真实状态目录内**创建/删除文件；不在本次委托范围，仅记录。"
+    },
+    {
+      "id": "FA-5",
+      "question": "反向验证：这一段里还漏了什么？（基础设施分账之后，呈现是否不再骗人？）",
+      "did": "对 infraConsecutive / infraFailure / _run_infra_label / FAILED-TASKS 做全仓消费点检索，并核对 loop.py stats、GUARD-REPORT.json、doctor.py、worker 的 reject/remaining 文案。",
+      "result": "infraConsecutive：唯一出现的地方是 worker.py 自己写、selftest.py 自己读；**没有任何展示端**。FAILED-TASKS.json：只被 worker._note_failure/_clear_failure（写）与 loop.py backoff_blocked（只读 retryAfter）使用；doctor/sentinel 完全不读。提交说明：worker.py L283-300 的 rc≠0 分支与 L244-255/L267-277 的 no-output 分支都没有提到基础设施，infraFailure 从未进入 summary/remaining。存量：现 9 条台账 infraConsecutive 全为 None，其中 7 条 task 的日志多数含基础设施串（L2:0110 12/18、L1:0121 5/6、L1:0125 5/7、xiyou:L1:0037 4/6），L2:0110 甚至已在 done 集合里。",
+      "conclusion": "分账解决了『以后把网络失败算作难任务』，但**没有**解决 E31 声称的真正问题（可观测性对不上事实）：呈现路径一字未改、旧数据不迁移、reject 文案不提基础设施。E31 原文『会让难任务名单骗人』在当前 FAILED-TASKS.json 上**仍成立且可复算**。"
+    },
+    {
+      "id": "FA-6",
+      "question": "变异验证：这些检查真的会因对应改动回退而变红吗？",
+      "did": "在**不修改 loop/bin** 的前提下，用 importlib spec.loader.exec_module 打桩（只作用于 selftest 自己加载的 worker_t 模块），分别注入 3 种变异：(1) 还原 pre-change 的 `_note_failure`（所有失败都进 consecutive）；(2) 分账保留但 reset consecutive=0；(3) 分账保留但指数改回 consecutive-1；(4) retryAfter 照写但退避恒定 30s。",
+      "result": "(1) 12q7c **FAIL**（infra: consecutive=1 infraConsecutive=None）→ 这条检查确实能击穿 pre-change 语义，是好检查；(2) 12q7c/12q7d 全 PASS → CE-4；(3)(4) 12q7c/12q7d 全 PASS → CE-5。另外 12q7b 的负例夹具太干净：只要内容失败日志里出现一次 `ECONNRESET`/`502 Bad Gateway`/`AUTH: `，它就返回 NETWORK/SERVER/AUTH，负例不再有区分力。",
+      "conclusion": "12q7c 是本轮新增检查里唯一有真实击穿力的；12q7b 的负例覆盖过窄；12q7d 近乎只查字段存在性。"
+    }
+  ],
+  "remaining": [
+    "classify_failure 的误判面没有被任何检查覆盖：12q7b 的负例是 `引文对不上原文…turn failed` 这种不含任何关键词的文本，而真实 agent 日志会引用历史错误串。建议判据改为『命中必须出现在 dsh 自身的错误行上』（例如行首 `dsh: (AUTH|RATE_LIMIT|TRANSPORT|NETWORK|SERVER|PROFILE)` 或 `Error:`/`does not exist`/`disconnected` 等错误形），并把 12q7b 换成含关键词的内容失败负例；我实测这一改动能把 9/9 真实基础设施失败全部保留（全部命中错误行）。",
+    "缺少『尾部窗口』方向的反例：read:dafeng:L1:0065（rc=124）的基础设施引用在 offset 2881、距尾部 563756 字符，被 8000 字符窗口漏掉。建议对 rc=124/1 的失败改为扫描全文（或先扫描 dsh 错误行再截窗口）。",
+    "17d 的 prof_ready 应改用与 sentinel 相同的完整性判据（package.json 且 cordis.patch.yml 且 package.json 可解析、含 castline bundle），否则 0 字节 package.json 能过。",
+    "FAILED-TASKS.json 的存量数据未迁移/未标注：现有 7 条记录的 consecutive 混合了基础设施失败，且 infraConsecutive 为 None，无法与新增记录区分。建议加 `ledgerVersion` 或对旧记录标 `infraUnclassified: true`。",
+    "infraConsecutive/infraLabels/lastInfraLabel 目前是只写不读字段。若要让 E31 的可观测性真的到位，至少要在 doctor/sentinel 的汇总或 GUARD-LOG 里报出『本轮基础设施失败 N 次（AUTH 2 / RATE_LIMIT 1）』；我没有验证用户是否需要它，不擅自改受测路径。",
+    "worker.py 的 reject/partial 提交说明（L283-300）未按改动③的承诺写明基础设施归因；改动③的注释（L467）与实际代码不符，属文档-代码不一致。",
+    "12q7d 只断言 retryAfter 字段存在且在未来；建议补一条『同一任务连续失败时 retryAfterSeconds 单调不减且封顶』的行为断言（我实测当前实现满足）。",
+    "本次复核期间 selftest.py 被 lead 侧持续改写（我拿到过 6310c472、634825b3、3d0be80c 三个版本，17d 与 12q7 区段逐字节未变，但同文件还新增了 12q7e/12q8 及 12k2b 相关检查）。我的结论只对登记的哈希负责；12k2b 在我的运行里是红的，与本轮三处改动无关，需 lead 自行确认。",
+    "我未验证 12q7e 的端到端接线是否真的能击穿（它不在本轮委托范围），只注意到它在真实 loop/state 下建临时目录。"
+  ],
+  "evidence": [
+    {
+      "path": "loop/bin/worker.py",
+      "sha256": "b29820458c4553f8cfb9fb2aedce6260efe3f6c0d1e50367ab96c62d6d23575f",
+      "kind": "被复核改动 #2；classify_failure L479-496、INFRA_FAILURE_PATTERNS L468-476、_note_failure L517-554（其中 L543 退避公式）、run_agent L201 infra 判定"
+    },
+    {
+      "path": "loop/bin/selftest.py",
+      "sha256": "3d0be80c0a6367460922a1033c64c65c416a9ad6aff967e6f5ace482950b8cb1",
+      "kind": "被复核改动 #1/#3；17d 区段 L105-126（sha256 93b9b93aa890291bcac1244a4d8def30ef300d92d7ffa2faa2aa4ea3fe643b88）、12q7 区段 L907-1010（sha256 271d63c83c1294102ffe09883c008bdc2c42c342226d783eb478103235f50412）。注：复核期间该文件被并发改写，我另登记过 6310c472bb1485c5d83479f068dbac256481669258b7f560698cf2f068592415 与 634825b3b65b10879418a1b6b98771cdcec46f4940719f3e045a477df3171c71，两个版本里 17d 与 12q7 区段与本哈希逐字节相同"
+    },
+    {
+      "path": "loop/bin/sentinel.py",
+      "sha256": "b9f9295ec4e4a472ca8493b2969e81156051ea9b0fcdd207176d83325a4a4c06",
+      "kind": "ensure_castline_profile L264-299（L282 完整性判据）、has_profile L332-333、discover_dsh_home L318-364（L337-339 own 分支）"
+    },
+    {
+      "path": "loop/bin/loop.py",
+      "sha256": "f01d4b46ab58ccae994fcfff12f5cab7bf0289c671a0016ef3bb56c50b12282d",
+      "kind": "消费点：backoff_blocked L525-551（只读 retryAfter）、pick L553+、unblock_score L503-531（评分不含失败台账）、cmd_stats L1019-1066（无失败台账字段）"
+    },
+    {
+      "path": "loop/state/logs/w-xiyou-1-read-dafeng-L3-0143-20261009-155959.log",
+      "sha256": "b4073d074c74713cbdbd0d73b8063ee26d1da8b865869dbde1349dcc1858c0a0",
+      "kind": "CE-1/FA-2 的真实语料反例：671107 字节、rc=0 的成功阅读运行，agent 在尾部署名处引用 RATE_LIMIT/AUTH；classify_failure 现在返回 AUTH"
+    },
+    {
+      "path": "loop/state/logs/w-sanguo-0-read-dafeng-L1-0065-20261008-170512.log",
+      "sha256": "5bd5ffe303a973c3c30ef1fb1224ee43f34de1490556c40dd38ffa125e1bf7e3",
+      "kind": "FA-2 的漏判反例：rc=124、566637 字节；SERVER/Client network socket disconnected 在 offset 2881（距尾 563756 字符）被 8000 字符窗口漏掉"
+    },
+    {
+      "path": "loop/state/FAILED-TASKS.json",
+      "sha256": "cc589d6ce3e990d98e9cfc988de9240c78d5bde7baae2019bc26f66c5c6ddc17",
+      "kind": "CE-7/FA-5：9 条存量记录，infraConsecutive 全为 None；L2:0110 consecutive=16 且已在 done 集合内（loop.done_ids() 实测为 True）；改名测试前后哈希一致"
+    },
+    {
+      "path": "/tmp/verify-loopfixes/probe_classify.py",
+      "sha256": "224759b737baa3a21d26d0e47bad7dd155b0ac2e23d2fd07bb1b509a51672a6f",
+      "kind": "CE-1/CE-2 复现：12 类合成日志的 classify_failure 判定表"
+    },
+    {
+      "path": "/tmp/verify-loopfixes/probe_17d_live.py",
+      "sha256": "fbb274f198075b5a74ec121c1448081638303c2ab62791d863b3e7edbd2f4633",
+      "kind": "FA-1 复现：在真实 DSH_HOME 上 mv 掉 profiles/castline，old=False / new=True，finally 逐字节还原（哈希证明）"
+    },
+    {
+      "path": "/tmp/verify-loopfixes/probe_17d_red.py",
+      "sha256": "70359761620b0972f2b873be9e36b3b25e837652fa8ede56c3cdaf9983cdb69f",
+      "kind": "FA-1 第二段：4 种『能红』构造（未设/只读父目录/文件路径/只读 home）"
+    },
+    {
+      "path": "/tmp/verify-loopfixes/probe_17d_incomplete2.py",
+      "sha256": "ba159557541e262dd1091874d944de8e348094240e930a1ecfa93b2f3d2e129c",
+      "kind": "CE-3 复现：只放 package.json（缺 cordis.patch.yml，ensure=False）时 17d 仍 PASS"
+    },
+    {
+      "path": "/tmp/verify-loopfixes/probe_17d_empty_pkg.py",
+      "sha256": "f27a472c27fd613e0f397838f3db82b613961609fccd09d8314e03bbce0ab8c6",
+      "kind": "CE-3 极值复现：0 字节 package.json 时 17d 仍 PASS"
+    },
+    {
+      "path": "/tmp/verify-loopfixes/probe_12q7c_revert.py",
+      "sha256": "6495c5764c7d08ac35ac65b570f84fed795e5a13ed06208e47d06c9c10a3be3b",
+      "kind": "FA-6(1)：还原 pre-change _note_failure ⇒ 12q7c FAIL（证明该检查有击穿力）"
+    },
+    {
+      "path": "/tmp/verify-loopfixes/probe_12q7c_reset.py",
+      "sha256": "812184c4ba2846230798f6f179c5fd8132956197ede55175bfc2b210943ded4f",
+      "kind": "CE-4 复现：把 infra 分支改成 reset consecutive=0 ⇒ 12q7c 仍 PASS"
+    },
+    {
+      "path": "/tmp/verify-loopfixes/probe_12q7d_shallow.py",
+      "sha256": "b8e76ca1f640793491846fc7229fadc9f1a1868ca82e25e9d54fd0a72400d769",
+      "kind": "CE-5 变异①：退避恒定 30s ⇒ 12q7d 仍 PASS"
+    },
+    {
+      "path": "/tmp/verify-loopfixes/probe_12q7d_exponent.py",
+      "sha256": "88715dc692e4c9a754868761b6321f9871e8337befdabf8faf5424a1cfd91865",
+      "kind": "CE-5 变异②：保留分账但指数改回 consecutive-1 ⇒ 12q7c/12q7d 全 PASS"
+    },
+    {
+      "path": "/tmp/verify-loopfixes/probe_backoff3.py",
+      "sha256": "8a58f605a1b8c18a1f8ad6ed3a5e6265e600d65744aaa1eb8a047431dcf50e37",
+      "kind": "FA-3 复现：OLD/NAIVE/NEW 三口径逐条对照，NEW 从未更短"
+    },
+    {
+      "path": "/tmp/verify-loopfixes/probe_ledger_rename.sh",
+      "sha256": "69536231f4afb6dabcea825955973d9753eb18005bb5227f95bff22bffeabb9b",
+      "kind": "FA-4 复现：把真实 FAILED-TASKS.json 改名 → 12q7*/17d 结果不变 → 还原（哈希一致）"
+    },
+    {
+      "path": "/tmp/verify-loopfixes/audit_selftest.py",
+      "sha256": "1fdcc7fa3c88ef00ce1ef3961c92f6779238c13a277c86770ec548b41df34236",
+      "kind": "FA-4 复现：sys.addaudithook 记录 selftest 全过程的文件访问（20 条命中，12q7 相关 6 条全在临时目录）"
+    },
+    {
+      "path": "/tmp/verify-loopfixes/all-hashes.txt",
+      "sha256": "见文件本身（记录复核时刻全部源码/快照/探针/语料哈希）",
+      "kind": "证据索引：登记了 6310c472/634825b3/f01d4b46 等并发版本与全部探针哈希"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "17d 在改动前会红、改动后同样情形变绿（真实 home 上 mv 走 profile）",
+      "command": "python3 -B -s /tmp/verify-loopfixes/probe_17d_live.py",
+      "result": "pass"
+    },
+    {
+      "text": "17d 改后仍能被击穿（未设 DSH_HOME / 只读父目录 / 文件路径三种构造都 FAIL）",
+      "command": "python3 -B -s /tmp/verify-loopfixes/probe_17d_red.py",
+      "result": "pass"
+    },
+    {
+      "text": "17d 会因不完整 profile 而误绿（缺失 cordis.patch.yml；0 字节 package.json）",
+      "command": "python3 -B -s /tmp/verify-loopfixes/probe_17d_incomplete2.py; python3 -B -s /tmp/verify-loopfixes/probe_17d_empty_pkg.py",
+      "result": "pass"
+    },
+    {
+      "text": "classify_failure 会把内容失败误判成基础设施（合成 9/9 误判 + 真实语料 0143 日志判成 AUTH）",
+      "command": "python3 -B -s /tmp/verify-loopfixes/probe_classify.py; python3 -B -c \"import importlib.util;s=importlib.util.spec_from_file_location('w','loop/bin/worker.py');w=importlib.util.module_from_spec(s);s.loader.exec_module(w);print(w.classify_failure('loop/state/logs/w-xiyou-1-read-dafeng-L3-0143-20261009-155959.log'))\"",
+      "result": "pass"
+    },
+    {
+      "text": "真实语料上既有误判也有漏判：48 次失败中 9 次判 infra（8 次命中真实错误行、1 次漏判在 8000 字符窗口外）",
+      "command": "见 remaining 第 2 条与 /tmp/verify-loopfixes/all-hashes.txt 的复算脚本；核心循环见 probe_classify.py 同目录统计段",
+      "result": "pass"
+    },
+    {
+      "text": "退避语义等价或更强，NEW 从未短于 OLD/NAIVE",
+      "command": "python3 -B -s /tmp/verify-loopfixes/probe_backoff3.py",
+      "result": "pass"
+    },
+    {
+      "text": "12q7c 能击穿 pre-change 语义（变异复现 FAIL）",
+      "command": "python3 -B -s /tmp/verify-loopfixes/probe_12q7c_revert.py",
+      "result": "pass"
+    },
+    {
+      "text": "12q7c/12q7d 不能覆盖 reset 语义与退避语义（两种变异下仍 PASS）",
+      "command": "python3 -B -s /tmp/verify-loopfixes/probe_12q7c_reset.py; python3 -B -s /tmp/verify-loopfixes/probe_12q7d_shallow.py; python3 -B -s /tmp/verify-loopfixes/probe_12q7d_exponent.py",
+      "result": "pass"
+    },
+    {
+      "text": "12q7c/12q7d 自持：真实 FAILED-TASKS.json 改名后结果不变且逐字节还原",
+      "command": "bash /tmp/verify-loopfixes/probe_ledger_rename.sh",
+      "result": "pass"
+    },
+    {
+      "text": "12q7 相关文件访问全部落在临时目录（审计钩子 0 次触碰活 ledger）",
+      "command": "python3 -B -s /tmp/verify-loopfixes/audit_selftest.py（结果 /tmp/verify-loopfixes/audit-hits.json）",
+      "result": "pass"
+    },
+    {
+      "text": "infraConsecutive 无任何消费点；FAILED-TASKS 只被 worker 与 loop.backoff_blocked 使用",
+      "command": "grep -rn \"infraConsecutive\" --include=*.py --include=*.sh --include=*.js --include=*.md . | grep -v loop/state/ ; grep -rn \"FAILED-TASKS\\|FAIL_LEDGER\" loop/bin/doctor.py loop/bin/sentinel.py loop/bin/verify_evidence.py",
+      "result": "pass"
+    },
+    {
+      "text": "存量台账仍把基础设施失败混在 consecutive（9 条中 7 条的日志多数含基础设施串，infraConsecutive 全为 None）",
+      "command": "python3 - <<'EOF' 见 probe_ledger_rename.sh 同目录统计（对每条台账按 task 匹配日志并统计基础设施串命中）EOF",
+      "result": "pass"
+    },
+    {
+      "text": "我未修改 loop/bin 下任何文件（唯一动过的活文件是真实 home 的 profile，已逐字节还原）",
+      "command": "sha256sum loop/bin/worker.py loop/bin/selftest.py loop/bin/loop.py loop/bin/sentinel.py；与被复核基线逐字节一致（worker.py b2982045…、sentinel.py b9f9295e…）",
+      "result": "pass"
+    }
+  ],
+  "changes": [],
+  "sourceHashes": {
+    "loop/bin/worker.py": "b29820458c4553f8cfb9fb2aedce6260efe3f6c0d1e50367ab96c62d6d23575f",
+    "loop/bin/sentinel.py": "b9f9295ec4e4a472ca8493b2969e81156051ea9b0fcdd207176d83325a4a4c06",
+    "loop/bin/loop.py": "f01d4b46ab58ccae994fcfff12f5cab7bf0289c671a0016ef3bb56c50b12282d",
+    "loop/state/FAILED-TASKS.json": "cc589d6ce3e990d98e9cfc988de9240c78d5bde7baae2019bc26f66c5c6ddc17"
+  },
+  "rollback": {
+    "kind": "none",
+    "note": "复核者只读；未修改受保护路径；活文件唯一动过的是真实 DSH_HOME 的 profiles/castline，已在 finally 中逐字节还原（哈希见 probe_17d_live.py 输出）"
+  },
+  "submittedAt": "2026-10-09T15:20:23Z",
+  "wallClockNote": "租约里没有 startedAt（任务可能由非 loop 路径提交，或租约已被回收）—— 留空而不估算",
+  "validation": {
+    "problems": [
+      "证据哈希不符：/tmp/verify-loopfixes/all-hashes.txt（声明 见文件本身（记录复核时刻 实际 ae41b63ceff0）"
+    ],
+    "at": "2026-10-09T15:20:23Z"
+  }
+}

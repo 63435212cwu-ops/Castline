@@ -1,0 +1,76 @@
+{
+ "task": "read:sanguo:L0:0022",
+ "agent": "w-xiyou-1",
+ "status": "done",
+ "summary": "精读《三国演义》第二十三回 [115741,121524) 全 5783 codepoint：23 条任务五元组（1 achieved／2 partial／4 not_achieved／16 undetermined，7 条 objective、8 条 obstacle、13 条 cost 写 null 而不补编造值）、28 条带方向+触发+机制的因果边、14 条被拒边（含 R2「曹操恨祢衡→祢衡死」跳过刘表黄祖两环、R3「祢衡死→兴兵问罪」把触发条件读成「不见刘表来降」而非祢衡之死、R10「曹操说皆招证明白→四人真招了」三处最易连错的方向/层级错误）、10 条状态变化 + 6 条知识差（逐条分列 whoKnows／whoDoesNotKnow）、6 条伏笔（3 条区间内铺设+回收的 resolved、1 条指困境被回应、1 条显式 unresolved 并写明回收在区间外、1 条明确否定为「事后自述非伏笔」）+ 10 条非伏笔、20 条 unknowns、14 条 selfCritique、10 条用字异文、116 条话语清单、2 条插入韵语、6 条跨单元对照、18 个连接词 76 处逐处偏移台账，共 369 条结构化逐字引文（落在 106 个互异原文跨度上），实测正文覆盖率 91.55%（5222/5704），剩余 2 段未覆盖片段已逐条列出原文。semanticReview 未做。另有两项机械发现：一是引号层，118606 起的「对曰」转述内部有一处引号错位（118698 该是左单引号、118709 该是右单引号，同一个错位的两端），本候选只应用一处最小修复（候选 A）；二是构建期自查，我最初把两端都替换掉，导致 voice 与自报审计矛盾（Q8 一度 70 条不一致），已改为单一真源并加机检。",
+ "evidence": [
+  {"path": "loop/state/out/read_sanguo_L0_0022.candidate.json",
+   "sha256": "4655c3edfc61be9cb8addb0e3097fdb05b7401949da41d85be43ac6e57f862d4",
+   "kind": "worker-output"}
+ ],
+ "assertions": [
+  {
+   "text": "源文件 sha256 == 任务 sourceHash：python3 -c \"import hashlib;print(hashlib.sha256(open('data/cache/152e2a6eed94f1075e7e7070.docs.json','rb').read()).hexdigest())\" → 2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff，与任务 JSON 的 sourceHash 逐字相同",
+   "result": "pass"
+  },
+  {
+   "text": "偏移口径自检：python3 -c \"import json;t=json.load(open('data/cache/152e2a6eed94f1075e7e7070.docs.json'))[0]['text'];print(repr(t[115741:115762]))\" → '第二十三回\\u3000祢正平裸衣骂贼\\u3000吉太医下毒遭刑'，与 unitHead 相同；并按 TEXT[121524:121545]=='第二十四回…' 确认切片右端点正确。证实 start/end 是相对 docs[0].text 全文的绝对 codepoint 偏移，不是相对切片",
+   "result": "pass"
+  },
+  {
+   "text": "切片哈希（另起字段 segmentSha256，未覆盖 sourceHash）：sha256(TEXT[115741:121524]) = b87f01c302b7ee2ebfa9905a4e873d825f0e4224f3a38ef75ba5e32d37dee382；切片长度 5783 codepoint，与任务声明的 5783 字一致",
+   "result": "pass"
+  },
+  {
+   "text": "引文可靠性由构建期锚串强制保证，不靠手抄：369 条引文全部由「切片内唯一的 head 锚串」定位、按可选的「切片内唯一的 tail 锚串」结尾截取；core.q() 在构建期断言 head 在切片内出现且仅出现 1 次、tail 亦然，任何手抄错字会抛 LocateError 而不是产出错引文。锚串表 109 条全部通过唯一性校验（ok=109 bad=0）。工具链在 /tmp/b23/（core.py、refs.py、catalog.json、part_tasks.py、part_cause.py、part_fs.py、build.py、verify.py、offsets.py、punct.py、crosscheck.py、seams.py），运行 python3 -B -s /tmp/b23/build.py 可复现整份候选",
+   "result": "pass"
+  },
+  {
+   "text": "全部 369 条结构化引文逐条满足 TEXT[start:end]==quote、115741<=start 且 end<=121524、quote in TEXT、sourceHash 一致、occurrencesInSlice 与实算一致。复现：python3 -B -s /tmp/b23/verify.py → A1–A5 五项全 pass（n=369, mismatch=0, out-of-range=0, not-found=0, hash-mismatch=0, occ-mismatch=0）",
+   "result": "pass"
+  },
+  {
+   "text": "引号层机检（Q1–Q8，verify.py）：Q1 恰好应用一处修复；Q1b 自报 defect.appliedRepair 与实际应用一致；Q1c 三个修复候选（A/B/A+B）各自自报的净深度与负深度点数与实际复算一致（A=(0,0,0) B=(0,0,0) A+B=(-1,1,65)）；Q2/Q3 修复后双、单引号净深度均为 0；Q4 无负深度点；Q5 切片末深度归零；Q6 自报 finalDepthAfterRepair 与实算一致；Q7 每条 insideQuotedSpan 与实算深度一致（mismatch=0）；Q8 每条 voice 与实算层级一致（mismatch=0，369 条：mixed 266／narration 98／speech 5）。全部 pass",
+   "result": "pass"
+  },
+  {
+   "text": "偏移断言（offsets.py）：97 条断言覆盖候选正文里出现的每一个 6 位偏移，三种口径（start/end/at）逐条对 TEXT 实测值核验，失败 0；并反向检查「候选正文里出现的偏移是否都已登记」→ 55 个已出现偏移，未登记 0。这一项是本轮抓错的主要工具：构建过程中它先后抓出 9 处正文偏移与原文不符（例：「王子服等吾已擒下」实际在 121319 我写成 121296；「教二十个狱卒」实际在 120313 我写成 120308），全部按 TEXT.find 实测改正",
+   "result": "pass"
+  },
+  {
+   "text": "覆盖率不是估计值而是实测：把 369 条引文的 [start,end) 合并（得 26 个互异区段）后与叙事正文区间 [115763,121467) 求交，coveredChars=5222 / 5704 = 91.55%；剩余 >=12 字的未覆盖片段仅 2 段（孔融表文的第 2、3 段共 365 字，均非任何结论的直接依据），已在 coverage 与 uncoveredNarrative 中逐条列出原文。复现：python3 -B -s /tmp/b23/build.py 末尾的实测块",
+   "result": "pass"
+  },
+  {
+   "text": "任务五元组与 basis 的完整性由 verify.py 断言：23 条 task 全部含 objective/obstacle/action/result/cost 五键；非 null 项一律有 basis（四档合法值之一）且 quoteRefs 非空；28 条 causeEdges 每条有 direction/trigger/mechanism/basis；10 条 states 每条有 before/after/anchor；未回收伏笔有 unresolvedReason。basis 分布 explicit=145 / inferred=2 / derived=2，未出现 unverified 以外的臆造档位；semanticReview 字段为 not-performed",
+   "result": "pass"
+  },
+  {
+   "text": "受保护路径未改动：本轮只在 loop/state/out/read_sanguo_L0_0022.candidate.json 写入（任务 writes 指定路径），构建脚本与临时产物全部在 /tmp/b23/。未执行 git checkout/reset/stash，未跑 GPU/浏览器测试，未申请锁。可用 git status --short 核对 css/ js/ 等路径的改动均非本 agent 所为（本轮开始前即存在）",
+   "result": "pass"
+  }
+ ],
+ "changes": [
+  {"path": "loop/state/out/read_sanguo_L0_0022.candidate.json", "kind": "append-only"}
+ ],
+ "sourceHashes": {
+  "data/cache/152e2a6eed94f1075e7e7070.docs.json": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff"
+ },
+ "remaining": [
+  "semanticReview 未做：本候选只完成逐字引用核验、偏移自洽、引号层机械判定、basis 标注与分层记账。人物动机与因果读法是否正确，未经任何独立核验，须由 read-verify 通道复核。「引用定位正确」不等于「语义已核验」。",
+  "U1 引号错位未定案：118698 该是左单引号还是 118709 该是右单引号，A/B 两个候选在机械上等价（都能配平），我按同段前三轮的层级格式选 A。若复核者判为 B，只影响 voice/insideQuotedSpan 字段，不影响任何引文的偏移与逐字内容。原文一个字未改。",
+  "U9 义状名单不足自证：「同谋者先有六人。与汝共七人者」这句的六/七所指，须跨到第二十回（105679 起的六位名单 + 董承「尚容再请三人，共聚十义」）才能比对；本单元区间内不足以自证，我未指实。",
+  "U3 吉平「只得供招」的内容原文零记载：我按「未招」处理并据此把 T14 标 not_achieved、T17 标 partial。若复核者认为他确实供出了同谋，这两处 objectiveStatus 需改。这是本单元对我结论影响最大的一处不确定性（SC1）。",
+  "U4 王子服等四人是否真招认：曹操对董承说「皆招证明白」，而原文对四人的记载全部是否认。我按「话术」处理（C27/K4/RC10），未把曹操的说法当叙述事实。",
+  "U8 吉平死法的全书措辞不一致：本单元叙述层写「撞阶而死」（自杀），全书 350475 处转述为「曾杀其父」。我以本单元叙述层为准并登记分歧，未合并。",
+  "C14/C22/C27/T3 四条边的 basis 标为 inferred/derived 而非 explicit：原文没有一句话写明「孔融的话促成不杀」「曹操由庆童得知下毒」「同谋名单来自搜查而非口供」这几步。若复核者能指出原文别处的交代，这些应上调；反之若认为链太弱，应下调为 unverified。",
+  "本候选不产生质量分，也不代表「读懂了三本书」。第二十三回只是一个原文单元；全书语义完成要求 1133 个单元全部有审阅处置。",
+  "未做真机/读屏/独立盲审；这些缺口不会因为本轮通过而消失。",
+  "构建过程中发现并修正的两处自身错误（SC13 引号修复一度两端同改导致 voice 与自报审计矛盾、SC14 正文偏移 9 处与原文不符）已写入 selfCritique 并加了机检；但同类「自报审计与实际行为不一致」的错误在引文层面不会暴露，仍需复核者从语义侧反向检查。"
+ ],
+ "rollback": {
+  "kind": "append-only",
+  "strategy": "delete-added-files",
+  "files": ["loop/state/out/read_sanguo_L0_0022.candidate.json"]
+ }
+}

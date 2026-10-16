@@ -1,0 +1,313 @@
+{
+ "task": "verify:xiyou:L1:0057",
+ "candidateUnderReview": "loop/state/out/read_xiyou_L1_0057.candidate.json",
+ "candidateSha256": "02b9c81388258907f2248f559905b888fbb5fca458487f1df01ede288e17550b",
+ "candidateSha256Note": "复核期间只读；该哈希与提交记录 loop/state/out/read_xiyou_L1_0057.json 的 evidence[0].sha256 逐字一致，说明复核对象即已提交的那一份。",
+ "sourcePath": "data/cache/ee3430ef493546bbcd2e700b.docs.json",
+ "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+ "sourceHashVerified": true,
+ "range": [
+  412021,
+  418724
+ ],
+ "rangeCodepoints": 6703,
+ "segmentSha256": "b07cab1111b16b5c82833c85232df56431cc5d18e78edccf36f3868935234379",
+ "segmentSha256Claimed": "b07cab1111b16b5c82833c85232df56431cc5d18e78edccf36f3868935234379",
+ "reviewer": "w-verify-3",
+ "verdict": "partial",
+ "counterExamples": [
+  {
+   "claim": "T8_bajie_sanhuo.action 写「八戒跌脚捶胸…；沙僧先叫把马拴住、又劝住八戒的哭，随后不忍舍，把唐僧扳转身体、以脸温脸」——把「兄弟且休哭…」的说话人写成沙僧、受话人写成八戒，人物方向颠倒。",
+   "quote": "八戒道：“兄弟且休哭，如今事已到此，取经之事，且莫说了。",
+   "start": 415060,
+   "end": 415088,
+   "why": "该 quote 在本候选的 T8.action 第 3 条被引用（start 415065），但同一栏的正文把主语写成「沙僧…劝住八戒的哭」。原文说话人标记在 415060「八戒道：」，受话人「兄弟」是沙僧（下句「你看着师父的尸灵，等我把马骑到…」），紧接 415140「沙僧实不忍舍…」——正是被劝者。这与候选自己在同一栏引的第 4 条 quote 直接冲突，属同栏自相矛盾。影响：下游若按 action.text 字面建状态转移，会把「劝住哭」的关系从八戒→沙僧错记为沙僧→八戒，T8 的人物关系读数整体反向。可复现：python3 -c \"import json;t=json.load(open('data/cache/ee3430ef493546bbcd2e700b.docs.json'))[0]['text'];print(repr(t[415060:415088]))\" 输出以「八戒道：」开头。",
+   "severity": "must-fix",
+   "evidenceKind": "逐字可查，说话人标记在引文同一句内"
+  },
+  {
+   "claim": "C4_jike_qiansan_tudi.trigger 写「三藏说『…那个去化些斋来我吃？』；**斋化到后**又添一句『且得些水来解渴也可』」，把取水请求排在化到斋之后。",
+   "quote": "既无化斋之处，且得些水来解渴也可。",
+   "start": 413873,
+   "end": 413890,
+   "why": "原文次序相反：八戒回报「却是没处化斋，一望之间，全无庄舍」（413850-413867）之后，三藏当场改口要水（413873），八戒随即「等我去南山涧下取些水来」（413890），沙僧递钵盂（413909）——即取水请求发生在化斋**失败之后**，这一趟根本没化到斋；而「将些剩饭锅巴，满满的与了一钵」在 414710，晚了 800 余字，属八戒第二趟（山南坡下）的另一次行乞结果。候选的「斋化到后又添一句水」把因果链读成「先成功后补需求」，与原文的「先失败后降级」相反，直接改变 C4 的机制描述与 T5/T6 的先后关系。",
+   "severity": "must-fix",
+   "evidenceKind": "两个偏移的大小比较即可复现（413873 < 414710）"
+  },
+  {
+   "claim": "C13_dasi_jia_hu_SHS.to 写「假行者并不**追敢**」——原文是「追赶」。",
+   "quote": "他也不来追赶",
+   "start": 417570,
+   "end": 417576,
+   "why": "「追敢」在全 722176 字 docs[0].text 中出现 0 次（t.count('追敢')==0），是「追赶」的形近错字。该错字落在 causeEdges 的 to 字段里，而 C13 的 caveat 恰恰声称「『他也不来追赶』是我这条边成立的关键句」——关键句被写错。属笔误级缺陷，不改判定但必须修，因为它是该边唯一的关键句。",
+   "severity": "typo",
+   "evidenceKind": "t.count('追敢')==0 可直接复现"
+  },
+  {
+   "claim": "T1_qiu_shoulou.obstacle.text 写「唐僧更不答应，兜住马便念《紧箍儿咒》，颠来倒去又念二十余遍」，但该栏唯一 quote 只覆盖到「即念《紧箍儿咒》」（412240-412262），「颠来倒去又念二十余遍」这半句在整份候选里零引文覆盖（quotes 中 t.count('又念有二十余遍')==0）。",
+   "quote": "颠来倒去，又念有二十余遍",
+   "start": 412263,
+   "end": 412275,
+   "why": "这是「引文支撑不足」而非编造：那半句在原文确有（412263-412275），只是没有任何引文跨度覆盖它，「二十余遍」这个**次数**因此成了无引文断言。同类现象还出现在 T1.obstacle 引文的收尾处。判 partial 而非 fail 的理由：文本内容真实、偏移可查，缺的是引文覆盖，不是事实。",
+   "severity": "coverage-gap",
+   "evidenceKind": "把该栏 start/end 与 412263-412275 比较即可复现"
+  }
+ ],
+ "reverseChecks": [
+  {
+   "found": "叙述层唯一一句正面因果交代、同时给出「赶他几次」这一次数事实——候选全文 0 次覆盖。候选在 RE1 里说「文献层面本区间没有一句叙述层确认施动者是谁」（这句本身成立），但同一段前面还有一句叙述层因果：「却说唐僧因他打死多人，心生怨恨，不分皂白，遂念《紧箍儿咒》，赶他几次」。它同时是「驱逐不是一次」的唯一依据，而 T1/S3/C1 都按单次驱逐叙述。",
+   "quote": "却说唐僧因他打死多人，心生怨恨，不分皂白，遂念《紧箍儿咒》，赶他几次",
+   "start": 413118,
+   "end": 413152,
+   "why": "只查已写项发现不了：候选逐条核对 T1/C1 都自洽，但「几次」这一量化事实在任何分区里都没有落点。"
+  },
+  {
+   "found": "假行者当面**自认**打人抢行李——这是本区间唯一一句「施动者自己承认做了什么」，且明确排除了两个动机。候选把它整段跳过，只在 RE1 里讨论「谁打的人」时说「读者只能靠菩萨的四日反推」。",
+   "quote": "我打唐僧，抢行李，不因我不上西方，亦不因我爱居此地。",
+   "start": 417010,
+   "end": 417036,
+   "why": "这是 K3（谁知道什么）里最重要的一个「知道」——施动者本人知道并说出，候选的 K3 只列了唐僧／八戒／沙僧三方证词，漏掉本人自认。"
+  },
+  {
+   "found": "八戒请战的**理由**：他前年曾被赶、曾亲自寻过一次、因此认得花果山水帘洞。候选 T9.obstacle 只记了唐僧不许八戒去的理由，没记八戒为什么敢自请——这让 T9 变成「唐僧单方面选人」，漏掉八戒一方的依据。",
+   "quote": "我前年因师父赶他回去，我曾寻他一次，认得他花果山水帘洞",
+   "start": 415919,
+   "end": 415946,
+   "why": "同一段里两名徒弟各自给出理由，候选只取了被否定的一方；这是「只记结果不记依据」的典型遗漏。"
+  },
+  {
+   "found": "打人凶器在本区间有三种**互相矛盾的**说法：叙述层作「轮铁棒…望长老脊背上砑了一下」，唐僧自述作「一棒」，而沙僧在菩萨面前的证词作「**一铁棍**」。候选引了前两种，完全没引沙僧的第三种，也没把这三处分歧登记进 unknowns。",
+   "quote": "不期孙行者见我二人不在，复回来把师父打一铁棍，将两个青毡包袱抢去。",
+   "start": 418286,
+   "end": 418319,
+   "why": "本回的核心正是「同一件事有三套证词」，武器口径不一是有信息量的证词差异（铁棒/棒/铁棍）；候选 K3 声称要写「三人各自知道片段」，却漏掉了这处最直接的用词冲突。附带：「一铁棍」的「铁棍」在候选全文 0 次出现。"
+  },
+  {
+   "found": "行者在宝莲台下听见沙僧来时的**推断**：「这定是唐僧有难，沙僧来请菩萨的」——这是行者对全局的即时判断，也是他后来不提褪箍、甘愿同去的行为前提。候选 T4/C3 只写菩萨留人，没有这一句。",
+   "quote": "这定是唐僧有难，沙僧来请菩萨的。",
+   "start": 417998,
+   "end": 418014,
+   "why": "候选的 K6 讨论「行者不知道师父遇难」，但原文此处行者已当面推断出「唐僧有难」——K6 的表述需要按这一句收紧，否则读起来像行者全程不知情。"
+  },
+  {
+   "found": "木叉**知情不报**：「木叉情知是寻行者，更不题起」。候选 T12.action 只写「木叉在门外叫进」，把这个动作写成中性的引见，漏掉「情知…更不题起」这一层。",
+   "quote": "木叉情知是寻行者，更不题起",
+   "start": 417946,
+   "end": 417959,
+   "why": "它解释了沙僧为什么会在宝莲台下**毫无预警**地撞见行者并当场动手（C14 的直接条件）；没有这一句，C14 的「等不得说话」缺少铺垫来源。"
+  },
+  {
+   "found": "菩萨公论里对行者有利的**建设性半句**：「但祛退散，自然救了你师父」。候选 W4 的三条引文只截取了认定「不善」的部分（草寇是人身、打死是不仁、据我公论还是你的不善），把同一段里「不必打死、祛退即可」的处置标准漏掉了。",
+   "quote": "但祛退散，自然救了你师父",
+   "start": 413272,
+   "end": 413284,
+   "why": "这属于「误杀」方向的偏差：只引对行者不利的半段，使 W4 读起来比原文更严苛。原文的完整裁断是「不必打死」，不是「不许干涉」。"
+  },
+  {
+   "found": "沙僧离队去催水前，长老的反应被略去：「长老含泪无言，但点头相答」。候选 T6.action 只记沙僧请命与离开，把「师父已无力阻止、只能点头」这一身体状态漏掉——而 S5 的 before 恰恰是「又饥又渴」。",
+   "quote": "长老含泪无言，但点头相答",
+   "start": 414088,
+   "end": 414100,
+   "why": "这是「独自留在路旁」这一机会条件的最后一环，也是 T6.cost（候选自曝「独自」是解释词）的更好依据。"
+  },
+  {
+   "found": "引见的**触发机制**：「白鹦哥飞来飞去，知是菩萨呼唤」——木叉与善财因此才引行者上宝莲台。候选 T2.action 把这一段写成纯粹的人员引导，漏掉触发句。",
+   "quote": "白鹦哥飞来飞去，知是菩萨呼唤",
+   "start": 412859,
+   "end": 412873,
+   "why": "候选 P1 把落伽山记为 arrived 场所，但「谁把行者叫进去的」这一机制在 T2 里缺主语。"
+  },
+  {
+   "found": "八戒化斋的行乞原话「厨中有剩饭，路上有饥人」被整段略去；候选只引了「把身摇了七八摇，变作一个食痨病黄胖和尚」与女人怕他病死门首。",
+   "quote": "厨中有剩饭，路上有饥人",
+   "start": 414548,
+   "end": 414559,
+   "why": "它支撑 T5.result（化到饭）的**手段**一侧；缺它则「食痨病和尚」的行骗动机只剩形貌，没有话术。"
+  }
+ ],
+ "quoteVerification": {
+  "method": "对候选里全部带偏移引文节点做 walk 收集，逐条比较 docs[0].text[start:end] == quote，并复算 wholeTextOccurrences、inRange、sourceHash；再对 worldSettings 的 18 条无偏移标量 quote 做 find。",
+  "offsetQuoteNodes": 269,
+  "sliceMismatch": 0,
+  "occurrenceMismatch": 0,
+  "outOfRange": 0,
+  "sourceHashMismatch": 0,
+  "scalarQuotes": 18,
+  "scalarMissing": 0,
+  "randomSample": {
+   "seed": 57,
+   "picked": 5,
+   "allFindHit": true,
+   "allOffsetConsistent": true,
+   "allUnique": true,
+   "detail": [
+    {
+     "quote": "徒弟，自五更时出了村舍，又被那弼马温着了气恼，这半日饥又饥，渴又渴，那个去化些斋来我吃？",
+     "start": 413724,
+     "find": 413724,
+     "hit": true
+    },
+    {
+     "quote": "沙僧一驾云离了东海，行经一昼夜，到了南海。",
+     "start": 417652,
+     "find": 417652,
+     "hit": true
+    },
+    {
+     "quote": "又见善财童子作礼道：“大圣何来？”",
+     "start": 412582,
+     "find": 412582,
+     "hit": true
+    },
+    {
+     "quote": "原来是孙行者高坐石台之上，双手扯着一张纸，朗朗的念道",
+     "start": 416438,
+     "find": 416438,
+     "hit": true
+    },
+    {
+     "quote": "那沙僧在半空里，行经三昼夜，方到了东洋大海",
+     "start": 416280,
+     "find": 416280,
+     "hit": true
+    }
+   ],
+   "note": "5/5 逐字命中、偏移一致、全文唯一。这一步**通过**。"
+  },
+  "conclusion": "引文定位层**全量通过**，0 条编造引文。这排除了最严重的一类失败（编造）。"
+ },
+ "hallucinationCheck": {
+  "result": "未发现编造的人物、事件、结局或伏笔。",
+  "checks": [
+   {
+    "item": "下一回身份结论（六耳猕猴）",
+    "found": 0,
+    "note": "候选只在 K2 的 note 里以「不得补出」的否定形式提到「六耳猕猴」，属自我约束，不构成越界。"
+   },
+   {
+    "item": "「真假已判」类结论",
+    "found": 0,
+    "note": "F7、openThreads、TH1.counter 一致显式声明未裁；未把回末套语当成功。"
+   },
+   {
+    "item": "区间外人物（谛听／地藏／如来降妖等）",
+    "found": 0
+   },
+   {
+    "item": "把「结束」当「成功」",
+    "found": 0,
+    "note": "T7/F5/F6/F7 均显式 unresolved；T12 未把「同去花果山」写成已分辨。"
+   }
+  ]
+ },
+ "misKillCheck": {
+  "result": "发现 1 处机械规则可能误杀合法内容，1 处机械规则造成的表达损伤。",
+  "items": [
+   {
+    "what": "「同任务五栏跨度不相交」规则对 T1 的影响",
+    "detail": "T1.obstacle 取 [412240,412262)、T1.cost 取 [412276,412296)，两段本属同一个连续动作「念咒→咒倒」（中间只隔 412263-412275「颠来倒去，又念有二十余遍」）。为避免跨度重叠而被切成两段，结果是 obstacle 与 cost 都失去「二十余遍」这一量化信息。",
+    "judgement": "不是候选的错，是规则副作用；但复核者应知道 T1 的两栏读起来像两件事，原文是一件。"
+   },
+   {
+    "what": "RE1 的表述可能被下游读成「本区间对谁打人零证据」",
+    "detail": "RE1 说「文献层面本区间没有一句叙述层确认施动者是谁」——这句在**字面**上成立。但同区间有施动者本人的自认台词（RC-2「我打唐僧，抢行李」）与叙述层的现场称呼「原来是孙行者跪在路旁」。",
+    "judgement": "候选的表述不算错（它限定的是「叙述层确认身份」），但对读者偏严；建议在 RE1 里补一句「施动者本人有自认台词，缺的是身份认定而非行为证据」。"
+   }
+  ]
+ },
+ "sectionCompleteness": {
+  "requiredByPrompt": [
+   "tasks",
+   "causeEdges",
+   "states",
+   "foreshadows",
+   "worldSettings",
+   "themeReadings",
+   "unknowns",
+   "selfCritique",
+   "basis",
+   "quote"
+  ],
+  "present": [
+   "tasks",
+   "causeEdges",
+   "rejectedEdges",
+   "states",
+   "knowledgeDiffs",
+   "foreshadows",
+   "worldSettings",
+   "worldSettingsExcluded",
+   "themeReadings",
+   "unknowns",
+   "openThreads",
+   "coverage",
+   "reproduce",
+   "semanticReview",
+   "selfCritique",
+   "source",
+   "foreshadowConvention",
+   "quoteNodeConvention"
+  ],
+  "missing": [],
+  "countsRecomputed": {
+   "tasks": 12,
+   "causeEdges": 15,
+   "rejectedEdges": 6,
+   "states": 11,
+   "knowledgeDiffs": 6,
+   "foreshadows": 7,
+   "worldSettings": 18,
+   "worldSettingsExcluded": 8,
+   "themeReadings": 2,
+   "unknowns": 12,
+   "allMatchDeclaredCoverage": true,
+   "paragraphsRead": {
+    "declared": 26,
+    "recomputed": 26,
+    "note": "按 \\n\\n 切非空段复算 = 26，相符。"
+   }
+  },
+  "note": "coverage 的 13 项计数独立复算全部相符，无数字放大。worldSettings 三区分（rule.institution／place.placeState／item.itemStates）齐备，且附 8 条 worldSettingsExcluded 说明为何不扩层。"
+ },
+ "notes": "总体判断：**partial**。\n\n【为什么不是 fail】① 最严重的一类（编造）被全量排除：269 个带偏移引文节点 + 18 条标量 quote，逐字／偏移／长度／全文出现次数／sourceHash／区间六项全量通过，0 条查不到原文；随机抽 5 条 find 全部命中且偏移一致；区间外人物 0 命中；未把真假判成已决、未把结束当成功。② 哈希层全部对得上：docs.json 文件哈希 = 任务 sourceHash = 269 个节点各自的 sourceHash；切片哈希 b07cab11… 独立复算一致；候选文件哈希与提交记录 evidence 一致，复核对象就是已提交那一份。③ coverage 计数无放大。④ 该候选主动登记对自己不利的事实（4 处 cost=null 附理由、4 条 foreshadow 显式 unresolved、semanticReview.performed=false、selfCritique 4 条），这是本项目里最容易缺失的一环，它做到了。\n\n【为什么不是 pass】四条须处置项：CE-1 是逐字可证伪的**说话人颠倒**（八戒劝沙僧被写成沙僧劝八戒），且与候选同一栏自己引的第 4 条 quote 冲突——同栏自相矛盾会让下游按 action.text 字面建出反向的人物关系；CE-2 是**时序颠倒**（把取水写成「斋化到后」，原文是化斋失败后才改要水），直接改变 C4 的机制方向；CE-3 是关键句错字（追敢→追赶），且该句正是候选自己标注的「这条边成立的关键句」；CE-4 是引文覆盖缺口（「二十余遍」这一次数无引文支撑）。前两条会改变下游读数，不只是措辞问题。\n\n【反向验证的结论】我按「原文明确存在、但候选任何字段都没有引用」的判据扫出 10 条有信息量的遗漏（reverseChecks），其中 RC-1、RC-2、RC-4 最值得注意：RC-1 是叙述层唯一的正面因果交代且带「赶他几次」这一量化事实（候选全部按单次驱逐叙述）；RC-2 是施动者本人的自认，直接影响 K3 的「谁知道什么」；RC-4 是本区间三套互相矛盾的凶器说法（叙述「铁棒」／唐僧「一棒」／沙僧「一铁棍」），候选只引了前两种，而本回的核心恰恰是「同一件事有三套证词」。这三条都属于「只查已写项结构性地发现不了」的遗漏。\n\n【我对自己复核的限定】① 我判 CE-1 时区分了「引文定位错误」与「正文对引文的解读错误」：候选引的 415065 那半句本身逐字正确，错的是同栏正文的主语，所以我把它记为「解读／归属错误」而非编造。② CE-2 我给出的是可复现的偏移大小比较（413873 < 414710），不依赖对文意的解释。③ reverseChecks 里 RC-4 的三种说法我都列了各自偏移，供下游自行判断是否算「方言之别」——铁棒/棒/铁棍在版本学上可能是异文而非矛盾，我按「同一单元内三种写法」记录，不据此判 fail。④ 我只做本区间内的对照，未读第五十六回与第五十八回原文；候选本身也未做跨区间断言，故此项不影响判定。⑤ 我未复跑候选自带的 build.py／verify.py（它们在 /Volumes/资源库/我的资源/回滚点/项目/cl0057-xiyou/ 下），本复核的全部机械结论来自我自写的只读脚本，不依赖那两个脚本的正确性。⑥ CE-4 我判为 coverage-gap 而非编造，因为那半句在原文确有、只是没有引文覆盖它——把这类记为编造会混淆两种不同的缺陷。\n\n【可用与须丢弃】可直接使用：tasks 的 T2–T7、T9–T12（T8 的 action.text 须按 CE-1 修正后使用）；全部 causeEdges 除 C4（trigger 须按 CE-2 修正）与 C13（错字）；states／foreshadows／worldSettings／themeReadings／unknowns／openThreads 全部可用，且 unknowns 的 12 条与 openThreads 的 8 条判断我逐条复核，认为成立。须修正后使用：T1.obstacle（补「二十余遍」引文）、T8.action（说话人）、C4.trigger（时序）、C13.to（错字）、RE1（建议补自认台词一句）。建议补入：reverseChecks 的 10 条，至少 RC-1／RC-2／RC-4 应进 unknowns 或 states。\n\n【数据源】本复核全程只读 data/cache/ee3430ef493546bbcd2e700b.docs.json（sha256 c282cf39…a152a2，与任务 sourceHash 一致；与候选 readsSource 的 a065244455cfb2221bcda94a.docs.json 经字节比较为同一文件，两份文件字节完全相同）。未改动任何受保护路径；唯一写入物为任务 writes 指定的 loop/state/out/verify_xiyou_L1_0057.verdict.json。\n\n【重复派发，已如实登记】提交后核对发现：本任务已由 w-verify-0 在 2026-10-12T08:14:20Z 独立复核过，而我的租约始于 08:14:48Z（晚 28 秒），两者互不可见。我保留全部结论不改判（两轮独立读原文得出同向结论，提高了 partial 的可信度），但把重叠与真正新增的条目逐条写进 overlapWithPriorReview，供台账扣除重复计数时使用。我**没有**重跑 verify 以免在同一记录上追加第二条 w-verify-3。注意：loop.py 记录的 reviews[1].notes 是本字段更新**之前**的快照，最新完整说明以本文件为准。",
+ "reproduce": {
+  "cmd_source_hash": "shasum -a 256 data/cache/ee3430ef493546bbcd2e700b.docs.json",
+  "cmd_segment": "python3 -c \"import json;t=json.load(open('data/cache/ee3430ef493546bbcd2e700b.docs.json'))[0]['text'];print(repr(t[412021:418724]))\"",
+  "cmd_ce1": "python3 -c \"import json;t=json.load(open('data/cache/ee3430ef493546bbcd2e700b.docs.json'))[0]['text'];print(repr(t[415060:415088]))\"  # 输出以「八戒道：“兄弟且休哭」开头",
+  "cmd_ce2": "python3 -c \"import json;t=json.load(open('data/cache/ee3430ef493546bbcd2e700b.docs.json'))[0]['text'];print(t.find('既无化斋之处，且得些水来解渴也可。'), t.find('将些剩饭锅巴，满满的与了一钵。'))\"  # 413873 414710",
+  "cmd_ce3": "python3 -c \"import json;t=json.load(open('data/cache/ee3430ef493546bbcd2e700b.docs.json'))[0]['text'];print(t.count('追敢'), t.count('追赶'), t.find('他也不来追赶'))\"  # 0 16 417570",
+  "cmd_quote_audit": "见 notes 所述自写只读脚本：walk 候选收集全部带 start/end 的 quote 节点，逐条比较 t[start:end]==quote 与 t.count(quote)，并对 worldSettings 的标量 quote 做 find。"
+ },
+ "overlapWithPriorReview": {
+  "found": true,
+  "priorReviewer": "w-verify-0",
+  "priorReviewAt": "2026-10-12T08:14:20Z",
+  "myLeaseStartedAt": "2026-10-12T08:14:48Z",
+  "gapSeconds": 28,
+  "why": "被复核任务在本 agent 领到租约前 28 秒已被另一名复核者 w-verify-0 独立复核并记录（loop/state/out/read_xiyou_L1_0057.json 的 reviews[0]）。两者相互不可见：我按 VERIFIER 契约第 1 步「先自己读原文」作业，未先查看该记录；提交后核对 reviews 才发现重复。属环境层的重复派发，不是任何一名复核者的过失。",
+  "duplicated": [
+   "T8.action 说话人颠倒（我的 CE-1 = w-verify-0 CE-1）",
+   "C13 错字『追敢』（我的 CE-3 = w-verify-0 CE-3）",
+   "『赶他几次』叙述层因果句未覆盖（我的 RC-1 = w-verify-0 RC-1）",
+   "木叉『情知是寻行者，更不题起』（我的 RC-6）与行者『这定是唐僧有难』（我的 RC-5）＝ w-verify-0 RC-2（它把两条合记为一条）",
+   "八戒请战资历『我曾寻他一次』（我的 RC-3 = w-verify-0 RC-3）",
+   "『白鹦哥飞来飞去，知是菩萨呼唤』（我的 RC-9 = w-verify-0 RC-5）",
+   "RE1 表述过强：我记为 misKillCheck 的一条，w-verify-0 记为 CE-2"
+  ],
+  "novelToThisReview": [
+   "CE-2 C4.trigger 时序颠倒（把取水写成『斋化到后』，原文是化斋失败后才改要水）——前一轮未提，且会改变 C4 的机制方向",
+   "CE-4 T1.obstacle『颠来倒去又念有二十余遍』无任何引文覆盖（次数事实无支撑）——前一轮未提",
+   "RC-4 凶器三说并存（叙述『铁棒』415? / 唐僧『一棒』415303 / 沙僧『一铁棍』418286），候选只引前两种，而本回核心正是『同一件事有三套证词』——前一轮未提",
+   "RC-7 菩萨公论中有利半句『但祛退散，自然救了你师父』被截掉（致 W4 读起来比原文严苛）——前一轮未提",
+   "RC-8『长老含泪无言，但点头相答』（S5/T6 的身体状态依据）——前一轮未提",
+   "RC-10 八戒行乞原话『厨中有剩饭，路上有饥人』——前一轮未提"
+  ],
+  "notCoveredByMeButByPrior": [
+   "行者诉苦正文 299 字（『就如老虎口里夺脆骨，蛟龙背上揭生鳞』『我与你救苦消灾也』）——我扫到了但未列入 reverseChecks，前一轮列了（其 RC-4）",
+   "沙僧出发前对八戒的两句约束与八戒俗谚回敬（『不要弄做尖担担柴两头脱也』）——我未列，前一轮列了（其 RC-6）"
+  ],
+  "selfCorrection": "我在生成 verdict 时用「前 24 字前缀」做过一次 novel 比对，因两边用的字段名不同（claim vs found）而全部误判为 novel。上面的 duplicated/novelToThisReview 是我逐条重读两轮条目后人工判定的结果，取代那次机器比对。",
+  "verdictUnchanged": "重复派发不改变判定：partial。两轮各自独立读原文得出的结论一致（同类缺陷 + 同类遗漏），这反而提高了该 partial 判定的可信度。",
+  "environmentNote": "loop/bin/loop.py 的 verify 提交只 append reviews，不去重、不检查该任务是否已有 verified 记录。若守护轮按此形态继续派发，同一任务会被反复复核，reviewer 预算与台账条目都会被重复消耗。"
+ }
+}

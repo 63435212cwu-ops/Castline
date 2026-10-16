@@ -1,0 +1,112 @@
+{
+  "task": "verify:sanguo:L1:0047",
+  "agent": "w-sanguo-1",
+  "status": "rejected",
+  "summary": "独立反向复核《三国演义》第四十八回（[238470,241956)，3486 codepoint）。先自读原文全段（未先看候选结论），再机械复核候选 235 条结构化引文：逐条 text[start:end]==quote、find()==声明 start、区间内、全文唯一、sourceHash 一致——**235/235 全部通过**，随机 5 条（seed 47）find 亦全部命中；额外独立复算 insideQuotedSpan/quotedSpanFraction 两栏（按全文 “…” 配对重建），零不一致。复算 metrics 全部计数一致；句级覆盖率 166 句/18 条未覆盖/367 字/0.8947 我逐段复算完全相同；loop.py 的 validate_sections() 与 validate() 直接跑通、零问题。**判 partial**，不判 fail：拿到 1 条逐字可查的反例——causeEdges.CE12 的『因』节点引文区间跨越并包含了『果』节点的区间（from [239399,239426)+[239495,239528)，to [239448,239464)+[239464,239495)，from 最大终点超出 to 最小起点 80 codepoint），即被判为因的那段话里有一半发生在果之后；mechanism 那句『荀攸的提醒发生在这两轮话之后』与原文相反（原文顺序 round1@239399 → 提醒@239448 → 回绝@239464 → round2@239495），且与同一候选 states.S11.text（顺序正确）自相矛盾。不判 fail 的理由：反例不是编造——两个事件、引文均真实且逐字正确，人名双向差集与结局/伏笔/越权三类定向检索均为阴性，无原文没有的人物/事件/结局/伏笔。反向验证另列 5 条候选未覆盖而原文明确存在的事实（3 条有实质价值：四顾地形清单、回顾左右无人、毛玠于禁诣帐下请调），这些是**句级覆盖率的盲区**（长句被任一引文切中即算已覆盖），不作为判 partial 依据。另核验候选 selfCritique.SC7 的自述：对照外置 PRE-FIX 备份逐条验证①②⑥⑦⑧四项，**全部属实**。",
+  "evidence": [
+    {
+      "path": "loop/state/out/verify_sanguo_L1_0047.verdict.json",
+      "sha256": "e249c2ac9206180aafdd9fd865dce4ed1edb5e565df2cfa513604851f3c6a696",
+      "kind": "本任务产出：复核结论（verdict=partial / counterExamples×1 / reverseChecks×5 / notes）"
+    },
+    {
+      "path": "loop/state/out/read_sanguo_L1_0047.candidate.json",
+      "sha256": "5b6e8786834cf4ed8f2a258c218a66cd3db6f874ad6e9958642b60b14e273e71",
+      "kind": "被复核的候选（read:sanguo:L1:0047，作者 w-read-4）"
+    },
+    {
+      "path": "data/cache/b1687d1214f4d6c8bcd06c6f.docs.json",
+      "sha256": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+      "kind": "被复核候选所依据的原文 docs.json（本复核只读，未修改）"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/cl0047-r2/PRE-FIX.candidate.json.bak",
+      "kind": "候选上一稿的外置留存（用于核验 SC7『已修正十一处』的自述是否属实）"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/cl0047-r2/assemble.py",
+      "kind": "候选生成脚本（用于确认其自检只覆盖引文逐字命中、不覆盖 mechanism 的先后关系）"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "源与切片自检：sha256(data/cache/b1687d1214f4d6c8bcd06c6f.docs.json)=8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2；切片 [238470,241956) 长 3486，以回目「第四十八回　宴长江曹操赋诗　锁战船北军用武」开头；切片 sha256=e87c233fd3bdb4de745f120cd49005821cceea788834b2a1ff025786f8aae676。复现：python3 -c \"import json;t=json.load(open('data/cache/b1687d1214f4d6c8bcd06c6f.docs.json'))[0]['text'];print(t[238470:238492])\"",
+      "result": "pass"
+    },
+    {
+      "text": "任务 sourceHash 口径冲突我已独立复现：任务 JSON 冻结的 2988ce6e… 不等于本轮 prompt 指定文件的 sha256；遍历 data/cache/*.docs.json 逐个算文件 sha256，命中 2988ce6e… 的只有 152e2a6eed94f1075e7e7070.docs.json 与 f0b45e85aac6c95e584075a2.docs.json。候选按指定路径实际文本定位并在 unknowns.U1 显式留白，处置正确。",
+      "result": "confirmed（候选无过）"
+    },
+    {
+      "text": "引文层全量复核：235/235 条 quoteRef 满足 text[start:end]==quote、find(q)==start、区间内、全文唯一、sourceHash 一致；随机 5 条 seed 47 全部命中。未只抽样。",
+      "result": "pass（0 缺陷）"
+    },
+    {
+      "text": "机器栏独立复算：自建全文 “…” 引号配对区间，独立算 insideQuotedSpan 与 quotedSpanFraction，235 条与候选声明零不一致。",
+      "result": "pass"
+    },
+    {
+      "text": "反例 CE12 结构倒置可复算：from 引文 [239399,239426)+[239495,239528)，to 引文 [239448,239464)+[239464,239495)；from 最大终点 239528 − to 最小起点 239448 = 80 > 0，且 to 终点 239495 == from 第二条起点。复现：python3 -c \"import json;t=json.load(open('data/cache/b1687d1214f4d6c8bcd06c6f.docs.json'))[0]['text'];print(t.find('荀攸曰：“丞相勿言'), t.find('又指夏口曰'))\" → 239448 239495",
+      "result": "fail（候选缺陷）"
+    },
+    {
+      "text": "覆盖率复算：按。！？切句（并入紧随后引号）求与全部引文区间交集 → 166 句 / 18 条未覆盖 / 367 字 / 0.8947，与候选 reverseCheck 逐段一致；小句级（528 小句）另得 78 条未覆盖，其中 3 条为『既未引又未在断言文字出现』的实质遗漏。",
+      "result": "pass（候选统计属实；遗漏另列 reverseChecks）"
+    },
+    {
+      "text": "幻觉/越权检查：人名双向差集『切片有候选无』为空；候选独有 张郃/夏侯惇/董太后 三处全部出自说明底本用字或已删错误的元讨论，逐条复算属实（切片『张颌』1 次『夏侯敦』1 次，『张郃』『夏侯惇』各 0 次；全文『养母』仅 1 次且 @8803 与本区间无关）。未发现把结束当成功、把悬念句当结局、或声称语义已核验。",
+      "result": "pass（0 幻觉）"
+    },
+    {
+      "text": "自述核验：对照外置 PRE-FIX 备份逐条验证 selfCritique.SC7 的①(CE13→RE8)⑧(养母)⑥(S3 前后值对调)⑦(T6 两栏 explicit→inferred) 四项，全部属实；SC7 ⑨ 声称已修正 CE12 顺序只对了一半（改对了『军情判断在提醒之前』，新写出『提醒在两轮之后』又与原文相反）。",
+      "result": "部分属实（已在 notes 写明）"
+    },
+    {
+      "text": "候选拒绝项误杀检查：逐条读 rejectedEdges 8 条与 notForeshadows 6 / notWorldSettings 5 的排除理由，未发现把合法项排除的形态；RE8 撤回『席间无人能拦』有原文依据——切片内「拦」「阻」「谏」「止」四字出现次数均为 0。",
+      "result": "no misfire"
+    }
+  ],
+  "remaining": [
+    "本次复核**只覆盖 [238470,241956) 这一个区间**。反例 CE12 涉及的先后关系可由本区间原文完全裁定，无需区间外证据；但候选对『哪一个是正确冻结哈希』的疑问（U1）本区间无法判定，我也没有去改任何哈希或校验规则。",
+    "反向发现的 3 条实质遗漏（四顾地形清单 @239229-239271、回顾左右无人 @238530-238536、毛玠于禁诣帐下请调 @240262-240281）我**没有**替候选补写进候选文件——该文件不在本任务的 writes 里，且补写会与候选作者的工作冲突。它们已逐条带偏移写进 verdict 的 reverseChecks，供返工或后续单元使用。",
+    "我**没有**跑 GPU/浏览器测试，没有改 js/ css/ index.html/ serve.py/ narrative.py/ scripts/ tests/ docs/ data/ 任何受保护路径；本任务只写了 writes 指定的 loop/state/out/verify_sanguo_L1_0047.verdict.json 一个文件（外加本提交记录，属 loop/ 追加式路径）。",
+    "候选 coverage.paragraphs=13 是按换行计（含 5 个空行），若按空行分段则为 6 段/frac 0.8333。两种口径都能自洽，我未把它记为缺陷，只在 verdict.coverageAudit.paragraphFieldNote 里说明复算基准——若上游对 paragraphs 有唯一定义，需要明确。",
+    "CE12 的修法有三种（改 mechanism 措辞 / 拆分 from 节点另立一条边 / 降级为 unverified 并加注），我**没有**替候选选定一种，三种都写进了 usable.mustFix；选择权应在候选作者或后续返工任务，复核者不应代改内容。"
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/verify_sanguo_L1_0047.verdict.json",
+      "kind": "append-only"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/b1687d1214f4d6c8bcd06c6f.docs.json": {
+      "sha256Before": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+      "sha256After": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+      "note": "只读；动手前后一致，未修改原文"
+    },
+    "loop/state/out/read_sanguo_L1_0047.candidate.json": {
+      "sha256Before": "5b6e8786834cf4ed8f2a258c218a66cd3db6f874ad6e9958642b60b14e273e71",
+      "sha256After": "5b6e8786834cf4ed8f2a258c218a66cd3db6f874ad6e9958642b60b14e273e71",
+      "note": "只读；未修改被复核的候选"
+    }
+  },
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/verify_sanguo_L1_0047.verdict.json"
+    ],
+    "note": "该路径在本轮前不存在（新建），删除即回到动手前状态；未改动任何既有文件。"
+  },
+  "submittedAt": "2026-10-12T06:48:40Z",
+  "wallClockSeconds": 2275,
+  "wallClockFrom": "lease.startedAt",
+  "validation": {
+    "problems": [
+      "证据缺 sha256：/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/cl0047-r2/PRE-FIX.candidate.json.bak（声明过的证据必须可复核；补上真实哈希再提交）",
+      "证据缺 sha256：/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/cl0047-r2/assemble.py（声明过的证据必须可复核；补上真实哈希再提交）"
+    ],
+    "at": "2026-10-12T06:48:40Z"
+  }
+}

@@ -1,0 +1,92 @@
+{
+ "task": "read:dafeng:L0:0036",
+ "agent": "w-dafeng-0",
+ "status": "done",
+ "summary": "精读《大奉打更人》第三十七章 劝学，原文区间 codepoint [110506,113766)（3260 字，落在 data/cache/9b676d7031b1bcd3b8377a18.docs.json 的 docs[0].text 上）。全篇引文偏移由脚本在原文上现算（不手打），再用**独立实现**的重验脚本从磁盘重读成品复验。产出 tasks[9]（objective/obstacle/action/result/cost；缺项一律字面 null + <field>Note 写明为什么缺，共 10 处 null）、causeEdges[14]（每条带方向 from/to + mechanism；其中 2 条显式标 derived）、rejectedCauseEdges[12]（相邻当因果、评论填动机、单人经验当社会事实、台词当真相、提议当决议、主题相似当因果等，逐条给拒因与逐字引文）、states[9]（前值/锚点/后值；叙述者设定段的前后值显式写「不适用」）、knowledgeGaps[8]（谁知/不知，含「两句争吵台词未逐句署名」）、foreshadows[5]（3 条 resolved-out-of-range + 2 条 unresolved；每条写明回收点章节与偏移、以及为什么算/不算回收）、rejectedForeshadows[8]（一次出现当伏笔、「后文这个人很重要」倒推伏笔等）、characterClaims[54]（narratorConfirmed 全按「叙述者是否确认外部事实」口径，台词与人物内心一律 false，共 21 条 true 全是叙述者直述）、openThreads[6]、unknowns[13]、selfCritique[5]、textCritical[9]（含 6 处疑似排印：院子/甩子/仿佛再说/震耳发聩/雄起/犄角旮沓，只登记不改字）、paratext[4]、outOfRangeCorroboration[25]、quoteIndex[124]、coverageDisclosure（逐条列出 7 段未被引文覆盖的段落与原因）。关键口径：右端点 113766 之后就是第三十八章标题；区间内含一条章级分隔行（113752）。语义未核验，semanticReview 保持 not-performed。",
+ "evidence": [
+  {
+   "path": "loop/state/out/read_dafeng_L0_0036.candidate.json",
+   "sha256": "bc5543fb319b042dc1499650f173dbc3753bd653ec10a525fefab76fdb4a95a5",
+   "kind": "candidate-read-output"
+  },
+  {
+   "path": "data/cache/9b676d7031b1bcd3b8377a18.docs.json",
+   "sha256": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+   "kind": "source-text（只读引用，未修改）"
+  },
+  {
+   "path": "data/cache/9b676d7031b1bcd3b8377a18.json",
+   "sha256": "3c2fae1d399d6768719f2d5476fa0cfd88fb4fbbc12abdf080323fa4b846ebdf",
+   "kind": "graph-cache（只读对照已有结论，未作为证据）"
+  }
+ ],
+ "assertions": [
+  {
+   "text": "源文件哈希与任务 sourceHash 一致",
+   "result": "pass",
+   "cmd": "shasum -a 256 data/cache/9b676d7031b1bcd3b8377a18.docs.json"
+  },
+  {
+   "text": "区间边界自检通过：text[110506:110514]=='第三十七章 劝学'；text[113766:113774]=='第三十八章 诗成'，其前是落在区间内的分隔行 text[113752:113766]=='------------\\n\\n'",
+   "result": "pass",
+   "cmd": "python3 -c \"import json;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];print(repr(t[110506:110514]),repr(t[113752:113766]),repr(t[113766:113774]))\""
+  },
+  {
+   "text": "切片长度 3260、sha256 写入候选 source.segmentSha256",
+   "result": "pass",
+   "cmd": "python3 -c \"import json,hashlib;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];s=t[110506:113766];print(len(s),hashlib.sha256(s.encode()).hexdigest())\""
+  },
+  {
+   "text": "全部引文逐字可查、偏移自洽、inRange 标记与落点一致、sourceHash 一致：成品里 497 个 quote 引用（124 条去重后进 quoteIndex）由独立脚本从磁盘重读后重算，problems=0",
+   "result": "pass",
+   "cmd": "python3 /tmp/cl0036/reverify.py"
+  },
+  {
+   "text": "构建期同样做了硬自检（切片相等/长度/hash/inRange/null 必带 Note/台词不得标 narratorConfirmed/quoteIndex 与全量引用集合相等），problems=0",
+   "result": "pass",
+   "cmd": "python3 /tmp/cl0036/build.py"
+  },
+  {
+   "text": "章号会重复（913 个标题只有 267 个不同章号），所以每条区间外引用都同时给章号+绝对偏移+逐字原文；且 1028 条 '------------' 全部出现在 913 个章标题之前 ⇒ 它是章级而非卷级分隔",
+   "result": "pass",
+   "cmd": "python3 -c \"import json,re;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];h=[m.start() for m in re.finditer(r'^第[一二三四五六七八九十百千零两]+章.*$',t,re.M)];s=[m.start() for m in re.finditer(r'^------------$',t,re.M)];print(len(h),len(s),sum(1 for x in h if any(x-14<=y<x for y in s)))\""
+  },
+  {
+   "text": "反向检查：区间内出现的专名（含周侍郎/户部侍郎、长公主、院长、四大儒等）在成品中都有对应条目或明确的「区间内未出现」限定；区间内数字（82岁/三两/十文/六十里/一个时辰/三个月/四根六个两个一碗三碟/四五人量）均已登记",
+   "result": "pass",
+   "cmd": "python3 -c \"import json,re;A=json.dumps(json.load(open('loop/state/out/read_dafeng_L0_0036.candidate.json')),ensure_ascii=False);S=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'][110506:113766];print([n for n in ['许七安','许新年','朱县令','李慕白','张慎','陈泰','杨恭','长公主','户部侍郎','圣人','云鹿书院','清云山','春闱'] if n in S and n not in A])\""
+  },
+  {
+   "text": "覆盖率按「弱口径」（段落与引文相交即算）计算，并显式排除 coverageDisclosure 自身的引文以免自证；实测 87/94=0.9255，未覆盖的 7 段逐条给出原文与原因（其中 1 段是我的漏引）",
+   "result": "pass",
+   "cmd": "python3 /tmp/cl0036/reverify.py"
+  }
+ ],
+ "changes": [
+  {
+   "path": "loop/state/out/read_dafeng_L0_0036.candidate.json",
+   "kind": "append-only"
+  }
+ ],
+ "sourceHashes": {
+  "data/cache/9b676d7031b1bcd3b8377a18.docs.json": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+  "data/cache/9b676d7031b1bcd3b8377a18.json": "3c2fae1d399d6768719f2d5476fa0cfd88fb4fbbc12abdf080323fa4b846ebdf"
+ },
+ "remaining": [
+  "语义正确性未核验（semanticReview=not-performed）：本文件只保证引文定位与偏移自洽，不保证我对人物动机、因果机制、伏笔判定的读法正确——这要等 read-verify 的独立复核。",
+  "fs_vendor_face 与 fs_xu_ruyi_attire 我判为伏笔（要求具体物件＋显式回指＋在回收处起作用），但「母题重现」与「伏笔回收」的边界可争；若复核用更严口径（要求铺设处带将来时标记），这两条应降级。",
+  "fs_sage_82 被我放进 rejectedForeshadows（理由：后文是疑问的持续升级而非解决）。若复核认为「持续升级的疑问也算回收」，此条应移回 foreshadows 并标 resolved-out-of-range。",
+  "棋局争吵的四句台词（要重来／落子无悔／圣人曰知错就改／圣人是这个意思吗）无法逐句分配说话人，只登记在 knowledgeGaps，未写进 states。",
+  "「许新年是否知道圣人品级」我只能记 unknowns（他答的是反问句，紧接的「你不知道就不知道」是许七安的腹诽）。",
+  "task_narrator_book_context 是叙述者设定段，放在 tasks[] 里只是为了让「叙述者直述」与「人物盘算」分层；若下游要求 tasks[] 只收人物目标，该条应移出（已在 objectiveNote 里标注）。",
+  "outOfRangeCorroboration 的章号来自行首标题正则反查，因本书章号跨卷重复，我用「章号+绝对偏移+逐字原文」三件套定位；仍未做跨卷的卷号归属。",
+  "本区间内 6 处疑似排印（院子/甩子/仿佛再说/震耳发聩/雄起/犄角旮沓）只登记、不改字；其中「震耳发聩」全书 13 次、「振聋发聩」0 次，更像作者用词而非本处错字。"
+ ],
+ "rollback": {
+  "kind": "append-only",
+  "strategy": "delete-added-files",
+  "files": [
+   "loop/state/out/read_dafeng_L0_0036.candidate.json"
+  ]
+ }
+}

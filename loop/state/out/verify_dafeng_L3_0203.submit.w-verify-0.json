@@ -1,0 +1,87 @@
+{
+  "task": "verify:dafeng:L3:0203",
+  "agent": "w-verify-0",
+  "role": "VERIFIER",
+  "status": "done",
+  "verdict": "partial",
+  "reviewedTask": "read:dafeng:L3:0203",
+  "reviewedCandidate": "loop/state/out/read_dafeng_L3_0203.candidate.json",
+  "reviewedCandidateSha256": "a54b7fb25ef2dd0903cf28bd109611a4da0a9d3f71be83556ba7bbe32f71c822",
+  "reviewedAuthor": "w-xiyou-1",
+  "book": "dafeng",
+  "lane": 3,
+  "unitIndex": 203,
+  "unitHead": "第两百零二章 审问",
+  "sourceRange": [745827, 750897],
+  "verdictFile": "loop/state/out/verify_dafeng_L3_0203.verdict.json",
+
+  "summary": "先自己把 [745827,750897) 逐行读完才打开候选。结论：候选的**引用层与抽取层质量很高**——206 条引文逐字全中、偏移全对、切片与文件哈希对得上、行覆盖统计复算一致、拒绝项（RC1–RC6/NF1–NF6/NW1–NW5）方向全部正确、无幻觉人物、无区间外文字冒充区间内、result 栏守住『结束≠成功』。判 partial 的唯一原因在**注释层**：8 条反例中 4 条是实质性引用链缺陷（越界取材+悬空引用 T7 / 虚假交叉引用 states S1 / 与自身 unknowns K7 口径冲突 / 把推断写成『叙述明确』），4 条是细节越写与台账错位（『收回怀里』/ 章号 207→204 / 编号 5 vs 6 / 存疑指错到 K3）。这些都不推翻任何一条正文断言。另发现一处**误杀**：六位金锣在区间内的合法动作链被整条撤掉（objective/obstacle 有据、只缺 result），已按提示词口径登记为可立 T7 + result=null。",
+
+  "assertions": [
+    {"text": "原文区间与标题：index.json 的 chapterUnits[203] 给出 [745827,750897) head='第两百零二章 审问'；docs[0].text[745827:750897] 逐字以该标题开头（自检式通过），长度 5070 codepoint。", "result": "pass"},
+    {"text": "sourceHash 复核：任务声明 = fdde5558…39839。shasum -a 256 独立复算 data/cache/2a051246a0ed28d5e90e0fc8.docs.json 与 data/cache/1063b17ca65ec1b76f30e460.docs.json **两者完全相同**，且两份 docs[0].text 逐字相同（长度同为 4760263）。故候选 source.path 写 1063b… 而任务 sourceHash 对应 2a051… 是同一内容的两份缓存副本，不构成错误。", "result": "pass"},
+    {"text": "切片哈希：sha256(docs[0].text[745827:750897]) = 1492f899…46ace，与候选 source.segmentSha256 一致。", "result": "pass"},
+    {"text": "引用逐字核验（不 import 生成脚本，重取原文）：共 211 个含 quote 的对象，剔除 machineSelfCheck 的 5 条回显后实际 206 条，与候选自报 quoteRefs=206 一致；text[st:en]==quote 全部成立、text.find(quote)==st 全部成立、逐字不合 0 / 偏移不合 0。", "result": "pass"},
+    {"text": "inUnitRange 与 occurrences 复核：206 条的 inUnitRange 标记与 abs 区间判定全部一致（谎标 0）；occurrencesInWholeDoc / occurrencesInSlice / allOccurrencesInSlice 全部重算一致（不合 0）。", "result": "pass"},
+    {"text": "行级覆盖独立复算：按非空行与引文区间求交，125 个非空行中 120 行相交、5 行未覆盖（章标题、3 个场景分隔符、文末分隔线），与候选自报 uncoveredLineCount=5、uncoveredSegments=[] 一致。", "result": "pass"},
+    {"text": "字符级复算（比候选行级更细）：引文并集之外的非平凡空白段 10 段 / 165 字，其中 [750418,750443)『“许七安已在冲击炼神境，晋升之日可待。』一段是候选漏引的实质内容（见反查 RV1）。", "result": "pass"},
+    {"text": "随机抽 5 条 quote 做 find() 核验（tasks[1].action[5]=749612、tasks[0].result[1]=749815、states[5].before[0]=750063、worldSettings[5][1]=748200、tasks[4].objective[1]=750510）：5/5 逐字命中且偏移一致。", "result": "pass"},
+    {"text": "counterExamples 逐条可查：8 条的 quote 全部 text.find() 命中；方向核验通过——CE1（751027）与 CE6（757339）确实落在区间外，其余 6 条确实落在区间内。判 fail 所需的原文引证齐备。", "result": "pass"},
+    {"text": "reversChecks 逐条可查：4 条的引证全部落在 [745827,750897) 内（RV1=750424、RV2=749980、RV3=749777、RV4=747026）。", "result": "pass"},
+    {"text": "定向复现 8 条反例的事实前提（15 项）：CE1 区间内『怂恿』『示意』计数 0 且候选无 T7；CE2 该句不在 states[0] 的任何 quote 区间内；CE3 states 全分区『望气/白丁/搜索』计数 0 且 K7 自称 inferred；CE4『没有读信』全书计数 0；CE5『怀里』区间内计数 0；CE6 该句在第两百零四章；CE7 T3.action.quoteRefs 实际 5 条；CE8 K3.what 讲的是截胡。15/15 成立。", "result": "pass"},
+    {"text": "误杀检查（计划100 教训）：逐条核 RC1–RC6、NF1–NF6、NW1–NW5，未发现合法因果边被词表/正则挡住；拒绝项均有区间内原文支撑（如 RC1 有『苏苏的话没有证据』749245）。唯一过度保守是六位金锣整条任务被撤（RV2），已登记为可补而非判错。", "result": "pass"},
+    {"text": "幻觉/越权检查：区间内 44 个具名实体在候选里全部有对应登记，无凭空增补；候选 prose 中的区间外专名（张巡抚/黄伯街/狗市/宁采臣）只出现在 payoffOutsideRange、unknowns、selfCritique 三类显式标注区间外的分区，该处 5 条引文一律标 inUnitRange=false；result 栏无『成功/告破/获批』措辞。", "result": "pass"},
+    {"text": "machineSelfCheck.counts 自洽：13 个分区计数与实体实际长度逐一比对，全部相等。", "result": "pass"},
+    {"text": "受保护路径与写入边界：本轮仓库内**只新增** loop/state/out/verify_dafeng_L3_0203.verdict.json（任务 writes 指定的唯一路径）；未改动候选、原文、js/ css/ index.html serve.py narrative.py scripts/ tests/ docs/ data/。audit 脚本与输出写在外置盘。", "result": "pass"}
+  ],
+
+  "evidence": [
+    {"path": "loop/state/out/verify_dafeng_L3_0203.verdict.json",
+     "sha256": "621805b8d4ca057ad6a42154b5c9c6758ccabecffc0d410bad6b3ebe5422d3f3",
+     "note": "本轮复核产物本体（verdict=partial，8 counterExamples + 4 reverseChecks + notes + remaining）"},
+    {"path": "loop/state/out/read_dafeng_L3_0203.candidate.json",
+     "sha256": "a54b7fb25ef2dd0903cf28bd109611a4da0a9d3f71be83556ba7bbe32f71c822",
+     "note": "被复核候选本体（未改动）"},
+    {"path": "data/cache/2a051246a0ed28d5e90e0fc8.docs.json",
+     "sha256": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+     "note": "原文只读引用；sourceHash 即本文件 sha256（整个文件的，不是切片）"},
+    {"path": "data/cache/1063b17ca65ec1b76f30e460.docs.json",
+     "sha256": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+     "note": "候选 source.path 指向的副本；与上一份 sha256 完全相同、text 逐字相同，只作对照"},
+    {"path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/probe-dafeng-0203-verify/audit.py",
+     "sha256": "6168c932e79c1d8c50b35915d7852aa87b871b533de40fa4f7e4d00153d0d13f",
+     "note": "独立复核脚本：不 import 生成脚本；重取 index/docs；正查引用层（逐字/偏移/谎标/occ/行覆盖/字符级空白段），反查 8 条 counterExample + 4 条 reverseCheck 的区间内外方向与 15 项事实前提"},
+    {"path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/probe-dafeng-0203-verify/audit.out.txt",
+     "sha256": "509ca68ca90262af015fa1a501269b3a85155f64a46a256bf1728e2cc74b0d47",
+     "note": "完整审计输出：26 项检查全部通过、失败 0；含 10 段字符级空白段明细与逐条反例定位"}
+  ],
+
+  "sourceHashes": {
+    "data/cache/2a051246a0ed28d5e90e0fc8.docs.json": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "data/cache/1063b17ca65ec1b76f30e460.docs.json": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "loop/state/out/read_dafeng_L3_0203.candidate.json": "a54b7fb25ef2dd0903cf28bd109611a4da0a9d3f71be83556ba7bbe32f71c822",
+    "loop/state/out/verify_dafeng_L3_0203.verdict.json": "621805b8d4ca057ad6a42154b5c9c6758ccabecffc0d410bad6b3ebe5422d3f3"
+  },
+
+  "auditCmd": "python3 -B -s '/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/probe-dafeng-0203-verify/audit.py' --root /Users/carmen/Desktop/星系",
+
+  "changes": [
+    {"path": "loop/state/out/verify_dafeng_L3_0203.verdict.json", "kind": "append-only",
+     "note": "任务 writes 指定的唯一路径；本提交可能再生成 loop/state/out/verify_dafeng_L3_0203.json（规范记录名）"}
+  ],
+
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": ["loop/state/out/verify_dafeng_L3_0203.verdict.json", "loop/state/out/verify_dafeng_L3_0203.json"],
+    "note": "本轮仓库内只新增复核文件；read 记录 loop/state/out/read_dafeng_L3_0203.json 由 verify 命令按设计写入 reviews/verifyState，不属本轮新增，不回滚。候选与原文均未改动。"
+  },
+
+  "remaining": [
+    "本复核未跑 GPU/浏览器测试（任务未声明要跑，遵守 GPU 全局串行）。",
+    "未核验候选 machineSelfCheck.generator 所引 build_candidate.py 的实际内容（在 /Volumes 外部回滚点路径，非本轮 writes 范围；其哈希已在原提交 evidence 中登记）。",
+    "themeReadings TR1/TR2 属解释层，本复核只确认其 support/counter 引文逐字可查，未判定框架选择是否最优（提示词允许主题读法并列不唯一）。",
+    "foreshadows F1–F3 的 payoffOutsideRange 我抽验了 F1（751192/752424 均在下一章）、F2（782539 第两百零九章）、F3（762292 第两百零五章 / 788058 第两百一十一章）的逐字与章号均对，但未逐字复核其转述是否完全准确。",
+    "反例中的 CE1–CE8 需由原提交者（w-xiyou-1）修复；本复核不代改候选（writes 不含该路径）。"
+  ]
+}

@@ -1,0 +1,148 @@
+{
+  "task": "read:dafeng:L1:0013",
+  "agent": "w-dafeng-1",
+  "status": "done",
+  "summary": "精读《大奉打更人》第十四章 心理博弈 docs[0].text[40599,43557)（2958 字，83 个非空段落全过）。产出 6 条 task 五元组（objective/cost 缺项写 null）、13 条带触发机制的 causeEdge、8 条状态前后值（含 1 条知识差）、3 条伏笔（F1 unresolved，F2/F3 铺设在本区间、回收在紧邻第十五章，显式标 resolved_out_of_range 并给 crossRange 引文）、5 条明确排除的「不算伏笔」、4 条排除的「不算因果边」、14 条 unknowns、3 条 selfCritique。82 条去重引用全部由脚本在全文唯一定位后回切校验 docs[0].text[start:end]==quote，0 处不符；其中区间内 70 条、区间外 12 条（crossRange=true，切片内 0 次出现）。",
+  "evidence": [
+    {
+      "path": "loop/state/out/read_dafeng_L1_0013.candidate.json",
+      "sha256": "149d8cfffd65e1449c45987e9380ec69acb6c5ed1de6cc8f2e9526673653d1f6",
+      "kind": "candidate"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "原文来源哈希：sha256(data/cache/9b676d7031b1bcd3b8377a18.docs.json) == fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839，与任务 sourceHash 一致。",
+      "result": "pass",
+      "command": "python3 -c \"import hashlib;print(hashlib.sha256(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json','rb').read()).hexdigest())\"",
+      "observed": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+    },
+    {
+      "text": "偏移口径自检：docs[0].text[40599:40611] == '第十四章 心理博弈\\n\\n '，切片以本单元标题开头；len(text[40599:43557]) == 2958 == 任务给定字数。偏移是相对 docs[0].text 全文的 codepoint 偏移，不是相对切片。",
+      "result": "pass",
+      "command": "python3 -c \"import json;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];print(repr(t[40599:40611]),len(t[40599:43557]))\"",
+      "observed": "'第十四章 心理博弈\\n\\n ' 2958"
+    },
+    {
+      "text": "全部引用回切校验：把候选 JSON 里所有含 quote/start/end 的对象递归取出并按 (start,end) 去重，逐条断言 docs[0].text[start:end]==quote、sourceHash 一致、全文 find 唯一命中；结果为 82 条引用 bad=0 badHash=0 nonUnique=0，区间内 70 条、区间外 12 条。",
+      "result": "pass",
+      "command": "python3 -c \"import json;c=json.load(open('loop/state/out/read_dafeng_L1_0013.candidate.json'));open('/tmp/wk13/verify_0013.py','w').write(c['selfCheck']['reproduceScript'])\" && python3 /tmp/wk13/verify_0013.py",
+      "observed": "quotes 82 bad 0 badHash 0 inRange 70 crossRange 12 nonUnique 0 / ALL VERBATIM"
+    },
+    {
+      "text": "引文生成时即强制唯一：构建脚本对每条 quote 断言 TEXT.count(quote)==1（全文唯一）后才取偏移，区间内引用另断言切片内 count==1、且必须落在 [40599,43557) 内；找不到或不唯一直接 AssertionError 退出。因此不存在「引文在别处也能命中、偏移却指向我想要的语义」这种错配。",
+      "result": "pass",
+      "command": "python3 /tmp/wk13/build.py",
+      "observed": "quotes built: 221 unique refs: 82 in-range: 70 cross-range: 12（221 为未去重的引用条目数）"
+    },
+    {
+      "text": "未把人物台词当叙述事实（本段最大的坑）：全区间共 3 处「招供」字样，其中「因为张献已经招供了」是许七安对嫌犯说的话。候选把它写成 F3 的 setup（status=resolved_out_of_range，回收是第十五章作者交底「他刚才是骗杨珍珍的……」），并在 U2 显式记为不可判定；C9/C10 的 to 值只写「她听到这句话后的反应」。同理「张献故意在墙上留下脚印」「张有瑞常去青楼」也只作台词引用。",
+      "result": "pass",
+      "command": "python3 -c \"import json;c=json.load(open('loop/state/out/read_dafeng_L1_0013.candidate.json'));print([f['id'] for f in c['foreshadows']], c['unknowns'][1]['question'], '|', c['foreshadows'][2]['status'])\"",
+      "observed": "['F1_promise_to_buy_runner_a_drink', 'F2_next_is_the_killing_blow', 'F3_claim_that_zhang_xian_confessed'] 张献到底招供了没有？ | resolved_out_of_range"
+    },
+    {
+      "text": "未把「读到章末」当成功：本区间结束时案件既无判决也无供词（朱县令只下令「先将两人收监，休堂」，章末停在「接下来才是杀招」）。T1.result 写「当堂没有拿到招供」，T5.result 写「她始终没有认罪、没有供述」，F2 的 whyNotResolved 明确写出「若复核口径要求回收也必须落在本单元区间内，则本条应降级为 unresolved」。",
+      "result": "pass",
+      "command": "python3 -c \"import json;c=json.load(open('loop/state/out/read_dafeng_L1_0013.candidate.json'));print(c['tasks'][0]['result'][:30]);print(c['tasks'][4]['result'][-30:]);print(c['foreshadows'][1]['whyNotResolved'][:40])\"",
+      "observed": "当堂没有拿到招供：二十大板不足以招供，供词也没有到手 但本区间内她始终没有认罪、没有供述 如果复核口径要求回收也必须落在本单元区间 [40599,43557"
+    },
+    {
+      "text": "未用未知填默认值：tasks 中缺项一律写 null（T3.objective=null、T3.cost=null、T6.cost=null），basis 对象里对应键也写 null。",
+      "result": "pass",
+      "command": "python3 -c \"import json;c=json.load(open('loop/state/out/read_dafeng_L1_0013.candidate.json'));print([(t['id'],t['objective'],t['cost']) for t in c['tasks'] if t['objective'] is None or t['cost'] is None])\"",
+      "observed": "[('T3_runner_carries_message', None, None), ('T6_xu_qian_trades_on_curiosity', '让县令接受他的办法并给他空间（「容我卖个关子，大人静候佳音便是」）', None)]"
+    },
+    {
+      "text": "未声明语义复核完成：reviewStatus.semanticReview == 'not_performed'，并写明「引用定位正确 ≠ 语义已核验」，语义交由 read-verify 通道的独立复核者。",
+      "result": "pass",
+      "command": "python3 -c \"import json;print(json.load(open('loop/state/out/read_dafeng_L1_0013.candidate.json'))['reviewStatus']['semanticReview'])\"",
+      "observed": "not_performed"
+    },
+    {
+      "text": "图谱缓存未当证据：source.graphCacheNote 写明缓存里 quoteRef 落在我区间内的 event 只有 3 条（家叔任职礼部给事中 / 帮我带句话让老爷暂时休堂 / 你不奇怪我为什么知道的这么清楚），它们与我的 C2、C4、C10 指向同一批原文，但候选没有引用它的摘要或 claim。",
+      "result": "pass",
+      "command": "python3 -c \"import json,re;g=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.json'));n=[e for e in g['events'] if any(40599<=int(x)<43557 for x in re.findall(r'\\\"(?:start|end)\\\":\\\\s*(\\\\d+)',json.dumps(e)))];print(len(n),[e['quote'][:12] for e in n])\"",
+      "observed": "3 ['家叔任职礼部给事中，大人就', '帮我带句话，让老爷暂时休堂', '你不奇怪我为什么知道的这']"
+    },
+    {
+      "text": "因果边不是「时间相邻」凑数：13 条每条都写了 direction 与 mechanism，并另有 rejectedAsCauseEdge 4 条记录我主动**不连**的相邻事件（如「许七安听不下去了」→「朱县令上刑」、「杖责」→「禁室问话」）。C3/C5/C13 三条证据不足的标 derived 并在 note 里写明「若复核认为证据不足应降级为 unknowns」。",
+      "result": "pass",
+      "command": "python3 -c \"import json;c=json.load(open('loop/state/out/read_dafeng_L1_0013.candidate.json'));print(len(c['causeEdges']),len(c['rejectedAsCauseEdge']),[e['id'] for e in c['causeEdges'] if e['basis']=='derived'])\"",
+      "observed": "13 4 ['C3_magistrates_risk_calc_opens_door_for_adjournment', 'C5_wagering_feeds_magistrates_curiosity', 'C13_previous_chapter_idea_to_adjournment']"
+    },
+    {
+      "text": "伏笔按「铺设+回收」判定、不按「出现两次」判定：区间内只出现一次的「回头请你喝酒」写作 F1 status=unresolved 且 payoff=null（全文检索该串全書仅 1 处：41483）；F2/F3 的回收在紧邻第十五章，status 显式写 resolved_out_of_range 而不是 resolved，并附 crossRange 引文。",
+      "result": "pass",
+      "command": "python3 -c \"import json;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];c=json.load(open('loop/state/out/read_dafeng_L1_0013.candidate.json'));print(t.count('请你喝酒'),[(f['id'],f['status'],f['payoff'] is None) for f in c['foreshadows']])\"",
+      "observed": "1 [('F1_promise_to_buy_runner_a_drink', 'unresolved', True), ('F2_next_is_the_killing_blow', 'resolved_out_of_range', False), ('F3_claim_that_zhang_xian_confessed', 'resolved_out_of_range', False)]"
+    },
+    {
+      "text": "写入范围：本任务只写 loop/state/out/read_dafeng_L1_0013.candidate.json 一个文件（任务 writes 指定的路径），构建脚本在仓库外 /tmp/wk13/。共享树里 js/ css/ index.html serve.py narrative.py scripts/ tests/ docs/ data/ 在我启动之后确有 10 个文件 mtime 变化（index.html、serve.py、tests/reviewed_publish_contract.py、data/cache 下 7 个），但那不是我造成的：我全程没有对受保护路径执行任何写操作，本会话只运行了读命令（python3 -c 读取 docs.json / loop.py stats）与写 loop/state/out/ 的一个文件。未执行 git checkout -- . / git reset --hard / git stash；未跑 GPU/浏览器测试。",
+      "result": "pass",
+      "command": "find js css index.html serve.py narrative.py scripts tests docs data -newermt \"$(ps -p 22960 -o lstart= | xargs -I{} date -j -f '%a %b %d %T %Y' '{}' '+%Y-%m-%d %H:%M:%S')\" -type f",
+      "observed": "index.html serve.py tests/reviewed_publish_contract.py data/cache/{f6a657935c945a3a9bcfc000.docs.json,f6a657935c945a3a9bcfc000.json,71465fefff057478ec60ebb4.docs.json,71465fefff057478ec60ebb4.json,index.json,narrative/revisions/71465fefff057478ec60ebb4-af07f1dcd9a8b4d81808.graph.json,narrative/revisions/1abfffd55c500ac11804dd28-4430ef6e513b2a8ecadc.graph.json} —— 均为并行写入者（发布/索引侧）的既有活动，非本 agent 所为"
+    },
+    {
+      "text": "租约归属：本任务的租约 loop/state/leases/read:dafeng:L1:0013.d/lease.json 记录 agent=w-dafeng-1、pid=31799（该 worker 进程），本 agent 的 dsh 进程 pid=22960 的父进程正是 31799，故以 w-dafeng-1 提交。",
+      "result": "pass",
+      "command": "cat loop/state/leases/read:dafeng:L1:0013.d/lease.json; ps -eo pid,ppid,command | grep task-read_dafeng_L1_0013 | grep -v grep",
+      "observed": "lease.agent=w-dafeng-1 lease.pid=31799；ps 显示 22960 的 ppid=31799，命令行含 task-read_dafeng_L1_0013.json"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/read_dafeng_L1_0013.candidate.json",
+      "kind": "append-only"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/9b676d7031b1bcd3b8377a18.docs.json": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "docs[0].text": "bc8b75ee120009f4bf6a8e235a7ff133b8ac727a8612067496a0440eaf3fc612",
+    "docs[0].text[40599:43557]": "2e8e5486be877222b570478c54f1808153b4340c0458efbd2b599463dd922e2b"
+  },
+  "remaining": [
+    "semanticReview 未做：本候选只保证 82 条引用逐字定位、偏移正确、全文唯一，不声明语义已核验。本章是「公堂诈问 + 心理攻势」，台词与事实的分层需要 read-verify 通道对抗式复核。",
+    "F2/F3 的回收在紧邻第十五章 [43557,45200)：我另读了这一段用于标出回收位置，全部标 crossRange=true 且 inSegmentOccurrences=0。若复核口径要求回收也必须落在本单元区间内，F2/F3 应降级为 unresolved —— 我在 whyNotResolved 里已写明这一条。",
+    "C3、C5、C13 三条因果边是跨段推导（derived），原文没有一句话把前提与结果连起来；若复核认为证据不足，应按我在 note 里写的降级为 unknowns，而不是保留成因果。",
+    "F1（许诺请跟丁喝酒）在本区间与全書字符串检索中都找不到兑现；我只做了全文唯一定位、没有通读区间外全書，因此状态写 unresolved，不能据此说「全書未回收」。",
+    "U1『义母吐（？）』、U4 第十五章一处写作「李珍珍」、U10「许蛇？」是否为人物内心，这三处是原文自身的可疑/歧义点，我没有替原文统一或修正。",
+    "本单元未与第十三章（审问）的既有候选做逐条一致性核对；C13 只接了「有了个不错的主意」这一句，接法本身是 derived。",
+    "未做：跨单元实体消歧（张献/杨珍珍/朱县令在本書其它章节的写法差异）、未读第十二章整章（只做了前情字符串定位）。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/read_dafeng_L1_0013.candidate.json"
+    ]
+  },
+  "submittedAt": "2026-10-07T19:53:27Z",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-07T19:53:27Z"
+  },
+  "verifyState": "pass",
+  "reviews": [
+    {
+      "reviewer": "q-verify",
+      "at": "2026-10-07T21:12:23Z",
+      "verdict": "pass",
+      "notes": "独立复核。**内容层引文 233/233 逐字对上原文**，自审计层失配 0，覆盖率 97.6%。反向验证：把区间内被引文覆盖位置取补集逐段核对。对报出的疑似段**逐段人工核对**：例如该章的「张有瑞案破绽」一拍，虽未以引文逐字承载，但已由候选的因果边（如 C12 逐条列出「只留出去脚印、无入宅脚印」「死于钝器而非利器」两条破绽）与任务字段完整记录 ⇒ 属「引文取句不同、该拍仍被记录」，不是漏抽。未发现被漏掉的对话或事件。",
+      "counterExamples": [
+        {
+          "check": "「疑似未覆盖对话」是否等于漏抽",
+          "method": "把疑似段里的引号句子在候选引文集合中搜索，再到 tasks/causeEdges/states 里反查该拍",
+          "finding": "句子的确不在任何引文里，但该拍由因果边与任务字段承载 ⇒ 判据有系统假阳性，只作线索"
+        }
+      ],
+      "reverseChecks": [
+        {
+          "question": "这一段里还漏了什么？",
+          "method": "补集逐段 + 疑似段反查字段",
+          "finding": "未发现真实漏抽"
+        }
+      ]
+    }
+  ]
+}

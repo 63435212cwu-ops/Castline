@@ -1,0 +1,586 @@
+{
+ "task": "verify:xiyou:L1:0031",
+ "agent": "w-dafeng-2",
+ "status": "done",
+ "verdict": "partial",
+ "reviewedTask": "read:xiyou:L1:0031",
+ "reviewedArtifact": {
+  "path": "loop/state/out/read_xiyou_L1_0031.candidate.json",
+  "sha256": "38e0b1d6173fade5101d9b362e04d30036c395080ba4930a831af80794a579a8",
+  "producedBy": "w-dafeng-0",
+  "note": "被复核的候选；全程只读，未修改。"
+ },
+ "source": {
+  "path": "data/cache/a065244455cfb2221bcda94a.docs.json",
+  "docIndex": 0,
+  "docName": "西游记",
+  "sha256": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+  "range": [
+   213984,
+   222747
+  ],
+  "codepoints": 8763,
+  "segmentSha256": "673e90c244f70bafd76f19b80f5c262952f092119760f8bd66bccec4009db78b",
+  "offsetBase": "absolute-doc-codepoint"
+ },
+ "summary": "独立反向复核《西游记》第三十一回「猪八戒义激猴王 孙行者智降妖怪」[213984,222747)（8763 码点）。先自读原文（38 个非空段）再看候选。引用层零编造：全量 128 个 quote 节点经 t[start:end]==quote、全文 count==1、落在区间内、sourceHash 一致四项核验，失败 0；随机抽 5 条 5/5 逐字命中且偏移一致。反向覆盖发现 7 条候选未登记而原文明确存在的事实（其中 3 条是实质遗漏：行者援引自设条件拒绝救唐僧、『一日为师终身为父』的行事准则未立 rule、『被逐→妖怪不认得行者』这条真边在拒假边时被连带丢失）。判 partial 而非 fail：无一条属编造，全部抽取内容经原文核验为真；判 partial 而非 pass：三处字段可由原文直接证伪（T6.result『得偿所愿』把结束当成功、T6.objective『顺带救唐僧』无引文支撑、T3.cost『内丹不还』与同文件 WS6 自述互相矛盾）。另附一条可复现的下游风险：T2 的 character 为『猪八戒、沙僧』，发布桥 resolve_character() 实测返回 None，该条会在转换阶段被静默丢弃。",
+ "method": [
+  "先读原文：python3 -B -s -c \"import json;t=json.load(open('data/cache/a065244455cfb2221bcda94a.docs.json'))[0]['text'];open('/tmp/seg31.txt','w').write(t[213984:222747])\" 后通读切片（8763 字 / 38 个非空段），之后才打开候选。",
+  "机械核验：python3 -B -s /tmp/v31.py → 'quote nodes checked: 128 bad: 0'（distinct 90，与 coverage 自报一致）。",
+  "反向覆盖：python3 -B -s /tmp/cov31.py → 候选引文覆盖切片 2132/8763 字（24.3%），未被任何引文触及的句子 290 条，逐条人工过筛后得 reverseChecks。",
+  "词汇外泄扫描：把候选所有叙述性字符串（跳过 quote 节点）按 CJK 2–5 字切词，与本区间比对，找出 1546 个本区间不存在的词，再逐个判定是『规范名指称在场实体』还是『编造』（结论：无编造）。",
+  "下游可发布性：用 loop/bin/to_candidate.py 的 resolve_character() 对六条 task 的 character 逐一求解（图谱 data/cache/df959d743e53206f56db2f92.json），只有 T2 返回 None。"
+ ],
+ "counterExamples": [
+  {
+   "claim": "T6.result.text 首句断言『得偿所愿』，把行者的目标写成已达成。",
+   "candidateField": "tasks[T6_wukong_subdues_demon].result.text",
+   "why": "行者自己把目标说成『把他拿住，碎尸万段，以报骂我之仇』，并设条件『报毕，我即回来』；原文的实际结果是奎木狼被收上界、收去金牌、贬去兜率宫烧火，且明写『有功复职』——既没有碎尸万段，也不是永久黜落，行者本人也没有回花果山而是继续西行。『得偿所愿』把『妖怪被收走、本回演完（结束）』当成了『目标逐项达成（成功）』，与同一栏 note 自称的『不靠打到结尾判定』自相矛盾。结果栏的正文叙述本身是准确的（收金牌、贬去兜率宫），要改的只是这个总括词。",
+   "severity": "must-fix",
+   "minimalRepair": "把『得偿所愿：』改为『部分达成：妖怪被收上界受贬（未如目标所说处死），行者继续西行而未回花果山』；result 的 rest 保持不动。",
+   "quotes": [
+    {
+     "quote": "我这去，把他拿住，碎尸万段，以报骂我之仇！报毕，我即回来。",
+     "start": 215646,
+     "end": 215675,
+     "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+     "offsetUnit": "codepoint",
+     "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+     "wholeTextOccurrences": 1,
+     "inRange": true
+    },
+    {
+     "quote": "收了金牌，贬他去兜率宫与太上老君烧火，带俸差操，有功复职，无功重加其罪。",
+     "start": 221606,
+     "end": 221642,
+     "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+     "offsetUnit": "codepoint",
+     "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+     "wholeTextOccurrences": 1,
+     "inRange": true
+    }
+   ]
+  },
+  {
+   "claim": "T6.objective.text 把『顺带救唐僧』写进行者此行的目标，但该栏唯一引文不支持这一分句。",
+   "candidateField": "tasks[T6_wukong_subdues_demon].objective.text",
+   "why": "objective.claimStatus=dialogue，quotes 只有『我这去，把他拿住…报毕，我即回来』一条；那句话里只有报仇与『报毕即回』，没有『救唐僧』。后文更能反证它当时不是无障碍的既定目标：唐僧获救前，行者正是援引『原与你说来，待降了妖精，报了骂我之仇，就回去的』当场拒绝施救，八戒劝止、沙僧下跪之后他才转意。这不影响 T1（八戒的目标确实是请他去救唐僧），但 T6 这一栏必须与行者自己的话对齐。",
+   "severity": "must-fix",
+   "minimalRepair": "改为『降黄袍怪、报被辱骂之仇（救唐僧是八戒转述的诉求，行者当时只认报仇与「报毕即回」）』，或删去『顺带救唐僧』分句。",
+   "quotes": [
+    {
+     "quote": "我这去，把他拿住，碎尸万段，以报骂我之仇！报毕，我即回来。",
+     "start": 215646,
+     "end": 215675,
+     "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+     "offsetUnit": "codepoint",
+     "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+     "wholeTextOccurrences": 1,
+     "inRange": true
+    },
+    {
+     "quote": "原与你说来，待降了妖精，报了骂我之仇，就回去的。",
+     "start": 222329,
+     "end": 222353,
+     "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+     "offsetUnit": "codepoint",
+     "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+     "wholeTextOccurrences": 1,
+     "inRange": true
+    }
+   ]
+  },
+  {
+   "claim": "T3.cost.text 写『内丹被行者吸取不还』，同一文件的 WS6.explain 却明确声明不记 lose、理由是原文没写他此后再也拿不回。",
+   "candidateField": "tasks[T3_kuimulang_checks_sons].cost.text vs worldSettings[WS6_sheli_inner_alchemy_orb].explain",
+   "why": "同一份候选对同一件事给出两个相反判断：cost 把『不还』当既成事实（虽标 basis=inferred，措辞仍是断言），WS6 说原文只写到『劈手来抢』未果与『吸在肚里』，没有一句写他失去或拿不回。按原文，这两个动作只支持『易主（transfer）』，不支持『永久失去（lose）』。两者必须统一到 WS6 的保守口径。",
+   "severity": "must-fix",
+   "minimalRepair": "T3.cost 的『内丹被行者吸取不还』改为『内丹被行者一口吸在肚里（易主；此后原文未写归还或收回）』。",
+   "quotes": [
+    {
+     "quote": "那妖慌了，劈手来抢",
+     "start": 219427,
+     "end": 219436,
+     "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+     "offsetUnit": "codepoint",
+     "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+     "wholeTextOccurrences": 1,
+     "inRange": true
+    },
+    {
+     "quote": "把那宝贝一口吸在肚里。",
+     "start": 219449,
+     "end": 219460,
+     "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+     "offsetUnit": "codepoint",
+     "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+     "wholeTextOccurrences": 1,
+     "inRange": true
+    }
+   ]
+  }
+ ],
+ "reverseChecks": [
+  {
+   "found": "行者当场援引 CE1 里自己设的条件拒绝救唐僧，八戒劝止、沙僧下跪求情后才转意下『快取水来』——整段『拒绝→求情→反转』在候选里没有任何条目。",
+   "why": "它是 CE1 那条『报毕，我即回来』的兑现点，也是唐僧得以复原的近因。候选的 CE7 只写了『取水念真言→虎气退』这个机械动作，跳过了『行者本来不肯救』这一前置条件；T6.result 与 T6.cost 也把复归写成顺理成章。缺了它，图谱上会留下『行者设了报毕即回的条件，然后再无下文』的断链。四句引证全部落在 [222272,222437)，是连续可引的一段。",
+   "quotes": [
+    {
+     "quote": "你凡事撺唆，是他个得意的好徒弟，你不救他，又寻老孙怎的？",
+     "start": 222301,
+     "end": 222329,
+     "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+     "offsetUnit": "codepoint",
+     "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+     "wholeTextOccurrences": 1,
+     "inRange": true
+    },
+    {
+     "quote": "原与你说来，待降了妖精，报了骂我之仇，就回去的。",
+     "start": 222329,
+     "end": 222353,
+     "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+     "offsetUnit": "codepoint",
+     "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+     "wholeTextOccurrences": 1,
+     "inRange": true
+    },
+    {
+     "quote": "沙僧近前跪下道：“哥啊，古人云，不看僧面看佛面。",
+     "start": 222354,
+     "end": 222378,
+     "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+     "offsetUnit": "codepoint",
+     "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+     "wholeTextOccurrences": 1,
+     "inRange": true
+    },
+    {
+     "quote": "行者用手挽起道：“我岂有安心不救之理？快取水来。”",
+     "start": 222412,
+     "end": 222437,
+     "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+     "offsetUnit": "codepoint",
+     "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+     "wholeTextOccurrences": 1,
+     "inRange": true
+    }
+   ]
+  },
+  {
+   "found": "『一日为师，终身为父，父子无隔宿之仇』被行者当作明文规矩说出来；worldSettings 的 rule 只有水解法、时间账、奎宿自辩三条，没有这条行事准则。",
+   "why": "按提示词 4b 的口径（『只提取影响行动、资源、约束或后果的明确设定』），这条正好影响行动——行者拒绝救唐僧时，正是被师徒之义反将；它比 WS3（奎宿自辩，已记 misunderstood）更适合立 rule：WS3 是单方自辩、玉帝并未据此免罪，而这条是行者与妖怪双方都在援引的行为准则（妖怪也拿『既受了师父赶逐』来讥他）。",
+   "quotes": [
+    {
+     "quote": "你这个泼怪，岂知一日为师，终身为父，父子无隔宿之仇！",
+     "start": 219892,
+     "end": 219918,
+     "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+     "offsetUnit": "codepoint",
+     "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+     "wholeTextOccurrences": 1,
+     "inRange": true
+    },
+    {
+     "quote": "既受了师父赶逐，却有甚么嘴脸又来见人！",
+     "start": 219867,
+     "end": 219886,
+     "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+     "offsetUnit": "codepoint",
+     "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+     "wholeTextOccurrences": 1,
+     "inRange": true
+    }
+   ]
+  },
+  {
+   "found": "『行者被逐回 → 黄袍怪不认得孙悟空』是原文写出的因果，候选只在 rejectedAsCauseEdge 里否掉了同源的另一条假边（被逐→唐僧被拿），这条真边没有立。",
+   "why": "行者自己解释了妖怪为何不知他姓孙：『将我逐回，故不曾同他一路行走』；妖怪当面证实：『止知他有两个徒弟，叫做猪八戒、沙和尚，何曾见有人说个姓孙的』。这是『否掉假边时把同源真边一起丢了』的误杀形态；它还正好解释了 CE4 与 FS1 里妖怪只『有些认得』却叫不出名字的来源。",
+   "quotes": [
+    {
+     "quote": "我不曾同他二人来，是我师父因老孙惯打妖怪，杀伤甚多，他是个慈悲好善之人，将我逐回，故不曾同他一路行走。",
+     "start": 219793,
+     "end": 219844,
+     "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+     "offsetUnit": "codepoint",
+     "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+     "wholeTextOccurrences": 1,
+     "inRange": true
+    },
+    {
+     "quote": "我拿住唐僧时，止知他有两个徒弟，叫做猪八戒、沙和尚，何曾见有人说个姓孙的。",
+     "start": 219733,
+     "end": 219770,
+     "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+     "offsetUnit": "codepoint",
+     "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+     "wholeTextOccurrences": 1,
+     "inRange": true
+    }
+   ]
+  },
+  {
+   "found": "行者用『孝』责问公主、公主惭愧失口承认思念父母，这是 T4 得以推进的机制；候选只记了行者的承诺与公主的躲避，没把这次道德责问记成因果或规则。",
+   "why": "公主的配合不是凭空来的：她先被『不孝之罪』逼到耳红面赤，才失口说出『我岂不思念父母』，随后才接受行者安排、躲开让他冒名顶替。T4.obstacle 只写了她自述的客观困难（法令谨、路远），漏掉这条被说服的主观转折，属『机制存在但没被记下来』。",
+   "quotes": [
+    {
+     "quote": "记得古书云，五刑之属三千，而罪莫大于不孝。",
+     "start": 217568,
+     "end": 217589,
+     "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+     "offsetUnit": "codepoint",
+     "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+     "wholeTextOccurrences": 1,
+     "inRange": true
+    },
+    {
+     "quote": "公主闻此正言，半晌家耳红面赤，惭愧无地",
+     "start": 217666,
+     "end": 217685,
+     "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+     "offsetUnit": "codepoint",
+     "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+     "wholeTextOccurrences": 1,
+     "inRange": true
+    },
+    {
+     "quote": "长老之言最善，我岂不思念父母？",
+     "start": 217692,
+     "end": 217707,
+     "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+     "offsetUnit": "codepoint",
+     "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+     "wholeTextOccurrences": 1,
+     "inRange": true
+    }
+   ]
+  },
+  {
+   "found": "唐僧复原后当众给出行者的功劳名分，国王设宴、率多官远送——本单元的收束与名分事实，候选只写到『陈诉思凡下界的原委』为止。",
+   "why": "T6.result 停在『当众陈诉原委』，没写唐僧的『你的功劳第一』与朝廷的谢礼远送。这既是人物关系（唐僧正式认账），也是本单元唯一的收束点；按『结束≠成功』的口径，收束事实应当登记，而不是留给读者从回目去猜。",
+   "quotes": [
+    {
+     "quote": "三藏谢之不尽道：“贤徒，亏了你也！亏了你也！这一去，早诣西方，径回东土，奏唐王，你的功劳第一。",
+     "start": 222579,
+     "end": 222626,
+     "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+     "offsetUnit": "codepoint",
+     "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+     "wholeTextOccurrences": 1,
+     "inRange": true
+    },
+    {
+     "quote": "他师徒受了皇恩，辞王西去，国王又率多官远送。",
+     "start": 222678,
+     "end": 222700,
+     "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+     "offsetUnit": "codepoint",
+     "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+     "wholeTextOccurrences": 1,
+     "inRange": true
+    }
+   ]
+  },
+  {
+   "found": "天庭一侧对行者的评断（天师当面讥其『村俗』、玉帝以『天上清平』为幸）与行者只『唱个大喏』不谢恩——三句写定的态度事实，候选没有登记。",
+   "why": "ST4 只写了天庭对奎木狼的处置，没写天庭与行者的关系面。行者受了玉帝的发放只唱喏不谢恩、天师讥他『村俗』、玉帝反以『只得他无事』为幸，这三句共同界定了『取经人 vs 天庭』的相处方式。它落不进 rule/place/item 任何一类，至少该进 unknowns，不应连提都没提（此条属存疑，不作为判定依据）。",
+   "quotes": [
+    {
+     "quote": "行者见玉帝如此发放，心中欢喜，朝上唱个大喏",
+     "start": 221642,
+     "end": 221663,
+     "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+     "offsetUnit": "codepoint",
+     "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+     "wholeTextOccurrences": 1,
+     "inRange": true
+    },
+    {
+     "quote": "玉帝道：“只得他无事，落得天上清平是幸。”",
+     "start": 221718,
+     "end": 221739,
+     "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+     "offsetUnit": "codepoint",
+     "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+     "wholeTextOccurrences": 1,
+     "inRange": true
+    }
+   ]
+  },
+  {
+   "found": "师徒复归时的旧怨被行者当面点出、八戒出言劝止，这段张力候选完全没有登记。",
+   "why": "行者救唐僧之前先翻旧账（『你怪我行凶作恶，赶我回去』），八戒替师父求情叫停（『不要只管揭挑他了』）。这说明复归不是无摩擦的和解，与 ST1『从花果山归队』、ST3『虎形复原身』都不同——它是第三段关系状态（唐僧与行者）的转折，候选没有对应条目（此条属存疑，不作为判定依据）。",
+   "quotes": [
+    {
+     "quote": "你怪我行凶作恶，赶我回去，你要一心向善，怎么一旦弄出个这等嘴脸？",
+     "start": 222237,
+     "end": 222269,
+     "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+     "offsetUnit": "codepoint",
+     "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+     "wholeTextOccurrences": 1,
+     "inRange": true
+    },
+    {
+     "quote": "八戒道：“哥啊，救他一救罢，不要只管揭挑他了。”",
+     "start": 222272,
+     "end": 222296,
+     "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+     "offsetUnit": "codepoint",
+     "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+     "wholeTextOccurrences": 1,
+     "inRange": true
+    }
+   ]
+  }
+ ],
+ "misKillChecks": [
+  {
+   "what": "八戒的直裰被花果山群猴揪破，被排除出 T1.cost（costNote 明说『不拿这件直裰充数』）。",
+   "verdict": "理由成立，不算误杀",
+   "why": "原文写的是『被一窝猴子捉住了，扛抬扯拉，把一件直裰子揪破』——这是他上山时的遭遇，不是叙述者为他此行目标结算的代价；且行者随后还给了他『来与不来，任从尊意』的免责条件。costNote 把取舍与理由都写明，属有据的保守判定。",
+   "quotes": [
+    {
+     "quote": "却说那呆子被一窝猴子捉住了，扛抬扯拉，把一件直裰子揪破",
+     "start": 214093,
+     "end": 214120,
+     "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+     "offsetUnit": "codepoint",
+     "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+     "wholeTextOccurrences": 1,
+     "inRange": true
+    }
+   ]
+  },
+  {
+   "what": "WS6 记 hold/transfer/use 而不记 lose。",
+   "verdict": "保守但可辩护；要改的是 T3.cost 一侧",
+   "why": "单看原文只有『劈手来抢』未果与『吸在肚里』两个动作，不记 lose 守得住；真正的矛盾出在同一文件另一处（见 counterExamples 第 3 条）。所以不是 WS6 误杀，而是两处口径必须统一。",
+   "quotes": [
+    {
+     "quote": "那妖慌了，劈手来抢",
+     "start": 219427,
+     "end": 219436,
+     "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+     "offsetUnit": "codepoint",
+     "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+     "wholeTextOccurrences": 1,
+     "inRange": true
+    },
+    {
+     "quote": "把那宝贝一口吸在肚里。",
+     "start": 219449,
+     "end": 219460,
+     "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+     "offsetUnit": "codepoint",
+     "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+     "wholeTextOccurrences": 1,
+     "inRange": true
+    }
+   ]
+  },
+  {
+   "what": "rejectedAsCauseEdge 否掉『行者被逐 → 唐僧在黑松林被拿』这条假边。",
+   "verdict": "否得对，但连带丢了同源真边",
+   "why": "原文把唐僧被拿的直接条件写成他自己『只当寺院』走到塔下（八戒转述），确实没有一句归因于行者不在，所以拒连边是对的；但同一段材料还支持『被逐 → 妖怪不认得行者』这条真边（见 reverseChecks 第 3 条）。否假边时把真边一起丢了，正是角色契约所说的误杀形态。",
+   "quotes": [
+    {
+     "quote": "你晓得师父没有坐性，他独步林间玩景，出得林，见一座黄金宝塔放光，他只当寺院，不期塔下有个妖精，名唤黄袍，被他拿住。",
+     "start": 214864,
+     "end": 214921,
+     "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+     "offsetUnit": "codepoint",
+     "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+     "wholeTextOccurrences": 1,
+     "inRange": true
+    },
+    {
+     "quote": "我不曾同他二人来，是我师父因老孙惯打妖怪，杀伤甚多，他是个慈悲好善之人，将我逐回，故不曾同他一路行走。",
+     "start": 219793,
+     "end": 219844,
+     "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+     "offsetUnit": "codepoint",
+     "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+     "wholeTextOccurrences": 1,
+     "inRange": true
+    }
+   ]
+  }
+ ],
+ "quoteAudit": {
+  "totalQuoteNodes": 128,
+  "distinctQuotes": 90,
+  "allVerbatimUniqueInRange": true,
+  "bad": 0,
+  "declaredCoverageMatchesActual": true,
+  "command": "python3 -B -s /tmp/v31.py",
+  "randomSample": [
+   {
+    "quote": "是那黄袍怪这等骂来，我故学与你听也。",
+    "claimedStart": 215537,
+    "findStart": 215537,
+    "exact": true
+   },
+   {
+    "quote": "他原来是孙大圣大闹天宫时打怕了的神将，闪在那山涧里潜灾，被水气隐住妖云，所以不曾看见他。",
+    "claimedStart": 221334,
+    "findStart": 221334,
+    "exact": true
+   },
+   {
+    "quote": "你替我折辩了家书，救了我一命，我也留心放你",
+    "claimedStart": 216576,
+    "findStart": 216576,
+    "exact": true
+   },
+   {
+    "quote": "且等我回家看看，是我的儿子不是我的儿子，再与他说话不迟。",
+    "claimedStart": 218646,
+    "findStart": 218646,
+    "exact": true
+   },
+   {
+    "quote": "长老之言最善，我岂不思念父母？",
+    "claimedStart": 217692,
+    "findStart": 217692,
+    "exact": true
+   }
+  ],
+  "randomSampleNote": "random.seed(20260731) 从 128 个 quote 节点中抽 5 条；5/5 逐字命中，find() 偏移与候选声明的 start 全部一致。"
+ },
+ "hallucinationCheck": {
+  "inventedCharacters": "无原文外人物。候选出现的实体（孙悟空、猪八戒、沙僧、唐僧、黄袍怪/奎木狼、百花羞/宝象国三公主、白龙马、玉帝、天师、二十七宿、太上老君、披香殿玉女、宫娥）在本区间或全书中均有出处；『百花羞』『花果山』在本区间 count=0 但在全书有据且指向在场实体（公主、水帘洞所在地），图谱可唯一解析，属规范名指称，不是编造。",
+  "inventedEnding": "无。T6.result 以『独少奎星→收他上界→贬去兜率宫』的叙述链承载成功，未把回末当成功（但总括词『得偿所愿』需改，见 counterExamples 第 1 条）。",
+  "inventedForeshadow": "无。FS1/FS2 的铺设与回收都在本区间内，且如实标 basis=inferred；FS3 如实标 unresolved；rejectedAsForeshadow 两条给了理由。",
+  "dialogueAsFact": "基本合规：每条 claimStatus 都区分 dialogue / narrator / character-inner；T1.obstacle 明确把八戒的谎话标注为『不作为事实主张』；T4.result 用叙述者的『带上金銮殿上…参拜』承载结果，不拿公主奏词当叙述事实。未发现把台词写成叙述事实的条目。",
+  "successVerdict": "一处越界：T6.result 的『得偿所愿』（counterExamples 第 1 条）；相同文件 T6.result.note 自称不靠打到结尾判定，属自述与措辞不一致，非编造结局。",
+  "semanticReview": "候选 semanticReview='not_performed'，semanticReviewNote 说明语义须由 read-verify 换 agent 反向核验，未越权声称完成。"
+ },
+ "coverage": {
+  "coveredCodepoints": 2132,
+  "span": 8763,
+  "coveragePct": 24.3,
+  "uncoveredSentences": 290,
+  "note": "覆盖率为『被引文逐字覆盖的字符数 / 区间长度』，不是质量指标也不参与判定；本次只用它来定位『候选一眼没看的地方』，再人工过筛出 reverseChecks。",
+  "command": "python3 -B -s /tmp/cov31.py"
+ },
+ "usable": [
+  "tasks 六条的 objective/obstacle/action/result 主体（T6.result 建议改总括词；T6.objective 建议去掉无引文支撑的分句）",
+  "causeEdges 七条的机制、direction、caveat（端点键名 from/to，与全库口径一致）",
+  "states 四条、foreshadows 三条（FS1/FS2 如实标 inferred，FS3 如实标 unresolved）",
+  "worldSettings 八条（WS6 的 itemStates 保留，改 T3.cost 一侧）",
+  "themeReadings 两条（均带 counter，未套三幕）",
+  "unknowns 八条、selfCritique 三条、reverseChecks 六条、rejectedAsCauseEdge 三条、rejectedAsForeshadow 两条",
+  "全部 128 个 quote 节点与 coverage 计数"
+ ],
+ "mustFix": [
+  "T6.result 的『得偿所愿』降级（妖怪被收押受贬、未如目标所说处死，且行者继续西行未回花果山）",
+  "T3.cost 的『内丹…不还』改为与 WS6 一致的『易主（transfer），此后原文未写归还』",
+  "T6.objective 去掉或改写『顺带救唐僧』分句"
+ ],
+ "shouldAdd": [
+  "R1 拒绝→求情→反转（[222272,222437)）的因果边或状态条目",
+  "R2『一日为师，终身为父，父子无隔宿之仇』的行事准则（rule 或 unknowns）",
+  "R3『被逐→妖怪不认得行者』这条真边",
+  "R4 行者以孝责问公主的机制",
+  "R5 唐僧给出行者功劳名分与朝廷远送的收束事实"
+ ],
+ "notes": "结论：partial。这份候选的机械层是干净的，语义层有三处需改、七处需补，但没有编造。\n\n【机械层：通过】候选 128 个 quote 节点全部满足 docs[0].text[start:end]==quote、全文 count==1、落在 [213984,222747) 内、sourceHash 与任务一致；bad=0。coverage 自报 128 节点 / 90 条不同引文，与实际重算完全一致。随机抽 5 条（random.seed(20260731)）逐字命中且偏移一致。候选文件 sha256=38e0b1d6…（与 read_xiyou_L1_0031.submit.json 记录一致），原文 sha256=c282cf39…（与任务 sourceHash 一致），切片 sha256=673e90c2…。六个内容分区齐全（validate_sections 返回空）；tasks 六条的五栏之间没有共用同一句引文（提示词明令禁止，实测 shared=0）。\n\n【语义层：三处必改】见 counterExamples。① T6.result 的『得偿所愿』把结束当成功；② T6.objective 的『顺带救唐僧』没有引文支撑、且被后文反证；③ T3.cost 的『内丹…不还』与同文件 WS6.explain 的『不记 lose，因为原文没写拿不回』互相矛盾。三处都是字段级措辞，改了不影响其余内容。\n\n【语义层：可用的部分】tasks 六条的五元组主体、causeEdges 七条的机制与 caveat、states 四条的前后值、foreshadows 三条（含 FS3 显式 unresolved）、worldSettings 八条、themeReadings 两条（都带反例），我逐条回原文核对，未发现无据条目。尤其值得肯定的四点：① rejectedAsCauseEdge 主动否掉三条『时间相邻』式连边；② T1/T2/T5 的 cost 写 null 并给出理由，而不是拿遭遇充数；③ 每条 causeEdge 都写了 caveat，把『八戒自编的辱骂』『公主本就感念沙僧』『妖怪半信半疑』这些反向证据留在文件里；④ reverseChecks 六条里有两条是对自己机制的反证（RC4 叙述者的宿命口吻、RC6 妖怪当面否认骂过）。这些是加分项，不是缺陷。\n\n【需要补的遗漏】见 reverseChecks 七条，最重要的是前三条：R1 行者援引自己设的条件当场拒绝救唐僧、八戒劝止、沙僧下跪后才转意（[222272,222437)，候选无任何条目）；R2『一日为师，终身为父』这条行事准则未立 rule；R3『被逐→妖怪不认得行者』这条真边在拒假边时被连带丢失。R6/R7 我拿不准该不该立分区（取决于 SCHEMA 是否容纳关系层），只作为反向发现列出，不主张候选违规。\n\n【误杀检查】三条，见 misKillChecks。没有一条构成需要判 fail 的误杀：八戒直裰那条是有理由的保守取舍；WS6 不记 lose 单看原文也守得住（矛盾在 T3.cost 一侧）；第三条是拒假边时的连带丢失，补边即可。\n\n【幻觉/越权】未发现原文之外的人物、事件、结局或伏笔；semanticReview 如实写 not_performed，没有把定位正确冒充语义已核验。三处名称要说明性质：候选用了『百花羞』『花果山』『九天』，这三个词在本区间内 count=0（分别来自第二十九回、前文与全书他处），但它们指向的实体在本区间都存在（公主、水帘洞所在地、天庭），图谱里也能解析到唯一人物（百花羞→ch_6ddebda4dddb2ce3），属于用规范名指称在场实体，不是编造人物或事件；『九天查勘』严格说不如原文的『查勘九曜星官』精确。记为低严重度措辞问题，不据此判 fail。\n\n【一个可复现的下游风险（不属于语义判定）】tasks[T2] 的 character 写成『猪八戒、沙僧』。用发布桥自己的解析器实测（loop/bin/to_candidate.py 的 resolve_character() + 图谱 data/cache/df959d743e53206f56db2f92.json）：六条里只有 T2 返回 None，其余五条都能解析到唯一人物；即 T2 会在 to_candidate 阶段以 no_resolvable_character 被静默丢弃。T2 描述的确是两个人的联合行动，问题在管线只接受单一身份，不在读者判断，本轮不据此改判。建议要么拆成两条（各写一人），要么在发布层支持联合主体。\n\n【我自己的更正】我第一遍用 e.get('cause')/e.get('effect') 打印 causeEdges，得到两个 null，一度怀疑七条因果边全都没有端点。实际是这七条的端点键名写作 from/to（与全库 3139 条边的口径一致；实测含 cause/effect 键的边为 0 条），是我的读法错了，不是候选缺字段。已在 method 里改正，特此如实记录（角色契约允许并鼓励复核者如实写自己的错）。\n\n【存疑，不作为 fail 依据】R6、R7 两条是否该立分区取决于 SCHEMA 是否容纳关系层，我拿不准；counterExamples 第 2 条的『顺带救唐僧』也可以争辩为行者的总体目标之一，我按『该栏唯一引文必须支持该栏文字』的口径记为反例，但它属引文支撑不足，不是事实错误。",
+ "evidence": [
+  {
+   "path": "loop/state/out/read_xiyou_L1_0031.candidate.json",
+   "sha256": "38e0b1d6173fade5101d9b362e04d30036c395080ba4930a831af80794a579a8",
+   "kind": "被复核候选（只读，未修改）"
+  },
+  {
+   "path": "data/cache/a065244455cfb2221bcda94a.docs.json",
+   "sha256": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+   "kind": "原文来源（只读引用，未修改）"
+  },
+  {
+   "path": "loop/state/out/read_xiyou_L1_0031.json",
+   "sha256": "686e626939ca564fa1e3d72a8f25516d8607a77bcf5af6fcce765fe72b0744ab",
+   "kind": "被复核任务的提交记录（读 agent/status 用；verify 机制随后会向它追加 reviews[]，故哈希为提交前实测）"
+  }
+ ],
+ "assertions": [
+  {
+   "text": "源文件哈希与任务 sourceHash 一致；切片 len==8763 且 sha256==673e90c2…",
+   "result": "pass",
+   "cmd": "python3 -c \"import json,hashlib;b=open('data/cache/a065244455cfb2221bcda94a.docs.json','rb').read();t=json.loads(b)[0]['text'];s=t[213984:222747];print(hashlib.sha256(b).hexdigest(),len(s),hashlib.sha256(s.encode()).hexdigest())\""
+  },
+  {
+   "text": "被复核任务的提交者不是本复核者（非自签）：read 记录 agent=w-dafeng-0，本复核 agent=w-dafeng-2",
+   "result": "pass",
+   "cmd": "python3 -c \"import json;print(json.load(open('loop/state/out/read_xiyou_L1_0031.json'))['agent'])\""
+  },
+  {
+   "text": "全量引文核验：128 个 quote 节点中 t[start:end]!=quote 0 条、count!=1 0 条、越界 0 条、sourceHash 不符 0 条",
+   "result": "pass",
+   "cmd": "python3 -B -s /tmp/v31.py"
+  },
+  {
+   "text": "随机抽 5 条（seed=20260731）：5/5 逐字命中、find()==start",
+   "result": "pass",
+   "cmd": "python3 -B -s /tmp/v31.py  # 见 quoteAudit.randomSample"
+  },
+  {
+   "text": "coverage 自报 128 节点 / 90 不同引文，与实际重算一致",
+   "result": "pass",
+   "cmd": "python3 -B -s /tmp/v31.py  # 末两行 coverage declares / actual"
+  },
+  {
+   "text": "tasks 五栏之间无共用同一句引文（提示词禁止），六条 shared=0",
+   "result": "pass",
+   "cmd": "python3 -B -s /tmp/col31.py"
+  },
+  {
+   "text": "反向覆盖：引文覆盖 2132/8763 字（24.3%），未覆盖句子 290 条",
+   "result": "pass",
+   "cmd": "python3 -B -s /tmp/cov31.py"
+  },
+  {
+   "text": "本复核文件的引证自检：counterExamples/reverseChecks/misKillChecks 的全部引文逐字命中且落在区间内",
+   "result": "pass",
+   "cmd": "python3 -B -s /tmp/selfcheck31.py"
+  },
+  {
+   "text": "下游可发布性：六条 task 的 character 经 to_candidate.resolve_character() 解析，只有 T2 返回 None",
+   "result": "pass",
+   "cmd": "python3 -B -s /tmp/bridge31.py"
+  }
+ ],
+ "remaining": [
+  "语义正确性未独立复核：本次只做引用定位全量核验 + 反向覆盖 + 误杀检查，未判断候选对人物动机/世界观的解读是否文学上最优（semanticReview 仍为 not_performed）。",
+  "复核只覆盖原文区间 [213984,222747)；区间外原文仅在核实名称出处时检索（百花羞@199932 等），未作为本区间证据写入任何断言。",
+  "『百花羞』『花果山』『九天』三词在本区间内 count=0：我判定为规范名/常用词指称在场实体，不是编造；若发布口径要求『区间内自足』，应把它们替换为区间内写法（公主、水帘洞、查勘九曜星官）。",
+  "T2 的 character『猪八戒、沙僧』在发布桥会因 no_resolvable_character 被丢弃：这是管线只接受单一身份所致，我未改判，留给发布任务处置。",
+  "R6/R7 两条（天庭态度、师徒旧怨张力）是否该立分区取决于 SCHEMA 是否容纳关系层，我拿不准，只作为反向发现列出。",
+  "未跑 GPU/浏览器测试（本任务不需要）；未修改被复核的候选文件与任何受保护路径。"
+ ],
+ "rollback": {
+  "kind": "append-only",
+  "strategy": "delete-added-files",
+  "files": [
+   "loop/state/out/verify_xiyou_L1_0031.verdict.json"
+  ],
+  "note": "本复核只新增 verdict 文件；`loop.py verify` 随后会向 loop/state/out/read_xiyou_L1_0031.json 追加一条 reviews[] 并置 verifyState（机制自身的写入）。删除本文件并撤下该条 review 即可完全回滚。"
+ },
+ "sourceHashes": {
+  "data/cache/a065244455cfb2221bcda94a.docs.json": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+  "loop/state/out/read_xiyou_L1_0031.candidate.json": "38e0b1d6173fade5101d9b362e04d30036c395080ba4930a831af80794a579a8"
+ },
+ "changes": [
+  {
+   "path": "loop/state/out/verify_xiyou_L1_0031.verdict.json",
+   "kind": "append-only",
+   "note": "任务 writes 声明的产出：本复核结论（本文件即提交记录，含 verdict/counterExamples/reverseChecks/notes）。"
+  },
+  {
+   "path": "loop/state/out/read_xiyou_L1_0031.json",
+   "kind": "append-only",
+   "note": "由 `python3 loop/bin/loop.py verify --task read:xiyou:L1:0031 --file loop/state/out/verify_xiyou_L1_0031.verdict.json --agent w-dafeng-2` 写入：向 reviews[] 追加本复核、verifyState 置为 partial（机制自身的写入，非我手工改写被复核内容）。"
+  }
+ ],
+ "remainingNote": "counterExamples 与 reverseChecks 的每一条都带逐字可查的原文引证；拿不出原文引证的反对意见（R6/R7、『顺带救唐僧』的另一种读法）已按角色契约降为 notes 里的『存疑』，未据此判 fail。"
+}

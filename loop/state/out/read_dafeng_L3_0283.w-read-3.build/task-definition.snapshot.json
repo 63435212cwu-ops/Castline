@@ -1,0 +1,27 @@
+{
+  "id": "read:dafeng:L3:0283",
+  "stream": "read",
+  "phase": 1,
+  "seq": 754,
+  "title": "精读 大奉打更人 第五十四章 问答",
+  "prompt": "精读《大奉打更人》第五十四章 问答（原文区间 codepoint [1206041,1212202)，6161 字）。\n\n读的是**原文**：`data/cache/1063b17ca65ec1b76f30e460.docs.json` 里 docs[0].text 的 [start,end) 切片。\n图谱缓存 `data/cache/1063b17ca65ec1b76f30e460.json` 里的摘要**不算原文证据**，只能用来对照已有结论。\n\n**偏移口径（必须遵守，已有 agent 在这里踩过）**：\n- `start`/`end` 是相对 **docs[0].text 全文** 的 codepoint 偏移（不是相对切片）。\n  自检式：`docs[0].text[start:end]` 应当以本单元的标题开头。\n- 你给的每条 `quoteRef.start/end` 也用**同一口径**（全文偏移），保证\n  `docs[0].text[quoteStart:quoteEnd] == quote` 逐字成立。\n- `sourceHash` 是**整个 docs.json 文件**的 sha256（不是切片的）。\n  如果你要额外给切片哈希，另起字段，不要覆盖 sourceHash。\n\n产出（写进 loop/state/out/read_dafeng_L3_0283.candidate.json）：\n1. `tasks[]`：任务五元组分列——objective（谁想要什么）/ obstacle / action / result（实际得到什么）/ cost（付出什么）。\n   缺哪一项写 `null`，**不要补一个听起来合理的值**。\n   **每一栏必须引用各自的原文依据**（每栏自带 `quotes[]`，逐字、带 start/end/sourceHash）：\n   禁止把同一句话同时当作多栏的依据 —— 实测旧图谱里有 714/1664 个任务五栏共用一句\n   （例如整条任务只引「趁着玄诚道长外出，他偷偷溜进来…」，而那句话既没说目标也没说代价）。\n   某一栏在原区间内**确实没有依据**时：写 `null`，并在同名的 `<栏位>Note` 里写明\n   **为什么没有**（例如「costNote」= 「本区间未出现代价描写」）。\n   **不写理由的 null 会被判为未标注的未知，与「已确认无代价」不是一回事。**\n   `cost` 尤其注意：`待验证/待核` 不是代价，`法律规定/禁令` 不是已执行结果。\n2. `causeEdges[]`：每条必须有方向与触发（A 导致 B 的机制），不能因为「时间相邻/同一场景」就连边。\n3. `states[]`：人物状态变化要有前值/后值 + 事件锚点；知识差要写清谁知/不知。\n4. `foreshadows[]`：有铺设与回收才算伏笔；只出现一次的东西不叫伏笔。未回收的要显式标 unresolved。\n4b. `worldSettings[]`（P3.10）：**只提取影响行动、资源、约束或后果的明确设定**。\n   每条给 `kind`（rule 世界规则 / place 地点 / item 物件）+ `name` + `quote` + `explain`。\n   **三条区分必须写进字段，不能靠读者自己分辨**：\n   · 地点：`placeState` = `arrived`（有到达/驻守动作）或 `mentioned`（只是提到/议论/图谋）。\n     **「取荆州」是图谋不是到达** —— 实测它在三国原文出现 52 次；\n     把图谋写成到达就是计划禁止的「提及≠到达」混淆。\n   · 物件：`itemStates` 从 hold / transfer / use / lose 里**多选**（可同时成立）。\n     四态分开写，**不许**把持有与丢失合成一条「物品链」。\n     原文用文言：匿/不见了/获得/献与/夺 —— 照原文写，不要改写成现代汉语动词。\n   · 规则：`institution` = `declared`（只有诏/令/法）/ `executed`（有执行动作）/\n     `misunderstood`（这是**人物**的理解）；并用 `explain` 写清它**如何解释人物能做或不能做**。\n     泛泛的术语与装饰性设定**不要写** —— 计划明令「没有依据就不扩出地图、物品链或术语装饰层」。\n   某类在本区间没有 ⇒ 写空数组，**不要**为了凑数编一条。\n4c. `themeReadings[]`（P3.11）：**主题与张力是解释层，不是事实层**，最多写 1–2 条。\n   每条必须给三件，缺一件就不要写：\n   · `perspective`：这是从**哪个角度**读的（以谁为轴、哪种读法）；\n   · `support`：支撑它的具体场景/事件（带 quote）；\n   · `counter`：**不利或相反的证据** —— 只列支持的那叫论证，不叫解释。\n   **禁止**用下列任何一条定义\"高潮\"：事件密度/剧情点数量、死亡人数、时间或篇幅中点。\n   也**不要**强行套三幕或英雄旅程；若借用某个框架，必须写成可选视角并给出反例。\n   同一批事实可以有多种合理解释 —— 并列写出比压成一条\"唯一真相\"更有价值。\n   本区间看不出主题 ⇒ 写空数组，不要为了凑数编一条。\n5. 每条断言给 `basis`：explicit（原文直述）/ inferred（你的归纳）/ derived（跨段推导）/ unverified（存疑）。\n6. 每条引用给 quote（原文子串，逐字）+ start/end（codepoint）+ sourceHash（fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839）。\n   摘要是你写的，引文必须是原文里能 `text.find(quote)` 找得到的。\n\n硬性红线（违反即作废，并会被独立复核抓出来）：\n- 不许把人物说的话当成叙述事实；不许把诈问/猜测写成真相。\n- 不许因为「播放到结尾」就写 result=成功；结束≠成功。\n- 不许出现原文里没有的人物、事件、结局。\n- 引用定位正确 ≠ 语义已核验；不得写 semanticReview 完成。\n- 你写不出证据的地方，就写进 `unknowns[]`，这比编一个结论有价值。\n\n最后写 `selfCritique`：本段我最可能读错的三处，以及我为什么仍然这么判断。\n",
+  "writes": [
+    "loop/state/out/read_dafeng_L3_0283.candidate.json"
+  ],
+  "verifierRequired": true,
+  "book": "dafeng",
+  "lane": 3,
+  "unitIndex": 283,
+  "unitHead": "第五十四章 问答",
+  "sourceRange": [
+    1206041,
+    1212202
+  ],
+  "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+  "requires": [
+    "read:dafeng:L3:0279"
+  ],
+  "verifyStream": "read-verify",
+  "roleFile": "loop/ROLES/READER.md",
+  "queueFile": "read.jsonl"
+}

@@ -1,0 +1,229 @@
+{
+ "schemaVersion": "loop-reader-verdict/1",
+ "task": "verify:dafeng:L2:0086",
+ "verifier": "w-verify-1",
+ "reviewedTask": "read:dafeng:L2:0086",
+ "reviewedCandidate": "loop/state/out/read_dafeng_L2_0086.candidate.json",
+ "reviewedCandidateSha256": "5057a5ca4c3a12900bc5d72b86c28fcde69ea403cdd78916bd1b1f7d7757acd7",
+ "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+ "sourceRange": [
+  275006,
+  278005
+ ],
+ "method": [
+  "先自读原文：从 data/cache/9b676d7031b1bcd3b8377a18.docs.json 取 docs[0].text[275006:278005] 全文独立通读，未先看候选结论。",
+  "机器复算：自写脚本重算全部 215 条 quoteRef 的 find()/回切/命中数（不调用候选自带脚本）。",
+  "覆盖率复算：按候选自述口径重算 84 段中被区间内引文逐字覆盖的段集合。",
+  "反向验证：以「候选没覆盖什么」为准，对 CORE 抽取分区（tasks/causeEdges/states/foreshadows/knowledgeGaps/characterClaims/unknowns 等）做逐段缺席扫描。",
+  "引用核验：random.seed(20251009) 抽 5 条 quote 逐条 find()。"
+ ],
+ "machineVerification": {
+  "quoteRefs": 215,
+  "offsetMismatches": 0,
+  "occurrenceCountMismatches": 0,
+  "inRangeQuoteRefs": 201,
+  "outOfRangeQuoteRefs": 14,
+  "candidateOwnVerifierRerun": "python3 -B -s /tmp/r86/verify_dafeng_L2_0086.py -> refs=215 inRange=201 outRange=14 roundtripFail=0 notFound=0 nonUniqueInRange=0 outOfRange=0 badHash=0 badChapterLabel=0 badVolume=0 ALLPASS=True",
+  "paragraphCoverageRecomputed": "covered=64 / notDirectlyQuoted=20，与候选声明集合逐一相等",
+  "selfReportedStats": "keyTermCounts / charactersInRange.firstAt+count / absentInRangeControl / saidAndThoughtMarkers / slice 长度 2999 / 非空白 2503 / 段数 84 —— 逐项复算全相符",
+  "outOfRangeChapterLabels": "11 条区间外引文的 chapterLabel 按偏移反查全部正确",
+  "hashes": "file/docsText/slice/graphCache 四个 sha256 全部与候选声明一致",
+  "boundary": "text[275006:275024]=='第八十七章 我只想当一个安静的美男子'；下章标题 @278005；切片以 '------------' 结束"
+ },
+ "verdict": "partial",
+ "verdictRationale": "引用定位层（215/215 逐字命中、偏移零错、命中数零错）与边界/哈希层完全通过，可整层采信。抽取层的任务/因果/伏笔/「结束≠成功」主线经我独立复核成立，无需推翻。但发现 3 处逐字可查的抽取层错误（1 处自相矛盾的计数、1 处章节标签错、1 处说话对象错），故不能判 pass；三处均为可定点修正的元数据/归属错误，不构成编造，故不判 fail。",
+ "counterExamples": [
+  {
+   "id": "CE1",
+   "claim": "causeEdges NC4.whyNot 与 knowledgeGaps KG8.text 均写：南宫倩柔「在本区间只出现两处」（段54 旁白、段59「看了过来」），并据此称「信息量约为零」。",
+   "quote": "李玉春朝着魏渊和南宫倩柔抱拳，转身跟了上去。",
+   "start": 277426,
+   "end": 277448,
+   "why": "原文区间内「南宫倩柔」实为 3 处：@277120（段54）、@277305→段59（@277302）、@277426（段65）。被漏掉的第 3 处就是本条引文。这不是我的推算——候选**自己的** charactersInRange 就写 {'name':'南宫倩柔','occurrencesInRange':3,'firstAt':277120}，与 NC4/KG8 的「两处」在同一文件内直接冲突。可复现：python3 -c \"import json;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];print(t[275006:278005].count('南宫倩柔'))\" -> 3。结论（南宫倩柔本区间无台词无动作）仍然成立，但计数与「只有两处」的表述必须修正为 3 处并补上段65。"
+  },
+  {
+   "id": "CE2",
+   "claim": "knowledgeGaps KG3.text 写：「魏渊**知道**甲上（第六十六章 @197093 记载是他亲笔在户籍上写下「甲上」二字、并要李玉春「记得守口如瓶」）」。",
+   "quote": "在户籍上写了“甲上”二字。",
+   "start": 197086,
+   "end": 197099,
+   "why": "「亲笔写下甲上」这一幕的章节标签错。@197086 落在『第六十四章 各大修行体系』（章头 @194909，下一章头 @197465 之前），不在第六十六章（章头 @201191）。KG3 把两件不同章的事并到「第六十六章」一个标签下：写字在第六十四章 @197086，而「记得守口如瓶」在第六十六章 @201844——KG3 引文数组里那条 @201844 的 chapterLabel 是「第六十六章 突发任务」（正确），但正文句把 @197093 也说成第六十六章（错）。可复现：python3 -c \"import json,re;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];print([m.group() for m in re.finditer(r'第[一二三四五六七八九十]+章 [^\\n]*',t[194000:202000])])\"。实质结论（魏渊知情、本区间未告知姜律中）不受影响。候选自带校验器只核对 quote 的 chapterLabel，不核对正文散文里的 @偏移，故未被自身复算抓到。"
+  },
+  {
+   "id": "CE3",
+   "claim": "characterClaims CC2 声明「以后你就是我的人了」的 addressee =「李玉春」。",
+   "quote": "“是姜大人让我过来提人，他看中这小子了，嘿，也不知道他哪来的福气....你傻愣着干嘛，过来啊，还杵墙角，以后你就是我的人了。",
+   "start": 275469,
+   "end": 275531,
+   "why": "该句的听话对象是许七安，不是李玉春。原文段12 明写陶满「指着角落里的许七安：」才说出这句话，句中「你傻愣着干嘛，过来啊，还杵墙角」直接指向段7-8 被李玉春「指了指墙角，示意许七安到那里去」的那个人。旁证：「“陶大人又是何意？”李玉春面无表情的起身，指了指墙角，示意许七安到那里去。」（@275230）。同文件的 CC1 对同一段话写 addressee=李玉春（当着许七安的面）[此为候选字段值，非原文引证]，CC2 却写 addressee=李玉春[候选字段值，非原文引证]，两者对同一句给出不同对象，至少 CC2 必须改为许七安。"
+  }
+ ],
+ "reverseChecks": [
+  {
+   "id": "RC1",
+   "found": "候选漏掉了段9 的**正面**制度规则（同金锣内部调动免流程）——它只抽了限制性的那半边（段10/段11）。段9 与段11 是一组对照，缺了段9，「不能随意调动」就失去了参照系：读者无法知道制度原本可以多简便。",
+   "quote": "同一个金锣手底下的话，人员的调动甚至都不需要去文房修改档案，直接上门报道就成。",
+   "start": 275323,
+   "end": 275362,
+   "whyItMatters": "候选在 paragraphCoverage.notDirectlyQuotedNotes 把段9 归为「同一场景的制度补充句……B2 的引文已取该说明的结论句（段11）[候选原文，非源文]」，即判定其语义已被承载。实际上段9 陈述的是一条**独立规则**（同金锣免流程），不是段11 的同义重复。可复现：该句在 CORE 抽取分区（tasks/causeEdges/states/knowledgeGaps/characterClaims/openThreads/unknowns 等）中 0 次命中，只在 paragraphs 与 coverage 备注里出现。",
+   "strength": "strong"
+  },
+  {
+   "id": "RC2",
+   "found": "候选断言姜律中本区间不知道甲上（KG1/ST3），但没有处理本区间内与之存在张力的原文事实：段41 明写他已经「调来了许七安的户籍和资料」——户籍正是甲上评级的载体（第六十四章 @197086 写的就是在户籍上写甲上，第八十八章 @280435 姜律中也是翻开户籍才看到甲上）。",
+   "quote": "姜律中坐在堂内，调来了许七安的户籍和资料，一看才知道，原来是当初税银案中表现突出的长乐县小快手。",
+   "start": 276420,
+   "end": 276468,
+   "whyItMatters": "KG1 用「甲上要到第八十八章 @280467 他翻开户籍才看到[候选原文，非源文]」来解释他不知情，却没说清一个更紧的问题：他本区间已经拿到过户籍，为什么没看到评级？原文没有回答。这是本区间一个真实的叙事张力（要么评级不在他调来的那份档案里，要么他没细看），候选把它整段略过——它既没进 unknowns，也没进 knowledgeGaps。可复现：CORE 分区中「同一份户籍」「他已经看过户籍」均 0 次命中。",
+   "strength": "strong"
+  },
+  {
+   "id": "RC3",
+   "found": "段21 明确交代听宋廷风抖落「封口费」的听众里，除了本衙门的铜锣和吏员，还有「陶满带来的铜锣」——即**姜律中一方**的人。候选 ST7 只把这层意思收敛为「秘密在同僚这个小圈子里已经不再是秘密」，从未点出泄密发生在对方阵营的人在场时。",
+   "quote": "两位银锣的争吵人惊动了偏厅的铜锣和吏员们，宋廷风和朱广孝，以及陶满带来的铜锣，几个人蹲在院子里吃炒豆，听着里头的骂街声。",
+   "start": 275826,
+   "end": 275886,
+   "whyItMatters": "这是本区间唯一一处「许七安的私事被跨阵营传播[我的概括]」的实证，而姜律中正在查他、正要抢他，情报方向恰好相反。候选只在 unknowns U5 里追问「这位铜锣的身份（是陶满带来的人还是本衙门的）未写[候选原文，非源文]」——但段21 已经写明在场者包含陶满带来的人，U5 问的是拍大腿那一位具体是谁，候选未把「在场有对方的人」这层已确定的事实用到 ST7/KG7 里。",
+   "strength": "medium"
+  },
+  {
+   "id": "RC4",
+   "found": "段24 里追问的铜锣们给出的推断是「这样的人，肯定有天赋异禀之处」——这是全文唯一一处旁观者**猜对了方向**的判断（许七安确实有甲上资质），随后被宋廷风的「睡姑娘不要钱」带偏成笑料。候选把它当作追问序列的填充句丢掉，未抽为任何条目。",
+   "quote": "“那姜金锣会点名道姓的要他？”铜锣们不信，这样的人，肯定有天赋异禀之处。",
+   "start": 275950,
+   "end": 275986,
+   "whyItMatters": "这条与主线（姜律中/杨砚争的正是资质）形成结构对照：无名铜锣一句玩笑式的猜测，比当事人自己「我都不认识他」的吐槽更接近真相。CORE 分区 0 次命中；段24 在 paragraphCoverage 里被归为「铜锣的追问句……同属追问序列[候选原文，非源文]」，语义未被承载。是否值得升格为独立条目可讨论，但作为「候选没覆盖的原文事实[我的表述]」成立。",
+   "strength": "medium"
+  },
+  {
+   "id": "RC5",
+   "found": "段80 是叙述者给「演武场武力解决」这条规矩补的**价值前提**（武夫要纯粹，意气不可抑），候选只抽了机制（段78 魏渊定的规矩）与场面（段79 真刀真枪），把段80 判为「抒情收束」丢掉。",
+   "quote": "武夫要纯粹，意气不可抑。",
+   "start": 277888,
+   "end": 277900,
+   "whyItMatters": "段78 回答「规矩是什么」，段79-80 回答「为什么要有这条规矩」。候选的 CC14/ST8/CE6 全部只承载前者；把段80 当抒情句丢掉，等于放弃了本区间对打更人组织逻辑唯一一句价值陈述。它在 CORE 分区 0 次命中。",
+   "strength": "medium"
+  }
+ ],
+ "misKillCheck": {
+  "summary": "候选的排除机制主要是「同拍内语义已由相邻引文承载」与「一次出现不算伏笔」，未发现基于词表/正则的整词误杀。抽检了两类高风险排除，结论如下。",
+  "items": [
+   {
+    "excluded": "段14「姜金锣看上了你，这是你的福气。」",
+    "verdict": "排除合法",
+    "why": "与段13 同一次发言的下半句，重复强调，判为同拍不另设条目成立。"
+   },
+   {
+    "excluded": "「八抬大轿抬我过门」不作为伏笔（RF2）",
+    "verdict": "排除合法",
+    "why": "我独立复算全书 4 次命中：@144318 在第四十八章、@2418753 在第一百九十九章、@4612371 在第九十六章，三处均为各章独立的嫁娶玩笑，与本次抢人无铺设/回收关系。候选的理由与我复算一致。"
+   },
+   {
+    "excluded": "「宝藏男孩」「白嫖是人类自古不变的快乐」「炒豆」「安静的美男子」等不作为伏笔",
+    "verdict": "排除合法",
+    "why": "逐项复算：宝藏男孩全书 1 次、白嫖同措辞 1 次、炒豆 7 次（本区间仅 1 次，其余在第七十六章/第八十一章）、安静的美男子 2 次且两次都在本章。单次出现不构成伏笔，判法正确。"
+   },
+   {
+    "excluded": "段9/段24/段39/段80 被判「语义已由同拍引文承载」",
+    "verdict": "排除**不合法**（见 RC1/RC4/RC5）",
+    "why": "这几段各自承载独立事实（一条正面规则、一条猜对的旁观推断、一句价值前提），不是相邻引文的同义重复。"
+   }
+  ]
+ },
+ "hallucinationCheck": {
+  "fabricatedPersons": 0,
+  "fabricatedEndings": 0,
+  "endIsNotSuccess": "成立。本区间末只写到「要在演武场一决雌雄，消息不胫而走」与许七安去看热闹。我独立读了下一章开头：『两位金锣闹矛盾了，在他们前往演武场的路上』，比试在第八十八章才发生，且 @280125 收尾为「既然不分胜负，人事调动的事就不提了」——候选把 T1.result/ST1.after/OT1 一律按「尚未发生/未定」写，正确。",
+  "outOfRangeEntityLeakage": "未发现越权引入。我扫描了候选全文中所有在区间内 0 次、但在全书出现的专名：楚元缜/褚采薇/宋卿/恒慧/周立/许平志/许玲月/长公主/怀庆/临安/监正 等，逐一查证均只出现在 absentInRangeControl、mentionOnlyEntities 这类**显式标注为区间外对照**的字段中，无一处被当作本区间事实使用。",
+  "minorNote": "tasks[].who 里的身份修饰语「字宁宴」「四十多」「眯眯眼」「沉默寡言」「大宦官」在本区间内 0 次命中（全书分别 974/7/15/33/45 次），属借用全书层人物档案作标签；「打更人衙门最高层」全书 0 次，是候选自己的概括。这些与该文件 redLines.noFabricatedEntities「专名全部来自原文逐字引用」的措辞不完全一致，属标注尺度问题，记为存疑，不据此判 fail。"
+ },
+ "quoteSpotCheck": {
+  "seed": 20251009,
+  "sampled": 5,
+  "allExact": true,
+  "detail": [
+   {
+    "kind": "out-of-range-quote",
+    "quote": "既然不分胜负，人事调动的事就不提了。",
+    "find": 280125,
+    "declaredStart": 280125,
+    "hit": true,
+    "occurrencesDeclared": 1,
+    "occurrencesActual": 1
+   },
+   {
+    "kind": "in-range-quote",
+    "quote": "这话怎么听起来怪怪的....姜大人是不是还要八抬大轿抬我过门？话说我都不认识他....许七安心里吐槽，朝李玉春投去询问的眼神。",
+    "find": 275560,
+    "declaredStart": 275560,
+    "hit": true,
+    "occurrencesDeclared": 1,
+    "occurrencesActual": 1
+   },
+   {
+    "kind": "in-range-quote",
+    "quote": "等小老弟乖巧的照做，他才看向陶银锣，继续道：“你和我不是一个金锣手下的，没有这个规矩。”",
+    "find": 275273,
+    "declaredStart": 275273,
+    "hit": true,
+    "occurrencesDeclared": 1,
+    "occurrencesActual": 1
+   },
+   {
+    "kind": "in-range-quote",
+    "quote": "两位金锣为了争一个小铜锣，要在演武场一决雌雄，消息不胫而走。",
+    "find": 277906,
+    "declaredStart": 277906,
+    "hit": true,
+    "occurrencesDeclared": 1,
+    "occurrencesActual": 1
+   },
+   {
+    "kind": "out-of-range-quote",
+    "quote": "作诗之人不是杨凌？",
+    "find": 182153,
+    "declaredStart": 182153,
+    "hit": true,
+    "occurrencesDeclared": 1,
+    "occurrencesActual": 1
+   }
+  ]
+ },
+ "usableAndDiscardable": {
+  "usableAsIs": [
+   "全部 215 条 quote 及其 start/end/命中数",
+   "paragraphs 84 段全文回切",
+   "boundaryCheck",
+   "四个 sha256",
+   "volumeAssignmentEvidence",
+   "metrics",
+   "countAssertions 14 项",
+   "absentInRangeControl",
+   "T1-T7 的任务/阻碍/动作/结果主线",
+   "CE1-CE9 因果边（含 derived/inferred 标注）",
+   "F1-F6 与 RF1-RF6 的伏笔判定",
+   "「结束≠成功」纪律",
+   "out-of-range 引文的 chapterLabel/volumeIndex"
+  ],
+  "mustFix": [
+   "NC4.whyNot 与 KG8.text 的「只出现两处」→ 3 处，补 段65 @277426",
+   "KG3.text 的「第六十六章 @197093」→ 第六十四章 @197093（@201844 的第六十六章保留）",
+   "CC2.addressee「李玉春」→「许七安」"
+  ],
+  "shouldAdd": [
+   "段9 同金锣免流程规则（RC1）",
+   "段41 已调户籍与 KG1/ST3 的张力，入 unknowns（RC2）",
+   "段21 在场者含陶满带来的铜锣，写进 ST7/KG7（RC3）"
+  ],
+  "downgradeToUnknowns": [
+   "RC2 的「他为何没从户籍看到甲上」应记 unknowns，不得由候选自行裁决"
+  ]
+ },
+ "notes": "结论：引用定位层完全可信（我独立复算 215/215 逐字命中、偏移与命中数零错，候选自带校验器重跑亦 ALLPASS），语义层主线经独立复核成立，无需推翻；但抽取层有 3 处逐字可查的错误，因此判 partial 而非 pass。三处缺陷的性质：CE1 是文件内部自相矛盾的计数（同一文件 charactersInRange 写 3、NC4/KG8 写 2），CE2 是正文散文里的章节标签错（候选自带校验器只核 quote 的 chapterLabel，不核散文里的 @偏移，所以自身复算抓不到——这是它校验口径的一个真实盲区），CE3 是说话对象归属错。三者都不涉及编造人物/结局/伏笔，也不改变任何一条主结论，故不判 fail。\n\n关于我自己的反向验证：RC1 与 RC2 我判为强证据（前者是 CORE 分区零命中的独立制度规则，后者是候选断言与区间内原文事实之间的真实张力且未入 unknowns）。RC3/RC4/RC5 我判为中等：RC3 候选在 U5 里已触及在场者身份问题，只是没把「对方阵营在场」这层确定事实用进 ST7，说「漏掉」需承认是「未贯彻」而非「未察觉」；RC4/RC5 是否值得升格为独立抽取项本身可讨论，我把它们如实列为「候选没覆盖的原文事实[我的表述]」，但不主张它们足以单独判 fail。\n\n存疑（不作为 fail 依据）：tasks[].who 的五处身份修饰语在区间内 0 次命中，与 redLines 的措辞尺度不完全一致；这属于标注规范问题，需要更上位的口径来定，我拿不出「原文证明它错」的引证，故只记录。\n\n未做：未跑 GPU/浏览器测试（任务未要求）；未逐字通读全部 11 条区间外引文所在整章，只核了偏移、章节标签与必要的上下文（第八十八章读了开头、@280125 收尾、@280435-@280493 段）。",
+ "reproduce": {
+  "sourceHashCmd": "python3 -c \"import hashlib;print(hashlib.sha256(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json','rb').read()).hexdigest())\"",
+  "sliceCmd": "python3 -c \"import json;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];print(len(t[275006:278005]));print(t[275006:278005].count('南宫倩柔'))\"",
+  "candidateVerifierCmd": "python3 -B -s /tmp/r86/verify_dafeng_L2_0086.py",
+  "quoteRoundtripNote": "对候选做递归遍历取所有含 quote+start 的字典，逐条断言 text[start:end]==quote 且 T.count(quote)==occurrencesInSource；实测 215 条、0 处不符。"
+ }
+}

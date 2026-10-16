@@ -1,0 +1,369 @@
+{
+ "task": "verify:dafeng:L0:0148",
+ "reviewer": "w-verify-3",
+ "verdict": "partial",
+ "roleContract": "loop/ROLES/VERIFIER.md",
+ "reviewedCandidate": {
+  "path": "loop/state/out/read_dafeng_L0_0148.candidate.json",
+  "sha256": "a979cea714cc48678253550b16e2d440456cc63b9d0099fe19e8e9b753023561",
+  "authorAgent": "w-xiyou-0",
+  "note": "复核者 w-verify-3 ≠ 原提交者 w-xiyou-0（非自签）"
+ },
+ "source": {
+  "path": "data/cache/1063b17ca65ec1b76f30e460.docs.json",
+  "docIndex": 0,
+  "range": [
+   522632,
+   527216
+  ],
+  "sourceHashRecomputed": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+  "sourceHashMatchesTask": true,
+  "segmentSha256Recomputed": "a58b996f7296df14d2fc190b84f90ee9610127f89ffa9683314087453e74f7b8",
+  "segmentSha256MatchesCandidate": true,
+  "boundary": {
+   "head": "第一百四十八章 故事（二）\n\n    一年前的故事.",
+   "afterRight": "第一百四十九章 等待结果\n"
+  },
+  "method": "先自读原文（切片 4584 字、115 段），再看候选；所有偏移由本脚本从磁盘现取，不手写。"
+ },
+ "counterExamples": [
+  {
+   "id": "CE1",
+   "claim": "coverage.reasons['P005'] 与 ['P006'] 错位：P005 的理由写的是 P006 的内容，P005 自己的内容在整份候选里没有任何载体。",
+   "quote": "    “恒慧和尚与平阳郡主的案子，到此刻，已经喧宾夺主，压过了桑泊案....总感觉背后的人在故意让恒慧暴露在阳光下....”",
+   "start": 522890,
+   "end": 522953,
+   "paragraph": "P005",
+   "why": "reasons['P005'] 写『杨砚枪尖绞碎袖管、确认恒远非妖物』——那是 P006；reasons['P006'] 写『同上』，回指的正是这条错位的理由。净效果：P005（许七安『喧宾夺主…背后的人在故意让恒慧暴露在阳光下』）既没有引文节点，也没有属于它自己的排除理由。可复现：子串『喧宾夺主』『阳光下』在候选 JSON 中出现 0 次。",
+   "severity": "real-omission",
+   "suggestedFix": "把 reasons['P006'] 的理由补成 P006 自己的（审问现场的身体描写/非妖物判定的落点），并为 P005 单写理由或直接登记为一条事实（它与 F4/U3/U6、N2 的『故意推到台前』同轴）。",
+   "reproduce": "python3 -c \"import json;c=json.load(open('loop/state/out/read_dafeng_L0_0148.candidate.json'));print(c['coverage']['reasons']['P005']);print(c['coverage']['reasons']['P006'])\""
+  },
+  {
+   "id": "CE2",
+   "claim": "notForeshadows[NF2].why 对原文的事实陈述错误：它说『在本区间只出现一次』，实际出现 2 次。",
+   "quote": "    搞破坏？目前为止，只有一桩平远伯府灭门案，影响很大，但实质性的伤害却不大。",
+   "start": 522778,
+   "end": 522819,
+   "paragraph": "P003",
+   "why": "原文里『灭门案』出现在 P003（@522799，作为已发生的既成案件，并写明『实质性的伤害却不大』）与 P066（@525177，许七安听故事时的联想）。候选引的只有 P066 那一处，P003 那一处未被任何引文节点覆盖，其 coverage 理由也没提灭门案。",
+   "severity": "false-statement-about-source",
+   "suggestedFix": "把 NF2 的『只出现一次』改为两次，并把 P003 登记为独立事实（灭门案是既成案件）；N4 的论证应基于『既成案件 + 一句联想』两处，而不是只有一句联想。",
+   "reproduce": "python3 -c \"import json;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'][522632:527216];print(t.count('灭门案'))\""
+  },
+  {
+   "id": "CE3",
+   "claim": "foreshadows[F2]（佛珠散了一地）status=resolved，违反『一次出现当伏笔』红线：铺设在本区间只出现 1 次，且它所声明的回收引文里根本没有「佛珠」。",
+   "quote": "    不知为何，佛珠散了一地。",
+   "start": 524512,
+   "end": 524528,
+   "paragraph": "P050",
+   "why": "F2.payoff 引的是 P057『恒慧答应了，他终于看清楚了自己的内心，选择面对真实的自己。』——句中无『佛珠』二字，也没有任何指回它的措辞；F2.payoff.basis 自陈是 inferred，note 自陈『本区间没有任何一句话把两者接上』。按 ROLES/READER.md『一次出现当伏笔（同一物件出现两次不叫伏笔，要有铺设+回收）』，铺设侧在本区间只有 1 次出现（可复现：seg.count('佛珠')==1），回收侧无本体指涉 ⇒ 不能记 resolved。",
+   "severity": "redline-one-occurrence-as-foreshadow",
+   "suggestedFix": "降级：F2.status 改为 unresolved，或移入 notForeshadows（候选 selfCritique 第 3 条已自陈这条改判路径）。",
+   "reproduce": "python3 -c \"import json;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'][522632:527216];print(t.count('佛珠'))\""
+  },
+  {
+   "id": "CE4",
+   "claim": "coverage.reasons['P109'] 声称该评价句『已用作 T4 结果的对照』，但全文没有任何一处引用 P109。",
+   "quote": "    不爱说话的杨砚微微颔首，破天荒的说道：“此案你是首功，即使桑泊案最后没有查出究竟，陛下多半也会免你的罪。”",
+   "start": 527032,
+   "end": 527089,
+   "paragraph": "P109",
+   "why": "T4.result 只引 P108（Q019）；『首功』仅出现在 notCauseEdges[N3].from 的说明文本里；『免你的罪』在候选 JSON 中出现 0 次。所以 P109 是被**静默排除**的，排除理由所声明的用途不存在。这句是本区间唯一涉及『办成之后会怎样』的表述，且带『多半』二字，按『结束≠成功』必须显式处置而不是声称已用作对照。",
+   "severity": "reason-not-supported-by-file",
+   "suggestedFix": "把 reasons['P109'] 改写为如实说明：该句是前瞻性免罪预期（含『多半』），未被任何条目引用；或把 N3 的对照真正落到引文节点上。",
+   "reproduce": "python3 -c \"import json;c=json.load(open('loop/state/out/read_dafeng_L0_0148.candidate.json'));print([q['paragraph'] for q in c['tasks'][3]['result']['quotes']]);print('免你的罪' in json.dumps(c,ensure_ascii=False))\""
+  }
+ ],
+ "reverseChecks": [
+  {
+   "quote": "    “恒慧和尚与平阳郡主的案子，到此刻，已经喧宾夺主，压过了桑泊案....总感觉背后的人在故意让恒慧暴露在阳光下....”",
+   "start": 522890,
+   "end": 522953,
+   "paragraph": "P005",
+   "found": "许七安在恒远开讲**之前**就已给出『此案喧宾夺主、背后有人在故意让恒慧暴露在阳光下』的判断——这正是 F4/U3/U6 与 N2 讨论的那条『故意推到台前』轴的**最早一次**陈述，且发生在故事之外（现在时）。候选把它整段落下：『喧宾夺主』『阳光下』两个子串在候选 JSON 里出现 0 次；而 coverage.reasons['P005'] 写的是 P006 的内容（杨砚枪尖、绝非妖物）。",
+   "whyItMatters": "U6 只说『两种判断并存（P091 灰猫 / P093 许七安）』；P005 表明该怀疑在 P093 之前、甚至在听故事之前就已存在，因此它不是听完后的反应，而是全章的取景框。",
+   "evidence": {
+    "p005Quote": {
+     "quote": "    “恒慧和尚与平阳郡主的案子，到此刻，已经喧宾夺主，压过了桑泊案....总感觉背后的人在故意让恒慧暴露在阳光下....”",
+     "start": 522890,
+     "end": 522953,
+     "paragraph": "P005"
+    },
+    "p006Quote": {
+     "quote": "    杨砚枪尖轻点，气机绞碎恒远和尚的袖管，一双肌肉虬结的手臂，蕴含着强大的力量，但绝非妖物。",
+     "start": 522955,
+     "end": 523003,
+     "paragraph": "P006"
+    },
+    "candidateReasonForP005": "杨砚枪尖绞碎袖管、确认恒远非妖物——是上一章动作的收尾，与本区间五个任务无引用关系；「绝非妖物」这一条已隐含在 T2 的讲述可信度问题里。",
+    "candidateReasonForP006": "同上：这一段是审问现场的身体描写，不含可提取的目标/障碍/代价。",
+    "stringChecks": {
+     "喧宾夺主": false,
+     "阳光下": false,
+     "压过": false
+    }
+   }
+  },
+  {
+   "quote": "    搞破坏？目前为止，只有一桩平远伯府灭门案，影响很大，但实质性的伤害却不大。",
+   "start": 522778,
+   "end": 522819,
+   "paragraph": "P003",
+   "found": "『平远伯府灭门案』在本区间出现 **2 次**（P003 与 P066），不是 1 次；P003 是许七安开篇的问题清单里的既有事实（且写明『实质性的伤害却不大』），P066 才是他听故事时的联想。P003 未被任何引文节点覆盖。",
+   "whyItMatters": "N4/NF2 的论证建立在『只有一句联想』之上；实际原文先把它列为**已发生的既成案件**，再在听故事时把它与平阳郡主之死并置。这改变了 N4『联想而非事实』的分量，至少应把 P003 登记为独立事实（灭门案是既成案件）。",
+   "evidence": {
+    "occurrences": [
+     {
+      "at": 522799,
+      "paragraph": "P003"
+     },
+     {
+      "at": 525177,
+      "paragraph": "P066"
+     }
+    ],
+    "p003Quote": {
+     "quote": "    搞破坏？目前为止，只有一桩平远伯府灭门案，影响很大，但实质性的伤害却不大。",
+     "start": 522778,
+     "end": 522819,
+     "paragraph": "P003"
+    },
+    "p066Quote": {
+     "quote": "    这也就有了后来的平远伯府灭门案....只是不知道兵部尚书府在里面扮演着什么角色....许七安看着六号恒远，心说，你就是因为知道他们曾与牙子组织接触过，才认定他们是被拐骗的吗？",
+     "start": 525161,
+     "end": 525252,
+     "paragraph": "P066"
+    },
+    "candidateClaim": "在本区间只出现一次，且是许七安的联想句；没有铺设动作（没有先写谁与平远伯府结怨、也没有写动手的迹象），因此不列为伏笔。"
+   }
+  },
+  {
+   "quote": "    不爱说话的杨砚微微颔首，破天荒的说道：“此案你是首功，即使桑泊案最后没有查出究竟，陛下多半也会免你的罪。”",
+   "start": 527032,
+   "end": 527089,
+   "paragraph": "P109",
+   "found": "杨砚在结尾给出的是**前瞻性的免罪预期**（『陛下多半也会免你的罪』）与首功归属，这是本区间唯一涉及『案子办成之后会怎样』的句子；候选没有任何引文节点覆盖 P109，而 coverage.reasons['P109'] 声称『评价句本身已用作 T4 结果的对照』——与文件不符：T4.result 只引 P108，『首功』只出现在 N3 的 from 文本里，『免你的罪』在整个 JSON 里出现 0 次。",
+   "whyItMatters": "ROLES/READER.md 的红线是『结束≠成功』。P109 正是最容易被洗成成功的那一句（『陛下多半也会免你的罪』是预期、带『多半』）；候选没有把它升级成成功是对的，但它给出的排除理由不成立，等于这条事实**既没被登记、也没被如实说明**。",
+   "evidence": {
+    "p109Quote": {
+     "quote": "    不爱说话的杨砚微微颔首，破天荒的说道：“此案你是首功，即使桑泊案最后没有查出究竟，陛下多半也会免你的罪。”",
+     "start": 527032,
+     "end": 527089,
+     "paragraph": "P109"
+    },
+    "t4ResultQuotes": [
+     "P108"
+    ],
+    "t4ResultNote": "结果取「殓好尸骨」这一已发生动作；「做的不错」是同僚的评价，不等于案子办成。",
+    "stringChecks": {
+     "首功": true,
+     "免你的罪": false
+    }
+   }
+  },
+  {
+   "quote": "    我可以继续陪伴佛陀，再没有人打扰....他松了口气，觉得是自己的诚心感动了佛陀。",
+   "start": 524413,
+   "end": 524457,
+   "paragraph": "P047",
+   "found": "『她终于不来了』（P046）之后紧接着写恒远的自我解释：他松了口气，『觉得是自己的诚心感动了佛陀』——原文随后用她再次出现（P048）与私奔（P055）推翻了这条自解。候选只在 coverage.reasons['P047'] 里写『是误认』，未把这条**误认**登记为状态或知识差。",
+   "whyItMatters": "S2 只写了她来访状态的两端（每天来 → 一个月不来），把**他对自己解释错了**这一层丢了；而 S1 记的是他对方丈的表态 vs 真实选择，两者是同一条讽刺线的两端。这是本区间里唯一由叙述自己标出的『人物认知 ≠ 事实』，属于 knowledgeDiffs 的典型素材。",
+   "evidence": {
+    "p047Quote": {
+     "quote": "    我可以继续陪伴佛陀，再没有人打扰....他松了口气，觉得是自己的诚心感动了佛陀。",
+     "start": 524413,
+     "end": 524457,
+     "paragraph": "P047"
+    },
+    "p046Quote": {
+     "quote": "    她终于不来了，连续一个月没有再踏足青龙寺，彻底从他的生活中退出，仿佛从来都没有存在过。",
+     "start": 524364,
+     "end": 524411,
+     "paragraph": "P046"
+    },
+    "p048Quote": {
+     "quote": "    有一天，她又来了，失魂落魄的模样，脸蛋瘦削了一圈，神容憔悴。",
+     "start": 524459,
+     "end": 524493,
+     "paragraph": "P048"
+    },
+    "candidateReasonForP047": "他的自我安慰（觉得诚心感动了佛陀）——是误认，与 P046 的「她终于不来了」同指一段时间，S2 已引 P046。",
+    "s2": "来访（每天来 → 连续一个月不来）"
+   }
+  },
+  {
+   "quote": "    杨砚枪尖轻点，气机绞碎恒远和尚的袖管，一双肌肉虬结的手臂，蕴含着强大的力量，但绝非妖物。",
+   "start": 522955,
+   "end": 523003,
+   "paragraph": "P006",
+   "found": "杨砚在开篇做的是**身体检查**：气机绞碎袖管后确认『绝非妖物』——这是本区间唯一的现场身体/物种验证，且它回答的正是许七安随后要找灰猫核实的问题（P088『有没有可能被夺舍或者被控制？』）。",
+   "whyItMatters": "coverage.reasons['P005'] 声称『「绝非妖物」这一条已隐含在 T2 的讲述可信度问题里』——但 T2 的障碍是『人死如灯灭』这条常识，讲的是**他说的内容可不可信**，与『这个人是不是妖物』不是同一件事。",
+   "caveat": "如实记下我自己的不确定：P006 只否证了『妖物』，**没有**否证『夺舍/被控制』，所以它不能被当作灰猫那句『是恒远没错』的独立佐证。故本条只作为**存疑**记录，不据此判 fail，也不主张候选漏了一条完整因果。",
+   "evidence": {
+    "p006Quote": {
+     "quote": "    杨砚枪尖轻点，气机绞碎恒远和尚的袖管，一双肌肉虬结的手臂，蕴含着强大的力量，但绝非妖物。",
+     "start": 522955,
+     "end": 523003,
+     "paragraph": "P006"
+    },
+    "p088Quote": {
+     "quote": "    许七安骑在马背上，心情有些沉重，他半晌无言，许久后低声道：“那是恒远？有没有可能被夺舍或者被控制？”",
+     "start": 526124,
+     "end": 526178,
+     "paragraph": "P088"
+    },
+    "t2Obstacle": "障碍是常识本身：叙述先写众人心里都有疑惑，紧接着给出那句常识——人死如灯灭，是不可能复生的。他要跨过的是这条常识，而不是某个具体的人。",
+    "candidateReasonForP005": "杨砚枪尖绞碎袖管、确认恒远非妖物——是上一章动作的收尾，与本区间五个任务无引用关系；「绝非妖物」这一条已隐含在 T2 的讲述可信度问题里。"
+   }
+  }
+ ],
+ "misKillCheck": [
+  {
+   "claim": "T5.obstacle / T5.cost 判 null（未补「来自誉王府的阻力」「灭门案当代价」）",
+   "verdict": "不是误杀，是正确处置",
+   "why": "原文确实没有写这条计策遇到阻力、也没有写它为谁付出代价；「杀害郡主是灭三族的大罪」（P076）是法度陈述，候选把 WR1 记 declared（不是 executed）是对的。补一个听起来合理的阻力才是编造。"
+  },
+  {
+   "claim": "NF3 把溪边手帕排除出伏笔；NW1/NW2 把溪边景物与白凤山排除出地点",
+   "verdict": "不是误杀",
+   "why": "手帕的捞起/奉还在同一拍内完成（P015→P016→P020），确实没有铺设+回收；白凤山只在一句游山回忆里出现，不解释任何行动可否。按「没有依据就不扩装饰层」应排除。"
+  },
+  {
+   "claim": "coverage.reasons['P048'] 以「TH2 反例栏已引 P037 与 P092 两点」为由不再建节点",
+   "verdict": "存疑（不判 fail）",
+   "why": "P048『失魂落魄的模样，脸蛋瘦削了一圈，神容憔悴』是她这条线唯一的身体性衰败描写，TH2 的反例正需要它，但候选为避堆叠没引。这是取舍而非错误——我无法用原文证明它必须被引。"
+  },
+  {
+   "claim": "WI3（屏蔽气息的法器）条目 basis=explicit，但 hold 态自陈是 inferred",
+   "verdict": "内部口径不一致，建议修正（不判 fail）",
+   "why": "quotes 本身是逐字 explicit 的，所以 basis 指引文层时成立；但 itemStates 里的 hold 是反推。条目层 basis 与状态层依据混在一个字段里，读的人会把它当成整条 explicit。"
+  }
+ ],
+ "hallucinationCheck": {
+  "inventedEntities": "无。候选正文里出现的专名（恒慧/恒远/平阳郡主/许七安/灰猫/杨砚/姜律中/南宫倩柔/朱金锣/张奉/孙鸣钟/盘树/元景帝/誉王/平远伯/桑泊/青龙寺/司天监/太康县/长乐县/白凤山/京城/衙门/誉亲王府/兵部尚书府/万妖国）逐个在原文区间内命中，无原文没有的人物或地点。",
+  "inventedEnding": "无。候选 n2/N2 明确拒绝把「挖到尸骨」写成破案；T4.result 的 note 明写「『做的不错』是同僚的评价，不等于案子办成」；deliberatelyNotAsserted 第 1/4 条拒绝断言恒远说真话与死因独立确认。",
+  "successLaundering": "未发现。3 处最接近成功判定的地方（灰猫『案子破的比你想象的要轻松』P091、杨砚『此案你是首功』P109、『正如恒远所说』P103）都没有被写成案子办成。注意 P109 的**排除理由不成立**（见 counterExamples CE4），但结论方向是对的。",
+  "semanticReviewOverclaim": "无。semanticReview.performed==false，note 明写未做，与 ROLES/READER.md「不得写 semanticReview 完成」一致。",
+  "protectedPaths": "本复核未改任何受保护路径；被复核候选的 changes 也只有一条 append-only。"
+ },
+ "quoteSpotCheck": [
+  {
+   "qid": "Q104",
+   "paragraph": "P064",
+   "declared": [
+    525025,
+    525059
+   ],
+   "find": 525025,
+   "verbatim": true,
+   "findEqualsDeclaredStart": true,
+   "occurrencesInFullText": 1,
+   "recomputedParagraph": "P064",
+   "quote": "这一切豁然开朗，平远伯手底下掌握着一个牙子组织，最擅长身份造假、偷渡"
+  },
+  {
+   "qid": "Q010",
+   "paragraph": "P104",
+   "declared": [
+    526813,
+    526840
+   ],
+   "find": 526813,
+   "verbatim": true,
+   "findEqualsDeclaredStart": true,
+   "occurrencesInFullText": 1,
+   "recomputedParagraph": "P104",
+   "quote": "“阿弥陀佛。”恒远不忍再看，闭上眼睛，沉痛的念诵佛号。"
+  },
+  {
+   "qid": "Q090",
+   "paragraph": "P111",
+   "declared": [
+    527121,
+    527143
+   ],
+   "find": 527121,
+   "verbatim": true,
+   "findEqualsDeclaredStart": true,
+   "occurrencesInFullText": 1,
+   "recomputedParagraph": "P111",
+   "quote": "他不用回头也知道，那道锐利的视线来自朱金锣。"
+  },
+  {
+   "qid": "Q073",
+   "paragraph": "P101",
+   "declared": [
+    526687,
+    526720
+   ],
+   "find": 526687,
+   "verbatim": true,
+   "findEqualsDeclaredStart": true,
+   "occurrencesInFullText": 1,
+   "recomputedParagraph": "P101",
+   "quote": "平阳郡主的尸骨一点点的暴露在众人眼中，时隔一年多，她终于重现天日。"
+  },
+  {
+   "qid": "Q070",
+   "paragraph": "P064",
+   "declared": [
+    525060,
+    525111
+   ],
+   "find": 525060,
+   "verbatim": true,
+   "findEqualsDeclaredStart": true,
+   "occurrencesInFullText": 1,
+   "recomputedParagraph": "P064",
+   "quote": "平阳郡主即便不知道牙子组织的存在，但两家作为来玩还算密切的世交，知道一些平远伯府的手段也是合情合理的。"
+  }
+ ],
+ "mechanicalRecheck": {
+  "quotesVerbatim": "141/141 逐字回切成立（我重算，非引用候选的结论）",
+  "quotesInRange": "141/141 落在 [522632,527216)",
+  "quoteNodes": 141,
+  "quoteNodesUnique": 69,
+  "paragraphs": 115,
+  "paragraphsCited": 68,
+  "paragraphsUncited": 47,
+  "uncitedSetEqualsDeclared": true,
+  "reasonsKeysEqualUncited": true,
+  "taskColumnQuotes": 26,
+  "withinTaskColumnQuoteReuse": 0,
+  "withinTaskColumnParagraphReuse": 0,
+  "crossTaskQuoteReuse": 0,
+  "basisHistogramRecomputed": {
+   "explicit": 80,
+   "derived": 6,
+   "unverified": 2,
+   "inferred": 8
+  },
+  "sourceHashRecomputed": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+  "segmentHashRecomputed": "a58b996f7296df14d2fc190b84f90ee9610127f89ffa9683314087453e74f7b8",
+  "candidateSha256": "a979cea714cc48678253550b16e2d440456cc63b9d0099fe19e8e9b753023561",
+  "boundaryCheck": {
+   "left": "'第一百四十八章 故事（二）'",
+   "right": "'第一百四十九章 等待结果\\n'",
+   "unitHeadMatches": false
+  }
+ },
+ "usable": [
+  "6 条任务五元组（T1–T6）及其 26 条栏位引文：全部逐字可查、栏位间零共用引文与零共用段落，可用。",
+  "9 条因果边（C1–C9）：每条在原文都有对应文字；C2/C5/C7/C9 的连接词（『对此』『为此』『最后』『为了掩盖罪行』）确实在原文里。",
+  "5 条非因果边（N1–N5）、7 条状态（S1–S7）、5 条知识差（K1–K5）：引文全部命中，可用；K3 的 knower 写法（『本区间无人补上这一环』）是如实记法，可用。",
+  "14 条世界设定 + 5 条排除：地点三态（arrived 4 / mentioned 4）与原文动作一致，「出城」不判 arrived 是对的；rule 三态取值都写了 taxonomyCaveat，可用。",
+  "3 条非伏笔（NF1–NF3）中的 NF1/NF3：结论正确（见 CE2 修正 NF2 的事实陈述）。",
+  "2 条主题读法（TH1/TH2）：perspective/support/counter 三件套齐全，counter 是对己不利的证据（TH1 用仵作检验只能证明人死了、TH2 用『可怜人』），可用。",
+  "11 条 unknowns 与 deliberatelyNotAsserted：方向正确，是本文件最有价值的部分。"
+ ],
+ "mustDiscardOrDowngrade": [
+  "F2（佛珠散了一地）：status 从 resolved 降为 unresolved，或移入 notForeshadows —— 铺设侧单次出现、回收侧引文不含本体（CE3）。",
+  "notForeshadows[NF2].why：『只出现一次』必须改为两次，并把 P003 登记为独立事实（CE2）。",
+  "coverage.reasons['P005'] 与 ['P006']：必须重写；P005 的真内容需单列理由或登记为事实（CE1）。",
+  "coverage.reasons['P109']：『已用作 T4 结果的对照』这句无依据，必须改写（CE4）。",
+  "worldSettings[WI3]（法器）basis 与 stateNotes 的口径不一致：建议把条目层 basis 与状态层依据分开（存疑，非 fail 依据）。"
+ ],
+ "notes": "判定 partial。**没有发现编造**：141 个引文节点逐条现算回切全部成立，偏移与 sourceHash 全部对得上；专名、结局、伏笔都没有原文之外的发明，semanticReview 如实记为未做，『结束≠成功』守住了（T4.result 的 note 明确拒绝把『做的不错』当案子办成）。机械层我独立重算并复现了候选的每一个计数（141/69/115/68/47、五栏互斥 0、basis 直方图），无一处虚报。判 partial 的原因是**覆盖层与排除理由层**有四处实的缺陷，且每一处都有逐字可查的原文引证：CE1（P005 的理由串到了 P006，P005 的真实内容——许七安在开篇就说『喧宾夺主…背后的人在故意让恒慧暴露在阳光下』——在整份文件里没有任何载体，而它正是 N2/U3/U6 那条轴的**最早陈述**，比候选所引的 P093 更早、且在故事之外）；CE2（NF2 声称灭门案『只出现一次』，实际两次，P003 那一次无人承载）；CE3（F2 以单次出现记为 resolved 伏笔，回收引文里没有『佛珠』，触到『一次出现当伏笔』这条红线）；CE4（P109 的排除理由声称『已用作 T4 结果的对照』，但全文没有一处引它）。这四处的共同形态值得记下：**理由层写得像已处置，实际是静默丢弃** —— 与项目反复出现的『机制在、产出在、但不产生信息』同形；机械校验（哈希、偏移、计数、五栏互斥）全部绿灯，正是这种缺陷不被结构性发现的原因。反向上我另外记了 5 条候选未覆盖的原文事实（P005 的取景框、P003 的既成案件、P109 的免罪预期、P047 恒远的自我误认、P006 的身体/物种验证），其中 R5（P006）我自己降级为**存疑**：P006 只否证『妖物』，没有否证『夺舍/被控制』，拿它当灰猫那句确认的独立佐证会过度解读，故不据此判 fail。候选 selfCritique 自陈的三处最可能读错的地方（T4.objective 用祈使句、F2 伏笔、T1 全标 explicit），我逐条核过：T4.objective 的读法我认为可用（P107 逐项写清了要达成什么，且 P108 证明被执行，note 已自陈这一层）；T1 全标 explicit 也可用（原文确实以无引号全知笔法写往事，候选在 S4/U5 单列了不可验证部分，处置是干净的）；只有 F2 不成立（见 CE3）。也就是说，它自己标出的三处风险里，最轻的两处判对了，最重的一处判错了 —— 但它是自己标出来的，这一点应当记功。"
+}

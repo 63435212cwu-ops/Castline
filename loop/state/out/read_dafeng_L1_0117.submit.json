@@ -1,0 +1,97 @@
+{
+ "task": "read:dafeng:L1:0117",
+ "agent": "w-sanguo-0",
+ "role": "READER",
+ "status": "done",
+ "reworkOf": "loop/state/out/REJECTED__read_dafeng_L1_0117.json",
+ "reworkReason": "上一轮被 worker 代提交为拒绝（agent rc=1 退出，writes 路径上没有文件；REJECTED 记录写「agent 未产出任务要求的文件，且未提交」）。本轮重做，未继承上一轮任何未核验内容：我从 docs[0].text[398486:402669) 重读全部 228 段，再建候选。",
+ "summary": "精读《大奉打更人》第一百一十八章 灭口（docs[0].text 的 [398486,402669) 切片，4183 codepoint / 228 段，逐段读过），产出候选 loop/state/out/read_dafeng_L1_0117.candidate.json：tasks[8]（五元组分列，每栏各自带逐字引文；T1.obstacle、T1.cost、T2.cost、T3.cost、T4.cost、T6.action、T6.cost 共 7 处 null 全部带同名 Note 说明为什么没有；同一条任务五栏之间零共用引文——构建期同时查「精确 (start,end) 相等」与「互为子串包含」，违规即终止，实测 0）、causeEdges[8]（每条带 from/to/trigger/mechanism；CE2/CE8 标 inferred+medium 并各自写明可推翻的反例）、rejectedEdges[6]（显式拒绝的伪因果，含「下旨≠已开城门」「标题=灭口 不能当区间内事实」）、states[6]、knowledgeDiffs[5]、foreshadows[7]（逐条标 status=resolved-out-of-range 并给出区间外回收位置；区间内没有已回收项）、worldSettings[14]（rule 5 / place 6 / item 3，placeState 与 itemStates 与 institution 三套区分逐条写进字段）、excludedSettings[5]（显式拒绝扩层：观想法未交付故不记 item、手书未出现、赵守神通无约束、穿越者词汇无设定、灰户无说明）、themeReadings[2]（各带 perspective/support/counter）、characterClaims[8]（把人物说法与叙述者确认分开，其中朱退之「修身境」一条是叙述者确认的例外）、sourceAnomalies[5]、outOfRangeContext[8]、unknowns[20]、selfCritique[6]。verification：239 条带偏移引文（区间内 204 / 区间外 35，区间内去重 114），全部 text[start:end]==quote 逐字成立、sourceHash 全等、inRange 与章节名全对。",
+ "evidence": [
+  {
+   "path": "loop/state/out/read_dafeng_L1_0117.candidate.json",
+   "sha256": "9c82f8ff5a7901413d25dc6d2c0903239db00bcfae841c0f9d6720d69c68206b",
+   "kind": "candidate",
+   "note": "本轮精读产物（任务 writes 指定的唯一路径）"
+  },
+  {
+   "path": "data/cache/1063b17ca65ec1b76f30e460.docs.json",
+   "sha256": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+   "kind": "source",
+   "note": "原文来源；sha256(整个 docs.json 文件) 与任务 JSON 的 sourceHash 逐字相同"
+  }
+ ],
+ "assertions": [
+  {
+   "text": "源文件哈希与任务 sourceHash 一致：sha256(data/cache/1063b17ca65ec1b76f30e460.docs.json) = fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+   "result": "pass",
+   "command": "python3 -c \"import hashlib;print(hashlib.sha256(open('data/cache/1063b17ca65ec1b76f30e460.docs.json','rb').read()).hexdigest())\""
+  },
+  {
+   "text": "偏移口径自检：docs[0].text[398486:402669] 长度 4183 且以本单元标题开头（全文 codepoint 偏移，左闭右开，非切片相对偏移）；切片 sha256=bc82846544c77537105192584d973929a92d4a00e4e790155a9d97a92b7a14a0",
+   "result": "pass",
+   "command": "python3 -c \"import json,hashlib;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];s=t[398486:402669];print(len(s),repr(s[:10]),hashlib.sha256(s.encode()).hexdigest())\""
+  },
+  {
+   "text": "独立复验（不 import 构建脚本）python3 -B -s /tmp/audit_0117.py：239 条带偏移引文逐字回切 239/239 命中、sourceHash 239/239 相符、inRange 标志 239/239 正确、章节名 239/239 与 bisect 重算的章节表相符、occurrencesInFullText/Unit 全对、六个必需分区键齐全、worldSettings 三套枚举合法、themeReadings 三件套齐全、causeEdges 均有 trigger+mechanism、全部 basis 取值合法且 semanticReview=not-performed；fails=[]，rc=0",
+   "result": "pass",
+   "command": "python3 -B -s /tmp/audit_0117.py"
+  },
+  {
+   "text": "「同一条任务五栏不得共用一句」按精确 (start,end) 与「互为子串包含」双尺子断言：taskColumnsShareNoQuote=true，实测违规 0（构建脚本遇违规即抛错终止）；跨任务复用 4 组已登记在 verification.quoteReuseAcrossTasks（如「第三条指令，前往府衙，审太康县令。」被 T3.objective 与 T4.objective 各自使用，同学科同一句对不同 who 可分别成立）",
+   "result": "pass",
+   "command": "python3 -c \"import json;c=json.load(open('loop/state/out/read_dafeng_L1_0117.candidate.json'));print(c['verification']['taskColumnsShareNoQuote'], c['verification']['quoteReuseAcrossTasksCount'], c['verification']['nullColumnsWithNotes'])\""
+  },
+  {
+   "text": "每一处 null 栏位都有同名 Note：nullColumnsWithNotes=7，脚本对每个 null 断言 t[cn+'Note'] 存在且非空，实测 0 处缺失（T6.action 的 Note 写明目标与动作落在同一句、不得拆成两栏充数）",
+   "result": "pass",
+   "command": "python3 -c \"import json;c=json.load(open('loop/state/out/read_dafeng_L1_0117.candidate.json'));print([ (t['id'],k) for t in c['tasks'] for k in ('objective','obstacle','action','result','cost') if t.get(k) is None])\""
+  },
+  {
+   "text": "区间外引文全部真实存在且不在区间内：35 条 outOfUnitQuotes 由 ref_oor() 断言 text.find>0 且不落在 [398486,402669)，章节名由独立章节表重算（如「狱卒又吼了几声…」在第一百一十九章 社交三要素、offset 402688）",
+   "result": "pass",
+   "command": "python3 -c \"import json;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];q='狱卒又吼了几声，赵县令依旧纹丝不动。';print(t.find(q), len(q))\""
+  },
+  {
+   "text": "受保护路径在本轮租约期内零改动：以租约 startedAt=2026-10-09T11:27:29Z 为界，find js css index.html serve.py narrative.py scripts tests docs data -newermt '2026-10-09 19:27:25' 返回 0 个文件（find 按 mtime，覆盖创建与修改）。注意：git status 里那些 M/D 条目是**本轮之前**其他会话留下的未提交改动（AGENTS.md 已声明共享树里有大量这类改动），不是我做的；我的 changes 只含本任务 writes 指定的候选文件与提交记录本身，两者都在 loop/ 下（append-only 分类）。",
+   "result": "pass",
+   "command": "date -u +%Y-%m-%dT%H:%M:%SZ; find js css index.html serve.py narrative.py scripts tests docs data -newermt \"2026-10-09 19:27:25\" -type f | wc -l"
+  },
+  {
+   "text": "提交文件与候选文件的证据哈希在提交时刻一致：sha256(loop/state/out/read_dafeng_L1_0117.candidate.json) = 9c82f8ff5a7901413d25dc6d2c0903239db00bcfae841c0f9d6720d69c68206b",
+   "result": "pass",
+   "command": "python3 -c \"import hashlib;print(hashlib.sha256(open('loop/state/out/read_dafeng_L1_0117.candidate.json','rb').read()).hexdigest())\""
+  }
+ ],
+ "changes": [
+  {
+   "path": "loop/state/out/read_dafeng_L1_0117.candidate.json",
+   "kind": "append-only",
+   "note": "任务 writes 指定的唯一内容写入路径；本轮为新建（上一轮被拒时该路径上没有文件，不存在覆盖他人未提交产物的问题）"
+  },
+  {
+   "path": "loop/state/out/read_dafeng_L1_0117.submit.json",
+   "kind": "append-only",
+   "note": "本提交记录自身（READER 契约要求写成 JSON 再 submit）；与既有 89 个 *.submit.json 同目录同命名约定，落在 loop/ 下"
+  }
+ ],
+ "sourceHashes": {
+  "data/cache/1063b17ca65ec1b76f30e460.docs.json": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+ },
+ "remaining": [
+  "semanticReview 未完成，也不应由我完成：本文件只保证引文逐字命中、偏移自洽与字段枚举合法；情节含义层面的判断（哪条算真因果、哪句是说法）留给 read-verify 的独立复核者（须换 agent）。",
+  "CE2（报出封印物→魏渊岔开话题）与 CE8（栽培承诺→效忠表态）标 inferred/medium，两条都写明了可推翻的反例；若复核认为机制不成立，正确处置是移入 rejectedEdges，而不是保留成因果边。",
+  "T5（少尹）objective 与 cost 均为 inferred：原文只写他的反问与「屁话，命都没了，还管这些」，没有一句直述他的意图或损失；若复核认为这属过度归纳，应把两项一并降为 null 并补 Note。",
+  "worldSettings 中桑泊/极渊/大黄山三条只记 placeState=mentioned、无地理描写；若复核认为这仍属「没有依据就扩地图」，删掉这三条不影响任何任务栏位。",
+  "F4 把章节标题「灭口」登记为铺设端之一（已单独标 note 说明它是标题而非叙述句）；若复核不接受标题作为证据，删掉该条 quote 后 F4 用正文引文仍成立。",
+  "本区间只覆盖到「赵县令一动不动，似乎没有听到」，本章标题所指的灭口、以及三条指令的任何结果都在区间外（已逐条记入 outOfRangeContext 与 foreshadows 的 payoffWhere）；这些不能在后续任务里倒算成本区间的 result。",
+  "未跑任何 GPU/浏览器测试（任务未要求，且 GPU 全局串行）。"
+ ],
+ "rollback": {
+  "kind": "append-only",
+  "strategy": "delete-added-files",
+  "files": [
+   "loop/state/out/read_dafeng_L1_0117.candidate.json"
+  ],
+  "note": "回滚即删除本任务 writes 指定的候选文件；源文件与受保护路径本轮未被修改，无需回滚。"
+ }
+}

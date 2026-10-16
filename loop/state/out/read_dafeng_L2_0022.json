@@ -1,0 +1,100 @@
+{
+  "task": "read:dafeng:L2:0022",
+  "agent": "w-dafeng-0",
+  "status": "done",
+  "summary": "返工重做《大奉打更人》第二十三章 刑部缉拿人犯（docs[0].text 绝对 codepoint [68044,71277)，3233 字 / 91 非空行）。上一轮候选（agent=w-xiyou-1，sha256=e2c74002…）被独立复核连续判 fail：CE1/CE2/CE3 三条 must-fix 两次复核「一字未改」，而 to_candidate.py 对 verdict=fail 是整单元跳过 ⇒ 该单元图谱产出一直为 0。本轮定点修掉这三条，并顺带修掉我独立复算查出的**同形态**实例 8 处（完成态断言取自区间外叙述），补录复核 RV1–RV4 的断言层缺口 4 条。引文层一字未动：440 个 {quote,start,end} 字典返工前后逐字相同（repair.py 末尾断言强制），区间内 2695 个非空白字符仍全覆盖。semanticReview 保持 not-performed：引用定位正确 ≠ 语义已核验。",
+  "evidence": [
+    {
+      "path": "loop/state/out/read_dafeng_L2_0022.candidate.json",
+      "sha256": "918b50b863ac610b8823d99a614597fcf1fd176492e1661c4a45c6b6b4734361",
+      "kind": "reader-output",
+      "bytes": 333560
+    }
+  ],
+  "assertions": [
+    {
+      "text": "源哈希：shasum -a 256 data/cache/1063b17ca65ec1b76f30e460.docs.json = fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839，与任务声明的 sourceHash 逐字一致，返工前后各算一次未变。",
+      "result": "pass"
+    },
+    {
+      "text": "偏移口径：docs[0].text[68044:68056]=='第二十三章 刑部缉拿人犯' 且全文仅 1 次；docs[0].text.find('第二十四章 蓝皮书')==71277==rangeEnd。命令：python3 -c \"import json;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];print(repr(t[68044:68056]),t.count('第二十三章 刑部缉拿人犯'),t.find('第二十四章 蓝皮书'))\"",
+      "result": "pass"
+    },
+    {
+      "text": "引文层独立复算（不复用上一轮脚本）：recheck_refs.py 递归遍历候选里全部 440 个 {quote,start,end} 字典，复算 text[start:end]==quote 失配 0、inSourceRange 标记失配 0、sourceHash 失配 0、occurrencesInSource/Unit 失配 0、start 非首次出现 0；区间内 2695 个非空白字符全部被已登记引文覆盖（残余 0）。命令：python3 -B -s <artifacts>/cl_l2_0022/recheck_refs.py（exit 0）。",
+      "result": "pass"
+    },
+    {
+      "text": "返工纪律（引文层不许动）：repair.py 在写盘前比对返工前后的引文指纹（440 个 (start,end,quote) 三元组排序后全等）并对写盘后再次断言；只改文本字段 11 处，未新增/未删除/未移动任何引文。命令：python3 -B -s <artifacts>/cl_l2_0022/repair.py（输出 quoteDictsBefore=440 / quoteDictsAfter=440 / quoteLayerUnchanged=true）。",
+      "result": "pass"
+    },
+    {
+      "text": "CE1 已修：tasks[1].result.value 删去「周公子的人把刑部招来」（区间内『招来』0 次），改为区间内可证的「刑部甲士到场、把许七安锁住」；补 note 指明 C2 的机制句在区间外 @79779 且 basis=derived/confidence=medium。",
+      "result": "pass"
+    },
+    {
+      "text": "CE2 已修：tasks[6].result.value 删去「缉拿这一步在本区间内执行完成（人犯被押走）」（区间内『押走』0 次；叙述完成态的那句起点 @71292 属第二十四章），改为「区间内停在『命令』这一步」；补 note 注明 outOfRangeContext.X_TAKEN_AWAY。",
+      "result": "pass"
+    },
+    {
+      "text": "CE3 已修：worldSettings[5].explain 的「格斗勿论」→「格杀勿论」。复算 docs[0].text.count('格斗勿论')==0、count('格杀勿论')==10（区间内 1 次 @68798-68820，与 quoteRegistry.ZHU_KILL_ORDER 逐字一致）。",
+      "result": "pass"
+    },
+    {
+      "text": "同形态自查（复核未点名的 8 处）：scan_overclaim.py 查出候选散文里凡『完成态』措辞而该动作叙述只在区间外者，逐处改为区间内措辞 —— tasks[5].result.value（『被锁带走』『场面落幕』）、states[3].after.value、knowledgeGaps[1].known、causeEdges[1].to、tasks[3].result.value/notSuccessWhy、states[0].after.value、foreshadows[1].note。命令：python3 -B -s <artifacts>/cl_l2_0022/scan_overclaim.py。",
+      "result": "pass"
+    },
+    {
+      "text": "negative control（证明自检不是橡皮图章）：把 selfcheck.py 跑在**返工前**的候选（备份 read_dafeng_L2_0022.candidate.PRIOR-e2c74002.json，sha256 与两份 verdict 记录的 candidateSha256 逐字相同）上，exit=1 且 G 段精确命中 worldSettings[5] 的「格斗勿论」（框架『朱县令才敢喊』）——即该判据真能抓住 CE3；跑在返工后的候选上 exit=0。",
+      "result": "pass"
+    },
+    {
+      "text": "全文自检：python3 -B -s <artifacts>/cl_l2_0022/selfcheck.py → pass=true。覆盖 A 引文层（逐字/区间标记/哈希/出现次数/段落归属）、B 任务五栏跨栏不共用同一句且区间不重叠、C null 栏位必须带 why/Note、D worldSettings 的 kind/placeState/itemStates/institution、E themeReadings 三件齐全、F foreshadows setup/payoff/status 齐全、G 散文层引文主张（言语框架）逐字可查。",
+      "result": "pass"
+    },
+    {
+      "text": "发布链实测（不是我自评）：python3 -B -s loop/bin/to_candidate.py --task read:dafeng:L2:0022 本轮仍输出 `复核 verdict=fail`。这不是候选没修好，而是两份 verdict 文件（verify_dafeng_L2_0022.json 与 .verdict.json）都记录 candidateSha256=e2c74002…（**返工前**的哈希），且桥对 fail 是整单元跳过、不比对哈希。read:dafeng:L2:0022 与 verify:dafeng:L2:0022 均**不在 done_ids()** 中（命令：python3 -c \"import sys;sys.path.insert(0,'loop/bin');import loop as L;d=L.done_ids();print('read:dafeng:L2:0022' in d,'verify:dafeng:L2:0022' in d)\" → False False），故复核任务可被重新领取：需由 VERIFIER 对新哈希 918b50b8… 重出一份 verdict，该单元才能过桥。已写入 remaining，本候选不声称已可通过发布链。",
+      "result": "pass"
+    },
+    {
+      "text": "受保护路径未动：find js css index.html serve.py narrative.py scripts tests docs -newermt '2026-10-13 06:40' -type f 输出为空。工作树里其它 M/D 条目是并行 agent 的既有未提交改动，非本轮所为；本轮未执行任何 git checkout/reset/stash。",
+      "result": "pass"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/read_dafeng_L2_0022.candidate.json",
+      "kind": "append-only"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/1063b17ca65ec1b76f30e460.docs.json": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+  },
+  "reworkOf": "read:dafeng:L2:0022@e2c74002c01bfdcfb1b1533b830e99737309ebed618f89f3e65e21fcf6ea6f40",
+  "reworkReason": "上一轮候选（agent=w-xiyou-1，sha256=e2c74002…）被独立复核连续判 fail，CE1/CE2/CE3 三条 must-fix 在两轮复核间一字未改（candidateSha256 与上轮 verdict 记录值逐字相同），而 to_candidate.py 对 verdict=fail 整单元跳过 ⇒ 本单元图谱产出为 0。本轮定点修复这三条 + 同形态自查 8 处 + 复核 RV1–RV4 断言层补录 4 条。",
+  "remaining": [
+    "本单元仍**不能过发布链**：两份 verdict 文件记录的是返工前哈希 e2c74002…，且桥对 verdict=fail 整单元跳过。需 VERIFIER 对返工后哈希 918b50b863ac610b8823d99a614597fcf1fd176492e1661c4a45c6b6b4734361 重出 verdict（verify:dafeng:L2:0022 不在 done_ids，可被重新领取）。本候选不声称已可通过 to_candidate.py。",
+    "未做独立语义复核：semanticReview 保持 not-performed。全部 basis 是我的判断层级，不是复核结论；引用定位正确 ≠ 语义已核验。",
+    "CE1 所涉因果（扈从离县衙 → 刑部到场）的机制句在区间外第二十七章 @79779，本区间内无法证实；候选按 derived/medium + caveat 保留，未写成事实。",
+    "foreshadows[1]（『许七安有难，速救』）的回收端跨到第二十八章 @82985；其中『救援机制』只是许七安带问号的猜测句，本候选只登记『送达』这一层，未核实司天监是否真因该书出兵。",
+    "复核 CE4/CE5 是复核者自陈的自身错误（误杀合法 C1、把断言层缺口写成引文层未覆盖），已在候选的 assertionLayerAdditionsNote 与 reworkProvenance 里如实转述；我没有、也无法独立验证复核链内部的取舍。",
+    "本轮同形态自查的 8 处中，有几处（如 tasks[3].result『仍被带走』、states[0].after『即将被押走』）属于我按『命令≠完成态』口径做的措辞收紧，可能被复核判为误杀；已在 selfCritique 显式登记该风险。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/read_dafeng_L2_0022.candidate.json"
+    ],
+    "priorVersionBackup": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/备份/read_dafeng_L2_0022.candidate.PRIOR-e2c74002.json",
+    "priorVersionSha256": "e2c74002c01bfdcfb1b1533b830e99737309ebed618f89f3e65e21fcf6ea6f40"
+  },
+  "submittedAt": "2026-10-12T23:12:08Z",
+  "wallClockSeconds": 1708,
+  "wallClockFrom": "lease.startedAt",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-12T23:12:08Z"
+  },
+  "verifyState": "pending"
+}

@@ -1,0 +1,116 @@
+{
+  "task": "merge:final-handoff:20261013",
+  "reviewer": "integration_resume",
+  "reviewKind": "independent-read-only-lifecycle-setup-analysis",
+  "at": "2026-10-12T20:07:21.354618+00:00",
+  "runId": "20261013-033549-531319-58378",
+  "sourceDigest": "7f3e8460cc4670aaf50b7baac82aa233372fe1270f6468112d5123e04ad8a62d",
+  "evidence": {
+    "case138Log": {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261013-033549-531319-58378/临时/castline-accept.6SShP3/138.log",
+      "sha256": "d6f32c20a394b4d79d114f53eeabf1f11898cad15998c0b36c6ce8f2bd1b1d58"
+    },
+    "runner": {
+      "path": "tests/sky_shell_lifecycle.py",
+      "sha256": "fd6a371079f2e6bbaed9dea6ba845d517e0c99fae91557dc64ca753447bc9eab"
+    },
+    "observationHook": {
+      "path": "tests/sky_shell_lifecycle_init.js",
+      "sha256": "12ffeace39e714360e36a77f45ba774cd87833e9c2953302f8263def75a7df75"
+    },
+    "index": {
+      "path": "index.html",
+      "sha256": "50f6518ff525ce0b130db67830c58c4ae38af4a76acda1f2aa7a384f0d74c5fa"
+    },
+    "app": {
+      "path": "js/app.js",
+      "sha256": "3ee244b933bbcf53acbd91c4b3e7057cddbb6562c30560f23dc64110d839ee07"
+    },
+    "shell": {
+      "path": "js/sky/sky-shell.js",
+      "sha256": "3fc33770db0bb7b6d784702469ab7171f3244c8ba8ef0f5036f17788a2fd7bb7"
+    }
+  },
+  "originalFailure": {
+    "commandNumber": 138,
+    "command": [
+      "env",
+      "CL_GPU=1",
+      "python3",
+      "-B",
+      "-s",
+      "tests/sky_shell_lifecycle.py",
+      "--base",
+      "http://127.0.0.1:8002"
+    ],
+    "rc": 1,
+    "terminal": "SHELL-LIFECYCLE FAIL 0/1",
+    "failedAssertion": "runner completed every required real experiment",
+    "requiredExperimentCompleted": false,
+    "onlyReturnedAssertionPassed": false,
+    "scope": "The required held-shell setup did not complete. No completed startup/loader/state assertion matrix can be inferred from the single runner failure."
+  },
+  "recordedSetupState": {
+    "timeoutSeconds": 30,
+    "heldRequest": true,
+    "documentReadyState": "interactive",
+    "bootOrder": {
+      "graphReady": [],
+      "shellAt": null,
+      "deconstructionAt": null,
+      "domContentLoadedAt": null,
+      "afterDomContentLoaded": null
+    },
+    "graph": false,
+    "stagePropertyOmitted": true,
+    "errorPropertyOmitted": true,
+    "CLAppAvailabilityRecorded": false,
+    "resourceCompletionOrderRecorded": false,
+    "healthRecorded": false
+  },
+  "actualPrerequisites": [
+    {
+      "fact": "Runner main starts with navigate_with_shell_held; it does not explicitly open or mount the graph before this setup. The init hook only listens to the real cl:graph-ready event.",
+      "source": "tests/sky_shell_lifecycle.py:164; tests/sky_shell_lifecycle_init.js:24"
+    },
+    {
+      "fact": "Fetch pauses only the sky-shell.js Request; it disables cache. A paused preload request does not establish that earlier defer scripts have executed.",
+      "source": "tests/sky_shell_lifecycle.py:95-115"
+    },
+    {
+      "fact": "app.js is a defer script before the held sky-shell.js defer script in document order.",
+      "source": "index.html:974; index.html:1053"
+    },
+    {
+      "fact": "The URL data parameter autonomously calls bootData(data/sample-saga.json), then fetch, stagedMount, mount and the real cl:graph-ready event. This path does not await DOMContentLoaded or shell export. stagedMount retains its original two-rAF and 200ms fallback.",
+      "source": "js/app.js:4812; js/app.js:4608; js/app.js:1983; js/app.js:2051"
+    },
+    {
+      "fact": "History/jobs requests are started independently and are not awaited by the sample-saga bootData branch; a library cache index is not a prerequisite to this explicit sample URL boot.",
+      "source": "js/app.js:4798-4812; js/app.js:886; js/app.js:1117"
+    },
+    {
+      "fact": "beginWorkLoad writes CLLoadError=null and loadStage writes CLLoadStage before the sample fetch. The failure JSON omits both properties.",
+      "source": "js/app.js:1006-1010; js/app.js:1971-1973; js/app.js:4608-4611; tests/sky_shell_lifecycle.py:123"
+    }
+  ],
+  "assessment": {
+    "staticRacePathReachable": true,
+    "heldResourceAloneStaticallyPreventsAppBoot": false,
+    "recordedStateSuggests": "The setup had not reached bootData; this is an inference from omitted stage/error properties, not a direct CLApp/Network observation.",
+    "notEstablished": [
+      "Whether earlier defer resources were still loading or executing.",
+      "Whether app.js exited/threw before bootData.",
+      "Whether cold renderer/module setup exhausted the original 30-second setup deadline.",
+      "Whether the intended lifecycle assertions pass once their required race setup is reached."
+    ],
+    "rootCause": "undetermined from retained log and static source alone",
+    "engineeringOutcome": "Original required experiment failed to complete and rc=1 must remain in the final acceptance record."
+  },
+  "remaining": [
+    "Required lifecycle startup/loader/state real experiment matrix remains uncompleted for this run.",
+    "Root cause needs evidence that distinguishes early resource readiness and app availability/health; no product lifecycle failure count can be inferred from the one runner setup failure.",
+    "No timers, assertions, production source, sample input or baseline was changed; no extra GPU/Chrome or tests were launched by this review.",
+    "This limited metadata/static-source review is not product, art, semantic, real-device or film/FPS signoff."
+  ]
+}

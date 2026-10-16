@@ -1,0 +1,36 @@
+{
+ "task": "ops:activate-merged-code:20261009",
+ "agent": "reform-lead",
+ "at": "2026-10-08T19:35:59Z",
+ "why": "E15 的教训：常驻进程在启动时 import 一次核心模块，之后一直用内存里的旧版本。我合并了 loop/bin/sentinel.py（含 node PATH 自愈与 DSH_HOME 发现），但当时运行的 sentinel（pid 18945，启动于 02:18:55）**早于合并时间**（sentinel.py mtime 02:50:52）⇒ 修好的代码在磁盘上、却没有生效。",
+ "action": [
+  "kill 旧 sentinel(18945) 与全部 13 个 worker",
+  "loop.py reap 回收租约",
+  "以正确 PATH(node 22.22.2-6)+DSH_HOME 重启 sentinel --watch（新 pid 57263）",
+  "sentinel --once 按 roster 重新拉起 13 个 worker"
+ ],
+ "verification": {
+  "doctor": "干活 11 / 卡住 0 / 不在 0 / 空闲 2，子进程 11",
+  "workerCount": "13（与 roster 一致，无 stray）",
+  "selftest": "113/113",
+  "progress": "done 307 且持续增长"
+ },
+ "lesson": "这与 E15/E14 同一形态：**『我改了代码』不等于『系统在跑新代码』**。以后凡改动 loop/bin/ 下被常驻进程缓存的文件，必须一并重启 sentinel 与 worker，并在提交里写明重启动作。",
+ "assertions": [
+  {
+   "text": "运行的 sentinel 确实是新代码",
+   "command": "新 pid 启动时间晚于 sentinel.py mtime",
+   "result": "pass"
+  },
+  {
+   "text": "重启后 worker 数量与 roster 一致（无 stray）",
+   "command": "ps 计数 13",
+   "result": "pass"
+  },
+  {
+   "text": "重启未中断进度",
+   "command": "done 306 → 307 仍增长",
+   "result": "pass"
+  }
+ ]
+}

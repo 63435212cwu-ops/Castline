@@ -1,0 +1,84 @@
+{
+  "task": "read:xiyou:L0:0048",
+  "agent": "w-xiyou-0",
+  "status": "done",
+  "summary": "精读《西游记》第四十八回原文切片 docs[0].text[346551,353049)（6498 字，以回目开头、不含第四十九回），产出 5 条任务五元组（每栏各自引证、同任务内五栏零共用引文）、10 条因果边（另记 5 条拒绝边）、8 条状态变化、6 条知识差、4 条伏笔（1 已回收 / 3 显式 unresolved）、3 条跨单元回声、11 条 unknowns、6 条 selfCritique；共 137 条引文全部经 TEXT[start:end]==quote 逐字回验。",
+  "evidence": [
+    {
+      "path": "loop/state/out/read_xiyou_L0_0048.candidate.json",
+      "sha256": "3cad6cccc818526beae6b3d0c98490c5b3b1ace9de2b36eb3b88c7bccbe4367b",
+      "kind": "worker-output",
+      "bytes": 120484
+    }
+  ],
+  "assertions": [
+    {
+      "text": "源文件哈希与任务声明一致：shasum -a 256 data/cache/a065244455cfb2221bcda94a.docs.json == c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2（与 task.sourceHash 逐字相同）",
+      "result": "pass"
+    },
+    {
+      "text": "偏移口径自检：json.load(open('data/cache/a065244455cfb2221bcda94a.docs.json'))[0]['text'][346551:353049] 长度 6498、startswith('第四十八回') 为 True、'第四十九回' in 切片 为 False（切片止于本回，未越入下一回）",
+      "result": "pass"
+    },
+    {
+      "text": "137 条引文全部逐字回验通过：对 tasks 五栏 + causeEdges + states + knowledgeDiffs + foreshadows 的全部 evidence 断言 text[e['start']:e['end']]==e['quote']，bad 列表为空",
+      "result": "pass"
+    },
+    {
+      "text": "引文定位合法性：137 条引文全部满足 346551 <= start < end <= 353049（落在本单元区间内），且 sourceHash 全部等于 c282cf39…a152a2",
+      "result": "pass"
+    },
+    {
+      "text": "同一任务五栏不共用引文（prompt 点名的旧图谱缺陷）：对每条 task 收集 objective/obstacle/action/result/cost 的全部 quote，检查无重复 → SHARED 计数 0；同一栏内也无重复引文",
+      "result": "pass"
+    },
+    {
+      "text": "null 栏位均带同名 <栏位>Note 说明理由：T1.obstacle、T5.obstacle、T5.cost 三处为 null，各自都有 obstacleNote/costNote，检查通过（无「不写理由的 null」）",
+      "result": "pass"
+    },
+    {
+      "text": "没有把人物说话当叙述事实：逐栏比对 claimStatus 与 evidence.factStatus，不存在 claimStatus=narrated 而证据仅由 utterance 支撑的栏位；T1.objective、T2.objective、T4.objective、T5.objective 均显式标 utterance",
+      "result": "pass"
+    },
+    {
+      "text": "没有把「结束」当「成功」：T3.result 明确写「目标没有达成」（未抵西岸、被擒），T4.result 区分「捉到」与「没吃到」，F1 因此标 resolved=false",
+      "result": "pass"
+    },
+    {
+      "text": "未声称语义复核完成：semanticReview.performed=false；全文扫描 'semanticReview 完成' 0 次；'语义已核验' 仅 1 次且出现在「不等于『语义已核验』」的否定句里",
+      "result": "pass"
+    },
+    {
+      "text": "未改动受保护路径：本次运行只新建 loop/state/out/read_xiyou_L0_0048.candidate.json；git status --porcelain 该文件为 ?? （新增），js/ css/ index.html serve.py narrative.py scripts/ tests/ docs/ data/ 下的既有改动均为其他并行 agent 的未提交工作，非本次所改",
+      "result": "pass"
+    },
+    {
+      "text": "源文件在本次运行前后未被改动：data/cache/a065244455cfb2221bcda94a.docs.json 收尾重算哈希仍为 c282cf39…a152a2",
+      "result": "pass"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/read_xiyou_L0_0048.candidate.json",
+      "kind": "append-only"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/a065244455cfb2221bcda94a.docs.json": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2"
+  },
+  "remaining": [
+    "语义复核未做（semanticReview.performed=false）。本文件只证明「引文定位正确」，不证明语义正确；「引用定位正确」不等于「语义已核验」。需独立复核者对照原文判断每条断言是否读对。",
+    "伏笔 F2（冰盘大小两个鱼鳞）与 F3（石匣藏唐僧）在本区间内未回收，已显式标 resolved=false；F1（吃唐僧肉延寿长生）只到「下令」、被鳜婆以「且宁耐两日」挡下，同样未回收。三者的实际回收位置在第四十九回及以后，本任务区间内无法验证。",
+    "unknowns U1（灵感大王本相）、U2（冰上行人是否即鳜婆方案里的精怪所变）是本次读得最不确定的两处；U2 直接关系到「圈套—诱饵—上当」这条最顺的因果链能否成立，我选择不立边。",
+    "T2.obstacle 标 basis=inferred：原文那段季节反驳是对沙僧说的，把它认定为陈老这条任务线的障碍是我的归纳，不是叙述明写。",
+    "生成脚本写在临时目录 /tmp/cl0048/build.py（非留存产物），因此 candidate 的 reproduce.minimalCommands 写成自足的单行校验命令，不依赖该脚本。",
+    "speechFraction 是用「引号字符数 / 引文长度」估的粗值，只能区分整句叙述与整句说话，不是语言学统计。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/read_xiyou_L0_0048.candidate.json"
+    ]
+  }
+}

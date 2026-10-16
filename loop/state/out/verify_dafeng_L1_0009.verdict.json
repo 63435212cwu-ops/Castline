@@ -1,0 +1,427 @@
+{
+ "schema": "castline/verify-verdict/1",
+ "task": "verify:dafeng:L1:0009",
+ "reviewedTask": "read:dafeng:L1:0009",
+ "reviewedArtifact": "loop/state/out/read_dafeng_L1_0009.candidate.json",
+ "reviewer": "w-verify-0",
+ "reviewerRole": "VERIFIER",
+ "book": "dafeng",
+ "lane": 1,
+ "unitIndex": 9,
+ "unitHead": "第十章 县衙命案",
+ "source": {
+  "path": "data/cache/9b676d7031b1bcd3b8377a18.docs.json",
+  "docIndex": 0,
+  "field": "text",
+  "range": [
+   27180,
+   31095
+  ],
+  "chars": 3915,
+  "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+  "sourceHashVerified": true,
+  "textSha256": "bc8b75ee120009f4bf6a8e235a7ff133b8ac727a8612067496a0440eaf3fc612",
+  "sliceSha256": "17f29a77f55bb9a28220cb3d71af49a5e25444afc300f2ba69b9fc9621cad08d",
+  "candidateSha256": "822f98119dacc2eeefa691f4109c18616518cd1de3240705aeade2c3f94dc9bb"
+ },
+ "verdict": "partial",
+ "verdictRule": "内容层零编造、零错位（165/165 逐字命中，偏移全部等于首次出现位置）；但存在 2 处可机器证伪的自述/引用缺陷（CE1 覆盖记账与产物自相矛盾、CE2 悬空条目引用）与 5 条原文明确存在而未覆盖的事实（REV1–REV5）。按「判 fail 必须有 counterExample 且 quote 逐字可查」的纪律本可判 fail；但缺陷集中在元数据与覆盖记账层，任务/因果/状态/伏笔四类断言的证据全部成立，故按与 L1_0005 一致的口径判 partial：可用的是四类断言本身，必须修的是覆盖记账与坏引用。",
+ "counterExamples": [
+  {
+   "id": "CE1",
+   "severity": "self-description（覆盖记账与产物自相矛盾）",
+   "check": "coverage.omissions[0] 声称县衙形制段「只在 T6 的背景里用到」",
+   "claim": "县衙形制段（知县/县丞/主簿/典史/三班六房）是制度说明，未单独立为任务或状态，只在 T6 的背景里用到。",
+   "claimSource": "candidate coverage.omissions[0]",
+   "evidence": [
+    {
+     "quote": "    县衙的结构很值得说道，最大的当然是知县，叫做主官，他有两个副手，一个是县丞，一个是主簿。",
+     "start": 29762,
+     "end": 29810,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+    },
+    {
+     "quote": "    许七安就是快班里的差役，明间称为捕快。",
+     "start": 29938,
+     "end": 29961,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+    }
+   ],
+   "why": "可复现证伪：T6 的全部字段（who/objective/obstacle/action/result/cost/basis/notes）与其 8 条 evidence 中，形制词汇命中数均为 0（实测 T6 字段命中 0 个，T6 引文命中 0 个；用 auditCmd 里的命中统计即可复现）。也就是说该段并没有作为「T6 的背景」进入产物，而是整段未被覆盖：'主官'/'不入流'/'首领官'/'皂班'/'壮班'/'六部'/'编制' 在整个候选文件中出现 0 次。这句自述把一次整段漏抽写成了「已作为背景使用」，属自述与产物矛盾，会让下游把未覆盖误当已覆盖。注意：该段含「许七安就是快班里的差役，明间称为捕快」，是主角自身差事身份的定义句，不是纯布景。",
+   "whatMustChange": "把 omissions[0] 改为如实记「整段未覆盖」，或把形制段补成独立条目/证据；不要保留「只在 T6 的背景里用到」这一与产物矛盾的措辞。"
+  },
+  {
+   "id": "CE2",
+   "severity": "metadata（悬空条目引用）",
+   "check": "tasks[7].notes 以「见 F4」指向一个不存在的条目 id",
+   "claim": "result 只写他问到的东西——“京察”是什么，本区间一个字都没解释（解释在下一章开头，见 F4）。",
+   "claimSource": "candidate tasks[7].notes",
+   "evidence": [
+    {
+     "quote": "    “京察！”衙役点明。",
+     "start": 31066,
+     "end": 31080,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+    },
+    {
+     "quote": "京察，大奉京官考核制度，三年一查，以‘四格’、‘八法’为升降标准。",
+     "start": 31108,
+     "end": 31141,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+     "crossRange": true
+    }
+   ],
+   "why": "可复现：foreshadows 只定义了 F1_element_chant_becomes_periodic_table / F2_picked_silver_recurring_luck / F3_nineteen_years_ago_thieves，全文再无 F4；而 tasks[7].notes 是候选里唯一出现 'F4' 的位置。指针指向不存在的条目。实质内容并未丢失——京察定义句 @31108（第十一章 摸鱼，已在证据中列出）另记于 selfCheck.crossRangeQuotes[0] 与 rejectedAsForeshadow[4]——所以这是坏引用，不是编造，权重低于 CE1。",
+   "whatMustChange": "把 '见 F4' 改指实际记录该内容的位置（rejectedAsForeshadow 的京察条目 / selfCheck.crossRangeQuotes），或把京察补立为一个正式条目。"
+  }
+ ],
+ "reverseChecks": [
+  {
+   "id": "REV1",
+   "found": "观星楼的身份与「大奉京城最高建筑」这一定位整段缺失：候选里连 '观星' 这个子串都出现 0 次，本区间开篇的场景是「司天监的办公地点」，候选只在 structureRead 里写「司天监丹室」并提到「第七层」，没有记这栋楼的名字与它「京城最高建筑」的设定。",
+   "evidence": [
+    {
+     "quote": "大奉京城最高建筑，观星楼，司天监的办公地点。",
+     "start": 27210,
+     "end": 27232,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+    }
+   ],
+   "whyItMatters": "场景地标被降级为无名「丹室」；而同一句里的「大奉京城最高建筑」是全区间唯一的城市尺度设定。",
+   "mitigation": "如实说明：coverage.omissions[2] 有一句「京城地理位置说明未单独立项」，算是**部分**触及；但「观星楼=司天监办公地点=京城最高建筑」这一有名有姓的事实本身在任何字段里都没有落地，故仍记为未覆盖，权重按「部分被笼统提及」下调。",
+   "crossRangeLead": "同一措辞「京城最高建筑」在区间外 @71816（第二十四章 蓝皮书）被用于「摘星楼」，且该处同样描述为司天监所在。这是文本层的一个潜在不一致/异名线索，**属区间外、我只做子串定位未读正文**，不作为本区间结论。"
+  },
+  {
+   "id": "REV2",
+   "found": "称呼规则「用字不用名」整条缺失：候选引了紧随其后的「宁宴，你可得请客喝酒」，并把「许七安（字宁宴，本章明确）」写进 namedEntitiesInRange，却没有记录解释这个称呼的规则句——'用字不用名' 在候选里出现 0 次。",
+   "evidence": [
+    {
+     "quote": "    在这个时代，称呼友人，用字不用名。自我介绍时，用名不用字。",
+     "start": 30496,
+     "end": 30529,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+    },
+    {
+     "quote": "    “宁宴，你可得请客喝酒。”",
+     "start": 30477,
+     "end": 30494,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+    }
+   ],
+   "whyItMatters": "这是原文明确给出的世界规则，也是「宁宴」这个称谓在章内唯一的成立机制；候选收了「字」却丢了「用字的规则」，下游无法从候选复原称谓逻辑。"
+  },
+  {
+   "id": "REV3",
+   "found": "许七安追问的叙述层理由缺失：候选 T8 记录了他「听到『只是死了个商贾』后继续追问县令为何大发雷霆」，但没有记录紧接其后的叙述层解释句，'从五品' 在候选里出现 0 次。",
+   "evidence": [
+    {
+     "quote": "    自古人命皆是大案，但身为京城附郭县的县令，从五品，不至于这般。",
+     "start": 30950,
+     "end": 30985,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+    }
+   ],
+   "whyItMatters": "「自古人命皆是大案，但……不至于这般」正是他之所以觉得反常、并继续追问的原因；缺了它，T8 的追问在候选里没有动机依据，也丢掉了知县的品级。"
+  },
+  {
+   "id": "REV4",
+   "found": "县衙形制与主角差事身份整段缺失（与 CE1 同源）：'快班'/'皂班'/'壮班'/'主官'/'首领官'/'不入流'/'六部' 全为 0 次，其中包含定义主角本人职务的「许七安就是快班里的差役，明间称为捕快」。",
+   "evidence": [
+    {
+     "quote": "    三位朝廷命官之下，是典史，又称首领官。",
+     "start": 29848,
+     "end": 29871,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+    },
+    {
+     "quote": "    但没有品级，不入流。",
+     "start": 29873,
+     "end": 29887,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+    },
+    {
+     "quote": "    接着是三班六房：三班是皂班、快班、壮班，负责仪仗、治安、缉捕之类；而六房对应朝廷六部。",
+     "start": 29889,
+     "end": 29936,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+    },
+    {
+     "quote": "    许七安就是快班里的差役，明间称为捕快。",
+     "start": 29938,
+     "end": 29961,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+    }
+   ],
+   "whyItMatters": "这不只是制度布景：它定义了许七安在县衙的编制位置（快班差役/捕快），是他后续能在县衙走动、被同僚道贺的身份基础。"
+  },
+  {
+   "id": "REV5",
+   "found": "鄙视链的收束句缺失：候选在 rejectedAsForeshadow 里引了「至于儒家，对不起，恕我直言，在座的各位都是垃圾。」，却漏掉紧接其后的限定句，'衰弱' 在候选里出现 0 次。",
+   "evidence": [
+    {
+     "quote": "    不过近代儒家已经衰弱了。",
+     "start": 28512,
+     "end": 28528,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+    }
+   ],
+   "whyItMatters": "这句限定了上一句玩笑的适用范围（儒家曾经最被看不起，但近代已衰弱）；缺它会把一句带时代限定的调侃读成无条件的现状判断。权重较轻，但属原文明确存在。"
+  },
+  {
+   "id": "REV6",
+   "found": "「八卦台」这个候选**自己在用**的地名，其命名来历（楼顶不是正常檐顶，而是八角形平台、暗合八卦，因此得名）整段未记。候选在 coverage.structureRead[1] 里把该场景标为「八卦台 [28686,29275)」，但定义句本身在任何字段里都找不到。",
+   "evidence": [
+    {
+     "quote": "    观星楼的楼顶，不是正常的檐顶，而是一个八角形的平台，暗合八卦。",
+     "start": 28686,
+     "end": 28721,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+    },
+    {
+     "quote": "    因此被称为八卦台。",
+     "start": 28723,
+     "end": 28736,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+    }
+   ],
+   "whyItMatters": "与 REV2 同类：候选使用了术语（八卦台）却未记录术语的成立依据，下游无法从候选复原「八卦台」为何叫这个名字。同段还含被命名前的场景描写（白衣老者伏案饮酒、师尊平日不做正事且不喜打扰），候选的 T3/T4 只记了对白与结果，未记这层场景前提。",
+   "crossRangeLead": "区间外 @71816 同一栋「京城最高建筑」被写作「摘星楼」；本条与 REV1 指向同一处待判定的异名线索。"
+  }
+ ],
+ "misKillCheck": {
+  "checked": "候选 rejectedAsCauseEdge 的 4 条排除理由，逐条对照被保留的 causeEdges。",
+  "finding": {
+   "item": "rejectedAsCauseEdge[3]：「李典史传话」→「王捕头脸色一苦」",
+   "exclusionReason": "这一对有直接反应关系（他听完传话才苦脸），但它只是把同一场景内的动作串起来，不产生跨事件的信息（谁导致谁的处境变化，本区间由衙役转述给出，见 C4/T9）。为免把场景内时序当因果，不单列，机制已在 T9/S10 说明。",
+   "evidence": [
+    {
+     "quote": "    走过长廊，在西侧的偏厅坐了几分钟后，李典史脸色阴沉的进来了，望向王捕头：“老王，县令老爷让我们去一趟内堂。”",
+     "start": 30730,
+     "end": 30788,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+    },
+    {
+     "quote": "    王捕头脸色一苦，闷不吭声的出去了。",
+     "start": 30790,
+     "end": 30811,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+    }
+   ],
+   "why": "候选自述这对有「直接反应关系（他听完传话才苦脸）」，即以刺激→反应为机制；但它被排除的理由是「只是把同一场景内的动作串起来」。同一理由若一致适用，会同时排除候选**保留**的 C6（影子→李典史宣示→众人松气）、C7（玩笑→大惊→改口）、C8（信息差→见鬼反应）——这三条同样是同场景刺激→反应链。故这是标准不一致导致的**疑似误杀**，而非纯时序相邻。",
+   "notFailBasis": "该对的事实并未丢失：T9 与 S10 已完整记录（含同样两条引文）。按纪律，拿不出原文引证的反对意见只能记存疑；此条有逐字引证，但争点是「口径是否自洽」而非「事实是否存在」，故记为待原提交者统一口径，**不据此判 fail**。"
+  },
+  "otherThree": [
+   "「同僚起哄请客」→「许七安捡到碎银」：排除正确。原文「忽然脚下踩到了硬疙瘩」是偶然动作，无机制，连边即为把偶然当因果。",
+   "「许七安炼出假银」→「陛下降旨」：排除正确。本区间无一句直述许七安炼银，他未被点名。",
+   "「采薇进丹室指导」→「师兄们仍然失败」：排除正确。原文本区间未交代师兄是否按口诀试过，缺机制。"
+  ]
+ },
+ "hallucinationCheck": {
+  "result": "未发现编造",
+  "checked": [
+   "人物：候选出现的具名实体（许七安/褚采薇/许平志/李典史/王捕头/白衣老者/县令/给事中/万师兄）逐个在区间原文中定位命中，无原文外人物。",
+   "结局：T1/T3/T4/T9 的 result 均写「未解决/未拿到/未写」而非补齐；S4 明写「本区间内没有成功」。",
+   "伏笔：F1/F2/F3 全部 status=unresolved 且 payoff=null，并各自声明「单凭本区间证据不足以称伏笔」，未把一次出现当已回收。",
+   "成功判定：reviewStatus.semanticReview=not_performed、note 明写「本文件不做任何已完成语义复核的声称」；全文件无「semanticReview 完成」字样。",
+   "人物话语当事实：S2 把「我当初也是这么炼制的」标为「对外表现/自称」；C4 把「想来是那边给了压力」标 unverified 并注明「想来」是揣测；S5 把「我出狱了」标为「他自己的公开口径」，unknowns[9] 声明无官方或叙述层确认。",
+   "越权：未出现区间内不存在的事件结论；区间外仅 9 处子串定位，全部显式 crossRange 标注。"
+  ]
+ },
+ "citationCheck": {
+  "method": "全量重算 + 契约要求的随机抽样",
+  "totals": {
+   "contentQuotes": 165,
+   "inRange": 150,
+   "crossRangeFlagged": 15,
+   "selfCheckCrossRangeQuotes": 9,
+   "grandTotal": 174,
+   "verbatimFailures": 0,
+   "hashFailures": 0,
+   "offsetNotFirstOccurrence": 0,
+   "inRangeQuoteOutsideRange": 0,
+   "crossRangeQuoteInsideRange": 0
+  },
+  "outOfRangeReconciliation": "内容引文 165 条 + selfCheck.crossRangeQuotes 9 条 = 174 条，与既有 q-verify 复核记录的 174 条一致；其中区间外记录 24 条（区间前 5、区间后 19），亦与其记录的 5/19 一致 ⇒ 候选自 03:35 那次复核以来未被改动，本次为**追加的独立复核**而非替换。",
+  "randomSample5": [
+   {
+    "path": "见 samplePaths",
+    "quote": "    众人闻言，齐齐松了口气。",
+    "start": 30143,
+    "end": 30159,
+    "find": 30143,
+    "verbatim": true
+   },
+   {
+    "path": "见 samplePaths",
+    "quote": "    奇才在哪里啊，师兄你别胡思乱想！褚采薇笑容不变。",
+    "start": 28148,
+    "end": 28176,
+    "find": 28148,
+    "verbatim": true
+   },
+   {
+    "path": "见 samplePaths",
+    "quote": "    李典史大惊，众衙役心里一紧。",
+    "start": 30188,
+    "end": 30206,
+    "find": 30188,
+    "verbatim": true
+   },
+   {
+    "path": "见 samplePaths",
+    "quote": "    “传出去岂不成了笑话。”",
+    "start": 28356,
+    "end": 28372,
+    "find": 28356,
+    "verbatim": true
+   },
+   {
+    "path": "见 samplePaths",
+    "quote": "    请客喝酒倒是可以，睡女人还要我请，过分了....许七安刚想推脱说没钱，忽然脚下踩到了硬疙瘩，低头一看，竟是一粒碎银。",
+    "start": 30594,
+    "end": 30656,
+    "find": 30594,
+    "verbatim": true
+   }
+  ],
+  "chapterAttributionOfCrossRangePointers": [
+   {
+    "start": 31108,
+    "chapter": "第十一章 摸鱼"
+   },
+   {
+    "start": 38931,
+    "chapter": "第十三章 审问"
+   },
+   {
+    "start": 38975,
+    "chapter": "第十三章 审问"
+   },
+   {
+    "start": 15992,
+    "chapter": "第六章 懵逼的二叔"
+   },
+   {
+    "start": 291610,
+    "chapter": "第九十二章 监正的礼物"
+   },
+   {
+    "start": 62722,
+    "chapter": "第二十一章 自古恶霸多嚣张"
+   },
+   {
+    "start": 49236,
+    "chapter": "第十七章 日常怼婶婶"
+   },
+   {
+    "start": 463953,
+    "chapter": "第一百三十四章 塑料父子情"
+   },
+   {
+    "start": 464,
+    "chapter": "第一章 牢狱之灾"
+   }
+  ],
+  "chapterAttributionResult": "9 条区间外指针的章节归属逐条与候选自称一致（第十一/十三/六/九十二/二十一/十七/一百三十四/一 章），0 处错标。"
+ },
+ "usableVsDiscard": {
+  "usableAsIs": [
+   "tasks[0..8] 的五元组与其 basis 分级（含 6 处按纪律写 null 的项）：证据全部逐字成立，未发现把人物话语当事实、把结束当成功。",
+   "causeEdges C1–C8：证据全部逐字成立；C4 的 unverified 定级与「想来是」甄别正确。",
+   "states S1–S12：前值/后值/锚点均可回溯；S2/S6/S7/S12 的知识差标注成立。",
+   "foreshadows F1–F3：unresolved + payoff=null + 两次标准自述，符合纪律，未越权声称回收。",
+   "unknowns 15 条：与原文一致，未见「用听起来合理的值补空缺」。",
+   "coverage.structureRead 6 段边界：抽查边界与其自称一致。",
+   "selfCheck.reproduceScript：实跑输出 'quotes 165 bad 0 badHash 0 rangeBad 0 crossInRange 0' + 'ALL VERBATIM'，与 reproduceExpected 完全一致。"
+  ],
+  "mustFix": [
+   "CE1：coverage.omissions[0] 的「只在 T6 的背景里用到」与产物矛盾，须改为如实记「整段未覆盖」或补条目。",
+   "CE2：tasks[7].notes 的悬空 '见 F4'，须改指真实位置或补立条目。"
+  ],
+  "shouldAdd": [
+   "REV1–REV5 五条原文事实建议补入（REV1 权重因 omissions[2] 的笼统提及而下调）。"
+  ],
+  "keepAsIsUnresolved": [
+   "F1/F2/F3 的 payoff 依赖区间外章节，本轮未读那些章正文，故其回收状态**维持 unresolved**，不因本轮复核升级。",
+   "采薇为何一次成功、复制却失败（unknowns[1]）；十九年前小偷是谁、偷了什么（unknowns[2]）；白衣老者是否即监正（unknowns[3]）—— 均为原文明确写下的未知，维持 unknowns。"
+  ]
+ },
+ "notes": "总判 partial。**内容层零编造**：165 条内容引文全部满足 T[start:end]==quote，且 start 全部等于该串在全文的首次出现位置（0 处偏移取错），sourceHash 165/165 正确；文件 sha256、全文 sha256、切片 sha256 三个哈希重算全部与声明一致；切片确以「第十章 县衙命案」开头。契约第 6 步随机抽 5 条全部逐字命中、偏移一致。反向验证（契约第 2 步）用机械方法扫描：区间内 120 个非空段落中，有 42 段连一个 7 字窗口都不出现在候选里 —— 逐段人工核对后，多数属于「同一场戏已由别的句子记录」（如「采薇，是采薇师妹」对应的整场戏已在 T2/S1），判为假阳性；真正构成漏抽的是 REV1–REV6 六条。误杀检查发现 1 处口径不自洽（rejectedAsCauseEdge[3] vs 保留的 C6/C7/C8），但其事实已在 T9/S10 记录，故只记存疑。\n\n不确定处（如实记录）：(1) 我没有读任何区间外章节的正文，9 条区间外指针只做子串定位与章节归属核验；因此 F1/F2/F3 的 payoff、C5 的跨区间机制都未获独立语义确认，我把它们维持 unresolved。(2) REV1 存在减轻情节——coverage.omissions[2] 的「京城地理位置说明未单独立项」笼统触及该段，我在 reverseChecks 里显式标出，未按完全静默漏抽计权。(3) T2.result 的「脱身成功」是全文件唯一带「成功」字样的结果判定；我核对了原文（她说完「下次一定！」后「从白衣师兄群里硬挤出去，继续拾阶而上」），她确实离场，故不构成「把结束当成功」；但它是对未完结剧情的措辞最强的判定，记此以备下游注意。(4) 本轮我未修改候选（复核者只读），CE1/CE2/REV1–REV6 均只列证不代写。\n\n我的反向验证自身的局限：orphan-line 扫描只证明「这些字没有出现在候选里」，不能单独证明「该事实未被覆盖」——所以我逐条回读原文确认语义，并保留了 REV1 的减轻说明，避免把「换了引文」误判成漏抽（这正是既有 q-verify 复核踩过的假阳性）。",
+ "evidence": [
+  {
+   "path": "loop/state/out/read_dafeng_L1_0009.candidate.json",
+   "sha256": "822f98119dacc2eeefa691f4109c18616518cd1de3240705aeade2c3f94dc9bb",
+   "kind": "被复核候选（只读，未修改）"
+  },
+  {
+   "path": "data/cache/9b676d7031b1bcd3b8377a18.docs.json",
+   "sha256": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+   "kind": "原文（只读引用，未修改）"
+  },
+  {
+   "path": "loop/state/out/verify_dafeng_L1_0009.verdict.json",
+   "kind": "本任务产出：复核结论（verdict/counterExamples/reverseChecks/notes）；自指文件不在此声明自身哈希，真实哈希由提交记录 loop/state/out/verify_dafeng_L1_0009.json 登记"
+  }
+ ],
+ "sourceHashes": {
+  "data/cache/9b676d7031b1bcd3b8377a18.docs.json": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+  "loop/state/out/read_dafeng_L1_0009.candidate.json": "822f98119dacc2eeefa691f4109c18616518cd1de3240705aeade2c3f94dc9bb"
+ },
+ "assertions": [
+  {
+   "text": "先自读原文再读候选：独立通读切片 [27180,31095) 全文 3915 字、120 个非空段落，之后才打开候选文件",
+   "result": "pass",
+   "command": "python3 -B -s -c \"import json;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];print(t[27180:31095])\""
+  },
+  {
+   "text": "三个哈希与候选声明一致（文件 sha256 / 全文 sha256 / 切片 sha256），且切片以「第十章 县衙命案」开头",
+   "result": "pass",
+   "command": "python3 -B -s -c \"import json,hashlib;raw=open('data/cache/9b676d7031b1bcd3b8377a18.docs.json','rb').read();t=json.loads(raw)[0]['text'];print(hashlib.sha256(raw).hexdigest());print(hashlib.sha256(t.encode()).hexdigest());print(hashlib.sha256(t[27180:31095].encode()).hexdigest())\""
+  },
+  {
+   "text": "内容层 165 条引文全量重算：bad=0 badHash=0 offsetNotFirst=0 rangeBad=0 crossInRange=0（独立脚本，非候选自带脚本）",
+   "result": "pass"
+  },
+  {
+   "text": "候选自带 reproduceScript 实跑，输出与 reproduceExpected 完全一致（quotes 165 bad 0 badHash 0 rangeBad 0 crossInRange 0 / ALL VERBATIM）",
+   "result": "pass",
+   "command": "python3 -B -s -c \"import json;open('/tmp/verify_0009.py','w').write(json.load(open('loop/state/out/read_dafeng_L1_0009.candidate.json'))['selfCheck']['reproduceScript'])\" && python3 -B -s /tmp/verify_0009.py"
+  },
+  {
+   "text": "契约第 6 步随机抽 5 条 quote，全部逐字命中且 start 等于首次出现位置（见 citationCheck.randomSample5）",
+   "result": "pass"
+  },
+  {
+   "text": "9 条区间外指针的章节归属逐条核验，与候选自称 0 处不符（用全文 791 个章节标题构边建图）",
+   "result": "pass"
+  },
+  {
+   "text": "CE1 可机器证伪：T6 全部字段与 8 条引文中形制词汇命中数为 0，'主官'/'不入流'/'首领官'/'皂班'/'壮班'/'六部'/'编制' 在整个候选中 0 次",
+   "result": "fail"
+  },
+  {
+   "text": "CE2 可机器证伪：foreshadows 仅定义 F1/F2/F3，全文唯一 'F4' 出现在 tasks[7].notes",
+   "result": "fail"
+  },
+  {
+   "text": "反向验证产出 5 条原文明确存在而候选未覆盖的事实，全部附逐字引证与唯一出现校验",
+   "result": "pass"
+  }
+ ],
+ "auditCmd": "python3 -B -s -c \"import json;exec(json.load(open('loop/state/out/verify_dafeng_L1_0009.verdict.json'))['auditScript'])\"",
+ "auditScript": "#!/usr/bin/env python3\n# -*- coding: utf-8 -*-\n\"\"\"verify:dafeng:L1:0009 复核的独立复现脚本（不依赖候选自带的 reproduceScript）。\n用法：python3 -B -s /tmp/verify_0009_audit.py\n输出应含：AUDIT OK 以及 CE1/CE2 的证伪命中统计。\"\"\"\nimport json, hashlib, re\nfrom pathlib import Path\n\nROOT = Path(\"/Users/carmen/Desktop/星系\")\nDOCS = ROOT / \"data/cache/9b676d7031b1bcd3b8377a18.docs.json\"\nCAND = ROOT / \"loop/state/out/read_dafeng_L1_0009.candidate.json\"\nVERD = ROOT / \"loop/state/out/verify_dafeng_L1_0009.verdict.json\"\nFILE_SHA = \"fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839\"\nS, E = 27180, 31095\n\nraw = DOCS.read_bytes()\nassert hashlib.sha256(raw).hexdigest() == FILE_SHA, \"源文件哈希不符\"\nT = json.loads(raw)[0][\"text\"]\nC = json.loads(CAND.read_text(encoding=\"utf-8\"))\nV = json.loads(VERD.read_text(encoding=\"utf-8\"))\nBLOB = json.dumps(C, ensure_ascii=False)\n\n# --- 1. 候选内容层引文全量核验 ---\nQ = []\ndef collect(o):\n    if isinstance(o, dict):\n        if \"quote\" in o and \"start\" in o: Q.append(o)\n        for v in o.values(): collect(v)\n    elif isinstance(o, list):\n        for v in o: collect(v)\nfor b in (\"tasks\", \"causeEdges\", \"states\", \"foreshadows\", \"rejectedAsForeshadow\", \"rejectedAsCauseEdge\"):\n    collect(C[b])\nbad = [x for x in Q if T[x[\"start\"]:x[\"end\"]] != x[\"quote\"]]\nbadhash = [x for x in Q if x.get(\"sourceHash\") != FILE_SHA]\nnotfirst = [x for x in Q if T.find(x[\"quote\"]) != x[\"start\"]]\ninr = [x for x in Q if not x.get(\"crossRange\")]\nrangebad = [x for x in inr if not (S <= x[\"start\"] and x[\"end\"] <= E)]\ncrin = [x for x in Q if x.get(\"crossRange\") and S <= x[\"start\"] < E]\nprint(\"quotes=%d bad=%d badHash=%d notFirst=%d rangeBad=%d crossInRange=%d\"\n      % (len(Q), len(bad), len(badhash), len(notfirst), len(rangebad), len(crin)))\nassert not (bad or badhash or notfirst or rangebad or crin), \"候选引文核验失败\"\n\n# --- 2. 哈希三方一致 ---\nassert hashlib.sha256(T.encode()).hexdigest() == C[\"source\"][\"textSha256\"]\nassert hashlib.sha256(T[S:E].encode()).hexdigest() == C[\"source\"][\"sliceSha256\"]\nassert T[S:E].startswith(\"第十章 县衙命案\")\nassert C[\"source\"][\"sourceHash\"] == FILE_SHA\n\n# --- 3. CE1 证伪：形制段并未进入 T6 ---\nT6 = C[\"tasks\"][5]\nT6BLOB = json.dumps(T6, ensure_ascii=False)\nTERMS = [\"主官\", \"县丞\", \"主簿\", \"首领官\", \"三班六房\", \"皂班\", \"快班\", \"壮班\", \"六部\", \"品级\", \"不入流\", \"编制\"]\nt6_hits = [k for k in TERMS if k in T6BLOB]\nev_hits = [k for k in TERMS if any(k in e[\"quote\"] for e in T6[\"evidence\"])]\nabsent = [k for k in TERMS if k not in BLOB]\nprint(\"CE1: T6 field hits=%r  T6 evidence hits=%r  absent-in-candidate=%r\" % (t6_hits, ev_hits, absent))\nassert t6_hits == [] and ev_hits == [], \"CE1 不成立：形制段确实进了 T6\"\nassert C[\"coverage\"][\"omissions\"][0].endswith(\"只在 T6 的背景里用到。\")\n\n# --- 4. CE2 证伪：悬空 F4 ---\nids = [f[\"id\"] for f in C[\"foreshadows\"]]\nassert not any(i.startswith(\"F4\") for i in ids), ids\nassert BLOB.count(\"F4\") == 1 and \"见 F4\" in C[\"tasks\"][7][\"notes\"]\nprint(\"CE2: foreshadow ids=%r  'F4' occurrences=%d\" % (ids, BLOB.count(\"F4\")))\n\n# --- 5. 本复核文件自身引文核验 ---\nVQ = []\ndef collect2(o):\n    if isinstance(o, dict):\n        if \"quote\" in o and \"start\" in o: VQ.append(o)\n        for v in o.values(): collect2(v)\n    elif isinstance(o, list):\n        for v in o: collect2(v)\ncollect2(V)\nvbad = [x for x in VQ if T[x[\"start\"]:x[\"end\"]] != x[\"quote\"] or T.count(x[\"quote\"]) != 1]\nprint(\"verdict quotes=%d bad=%d\" % (len(VQ), len(vbad)))\nassert not vbad, \"复核文件自身引文有误\"\nassert V[\"verdict\"] in (\"pass\", \"fail\", \"partial\")\nassert V[\"counterExamples\"] and V[\"reverseChecks\"]\nprint(\"AUDIT OK\")\n",
+ "remaining": [
+  "CE1、CE2 两处缺陷须由原提交者或后续合并任务修正；本复核只读候选，未改动。",
+  "REV1–REV5 五条漏抽建议补入候选；本复核只列证，未代写。",
+  "区间外章节未做语义核验（9 处仅子串定位+章节归属）：F1/F2/F3 的 payoff 与 C5 的跨区间机制未获独立确认，维持 unresolved。",
+  "REV1 的区间外线索（@71816「摘星楼」亦被称京城最高建筑且同指司天监）需在读到第二十四章正文后判定是异名还是文本不一致；本轮不结。"
+ ],
+ "reviewRecordNote": "read:dafeng:L1:0009 的 reviews 里有 2 条 w-verify-0 记录（20:12:10Z 与 20:13:50Z）：第一次记录后我修正了本文件 CE1.why 的一处渲染缺陷（百分号插值把空列表打成 []），重新构建产物后用官方 verify 命令再次登记，而该命令是**追加**语义，故产生第二条。两条 verdict 同为 partial，notes 与 reverseChecks 逐字节相同，仅 CE1.why 的措辞与时间戳不同；第二条为准。我没有手工编辑 read:dafeng:L1_0009.json 去删除第一条——该文件不在本任务 writes 内，追加式审计轨迹应保持原样。",
+ "rollback": {
+  "kind": "append-only",
+  "strategy": "delete-added-files",
+  "files": [
+   "loop/state/out/verify_dafeng_L1_0009.verdict.json"
+  ]
+ }
+}

@@ -1,0 +1,248 @@
+--- a/js/sky/sky-deconstruction.js
++++ b/js/sky/sky-deconstruction.js
+@@ -17,7 +17,8 @@
+   var PAGE_SIZE = 24, TRACK_BINS = 48, searchTimer = null;
+   var browse = { people: { query: '', filter: 'all', page: 0 }, evidence: { query: '', filter: 'all', kind: 'all', person: '', order: 'time', page: 0 }, arc: { page: 0 }, quotes: { page: 0 } };
+   var personDetail = null;
+-  var m84 = { open: false, selected: 'characters', request: 0, selectionProgress: 1 };
++  var m84 = { open: false, selected: 'characters', request: 0, selectionProgress: 1,
++    returning: false, returnOpen: false, returnScroll: null, returnLayer: null, trigger: null, openScroll: null };
+   var LAYERS = { tasks: '任务', relations: '人物关系', causeEdges: '因果', clues: '伏笔', characterStates: '状态', narrativeUnits: '剧情单元', reviewIssues: '核验批注' };
+   browse.mechanics = { query: '', filter: 'all', layer: 'tasks', page: 0, selected: null };
+   browse.mechanicQuotes = { page: 0 }; browse.references = { page: 0 }; browse.attributes = { page: 0 };
+@@ -433,7 +434,7 @@
+     for (var gi = 0; gi < groupRows.length && !groupSample; gi++) {
+       var group = groupRows[gi], memberNames = arr(group.members).filter(function (name) { return typeof name === 'string'; }), members = [];
+       memberNames.forEach(function (name) { var p = uniquePerson(name); if (p && members.length < 4 && !members.some(function (x) { return x.id === p.id; })) members.push(p); });
+-      if (group.name && groupNames[String(group.name)] === 1 && members.length) groupSample = { name: String(group.name), index: gi, ids: members.map(function (p) { return p.id; }), members: members, key: 'camps:' + gi + ':' + String(group.name) };
++      if (group.name && groupNames[String(group.name)] === 1 && members.length) groupSample = { name: String(group.name), index: gi, ids: members.map(function (p) { return p.id; }), members: members, memberTotal: memberNames.length, key: 'camps:' + gi + ':' + String(group.name) };
+     }
+     var relationSample = null;
+     for (var ri = 0; ri < relations.length && !relationSample; ri++) {
+@@ -594,7 +595,7 @@
+       if (e.target.closest && e.target.closest('.skg-deck')) return;
+       close();
+     });
+-    g.addEventListener('keydown', function (e) { if (state.open && e.key === 'Escape' && !e.defaultPrevented) { e.preventDefault(); if (m84.open) cancelM84(true); else close(true); } }, true);
++    g.addEventListener('keydown', function (e) { if (state.open && e.key === 'Escape' && !e.defaultPrevented) { e.preventDefault(); if (m84.open) cancelM84(true, true); else close(true); } }, true);
+     return root;
+   }
+ 
+@@ -606,6 +607,7 @@
+   }
+   function setMode(mode) {
+     if (['overview', 'lines', 'people', 'evidence', 'mechanics', 'causal', 'foreshadow', 'states'].indexOf(mode) < 0) mode = 'overview';
++    if (mode === 'overview' && m84.returning) { returnStructureOverview(); return; }
+     if (mode !== 'overview' && m84.open) cancelM84(true);
+     if (mode !== 'people') { if (g.CLSky && g.CLSky.clearNeighborCompare) g.CLSky.clearNeighborCompare(); browse.neighbors.bId = ''; browse.neighbors.result = null; browse.neighbors.demoCounts = null; browse.neighbors.origin = null; }
+     if (searchTimer != null) { g.clearTimeout(searchTimer); searchTimer = null; }
+@@ -621,6 +623,7 @@
+   }
+   function close(refocus) {
+     cancelM84(true);
++    m84.returning = false; m84.returnOpen = false; m84.returnScroll = null; m84.returnLayer = null;
+     if (g.CLSky && g.CLSky.clearNeighborCompare) g.CLSky.clearNeighborCompare();
+     browse.neighbors.bId = ''; browse.neighbors.result = null; browse.neighbors.demoCounts = null; browse.neighbors.origin = null; browse.neighbors.returnAfterBasis = false;
+     state.open = false; syncButton();
+@@ -647,9 +650,10 @@
+     if (searchTimer != null) { g.clearTimeout(searchTimer); searchTimer = null; }
+     var action = b.getAttribute('data-action'), mode = b.getAttribute('data-mode');
+     var layer = b.getAttribute('data-layer');
+-    if (m84.open && action !== 'structure-stage' && action !== 'structure-layer') cancelM84(true);
+-    if (action === 'structure-stage') { if (m84.open) cancelM84(true); else if (structureReady()) openM84(); return; }
++    if (m84.open && action !== 'structure-stage' && action !== 'structure-layer' && action !== 'structure-nav') cancelM84(true);
++    if (action === 'structure-stage') { if (m84.open) cancelM84(true, true); else if (structureReady()) openM84(); return; }
+     if (action === 'structure-layer') { selectM84Layer(b.getAttribute('data-structure-layer')); return; }
++    if (action === 'structure-return') { returnStructureOverview(); return; }
+     if (action === 'structure-plot') { cancelM84(true); if (g.CLSky && g.CLSky.setPlot) g.CLSky.setPlot(true); return; }
+     if (action === 'structure-nav') { navigateStructure(b.getAttribute('data-structure-nav')); return; }
+     if (LAYERS[layer]) {
+@@ -743,8 +747,12 @@
+   }
+ 
+   function navigateStructure(which) {
++    if (!m84.returning) {
++      var body = doc.getElementById('skyDeconBody');
++      m84.returning = true; m84.returnOpen = m84.open; m84.returnLayer = m84.selected;
++      m84.returnScroll = m84.open && m84.openScroll != null ? m84.openScroll : body ? body.scrollTop : 0;
++    }
+     cancelM84(true);
+-    m84.returning = true;
+     if (which === 'people') { browse.people.query = ''; browse.people.filter = 'all'; setMode('people'); }
+     else if (which === 'groups') { browse.people.query = ''; browse.people.filter = 'all'; setMode('people'); setText('skyDeconMeta', '群组/阵营记录通过人物条目的阵营字段浏览；此入口不合并人物身份。'); }
+     else if (which === 'relations') { browse.mechanics.layer = 'relations'; browse.mechanics.query = ''; browse.mechanics.filter = 'all'; browse.mechanics.page = 0; browse.mechanics.selected = null; setMode('mechanics'); }
+@@ -753,6 +761,17 @@
+     else if (which === 'units') { browse.mechanics.layer = 'narrativeUnits'; browse.mechanics.query = ''; browse.mechanics.filter = 'all'; browse.mechanics.page = 0; browse.mechanics.selected = null; setMode('mechanics'); }
+     else if (which === 'lines') setMode('lines');
+     else if (which === 'clues') setMode('foreshadow');
++  }
++  function returnStructureOverview() {
++    if (!m84.returning) { setMode('overview'); return; }
++    var reopen = !!(m84.returnOpen && structureReady()), scroll = m84.returnScroll;
++    if (m84.returnLayer && ['characters', 'groups', 'relations', 'events'].indexOf(m84.returnLayer) >= 0) m84.selected = m84.returnLayer;
++    m84.returning = false; m84.returnOpen = false; m84.returnScroll = null; m84.returnLayer = null;
++    state.mode = 'overview'; state.focus = null;
++    state.restore = { attr: 'data-structure-layer', value: m84.selected };
++    render();
++    var body = doc.getElementById('skyDeconBody'); if (body && scroll != null) body.scrollTop = scroll;
++    if (reopen) openM84();
+   }
+   function onInput(e) {
+     var el = e.target, mode = el.getAttribute && el.getAttribute('data-search');
+@@ -1159,13 +1178,30 @@
+   }
+   function m84Sample(key, f) { return key === 'characters' ? f.people.sample : key === 'groups' ? f.groupSample : key === 'relations' ? f.relations.sample : f.events.sample; }
+   function m84SourceId(key, sample) { return key === 'groups' ? sample && sample.key : sample && sample.id; }
+-  function cancelM84(clear) {
++  function m84CountSummary(key, f, sample, anchor) {
++    var fact = key === 'characters' ? f.people : key === 'groups' ? f.groups : f[key];
++    if (!fact || !fact.provided) return '记录总数未提供';
++    var total = fact.count || 0;
++    if (!total) return '共 0 条记录';
++    if (!sample) return '共 ' + total + ' 条记录 · 暂无唯一示例';
++    var summary = '记录样本 1 / ' + total + (anchor ? ' · 当前有投影' : ' · 当前视图未投影');
++    if (key === 'groups') summary += ' · 成员已解析并展示 ' + sample.members.length + ' / ' + sample.memberTotal;
++    return summary;
++  }
++  function cancelM84(clear, returnFocus) {
+     if (m84Tween && g.CLSkyMotion) g.CLSkyMotion.cancelAll('m84');
+     if (m84InputCancel) { m84InputCancel(); m84InputCancel = null; }
+     m84Tween = null;
+     if (clear && m84Stage && m84Stage.parentNode) m84Stage.parentNode.removeChild(m84Stage);
+     if (clear) m84Stage = null;
++    var trigger = m84.trigger, restoreScroll = m84.openScroll;
+     m84.open = false;
++    if (returnFocus && trigger && trigger.isConnected) {
++      var body = doc.getElementById('skyDeconBody'); if (body && restoreScroll != null) body.scrollTop = restoreScroll;
++      if (trigger.focus) trigger.focus({ preventScroll: true });
++      if (trigger.scrollIntoView) trigger.scrollIntoView({ block: 'nearest' });
++    }
++    m84.trigger = null; m84.openScroll = null;
+   }
+   function stageMarkup(f) {
+     var keys = ['characters', 'groups', 'relations', 'events'], labels = {characters:'人物',groups:'群组',relations:'关系',events:'事件'}, positions = {};
+@@ -1178,7 +1214,7 @@
+       var detail = !exists ? '当前无记录' : !sample ? '有记录；当前未取得唯一对象引用' : key === 'events' && !anchor && !plotNow ? '当前视图未展开事件' : key === 'events' && !anchor ? '此事件在当前剧情视图没有投影' : !anchor ? '当前视图未投影此对象' : (name || labels[key]);
+       var sourceId = m84SourceId(key, sample), sourceIndex = sample && sample.index;
+       var sourcePoints = anchors.map(function (p) { return p.point[0] + ',' + p.point[1]; }).join(';');
+-      return '<article class="sd-structure-copy layer-' + key + (m84.selected === key ? ' is-selected' : '') + (anchor ? ' has-source' : '') + '" data-structure-copy="' + key + '" data-layer-depth="' + i + '"' + (anchor ? ' data-source-x="' + anchor[0] + '" data-source-y="' + anchor[1] + '" data-source-points="' + sourcePoints + '"' : '') + (sourceId != null ? ' data-source-id="' + esc(sourceId) + '"' : '') + (key === 'groups' && sample ? ' data-source-members="' + esc(sample.ids.join(',')) + '"' : key === 'relations' && sample ? ' data-source-members="' + esc(sample.a.id + ',' + sample.b.id) + '"' : '') + (sourceIndex != null ? ' data-source-index="' + sourceIndex + '"' : '') + '><small>' + labels[key] + '</small><b>' + esc(detail) + '</b>' + (sample && anchor ? '<span>' + esc(key === 'relations' ? sample.kind + ' · ' + sample.scope : key === 'events' ? sample.chapter : sample.identity || '源对象') + '</span>' : key === 'events' && exists && !anchor ? '<span class="sd-structure-hop">转到剧情</span>' : '') + '</article>';
++      return '<article class="sd-structure-copy layer-' + key + (m84.selected === key ? ' is-selected' : '') + (anchor ? ' has-source' : '') + '" data-structure-copy="' + key + '" data-layer-depth="' + i + '"' + (anchor ? ' data-source-x="' + anchor[0] + '" data-source-y="' + anchor[1] + '" data-source-points="' + sourcePoints + '"' : '') + (sourceId != null ? ' data-source-id="' + esc(sourceId) + '"' : '') + (key === 'groups' && sample ? ' data-source-members="' + esc(sample.ids.join(',')) + '"' : key === 'relations' && sample ? ' data-source-members="' + esc(sample.a.id + ',' + sample.b.id) + '"' : '') + (sourceIndex != null ? ' data-source-index="' + sourceIndex + '"' : '') + '><small>' + labels[key] + '</small><b>' + esc(detail) + '</b>' + (sample && anchor ? '<span>' + esc(key === 'relations' ? sample.kind + ' · ' + sample.scope : key === 'events' ? sample.chapter : sample.identity || '身份未提供') + '</span>' : '') + '<span class="sd-structure-count">' + esc(m84CountSummary(key, f, sample, anchor)) + '</span></article>';
+     }).join('');
+     var lines = mobile ? '' : keys.map(function (key) { var ps = positions[key] || [], i = keys.indexOf(key), target = ps.length ? ps[0].point : null; if (!target) return ''; return ps.map(function (p, j) { return '<line data-guide="' + key + '" data-guide-index="' + j + '" x1="' + p.point[0] + '" y1="' + p.point[1] + '" x2="' + target[0] + '" y2="' + (target[1] - (i + 1) * 28) + '" />'; }).join(''); }).join('');
+     return '<div class="sd-structure-stage' + (mobile ? ' is-inline' : '') + '" aria-hidden="' + String(!mobile) + '"><div class="sd-structure-stage-title">同一张图的组成' + (mobile ? '<button type="button" class="sd-structure-stage-close" data-action="structure-stage">收起</button>' : '') + '</div><svg class="sd-structure-guides" viewBox="0 0 ' + g.innerWidth + ' ' + g.innerHeight + '" preserveAspectRatio="none">' + lines + '</svg><div class="sd-structure-copies">' + cards + '</div></div>';
+@@ -1187,6 +1223,12 @@
+     if (m84.open) return;
+     m84.open = true; m84.request++;
+     m84.returning = false;
++    var readingBody = doc.getElementById('skyDeconBody');
++    m84.openScroll = readingBody ? readingBody.scrollTop : 0;
++    m84.trigger = root && root.querySelector('[data-action="structure-stage"]');
++    var readingBody = doc.getElementById('skyDeconBody');
++    m84.openScroll = readingBody ? readingBody.scrollTop : 0;
++    m84.trigger = root && root.querySelector('[data-action="structure-stage"]');
+     if (g.CLSky) {
+       if (g.CLSky.clearNeighborCompare) g.CLSky.clearNeighborCompare();
+       if (g.CLSky.showParticipants) g.CLSky.showParticipants(false);
+@@ -1255,6 +1297,8 @@
+     }
+     if (mobile || prefersReduced || !g.CLSkyMotion) paint(1);
+     else { m84Tween = g.CLSkyMotion.tween({ from: 0, to: 1, dur: .9, ease: function (v) { return v; }, tag: 'm84', onUpdate: paint, onDone: function () { m84Tween = null; } }); }
++    if (mobile && m84Stage.scrollIntoView) m84Stage.scrollIntoView({ block: 'nearest' });
++    if (mobile && m84Stage.scrollIntoView) m84Stage.scrollIntoView({ block: 'nearest' });
+   }
+   function selectM84Layer(key) {
+     if (['characters','groups','relations','events'].indexOf(key) < 0) return;
+@@ -1569,6 +1613,9 @@
+       '<div class="sd-causal-map" role="list" aria-label="伏笔生命周期">' + (cards || '<p class="sd-empty">' + esc(empty) + '</p>') + '</div>' + (records.length ? pager('foreshadow', view) : '') + '</section>';
+   }
+ 
++  function structureReturnMarkup() {
++    return '<div class="sd-structure-return"><button type="button" class="sd-detail-action" data-action="structure-return">← 返回结构总览</button></div>';
++  }
+   function render() {
+     if (!root || !state.ready) return;
+     var title = state.mode === 'lines' ? '故事线骨架' : state.mode === 'people' ? '人物弧线' : state.mode === 'evidence' ? '原文证据层' : state.mode === 'mechanics' ? '情节证据' : state.mode === 'causal' ? '因果网络' : state.mode === 'foreshadow' ? '伏笔生命周期' : state.mode === 'states' ? '状态与视野' : '全书叙事 DNA';
+@@ -1578,7 +1625,14 @@
+     setText('skyDeconMeta', (model.axis && model.axis.summary || model.nCh + ' 个章节段') + ' · ' + graph.events.length + ' 剧情点 · ' + graph.characters.length + ' 人物 · ' + unresolved + ' 条线未收束');
+     Array.prototype.forEach.call(root.querySelectorAll('.sd-tabs [role="tab"]'), function (b) { var active = b.getAttribute('data-mode') === state.mode; b.classList.toggle('is-on', active); b.setAttribute('aria-selected', String(active)); b.tabIndex = active ? 0 : -1; });
+     var body = doc.getElementById('skyDeconBody');
+-    if (body) { body.innerHTML = state.mode === 'lines' ? renderLines() : state.mode === 'people' ? renderPeople() : state.mode === 'evidence' ? renderEvidence() : state.mode === 'mechanics' ? renderMechanics() : state.mode === 'causal' ? renderCausal() : state.mode === 'foreshadow' ? renderForeshadow() : state.mode === 'states' ? renderStates() : renderOverview(); body.setAttribute('aria-labelledby', 'skyDeconTab' + state.mode.charAt(0).toUpperCase() + state.mode.slice(1)); if (browse.neighbors.scrollTop != null) { body.scrollTop = browse.neighbors.scrollTop; browse.neighbors.scrollTop = null; } bindVars(body); restoreFocus(body); }
++    if (body) {
++      var content = state.mode === 'lines' ? renderLines() : state.mode === 'people' ? renderPeople() : state.mode === 'evidence' ? renderEvidence() : state.mode === 'mechanics' ? renderMechanics() : state.mode === 'causal' ? renderCausal() : state.mode === 'foreshadow' ? renderForeshadow() : state.mode === 'states' ? renderStates() : renderOverview();
++      if (state.mode !== 'overview' && m84.returning) content = structureReturnMarkup() + content;
++      body.innerHTML = content;
++      body.setAttribute('aria-labelledby', 'skyDeconTab' + state.mode.charAt(0).toUpperCase() + state.mode.slice(1));
++      if (browse.neighbors.scrollTop != null) { body.scrollTop = browse.neighbors.scrollTop; browse.neighbors.scrollTop = null; }
++      bindVars(body); restoreFocus(body);
++    }
+   }
+ 
+   function restoreFocus(body) {
+@@ -1612,6 +1666,7 @@
+     if (!nextGraph || !nextModel || !nextModel.ok) return false;
+     if (nextGraph !== graph) {
+       cancelM84(true);
++      m84.returning = false; m84.returnOpen = false; m84.returnScroll = null; m84.returnLayer = null;
+       if (searchTimer != null) { g.clearTimeout(searchTimer); searchTimer = null; }
+       Object.keys(browse).forEach(function (key) { browse[key].page = 0; if (browse[key].query != null) browse[key].query = ''; if (browse[key].filter != null) browse[key].filter = 'all'; });
+       browse.evidence.kind = 'all'; browse.evidence.person = ''; personDetail = null; state.focus = null;
+--- a/css/sky-reading.css
++++ b/css/sky-reading.css
+@@ -178,6 +178,8 @@
+ .sd-structure-link b { color: var(--skd-ink); font: var(--skd-fs-sm)/1.45 var(--skd-font-sans); }
+ .sd-structure-link span { color: var(--skd-brass); font: var(--skd-fs-sm)/1.45 var(--skd-font-mono); overflow-wrap: anywhere; }
+ .sd-structure-actions { display: grid; gap: var(--abyss-space-xs); }
++.sd-structure-return { margin: 0 0 var(--abyss-space-sm); }
++.sd-structure-return button { min-height: 44px; }
+ .sd-structure-layers { display: flex; flex-wrap: wrap; gap: var(--abyss-space-xs); }
+ .sd-structure-layer { min-height: 44px; padding: var(--abyss-space-xs) var(--abyss-space-sm); border: 1px solid var(--skd-hair-2); border-radius: var(--skd-radius-s); background: var(--skd-void-1); color: var(--skd-ink-2); font: var(--skd-fs-sm)/1.4 var(--skd-font-sans); cursor: pointer; }
+ .sd-structure-layer[aria-pressed="true"] { border-color: var(--skd-hair-brass); color: var(--skd-brass-hot); background: color-mix(in oklch, var(--skd-brass) 8%, var(--skd-void-1)); }
+--- a/tests/sky_story_browser.py
++++ b/tests/sky_story_browser.py
+@@ -150,8 +150,12 @@
+   ev('document.querySelector("#skyStoryPanel [data-story=previous]").focus()');key(' ','Space',32,' ')
+   check('trusted Space on previous-event control restores one event without a hidden scene shortcut','CLSky.playerState().eventId===CLApp.graph().events[184].id&&!CLSky.state().playing')
+   key('Escape','Escape',27)
+-  check('Escape closes reading and restores the playback-button focus','document.getElementById("skyStoryPanel").hidden&&document.activeElement.id==="skyPlay"')
++  end=time.time()+2
++  while time.time()<end and not ev('document.getElementById("skyStoryPanel").hidden&&document.activeElement.id==="skyPlay"'):time.sleep(.05)
++  check('Escape completes the reading close and restores the playback-button focus','document.getElementById("skyStoryPanel").hidden&&document.activeElement.id==="skyPlay"')
+   # M84 extends this real-book structure and reading journey.
++  r.navigate(args.base+'/?sky=1&data=data/cache/ed3dc1255ca08fbdaae30bbd.json');ready()
++  check('M84 uses its frozen Xiyou graph with twenty real relations and 798 real events','CLApp.key()==="ed3dc1255ca08fbdaae30bbd"&&CLApp.graph().characters.length===219&&CLApp.graph().relations.length===20&&CLApp.graph().events.length===798&&CLApp.graph().narrativeUnits.length===58')
+   ev('CLSky.setPlot(true)');time.sleep(1)
+   ev('CLSkyDeconstruction.open();CLSkyDeconstruction.setMode("overview")');time.sleep(.3)
+   check('structure explanation is gated before M83 reaches its terminal structure state','!document.querySelector("#skyDeconBody [data-action=structure-stage]")')
+@@ -163,11 +167,18 @@
+   check('overview distinguishes route provenance and reuses its eight reader paths','(()=>{let e=document.querySelector(".sd-structure-overview");return !!e&&e.textContent.includes("主线 / 支线")&&e.textContent.includes("自动分段")&&e.querySelectorAll("[data-action=structure-nav]").length===8;})()')
+   click('#skyDeconBody [data-action="structure-stage"]');time.sleep(1.05)
+   check('M84 reaches its settled state on the host clock with four source-keyed copies','(()=>{let s=document.querySelector(".sd-structure-stage"),c=s&&Array.from(s.querySelectorAll(".sd-structure-copy"));return !!s&&s.dataset.phase==="settled"&&c.length===4&&c.every(x=>x.dataset.sourceId);})()')
++  check('four layer copies show their real sample denominators and group member coverage','(()=>{let s=document.querySelector(".sd-structure-stage").textContent;return s.includes("1 / 219")&&s.includes("1 / 20")&&s.includes("1 / 798")&&/成员已解析并展示 [1-4] \/ \d+/.test(s);})()')
+   check('four desktop copies fit the clear canvas, stay left of the reading panel and do not overlap','(()=>{let p=document.querySelector("#skyDeconPanel").getBoundingClientRect(),cs=Array.from(document.querySelectorAll(".sd-structure-stage .sd-structure-copy")),bs=cs.map(x=>x.getBoundingClientRect());return bs.length===4&&bs.every(b=>b.width>0&&b.height>0&&b.left>=0&&b.right<=p.left-8)&&bs.every((a,i)=>bs.slice(i+1).every(b=>a.right<=b.left||b.right<=a.left||a.bottom<=b.top||b.bottom<=a.top));})()')
+   check('desktop layer controls meet the forty-four-pixel touch target','Array.from(document.querySelectorAll(".sd-structure-layer")).every(b=>b.getBoundingClientRect().height>=44)')
+-  click('#skyDeconBody [data-structure-layer="relations"]')
++  ev('window.__m84Scroll=document.getElementById("skyDeconBody").scrollTop')
++  click('#skyDeconBody [data-structure-layer="events"]')
++  ev('document.querySelector("#skyDeconBody [data-structure-nav=people]").scrollIntoView({block:"center"})')
++  click('#skyDeconBody [data-structure-nav="people"]')
++  check('structure navigation exposes one direct return to the original overview','!document.querySelector(".sd-structure-stage")&&!!document.querySelector("#skyDeconBody [data-action=structure-return]")')
++  click('#skyDeconBody [data-action="structure-return"]')
++  check('return restores the selected events layer, prior scroll and previously open explanation','document.querySelector("[data-structure-layer=events]").getAttribute("aria-pressed")==="true"&&document.querySelector(".sd-structure-stage")&&document.getElementById("skyDeconBody").scrollTop===__m84Scroll')
+   key('Escape','Escape',27)
+-  check('selecting a layer highlights its copy and closing the stage preserves that layer','!document.querySelector(".sd-structure-stage")&&document.querySelector("[data-structure-layer=relations]").getAttribute("aria-pressed")==="true"')
++  check('closing the returned stage preserves its selected layer','!document.querySelector(".sd-structure-stage")&&document.querySelector("[data-structure-layer=events]").getAttribute("aria-pressed")==="true"')
+   click('#skyDeconBody [data-action="structure-stage"]');time.sleep(1.05)
+   click('#skyStructure')
+   check('exiting M83 immediately removes its entry and cancels an open M84 stage','!document.querySelector("#skyDeconBody [data-action=structure-stage]")&&!document.querySelector(".sd-structure-stage")')
+@@ -180,8 +191,11 @@
+   click('#skyDeconBody [data-action="structure-stage"]')
+   check('narrow M84 uses four static cards inside the scrollable reading overview with a reachable close control','(()=>{let s=document.querySelector(".sd-structure-stage"),cs=s&&Array.from(s.querySelectorAll(".sd-structure-copy")),b=s&&s.querySelector("[data-action=structure-stage]");return !!s&&s.classList.contains("is-inline")&&s.parentElement.classList.contains("sd-structure-overview")&&cs.length===4&&cs.every(x=>{let r=x.getBoundingClientRect();return r.width>0&&r.height>0&&r.left>=0&&r.right<=innerWidth;})&&b&&b.getBoundingClientRect().height>=44;})()')
+   ev('document.querySelector(".sd-structure-stage-close").scrollIntoView({block:"center"})');click('.sd-structure-stage-close')
++  check('narrow close returns focus and scroll to the original stage trigger','!document.querySelector(".sd-structure-stage")&&document.activeElement.getAttribute("data-action")==="structure-stage"')
+   ev('CLSky.setPlot(true)');click('#skyStructure');time.sleep(.9)
+   r.ws.call('Emulation.setDeviceMetricsOverride',width=1440,height=900,deviceScaleFactor=1,mobile=False);time.sleep(.5)
++  ev('CLSkyDeconstruction.close()')
++  r.navigate(args.base+'/?sky=1&data=data/cache/c84e8657afff87043c11ae57.json');ready()
+   ev('CLSkyDeconstruction.open();CLSkyDeconstruction.setMode("mechanics")');time.sleep(.3)
+   # Shared page integration; pure calibration semantics stay in sky_gold_throughput_contract.js.
+   check('calibration modules are loaded in the real reading page','!!(window.CLSkyGoldStandard&&typeof CLSkyGoldStandard.coverage==="function"&&window.CLSkyThroughput&&typeof CLSkyThroughput.qualifiedRate==="function")')

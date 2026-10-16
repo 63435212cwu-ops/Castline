@@ -1,0 +1,452 @@
+{
+ "task": "verify:dafeng:L2:0126",
+ "agent": "w-verify-1",
+ "role": "VERIFIER",
+ "reviewedTask": "read:dafeng:L2:0126",
+ "reviewedArtifact": {
+  "path": "loop/state/out/read_dafeng_L2_0126.candidate.json",
+  "sha256": "a81e192289975088bfc25fcaf47f41b4fcb295371812cdf585bdb28bf341b1e1",
+  "bytes": 262771,
+  "agent": "w-read-4",
+  "note": "被复核的是**当前字节**（a81e1922…，mtime 2026-10-13T05:28Z，w-read-4 的返工版）。注意：上一轮 fail 复核（loop/state/out/verify_dafeng_L2_0126.verdict.json，w-verify-3，cf62a5ec…，mtime 02:54Z）评的是更早的 345f2b10… 版；本文件写回同一路径，是对**新一轮**的结论。"
+ },
+ "source": {
+  "file": "data/cache/1063b17ca65ec1b76f30e460.docs.json",
+  "fileSha256": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+  "range": [
+   433816,
+   437926
+  ],
+  "sliceChars": 4110,
+  "sliceSha256": "5a7f90be9a0937fa0ed214ffeba7c632de5f15c0fcc2fa0f6191be78fb7b2824",
+  "verifiedAgainstTaskSourceHash": true
+ },
+ "verdict": "partial",
+ "counterExamples": [
+  {
+   "id": "VEX-1_dangling_OT_in_RF4",
+   "severity": "should-fix（悬空指针；与上一轮 CEX-E 同类）",
+   "field": "rejectedForeshadows[3].why（RF4_huangdi_kezaozhicai）",
+   "claim": "RF4 说「可造之材」的价值之一在于「OT（皇帝对许七安的印象）」，但 openThreads 里并不存在这一条。",
+   "why": "**悬空指针**：候选只立了 OT1–OT8，逐条为「赵县令之死的追查／灵龙对怀庆先迎后拒的原因／青龙寺法器的下落与用途／平阳郡主失踪案与誉王的病／临安赏赐的腰玉与「断绝来往」的承诺／「醉后不知天在酒，满船清梦压星河」的前半首／临安与怀庆之间由许七安引发的对峙／誉王入阁的传言与勋贵／文官之争」，**没有**任何一条是「皇帝对许七安的印象」。RF4 用它来论证「不必为『可造之材』单立伏笔」，而这条论据指向一个不存在的分区。结论（不立伏笔）本身可接受，错的是指针。",
+   "evidence": [
+    {
+     "quote": "它的价值在于**语义分区登记**（C12）与 OT（皇帝对许七安的印象），不在伏笔。",
+     "start": -1,
+     "end": -1,
+     "quoteOffsetNote": "取自候选自身产物（非原文引文），出处：rejectedForeshadows[3].why",
+     "sourceFile": "loop/state/out/read_dafeng_L2_0126.candidate.json"
+    },
+    {
+     "openThreads实际id": [
+      "OT1_zhaoxianling_an",
+      "OT2_linglong_yichang",
+      "OT3_qinglongsi_faqi_xiayao",
+      "OT4_pingyang_shizong",
+      "OT5_yaoyu",
+      "OT6_ban_shou_shi",
+      "OT7_linan_huaiqing_zhiZheng",
+      "OT8_yuwang_ruge"
+     ]
+    }
+   ],
+   "minimalRepair": "把「与 OT（皇帝对许七安的印象）」删去，或真的补立一条 OT 再引用它；「语义分区登记（C12）」这半句成立，可保留。",
+   "reproduce": "python3 -c \"import json;c=json.load(open('loop/state/out/read_dafeng_L2_0126.candidate.json'));print([o['id'] for o in c['openThreads']]);print('OT（皇帝对许七安的印象）' in json.dumps(c,ensure_ascii=False))\"  # → 8 条 OT 中无「皇帝对许七安的印象」"
+  },
+  {
+   "id": "VEX-2_ordercheck_mislabels_T4_T7",
+   "severity": "should-fix（错标条目；正是本版新增的 verification 分区）",
+   "field": "verification.orderSensitiveClaims 的键名 + verification.orderCheckNote",
+   "claim": "orderCheckNote 写「T7.obstacle 的 note 与她问句同序（请求在前、意外在后：436192→436219）」——但 436192／436219 既不在 T7.obstacle 的引文里，也不在 T7.obstacle 的 note 里；承载这两个偏移的是 T5（tasks[4]），键名 T4_request_then_surprise 也与实际条目不符（T4 是魏渊在轿中谈诗）。",
+   "why": "**错标条目**：①T7 = T7_huaiqing_bi_biaotai，其 obstacle.note 逐字写的是「次序须写明：**她先问（@437326），他后答（@437351）**」，与 436192／436219 无关；②436192（求助）＋436219（意外）落在 T5_xuqian_bao_qinglongsi 的场景里，由 causeEdges[15]（CE16）两句并置承载；③键名却叫 T4_request_then_surprise，而 T4 = T4_weiyuan_tan_shi（魏渊在轿前打听在场者）。该分区是本轮为证明「次序已按偏移复算」而新增的，指针错标会直接削弱它的证明力。**次序结论本身我已独立复算为真**（436192 求助在前、436219 意外在后）。",
+   "evidence": [
+    {
+     "quote": "T7.obstacle 的 note 与她问句同序（请求在前、意外在后：436192→436219）",
+     "start": -1,
+     "end": -1,
+     "quoteOffsetNote": "取自候选自身产物（非原文引文），出处：verification.orderCheckNote",
+     "sourceFile": "loop/state/out/read_dafeng_L2_0126.candidate.json"
+    },
+    {
+     "quote": "次序须写明：**她先问（@437326），他后答（@437351）**。",
+     "start": -1,
+     "end": -1,
+     "quoteOffsetNote": "取自候选自身产物（非原文引文），出处：tasks[6].obstacle.note",
+     "sourceFile": "loop/state/out/read_dafeng_L2_0126.candidate.json"
+    },
+    {
+     "quote": "“此事有待查证，这件事，还得长公主帮忙。”",
+     "start": 436192,
+     "end": 436213,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+     "inRange": true,
+     "sourceFile": "data/cache/1063b17ca65ec1b76f30e460.docs.json"
+    },
+    {
+     "quote": "“我？”精致眉梢挑了挑，她有些意外。",
+     "start": 436219,
+     "end": 436237,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+     "inRange": true,
+     "sourceFile": "data/cache/1063b17ca65ec1b76f30e460.docs.json"
+    }
+   ],
+   "minimalRepair": "把键名 T4_request_then_surprise 改为 T5_request_then_surprise；把 note 里的「T7.obstacle 的 note」改为「T5 场景（CE16）的 note」。",
+   "reproduce": "python3 -c \"import json;c=json.load(open('loop/state/out/read_dafeng_L2_0126.candidate.json'));print(c['tasks'][6]['id'],'|',c['tasks'][6]['obstacle']['note'][:40]);print(c['tasks'][4]['id']);print(list(c['verification']['orderSensitiveClaims']))\""
+  },
+  {
+   "id": "VEX-3_ordercheck_note_437523_vs_own_data_437563",
+   "severity": "should-fix（内部数字自相矛盾）",
+   "field": "verification.orderCheckNote vs verification.orderSensitiveClaims.CE12",
+   "claim": "orderCheckNote 把「他改口」记在 437523；但同一分区的 orderSensitiveClaims.CE12 把「他改口承诺」记在 437563，而 437523 实际是上一段的段首「这女人的性格，外表看冷若冰霜…」。",
+   "why": "**同一分区内两处对同一事件给了不同偏移**。437523 指向的是许七安对长公主性格的私下判语那一句，不是改口承诺；「迅速低头：“卑职明白…”」在 437563（「卑职明白」四字本身在 437569）。结论（她问→他答→她揭穿→他改口）次序为真，错的是 note 里的那个数字。",
+   "evidence": [
+    {
+     "quote": "他改口(437523)",
+     "start": -1,
+     "end": -1,
+     "quoteOffsetNote": "取自候选自身产物（非原文引文），出处：verification.orderCheckNote",
+     "sourceFile": "loop/state/out/read_dafeng_L2_0126.candidate.json"
+    },
+    {
+     "quote": "{\"what\": \"他改口承诺\", \"at\": 437563}",
+     "start": -1,
+     "end": -1,
+     "quoteOffsetNote": "取自候选自身产物（非原文引文），出处：verification.orderSensitiveClaims.CE12（序列化形态）",
+     "sourceFile": "loop/state/out/read_dafeng_L2_0126.candidate.json"
+    },
+    {
+     "quote": "这女人的性格，外表看冷若冰霜，内在其实很霸道啊....许七安诧异的看了眼长公主，迅速低头：“卑职明白，卑职这就把腰玉还给",
+     "start": 437523,
+     "end": 437583,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+     "inRange": true,
+     "sourceFile": "data/cache/1063b17ca65ec1b76f30e460.docs.json"
+    }
+   ],
+   "minimalRepair": "把 orderCheckNote 里的「他改口(437523)」改为「他改口(437563)」（与其自身 CE12 数据一致）。",
+   "reproduce": "python3 -c \"import json;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];print(repr(t[437523:437545]));print(repr(t[437563:437580]))\""
+  },
+  {
+   "id": "VEX-4_T7_note_points_to_T5obstacle_wrong_para",
+   "severity": "should-fix（错标条目 + 「同段落」不成立）",
+   "field": "tasks[6].result.note（T7_huaiqing_bi_biaotai）",
+   "claim": "T7.result.note 写「他此前开口求助时她的第一反应是意外（见 T5.obstacle 的同段落语境与 CE16…）」，但 T5.obstacle 的引文与「求助／意外」两句**不在同一段**，T5.obstacle 里也没有这两句。",
+   "why": "**错标条目 + 段落断言不成立**：T5.obstacle 唯一引文是 @436000–436028「“当然，现在无法肯定周赤雄身上的法器一定便是青龙寺的。”」（第 55 段）；求助句 @436192 在第 59 段、意外句 @436219 在第 60 段。承载这两句的是 causeEdges[15]（CE16），note 后半句「与 CE16」才是对的指针。内容是转引、不影响 T7 结论，但「T5.obstacle 的同段落」经复算为假。",
+   "evidence": [
+    {
+     "quote": "他此前开口求助时她的第一反应是意外（见 T5.obstacle 的同段落语境与 CE16，该引文不在此重复引用以免跨栏重叠）。",
+     "start": -1,
+     "end": -1,
+     "quoteOffsetNote": "取自候选自身产物（非原文引文），出处：tasks[6].result.note",
+     "sourceFile": "loop/state/out/read_dafeng_L2_0126.candidate.json"
+    },
+    {
+     "quote": "“当然，现在无法肯定周赤雄身上的法器一定便是青龙寺的。”",
+     "start": -1,
+     "end": -1,
+     "quoteOffsetNote": "取自候选自身产物（非原文引文），出处：tasks[4].obstacle.quotes[0]",
+     "sourceFile": "loop/state/out/read_dafeng_L2_0126.candidate.json"
+    },
+    {
+     "quote": "“此事有待查证，这件事，还得长公主帮忙。”",
+     "start": 436192,
+     "end": 436213,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+     "inRange": true,
+     "sourceFile": "data/cache/1063b17ca65ec1b76f30e460.docs.json"
+    },
+    {
+     "quote": "“我？”精致眉梢挑了挑，她有些意外。",
+     "start": 436219,
+     "end": 436237,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+     "inRange": true,
+     "sourceFile": "data/cache/1063b17ca65ec1b76f30e460.docs.json"
+    }
+   ],
+   "minimalRepair": "把「见 T5.obstacle 的同段落语境与 CE16」改为「见 CE16（causeEdges[15]）」。",
+   "reproduce": "python3 -c \"import json;c=json.load(open('loop/state/out/read_dafeng_L2_0126.candidate.json'));print([ (q['start'],q['end']) for q in c['tasks'][4]['obstacle']['quotes']]);print([ (q['start'],q['end']) for q in c['causeEdges'][15]['evidence']])\""
+  }
+ ],
+ "reverseChecks": [
+  {
+   "id": "RC-1_taizi_zai_jiaozhong_de_zhudongmian_wu_state",
+   "found": "候选没有为**太子**立任何 state（11 条 state 的 who 只有元景帝×2／魏渊×2／怀庆×3／许七安×3／临安×1），而本区间太子是 4 条因果边（CE3／CE4／CE5…CE8）的行动者、且有一处明确内心立场。具体漏掉的是轿中这一段：他「默默等了片刻，**果然**听见」魏渊追问（预料到对方会问）、被问「前半首呢？」时「嘴角一挑」答「没有了。」、听到对面久久无声后「心情顿时愉悦起来」——三处连起来是**太子在反过来消遣魏渊**，是本区间内他唯一占据主动的地方。候选在 RE0 里声称该段「已由 TN7 与 ST4 时段承载」，但 TN7 是省略号标点观察、ST4 的 who 是魏渊，这句覆盖理由经复算不成立（P42 不在 ST4 任何引文区间内）。",
+   "quote": "见对面久久无声，太子心情顿时愉悦起来。",
+   "evidence": [
+    {
+     "quote": "见对面久久无声，太子心情顿时愉悦起来。",
+     "start": 435487,
+     "end": 435506,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+     "inRange": true,
+     "sourceFile": "data/cache/1063b17ca65ec1b76f30e460.docs.json"
+    },
+    {
+     "quote": "太子默默等了片刻，果然听见对面轿子里传来魏渊的追问：“前半首呢？”",
+     "start": 435408,
+     "end": 435441,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+     "inRange": true,
+     "sourceFile": "data/cache/1063b17ca65ec1b76f30e460.docs.json"
+    },
+    {
+     "quote": "太子嘴角一挑：“没有了。”",
+     "start": 435447,
+     "end": 435460,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+     "inRange": true,
+     "sourceFile": "data/cache/1063b17ca65ec1b76f30e460.docs.json"
+    },
+    {
+     "quote": "（p42）「见对面久久无声，太子心情顿时愉悦起来」——已由 TN7 与 ST4 时段承载；",
+     "start": -1,
+     "end": -1,
+     "quoteOffsetNote": "取自候选自身产物（非原文引文），出处：rejectedEdges[0].why",
+     "sourceFile": "loop/state/out/read_dafeng_L2_0126.candidate.json"
+    },
+    {
+     "states的who全集": [
+      "元景帝",
+      "元景帝",
+      "魏渊",
+      "魏渊",
+      "怀庆公主",
+      "怀庆公主",
+      "许七安",
+      "许七安",
+      "许七安",
+      "临安公主",
+      "怀庆公主"
+     ]
+    },
+    {
+     "ST4引文区间": [
+      [
+       435161,
+       435203
+      ],
+      [
+       435378,
+       435402
+      ],
+      [
+       435466,
+       435481
+      ],
+      [
+       435348,
+       435372
+      ]
+     ]
+    }
+   ],
+   "impact": "不构成 fail（不是编造、不是幻觉）：该段原文被 TN7 引用过，只是没有承载语义。但 RE0 的「已被承载」是**未经复算的覆盖声称**，建议在发布合成时改为为太子补一条 ST（或老实写进 reverseCoverage）。"
+  },
+  {
+   "id": "RC-2_liangge_shijian_maodian_de_kaojin_wei_dengji",
+   "found": "原文给了**两个几乎相同的时间锚点**，候选没有任何条目把它们的接近登记出来、也没有登记为未知或被拒：①许七安报法器下落：「大概在**一年前**，青龙寺一名叫恒慧的和尚动了凡心…盗走了那件法器」；②怀庆讲平阳失踪：「但在**一年多前**，平阳突然失踪了」。候选自己已经用 CE11／C7／KD3 把「法器—平阳失踪」扣成一条推断（并正当地标为未证实，U5），却漏了这两个锚点在时间上的贴近——它正是那条推断在原文里唯一的（弱）支持。本项**只登记事实**：两个时间表述在原文如此；我不主张恒慧出逃与平阳失踪必为同一时段，更不主张法器用途已被证实。",
+   "quote": "“但在一年多前，平阳突然失踪了，当时父皇出动了禁军满城搜寻，司天监的术士出动了大半，但都没有找到平阳。",
+   "evidence": [
+    {
+     "quote": "“但在一年多前，平阳突然失踪了，当时父皇出动了禁军满城搜寻，司天监的术士出动了大半，但都没有找到平阳。",
+     "start": 436901,
+     "end": 436952,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+     "inRange": true,
+     "sourceFile": "data/cache/1063b17ca65ec1b76f30e460.docs.json"
+    },
+    {
+     "quote": "许七安摇头：“早已丢了，卑职正要向公主禀报此事，大概在一年前，青龙寺一名叫恒慧的和尚动了凡心，与女香客私奔，逃离了京城，还顺势盗走了那件法器。”",
+     "start": 436062,
+     "end": 436134,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+     "inRange": true,
+     "sourceFile": "data/cache/1063b17ca65ec1b76f30e460.docs.json"
+    }
+   ],
+   "impact": "不构成 fail：属**遗漏的 derived 观察**，且涉及跨段推导，候选保守处理可以接受；建议在发布合成时补一条 derived/unknowns，而不是把它压成确定结论。"
+  },
+  {
+   "id": "RC-3_zuoniuzuoma_cuoci_de_zhuanyi_wei_dengji",
+   "found": "「做牛做马」这一自贬措辞在本区间出现**两次**，且是**从一位公主转到另一位公主**：第一次是他转述临安的要求（「临安公主非要我投靠她，给她做牛做马」@437301），第二次是他对怀庆的内心誓言（「我发誓，从今以后与裱裱恩断义绝，只给你做牛做马！」@437635）。候选登记了同段的语域对照（对外「临安公主」／对内「裱裱」，TN3／ST9／TH1.counter），但没有登记这层**措辞本身的转移**：他对临安用的那套话，转头原样用在怀庆身上。这是「归属被换、姿态没换」的直接文字证据，与 TH1 的轴心（他的归属被别人标注）同向。",
+   "quote": "我发誓，从今以后与裱裱恩断义绝，只给你做牛做马！",
+   "evidence": [
+    {
+     "quote": "许七安无奈道：“是的，临安公主非要我投靠她，给她做牛做马。还赏赐了一块腰玉给我。”",
+     "start": 437279,
+     "end": 437320,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+     "inRange": true,
+     "sourceFile": "data/cache/1063b17ca65ec1b76f30e460.docs.json"
+    },
+    {
+     "quote": "我发誓，从今以后与裱裱恩断义绝，只给你做牛做马！",
+     "start": 437619,
+     "end": 437643,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+     "inRange": true,
+     "sourceFile": "data/cache/1063b17ca65ec1b76f30e460.docs.json"
+    }
+   ],
+   "impact": "不构成 fail：属登记粒度缺口。建议补进 TN3 或 TH1.support；这是解释层，不影响事实层任何条目。"
+  },
+  {
+   "id": "RC-4_xuqian_dui_tiwen_neirong_de_tuice_ju_wu_yinyong",
+   "found": "许七安对「长公主在问什么」的推断句在原文里独立成句，却**没有任何引文引用**：「她问的应该是青龙寺的调查结果....」。同段他的应答（「确实有些眉目。」）被 T5.objective 引用，紧随其后的解释段被 O2 引用（文渊阁／宝塔寺回指），中间这一句推断被跳过。它与候选的 KD2／KD1 同类（人物依据前情判断对方所指），属于较细的粒度缺口。",
+   "quote": "她问的应该是青龙寺的调查结果....许七安说道：“确实有些眉目。”",
+   "evidence": [
+    {
+     "quote": "她问的应该是青龙寺的调查结果....许七安说道：“确实有些眉目。”",
+     "start": 435647,
+     "end": 435680,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+     "inRange": true,
+     "sourceFile": "data/cache/1063b17ca65ec1b76f30e460.docs.json"
+    },
+    {
+     "候选是否引用该句": "否（全文 blob 命中 0）"
+    }
+   ],
+   "impact": "不构成 fail：单句粒度缺口，段落层面该段已被覆盖（引用「确实有些眉目」）。仅作登记建议。"
+  },
+  {
+   "id": "RC-5_tianzaiJiu_yongzi_wei_ru_textualNotes_cunyi",
+   "found": "候选有 8 条 textualNotes，其中 TN5／TN6 专门登记用字（「国祚连续」的「连续」、「于自己」），但没有登记本章最显眼的一处用字：太子念的两句诗写作「醉后不知**天在酒**」。该句在本区间被 4 个条目引用（CE8／ST4／F5／OT6），却没有任何一条把它当作用字现象看待。",
+   "quote": "太子朗声道：“醉后不知天在酒，满船清梦压星河！”",
+   "evidence": [
+    {
+     "quote": "太子朗声道：“醉后不知天在酒，满船清梦压星河！”",
+     "start": 435348,
+     "end": 435372,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+     "inRange": true,
+     "sourceFile": "data/cache/1063b17ca65ec1b76f30e460.docs.json"
+    },
+    {
+     "textualNotes的id": [
+      "TN1_zhushi_58fo",
+      "TN2_zichen_qiehuan",
+      "TN3_biaobiao_sicheng",
+      "TN4_biaoti_bushi_zhengwen",
+      "TN5_yongci_guozuo_lianxu",
+      "TN6_yongci_yu_ziji",
+      "TN7_shengluehao_xingshi",
+      "TN8_duanmo_fengefu"
+     ]
+    }
+   ],
+   "impact": "**本项记为存疑，明确不作为任何判定依据**：要断言「酒」应为「水」必须借助区间外的版本或校勘本，而本任务的口径是「读本区间原文」，我拿不出区间内证据证明它是误字。只建议：若发布阶段做用字登记，这一处的显眼程度不低于 TN5／TN6。"
+  },
+  {
+   "id": "RC-6_changshi_fouzheng_dan_wei_chenggong_de_duikangxiang",
+   "found": "记录三条我**尝试证伪但未能证伪**的对抗项（避免复核只报缺陷、隐去通过的对抗）：①候选拒绝把「白子摔落＋静默」连成「皇帝因命案震动」（RE1）——我独立核对：原文只给相邻动作与「下了这么多年，没一次能赢的，无趣。」这句字面指向棋局，拒边成立且 CE1 只留可观察后果；②候选把「眼神仿佛在说：选一个吧」降级为叙述对眼神的解读（C10／CE14，basis=inferred）——「仿佛」是原文明写的限定词，降级正确；③候选不把太子「怀庆吹口哨→掀翻临安」的归因当事实（C1）——叙述紧接着写他「在内心稍稍偏向临安」，且该归因在本区间无第二来源，不采信正确。",
+   "quote": "实事求是，但在内心稍稍偏向临安，在父皇眼里，这是一种“简单”。",
+   "evidence": [
+    {
+     "quote": "实事求是，但在内心稍稍偏向临安，在父皇眼里，这是一种“简单”。",
+     "start": 434442,
+     "end": 434473,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+     "inRange": true,
+     "sourceFile": "data/cache/1063b17ca65ec1b76f30e460.docs.json"
+    },
+    {
+     "quote": "太子低头，回答道：“当时临安骑乘灵龙在水面嬉戏，是怀庆吹了声口哨，惊扰了灵龙，这才将临安掀入水中。”",
+     "start": 434340,
+     "end": 434390,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+     "inRange": true,
+     "sourceFile": "data/cache/1063b17ca65ec1b76f30e460.docs.json"
+    }
+   ],
+   "impact": "无。三项均为候选的**正确克制**，登记以免复核记录只呈现负面。"
+  }
+ ],
+ "citationCheck": {
+  "method": "对候选全部引用节点逐条复算（独立脚本 independent_verify.py / independent_meta_check.py，不复用候选生成器逻辑）：text[start:end]==quote、区间落在 [433816,437926)、sourceHash、text.find(quote)==firstOccurrenceAt、text.count(quote)==wholeTextOccurrences、occurrenceInUnit、firstOccurrenceInUnitAt、para、match、inRange；另按固定种子随机抽 5 条。",
+  "quoteNodes": 249,
+  "uniqueIntervals": 129,
+  "fieldsChecked": 2241,
+  "verbatimMismatch": 0,
+  "rangeFailures": 0,
+  "hashMismatch": 0,
+  "metadataMismatches": 0,
+  "duplicateAnchorKeys": 0,
+  "taskFieldOverlaps": 0,
+  "randomSample": {
+   "seed": 20261013,
+   "n": 5,
+   "verbatim": 5,
+   "offsetMatch": 5,
+   "picked": [
+    "于太子而言，一个小小的铜锣没什么值得在意，会记得他，纯粹是因为那半首诗实在令人惊艳。@434932",
+    "长公主毫不留情的揭穿：“以你的聪明，应该能看出这种虚张声势的威胁。”@437483",
+    "听到这样的解释，元景帝皱了皱眉，思考片刻，道：“摆驾，朕要去看一看灵龙。”@434755",
+    "许七安无奈道：“是的，临安公主非要我投靠她，给她做牛做马。还赏赐了一块腰玉给我。”@437279",
+    "“对了，听说昨日临安找过你？”@437207"
+   ]
+  },
+  "selfCorrection": "**我的复核脚本第一版判错了一次，如实登记**：我的 para 口径把标题行算作第 1 段，结果 249/249 条在 para 字段上全部「不符」。独立复算两种口径后确认候选用的是「标题行不计入、正文非空段从 1 起编号」，该口径下 249/249 全部命中（含标题那条显式写 para=0）。**错的是我的脚本，不是候选**，已修正后重跑。",
+  "note": "两条小样本引文（「滚！」@437706，全书 17 次）候选已自报 wholeTextOccurrences=17、firstOccurrenceAt=178604，并说明 start 指向**本区间内**那一次 —— 与其自报一致，不构成失配。"
+ },
+ "extractionCheck": {
+  "method": "先自读 [433816,437926) 全文（104 个非空段），再打开候选；逐条把候选的任务／因果／状态／知识差／伏笔／世界设定／说法台账回原文找对应文字。",
+  "fabricationFound": 0,
+  "note": "8 条任务五元组、16 条因果边、4 条被拒边、11 条状态、6 条知识差、6 条伏笔、11 条世界设定、2 条主题读法、14 条说法台账、8 条文本校勘、5 条跨段回指、17 条 unknowns、8 条 openThreads 均能在原文找到对应文字。人物名（许七安／魏渊／元景帝／太子／怀庆／临安／刘公公／陈府尹／赵县令／周赤雄／恒慧／平阳／誉王／誉王妃／张慎／盘树）全部在区间内出现，无区间外人物被写入。",
+  "priorRoundFixesVerified": {
+   "note": "上一轮 fail 的 6 条 counterExample 我逐条按偏移复算，**全部已修**：",
+   "CEX-A（请求先于意外）": "436192 求助 → 436219 意外，候选 CE16 与 verification 均按此写，已修",
+   "CEX-B（她问先于他答）": "437326 她问 → 437351 他答 → 437483 她揭穿，T7.obstacle.note 逐字写明，已修",
+   "CEX-C（她问先于瞳孔变化）": "437207 她问 → 437228 瞳孔幽暗，KD5 按此写，已修",
+   "CEX-D（「不止如此」被写成推翻）": "434611 按「追加」写（CE3／T3.action），已修",
+   "CEX-E（OT9→ST2 指针错）": "本版已无 OT9；ST 编号与 who 一一对应，悬空指针 0（但 RF4 新增一处悬空 OT，见 VEX-1）",
+   "CEX-F（P3 应为 P4）": "本版 P3=京城、P4=太康县府衙地牢，与各引用处一致，已修"
+  }
+ },
+ "falseKillCheck": {
+  "method": "查候选把什么**合法**的东西排除掉了：逐条读 rejectedEdges／rejectedTasks／rejectedForeshadows／excludedSettings，把被拒内容回原文找依据（沿用计划100「遂行」误杀的教训：词表/正则不得挡掉真实因果）。",
+  "falseKills": 0,
+  "note": "4 条被拒边均给出原文依据且拒得合理：RE0（叙述段不各立条目，防同句多栏共用）、RE1（白子摔落≠震动，明确按「时间相邻当因果」拒）、RE2（叙述自写「反而是最后那句话引起了他的兴趣」，故归属那层不连边——我核对原文确有此句）、RE3（看茶≠开始汇报）。4 条被拒伏笔同样成立：「腰玉」出现两次故不立「只出现一次」的伏笔、「裱裱」一次出现、[58 fo] 一次性文本痕迹、「可造之材」无回收点。excludedSettings 4 条（龙辇／棋盘棋子／东北巫师方位／道门阴神术语层）与提示词「没有依据就不扩出地图、物品链或术语装饰层」一致。"
+ },
+ "hallucinationCheck": {
+  "fabricatedEntities": 0,
+  "fabricatedEndings": 0,
+  "fabricatedForeshadows": 0,
+  "successOverreach": 0,
+  "note": "**结束≠成功**处理正确：T2.result 记 null，resultNote 明确写「区间写到『元景帝坐着龙辇走了。』即止…他离场不等于他弄清了此事」；U16 再次登记。T7.result 记的是「承诺」而非已执行的归还，note 说明腰玉未易手、断绝来往未生效（U15／F3 同口径）。**说法≠事实**处理正确：C1（太子归因带立场）、C2（魏渊两种可能并列）、C7（许七安的推断）、C9（长公主的揭穿）、C10（「仿佛」为叙述解读）均登记为人物说法/解读而非叙述事实。semanticReview.performed=false 如实申报，未声称语义核验完成；全文无 claimVerified 字样。"
+ },
+ "metricsVerification": {
+  "note": "候选自报 metrics 逐项复算，**全部相符**：",
+  "checked": "tasks 8／causeEdges 16／rejectedEdges 4／states 11／knowledgeDiffs 6／foreshadows 6（resolved 1・unresolved 5）／worldSettings 11（rule 4・place 4・item 3）／themeReadings 2／claimLedger 14／textualNotes 8／outOfRangeContext 5／unknowns 17／openThreads 8／selfCritique 6／tasksWithNullCost 8／tasksWithNullResult 1 — 与候选自报完全一致。",
+  "contractAudit": "格式契约机器审计 0 条问题：null 栏均带同名 Note、非 null 栏均有引文与 basis、causeEdges 均有 direction/trigger/mechanism/evidence、state 三段齐全且带引文、foreshadow 均标 resolved/unresolved、worldSettings 三区分均写进字段、themeReadings ≤2 且 perspective+support+counter 齐全、basis 取值全在 {explicit, inferred, derived, unverified} 内。"
+ },
+ "verdictRationale": "判 **partial** 而非 pass：抽取内容**零编造、零幻觉、零越权**，249 条引用逐字可查、元数据零失配，上一轮 6 条 counterExample 全部修复并经偏移复算确认 —— 事实层与引用层是干净的。但本版仍有 4 处**指针/标号类**缺陷（VEX-1…VEX-4），其中 VEX-1 是指向不存在分区的悬空引用、VEX-2／VEX-3 出现在本版新增、专门用来证明「次序已复算」的 verification 分区内部（键名错标、note 与自身数据给出两个不同偏移）。这类缺陷不改变任何一条抽取结论的真假，所以**不足以判 fail**；但它们正是上一轮 CEX-E／CEX-F 的同一类，且发布任务（publish:dafeng:B006）会直接消费这些指针，故不能判 pass。",
+ "usable": {
+  "可以原样使用": [
+   "tasks[0..7] 的五元组与全部引文（含 cost=null 的理由）",
+   "causeEdges[0..15]（含 CE16 的次序结论：436192→436219）",
+   "states[0..10]、knowledgeDiffs[0..5]、foreshadows[0..5]、worldSettings[0..10]、themeReadings[0..1]",
+   "claimLedger[0..13]、unknowns[0..16]、openThreads[0..7]、textualNotes[1..8]",
+   "rejectedEdges／rejectedTasks／rejectedForeshadows／excludedSettings 的拒绝理由"
+  ],
+  "必须修后才能用（内容不丢，只改指针/数字）": [
+   "rejectedForeshadows[3].why：删去或补齐悬空的「OT（皇帝对许七安的印象）」（VEX-1）",
+   "verification.orderSensitiveClaims 键名 T4_request_then_surprise → T5_…；orderCheckNote 里「T7.obstacle 的 note」→「T5 场景（CE16）的 note」（VEX-2）",
+   "verification.orderCheckNote 里「他改口(437523)」→「(437563)」（VEX-3）",
+   "tasks[6].result.note 里「见 T5.obstacle 的同段落语境与 CE16」→「见 CE16」（VEX-4）"
+  ],
+  "必须丢弃或降级为 unknowns": "无。反向发现 RC-2／RC-3／RC-5 属**建议补登**，RC-5 已明标存疑，均不作为丢弃依据。"
+ },
+ "notes": "总体判断：**这是一份事实层扎实、引用层可机器验证的返工版，判 partial（内容可用，4 处指针待修）**。我按角色契约先自读 4110 字原文再打开候选；引文核验、元数据核验、交叉引用核验、格式契约审计都是我自己重跑脚本得到的，不是照抄候选的自审数字。\n\n1) 上一轮 6 条 must-fix 我逐条按偏移复算，全部已修（见 extractionCheck.priorRoundFixesVerified）。上一轮最严重的形态是「自述与所引原文次序相反」，本版四处次序句我都独立复算为真。\n\n2) 本轮新发现集中在**指针与标号**，不是内容：悬空 OT 一处、verification 分区内错标两处、T7.result.note 的「同段落」经复算为假一处。四条我都给了 minimalRepair 与可复现命令。\n\n3) 反向验证（契约要求 ≥3 条）给出 6 条，全部附逐字引证。其中 RC-1 最值得处理：它不是单纯漏登，而是候选在 RE0 里对「已由 TN7 与 ST4 承载」做了**未经复算的覆盖声称** —— TN7 是标点观察、ST4 的 who 是魏渊，该段（P42）不在 ST4 任何引文区间内；太子在本区间是 4 条因果边的行动者，却没有任何 state。RC-2／RC-3 是登记粒度缺口，RC-5 我明确标为存疑、不作为判定依据。\n\n4) **我判自己错一次并已登记**：我第一版 para 口径把标题行算作第 1 段，导致 249/249 条 para「不符」；复算两种口径后确认错在我的脚本，候选口径自洽（标题那条显式写 para=0）。修正后重跑，元数据零失配。\n\n5) 不确定处：①W2 把「灵龙对皇子皇女差不多是一视同仁」标 institution=executed，三个标签对该条（叙述直写的规律）都不完全贴合，候选自己写了 labelNote 请求裁定 —— 我认为 executed 可接受（它以灵龙对怀庆的实际反应差别被检验），但这是解释层选择，不是事实错误；②CE1 把「话题被移开」归到魏渊这次进言上，候选自己声明「若复核认为不宜归到这次进言上，本条可整体删除」—— 我核对原文，报死因与白子坠落确为紧邻且无因由描写，CE1 已标 inferred 且只主张可观察后果，可保留。\n\n6) 未做的事（不谎报）：未做语义核验（semanticReview 仍为 not_performed）；未读上一章／下一章原文，所有跨单元判断只用区间内回指句；未比对其他版本（无他版本可比），故 RC-5 的诗句用字只能记为存疑；未跑 GPU/浏览器测试（本任务无需）。",
+ "reproduce": {
+  "cmd_hash_and_slice": "python3 -c \"import json,hashlib;d=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'));t=d[0]['text'];print(hashlib.sha256(open('data/cache/1063b17ca65ec1b76f30e460.docs.json','rb').read()).hexdigest());print(len(t[433816:437926]))\"  # → fdde5558… / 4110",
+  "cmd_quotes": "python3 -B -s \"$CL_ARTIFACTS/w-verify-1-L2-0126/independent_verify.py\"",
+  "cmd_metadata": "python3 -B -s \"$CL_ARTIFACTS/w-verify-1-L2-0126/independent_meta_check.py\"",
+  "cmd_xref": "python3 -B -s \"$CL_ARTIFACTS/w-verify-1-L2-0126/independent_xref_check.py\"",
+  "cmd_contract": "python3 -B -s \"$CL_ARTIFACTS/w-verify-1-L2-0126/independent_contract_audit.py\"",
+  "cmd_rebuild_verdict": "python3 -B -s \"$CL_ARTIFACTS/w-verify-1-L2-0126/build_verdict.py\""
+ },
+ "evidence": []
+}

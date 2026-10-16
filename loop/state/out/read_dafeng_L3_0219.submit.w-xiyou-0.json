@@ -1,0 +1,129 @@
+{
+ "task": "read:dafeng:L3:0219",
+ "agent": "w-xiyou-0",
+ "status": "done",
+ "summary": "精读《大奉打更人》第两百一十八章 人与人之间的信任（docs[0].text[817425,821142)，3717 codepoint / 3111 非空白），产出 loop/state/out/read_dafeng_L3_0219.candidate.json：8 条任务五元组（五栏各带独立引文，0 处字面串复用、0 处区间重叠；8 个 null 栏位全部带同名 Note）、14 条 causeEdges + 5 条 rejectedEdges、9 条人物状态、8 条知识差、5 条伏笔（1 条区间内回收 / 4 条显式 unresolved）+ 5 条 notForeshadows、15 条 worldSettings（7 place[arrived 4 / mentioned 3] + 3 item[itemStates 多选] + 5 rule[executed]）+ 8 条 notWorldSettings、2 条 themeReadings（各带 counter）、5 条 textualNotes、18 条 unknowns、7 条 selfCritique。198 个引文节点全部逐字命中，offset 经**独立脚本用 text.find 重新定位**复算一致。**方法说明**：初稿完成后做了一轮机器辅助的**反向验证**（逐段扫「哪些段落没有任何引文覆盖」），据此补进多处漏掉的原文，引文并集覆盖率 71.36% → 96.46%，零覆盖段落 21 → 4（剩下 4 段是招呼语、拟声词与两处分隔符，已在 coverage.zeroCoverageInterpretation 逐条说明为什么不引）。",
+ "evidence": [
+  {
+   "path": "loop/state/out/read_dafeng_L3_0219.candidate.json",
+   "sha256": "66b95de6cbd61b5683eec9c93e1549d25624ad05b87b60dabd2680a88559eab2",
+   "kind": "candidate-read-output（任务 writes 指定的唯一写入路径；本轮最终产物）"
+  },
+  {
+   "path": "loop/state/out/read_dafeng_L3_0219.w-xiyou-0.build/build_candidate.py",
+   "sha256": "a01ea269b7ac08859cfbeeefdfe1c6b68b0bc2b8cee994d164e2305f6feb0047",
+   "kind": "build-script（可复现：构建期强制 9 类自检，不通过则拒绝写出）"
+  },
+  {
+   "path": "loop/state/out/read_dafeng_L3_0219.w-xiyou-0.build/verify_candidate.py",
+   "sha256": "6f5ee3bc36041ed89598a76c754abab3cfe1b464ba046e8d01b7f9554630a5a8",
+   "kind": "independent-verify-script（不复用构建期偏移，用 text.find 重定位复算；**它抓出了构建期没报出的真缺陷**，见 assertions 第 4 条）"
+  },
+  {
+   "path": "loop/state/out/read_dafeng_L3_0219.w-xiyou-0.build/verify_report.json",
+   "sha256": "2c9467d2dc77429ea1bf6000f45e6b20b7b7cb430d838290cc38b1bf3528ffda",
+   "kind": "verify-report（12 项检查逐条 pass，problems=[]）"
+  },
+  {
+   "path": "data/cache/1063b17ca65ec1b76f30e460.docs.json",
+   "sha256": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+   "kind": "source-text（只读引用，未修改；sha256 与 task.sourceHash 逐字一致）"
+  },
+  {
+   "path": "data/cache/1063b17ca65ec1b76f30e460.json",
+   "sha256": "98370a39df4f8105063004d6bc8194e50aa8008e111a584ffec32f7ad14a14df",
+   "kind": "graph-cache（只读对照，按提示词**不作原文证据**；本轮仅用于确认章节边界）"
+  }
+ ],
+ "assertions": [
+  {
+   "text": "sourceHash 复核：shasum -a 256 data/cache/1063b17ca65ec1b76f30e460.docs.json = fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839，与 task.sourceHash 及候选 source.sha256 三方一致（它**是整份 docs.json 的哈希**，不是切片的）。",
+   "result": "pass"
+  },
+  {
+   "text": "偏移口径自检：docs[0].text[817425:821142] 以 unitHead「第两百一十八章 人与人之间的信任」开头（构建与核验脚本各断言一次），切片长 3717 codepoint，切片 sha256=1ae952d4bced7f77b7d93be85914acd6e4d83638ce6f3bc989c9094c45d9227a（作为附加字段 segmentSha256，未覆盖 sourceHash）。",
+   "result": "pass"
+  },
+  {
+   "text": "逐条引文机器核验：198 个引文节点，全部 text[start:end]==quote、全部落在 [817425,821142) 内、全部 sourceHash 一致、全部在本区间内唯一。复现：python3 -B -s loop/state/out/read_dafeng_L3_0219.w-xiyou-0.build/verify_candidate.py（它**不复用**构建期偏移，而是把 quote 当字符串重新 text.find 定位）。",
+   "result": "pass"
+  },
+  {
+   "text": "**独立核验抓出并修掉的真缺陷（如实登记）**：初稿的 q() 只断言「本区间内唯一」，于是分隔线 `------------`（全书出现 1031 次）被放行，其 start=821128 与 TEXT.find(quote)=0 不一致，构建期自检没报。我按 find==start 写的核验脚本报 fail（root.textualNotes[3].quote find=0 但候选声明 start=821128）。修法是让引文自描述而不是放宽核验：每个节点现在带 wholeTextOccurrences / inRangeOccurrences / firstGlobalOffset / startIsFirstGlobalOccurrence / locatorStrength，构建期断言这些自述值与实况逐一相符；核验侧对全书唯一的 197 条按 find==start 严格校验，对不唯一的那 1 条要求显式声明定位强度。",
+   "result": "pass"
+  },
+  {
+   "text": "任务五栏互斥：8 条任务的 objective/obstacle/action/result/cost 引文，两两之间无字面串复用、无区间重叠（构建与核验双向断言，结果为 0/0）。唯一的「同句拆用」是 T06（障碍=「但武夫一旦有了警惕…」/行动=「苏苏狂吐阴气攻击许七安」/结果=「因此每一口阴气都被灵活的躲开…」），三个分句互不重叠、各承载各栏内容，已在 machineSelfCheck.sameSentenceFieldSplit 单列供复核者直接审视并在 T06.note 写明若判违规应如何降级。",
+   "result": "pass"
+  },
+  {
+   "text": "null 栏位全部带理由：8 个 null（T01/T02/T03/T04/T05/T07/T08 的 cost + T02 的 obstacle）每一条都有同名 Note 说明「为什么本区间确实没有依据」。T02 的 obstacleNote 特别写明我**没有**把「望气术也有局限性…」填进障碍栏充数，并给了位置证据：该句 offset 818854 出现在术士回报 offset 818688 **之后**。",
+   "result": "pass"
+  },
+  {
+   "text": "六个必需分区齐全（tasks/causeEdges/states/foreshadows/worldSettings/themeReadings），与 loop.py required_sections(task.prompt) 抽出的清单逐字一致。",
+   "result": "pass"
+  },
+  {
+   "text": "worldSettings 三态区分写进字段：7 条 place 各带 placeState（arrived 4 / mentioned 3，其中都指挥使司、南城外、白帝城均判 mentioned——都指挥使司只有「去」的动作、南城外只有士卒转述、白帝城只是官员归属限定，均无到达动作）；3 条 item 各带 itemStates 多选（旧纸人 lose；新纸人 hold+use；账簿 hold[inferred]）；5 条 rule 各带 institution=executed 与 explain。构建期与核验期各断言一次，问题数 0。",
+   "result": "pass"
+  },
+  {
+   "text": "「不编造」机器扫描：把候选散文里用到的 39 个人名/地名/术语（许七安、张巡抚、宋布政使、李妙真、苏苏、杨川南、都指挥使司、南城外、地书碎片、望气术…）逐个在切片里 find，缺失 0 个。",
+   "result": "pass"
+  },
+  {
+   "text": "反向验证（本项目的核心要求：问「还漏了什么」而不是「写好的那个好了吗」）：逐段计算「被引文并集覆盖的比例」，据此补进初稿漏掉的 T01（望气术那句、重复否认）、T03（众官员脸色微变、两处阻力的等级差）、T04（承认的增量限定句、众人搜索动作）、T06（她自己应下验证的动作）、T07（她先一愣、奉承加码、矜持的嗯）、S00（开篇武夫/术士不同席的关系铺垫）、S08（苏苏的态度线整个漏掉）、K08（问「哪个」答「没一个」的粒度错位）、F03（条件的具体内容）、textualNotes（原本是散文、无法机器核验，已改成带引文的结构）。引文并集覆盖率 71.36% → 96.46%，零覆盖段落 21 → 4。",
+   "result": "pass"
+  },
+  {
+   "text": "残留的 4 个零覆盖段落已逐条说明为何不引（coverage.zeroCoverageInterpretation）：「“许公子来了啊。”」是招呼语（接待动作已由相邻句登记进 S00）、「“咳咳！”」是拟声（出场动作已由 S03/CE05 引）、两处「....」是场景分隔符（与结尾分隔线同属排版标记，见 TN04）。我没有为了把覆盖率做高而给拟声词或分隔符硬凑断言。",
+   "result": "pass"
+  },
+  {
+   "text": "红线自检：semanticReview=not-performed（引用定位正确 ≠ 语义已核验，未声称完成语义复核）；11 组台词被单列进 speechAsClueNotFact（张巡抚的罪由宣布、宋布政使的质问、术士的否认、苏苏的转述与自称、李妙真的含混承认、士卒的军情转述…），逐条写明「只证明什么/不证明什么」；8 条 notWorldSettings 里含两条**自我修正**（地书碎片、被看守的杨川南一度想登记为 item，最终排除并写明理由）；5 条 foreshadows 中 4 条 payoff=null 且 status 显式 unresolved，未回收的不编回收点。",
+   "result": "pass"
+  }
+ ],
+ "changes": [
+  {
+   "path": "loop/state/out/read_dafeng_L3_0219.candidate.json",
+   "kind": "append-only"
+  },
+  {
+   "path": "loop/state/out/read_dafeng_L3_0219.w-xiyou-0.build/build_candidate.py",
+   "kind": "append-only"
+  },
+  {
+   "path": "loop/state/out/read_dafeng_L3_0219.w-xiyou-0.build/verify_candidate.py",
+   "kind": "append-only"
+  },
+  {
+   "path": "loop/state/out/read_dafeng_L3_0219.w-xiyou-0.build/verify_report.json",
+   "kind": "append-only"
+  }
+ ],
+ "sourceHashes": {
+  "data/cache/1063b17ca65ec1b76f30e460.docs.json": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+  "data/cache/1063b17ca65ec1b76f30e460.json": "98370a39df4f8105063004d6bc8194e50aa8008e111a584ffec32f7ad14a14df"
+ },
+ "remaining": [
+  "未做独立语义复核，也未由第二人做对抗复核——按 READER 契约留给 VERIFIER。我自己做的那轮反向验证是**同一作者**的机器辅助补漏，不能替代独立复核。",
+  "全部引文只经过机器逐字核验（find 命中 + 偏移回填一致 + 区间唯一）与我的分区判断，没有人工逐条复核语义归属；分区归属仍可能不准（见 selfCritique SC06：例如「男人都好名声」我放进 S01 的 before 栏，它也可以读作李妙真对许七安的独立评论；成本 96.46% 的引文覆盖率查不出这类错误）。",
+  "区间外原文一律未读：我**没有**去读下一单元（因此不声称 F02「将来凉的越彻底」、F05 章末军情会在哪里回收），也没有跨单元对读。",
+  "未与 data/cache/1063b17ca65ec1b76f30e460.json 图谱缓存做逐条对照（按提示词该缓存不算原文证据，本轮只用于确认章节边界）；因此本候选与现有图谱之间是否冲突、是否重复，本轮没有结论。",
+  "本区间 3111 个非空白码点，引文并集覆盖 3001（96.46%），平均段落覆盖率 94.64%，4 段零覆盖已逐条说明。**覆盖率不说明「读懂了哪里」**，也不构成质量分。",
+  "T06 的「同句拆用」是唯一一处五栏引文共享同一句叙述的案例（三个互不重叠的分句）。我判断它合规并已在 machineSelfCheck 单列；若复核认为违规，障碍栏应降级为 null，降级方法已写在 T06.note。",
+  "W10（账簿 hold）与 W-rule-1（判处 executed）的判据边界已写在 stateNote/institutionNote 与 selfCritique SC05，但复核者若认为应降级为 inferred，我不反对——这两处离「明确设定」确有距离。"
+ ],
+ "rollback": {
+  "kind": "append-only",
+  "strategy": "delete-added-files",
+  "files": [
+   "loop/state/out/read_dafeng_L3_0219.candidate.json",
+   "loop/state/out/read_dafeng_L3_0219.w-xiyou-0.build/build_candidate.py",
+   "loop/state/out/read_dafeng_L3_0219.w-xiyou-0.build/verify_candidate.py",
+   "loop/state/out/read_dafeng_L3_0219.w-xiyou-0.build/verify_report.json"
+  ]
+ }
+}

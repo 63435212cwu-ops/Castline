@@ -1,0 +1,64 @@
+--- a/tests/atlas_review_shots.py
++++ b/tests/atlas_review_shots.py
+@@ -227,12 +227,36 @@
+         return False, last
+ 
+ 
++# ---------------------------------------------------------------- 泄漏兜底
++# 实测事故（2026-10-08）：GPU 串行槽内累积了 **3 个孤儿 Chrome**
++# （PPID=1、无 CDP 客户端、`user-data-dir=.../atlas-review-*`），
++# 合计持续占用 ~70% CPU，把同期的 4K 帧率从 ~48fps 压到 ~36fps。
++# 根因：本脚本的清理在 `run_viewport()` 的 `finally: sess.close()`（下方）
++# 与 `Session.close()` 里，**但 SIGTERM/SIGKILL 会绕过 `finally`** ——
++# 实测三次泄漏、三个不同临时目录，说明不是偶发。
++# 兜底：进程注册 atexit + SIGTERM/SIGINT 处理器，保证即使被中断也回收。
++_LIVE_SESSIONS = []
++
++
++def _reap_all_sessions():
++    while _LIVE_SESSIONS:
++        try:
++            _LIVE_SESSIONS.pop().close()
++        except Exception:
++            pass
++
++
++def _install_reapers():
++    atexit.register(_reap_all_sessions)
++    for sig in (signal.SIGTERM, signal.SIGINT):
++        prev = signal.getsignal(sig)
++
++        def _handler(signum, frame, _prev=prev):
++            _reap_all_sessions()
++            if callable(_prev):
++                return _prev(signum, frame)
++            raise SystemExit(128 + signum)
++        try:
++            signal.signal(sig, _handler)
++        except (ValueError, OSError):
++            pass  # 非主线程或不支持时静默跳过，不改变既有行为
++
++
+ def run_viewport(w, h):
+     size_tag = '%dx%d' % (w, h)
+     sess = Session(w, h)
++    _LIVE_SESSIONS.append(sess)
+     result = {'size': size_tag, 'steps': []}
+     try:
+         sess.start()
+@@ -360,6 +384,9 @@
+         return result
+     finally:
++        try:
++            _LIVE_SESSIONS.remove(sess)
++        except ValueError:
++            pass
+         sess.close()
+ 
+ 
+@@ -390,6 +417,7 @@
+ 
+ 
+ def main():
++    _install_reapers()
+     ...

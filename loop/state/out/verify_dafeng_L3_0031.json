@@ -1,0 +1,131 @@
+{
+  "task": "verify:dafeng:L3:0031",
+  "agent": "w-dafeng-3",
+  "status": "done",
+  "summary": "独立反向复核《大奉打更人》第三十二章 [94332,97034)（2702 码点、65 非空段、82 句单元）。先自己通读原文再打开候选。判定 partial：机械层零缺陷（339 条引文 = 309 段内 + 30 段外，quote/offset/sourceHash/stats 四项全过，固定种子抽 5 条 5/5 逐字命中，14 项自报计数零放大），但反向验证找到 1 处真实漏抽与 3 处可复现的自述错误。counterExamples 4 条：(1) 96350『“怎么了？”许七安心里一沉，怀疑自己说错话了。』在全部九类分析字段中零命中，是 82 句中唯一完全未记录的一句，也是 CE6 缺失的后半拍；(2) TD2 的统计数字 49 不可复现——正则『第X章后无空格』=29，其真子集『后接非空格非标点非换行』=20，49=29+20 为重复计数（10 种口径里只有这一种等于 49）；(3) TD2『全库另有若干只有章号的章头』与权威口径 narrative.chapter_spans 矛盾（912 个 span 中纯章号章头仅第 32 章一个；24 个纯章号是图谱事件标签，只有 1 个等于某章头）；(4) K5/U4 的『只有本单元这一段』字面为假（另有 38993 徐主簿试探朱县令一段），但其结论本身成立。reverseChecks 5 条：白衣（段内 6 次、本章双线焦点）未建 characters 条目，而只出现 1 次的孙尚书/王捕头却有；开篇『斡旋二十年→晚辈感情很好』这条带连接词的叙述因果未入 causeEdges、许二叔无 states 条目；许二叔/许新年两个有 tasks 的人物都无 states；两场景时间关系未登记为 unknown；NF2/SC6 把『卡姿兰大眼睛』写成全库 12 次（实为 11 次，12 是更短的『卡姿兰』）。未判 fail：无编造、无把台词当事实、无把结束当成功（T1/T4 写未达成/未弄清，5 条伏笔 4 条标未回收，semanticReview 两处 not_done）。",
+  "evidence": [
+    {
+      "path": "loop/state/out/verify_dafeng_L3_0031.verdict.json",
+      "sha256": "2466d086192ffd113ae6164770280715922bfca07d343254351c4216f58941ca",
+      "kind": "verdict",
+      "note": "本轮复核产物，任务 writes 指定的唯一写入路径。verdict=partial、counterExamples 4 条、reverseChecks 5 条。"
+    },
+    {
+      "path": "loop/state/out/read_dafeng_L3_0031.candidate.json",
+      "sha256": "868df912a397c582b573025e738fb80e744559d3131aef8b03ae93df8066be37",
+      "kind": "被复核候选（只读，未改一字节）"
+    },
+    {
+      "path": "data/cache/9b676d7031b1bcd3b8377a18.docs.json",
+      "sha256": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+      "kind": "source-document"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "源哈希与任务一致，切片口径自检：docs[0].text[94332:97034) 长度 2702、以章号开头、sha256=9f44fdc3…。",
+      "result": "pass",
+      "command": "python3 -c \"import json,hashlib;T=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];s=T[94332:97034];print(len(s),s.startswith('第三十二章'),hashlib.sha256(s.encode()).hexdigest())\"",
+      "observed": "2702 True 9f44fdc3ce37f608d907baf22253ce67d06b34d4b4eb9fb4a4d47141d4d2b349"
+    },
+    {
+      "text": "引文层四项全过：339 条引用（309 段内 + 30 段外）无一编造，text[start:end]==quote、end-start==len(quote)、sourceHash、inRange 落点零失败。",
+      "result": "pass",
+      "command": "python3 /tmp/cl-verify-0031/verify_0031.py",
+      "observed": "quoteRefs_total=339 in_unit=309 out_of_unit=30 quote_missing_anywhere=0 slice_ne_quote=0 end_minus_start_ne_len=0"
+    },
+    {
+      "text": "偏移口径提示（非缺陷，登记以免误判）：3 条段内引文的 start 不是全文中该串首次出现（『......』声明 95530、『------------』声明 97020）。三条回切均成立且声明位置就是本单元内那一次，属排版分隔符的高频重复，不是错位。",
+      "result": "pass",
+      "command": "python3 /tmp/cl-verify-0031/verify_0031.py",
+      "observed": "in_unit_start_ne_first_find 3 条，slice_eq 全部 True"
+    },
+    {
+      "text": "统计未放大：候选 stats 自报 14 项计数与实际数组长度逐项相等，tasksWithNullCost=5 与实际相符。",
+      "result": "pass",
+      "command": "python3 /tmp/cl-verify-0031/verify_0031.py",
+      "observed": "stats_mismatches=[] stats_tasksWithNullCost_ok=True"
+    },
+    {
+      "text": "反向验证（核心方法：问『这一段还漏了什么』而非『已写项对不对』）：把 9 类分析字段的全部引文并成覆盖集，对 82 个句单元逐句求补集。结果恰有 1 句完全未覆盖，且该句三串关键词在候选 JSON 中计数为 0、无任何引文区间与之重叠。",
+      "result": "pass",
+      "command": "python3 /tmp/cl-verify-0031/verify_0031.py",
+      "observed": "sentences_checked=82 uncovered=1 @96355『”许七安心里一沉，怀疑自己说错话了。』（整句逐字区间 [96350,96373)）"
+    },
+    {
+      "text": "counterExample 2 的 49 不可复现：遍历 10 种口径（no-space 29、其子集 20、中文数字 28、非空格非标点 21、图谱标签出现 53、标签去重 24、三书 29、章节 span 1、29+20=49、29+24=53），只有 29+20 等于 49，而 20 是 29 的真子集 ⇒ 重复计数。",
+      "result": "pass",
+      "command": "python3 /tmp/cl-verify-0031/verify_0031.py",
+      "observed": "claim_49_reproducible=True only_for=['29+20'] subclass_is_subset_of_wider=True partition={newline:1,punct:8,other:20}"
+    },
+    {
+      "text": "counterExample 3 的『另有若干无标题章头』用项目权威口径 narrative.chapter_spans 证伪：912 个 span 中 head 整串匹配『第X章』的只有第 32 章；24 个纯章号是图谱事件的 chapter 标签，其中只有 1 个恰好等于某章头字符串。",
+      "result": "pass",
+      "command": "python3 /tmp/cl-verify-0031/verify_0031.py",
+      "observed": "CE2_solo_head_count=1 ['第三十二章'] total_spans=912 graph_solo_labels_equal_a_head=['第三十二章']"
+    },
+    {
+      "text": "counterExample 4 的字面证伪：段落级检索『含朱县令且含口风或试探』命中 2 段，另一段在区间外（38993 徐主簿试探朱县令）。但只有本单元 95322 那段同时含『口风』⇒ K5/U4 的结论成立，错的是限定语。",
+      "result": "pass",
+      "command": "python3 /tmp/cl-verify-0031/verify_0031.py",
+      "observed": "CE3_paragraphs=2 in_unit=1(95322) out=1(38993) only_koufeng_para=[[95322,…]]"
+    },
+    {
+      "text": "引用核验：固定种子 random.seed(20261008) 抽 5 条含 start/end 的引文，各自 text.find 一次并回切比较。",
+      "result": "pass",
+      "command": "python3 /tmp/cl-verify-0031/verify_0031.py",
+      "observed": "5/5 verbatim=True slice_eq=True，声明偏移与 find 结果完全一致"
+    },
+    {
+      "text": "误杀检查（VERIFIER 契约第 4 条）：逐条审 6 条 nonEdges 的排除理由，未发现把合法真实因果挡掉的情形；CE10 这类低权重边被收录而非排除，方向是「宁可多收」。",
+      "result": "pass",
+      "command": "python3 -c \"import json;d=json.load(open('loop/state/out/read_dafeng_L3_0031.candidate.json'));print(len(d['nonEdges']))\"",
+      "observed": "nonEdges=6，理由分别为防倒果为因/相邻非因果/同场景物件不合并/未写明原因/场面动作/排版符，均与原文一致"
+    },
+    {
+      "text": "红线自查：无编造（13 个 characters 均能在区间内逐字定位）、未把台词当事实（猫树能力归宋卿台词标 unverified、朱县令与许玲月推演标内心话）、未把结束当成功（T1/T4 写未达成/未弄清，5 条伏笔 4 条标未回收）、未把定位当语义（两处 semanticReview 均 not_done）。",
+      "result": "pass",
+      "command": "python3 /tmp/cl-verify-0031/verify_0031.py",
+      "observed": "semanticReview=['not_done','not_done'] foreshadows_unpaid=4/5"
+    },
+    {
+      "text": "受保护路径未动：本轮只写 writes 指定的 1 个文件（取证脚本原文嵌入该文件的 evidenceScript 字段，未在仓库内另建文件；临时落盘只在 /tmp）。未跑 GPU/浏览器测试，未使用 git checkout/reset/stash。被复核候选字节未变（复核前后 sha256 均为 868df912…be37）。",
+      "result": "pass",
+      "command": "python3 -c \"import hashlib;print(hashlib.sha256(open('loop/state/out/read_dafeng_L3_0031.candidate.json','rb').read()).hexdigest())\"",
+      "observed": "candidate sha256 = 868df912a397c582b573025e738fb80e744559d3131aef8b03ae93df8066be37（与既有提交记录一致）"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/verify_dafeng_L3_0031.verdict.json",
+      "kind": "append-only",
+      "note": "任务 writes 指定的唯一写入路径。"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/9b676d7031b1bcd3b8377a18.docs.json": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "data/cache/9b676d7031b1bcd3b8377a18.json": "3c2fae1d399d6768719f2d5476fa0cfd88fb4fbbc12abdf080323fa4b846ebdf"
+  },
+  "remaining": [
+    "未判 fail，因此本轮不阻断发布：counterExamples 里没有一条点名 LAYER_MAP 内的条目 id（tasks/causeEdges/states/foreshadows/clues），故发布桥不会因本次 partial 排除任何节点。我不认为现有 tasks/causeEdges/states/foreshadows 中有哪条错到该被拦下。",
+    "建议修正（我未改候选，按「不改别人产出」纪律留给下一轮）：① 为 96350 补一条记录（新 id，作为 CE6 的后半拍或 ST9 的新锚点）；② TD2 的 49 与「另有若干无标题章头」建议删数字或降级为 unknowns；③ K5/U4 的限定语改为「只有本单元这一段是『朱县令+口风』，另有一处方向相反的『徐主簿+试探+朱县令』」；④ NF2/SC6 的「全库 12 次」应为 11。",
+    "未做语义终审：本轮只证明引文逐字、偏移自洽、统计不放大，并做了补集式反向验证；不证明对案情的解释正确。本单元语义难点两层（县衙线几乎全是「谁在猜谁」的内心话；观星楼线关键情节全部由宋卿口述）候选已正确标为 unverified/内心话，但我未做二次独立语义裁定。",
+    "检索边界：全书级核对我只用字符串/段落级检索（『斡旋』13 处、『朱县令』80 处、『木瘤』2 处、『卡姿兰』12 处），凡「没找到」均写成检索边界而非全书事实。未通读全书。",
+    "我自己的两处中途修正已如实登记在 verdict 的 notes：初判「3 条偏移缺陷」经复核撤回（实为排版分隔符口径）；初判「2 段未覆盖」逐句化后收敛为 1 段（另一个是纯章号，由 unit.titleQuote 覆盖）。",
+    "独立性说明：候选 JSON 内嵌 agent 字段与我的 worker 名同为 w-dafeng-3，易被误读为自签。规范提交记录 loop/state/out/read_dafeng_L3_0031.json 的 agent 是 w-dafeng-2，loop.py verify 的自签判据取该记录，故不构成自签；我按契约先读原文再开候选，未改动候选字节。",
+    "未跑 GPU/浏览器测试（本任务为原文复核，不涉及页面路径）。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/verify_dafeng_L3_0031.verdict.json"
+    ]
+  },
+  "submittedAt": "2026-10-08T10:22:14Z",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-08T10:22:14Z"
+  },
+  "verifyState": "pending"
+}

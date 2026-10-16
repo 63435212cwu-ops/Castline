@@ -1,0 +1,111 @@
+{
+  "task": "verify:xiyou:L0:0076",
+  "agent": "w-dafeng-2",
+  "role": "VERIFIER",
+  "status": "done",
+  "summary": "独立反向复核《西游记》第七十六回（原文 [549490,557492)，8002 字）：先自读原文切片再核候选。162 条引文（去重 124）逐字/切片内唯一/全文唯一/落区间/sourceHash 五项全对（0 失配），factStatus 与 factStatusRawPairing 两栏用自写的栈式配对独立重算 162/162 相符，machineSelfCheck 32 项计数全符，R1/R2 两处原文引号方向错独立复现；0 编造、0 结局越权、0 图谱缓存越权。判 partial：1 处实质错误（knowledgeDiffs K5 断言「二魔完全不知道绳儿拴心的机制」，被二怪自己 552152「实为兄长性命要紧」与 551075/551145 他亲手拿绳并说出「心上拴了一根绳子」逐字否掉，且与候选自己 C8/F5 对同一句的归属自相矛盾），另 2 处轻措辞/括注须改（W11「城破」、U7 章节括注）；反向验证另列出 10 条原文明确存在但候选完全未覆盖的事实。复核中我自己写错 1 条（钉钯捞回）已当场改正并留痕。",
+  "evidence": [
+    {
+      "path": "loop/state/out/verify_xiyou_L0_0076.verdict.json",
+      "sha256": "0590015ecc5260023b9d5511afe46ad5db2b09b852f199a29f035f700f430563",
+      "kind": "verifier-verdict",
+      "note": "任务 writes 指定的唯一产物。"
+    },
+    {
+      "path": "loop/state/out/read_xiyou_L0_0076.candidate.json",
+      "sha256": "b48350ef4bcb21355941f72630cc438fc2a2003e3ea287bbac114c552990d1e5",
+      "kind": "reviewed-candidate",
+      "note": "被复核对象（提交者 w-xiyou-1）。复核者 w-dafeng-2 ≠ w-xiyou-1，非自签；复核全程未改此文件（哈希为复核结束时值）。"
+    },
+    {
+      "path": "data/cache/ed3dc1255ca08fbdaae30bbd.docs.json",
+      "sha256": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+      "kind": "source-text",
+      "note": "原文来源；其 docs[0].text[549490:557492) 即本单元 8002 字切片，与任务 sourceHash 声明一致。"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "区间边界与切片自检：t[549490:549508]=='第七十六回　心神居舍魔归性'（起点即回目标题）；t[557492:557510]=='第七十七回　群魔欺本性　一体拜真如'（右开端点为下一回标题，本单元不含它）；len(t[549490:557492])==8002；独立重算切片 sha256==10fb95ed2876635880911e526aa069a3c4abb97fff9bc04e2fde0ac6a1596b9c，与候选 source.sliceSha256 一致。命令：见 verdict.reproduce['3_区间与切片']（已实跑，输出 8002 True 第七十七回　群魔欺本性　一体拜真如 10fb95ed2876…）。",
+      "result": "pass"
+    },
+    {
+      "text": "源哈希核对：shasum -a 256 data/cache/ed3dc1255ca08fbdaae30bbd.docs.json → c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2，与任务 sourceHash 一致；候选 source.sourceHash 与全部 162 条引文的 sourceHash 字段都用这同一个值（0 失配）。候选 readsSource.path 写的是同哈希的另一个缓存键 a065244455cfb2221bcda94a.docs.json（我实算两文件 docs[0].text 逐字相等 True），不是缺陷。",
+      "result": "pass"
+    },
+    {
+      "text": "引文逐条复算：162 条引文节点（去重 124）逐条断言 TEXT[s:e]==quote、TEXT.count(quote)==1（切片内与全文各一次）、549490<=s<e<=557492、sourceHash 一致、inSliceCount/inFullCount 与实算一致。命令：见 verdict.reproduce['4_全部引文复算']（自包含脚本，已实跑）→ 输出 nodes 162 sliceEq_fail 0 uniq_fail 0 range_fail 0 hash_fail 0 countfield_fail 0。",
+      "result": "pass"
+    },
+    {
+      "text": "factStatus 独立重算（不复用候选代码）：从切片重新按 “ ” 栈式配对重建话语跨度，raw 与 repaired（翻转 550058 '“'→'”'、553961 '”'→'“' 两处方向错）各算一遍，逐条重算 factStatus 与 factStatusRawPairing 两栏。命令：同 reproduce['4'] 的脚本 → 输出 raw spans 128 mismatch 0 / repaired spans 128 mismatch 0；另复算 spansRaw=128、spansAfterRepair=128、rawBogusSpan=[550004,554017]、repairedSpans=[[550004,550058],[550058,553961],[553961,554017]]、factStatusDistribution{narrated 86, utterance 72, mixed 4}，与 textPairingAudit/machineSelfCheck 逐项相符。",
+      "result": "pass"
+    },
+    {
+      "text": "machineSelfCheck 计数独立复算 32 项：quoteRefs 162、distinctQuotes 124、tasks 5、causeEdges 16、rejectedEdges 6、states 9、knowledgeDiffs 5、foreshadows 9、rejectedForeshadows 5、worldSettings 16、themeReadings 2、unknowns 12、selfCritique 3、placeStates{arrived 6, mentioned 1}、itemStates{hold 2, transfer 2, use 2, lose 2}、taskSlotSharedQuotes []（跨任务五栏引文槽交集实算为空）、tasksWithNullSlot []、factStatusPairingDisagreementCount 27（去重后条数与列表逐条相符）——全部相符，0 处不符。",
+      "result": "pass"
+    },
+    {
+      "text": "随机抽查 5 条 quote 做 find 核验（固定种子 seed=76，random.sample 于 162 节点，可复现）：5/5 逐字命中、偏移与声明一致、全文唯一。命令：verdict.reproduce['6_抽查引文']（自包含一行脚本，已实跑）→ 5 行全 True True True；抽中偏移依次 552056、550881、556022、552323、551915。",
+      "result": "pass"
+    },
+    {
+      "text": "反向验证（本角色主要动作）：先机械扫描「未被任何候选引文覆盖的字符区间」（候选引文总覆盖率 33.0%，≥120 字未覆盖空洞 16 处），再逐处人工判定哪些含「原文明确存在、候选完全未处理」的事实；另用关键短语在候选全文原文串与 quote 节点两道探测做存在性核对。得出 10 条 reverseChecks，每条给逐字引文+偏移，全部 offset 经 t.find/唯一性/切片内三重校验（0 失配）。",
+      "result": "pass"
+    },
+    {
+      "text": "反证与越权检查：逐条回原文核 5 条 tasks、16 条 causeEdges、9 条 states、9 条 foreshadows、16 条 worldSettings、12 条 unknowns、5 条 resultIsSuccess——未发现编造的人物/地点/结局/伏笔，未发现把「本回结束」当成功，未发现「时间相邻当因果」写进 causeEdges。候选 readsGraphCache=false，全文 0 处 chp_/ev_/rel_/sl_/evd_/loc_/storyline/eventId/graphKey 痕迹，未越权使用未打开的图谱缓存。",
+      "result": "pass"
+    },
+    {
+      "text": "误杀检查：逐条核候选主动排除的 11 项（rejectedEdges 6 + rejectedForeshadows 5），排除理由均能在原文站住，未发现词表/正则把合法项挡掉的误杀。其中我最初怀疑「红沙」是误杀（VERIFIER.md 举的正是整词判定误杀合法因果一类），实算全文「红沙」仅 2 次（113895 在第十六回且为「血染红沙」异义、556506 在本区间），故该反向怀疑不成立、我如实撤回并记入 verdict.notes。",
+      "result": "pass"
+    },
+    {
+      "text": "判 partial 的依据（不是凭感觉否决）：counterExamples 每条附逐字引文与偏移，3 条 quote 全部通过 t.find 唯一性核验。实质错误只有 K5 一条（有 552152 逐字反证，且与候选自身 C8/F5 归属矛盾）；因其余分区逐条核后无事实性错误，故不判 fail——按 VERIFIER.md「判 fail 必须有 counterExample」，我有反证，但 fail 会暗示整份产物不可用，证据不支持该结论。必须丢弃/降级与可原样使用的部分分列于 verdict.usableVsDiscard。",
+      "result": "pass"
+    },
+    {
+      "text": "自我纠错留痕（如实登记，未掩盖）：我最初把 reverseChecks 第 9 条写成「钉钯被捞回」候选 0 命中，实算后发现该句已出现在 rejectedForeshadows[1] 的排除理由里（只是没有对应断言槽），故把该条范围收窄为「后门里走」并写明降级说明；另修正了 reproduce['9'] 里 expected 输出与实跑不一致的一处。两处都写进了 verdict 正文而非静默改掉。",
+      "result": "pass"
+    },
+    {
+      "text": "复核纪律遵守：未跑 GPU/浏览器测试；未改任何受保护路径（js/ css/ index.html serve.py narrative.py scripts/ tests/ docs/ data/）；未改被复核的候选文件；未执行 git checkout -- . / git reset --hard / git stash；产物只写任务 writes 指定的 1 个路径。",
+      "result": "pass"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/verify_xiyou_L0_0076.verdict.json",
+      "kind": "append-only"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/ed3dc1255ca08fbdaae30bbd.docs.json": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+    "data/cache/ed3dc1255ca08fbdaae30bbd.json": "3005a49ae29146d3a7b78bc35767c0407bd265f459b7aed715306c51309b8eb5",
+    "loop/state/out/read_xiyou_L0_0076.candidate.json": "b48350ef4bcb21355941f72630cc438fc2a2003e3ea287bbac114c552990d1e5"
+  },
+  "remaining": [
+    "K5 的修法取决于对「二魔何时、通过什么途径得知拴心机制」的判定——原文没有单独交代该时点，只有他到场拿绳（551075）并说出「实为兄长性命要紧」（552152）。首选修法是降级为 unknowns，而不是替他另写一条知识状态；最终改法应由下一轮 READER 或发布方决定。",
+    "W11「城破门开」与 U7「第七十四、七十五回」两处措辞/括注待改（改动很小，我在 verdict.counterExamples 里给了原文依据与改法）。",
+    "K1 第二半（「老魔与三魔不知道行者听见了」）候选自认是默认值却标 basis=explicit——我按纪律只记存疑（未附逐字反证），未据此判 fail，留给发布方或下一轮处理。",
+    "10 条 reverseChecks 是候选未覆盖的真实事实清单，供下一轮补写 tasks/causeEdges/states/foreshadows 使用；本轮我未代写这些分区（复核者不代笔是 VERIFIER 的边界）。",
+    "未做的事：未打开图谱缓存（data/cache/*.json 的图谱侧），未核验候选任何结论在**发布版本**中的落位，未跑任何真实页面路径或 accept.sh（本任务不要求，且 GPU/浏览器测试全局串行）。",
+    "selfCritique：我的反向验证基于「未覆盖区间 + 短语存在性」两道机械探测加人工判定，仍可能有「原文有、但我的短语表没覆盖到」的遗漏——这是本方法的固有上界，不宣称穷尽。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/verify_xiyou_L0_0076.verdict.json"
+    ]
+  },
+  "submittedAt": "2026-10-12T04:45:53Z",
+  "wallClockSeconds": 2546,
+  "wallClockFrom": "lease.startedAt",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-12T04:45:53Z"
+  },
+  "verifyState": "pending"
+}

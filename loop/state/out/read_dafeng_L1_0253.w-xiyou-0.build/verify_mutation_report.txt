@@ -1,0 +1,24 @@
+=== 变异自检（read:dafeng:L1:0253）===
+基线（未变异，应通过）：
+  [通过] 基线 exit=0
+
+注入缺陷（每一种都必须被拦下）：
+  [拦下] M1 start 偏移 +1                     exit=1 [FAIL] C1 cand.tasks[0].objective.quotes[0] 逐字不成立 text[1042186:1042222]='外的侍卫走了过来，停在十几米外就不
+  [拦下] M2 引文末字改坏                          exit=1 [FAIL] C1 cand.tasks[1].obstacle.quotes[0] 逐字不成立 text[1045054:1045078]='是啊，太子虽还未从大理寺出来，但也是
+  [拦下] M3 quoteRef.sourceHash 改坏          exit=1 [FAIL] C2 cand.tasks[2].action.quotes[0] sourceHash 不等于文件哈希
+  [拦下] M4 候选 sourceHash 改坏                exit=1 [FAIL] A2 候选 sourceHash != 文件哈希
+  [拦下] M5 删掉 themeReadings 分区             exit=1 [FAIL] D1 缺分区：['themeReadings']
+  [拦下] M6 五栏共用同一句引文                       exit=1 [FAIL] E3 tasks[3] 的 objective 与 obstacle 共用同一句引文 [(1043041, 1043068)]
+  [拦下] M7 null 栏位缺 Note                   exit=1 [FAIL] E1 tasks[0].cost 是 null 但缺 costNote（未标注的未知）
+  [拦下] M8 place 缺 placeState              exit=1 [FAIL] F2 worldSettings[6] place 缺 placeState 或取值非法：None
+  [拦下] M9 rule institution 非法值            exit=1 [FAIL] F4 worldSettings[0] rule 缺 institution 或取值非法：'maybe'
+  [拦下] M10 引文越出本单元区间（考 C3）                exit=1 [FAIL] C3 cand.tasks[0].objective.quotes[0] 引文越出本单元区间 [68044,68049]
+
+散文层变异（必须被 verify_prose.py 拦下）：
+  [拦下] PM1 逐字引述改成近似（来都来了→殿下来都来了）          exit=1 [FAIL] PROSE cand.tasks[4].objective.text 的「殿下来都来了，殿下就带我进一趟景秀宫吧，正好卑职要为福妃案收尾」不是逐字原文（约定：「」= 
+  [拦下] PM2 同义改写（不得→不许）                    exit=1 [FAIL] PROSE cand.tasks[9].objective.text 的「不许置喙皇后娘娘」不是逐字原文（约定：「」= 逐字，自造词请用『』）
+  [拦下] PM3 编造原文没有的引述                      exit=1 [FAIL] PROSE cand.foreshadows[0].note 的「琅儿其实是陈贵妃的眼线」不是逐字原文（约定：「」= 逐字，自造词请用『』）
+  [拦下] PM4 occurrences 造假（1→7）            exit=1 [FAIL] QUANT notForeshadows[n1].occurrences 声明 7，实测 1
+
+结果：14/14 种缺陷被拦下；基线通过
+OK（验证器不是「永远判 pass」）

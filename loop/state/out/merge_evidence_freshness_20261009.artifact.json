@@ -1,0 +1,65 @@
+{
+ "task": "merge:evidence-freshness-false-alarm:20261009",
+ "agent": "reform-lead",
+ "at": "2026-10-08T19:11:36Z",
+ "gateLock": "本合并任务持有 GATE.lock（agent=reform-lead）",
+ "defect": {
+  "what": "我按 P2 正常推进环境台账（loop/state/index.json 切默认键、PUBLISH-LEDGER.json 登记新键、PUBLISHED-WITH-KNOWN-DEFECTS.json 登记缺陷、桥重跑改写 candidates/），结果 **4 条与之无关的记录**被判「证据失效」并退回重做，完成数从 296 掉到 294。",
+  "why_it_matters": "QUALITY P0.2 明文禁止：「索引按相关原文分片或固定快照取证，**不能用无关索引改动使整批阅读失效**」。这条正是那个形态 —— 环境自身的台账演进被误报成产物被改坏，于是完成数无故下降、worker 反复重做无关任务，而看板看起来只是『数字波动』。",
+  "rootCause": "EVOLVING_PREFIXES 只列了 loop/bin、loop/ROLES、loop/queue、policy.json、scripts、tests、tools、docs；漏了**环境自身的台账/索引/候选产物**（loop/state/index.json、PUBLISH-LEDGER.json、PUBLISHED-WITH-KNOWN-DEFECTS.json、loop/state/candidates/）。而记录里大量 evidence 正是指向这些文件。"
+ },
+ "fix": {
+  "file": "loop/bin/loop.py",
+  "sha256": "0b88b78fc6173e1cc3c4360219859748b11830e84a233fff26f8f34971950d69",
+  "change": "EVOLVING_PREFIXES 增补 loop/state/index.json、loop/state/PUBLISH-LEDGER.json、loop/state/PUBLISHED-WITH-KNOWN-DEFECTS.json、loop/state/candidates/",
+  "boundary": "产品产物（data/ 等）与原文/审阅产物（loop/state/out/）**仍属 mutable**，其漂移依旧判失效 —— 不把真问题藏进 evolving。",
+  "sameSource": "loop/bin/verify_evidence.py 与 selftest 共用 loopmod.is_evolving，口径自动一致（AGENTS/QUALITY 要求的『同一来源』）。"
+ },
+ "verification": {
+  "statsBefore": {
+   "done": 294,
+   "staleEvidenceCount": 8
+  },
+  "statsAfter": {
+   "done": 299,
+   "staleEvidenceCount": 2,
+   "remainingStale": [
+    "adopt:P12-W05（引用的 artifacts/plan100/* 确已不存在）",
+    "read:xiyou:L0:0022（候选文件确被重写）"
+   ]
+  },
+  "newSelftestChecks": [
+   "12k2b 环境台账/索引/候选产物的演进不算失效",
+   "12k2c 产品产物与原文证据仍判失效（不得把真问题藏进 evolving）"
+  ],
+  "selftest": "113/113",
+  "productAccept": "sh scripts/accept.sh → 132/132 passed",
+  "verifyEvidence": "loop/bin/verify_evidence.py → 产物级证据全部仍可复现"
+ },
+ "assertions": [
+  {
+   "text": "无关记录不再因台账演进失效",
+   "command": "stats: stale 8 → 2，done 294 → 299",
+   "result": "pass"
+  },
+  {
+   "text": "产品产物漂移仍被判失效（没有把真问题藏起来）",
+   "command": "is_evolving('data/cache/…') == False",
+   "result": "pass"
+  },
+  {
+   "text": "环境自检全绿且新增两条回归",
+   "command": "selftest 113/113",
+   "result": "pass"
+  },
+  {
+   "text": "产品门禁全绿",
+   "command": "accept.sh 132/132",
+   "result": "pass"
+  }
+ ],
+ "remaining": [
+  "余下 2 条 stale 是**真实**失效（artifacts/plan100 已被移出、候选确被重写），不是误报，保留待各自返工。",
+  "P3/P4/P5 未开始。"
+ ]
+}

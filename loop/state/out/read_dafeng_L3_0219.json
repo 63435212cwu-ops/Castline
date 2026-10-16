@@ -1,0 +1,274 @@
+{
+  "task": "read:dafeng:L3:0219",
+  "agent": "w-xiyou-0",
+  "status": "done",
+  "summary": "精读《大奉打更人》第两百一十八章 人与人之间的信任（docs[0].text[817425,821142)，3717 codepoint / 3111 非空白），产出 loop/state/out/read_dafeng_L3_0219.candidate.json：8 条任务五元组（五栏各带独立引文，0 处字面串复用、0 处区间重叠；8 个 null 栏位全部带同名 Note）、14 条 causeEdges + 5 条 rejectedEdges、9 条人物状态、8 条知识差、5 条伏笔（1 条区间内回收 / 4 条显式 unresolved）+ 5 条 notForeshadows、15 条 worldSettings（7 place[arrived 4 / mentioned 3] + 3 item[itemStates 多选] + 5 rule[executed]）+ 8 条 notWorldSettings、2 条 themeReadings（各带 counter）、5 条 textualNotes、18 条 unknowns、7 条 selfCritique。198 个引文节点全部逐字命中，offset 经**独立脚本用 text.find 重新定位**复算一致。**方法说明**：初稿完成后做了一轮机器辅助的**反向验证**（逐段扫「哪些段落没有任何引文覆盖」），据此补进多处漏掉的原文，引文并集覆盖率 71.36% → 96.46%，零覆盖段落 21 → 4（剩下 4 段是招呼语、拟声词与两处分隔符，已在 coverage.zeroCoverageInterpretation 逐条说明为什么不引）。",
+  "evidence": [
+    {
+      "path": "loop/state/out/read_dafeng_L3_0219.candidate.json",
+      "sha256": "66b95de6cbd61b5683eec9c93e1549d25624ad05b87b60dabd2680a88559eab2",
+      "kind": "candidate-read-output（任务 writes 指定的唯一写入路径；本轮最终产物）"
+    },
+    {
+      "path": "loop/state/out/read_dafeng_L3_0219.w-xiyou-0.build/build_candidate.py",
+      "sha256": "a01ea269b7ac08859cfbeeefdfe1c6b68b0bc2b8cee994d164e2305f6feb0047",
+      "kind": "build-script（可复现：构建期强制 9 类自检，不通过则拒绝写出）"
+    },
+    {
+      "path": "loop/state/out/read_dafeng_L3_0219.w-xiyou-0.build/verify_candidate.py",
+      "sha256": "6f5ee3bc36041ed89598a76c754abab3cfe1b464ba046e8d01b7f9554630a5a8",
+      "kind": "independent-verify-script（不复用构建期偏移，用 text.find 重定位复算；**它抓出了构建期没报出的真缺陷**，见 assertions 第 4 条）"
+    },
+    {
+      "path": "loop/state/out/read_dafeng_L3_0219.w-xiyou-0.build/verify_report.json",
+      "sha256": "2c9467d2dc77429ea1bf6000f45e6b20b7b7cb430d838290cc38b1bf3528ffda",
+      "kind": "verify-report（12 项检查逐条 pass，problems=[]）"
+    },
+    {
+      "path": "data/cache/1063b17ca65ec1b76f30e460.docs.json",
+      "sha256": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+      "kind": "source-text（只读引用，未修改；sha256 与 task.sourceHash 逐字一致）"
+    },
+    {
+      "path": "data/cache/1063b17ca65ec1b76f30e460.json",
+      "sha256": "98370a39df4f8105063004d6bc8194e50aa8008e111a584ffec32f7ad14a14df",
+      "kind": "graph-cache（只读对照，按提示词**不作原文证据**；本轮仅用于确认章节边界）"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "sourceHash 复核：shasum -a 256 data/cache/1063b17ca65ec1b76f30e460.docs.json = fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839，与 task.sourceHash 及候选 source.sha256 三方一致（它**是整份 docs.json 的哈希**，不是切片的）。",
+      "result": "pass"
+    },
+    {
+      "text": "偏移口径自检：docs[0].text[817425:821142] 以 unitHead「第两百一十八章 人与人之间的信任」开头（构建与核验脚本各断言一次），切片长 3717 codepoint，切片 sha256=1ae952d4bced7f77b7d93be85914acd6e4d83638ce6f3bc989c9094c45d9227a（作为附加字段 segmentSha256，未覆盖 sourceHash）。",
+      "result": "pass"
+    },
+    {
+      "text": "逐条引文机器核验：198 个引文节点，全部 text[start:end]==quote、全部落在 [817425,821142) 内、全部 sourceHash 一致、全部在本区间内唯一。复现：python3 -B -s loop/state/out/read_dafeng_L3_0219.w-xiyou-0.build/verify_candidate.py（它**不复用**构建期偏移，而是把 quote 当字符串重新 text.find 定位）。",
+      "result": "pass"
+    },
+    {
+      "text": "**独立核验抓出并修掉的真缺陷（如实登记）**：初稿的 q() 只断言「本区间内唯一」，于是分隔线 `------------`（全书出现 1031 次）被放行，其 start=821128 与 TEXT.find(quote)=0 不一致，构建期自检没报。我按 find==start 写的核验脚本报 fail（root.textualNotes[3].quote find=0 但候选声明 start=821128）。修法是让引文自描述而不是放宽核验：每个节点现在带 wholeTextOccurrences / inRangeOccurrences / firstGlobalOffset / startIsFirstGlobalOccurrence / locatorStrength，构建期断言这些自述值与实况逐一相符；核验侧对全书唯一的 197 条按 find==start 严格校验，对不唯一的那 1 条要求显式声明定位强度。",
+      "result": "pass"
+    },
+    {
+      "text": "任务五栏互斥：8 条任务的 objective/obstacle/action/result/cost 引文，两两之间无字面串复用、无区间重叠（构建与核验双向断言，结果为 0/0）。唯一的「同句拆用」是 T06（障碍=「但武夫一旦有了警惕…」/行动=「苏苏狂吐阴气攻击许七安」/结果=「因此每一口阴气都被灵活的躲开…」），三个分句互不重叠、各承载各栏内容，已在 machineSelfCheck.sameSentenceFieldSplit 单列供复核者直接审视并在 T06.note 写明若判违规应如何降级。",
+      "result": "pass"
+    },
+    {
+      "text": "null 栏位全部带理由：8 个 null（T01/T02/T03/T04/T05/T07/T08 的 cost + T02 的 obstacle）每一条都有同名 Note 说明「为什么本区间确实没有依据」。T02 的 obstacleNote 特别写明我**没有**把「望气术也有局限性…」填进障碍栏充数，并给了位置证据：该句 offset 818854 出现在术士回报 offset 818688 **之后**。",
+      "result": "pass"
+    },
+    {
+      "text": "六个必需分区齐全（tasks/causeEdges/states/foreshadows/worldSettings/themeReadings），与 loop.py required_sections(task.prompt) 抽出的清单逐字一致。",
+      "result": "pass"
+    },
+    {
+      "text": "worldSettings 三态区分写进字段：7 条 place 各带 placeState（arrived 4 / mentioned 3，其中都指挥使司、南城外、白帝城均判 mentioned——都指挥使司只有「去」的动作、南城外只有士卒转述、白帝城只是官员归属限定，均无到达动作）；3 条 item 各带 itemStates 多选（旧纸人 lose；新纸人 hold+use；账簿 hold[inferred]）；5 条 rule 各带 institution=executed 与 explain。构建期与核验期各断言一次，问题数 0。",
+      "result": "pass"
+    },
+    {
+      "text": "「不编造」机器扫描：把候选散文里用到的 39 个人名/地名/术语（许七安、张巡抚、宋布政使、李妙真、苏苏、杨川南、都指挥使司、南城外、地书碎片、望气术…）逐个在切片里 find，缺失 0 个。",
+      "result": "pass"
+    },
+    {
+      "text": "反向验证（本项目的核心要求：问「还漏了什么」而不是「写好的那个好了吗」）：逐段计算「被引文并集覆盖的比例」，据此补进初稿漏掉的 T01（望气术那句、重复否认）、T03（众官员脸色微变、两处阻力的等级差）、T04（承认的增量限定句、众人搜索动作）、T06（她自己应下验证的动作）、T07（她先一愣、奉承加码、矜持的嗯）、S00（开篇武夫/术士不同席的关系铺垫）、S08（苏苏的态度线整个漏掉）、K08（问「哪个」答「没一个」的粒度错位）、F03（条件的具体内容）、textualNotes（原本是散文、无法机器核验，已改成带引文的结构）。引文并集覆盖率 71.36% → 96.46%，零覆盖段落 21 → 4。",
+      "result": "pass"
+    },
+    {
+      "text": "残留的 4 个零覆盖段落已逐条说明为何不引（coverage.zeroCoverageInterpretation）：「“许公子来了啊。”」是招呼语（接待动作已由相邻句登记进 S00）、「“咳咳！”」是拟声（出场动作已由 S03/CE05 引）、两处「....」是场景分隔符（与结尾分隔线同属排版标记，见 TN04）。我没有为了把覆盖率做高而给拟声词或分隔符硬凑断言。",
+      "result": "pass"
+    },
+    {
+      "text": "红线自检：semanticReview=not-performed（引用定位正确 ≠ 语义已核验，未声称完成语义复核）；11 组台词被单列进 speechAsClueNotFact（张巡抚的罪由宣布、宋布政使的质问、术士的否认、苏苏的转述与自称、李妙真的含混承认、士卒的军情转述…），逐条写明「只证明什么/不证明什么」；8 条 notWorldSettings 里含两条**自我修正**（地书碎片、被看守的杨川南一度想登记为 item，最终排除并写明理由）；5 条 foreshadows 中 4 条 payoff=null 且 status 显式 unresolved，未回收的不编回收点。",
+      "result": "pass"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/read_dafeng_L3_0219.candidate.json",
+      "kind": "append-only"
+    },
+    {
+      "path": "loop/state/out/read_dafeng_L3_0219.w-xiyou-0.build/build_candidate.py",
+      "kind": "append-only"
+    },
+    {
+      "path": "loop/state/out/read_dafeng_L3_0219.w-xiyou-0.build/verify_candidate.py",
+      "kind": "append-only"
+    },
+    {
+      "path": "loop/state/out/read_dafeng_L3_0219.w-xiyou-0.build/verify_report.json",
+      "kind": "append-only"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/1063b17ca65ec1b76f30e460.docs.json": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "data/cache/1063b17ca65ec1b76f30e460.json": "98370a39df4f8105063004d6bc8194e50aa8008e111a584ffec32f7ad14a14df"
+  },
+  "remaining": [
+    "未做独立语义复核，也未由第二人做对抗复核——按 READER 契约留给 VERIFIER。我自己做的那轮反向验证是**同一作者**的机器辅助补漏，不能替代独立复核。",
+    "全部引文只经过机器逐字核验（find 命中 + 偏移回填一致 + 区间唯一）与我的分区判断，没有人工逐条复核语义归属；分区归属仍可能不准（见 selfCritique SC06：例如「男人都好名声」我放进 S01 的 before 栏，它也可以读作李妙真对许七安的独立评论；成本 96.46% 的引文覆盖率查不出这类错误）。",
+    "区间外原文一律未读：我**没有**去读下一单元（因此不声称 F02「将来凉的越彻底」、F05 章末军情会在哪里回收），也没有跨单元对读。",
+    "未与 data/cache/1063b17ca65ec1b76f30e460.json 图谱缓存做逐条对照（按提示词该缓存不算原文证据，本轮只用于确认章节边界）；因此本候选与现有图谱之间是否冲突、是否重复，本轮没有结论。",
+    "本区间 3111 个非空白码点，引文并集覆盖 3001（96.46%），平均段落覆盖率 94.64%，4 段零覆盖已逐条说明。**覆盖率不说明「读懂了哪里」**，也不构成质量分。",
+    "T06 的「同句拆用」是唯一一处五栏引文共享同一句叙述的案例（三个互不重叠的分句）。我判断它合规并已在 machineSelfCheck 单列；若复核认为违规，障碍栏应降级为 null，降级方法已写在 T06.note。",
+    "W10（账簿 hold）与 W-rule-1（判处 executed）的判据边界已写在 stateNote/institutionNote 与 selfCritique SC05，但复核者若认为应降级为 inferred，我不反对——这两处离「明确设定」确有距离。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/read_dafeng_L3_0219.candidate.json",
+      "loop/state/out/read_dafeng_L3_0219.w-xiyou-0.build/build_candidate.py",
+      "loop/state/out/read_dafeng_L3_0219.w-xiyou-0.build/verify_candidate.py",
+      "loop/state/out/read_dafeng_L3_0219.w-xiyou-0.build/verify_report.json"
+    ]
+  },
+  "submittedAt": "2026-10-13T11:14:54Z",
+  "wallClockSeconds": 2098,
+  "wallClockFrom": "lease.startedAt",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-13T11:14:54Z"
+  },
+  "verifyState": "partial",
+  "reviews": [
+    {
+      "reviewer": "w-verify-1",
+      "at": "2026-10-13T15:36:38Z",
+      "verdict": "partial",
+      "notes": "总判：**partial（可用，需补登与一处改数）**，不判 fail 也不判 pass。\n\n先说为什么不是 fail：我按 VERIFIER 契约先独立读完 3717 字原文再开候选，随后做的是「找编造」与「找遗漏」两件事。找编造的结果是干净的——198 条引文全部满足 docs[0].text[start:end]==quote，候选自述的 wholeTextOccurrences/inRangeOccurrences/firstGlobalOffset/startIsFirstGlobalOccurrence 我逐条复算零偏差；候选散文里的每个专名都能在区间内命中，原著其他人物 0 次出现；章末急报、杨川南案、账簿真假、地书碎片四处的「结束≠成功」纪律都守住了。判 fail 需要能证伪结论的逐字反例，我拿不出来，按纪律就不该判 fail。\n\n再说为什么不是 pass：这次复核的价值全在反向验证那一栏。我认为最值得当事 agent 看的是第一条——「午时，许七安招呼两位大美人用完鳝，估摸着张巡抚也快回来了。」这句话的**字被引了，事没被登记**：它只作为 TN01 的错字样本存在，而它其实是全章最后一个叙事枢纽（预期 → 「结果巡抚没等到」→ 章末军情）。这恰好坐实了候选自己在 SC06 里写的警告「覆盖率是引文覆盖率，不是理解度」——96.46% 这个数字把一句只用于校勘的引文也算成了覆盖。我把它列在 reverseChecks 首位，不是因为它让哪条结论变错，而是因为**这正是「机制有产出但不产生信息」的微观形态**，而且只有反向扫段才看得见。\n\n另外两处需要说明我的自我约束：\n(a) CE14 的 2900/2718 是算术，我把它写成 counterExample 而不是 reverseCheck，因为它是候选的可证伪自述，不是原文遗漏；但它 minor，不改变 CE14 这条边的成立。\n(b) 我一度以为 RE01 与 S01 自相矛盾（同一因果一处拒绝一处采用），复查后**判定我的这个质疑不成立**，理由写在 misKillCheck 里：RE01 拒的是需要行动落地的因果边，S01 记的是评价被改变的状态，候选在 RE01 的 why 里正是以「没有任何后续」立论。我把它如实留在存疑记录里，没有拿它当 fail 依据——按契约，我应该能判自己错。\n\n不确定处：(1) 「你俩什么时候走」是否够格算一条 unknown，取决于口径宽严；我倾向算，因为它确实在区间内被提出且无人回答，但若按「只登记影响行动的未决项」的口径，它可以只留在 CE14/TH01 里。(2) 绯袍一句我标 minor 而非 moderate，是因为候选把宋布政使登记为 T03/T04/S07 的行动者已经抓住了他的功能，外观信息属于可选补充。\n\n未做：我没有做跨单元对读（区间外原文一律未读），因此对 F02（「将来凉的越彻底」是否在后文回收）、U10（都指挥使司查账结果）等跨区间问题不给任何判断；也没有运行 GPU/浏览器测试或改动任何受保护路径——本轮只写了 loop/state/out/verify_dafeng_L3_0219.verdict.json 一个文件。",
+      "counterExamples": [
+        {
+          "claim": "CE14 的 mechanism 写「两端相距约 2900 码点」（指区间开头姜律中随张巡抚离开，与中段许七安那句「不是要趁姜金锣不在」之间）。",
+          "quote": "“来的挺早啊。”张巡抚笑呵呵的说了一句，带着姜律中离开。",
+          "quote2": "“你俩什么时候走？不是要趁姜金锣不在，劫走杨川南吧。”",
+          "why": "两条引文的 span 是 [817447,817475) 与 [820165,820192)。start 到 start = 820165-817447 = **2718**；end 到 start = 820165-817475 = **2690**。无论取哪种口径都不到 2718~2690 的范围，与「约 2900」相差约 7%（偏大约 180~210 码点）。这是候选自己散文里的可算术核验的数字，不是原文事实错误；它不影响 CE14 这条边的方向与成立（方向由「姜金锣不在」闭合，判断正确），但数字本身应改为「约 2700 码点」。这是本轮唯一一条可证伪的候选自述错误。",
+          "severity": "minor",
+          "reproduce": "python3 -c \"import json;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];print(820165-817447, 820165-817475)\"  # -> 2718 2690"
+        }
+      ],
+      "reverseChecks": [
+        {
+          "found": "「午时与两位美人共膳、并预期张巡抚将归」这一事件在候选里**没有登记**：它的整句只被 textualNotes/TN01 当作「用完鳝/用完膳」的错字证据引用，从未进入任何 task / state / causeEdge / 时间线。",
+          "quote": "午时，许七安招呼两位大美人用完鳝，估摸着张巡抚也快回来了。",
+          "absOffset": 820873,
+          "why": "这是区间倒数第二个事件的**枢纽**：他形成「张巡抚快回来了」的预期，紧接着下一句就用「结果巡抚没等到」把预期打翻，直接推到章末军情。候选的 S06（驿站局势）before/after 从「众官员陪同去都指挥使司、许七安留守」直接跳到「士卒急报」，缺了这条预期与落空；CE13 用的是「张巡抚不在驿站」这个静态前提，也不含「等待—落空」这层。更要紧的是：候选的 coverage 把这句话算作**已覆盖**（因为 TN01 引了它），所以 SC06 里「覆盖率不是理解度」的自我警告，在这里有一个具体实例——**引到了字，却没有登记这件事**。这是我用「还漏了什么」重扫时发现的最实质一条。",
+          "severity": "moderate"
+        },
+        {
+          "found": "「许七安问两位美人何时离开」是区间内一个**原文没有回答的未决问题**，但候选的 18 条 unknowns 里没有它。",
+          "quote": "“你俩什么时候走？不是要趁姜金锣不在，劫走杨川南吧。”",
+          "absOffset": 820165,
+          "why": "这句话被候选引了两次（CE14 与 TH01），但只被用来支撑「姜金锣不在」这条使能关系与「信息位差」这条可选视角；问句本身「你俩什么时候走」在区间内始终无人回答（李妙真与苏苏答的是「主人最是信守诺言」，答的是另一件事），随后章末军情截断全场。候选的 U08 问的是「李妙真用什么手段藏纸人」，不是「她们何时离开」。按未决问题应显式登记的口径，这是漏登的一条 unknown。",
+          "severity": "moderate"
+        },
+        {
+          "found": "宋布政使施压时的**身体动作递进**「顿了顿，他俯身，让自己更靠近张巡抚一些」在候选里没有任何定位引文；T03 的 obstacle 只登记了他的台词与「睁大眼睛」的凝视。",
+          "quote": "顿了顿，他俯身，让自己更靠近张巡抚一些，继续说道：",
+          "absOffset": 818249,
+          "why": "原文把这次施压写成两步：先用「慎重，慎重啊」定调，再**缩短物理距离**后抛出「莫非有确凿证据」。候选的 T03 obstacle 引了台词与凝视，却把中间这个升级动作整段空掉（该句 0 次引用）。它不改变 T03 的结论，但「以沉默与脸色变化附和」这一栏描述的群体压力，与宋布政使个人的逼近动作是两个层次，后者未被登记。",
+          "severity": "minor"
+        },
+        {
+          "found": "宋布政使的**身份外观**「穿着绯袍」与他的**发言方式**「开门见山，直入主题」在候选里 0 次引用。",
+          "quote": "一番寒暄之后，穿着绯袍的宋布政使，开门见山，直入主题：",
+          "absOffset": 818017,
+          "why": "候选把宋布政使登记为 T04 的 actor、T03 与 S07 的施压者，但从未引用这句对他身份与发问姿态的定性。他是本区间官场戏的**发起者**（抓人一事由他当众提出），绯袍在原著是品级服色，属于「原文明确给出、且与人物行动力相关」的外观信息。不登记不构成错误，但属于反向验证应报告的未覆盖事实。",
+          "severity": "minor"
+        },
+        {
+          "found": "官员锁定许七安所依据的三条线索中，**「留守驿站的打更人不多，偏就有那位铜锣，职务不高，却可以坐在巡抚大人身边。」整句没有任何定位引文**。",
+          "quote": "留守驿站的打更人不多，偏就有那位铜锣，职务不高，却可以坐在巡抚大人身边。",
+          "absOffset": 819328,
+          "why": "候选 T04 的 resultNote 明确点名了这三条线索（「留守驿站 + 职务不高却能坐在巡抚身边 + 佩刀不同」），并诚实注明「NF04 引了其中一条」——即它知道另两条没有引文。事实陈述准确、且已自我披露，所以这不是编造，也不构成误杀；仅作为「事实存在但未落到 locator」的证据卫生项记录。",
+          "severity": "note"
+        }
+      ]
+    },
+    {
+      "reviewer": "w-verify-1",
+      "at": "2026-10-13T16:19:00Z",
+      "verdict": "partial",
+      "notes": "总判 **partial**（结论可用；需补两处登记、改一处数字与一处归因）。\n\n**为什么不是 fail**：我按契约先读完 3717 字原文再开候选，随后做「找编造」与「找遗漏」两件事。找编造的结论是**干净**的：198 条引文全部满足 docs[0].text[start:end]==quote，候选自述的 wholeTextOccurrences / inRangeOccurrences / firstGlobalOffset / startIsFirstGlobalOccurrence 逐条复算**零偏差**；七项 coverage 统计逐位相符；跨栏同句 0 处、区间重叠 0 处；8 个 null 栏全带 Note；50 个区间外人物名 0 次出现；结构化条目无一条缺引文。唯一 find!=start 的是分隔线，候选**自己已披露**（SC07）并标了 unique-within-range-only——我核对属实。\n\n**为什么不是 pass**：①CE14 的「约 2900 码点」可算伪（实测 2718/2690/2745）；②CE14 依赖「姜律中=姜金锣」这一**区间内无据**的共指，却未登记为 unknown；③「你俩什么时候走」这个未回答问题漏登；④「午时预期→落空」这个叙事枢纽只以错字证据的形式出现，未进任何结构分区。①②是可定点修正的错误，③④是漏登，都不推翻既有结论，故记 partial。\n\n**三条 moderate 里我最看重第 3 条（姜律中共指）**。它正是本项目反复出现的失败形态的一个新实例：CE14 的 basis 老实写了 derived、note 也写了「是我跨段接的」，**看起来已经诚实降级了**；但「derived」这个标签掩盖了链条里**具体哪一环是外部补入的**——读者会以为两端都是区间内事实、只是连接是推的，实际上**中间项本身就是区间外知识**。标注到位 ≠ 缺口可见。第 1 条（午时句）同形：字被引了、事没登记，且正因为被引了，覆盖率统计反而把它算成「已覆盖」，于是 96.46% 这个数字替它做了掩护。这两条都只有反向扫段才看得见。\n\n**关于本任务的环境事实（必须如实记下）**：我接手时本文件**已存在**且署名 w-verify-1（即本 agent 的前一次运行，2026-10-13T15:36Z），其内容已作为 review 落账进 read:dafeng:L3:0219。我做了字节级备份（哈希与原件一致）后重写。我扫描全部 1133 条 verify 任务：345 条有自身提交记录、**2 条「review 已落账但没有自身提交记录」**（本任务与 verify:sanguo:L0:0082）——`done_ids()` 只认 output_name(task)（=verify_dafeng_L3_0219.json）且该文件不存在，所以**这条任务会被无限重派**，每派一次就重做一遍复核。我这轮已按角色契约补上该任务的提交记录以闭合它。根因未查明（不臆测是回收时序还是代提交未触发），记在 remaining 里，不作为对候选的指控。\n\n**我自己的错，如实记下**：第一版反向扫描报「4 条 foreshadows 无引文」，实际是我的检查器只看顶层 quote 键、漏了 setup.quote/payoff.quote 的嵌套结构——**我的仪器错，不是候选错**，已修正且未计入发现。这与候选 SC07 记下的教训同形：**校验口径不同，缺陷就会在两道关之间隐身**（也可能凭空造出一个）。按契约，我能判自己错。\n\n**存疑（拿不出原文引证，故不据此判 fail，仅记录）**：RE01 与 S01.after 的口径并存问题；T04.actor 括注若按「发问者泛指推动方」解读则不算错；候选 W-rule-1 把「官员施压」算作制度执行面，属升格判断，我倾向接受但不排除过读。\n\n**未做**：未读区间外原文（不跨单元对读，故不评价 CE14 的共指在书后是否被证实）；未核验 graphCache（按提示词不作原文证据）；未运行 GPU/浏览器测试；未评价任何审美或内容质量；未改动任何受保护路径。",
+      "counterExamples": [
+        {
+          "claim": "CE14 的 mechanism 写「两端相距约 2900 码点」（指区间开头的姜律中离场句与中段许七安那句「不是要趁姜金锣不在」之间）。",
+          "quote": "“来的挺早啊。”张巡抚笑呵呵的说了一句，带着姜律中离开。",
+          "quote2": "“你俩什么时候走？不是要趁姜金锣不在，劫走杨川南吧。”",
+          "why": "两条引文的 span 是 [817447,817475) 与 [820165,820192)。start→start = **2718**；end→start = **2690**；start→end = **2745**。三种口径没有一种接近 2900，最小偏差约 6.7%（偏大 182 码点）。这是候选**自己散文里的算术**，可独立复算，不涉及原文事实争议。它不影响 CE14 的方向与成立（方向由「姜金锣不在」闭合，候选也已老实标 basis=derived 并写「是我跨段接的」），但数字应改为「约 2700 码点」。这是本轮唯一一条可*算术*证伪的候选自述错误。",
+          "severity": "minor",
+          "reproduce": "python3 -c \"import json;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];print(820165-817447, 820165-817475, 820192-817447)\"  # -> 2718 2690 2745"
+        },
+        {
+          "claim": "T04.actor 写「白帝城在场官员（以宋布政使为发问者）」，把 T04 目标栏那句发问归给宋布政使。",
+          "quote": "一位官员咽了咽口水，问道：“巡抚大人手底下，人才济济啊。不知是哪位大人，立下了这汗马功劳？”",
+          "quote2": "宋布政使目光微闪，笑道：“本官记得，那位精通农耕之事的铜锣，当日并未陪同巡抚视察。”",
+          "why": "原文里目标栏那句「人才济济／哪位大人」的发问者是**「一位官员」（无名）**（全局偏移 819068）；宋布政使是在**三段之后**才以「目光微闪，笑道」登场（全局偏移 819171），说出的是另一句（点破铜锣身份）。两句之间还隔着叙述句「说话的同时，他扫了一眼周围的打更人。」与「其他官员不动声色的审视着打更人，都在猜测。」。候选的 actor 括注「以宋布政使为发问者」把两个说话人并成了一人：**发起打听的是无名官员，点破的才是宋布政使**。候选的 action 栏归因是对的（点破确记在宋布政使名下），故这是 actor 标签的**过度指定**，不改变本条成立。我据此**不判 fail**；若复核口径认为「发问者」泛指该场打听的推动方，本条可降为存疑。",
+          "severity": "minor",
+          "reproduce": "python3 -c \"import json;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];print(t.find('一位官员咽了咽口水，问道'), t.find('宋布政使目光微闪，笑道'), t.find('一位官员咽了咽口水，问道')-t.find('宋布政使目光微闪，笑道'))\"  # -> 819068 819171 -103（发问者与点破者相隔 103 码点、分属两段）"
+        }
+      ],
+      "reverseChecks": [
+        {
+          "found": "「午时与两位美人共膳 + 预期张巡抚将归」这一事件**没有进入任何结构性分区**：全候选里它只作为 textualNotes/TN01 的「用完鳝/用完膳」错字证据被引用，tasks / causeEdges / states / knowledgeGaps / foreshadows / worldSettings 一律没有它。",
+          "quote": "午时，许七安招呼两位大美人用完鳝，估摸着张巡抚也快回来了。",
+          "absOffset": 820873,
+          "coveredByStructuralSection": false,
+          "why": "这是区间倒数第二个事件的**转折枢纽**：他先形成「张巡抚快回来了」的预期，紧接着下一句「结果巡抚没等到」把预期打翻，直接推出章末军情。候选 S06（驿站局势）before→after 从「众官员陪同去都指挥使司、许七安留守」直接跳到「士卒急报」，**缺了「等待—落空」这一层**；CE13 用的是「巡抚不在驿站」这个静态前提，也不含预期落空。更值得记的是：候选 coverage 把这句话算作**已覆盖**（因为 TN01 引了它），所以候选 SC06 自己写的「覆盖率不是理解度」在这里有一个**具体实例**——**引到了字，却没有登记这件事**。我用「只在排除性分区出现的引文」口径扫出 7 条，这是最实质的一条。",
+          "severity": "moderate"
+        },
+        {
+          "found": "「许七安问两位美人何时离开」是区间内一个**原文没有回答的未决问题**，但候选的 18 条 unknowns（U01–U18）里没有它。",
+          "quote": "“你俩什么时候走？不是要趁姜金锣不在，劫走杨川南吧。”",
+          "absOffset": 820165,
+          "why": "该句被候选引用两次（CE14 与 TH01），但两次都只用来支撑「姜金锣不在」这条使能关系与「信息位差」这条可选视角；问句本身「你俩什么时候走」在本区间**始终无人回答**——李妙真与苏苏答的是「主人是天宗圣女，最是信守诺言」，答的是另一件事，随后章末军情截断全场。我实测候选 unknowns 全文里「什么时候走」「离开」均为 0 次命中。按「未决问题应显式登记」的口径，这是漏登的一条 unknown（应补为 U19）。",
+          "severity": "moderate",
+          "reproduce": "python3 -c \"import json;c=json.load(open('loop/state/out/read_dafeng_L3_0219.candidate.json'));u=' '.join(c['unknowns']);print('什么时候走' in u, '离开' in u)\"  # -> False False"
+        },
+        {
+          "found": "CE14 的成立依赖一个**原文从未写明的前提**：姜律中就是「姜金锣」。该共指关系没有被登记为 unknown。",
+          "quote": "“来的挺早啊。”张巡抚笑呵呵的说了一句，带着姜律中离开。",
+          "quote2": "“你俩什么时候走？不是要趁姜金锣不在，劫走杨川南吧。”",
+          "absOffset": 817469,
+          "why": "CE14 的 trigger 写「姜律中随张巡抚离场，驿站里没有金锣坐镇」——这句话要成立，必须预设**姜律中=金锣**。实测本区间内「姜律中」出现 **1** 次、「姜金锣」出现 **1** 次，**没有任何一句同时含这两个称呼**，也没有一句说明二人是同一人（两名相距 2709 码点、分属两个场景）。也就是说：这条链的**中间项是读者用区间外知识或人名联想补上的**。候选已把 CE14 标 basis=derived 并注明「是我跨段接的」，**这一步是诚实的**；但「derived」这个标签掩盖了链条里**具体哪一环是外部补入的**——读者会以为两端都是区间内事实、只是连接是推的，而实际上中间项本身就是区间外知识。按 unknowns 纪律（与 U08「李妙真用什么手段」同类）应显式登记；我实测候选 unknowns 里「姜律中」「姜金锣」「同一人」均 0 次命中。**这是前次复核没有提出的一条。**",
+          "severity": "moderate",
+          "reproduce": "python3 -c \"import json;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];s=t[817425:821142];print(s.count('姜律中'), s.count('姜金锣'), any(('姜律中' in x and '姜金锣' in x) for x in s.split(chr(10))))\"  # -> 1 1 False"
+        },
+        {
+          "found": "宋布政使施压时的**身体动作递进**整句 0 次引用：T03 的 obstacle 登记了他的台词与「睁大眼睛」的凝视，却把中间这个**缩短物理距离**的升级动作空掉。",
+          "quote": "顿了顿，他俯身，让自己更靠近张巡抚一些，继续说道：",
+          "absOffset": 818249,
+          "coveredByStructuralSection": false,
+          "why": "原文把这次施压写成两步：先用「慎重，慎重啊」定调，再**俯身靠近**之后抛出「莫非有确凿证据」。我实测该句在任何引文区间内均不命中（所在句字符覆盖率仅 0.40，只有后半句台词被引）。它不推翻 T03 的结论，但 T03.obstacleNote 把群体压力与宋布政使个人行为并成一栏，缺了这一层「步步逼近」的动作证据。",
+          "severity": "minor"
+        },
+        {
+          "found": "宋布政使的**身份外观**与**发言方式**整句 0 次引用：候选把他登记为 T04 的 actor、T03 与 S07 的施压者，却从未引用这句对他身份与发问姿态的定性。",
+          "quote": "一番寒暄之后，穿着绯袍的宋布政使，开门见山，直入主题：",
+          "absOffset": 818017,
+          "coveredByStructuralSection": false,
+          "why": "我实测候选全文里「绯袍」出现 **0** 次、「俯身」**0** 次。他是本区间官场戏的**发起者**（抓人一事由他当众提出），而「绯袍」在原著是品级服色，属于「原文明确给出、且与人物行动力相关」的外观信息。不登记不构成错误（候选也从未声称登记了它），但属于反向验证应报告的未覆盖事实。",
+          "severity": "minor"
+        },
+        {
+          "found": "官员锁定许七安所依据的三条线索中，**「留守驿站的打更人不多，偏就有那位铜锣，职务不高，却可以坐在巡抚大人身边。」整句没有任何定位引文**。",
+          "quote": "留守驿站的打更人不多，偏就有那位铜锣，职务不高，却可以坐在巡抚大人身边。",
+          "absOffset": 819328,
+          "coveredByStructuralSection": false,
+          "why": "候选 T04.resultNote 明确点名了这三条线索（留守驿站 + 职务不高却能坐在巡抚身边 + 佩刀不同）并诚实注明「NF04 引了其中一条」——即它**知道**另两条没有引文。事实陈述准确且已自我披露，所以这**不是编造**、也不构成误杀，仅作为「事实存在但未落到 locator」的证据卫生项记录（我实测该句字符覆盖率 0.00）。",
+          "severity": "note"
+        },
+        {
+          "found": "候选把「招呼语／拟声词／排版分隔符」判为不需引证，我用句级扫描独立复核后认为该判断成立，未发现被此判断掩盖的实义内容。",
+          "quote": "“许公子来了啊。”",
+          "absOffset": 817524,
+          "why": "候选 coverage.zeroCoverageParagraphs 列了 4 段零覆盖（817528「“许公子来了啊。”」、817908「....」、819433「“咳咳！”」、819537「....」）并逐条说明理由。我用自写句级扫描独立复核：**除上面 6 条实义句之外**，全区间再没有任何「既未被引文覆盖、也未被散文讨论」的句子（gap_scan.py 合计 **0**）。把招呼语/拟声词/分隔符排除属于**合法排除**，不是误杀。这一条是对候选 coverage 自述的**独立确认**。",
+          "severity": "note"
+        }
+      ]
+    }
+  ]
+}

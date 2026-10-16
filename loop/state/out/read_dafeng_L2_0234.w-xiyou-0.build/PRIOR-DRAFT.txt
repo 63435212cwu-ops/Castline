@@ -1,0 +1,45 @@
+同路径上的前一轮草稿（来源：同一 worker 名 w-xiyou-0 的一段未走完租约）
+=====================================================================
+本任务 read:dafeng:L2:0234 的租约在 2026-10-15T03:37:21Z 由 w-xiyou-0 领取（worker pid 43457，
+dsh 子进程 69157 即本轮）。工作过程中发现 loop/state/out/read_dafeng_L2_0234.w-xiyou-0.build/
+下**已经存在**同一任务的构建目录：
+
+  content_a.py   mtime 2026-10-15 11:27:52 local   sha256 df24044976f0aaadab9a3e5fd7907aa2f40e72b636d7cddc4a8e234819d1faa5
+  content_b.py   mtime 2026-10-15 11:31:54 local   sha256 3a10ef96462a05daa598abb008775bbf5d11a3eec0b9d172530724cf2fdfec3d
+  build_candidate.py   缺失（上一段租约没走到这一步）
+  verify_independent.py 缺失
+  提交记录               不存在（loop/state/out/ 下没有任何 0234 的 .json 记录）
+
+即：上一段租约只写出了两层内容（内容 A/B），既没有构建器、也没有候选、也没有提交。
+
+本轮的处置（**没有**直接搬运，逐条重读原文核对后才采用）
+--------------------------------------------------------
+1. 通读 docs[0].text[923035,929759) 的 187 个非空段（切片以本单元标题开头，codepoints=6724）。
+2. 逐条把内容层的 **264** 条 (段锚, 逐字子串) 拿去 docs[0].text 里核：
+   每条都要求在**指定段锚内恰好出现 1 次**。首次核对有 144 条失败，
+   原因不是内容错，而是段锚带小写后缀（P014a / P126c …）—— 剥掉后缀后 264/264 全中。
+   这直接改变了构建器的定位逻辑（见 build_candidate.py 的 SUFFIX_RE 与 locate()）。
+3. 修正两类**真实缺陷**（都留在 prior/ 备份里可 diff 复算）：
+   · 121 处非逐字『』/「」跨度 → 改标〔〕。
+     这与 L2:0230 被独立复核判 FAIL 的 C12（331 处非逐字跨度）是同一种形态；
+     本轮由 fix_brackets.py 逐行纠正，另有 2 处跨行的由手工改（行级扫描看不到跨行跨度）。
+   · 2 处 worldSettings 之间的引文复用（W5↔W11、W6↔W12 原本共用整句）→
+     改用互不重叠的半句（P126 拆成「从假山后出来，裱裱把刀还给侍卫，」与
+     「带着许七安进了大厅，那名当差的跟在身后，用奇怪的眼神打量着二公主。」；
+     P174 拆成「门房老张取了一钱银子，走出府门」与「把银子递给魁梧的中年和尚，道：」）。
+4. `paraLabel` 字段的口径修正：候选里只写**真实段号**（P014），
+   内容层用来区分「同一段引不同半句」的后缀另存 `contentAnchor`。
+   修正前独立重算 C05 判 FAIL（145 处后缀不是可核验段号）。
+
+独立重算结论
+------------
+  python3 -B -s loop/state/out/read_dafeng_L2_0234.w-xiyou-0.build/verify_independent.py
+  ⇒ 15 项判据全部 PASS（含 C14 变异测试：改坏引文/挪偏移后 C04 如期报红）。
+
+复算命令
+--------
+  shasum -a 256 loop/state/out/read_dafeng_L2_0234.candidate.json
+  diff loop/state/out/read_dafeng_L2_0234.w-xiyou-0.build/prior/content_a.py.before_bracketfix \
+       loop/state/out/read_dafeng_L2_0234.w-xiyou-0.build/content_a.py
+  diff loop/state/out/read_dafeng_L2_0234.w-xiyou-0.build/prior/content_b.py.before_bracketfix \
+       loop/state/out/read_dafeng_L2_0234.w-xiyou-0.build/content_b.py

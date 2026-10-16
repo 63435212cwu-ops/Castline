@@ -1,0 +1,93 @@
+{
+ "task": "read:dafeng:L0:0092",
+ "agent": "w-dafeng-1",
+ "role": "READER",
+ "status": "done",
+ "summary": "精读《大奉打更人》第九十三章「三号不愧是读书人」（原文区间 codepoint [294547,297902)，3355 字）：产出 3 条任务五元组（每栏独立引文，五栏无一句共用；T1/T2/T3 的 cost 与 T1 的 obstacle 为 null 并各带 <栏位>Note 说明为什么没有）、6 条因果边（各带方向与触发机制，含 1 条反事实负结果边 CE5）、7 条人物状态（含 2 条知识差写清谁知/不知）、6 条伏笔（4 条有回收、回收点全在区间外并逐条标 outOfRange 与距离，2 条显式 unresolved）、6 条 worldSettings（rule 2 / place 3 / item 1；place 严格区分 arrived 与 mentioned，皇城记 mentioned 因本区间只有陈述没有到达；item 四态分开写）、2 条主题解读（各带 perspective/support/counter）、11 条 unknowns、4 条 selfCritique、6 条刻意不写的结论。引文节点 79 个（区间内 74 / 区间外回收端 5），全部逐字回切且偏移自洽；semanticReview 保持 not-performed（定位正确≠语义已核验）。本轮是重做：该任务此前有多次未产出/超时的记录（loop/state/out/REJECTED__read_dafeng_L0_0092.json）。",
+ "reworkOf": "loop/state/out/REJECTED__read_dafeng_L0_0092.json",
+ "reworkReason": "该任务此前多次未产出（机器记录为 rejected：agent 未产出 writes 路径文件且未提交），本轮从头重读原文并补齐全部分区。",
+ "evidence": [
+  {
+   "path": "loop/state/out/read_dafeng_L0_0092.candidate.json",
+   "sha256": "704819aafcee3a2b14dab619e92b01c6f0f3128355196a440f6eb001985a6630",
+   "kind": "candidate",
+   "note": "本轮唯一写入物，即任务 writes 指定路径"
+  }
+ ],
+ "assertions": [
+  {
+   "text": "docs.json sha256 == 任务 sourceHash：shasum -a 256 data/cache/1063b17ca65ec1b76f30e460.docs.json",
+   "result": "pass",
+   "detail": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839（与任务 JSON sourceHash 逐字相同）"
+  },
+  {
+   "text": "切片边界自检：docs[0].text[294547:294561] == '第九十三章 三号不愧是读书人'；docs[0].text[297902:297911] == '第九十四章 凶杀案'（= 区间终点）",
+   "result": "pass",
+   "detail": "切片长 3355 codepoint；segment sha256 = 72a35f44c1b660b3ee5263fc1055595c3ce247ce64746483ec00bb737f2e3ccf"
+  },
+  {
+   "text": "全部 79 个引文节点逐字回切：text[start:end]==quote，sourceHash 一致；标为 inUnit 的 74 条全部落在 [294547,297902) 内",
+   "result": "pass",
+   "detail": "独立审计脚本 /tmp/clb/audit.py（不 import 构建脚本，重算同一量）报 PROBLEMS: 0"
+  },
+  {
+   "text": "区间内引文 74 条全部满足 text.find(quote)==start（首次出现即本处），不会因别处有同句而落到错位置",
+   "result": "pass",
+   "detail": "复核脚本重算：find != start 的条数为 0"
+  },
+  {
+   "text": "任务五栏不共用引文：3 条任务 × 5 栏，同一 quote 在任何一栏内只出现一次",
+   "result": "pass",
+   "detail": "构建期断言命中即抛错终止（本次未触发）；独立审计复算 0 命中"
+  },
+  {
+   "text": "每个 null 栏位都带同名的 <栏位>Note 写明为什么没有依据（T1 obstacle/cost、T2 cost、T3 cost 共 4 处）",
+   "result": "pass",
+   "detail": "T1.obstacleNote 说明刀是监正主动掷来、魏青衣催谢，无阻挠；三条 costNote 逐条排除「待验证/风险/成本考虑」之类非代价项"
+  },
+  {
+   "text": "worldSettings 枚举合法：kind ∈ {rule,place,item}；place.placeState ∈ {arrived,mentioned}；item.itemStates ⊆ {hold,transfer,use,lose}；rule.institution ∈ {declared,executed,misunderstood}",
+   "result": "pass",
+   "detail": "6 条逐条核对；W4（长公主府/皇城）本区间只有褚采薇的陈述、无到达动作，按要求记 mentioned；W1 itemStates=[hold,transfer,use] 四态分写，lose 未发生故不写"
+  },
+  {
+   "text": "foreshadows 状态合法：有铺设+回收的记 resolved，未回收的显式记 unresolved；被屏蔽/单次出现的项移入 notForeshadows / unknowns",
+   "result": "pass",
+   "detail": "F1–F4 resolved（回收点全在区间外，逐条带 outOfRange 与 distanceFromUnit）；F5、F6 unresolved 且 payoff.quote 为 null"
+  },
+  {
+   "text": "semanticReview.performed == false：本文件只做引文定位与分层，不声称语义已核验",
+   "result": "pass",
+   "detail": "candidate.semanticReview 明确写「引文定位正确 ≠ 语义已核验」"
+  },
+  {
+   "text": "受保护路径未在本轮被改动：本轮只在 loop/state/out/ 下新建 2 个文件（candidate + submit），未写 js/ css/ index.html serve.py narrative.py scripts/ tests/ docs/ data/",
+   "result": "pass",
+   "detail": "复核命令：git status --porcelain -- js css index.html serve.py narrative.py scripts tests docs data → 输出的改动项 mtime 全部早于本轮开始时刻（本轮约 23:00 起；实测 css/plot.css 03:25、index.html 18:33、docs/QUALITY.md 22:01、data/cache/index.json 17:23），是其他并行 agent 的既有未提交改动，不是我造成的；本轮新建的两个文件在 git status 中为 ?? loop/state/out/read_dafeng_L0_0092.{candidate,submit}.json（未跟踪新文件）。"
+  }
+ ],
+ "changes": [
+  {
+   "path": "loop/state/out/read_dafeng_L0_0092.candidate.json",
+   "kind": "append-only"
+  }
+ ],
+ "sourceHashes": {
+  "data/cache/1063b17ca65ec1b76f30e460.docs.json": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+ },
+ "remaining": [
+  "未做语义核验：candidate.semanticReview.performed=false，只完成引文定位与 explicit/inferred/derived/unverified 分层。",
+  "foreshadows F1–F4 的回收点全部在本区间之外，只核了关键词命中点，未逐章通读中间过程。",
+  "「魏青衣＝魏渊」「暗金色长刀＝黑金刀」两处等同只有区间外依据，已写进 unknowns。",
+  "「前天他把六号卖给魏渊了」被叙述框为他的回忆、「卖」是他自嘲措辞，是否该这样定性已写进 unknowns。",
+  "桂月楼在全书中的业态不一致（偏移 24100 酒楼 vs 63798 三等青楼），我没有裁决哪一处为准。",
+  "原文有三处疑似讹字/成分重复（「等落到监正手里是」、「他拉着褚采薇的下手」、「我在东城的养生堂我把…」），我只取可读事实、未修补原文，均列入 unknowns。"
+ ],
+ "rollback": {
+  "kind": "append-only",
+  "strategy": "delete-added-files",
+  "files": [
+   "loop/state/out/read_dafeng_L0_0092.candidate.json"
+  ]
+ }
+}

@@ -1,0 +1,101 @@
+{
+  "task": "read:dafeng:L3:0015",
+  "agent": "w-xiyou-0",
+  "status": "done",
+  "summary": "精读《大奉打更人》第十六章 许七安的日记 docs[0].text[46353,48870)（2517 字，本单元为全第一人称日记，无第三人称叙述）。产出 15 条 task 五元组、14 条带触发机制的 causeEdge、7 条状态前后值、4 条具铺设+回收判定的伏笔（全部 unresolved，并限定 statusScope 在本单元内）、3 条明确排除的「不算伏笔」、14 条 unknowns、4 条 selfCritique。156 条引用全部由脚本在切片上 str.find 唯一定位后取 start=46353+命中下标，并回切校验 docs[0].text[start:end]==quote，0 处不符。",
+  "evidence": [
+    {
+      "path": "loop/state/out/read_dafeng_L3_0015.candidate.json",
+      "sha256": "b92ca9093ea72a631104f3f6ece69c529adddd5b5b53a6771b6edb58a835a9ce",
+      "kind": "candidate"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "原文来源哈希：sha256(data/cache/9b676d7031b1bcd3b8377a18.docs.json) == fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839，与任务 sourceHash 一致。",
+      "result": "pass",
+      "command": "python3 -c \"import hashlib;print(hashlib.sha256(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json','rb').read()).hexdigest())\""
+    },
+    {
+      "text": "偏移口径自检：docs[0].text[46353:46364] == '第十六章 许七安的日记'，即切片以本单元标题开头，偏移是相对 docs[0].text 全文的 codepoint 偏移（非相对切片）。",
+      "result": "pass",
+      "command": "python3 -c \"import json;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];print(repr(t[46353:46364]))\""
+    },
+    {
+      "text": "全部 156 条引文回切校验：递归取出候选 JSON 中所有含 quote/start/end 的对象，逐条断言 docs[0].text[start:end]==quote，mismatches=0；且全部 start/end 落在 [46353,48870) 内（生成脚本内 assert）。",
+      "result": "pass",
+      "command": "python3 -c \"import json;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];c=json.load(open('loop/state/out/read_dafeng_L3_0015.candidate.json'));R=[];w=lambda o:[R.append((o['quote'],o['start'],o['end'])) if isinstance(o,dict) and 'quote' in o and 'start' in o and 'end' in o else None,[w(v) for v in (o.values() if isinstance(o,dict) else o)] if isinstance(o,(dict,list)) else None];w(c);print('refs=%d mismatches=%d'%(len(R),len([r for r in R if t[r[1]:r[2]]!=r[0]])))\"",
+      "observed": "refs=156 mismatches=0"
+    },
+    {
+      "text": "引文唯一性：生成脚本对每条 quote 断言 SEG.count(quote)==1（切片内唯一命中）后才取偏移，命中不唯一或找不到直接 SystemExit；因此不存在「引文在别处也能命中、偏移却指向我想要的语义」这种错配。",
+      "result": "pass",
+      "command": "python3 /tmp/gen_cand_0015.py  # 输出 OK quotes=156"
+    },
+    {
+      "text": "「捡钱」计数的可复现口径：切片内 '一钱银子' 命中 6 次、'捡到' 命中 6 次，但其中 1 次是否定句（10月27日 '今天没有捡到银子'），故正面捡到为 5 次 + 11月5日 '又见到' 1 次。已在 F1.setup.caution 与 F1.counterCounter 写明，避免把 6 次说成 6 次正面捡钱。",
+      "result": "pass",
+      "command": "python3 -c \"import json;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];s=t[46353:48870];print('一钱银子',s.count('一钱银子'),'捡到',s.count('捡到'),'没有捡到',s.count('没有捡到'),'见到',s.count('见到'))\"",
+      "observed": "一钱银子 6 捡到 6 没有捡到 1 见到 1"
+    },
+    {
+      "text": "未把人物台词/猜测/转述写成叙述事实：本单元为全第一人称日记，已在 readingStatus.framing 统一声明 basis=explicit 只表示「原文逐字这样写」，不表示「故事世界里被独立证实」；王妃美貌（U7，李典史←县令老爷、二叔均为转述）、采薇是否想要炼金秘术（T11 caution/U6，为反问式猜测）、'小贪便是好官'（C11 caution）均加了 caution 或降级。",
+      "result": "pass"
+    },
+    {
+      "text": "未把「读到本章结束」当成功：T2（辞职未执行）、T5（纸张计划弃因未写）、F4（五条变现路线本单元内全部无下文）均写 status=unresolved/result 未成功，并在 F4.statusScope 限定为 within unit [46353,48870)，明确不把章节结束读成计划结局。",
+      "result": "pass"
+    },
+    {
+      "text": "未用未知填默认值：tasks 中缺项一律写 null 并附 xxxNote（如 T1.cost=null、T3.action=null、T5.result=null、T10.objective=null）；金额缺口（U9 存款余额/物价）写 unknown 而非补数字。",
+      "result": "pass"
+    },
+    {
+      "text": "未声明语义复核完成：readingStatus.semanticReview == 'not_done'，并写明「定位逐字正确 ≠ 语义已核验」，语义交由 read-verify 通道对抗式复核。",
+      "result": "pass",
+      "command": "python3 -c \"import json;print(json.load(open('loop/state/out/read_dafeng_L3_0015.candidate.json'))['readingStatus']['semanticReview'])\"",
+      "observed": "not_done"
+    },
+    {
+      "text": "图谱缓存未当证据：readingStatus.graphCacheUsedAsEvidence == false；data/cache/9b676d7031b1bcd3b8377a18.json 仅用于对照实体写法（采薇=褚采薇、二叔=许平志），其摘要与任务条目均未引用。",
+      "result": "pass"
+    },
+    {
+      "text": "写入范围：本任务只写了 loop/state/out/read_dafeng_L3_0015.candidate.json 一个文件（任务 writes 指定的路径）。共享树里 js/ css/ index.html serve.py narrative.py scripts/ tests/ docs/ data/ 确实有 282 条未提交改动，但那些是并行写入者的既有足迹，不是我造成的：以本 agent 进程（pid 40566）启动时刻为界限，`find <受保护路径> -newermt <我的启动时刻> -type f` 计数为 0，即我启动之后没有任何受保护路径文件被改动。未执行 git checkout -- . / git reset --hard / git stash；未跑 GPU/浏览器测试。",
+      "result": "pass",
+      "command": "ps -p 40566 -o lstart= ; find js css index.html serve.py narrative.py scripts tests docs data -newermt \"$(ps -p 40566 -o lstart= | xargs -I{} date -j -f '%a %b %d %T %Y' '{}' '+%Y-%m-%d %H:%M:%S')\" -type f | wc -l",
+      "observed": "进程启动 Thu Oct 8 03:08:31 2026；受保护路径在我启动后改动数 = 0（git status 里那 282 条为该时刻之前并行写入者的既有改动）"
+    },
+    {
+      "text": "本轮开始前我的租约由 w-xiyou-0（pid 97713）持有；确认 pid 40566 为本 agent 自身 dsh 进程、其父进程即该 worker，故以 w-xiyou-0 提交，避免出现非租约持有者提交导致的歧义。",
+      "result": "pass",
+      "command": "ps -eo pid,ppid,command | grep 'task-read_dafeng_L3_0015'"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/read_dafeng_L3_0015.candidate.json",
+      "kind": "append-only"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/9b676d7031b1bcd3b8377a18.docs.json": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "docs[0].text": "bc8b75ee120009f4bf6a8e235a7ff133b8ac727a8612067496a0440eaf3fc612",
+    "docs[0].text[46353:48870]": "e0c0a1cdeb63e8b08219bf494607daec8a21e5db3b1075b45d807c323534de43"
+  },
+  "remaining": [
+    "semanticReview 未做：本候选只保证 156 条引文逐字定位与偏移正确，不声明语义已核验。日记体特有的「自述 vs 叙述事实」分层需要 read-verify 通道对抗式复核。",
+    "本单元内 4 条伏笔（F1 高频捡钱 / F2 采薇与炼金秘术 / F3 镇北王妃 / F4 知识变现连续失败）在本单元区间内全部 unresolved。我未使用 [48870, ...) 的章外文本（如紧邻下一章他试探「系统爸爸」、'辞旧是许新年的字'）来补结论，因此 F1/F2/F3 的跨章回收状态在本次产出中是未知，不能据此说「全书未回收」。",
+    "unknowns 14 条未解决，其中较关键的：U13『穿越一旬』与『第一个月』自相矛盾、U5 勾栏各次消费谁付钱、U4 二叔是否知道私房钱被捡走、U8『二郎=许新年』在本单元内无明写。",
+    "T9.cost 的存款金额、U9 的物价换算在原文中没有数字，保持 null/unknown；若后续单元给出物价，可回填但不得在本单元凭推测补。",
+    "F1 的「6 次」与 F4 的「五条路线」是我按切片计数/归并得出的 derived 结论，原文没有给计数或编号；若复核口径不同（例如是否把 11月5日『又见到』计入），应以原文重数。",
+    "未做：跨单元一致性核对（如与第十四、十五章关于炼精境/采薇/司天监的既有结论对齐）。本次范围为单单元精读，未读其它单元候选。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/read_dafeng_L3_0015.candidate.json"
+    ]
+  }
+}

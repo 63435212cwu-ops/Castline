@@ -1,0 +1,93 @@
+{
+  "task": "read:xiyou:L0:0016",
+  "agent": "w-sanguo-1",
+  "role": "READER",
+  "status": "done",
+  "summary": "精读《西游记》第十六回「观音院僧谋宝贝 黑风山怪窃袈裟」（全文 codepoint [107424,115108)，7684 字，37 段）：产出 tasks 7 条（五元组；T1/T2/T3/T4/T6/T7 显式写 resultIsSuccess=false 并给出理由，T5 的 true 限定为「本单元内妖精拿到袈裟离场」，仅 3 处缺项写 JSON null 并逐条说明）、causeEdges 25 条（每条带方向+触发机制，其中 C25 显式标 partial=true 并写明缺口）、rejectedEdges 12 条（主动否掉的连边及理由）、states 12 条（前值/后值+事件锚点，含一处 mid）、knowledgeDiffs 7 条（谁知／不知）、foreshadows 7 条（F1/F2/F6/F7 显式回收；F4/F5 标 inferred 并写明可能降级的理由；F3 只有铺设、回收在第十七回，显式 resolved=false + payoff=null）、rejectedForeshadows 7 条、unknowns 12 条、crossUnitEchoes 6 组、selfCritique 4 条。共 326 个单元内引文节点（138 条不同引文）+ 7 条单元外引文；构建脚本对每条引文断言「全文唯一 + 完全落在区间内 + TEXT[start:end] 逐字相等 + factStatus 重算一致」，另写独立审计脚本（不复用构建逻辑、用另一种引号配对算法）从产物与原文重算全部节点，problems=0。本轮真实抓出并修掉了 4 类自己的缺陷（见 assertions）。未声明 semanticReview 完成。",
+  "evidence": [
+    {
+      "path": "loop/state/out/read_xiyou_L0_0016.candidate.json",
+      "sha256": "6e6a851d67410fe8dcb31fa649a413cb709bf9033f7cfca61c08352155979ab8",
+      "kind": "candidate",
+      "note": "任务 writes 指定的唯一产物（本轮唯一写入的共享树文件）。"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "区间与标题自检：docs[0].text[107424:115108] 以 '第十六回　观音院僧谋宝贝　黑风山怪窃袈裟' 开头；TEXT.find('第十六回')==107424==start；TEXT.find('第十七回')==115108==end；len(slice)==7684，与任务 prompt 声明的字数一致。候选 unitHeadCheck 记录了这几条。命令：python3 -c \"import json;T=json.load(open('data/cache/df959d743e53206f56db2f92.docs.json'))[0]['text'];print(T.find('第十六回'),T.find('第十七回'),len(T[107424:115108]))\" → 107424 115108 7684。",
+      "result": "pass"
+    },
+    {
+      "text": "sourceHash 口径：任务声明 c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2；实测 shasum -a 256 data/cache/df959d743e53206f56db2f92.docs.json == 该值（**整文件**哈希）。切片自身哈希另记 segmentSha256=d97003c3c5c580025a61c48716cae44bcd61db5755a05f0b4b11127d721d8862，构建脚本硬断言它不得等于 sourceHash，避免两种口径互相冒充。",
+      "result": "pass"
+    },
+    {
+      "text": "引文逐字校验：构建脚本对每条被引用的 quote 断言 TEXT.count(quote)==1（全文 722176 字内唯一）、完全落在 [107424,115108) 内、TEXT[start:end]==quote、sourceHash 正确，任一不成立即整体构建失败、不产出文件。脚本实跑通过，输出 'OK in-unit=326 distinct=138 cross=7'（exit 0）。命令：python3 -B -s /tmp/rd0016/bin/build.py。",
+      "result": "pass"
+    },
+    {
+      "text": "独立审计（不复用构建脚本逻辑，另写一套引号配对与 factStatus 判定）：/tmp/rd0016/bin/audit_xy16.py 直接从候选 JSON 与 docs.json 重算：A1 事实基线、A2 全部 333 条引文节点（326 单元内 + 7 单元外）的 count/start/end/唯一性/sourceHash/offsetBase、A3 用**另一种算法**（记号序列交替走查，取代构建脚本的顺序配对+reopen）重算 126 对引号区间与全部 factStatus、A5 覆盖率、A6 伏笔 resolved/payoff 一致性、A7 六个跨单元回目的独立回目表核对、A8 称谓正向+负向扫描、A9 全部计数字段、A10 红线。命令：python3 -B -s /tmp/rd0016/bin/audit_xy16.py → 'PROBLEMS=0'（exit 0）。两种引号口径下 factStatus 分布完全一致（narrated 159 / utterance 143 / mixed 24）。",
+      "result": "pass"
+    },
+    {
+      "text": "本轮审计真实抓出并已修掉 4 类我自己的缺陷（均为我自报，不是复核者发现的）：(1) **覆盖率造假风险**：覆盖率原本用整张引文登记表（含未被产物引用的候选池条目）计算，把「我准备过」算成了「我引用了」——改为只用真正出现在产物里的引文重算后，立刻暴露出 3 个此前被掩盖的未锚定散段（老僧出场与寒暄段 [108412,108606)/[108608,108636)/[108638,108669)），已补 S13 等条目把这 3 段用真实引文锚定；修好后未锚定段只剩章节标题行。(2) **字段缺失**：T6/T7 标了 resultIsSuccess=false 却没写理由，两处 resultNote 已补；T2/T3 原本连成功/失败判定都没有，已补 resultIsSuccess=false + 理由，使 7 条任务全部有显式判定。(3) **禁用称谓回流**：审计发现「熊罴怪/金池长老/受人间香火/剃度」以叙述主体形式出现在我的说明文字里；已确认它们在本单元出现 0 次（属第十七回），并把审计的负向检查改为区分「实际使用」与「显式否弃/原文引文/检索词声明」，同时修掉我自己措辞里可被误读的地方。(4) **引文卫生**：我原本用 “” 同时包装原文引文和我自己的标签、转述与节引，导致 36 处「看起来像原文引文、其实 find 不到」的片段。已改为：本文件里 “” 只承担「逐字完整可 find 的原文引文」一个含义，我自己的标签/节引一律用 「」（节引另标（节引））。修完后散文字段内所有 “…” 均可逐字命中，且无歧义引文（全文多次命中的短引文已加长或改标签）。这项检查已固化为审计的 A11，实跑输出「引文卫生: 散文字段内所有 “…” 均可逐字命中且无歧义」。",
+      "result": "pass"
+    },
+    {
+      "text": "称谓出处自检（红线「不许出现原文里没有的人物」）：构建脚本内置正向/负向两道断言——正向要求本文件使用的 28 个称谓（老僧、老和尚、老院主、师祖、师公、老死鬼、院主、黑大王、妖精、黑怪、幸童、头陀、道人、三藏、唐僧、行者、老孙、大圣、天王、广智、广谋、观音禅院、锦襕袈裟、辟火罩、黑风山、黑风洞、南天门、广目天王）在本单元切片中均 >0，任一为 0 即构建失败；负向断言「熊罴/金池/守山大神/受人间香火/剃度/黑熊精」在本单元必须为 0，若不为 0 则说明我的假设被推翻、需重新核对。实跑通过。这正是把上一轮（0014/0008）踩过的坑变成机检：我在 0008 轮曾杜撰「洪江龙王」（全书 0 次）与「陈玄奘」（本单元 0 次）。命令：python3 -B -s /tmp/rd0016/bin/build.py（含 ATTESTED/FORBIDDEN 两段断言）。本单元的窃贼因此一律称「妖精/黑大王/黑怪/一山兽怪」（原文用词），不写「熊罴怪」；老僧一律不写「金池长老」。",
+      "result": "pass"
+    },
+    {
+      "text": "事实状态机械判定：由引文与**本切片内** “ ” 配对区间的位置关系判定——整段落在某对引号内=utterance，有配对界严格落在引文内=mixed，否则 narrated。本切片自足（结尾无未闭合引号），故用切片内配对。实测 126 对、异常 1 处：stray-close@108879（原文「那和尚便问：老爷，你有多少年纪了？”」缺前引号，是数据自身问题）。该异常已如实写进候选的 quotePairingCheck 与 unknowns U3，并说明：若复核改用「深度累加 mask」式判定，未闭合区间可能吞掉其后叙述文字从而改变相邻节点判定——这属口径差异而非事实冲突。审计用另一种算法重算，两种口径下 factStatus 完全一致。",
+      "result": "pass"
+    },
+    {
+      "text": "单元外引文严格隔离：6 组 crossUnitEchoes（7 条引文）全部带 outsideUnit=true 且 factStatus=null；审计断言它们必须完全落在 [107424,115108) 之外、不得声明机械 factStatus、不得构成本单元任何断言的唯一依据。另加**回目归属机检**：用独立的回目标题表（正则 + 中文数字换算，全书解析出 100 个回目）算出每条单元外引文所属回目，断言与所写 chapter 一致——不符则构建失败。实跑通过（X1→第8回、X2→第11回、X3/X4/X5→第17回、X6→第26回）。命令：python3 -B -s /tmp/rd0016/bin/build.py（含 chapterAttributionCheck 断言）。",
+      "result": "pass"
+    },
+    {
+      "text": "红线自检：(1) **未把人物话语当叙述事实**——143 条 utterance 引文逐条带事实状态，只用于「某人说了这话」；典型如行者「一定是那黑怪偷去无疑」记作 utterance，并在 K4/U5 单列「本单元叙述者从未确认窃贼身份」；妖精「这必是观音院里失了火」只证明他说了这话。(2) **结束≠成功**——本单元结在「急纵筋斗云，径上黑风山，寻找这袈裟」与「且听下回分解」，T1/T2/T3/T4/T6/T7 的 result 全部显式 resultIsSuccess=false 且各带理由，未把「播放到结尾」当达成；T5 的 true 已限定范围并注明全书意义的回收在第十七回。(3) **未编造人物/事件/结局**——所有专名均可在本单元 find；负向断言把「熊罴/金池/守山大神/受人间香火/剃度/黑熊精」钉死为 0。(4) **时间相邻不当因果**——12 条 rejectedEdges 主动否掉，例如「行者助风 → 老僧撞死」（邻近无机制）、「常与他讲道 → 妖精预谋」（原文写的是当场「财动人心」）。(5) **一次出现当伏笔**——7 条 rejectedForeshadows，含回末悬念套语、两度变蜜蜂、辟火罩借还闭环、十二柜袈裟数目。(6) **不用未知填默认值**——仅 3 处 null，均写进 nullFields 说明原文为何读不出。(7) **定位≠语义**——semanticReview.performed=false，未声称语义已核验。",
+      "result": "pass"
+    },
+    {
+      "text": "只写指定路径：本轮唯一写入的共享树文件是 loop/state/out/read_xiyou_L0_0016.candidate.json（任务 writes 指定路径，追加式新文件）。未在共享树触碰 js/ css/ index.html serve.py narrative.py scripts/ tests/ docs/ data/ 任何受保护路径；未运行 GPU/浏览器测试（任务未声明要跑）；未执行 git checkout/reset/stash。构建与审计脚本放在 /tmp/rd0016/bin/，不入库、不影响并行 agent。命令：git status --porcelain 对照确认无受保护路径新增改动来自本轮。",
+      "result": "pass"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/read_xiyou_L0_0016.candidate.json",
+      "kind": "append-only",
+      "note": "任务 writes 指定的候选文件，本轮新增。"
+    },
+    {
+      "path": "loop/state/out/read_xiyou_L0_0016.submit.json",
+      "kind": "append-only",
+      "note": "本提交记录，本轮新增。"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/df959d743e53206f56db2f92.docs.json": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+    "data/cache/df959d743e53206f56db2f92.json": "744a9718ac49efcc27bbf4710fb0dd475282e24ee2defae94752f32e7e9d9208",
+    "loop/state/out/read_xiyou_L0_0016.candidate.json": "6e6a851d67410fe8dcb31fa649a413cb709bf9033f7cfca61c08352155979ab8"
+  },
+  "remaining": [
+    "语义未独立复核：本文件只保证引文定位逐字成立、事实状态是机械判定的、计数与覆盖可重算，不保证引文被放在正确的条目下，也不保证语义读对。semanticReview.performed=false，需走 read-verify 由别的 agent 反向复核。",
+    "最可能被推翻的三处已写进 selfCritique：(1) C18/C19 关于妖精「本是来救火、被袈裟引诱才改行窃」的因果方向，依赖「正呼唤叫取水来」出现在见包袱之前这一叙述顺序；(2) F4 把老僧「就死也闭眼」的誓愿当伏笔（标 inferred，若按红线从严应移入 rejectedForeshadows）；(3) C25 我把「行者助风 → 袈裟失窃」标 partial=true 而非 reject，从严或从宽都可能被推翻。",
+    "rejectedEdges 12 条里有 3 条（R01 预言—应验、R02 助风→撞死、R08 失窃→念咒）是我主动否掉的**并置**关系，原文没给机制。若复核认为并置本身足以成边，这 3 条需重新讨论。",
+    "unknowns 12 条里有多条是原文自身的落差或空档，短期内无法在本单元内解决：U1（黑风山方位「正南」vs「正东南」矛盾）、U2（「锦襕袈裟/锦澜袈裟/五彩织金袈裟」三种用字是否同一物，我未断言）、U8（广智广谋是否即那两个徒孙）、U11（叙述语「骗到手」与三藏自愿交付如何并存）、U12（行者为何没拦下妖精——原文在行者上房后到次日起床之间完全没写他的知觉，这是一个真实的叙事空档，我未编解释）。",
+    "本切片有 1 处引号不平衡（stray-close@108879，原文缺前引号），是数据自身问题不是本文件造成的。已记入 quotePairingCheck 与 U3。若 read-verify 用不同引号口径比较，应在同一份 anomalies 上先对齐口径再判冲突。",
+    "causeEdges 25 条中 24 条 explicit、1 条 derived（C25，已标 partial）；rejectedEdges 12 条。复核可优先攻击 C25 与 R01/R02/R08。",
+    "F5「不是真僧不敢穿」的回收是诗句与人物结局的对应（标 inferred），其另一半（妖精的结局）在本单元内未回收，回收位置在第十七回，我只在 crossUnitEchoes X5 标位置、未并入 F5 的断言。若复核要求伏笔严格限定在单元内，F4/F5 应降级，F1/F2/F3/F6/F7 不受影响。",
+    "未做：不跑 GPU/浏览器测试（任务未声明要跑）；不写回任何受保护路径；不做语义评审（属 read-verify 流）；不推算年份、距离、人数（原文只给「二百七十岁」「二百余众/二百三十名」「二十里」等原文自身表述，两处口径不一致者一律列入 unknowns 而非合并）。",
+    "构建脚本的引文登记表里另有 32 条候选引文未进入产物（脚本会打印清单）。它们不参与任何断言与覆盖计算；列在此处是为了说明「准备过」不等于「引用了」，不计入任何工作量。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/read_xiyou_L0_0016.candidate.json",
+      "loop/state/out/read_xiyou_L0_0016.submit.json"
+    ]
+  }
+}

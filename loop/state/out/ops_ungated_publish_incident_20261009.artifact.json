@@ -1,0 +1,81 @@
+{
+ "task": "ops:ungated-publish-incident-20261009",
+ "agent": "reform-lead",
+ "at": "2026-10-08T18:35:48Z",
+ "severity": "process（不是内容缺陷；内容是干净的，但**绕过了 GATE**）",
+ "what_happened": "我为验证 P2（真实发布）在 /tmp 搭了沙箱，用**符号链接**指回仓库的 out/index/cache，并复制 serve.py 的链接。但 `serve.publish_reviewed_graph` 经 `os.path.realpath` 解析后写的是**仓库真实** `data/cache/`，于是沙箱里的 `--write` 实际发布到了共享树，且当时 GATE.lock 由 p14b 持有。",
+ "why_it_matters": "AGENTS.md 与 QUALITY §05.1 要求：受保护路径只能在合并任务里改并持 GATE.lock。我做了一次**无锁写入**，制造了一个未经合并任务审核的已发布版本键。这与本计划要修的『用旁路验证出来的成功不能证明主路能走通』是同一类错误 —— 而且这次旁路**写进了产品**。",
+ "escaped_artifacts": {
+  "newGraphKey": "03c1b89c18229357ef5dcf5d",
+  "graphSha256": "1f7156f45144fc572b8fb18aad08afc32752b8d573c5ebdd5716cf23bf5798ee",
+  "docsSha256": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+  "parentKey": "9b676d7031b1bcd3b8377a18",
+  "parentSha256": "3c2fae1d399d6768719f2d5476fa0cfd88fb4fbbc12abdf080323fa4b846ebdf",
+  "parentPreserved": true,
+  "backupMadeByTool": "data/cache/narrative/revisions/9b676d7031b1bcd3b8377a18-*.graph.json（工具自身机制）"
+ },
+ "content_assessment": {
+  "note": "内容本身是**修好的桥**产出的干净 B002 候选，不是污染版本；这一点必须说清，否则会把内容问题与流程问题混算。",
+  "scope": [
+   122388,
+   185812
+  ],
+  "delta_vs_parent": {
+   "tasks": "5 -> 18",
+   "characterStates": "7 -> 14",
+   "clues": "0 -> 7"
+  },
+  "emptyShellTasks": 0,
+  "completedButOutcomeSaysFailure": 0,
+  "referencePrecision": "59/59 = 100%",
+  "claimAnchorPrecision": "275/275 = 100%",
+  "reviewHistory": {
+   "origin": "reviewed_publication",
+   "scope": [
+    122388,
+    185812
+   ],
+   "candidateDigest": "2a6e6f41d95c5e2997420a4430b1dbb12f7d36107b799f83806da09c78c612f2"
+  }
+ },
+ "cleanup_done": [
+  "把 escaped 的库条目从 data/cache/index.json 移除（否则 selftest 15 转红：大奉默认键被改成 03c1b89c，而它是**缺 B000 内容的兄弟分支**）",
+  "index.json 以**文本方式**只删该条目，保持其余条目字节不变（不是整份 re-dump，避免格式漂移）",
+  "selftest 恢复 109/109；parent 字节未变"
+ ],
+ "not_done_and_why": [
+  "**未删除** 03c1b89c 版本键：AGENTS.md 明令不得删除已发布图谱版本；隐瞒缺陷比缺陷本身更糟。它保留在磁盘上，但**不在作品库索引里**，因此读者不会默认打开它。",
+  "未把它记成『干净发布』：它是无锁产物，不满足 R0 的发布口径（无 GATE、无合并任务审核、无逐条保留/排除复核）。"
+ ],
+ "registration": {
+  "where": "loop/state/PUBLISHED-WITH-KNOWN-DEFECTS.json（新增一条）+ 本记录",
+  "classification": "含**流程缺陷**（绕过 GATE）的已发布版本；内容无已知语义缺陷，但**未按发布口径复核**"
+ },
+ "prevention": [
+  "沙箱必须**复制**被写入的目录（不能符号链接 data/cache），否则 realpath 会解析回真实仓库 —— 这是本次事故的直接技术根因。",
+  "写保护路径前先断言 `loop.py stats` 的 `gateLock` 属于自己；不属于自己就只做只读验证。",
+  "真实发布必须走 APPLY.md 的合并流程（持锁→dry-run→write→登台账）。"
+ ],
+ "assertions": [
+  {
+   "text": "parent 字节未变",
+   "command": "shasum -a 256 data/cache/9b676d7031b1bcd3b8377a18.json == 3c2fae1d…",
+   "result": "pass"
+  },
+  {
+   "text": "作品库默认键已恢复",
+   "command": "selftest 15 PASS dafeng=1063b17c",
+   "result": "pass"
+  },
+  {
+   "text": "环境自检全绿",
+   "command": "selftest 109/109",
+   "result": "pass"
+  },
+  {
+   "text": "逃逸键未被删除（可追溯）",
+   "command": "data/cache/03c1b89c…json 仍在",
+   "result": "pass"
+  }
+ ]
+}

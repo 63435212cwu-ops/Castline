@@ -1,0 +1,74 @@
+{
+ "task": "p3:timeout-and-autosubmit-integrity:20261009",
+ "agent": "reform-lead",
+ "at": "2026-10-08T20:12:28Z",
+ "scope": "只读审计：任务超时率与「worker 代提交」对 done 语义的影响。未改任何文件。",
+ "finding1_timeoutLoss": {
+  "fact": "最近 306 条 run 里 **30 条（9.8%）以 rc=124 超时结束**（被 2700s 上限杀掉）。",
+  "distribution": {
+   "ok_n": 276,
+   "ok_p50": 1858,
+   "ok_p90": 2506,
+   "ok_max": 2696,
+   "timeout_n": 30,
+   "cap_seconds": 2700
+  },
+  "interpretation": "中位 1858s、p90 2506s 已经**贴着** 2700s 上限 ⇒ 上限对当前任务规模偏紧，约十分之一的工作在完成前被杀。",
+  "sizeCorrelation": {
+   "0-3000chars": "8.6% 超时",
+   "3000-4000": "8.2%",
+   "4000-5000": "15.4%",
+   "5000+": "11.8%",
+   "note": "越长越容易超时（大单元是主要受害面）"
+  },
+  "causeNotMine": "超时按小时均匀分布（00-23 点均有），**不是**我本轮重启造成的；重启窗口(03:33/03:46/03:49)内只有 2 条。"
+ },
+ "finding2_autosubmitSemantics": {
+  "fact": "有 **45 条记录是 worker 代提交的**（agent 自己没写自述），判据只是『writes 路径存在 + 哈希一致』。其中按 agent 最后一次退出码分：{\"1\": 7, \"124\": 18, \"0\": 19, \"127\": 1}。",
+  "whyItMatters": "代提交**无法区分**两种处境：①agent 正常做完但忘了 submit（应接受）；②agent 被超时**杀掉**、留下的是中断态（不应无条件接受）。两者在记录里长得完全一样，都是 done。",
+  "evidenceCount": "rc=124 且被代提交 = 18 条；rc=1 且被代提交 = 7 条。",
+  "mitigationObserved": "内容分区校验挡住了一部分：45 条里只有 1 条（read:dafeng:L1:0081）仍缺 worldSettings/themeReadings。所以**不是**大规模放水，但『完成』语义确实被放宽了。",
+  "worstCase": "read:dafeng:L0:0080 在 daemon 日志里出现 **477 次**：超时(2700s) → 重跑成功 → 又被超时 → 代提交 done。同一任务反复烧 45 分钟。"
+ },
+ "proposedFix": [
+  "① 代提交的记录写入 `agentExitRc` 与 `autoSubmitted: true`：让『agent 自述完成』与『worker 代登记』在记录里可区分（可核对的诚实登记）。",
+  "② rc=124（超时被杀）**不再**自动接受为 done：改为 `partial` 或退回待重做，避免把中断态当完成。rc=0 的代提交仍保留（那是原设计的合理用途）。",
+  "③ 超时上限与中位耗时的关系应有判据：2700s 对 p90=2506s 过紧；提高上限或按单元长度分档，并在 policy 里写明依据。"
+ ],
+ "assertions": [
+  {
+   "text": "超时率与耗时分布是实测不是估计",
+   "command": "遍历 loop/state/runs/run-*.json 统计 rc 与 seconds",
+   "result": "pass"
+  },
+  {
+   "text": "超时不是本轮重启造成的",
+   "command": "按小时分布：00-23 点均有，重启窗口内仅 2 条",
+   "result": "pass"
+  },
+  {
+   "text": "代提交记录确实缺 agent 自述",
+   "command": "assertions 恰为 worker 生成的单条固定文本",
+   "result": "pass"
+  },
+  {
+   "text": "影响面被如实界定（不是大规模放水）",
+   "command": "45 条中仅 1 条违反内容分区合同",
+   "result": "pass"
+  }
+ ],
+ "action": "GATE 现由 p48 持有（P4.8）。本项属 loop/bin/worker.py 的语义修正，已记入队列待其合并任务处理；本次只做只读审计与登记。",
+ "refinedClassification": {
+  "by_exitcode_and_evidence": {
+   "rc=0 + verdict.json": 19,
+   "rc=1 + candidate.json": 4,
+   "rc=1 + verdict.json": 3,
+   "rc=124 + candidate.json": 11,
+   "rc=124 + verdict.json": 7,
+   "rc=127 + verdict.json": 1
+  },
+  "reading": "**合法的 19 条**：rc=0（agent 正常退出）且指向真实 `.verdict.json` —— 那是原设计的用途（agent 做完但忘了 submit），必须保留。**有问题的 26 条**：agent 以 rc=1（报错）/124（超时被杀）/127（命令找不到）退出，产物是失败或中断态，却被代登记为 done。",
+  "whyNotMassiveCorruption": "内容分区校验（validate_sections）挡住了大部分 —— 45 条里只有 1 条违反分区合同。所以这是**语义放宽**（done 的定义被稀释），不是大规模产出污染。"
+ },
+ "fixScope": "最小修正应只针对 rc≠0 的代提交：rc=0 保持现状（合法），rc=124/127/1 改为 partial 或退回待重做，并把 agentExitRc 写入记录。"
+}

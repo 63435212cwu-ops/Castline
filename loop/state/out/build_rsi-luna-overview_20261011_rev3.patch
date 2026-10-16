@@ -1,0 +1,78 @@
+--- a/js/sky/sky-deep.js
++++ b/js/sky/sky-deep.js
+@@ -33,6 +33,14 @@
+       structureLegend.style.opacity = String(clip((time - T.DUR.structureFace) / (T.DUR.structureLegend - T.DUR.structureFace)));
+     }
+   }
++  function announceStructureState() {
++    var detail = { on: structureOn, progress: structureProgress,
++      ready: structureOn && structureProgress >= 1 && !structureTw };
++    var event;
++    if (typeof g.CustomEvent === 'function') event = new g.CustomEvent('cl:sky-structure-state', { detail: detail });
++    else { event = doc.createEvent('CustomEvent'); event.initCustomEvent('cl:sky-structure-state', false, false, detail); }
++    doc.dispatchEvent(event);
++  }
+   function setStructure(on, instant) {
+     if (!inited) return false;
+     on = !!on;
+@@ -51,13 +59,16 @@
+       structureButton.setAttribute('aria-label', on ? '返回实体' : '看清结构');
+       structureButton.setAttribute('aria-pressed', String(on));
+     }
+-    if (instant || reduced()) paintStructure(on ? 1 : 0);
++    if (instant || reduced()) { paintStructure(on ? 1 : 0); announceStructureState(); }
+     else structureTw = CLSkyMotion.tween({from: structureProgress, to: on ? 1 : 0,
+       dur: on ? T.DUR.structure : T.DUR.structureBack, ease: function (v) { return v; },
+-      tag: 'structure', onUpdate: paintStructure, onDone: function () { structureTw = null; }});
++      tag: 'structure', onUpdate: paintStructure, onDone: function () { structureTw = null; announceStructureState(); }});
++    /* Exiting M83 invalidates the explanation immediately; entering becomes
++       available only after the final host-clock update. */
++    if (!on && !instant && !reduced()) announceStructureState();
+     return on;
+   }
+-  function finishStructure() { if (structureTw) { CLSkyMotion.finishAll('structure'); structureTw = null; } }
++  function finishStructure() { if (structureTw) { CLSkyMotion.finishAll('structure'); structureTw = null; announceStructureState(); } }
+   function placeStructureLegend() {
+     if (!structureLegend) return;
+     var top = doc.querySelector('.sky-top'), crumb = doc.querySelector('.sky-crumb:not([hidden])');
+--- a/js/sky/sky-deconstruction.js
++++ b/js/sky/sky-deconstruction.js
+@@ -1600,6 +1600,11 @@
+     graph = nextGraph; model = nextModel; index = buildIndex(); state.ready = true; ensure(); render(); syncButton(); return true;
+   }
+   doc.addEventListener('cl:sky-deconstruct-toggle', toggle);
++  doc.addEventListener('cl:sky-structure-state', function (event) {
++    var ready = !!(event && event.detail && event.detail.ready === true);
++    if (!ready && m84.open) cancelM84(true);
++    if (state.open && state.mode === 'overview') render();
++  });
+   doc.addEventListener('cl:sky-plot', function () { if (m84.open) cancelM84(true); if (state.open && state.restore) closeToPlot(); });
+   doc.addEventListener('cl:sky-compass', function () { if (state.open) close(false); });
+   doc.addEventListener('cl:graph-ready', function () { if (m84.open) cancelM84(true); g.setTimeout(syncGraph, 0); });
+--- a/tests/sky_story_browser.py
++++ b/tests/sky_story_browser.py
+@@ -153,8 +153,12 @@
+   check('Escape closes reading and restores the playback-button focus','document.getElementById("skyStoryPanel").hidden&&document.activeElement.id==="skyPlay"')
+   # M84 extends this real-book structure and reading journey.
+   ev('CLSky.setPlot(true)');time.sleep(1)
+-  if not ev('document.body.classList.contains("sk-structure")'):click('#skyStructure');time.sleep(.9)
+   ev('CLSkyDeconstruction.open();CLSkyDeconstruction.setMode("overview")');time.sleep(.3)
++  check('structure explanation is gated before M83 reaches its terminal structure state','!document.querySelector("#skyDeconBody [data-action=structure-stage]")')
++  click('#skyStructure')
++  end=time.time()+8
++  while time.time()<end and not ev('CLSkyDeep.stats().structure.progress===1&&!CLSkyDeep.stats().structure.moving'):time.sleep(.1)
++  check('M83 completion immediately adds the M84 entry to an already-open overview','CLSkyDeep.stats().structure.progress===1&&!CLSkyDeep.stats().structure.moving&&!!document.querySelector("#skyDeconBody [data-action=structure-stage]")')
+   check('structure overview leads with real record counts and the source-axis split','(()=>{let t=document.getElementById("skyDeconBody").textContent;return t.includes("219")&&t.includes("20")&&t.includes("798")&&t.includes("58")&&t.includes("100 正文 / 17 其他")&&t.indexOf("同一张图的组成")<t.indexOf("审阅范围");})()')
+   check('overview distinguishes route provenance and reuses its eight reader paths','(()=>{let e=document.querySelector(".sd-structure-overview");return !!e&&e.textContent.includes("主线 / 支线")&&e.textContent.includes("自动分段")&&e.querySelectorAll("[data-action=structure-nav]").length===8;})()')
+   click('#skyDeconBody [data-action="structure-stage"]');time.sleep(1.05)
+@@ -162,6 +166,10 @@
+   click('#skyDeconBody [data-structure-layer="relations"]')
+   key('Escape','Escape',27)
+   check('selecting a layer highlights its copy and closing the stage preserves that layer','!document.querySelector(".sd-structure-stage")&&document.querySelector("[data-structure-layer=relations]").getAttribute("aria-pressed")==="true"')
++  click('#skyDeconBody [data-action="structure-stage"]');time.sleep(1.05)
++  click('#skyStructure')
++  check('exiting M83 immediately removes its entry and cancels an open M84 stage','!document.querySelector("#skyDeconBody [data-action=structure-stage]")&&!document.querySelector(".sd-structure-stage")')
++  time.sleep(.9)
+   ev('CLSkyDeconstruction.open();CLSkyDeconstruction.setMode("mechanics")');time.sleep(.3)
+   # Shared page integration; pure calibration semantics stay in sky_gold_throughput_contract.js.
+   check('calibration modules are loaded in the real reading page','!!(window.CLSkyGoldStandard&&typeof CLSkyGoldStandard.coverage==="function"&&window.CLSkyThroughput&&typeof CLSkyThroughput.qualifiedRate==="function")')

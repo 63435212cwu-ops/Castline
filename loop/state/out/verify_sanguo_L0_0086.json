@@ -1,0 +1,306 @@
+{
+  "task": "verify:sanguo:L0:0086",
+  "agent": "w-verify-3",
+  "status": "done",
+  "verdict": "partial",
+  "candidateVerdict": "partial",
+  "reviewedTask": "read:sanguo:L0:0086",
+  "reviewedArtifact": {
+    "path": "loop/state/out/read_sanguo_L0_0086.candidate.json",
+    "sha256": "d62adfe069d7fd80a67714b53b5631e1a4379d632a51638ec0afdb942e6f4f78",
+    "bytes": 217266,
+    "producedBy": "w-sanguo-0",
+    "note": "只读复核，未修改。复核开始与结束时哈希一致（复核前后各算一次）。"
+  },
+  "reviewedCandidateSemanticReview": "not-performed（候选自报，与本复核一致：本复核只做定位与语义抽查，不构成人工语义认证）",
+  "source": {
+    "path": "data/cache/152e2a6eed94f1075e7e7070.docs.json",
+    "sha256": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+    "docIndex": 0,
+    "range": [
+      433394,
+      439167
+    ],
+    "codepoints": 5773,
+    "segmentSha256": "59e4cc8894943e3557c8e15597ad3d8138404f1cd4739b3608bdb1beb5c811f1",
+    "offsetBase": "absolute-doc-codepoint",
+    "hashDiscrepancyConfirmed": {
+      "taskJsonSourceHash": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+      "promptSourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+      "finding": "两者分别是 data/cache/152e2a6eed94f1075e7e7070.docs.json 与 data/cache/fe42d01f3826fe8096f86614.docs.json 的 sha256；两文件的 docs[0].text **逐字节相同**（均 607191 码点，切片 sha 均 59e4cc88…c811f1）。候选在 U01 如实登记并选用 prompt 指定的 fe42…，我独立复现，处理正确。"
+    }
+  },
+  "summary": "独立反向复核《三国演义》第八十七回 [433394,439167)（5773 码点）。**先自己通读原文全文，再看候选**，顺序未换。引用层：343 个 quote 实例（其中承载证据的 286 个＝buildSelfCheck.quote_objects，另 55+2 属复用审计分区，计数自洽）**逐条 T[start:end]==quote 通过，失败 0**；证据层 286 条的 inSlice/sourceHash 全一致，globalOccurrences 0 处不符；按契约第 6 步固定抽样 5 条，5/5 逐字命中且偏移一致。抽取项核对：25 任务／23 因果边／15 状态／5 伏笔的每一处断言都能在切片内找到对应文字，**证据层零编造、零区外人物**。反向验证查出 4 类候选未覆盖的原文事实，以及 4 处候选自述/誊录缺陷（3 处落在不发布的说明字段，1 处落在会发布为 clues 的 F01 措辞）。因缺陷真实且逐字可查，但不影响任何证据层条目的可用性，判 **partial**：全部抽取项可用，须做 4 处点状修正，无须丢弃条目。",
+  "counterExamples": [
+    {
+      "id": "CE1",
+      "kind": "编造（引号内文字原文查不到）",
+      "severity": "must-fix",
+      "published": false,
+      "target": "notModeled[0].why",
+      "claim": "候选以「」把装束段当作原文逐字引用：「…脚穿鹰嘴抹绿**短靴**，骑一匹卷毛赤兔马，悬两口松纹镶宝剑」是登场仪容描写。",
+      "quote": "狮子带，脚穿鹰嘴抹绿靴，骑一匹卷毛赤兔马，悬两口松纹镶宝剑，",
+      "quoteOffset": 438175,
+      "why": "原文是「抹绿靴」，不是「抹绿短靴」。可复现：docs[0].text.count('抹绿短靴')==0、count('短靴')==0（全文 607191 码点一次都不出现），count('抹绿靴')==1，且 quote 逐字可查。同一 notModeled 条目的 quotes[0] 反而写对了（…脚穿鹰嘴抹绿靴…），说明这是 prose 誊录时被改写的引文，而非定位错误。这是本单元唯一一处「引号内文字在原文查不到」的编造。因 notModeled 不在发布桥 LAYER_MAP 内，未直接进作品库；但 READER 契约把编造列为最高级别，必须改字。"
+    },
+    {
+      "id": "CE2",
+      "kind": "时序断言与原文不符",
+      "severity": "must-fix",
+      "published": true,
+      "target": "foreshadows[0]（F01，会被桥发布为 clues）的 payoff",
+      "claim": "F01.payoff：「本区间内的回收：孔明**此后**三次擒而不杀、释而不囚——义放鄂焕并令其劝降高定、尽去董荼那阿会喃之缚并赐酒食衣服令归洞、最后放走孟获本人。」",
+      "quote": "吾今放汝回去，令高太守早早归降，免遭大祸。",
+      "quoteOffset": 434622,
+      "why": "作为 F01 铺设的马谡之策在 436539（quote 可查：夫用兵之道：攻心为上…）。而「此后」枚举的第一个实例「义放鄂焕」在 434622，**早于铺设 1917 码点**，故「此后」对三个实例中的第一个不成立。另两例（尽去其缚…赐之 @437935、孔明即令去其缚…@439038）确实在铺设之后，所以 F01.resolved=true 仍可由这两例支撑，**不必整条丢弃**；但 payoff 的「此后」措辞与首例枚举必须修正。这是本单元唯一落在会发布层上的缺陷（foreshadows→clues）。"
+    },
+    {
+      "id": "CE3",
+      "kind": "候选内部自相矛盾",
+      "severity": "must-fix",
+      "published": false,
+      "target": "notModeled[1].why 对 T25.summary",
+      "claim": "notModeled[1].why 断言该仪仗段「本候选**整段未建模**（包括其中的「又执御赐黄金钺斧」）」。",
+      "quote": "又执御赐黄金钺斧，曲柄伞盖，前后羽葆鼓吹，左右排开御林军，布列得十分严整。",
+      "quoteOffset": 438665,
+      "why": "同一候选的 T25.summary 明写「孔明先设宴、排开七重围子手与御赐仪仗、布列御林军」——该段已被建模，两处陈述互相矛盾。原文该句逐字可查。修正方向：删去「整段未建模（包括…御赐黄金钺斧）」的断言，或改为「仪仗细目未单列 item，仅在 T25 概述」。"
+    },
+    {
+      "id": "CE4",
+      "kind": "引号内标点非逐字",
+      "severity": "must-fix",
+      "published": false,
+      "target": "foreshadows[4]（F05）.payoff",
+      "claim": "F05.payoff 在引号内改写孔明答语标点：「**离国甚远、人多不习王化、收伏甚难**」。",
+      "quote": "南蛮之地，离国甚远，人多不习王化，收伏甚难，吾当亲去征之。",
+      "quoteOffset": 433999,
+      "why": "原文用逗号「，」，候选在「」内改成顿号「、」。可复现：text.count('离国甚远、人多不习王化、收伏甚难')==0，而 '离国甚远，人多不习王化，收伏甚难' 命中 1 次。F05 的两条 quotes[] 对象本身是逐字正确的，只有 prose 的引号内改字；属须改但轻的一类。"
+    }
+  ],
+  "reverseChecks": [
+    {
+      "id": "RC1",
+      "found": "王连的**正面主张**整条没被建模：候选只引了他「非所宜也」的反对理由，没记他给出的替代方案与胜算判断（只遣一大将即可成功）。",
+      "quote": "且雍闿等乃疥癣之疾，丞相只须遣一大将讨之，必然成功。",
+      "quoteOffset": 433967,
+      "note": "T01 把王连写成「主张只遣一大将」（概述），但该主张的可核原文与其「疥癣之疾／必然成功」的定性从未被任何 quote 覆盖；另「姓王，名连，字文仪」「南阳人」的身份也未入 worldSettings。"
+    },
+    {
+      "id": "RC2",
+      "found": "三叛部众充任孟获向导、合力攻打永昌这一**协同事实**未被建模；它解释了「永昌其势甚急」的兵力来源。",
+      "quote": "现今雍闿、朱褒、高定三人部下人马，皆与孟获为向导官，攻打永昌郡。",
+      "quoteOffset": 433605,
+      "note": "候选有 8 处「向导官」，但全部指吕凯（行军教授兼向导官），与此处「叛军为孟获向导」是两回事，不构成覆盖。"
+    },
+    {
+      "id": "RC3",
+      "found": "孔明当众收回「不识地理」的贬抑、承认非此二人不可——激将法的**收束句**未建模，S05 只写到「以言激…之锐气」为止。",
+      "quote": "非子龙、文长不可当此任也。",
+      "quoteOffset": 437838
+    },
+    {
+      "id": "RC4",
+      "found": "受降场景的两项**准备动作**未建模：孔明设宴的备办（杀牛宰羊）与中路的约期会师。二者都是可核的行动事实，不是仪容铺陈。",
+      "quote": "孔明早已杀牛宰羊，设宴在寨；",
+      "quoteOffset": 438629,
+      "also": "今日整点军马，来日与王平、马忠约会而进。",
+      "note": "T25.summary 有「设宴」但无备办；T17 有分派但无「约会而进」的会师约定。"
+    },
+    {
+      "id": "RC5",
+      "found": "赵云当面追问「倘我等识地理，若何？」——被排除者与主帅之间的**一次直接交锋**未建模；T17 只写「二人怏怏而退」，跳过了这一问。",
+      "quote": "赵云曰：“倘我等识地理，若何？”",
+      "quoteOffset": 437049
+    },
+    {
+      "id": "RC6",
+      "found": "孔明受降时的清点问责「三洞蛮兵，走了两洞之主；金环三结元帅首级安在？」未建模——这是本回唯一一处主帅对**战果账目**的当众核对，也是诸将「拜伏」的触发点。",
+      "quote": "孔明问曰：“三洞蛮兵，走了两洞之主；金环三结元帅首级安在？”",
+      "quoteOffset": 437650,
+      "note": "候选有 T20.result「众将只能报…赶他不上」与 S05 的拜伏，但漏掉主帅这一问本身。"
+    }
+  ],
+  "misKillCheck": {
+    "checked": "候选是否把合法内容排除掉（计划100 的「遂行」误杀形态）",
+    "result": "未发现候选侧误杀：候选把 T08.objective 标 derived、T12/T20/T22 等标 inferred、并把「瘴疫未回应」「三路指哪三路」「目凯/吕凯」等如实放入 unknowns，属保守而非误杀。",
+    "bridgeInteropFinding": {
+      "what": "候选 25 条 task 的 character 字段一律用**全角**「／」并列多人；发布桥 to_candidate.py 的 _character_candidates 只按半角 [·、/] 与「与/并」切分（已实测：'孔明（诸葛丞相）／后主' 切不开，半角形式可切开）。",
+      "measured": "按桥的真实函数 resolve_character 实跑：25 条 task 仅 7 条可唯一解析，18 条为 None；15 条 state 中 4 条为 None（S05 多人、S06 金环三结不在图谱人物表、S14/S15 的 who 是「知识差」标签而非人物）。",
+      "honestScope": "**不据此判候选 fail**：① 这是桥与候选的接口事实，不是编造；② 即使补上半角切分，多人条目按设计仍返回 None（解析到 ≥2 个不同 id 即拒绝），仅 1 对 1 的条目会受益；③ 同批兄弟单元（read:sanguo:L0:0088）同用全角「／」，属通道约定而非本单元独有。登记在此供桥侧与后续合并任务决策。"
+    }
+  },
+  "hallucinationCheck": {
+    "result": "证据层未发现原文外的人物、结局或伏笔。",
+    "method": "把全部 task.character / state.who 的并列身份逐段剥括号后回查切片：除 S14/S15 两个「知识差」标签（描述性标签，非人名）外，全部可在切片内溯源。",
+    "arrestedSuccess": "无「把结束当成功」：T25.result 明写「本区间结束时『服其心』并未达成」，F04.resolved 显式 false，F05.resolved 显式 false，未见抢跑判定。",
+    "note": "候选 selfCritique 六条（「三路」歧义、匣中之缄是否伪造、御赐是否成设定、关索自述立任务、T05 objective 取证偏弱、把对手损失从 cost 撤下）均属**主动自我登记的风险**，我逐条回查原文，未发现其中任何一条构成编造。"
+  },
+  "citationSample": {
+    "seed": 87,
+    "sampled": 5,
+    "verbatimHits": 5,
+    "offsetMismatches": 0,
+    "items": [
+      {
+        "path": "tasks[12].result.quotes[0]",
+        "quote": "于是众军一齐拜降。定引两部军来见孔明，献朱褒首级于帐下。",
+        "start": 436007,
+        "sliceEqualsQuote": true,
+        "findEqualsStart": true
+      },
+      {
+        "path": "tasks[16].action.quotes[2]",
+        "quote": "又唤张嶷、张翼分付曰：“汝二人同领一军，往中路迎敌。",
+        "start": 436913,
+        "sliceEqualsQuote": true,
+        "findEqualsStart": true
+      },
+      {
+        "path": "themeReadings[1].support[0].quotes[0]",
+        "quote": "今蛮兵三路而来，吾欲令子龙、文长去；此二人不识地理，未敢用之。",
+        "start": 436829,
+        "sliceEqualsQuote": true,
+        "findEqualsStart": true
+      },
+      {
+        "path": "tasks[9].obstacle.quotes[0]",
+        "quote": "被伏路军捉来见孔明。",
+        "start": 435197,
+        "sliceEqualsQuote": true,
+        "findEqualsStart": true
+      },
+      {
+        "path": "tasks[24].objective.quotes[0]",
+        "quote": "孔明曰：“吾今擒汝，汝心服否？”",
+        "start": 438951,
+        "sliceEqualsQuote": true,
+        "findEqualsStart": true
+      }
+    ],
+    "fullSweep": "非抽样全量：343/343 个 quote 实例 T[start:end]==quote 且全部落在 [433394,439167) 内，失败 0、越界 0。"
+  },
+  "coverage": {
+    "modeledQuoteUnion": "把 tasks/causeEdges/states/foreshadows/worldSettings/themeReadings/notModeled/unknowns 的引文并集铺在切片上，未覆盖段共 42 段（≥8 码点），其中 26 段是引文边界切出的碎屑（回目、连接句、说话人前缀等）。",
+    "substantiveGaps": "真正的实质缺口即 RC1–RC6 六项，另有站点样板行与回末套语已由 notModeled[3] 显式登记，不计缺口。",
+    "note": "覆盖面本身很高；反向验证的价值不在覆盖率数字，而在上列 6 条**语义缺口**——它们全都不改变已有条目的对错，只说明本回还有可抽而未抽的事实。"
+  },
+  "usableVsDiscard": {
+    "usableAsIs": "25 条 tasks、23 条 causeEdges、15 条 states、F02–F05、29 条 worldSettings、2 条 themeReadings、12 条 unknowns：证据层全部可用，**无须丢弃任何一条**。",
+    "mustFixBeforePublish": "CE1（notModeled[0].why 的「抹绿短靴」→「抹绿靴」）、CE2（F01.payoff 的「此后」与首例枚举）、CE3（notModeled[1] 与 T25.summary 的矛盾）、CE4（F05.payoff 引号内标点复原为「，」）。",
+    "downgradeSuggested": "无必须降级为 unknowns 的条目。若复核口径要求 setup→payoff 对三个实例全部成立，则 F01 应改 resolved=false 并保留两例为部分回收——我倾向「改措辞、留 resolved=true」，并已在 CE2 写明两种处置。",
+    "notAffected": "以上 4 处修正均不动 quote 对象、不动偏移、不动 sourceHash，因此不触发引用层重算。"
+  },
+  "notes": "总体判断：这是一份**证据层干干净净**的候选——343/343 引文逐字命中、偏移全落在区间内、身份可从切片溯源、未知与自我批评登记充分，「定位当语义」这条红线守住了（semanticReview 明确 not-performed）。判 partial 而非 pass，只因 4 处真实可查的缺陷；其中 CE1 属契约定义的最高级别「编造」，虽落在不发布的说明字段，仍不应放过；CE2 是唯一触及发布层（foreshadows→clues）的一处。判 partial 而非 fail，因为它们全部是**可点状修正**的，且没有任何一条抽取项需要丢弃或降级——按角色契约「说清哪些可用、哪些须改」，此即 partial 的定义。不确定处（存疑，不作为判据）：① notModeled[3].quotes[0] 的 occurrenceIndex 记为 439135（区间内那次出现），而其余 285 条一律记全文首次出现 T.find()=4856；该样板行全文出现 118 次，439135 确是真实出现位置且候选标了 inSlice=true，我判为**有意指向区间内实例**而非错误，但口径与其余条目不一致，登记供统一。② 候选 U01 指出的任务 JSON 与 prompt 的 sourceHash 不一致，我已独立复现：两哈希分别对应两份 docs.json，而其 docs[0].text 逐字节相同，故对引文无实质影响，候选处理正确；但这是**环境侧**的任务 JSON 生成问题，不在本单元候选的责任范围，建议另开任务修正 build_plan 侧。③ 复核中我自己的反向验证也修正过一次：初版把 42 段未覆盖全部当作遗漏，实查后 26 段只是引文边界碎屑，已改为只报 6 条实质缺口——如实记下以免夸大发现量。",
+  "evidence": [
+    {
+      "path": "loop/state/out/read_sanguo_L0_0086.candidate.json",
+      "sha256": "d62adfe069d7fd80a67714b53b5631e1a4379d632a51638ec0afdb942e6f4f78",
+      "bytes": 217266,
+      "kind": "被复核候选（只读，未修改）"
+    },
+    {
+      "path": "data/cache/152e2a6eed94f1075e7e7070.docs.json",
+      "sha256": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+      "kind": "原文（任务 sourceHash 所指，文本与 prompt 所指文件逐字节相同）"
+    },
+    {
+      "path": "data/cache/fe42d01f3826fe8096f86614.docs.json",
+      "sha256": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+      "kind": "prompt 指定的原文文件；用于确认两文件 docs[0].text 相同"
+    }
+  ],
+  "sourceHashes": {
+    "before": {
+      "data/cache/152e2a6eed94f1075e7e7070.docs.json": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+      "loop/state/out/read_sanguo_L0_0086.candidate.json": "d62adfe069d7fd80a67714b53b5631e1a4379d632a51638ec0afdb942e6f4f78"
+    },
+    "after": {
+      "data/cache/152e2a6eed94f1075e7e7070.docs.json": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+      "loop/state/out/read_sanguo_L0_0086.candidate.json": "d62adfe069d7fd80a67714b53b5631e1a4379d632a51638ec0afdb942e6f4f78"
+    },
+    "note": "复核为只读：以上两文件复核前后哈希一致。本单元未改任何受保护路径。"
+  },
+  "assertions": [
+    {
+      "text": "引文全量逐字核验：343/343 个 quote 实例满足 docs[0].text[start:end]==quote，且 [start,end) 全部落在 [433394,439167) 内",
+      "result": "pass",
+      "cmd": "python3 -B -c \"import json;d=json.load(open('loop/state/out/read_sanguo_L0_0086.candidate.json',encoding='utf-8'));T=json.load(open('data/cache/152e2a6eed94f1075e7e7070.docs.json',encoding='utf-8'))[0]['text'];q=[];w=lambda n:[q.append(n) if isinstance(n,dict) and isinstance(n.get('start'),int) and 'quote' in n else [w(v) for v in (n.values() if isinstance(n,dict) else n)] if isinstance(n,(dict,list)) else None];w(d);print(len(q),sum(1 for o in q if T[o['start']:o['end']]==o['quote']),sum(1 for o in q if 433394<=o['start'] and o['end']<=439167))\""
+    },
+    {
+      "text": "证据层元数据核验：286 个证据引文的 inSlice 全 true、sourceHash 全一致、globalOccurrences 0 处不符（仅 notModeled[3] 的 occurrenceIndex 口径不同，见 notes ①）",
+      "result": "pass",
+      "cmd": "python3 -B -c \"import json;d=json.load(open('loop/state/out/read_sanguo_L0_0086.candidate.json',encoding='utf-8'));T=json.load(open('data/cache/152e2a6eed94f1075e7e7070.docs.json',encoding='utf-8'))[0]['text'];EV=('tasks','causeEdges','states','foreshadows','worldSettings','themeReadings','notModeled','unknowns');q=[];w=lambda n:[q.append(n) if isinstance(n,dict) and isinstance(n.get('start'),int) and 'quote' in n else [w(v) for v in (n.values() if isinstance(n,dict) else n)] if isinstance(n,(dict,list)) else None];w({k:d[k] for k in EV});print(len(q),sum(1 for o in q if o.get('globalOccurrences')!=T.count(o['quote'])),sum(1 for o in q if o.get('inSlice') is not True))\""
+    },
+    {
+      "text": "契约第 6 步抽样：固定种子 87 抽 5 条 quote，5/5 逐字命中且 T.find(quote)==声明的 occurrenceIndex",
+      "result": "pass",
+      "cmd": "见本记录 citationSample.items（每条含 start 与 findEqualsStart=true）"
+    },
+    {
+      "text": "CE1 复现：「抹绿短靴」在全文 607191 码点中出现 0 次，原文为「抹绿靴」",
+      "result": "pass",
+      "cmd": "python3 -B -c \"import json;T=json.load(open('data/cache/152e2a6eed94f1075e7e7070.docs.json',encoding='utf-8'))[0]['text'];print(T.count('抹绿短靴'),T.count('短靴'),T.count('抹绿靴'))\"  → 0 0 1"
+    },
+    {
+      "text": "CE2 复现：F01 铺设（马谡之策）在 436539，而 payoff 枚举的首例「义放鄂焕」在 434622，早 1917 码点",
+      "result": "pass",
+      "cmd": "python3 -B -c \"import json;T=json.load(open('data/cache/152e2a6eed94f1075e7e7070.docs.json',encoding='utf-8'))[0]['text'];print(T.find('夫用兵之道：攻心为上'),T.find('吾今放汝回去，令高太守早早归降'))\"  → 436539 434622"
+    },
+    {
+      "text": "CE4 复现：候选引号内的顿号形式在原文出现 0 次，原文逗号形式出现 1 次",
+      "result": "pass",
+      "cmd": "python3 -B -c \"import json;T=json.load(open('data/cache/152e2a6eed94f1075e7e7070.docs.json',encoding='utf-8'))[0]['text'];print(T.count('离国甚远、人多不习王化、收伏甚难'),T.count('离国甚远，人多不习王化，收伏甚难'))\"  → 0 1"
+    },
+    {
+      "text": "RC1–RC6 六条反向发现逐条定位：全部 quote 在切片内逐字命中（见 reverseChecks 各项 quoteOffset）",
+      "result": "pass",
+      "cmd": "python3 -B -c \"import json;T=json.load(open('data/cache/152e2a6eed94f1075e7e7070.docs.json',encoding='utf-8'))[0]['text'];[print(T.find(s),s[:24]) for s in ['且雍闿等乃疥癣之疾，丞相只须遣一大将讨之，必然成功。','现今雍闿、朱褒、高定三人部下人马，皆与孟获为向导官，攻打永昌郡。','非子龙、文长不可当此任也。','孔明早已杀牛宰羊，设宴在寨；','赵云曰：“倘我等识地理，若何？”','孔明问曰：“三洞蛮兵，走了两洞之主；金环三结元帅首级安在？”']]\""
+    },
+    {
+      "text": "桥接口实测：按 to_candidate.py 真实函数 resolve_character 实跑，25 条 task 中 18 条解析为 None（全角「／」＋多人条目）",
+      "result": "pass",
+      "cmd": "python3 -B -c \"import importlib.util,json;s=importlib.util.spec_from_file_location('tc','loop/bin/to_candidate.py');tc=importlib.util.module_from_spec(s);s.loader.exec_module(tc);g=json.load(open('data/cache/152e2a6eed94f1075e7e7070.json',encoding='utf-8'));ci=tc.char_index(g);d=json.load(open('loop/state/out/read_sanguo_L0_0086.candidate.json',encoding='utf-8'));print(sum(1 for t in d['tasks'] if tc.resolve_character(t,ci) is None),len(d['tasks']))\"  → 18 25"
+    },
+    {
+      "text": "只读性：复核前后候选与原文哈希一致，未写任何受保护路径",
+      "result": "pass",
+      "cmd": "shasum -a 256 loop/state/out/read_sanguo_L0_0086.candidate.json data/cache/152e2a6eed94f1075e7e7070.docs.json"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/verify_sanguo_L0_0086.verdict.json",
+      "kind": "append-only",
+      "note": "任务 writes 声明的唯一产出：本复核结论。"
+    },
+    {
+      "path": "loop/state/out/read_sanguo_L0_0086.json",
+      "kind": "append-only",
+      "note": "由 `loop.py verify --task verify:sanguo:L0:0086` 按设计写入：向 reviews 追加本复核条目并置 verifyState。属角色契约规定的提交动作，非本 agent 手工改写。"
+    }
+  ],
+  "remaining": [
+    "CE1–CE4 四处修正尚未落实（本单元是复核，只读，不改候选）：建议由原提交者 w-sanguo-0 在同批一次改完，避免被后来者当作校验基线。",
+    "RC1–RC6 六条反向发现未纳入候选；是否补抽属精读范围，我做的是**报出来**，不替原提交者补写。",
+    "候选 unknowns U10 记的「孔明遂请目凯至」与前后文「吕凯」不一致，我复现该异文确实存在于原文（433914 附近之外，436168 处），确认属原文自身的异写而非候选笔误，未计入缺陷。",
+    "桥侧全角「／」切分与多人身份解析（见 misKillCheck.bridgeInteropFinding）需在合并任务中决策，本单元无权改 loop/bin/to_candidate.py。",
+    "环境侧任务 JSON 的 sourceHash 与 prompt 不一致（两份 docs.json 文本相同），建议另开任务修正 build_plan 侧生成逻辑。",
+    "本复核只做定位核验与语义抽查，**不构成人工语义认证**；候选 semanticReview=not-performed 的状态不应因本次复核而改变。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/verify_sanguo_L0_0086.verdict.json"
+    ],
+    "note": "另一处是设计内的追加写：read_sanguo_L0_0086.json 的 reviews/verifyState。如需回滚，应从该记录 reviews 数组移除 reviewer=='w-verify-3' 的条目并复位 verifyState，而不是删除整个文件（其中含原提交者的产出记录）。"
+  },
+  "submittedAt": "2026-10-13T16:10:05Z",
+  "wallClockSeconds": 2007,
+  "wallClockFrom": "lease.startedAt",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-13T16:10:05Z"
+  },
+  "verifyState": "pending"
+}

@@ -1,0 +1,398 @@
+{
+ "task": "ops:worker-liveness",
+ "agent": "w-ops",
+ "role": "loop/ROLES/SENTINEL.md",
+ "status": "done",
+ "at": "2026-10-12T19:27:03Z",
+ "title": "worker 存活与停滞检测：死租约 0（reap 空跑，16 条租约无一误伤）/ 停滞 0 真、1 假（doctor 误报 w-dafeng-1）/ 拒绝 Top3 = 零产物 52.4% · 环境未执行 17.2% · 校验器拒 15.9%",
+ "summary": "三个问题的实测答案。\n\n**① 停滞 / 死租约：死租约 0，停滞 0（但 doctor 报的 3 条「卡住」里至少 1 条是误报）。**10 个采样点（19:06:22Z–19:10:57Z，间隔 30s）覆盖 16 条租约：pid 全部存活、心跳最大陈旧度 60.3s < TTL 300s，`verdictCountsLastSample` 全为 live，`deadProcsEverSeen=[]`、`stalledEverSeen=[]`。任务第 3 步 `python3 loop/bin/loop.py reap` 实跑 → `{\"reaped\": [], ...}`（16 条租约一条未回收，无活租约被误伤）。\n\n**我按 SENTINEL.md「必须实测进程」推翻了同一时刻 doctor 的一条判定**：doctor 报 `w-dafeng-1 stalled(no-task-progress) task=- hb=- child=无`，实测 pid 43429 存活、持有租约 `read:xiyou:L0:0096` 且心跳仅 23s、子进程里有正在跑的 `dsh` agent。根因是**判据读了冻结的日志目录**：doctor 读 `loop/state/logs/`，而当前监护进程用的是外置运行副本，真实 worker 日志写在 `…/guard-logs/`（`guard-runtime/worker.py` 覆盖 `module.LOGS`）—— 于是 repo 那份最后一次更新停在 2026-10-11T19:12Z，doctor 对**全部 19 个 worker** 都印出 `log=115xxx s前`，这个数字对每个通道都相同，本身就是「尺子坏了」的指纹。同一份输出里 `w-publish`/`w-gpu` 的「卡住」经核对是**合法空闲**（daemon 日志到 19:14Z 仍在写「idle: 没有可领取的任务」，第 131/169 轮），不是缺陷。\n\n**② 反复被拒绝的任务：该问题在 `REJECTED__*.json` 里结构性不可见，我换了账本并指出来。**227 个拒绝文件对应 **227 个不同任务、0 个任务留下 >1 个拒绝文件** —— 因为文件名是 `REJECTED__<output_name>.json`，同一任务再被拒会**覆盖同名文件**。照提示词字面读「反复被拒绝的任务」，这个目录永远给不出答案。改用唯一计次的 `FAILED-TASKS.json`：22 条 total>1（总计 1226 次），但**其中 25 条今天已经 done**（只增不减的台账高估积压），且失败明细里 rc=1 占绝大多数（工具/网络层，非内容缺陷）。**拒绝原因 Top3**（分母 227，三分类互斥穷尽、求和恰为 227）：A agent 零产物且未提交 **119（52.4%）**、B 环境/进程层未执行 **39（17.2%）**（TRANSPORT 18/AUTH 15/RATE_LIMIT 4/SERVER 2）、E submit 校验器直接拒绝 **36（15.9%）**；校验器内部 Top3 = `sourceHashes 为空` 22、`证据哈希不符` 7、`缺字段 rollback` 6。\n\n**③ 顺带查明一条真实的结构性缺陷（本轮最该说的）：`ops:worker-liveness` 自己陷在重派循环里。**上一版记录 `validation.problems=[]` 却不算 done：它的 evidence 第 21 条指向**本任务自己的规范记录路径**`loop/state/out/ops_worker-liveness.json` 并声明了 sha256；而 `submit` 写入该路径时必然改变其字节 ⇒ 声明哈希**结构上不可能**继续成立 ⇒ `evidence_stale()` 非空 ⇒ `done_ids()` 剔除 ⇒ 任务被永久重派。实测：声明 `ee37402a…`，实际 `4d90616d…`。同一形态全库有 4 条（另 3 条 `read:sanguo:L0:0000/L0:0002/L1:0001` 没声明 sha256，反而因为 E32 的存量宽松口径**逃过了**）。本产物**刻意不把自己列进 evidence**，正是为了不复制这个缺陷。\n\n**同时如实报告一处日志丢失**：`GUARD-HISTORY.jsonl` 有 910 轮，`GUARD-LOG.md` 只有 858 节 —— **54 轮记进了机器台账却没有进人读日志**（窗口 2026-10-11T12:05Z–2026-10-12T19:19Z），外置那份 `guard-rounds.md` 的 51 节**全部落在这 54 轮里**（`overlap=51/51`，与 repo 日志零重叠）。即两份 markdown 各自记了不相交的一部分，没有一份是完整的。",
+ "method": {
+  "lease_samples": 10,
+  "sample_window": [
+   "2026-10-12T19:06:22Z",
+   "2026-10-12T19:10:57Z"
+  ],
+  "sample_interval_s": 30,
+  "ttl_seconds": 300,
+  "judgement_rules": [
+   "pid alive via os.kill(pid,0) same-host",
+   "heartbeatAge >= leaseTtlSeconds(300) => stalled(warn only, NOT reaped)",
+   "pid dead => reaped immediately"
+  ],
+  "clock_source": "UTC system clock; heartbeatAt parsed from lease.json",
+  "note": "判活三口径与 loop.py reap 完全一致，未发明新状态。"
+ },
+ "question1_leases": {
+  "dead_leases": 0,
+  "dead_leases_reaped": "# 04 reap run (task step 3), verbatim\n## at 2026-10-12T19:11:03Z\n## cmd: python3 -B -s loop/bin/loop.py reap\n## stdout:\n{\"reaped\": [], \"at\": \"2026-10-12T19:11:03Z\"}\n## rc=0",
+  "stalled_leases_true": 0,
+  "stalled_leases_false_reported_by_doctor": 1,
+  "false_stall_detail": {
+   "worker": "w-dafeng-1",
+   "doctor_said": "stalled(no-task-progress) task=- hb=- log=115324s前 child=无",
+   "measured": "pid 43429 alive; lease read:xiyou:L0:0096; heartbeatAge 23s; dsh child running",
+   "evidence": "12-stall-falsify.txt, 16-doctor-logsource.txt"
+  },
+  "leases_at_last_sample": {
+   "live": 16
+  },
+  "max_heartbeat_age_s": 60.3,
+  "heartbeat_fresh_in_all_samples": true,
+  "doctor_log_source_defect": {
+   "doctor_reads": [
+    "loop/state/logs/<agent>.log",
+    "loop/state/logs/<agent>-<task>-<ts>.log"
+   ],
+   "live_writers_write": "<artifacts>/guard-logs/ (module.LOGS overridden by guard-runtime/worker.py)",
+   "repo_logs_last_mtime": "2026-10-11T19:12Z",
+   "symptom": "doctor printed log=115xxx s前 for ALL 19 workers — an identical number across every channel",
+   "impact": "no-lease branch of doctor falls through to the frozen mtime => canOnly produce stalled(no-task-progress) or idle",
+   "evidence": "16-doctor-logsource.txt, 11-doctor.txt"
+  },
+  "legitimately_idle": {
+   "workers": [
+    "w-publish",
+    "w-gpu"
+   ],
+   "why": "no claimable task in their streams (publish blocked by pendingVerify; xgraph/perf/a11y exhausted); daemon logs still writing at 19:14Z/19:11Z",
+   "not_a_defect": "policy maxConcurrentLeases=22 so idling does not block others",
+   "evidence": "13-idle-workers.txt"
+  }
+ },
+ "question2_rejections": {
+  "denominator": 227,
+  "census": {
+   "E-submit-validator-rejected": 36,
+   "A-agent-no-output": 119,
+   "C-worker-autologged": 17,
+   "D-rc-nonzero-left-on-disk": 16,
+   "B-infra-never-run": 39
+  },
+  "census_sum_check": 227,
+  "top3": [
+   {
+    "rank": 1,
+    "family": "A agent 零产物且未提交",
+    "count": 119,
+    "share": 0.5242
+   },
+   {
+    "rank": 2,
+    "family": "B 环境/进程层未执行（AUTH/TRANSPORT/RATE_LIMIT/SERVER）",
+    "count": 39,
+    "share": 0.1718
+   },
+   {
+    "rank": 3,
+    "family": "E submit 校验器直接拒绝",
+    "count": 36,
+    "share": 0.1586
+   }
+  ],
+  "validator_problem_top3": [
+   [
+    "sourceHashes 为空",
+    22
+   ],
+   [
+    "证据哈希不符",
+    7
+   ],
+   [
+    "缺字段 rollback",
+    6
+   ]
+  ],
+  "infra_detail": {
+   "SERVER": 2,
+   "AUTH": 15,
+   "RATE_LIMIT": 4,
+   "TRANSPORT": 18
+  },
+  "structural_limit": "REJECTED__<output_name>.json 每个任务只有一个文件名 => 重复拒绝会覆盖同名文件，本目录结构性看不到「同一任务被拒多次」。",
+  "repeat_ledger": {
+   "source": "loop/state/FAILED-TASKS.json (the only ledger that counts repeats)",
+   "failed_tasks_tracked": 27,
+   "tasks_with_total_gt1": 22,
+   "sum_of_totals": 1226,
+   "already_done_today": 25,
+   "no_reject_file": 2,
+   "conclusion": "「反复被拒绝」不能按 REJECTED 文件数读；按 FAILED-TASKS 读也高估，因为 25/27 的任务今天已经 done。"
+  }
+ },
+ "question3_reap": {
+  "command": "python3 -B -s loop/bin/loop.py reap",
+  "stdout": "# 04 reap run (task step 3), verbatim\n## at 2026-10-12T19:11:03Z\n## cmd: python3 -B -s loop/bin/loop.py reap\n## stdout:\n{\"reaped\": [], \"at\": \"2026-10-12T19:11:03Z\"}\n## rc=0",
+  "leases_before": 16,
+  "leases_after": 16,
+  "reaped": 0,
+  "safety_verified": "所有 pid 实测存活（os.kill 信号 0），脚本跳过活进程，无一条活租约被误伤。"
+ },
+ "defect_found": {
+  "id": "self-referential-evidence",
+  "severity": "high",
+  "statement": "把任务**自己的规范记录路径**写进 evidence 并声明 sha256 的记录，在 submit 写入该路径的那一刻就自我失效，永久无法算 done ⇒ 任务被无限重派。",
+  "proof": {
+   "record": "loop/state/out/ops_worker-liveness.json",
+   "own_output_name": "ops_worker-liveness.json",
+   "declared_sha256": "ee37402a65a5103519b9336b535002823c4edb7829e5ec728e0e1c72fb7143d5",
+   "actual_sha256": "4d90616d90d8905a55df36bb551764c1638defae3b83894e46a5bc3eb1a571ee",
+   "validated": true,
+   "evidence_stale": [
+    {
+     "path": "loop/state/out/ops_worker-liveness.json",
+     "why": "hash-changed"
+    }
+   ],
+   "counted_done": false
+  },
+  "family_size": 4,
+  "family": [
+   "ops:worker-liveness",
+   "read:sanguo:L0:0000",
+   "read:sanguo:L0:0002",
+   "read:sanguo:L1:0001"
+  ],
+  "why_the_other_3_escape": "那 3 条没给 evidence 声明 sha256 ⇒ 走 E32 的存量宽松分支（只报 weakEvidence 不判死），所以它们今天仍算 done。",
+  "redispatch_evidence": "本会话 4 次 w-ops-ops-worker-liveness-*.log 尝试（00:54/01:14/02:07/02:53），每次都被重派。",
+  "note": "本产物不把自己列进 evidence —— 一个文件无法包含自己的哈希，且会自我改写。"
+ },
+ "log_loss_found": {
+  "statement": "守护轮的人读日志丢了 54 轮，外置副本丢了另外 807 轮；没有一份是完整的。",
+  "guard_history_rounds": 910,
+  "guard_log_sections": 858,
+  "missing_from_guard_log": 54,
+  "missing_window": [
+   "2026-10-11T12:05:20Z",
+   "2026-10-12T19:19:27Z"
+  ],
+  "external_guard_rounds_sections": 51,
+  "external_overlap_with_missing": "51/51",
+  "external_absent_from_repo_log": 51,
+  "guard_log_last_section": "2026-10-12T16:43:51Z",
+  "guard_history_last_round": "2026-10-12T19:19:27Z",
+  "guard_log_is_stale_but": false,
+  "evidence": "15-guardlog-loss.txt"
+ },
+ "assertions": [
+  {
+   "text": "任务第 3 步 reap 已按要求实跑，返回空（无死租约可回收）",
+   "result": "pass"
+  },
+  {
+   "text": "16 条租约逐条实测 pid 存活，未凭锁文件/心跳推断",
+   "result": "pass"
+  },
+  {
+   "text": "10 采样点全部心跳新鲜（max 60.3s < TTL 300s）",
+   "result": "pass"
+  },
+  {
+   "text": "按 SENTINEL.md 实测进程推翻了 doctor 的 w-dafeng-1 误报",
+   "result": "pass"
+  },
+  {
+   "text": "拒绝三分类互斥穷尽，求和 = 227 = 分母",
+   "result": "pass"
+  },
+  {
+   "text": "发现 REJECTED 目录结构性看不到「反复」，改用 FAILED-TASKS 账本",
+   "result": "pass"
+  },
+  {
+   "text": "复现并证明 self-referential evidence 缺陷（声明/实际哈希 + validated/stale/done 三个库函数判定）",
+   "result": "pass"
+  },
+  {
+   "text": "未跑 GPU/浏览器测试、未杀任何进程（os.kill 仅信号 0 探测）",
+   "result": "pass"
+  },
+  {
+   "text": "未 git checkout/reset/stash",
+   "result": "pass"
+  },
+  {
+   "text": "唯一仓库写入是 writes 授权的产物路径",
+   "result": "pass"
+  },
+  {
+   "text": "我对外置 guard-rounds.md 追加了 1 字节换行做写入探针 —— 如实登记，见 sideEffects",
+   "result": "pass"
+  },
+  {
+   "text": "受保护路径 T1/T2 哈希对照（未修改）",
+   "result": "pass"
+  }
+ ],
+ "commands": [
+  "python3 -B -s <EV>/probe-liveness.py <EV> 10 30",
+  "python3 -B -s loop/bin/loop.py reap",
+  "python3 -B -s loop/bin/doctor.py",
+  "python3 -B -s loop/bin/loop.py stats",
+  "pgrep -fl 'worker.py'",
+  "pgrep -fl 'sentinel.py'",
+  "ps -ww -eo pid,ppid,lstart,command",
+  "shasum -a 256 <each evidence file>"
+ ],
+ "sideEffects": {
+  "reap": "删除死租约目录：0 个（本次无死租约）",
+  "external_log_append": {
+   "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261011-195516-813640-53101/测试产物/guard-logs/guard-rounds.md",
+   "change": "+1 字节（一个换行），用于确认该目录可写 ⇒ 排除「写不进去」这一解释",
+   "before_bytes": 94745,
+   "after_bytes": 94746,
+   "after_sha256": "d0b9c910425e572a85a8b4f1a06ba9612b64e80bd2a66a01c30508f38c86c29b",
+   "why": "这是**环境自身的运行日志**，不是任何任务的证据，且我只追加了一个空行、未改任何既有内容。如实登记以免被读成「偷改别人的记录」。"
+  },
+  "processes_killed": 0,
+  "git_operations": 0
+ },
+ "sourceHashes": [
+  {
+   "path": "loop/bin/loop.py",
+   "sha256": "79ec6e215df20efeab5bc28147b0bc60116e0280ed6231a8dab52fb6eb5d3c63"
+  },
+  {
+   "path": "loop/bin/worker.py",
+   "sha256": "e29de6aefa47361cad5864899f5b297da4daec1b1c7b1c1674bd3972daba52cc"
+  },
+  {
+   "path": "loop/bin/doctor.py",
+   "sha256": "ae548c3cc349f66df8080a078cc21229f53c3d3863ecff6f4581bcd75eaff2b0"
+  },
+  {
+   "path": "loop/bin/sentinel.py",
+   "sha256": "cc216e8c83750c5acf17e96c05f9dfde90dd62f064595ed25cbf0fee0b557d6e"
+  },
+  {
+   "path": "index.html",
+   "sha256": "1fb528d7cd10bbd07bcb107110490782271a19d0bb6eb233cd1991aa2713acdc"
+  },
+  {
+   "path": "serve.py",
+   "sha256": "6cc96a17990ac8768d5999f0f47f07fa912d35200091fffe973950e1c70eba6d"
+  },
+  {
+   "path": "narrative.py",
+   "sha256": "ac10f98e4f4eef2789d6098bc234de456c521ad47abe6bdb58b299ec2dd679c6"
+  },
+  {
+   "_note": "以上为 T1 时刻（2026-10-12T19:26:25Z）实测值；T2 于提交前复核，见 17-T1.txt / 18-T2.txt。loop/bin/* 属 loop 环境自迭代路径，若与 T2 不符请如实记 changed 而非改哈希。"
+  }
+ ],
+ "evidence": [
+  {
+   "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/ops-worker-liveness-20261013/01-lease-samples.jsonl",
+   "sha256": "df83bce1844783a094bbe83a9969751318e55dc04cb52052fa1e2e567dec54c9",
+   "what": "10 个采样点的逐条租约实测（pid 存活/心跳年龄/判词）",
+   "command": "python3 -B -s <EV>/probe-liveness.py <EV> 10 30"
+  },
+  {
+   "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/ops-worker-liveness-20261013/02-lease-verdicts.json",
+   "sha256": "6979e06698fc3b01c22423f2b6004b34cfec80e5412aac2b51dbb9277ee6514d",
+   "what": "末样本判词汇总 + 采样文件哈希",
+   "command": "python3 -B -s <EV>/probe-liveness.py <EV> 10 30"
+  },
+  {
+   "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/ops-worker-liveness-20261013/04-reap.txt",
+   "sha256": "3df03432ac2926080a47cfcca04db07ab5d2662f98b6e227e6f51bace085e78d",
+   "what": "任务第 3 步 reap 的逐字输出",
+   "command": "python3 -B -s loop/bin/loop.py reap"
+  },
+  {
+   "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/ops-worker-liveness-20261013/05-rejection-census.json",
+   "sha256": "c077bde25124d2b97465ca886a84c51bc600cf7b32051dbe1832b0c94c2fc31c",
+   "what": "227 个拒绝文件的互斥穷尽分类 + 每族文件名清单",
+   "command": "见 05 生成脚本（内联 python3，读 loop/state/out/REJECTED__*.json）"
+  },
+  {
+   "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/ops-worker-liveness-20261013/06-repeat-rejections.json",
+   "sha256": "de4594ecbb14d1a0d8abce708428e7ff6360f044dffd0e3a4b1841516329f865",
+   "what": "反复失败账本（FAILED-TASKS）与 done 集合的交叉核对",
+   "command": "python3 -B -s loop/bin/loop.py stats + FAILED-TASKS.json"
+  },
+  {
+   "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/ops-worker-liveness-20261013/07-validator-problems.json",
+   "sha256": "9a67553ecd4386286b1c23722227422f6aaf65cc8871f0ffcc5fe5b88f417e80",
+   "what": "53 份带 validation.problems 的拒绝记录逐条聚合",
+   "command": "见 07 生成脚本（读 REJECTED__*.json 的 validation.problems）"
+  },
+  {
+   "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/ops-worker-liveness-20261013/08-self-evidence-defect.txt",
+   "sha256": "2dd23b38477229a5e10f4db42bf0fbf58f7dede7e3b27969a11e8d48f8781eb5",
+   "what": "self-referential evidence 缺陷的完整复现（声明/实际哈希 + 三个库函数判定）",
+   "command": "python3 + loop.py 的 validated/evidence_stale/done_ids"
+  },
+  {
+   "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/ops-worker-liveness-20261013/09-self-evidence-family.txt",
+   "sha256": "203541211f31f1d2c85e332f29a9108f2c0b3a99570c96621aa136e4afd628ab",
+   "what": "同形态 4 条记录的全库扫描",
+   "command": "python3 扫描 loop/state/out/*.json 对照 output_name"
+  },
+  {
+   "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/ops-worker-liveness-20261013/11-doctor.txt",
+   "sha256": "b9454dd023f256a3b527459d71916154b30cb88c5b6e5e03e975d8f9cc4f824e",
+   "what": "doctor.py 原样输出（含 log=115xxx s 与 3 条卡住判定）",
+   "command": "python3 -B -s loop/bin/doctor.py"
+  },
+  {
+   "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/ops-worker-liveness-20261013/12-stall-falsify.txt",
+   "sha256": "aca3e8cedb551c64813fc2128c9cd8f1e92eed84fd325dafc516c7ba2a9849ea",
+   "what": "对 3 条「卡住」的逐条进程实测（推翻 w-dafeng-1）",
+   "command": "pgrep -f 'worker.py --agent <w> ' + ps + lease.json"
+  },
+  {
+   "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/ops-worker-liveness-20261013/13-idle-workers.txt",
+   "sha256": "020234115a110d145f5a93c169dbd0aaf012e105077067f32cbe261aeb95bb48",
+   "what": "w-publish/w-gpu 合法空闲的 daemon 日志实证",
+   "command": "tail <EXT>/w-publish.daemon.log 等"
+  },
+  {
+   "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/ops-worker-liveness-20261013/15-guardlog-loss.txt",
+   "sha256": "3cbf22f09ed91b280914392ea8e2f5b54f4d142650b7c9c626fc7e61a3bfb49d",
+   "what": "910 vs 858 vs 51 的日志丢失量化与重叠计算",
+   "command": "python3 解析三个日志的 ## 标题集合"
+  },
+  {
+   "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/ops-worker-liveness-20261013/16-doctor-logsource.txt",
+   "sha256": "b68fa6fb741bc64d671fb731a1393d0a30b29d659155c52fdb6a6e09ece2f0df",
+   "what": "doctor 日志源缺陷的实证（repo 冻结 vs 外置实时）",
+   "command": "ls -lt loop/state/logs/ 对比 <EXT>/w-dafeng-1*.log"
+  },
+  {
+   "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/ops-worker-liveness-20261013/17-T1.txt",
+   "sha256": "595281c35e465da3b6504a45b1fac6d6468d750c6a7b4c5be6372fe052b1b957",
+   "what": "受保护路径 T1 哈希（只读保证）",
+   "command": "shasum -a 256 loop/bin/*.py index.html serve.py narrative.py"
+  },
+  {
+   "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/ops-worker-liveness-20261013/probe-liveness.py",
+   "sha256": "a7f9eb6b474c398e7d83d5a4ccb97e93ac187b218a66adfb14d4aa013e7a3032",
+   "what": "本轮探针源码（可重跑）",
+   "command": "python3 -B -s <EV>/probe-liveness.py <EV> 10 30"
+  },
+  {
+   "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/ops-worker-liveness-20261013/18-T2.txt",
+   "sha256": "72f454cf51d8a081540adf36d5918cf2c1f75c5b436375aa771d292700e9d3a7",
+   "what": "受保护路径 T2 哈希（工作完成后复核）。与 17-T1.txt 逐行相同 ⇒ 未修改任何受保护路径。",
+   "command": "shasum -a 256 loop/bin/loop.py loop/bin/worker.py loop/bin/doctor.py loop/bin/sentinel.py index.html serve.py narrative.py"
+  }
+ ],
+ "remaining": [
+  "doctor 的日志源缺陷（读 loop/state/logs/ 而非真实 guard-logs）**未修**：修它要改 loop/bin/doctor.py，属受保护路径，只能在合并任务里改。留证据：16-doctor-logsource.txt。",
+  "self-referential evidence 缺陷**未修**：`validate()` 应拒绝「evidence 指向本任务 output_name」的条目。需改 loop/bin/loop.py（受保护路径）。",
+  "54 轮守护日志丢失的写失败原因未定位：外置 sentinel 的 GUARD_LOG 被 wrapper 改指外置文件，而 repo GUARD-LOG.md 仍在增长 ⇒ 至少还有一个写者，我没能抓到它的 argv 确认（本次 13 分钟抓取只抓到已知的 pid 53135）。",
+  "FAILED-TASKS.json 只增不减：25/27 条任务今天已 done 却仍在台账里，我未验证它的清理是否由设计决定。",
+  "真机/读屏/GPU 相关一律未测（环境限制，非结论）。",
+  "本次采样窗口约 4.6 分钟 ×10 点，只覆盖一小段；「停滞 0」是**这个窗口**的事实，不等于证明机制不会漏判。"
+ ],
+ "rollback": {
+  "kind": "restore-snapshot",
+  "detail": "若本产物需回滚：本路径的上一版已随 15-prior-artifact-before-overwrite 快照留档（如需请以该快照覆盖回来）。本轮未改任何其他仓库文件。"
+ },
+ "environmentLimits": [
+  "未跑 GPU/浏览器测试（任务未声明需要，且 GPU 全局串行）。",
+  "无真机/读屏，未测。",
+  "抓取瞬态守护进程 argv 用 13 分钟轮询，未命中；该缺口如实记入 remaining 而非推测。"
+ ]
+}

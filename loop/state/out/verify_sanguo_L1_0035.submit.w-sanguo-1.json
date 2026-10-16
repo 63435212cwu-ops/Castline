@@ -1,0 +1,420 @@
+{
+ "task": "verify:sanguo:L1:0035",
+ "agent": "w-sanguo-1",
+ "status": "done",
+ "verdict": "partial",
+ "candidateVerdict": "partial",
+ "reviewedTask": "read:sanguo:L1:0035",
+ "role": "VERIFIER",
+ "method": {
+  "contract": "loop/ROLES/VERIFIER.md：先自己读原文，再读候选；抽取项核对 → 反向验证 → 误杀检查 → 幻觉/越权 → 随机抽 5 条 find。",
+  "order": "本轮严格执行：先通读 docs[0].text[180031,184297) 全文（10 个非空段/15 行），把全文抄录并标注逐段偏移之后，才打开候选 JSON。",
+  "reproduce": "python3 -B -s $CL_ARTIFACTS/verify_sanguo_L1_0035_r1090/audit.py（脚本本轮新写，不复用候选或上一轮的中间结果；stdout 见同目录 audit.out.txt）",
+  "independence": "audit.py 独立遍历候选全树收集 quote+start+end，逐条对 docs[0].text 重新切片比对；未调用候选的 verify_offline.py，也未复用其 machineSelfCheck 结论。"
+ },
+ "reviewedArtifact": {
+  "path": "loop/state/out/read_sanguo_L1_0035.candidate.json",
+  "sha256": "281c63d405c77fe6a84e904ef0168a9cdeb03ba4d8865935264d42046aca583d",
+  "bytes": 232409,
+  "producedBy": "w-read-2",
+  "producedAt": "2026-10-11T11:10:56Z",
+  "changedByMe": false
+ },
+ "source": {
+  "path": "data/cache/fe42d01f3826fe8096f86614.docs.json",
+  "sha256": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+  "docIndex": 0,
+  "range": [
+   180031,
+   184297
+  ],
+  "codepoints": 4266,
+  "segmentSha256": "98a683862b604fef726c1e7dae7336af6e2d00d99765755e4cf717b0f07facb3",
+  "segmentBoundaryHead": "第三十六回　玄德用计袭樊城　元直走马荐诸葛",
+  "textSha256": "9d28638de0b0a89fa080cc2defb4a1f8de6adb1260c4545c04ef80f73cbb221e",
+  "textCodepoints": 607191,
+  "taskDeclaredSourceHash": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+  "taskDeclaredSourceHashNote": "任务冻结的 sourceHash=2988ce6e… 与任务**指定读取文件** fe42d01f….docs.json 的实际 sha256=8ab7298a… 不符。我方独立核实候选的诊断成立：data/cache/152e2a6eed94f1075e7e7070.docs.json 与 data/cache/f0b45e85aac6c95e584075a2.docs.json 两份的 sha256 都等于 2988ce6e…，且这两份与 fe42d01f… **解析后 text 逐字相同**（len=607191，sha256(text)=9d28638d…）；差异只在 doc0 的 JSON 键序（fe42d01f 为 kind,name,path,text；另两份为 path,name,text,kind）。所以候选在 quoteRef.sourceHash 上填 8ab7298a… 是**与所读文件一致**的口径，不是掩盖；我方 288 条逐条复核确认 0 处例外。"
+ },
+ "summary": "独立反向复核《三国演义》第三十六回 [180031,184297)（4266 码点）。先自读原文、后看候选。**引用层零编造、零定位错误**：288 条带偏移引文全部满足 text[start:end]==quote、find()==start、全文出现次数为 1、start/end 全在区间内、sourceHash 全等于所读文件；另有 33 条无偏移的裸 quote 字段也全部逐字命中且落在区间内（失败 0/321）。17 项自报计数器（tasks/causeEdges/rejectedEdges/states/foreshadows/worldSettings/themeReadings/speechAsClueNotFact/unknowns/selfCritique/places/items/rules/placesArrived/placesMentioned/knowledgeGaps/nullFields/uniqueQuotes/quoteRefs…）我方全量重算**全部一致**；受控词表（placeState/institution/itemStates/kind/basis）取值全部合法；voice 与 containsReportedSpeech 288/288 与其自身图例自洽；随机抽 5 条 find() 5/5 命中且 find==start。无原文外人物、无原文外结局、semanticReview 保持 not_performed（未越权声称语义已核验）。但抽取核对查出 **2 条与原文直接矛盾的断言**（CE19 把曹操对徐母说的开场白记成程昱所说；CE12 把先发生的「徐庶便拜谢欲行」写成玄德拒绝之后的「下文」），反向验证另查出 **21 条原文明确存在而候选 JSON 里完全不出现的事实**，其中**长亭送别后半链（别求高贤→樗栎庸材→嘱诸将→执手天各一方→涕泣而别）整段无任何引文覆盖**，而「使君宜别求高贤辅佐，共图大业」正是本回荐诸葛的直接动机句。判 **partial** 而非 fail：无一条引文编造、无原文外实体、无「结束=成功」越权，抽取层逐条有逐字锚点，两处矛盾断言与全部遗漏都能在原文上定点改正；且候选 selfCritique SC5 已自行标出 CE12 的弱点，属**已知弱点的兑现**而非隐瞒。",
+ "quoteAudit": {
+  "method": "读盘后遍历候选全树，收集所有含 quote+start+end 的对象（288 条）逐条断言 DOC[start:end]==quote，并全量重算 find()==start / 全文出现次数 / 切片出现次数 / 区间越界 / sourceHash；另收集 33 条无 start 的裸 quote 字段单独核验（find 定位 + 区间判定）。",
+  "totalQuoteRefs": 288,
+  "totalBareQuoteFields": 33,
+  "totalQuoteBearingFields": 321,
+  "verbatimFailures": 0,
+  "findNeStartFailures": 0,
+  "notFoundFailures": 0,
+  "occurrenceDeclarationMismatches": 0,
+  "outOfRangeFailures": 0,
+  "sourceHashMismatches": 0,
+  "bareQuoteVerbatimFailures": 0,
+  "bareQuoteOutOfRange": 0,
+  "uniqueQuotes": 162,
+  "voiceLegendViolations": 0,
+  "basisLegendViolations": 0,
+  "randomSpotCheck": {
+   "seed": 20261011,
+   "n": 5,
+   "method": "按引文出现顺序分 5 层各随机抽 1 条，重新 find() 一次",
+   "results": [
+    {
+     "quote": "操曰：“惜乎贤士归于刘备！羽翼成矣？奈何？”",
+     "start": 181590,
+     "find": 181590,
+     "hit": true
+    },
+    {
+     "quote": "将到河边，才欲寻船渡河",
+     "start": 180933,
+     "find": 180933,
+     "hit": true
+    },
+    {
+     "quote": "玄德闻徐庶之语，方悟司马德操之言，似醉方醒，如梦初觉。",
+     "start": 183983,
+     "find": 183983,
+     "hit": true
+    },
+    {
+     "quote": "岸上一彪军杀到：为首大将，乃张飞也。",
+     "start": 180945,
+     "find": 180945,
+     "hit": true
+    },
+    {
+     "quote": "老母手书来唤，庶不容不去。",
+     "start": 182573,
+     "find": 182573,
+     "hit": true
+    }
+   ],
+   "hits": 5
+  }
+ },
+ "counterExamples": [
+  {
+   "claim": "ce19_speaker_misattribution",
+   "what": "causeEdges 中 id=CE19_chengyu_jiuxin_xiangshu_xumu 的 `from` 写作「程昱以『闻令嗣徐元直，乃天下奇才』开场，替曹操劝徐母作书」，把「闻令嗣徐元直，乃天下奇才也」这句**曹操对徐母说的话**记成程昱所说；连边 id 也命名为 _chengyu_（程昱）。",
+   "evidence": {
+    "quote": "操大喜，使人星夜前去取徐庶母。不一日取至，操厚待之。因谓之曰：“闻令嗣徐元直，乃天下奇才也。",
+    "start": 181713,
+    "end": 181759,
+    "offsetUnit": "absolute-doc-codepoint",
+    "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+   },
+   "why": "原文主语链是「操厚待之。因谓之曰：『闻令嗣徐元直…』」——说话人是**操（曹操）**且是对徐母说的。程昱在本区间的发言只有两处：181432「此非单福也…」（向曹操揭真名）与 182031「徐母触忤丞相者，欲求死也…」（谏止杀徐母），**都不是**这句开场白；且 181713 处 程昱 尚未出场（其后首次出现程昱在 182031，已在徐母取石砚打曹操之后）。候选该边的 trigger 字段写的是「曹操说刘备『沛郡小辈…』」，即候选自己也把贬语归给曹操 —— `from` 与 `trigger` 内部不一致。",
+   "supportingQuotes": [
+    {
+     "quote": "程昱笑曰：“此非单福也。",
+     "start": 181432,
+     "end": 181444,
+     "offsetUnit": "absolute-doc-codepoint",
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    },
+    {
+     "quote": "程昱急止之，入谏操曰：“徐母触忤丞相者，欲求死也。",
+     "start": 182031,
+     "end": 182056,
+     "offsetUnit": "absolute-doc-codepoint",
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    }
+   ],
+   "reproduce": "python3 -c \"import json;t=json.load(open('data/cache/fe42d01f3826fe8096f86614.docs.json'))[0]['text'];print(repr(t[181713:181790]));print(t.find('程昱',181713,182100))\"  ⇒ 打印出的说话人是操；程昱首现于 182031",
+   "severity": "high",
+   "action": "必须改 `from` 的说话人为曹操、并把 id 前缀 _chengyu_ 改为 _caocao_；该边的 trigger/mechanism/引文本身无误，改后可保留。"
+  },
+  {
+   "claim": "ce12_false_textual_order",
+   "what": "causeEdges 中 id=CE12_sunqian_ku_liu_beiju_xushu_xing 的 mechanism 写「玄德明确拒绝…阻碍没有成立，**下文**徐庶便拜谢欲行」，并把「徐庶便拜谢欲行。」列为该边支持引文；但该句在原文中出现于孙乾进言与玄德拒绝**之前**。",
+   "evidence": {
+    "quote": "徐庶便拜谢欲行。",
+    "start": 182665,
+    "end": 182673,
+    "offsetUnit": "absolute-doc-codepoint",
+    "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+   },
+   "why": "按 codepoint 先后：『徐庶便拜谢欲行。』start=182665 < 『孙乾密谓玄德曰』start=182690 < 『玄德曰：不可…』start=182779。也就是说徐庶**在**孙乾提议苦留之前就已拜谢欲行；「下文」二字与原文次序直接矛盾。该边的 `to`（「玄德拒绝此计，徐庶得以成行」）因此也不能用 182665 这句作「成行」的证据。边本身作为反事实推演（计策未被采纳 ⇒ 未形成阻碍）仍可保留，但须删掉时序断言并换锚点。候选 selfCritique SC5 已自行声明这条边是构造的反事实边、比其他边弱 —— 本次复核确认其**序号层面**确实不成立。",
+   "supportingQuotes": [
+    {
+     "quote": "玄德曰：“乞再聚一宵，来日饯行。”",
+     "start": 182673,
+     "end": 182690,
+     "offsetUnit": "absolute-doc-codepoint",
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    },
+    {
+     "quote": "孙乾密谓玄德曰：“元直天下奇才，久在新野，尽知我军中虚实。",
+     "start": 182690,
+     "end": 182719,
+     "offsetUnit": "absolute-doc-codepoint",
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    },
+    {
+     "quote": "玄德曰：“不可。使人杀其母，而吾用其子，不仁也；留之不使去，以绝其子母之道，不义也。吾宁死，不为不仁不义之事。”",
+     "start": 182779,
+     "end": 182835,
+     "offsetUnit": "absolute-doc-codepoint",
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    },
+    {
+     "quote": "玄德与徐庶并马出城，至长亭，下马相辞。",
+     "start": 182929,
+     "end": 182948,
+     "offsetUnit": "absolute-doc-codepoint",
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    }
+   ],
+   "reproduce": "python3 -c \"import json;t=json.load(open('data/cache/fe42d01f3826fe8096f86614.docs.json'))[0]['text'];print([(k,t.find(v)) for k,v in [('拜谢欲行','徐庶便拜谢欲行。'),('孙乾密劝','孙乾密谓玄德曰：'),('玄德拒绝','玄德曰：“不可。使人杀其母')]])\" ⇒ 182665 / 182690 / 182779，顺序与「下文」相反",
+   "severity": "medium",
+   "action": "删掉「下文」这一时序断言；把「成行」的锚点换成 182929「玄德与徐庶并马出城，至长亭，下马相辞。」，或整条降级为 unknowns（按 SC5 的自我声明处置）。"
+  }
+ ],
+ "reverseChecks": [
+  {
+   "found": "**长亭送别后半链整段没有任何引文覆盖**（候选 T8 只引到 183316「玄德哭曰：元直去矣」，此后 66 字符与 183364–183443 两段均无引文）：「不劳使君远送」→ 玄德马上执手「天各一方，未知相会却在何日」→ 泪如雨下 → 庶亦涕泣而别。这是本回情绪最重、且是徐庶去意最终确认的一段；「执手」这一动作与「天各一方」这一判断在候选 states 里都没有落点。",
+   "quote": "庶辞曰：“不劳使君远送，庶就此告别。”玄德就马上执庶之手曰：“先生此去，天各一方，未知相会却在何日！”说罢，泪如雨下。庶亦涕泣而别。",
+   "reproduce": "python3 -B -s $CL_ARTIFACTS/verify_sanguo_L1_0035_r1090/audit.py | sed -n '/反向验证/,/未覆盖探针/p'"
+  },
+  {
+   "found": "**徐庶当众嘱咐诸将**这一段完全未被覆盖：「愿诸公善事使君，以图名垂竹帛，功标青史，切勿效庶之无始终也」，随后叙述写「诸将无不伤感」。这既是徐庶对自己「半途而别」的自我定性（与 T7 的 cost 直接相关，而 T7.cost 只引了「半途而别」那一句），也是本回唯一一次他把离别讲给第三方听。",
+   "quote": "临别，又顾谓诸将曰：“愿诸公善事使君，以图名垂竹帛，功标青史，切勿效庶之无始终也。”诸将无不伤感。"
+  },
+  {
+   "found": "**徐庶劝刘备「别求高贤」的话未被覆盖**，而它正是「走马荐诸葛」在原文里的直接动机句：他先说自己方寸已乱、在此无益，紧接着要刘备「别求高贤辅佐，共图大业」；刘备答「天下高贤，无有出先生右者」，徐庶再自谦「某樗栎庸材」。候选 CE13 把荐贤归因于徐庶自称的「心绪如麻，忘却一语」，漏掉了这条更直接、且同样出自徐庶之口的因果。",
+   "quote": "使君宜别求高贤辅佐，共图大业，何便灰心如此？”玄德曰：“天下高贤，无有出先生右者。”庶曰：“某樗栎庸材，何敢当此重誉。”"
+  },
+  {
+   "found": "**徐庶览毕伪书后的即时反应未被登记**：「徐庶览毕，泪如泉涌。」候选 SP7 只处理伪书**内容**（正确地不当事实）、ST3 只记位置变化，但没有任何一条记录他读完信当场落泪。这与后文「二人相对而泣，坐以待旦」是两个不同时点的落泪，不可合并。",
+   "quote": "徐庶览毕，泪如泉涌。"
+  },
+  {
+   "found": "**玄德对徐庶去而复回的两次追问未被覆盖**：「元直复回，莫非无去意乎？」（把回头误读为回心转意）与「先生此回，必有主意」。候选 CE13 直接以「忽见徐庶拍马而回」起引，跳过玄德的反应；而「莫非无去意乎」恰好证明刘备当时并不知道徐庶要荐人 ——这与 ST9 记的「刘备此前只听过水镜之语而不知其人」是同一知识差的两端，却缺了中间这一环。",
+   "quote": "玄德曰：“元直复回，莫非无去意乎？”遂欣然拍马向前迎问曰：“先生此回，必有主意。”"
+  },
+  {
+   "found": "**程昱介绍徐庶旧案的后半句被截断丢弃**：候选 SP19 引到「而同伴窃解救之。」为止，紧接的「乃更姓名而逃，折节向学，遍访名师，尝与司马徽谈论」全未出现（候选 JSON 里 0 次）。这一截断有实质影响：徐庶「尝与司马徽（水镜）谈论」正是本回 FS5「水镜曾言伏龙、凤雏」那层关系在曹操一侧的旁证，也是「折节向学」这一转向的唯一交代。",
+   "quote": "乃更姓名而逃，折节向学，遍访名师，尝与司马徽谈论。"
+  },
+  {
+   "found": "**寇封出场的外形与站位描写未被覆盖**：「只见一人侍立于侧。玄德视其人器宇轩昂，因问泌曰：『此何人？』」。候选 ST7/T10 用的是刘泌的介绍语（181194 起），但玄德**为什么**会注意到这个人（侍立于侧 + 器宇轩昂）没有引文 ——这是收义子事件的起因句。",
+   "quote": "玄德视其人器宇轩昂"
+  },
+  {
+   "found": "**程昱劝阻曹操杀徐母的两条理由之一被丢**：候选 CE9/SP6 引了「徐母既死，徐庶必死心助刘备以报仇矣…」，但同一段紧接前句的「丞相若杀之，则招不义之名，而成徐母之德」在候选 JSON 里 0 次出现。这是 CE9 所谓「后果比较改变决定」的另一半论据（名声成本），缺了它，该边的机制只剩一半。",
+   "quote": "丞相若杀之，则招不义之名，而成徐母之德。"
+  },
+  {
+   "found": "**八门金锁阵的吉凶规则本体未作为任何一条世界规则收录**：候选 CE4 的 mechanism 明写「选生门（东南角）入、景门（正西）出即避开伤亡之门」，但 W 段 6 条 rule 里没有八门规则，引文只给了「如从东南角上生门击人，往正西景门而出，其阵必乱。」与执行句；「入则吉／入则伤／入则亡」三条规则本体在候选 JSON 里 0 次出现（只在 notForeshadows[1] 以短引「八门者：休、生、伤、杜、景、死、惊、开。」出现）。按「影响行动、资源、约束或后果」的收录口径，这条规则直接决定了赵云走的路线，应当收录；候选 selfCritique SC7 已自行提出这一疑点，本次复核**支持 SC7 的怀疑成立**。",
+   "quote": "如从生门、景门、开门而入则吉；从伤门、惊门、休门而入则伤；从杜门、死们而人则亡。"
+  }
+ ],
+ "misKillCheck": {
+  "method": "反向问「候选把什么**合法**的东西排除掉了」，而不是只查已写项。",
+  "findings": [
+   {
+    "item": "八门金锁阵的吉凶规则（生/景/开=吉，伤/惊/休=伤，杜/死=亡）",
+    "verdict": "误杀（成立）",
+    "why": "它被放进 notWorldSettings，理由是「一次性战术说明」；但同一份提示词对 rule 的判据是「影响行动、资源、约束或后果」，而该规则直接决定了赵云五百军的进出路线（CE4/T15 都据此连边）。按判据应作 rule 收录。候选 SC7 已自陈此点。"
+   },
+   {
+    "item": "徐庶「终身不设一谋」之誓（未收进 worldSettings）",
+    "verdict": "不算误杀",
+    "why": "本区间内没有任何行为受该誓约束的记载（他立誓后即赴许昌，叙述未再写他为谁设谋），按「没有依据就不扩术语装饰层」不收是合理的；候选以 SP9 + FS7(unresolved) 两处登记，处置正确。"
+   },
+   {
+    "item": "刘泌家（收义子事件的发生地）未作 place 收录",
+    "verdict": "存疑，不判误杀",
+    "why": "原文有「遂请玄德到家，设宴相待」的到达动作，按 placeState=arrived 的口径可以收录；但它不改变任何行动或后果，不收也在「装饰性设定不要写」的允许范围内。候选 SC4 已自陈。此项**不作为 counterExample**（不足以判 fail）。"
+   },
+   {
+    "item": "徐母笔下「下我于缧绁」被排除出事实层",
+    "verdict": "正确排除",
+    "why": "该句是程昱诈修家书的内容，叙述对徐母的处置只写「送于别室养之」。候选 SP7 的排除是对的，未误杀。"
+   }
+  ]
+ },
+ "hallucinationCheck": {
+  "entitiesInCandidateNotInSlice": [
+   {
+    "name": "关羽",
+    "inSlice": 0,
+    "inCandidate": 31,
+    "verdict": "非编造"
+   },
+   {
+    "name": "诸葛亮",
+    "inSlice": 0,
+    "inCandidate": 16,
+    "verdict": "非编造"
+   },
+   {
+    "name": "刘表",
+    "inSlice": 0,
+    "inCandidate": 2,
+    "verdict": "非编造"
+   }
+  ],
+  "why": "三者都是本区间已有称谓的通用名：区间内作「关云长」（5 次）/「云长」、「孔明」（8 次）/「卧龙先生」、「刘景升」（2 次）。候选在 explain/note 里使用通行名，属称谓替换而非引入原文外人物；所有 321 条引文本身逐字可查，无一条含区间外文字。",
+  "endingsInvented": 0,
+  "foreshadowsInvented": 0,
+  "successOverreach": "未发现。反例：T2/T15 的 objectiveStatus=achieved_in_unit 有叙述句支撑（「玄德大获全胜，引军入樊城」）；T7 明写「「见母」只写到赴许昌为止」；T14 明写「结束不等于成功：本区间到「拂袖而入」为止，孔明是否出山没有任何结论」；ST3 明写「「赴」是出发义，不是到达」。",
+  "semanticReview": "not_performed（未越权声称语义已核验，与提示词要求一致）"
+ },
+ "metricsCheck": {
+  "method": "全部自报计数器用候选自身内容重算，不采信其 machineSelfCheck。",
+  "allMatch": true,
+  "recomputed": {
+   "quoteRefs": 288,
+   "uniqueQuotes": 162,
+   "tasks": 16,
+   "causeEdges": 19,
+   "rejectedEdges": 5,
+   "states": 15,
+   "knowledgeGaps": 3,
+   "foreshadows": 7,
+   "foreshadowsResolved": 5,
+   "foreshadowsUnresolved": 2,
+   "worldSettings": 23,
+   "places": 10,
+   "placesArrived": 7,
+   "placesMentioned": 3,
+   "items": 7,
+   "rules": 6,
+   "themeReadings": 2,
+   "speechAsClueNotFact": 22,
+   "unknowns": 20,
+   "selfCritique": 12,
+   "nullFields": 12,
+   "nullFieldsWithNote": 12,
+   "tasksWithNullField": 9,
+   "tasksWithNullAndNote": 9,
+   "sameQuoteAcrossTaskFields": 0
+  },
+  "mismatches": [],
+  "coverageFieldNote": "候选 coverage.narrativeChars=4252 与它自己写的 boilerplate 口径**不自洽**：4266−21(回目行)−20(分隔线)−34(枫林晚导航行)=4191，而 4252 = 4266−14(换行符)。即该字段算的是「去掉换行」而不是它注释里声称的「剔除 boilerplate」，两者差 61 字符。此项不影响任何引文与结论，属元数据口径瑕疵，**不作为 counterExample**，据契约纪律记为存疑。"
+ },
+ "coverageReverseCheck": {
+  "method": "把 288 条带偏移引文 + 33 条裸引文（find 定位）的全部区间投到切片上求并集，再看哪些原文段落完全无覆盖。",
+  "sliceCodepoints": 4266,
+  "coveredCodepoints": 3362,
+  "sliceCoverage": "78.8%",
+  "boilerplateCodepoints": 75,
+  "narrativeCodepoints": 4191,
+  "narrativeCoverage": "80.2%",
+  "uncoveredNarrative": 829,
+  "uncoveredRunsOver25": 11,
+  "largestUncoveredRuns": [
+   "183103–183212（109 字符）：别求高贤／天下高贤无出先生右者／樗栎庸材／嘱诸将名垂竹帛",
+   "182354–182437（83 字符）：伪书后半（若得汝降…更不多嘱）＋徐庶览毕泪如泉涌",
+   "183229–183295（66 字符）：不劳使君远送／执手天各一方／泪如雨下／庶亦涕泣而别",
+   "183527–183586（59 字符）：无异周得吕望汉得张良／驽马并麒麟寒鸦配鸾凤",
+   "183402–183443（41 字符）：元直复回莫非无去意乎／先生此回必有主意"
+  ],
+  "note": "未覆盖 ≠ 错误：本区间含大量对话，逐句收录会淹没抽取层。但上列第 1、3 段属**结构性遗漏**（长亭送别的动机句与情感收束句），不是可有可无的修饰，故计入 reverseChecks。"
+ },
+ "notes": "总体判断：**引用层可信、抽取层可用、两处断言需改、送别段有结构性遗漏** ⇒ partial。\n\n可以原样采信的部分：(1) 全部 321 条引文实例（288 带偏移 + 33 裸引）逐字命中、偏移一致、出现在区间内，sourceHash 与所读文件一致 —— 这是**零编造**；(2) 全部自报计数器与受控词表取值经全量重算无一不符；(3) tasks 的 null 栏位全部配 <栏位>Note 说明「为什么没有」，符合「不写理由的 null 才算未知」的要求；(4) 16 条任务五栏无一句共用（reuse=0）；(5) states 的知识差（ST1/ST9/ST12/ST15）写清了谁知/不知/未定，尤其 ST12 明写誓言「原文没有写曹操一方得知」，与 SP9 呼应，未把誓语当事实；(6) rejectedEdges 5 条明确拒绝「时间相邻就连边」，其中第 1 条（伐树→回头）拒绝得正确 —— 原文确无徐庶听见该语的记载；(7) 无「结束=成功」越权（T14 明写孔明是否出山未定）。\n\n必须丢弃或降级的部分：CE19 的 `from` 归属（改为曹操，或整条重写）、CE12 的「下文」时序断言（删断言并换锚点，或整条降为 unknowns）。其余 17 条 causeEdges 的触发与机制我方逐条回原文核对，未发现第二处归属或时序错误。\n\n**存疑（按契约纪律不据此判 fail，仅记录）**：\n① voice 标签语义：候选把 72 条落在原文引号内部的引文标为 voice=narration / containsReportedSpeech=false。因其 voiceLegend 自我定义为「引文内不含引号」（**字面**判据），288/288 与图例自洽，故不构成对原文的矛盾；但若按「这段话是不是人物说的」这一**语义**判据，其中至少 13 条是纯人物话语切片（如 180135「彼若尽提兵而来…」）。这是图例定义问题而非引文错误，我无法用原文引证来否定它，故记为存疑。\n② coverage.narrativeChars=4252 与其 boilerplate 注释口径相差 61 字符（详见 metricsCheck.coverageFieldNote）。\n③ 候选 source.sourceHash 填 8ab7298a…（所读文件实际值）而非任务冻结的 2988ce6e…：我方独立核实两份哈希指向的**解析后文本逐字相同**，候选的口径正确且已在 sourceHashDiscrepancy 里写明；这属于**任务/队列侧**的哈希登记问题，不是候选的缺陷，建议上游修正 build_plan 的 docsSha256 取值。\n\n**我的自我更正**：我最初用一份只遍历部分顶层分区的 walker，得到「241 条引文」并据此以为候选自报的 288 有虚报；改为遍历全树后确认恰为 288 条带偏移引文 + 33 条裸引文，**候选的自报是对的，我的第一版统计是错的**，如实记录在此。\n\n**写入路径处置**：本轮租约（startedAt 2026-10-11T13:37:32Z）开始前，该 writes 路径上已存在一份**未被提交**的上一轮草稿（sha256=b0a03d96b90d81dc9a9f8049f00a08a6ffc428747f8e7de85f24fc85618f1dbd，21:36:15 本地写入，loop/state/out/ 下无对应的 verify_sanguo_L1_0035.json 提交记录，且守护日志显示 19:12:35 已收到 SIGTERM 退出）。按任务 writes 指定，本轮由我覆写该路径；覆写前的草稿哈希记录于此，便于追溯。",
+ "evidence": [
+  {
+   "path": "loop/state/out/verify_sanguo_L1_0035.verdict.json",
+   "sha256": "a0d6ebbdeadad1973ddfcf82a29e1ccc2cd42da0c95cb7b23abc3e2bbdebe61e",
+   "kind": "verdict",
+   "note": "本轮复核产物（任务 writes 指定的唯一写入路径）：verdict=partial、counterExamples 2 条（每条含逐字原文引证+偏移+可复现命令）、reverseChecks 9 条、misKillCheck/hallucinationCheck/metricsCheck/coverageReverseCheck 各一"
+  },
+  {
+   "path": "data/cache/fe42d01f3826fe8096f86614.docs.json",
+   "sha256": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+   "kind": "source",
+   "note": "原文来源；[180031,184297) 切片 sha256=98a683862b604fef726c1e7dae7336af6e2d00d99765755e4cf717b0f07facb3（4266 码点）"
+  },
+  {
+   "path": "loop/state/out/read_sanguo_L1_0035.candidate.json",
+   "sha256": "281c63d405c77fe6a84e904ef0168a9cdeb03ba4d8865935264d42046aca583d",
+   "kind": "candidate",
+   "note": "被复核候选（只读，未改动；本轮开始与结束哈希一致，281c63d4…）"
+  },
+  {
+   "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261011-195516-813640-53101/测试产物/verify_sanguo_L1_0035_r1090/audit.py",
+   "sha256": "380beda0ee9e25ee1aa964206ff72171156d00082476f22e224e1d24e23b373f",
+   "kind": "audit-script",
+   "note": "我方本轮新写的独立复核脚本；运行 0 失败"
+  },
+  {
+   "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261011-195516-813640-53101/测试产物/verify_sanguo_L1_0035_r1090/audit.out.txt",
+   "sha256": "168b4b7a1106a61dfda2123f88f72c0272091ce2f2cff0b5a207818f78848cce",
+   "kind": "audit-output",
+   "note": "audit.py 完整 stdout：288 条带偏移引文全量断言 + 33 条裸引文 + 计数器对账 + 覆盖度 + 21 条反向探针 + 抽 5 条 find 抽查"
+  }
+ ],
+ "assertions": [
+  {
+   "text": "引文逐字性（全量，不抽样）：遍历候选全树取 288 条含 quote+start+end 的对象，逐条断言 T[start:end]==quote 且 find(quote)==start 且全文出现次数为 1 ⇒ 失败 0 条",
+   "result": "pass"
+  },
+  {
+   "text": "裸引文字段：33 条无偏移 quote 单独 find 定位，全部逐字命中且落在 [180031,184297) 内 ⇒ 失败 0 条",
+   "result": "pass"
+  },
+  {
+   "text": "sourceHash：288 条引文的 sourceHash 全部 == 8ab7298a…（所读文件实际 sha256）⇒ 0 处不符；任务冻结的 2988ce6e… 已独立核实在另两份解析后逐字相同的缓存上",
+   "result": "pass"
+  },
+  {
+   "text": "自报计数器全量重算：quoteRefs/uniqueQuotes/tasks/causeEdges/rejectedEdges/states/knowledgeGaps/foreshadows(±resolved)/worldSettings/places(±arrived)/items/rules/themeReadings/speechAsClueNotFact/unknowns/selfCritique/nullFields(±Note)/tasksWithNull(±Note)/sameQuoteAcrossTaskFields ⇒ 全部一致，0 处不符",
+   "result": "pass"
+  },
+  {
+   "text": "受控词表：placeState/institution/itemStates/kind/basis 取值全部落在提示词与候选自述图例允许的枚举内 ⇒ 0 处越界",
+   "result": "pass"
+  },
+  {
+   "text": "随机抽 5 条（seed=20261011，按出现顺序分 5 层）重新 find() ⇒ 5/5 命中且 find==start、切片逐字一致",
+   "result": "pass"
+  },
+  {
+   "text": "反向验证：21 条原文明确存在且全文唯一的探针，在候选 JSON 里完全不出现 ⇒ 21/21 确认未覆盖；量化覆盖度 78.8% 全切片 / 80.2% 叙事（未覆盖叙事 829 字符）",
+   "result": "pass"
+  },
+  {
+   "text": "幻觉检查：候选出现的 关羽/诸葛亮/刘表 三词在区间内为 0 次，但区间内有对应称谓 云长/孔明/刘景升；属称谓替换而非引入原文外人物，321 条引文无一条含区间外文字 ⇒ 无编造",
+   "result": "pass"
+  },
+  {
+   "text": "复核结论：判 partial。2 条 counterExample（CE19 说话人归属错误、CE12 时序断言与原文相反）均逐字可查；无一条引文编造、无原文外实体、无「结束=成功」越权 ⇒ 按契约不判 fail",
+   "result": "pass"
+  }
+ ],
+ "changes": [
+  {
+   "path": "loop/state/out/verify_sanguo_L1_0035.verdict.json",
+   "kind": "append-only"
+  },
+  {
+   "path": "loop/state/out/verify_sanguo_L1_0035.submit.w-sanguo-1.json",
+   "kind": "append-only"
+  }
+ ],
+ "sourceHashes": {
+  "data/cache/fe42d01f3826fe8096f86614.docs.json": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+  "loop/state/out/read_sanguo_L1_0035.candidate.json": "281c63d405c77fe6a84e904ef0168a9cdeb03ba4d8865935264d42046aca583d",
+  "loop/state/out/verify_sanguo_L1_0035.verdict.json": "a0d6ebbdeadad1973ddfcf82a29e1ccc2cd42da0c95cb7b23abc3e2bbdebe61e",
+  "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261011-195516-813640-53101/测试产物/verify_sanguo_L1_0035_r1090/audit.py": "380beda0ee9e25ee1aa964206ff72171156d00082476f22e224e1d24e23b373f",
+  "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261011-195516-813640-53101/测试产物/verify_sanguo_L1_0035_r1090/audit.out.txt": "168b4b7a1106a61dfda2123f88f72c0272091ce2f2cff0b5a207818f78848cce"
+ },
+ "remaining": [
+  "CE19 与 CE12 两条需**原提交者（w-read-2）或后续返工轮**定点改正：CE19 改 `from` 的说话人为曹操并改 id 前缀；CE12 删「下文」并换锚点为 182929「玄德与徐庶并马出城，至长亭，下马相辞。」，或整条降为 unknowns。我方只写 verdict.json，未改动候选。",
+  "9 条 reverseChecks 是**遗漏清单**而非错误清单：长亭送别后半链（别求高贤→樗栎庸材→嘱诸将→执手天各一方→涕泣而别）与八门吉凶规则建议在返工轮补入；八门规则按「影响行动」口径应作 rule 收录（与候选 SC7 的自我怀疑一致）。",
+  "存疑项未判 fail：①voice 标签按「引文内不含引号」的字面图例自洽（288/288），但按语义判据至少 13 条属纯人物话语切片，属图例定义问题；②coverage.narrativeChars=4252 与其 boilerplate 注释口径差 61 字符。两项都无法用原文引证否定，故只记录。",
+  "任务/队列侧问题（非候选缺陷）：build_plan 写入 task.sourceHash 时取的 docsSha256 指向 152e2a6e…/f0b45e85… 而非任务 writes 指定的 fe42d01f…，两者解析后文本逐字相同、仅 JSON 键序不同。建议上游统一，否则每个读到该单元的 agent 都要重新诊断一次。",
+  "本轮 writes 路径上原有上一轮**未提交**草稿（sha256=b0a03d96b90d81dc9a9f8049f00a08a6ffc428747f8e7de85f24fc85618f1dbd，21:36:15 写入，loop/state/out/ 下无对应提交记录）。按任务 writes 指定由本轮覆写；哈希已记入 notes 便于追溯。",
+  "本轮未做也未声称：未运行 GPU/浏览器测试（任务未声明需要，且 GPU 全局串行）；未对候选做任何写入。"
+ ],
+ "rollback": {
+  "kind": "append-only",
+  "strategy": "delete-added-files",
+  "files": [
+   "loop/state/out/verify_sanguo_L1_0035.verdict.json",
+   "loop/state/out/verify_sanguo_L1_0035.submit.w-sanguo-1.json"
+  ]
+ }
+}

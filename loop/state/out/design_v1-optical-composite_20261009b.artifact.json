@@ -1,0 +1,276 @@
+{
+  "task": "design:v1-optical-composite:20261009b",
+  "agent": "w-gpu",
+  "producedAt": "2026-10-09T12:04:04Z",
+  "verdict": "reject_no_visible_gain",
+  "verdictScope": "候选补丁本身是**可用**的（可应用、语法通过、单趟逐像素不变、恢复精确），但它没有产生任务要求的可见收益，所以不作为升级候选提交合并。",
+  "writes": {
+    "artifact": "loop/state/out/design_v1-optical-composite_20261009b.artifact.json",
+    "patch": "loop/state/out/design_v1-optical-composite_20261009b.patch"
+  },
+  "acceptance": {
+    "asked": [
+      "厚处遮挡后景",
+      "薄棱透光",
+      "无硬黑补丁",
+      "至少一个人物的全幅/斜视/暗部/旋转",
+      "旋转不可仅截图冒充录像"
+    ],
+    "thick_occludes_backdrop": {
+      "result": "fail",
+      "measured": "在晶体后方放一块不透明棋盘板（真实场景对象，opaque pass，depthWrite/depthTest 开），以「棋盘对比度存活率」量测透过率：板自身对比度 54.369；生产 47.513 (87.4%)；候选 48.562 (89.3%) ⇒ 候选**多透过 2.2%**，方向相反。",
+      "why_structurally": "该机制把 alpha 守恒到 aProd = 1-(1-aSingle)^2（生产两面合成覆盖），所以**按构造它不可能改变遮挡总量**；它只把「远面被吸收掉的那一份」改由近面补上。遮挡总量不变 ⇒ 不可能出现「厚处遮挡后景」的净收益。",
+      "evidence": [
+        {
+          "path": "/tmp/castline-shots/review-20261009b/optics-composite-v3/chk2-baseline.png",
+          "sha256": "f5ea0e821e8e4874c92406a6bd833bc143e67a4f22a1f70367c5ab49c6bef9b9",
+          "note": "生产基线：晶体 + 棋盘板"
+        },
+        {
+          "path": "/tmp/castline-shots/review-20261009b/optics-composite-v3/chk2-candidate.png",
+          "sha256": "4fa6327827feb65f6ee3a49dc06fc9e28e45e088d9d549a94694c3c9b5a0590b",
+          "note": "候选：晶体 + 棋盘板"
+        },
+        {
+          "path": "/tmp/castline-shots/review-20261009b/optics-composite-v3/chk2-restore.png",
+          "sha256": "f5ea0e821e8e4874c92406a6bd833bc143e67a4f22a1f70367c5ab49c6bef9b9",
+          "note": "恢复：与基线逐像素相同"
+        },
+        {
+          "path": "/tmp/castline-shots/review-20261009b/optics-composite-v3/chk-withShells.png",
+          "sha256": "c000736878671d8f7dcc8b8ea574b050e4d8e48a3f6ccc334958110ec99827c1",
+          "note": "含两层基底壳（用于取剪影）"
+        },
+        {
+          "path": "/tmp/castline-shots/review-20261009b/optics-composite-v3/chk-withoutShells.png",
+          "sha256": "12fe611c60b9057360cbe69b262c584e257585d92314f016d8edf6fe0370eb24",
+          "note": "隐藏两层基底壳（板自身对比度基准）"
+        },
+        {
+          "path": "/tmp/castline-shots/review-20261009b/optics-composite-v3/chk2-baseline-detail.png",
+          "sha256": "e355c8cbca9d01941b818ba4512c91cb77503ac586c0bfb0498f093d780d9136",
+          "note": "基线局部裁切"
+        },
+        {
+          "path": "/tmp/castline-shots/review-20261009b/optics-composite-v3/chk2-candidate-detail.png",
+          "sha256": "60c8a62810f16d3df45f7cc129e46005b381705d300ac1dda2b8b9afd90acf5f",
+          "note": "候选局部裁切"
+        }
+      ]
+    },
+    "thin_edge_transmits": {
+      "result": "not_separately_proven",
+      "measured": "薄棱区域在本次机位下细于 64px 量测格（rim cells = 0），不足以与厚处分开统计；因此「薄棱透光」本轮**没有得到独立证据**，不作声称。"
+    },
+    "no_hard_black_patch": {
+      "result": "pass",
+      "measured": "判据 = 基线 >45 且候选 <18 的新增近黑像素，且成块（≥40px）且边界锐利（3x3 最大滤波下的平均落差 >28）。full 9px / oblique 9px / dark 68px / rotateA 63px，**成块区域 0 个、硬边 0 个**。对比：被否决的继承候选在同一判据下 dark 与 rotateA 各有 1–2 块硬边近黑三角。",
+      "evidence": [
+        {
+          "path": "/tmp/castline-shots/review-20261009b/optics-composite-v3/dark-baseline-detail.png",
+          "sha256": "ed13990e0498c006eaf5044c7262f63570fb3ebc748cb91a7aa102f1e947da8d",
+          "note": "暗部基线"
+        },
+        {
+          "path": "/tmp/castline-shots/review-20261009b/optics-composite-v3/dark-candidate-detail.png",
+          "sha256": "0a6ed9d8d4059a853a672ce4b85b107c23be75f92e1114d34f537839807ded6f",
+          "note": "暗部候选"
+        },
+        {
+          "path": "/tmp/castline-shots/review-20261009b/optics-composite-v3/rotateA-baseline-detail.png",
+          "sha256": "80340742e4cca4f21d7e49e60f229b091dec3fae02046d6153318fb969f53ef1",
+          "note": "旋转 A 基线"
+        },
+        {
+          "path": "/tmp/castline-shots/review-20261009b/optics-composite-v3/rotateA-candidate-detail.png",
+          "sha256": "da5936f2aee7a7ee9b7c2ee0f80fe7ef35dc1acf8349dcf3d209bd48a111b7dd",
+          "note": "旋转 A 候选"
+        }
+      ]
+    },
+    "rotation_record": {
+      "result": "done",
+      "measured": "真实轨道录像，两条臂各 24 帧：distinctCameras=24（不是同一张静帧复制）、rendererFrame 严格递增（baseline 14074→14764、candidate 115174→115864）、glErrors=[0]，逐帧 performance.now() 与真实相机坐标入库，并由这些真实帧间隔编码为 H.264 MP4。",
+      "honest_limits": [
+        "canvas 帧序列（真实渲染节奏），**不是** CDP Page.startScreencast 合成器采集 ⇒ 只有 WebGL 画布，不含 DOM/HUD。",
+        "tAnim 被 SETUP 钉住是设计使然（同相位可比），所以这是**相机轨道**记录，不是材质动画记录。",
+        "它是旋转记录，**不是性能测量**。"
+      ],
+      "evidence": [
+        {
+          "path": "/tmp/castline-shots/review-20261009b/optics-rotation-v2/rotation-baseline.mp4",
+          "sha256": "10aa9c67efd7e8b7fefcc296b06bbb776e1e40052c39113943da7156644973dc",
+          "note": "基线 24 帧真实轨道 MP4"
+        },
+        {
+          "path": "/tmp/castline-shots/review-20261009b/optics-rotation-v2/rotation-candidate.mp4",
+          "sha256": "7d00d9c54e27d39cbb1a3ece9304ed2e781c9f23c34880642ee5471bf16f5c2a",
+          "note": "候选 24 帧真实轨道 MP4"
+        },
+        {
+          "path": "/tmp/castline-shots/review-20261009b/optics-rotation-v2/rotation-report.json",
+          "sha256": "4e4de82c96131b4b6f5e62363bf49a86691788d3f309790525eefd69ee889c88",
+          "note": "逐帧 rendererFrame / now / camera / yaw"
+        }
+      ]
+    }
+  },
+  "methodHealth": {
+    "parityGate_singlePassIdentical": true,
+    "parityGateNote": "uPass=0.5 时 passLegacy 精确为 1，frontness 逐字等于 gl_FrontFacing ⇒ 默认路径与改动前**逐像素相同**。这是本候选可安全默认关闭的依据。",
+    "restoreExactAllViews": true,
+    "sameClockAndCameraAllViews": true,
+    "freshRendersStrictlyIncreasing": true,
+    "health": {
+      "jserr": [],
+      "jsrej": [],
+      "shaderErrors": 0,
+      "glError": 0,
+      "quality": {
+        "dpr": 1,
+        "deviceDpr": 1,
+        "maxPixels": 8300000,
+        "boost": 1,
+        "boostPin": true,
+        "samples": 4,
+        "boostBad": false,
+        "context": "compass",
+        "still": 2.1,
+        "dip": 0,
+        "bloomScale": 0.5,
+        "lineComp": 1.26,
+        "degrade": 0,
+        "gl2": true,
+        "drawW": 1920,
+        "drawH": 1080,
+        "msaaResolve": "direct-color",
+        "lightOwner": "crown-core",
+        "sharedTier": {
+          "tag": "full",
+          "level": 0,
+          "glow": 12,
+          "labels": "d2",
+          "particles": 1,
+          "animation": 1
+        }
+      },
+      "degrade": 0
+    },
+    "drawingBuffer": {
+      "drawW": 1920,
+      "drawH": 1080,
+      "dpr": 1,
+      "degrade": 0
+    },
+    "note": "1920×1080，非原生 4K；本轮**不**声称 4K 或持续性能。健康门 jserr/jsrej/shaderErrors/glError 全 0。"
+  },
+  "rootCause": {
+    "finding": "生产基底是一张 DoubleSide、depthWrite:false 的半透明网格 ⇒ 内外两个小面**都**着色，合成覆盖是 1-(1-aSingle)^2，而继承候选把它当成单面 aSingle 去拆分，于是系统性欠覆盖（按实测 thk 0.55–1.00 计算欠 0.10–0.25），这正是被否决帧均值 -4.4 的来源。",
+    "measured_inputs": "从活页面读**真实 aH 属性**（着色器 vH = aH，不是 position.y）：薄荷绿柱 thk med 0.6632 / p95 1.0 / frac_thk1 0.20；紫晶 thk med 0.9868 / frac_thk1 0.50；两者 frac_raw_above_2 = 0。",
+    "correction_applied": "守恒对象改为两面合成 aProd，使 1-(1-aFar)(1-aNear) 精确等于 aProd（实测 |误差| < 1e-12）。修正后均值偏移由 -4.4 变为 +2.2（不再是系统性压暗）。",
+    "residual_limit": "但守恒 ⇒ 遮挡总量不变 ⇒ **仍然不可能**产生「厚处遮挡后景」的净收益。这是机制层面的天花板，不是参数没调好，所以按 QUALITY §11「每机制最多两轮」不再做第三轮同机制扫描。",
+    "supersedes_earlier_probe": "同目录早期 probe 用 position.y 当 vH，结论作废；本文件只引用 aH 口径的 rootcause-vH.json。",
+    "evidence": [
+      {
+        "path": "/tmp/castline-artifacts/review-20261009b/rootcause-vH.json",
+        "sha256": "11c25c1edef7f519a1635dafb89a4a65a7ea5526aea2893be9a72176a60af472",
+        "note": "真实 aH 口径的 thk/depthMetric 分布与 alpha 上限"
+      },
+      {
+        "path": "/tmp/castline-shots/review-20261009b/optics-composite-v2/ab-report.json",
+        "sha256": "1fbbee036b8e8c195af83065646f96ddee0f13981e9911970d55331a553b0b30",
+        "note": "第一版（单面守恒）A/B，用于对照 +2.2 vs -4.4"
+      },
+      {
+        "path": "/tmp/castline-shots/review-20261009b/optics-composite-v3/ab-report.json",
+        "sha256": "d399e9f3137e1233ae7103aa93e8300c9ebc7028908fa25428efb4b0eb0c3a73",
+        "note": "修正版（两面守恒）A/B"
+      }
+    ]
+  },
+  "patch": {
+    "path": "loop/state/out/design_v1-optical-composite_20261009b.patch",
+    "sha256": "18de56926692ab870019f57af28b88060a50fdb3da97654875196197765a8341",
+    "appliesCleanly": true,
+    "applyCheck": "cd %s && git apply --check loop/state/out/design_v1-optical-composite_20261009b.patch",
+    "touches": [
+      "js/core/scene-mats.js",
+      "js/scene.js"
+    ],
+    "files": {
+      "js/core/scene-mats.js": {
+        "before": "0902786787855da799e5f54799f8413b1ed731c50a1a33189236608b2567890b",
+        "expectedAfter": "23d916dd626d78a69afc4a1aee161b17c25fc0c20fc45e83cb06f84505ca7292"
+      },
+      "js/scene.js": {
+        "before": "9c240b6f752e77543309a034ac34e949c29357ff826012da8638a03381e5d6ac",
+        "expectedAfter": "bcb4ce5bf7d2a58c46c83ea0bec87fe6e8a0da8eaf40fbfb3670dbe7e4d3b539"
+      }
+    },
+    "syntaxChecked": "node --check on both patched files => OK",
+    "changedMechanism": "把基底从「一张 DoubleSide 网格按三角形缓冲序提交、前后小面交错」改为「先远面（BackSide）后近面（FrontSide）」两趟显式合成，两趟各持一个 ShaderMaterial（uniform 按材质上传，共享一个材质拿不到不同 uPass；side 也必须固定，onBeforeRender 改 side 在材质 id 不变时不重新生效），uPass 之外的 uniform 对象按引用共享以保持逐帧动画同步。",
+    "conservation": "1-(1-aFar)(1-aNear) == aProd == 1-(1-aSingle)^2，max |err| < 1e-12",
+    "defaultOff": "gemMat 的 uPass 默认 0.5；未显式拆分时 a 与改动前逐字相同（parity gate 实测逐像素相同）。",
+    "mergeRecommendation": "**不建议本轮合并**：机制无可见收益（见 acceptance.thick_occludes_backdrop = fail）。补丁保留在 writes 路径，供下一个换机制的候选复用其中的两趟骨架与守恒式，或由合并任务评估其「默认关闭、零风险」的部分。"
+  },
+  "notClaimed": [
+    "没有产生可见的晶体质感收益；本轮如实判 reject_no_visible_gain，不制造通过。",
+    "没有 4K 原生画布证据（本轮 1920×1080）。",
+    "没有持续性能/长时曲线证据。",
+    "没有三书证据：只做了西游记一个人物（孙悟空）。",
+    "没有独立艺术审阅：本裁决是我自己的测量，独立审阅者有否决权。",
+    "「薄棱透光」未获独立证据。",
+    "没有真机、读屏证据。",
+    "未改任何受保护路径；生产源码字节未变。"
+  ],
+  "remaining": [
+    "厚处遮挡后景未成立：守恒式按构造保持遮挡总量不变，需要改「覆盖总量随厚度上升」而不是改守恒式。",
+    "薄棱 / 厚处的分离量测需要更细的局部口径（本次 64px 格下薄棱样本为 0）。",
+    "下一个机制候选建议优先做「覆盖总量随真实光程单调上升」（让厚处真正压过后景），而不是继续拆分前后趟。",
+    "本轮未覆盖下谱紫晶在掠射角的独立检查。"
+  ],
+  "sourceHashes": {
+    "js/core/scene-mats.js": "0902786787855da799e5f54799f8413b1ed731c50a1a33189236608b2567890b",
+    "js/scene.js": "9c240b6f752e77543309a034ac34e949c29357ff826012da8638a03381e5d6ac",
+    "data/cache/ed3dc1255ca08fbdaae30bbd.json": "3005a49ae29146d3a7b78bc35767c0407bd265f459b7aed715306c51309b8eb5"
+  },
+  "protectedPathsUntouched": true,
+  "inheritedAttempt": {
+    "source": "loop/state/out/design_v1-optical-composite_20261009b.patch as left by the rc=1 attempt (2026-10-09T11:26:59Z, log loop/state/logs/w-gpu-design-v1-optical-composite-20261009b-20261009-185547.log tail = \"RATE_LIMIT\")",
+    "defect_1": "js/scene.js referenced `uPass: { value: PASS_SINGLE }` but PASS_SINGLE is defined nowhere in production (`grep -rn PASS_SINGLE js/` => 0 hits) => ReferenceError while building the gem crown.",
+    "defect_2": "the file was not a valid unified diff: `git apply --check` => \"error: corrupt patch at line 37\". A merge task could not apply it at all.",
+    "reproduce": "grep -rn PASS_SINGLE js/ ; git apply --check <that file>"
+  },
+  "evidence": [
+    {
+      "path": "/Users/carmen/Desktop/星系/loop/state/out/design_v1-optical-composite_20261009b.patch",
+      "sha256": "18de56926692ab870019f57af28b88060a50fdb3da97654875196197765a8341",
+      "note": "候选补丁（可用，但本轮不推荐合并）"
+    },
+    {
+      "path": "/tmp/castline-shots/review-20261009b/optics-composite-v3/ab-report.json",
+      "sha256": "d399e9f3137e1233ae7103aa93e8300c9ebc7028908fa25428efb4b0eb0c3a73",
+      "note": "修正版真实 A/B：parity / 恢复 / 健康"
+    },
+    {
+      "path": "/tmp/castline-shots/review-20261009b/optics-rotation-v2/rotation-report.json",
+      "sha256": "4e4de82c96131b4b6f5e62363bf49a86691788d3f309790525eefd69ee889c88",
+      "note": "真实轨道录像报告"
+    },
+    {
+      "path": "/tmp/castline-artifacts/review-20261009b/ab-v3.log",
+      "sha256": "2d22b322ba2d4de0345d832329773b560e09960e34e90d254b489e712c040da6",
+      "note": "修正版 A/B 运行日志"
+    },
+    {
+      "path": "/tmp/castline-artifacts/review-20261009b/rotation-v2.log",
+      "sha256": "662b91feba113572c24d2b399717da8b7183cd225752aac3d726c73095eb1a9e",
+      "note": "旋转录像运行日志"
+    },
+    {
+      "path": "/Users/carmen/Desktop/星系/loop/state/logs/w-gpu-design-v1-optical-composite-20261009b-20261009-185547.log",
+      "sha256": "abb1cc2bebf29c5309f8a8b666c6f3a1d9ee2d38728d9e69e099b6cef7c7beea",
+      "note": "被取代那一次尝试的日志（尾部为 RATE_LIMIT 基础设施失败）"
+    }
+  ]
+}

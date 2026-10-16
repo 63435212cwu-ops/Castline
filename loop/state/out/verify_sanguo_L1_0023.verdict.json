@@ -1,0 +1,274 @@
+{
+  "schema": "castline/loop-read-verify/1",
+  "task": "verify:sanguo:L1:0023",
+  "reviewedTask": "read:sanguo:L1:0023",
+  "reviewer": "w-verify-4",
+  "role": "VERIFIER",
+  "status": "done",
+  "book": "sanguo",
+  "lane": 1,
+  "unitIndex": 23,
+  "unitHead": "第二十四回　国贼行凶杀贵妃　皇叔败走投袁绍",
+  "sourceRange": [121524, 124400],
+  "sourceHash": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+  "segmentSha256": "b563a9b0fb6752a814d69b1a516d63efe93be0eef3a40a6958f8f10cc94a87ba",
+  "segmentChars": 2876,
+  "reviewedCandidate": {
+    "path": "loop/state/out/read_sanguo_L1_0023.candidate.json",
+    "sha256": "b07786383bc775a434c5cd901a73fcf1a329e0253a0f6faeb0f2d019d3634c05",
+    "bytes": 209549,
+    "author": "w-xiyou-0",
+    "selfSigned": false,
+    "note": "只读复核；本复核全程未修改被复核文件一个字节。"
+  },
+  "verdict": "partial",
+  "verdictScope": "只裁「本单元抽取是否为真、是否漏掉原文明确存在的事实、是否误杀合法条目、是否越权」。不裁文学解读优劣；semanticReview 本身仍为 not_performed。",
+
+  "summary": "定位层零缺陷：候选 215 条 quoteRef 逐条复算 T[start:end]==quote 失败 0、occurrencesInWholeDoc/Slice 声明与实际计数全部相符（215/215）、inUnitRange 标志 0 处错误；用独立重建的引号深度模型复算 speech/narration 与 insideQuotedSpan 标签，215/215 完全吻合；固定种子 20261010 抽 5 条 find 全部逐字命中且偏移一致。12 tasks / 24 causeEdges / 6 rejectedEdges / 10 states / 6 foreshadows / 8 notForeshadows 逐条回原文均能找到对应文字，**无一条编造**，故不判 fail；对「结束≠成功」（T12 unresolved_at_unit_end、F5）与「人物话语不升格为事实」（22 条 speechAsClueNotFact、R1/R3/R4 拒绝把征兆/预测/判断连成因果）两条纪律执行到位，这是本次复核见到的最好的一例之一。判 partial 的原因是反向验证与自审计一致性的实证发现：① 3 处原文明确存在的叙事事实未被任何抽取项登记（郭嘉入场、刘备拜谢、奔还小沛的意图）；② 候选自报的「叙事正文未覆盖句数=0」与它自己声明的方法不符——按它写下的「以。！？切分」得 147 句而非 150，它实际用了未声明的按换行切分才得到 150，而换行切分把每段首行整段当一个「句」，正是这个口径把上述 3 处整段并进相邻已引句子从而看不见缺口；③ 候选自报 narrativeCoveredRatio=0.9644 用了一个偏小的分母（narrativeTotalChars=2784，我按同一引文集重算分母 2800），真实引文覆盖率为 0.9589，虚高 0.55 个百分点；④ machineSelfCheck.quoteDepthModel 与 punctuationAudit 就同四个字段给出互相矛盾的两组值（0/1/0/0 vs 5/6/5/5），我独立重算为 5/6，即 quoteDepthModel 那组是错的。以上四项均为可复算的机械缺陷，不涉及语义编造，故判 partial 而非 fail。误杀检查未发现候选因词表/正则把合法因果挡掉；反向也确认候选未越权引区间外材料、未把回末当结局。",
+
+  "counterExamples": [
+    {
+      "id": "CE1",
+      "severity": "low",
+      "kind": "自审计口径失真（机械，可复算）",
+      "claim": "reverseAudit.method 声明「把区间内全部句子（以「。！？」切分，共 150 句）」，但同一 method 与 reverseAudit.sentenceCount 都写 150。按其声明的方法复算得不到 150。",
+      "quote": "把区间内全部句子（以「。！？」切分，共 150 句）与候选里全部引文的 [start,end) 区间求交",
+      "quoteLocation": "loop/state/out/read_sanguo_L1_0023.candidate.json → reverseAudit.method",
+      "why": "独立复算（命令见 evidence.commands）：对 docs[0].text[121524:124400) 按 (?<=[。！？]) re.split 非空段 = **147**；按 re.finditer(r'[^。！？]*[。！？]') = **146**；只有额外把换行也当切分符（(?<=[。！？\\n])）= **150**，与声明的方法不符。这不是数字笔误：按声明口径（147 句，句内无换行）切分时，「正议间，郭嘉自外而入。」「玄德拜谢」「急欲奔还小沛」等 3 处会成为独立句子而暴露为缺口（见 CE2）；按未声明的换行口径（150 句）时它们被并进所在整段，整段因含已引句子而被判「有交集=已覆盖」，缺口因此不可见。",
+      "impact": "候选 reverseAudit.finalUncoveredNarrative=0 这条自审计结论在它自己写下的方法下不成立；该自审计不能作为「叙事无缺口」的证据。"
+    },
+    {
+      "id": "CE2",
+      "severity": "medium",
+      "kind": "反向验证：原文明确存在但未被任何抽取项登记的事实",
+      "claim": "候选 reverseAudit 自报「叙事正文未覆盖句数为 0」。用候选自身的引文集（全部 134 条 distinct quote）做覆盖掩码，区间叙事正文中仍有 3 处原文事实落在任何引文区间之外，且未被 tasks/causeEdges/states/foreshadows/speechAsClueNotFact/unknowns 中任何一条登记：① 郭嘉的入场方式；② 刘备对袁绍出迎的答礼动作；③ 刘备突围后的意图「急欲奔还小沛」。",
+      "evidence": [
+        {
+          "fact": "① 郭嘉是在曹操与程昱议论之间从外面进来的（入场方式），原文单独一句写出；「郭嘉自外而入」在候选整个文件中出现 0 次（连 connectiveAudit 的 38 条语境串里也没有）。",
+          "quote": "正议间，郭嘉自外而入。",
+          "start": 122427,
+          "end": 122438,
+          "coveredCharsByAnyQuote": "0/11",
+          "inClaimSections": false
+        },
+        {
+          "fact": "② 袁绍亲自出邺郡三十里迎接后，刘备先「拜谢」，袁绍才「忙答礼」——下对上的礼序在原文里是明写的动作；「拜谢」在候选整个文件中出现 0 次。T10.action 只登记了袁绍一侧的动作（「并答礼」），把刘备这一侧的动作漏掉。",
+          "quote": "玄德拜谢，绍忙答礼曰：“昨为小儿抱病，有失救援，于心怏怏不安。今幸得相见，大慰平生渴想之思。”",
+          "start": 123935,
+          "end": 123982,
+          "coveredCharsByAnyQuote": "4 字（玄德拜谢）为 0/4",
+          "inClaimSections": false
+        },
+        {
+          "fact": "③ 玄德在小沛火起、徐州下邳去路被截之后，先有「急欲奔还小沛」这个意图，然后才「只得弃了小沛」——原文把「想回」与「回不去」分成两句写；候选只登记了后一句（弃小沛），把前一句的意图漏掉。「急欲」「奔还」在候选整个文件中出现 0 次。",
+          "quote": "玄德回顾，止有三十余骑跟随；急欲奔还小沛，早望见小沛城中火起，只得弃了小沛；",
+          "start": 123650,
+          "end": 123688,
+          "coveredCharsByAnyQuote": "急欲奔还小沛 7 字为 0/7",
+          "inClaimSections": false
+        }
+      ],
+      "why": "三处都是叙事层直述（不是人物话语），都落在 [121524,124400) 内，且都不在候选的任何抽取分区里。按角色契约第 2、3 条，这是结构性遗漏而非「已写项写得对不对」的问题。定 medium 而非 high 的理由：三处都不改变候选已登记事件链的方向与真假（郭嘉入场是场面调度、拜谢是礼序、奔还是未实现的意图），因此不足以判 fail；但③与候选已登记的 T9.action（「突围而走、弃小沛」）直接相邻，漏掉它会让「弃小沛」看起来是主动选择而不是走投无路后的结果。",
+      "howFound": "对候选全部 215 条 quoteRef 的 [start,end) 在区间内建覆盖掩码，再按 [^，；。！？\\n]+ 切出全部子句，逐条取完全无覆盖者：得 7 条，其中 3 条为章回标题与站点样板（role=title/boilerplate，候选已正确排除），另 4 条中的 3 条即上述事实（第 4 条为 CE3 的曹操答话）。"
+    },
+    {
+      "id": "CE3",
+      "severity": "low",
+      "kind": "反向验证：曹操对风向旗色的回答只被旁证引用，未进任何抽取项",
+      "claim": "曹操答荀彧的那句「风自东南方来，吹折角上牙旗，旗乃青红二色。」是 T7.action 里「荀彧据风向+旗色断言」这一机制的另一半（荀彧问、曹操答），但该句在候选的抽取分区里只以省略形式出现（「风自东南方来」被 connectiveAudit 的语境串收录，T7.action 的引文只引了荀彧的问句与判断），T7.action 未登记曹操的答话本身。",
+      "evidence": [
+        {
+          "quote": "操曰：“风自东南方来，吹折角上牙旗，旗乃青红二色。”",
+          "start": 123138,
+          "end": 123164,
+          "coveredCharsByAnyQuote": "0/25",
+          "inClaimSections": false,
+          "note": "「风自东南方来」「吹折角上牙旗」「旗乃青红二色」三个片语仅出现在 connectiveAudit[21]/[22] 的 context 字符串里（那是标记枚举的语境串，不是抽取项），claimSections 中均不出现。"
+        }
+      ],
+      "why": "定 low：该句的内容（东南风、青红牙旗）在 T7.action 的叙述里已被间接写出，读者不会因此丢失机制；缺的是「曹操本人答了这一问」这个可核验的归属。它与 CE2① 同型（对话中的一回被省略），但后果更小。",
+      "howFound": "同 CE2 的覆盖掩码；并用 51 条 `X曰：“…”` 正则枚举全部对话轮，逐一检查其内容是否进入任一抽取分区，得 2 条完全未进入者：本句与「丰曰：“主公何出此言？”」（后者见 notes 中的不成立条目）。"
+    },
+    {
+      "id": "CE4",
+      "severity": "low",
+      "kind": "自报指标虚高（可复算）",
+      "claim": "coverage 自报 narrativeCoveredRatio=0.9644（narrativeTotalChars=2784、narrativeCoveredChars=2685）。用一个与候选自报分子一致的口径复算，分母应为 2800，真实比值为 0.9589。",
+      "quote": "\"narrativeTotalChars\": 2784,\n  \"narrativeCoveredChars\": 2685,\n  \"narrativeCoveredRatio\": 0.9644,",
+      "quoteIsFromCandidate": true,
+      "quoteVerbatimInCandidate": true,
+      "quoteLocation": "loop/state/out/read_sanguo_L1_0023.candidate.json → coverage（逐字取自该文件 coverage 段落；因 JSON 缩进含换行，此处给出三段键值的连续片段）",
+      "why": "我用候选自己的引文集（134 条 distinct quote）对 docs[0].text[121524:124400) 建掩码复算：被引文覆盖的字符数 = **2685**（与候选自报的分子逐字一致）；但叙事区（去掉标题段 [121524,121545) 与样板段 [124345,124400)）总字符 = **2800**。2685/2800 = **0.9589**，不是 0.9644。候选的分子可复现、分母偏小 16 字符（0.9644 对应分母 2784）。这是可复算的机械偏差，覆盖缺口 115 字符（4.11%），其中 3 处是 CE2/CE3 的实质缺口。",
+      "impact": "该比值是候选唯一的自报覆盖率；虚高 0.55 个百分点不改变结论方向，但会让「叙事覆盖 96.44%」这一数字被后续统计引用。"
+    },
+    {
+      "id": "CE5",
+      "severity": "low",
+      "kind": "同一文件内自相矛盾（引用深度模型）",
+      "claim": "machineSelfCheck.quoteDepthModel 与 punctuationAudit 就同四个字段给出两组互不相容的值：entryRawDepth/finalRawDepth 为 0/1（quoteDepthModel）与 5/6（punctuationAudit），entryRelativeDepth/finalRelativeDepth 为 0/0 与 5/5。我独立重算支持 punctuationAudit 那组。",
+      "quote": "\"entryRelativeDepth\": 0,\n   \"entryRawDepth\": 0,\n   \"finalRelativeDepth\": 0,\n   \"finalRawDepth\": 1,",
+      "quoteIsFromCandidate": true,
+      "quoteVerbatimInCandidate": true,
+      "quoteLocation": "loop/state/out/read_sanguo_L1_0023.candidate.json → machineSelfCheck.quoteDepthModel（逐字取自该文件，含其行内缩进）",
+      "why": "独立重算（命令见 evidence.commands）：从 docs[0].text 起点走到 121524，绝对引号深度（“ +1 / ” −1）= **5**；区间内净变化 = **+1**（区间内左引号 53、右引号 52，已复算相符）；离开区间 124400 时绝对深度 = **6**。即 punctuationAudit 的 5/6 与 absoluteEntryDepth=5/absoluteFinalDepth=6 正确，quoteDepthModel 的 0/1 错误（0 恰与 relativeDepth 同值，疑为把相对量当绝对量填入）。",
+      "impact": "只影响该文件的机械自检字段，不影响 voice 标签——我按独立重建的深度模型（修复 122665 处缺失右引号）复算 215 条引文的 speech/narration 与 insideQuotedSpan，与候选声明 **215/215 全部吻合**，故该错误未传导到抽取结论。"
+    },
+    {
+      "id": "CE6",
+      "severity": "low",
+      "kind": "自报计数与实际不符（任务条目字段）",
+      "claim": "metrics 报 tasksWithNullField=1，但按「字段对象存在而 text 为 null」这一自然读法，实际有 5 条任务存在空字段（T3.cost、T7.cost、T10.cost、T11.cost、T12.cost）。候选自己的 selfCritique.SC5 也写「五处 cost 为空」，与 metrics 的 1 直接冲突。",
+      "quote": "五处 cost 为空。我逐段核对过：区间内这些段落确实没有写代价",
+      "quoteLocation": "loop/state/out/read_sanguo_L1_0023.candidate.json → selfCritique[id=SC5].detail（对照 metrics.tasksWithNullField=1）",
+      "why": "独立复算：对 12 条任务的 objective/obstacle/action/result/cost 五个字段逐一检查，`字段 is None` 者共 **1** 处（T10.obstacle，这正是 metrics 取的口径），`字段.text is None` 者共 **5** 处（五个 cost）。两个口径都不算错，但同一文件内 SC5 用后者、metrics 用前者而都写作无口径说明的「为空/NullField」，读者无法从字段名分辨。",
+      "impact": "低。属口径未标注，不是虚报：两个数各自都可复算。建议后续候选在 metrics 中写明判据（对象为空 vs text 为空）。"
+    }
+  ],
+
+  "reverseChecks": [
+    {
+      "found": "郭嘉的入场方式「自外而入」——曹操正与程昱议论间郭嘉从外面进来，原文单独一句。候选全部文件中 0 次出现。",
+      "quote": "正议间，郭嘉自外而入。",
+      "start": 122427,
+      "end": 122438,
+      "why": "这是场面调度/在场性事实，叙事层直述。它与 T3.action 登记的「郭嘉附议东征」是两个不同的事实：一个是他在何时以何种方式到场，一个是他主张什么。"
+    },
+    {
+      "found": "刘备对袁绍出迎的答礼动作「拜谢」——礼序写在原文里（玄德先拜谢，绍忙答礼）。候选全部文件中 0 次出现。",
+      "quote": "玄德拜谢，绍忙答礼曰：“昨为小儿抱病，有失救援，于心怏怏不安。今幸得相见，大慰平生渴想之思。”",
+      "start": 123935,
+      "end": 123982,
+      "why": "T10.action 只登记了袁绍一侧（「并答礼」），把刘备一侧的动作漏掉。原文用「忙」字写袁绍回礼的仓促，与刘备的「拜谢」构成一组礼序；漏掉一侧会让这次相见只剩单方动作。"
+    },
+    {
+      "found": "刘备突围后的意图「急欲奔还小沛」——先想回小沛，望见城中火起才被迫放弃。候选只登记了「弃了小沛」的结果。",
+      "quote": "玄德回顾，止有三十余骑跟随；急欲奔还小沛，早望见小沛城中火起，只得弃了小沛；",
+      "start": 123650,
+      "end": 123688,
+      "why": "原文把「想回」与「回不去」分写成两层，T9.action 只取了后一层。漏掉意图层会让「弃小沛」被读成主动决策，而原文写的是被迫（「只得」）。"
+    },
+    {
+      "found": "曹操答荀彧「风从何方来？吹折甚颜色旗？」的那句答话本身未被任何抽取项登记（只作 connectiveAudit 的语境串出现）。",
+      "quote": "操曰：“风自东南方来，吹折角上牙旗，旗乃青红二色。”",
+      "start": 123138,
+      "end": 123164,
+      "why": "T7.action 把「据东南风+青红牙旗断言」写在荀彧一侧，但风声旗色的口径是曹操给出的。机制链缺了信息源那一环的归属。"
+    },
+    {
+      "found": "袁绍接见孙乾时的外观「形容憔悴，衣冠不整」只被用作 S5 的状态前值，未被登记为 T4/T5 任何一条的触发或障碍要素（候选对此的判断见 SC8，属有意为之）——反向列出以备复核者判断是否过严。",
+      "quote": "只见绍形容憔悴，衣冠不整。",
+      "start": 122640,
+      "end": 122653,
+      "why": "候选 SC8 已明写：外观不是机制，机制是他自述的幼子之病。我认为该处理成立（原文的因果由袁绍自己的话给出），故只列为反向发现，不计入 counterExamples。"
+    },
+    {
+      "found": "本单元有 51 轮 `X曰：“…”` 形式的对话轮，其中 30 轮的内容没有对应的 speechAsClueNotFact 条目（例：帝告曰「董妃有五月身孕，望丞相见怜」、操曰「忘了破指修诏耶？」、玄德曰「素以汝为一勇夫耳…」）。逐条核验后确认：这 30 轮的内容都已通过 tasks/states/causeEdges 等分区以逐字引文登记，只是未单列条目，故不构成遗漏。",
+      "quote": "帝告曰：“董妃有五月身孕，望丞相见怜。”",
+      "start": 121958,
+      "end": 121978,
+      "why": "如实登记我这条反向验证的**不成立**部分：speechAsClueNotFact 是「人物话语不升格为事实」的清单，不是对话全集，候选未声称它是全集（voiceInventoryNote 另有口径）。故这一项不判为缺口。"
+    }
+  ],
+
+  "misKillCheck": {
+    "result": "未发现误杀",
+    "detail": "复算候选 6 条 rejectedEdges（R1 异象→劫寨、R2 弃城→献城、R3 预测→成功、R4 判断→拒发兵、R5 拒谏→厚待、R6 处斩→下泪）逐条成立：R1 的顺序论证可复算（「乃从其言，分兵劫寨」@123054-123064 早于牙旗被折 @123068-123103，异象出现时劫寨已定），R2 原文三句并列无任何原因词，R4 袁绍给出的理由是幼子之病而非「疑」。特别检查了「因词表/正则把真实因果挡掉」这一形态：候选的 connectiveAudit 逐处枚举了 10 个连接标记的全部 38 次出现（我复算 byMarker 遂5/乃11/于是1/故6/便2/即4/却3/方6 = 38，**逐项吻合**），并说明不因顺承连边；未发现被标记表挡掉的合法因果。另外 R6 的处理（承认「处斩→下泪」因果成立，仅拒绝把它接到后续政治后果）属于正确的过严而非误杀。"
+  },
+
+  "hallucinationCheck": {
+    "result": "未发现幻觉或越权",
+    "detail": "① 人物：区间内出现的全部 38 个专名（含夏侯敦/曹洪/袁谭/糜竺/简雍/陈登/刘岱/王子服等只出现 1 次者）在候选文件中全部可查，反向检查「候选出现而原文没有的人物」未发现。② 数值：区间内 18 类数量表达（七百余人、三十余骑、二十万、五路、九队、八面、三十里、三百里、五月等）全部在候选中有对应引文。③ 结局：T12 与 F5 都停在「未知其计若何，且听下文分解」，objectiveStatus=unresolved_at_unit_end，未把回末读成成功；关羽是否归降、计策内容、下邳结局都明确留在区间外。④ 区间外材料：crossUnitRefs 3 条全部标 isEvidence=false / outsideUnitRange=true，且引用的是「秦庆童告发」这类上一单元事件名（秦庆童在全文出现 2 次，偏移 119599 与 121240，均在区间之前，可复算），未引其文本作证据。⑤ 未发现把叙述者诗（N7 登记的 4 处）当作叙述事实使用，U13 明确把「兆」搁置。"
+  },
+
+  "quoteVerification": {
+    "totalQuoteRefs": 215,
+    "sliceEqualsQuote": "215/215（T[start:end]==quote 失败 0）",
+    "occurrencesWholeDocWrong": 0,
+    "occurrencesSliceWrong": 0,
+    "inUnitRangeFlagWrong": 0,
+    "distinctQuotes": 134,
+    "voiceLabelMismatch": "0/215（用独立重建的修复后引号深度模型复算 speech/narration 与 insideQuotedSpan，全部吻合；修复点 122665 与候选 punctuationAudit.repairs 声明一致）",
+    "random5Seed": 20261010,
+    "random5": [
+      {
+        "quote": "操令取白练至面前。",
+        "claimedStart": 122063,
+        "claimedEnd": 122072,
+        "find": 122063,
+        "count": 1,
+        "sliceEq": true,
+        "hit": "逐字命中，偏移一致"
+      },
+      {
+        "quote": "只有数十骑跟定。欲还小沛，去路已断，欲投徐州、下邳，又恐曹军截住；寻思无路，只得望芒砀山而去。",
+        "claimedStart": 123540,
+        "claimedEnd": 123587,
+        "find": 123540,
+        "count": 1,
+        "sliceEq": true,
+        "hit": "逐字命中，偏移一致"
+      },
+      {
+        "quote": "且说曹操引军往小沛来。正行间，狂风骤至，忽听一声响亮，将一面牙旗吹折。",
+        "claimedStart": 123068,
+        "claimedEnd": 123103,
+        "find": 123068,
+        "count": 1,
+        "sliceEq": true,
+        "hit": "逐字命中，偏移一致"
+      },
+      {
+        "quote": "操曰：“天报应我，当即防之。”",
+        "claimedStart": 123292,
+        "claimedEnd": 123307,
+        "find": 123292,
+        "count": 1,
+        "sliceEq": true,
+        "hit": "逐字命中，偏移一致"
+      },
+      {
+        "quote": "忽见曹操带剑入宫，面有怒容，帝大惊失色。",
+        "claimedStart": 121857,
+        "claimedEnd": 121877,
+        "find": 121857,
+        "count": 1,
+        "sliceEq": true,
+        "hit": "逐字命中，偏移一致"
+      }
+    ]
+  },
+
+  "extractionItemCheck": {
+    "result": "无编造",
+    "tasks": "12/12 逐条回原文找到对应文字（T1..T12 的五个字段全部有 in-unit 引文支撑）",
+    "causeEdges": "24/24 两端均可指认；其中 E13 自标 basis=derived 并写明「原文没有一句写因为袁绍不发兵，所以只能劫寨」——该自曝与原文相符（我复算「只得」@122941、「乃从其言」@123054 两处承接词确实存在，机制可辩护），处理正确",
+    "rejectedEdges": "6/6 逐条成立（见 misKillCheck）",
+    "states": "10/10（8 state_change + 2 knowledge_gap）前后值均有引文；K1/K2 的 whoKnows/whoDoesNotKnow 二分与原文一致",
+    "foreshadows": "6/6（2 resolved_in_unit + 1 partial_in_unit + 3 unresolved_in_unit）；F1 的铺设与两次回收逐字对应可复算（铺设「倘有不如意，可来相投」@122853-122891 与内心复述 @123710-123760 字面一致），F3 标 partial 并明写「原文没有写曹操是否应允」，未越权",
+    "notForeshadows": "8/8 的「只出现 N 次」由候选 notForeshadowsAudit 机械核对；我抽查芒砀山（全文 3 次、偏移 96103/123581/141508，区间内 1 次）与「后人有诗」（全文 147 次、区间内 3 次）均与候选声明吻合",
+    "sumSelfReportedCounts": "候选 metrics 的 25 项中，逐项复算吻合的：quoteRefs 215、uniqueQuotes 134、tasks 12、tasksWithAllFive 12、causeEdges 24、rejectedEdges 6、states 10、stateChanges 8、knowledgeGaps 2、foreshadows 6、foreshadowsResolved 2、foreshadowsPartial 1、foreshadowsUnresolved 3、notForeshadows 8、speechAsClueNotFact 22、unknowns 14、selfCritique 8、textVariants 5、crossUnitRefs 3、basisExplicit 153、basisInferred 0、basisDerived 1、basisUnverified 5、connectiveOccurrences 38。不吻合 1 项：tasksWithNullField（见 CE6）。另 reverseAudit.sentenceCount（见 CE1）与 coverage.narrativeCoveredRatio（见 CE4）不吻合。"
+  },
+
+  "notes": "总体判断：这是一份**定位层近乎完美、自审计层有两处失真、反向有 3 处小缺口**的候选，据此判 partial。\n\n可以用（不必丢弃）：全部 12 tasks、24 causeEdges、6 rejectedEdges、10 states、6 foreshadows、8 notForeshadows、22 speechAsClueNotFact、14 unknowns、5 textVariants、215 条 quoteRef —— 逐条回原文核验无编造，引文逐字与偏移全部正确。候选对两条最易犯的纪律（结束≠成功、人物话语≠事实）的执行是本次复核所见最好的一例：T12 明确停在「未知其计若何」、R1 用「劫寨之计先于异象」的顺序论证拒绝征兆边、R3 把张飞的预测标为「被后文事实推翻」而不是连成因果、R4 拒绝把郭嘉的「多疑」判断接成袁绍拒发兵的原因——这四条都是主动放弃可连之边的克制，且都给了原文依据。\n\n必须降级或丢弃的项：① reverseAudit.finalUncoveredNarrative=0 与 reverseAudit.sentenceCount=150 —— 该自审计的方法陈述与实际口径不符，不可作为「叙事无缺口」的证据（CE1），应按 CE2 补登 3 处事实后重报；② coverage.narrativeCoveredRatio=0.9644 —— 分子可复现、分母偏小，真实为 0.9589（CE4）；③ machineSelfCheck.quoteDepthModel 的 entryRawDepth/finalRawDepth/entryRelativeDepth/finalRelativeDepth 四个字段（0/1/0/0）是错的，应取 punctuationAudit 的 5/6/5/5（CE5）；④ metrics.tasksWithNullField 需注明判据（CE6）。以上四项**均不影响任何抽取项的真假**，属自审计层缺陷，故不判 fail。\n\n我自己的错，如实登记（两处）：① 我第一版审计脚本按「子句与任一引文区间有交集即算覆盖」建掩码时，先用 `re.split(r'(?<=[。！？])')` 处理「句」再切子句，一度把整段首行并成一句，同样看不见 CE2 的 3 处缺口 —— 我是在改用 [^，；。！？\\n]+ 逐子句穷尽之后才发现它们；这与我判候选 CE1 的缺陷是同一个坑，候选踩在句级、我第一版踩在段级。② 我一度把「30 轮对话没有 speechAsClueNotFact 条目」当作候选的遗漏方向，逐条核验后发现这 30 轮的内容都已通过其他分区逐字登记，我的这条反向验证**不成立**，已按要求写进 reverseChecks 末条而不是留在 counterExamples 里充数。\n\n不确定处（拿不出原文引证，只记存疑，不据此判 fail）：① U4「天报应我」的语义，候选标 unverified 并只登记不释义，我认同该处理，但我也无法给出更确定的读法；② 「陈登献了徐州」与「糜竺、简雍守把不住」是否在底本层面有因果关联，本区间内无文本可证，候选 R2 拒绝连边成立；③ 候选的 voice 规则把内心话、书信、诏书一律记 speech（voiceInventoryNote 已声明），本区间内玄德内心话 @123710 按该规则记 speech —— 规则自洽，但「内心话算不算 speech」属口径选择而非对错，留给后续统一。\n\n程序性说明：本任务为 read-verify 通道，按角色契约用 `loop.py verify` 提交；被复核候选的作者是 w-xiyou-0，与本人 w-verify-4 不同，非自签。\n\n我自己的错，第三处（程序性，如实披露并已自查纠正）：我在写完本文件后先执行了一次 `loop.py verify`，**随后**才跑「对自己文件的引证自检」，结果查出我自己有 8 处引证错误——3 条 counterExample/reverseCheck 引文的 end 偏移写错（123994→123982、123687→123688、123163→123164，其中前两处是我心算长度时把结尾引号/分号算漏），2 处「候选自述」引文不是候选文件的逐字片段（我用了压缩改写，而按纪律 quote 必须逐字可查）。我随即改正全部 8 处并重跑自检（17/17 干净），然后重新执行了一次 verify。后果（如实、且请按可复算判据读）：我在同一任务上执行了多次 `loop.py verify`（先是含错误偏移的初版，再是修正版，最后又补发了本条说明），因此 `loop/state/out/read_sanguo_L1_0023.json` 的 `reviews[]` 里现在有**多条 w-verify-4 条目**（不止一条）。该文件不在本任务 `writes`（只有本 verdict 文件）内，我**不越权去手改它**。三者 verdict 一致（partial），差异只在引文偏移与说明文字。**权威版本判据（不依赖时间戳、也不把哈希写进它自己所哈希的文件——那是自指，做不到）：以 `reviews[]` 中 `at` 最大的那一条为准；它与本文件一致，可用本文件第 1 条 counterExample 的 `id` 是否为 `CE1` 且 `counterExamples` 长度是否为 6、`reverseChecks` 长度是否为 6 来对齐。** 我此前把「本文件的 sha256」写进本文件是**第二个自指错误**（任何写入都会改变被写入的那个值）——这里如实记下，不再尝试把自身哈希嵌进自身；要对齐请由外部命令现算：`shasum -a 256 loop/state/out/verify_sanguo_L1_0023.verdict.json`。教训与我判候选的 CE1/CE4 同源：**先跑机械自检再交，不要先交再自查**——我这次是先交后查，代价是记录里留下多条需要人工分辨的条目。**本文件自此不再改动。**",
+
+  "method": "按角色契约顺序执行：① 先自己通读 docs[0].text[121524,124400) 全片 2876 字（按换行 18 段，其中标题 1 段、叙事 8 段、样板 2 段、空段 7 段），读原文时先不看候选结论；② 独立复算源文件 sha256（与任务 sourceHash 相符）与切片 sha256；③ 抽取项核对：12 tasks / 24 causeEdges / 6 rejectedEdges / 10 states / 6 foreshadows / 8 notForeshadows / 22 speechAsClueNotFact / 14 unknowns 逐条回原文找对应文字；④ 全量引用核验：215 条 quoteRef 逐条断言 T[start:end]==quote、occurrencesInWholeDoc、occurrencesInSlice、inUnitRange，并用独立重建的引号深度模型（含 122665 修复）复算 voice/insideQuotedSpan；⑤ 反向验证：对全部引文建覆盖掩码，按 [^，；。！？\\n]+ 穷尽全部子句取补集，再逐条判读（不抽样）；⑥ 误杀检查：复算 6 条 rejectedEdges 与 notForeshadows 的「只出现 N 次」机械计数；⑦ 幻觉/越权检查：枚举区间内全部专名与数量表达逐条查在候选中的存在性，并反向查候选提到的实体是否在原文中真实存在；⑧ 引用抽核：固定种子 20261010 随机抽 5 条 quote 复算 find/count/slice；⑨ 复算候选自报的全部 25 项 metrics 与 3 项自审计指标。所有偏移与哈希均由 /tmp 下的一次性脚本现算，不手抄。",
+
+  "evidence": {
+    "commands": [
+      "python3 -c \"import json,hashlib;b=open('data/cache/152e2a6eed94f1075e7e7070.docs.json','rb').read();print(hashlib.sha256(b).hexdigest())\"  # -> 2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff，与任务 sourceHash 相符",
+      "python3 -c \"import json,hashlib;d=json.load(open('data/cache/152e2a6eed94f1075e7e7070.docs.json'));print(hashlib.sha256(d[0]['text'][121524:124400].encode()).hexdigest())\"  # -> b563a9b0fb6752a814d69b1a516d63efe93be0eef3a40a6958f8f10cc94a87ba",
+      "# 215 条引文全量核验（T[start:end]==quote / occurrences / inUnitRange / voice）——见 method 步骤④，失败数 0",
+      "python3 -c \"import re,json;d=json.load(open('data/cache/152e2a6eed94f1075e7e7070.docs.json'))[0]['text'][121524:124400];print(len([p for p in re.split(r'(?<=[。！？])',d) if p.strip()]))\"  # -> 147（候选声明方法），另 (?<=[。！？\\\\n]) -> 150",
+      "python3 -c \"import json;d=json.load(open('data/cache/152e2a6eed94f1075e7e7070.docs.json'))[0]['text'];print(sum(1 for i in range(121524) if d[i]=='“')-sum(1 for i in range(121524) if d[i]=='”'))\"  # -> 5（进入区间时绝对引号深度）"
+    ],
+    "artifacts": [
+      "loop/state/out/read_sanguo_L1_0023.candidate.json（sha256 b07786383bc775a434c5cd901a73fcf1a329e0253a0f6faeb0f2d019d3634c05，只读）",
+      "data/cache/152e2a6eed94f1075e7e7070.docs.json（sha256 2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff，只读）"
+    ],
+    "protectedPathsTouched": []
+  },
+
+  "sourceHashes": {
+    "data/cache/152e2a6eed94f1075e7e7070.docs.json": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff"
+  }
+}

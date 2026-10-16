@@ -1,0 +1,138 @@
+{
+  "task": "verify:xiyou:L0:0042",
+  "reviewer": "w-dafeng-2",
+  "reviewedTask": "read:xiyou:L0:0042",
+  "reviewedCandidate": "loop/state/out/read_xiyou_L0_0042.candidate.json",
+  "verdict": "partial",
+  "sourceAnchor": {
+    "path": "data/cache/df959d743e53206f56db2f92.docs.json",
+    "sha256": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+    "docIndex": 0,
+    "range": [299607, 307813],
+    "codepoints": 8206,
+    "reviewedCandidateSha256": "ac9393d61f74f0993baf9550e1aaafb447638d2bc933e717978eca61814d5364",
+    "headCheck": "docs[0].text[299607:307813] 以「第四十二回　大圣殷勤拜南海　观音慈善缚红孩」开头，307813 处紧接「第四十三回　黑河妖孽擒僧去　西洋龙子捉鼍回」——与任务 sourceRange 一致",
+    "method": "先自己通读原文区间（未先看候选结论），再对候选做机器复算：385 条引文节点逐条重算定位/唯一性/区间/sourceHash；从全文 0 独立重建引号状态重算 factStatus 与 speechFraction；重算 37 项 nameAttestation 计数；重算 counts/coverage；解析 nullFields 路径；核验 crossUnitEchoes 的单元外引文。"
+  },
+  "extractionAudit": {
+    "result": "未发现编造：385 条引文节点中 383 条单元内、2 条单元外（inUnit=false 且 factStatus=null，如实标注）",
+    "sliceExact": "T[start:end]==quote：383/383 通过（含 2 条单元外共 385/385）",
+    "uniqueness": "T.count(quote)==1：385/385 通过（find 无歧义）",
+    "sourceHashField": "385/385 与 c282cf39… 一致",
+    "factStatusRecompute": "383 条单元内节点全部重算，mismatch=0（utterance 119 / mixed 153 / narrated 111）",
+    "speechFractionRecompute": "383 条全部重算，mismatch=0",
+    "nameAttestation": "37/37 项 unit/full 计数与原文逐字相符（nameAttestation.checked 全部 OK）",
+    "countsRecompute": "tasks 8 / causeEdges 30 / rejectedEdges 9 / states 13 / knowledgeDiffs 6 / foreshadows 10（resolved=false 2）/ rejectedForeshadows 9 / crossUnitEchoes 5 / unknowns 17 / nullFields 10 / selfCritique 5 / quoteNodesInUnit 383 / quoteNodesOutsideUnit 2 / distinctInUnitQuotes 143 —— 全部与声明一致",
+    "nullFields": "tasks[T3].isSuccess / tasks[T4].isSuccess / tasks[T4].cost / tasks[T7].obstacle / foreshadows[F7].payoff / foreshadows[F10].payoff 均为真正的 JSON null；unknowns[*].evidence 与 rejectedEdges[*].evidence 为空数组",
+    "coverage": "非空段落 29 段，与声明一致；以全部单元内引文区间求交后，零引文覆盖的段落数 = 0，与声明一致",
+    "crossUnitEchoes": "5 条 outsideQuote 全部可在全文 find 到且确在区间外（298820 / 357826 / 544367 / 123101 / 307836）；5 条 inUnitAnchor 全部在区间内可 find",
+    "reproduceCommands": "候选自报的最小复算命令实跑复现：T.find('第四十二回…')=299607、T.find('第四十三回…')=307813、len(T[299607:307813])=8206；385 383 True",
+    "quoteSpotCheck": "随机抽 5 条（seed=42）逐条 find：302592 / 306757 / 301312 / 302393 / 303186 —— find 命中值与声明 start 完全一致，T[start:end]==quote 全部为真"
+  },
+  "counterExamples": [
+    {
+      "id": "CE1",
+      "claim": "causeEdges[15]（C16）的 from 字段：「行者认出妖精要将自己「圣婴」错认并占了莲台」——把「错认圣婴」这件事的施动者写成行者、受动者写成妖精自己。",
+      "quote": "泼猴头，错认了我也！他不知把我圣婴当作个甚人。",
+      "quoteAt": 306535,
+      "quoteVerified": "unit_count=1，T[306535:306560]==quote 为真",
+      "why": "原文这句是妖精说的，方向是「行者（他）把妖精（我，圣婴）当作个甚人」——错认的施动者是行者、被错认的是妖精。候选把方向倒成「妖精将自己圣婴错认」。同一条边的 to 字段讲的却是「行者提示莲台被占」，对应的是 306635「行者看见道：“好！好！好！莲花台儿好送人了！”」——两件不同的事（称谓被错认 / 莲台被占）被并进同一个 from。注意：该边携带的 2 条 evidence 都是逐字命中、区间正确的，trigger 的文字也是对的（「行者只看见莲台被占，看不到台已换成刀」），所以这是**标签层的方向倒置**，不是编造事实；修法是重写 from/to，不必丢弃整条边。",
+      "severity": "低—中（局限于标签，不动证据）",
+      "action": "rewrite-label（不要丢弃该边）"
+    },
+    {
+      "id": "CE2",
+      "claim": "rejectedForeshadows[3]（RF4）的拒绝理由：「这条有明确的铺设…却**没有回收动作**：行者逐项拒绝之后，原文直接写菩萨下莲台出发，押物既没交也没再提。…铺设之后没有任何后续，无法构成伏笔。」",
+      "quote": "你今要当头，情愿将此为当，你念个松箍儿咒，将此除去罢",
+      "quoteAt": 304101,
+      "quoteVerified": "unit_count=1，T[304101:304128]==quote 为真",
+      "why": "「铺设之后没有任何后续」与原文不符。铺设点在 303962「你须是留些甚么东西作当。」之后，原文还有四个可指认的后续节拍：① 304101 行者提出用金箍作当并提出条件；② 304164「只将你那脑后救命的毫毛拔一根与我作当罢」（菩萨把押物收窄）；③ 304212「但恐拔下一根，就拆破群了，又不能救我性命」（行者拒绝并给理由）；④ 304237「你便一毛也不拔，教我这善财也难舍。」（菩萨点破）——之后才是 304291「那菩萨逍遥欣喜下莲台」。这正是本任务角色契约点名的「误杀检查」类型：一条真实存在的线索被一条规则形状的判词挡掉。RF4 的**结论**（不记为伏笔）仍可成立，但理由必须改成「铺设后以『条件作废』收束、无回收动作」，不能写成「没有再被提」。",
+      "severity": "中（拒绝理由与原文冲突；结论可保留）",
+      "action": "fix-reason（结论可留，理由必改）"
+    }
+  ],
+  "reverseChecks": [
+    {
+      "id": "R1",
+      "found": "菩萨当场指出「悟能不曾来」——行者的报告被对上并部分证伪；同时「不能驾云」才是他派八戒来的理由。候选的 C22 只写到行者报告与菩萨大怒，这两句都不在任何分区的引文里（「悟能不曾来」inCand=0、「不能驾云」inCand=0）。",
+      "quote": "只是弟子被烟熏了，不能驾云，却教猪八戒来请菩萨。”菩萨道：“悟能不曾来呀。",
+      "quoteAt": 303072,
+      "why": "这是一条独立的核对机制（菩萨用手头的反证检验行者叙述），而候选把 C22 记成「情报补上缺口」，漏掉了叙述被当场对账这一层。",
+      "suggest": "补入 C22 的 evidence 或单列一条边；「不能驾云」应进 T8.obstacle（他借瓶的处境来自不能亲自往返）。"
+    },
+    {
+      "id": "R2",
+      "found": "行者藏身于菩萨的神光影——这是妖精失去行者踪影、转而向菩萨发问的直接机制。候选 C15 的引文从 306326（妖精问话）起步，跳过了它（「神光影」inCand=0）。",
+      "quote": "行者将身一幌，藏在那菩萨的神光影里。",
+      "quoteAt": 306308,
+      "why": "缺了这句，C15 的因果起点（妖精为什么突然面对菩萨）在候选里没有原文锚点，变成场景切换。",
+      "suggest": "补为 C15 的 evidence[0]。"
+    },
+    {
+      "id": "R3",
+      "found": "行者当面赞叹菩萨「大慈大悲」并给出自己的反事实（若他有此法力，倒瓶便不管禽兽蛇虫）——紧接在写「迷」字之前。候选 F8 讨论回目的「慈善」时只用了菩萨的行为与行者下拜，未用这句（「大慈大悲」inCand=0）。",
+      "quote": "果然是一个大慈大悲的菩萨！",
+      "quoteAt": 305540,
+      "why": "这是本单元唯一由行者直接说出「慈善」的评价句，且与他自己「不管禽兽蛇虫」的对照构成人物刻画；回目主题层的回收缺它就不完整。",
+      "suggest": "补入 F8 的 evidence。"
+    },
+    {
+      "id": "R4",
+      "found": "叙述者交代此行目的的收束联「只为圣僧遭障害，要降妖怪救回来」，位置在菩萨下莲台（304291）与渡海之间。候选 C23/F8 引了 304272 与 304291，未引这一联（inCand=0）。",
+      "quote": "只为圣僧遭障害，要降妖怪救回来。",
+      "quoteAt": 304310,
+      "why": "它是叙述者对「为什么整趟南海之行会发生」的明文交代，属因果层的叙述句（narrated），不是人物话语。",
+      "suggest": "补入 C23 或 F8 的 evidence。"
+    },
+    {
+      "id": "R5",
+      "found": "本单元唯一交代惠岸/木叉身份与来历的一句（托塔李天王第二个太子、俗名木叉、亲传授的徒弟、护法惠岸行者）。候选 T5/S12 全程使用「惠岸/木叉」，但从未记录这句身份交代（inCand=0）。",
+      "quote": "惠岸乃托塔李天王第二个太子，俗名木叉是也，乃菩萨亲传授的徒弟，不离左左，称为护法惠岸行者",
+      "quoteAt": 304759,
+      "why": "T5 的 actor 与 S12 的 who 都建立在「惠岸即木叉」这一同指上，而候选没有给出引入这一同指的原文依据。句中的「不离左左」（全书他处作「不离左右」）还是候选未登记的第二类用字异常。",
+      "suggest": "补为 T5/S12 的 evidence；「不离左左」并入 U5/U17 的异常清单。"
+    },
+    {
+      "id": "R6",
+      "found": "行者拒绝在菩萨面前驾云的理由（怕掀露身体、怪他不敬）——莲花瓣渡海这个手段存在的动机。候选 C24 逐句写了花瓣的怀疑与变大，但这句动机不在任何引文里（「不敢施展」inCand=0）。",
+      "quote": "弟子不敢在菩萨面前施展。若驾筋斗云啊，掀露身体，恐菩萨怪我不敬。",
+      "quoteAt": 304399,
+      "why": "C24 的 trigger 把这段记成「手段展示打消疑虑」，但行者起先不肯驾云才是菩萨另劈莲花的触发条件，缺这一环。",
+      "suggest": "补入 C24 的 evidence。"
+    },
+    {
+      "id": "R7",
+      "found": "候选的「用字/文本异常」扫描不完整：它登记了 王罡刀/天罡刀（U5）与 终不得/终不成（U17），但同属这一类的还有三处 —— 同一场动作内先写「使降妖杵」再写「将降魔杵」（306807 / 306831）、「搭驽张弓」（299812，全书他处作「搭弩」，full=2）、「搴着铁棒」（302328，全书「掣着铁棒」0 次）。",
+      "quote": "使降妖杵，把刀柄儿打打去来。”那木叉按下云头，将降魔杵",
+      "quoteAt": 306807,
+      "why": "这是**同一类**事实（本单元文本的用字不一致），候选既然为同类建了 U5/U17，就应在同一次扫描里一并列出；只登记两处会让「异常扫描已完成」这个印象强于实际。",
+      "suggest": "把三处并进 U5/U17 所在的异常清单（并入 unknowns，不替原文改字）。"
+    },
+    {
+      "id": "R8",
+      "found": "同一个容器在本单元有两个名字：妖精说八戒「吊在如意袋中」（300844），后文与行者转述作「皮袋」。候选使用了「皮袋」（inCand=2），未登记「如意袋」（inCand=0）。",
+      "quote": "见吊在如意袋中，也要蒸他与众小的们吃哩。",
+      "quoteAt": 300844,
+      "why": "按候选自己的 aliasWarning 口径（「凡本单元 0 次的称谓一律不进 actor/who」，且名称以原文实际用词为准），异名同指应当登记；否则「如意袋」在下游看起来是一个未被处理的新物件。",
+      "suggest": "补入異名说明或 unknowns。"
+    }
+  ],
+  "notes": "【总判】partial。抽取层的机械质量经独立复算后无懈可击：385 条引文全部逐字命中且全文唯一、区间与 sourceHash 全对、factStatus/speechFraction 383 条重算零失配、37 项名称计数全对、counts 与 coverage 全部复现、nullFields 全是真的 null、2 条单元外引文如实标 inUnit=false+factStatus=null。我没有找到任何编造（原文没有的人物/结局/伏笔/成功判定）：T3/T6 的 isSuccess 都记 null 并在 nullFields 里写明「结束≠成功」，F7/F10 显式 resolved=false 且不携带 payoff，RC4/RC5/RC6 主动挡掉了「求饶=皈依」「命名=成了善财童子」「自述不疼=伤愈」三类把说法当事实的读法，selfCritique 5 条自查也是真的反向读法。这是我在本环境见过的语义自省做得最足的一份候选。【为什么不是 pass】两条有原文引证的实证缺陷：CE1（C16 的 from 把「圣婴」错认的施动/受动方向倒置，且把称谓被错认与莲台被占并成一条）；CE2（RF4 的拒绝理由「铺设之后没有任何后续」与原文冲突——303962 之后还有 304101/304164/304212/304237 四个节拍）。两条都不是编造，但都属「说法与原文不符」，按角色契约不能盖章 pass。【为什么不是 fail】判 fail 需要的 counterExample 应指向编造或结论性错误；CE1 是标签层、其证据与 trigger 均正确，CE2 的结论（不记为伏笔）本身可保留、只是理由错。整份产物的证据底座经复算是干净的，fail 会把它误标成不可用。【哪些可用】tasks 8 条、states 13 条、causeEdges 30 条、knowledgeDiffs 6 条、crossUnitEchoes 5 条、unknowns 17 条、nullFields 与 selfCritique 全部可以用，其引文均可独立复算。【哪些必须改】① C16 的 from/to 重写（保留边与证据）；② RF4 的 why 改为「以条件作废收束、无回收动作」，结论可留；③ 反向发现 R1–R8 应补入或在 remaining 里显式声明为范围外——其中 R1、R2 是因果链缺口（C15/C22 的起点缺锚点），R5、R7、R8 是它自己口径下应登记的项，建议按 unknowns 处理而不是丢给下一轮。【需要降级为 unknowns 的】只剩需人工对照本子才能定的项：王罡刀/天罡刀（已有 U5）、终不得/终不成（已有 U17）、外加 R7 的三处用字不一致——这些都不该由本 agent 替原文选一个「正字」。【我自己的不确定】RF4 那条我可能判重了：如果口径是「凡无回收动作一律不算伏笔」，RF4 的结论正确，我只是指出它的理由写错了（原文在后面还有四个节拍），这一点我在 CE2 的 severity 与 action 里已按「结论可留、理由必改」登记。C16 的 from 也可能只是草稿阶段的措辞残缺，我无法还原作者的原意，只能按字面与引文对照指出方向不符。【方法学上的诚实】R1–R8 是「候选没有覆盖但原文明确存在」的清单，不是「候选写错」的清单；按角色契约，遗漏本身不构成 fail，所以它们只进 reverseChecks。【一条不影响判定的提示】候选引用的路径是 data/cache/df959d743e53206f56db2f92.docs.json，而 loop/state/index.json 为西游声明的 graphKey 是 ed3dc1255ca08fbdaae30bbd；两个 .docs.json 字节完全相同（同为 sha256 c282cf39…，实测），所以候选的引文与 sourceHash 均可复现，不记为缺陷——但按 loop 索引取文件的读者会打开另一个文件名，建议后续统一到索引声明的键，以免下游复算时以为找错了源。【未做/无法做的】没有跑 GPU 与浏览器测试（任务未要求）；没有核验 /tmp/xy42/*.py（候选自报的构建与审计脚本）的内部逻辑——只确认这些文件存在；它们是临时路径、会被回收，因此我在上面改用候选自报的最小命令原样复跑并全部复现，未依赖 /tmp 脚本。人工核对不同版本刻本（U1「祖延道龄张先生」、U17 引号异常）不在本任务范围，留作 unknowns。",
+  "reproduce": {
+    "candidateHash": "shasum -a 256 loop/state/out/read_xiyou_L0_0042.candidate.json  ->  ac9393d61f74f0993baf9550e1aaafb447638d2bc933e717978eca61814d5364",
+    "sourceHash": "shasum -a 256 data/cache/df959d743e53206f56db2f92.docs.json  ->  c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+    "keyEquivalence": "shasum -a 256 data/cache/ed3dc1255ca08fbdaae30bbd.docs.json  ->  同样 c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2（与 df959d… 字节相同）",
+    "rangeAndLength": "python3 -c \"import json;T=json.load(open('data/cache/df959d743e53206f56db2f92.docs.json'))[0]['text'];print(T.find('第四十二回\\u3000大圣殷勤拜南海\\u3000观音慈善缚红孩'), T.find('第四十三回\\u3000黑河妖孽擒僧去\\u3000西洋龙子捉鼍回'), len(T[299607:307813]))\"  ->  299607 307813 8206",
+    "allQuotes": "385 条引文节点逐条断言 T[start:end]==quote、T.count(quote)==1、落在 [299607,307813)、sourceHash 相符 —— 383 条单元内全部通过；2 条单元外如实标 inUnit=false/factStatus=null",
+    "counterExampleQuotes": "python3 -c \"import json;T=json.load(open('data/cache/df959d743e53206f56db2f92.docs.json'))[0]['text'];[print(T.find(q)) for q in ['泼猴头，错认了我也！他不知把我圣婴当作个甚人。','你今要当头，情愿将此为当，你念个松箍儿咒，将此除去罢']]\"  ->  306535 304101",
+    "reverseCheckQuotes": "python3 -c \"import json;T=json.load(open('data/cache/df959d743e53206f56db2f92.docs.json'))[0]['text'];[print(T.find(q)) for q in ['只是弟子被烟熏了，不能驾云，却教猪八戒来请菩萨。”菩萨道：“悟能不曾来呀。','行者将身一幌，藏在那菩萨的神光影里。','果然是一个大慈大悲的菩萨！','只为圣僧遭障害，要降妖怪救回来。','惠岸乃托塔李天王第二个太子，俗名木叉是也，乃菩萨亲传授的徒弟，不离左左，称为护法惠岸行者','弟子不敢在菩萨面前施展。若驾筋斗云啊，掀露身体，恐菩萨怪我不敬。','使降妖杵，把刀柄儿打打去来。”那木叉按下云头，将降魔杵','见吊在如意袋中，也要蒸他与众小的们吃哩。']]\"",
+    "offsetNote": "以上所有偏移均为 docs[0].text 全文绝对 codepoint 偏移，与候选采用的 offsetBase 同一口径；quoteAt 处 T[quoteAt:quoteAt+len(quote)] 逐字相等。"
+  },
+  "remaining": [
+    "R1–R8 未被候选覆盖；它们是遗漏而非错误，按角色契约只进 reverseChecks，不据此判 fail。",
+    "CE2 的严重度取决于口径：若口径为「无回收动作一律不算伏笔」，RF4 的结论正确，只需改理由；我按「结论可留、理由必改」登记。",
+    "CE1 的 from 是否为草稿残缺我无法还原作者原意，只能按字面与引文对照指出方向不符。",
+    "U1「祖延道龄张先生」、U17 引号异常、R7 三处用字不一致均需人工对照不同版本刻本，非本 agent 可定，留作 unknowns。",
+    "未跑 GPU 与浏览器测试（任务未要求）；未核验 /tmp/xy42/*.py 的内部逻辑（临时路径、会被回收），只确认存在，复算全部改用候选自报的最小命令。"
+  ]
+}

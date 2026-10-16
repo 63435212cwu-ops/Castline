@@ -1,0 +1,426 @@
+{
+  "verdict": "partial",
+  "verdictScope": "独立反向复核 read:xiyou:L0:0002（候选 loop/state/out/read_xiyou_L0_0002.candidate.json，sha256 23f5b38ff47391d56f1b553e04a9837118e3c3b6283d3a7a840d35c72e45b141）。方法：**先自己通读** docs[0].text[14232,21362) 全部 7130 字（25 个自然段）并写下独立笔记，之后才打开候选；随后 612 个引文槽位全量重算、复现候选自述的 factStatus 判据、复算 counts/coverage 全部数字、做反向验证（覆盖并集取补 → 118 个未覆盖块逐块读 + 45 项关键事实逐字反查）、误杀检查与幻觉检查；固定种子抽 5 条引文核验。",
+  "counterExamples": [
+    {
+      "quote": "悟空道：“我自闻道之后，有七十二般地煞变化之功；筋斗云有莫大的神通；善能隐身遁身，起法摄法；上天有路，入地有门；步日月无影，入金石无碍；水不能溺，火不能焚。那些儿去不得？”",
+      "start": 15529,
+      "end": 15615,
+      "offsetBase": "full-text codepoint index of docs[0].text（0 基）；TEXT[start:end]==quote 已逐字核验",
+      "claim": "【标注层：factStatus 判据边界使 18 个区间把人物台词整条标成叙述事实】候选自述判据为『引文区间完全落在某对 “ ” 内→utterance，否则 narrated』。我按同一规则独立重算 306 条内容槽位，失配 **0** —— 规则的*实现*无误。但边界取在『完全落在内』，于是『悟空道：“……”』这类最常见句式因起点在开引号之前而整条落进 narrated。按去重区间计，本单元有 **18** 个区间被标 narrated 而实际 ≥50% 字符在直接引语内；最极端者即本条：86 字里 82 字（**95%**）是悟空的话。",
+      "why": "后果不是定位错，而是**可用性被高估**：下游（`loop/bin/to_candidate.py` 桥、发布校验）把 factStatus=narrated 的引文当可作世界事实的叙述句。本条挂在 `causeEdges/C7/to`，支起『悟空自述神通 → 即刻下水赴龙宫』这条边，而『水不能溺、火不能焚、七十二般变化』全是人物自夸，非叙述者判定。同型重灾区：`states/S10/anchor` [20737,20752)『玉帝道：“那路神将下界收伏？”』73%，却被用来论证天庭决策状态；`causeEdges/C21/to` 与 `C22/to` 两个『览毕，传旨』65%/68%，用来论证玉帝旨意。候选在 C7.to、S9.anchor、C23.to 三处写法一致，说明是判据本身的边界缺陷而非笔误。",
+      "severity": "medium"
+    },
+    {
+      "quote": "暗中有阎王老子管着",
+      "start": 3190,
+      "end": 3199,
+      "offsetBase": "full-text codepoint index of docs[0].text（0 基）；TEXT[start:end]==quote 已逐字核验",
+      "claim": "【自报计数口径混算】`counts.uniqueIntervals` 声明 178，但该数只能由跨口径混算得出；自洽口径下唯一区间为 **179**。",
+      "why": "实测（可复现）：306 条内容槽位的 (start,end) 去重、**含**单元外那条 = **179**；仅取 `inUnit=True` 去重 = **178**。而同一批 `counts.uniqueQuotes=179` 恰是**含**单元外那条的数。即 178 与 179 分别取自两个不同口径（一个排除单元外、一个包含单元外），却被并列写进同一组计数。我另核：`quoteAudit` 的区间集合与全部内容槽位的区间集合**完全相等**（179 个），不存在『同区间多引文』的情形。本条引文正是被排除的那一条，落在第一回 [3190,3199)，候选已在 quoteAudit 里以 `location='out-of-unit(declared)'` 显式登记（这点做得对）。该项不承载语义，属统计字段口径缺陷。",
+      "severity": "low"
+    },
+    {
+      "quote": "似走兽，不伏麒麟管；似飞禽，不受凤凰辖。另有个簿子",
+      "start": 19519,
+      "end": 19544,
+      "offsetBase": "full-text codepoint index of docs[0].text（0 基）；TEXT[start:end]==quote 已逐字核验",
+      "claim": "【复核清单内部偏移登记错误 + 计数与数组不符】`reverseCheck.notAnchored` 条目『猴归类的四不像说明』声明 start=19501，但该 quote 真实 `find()`=**19519**（差 18 字）；同节 `reverseCheck.found` 声明 17，而 `notAnchored` 数组只列 **15** 条。",
+      "why": "实测 T[19501:19526] 是『似人相，不入人名；似裸虫，不居国界；似走兽，不伏麒』，并非它自己写的 quote。这只影响 reverseCheck 这一节的**登记**，不影响候选正文引文（正文 612 槽位偏移 0 错）。计数方面：被扣除的 2 条去向没有记录 —— `selfAssessment` 说是『已在本轮修正中补锚』，但那 2 条仍在数组里，且实测两条**均已被覆盖**（见 notes 的补锚核算），所以 17 这个数与数组实际内容对不上。",
+      "severity": "low"
+    },
+    {
+      "quote": "裸虫、毛虫、羽虫、昆虫、鳞介之属，俱无他名。",
+      "start": 19467,
+      "end": 19489,
+      "offsetBase": "full-text codepoint index of docs[0].text（0 基）；TEXT[start:end]==quote 已逐字核验",
+      "claim": "【coverage.disclosure 与 selfCritique[4] 用的是补锚前的旧数】disclosure 写『未覆盖的 3472 字（48.7%）』、selfCritique[4] 写『3472 字里有 1592 字』与『117 个未覆盖块』，与同一结构里自己声明的 `uncoveredChars=3425`（48.04%）、`uncoveredBlockCount=118` 冲突。",
+      "why": "复算：覆盖并集 3705 字，7130−3705=**3425**，3425/7130=48.04%。而 3472 = 3425 + **47**，47 恰等于候选自述『已在本轮修正中补锚』那两条引文长度之和：本条 [19467,19489) 长 22，加 [19519,19544) 长 25，22+25=47，精确吻合 ⇒ disclosure 的 3472 确为**补锚前**旧值。同段 selfCritique[4] 自称是『改了措辞之后留下的记录』，但其 3472 与『117 个块』同样没跟着更新（实际 118）。正文更新了、两处自述没更新。",
+      "severity": "low"
+    },
+    {
+      "quote": "香港子才：",
+      "start": 21355,
+      "end": 21360,
+      "offsetBase": "full-text codepoint index of docs[0].text（0 基）；TEXT[start:end]==quote 已逐字核验",
+      "claim": "【U1 把 5 个字的引文说成『七个字』】U1 正文称末尾『且听下回分解。香港子才：』为『七个字』，但它自己登记的引文只有 5 个码元。",
+      "why": "`U1.evidence[0]` 区间 [21355,21360)、长度 **5**、内容『香港子才：』，全电子文本仅此一处。『且听下回分解。』自身是 7 字（[21337,21344)），若指它则 U1 引错了窗口；两者相连则是 12 字。两种读法都不等于 7。不影响『这是整理者残留』的结论本身，属描述与自身证据不符。",
+      "severity": "low"
+    },
+    {
+      "quote": "第三回　四海千山皆拱伏　九幽十类尽除名",
+      "start": 14232,
+      "end": 14251,
+      "offsetBase": "full-text codepoint index of docs[0].text（0 基）；TEXT[start:end]==quote 已逐字核验",
+      "claim": "【unitHeadCheck.pass=false 与实测相反，属自检字段写反】该字段声明 pass=false，但按其自己写下的 `rule` 与 `sliceOpensWith` 复算，结果应为 **true**。",
+      "why": "复算：T[14232:14251] == '第三回\\u3000四海千山皆拱伏\\u3000九幽十类尽除名'，且 `seg.startswith(candidate.unitHeadCheck.sliceOpensWith)` 为 **True**。旁证：31 个带 unitHeadCheck 的候选里**只有本候选**是 pass=false，另 30 个都是 true。更关键的是它与同文件其余部分自相矛盾 —— coverage/quoteAudit/引用核验全部按 [14232,21362) 正确工作。这是**自检结果被写反**，不是切片真有问题。（此条与已失效的前一轮复核结论一致，我独立复算确认。）",
+      "severity": "low"
+    }
+  ],
+  "reverseChecks": [
+    {
+      "quote": "即着鳜都司取出一把大捍刀奉上",
+      "start": 16001,
+      "end": 16015,
+      "offsetBase": "full-text codepoint index of docs[0].text（0 基）；TEXT[start:end]==quote 已逐字核验",
+      "found": "**T2.obstacle 的散文断言了三个兵器的具体名色与重量，但三者一个都没有引文锚点。** 候选散文写『龙王先后取出大捍刀、三千六百斤九股叉、七千二百斤画杆方天戟』，而它在该槽位实际只锚了 5 句对白（『老孙不会使刀』『轻！轻！轻！』『也还轻！』『我宫中只有这根戟重』『委的再无』）。也就是说：结论里那些**可核验的具体数字与器物名**（大捍刀 / 三千六百斤 / 九股叉 / 七千二百斤 / 画杆方天戟）在 306 个槽位里没有任何一条承载。这正是本项目最该防的形态：散文比引文走得远，而机检只看引文是否逐字命中，**查不出『断言多余证据』**。",
+      "why": "逐字核验：『即着鳜都司取出一把大捍刀奉上』[16001,16015)、『这叉有三千六百斤重哩』[16111,16121)、『那戟有七千二百斤重』[16163,16172)，三条均 `anchored=False`（不落在任何 in-unit 引文区间内），且均不在候选自己的 `reverseCheck.notAnchored` 清单里。校验脚本只验『已写的引文对不对』，验不了『写的散文有没有证据』——所以这是结构性盲区，不是偶发遗漏。",
+      "severity": "medium"
+    },
+    {
+      "quote": "请六王赴饮，杀牛宰马，祭天享地，着众怪跳舞欢歌，俱吃得酩酊大醉。",
+      "start": 18642,
+      "end": 18674,
+      "offsetBase": "full-text codepoint index of docs[0].text（0 基）；TEXT[start:end]==quote 已逐字核验",
+      "found": "**幽冥界一节的前因链（为什么他会醉卧被勾）整段未被锚定。** `causeEdges/C17/from` 写『猴王醉卧松阴，睡中见两人拿批文』，但它锚的第一句是『只见那美猴王睡里见两人拿一张批文』[18719,…) —— 从『醉卧』到『被勾』之间，**他为何醉、为何睡在桥边、四健将为何围护**这一串触发条件没有任何引文。C17 是整条幽冥线（C17→C18→C19→C20→T6→C22）的起点，起点缺证据。",
+      "why": "逐字核验：本引文 [18636,18673) 区间内『anchored=False』，且不在候选 `reverseCheck.notAnchored` 清单里。候选另有一处相关但不等价的登记：U2 处理的是『南柯一梦 vs 叙述者直述后果』的矛盾，notAnchored[9] 登记的是『忽然绊着一个草纥繸』（醒来时的动作）——**都不是**『醉卧的前因』。",
+      "severity": "medium"
+    },
+    {
+      "quote": "与那锁子甲、步云履，以礼送出。",
+      "start": 20244,
+      "end": 20259,
+      "offsetBase": "full-text codepoint index of docs[0].text（0 基）；TEXT[start:end]==quote 已逐字核验",
+      "found": "**同一件事（悟空离宫）在龙王表文与叙述层是两种说法，候选两处都引了却未登记这个冲突。** 叙述层写『使动如意棒，**一路打出去**』（[17683,…)，被 T3.result 引用）；龙王上奏的表文却自称『献神珍之铁棒，凤翅之金冠，与那锁子甲、步云履，**以礼送出**』。候选为『表文主张 ≠ 世界事实』专门建了 U5（地藏表文把销名后果扩大到轮回），却漏了这一处同型、且更直白的**同一事件双说法**。",
+      "why": "逐字核验：『与那锁子甲、步云履，以礼送出。』[20244,20259) `anchored=False`，字符串在候选文件里出现 **0** 次；对照 『一路打出去』[17683,17689) 已被 T3.result 引用。候选的 U5 只覆盖地藏表文的『猴属之类无拘…寂灭轮回』与叙述句『山猴都有不老者』的范围差，未覆盖龙王表文的『以礼送出』与叙述『一路打出去』的事实差。",
+      "severity": "medium"
+    },
+    {
+      "quote": "我待下去买他几件，还不如使个神通觅他几件倒好。",
+      "start": 14686,
+      "end": 14709,
+      "offsetBase": "full-text codepoint index of docs[0].text（0 基）；TEXT[start:end]==quote 已逐字核验",
+      "found": "**由『买』改『抢』的当场决策未被锚定，而它正是 C2→C3 之间缺的那一环。** C2 的 `to` 是『悟空即刻纵筋斗云过二百里水面赴傲来国』，C3 的 `from` 已经是『悟空捻诀吸气，吹出一阵飞沙走石的狂风』。从『到傲来国上空』到『动手使狂风』之间，原文写了他**当场把手段从买改成使神通**；候选的 C3 trigger 只解释了『才』字标明的条件关系，没有承载这个决策。",
+      "why": "逐字核验：本引文 [14686,14709) `anchored=False`，在候选文件里出现 **0** 次。旁证候选自己也重视机制而非时间相邻（`rejectedEdges` 显式拒掉 4 条同场景假边，R1 理由即『没有机制，只是叙述顺序』），所以这一环的缺失与它自己的标准不一致。注意：该位置落在候选已披露的 `coverage.uncoveredRegions` 之内 —— 候选知道『这里有未覆盖文本』，但没有识别出**这段文本承载了一条因果链的中间机制**。这是覆盖面披露与语义识别的差别。",
+      "severity": "medium"
+    },
+    {
+      "quote": "得一个无生无灭之体",
+      "start": 15936,
+      "end": 15945,
+      "offsetBase": "full-text codepoint index of docs[0].text（0 基）；TEXT[start:end]==quote 已逐字核验",
+      "found": "**『超出三界、不伏管辖』这一族自称的最早一次出现未被锚定。** 悟空对龙王说『我自生身之后，出家修行，得一个**无生无灭之体**』，这是他在本单元第一次以『已了生死』自居 —— 早于对十王的『超出三界之外，不在五行之中，已不伏他管辖』（后者被 S6 锚定）。S5/S6 建的是『生死名籍』与『名号与自我定位』两条状态变化，而这条**同一自我定位的首现**没有引文。",
+      "why": "逐字核验：本引文 [15936,15945) `anchored=False`，在候选文件里出现 **0** 次，且不在 `reverseCheck.notAnchored` 清单里。判 fail 的纪律不适用于此条（它是**遗漏**而非编造），但它使 S6 的 `prev` 缺少了时间上更早的锚点。",
+      "severity": "low"
+    },
+    {
+      "quote": "幽冥界乃阎王所居",
+      "start": 18831,
+      "end": 18839,
+      "offsetBase": "full-text codepoint index of docs[0].text（0 基）；TEXT[start:end]==quote 已逐字核验",
+      "found": "**猴王认出所在之地的判断句未被锚定，而它关系到 U2/F6 两条结论。** 原文写他『顿然醒悟道：“幽冥界乃阎王所居，何为到此？”』—— 这是他**认出**此处归阎王管辖的那一刻；U2 讨论梦/实矛盾、F6 讨论第一回『暗中阎王老子管着』的忧患在此部分兑现，两条都以此为关节，却没有这条引文。",
+      "why": "逐字核验：本引文 [18831,18839) `anchored=False`（不落在任何 in-unit 引文区间内）。它在候选文件里仅作为 `coverage.uncoveredRegions` 某块的 `opensWith` 片段出现 1 次，未被任何节点引用。",
+      "severity": "low"
+    },
+    {
+      "quote": "忤官王",
+      "start": 19220,
+      "end": 19223,
+      "offsetBase": "full-text codepoint index of docs[0].text（0 基）；TEXT[start:end]==quote 已逐字核验",
+      "found": "**候选自报『十代冥王自报名号全单』未被锚定，但它给的引文只覆盖 10 个名号中的 3 个；余下 7 个在本候选文件里一次都没出现。** 候选 `reverseCheck.notAnchored[0]` 确实诚实登记了『全单』这一遗漏（这点值得肯定），但它引的片段只到『秦广王、初江王、宋帝王』。全单是『秦广王、初江王、宋帝王、忤官王、阎罗王、平等王、泰山王、都市王、卞城王、转轮王』。",
+      "why": "逐字核验：全文本单元内该名单为 [19208,19247)。在本候选文件中出现的只有 秦广王/初江王/宋帝王 3 个；**忤官王、阎罗王、平等王、泰山王、都市王、卞城王、转轮王 7 个一次都没出现**（字符串计数 0）。本条的严重度低 —— 候选已把『全单未锚』写进自查清单，属**披露充分度**问题而非隐瞒；我列它是因为『登记了一条遗漏』不等于『该遗漏被完整表示』，下游若按候选文本重建名单只会得到 3/10。",
+      "severity": "low"
+    }
+  ],
+  "usableAsIs": {
+    "结论": "引用层**可以整体使用**；标注层与自述字段需要降级或加限定后使用。",
+    "可原样使用": [
+      "tasks[8] 的五元组骨架与全部 evidence 定位：T[start:end]==quote 且 find()==start，0 例外。",
+      "causeEdges[24]：全部引文定位正确；每条带 direction/trigger/mechanism，且 rejectedEdges[4] 显式拒绝了 4 条同场景假边（R1『没有机制，只是叙述顺序』、R3『不能因为都发生在同一回就连边』），方向正确 —— 这是本批里少见的自律。",
+      "states[14]：S6/S11 明确写了『人物自述≠叙述事实』，S13/S14 用 knowledge 型状态区分『谁知/不知』，符合任务第 3 项要求。",
+      "unknowns[14]：U2（梦与实矛盾）、U3（口头旨意≠已发兵）、U5（表文主张范围>叙述句范围）、U12（承诺未兑现但不写成赖账）、U13（『差人差了』不当作事实）全部是**正确的越界防守**，建议保留。",
+      "foreshadows[9] 的分级诚实：F7/F8/F9 明确标 unresolved 并写明『严格说只是未兑现的许诺，不能当作伏笔成立』。",
+      "rejectedEdges[4] 与 graphCacheCrossCheck 的『不作证据』声明，可直接沿用。"
+    ],
+    "必须丢弃或降级": [
+      "**18 个 factStatus=narrated 但 ≥50% 字符在直接引语内的区间**（CE1 最极端 95%）：改用 utterance/mixed，或逐条加限定。受影响的下游论据至少包括 causeEdges/C7/to、states/S10/anchor、causeEdges/C21/to、C22/to、S4.next、C13.to、F1.setup、F3.payoff、tasks/T8.cost、F7.setup。",
+      "`counts.uniqueIntervals=178` → 179（或写明口径）。",
+      "`coverage.disclosure` 的 3472/48.7% → 3425/48.04%；`selfCritique[4]` 的 3472 与『117 个块』→ 3425 与 118。",
+      "`reverseCheck.found=17` → 15（或把被扣除的 2 条显式列出）；notAnchored[3] 的 start 19501 → 19519。",
+      "`U1` 的『七个字』→『五个字』（或改引为含『且听下回分解。』的 [21337,21360) 共 12 字）。",
+      "`unitHeadCheck.pass` false → true（自检结果写反，需在构建脚本里查明为何写出与事实相反的值）。",
+      "T2.obstacle 散文中的『大捍刀 / 三千六百斤 / 九股叉 / 七千二百斤 / 画杆方天戟』在补上引文前，不应被下游当作已锚定事实使用。"
+    ]
+  },
+  "misKillCheck": {
+    "结论": "**未发现候选误杀合法条目。** 计划100 的西游『遂行』整词误杀类型在本单元不存在。",
+    "checked": [
+      "本单元『遂』仅 2 处：『不遂我意』[15483,15487) 与『此时遂大开旗鼓』[18370,18377) —— 两条**都已被引文覆盖**（anchored=True），也都出现在候选文本里，没有被任何词表挡掉。",
+      "全文检索候选 JSON：不含『词表/白名单/黑名单/stopword/排除词/整词/whole-word』等字段；『正则』仅用于 factStatus 的引语配对，不用于筛选条目。",
+      "rejectedEdges[4] 条拒绝理由逐条复核后成立：R1/R3 拒的是真正的假边（同场景、无机制），不是把合法因果因『词面不像因果』而丢弃。",
+      "对被误杀风险最高的 4 类合法边（傲来国取兵器的目的、买→抢的手段升级、销名时的放话、金星招安的理据）逐条反查：候选**都建了边或节点**，没有丢掉。"
+    ]
+  },
+  "hallucinationCheck": {
+    "结论": "**无原文外人物、无原文外结局、无把结束当成功。**",
+    "checked": [
+      "人物：候选引用的专名全部可在本单元原文逐字找到（敖广/敖钦/敖顺/敖闰/邱弘济真人/葛仙翁天师/千里眼/顺风耳/太白长庚星/文曲星官/十代冥王/地藏王菩萨/牛魔王等六兄弟/四健将 等），未出现原文外人物。",
+      "结局：T8.result 明确写『本单元到此结束于毕竟不知授个甚么官爵，且听下回分解』并注明『他上天后得到什么官爵，本单元没有给出』，没有把悬念套语写成结果。",
+      "成功判定：U3 显式登记『天庭两次传旨朕即遣将擒拿之后是否真的发过兵，本单元没有叙述』，未把口头旨意写成已执行；T5.result/T6.result 都只写到『旨意』。",
+      "把人物台词当叙述事实：**整体上比同批做得好，但存在 CE1 的系统性边界缺陷**（见 counterExamples[0]）—— 这是 I2 类问题而非编造，方向与『编造原文没有的话』相反。"
+    ],
+    "externalCrossCheck": "候选 graphCacheCrossCheck 自报 graphCacheSha256=744a9718ac49efcc27bbf4710fb0dd475282e24ee2defae94752f32e7e9d9208 —— 我**独立复算该文件 sha256，完全一致**；其列出的 4 个图谱事件（ev_020dd5d80f05274d 龙宫得神铁 / ev_1cc5e3a93c9a0abd 强索披挂 / ev_edc2ec511ff81960 闹幽冥销名 / ev_e4df9191be8ee60f 金星议招安）确以 chapter='第三回　四海千山皆拱伏　九幽十类尽除名' 挂在本回，2 个 episode 的 eventIds/orders 与之一致。注意其 graphEvents[0].quote 用的是**图谱缓存原样**（弯引号被写成直角单引号 `唤做'如意金箍棒'`），该串在小说原文中 find() 为 -1 —— 但候选已在同节 rule 里声明『图谱缓存里的摘要不算原文证据，只用于对照』，且未把该串放进 quoteAudit，处理正确，**不计为编造**。"
+  },
+  "citationSample": {
+    "seed": "20261009",
+    "sampled": 5,
+    "method": "random.seed(20261009); random.sample(range(306),5)，对每条执行 T.find(quote) 与 T[start:end]==quote",
+    "results": [
+      {
+        "path": "quoteAudit[102] (causeEdges/C4/from)",
+        "quote": "变做千百个小猴，都乱搬乱抢",
+        "declared_start": 15009,
+        "declared_end": 15022,
+        "find": 15009,
+        "slice_eq_quote": true,
+        "offset_consistent": true,
+        "harness": "逐字命中、偏移一致"
+      },
+      {
+        "path": "quoteAudit[236] (states/S10/anchor)",
+        "quote": "大天尊宣众文武仙卿，问曰：“这妖猴是几年生育，何代出生，却就这般有道？”",
+        "declared_start": 20638,
+        "declared_end": 20674,
+        "find": 20638,
+        "slice_eq_quote": true,
+        "offset_consistent": true,
+        "harness": "逐字命中、偏移一致"
+      },
+      {
+        "path": "quoteAudit[71] (tasks/T6/result)",
+        "quote": "秦广王亦顿首谢去。",
+        "declared_start": 20627,
+        "declared_end": 20636,
+        "find": 20627,
+        "slice_eq_quote": true,
+        "offset_consistent": true,
+        "harness": "逐字命中、偏移一致"
+      },
+      {
+        "path": "quoteAudit[171] (causeEdges/C20/to)",
+        "quote": "旁有传言玉女，接上表文，玉皇亦从头看过。",
+        "declared_start": 20398,
+        "declared_end": 20418,
+        "find": 20398,
+        "slice_eq_quote": true,
+        "offset_consistent": true,
+        "harness": "逐字命中、偏移一致"
+      },
+      {
+        "path": "quoteAudit[42] (tasks/T3/result)",
+        "quote": "我有一顶凤翅紫金冠哩。",
+        "declared_start": 17629,
+        "declared_end": 17640,
+        "find": 17629,
+        "slice_eq_quote": true,
+        "offset_consistent": true,
+        "harness": "逐字命中、偏移一致"
+      }
+    ]
+  },
+  "quoteIntegrity": {
+    "content_slots": 612,
+    "quoteAudit_entries": 306,
+    "T_start_end_ne_quote": 0,
+    "find_failed": 0,
+    "interval_set_equals_quoteAudit": true,
+    "unique_quotes_all": 179,
+    "unique_quotes_in_unit": 178,
+    "unique_intervals_all": 179,
+    "unique_intervals_in_unit": 178,
+    "declared_uniqueQuotes": 179,
+    "declared_uniqueIntervals": 178,
+    "note": "612 个带 start/end 的内容槽位 + 19 个只有 quote 无偏移的槽位（4 条 graphCacheCrossCheck + 15 条 reverseCheck.notAnchored）；后者中 18/19 在原文 find() 命中，唯一 MISS 的是图谱缓存原样串（已声明不作原文证据）。",
+    "unitHeadCheck": {
+      "declared_pass": false,
+      "measured_pass": true,
+      "peers_with_unitHeadCheck": 31,
+      "peers_pass_false": 1
+    }
+  },
+  "statsRecompute": {
+    "counts_verified": [
+      "tasks=8",
+      "causeEdges=24",
+      "rejectedEdges=4",
+      "states=14",
+      "foreshadows=9",
+      "unknowns=14",
+      "selfCritique=6",
+      "quoteSlots=306",
+      "uniqueQuotes=179"
+    ],
+    "counts_mismatch": {
+      "counts.uniqueIntervals": {
+        "declared": 178,
+        "measured_all": 179,
+        "measured_in_unit": 178,
+        "why": "178 与 179 分别取自『排除单元外』与『包含单元外』两个口径，被并列写进同一组计数"
+      }
+    },
+    "coverage_recompute": {
+      "union_covered": 3705,
+      "unit_chars": 7130,
+      "covered_pct": 52.0,
+      "uncovered": 3425,
+      "uncovered_pct": 48.04,
+      "uncovered_blocks": 118
+    },
+    "coverage_disclosure_stale": {
+      "declared_in_disclosure": "3472 字（48.7%）",
+      "measured": "3425 字（48.04%）",
+      "delta": 47,
+      "explains": "3472 = 3425 + 47，而 47 = 候选自述『已在本轮修正中补锚』两条引文长度之和（[19467,19489)=22 与 [19519,19544)=25）⇒ 确为补锚前旧值"
+    },
+    "compositionOfUncovered_recompute": {
+      "measured": {
+        "charsInsideSpeech": 1592,
+        "charsNarration": 1833,
+        "blocksWithDialogue": 84,
+        "blocksTotal": 118
+      },
+      "candidate_declared": {
+        "charsInsideSpeech": 1592,
+        "charsNarration": 1833,
+        "blocksWithDialogue": 84,
+        "blocksTotal": 118
+      },
+      "match": true,
+      "note": "我按同一规则（逐字符判定是否落在 “ ” 配对区间内）独立重算，四项**全部相符** —— 候选 selfCritique[4] 自述‘第一版措辞（未覆盖的多是辞赋）是没核验过的自我开脱，实测 45.9% 落在引语内’这一自我修正，方向与数字都对得上（候选写 45.9%，我测得 1592/3425=46.5%；差 0.6pp 源于候选按 3472 旧分母算，属 CE4 同一处旧数）。"
+    }
+  },
+  "notes": "裁决 **partial**。按重要性从高到低说三件事。\n\n**一、引用层零编造，这一层可以放心用。** 612 个带偏移的内容槽位我全部重算：`T[start:end]!=quote` **0** 条、`find()` 失败 **0** 条、`quoteAudit` 的 306 条区间集合与全部内容槽位的区间集合**完全相等**（集合级一致）、切片 len==7130 且 sha256==0759797f…、源文件 sha256 与任务 sourceHash 一致。固定种子抽 5 条 5/5 逐字命中且偏移一致。**没有发现任何编造**：没有原文外人物、没有原文外结局、没有把结束当成功。\n\n**二、判 partial 的三类理由。** ① 标注层有一处**系统性**边界缺陷：候选的 factStatus 判据取『区间完全落在引号内』，使 18 个『某人道：“……”』型区间整条落进 narrated，最极端者 95% 字符是台词；这些标注会被下游当作可作世界事实的叙述句，而它们支撑的恰是 C7/S10/C21/C22 这些**关键因果与状态节点**。该缺陷不是实现 bug（我复现判据 0 失配），是判据选得不好。② 自报统计多处陈旧或口径混算，最硬的一处是 disclosure 的 3472 = 现值 3425 + 两条自述已补锚引文长度 47，**算术上证明了它用的是补锚前的旧数**。③ 反向验证补出 7 条候选未覆盖的原文事实，其中 3 条是 medium：T2.obstacle 散文断言的三件兵器名色与重量**一个都没有引文锚点**（散文比引文走得远，而机检查不出这种『断言多余证据』）、幽冥线起点 C17 的**前因链整段未锚定**、龙王表文『以礼送出』与叙述层『一路打出去』的**同一事件双说法**候选未登记。\n\n**三、必须说清的两点自我修正。** ① 我一度把『该寿三百四十二岁』与『三百年前天产石猴』当成数字冲突要记入 counterExamples，复核时发现二者**完全自洽**（生于 300 年前、寿 342 ⇒ 余约 42 年），属我自己制造的假阳性，已撤下，不作为任何判据。② 我的反向验证用的是『覆盖并集取补 + 45 项关键事实逐字反查』，**不是穷举**：45 项检索清单由我预设，未被我想到的遗漏这一方法查不出来 —— 这与候选自己在 selfAssessment 里的坦白是同一个局限，我如实标注。\n\n**四、关于本轮的合规性说明（供协调方判断）。** 本轮开始时 `loop/state/out/verify_xiyou_L0_0002.json` 已存在一条由 `w-dafeng-3` 提交、裁决同为 partial 的复核记录，且其 `reviewedCandidate` 的 sha256 与我本轮**完全相同**（23f5b38f…）—— 即**同一候选版本被复核了两次**。该记录因 `evidence` 里引用的 `loop/state/out/read_xiyou_L0_0002.json`哈希已变（该文件 03:55 被重写）而被判定 `evidence_stale`，从而 `done_ids()` 不再认它、任务被重新发出（这是 E12 机制按设计工作）。我**独立完成了全部核验**（先读原文、再读候选，未参考该记录的结论），但对其中两处已独立复算确认的发现（identity：unitHeadCheck.pass=false 与实测相反；counts.uniqueIntervals 178 vs 179）与本轮结论一致，我在对应条目里注明了这一点，以免把『独立复现』冒充成『首次发现』。说明：上一轮的复核记录 `loop/state/out/verify_xiyou_L0_0002.json` 正是本任务的规范记录路径，本轮 `submit` 会按既有重做语义将其覆盖为我的记录 ⇒ 其原始字节不再留存，故我**不把它列入 evidence**（避免引用一个即将被自己改写的哈希）。上文关于它的一切陈述（agent=w-dafeng-3、verdict=partial、reviewedCandidate sha256=23f5b38f…、因 evidence_stale 而失效）均系我在写入前读取并核对，属如实登记。本轮我唯一写入的是任务 `writes` 指定的`loop/state/out/verify_xiyou_L0_0002.verdict.json`，未触碰候选、原文与任何受保护路径。\n\n**五、remaining（未做或做不到的）。** 语义正确性我只做了抽样与反向核对，**未逐条通审语义**；306 条 quoteAudit 我做了集合一致性 + 固定种子抽样，未逐条读；候选 6 条 selfCritique 的自评是否恰当我只核了其中可核验的数字部分，未评价其判断质量。这些必须是 remaining 而不是『已验证』。",
+  "evidence": [
+    {
+      "path": "loop/state/out/read_xiyou_L0_0002.candidate.json",
+      "sha256": "23f5b38ff47391d56f1b553e04a9837118e3c3b6283d3a7a840d35c72e45b141",
+      "kind": "被复核候选（只读，未修改，sha256 与上一轮 reviewedCandidate 相同）"
+    },
+    {
+      "path": "data/cache/df959d743e53206f56db2f92.docs.json",
+      "sha256": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+      "kind": "原文（只读引用，未修改；sha256 == 任务 sourceHash）"
+    },
+    {
+      "path": "loop/state/out/read_xiyou_L0_0002.json",
+      "sha256": "6eb20dcdb45ed11ab61ce707b2050ba347ee4ee566b753d361c22dbd0db23a3c",
+      "kind": "被复核任务的提交记录（只读，用于读取历史评语；本轮未修改它）"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/df959d743e53206f56db2f92.docs.json": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+    "loop/state/out/read_xiyou_L0_0002.candidate.json": "23f5b38ff47391d56f1b553e04a9837118e3c3b6283d3a7a840d35c72e45b141",
+    "loop/state/out/read_xiyou_L0_0002.json": "6eb20dcdb45ed11ab61ce707b2050ba347ee4ee566b753d361c22dbd0db23a3c"
+  },
+  "assertions": [
+    {
+      "text": "源文件哈希与任务 sourceHash 一致；切片 len==7130 且 sha256==0759797f8c3c1d979b72a3e7285a960d62b467676aa74dc47f6a4ec84872e457",
+      "result": "pass",
+      "cmd": "python3 -c \"import json,hashlib;t=json.load(open('data/cache/df959d743e53206f56db2f92.docs.json'))[0]['text'];s=t[14232:21362];print(len(s),hashlib.sha256(s.encode()).hexdigest())\""
+    },
+    {
+      "text": "全量引文核验：612 个带偏移槽位中 T[start:end]!=quote 为 0、find() 失败为 0；quoteAudit 区间集合 == 全部内容槽位区间集合（179==179）",
+      "result": "pass",
+      "cmd": "python3 - <<'PY' (见 notes 方法；集合相等断言 assert ivall==slots)"
+    },
+    {
+      "text": "factStatus 判据复现：按候选自述规则独立重算 306 条内容槽位，失配 0；同时测得 18 个去重区间被标 narrated 而 ≥50% 字符在引语内（最极端 [15529,15615) 95%）",
+      "result": "pass",
+      "cmd": "python3 - (re.finditer(r'“([^“”]*)”', seg) 构造引语区间，逐条比 factStatus)"
+    },
+    {
+      "text": "coverage 复算：并集覆盖 3705 字、未覆盖 3425 字 / 118 块、48.04%；disclosure 的 3472 与 3425 差 47，等于两条自述已补锚引文长度之和（22+25）",
+      "result": "pass",
+      "cmd": "python3 - (区间并集 + 补集分块，assert (3705,3425,118))"
+    },
+    {
+      "text": "unitHeadCheck 复算：seg.startswith(sliceOpensWith) 为 True，与候选声明的 pass=false 相反；31 个带该字段的候选中仅本候选为 false",
+      "result": "pass",
+      "cmd": "python3 -c \"import json;t=json.load(open('data/cache/df959d743e53206f56db2f92.docs.json'))[0]['text'];c=json.load(open('loop/state/out/read_xiyou_L0_0002.candidate.json'));print(t[14232:21362].startswith(c['unitHeadCheck']['sliceOpensWith']))\""
+    },
+    {
+      "text": "反向验证：118 个未覆盖块逐块读 + 45 项关键事实逐字反查，补出 7 条候选未覆盖的原文事实（均带逐字引证与偏移）",
+      "result": "pass",
+      "cmd": "python3 - (覆盖并集取补 + 逐项 T.find 与 anchored 判定)"
+    },
+    {
+      "text": "误杀检查：本单元『遂』仅 2 处（[15483,15487)『不遂我意』、[18370,18377)『此时遂大开旗鼓』）且两条均已被锚定；候选无词表/整词过滤痕迹",
+      "result": "pass",
+      "cmd": "python3 - (在 [14232,21362) 内枚举『遂』并做 anchored 判定)"
+    },
+    {
+      "text": "幻觉检查：候选全部专名可在本单元原文逐字找到；T8.result 未把『毕竟不知授个甚么官爵』写成结果；U3 未把口头旨意写成已发兵",
+      "result": "pass",
+      "cmd": "python3 - (专名逐字反查 + 人工核对 result/unknowns)"
+    },
+    {
+      "text": "图谱缓存交叉核对：独立复算 data/cache/df959d743e53206f56db2f92.json 的 sha256 == 候选自报 744a9718ac49efcc27bbf4710fb0dd475282e24ee2defae94752f32e7e9d9208；4 个事件确以本回 chapter 挂载",
+      "result": "pass",
+      "cmd": "python3 -c \"import hashlib;print(hashlib.sha256(open('data/cache/df959d743e53206f56db2f92.json','rb').read()).hexdigest())\""
+    },
+    {
+      "text": "固定种子抽 5 条引文：5/5 逐字命中且 find()==declared start",
+      "result": "pass",
+      "cmd": "python3 - (random.seed(20261009); random.sample(range(306),5))"
+    },
+    {
+      "text": "本轮只写入任务 writes 指定路径；受保护路径（js/ css/ index.html serve.py narrative.py scripts/ tests/ docs/ data/）未改动",
+      "result": "pass",
+      "cmd": "git status --porcelain 对照 changes 字段"
+    }
+  ],
+  "changes": [
+    {
+      "kind": "artifact-only",
+      "path": "loop/state/out/verify_xiyou_L0_0002.verdict.json",
+      "note": "本轮唯一写入：复核结论（任务 writes 指定路径）。未修改候选、原文、上一轮复核记录或任何受保护路径。"
+    }
+  ],
+  "rollback": "删除 loop/state/out/verify_xiyou_L0_0002.verdict.json 即可回滚本轮产物；本轮未触碰候选、原文与任何受保护路径。注意：若已执行 `loop.py verify`，它会向前一轮的提交记录 loop/state/out/verify_xiyou_L0_0002.json 的 reviews[] 追加一条并改写 verifyState —— 那一步不是本文件可控的，如需完整回滚须一并处理该记录。",
+  "task": "verify:xiyou:L0:0002",
+  "agent": "w-dafeng-3",
+  "status": "done",
+  "role": "VERIFIER",
+  "book": "xiyou",
+  "unitHead": "第三回　四海千山皆拱伏　九幽十类尽除名",
+  "sourceRange": [
+    14232,
+    21362
+  ],
+  "segmentChars": 7130,
+  "segmentSha256": "0759797f8c3c1d979b72a3e7285a960d62b467676aa74dc47f6a4ec84872e457",
+  "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+  "reviewedTask": "read:xiyou:L0:0002",
+  "reviewedCandidate": "loop/state/out/read_xiyou_L0_0002.candidate.json",
+  "reviewedCandidateSha256": "23f5b38ff47391d56f1b553e04a9837118e3c3b6283d3a7a840d35c72e45b141",
+  "summary": "独立反向复核《西游记》第三回 [14232,21362)（7130 字）。先自己通读全文 25 段再打开候选。**引用层零编造**：612 槽位 T[start:end]!=quote 0 失败、find 0 失败、quoteAudit 与内容槽位区间集合完全相等、切片哈希与任务声明吻合、固定种子抽 5 条 5/5 命中。判 partial 的三类理由：① factStatus 判据边界使 18 个区间把人物台词整条标 narrated（最极端 95%），且这些标注支撑 C7/S10/C21/C22 等关键节点；② 自报统计陈旧/口径混算，最硬的是 disclosure 的 3472 = 3425 + 两条已补锚引文长度 47，算术上证明用了旧数；③ 反向验证补出 7 条未覆盖事实，3 条 medium（T2.obstacle 三件兵器名色重量全无锚点、幽冥线起点前因链未锚、龙王表文『以礼送出』与叙述『一路打出去』双说法未登记）。误杀：未发现（西游『遂』两处均已锚定）。幻觉：无原文外人物/结局/成功判定。附：本轮与上一轮已失效记录复核的是**同一候选版本**（sha256 相同），我独立完成核验，对两处重合发现已在条目内注明来源。",
+  "method": "1) 先读原文切片全文并写独立笔记；2) 全量重算 612 槽位定位与集合一致性；3) 复现候选自述 factStatus 判据并测其边界；4) 复算 counts/coverage 全部数字（含 47 字差额的算术归因）；5) 反向验证：覆盖并集取补 → 118 个未覆盖块逐块读，另做 45 项关键事实逐字反查；6) 误杀检查（词表痕迹 + 计划100『遂行』案例对应位置）；7) 幻觉检查（专名逐字反查 + 结局/成功判定）；8) 固定种子抽 5 条引文；9) 对 unitHeadCheck.pass=false 做独立复算并与另 30 个候选对照；10) 独立复算图谱缓存 sha256 交叉核对。",
+  "remaining": [
+    "语义正确性只做抽样与反向核对，**未逐条通审语义**：306 条 quoteAudit 只做了集合一致性 + 固定种子抽样，未逐条读。",
+    "反向验证的 45 项检索清单由我预设，**不是穷举**；未被我想到的遗漏这一方法查不出来（与候选 selfAssessment 同一局限）。",
+    "候选 selfCritique[6] 的自评质量我未评价，只核了其中可核验的数字部分。",
+    "F6 的跨单元铺设（第一回 [3190,3199)）我只核到它引文逐字存在、章归属正确（第一回），**未通读第一回**判断该呼应是否成立。",
+    "候选对『南柯一梦』与『叙述者直述后果』的矛盾（U2）我未给出裁决：原文确实两说并存，我认同不合并，但未进一步判断哪一说更接近作者意图。",
+    "本轮与上一轮复核同一候选版本（sha256 相同）：我未去比对上一轮逐条结论的差异，故无法断言两轮结论的**完备**一致性，只能确认我独立复算到的两处与其一致。",
+    "上一轮复核记录（loop/state/out/verify_xiyou_L0_0002.json）会被本轮 submit 覆盖（它正是本任务的规范记录路径），故其完整原文在本轮之后不可再核；我只在覆盖前读取并核对了 agent/verdict/reviewedCandidate-sha256/失效原因四项，**未逐条比对两轮结论的差异** —— 因此不能声称两轮发现完全一致。",
+    "我**没有**运行 `loop.py verify`（理由见 submissionPathDecision）。因此我这条复核结论目前只存在于 `verify_xiyou_L0_0002.verdict.json` 与本轮 `submit` 写出的规范记录里，**未**追加进 read 记录的 reviews[]。若下游有环节只读 read 记录的 reviews[]，应当被视为未生效 —— 这是 remaining，不是我已完成的事。"
+  ],
+  "submissionPathDecision": {
+    "case": "角色契约 loop/ROLES/VERIFIER.md 写的是 `loop.py verify --task <被复核任务> --file <复核文件>`；而本任务 prompt 与启动说明写的是 `loop.py submit --file <提交文件>`。两者不一致，我选后者，理由是可验证的：",
+    "evidence": [
+      "`cmd_verify` 会把我的结论**追加进 loop/state/out/read_xiyou_L0_0002.json 的 reviews[]** 并改写其 verifyState/字节；而该文件正是我在本裁决 evidence[] 里引用的对象之一 —— 一跑 verify，我自己刚提交的哈希立刻失效。",
+      "这不是推测：**上一轮就是这么失效的**。实测 `evidence_stale(verify_xiyou_L0_0002.json)` = [{'path':'loop/state/out/read_xiyou_L0_0002.json','why':'hash-changed'}]，所以 done_ids() 不再认那条记录、任务被重新发给我。这正是 PROJECT-STATE.md 的 E12 机制。",
+      "任务 `writes` 只声明 `loop/state/out/verify_xiyou_L0_0002.verdict.json` 一个路径；`read_xiyou_L0_0002.json` **不在** writes 里，改它属于越权写入（通用纪律：只在 writes 指定路径写文件）。",
+      "`submit` 写入的规范记录 `verify_xiyou_L0_0002.json` 本身就带 `verdict` 与 `counterExamples` 字段；`loop/bin/to_candidate.py` 的桥**两个来源都读**（record 与 sidecar），所以我的 partial 裁决与 6 条点名都能被下游读到，不需要再跑 verify 才生效。"
+    ],
+    "consequence": "本轮只跑 `submit`，不跑 `verify`。若协调方认为必须由 `cmd_verify` 写入 read 记录的 reviews[]，那需要先解决『复核者引用被复核记录 ⇒ 自证失效』这个循环，否则每跑一轮都会把上一轮判成 stale 并重发 —— 本任务已经这样空转了一轮。我把它作为环境缺陷上报，而不是自己绕过校验去改 read 记录。"
+  },
+  "submittedAt": "2026-10-08T20:30:24Z",
+  "wallClockSeconds": 2021,
+  "wallClockFrom": "lease.startedAt",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-08T20:30:24Z"
+  },
+  "verifyState": "pending"
+}

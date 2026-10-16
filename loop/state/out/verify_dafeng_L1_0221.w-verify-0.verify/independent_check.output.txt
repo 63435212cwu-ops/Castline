@@ -1,0 +1,125 @@
+== 0. 源身份 ==
+PASS  docs.json sha256 == task.sourceHash | fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839
+PASS  切片长度 5984 | 5984
+PASS  候选自报 sliceCodepoints/sliceSha256 与实算一致 | eab25ff79f245c41
+PASS  切片以章题开头 | '第两百二十章 安抚和翻脸（大章）\n\n  '
+
+== 1. 独立重建段落表 ==
+PASS  非空段落数 == 候选声明 | 151 vs 151
+
+== 2. 引文机械层（全量，非抽样） ==
+PASS  带偏移的引文对象数 == coverage.quoteObjects | 181 vs 181
+PASS  无偏移的引文对象恰好 1 个 = /crossEdgeQuoteReuse[0] | ['/crossEdgeQuoteReuse/0']
+PASS  text[start:end]==quote 全部命中 | 0 处不符
+PASS  find(quote)==start 全部一致 | []
+FAIL  docOccurrences 全部相符 | [('/worldSettings/0', 1, None), ('/worldSettings/1', 1, None), ('/worldSettings/2', 1, None)]
+FAIL  sliceOccurrences 全部相符 | [('/worldSettings/0', 1, None), ('/worldSettings/1', 1, None), ('/worldSettings/2', 1, None)]
+PASS  sourceHash 全部 == docs.json sha256 | []
+PASS  全部落在 [826801,832785) 内 | []
+PASS  引文对象总数 = 带偏移 + 1（复用登记表） | 182
+      crossEdgeQuoteReuse[0] 逐字可查于 827767（出现 1 次），但该对象无 start/end/sourceHash
+
+== 3. 五栏引文区间互斥（判据实跑，非空转） ==
+PASS  五栏 refs 实际收集到 spans | 43 个
+PASS  五栏引文区间两两不相交 | []
+
+== 4. coverage 独立复算 ==
+PASS  触及段落数 == 声明 | 90 vs 90
+PASS  零覆盖段落数 == 声明 | 61 vs 61
+PASS  唯一引文区间数 == 声明 | 90 vs 90
+      引文并集码点数 = 3837 / 切片 5984 = 0.6412
+PASS  zeroCoverageList 集合 == 独立复算的零覆盖集合 | diff=[]
+PASS  zeroCoverageList 每条的 text 与原文切片逐字一致 | 61 条
+      部分覆盖段落中仍有未引码点的段落数 = 1，最大残差 = 20
+
+== 5. 内部交叉引用（『见 X』） ==
+FAIL  『见 X』指针全部指向真实存在的条目 id | 悬空=['t1', 't3']（现存 id 形如 ['c1', 'c10', 'c11', 'c12', 'c13', 'c14']）
+
+== 6. 随机抽 5 条 quote 核验（random.seed(221)） ==
+      /causeEdges/8/quotes/1                   find=828055  start=828055  occ=1 OK
+      /states/8/quotes/1                       find=832300  start=832300  occ=1 OK
+      /tasks/3/result/quotes/1                 find=831868  start=831868  occ=1 OK
+      /notForeshadows/1/quotes/0               find=832590  start=832590  occ=1 OK
+      /causeEdges/12/quotes/2                  find=832482  start=832482  occ=1 OK
+
+== 7. null 栏账目 ==
+PASS  null 栏数 == nullFieldDisposition 条数 | 6 vs 6
+PASS  每个 null 栏都有同名 Note | [(1, 'cost', True), (2, 'result', True), (2, 'cost', True), (4, 'obstacle', True), (4, 'cost', True), (5, 'cost', True)]
+      null 栏：[(1, 'cost'), (2, 'result'), (2, 'cost'), (4, 'obstacle'), (4, 'cost'), (5, 'cost')]
+
+== 8. 标签/人名编造检查 ==
+PASS  候选【】标签内容均能在原文命中 | []
+PASS  候选使用的专名全部在切片内命中（抽 32 个） | []
+PASS  区间外人物 0 次进入事实层分区（只允许出现在 predecessorDisclosure） | 事实层命中=[]
+PASS  区间外人物确实被如实登记在 predecessorDisclosure 的『不在场』说明里
+
+== 9. 结束≠成功 / 计划≠已执行 检查 ==
+PASS  t3（诱杀令）result=null：本区间只有命令没有执行 | None
+PASS  f2 显式声明回收边界（不是『将领已被杀』） | 这是全章最大的一处铺设＋回收（标题里的『翻脸』）。**但要注意边界**：回收的是『他并不打算真的放过领头者』这一层，不是『将领已被杀』——杀令在本区间没有执行（
+PASS  伏笔 status 与 payoff 双向一致 | [('f1', 'resolved', '回程途中姜律中一句『缓兵之计只能用一时』把它点破，张巡抚答『本官知道』，随后即以诱杀令处理同一批人；叙述另有一段把它归位：『杀徐虎臣是稳杨川南这条线』。'), ('f2', 'resolved', '同一章的回程途中，他密令姜律中把徐虎臣等一干将领诱出军营后全部斩杀。'), ('f3', 'unresolved', None), ('f4', 'unresolved', None), ('f5', 'unresolved', None)]
+PASS  semanticReview 如实写 not_performed | not_performed
+
+== 10. 反例（counterExamples）定位复核 ==
+      ce1            find=827568  OK
+      ce2            find=830939  OK
+      ce3-evidence   find=828422  OK
+      ce4-evidence   find=827618  OK
+      ce5-evidence   find=830887  OK
+
+== 11. 反例 CE1：s7/u1『许七安没有触及这份密报』是否成立 ==
+      s7.after 原文断言：许七安只反问『都指挥使杨川南卷入了什么案子』，没有触及这份密报
+      s7.after 实际文本：本区间结束时，张巡抚一方未作任何回应，叙述也没有证实或否认；许七安只反问『都指挥使杨川南卷入了什么案子』，没有触及这份密报。
+PASS  s7.after 确实含该断言（复核对象存在） | 安只反问『都指挥使杨川南卷入了什么案子』，没有触及这份密报。
+      密报内容 [827318,827348)：'巡抚率队强攻都指挥使府邸，杨大人被一位金锣重创，奄奄一息。\n'
+      许七安当场反证 [827568,827616)：'    “但你得为杨大人想想，他还好端端的在驿站里，八字还没一撇的罪，徐将军是要给他提前判了？”'
+PASS  同一句被候选自己登记为 /tasks[0]/action/quotes[0]（⇒ 与 s7.after 自相矛盾） | 登记数=3
+PASS  u1.why 含同调断言（『没有任何叙述或第三方证实或否认』） | 本区间只有他一个人的转述，没有任何叙述或第三方证实或否认，而被指的一方（张巡抚、姜律中）从头到尾没有回应过它。它却是徐虎
+
+== 12. 反例 CE2：『见 t1.result』悬空指针 ==
+      t1.result 含『这个铜锣』? False ；含『从中斡旋』? False
+      t6.result.note 提到功劳归属=True 指向 t1.result=True
+PASS  t6.result.note 指向 t1.result 但 t1.result 无该内容（悬空）
+      c9.caveat      提到功劳归属=True 指向 t1.result=True
+PASS  c9.caveat 指向 t1.result 但 t1.result 无该内容（悬空）
+
+== 13. 反例 CE3：零覆盖段计数 61 vs 62 ==
+      coverage.zeroCoverageParagraphs=61, len(zeroCoverageList)=61, 独立复算=61
+      sc9 内出现 '62' 的次数=2（文本：['FIER 契约做的反向检查：把 62 个零覆盖段逐段过一遍，问『这一', '在这里是因为它最能说明零覆盖率（62/151 段无引文）带来的真实风']）
+PASS  sc9 写 62 而实际 61（数字不一致） | 62 出现 2 次
+
+== 14. 反例 CE4：sc8 的 derived 计数 12 vs 实际 ==
+      causeEdges basis：Counter({'derived': 13, 'explicit': 1})
+      实际 derived 的边：['c1', 'c3', 'c4', 'c5', 'c6', 'c7', 'c8', 'c9', 'c10', 'c11', 'c12', 'c13', 'c14']
+      sc8 列出的边（12 条）：['c1', 'c3', 'c4', 'c5', 'c6', 'c7', 'c8', 'c9', 'c11', 'c12', 'c13', 'c14']
+FAIL  sc8 声称/列出的 derived 边数与实际一致 | 实际 13 条，sc8 列 12 条，漏列 ['c10']
+
+== 15. 反例 CE5：s2.after『他本人不再出现在本区间』 ==
+      该断言之后原文仍提到『徐虎臣』2 次：
+        @832369 | 是心急，越容易露出马脚....姜金锣斩杀徐虎臣等将领，然后调动各卫所兵马过来，巡抚大人就能安枕无忧，
+        @832542 | “留给我们的时间不多了。”      杀徐虎臣是稳杨川南这条线，调动兵马是稳幕后黑手这条线。毕竟案子
+PASS  s2.after『他本人不再出现在本区间』与原文后续提及相抵 | 后续提及 2 次
+
+== 16. 反向验证：候选零覆盖、但原文明确存在的事实 ==
+      [在区间内] @827401 len=48 正文命中=0 零覆盖清单命中=1
+         许七安为『兵贵神速』自辩＋反事实推演（若杨是黑手早已造反）——他回答徐虎臣『私闯府邸』指控的理由
+      [在区间内] @828811 len=27 正文命中=0 零覆盖清单命中=1
+         张巡抚听到兵谏时的恐惧（随后才是『既惊且怒，同时还有焦虑和担忧』）
+      [在区间内] @832075 len=34 正文命中=0 零覆盖清单命中=1
+         接见催办官员前他主动清场——直接影响 s9 那条知识差里『谁知道』的边界
+      [在区间内] @831123 len=44 正文命中=0 零覆盖清单命中=1
+         叙述给出的『安抚为何对徐虎臣生效』的第二机制（人情＋身份），与 c10 的承诺机制并列
+      [在区间内] @827134 len=39 正文命中=0 零覆盖清单命中=1
+         许七安的程序立场（双方都无权先判）——他整条行动线的规范依据
+      [在区间内] @829012 len=14 正文命中=0 零覆盖清单命中=1
+         许七安自担责任的公开表态（上一轮复核者也列过）
+      [在区间内] @830500 len=51 正文命中=0 零覆盖清单命中=1
+         张巡抚对徐虎臣的『格杀当场』威慑——收场三步里的第一步（上一轮复核者也列过）
+      [在区间内] @829771 len=28 正文命中=0 零覆盖清单命中=1
+         全区间判断『战没打起来』的机制句（上一轮复核者也列过）
+
+================ 结果 ================
+失败 4 条
+  - docOccurrences 全部相符 :: [('/worldSettings/0', 1, None), ('/worldSettings/1', 1, None), ('/worldSettings/2', 1, None)]
+  - sliceOccurrences 全部相符 :: [('/worldSettings/0', 1, None), ('/worldSettings/1', 1, None), ('/worldSettings/2', 1, None)]
+  - 『见 X』指针全部指向真实存在的条目 id :: 悬空=['t1', 't3']（现存 id 形如 ['c1', 'c10', 'c11', 'c12', 'c13', 'c14']）
+  - sc8 声称/列出的 derived 边数与实际一致 :: 实际 13 条，sc8 列 12 条，漏列 ['c10']

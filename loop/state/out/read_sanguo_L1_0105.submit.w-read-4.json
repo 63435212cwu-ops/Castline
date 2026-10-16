@@ -1,0 +1,102 @@
+{
+ "task": "read:sanguo:L1:0105",
+ "agent": "w-read-4",
+ "status": "done",
+ "summary": "精读《三国演义》第一百六回（codepoint [537888,543089)，5201 字）并产出候选 loop/state/out/read_sanguo_L1_0105.candidate.json：15 个任务五元组（75 栏全部各有独立原文依据，0 栏复用同一句、0 栏为 null）、14 条因果边（每条带方向+机制）、7 条被拒因果边（星象→死亡、暗喜→脱逃、拒罢兵→获胜等）、13 条状态变化（前值/后值+事件锚点）、10 条知识差、8 条伏笔（6 resolved / 2 显式 unresolved）、5 条非伏笔、29 条 worldSettings（place 8 / item 11 / rule 10）、6 条非世界设定、2 条主题解读（各带 perspective+support+counter+counterNote）、15 条 speechAsClueNotFact、12 条 unknowns、5 条 selfCritique、6 条 textualNotes。全部 548 条引文经脚本精确子串搜索定位，落在全文 codepoint 口径上，逐字往返校验 0 失败、区间内唯一命中 0 失败。反向覆盖自检：按句读切分并剥离说话人前缀后 250 句 0 未覆盖（首轮 108 句未触及，逐条补引而非新增无依据条目）。semanticReview 仍为 not_performed。",
+ "evidence": [
+  {
+   "path": "loop/state/out/read_sanguo_L1_0105.candidate.json",
+   "sha256": "031201f9e0aef4355ae088562c98cca1393d24af196ff91ba29ac06243278118",
+   "kind": "worker-output"
+  },
+  {
+   "path": "loop/state/out/read_sanguo_L1_0105.w-read-4.audit/verify_candidate.py",
+   "sha256": "d3528422a9699beab7956f7091143341218d02e7ab92d6ad507ab613654289e3",
+   "kind": "worker-output"
+  },
+  {
+   "path": "loop/state/out/read_sanguo_L1_0105.w-read-4.audit/AUDIT-REPORT.json",
+   "sha256": "7f3b86d241f00e18535beb073cf2da15c6e970a47429ccb10e27f9d46cfa236b",
+   "kind": "worker-output"
+  }
+ ],
+ "assertions": [
+  {
+   "text": "原文口径自检：docs[0].text[537888:543089] 以本单元标题「第一百六回　公孙渊兵败死襄平　司马懿诈病赚曹爽」开头，切片长度 5201，与任务声明一致；切片末尾接「第一百七回」开头，确认区间未错位。命令：python3 -B -s loop/state/out/read_sanguo_L1_0105.w-read-4.audit/verify_candidate.py（步骤 0 边界自检）",
+   "result": "pass"
+  },
+  {
+   "text": "548 条引文全部逐字往返：T[start:end] == quote，0 失败；且每条引文在本单元区间内有且仅有一次命中、start 正是那一次（排除「同句在全文别处再出现而偏移抄到别处」）。命令同上，输出 quote refs checked: 548 / structure problems: 0",
+   "result": "pass"
+  },
+  {
+   "text": "全部引文 sourceHash 采用实测 docs.json 文件哈希 8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2（与提示词正文一致），548/548 相符。实测命令：python3 -c \"import hashlib;print(hashlib.sha256(open('data/cache/fe42d01f3826fe8096f86614.docs.json','rb').read()).hexdigest())\"",
+   "result": "pass"
+  },
+  {
+   "text": "五栏独立依据：脚本强制检查「同一任务内五栏不得共用同一引文」，0 复用。首轮自查曾报 8 处复用（T05/T07/T09/T10/T11/T13 的 cost 与 action/result 撞句、T06 的 objective/obstacle/cost 三栏撞同一句群臣语），已逐条改为各栏引各自独立的原文依据后重跑通过",
+   "result": "pass"
+  },
+  {
+   "text": "worldSettings 枚举合法性：place 必须带 placeState∈{arrived,mentioned}、item 必须带非空 itemStates⊆{hold,transfer,use,lose}、rule 必须带 institution∈{declared,executed,misunderstood}。实测 29 条（place 8 / item 11 / rule 10）0 违规；「洛阳」唯一的 mentioned 已写明理由（区间内只有遣人赴洛阳催粮与班师回洛阳两处指向，无抵达叙述）",
+   "result": "pass"
+  },
+  {
+   "text": "foreshadows 完整性：resolved 必带非空 payoffQuotes、unresolved 必带 note 且 payoff 为空。实测 8 条（6 resolved / 2 unresolved：F02 无手足之肉、F06 管辂杀身之祸判语）0 违规",
+   "result": "pass"
+  },
+  {
+   "text": "causeEdges 方向与机制：14 条每条都带 mechanism（≥20 字，写明触发与机制）与独立的 causeQuotes/effectQuotes；另设 rejectedCauseEdges 7 条，明确拒掉「星象→公孙渊之死」「渊见无人暗喜→成功脱逃」「群臣请罢兵被拒→魏军获胜」「二人大笑→管辂预言不成立」等仅凭相邻或人物之辞的连边",
+   "result": "pass"
+  },
+  {
+   "text": "反向覆盖（问「这一段里还漏了什么」，而非只查已写项）：把区间按句读切分、剥离「X曰：」说话人前缀、剔除整理者标记段后共 250 句，逐句核对是否被任一引文触及（引文⊆句子 或 句子⊆引文，引文长度≥4）。首轮实测 108 句未触及，逐条补引后为 0。command: python3 -B -s loop/state/out/read_sanguo_L1_0105.w-read-4.audit/verify_candidate.py → sentences uncovered: 0",
+   "result": "pass"
+  },
+  {
+   "text": "未把人物之辞当叙述事实：单列 15 条 speechAsClueNotFact，逐条写明为何不能当事实（曹爽「此老若死」是误判、司马懿「吾今衰老病笃」是装病台词、「太傅耳聋」是旁人圆场、「五日之后星落处必斩公孙渊」是解星之辞、伦直与卜者的「不祥之兆」是人物解读、管辂「杀身之祸」是未兑现预言等）",
+   "result": "pass"
+  },
+  {
+   "text": "未把「结束」当「成功」：T15（曹爽出城、司马懿起兵）显式记 result 缺失并引回末套语「未知曹爽性命如何，且看下文分解」为证，resultNote 写明本区间未给结果；F06/F02 显式标 unresolved 且说明本区间无回收",
+   "result": "pass"
+  },
+  {
+   "text": "未写 semanticReview 完成：候选内 semanticReview = not_performed，并写明引文定位正确 ≠ 语义已核验，语义核验属 read-verify 通道",
+   "result": "pass"
+  },
+  {
+   "text": "受保护路径未改：本次会话只写 loop/state/out/ 下 3 个文件；未运行 git checkout/reset/stash，未跑 GPU 或浏览器测试。注：并发 agent 在 14:14 改过 tests/script_manifest.json（非本次会话所为，本次会话未对该路径执行任何写操作）",
+   "result": "pass"
+  }
+ ],
+ "changes": [
+  {"path": "loop/state/out/read_sanguo_L1_0105.candidate.json", "kind": "append-only"},
+  {"path": "loop/state/out/read_sanguo_L1_0105.w-read-4.audit/verify_candidate.py", "kind": "append-only"},
+  {"path": "loop/state/out/read_sanguo_L1_0105.w-read-4.audit/AUDIT-REPORT.json", "kind": "append-only"}
+ ],
+ "sourceHashes": {
+  "data/cache/fe42d01f3826fe8096f86614.docs.json": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+ },
+ "remaining": [
+  "semanticReview 未做（not_performed）：本候选只做定位、抽取与自证；语义核验属 read-verify 通道，须由另一位 agent 独立进行。",
+  "sourceHash 不一致未解决（属受保护路径，worker 不得改）：任务 JSON 的 sourceHash=2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff，实测对应 data/cache/f0b45e85aac6c95e584075a2.docs.json 与 data/cache/152e2a6eed94f1075e7e7070.docs.json（二者字节相同）；而本候选所读的 fe42d01f3826fe8096f86614.docs.json 实测哈希为 8ab7298a…，与提示词正文给出的值一致。三者的 docs[0].text 逐字相同（607191 codepoints）、仅 JSON 键序不同。本候选全部采用实测哈希，差异已写入候选 sourceHashDiscrepancy 字段，未隐去也未改校验。",
+  "U02/U03 存疑未决：大星「自首山东北，坠于襄平东南」与司马懿后文「见大星落于此处」的「此处」是否为同一地点，原文未交代；「丙寅日见星／壬申日应」与「五日之后」的日数关系亦无独立锚点可核，两者只记入 unknowns，未替原文调和。",
+  "U08 异文未校：「懿遂封其墓面荣其子孙」的「墓面」通行本多作「墓」；本候选照录原文并记入 textualNotes/unknowns，未做校勘结论。",
+  "F01 的 resolved 判定可争议：三件妖异与卜者占辞属主题性呼应，原文没有让任何一件怪事再次出现或参与事件，机制是缺的。我按「铺设→所指之事发生」记 resolved，并在 payoff 与 inRangeEcho 写明边界；若复核者按「必须有具体回收动作」的严格口径，应降为 unresolved。已同步写入 selfCritique SC02。",
+  "F04 的 resolved 判定可争议：铺设条件是「出城畋猎」，实际发生的是「谒高平陵祭祀先帝」，属条件被更宽地满足而非严格字面兑现。已在 inRangeEcho 写明并写入 selfCritique SC04。",
+  "T02/T04/T06/T10/T14/T15 的 cost 栏为「非 null 但边界注明」：原文对这些任务没有给出可计量的代价（无减员数字、无漕运耗费、无魏方伤亡），栏内记的是可引的实际处境或补给动作，并在 costNote 写明「按严格口径本区间对此项没有依据」。",
+  "跨分区引文复用 125 句、最大复用 8 次（见候选 quoteReuseReport）：同一句可同时作状态证据与因果证据，故未强行拆散，仅如实报数供复核抽查。",
+  "本候选未做：跨单元伏笔兑现核对（F02/F06 要读下一回）、全书人物/地名归一化、与既有图谱缓存 data/cache/fe42d01f3826fe8096f86614.json 的结论比对（该缓存按任务声明不算原文证据，本轮未用于抽取）。",
+  "未跑任何 GPU/浏览器测试（任务未声明需要，且 GPU 全局串行）。"
+ ],
+ "rollback": {
+  "kind": "append-only",
+  "strategy": "delete-added-files",
+  "files": [
+   "loop/state/out/read_sanguo_L1_0105.candidate.json",
+   "loop/state/out/read_sanguo_L1_0105.w-read-4.audit/verify_candidate.py",
+   "loop/state/out/read_sanguo_L1_0105.w-read-4.audit/AUDIT-REPORT.json"
+  ]
+ }
+}

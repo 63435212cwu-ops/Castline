@@ -1,0 +1,103 @@
+{
+ "task": "read:dafeng:L0:0044",
+ "agent": "w-dafeng-0",
+ "status": "done",
+ "summary": "精读《大奉打更人》第四十五章 大哥真讨厌，原文区间 codepoint [134604,137797)（3193 字，落在 data/cache/9b676d7031b1bcd3b8377a18.docs.json 的 docs[0].text 上）。本轮的 writes 路径上已有上一轮留下的草稿，我**没有重写**它，而是先做独立重验（422 条引用逐字命中、inRange 标记一致、源哈希与边界自检通过、30 条区间外引文的章号逐条反查无误），再修掉 4 处我自己不能同意的地方：**1 处编造**（foreshadows[1] fs_jiajie_question 把第 172 章的「鸡精/味精」当成「嫁接」的回收，且把时间线在本区间之前的第 33 章当回收；已降级为 unresolved 并把 payoff 置 null）、**3 处自相矛盾或写反**（监正 action 把施术者写成监正、与文件自己 causeEdges[0].basis=inferred/unknowns 冲突；tasks[0] 写「四次开口」却列了五项；tasks[4].cost 把张慎「索取」劝学诗指导权写成「让给」）。所有编辑逐条记在新增的 selfAudit 段。产出 tasks[8]（五元组，缺项一律字面 null + <field>Note，共 8 处 null）、causeEdges[11]（每条带方向 from/to + mechanism）、rejectedCauseEdges[5]、states[8]、knowledgeGaps[10]、foreshadows[6]（1 条 resolved-in-range + 4 条 resolved-out-of-range + 1 条显式 unresolved）、rejectedForeshadows[6]、characterClaims[32]（narratorConfirmed 口径见文件内约定，只有 2 条 true）、openThreads[8]、unknowns[13]、selfCritique[5]、textCritical[7]、paratext[3]、outOfRangeCorroboration[5]、selfAudit[1]。 提交前又自查出并修掉两处**我自己的**问题：quoteIndex 的 2 条孤儿条目与 refCount 漂移（已重算 126 条，孤儿 0／未索引 0）、source.boundaryCheck 一处差 2 个字符的切片断言（t[137797:137808] 实为 '第四十六章 买首饰\\n\\n'）。全部 6 处修正逐条记在 selfAudit.defectsFoundAndFixed。",
+ "evidence": [
+  {
+   "path": "loop/state/out/read_dafeng_L0_0044.candidate.json",
+   "sha256": "e4802fb769aeccf4402f11b749a6857789961f9dd6f81b9705b9976b220fb3ba",
+   "kind": "candidate-read-output"
+  },
+  {
+   "path": "data/cache/9b676d7031b1bcd3b8377a18.docs.json",
+   "sha256": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+   "kind": "source-text（只读引用，未修改）"
+  },
+  {
+   "path": "data/cache/9b676d7031b1bcd3b8377a18.json",
+   "sha256": "3c2fae1d399d6768719f2d5476fa0cfd88fb4fbbc12abdf080323fa4b846ebdf",
+   "kind": "graph-cache（只读对照已有结论，未作为原文证据）"
+  }
+ ],
+ "assertions": [
+  {
+   "text": "源文件哈希与任务 sourceHash 一致",
+   "result": "pass",
+   "cmd": "shasum -a 256 data/cache/9b676d7031b1bcd3b8377a18.docs.json"
+  },
+  {
+   "text": "区间边界自检通过：text[134604:134615]=='第四十五章 大哥真讨厌'，text[137797:137808]=='第四十六章 买首饰'，其前是落在区间内的章级分隔行 text[137783:137795]=='------------'；切片长度 3193 与任务声明一致",
+   "result": "pass",
+   "cmd": "python3 -c \"import json;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];print(repr(t[134604:134615]),repr(t[137783:137795]),repr(t[137797:137808]),len(t[134604:137797]))\""
+  },
+  {
+   "text": "切片 sha256 = source.segmentSha256 = 7315c69d…bbcca7ca",
+   "result": "pass",
+   "cmd": "python3 -c \"import json,hashlib;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];print(hashlib.sha256(t[134604:137797].encode()).hexdigest())\""
+  },
+  {
+   "text": "成品里全部 420 个 quote 引用（去重 124 组）由**独立实现**的重验脚本从磁盘重读后重算（不复用构建期代码）：t[start:end]==quote 逐字成立、end-start==len(quote)、sourceHash 等于整个 docs.json 的 sha256、inRange 布尔值与实际落点一致——0 处不符",
+   "result": "pass",
+   "cmd": "python3 -c \"import json,hashlib;…遍历候选里所有含 quote/start/end 的字典逐条断言…\""
+  },
+  {
+   "text": "30 条区间外引文的章号标注逐条反查行首章标题，0 处错配",
+   "result": "pass",
+   "cmd": "python3 -c \"import json,re;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];…对每个 inRange=false 的引用按其 offset 反查最近的 '第…章' 标题…\""
+  },
+  {
+   "text": "修掉的编造有可复现反证：第 172 章 offset 619989 那段 411 字窗口内「嫁接」出现 0 次、「采薇」3 次，内容为鸡精/味精（原文『听着褚采薇把鸡精和味精的原理说完』『从香菇中提取鲜味制作味精』）；「嫁接」全书 19 处、16 处在区间之后，无一处与褚采薇共现",
+   "result": "pass",
+   "cmd": "python3 -c \"import json,re;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];print([m.start() for m in re.finditer('嫁接',t)]);print(repr(t[619989:620400]))\""
+  },
+  {
+   "text": "metrics 全部由独立重算覆盖（total/unique 引用数、段落覆盖率 80/90=0.8889、basisCounts、foreshadow 三个状态计数），并写明统计范围；foreshadows 三状态计数与数组实际内容一致",
+   "result": "pass",
+   "cmd": "python3 -c \"…遍历各节重算并断言 metrics 与数组一致…\""
+  },
+  {
+   "text": "本轮我执行的写操作只有两条，且都在 loop/state/out/ 下：read_dafeng_L0_0044.candidate.json（任务 writes 指定的唯一产物）与 read_dafeng_L0_0044.submit.json（提交记录）。**说明**：共享树里 js/ css/ index.html/ tests/ 等受保护路径当前确实有未提交改动，但那是其他并行 agent 的写入（我检查了 mtime，集中在 13:01–13:03，且我全程没有对任何受保护路径执行过写命令）；它们不是本任务的产物，我也没有触碰。此断言只声明「本轮的写入不落在受保护路径上」，不声明共享树是干净的。",
+   "result": "pass",
+   "cmd": "ls -la loop/state/out/read_dafeng_L0_0044.candidate.json loop/state/out/read_dafeng_L0_0044.submit.json # 本任务仅有的两个写入点；另：stat -f '%Sm %N' -t '%Y-%m-%d %H:%M:%S' js/sky/sky-shell-player.js index.html 显示受保护路径的改动时间为 13:01–13:03，属并行 agent"
+  },
+  {
+   "text": "quoteIndex 与正文引用一致（提交前发现并修好的一处漂移）：把两处反证性引用从 foreshadows[1].payoff 摘除后，quoteIndex 里留下了 2 条孤儿条目、refCount 也不再等于实际引用数。已重算全部 126 条的 refCount 并确认「孤儿 0 条 / 被引用但未入索引 0 条」。另修 source.boundaryCheck 一处差 2 个字符的切片断言（t[137797:137808] 实为 '第四十六章 买首饰\\n\\n'）。",
+   "result": "pass",
+   "cmd": "python3 -c \"…重算每个 quoteIndex 条目的 refCount 并求与全节引用集的差集…\""
+  },
+  {
+   "text": "提交记录里的证据哈希在提交时刻与磁盘一致（本次提交后我不再改动 candidate，若复核时哈希不符即为并行写入）",
+   "result": "pass",
+   "cmd": "shasum -a 256 loop/state/out/read_dafeng_L0_0044.candidate.json"
+  }
+ ],
+ "changes": [
+  {
+   "path": "loop/state/out/read_dafeng_L0_0044.candidate.json",
+   "kind": "append-only"
+  }
+ ],
+ "sourceHashes": {
+  "data/cache/9b676d7031b1bcd3b8377a18.docs.json": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+  "data/cache/9b676d7031b1bcd3b8377a18.json": "3c2fae1d399d6768719f2d5476fa0cfd88fb4fbbc12abdf080323fa4b846ebdf"
+ },
+ "remaining": [
+  "语义正确性未核验（semanticReview=not-performed）：本文件只保证引用定位与偏移自洽、以及我修掉的 4 处内部矛盾；我对人物动机、因果机制、伏笔判定的读法是否正确，仍要等 read-verify 的独立复核。",
+  "本轮最重要的遗留判断：fs_jiajie_question 我判 unresolved（真铺设、无回收）。若复核能找到「褚采薇 × 嫁接」的回收处，改法是把 payoff 补回并把 status 改回 resolved-out-of-range；但请先验证回收处确实讲的是嫁接而不是味精。",
+  "fs_sixiang_gate 的回收链（ch160 规则 → ch171 斗志 → ch177 契机 → 终卷第一章「刚踏入六品不久」）我逐条核过引用存在且章号无误，但**这条链是我按时间顺序串起来的归纳**：原文没有一处把「鸡精」直接写成她晋升的凭据，最后一步只有监正一句「你刚踏入六品不久」。若复核用更严口径（要求回收处明写因果），该条应降级为 inferred 或 partial。",
+  "「监正眺望西北方向」我坚持不指向云鹿书院（区间内 2 处「西北方向」都不带宾语），但反方向风险很大：云鹿书院确在京城西北（ch48 明写），区间外第八十二章又说监正是术士体系巅峰。我拒绝的是把它写成已成立的伏笔，不是否认它可能有意义。",
+  "食物腐败的施术者我判 inferred（段落主语是褚采薇的「发现」，无监正动作句）。若复核认为人物判断加前后文已足够，改法是给 causeEdges[0] 升 explicit，而不是改引文。",
+  "李慕白的「你快立命了？！」我拒绝写成本区间已回收的伏笔：区间外第 4028133 处他仍在「将来我们若能晋升超凡」的期待里。但我的检索只覆盖「李慕白」（205 处）与「立命」（42 处）的共现，不排除作者在别处一笔带过。",
+  "我没有通读区间外章节：所有 out-of-range 引文都是按 offset 定点核对 + 反查章号，不是通读第 5/6/17/29/33/41/43/44/48/56/78/102/119/120/160/172/190 章。",
+  "本任务的 requires 是 read:dafeng:L0:0040（已完成），本轮未改动其产物。",
+  "**复核者请注意**：本轮我在 submit 之后又改过 candidate（补 quoteIndex 一致性与 boundaryCheck 修正），因此以 read_dafeng_L0_0044.json 里记的旧哈希为准会显示 hash-changed；本文件（submit.json）里的哈希是最终值，重新 submit 后应与磁盘一致。"
+ ],
+ "rollback": {
+  "kind": "append-only",
+  "strategy": "delete-added-files",
+  "files": [
+   "loop/state/out/read_dafeng_L0_0044.candidate.json"
+  ]
+ }
+}

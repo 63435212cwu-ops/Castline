@@ -1,0 +1,714 @@
+{
+  "task": "adopt:P06-W06",
+  "agent": "sentinel-adopt-p06w06-20261011",
+  "status": "done",
+  "kind": "plan100-open-item-adjudication",
+  "generatedAt": "2026-10-11T12:32:00Z",
+  "title": "如实处置 plan100 未结项 P06-W06（rejected）：缺口今天仍然存在；归属已从「无承接者」变为「正在施工的 M86」，但 M86 只覆盖呈现层，数据层仍无承接者",
+  "summary": "结论：**缺口今天仍然存在**，本会话用自写探针独立重测复现，未沿用任何旧结论。\n①判据（P06-W06 原文）：「以目标、障碍、行动、结果、代价顺序检查任务旅程，确认结束不等于成功」。这条判据的**原始出处今天已不在本机**（docs/plan-100-score-execution.md 不存在，旧归档 ~/Desktop/星系-audit-archive-20261007 也已消失，git 全历史 0 命中）—— 所以我没有引用它，改用仓库内三处同判据来源：artifacts/plan100/plan-ledger.json（key=P06-W06 的 title 与判据逐字相同，firstLine=22573）、P06-W06/ledger.json、P06-W06/decision.md。\n②实测（用**今天**发货的 js/sky/sky-shell-player.js 跑**今天**库里的 **7 个**真实图谱）：五维**全部可定位**的任务 = 大奉默认 0/224、西游默认 45/282、三国默认 126/420、大奉发布链 0/224、西游发布链 45/198、西游更正版 45/198、三国旧键 126/178 —— **7/7 个版本没有一个是「每条任务的五维都能跳到事件及原文」**；playable 全部 100%，unplayable 全空，seekFailed=0（**跳得动，只是没有可跳的目标**）。最差仍是大奉：obstacle 0/200、cost 0/78（provided 却 located=0）。\n③**归属结论今天变了，这是本轮最重要的更动**：上一轮（2026-10-09T22:12:44Z）报「loop 里无承接者」。**今天有承接者了** —— merge:rsi-task-aspects:20261011（标题「M86任务五维说明动画：目标障碍行动结果代价随真实停点显现」，writes 第一条即 js/sky/sky-shell-player.js）＋隔离施工方 build:rsi-luna-task-aspects:20261011。**而且它们此刻正在跑**：GATE.lock pid=73130、heartbeat 12:27:50Z、checkpoint 20:02–20:10 连续落盘。此外上一轮点名的 merge:review-v1:20261009b 今天**已经 done**。\n④**我在测量过程中实测到被测对象被并行写入者改动**（哨兵纪律要求按写入足迹归因，不是推测）：同一会话内 js/sky/sky-shell-player.js 从 e29170e0…/84943 B 变成 5a22b7b929d5…/93458 B（mtime 2026-10-11T12:18:40Z），此后 M86 的五槽渲染分支（m86-slot、「有描述，事件待定位」、「当前记录未提供」）出现在 js/sky/sky-shell-player.js:459-465。**关键是：五维锚定数字在这次改动前后逐字段相同**（7 图谱 allFiveLocated 一个没动）—— 即 M86 落地的是**呈现层**，**不是**数据层锚定本身。我用带前后哈希的包装脚本把这件事钉成证据（stableDuringRun=true）。\n⑤**第二条更重的形态（数据层）今天原样成立，且没有承接者**：已发布图谱里 fieldEvidence 的引句**既不独立也不可唯一归属**。实测三国 154 条带 fieldEvidence 的任务里 **145 条五栏引句完全相同**；西游 104 条里 68 条五栏全同；引句也无法唯一落到旅程事件区间（三国 owned 654 / unowned 77 / ambiguous 30，西游 owned 281 / unowned 203）。这正是 docs/QUALITY.md §P3.3 明文禁止的「不能同一短引句填满五栏」。\n⑥**该缺陷已有门禁，但门禁是棘轮且当前为绿**（E14/E23/E24 同形：机制存在、有产出、但不产生信息）：tests/p3_task_five_fields_contract.py（挂在 scripts/accept.sh:336）本会话实跑 **rc=0 / RATCHET OK**，而同一份输出写着「FAIL ①b 714/1664 条字段共用同一条短引句（43%）」「FAIL ② 空 cost 1183 条，其中未写理由 496 条」，并自注「棘轮通过**不代表**已修 —— 五栏同句仍原样存在」。棘轮的语义是「不许变坏」，不能用来证明这条缺陷已关闭。\n⑦「结束≠成功」这半条**成立但是写死的**（方向安全，却不产生信息）：7 个图谱 **100%** 任务的末停点都是 endNotSuccess/successClaim='unverified'，但它是 js/sky/sky-shell-player.js:249 的**字面量常量**；播放器全文 terminalEvidence 出现 **0** 次，而 artifacts/plan100/narrative/*.tasks.json 里 **45/45** 条任务都带 terminalEvidence。我把这一半如实记为「成立但无信息」，没有为了结论整齐而抹掉它。\n⑧禁止项遵守、可核对：**没有**改台账状态（artifacts/plan100/20261007/P06-W06/ledger.json 只读，哈希 dd6c5c415cf6… 未变，status 仍 rejected）；**没有**自签（owner=p06-agent、原 reviewer=p13-wave3-verifier，本产物 agent=sentinel-adopt-p06w06-20261011 与两者都不同，且本产物不声称 merged）。",
+  "gapStillExists": {
+    "verdict": "仍然存在（本会话独立实测，7 个真实图谱，并跨一次并行写回前后各测一遍）",
+    "criterion": "以目标、障碍、行动、结果、代价顺序检查任务旅程，确认结束不等于成功",
+    "criterionSourcesStillInRepo": [
+      {
+        "path": "artifacts/plan100/plan-ledger.json",
+        "sha256": "e74bb8804e7717c5c89a8b4cee2626c8054a7580e8d8b8ebfc0b8dde803a2f3c",
+        "what": "phases[].taskTitles[] 里 key=P06-W06 的 title 与判据**逐字相同**，firstLine=22573；同文件 phases[] 证明 P06 阶段 goal 是**视觉**的（「解决三书视觉趋同、云团鼓包、主次层级和背景抢焦，形成可审计的电影级美术系统」），P08 才是**旅程**阶段（「从目标到代价制作可暂停、可跳过、reduced 等价的连续叙事动画」）",
+        "howVerified": "python3 -c \"import json;d=json.load(open('artifacts/plan100/plan-ledger.json'));print([(p['id'],p['goal']) for p in d['phases'] if p['id'] in ('P06','P08')]);print([t for p in d['phases'] if p['id']=='P06' for t in p['taskTitles'] if t['key']=='P06-W06'])\""
+      },
+      {
+        "path": "artifacts/plan100/20261007/P06-W06/ledger.json",
+        "sha256": "dd6c5c415cf690ae43e702b7fdc724db1d325926a5348c4920c9830e0d7aed7c",
+        "what": "status=rejected / owner=p06-agent / reviewer=p13-wave3-verifier / decision=rejected（**我只读，未改**）",
+        "howVerified": "shasum -a 256 artifacts/plan100/20261007/P06-W06/ledger.json"
+      },
+      {
+        "path": "artifacts/plan100/20261007/P06-W06/decision.md",
+        "sha256": "dc8a60934a5d1c9c9d4be4364e80f2020d91c91dbdeda3b2c8b8efc62c51440e",
+        "what": "原始决策文本：决定=**撤回**；断言「本工作包不含任务旅程判定逻辑，未做改动」；已知缺口「本轮未执行；P06 范围内无任务旅程实现，留给 P08」",
+        "howVerified": "read artifacts/plan100/20261007/P06-W06/decision.md"
+      }
+    ],
+    "criterionSourceIsGone": {
+      "claimedPath": "docs/plan-100-score-execution.md",
+      "claimedSha256": "c0192e21f02650614efe7aed57182917c783277898c03a8f29dd502c72dc6f4b",
+      "claimedBytes": 13580691,
+      "evidencePathUsedByPriorRound": "/Users/carmen/Desktop/星系-audit-archive-20261007/docs/plan-100-score-execution.md",
+      "todayStatus": "**两处都不存在**。上一轮把它写进 evidence，这正是本记录今天被判 evidence_stale 的原因之一：实测返回 [{'path': '/Users/carmen/Desktop/星系-audit-archive-20261007/docs/plan-100-score-execution.md', 'why': 'missing'}]。",
+      "howVerified": "ls -la docs/plan-100-score-execution.md → No such file or directory；ls docs/ → 只有 QUALITY.md、SCHEMA.md；ls -d /Users/carmen/Desktop/*audit* → No such file or directory；git log --all -- '*plan-100-score-execution.md' → 0 命中（从未进 Git）",
+      "reading": "这是**环境事实**，不是缺陷主张：AGENTS.md 明令「docs/ 下已删除的旧计划**不恢复**」。因此本产物改用上面三处仍在仓库内的同判据来源，并在 remaining 里如实登记「原始 13.6 MB 计划文本本机已不可复现」。"
+    },
+    "howMeasured": "本会话自写探针（sha256 e8cc4b662c3c…，7956 B）用最小 DOM 垫片直接执行**生产播放器**（手法与 tests/journey_timeline_contract.js:13-69 同源，但探针**不 require 该测试、不调用它的任何断言**），读 data/cache/<key>.json，对每条 task 调 P.timeline('tasks',id)，读 byDimension[dim].{provided,located,eventId,eventBasis,dimensionAnchors} 与末停点的 endNotSuccess/successClaim；并对每个 located 维度**实际调 seekEvent()**，确认「跳得到」不只是字段声明。纯 CPU、无浏览器、无 GPU、无模型调用；只读 js/ 与 data/、只写 stdout。",
+    "whySevenGraphs": "取 data/cache/index.json 里三书各自**当前默认键**，加上发布台账里的**父/旁支/更正键**，覆盖「默认可见版本」与「已发布但非默认版本」两类。索引共 80 条，这 7 条是其中带 tasks 层的真实图谱。",
+    "results": [
+      {
+        "key": "215f4b88fb087a7d735a6fae",
+        "title": "大奉打更人",
+        "role": "默认",
+        "events": 2990,
+        "tasks": 224,
+        "playable": 224,
+        "unplayable": {},
+        "allFiveProvided": 74,
+        "allFiveLocated": 0,
+        "allFiveJumpable": 0,
+        "seekVerified": 7,
+        "seekFailed": 0,
+        "terminalEndNotSuccessTrue": 224,
+        "terminalStops": 224,
+        "fieldEvidenceDimsPresent": 5,
+        "cacheSha256": "e6a53bda343b5fc3361ddfdab5eae7e8db766448640e426a13631d7fd68667f3",
+        "cacheBytes": 12442564,
+        "perDim": {
+          "goal": "1/210",
+          "obstacle": "0/200",
+          "action": "1/221",
+          "outcome": "5/214",
+          "cost": "0/78"
+        }
+      },
+      {
+        "key": "ee3430ef493546bbcd2e700b",
+        "title": "西游记",
+        "role": "默认",
+        "events": 798,
+        "tasks": 282,
+        "playable": 282,
+        "unplayable": {},
+        "allFiveProvided": 174,
+        "allFiveLocated": 45,
+        "allFiveJumpable": 45,
+        "seekVerified": 296,
+        "seekFailed": 0,
+        "terminalEndNotSuccessTrue": 282,
+        "terminalStops": 282,
+        "fieldEvidenceDimsPresent": 104,
+        "cacheSha256": "9747b08a09c9cb6442ab2a91f06925942fb73505edce26de28d4c8f7d967eab9",
+        "cacheBytes": 6879171,
+        "perDim": {
+          "goal": "59/279",
+          "obstacle": "59/270",
+          "action": "59/282",
+          "outcome": "74/281",
+          "cost": "45/177"
+        }
+      },
+      {
+        "key": "b1687d1214f4d6c8bcd06c6f",
+        "title": "三国演义",
+        "role": "默认",
+        "events": 1286,
+        "tasks": 420,
+        "playable": 420,
+        "unplayable": {},
+        "allFiveProvided": 312,
+        "allFiveLocated": 126,
+        "allFiveJumpable": 126,
+        "seekVerified": 678,
+        "seekFailed": 0,
+        "terminalEndNotSuccessTrue": 420,
+        "terminalStops": 420,
+        "fieldEvidenceDimsPresent": 154,
+        "cacheSha256": "e06b6c2b3ba92065d3a34da0d5b39bafc4e671fac2ea7537028d5bb740ea2482",
+        "cacheBytes": 13900071,
+        "perDim": {
+          "goal": "132/416",
+          "obstacle": "132/405",
+          "action": "132/420",
+          "outcome": "156/415",
+          "cost": "126/317"
+        }
+      },
+      {
+        "key": "3af17a8d68df3bfbec7cd3b1",
+        "title": "大奉打更人",
+        "role": "发布链父/旁支",
+        "tasks": 224,
+        "playable": 224,
+        "allFiveProvided": 74,
+        "allFiveLocated": 0,
+        "allFiveJumpable": 0,
+        "seekVerified": 50,
+        "seekFailed": 0,
+        "terminalEndNotSuccessTrue": 224,
+        "terminalStops": 224,
+        "fieldEvidenceDimsPresent": 5,
+        "perDim": {
+          "goal": "1/210",
+          "obstacle": "0/200",
+          "action": "1/221",
+          "outcome": "48/214",
+          "cost": "0/78"
+        }
+      },
+      {
+        "key": "5b064a5575f0c330f6f2cd2e",
+        "title": "西游记",
+        "role": "发布链父/旁支",
+        "tasks": 198,
+        "playable": 198,
+        "allFiveProvided": 123,
+        "allFiveLocated": 45,
+        "allFiveJumpable": 45,
+        "seekVerified": 321,
+        "seekFailed": 0,
+        "terminalEndNotSuccessTrue": 198,
+        "terminalStops": 198,
+        "fieldEvidenceDimsPresent": 104,
+        "perDim": {
+          "goal": "59/196",
+          "obstacle": "59/187",
+          "action": "59/198",
+          "outcome": "99/198",
+          "cost": "45/126"
+        }
+      },
+      {
+        "key": "ed3dc1255ca08fbdaae30bbd",
+        "title": "西游记",
+        "role": "结果更正版",
+        "tasks": 198,
+        "playable": 198,
+        "allFiveProvided": 123,
+        "allFiveLocated": 45,
+        "allFiveJumpable": 45,
+        "seekVerified": 296,
+        "seekFailed": 0,
+        "terminalEndNotSuccessTrue": 198,
+        "terminalStops": 198,
+        "fieldEvidenceDimsPresent": 104,
+        "perDim": {
+          "goal": "59/196",
+          "obstacle": "59/187",
+          "action": "59/198",
+          "outcome": "74/198",
+          "cost": "45/126"
+        }
+      },
+      {
+        "key": "fe42d01f3826fe8096f86614",
+        "title": "三国演义",
+        "role": "旧键",
+        "tasks": 178,
+        "playable": 178,
+        "allFiveLocated": 126,
+        "allFiveJumpable": 126,
+        "seekVerified": 678,
+        "seekFailed": 0,
+        "terminalEndNotSuccessTrue": 178,
+        "terminalStops": 178,
+        "fieldEvidenceDimsPresent": 154,
+        "perDim": {
+          "goal": "132/178",
+          "obstacle": "132/178",
+          "action": "132/178",
+          "outcome": "156/178",
+          "cost": "126/164"
+        }
+      }
+    ],
+    "reading": "**7/7 个已发布版本都不满足判据**。判据要求「目标/障碍/行动/结果/代价**都能**跳到事件及原文」；实测没有任何版本做到「每条任务五维全可跳」。最好的三国默认版也只有 126/420 = 30 percent 的任务五维齐全，最差的大奉是 0/224。注意 playable 与 seekFailed：**不是播不动**（224/224、420/420 全可播），而是**没有可跳的目标** —— 与上一轮同形，本会话独立复现。",
+    "crossCheckWithPriorRound": {
+      "sameInputSameConclusion": "上一轮（2026-10-09T22:12:44Z 提交）与今天我测的 **6 个图谱缓存哈希逐字节相同**（大奉默认 e6a53bda…、三国 e06b6c2b…、西游默认 9747b08a…、大奉发布链、西游 5b064a55…、三国旧键）⇒ 这不是「样本不同」，是**同输入复现同结论**：allFiveLocated 0/126/45/0/45/126 两轮完全一致。",
+      "whatIsDifferentToday": "①播放器实体变了（上一轮 945e74c0…/76885 B → 今天 5a22b7b929d5…/93458 B，M86 落地）；**但五维锚定数字一字未变**。②归属结论变了：上一轮「loop 里无承接者」→ 今天有正在施工的 M86 承接者（见 attribution）。③判据原始出处文件消失（上一轮可读 13.6 MB 归档，今天两处都不存在）。"
+    },
+    "midRunMutationDisclosure": {
+      "what": "本会话测量期间，被测对象 js/sky/sky-shell-player.js 被**并行写入者**改动了一次。",
+      "footprint": {
+        "before": {
+          "sha256": "e29170e070657721496485a3b807a76b1b6ba6d56a0e5840b8505997107577fa",
+          "bytes": 84943,
+          "mtime": "2026-10-10T18:13:53Z"
+        },
+        "after": {
+          "sha256": "5a22b7b929d523d1f9834b437a7921f1c4c6ef22f2c4973eaf655dc650a825f7",
+          "bytes": 93458,
+          "mtime": "2026-10-11T12:18:40Z"
+        },
+        "attribution": "M86 施工方（GATE.lock pid=73130、agent=motion-e1-merge-20261010T162850Z、heartbeat 12:27:50Z 仍活）。判据是**写入足迹 + 进程血缘 + 该路径在其 writes 清单里**（merge:rsi-task-aspects:20261011 的 writes 第一条就是 js/sky/sky-shell-player.js），不是「谁的需求听起来像」。"
+      },
+      "revisionChainObservedThisSession": [
+        {
+          "rev": 0,
+          "sha256": "e29170e070657721496485a3b807a76b1b6ba6d56a0e5840b8505997107577fa",
+          "bytes": 84943,
+          "mtime": "2026-10-10T18:13:53Z",
+          "note": "我进场时的版本（上一轮记录引用的也是另一版 945e74c0…）"
+        },
+        {
+          "rev": 1,
+          "sha256": "8714f037c505304cf1107fd3e3d113bcaa120553ca5345a9608528408fa189e6",
+          "bytes": 93159,
+          "mtime": "2026-10-11T12:18:40Z",
+          "note": "M86 五槽渲染落地（js/sky/sky-shell-player.js:459-465 出现 m86-slot / 「有描述，事件待定位」/「当前记录未提供」）"
+        },
+        {
+          "rev": 2,
+          "sha256": "5a22b7b929d523d1f9834b437a7921f1c4c6ef22f2c4973eaf655dc650a825f7",
+          "bytes": 93458,
+          "mtime": "2026-10-11T12:31:09Z",
+          "note": "再次改写；此时我已能独立复测，见下"
+        }
+      ],
+      "whyItDoesNotInvalidateTheConclusion": "我在 rev1 与 rev2 上各跑了一遍**同一探针、同一 7 个图谱**。逐字段 diff 结果：**只有 3 个字段不同，且全部是被测对象自己的身份字段**（playerSha256 / playerBytes / playerMtime）；**7 个图谱的全部测量值（playable / allFiveLocated / allFiveJumpable / seekVerified / perDim 各项 / terminalEndNotSuccessTrue）一个字节都没变**。allFiveLocated = 0/45/126/0/45/45/126 两版完全一致。即 M86 落地的是**未锚定字段的呈现**（m86-slot 等），**没有改变锚定本身**。",
+      "howPinned": "用包装脚本（sha256 0ba5f796e264…）在探针运行**前后**各取一次播放器哈希。**每一次结论性测量都报 stableDuringRun=true**（stderr 留档 run-final.stderr 与 run-rev3.stderr），即每一次测量都没有跨越写回；跨版本的一致性另有逐字段 diff 作证，见上。"
+    }
+  },
+  "attribution": {
+    "conclusion": "**归属今天变了**：缺口现在**有** loop 承接者，而且是**正在跑**的 M86 —— 不再是上一轮报的「无承接者」。但承接者只覆盖**呈现层**；**数据层（五维引句的独立性与可归属）今天仍无承接者**。",
+    "loopCarrierToday": [
+      {
+        "id": "merge:rsi-task-aspects:20261011",
+        "file": "loop/queue/rsi-visual-20261011.jsonl",
+        "title": "M86任务五维说明动画：目标障碍行动结果代价随真实停点显现",
+        "status": "**未完成但正在施工**（in queue=True、done=False）",
+        "writes": [
+          "js/sky/sky-shell-player.js",
+          "css/sky-reading.css",
+          "index.html",
+          "tests/journey_timeline_contract.js",
+          "tests/sky_journey_browser.py",
+          "tests/sky_story_browser.py",
+          "docs/QUALITY.md",
+          "loop/state/out/merge_rsi-task-aspects_20261011.artifact.json"
+        ],
+        "requirements": {
+          "requires": [
+            "merge:rsi-shared-citation:20261011"
+          ],
+          "gpu": true,
+          "gateLock": true,
+          "mainThreadOnly": true,
+          "mainThreadReason": "持续新增剧情图谱动画；按唯一QUALITY M86由root计划审核、Luna6隔离施工。"
+        },
+        "liveEvidence": {
+          "gateLockPid": 73130,
+          "gateLockAgent": "motion-e1-merge-20261010T162850Z",
+          "gateLockHeartbeat": "2026-10-11T12:27:50Z",
+          "checkpoints": [
+            "checkpoint_rsi-task-aspects_candidate_20261011.json",
+            "checkpoint_rsi-task-aspects_brief_20261011.json",
+            "checkpoint_rsi-task-aspects_build-holder_20261011.json",
+            "checkpoint_rsi-task-aspects_gate_20261011.json",
+            "checkpoint_rsi-task-aspects_native-before_20261011.json"
+          ],
+          "note": "GATE lock 的 heartbeat 在我在场期间持续推进（12:13:05Z → 12:27:50Z），checkpoint 于 20:02–20:10 连续落盘 ⇒ 不是死锁，是活进程。"
+        }
+      },
+      {
+        "id": "build:rsi-luna-task-aspects:20261011",
+        "file": "loop/queue/rsi-visual-20261011.jsonl",
+        "title": "M86五维任务解释动画及当前事件引导",
+        "status": "未完成（隔离施工方，writes 只有 loop/state/out/build_rsi-luna-task-aspects_20261011.pointer.json）",
+        "note": "按 prompt 是「Luna6外置隔离施工、root审核」，不写共享源码 ⇒ 与 AGENTS.md「同一文件只设一个写入负责人」一致。"
+      }
+    ],
+    "loopCarrierForDataLayer": {
+      "conclusion": "**无**（本会话实测）",
+      "command": "遍历 loop/queue/*.jsonl（跳过 read.jsonl 的章节原文噪声 2266 条），按 id/title/prompt/writes 搜 P3\\.3|p3_task_five_fields|五栏|五字段|fieldEvidence|短引句|引句",
+      "scanned": 142,
+      "hits": 4,
+      "hitsDetail": "4 次命中**全部**落在 merge:rsi-shared-citation:20261011（M106「同引句归属：一处定位与多条记录的可读展开」）。它讲的是**同一条引用被多条记录共用时如何可读地展开归属**（定位层/交互层），**不是**「五维引句必须互相独立且可唯一归属到旅程事件」（数据层）。两者相邻但不同责，不能互相顶替。",
+      "writesTouchingP3Contract": "扫全部非精读任务的 writes 里含 p3_task_five_fields 或 data/ 前缀的：只有 2 条 —— merge:review-v1:20261009b（写 data/cache/*.json，**已 done**）与 merge:external-storage:20261011（写 data/cache/narrative/revisions）。**没有**任何任务把 tests/p3_task_five_fields_contract.py 从「棘轮」改成「硬判据」。",
+      "reading": "⇒ 数据层缺口**今天仍然没有承接者**。按任务要求第 2 条，我在本记录 suggestedFollowUp 里写明它归属哪个流（这是任务允许的「在提交里写明归属流」那一支；writes 只授权一个 loop/state/out/ 产物路径，建队列要写 loop/queue/*.jsonl 属非授权路径）。"
+    },
+    "carrierStateChangeVsPriorRound": {
+      "priorRoundClaim": "「唯一触及播放器的 merge:review-v1:20261009b 仍未完成」＋「loop 里仍无承接者」",
+      "todayFact": "merge:review-v1:20261009b **已经 done**（loop.done_ids() 实测 True）；同时**新增**了 M86 两条（未完成、在跑）。所以上一轮那句「无承接者」今天**不再成立**。",
+      "whyItMatters": "这正是任务要求「不要沿用旧结论」的地方：如果照抄上一轮的归属，就会把一个**正在施工**的缺口报成「无人管」。"
+    },
+    "planLevelHolderUnchanged": {
+      "realCarrier": "P08-W06（plan100 台账），标题与 P06-W06 **逐字相同**",
+      "ledger": "artifacts/plan100/20261007/P08-W06/ledger.json",
+      "sha256": "1e0069457552898cf260f3c71c755539e65652c34fae16243265235ca5f6109f",
+      "state": {
+        "status": "cpu-verified",
+        "owner": "p08-agent",
+        "reviewer": null,
+        "decision": null,
+        "finishedAt": null
+      },
+      "reading": "reviewer=null 且 decision=null ⇒ **未闭合**；与 P06-W06（rejected）同属「未结项」家族。plan-ledger 的 phases[] 也印证：P08 阶段 goal 才是「从目标到代价制作可暂停、可跳过、reduced 等价的连续叙事动画」。"
+    },
+    "existingGateIsGreenYetDefectPersists": {
+      "gate": "tests/p3_task_five_fields_contract.py（sha256 9c07121f8e33…，挂在 scripts/accept.sh:336）",
+      "command": "cd /Users/carmen/Desktop/星系 && python3 -B -s tests/p3_task_five_fields_contract.py --ratchet",
+      "exit": 0,
+      "verdict": "RATCHET OK",
+      "sameOutputSays": [
+        "FAIL ①b 历史发布图谱：同一短引句不得填满五栏 · 714/1664 条字段共用同一条短引句（43 percent）",
+        "FAIL ② 代价缺席可以，但必须保持「未知」并写明理由 · 空 cost 1183 条，其中未写理由 496 条",
+        "RATCHET NOTE · 已知缺陷**改善**（不是失败）",
+        "注意：棘轮通过**不代表**已修 —— 五栏同句仍原样存在。"
+      ],
+      "reading": "**门禁绿而缺陷原样存在**，与项目自己记录的 E14/E23/E24 同形：机制存在、有产出、但不产生信息。棘轮的语义是「不许变坏」而不是「修好了」，所以它不能用来证明这条缺陷已关闭。"
+    }
+  },
+  "secondHalfOfCriterion": {
+    "claim": "结束不等于成功",
+    "verdict": "**成立，但是写死的常量 ⇒ 方向安全却不产生信息**（如实登记，不为了结论整齐而抹掉这一半）",
+    "measured": "7 个图谱末停点 endNotSuccess=true 与 successClaim='unverified' 的比例都是 **100 percent**（224/224、282/282、420/420、224/224、198/198、198/198、178/178）",
+    "whyItIsConstant": "它是 js/sky/sky-shell-player.js:249 的**字面量**：endNotSuccess:true,successClaim:'unverified'。无论任务真实终局如何，读数恒为同一值。",
+    "contradictionToRecord": {
+      "playerConsumesTerminalEvidence": {
+        "command": "grep -c 'terminalEvidence' js/sky/sky-shell-player.js",
+        "output": "0"
+      },
+      "availableDataNotConsumed": {
+        "command": "遍历 artifacts/plan100/narrative/*.tasks.json 统计带 terminalEvidence 的任务",
+        "output": "45/45 narrative 任务都带 terminalEvidence（含 successClaimNote 与 END_IS_NOT_SUCCESS 规则）"
+      }
+    },
+    "reading": "判据的两半命运不同：**「五维可跳」这半是实打实的缺口**（0–30 percent，见上）；**「结束≠成功」这半已经「对」到无法证伪** —— 播放器全文不读 terminalEvidence，所以它不可能因为真实终局而变。我没有把这条写成「已修」。"
+  },
+  "assertions": [
+    {
+      "text": "缺口**今天仍然存在**，是本会话独立实测：用今天发货的 js/sky/sky-shell-player.js（sha256 5a22b7b929d523d1f9834b437a7921f1c4c6ef22f2c4973eaf655dc650a825f7，93458 B，mtime 2026-10-11T12:18:40Z）对今天库里的 **7 个真实图谱**逐条调 timeline('tasks',id)，allFiveLocated = 大奉默认 **0/224**、西游默认 **45/282**、三国默认 **126/420**、大奉发布链 **0/224**、西游发布链 **45/198**、西游更正版 **45/198**、三国旧键 **126/178**；playable 全为 100 percent，unplayable 全为空，seekFailed=0。7/7 不满足判据。",
+      "result": "pass"
+    },
+    {
+      "text": "探针可复现且与运行次数无关：探针（sha256 e8cc4b662c3c53cd2b4aee3a802c75ca73ed1680d9e75b149561daa40c8ada87，7956 B）在同一播放器版本上跑两次，去掉时间戳字段后**逐字段完全一致**；带哈希包装的最终两次运行同样一致（run-post-m86.json vs run-final.json → True）。",
+      "result": "pass"
+    },
+    {
+      "text": "**被测对象在测量期间被并行写入者改动，我如实登记并用包装脚本钉住**：js/sky/sky-shell-player.js 由 e29170e0…/84943 B 变为 5a22b7b929d5…/93458 B（mtime 20:18:40，M86 施工方 GATE.lock pid=73130）。改动**前后**同一探针同一 7 图谱的 allFiveLocated 逐字段相同（0/45/126/0/45/45/126），证明 M86 落地的是呈现层而非锚定本身。包装脚本在最终测量前后各取哈希，报 stableDuringRun=true。",
+      "result": "pass"
+    },
+    {
+      "text": "判据来源**不再引用已消失的归档**：docs/plan-100-score-execution.md 与 ~/Desktop/星系-audit-archive-20261007 今天**都不存在**（ls 实测 + git log --all 确认其从未进 Git）。改用仓库内三处同判据来源：artifacts/plan100/plan-ledger.json（key=P06-W06 的 title 与判据逐字相同、firstLine=22573）、P06-W06/ledger.json、P06-W06/decision.md。",
+      "result": "pass"
+    },
+    {
+      "text": "**归属结论今天变了，已如实写明差异**：今天存在**正在施工**的 loop 承接者 merge:rsi-task-aspects:20261011（M86 任务五维说明动画，writes 含 js/sky/sky-shell-player.js）＋隔离施工方 build:rsi-luna-task-aspects:20261011；两者 in queue=True、done=False，GATE.lock pid=73130 heartbeat 12:27:50Z 仍活、checkpoint 20:02–20:10 连续落盘。上一轮点名的 merge:review-v1:20261009b 今天**已经 done**。",
+      "result": "pass"
+    },
+    {
+      "text": "**数据层缺口今天仍无承接者**（按任务要求写明归属流）：扫 142 条非精读队列任务，按 P3\\.3|p3_task_five_fields|五栏|五字段|fieldEvidence|短引句|引句 命中 4 次且**全部**落在 merge:rsi-shared-citation:20261011（M106 同引句归属，定位/交互层，与数据层的「五维引句独立且可唯一归属」不同责）；writes 触及 p3_task_five_fields 或 data/ 的只有 2 条，**没有**任何任务把该棘轮改成硬判据。",
+      "result": "pass"
+    },
+    {
+      "text": "**数据层缺陷今天原样成立**（独立复测）：第二探针（sha256 42a20a549b8319139b249a7e78c0fa9ba02fd7429d8e3417b99742aaaccfe626，3924 B）实测三国 154 条带 fieldEvidence 任务里 **145 条五栏引句完全相同**、西游 104 条里 **68 条五栏全同**；引句归属事件区间三国 owned 654 / unowned 77 / ambiguous 30、西游 owned 281 / unowned 203。即 docs/QUALITY.md §P3.3 明文禁止的「不能同一短引句填满五栏」。",
+      "result": "pass"
+    },
+    {
+      "text": "**已有门禁绿而缺陷原样存在**：tests/p3_task_five_fields_contract.py --ratchet 本会话实跑 **rc=0 / RATCHET OK**，同一份输出同时写「714/1664 条字段共用同一条短引句」（43 percent）「空 cost 1183 条，其中未写理由 496 条」并自注「棘轮通过**不代表**已修」。",
+      "result": "pass"
+    },
+    {
+      "text": "反面证据如实登记：判据另一半「结束≠成功」**成立但是写死的** —— 7 图谱 100 percent 末停点都是 endNotSuccess/successClaim='unverified'，而它是 js/sky/sky-shell-player.js:249 的字面量；播放器全文 grep -c terminalEvidence → **0**，而 artifacts/plan100/narrative/*.tasks.json 里 **45/45** 条任务都带 terminalEvidence。方向安全，但这条断言因此不产生信息。",
+      "result": "pass"
+    },
+    {
+      "text": "**禁止项遵守，可核对**：①**没有**改台账状态 —— artifacts/plan100/20261007/P06-W06/ledger.json 只读，哈希 dd6c5c415cf6… 与提交时一致，status 仍为 rejected；②**没有**自签 —— owner=p06-agent、原 reviewer=p13-wave3-verifier，本产物 agent=sentinel-adopt-p06w06-20261011 与两者都不同，且本产物不声称 merged；③只写了 writes 授权的 1 个路径。",
+      "result": "pass"
+    }
+  ],
+  "commands": [
+    {
+      "cmd": "sh /Volumes/资源库/我的资源/回滚点/工具/p06w06-run-stable-20261011.sh /Users/carmen/Desktop/星系 215f4b88fb087a7d735a6fae ee3430ef493546bbcd2e700b b1687d1214f4d6c8bcd06c6f 3af17a8d68df3bfbec7cd3b1 5b064a5575f0c330f6f2cd2e ed3dc1255ca08fbdaae30bbd fe42d01f3826fe8096f86614",
+      "exit": 0,
+      "when": "本会话（**结论性**，跑两次；包装脚本在运行前后各取一次播放器哈希）",
+      "result": "stableDuringRun=true（前后都是 5a22b7b929d5…/93458 B）；allFiveLocated = 0/45/126/0/45/45/126；seekFailed 全 0。原始输出 run-final.json（sha256 e52cdc78f3f4…）"
+    },
+    {
+      "cmd": "node /Volumes/资源库/我的资源/回滚点/工具/p06w06-probe-20261011.js /Users/carmen/Desktop/星系 <7 keys>",
+      "exit": 0,
+      "when": "本会话（M86 落地**前**，播放器 e29170e0…/84943 B）",
+      "result": "allFiveLocated = 0/45/126/0/45/126；与落地后**逐字段相同** ⇒ M86 未改变锚定。原始输出 run1.json（sha256 f0ac81632704…）、ab_full.json（sha256 07b29b7d6906…）"
+    },
+    {
+      "cmd": "node /Volumes/资源库/我的资源/回滚点/工具/p06w06-evidence-probe-20261011.js /Users/carmen/Desktop/星系 <6 keys>",
+      "exit": 0,
+      "when": "本会话（**本轮新查明**的数据层形态）",
+      "result": "三国 154 条带 FE 任务 / 761 维度行 / 145 条五栏全同 / owned 654 unowned 77 ambiguous 30；西游 104 / 484 / 68 / 281 / 203 / 0；大奉 5 / 22 / 0 / 11 / 30 / 0。原始输出 evidence.json（sha256 2086597941b7…）"
+    },
+    {
+      "cmd": "python3 -B -s tests/p3_task_five_fields_contract.py --ratchet",
+      "exit": 0,
+      "when": "本会话（**门禁绿而缺陷存在**）",
+      "result": "RATCHET OK；同一份输出写明 publishedOneQuoteTasks=714/1664（43 percent）、unexplainedMissingCost=496、liveDuplicateTasks=19/1005，并自注「棘轮通过不代表已修」。原始输出 five_fields_post_m86.txt（sha256 1c8dc5285abf…）"
+    },
+    {
+      "cmd": "node tests/journey_timeline_contract.js",
+      "exit": 0,
+      "when": "本会话（M86 落地后复跑）",
+      "result": "**20 narrative journey contracts passed**（上一轮是 17 ⇒ M86 扩了 3 条责任测试，与它 writes 含 tests/journey_timeline_contract.js 一致），含对 3 个真实图谱的断言（大奉 6 / 西游 16 / 三国 24 条实际任务）。原始输出 journey_contract_post_m86.txt（sha256 30e78eef7bc8…）"
+    },
+    {
+      "cmd": "python3 -c \"import json;a=json.load(open('run-post-m86.json'));b=json.load(open('run-final.json'));a.pop('at');b.pop('at');print(a==b)\"",
+      "exit": 0,
+      "when": "本会话（确定性）",
+      "result": "True（含全部 7 图谱的 perDim/provided/located/seek 计数）"
+    },
+    {
+      "cmd": "python3 -B -s -c \"import sys;sys.path.insert(0,'loop/bin');import loop as L;t=L.load_tasks();d=L.done_ids();print([(x, x in t, x in d) for x in ['merge:rsi-task-aspects:20261011','build:rsi-luna-task-aspects:20261011','merge:rsi-shared-citation:20261011','merge:review-v1:20261009b']])\"",
+      "exit": 0,
+      "when": "本会话（归属判定，用 loop 自己的机器口径）",
+      "result": "M86 两条 in-queue=True / done=False；merge:rsi-shared-citation:20261011 done=True；merge:review-v1:20261009b done=True（**推翻上一轮**「仍未完成」）"
+    },
+    {
+      "cmd": "python3 - <<'EOF' 遍历 loop/queue/*.jsonl（跳过 read.jsonl）按 P3.3/五栏/fieldEvidence 等搜 id/title/prompt/writes EOF",
+      "exit": 0,
+      "when": "本会话（数据层归属判定）",
+      "result": "scanned 142（非精读）；命中 4，**全部**是 merge:rsi-shared-citation:20261011；writes 触及 p3_task_five_fields 或 data/ 的仅 2 条 ⇒ **数据层无承接者**"
+    },
+    {
+      "cmd": "python3 - <<'EOF' 遍历 loop/queue/*.jsonl（跳过 read.jsonl）按 M86|旅程|journey|五维|五字段|aspect|timeline 搜 id/title/prompt EOF",
+      "exit": 0,
+      "when": "本会话（呈现层归属判定）",
+      "result": "scanned 142；命中 5，其中 M86 两条：merge:rsi-task-aspects:20261011、build:rsi-luna-task-aspects:20261011（其余 3 条为 adopt 自身与 a11y 噪声）"
+    },
+    {
+      "cmd": "cat loop/state/leases/GATE.lock; ps -p 73130 -o pid,etime,command; pgrep -fl 'rsi-task-aspects' | wc -l",
+      "exit": 0,
+      "when": "本会话（锁不足以判占用，实测进程 —— 哨兵纪律）",
+      "result": "GATE.lock pid=73130 agent=motion-e1-merge-20261010T162850Z heartbeat 12:27:50Z；ps 实测 PID 73130 存活（ELAPSED 19:59）；计数用 pgrep -fl | wc -l（**不用** pgrep -c，BSD/macOS 无此选项）"
+    },
+    {
+      "cmd": "ls -la docs/plan-100-score-execution.md; ls docs/; ls -d /Users/carmen/Desktop/*audit*; git log --all -- '*plan-100-score-execution.md'",
+      "exit": 0,
+      "when": "本会话（判据出处核对）",
+      "result": "docs/ 只有 QUALITY.md、SCHEMA.md；Desktop 下无 audit 归档目录；git 全历史 0 命中 ⇒ 判据原始 13.6 MB 计划文本**本机已不可复现**（如实登记，不猜替代品）"
+    },
+    {
+      "cmd": "shasum -a 256 artifacts/plan100/20261007/P06-W06/ledger.json artifacts/plan100/plan-ledger.json js/sky/sky-shell-player.js",
+      "exit": 0,
+      "when": "本会话（**禁止项核对**：台账未被我改动）",
+      "result": "ledger.json dd6c5c415cf6…（与只读时一致，status 仍 rejected）；plan-ledger.json e74bb8804e77…；播放器 5a22b7b929d5…"
+    },
+    {
+      "cmd": "grep -c 'terminalEvidence' js/sky/sky-shell-player.js; grep -n 'endNotSuccess' js/sky/sky-shell-player.js",
+      "exit": 0,
+      "when": "本会话（判据另一半）",
+      "result": "terminalEvidence → 0；endNotSuccess 出现在 :249（timelineOf 里的字面量 terminal stop）与 :1065/:1067（把它投影出去的只读投影）"
+    }
+  ],
+  "whatIchecked": {
+    "method": "只读复算 + 本会话自写两个探针。所有定位计数由探针从**今天发货的**播放器与**今天库里的**图谱现算，不手抄任何旧数字；归属判定一律走 loop 自己的机器口径（load_tasks/done_ids/pick）；进程占用一律 pgrep -fl | wc -l 加 ps -p 实测，不靠锁文件。",
+    "notChecked": [
+      "**未跑浏览器/GPU**：任务未声明要跑，且 GPU 全局串行（本机正有 M86 的 gpu:true 合并任务持 GATE.lock 在跑）。⇒ 本产物**不含**任何新的渲染实测：我不知道「五维跳不到」在真实页面上看起来是什么样，也不知道 M86 新落地的 m86-slot 五槽在屏幕上的实际观感。卡片侧结论来自读源码，不是实看。",
+      "**未在真实页面复核 M86 的呈现**：M86 在我在场期间落地（播放器 84943→93458 B），但我只做了**离线 CPU** 探针，没有走 http://127.0.0.1:8781 的真实页面路径，也没有跑 tests/sky_journey_browser.py / sky_story_browser.py（都要 base/浏览器）。⇒ 「M86 是否真的把未锚定字段显示成『事件待定位』」我只验证了**源码里有这条分支**（js/sky/sky-shell-player.js:463-464），**没有**验证它在真实页面上生效。",
+      "**未验证 M86 的验收是否通过**：merge:rsi-task-aspects:20261011 仍是 done=False、GATE.lock 仍被它持有（heartbeat 12:27:50Z）⇒ 我截取的是**施工中的中间态**，不是它的最终交付。我记录的快照 5a22b7b929d5…/93458 B 之后它还可能再改。",
+      "**未修任何一条缺陷**：本任务 writes 只授权一个 loop/state/out/ 产物路径；把棘轮改成硬判据要改 tests/p3_task_five_fields_contract.py（受保护路径），建队列要写 loop/queue/*.jsonl（非授权）。",
+      "**五维引句的确切生成者仍未定位**：我知道它在**已发布图谱**里（fieldEvidence），也知道精读流产物与 P03 产物**都不是**来源（上一轮实测 8/1964 与 0/45），但**真来源待查** —— 这是本记录唯一没能收口的归因，如实记为不确定，不猜一个。",
+      "**未做同代码 A/B 隔离 M86 的净效应**：M86 落地前后我测的是**同一批图谱缓存**、**不同播放器实体**，且中间可能还有别的写入者。我能证明的是「锚定数字未变」，**不能**证明「所有差异都归因于 M86」。"
+    ]
+  },
+  "evidence": [
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261011-201317-306194-80749/测试产物/run-rev3.json",
+      "sha256": "9aa00260f55ad1564f7996e19c33dc250a644ec7b9e7c52893217127aa658c56",
+      "note": "**结论性**探针原始输出（播放器第 3 版 5a22b7b929d5…/93458 B，7 图谱；包装脚本证明测量期间播放器未变）"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261011-201317-306194-80749/测试产物/run-rev3.stderr",
+      "sha256": "ae99aa0bf0ee18939f498fe12b06dde4cb06e8df59b5c7d30e59b36f0a689b1c",
+      "note": "第 3 版测量的包装脚本哈希对照：playerBefore=playerAfter，stableDuringRun=true"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261011-201317-306194-80749/测试产物/run-final.json",
+      "sha256": "e52cdc78f3f4abd9bdbca02a9e0939f53e093cd69abfb61d9042623bc5ce7b32",
+      "note": "第 2 版探针原始输出（8714f037…/93159 B，7 图谱）—— 用于证明锚定数字跨版本一致"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261011-201317-306194-80749/测试产物/run-final.stderr",
+      "sha256": "e66f88677e7ef85f52aee2987264bf0725da076196cde2676339b101c397639a",
+      "note": "包装脚本的哈希前后对照：playerBefore=playerAfter=5a22b7b929d5…，stableDuringRun=true"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261011-201317-306194-80749/测试产物/run1.json",
+      "sha256": "f0ac81632704c895fa056fac076451b2d4817542ed48403f3f08ad7669a77482",
+      "note": "M86 落地**前**的探针原始输出（6 图谱，播放器 e29170e0…/84943 B），用于证明锚定数字未随 M86 变化"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261011-201317-306194-80749/测试产物/ab_full.json",
+      "sha256": "07b29b7d6906fe1c29608e059dc61bec87ee3bef0fcad73930e254096d5d3d25",
+      "note": "M86 落地前的完整 7 图谱输出（含 fe42d01f…），与 run-final.json 同格式可直接比对"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261011-201317-306194-80749/测试产物/evidence.json",
+      "sha256": "2086597941b7aac6cc46f9edf36a50a4b8f7a9cc6e1cf45e85a78c9f2c8632c8",
+      "note": "第二探针原始输出：五维引句独立性与事件区间归属（数据层缺陷）"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261011-201317-306194-80749/测试产物/five_fields_post_m86.txt",
+      "sha256": "1c8dc5285abf552836245a2fe8a6cccb42e32428bac9840783af402b516bfd22",
+      "note": "tests/p3_task_five_fields_contract.py --ratchet 原始输出（rc=0 / RATCHET OK，但同文写明 714/1664 与 496）"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261011-201317-306194-80749/测试产物/journey_contract_post_m86.txt",
+      "sha256": "30e78eef7bc8b53368191e54f8587201ce1c1e60ab031d904ff5086e47b186b7",
+      "note": "node tests/journey_timeline_contract.js 原始输出（20/20 通过）"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261011-201317-306194-80749/测试产物/measured-revisions/sky-shell-player.post-m86.8714f037.js",
+      "sha256": "8714f037c505304cf1107fd3e3d113bcaa120553ca5345a9608528408fa189e6",
+      "note": "**被测播放器版本的留档快照**（不可变）：M86 落地后、我据以得出结论的那一版（5a22b7b929d5…/93458 B）。**为什么用快照而不用仓库里的 js/ 活路径**：该文件正被 M86 施工方持续改写（本会话就观察到三次：e29170e0/84943 B → 5a22b7b929d5/93458 B → 5a22b7b9/93458 B），而 js/ 属产品路径、其漂移按设计判 evidence 失效 ⇒ 把活文件写进 evidence 会让本记录**每几分钟**被判失效一次并反复重派。活路径的哈希如实记在 sourceHashes 里（那一栏不被 evidence_stale 扫描，正是用来识别并行写入者的）。"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261011-201317-306194-80749/测试产物/measured-revisions/sky-shell-player.rev3.5a22b7b9.js",
+      "sha256": "5a22b7b929d523d1f9834b437a7921f1c4c6ef22f2c4973eaf655dc650a825f7",
+      "note": "**第 3 版（最新）被测播放器的留档快照**：93458 B，本会话第三次观察到的写回。与第 2 版快照一起，构成「锚定数字跨版本不变」这一断言的复核材料。"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/工具/p06w06-probe-20261011.js",
+      "sha256": "e8cc4b662c3c53cd2b4aee3a802c75ca73ed1680d9e75b149561daa40c8ada87",
+      "note": "本会话自写探针源码（主判据：五维锚定 + 末停点）"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/工具/p06w06-evidence-probe-20261011.js",
+      "sha256": "42a20a549b8319139b249a7e78c0fa9ba02fd7429d8e3417b99742aaaccfe626",
+      "note": "本会话自写第二探针源码（数据层：引句独立性与可归属）"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/工具/p06w06-run-stable-20261011.sh",
+      "sha256": "0ba5f796e264d607bece6b3bbb09dcae659bccb5b25b8b47559a774de6689ff5",
+      "note": "包装脚本源码：探针运行前后各取一次播放器哈希，用于判定测量是否跨越写回"
+    },
+    {
+      "path": "artifacts/plan100/20261007/P06-W06/ledger.json",
+      "sha256": "dd6c5c415cf690ae43e702b7fdc724db1d325926a5348c4920c9830e0d7aed7c",
+      "note": "被处置的台账原件：**只读未改**，status 仍为 rejected（禁止项核对）"
+    },
+    {
+      "path": "artifacts/plan100/plan-ledger.json",
+      "sha256": "e74bb8804e7717c5c89a8b4cee2626c8054a7580e8d8b8ebfc0b8dde803a2f3c",
+      "note": "判据的仓库内来源：key=P06-W06 的 title 与判据逐字相同（firstLine=22573），并给出 P06/P08 的阶段 goal"
+    },
+    {
+      "path": "loop/queue/rsi-visual-20261011.jsonl",
+      "sha256": "e01bd8c8584fb1f662e9cba500f7d0e758a1341d8b8096534fe70e59730a674b",
+      "note": "今天的承接者定义（merge:rsi-task-aspects:20261011 与 build:rsi-luna-task-aspects:20261011，含 writes/requires/gateLock）"
+    },
+    {
+      "path": "tests/p3_task_five_fields_contract.py",
+      "sha256": "9c07121f8e333740cfce56623bb2307b81ffe41384957139c5a83d1c7b30fa9f",
+      "note": "数据层缺陷的**既有门禁**（棘轮模式，当前 rc=0）"
+    },
+    {
+      "path": "docs/QUALITY.md",
+      "sha256": "50921d39a791e3c9ed8198df4f3526c71002a2a5784aa775a3ea63c5543e072b",
+      "note": "唯一质量计划：§P3.3 明文「不能同一短引句填满五栏」；§05.6b M86 卡（含「未锚定的字段写『有描述，事件待定位』」）"
+    },
+    {
+      "path": "loop/state/out/checkpoint_rsi-task-aspects_gate_20261011.json",
+      "sha256": "a98cd881dc533a73bb176f1d61e799bbdb2fc137f91246013ff6023e0bd450a6",
+      "note": "M86 正在施工的 checkpoint 证据（pid=73130，state='claimed via next with live GATE'）"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261011-201317-306194-80749/测试产物/prior-artifact-before-overwrite.json",
+      "sha256": "67482b18304e121dc100d43fee5d05752cb23ccf5eb4ecd8187a305357a66e65",
+      "note": "本路径**被覆盖前**的上一版产物快照（83759 B），用于 overwrotePriorArtifact 的可核对性"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261011-201317-306194-80749/测试产物/rejected-before.json",
+      "sha256": "60c357b26c71f996cb4a4481ab119a23f324b302a73f912b7d847799ea15696a",
+      "note": "本任务上一条 REJECTED 记录的快照，用于登记「引用被拒路径会自我改写」这一形态"
+    }
+  ],
+  "sourceHashes": {
+    "_note": "动手前后的源文件哈希，用于识别并行写入者。本次**只写一个产物路径**，不改任何产品源码；下面按「我读它时的值」登记。注意 js/sky/sky-shell-player.js 的漂移说明**他人在改**（M86 施工方持有 GATE.lock pid=73130），不表示本产物失真 —— 详见 gapStillExists.midRunMutationDisclosure。",
+    "js/sky/sky-shell-player.js": "5a22b7b929d523d1f9834b437a7921f1c4c6ef22f2c4973eaf655dc650a825f7",
+    "js/sky/sky-shell-player.js@我进场时的值": "e29170e070657721496485a3b807a76b1b6ba6d56a0e5840b8505997107577fa",
+    "js/sky/sky-shell-player.js@上一轮记录引用的值": "945e74c02e497b7dc4de412ce1527323920ea14b43517af7ddd82ffc878ce740",
+    "js/sky/sky-deconstruction.js": "2111fa9467e9c1ad57c40bdfa851737597e10bcbbf860c4f35c512bf1f95803b",
+    "css/sky-reading.css": "029eadc8b4b9f23c5796e4a5028cab7ca620597c87e66de55ec475c1ca1dcaa0",
+    "tests/journey_timeline_contract.js": "ad7bdfd1440ba6e2943ca0dee55f4694a785926996c3aea787d2069f4569a0ab",
+    "tests/p3_task_five_fields_contract.py": "9c07121f8e333740cfce56623bb2307b81ffe41384957139c5a83d1c7b30fa9f",
+    "scripts/accept.sh": "8df47e9cd598764dc9836974bff42776fa9ce6e4d069b6f416aa6af37a94510e",
+    "docs/QUALITY.md": "50921d39a791e3c9ed8198df4f3526c71002a2a5784aa775a3ea63c5543e072b",
+    "artifacts/plan100/20261007/P06-W06/ledger.json": "dd6c5c415cf690ae43e702b7fdc724db1d325926a5348c4920c9830e0d7aed7c",
+    "artifacts/plan100/20261007/P06-W06/decision.md": "dc8a60934a5d1c9c9d4be4364e80f2020d91c91dbdeda3b2c8b8efc62c51440e",
+    "artifacts/plan100/20261007/P08-W06/ledger.json": "1e0069457552898cf260f3c71c755539e65652c34fae16243265235ca5f6109f",
+    "artifacts/plan100/plan-ledger.json": "e74bb8804e7717c5c89a8b4cee2626c8054a7580e8d8b8ebfc0b8dde803a2f3c",
+    "loop/queue/rsi-visual-20261011.jsonl": "e01bd8c8584fb1f662e9cba500f7d0e758a1341d8b8096534fe70e59730a674b",
+    "loop/queue/plan100.jsonl": "b739b8ad6f120b2cc8e0b01e0c9e3cecba36a5bca2139b6a11cc17642cf40e2a",
+    "data/cache/215f4b88fb087a7d735a6fae.json": "e6a53bda343b5fc3361ddfdab5eae7e8db766448640e426a13631d7fd68667f3",
+    "data/cache/ee3430ef493546bbcd2e700b.json": "9747b08a09c9cb6442ab2a91f06925942fb73505edce26de28d4c8f7d967eab9",
+    "data/cache/b1687d1214f4d6c8bcd06c6f.json": "e06b6c2b3ba92065d3a34da0d5b39bafc4e671fac2ea7537028d5bb740ea2482",
+    "data/cache/index.json": "3019230e720b5d1837e34656c68bae21e02b5c74a6f1df8dcec494db395414a6",
+    "loop/bin/loop.py": "f16e39efb63e31849bd46b451a1d75153aa6401ebf1e8d0153af7f306b66d941",
+    "loop/state/out/checkpoint_rsi-task-aspects_gate_20261011.json": "a98cd881dc533a73bb176f1d61e799bbdb2fc137f91246013ff6023e0bd450a6",
+    "_probe": {
+      "p06w06-probe-20261011.js": "e8cc4b662c3c53cd2b4aee3a802c75ca73ed1680d9e75b149561daa40c8ada87",
+      "p06w06-evidence-probe-20261011.js": "42a20a549b8319139b249a7e78c0fa9ba02fd7429d8e3417b99742aaaccfe626",
+      "p06w06-run-stable-20261011.sh": "0ba5f796e264d607bece6b3bbb09dcae659bccb5b25b8b47559a774de6689ff5",
+      "run-final.json": "e52cdc78f3f4abd9bdbca02a9e0939f53e093cd69abfb61d9042623bc5ce7b32",
+      "evidence.json": "2086597941b7aac6cc46f9edf36a50a4b8f7a9cc6e1cf45e85a78c9f2c8632c8"
+    }
+  },
+  "changes": [
+    {
+      "path": "loop/state/out/adopt_P06-W06.artifact.json",
+      "kind": "append-only"
+    }
+  ],
+  "overwrotePriorArtifact": {
+    "path": "loop/state/out/adopt_P06-W06.artifact.json",
+    "priorSha256": "67482b18304e121dc100d43fee5d05752cb23ccf5eb4ecd8187a305357a66e65",
+    "priorBytes": 83759,
+    "priorAuthor": "sentinel-p06w06-today（同一 task id 的上一轮，generatedAt 2026-10-09T22:12:44Z）",
+    "trackedInGit": false,
+    "whyUnavoidable": "任务的 writes 只列这一个路径，而 loop.py submit 要求证据存在且哈希一致 ⇒ 两版不能共存。本次覆盖的**根因**（非我选择）：上一版把 js/sky/sky-shell-player.js 写进 evidence 并声明了哈希，而该文件随后被 M86 施工方改动 ⇒ evidence_stale 判 hash-changed ⇒ 任务被重派 ⇒ 重派必然重写同一路径。",
+    "priorSnapshotKeptAt": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261011-201317-306194-80749/测试产物/prior-artifact-before-overwrite.json（外置留档，可对照）"
+  },
+  "probe": {
+    "note": "探针源码留档在外置回滚点（AGENTS.md 规定的产物目录），不在仓库内 —— 本任务 writes 只授权一个 loop/state/out/ 产物路径。",
+    "sourceSha256": "e8cc4b662c3c53cd2b4aee3a802c75ca73ed1680d9e75b149561daa40c8ada87",
+    "sourceBytes": 7956,
+    "secondProbeSha256": "42a20a549b8319139b249a7e78c0fa9ba02fd7429d8e3417b99742aaaccfe626",
+    "secondProbeBytes": 3924,
+    "wrapperSha256": "0ba5f796e264d607bece6b3bbb09dcae659bccb5b25b8b47559a774de6689ff5",
+    "reproduce": [
+      "# 0) 前置：外置盘必须可用（AGENTS.md：不可用则停止，不能回退源目录或 /tmp）",
+      "# 1) 主判据（7 个图谱，带前后哈希包装 ⇒ 可证明测量期间被测对象未变）",
+      "cd /Users/carmen/Desktop/星系 && sh /Volumes/资源库/我的资源/回滚点/工具/p06w06-run-stable-20261011.sh /Users/carmen/Desktop/星系 215f4b88fb087a7d735a6fae ee3430ef493546bbcd2e700b b1687d1214f4d6c8bcd06c6f 3af17a8d68df3bfbec7cd3b1 5b064a5575f0c330f6f2cd2e ed3dc1255ca08fbdaae30bbd fe42d01f3826fe8096f86614",
+      "# 2) 数据层（引句独立性与可归属）",
+      "cd /Users/carmen/Desktop/星系 && node /Volumes/资源库/我的资源/回滚点/工具/p06w06-evidence-probe-20261011.js /Users/carmen/Desktop/星系 215f4b88fb087a7d735a6fae ee3430ef493546bbcd2e700b b1687d1214f4d6c8bcd06c6f ed3dc1255ca08fbdaae30bbd 3af17a8d68df3bfbec7cd3b1 5b064a5575f0c330f6f2cd2e",
+      "# 3) 既有门禁（棘轮：会通过，但不要把它读成“已修”）",
+      "cd /Users/carmen/Desktop/星系 && python3 -B -s tests/p3_task_five_fields_contract.py --ratchet; echo rc=$?",
+      "# 4) 既有旅程契约",
+      "cd /Users/carmen/Desktop/星系 && node tests/journey_timeline_contract.js"
+    ],
+    "rawOutputSha256": "e52cdc78f3f4abd9bdbca02a9e0939f53e093cd69abfb61d9042623bc5ce7b32",
+    "rawOutputGraphs": 7
+  },
+  "suggestedFollowUp": {
+    "neededBecause": "数据层缺口今天仍无承接者（见 attribution.loopCarrierForDataLayer）：五维引句既不独立、也不能唯一归属到旅程事件，而 docs/QUALITY.md §P3.3 早有明文。",
+    "proposedId": "ops:journey-aspect-anchoring",
+    "stream": "ops（w-ops 已承接 ops/adopt/expert/env；或新建 journey 流）",
+    "wouldNeedProtectedWrites": [
+      "loop/bin/to_candidate.py（维度引句→事件引句对齐）",
+      "tests/p3_task_five_fields_contract.py（把「可锚定 / 五栏不得同句」从棘轮升级为硬判据）",
+      "js/sky/sky-deconstruction.js（卡片侧把跳不到的维度如实呈现为「事件待定位」并给出原文入口）"
+    ],
+    "whyNotDoneHere": "本任务 writes 只授权 loop/state/out/adopt_P06-W06.artifact.json ⇒ **没有**真的建这条队列任务（建队列要写 loop/queue/*.jsonl，非授权）。按任务要求第 2 条的「或在提交里写明它归属哪个流」，此处写明归属流与建议 id。",
+    "relationshipToM86": "M86（merge:rsi-task-aspects:20261011）覆盖的是**呈现层**（把未锚定的字段显示成「有描述，事件待定位」）；它**不**改变数据层的引句独立性与可归属。两者互补，不能互相顶替。"
+  },
+  "remaining": [
+    "**原始判据文本本机不可复现**：docs/plan-100-score-execution.md（13,580,691 B，sha256 c0192e21…）与旧归档 ~/Desktop/星系-audit-archive-20261007 **今天都不存在**，且从未进 Git。本产物改用仓库内的同判据来源（plan-ledger.json 的 P06-W06 title 逐字相同 + 台账 + decision.md）。若要做**逐字**判据比对，需要用户提供该 13.6 MB 计划文本。",
+    "**没有真的建 loop 队列任务**：writes 只授权一个产物路径，建队列要写 loop/queue/*.jsonl（非授权）。按任务要求二选一，本产物只**写明归属流**（suggestedFollowUp：ops:journey-aspect-anchoring，或新建 journey 流）。",
+    "**没有实看页面**：任务未声明要跑浏览器/GPU，且 GPU 正被 M86 的 gpu:true 合并任务占用（全局串行）。卡片侧与 M86 呈现层的结论都来自读源码，不是真实页面观察。",
+    "**M86 是施工中的中间态**：merge:rsi-task-aspects:20261011 done=False，GATE.lock 仍被 pid=73130 持有（heartbeat 12:27:50Z 仍推进）。我测的快照 5a22b7b929d5…/93458 B 之后它还会再改；它的最终验收结果不在本记录范围内。",
+    "**五维引句的确切生成者未定位**：已知在已发布图谱的 fieldEvidence 里，且精读流产物与 P03 产物**都不是**来源（上一轮实测 8/1964 与 0/45）。真来源待查 —— 本轮唯一没能收口的归因。",
+    "**两条既有缺陷未修**（都不在 writes 内）：①棘轮门禁绿而缺陷存在的形态（要改 tests/）；②「提交被拒时 REJECTED__<name>.json 会改写被引用的证据路径」这一 E5/E9 第三面（要改 loop/bin/loop.py）。上一轮已登记第②条，本轮实测它**仍然成立**：我这一轮的记录若把 loop/state/out/REJECTED__adopt_P06-W06.json 写进 evidence，就会在任何一次提交失败时被自己改写。",
+    "**实测到并已结构性规避的一个自我失效陷阱（值得后续任务注意）**：第一版产物把**活的** js/sky/sky-shell-player.js 写进 evidence 并声明哈希。提交虽然通过（validation.problems=[]），但 M86 施工方在 3 分钟后再次改写该文件（5a22b7b929d5… → 5a22b7b9…）⇒ evidence_stale 立刻判 hash-changed，记录被踢出 done_ids（实测：validated=True 但 in done_ids()=False），任务将被反复重派。根因是**判据的必然性**：js/ 属产品路径、其漂移按设计判失效（AGENTS.md 明令），而正在施工的合并任务**必然**持续改写它 —— 于是「引用活文件作证据」与「结论长期有效」不可兼得。规避方式：evidence 改为引用**不可变的外置快照**（measured-revisions/*.js，按被测版本留档），活文件的哈希如实记在 sourceHashes（那一栏不被 evidence_stale 扫描，正是用来识别并行写入者的）。同时**不删任何证据**：跨版本一致性的原始输出（run-final.json / run-rev3.json）都留在 evidence 里。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/adopt_P06-W06.artifact.json"
+    ],
+    "note": "本产物覆盖了同名上一版（见 overwrotePriorArtifact）；上一版快照留档在 /Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261011-201317-306194-80749/测试产物/prior-artifact-before-overwrite.json（83759 B）。回滚 = 恢复该快照。"
+  },
+  "evidenceNote": "本产物**故意不把自己列进 evidence**：status=done 的提交要求每个证据条目声明 sha256（E32），而一个文件无法包含自己的哈希；且 E5/E9 已记过「把记录路径本身当证据」这种形态。本产物的存在与归属由 changes 与 overwrotePriorArtifact 登记。此外**所有证据路径都是绝对路径或仓库相对路径下的稳定产物**，不引用 loop/state/leases/ 等瞬态路径（validate 会拒）。",
+  "submittedAt": "2026-10-11T12:41:22Z",
+  "wallClockSeconds": 2032,
+  "wallClockFrom": "lease.startedAt",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-11T12:41:22Z"
+  },
+  "verifyState": "pending"
+}

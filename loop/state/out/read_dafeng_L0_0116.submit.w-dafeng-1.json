@@ -1,0 +1,183 @@
+{
+ "task": "read:dafeng:L0:0116",
+ "agent": "w-dafeng-1",
+ "status": "done",
+ "summary": "精读《大奉打更人》第一百一十七章 桑泊底下的封印物（区间 codepoint [393895,398486)，4591 字，docs[0].text 绝对偏移）。**过程**：先读任务定义与原始区间，再自读完整章原文（分段落表逐段核过偏移），然后用生成器把每条引文字面量在全文 find() 定位写候选、再用**独立实现**的校验器（read-0116/check_candidate_w-dafeng-1.py，从磁盘重读 docs.json、刻意不复用生成器断言）与两个反向工具复验。**独立校验器首轮抓出 7 项 FAIL，其中 4 项是候选真实缺陷、3 项是我校验器自身的缺陷**，逐项查清后修复：候选侧的真缺陷是 ①W6 案牍库标 arrived 但到达动词白名单漏了原文的「躲在」——经查是**校验器误杀**（引文「许七安此时正躲在案牍库的查资料」确是在场动词，白名单太窄），已扩白名单而非改候选；②metrics.quoteNodes 口径不一致（生成器把 crossRef 的 3 条对照事件也算进去，127 vs 实际 124），已改 count_nodes 跳过 crossRef；③coverage.sections 在标题行与首段之间有 2 字空隙（393911,393913 是空行），已并入标题段；④F2.name 把「初代监正已脱困」这个**许七安的心声**写成了事实陈述——这是红线级缺陷，已改成「『初代监正已脱困』这个判断（许七安的心声…）」；另有 ⑤六个原文明确事实（想到监正、跑司天监找监正的后备、两位金锣在场、周赤雄后边还有黑手、第二条方向耗神耗力、外柔内刚/李玉春/刽子手警告/留恋家人/社畜比喻）在候选里没有处置，已逐条补进对应任务栏。**反向验证**（reverse_coverage.py，问「这一段还漏了什么」）：首次扫描发现叙事正文有 25 段无任何引文覆盖，逐段补完后**只剩 1 段**——一行非叙事分节符「.....」[394394,394400)。**对抗自查**（adversarial_audit.py）：检查 dialogue/thought 引文有没有被当成事实用于 result/causeEdges 端点，首轮查出 4 条 causeEdge 说明缺失、1 条 result note 未标注引语层级，已全部补上「哪几条引文是人物的话/心声」。**产出**：tasks[8]（五元组分列；10 处字面 null 全部配 <栏位>Note 写明为什么没有依据；69 条栏位引文互不共用、栏间区间互不重叠）、causeEdges[7]（每条给方向+触发机制）、notCauseEdges[4]（时间相邻不成因果，如「恰好这时」吏员来叫、读完材料的车厢与传见的浩气楼）、states[9]、foreshadows[3]（均 unresolved 并写明回收点在本区间之外）、notForeshadows[6]、worldSettings[10]（rule 5 / place 4 / item 1；place 分 arrived/mentioned，桑泊按「提及≠到达」记 mentioned；item 只勾 hold）、excludedSettings[8]、themeReadings[2]（各带 perspective/support/counter）、unknowns[20]、selfCritique（3 条最可能读错）、textArtifacts[5]、coverage、crossRef（3 条缓存事件仅作对照）。semanticReview 保持 not-performed：本文件只保证引文逐字与定位正确，不主张语义已核验。",
+ "evidence": [
+  {
+   "path": "loop/state/out/read_dafeng_L0_0116.candidate.json",
+   "sha256": "04f97e4d7b9c6b9ae5e0502800b57f90b9e5d430e792dfa245481cd3611c3b2f",
+   "kind": "candidate-read-output（任务 writes 指定的唯一写入路径）"
+  },
+  {
+   "path": "data/cache/1063b17ca65ec1b76f30e460.docs.json",
+   "sha256": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+   "kind": "source-text（只读引用，未修改；与 task.sourceHash 一致）"
+  },
+  {
+   "path": "data/cache/1063b17ca65ec1b76f30e460.json",
+   "sha256": "98370a39df4f8105063004d6bc8194e50aa8008e111a584ffec32f7ad14a14df",
+   "kind": "graph-cache（只读对照，未作为原文证据）"
+  },
+  {
+   "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-140450-354357-43232/测试产物/read-0116/check_candidate_w-dafeng-1.py",
+   "sha256": "f1526c4e12d75dca922becd60409c79f105330a6fbc48408b93e197188d80fa7",
+   "kind": "独立校验器（不复用生成器断言，从候选文件本身出发重新定位每句引文）"
+  },
+  {
+   "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-140450-354357-43232/测试产物/read-0116/reverse_coverage.py",
+   "sha256": "b23d5c1fa7c784c7a83a4b3dc5e0f247aa6e4d5aaf36f766d7dfe22dfd61eb3c",
+   "kind": "反向验证工具（逐段问「还漏了什么」，找无引文覆盖的段落）"
+  },
+  {
+   "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-140450-354357-43232/测试产物/read-0116/adversarial_audit.py",
+   "sha256": "78fa12a33296b21bf1e3c6ad3ebcca3daf1a1b0f73d614007497080b87548d53",
+   "kind": "对抗自查工具（查人物的话/心声有没有被当事实用于 result 与因果端点）"
+  },
+  {
+   "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-140450-354357-43232/测试产物/read-0116/check_out.txt",
+   "sha256": "c34e7c66cef40578016da1b0eb9f5e7a446b5c3fdb81b0a1bf1e79ebe3e56c47",
+   "kind": "独立校验器输出（58 项 PASS / 0 FAIL / 0 WARN）"
+  },
+  {
+   "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-140450-354357-43232/测试产物/read-0116/reverse_out.txt",
+   "sha256": "7f2fa63ea84ee4aefe3b704469c7a880ae605b3e7e97cedd1110299c013ca214",
+   "kind": "反向验证输出（叙事正文仅剩 1 段非叙事分节符无引文）"
+  },
+  {
+   "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-140450-354357-43232/测试产物/read-0116/adversarial_out.txt",
+   "sha256": "dff6e314b5df01a6f5765d34cd9dfc37cd1f7750db486a7682d15ee04b1d78eb",
+   "kind": "对抗自查输出（A/B 两类问题均为 0）"
+  },
+  {
+   "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-140450-354357-43232/测试产物/read-0116/gen_candidate_w-dafeng-1.py",
+   "sha256": "5061db2d924aa5fbf525b333fd8b32534e96f3cbdb4c57fce8f595b7395a836e",
+   "kind": "生成器（引文偏移全部由全文 find() 取得，不手写）"
+  }
+ ],
+ "assertions": [
+  {
+   "text": "docs.json sha256 == 任务 sourceHash(fdde5558…)：shasum -a 256 data/cache/1063b17ca65ec1b76f30e460.docs.json",
+   "result": "pass"
+  },
+  {
+   "text": "区间头部自检：docs[0].text[393895:393911] == '第一百一十七章 桑泊底下的封印物'（16 字）；下一章标题「第一百一十八章 灭口」恰在 398486（=区间终点）",
+   "result": "pass"
+  },
+  {
+   "text": "全部 155 个 quote 节点逐字回切：docs[0].text[start:end] == quote（独立校验器 §3.1，不复用生成器代码）",
+   "result": "pass"
+  },
+  {
+   "text": "每条引文的 occurrencesInFullText 与全文实际 count 一致、occurrencesInUnit 与区间内实际次数一致（§3.6/§3.7）",
+   "result": "pass"
+  },
+  {
+   "text": "全部引文落在本单元区间内且全部落在叙事正文（无一条取自作者 PS [398238,…) 或分隔线）（§3.3/§3.4）",
+   "result": "pass"
+  },
+  {
+   "text": "tasks 五栏不共用同一句引文、栏间引文区间不重叠、栏内不重复、null 栏一律带同名 <栏位>Note（§4.2/§4.3；10 处 null 全部有说明）",
+   "result": "pass"
+  },
+  {
+   "text": "causeEdges 每条都有 from/to/mechanism(含触发与方向)/basis/quotes；notCauseEdges 每条写明为什么不是因果（§5.1/§5.2）",
+   "result": "pass"
+  },
+  {
+   "text": "states 每条有前值/后值/事件锚点/引文；知识差条目写清谁知/不知（§6.1/§6.2）",
+   "result": "pass"
+  },
+  {
+   "text": "foreshadows 有铺设引文，未回收的显式标 unresolved 并写明原因；只出现一次的东西记入 notForeshadows 且给了理由（§7.1/§7.2）",
+   "result": "pass"
+  },
+  {
+   "text": "worldSettings 每条有 kind/name/quote/explain；place 的 arrived 有到达/在场动作、mentioned 无；item 四态分开写；rule 的 institution 三态写进字段（§8.1–§8.5）",
+   "result": "pass"
+  },
+  {
+   "text": "「提及≠到达」自查：桑泊（议论封印物）记 mentioned、案牍库/浩气楼（有到达动作）记 arrived，无 place 因议论被标 arrived（§8.6）",
+   "result": "pass"
+  },
+  {
+   "text": "themeReadings ≤ 2 条、每条带 perspective+support(引文)+counter，未使用事件密度/死亡人数/篇幅中点等禁用定义，未强套三幕（§9.1–§9.3）",
+   "result": "pass"
+  },
+  {
+   "text": "实体字段没有搬入本区间不存在的专名（§10.3）；候选用到的专名全部能在原文 find 到且出现在本区间内（§10.1/§10.2）",
+   "result": "pass"
+  },
+  {
+   "text": "反向验证：原文 61 条明确事实（含想到监正、跑司天监找监正、两位金锣在场、周赤雄后边还有黑手、第二条方向耗神耗力、外柔内刚/李玉春/刽子手警告/留恋家人/社畜比喻）全部在候选里有处置（§11.1）",
+   "result": "pass"
+  },
+  {
+   "text": "反向验证（逐段扫描）：叙事正文里没有引文覆盖的段落从首轮 25 段降到 1 段，仅剩非叙事分节符「.....」[394394,394400)（reverse_coverage.py）",
+   "result": "pass"
+  },
+  {
+   "text": "对抗自查：dialogue/thought/mixed 引文用于 result/objective 或因果端点时，note 里都做了「这是人物的话/心声」的归属；0 处遗漏（adversarial_audit.py A/B 两类）",
+   "result": "pass"
+  },
+  {
+   "text": "红线自查：F2.name 曾把「初代监正已脱困」这一心声写成事实陈述，已改为「…这个判断（许七安的心声…）」；候选自己写的字段提到「脱困」处全部做了归属（§15.5b）",
+   "result": "pass"
+  },
+  {
+   "text": "semanticReview.performed=false，selfCritique.semanticReviewPerformed=false：不声明语义已核验（§15.1）",
+   "result": "pass"
+  },
+  {
+   "text": "coverage.sections 首尾相接覆盖整个区间 [393895,398486)（§12.1）；metrics 各计数与候选实际长度一致（§14.1）",
+   "result": "pass"
+  },
+  {
+   "text": "crossRef 的 3 条缓存事件引文逐字回切、eventId 真实存在于图谱缓存、且未漏掉缓存里落在区间的事件（§13.1–§13.4）",
+   "result": "pass"
+  },
+  {
+   "text": "独立校验器总计 58 项检查、0 FAIL、0 WARN；退出码 0（check_candidate_w-dafeng-1.py，输出留档 check_out.txt）",
+   "result": "pass"
+  },
+  {
+   "text": "受保护路径未被本任务改动：本轮只写 loop/state/out/read_dafeng_L0_0116.candidate.json 与提交记录本身；测试产物全部落在外置盘 $CL_ARTIFACTS/read-0116/（git status 里 data/ js/ css/ 等改动均为接手前既存，非本轮所为）",
+   "result": "pass"
+  }
+ ],
+ "changes": [
+  {
+   "path": "loop/state/out/read_dafeng_L0_0116.candidate.json",
+   "kind": "append-only",
+   "note": "任务 writes 指定的唯一写入路径（本轮新建，此前该路径不存在）。"
+  },
+  {
+   "path": "loop/state/out/read_dafeng_L0_0116.submit.w-dafeng-1.json",
+   "kind": "append-only",
+   "note": "本条提交记录本身（角色契约要求的 `submit --file` 输入）。"
+  }
+ ],
+ "sourceHashes": {
+  "data/cache/1063b17ca65ec1b76f30e460.docs.json": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+  "data/cache/1063b17ca65ec1b76f30e460.json": "98370a39df4f8105063004d6bc8194e50aa8008e111a584ffec32f7ad14a14df"
+ },
+ "remaining": [
+  "本区间在「请魏公屏退左右」处收束：许七安要禀告的内容、魏渊的反应、两位金锣是否退出，都在区间之外（下一章「第一百一十八章 灭口」）。F1 因此保持 unresolved，本候选未引用下一章任何内容。",
+  "「桑泊底下封印的是初代监正」是许七安自认的结论（心声），叙述层从未确认；本候选按猜想处理（U1/S3/T3.result）。若后续单元给出叙述层确认，本条应升级为 explicit。",
+  "纸面材料（大黄山硝石矿、小旗官被灭口、金吾卫私通妖族）的属实性本区间无解（U11/U13），需与相邻单元合看。",
+  "褚采薇的差事（查京城有没有屏蔽气息的法器）在本区间没有结果（U10）；「宋师兄」「一号」的身份也未交代（U4/U9）。",
+  "T4.cost 是本候选最弱的一栏（basis=inferred，原文没有明写的代价句，靠「放弃已构想的退路」这一读法支撑）；若复核口径要求代价必须有直接陈述句，应降为 null。",
+  "T2.objective（叙述层交代他重视许七安）与 T8.objective（一句心声「又要屏退我们？！」）是本候选依据最薄的两处任务栏，已在各自 note 与 selfCritique 第 3 条中标出；若复核要求任务必须有行动者自己的诉求陈述，T8 应删除或降级。",
+  "T1.obstacle 用的是「材料对他没价值 + 他自己的低预期」，不是外部阻力；已在 note 里写明「若复核认为障碍必须是外部阻力，本栏应降为 null」。",
+  "crossRef 只对照了缓存中 quoteRef.start 落在本区间的 3 条事件；缓存覆盖稀疏（meta 标注 clues/items/locations/worldRules 均为 false），不能据此判断本区间「只有这些事」。",
+  "「每段都有引文覆盖」只说明处置到了，不等于每段都读对了；语义支撑是否成立需独立复核判定（semanticReview 保持 not-performed）。",
+  "区间内两场戏（案牍库推理 → 浩气楼长谈）之间没有时间标记，本候选没有推定二者相隔多久。"
+ ],
+ "rollback": {
+  "kind": "append-only",
+  "strategy": "delete-added-files",
+  "files": [
+   "loop/state/out/read_dafeng_L0_0116.candidate.json"
+  ]
+ }
+}

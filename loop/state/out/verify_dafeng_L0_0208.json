@@ -1,0 +1,109 @@
+{
+  "task": "verify:dafeng:L0:0208",
+  "agent": "w-sanguo-1",
+  "status": "done",
+  "role": "VERIFIER",
+  "reviewedTask": "read:dafeng:L0:0208",
+  "reviewedArtifact": "loop/state/out/read_dafeng_L0_0208.candidate.json",
+  "reviewerRole": "VERIFIER（独立反向复核）",
+  "unitHead": "第两百零七章 狗肉铺子",
+  "verdict": "partial",
+  "summary": "独立反向复核《大奉打更人》第两百零七章 狗肉铺子（docs[0].text[769296,775009)，5713 codepoint／149 非空段）。按契约先自读原文（落盘 /tmp/verify208/src.txt，逐行读完 299 行）再看候选。**抽取项层零缺陷**：236 个引文对象逐条 text[start:end]==quote、切片内唯一、落在区间内、sourceHash 全对，**零误差**；84 个不同引文串无一句编造；22 个实体逐个在切片命中，区间外人物未被引入；随机抽 5 条 quote 做 find，5/5 逐字命中且偏移一致；越权也挡住了（t3 拒写『去了青州/禹州』、t5 拒写『行动成功』、t6.result 留 null、semanticReview=not_performed）。判 **partial**：4 条反例全部落在**候选对自己工作的描述/标签**层，不落在抽取项——① themeReadings[0].counter 称「许七安本人在本区间一次也没有出场」为**假**，他在黄伯街一场在场上行动说话 5 次（774268/774343/774501/774612/774842），且候选自己的 t5/t6 就是他的戏；② tasks[4]/[5] 的 actor 把三人标成「打更人」且 basis=explicit，而「打更人」在区间内只作内城巡逻力量出现 1 次；③ citationConvention 声称「「」=逐字 已机器强制、已全部改标」，实测 H16 只查 6 个分区，245 个「」片段里 **105 个不在其管辖内**，未受查片段中 19 处（18 个不同串）在切片查不到、2 处整本书都没有；④ coverage 零覆盖清单把一段**自己引用过**的文字（第 69 段，见 i2.itemStateQuotes.use）列为未覆盖，根因是计数漏掉 itemStateQuotes——按全部引文复算应为 **81/149、零覆盖 68**，非自报的 79/70（方向是低报）。**反向验证给了 8 条 RC**，优先补：RC1（e10 的机制句与「典故」具体内容都没引）、RC2（临安为何吃这封信这一套，原文有三句解释全未引）、RC3（本区间 8 处显式因果标记里 772777 的「因此」是唯一整句未引的）。**误杀检查**：11 条 rejectedEdges／7 条 excludedSettings／4 条 rejectedTasks／5 条 notForeshadows 逐条验过，未发现词表或正则挡掉合法因果边；并替候选确认 r9（用 e2 替换正确）与 r11（拒绝正确，原文从未说他因婶婶不识字而写短信）都成立。",
+  "evidence": [
+    {
+      "path": "loop/state/out/verify_dafeng_L0_0208.verdict.json",
+      "sha256": "12f120805f73a505fef77d412d16228a5b984fb2349607c0761b7bc8e77022ae",
+      "kind": "本任务产出：复核结论（verdict=partial／counterExamples[4]／reverseChecks[8]／falseKillCheck／fabricationCheck／citationCheck）"
+    },
+    {
+      "path": "loop/state/out/read_dafeng_L0_0208.candidate.json",
+      "sha256": "a8ccd3e916cd99cebe9843b56c1475e1ccc1d01c53d39ffcd00b449079dba599",
+      "kind": "被复核候选（只读，未修改；复核前后哈希一致）"
+    },
+    {
+      "path": "data/cache/1063b17ca65ec1b76f30e460.docs.json",
+      "sha256": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+      "kind": "原文（只读引用，未修改；与任务 sourceHash 逐字一致）"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "先自读原文再看候选：python3 落盘 docs[0].text[769296,775009) 到 /tmp/verify208/src.txt，逐行读完全部 299 行／149 非空段，在打开候选之前完成。边界自检：切片以「第两百零七章 狗肉铺子」开头、长 5713 codepoint、UTF-8 sha256 5c341b9d…，与任务 sourceRange 及候选 sliceSha256 三方一致。",
+      "result": "pass"
+    },
+    {
+      "text": "全量引文复算（我自己的脚本 /tmp/verify208/check.py 与 gen_verdict.py，不 import 候选构建代码）：236 个 {quote,start,end} 对象，text[start:end]!=quote 0 条、sourceHash 不符 0 条、切片内不唯一 0 条、越出 [769296,775009) 0 条。命令：python3 /tmp/verify208/check.py",
+      "result": "pass"
+    },
+    {
+      "text": "随机抽 5 条 quote 逐个在原文 find（random.seed(208)）：5/5 逐字命中、偏移与声明一致、切片内唯一。清单见 verdict.citationCheck.results。",
+      "result": "pass"
+    },
+    {
+      "text": "反例 1 复算：许七安在本区间绝对偏移 774268/774343/774501/774612/774842 共 5 处在场，其中 t5.obstacle 引文与 t6.action 引文即其本人动作与台词 ⇒ themeReadings[0].counter 的绝对句为假。命令：python3 -c \"import json,re;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];print([769296+m.start() for m in re.finditer('许七安',t[769296:775009])])\"",
+      "result": "pass"
+    },
+    {
+      "text": "反例 2 复算：「打更人」在切片内出现 1 次（772871..772927，内城治安句，已被候选用作 w2）；全切片无第二处；t5/t6 的 actorNote 也未主张该身份有区间内依据。",
+      "result": "pass"
+    },
+    {
+      "text": "反例 3 复算：我按 build_candidate 的 H16 原样复刻（INLINE=「([^」]+)」、仅扫 tasks/causeEdges/states/foreshadows/unknowns/selfCritique 六个分区）⇒ 命中 0 条，与候选自报一致；把同一判据扩到**整个 candidate** ⇒ 245 个「」片段中 105 个在管辖外，其中 19 处（18 个不同串）在切片查不到、2 处整本书都不存在（worldSettings[21]「两处各出现一次」、speechLayerDisclosure[41]「字写得多」）。⇒ citationConvention 的「已全部改标／机器强制」为过宽声明。",
+      "result": "pass"
+    },
+    {
+      "text": "反例 4 复算：按候选自己的口径（审计脚本 walk() 因 `return` 提前退出而跳过 itemStateQuotes，得 220 个对象）复算覆盖 = 79/149、零覆盖 70，与其自报一致；按**全部 236 个引文对象**复算 = 81/149、零覆盖 68。第 69 段「她抿着粉色的唇…」确实被 worldSettings[18].itemStateQuotes.use[0] 引用，故 zeroCoverageList 多列 1 段。⇒ 自报与自身审计自洽，但与被引用段落集合不自洽（低报）。",
+      "result": "pass"
+    },
+    {
+      "text": "误杀检查：逐条读并复核 rejectedEdges 全 11 条、excludedSettings 全 7 条、rejectedTasks 全 4 条、notForeshadows 全 5 条，并穷举切片内全部显式因果标记（因为×5/所以×2/于是×1/因此×1）核对是否被词表挡掉。结论：未发现合法因果边被误杀；其中 772871 的「因为」已被正向登记为 w2，772777 的「因此」整句未被引用（列入 RC3）。",
+      "result": "pass"
+    },
+    {
+      "text": "编造/越权检查：22 个具名实体（许七安/宁宴/宋廷风/朱广孝/褚采薇/许玲月/小豆丁/许铃音/婶婶/浮香/临安/裱裱/怀庆/影梅小阁/司天监/黄伯街/白帝城/驿站/教坊司/丁15号/许二郎/许二叔）逐个在切片内 find 命中；区间外人物（魏渊/元景帝/太子）未被候选引入；未发现原文没有的人物、结局或伏笔。",
+      "result": "pass"
+    },
+    {
+      "text": "受保护路径零改动（按修改时间判定，不靠 git status——共享树里本就有其他会话的未提交改动）：我本轮第一次写盘为 2026-10-15 03:58（租约 startedAt），命令 find js css index.html serve.py narrative.py scripts tests docs data -newermt '2026-10-15 03:55:00' -type f | wc -l ⇒ 0。我只写了任务 writes 指定的 loop/state/out/verify_dafeng_L0_0208.verdict.json。",
+      "result": "pass"
+    },
+    {
+      "text": "候选未被改动：复核前后 read_dafeng_L0_0208.candidate.json sha256 均为 a8ccd3e916cd99cebe9843b56c1475e1ccc1d01c53d39ffcd00b449079dba599。",
+      "result": "pass"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/verify_dafeng_L0_0208.verdict.json",
+      "kind": "append-only"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/1063b17ca65ec1b76f30e460.docs.json": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "loop/state/out/read_dafeng_L0_0208.candidate.json": "a8ccd3e916cd99cebe9843b56c1475e1ccc1d01c53d39ffcd00b449079dba599",
+    "loop/state/out/verify_dafeng_L0_0208.verdict.json": "12f120805f73a505fef77d412d16228a5b984fb2349607c0761b7bc8e77022ae"
+  },
+  "remaining": [
+    "未重跑候选构建/审计脚本（read_dafeng_L0_0208.w-xiyou-0.build/*.py）：本次是只读源复核，故 buildDisclosure「H1–H17」「不满足即 exit 1」、negative_control「27/27 被抓到」、审计「A1–A21 全绿」、「283 处混用」等自报数字**未经我重跑验证**（其中 220/82 与 79/70 已由我的独立复算间接复现）。",
+    "H16 管辖外的 105 处「」片段，我只做了逐字存在性机器判定 + 逐条上下文阅读，未逐个裁定其元语言用法是否全都恰当。",
+    "RC 清单受检索词形限制：只系统查了切片内全部显式因果标记与全部零覆盖段落，属「在已检范围内未见」，非穷尽性证明。",
+    "未核验区间外回收：f1/f2/f3/f4/f5/f7 标 unresolved 是就本区间而言，后章是否回收不在本次范围。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/verify_dafeng_L0_0208.verdict.json",
+      "loop/state/out/verify_dafeng_L0_0208.submit.w-sanguo-1.json"
+    ]
+  },
+  "auditCmd": "python3 /tmp/verify208/check.py",
+  "submittedAt": "2026-10-14T20:26:30Z",
+  "wallClockSeconds": 2213,
+  "wallClockFrom": "lease.startedAt",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-14T20:26:30Z"
+  },
+  "verifyState": "pending"
+}

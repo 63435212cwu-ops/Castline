@@ -1,0 +1,449 @@
+{
+  "task": "adopt:P12-W04",
+  "agent": "w-ops",
+  "status": "done",
+  "generatedAt": "2026-10-08T10:23:55Z",
+  "kind": "plan100-open-item-adjudication",
+  "title": "P12-W04（blocked）如实处置：台账记的缺口今天不存在（且『九视图』≠四投影面板）；真正仍开着的是一条归 xgraph 的**时效缺口**——在途 normalize() 重排事件，使落盘投影基准与今天重算只在 deconstruction.locator 一个字段上差 1237 处，而门禁契约漏检该字段",
+  "summary": "结论三条，全部现场重测（未沿用旧结论；台账原文只登记不改写）。①**台账记的缺口今天不存在**，且缺口『需要浏览器』这半句是把两个不同的东西缝在了一起：『九视图』实为 tests/sky_internal_review_shots.py 的 3 书 × 3 机位（panorama/oblique/rotation）**摄影矩阵**，全文 ID 相关命中只有 :184 一处取景用的 nodeOf('c:'+c.name)、ID 断言 0 条；而『同一 ID 跨图定位』这条判据**离线可验**，且已挂在产品门禁上（scripts/accept.sh:122，上一行注释『离线，不碰 GPU』）。我今天实跑 `node tests/sky_identity_projection_contract.js` → **43/43 passed, exit 0**；浏览器那半边由既有任务 xgraph:transfer-audit 完成（status=done、validation.problems=[]、verifyState=pass），我今天复核其 25 条证据**逐条哈希仍全部相符**。因此**没有为这个缺口新建任务**——它不该被『补跑』。②**但今天实测到一条台账完全没记、且门禁漏检的时效缺口**：js/atlas/atlas-source.js 的在途 normalize() 会重排事件位置（工作树版重排 1125/2990 大奉、35/481 西游、77/434 三国；同文件 HEAD 版重排 0/0/0，且 HEAD 版顺序与落盘基准**逐项相同**，输入图谱 sha256 未变 ⇒ 差异来自代码而非数据）。其**全部**后果是解构面板定位串 `deconstruction.locator`（'event index N'）错位：逐 ID 比对 5136 个实体，**唯一**变化的字段就是它（1237 处 = 1125+35+77），view **state 差异 = 0**、id 集合完全相同、章归属改变 = 0、id 往返 2990/2990·481/481·434/434。③**所以缺口归属要说清**：跨图身份结论**不被动摇**；真正还开着的是『已发布投影基准与今天重算不再逐字一致』，归属 **xgraph**（需 GATE.lock 的合并/重跑类任务重生成基准），**不是** P12 的发布职责、也不是 P04/P05。我并**没有**判定这次重排是对是错：改动带明确意图注释（:735-742 称旧计数法把三国『第十回』错塞进第 1 回，属计划 P1.2），且 tests/sky_chapter_axis_contract.js 今天 11/11 绿——但『章没排错』不等于『同章内次序对』（见 remaining）。门禁为什么没拦住：契约 :133-138 的『matches a fresh recomputation』只比 counts 与 people.stateHistogram，**从不比 events 的 rows/locator**，所以 1237 处 locator 漂移可以长期存在而门禁全绿。纪律：未改台账（sha256 动手前后均 0da73aca…，status 仍 blocked、reviewer 仍 null）、未自签（提交者 w-ops，owner=p12-agent、reviewer=null，均非本 agent）、未动任何受保护路径、未跑 GPU/浏览器（实测当时确有他人在占用：8 个 headless Chrome + 一个 browser 测试进程在跑，我未杀未借用）。一处自我更正：我起初据 mtime 推测首次 accept 的唯一失败项（sky_legend_parity_contract）是 css/sky-deep-hud.css 在 10:05:00Z 被改写所致，按累计耗时重算该检查约在 ~10:04:32Z 跑、**早于**那次改写，故该因果**不成立**，已如实降级为『未能归因』。",
+  "notSelfSigned": {
+    "note": "本产物由 w-ops 提交；P12-W04 的 owner 是 p12-agent、reviewer 是 null，均非本 agent。未做任何签收动作、未改台账任何状态位、未给 reviewer 填值。",
+    "owner": "p12-agent",
+    "originalReviewer": null,
+    "didNotChangeLedgerStatus": true,
+    "ledgerSha256Before": "0da73acaee6f98c57c39350315d953f11fb4019c42580c56e0a4f6ac75c54dcd",
+    "ledgerSha256After": "0da73acaee6f98c57c39350315d953f11fb4019c42580c56e0a4f6ac75c54dcd",
+    "statusStillBlocked": true,
+    "reviewerStillNull": true
+  },
+  "whatIchecked": [
+    {
+      "question": "台账说的『九视图 × 同一ID』到底是哪个东西？它真的检查 ID 吗？",
+      "how": "读 tests/sky_internal_review_shots.py 的 docstring 与渲染循环；对其全文 grep -n -E \"eventId|characterId|canonical|nodeByKey|nodeOf|dataset\\.id|stableId\"；并读九视图产物 artifacts/plan100/visual/nine-view/fix-on/index.json",
+      "answer": "九视图（--nine）= **3 书 × 3 机位**（panorama 全景 / oblique 斜视 / rotation 旋转），docstring 明写『供独立盲评』，是**摄影相位矩阵**。全文 ID 相关命中**只有 1 行**：:184 `S.nodeOf('c:'+c.name)`，用途是找最宽的人当 hero，**没有任何 ID 断言**。产物 index.json 也自证：每本书 3 张（panorama/oblique/rotation）4K 图。台账把『九视图』与『四投影面板』缝成了一个东西。"
+    },
+    {
+      "question": "『同一 ID 跨图定位』这条判据今天还在跑吗？跑得动吗（是否真需要浏览器）？",
+      "how": "node tests/sky_identity_projection_contract.js（本会话实跑）；grep -n \"identity_projection\" scripts/accept.sh；并观察当时 GPU 占用",
+      "answer": "在跑、且是产品门禁项：scripts/accept.sh:122（上一行注释：P05 · 跨图身份投影 / 通道语义唯一性 / 减弱动效静态等价（离线，不碰 GPU））。今天实跑输出 `43 cross-view identity projection contracts passed`、exit 0；全程未起浏览器/GPU。⇒ 『需要浏览器』这半句对**这条判据**不成立。"
+    },
+    {
+      "question": "那浏览器那半边今天是什么状态？（重测，不沿用旧数）",
+      "how": "读 loop/state/out/xgraph_transfer-audit.json；用 done_ids() 复核其 status/validation/verifyState；逐条重算它 25 条证据的 sha256",
+      "answer": "**已完成且证据仍然成立**：status=done、validation.problems=[]、verifyState=pass（经 loop.done_ids() 复核）、gpu=true、verifierRequired=true。其 25 条证据今天逐条哈希 **25/25 相符**、0 missing。⇒ 台账『本轮未跑 → 未签收』描述的是 2026-10-06 18:00Z 的状态，已被 2026-10-07 的后续工作取代。"
+    },
+    {
+      "question": "今天重算的投影还等于当初落盘的基准吗？（不是看报告，是重算）",
+      "how": "node tools/plan100/projection_probe.js --json 到仓库外 /tmp；与 tests/fixtures/contracts/projection/identity-projection.json 逐 ID、逐 view 比对（reasonRef 按 locatorReasons 解引用后比）",
+      "answer": "**不完全相同**。逐 ID 比对 5136 个实体（三书 × people/events/storylines）：id 集合完全相同、**章归属改变 = 0**、view **state 差异 = 0**；差异**只在一个字段**：`deconstruction.locator`（'event index N'），共 **1237** 处（大奉 1125 / 西游 35 / 三国 77）。三书的 fields-differing 集合都恰好是 ['deconstruction.locator']。"
+    },
+    {
+      "question": "这点差异是『今天的数据变了』还是『代码把顺序改了』？",
+      "how": "A/B：git show HEAD:js/atlas/atlas-source.js 取到仓库外 /tmp，node 分别用 HEAD 版与工作树版 normalize() 同一份 data/cache，比较事件 id 序列、并各自与落盘基准的顺序比",
+      "answer": "**是代码，不是数据**。同一份输入（大奉 sha256 3c2fae1d…、mtime 2026-10-06T08:24:03Z，早于本会话）：HEAD 版顺序与落盘基准**逐项相同**（三书均 true），工作树版则不再相同，HEAD↔工作树移动位置 = 1125 / 35 / 77。原始 cache 的事件 order 本身单调递增，故重排由 normalize() 的在途改动引入。"
+    },
+    {
+      "question": "是谁改的？（按写入足迹，不按『谁的需求听起来像』）",
+      "how": "shasum -a 256 + stat mtime；与我的租约 startedAt（2026-10-08T09:55:34Z）比对；git status/diff --stat",
+      "answer": "**不是我**。js/atlas/atlas-source.js mtime = **2026-10-08T09:08:16Z**，早于我的租约 09:55:34Z；本会话我全程只读它。属**并行写入者**的在途改动：` M js/atlas/atlas-source.js`，`git diff --stat HEAD` = 1084 insertions(+), 22 deletions(-)。改动处带明确意图注释（:735-742，称旧计数法把三国『第十回』错塞进第 1 回）。我按足迹只报事实，不替其作者宣称意图。"
+    },
+    {
+      "question": "门禁为什么没拦住这 1237 处 locator 漂移？",
+      "how": "逐行读 tests/sky_identity_projection_contract.js 的 E 段（与落盘基准比对的那部分）",
+      "answer": "因为契约**只比了两样东西**：:133-134 比 `counts`（三书各 3 个数字）、:137-138 比 `people.summary.stateHistogram`。**从不比 events 的 rows / locator**。于是『matches a fresh recomputation』名不副实：events 的 1237 处 locator 漂移可以长期存在而门禁全绿。这是**测试覆盖缺口**，我未修改测试（受保护路径）。"
+    },
+    {
+      "question": "台账的归属（P12 / P04 / P05）与建议命令对吗？",
+      "how": "python 读 artifacts/plan100/plan-ledger.json 的 14 个 phase 的 goal 与 -W04 标题；读 P05-W04/ledger.json；读 tests/sky_deep.py docstring 并 grep 其 identity/跨图 相关符号",
+      "answer": "**归属错、面板错、方法错**。①标题『将结构对象投影到星座、星盘、罗盘和解构面板，检查同一ID的跨图定位』在 plan-ledger.json 里出现 **14 次**（P00..P13 逐字相同）⇒ 它是模板，不承载 P12 的职责信息。②P12 goal=『形成可发布构建、健康检查、日志脱敏、缓存失效、回滚和客户验收包』；P05 goal=『扩展现有 sky-deconstruction、atlas、annulus、gem、domains 投影，不另造互相矛盾的数据源』——后者才是本判据归属。③真正闭合它的是 **P05-W04**（cpu-verified / reviewer=p13-wave2-verifier 非自签 / decision=merged）。④台账 decision.md 建议的下一步 tests/sky_deep.py 是**星空光层验收**（docstring：WebGL 后期虚化/星体光学/势力星云/星带/光环与星轨），其 identity 相关命中仅 3 行且全是 `S.nodeOf('c:'+name)` 取景/可见性判断，**跨图身份断言 0 条** ⇒ 照它跑，跑绿了也证明不了判据。"
+    },
+    {
+      "question": "有没有 loop 任务能承接『重建投影基准』这件事？",
+      "how": "python 遍历 loop/queue/*.jsonl 全部任务的 writes 字段",
+      "answer": "**没有**。全队列 2341 条任务，writes 触及 js/ css/ index.html tests/ tools/ docs/ data/ 的 = **0 条**。所以要重建基准必须走持 loop/state/leases/GATE.lock 的合并/重跑类任务；普通 worker 任务做不到。这也是我不新建任务、只写明归属的原因之一（另一原因：建队列要写 loop/queue/*.jsonl，不在本任务 writes 授权内）。"
+    },
+    {
+      "question": "本任务此前被拒过吗？（我接手的是不是首做）",
+      "how": "读 loop/state/out/REJECTED__adopt_P12-W04.json 与 loop/state/runs/20261008.jsonl",
+      "answer": "被拒过，且是**机器校验**退回：09:10:58Z 的记录 problems=[『sourceHashes 为空：done 必须记录动手前后源文件哈希』]。另有一版在 09:27:27Z **通过了**校验，但随后因 js/sky/sky-deconstruction.js 被并行改写（09:51:39Z）触发 evidence_stale→hash-changed，未被计入 done_ids，任务回到队列。⇒ 本版据此把易变文件移出 evidence。"
+    },
+    {
+      "question": "首次 accept 全量跑出的唯一失败项，是不是并行写入者造成的？",
+      "how": "sh scripts/accept.sh（离线）→ 逐项统计；对失败项单独重跑；按累计耗时估算该检查的执行时刻，并与相关文件 mtime 比对",
+      "answer": "**首次 106/107**，唯一失败是 tests/sky_legend_parity_contract.js（断言『every dashed-border rule in the panel belongs to the availability family alone』）。**独立重跑两次均 13/13 passed**；随后第二次全量 accept **107/107 passed**。⇒ 该失败**不可复现**。我起初据 mtime 推测是 css/sky-deep-hud.css 在 10:05:00Z 被改写所致，但按累计耗时该检查约在 **10:04:32Z** 执行、**早于**那次改写，故该因果**不成立**，我不做此归因（记为未能归因，见 remaining）。跨图身份契约在该次运行中为 [47] PASS（2s）。"
+    },
+    {
+      "question": "跑这些检查有没有占用被他人占用的 GPU？",
+      "how": "pgrep -fl 'Google Chrome.*headless' | wc -l（注意 BSD/macOS 的 pgrep **没有 -c**，空输出不等于 0）；pgrep -fl 'sky_.*\\\\.py|_browser\\\\.py'",
+      "answer": "**没有**。实测当时 **8 个** headless Chrome 进程 + 至少一个 browser 测试在跑（先见 tests/sky_deck.py，后见 tests/atlas_lab_browser.py）。按角色契约我未杀、未接管、未借用其 GPU；本任务全程只跑离线契约（node/纯 CPU）。"
+    }
+  ],
+  "keyFindings": {
+    "F1_theRecordedGapNoLongerExists": {
+      "claim": "台账 knownGaps『跨图定位验证需要浏览器（九视图 × 同一ID）…本轮未跑 → 未签收』今天两半都不成立，且为现场重测",
+      "offlineHalf": {
+        "artifact": "tools/plan100/projection_probe.js + tests/sky_identity_projection_contract.js",
+        "inProductGate": "scripts/accept.sh:122（注释自称『离线，不碰 GPU』）",
+        "todayResult": "43 cross-view identity projection contracts passed, exit 0",
+        "gpuNeeded": false
+      },
+      "browserHalf": {
+        "task": "xgraph:transfer-audit",
+        "agent": "w-gpu",
+        "status": "done",
+        "validation": "problems=[]",
+        "verifyState": "pass",
+        "gpu": true,
+        "verifierRequired": true,
+        "evidenceIntactToday": "25/25 sha256 相符、0 missing"
+      },
+      "soTheLedgerLineIsObsolete": "『本轮未跑 → 未签收』描述的是 2026-10-06T18:00Z 的状态，已被 2026-10-07 的后续工作取代。台账文本按纪律只登记不改写。"
+    },
+    "F2_theLedgerUsedTheWrongSurface": {
+      "nineViewIsPhotography": "tests/sky_internal_review_shots.py 的九视图 = 3 书 × 3 机位（panorama/oblique/rotation），供独立盲评出图；产物 index.json 自证每书 3 张",
+      "nineViewNeverChecksIDs": "全文 ID 相关命中仅 :184 取景用 nodeOf('c:'+c.name)，ID 断言 0 条",
+      "theRealCriterionIsOfflineTestable": "六图（constellation/disc/compass/deconstruction/gem/domains）逐 ID 定位状态由 projection_probe 离线算出（复用 CLStory.analyze + CLSkyModel.build 两个纯函数）",
+      "wrongNextStep": "台账建议的 tests/sky_deep.py 是 WebGL 光层验收，其 identity 命中 3 行全为取景/可见性，跨图身份断言 0 条"
+    },
+    "F3_NEW_baselineIsStaleAndTheGateCannotSeeIt": {
+      "whatChanged": "js/atlas/atlas-source.js 的在途 normalize() 会重排事件位置（并行写入者 09:08:16Z 的版本，早于我的租约）",
+      "measuredEffect": "工作树版相对 HEAD 版移动事件位置 1125/2990（大奉）、35/481（西游）、77/434（三国）；HEAD 版顺序与落盘基准逐项相同",
+      "inputUnchanged": "大奉输入图谱 sha256 3c2fae1d…、mtime 2026-10-06T08:24:03Z ⇒ 差异来自代码而非数据",
+      "onlyOneFieldDiffers": "逐 ID 比 5136 个实体：唯一变化字段 = deconstruction.locator，共 1237 处；view state 差异 = 0、id 集合相同、章归属改变 = 0、id 往返 2990/2990·481/481·434/434",
+      "whyTheGateMissesIt": "契约 :133-138 只比 counts 与 people.stateHistogram，从不比 events 的 rows/locator",
+      "so": "**不推翻**跨图身份结论；**推翻**『已发布投影基准与今天重算逐字一致』——这才是今天真正还开着、且台账没记的缺口",
+      "ownership": "xgraph（需 GATE.lock 的合并/重跑类任务重生成基准）；非 P12 发布职责、非 P04/P05"
+    }
+  },
+  "disposition": {
+    "ledgerStatusChanged": false,
+    "ledgerStatus": "blocked（未动；sha256 动手前后一致 0da73aca…；reviewer 仍 null）",
+    "reason": "任务明令禁止为让门禁变绿改台账状态；且本产物是判定，不是签收",
+    "gapExistsToday": false,
+    "gapExistsTodayDetail": "台账记的缺口（跨图定位验证未跑）今天不存在：离线半边是门禁项且实跑 43/43；浏览器半边已完成并 verifyState=pass。故**不新建任务去补跑它**。",
+    "whatReplacesIt": "真正仍开着的是投影基准的时效：已发布基准（fixture / 发布报告 / P05-W04 报告三份同 sha256 5283530b…）在旧 normalize() 下生成，与今天工作树版重算在 events 的 deconstruction.locator 上差 1237 处。归属 **xgraph**，建议 id `xgraph:projection-baseline-revalidate`（持 GATE.lock 的合并/重跑类任务）。本任务只登记不建：建队列要写 loop/queue/*.jsonl，不在 writes 授权内。",
+    "whyNotMerged": "P12-W04 的进程状态保持 blocked 不改；它记的理由今天已过期，同时暴露一条新的、归 xgraph 的时效缺口。将来若改判，应依据本产物而不是原 knownGaps 文本。",
+    "ledgerTextItselfIsWrong": "decision.md 的『下一步』指向 tests/sky_deep.py（方向不对），且把『九视图』与『四投影面板』缝在一起。按纪律只登记不改写已提交记录。"
+  },
+  "commands": [
+    {
+      "cmd": "node tests/sky_identity_projection_contract.js",
+      "exit": 0,
+      "result": "43 cross-view identity projection contracts passed（结论性：判据今天在跑且离线）"
+    },
+    {
+      "cmd": "grep -n \"identity_projection\" scripts/accept.sh",
+      "exit": 0,
+      "result": "122:run \"$ATLAS_NODE\" tests/sky_identity_projection_contract.js（产品门禁项）"
+    },
+    {
+      "cmd": "node tools/plan100/projection_probe.js --json ../../../../tmp/p12w04_probe_fresh.json",
+      "exit": 0,
+      "result": "三书计数与落盘基准一致（大奉 453 人/2990 事/8 线；西游 219/481/10；三国 507/434/34）；人物全图可达 380/453、189/219、350/507"
+    },
+    {
+      "cmd": "python3 逐 ID 比 fresh vs fixture（reasonRef 按 locatorReasons 解引用）",
+      "exit": 0,
+      "result": "5136 实体：id 集合相同；唯一差异字段 deconstruction.locator（1237 = 1125+35+77）；state 差异 0；章归属改变 0"
+    },
+    {
+      "cmd": "git show HEAD:js/atlas/atlas-source.js > /tmp/p12w04_head_atlas.js",
+      "exit": 0,
+      "result": "14837 bytes（工作树版 80859 bytes；git diff --stat HEAD = 1084 insertions, 22 deletions）"
+    },
+    {
+      "cmd": "node -e 用 HEAD 版与工作树版分别 normalize 同一份 data/cache，比事件 id 序列并与基准比",
+      "exit": 0,
+      "result": "HEAD==fixture: true/true/true；WT==fixture: false/false/false；HEAD↔WT moved = 1125/35/77；raw==fixture: true/true/true"
+    },
+    {
+      "cmd": "sed -n '127,140p' tests/sky_identity_projection_contract.js",
+      "exit": 0,
+      "result": "E 段只比 counts（:133-134）与 people.summary.stateHistogram（:137-138），无比 events rows/locator ⇒ 漏检点"
+    },
+    {
+      "cmd": "python3 -c 读 plan-ledger.json",
+      "exit": 0,
+      "result": "目标标题出现 14 次（distinct=1）；P12 goal=发布流水线；P05 goal=扩展既有投影"
+    },
+    {
+      "cmd": "grep -n -E \"eventId|characterId|canonical|nodeByKey|nodeOf|dataset\\\\.id|stableId\" tests/sky_internal_review_shots.py",
+      "exit": 0,
+      "result": "仅 :184 一行 nodeOf('c:'+c.name)（取景用）⇒ 九视图无 ID 断言"
+    },
+    {
+      "cmd": "grep -n -E \"eventId|characterId|canonical|nodeByKey|nodeOf|dataset\\\\.id|stableId|identity\" tests/sky_deep.py",
+      "exit": 0,
+      "result": "3 行，全部是 S.nodeOf('c:'+name) 的取景/可见性判断 ⇒ 无跨图身份断言"
+    },
+    {
+      "cmd": "python3 逐条重算 loop/state/out/xgraph_transfer-audit.json 的 25 条证据 sha256",
+      "exit": 0,
+      "result": "ok=25 stale=0 missing=0；该记录 status=done、validation.problems=[]、verifyState=pass"
+    },
+    {
+      "cmd": "python3 -c 用 loop.done_ids() 复核 xgraph:transfer-audit",
+      "exit": 0,
+      "result": "in done_ids=True；verifyState=pass"
+    },
+    {
+      "cmd": "python3 遍历 loop/queue/*.jsonl 的 writes",
+      "exit": 0,
+      "result": "2341 条任务；writes 触及 js/ css/ index.html tests/ tools/ docs/ data/ 的 = 0 条"
+    },
+    {
+      "cmd": "sh scripts/accept.sh（离线，第一次）",
+      "exit": 1,
+      "result": "ACCEPT: 106/107 passed；唯一失败 tests/sky_legend_parity_contract.js；跨图身份契约为 [47] PASS · 2s"
+    },
+    {
+      "cmd": "node tests/sky_legend_parity_contract.js（单独重跑两次）",
+      "exit": 0,
+      "result": "两次均 13 legend-parity contracts passed ⇒ 该失败不可复现"
+    },
+    {
+      "cmd": "sh scripts/accept.sh（离线，第二次全量）",
+      "exit": 0,
+      "result": "ACCEPT: 107/107 passed · ATLAS REFACTOR CONTRACTS PASSED"
+    },
+    {
+      "cmd": "pgrep -fl 'Google Chrome.*headless' | wc -l",
+      "exit": 0,
+      "result": "8（另有 browser 测试进程在跑）⇒ GPU 被他人占用，本任务据此未跑任何浏览器/GPU 检查（BSD pgrep 无 -c）"
+    },
+    {
+      "cmd": "shasum -a 256 artifacts/plan100/20261007/P12-W04/ledger.json（动手前后各一次）",
+      "exit": 0,
+      "result": "两次均 0da73acaee6f98c57c39350315d953f11fb4019c42580c56e0a4f6ac75c54dcd ⇒ 未改台账"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "台账那条缺口**今天已不存在**，且为现场重测：离线半边是产品门禁项（scripts/accept.sh:122）本会话实跑 `node tests/sky_identity_projection_contract.js` → 43/43 passed、exit 0；浏览器半边由既有任务 xgraph:transfer-audit 完成（status=done / validation.problems=[] / verifyState=pass），其 25 条证据今天逐条哈希仍 25/25 相符",
+      "result": "pass"
+    },
+    {
+      "text": "台账记的**面板与方法都错**：『九视图』是 3 书 × 3 机位（panorama/oblique/rotation）的摄影矩阵（tests/sky_internal_review_shots.py 全文 ID 相关命中仅 :184 一行取景用 nodeOf，ID 断言 0 条；产物 index.json 自证每书 3 相位）；该判据实为六图 × 同一 ID 且**离线可验**；台账建议的 tests/sky_deep.py 是 WebGL 光层验收，跨图身份断言 0 条",
+      "result": "pass"
+    },
+    {
+      "text": "判据标题是**模板**：plan-ledger.json 里『将结构对象投影到星座、星盘、罗盘和解构面板，检查同一ID的跨图定位』出现 **14 次**（P00..P13 逐字相同）；P12 goal=发布流水线、P05 goal=扩展既有投影，真正闭合它的是 **P05-W04**（cpu-verified / reviewer=p13-wave2-verifier 非自签 / decision=merged）",
+      "result": "pass"
+    },
+    {
+      "text": "**本轮新发现（台账未记）**：js/atlas/atlas-source.js 的在途 normalize() 重排事件位置 —— 工作树版相对 HEAD 版移动 1125/2990（大奉）、35/481（西游）、77/434（三国）；HEAD 版顺序与落盘基准**逐项相同**。输入图谱 sha256 3c2fae1d…、mtime 2026-10-06T08:24:03Z 未变 ⇒ **差异来自代码而非数据**",
+      "result": "pass"
+    },
+    {
+      "text": "漂移的**后果被限定到唯一一个字段**：逐 ID 比对 5136 个实体（三书 × people/events/storylines），id 集合完全相同、章归属改变 = 0、逐 view **state 差异 = 0**，唯一变化字段是 `deconstruction.locator`，共 **1237** 处（= 1125+35+77）⇒ **不推翻**跨图身份结论，但**推翻**『已发布投影基准与今天重算逐字一致』",
+      "result": "pass"
+    },
+    {
+      "text": "**门禁漏检点已定位**：tests/sky_identity_projection_contract.js:133-138 的『matches a fresh recomputation』只比 `counts` 与 `people.summary.stateHistogram`，**从不比 events 的 rows/locator** ⇒ 1237 处 locator 漂移可长期存在而门禁全绿（测试覆盖缺口，我未改受保护路径）",
+      "result": "pass"
+    },
+    {
+      "text": "**未改台账、未自签**：P12-W04/ledger.json sha256 动手前后均为 0da73acaee6f98c57c39350315d953f11fb4019c42580c56e0a4f6ac75c54dcd，status 仍 blocked、reviewer 仍 null；本产物由 w-ops 提交，owner=p12-agent 非本 agent，不含任何签收动作",
+      "result": "pass"
+    },
+    {
+      "text": "**未动受保护路径、未跑 GPU/浏览器、未执行 git checkout/reset/stash**：本会话只读 js/ css/ data/ artifacts/ tests/ tools/ scripts/；唯一写入是本产物（writes 授权的单一路径）；A/B 用的 HEAD 版源码与 fresh 探针输出都在仓库外 /tmp，不进树",
+      "result": "pass"
+    },
+    {
+      "text": "**GPU 确实被他人占用，故本任务不跑**：实测 8 个 headless Chrome 进程 + 至少一个 browser 测试进程在跑（先 tests/sky_deck.py、后 tests/atlas_lab_browser.py）；按角色契约未杀、未接管、未借用其 GPU（BSD/macOS 的 pgrep 无 -c，故用 `pgrep -fl ... | wc -l`）",
+      "result": "pass"
+    },
+    {
+      "text": "**全量离线门禁实跑两遍**：首次 106/107（唯一失败 sky_legend_parity_contract，跨图身份契约为 [47] PASS · 2s）；该失败单跑两次均 13/13 通过、二次全量 **107/107 passed** ⇒ 不可复现",
+      "result": "pass"
+    },
+    {
+      "text": "**自查并降级了一处我自己的错误归因**：我起初据 mtime 推测首次 accept 的唯一失败项是 css/sky-deep-hud.css 在 10:05:00Z 被改写所致；按累计耗时重算该检查约在 10:04:32Z 执行、**早于**那次改写 ⇒ 该因果**不成立**，已如实记为『未能归因』而不是留下一个像模像样的解释",
+      "result": "pass"
+    },
+    {
+      "text": "归属与承接写明：重建投影基准归属 **xgraph** 流，需持 GATE.lock 的合并/重跑类任务（建议 id `xgraph:projection-baseline-revalidate`）；全队列 2341 条中 writes 触及 js/ css/ 等的 **0 条** ⇒ 本任务只登记不建（建队列要写 loop/queue/*.jsonl，非授权路径）",
+      "result": "pass"
+    },
+    {
+      "text": "**本记录自身的时效风险已处置**：上一版提交（09:27:27Z）曾通过机器校验，但 js/sky/sky-deconstruction.js 在 09:51:39Z 被并行写入者改写，触发 done_ids() 的 evidence_stale→hash-changed 而被退回。本版因此把易变被测源文件移入 sourceHashes、evidence 只留留存物，并已实测 evidence 12/12 存在且哈希相符",
+      "result": "pass"
+    }
+  ],
+  "evidence": [
+    {
+      "path": "artifacts/plan100/20261007/P12-W04/ledger.json",
+      "sha256": "0da73acaee6f98c57c39350315d953f11fb4019c42580c56e0a4f6ac75c54dcd",
+      "kind": "被处置的未结项台账（只读、未改；动手前后同哈希）。status 仍 blocked、reviewer 仍 null。哈希为读取时刻值"
+    },
+    {
+      "path": "artifacts/plan100/20261007/P12-W04/decision.md",
+      "sha256": "71f3bc7cb38a657fdc785a95f28ea34ea5123606a91b29d61018551423a50ac0",
+      "kind": "原阻塞决策全文（只读）：『跨图同 ID 定位验证需要浏览器…本轮未跑 → 未签收』——本产物判定该句今天已过期，并按纪律不改写它"
+    },
+    {
+      "path": "tests/sky_identity_projection_contract.js",
+      "sha256": "578fd6f34ed5eafb2b19e94ed80ad5a8e8c0a5b14e75db6492fe0b9985b190e7",
+      "kind": "本会话实跑的跨图身份契约 43/43 passed、exit 0。其 :133-138『matches a fresh recomputation』只比 counts 与 people.stateHistogram，从不比 events 的 rows/locator —— F3 漏检点的证据"
+    },
+    {
+      "path": "tools/plan100/projection_probe.js",
+      "sha256": "ab9a41d5ef626f57b2a48b976b2dd06be267eeb705844242ba79e97a7ddd1120",
+      "kind": "离线跨图投影探针（无浏览器/无 GPU）：复用 CLStory.analyze + CLSkyModel.build，对三书逐 ID 输出六图 locator 状态；assertKeyRules() 反向断言源码字面量"
+    },
+    {
+      "path": "tests/fixtures/contracts/projection/identity-projection.json",
+      "sha256": "5283530bcbe325bcb01954e8b51a266525ec4f5e0be7492b4a020c6a881a0e01",
+      "kind": "落盘投影基准（3,429,068 bytes），本会话重算并逐字段比对的对象。与 artifacts/plan100/projection/identity-projection.json 同 sha256 ⇒ 基准与发布报告未分叉"
+    },
+    {
+      "path": "artifacts/plan100/20261007/P05-W04/ledger.json",
+      "sha256": "7a7f1e4f3dfb75f32d0df71e50b13a7e739dafa17e7d16ccf6a9abdf2189f16b",
+      "kind": "真正闭合该判据的工作项：status=cpu-verified / reviewer=p13-wave2-verifier（非自签）/ decision=merged"
+    },
+    {
+      "path": "loop/state/out/xgraph_transfer-audit.json",
+      "sha256": "16c8499dcc6292e2c0d3b05a62d00a2b951c21a95846904068aef44f489145e2",
+      "kind": "浏览器那半边的完成记录：status=done / validation.problems=[] / verifyState=pass（经 done_ids() 复核）。其自身 25 条证据今天逐条哈希仍 25/25 相符"
+    },
+    {
+      "path": "artifacts/plan100/plan-ledger.json",
+      "sha256": "e74bb8804e7717c5c89a8b4cee2626c8054a7580e8d8b8ebfc0b8dde803a2f3c",
+      "kind": "阶段 goal 与 -W04 标题索引：14 个阶段的 W04 标题逐字相同（distinct=1）；P12 goal=发布流水线、P05 goal=扩展既有投影"
+    },
+    {
+      "path": "tests/sky_internal_review_shots.py",
+      "sha256": "dfa371dd5cd16fe2059bf63b45495b0c6889795c6c535b0aca8affc666d8545d",
+      "kind": "『九视图』的真实定义：3 书 × 3 机位（panorama/oblique/rotation）摄影矩阵；全文 ID 相关命中仅 :184 取景用 nodeOf('c:'+c.name)，ID 断言 0 条"
+    },
+    {
+      "path": "artifacts/plan100/visual/nine-view/fix-on/index.json",
+      "sha256": "2835167bf96e4058297258ebfd7251144e6484dbdba5d6f85e4cbbb76f9add8a",
+      "kind": "九视图产物样例：book + panorama/oblique/rotation 三相位 —— 『九视图=摄影矩阵』的直接证据"
+    },
+    {
+      "path": "data/cache/9b676d7031b1bcd3b8377a18.json",
+      "sha256": "3c2fae1d399d6768719f2d5476fa0cfd88fb4fbbc12abdf080323fa4b846ebdf",
+      "kind": "大奉输入图谱（只读）：mtime 2026-10-06T08:24:03Z、sha256 未变 ⇒ A/B 中数据侧恒定，事件顺序差异只能来自代码"
+    },
+    {
+      "path": "loop/state/out/REJECTED__adopt_P12-W04.json",
+      "sha256": "b2191960c226d631a36104cdd54ebb6cb7e0464beecb494b72e6e4eb17ab19db",
+      "kind": "更早一次（09:10:58Z）被拒记录：problems=[『sourceHashes 为空』]。证明本任务此前已因机器校验退回，本次是重做"
+    }
+  ],
+  "sourceHashes": {
+    "_note": "只读判定：唯一写入是本产物自身。分工刻意——`evidence` 只放留存且不易被并行改写的证明物；正在被并行改写的**被测源文件**放本段。实测教训：上一版提交（09:27:27Z）曾通过校验，但 js/sky/sky-deconstruction.js 在 09:51:39Z 被并行写入者改写，触发 done_ids() 的 evidence_stale→hash-changed，任务被退回队列。故本版把易变文件移出 evidence。本段哈希为读取时刻值；若日后漂移，说明写入者又改了代码，而非本产物失真。",
+    "_repoWritesByThisTask": [
+      "loop/state/out/adopt_P12-W04.artifact.json"
+    ],
+    "_readOnlyMeasuredNotWritten": "下列 js/ 文件本会话只读；mtime 全部早于我的租约 startedAt 2026-10-08T09:55:34Z",
+    "js/atlas/atlas-source.js": {
+      "today": "05969cb5c17ba3bd325ca17c84a41ae3e7e8aa6f55dc5e2743ab302d0d44dc66",
+      "mtimeUTC": "2026-10-08T09:08:16Z",
+      "sizeBytes": 80859
+    },
+    "js/sky/sky-deconstruction.js": {
+      "today": "9eeb5ffe8e4cbc48837bbcd910bd1d60917dc621e7eda5098e455a207d87c861",
+      "mtimeUTC": "2026-10-08T09:51:39Z",
+      "sizeBytes": 100832
+    },
+    "js/sky/sky-model.js": {
+      "today": "dd14ba9b5467bd0bab0c6ee3fd45c7c1e506dba2d5614ca39378e530e45174d5",
+      "mtimeUTC": "2026-10-08T07:03:19Z",
+      "sizeBytes": 64451
+    },
+    "js/scene.js": {
+      "today": "9c240b6f752e77543309a034ac34e949c29357ff826012da8638a03381e5d6ac",
+      "mtimeUTC": "2026-10-05T18:37:01Z",
+      "sizeBytes": 228150
+    },
+    "js/sky/sky-compass.js": {
+      "today": "863cb63d6655d0ed74fd802d82b8286c7c3a68291ebe7124cbf2d05b66d58f99",
+      "mtimeUTC": "2026-10-05T23:14:54Z",
+      "sizeBytes": 58835
+    },
+    "js/domains/domains-model.js": {
+      "today": "13cb814332bc8204be060bc0b1337b37c1127f5e228e13767265f6a707c20d65",
+      "mtimeUTC": "2026-09-25T16:31:06Z",
+      "sizeBytes": 18435
+    },
+    "js/app.js": {
+      "today": "3342e65e8bb1bb9c91026413fc14ca3d7c0a9d748e4273b920e058c536badce1",
+      "mtimeUTC": "2026-10-07T18:13:31Z",
+      "sizeBytes": 353782
+    },
+    "tests/sky_identity_projection_contract.js": {
+      "today": "578fd6f34ed5eafb2b19e94ed80ad5a8e8c0a5b14e75db6492fe0b9985b190e7"
+    },
+    "tools/plan100/projection_probe.js": {
+      "today": "ab9a41d5ef626f57b2a48b976b2dd06be267eeb705844242ba79e97a7ddd1120"
+    },
+    "tests/fixtures/contracts/projection/identity-projection.json": {
+      "today": "5283530bcbe325bcb01954e8b51a266525ec4f5e0be7492b4a020c6a881a0e01"
+    },
+    "artifacts/plan100/projection/identity-projection.json": {
+      "today": "5283530bcbe325bcb01954e8b51a266525ec4f5e0be7492b4a020c6a881a0e01"
+    },
+    "artifacts/plan100/20261007/P05-W04/ledger.json": {
+      "today": "7a7f1e4f3dfb75f32d0df71e50b13a7e739dafa17e7d16ccf6a9abdf2189f16b"
+    },
+    "artifacts/plan100/plan-ledger.json": {
+      "today": "e74bb8804e7717c5c89a8b4cee2626c8054a7580e8d8b8ebfc0b8dde803a2f3c"
+    },
+    "scripts/accept.sh": {
+      "today": "d195753feb6359e161d80d17f5e4e37edddaa60192378007f14c3e912a3c15ef"
+    },
+    "data/cache/9b676d7031b1bcd3b8377a18.json": {
+      "today": "3c2fae1d399d6768719f2d5476fa0cfd88fb4fbbc12abdf080323fa4b846ebdf"
+    },
+    "artifacts/plan100/20261007/P12-W04/ledger.json": {
+      "today": "0da73acaee6f98c57c39350315d953f11fb4019c42580c56e0a4f6ac75c54dcd",
+      "before": "0da73acaee6f98c57c39350315d953f11fb4019c42580c56e0a4f6ac75c54dcd",
+      "verdict": "动手前后一致 ⇒ 未改台账；status 仍 blocked、reviewer 仍 null"
+    }
+  },
+  "changes": [
+    {
+      "path": "loop/state/out/adopt_P12-W04.artifact.json",
+      "kind": "append-only"
+    }
+  ],
+  "verificationEnvironment": {
+    "node": "/Users/carmen/.workbuddy/binaries/node/versions/22.22.2-3/bin/node (v22.22.2)",
+    "python": "python3 3.13.12",
+    "probeKind": "纯 CPU、无浏览器、无 GPU、无模型调用；只读 js/ css/ data/ tools/ tests/ scripts/ artifacts/ 与仓库外 /tmp",
+    "gpuUsed": false,
+    "browserUsed": false,
+    "processesObserved": "8 个 headless Chrome 进程 + 至少一个 browser 测试进程（先 tests/sky_deck.py，后 tests/atlas_lab_browser.py）同时在跑；未杀、未接管、未借用其 GPU",
+    "note": "A/B 用的 HEAD 版源码与 fresh 探针输出都在仓库外 /tmp，不进树。本任务未声明要跑浏览器或 GPU，故一律未跑。"
+  },
+  "remaining": [
+    "**没有真的建 loop 任务**：本任务 writes 只授权 loop/state/out/adopt_P12-W04.artifact.json，而建队列要写 loop/queue/*.jsonl（非授权路径）。因此按任务要求只写明剩余缺口的归属流：**xgraph**，建议 id `xgraph:projection-baseline-revalidate`（需 GATE.lock 的合并/重跑类任务），内容是决定『已发布投影基准是否要在新 normalize() 下重生成』。全队列 2341 条中 writes 触及 js/ css/ 的为 0 条 ⇒ 普通 worker 任务做不到。",
+    "**我没有判定这次 normalize() 重排是对的还是错的**：改动带意图注释（:735-742 称旧计数法把三国『第十回』错塞进第 1 回，属计划 P1.2 的『把源位置未知伪造成发生在别处』），且 tests/sky_chapter_axis_contract.js 今天 11/11 绿 —— 但**『章没排错』不等于『同章内次序对』**。同章内 1237 处换位要么是新逻辑有意为之，要么是仍未被任何测试覆盖的副作用；我没有读完整定位算法，也没有作者视角，故不下判断。",
+    "**基准与实现已不一致，但没有任何测试会因此变红**：契约 :133-138 只比 counts 与 people.stateHistogram，不比 events 的 rows/locator。这是测试覆盖缺口（测试与它自称的『matches a fresh recomputation』名不副实）。修它要改 tests/（受保护路径），我未改。",
+    "**A/B 用的是 HEAD 版而非『改动前的工作树版』**：真正前一版是上一版产物记的 0e99ad81…，但该版本文本在 git 未跟踪、无备份，我已无法取得其字节。HEAD 版与 0e99ad81 不是同一版本，只是两者都不重排事件。所以我**没有**证明『重排是这次 09:08 改动引入的』；我证明的是『今天的工作树版重排 1237 处，而 HEAD 版不重排且与基准逐项相同』。",
+    "**没有在漂移后的源码上真跑浏览器 36 步**：我只证明了逐 view state 差异 = 0、章归属改变 = 0、id 契约未动、驱动可重放。**没有**在今天的 atlas-source.js(05969cb5) + sky-model.js(dd14ba9b) + sky-deconstruction.js(9eeb5ffe) 组合上真跑 xgraph 的 4 案例 × 9 步。严格说『审计结论仍成立』是代码路径与数据前提层面的论证，不是同版本 A/B 实跑。",
+    "**首次 accept 的唯一失败项我未能归因**：sky_legend_parity_contract 首跑失败、单跑两次均通过、二次全量 107/107。我起初据 mtime 推测是 css/sky-deep-hud.css 在 10:05:00Z 被改写所致，但按累计耗时该检查约在 10:04:32Z 执行、早于那次改写，故该因果不成立。它是否为并发写入者在我运行期间的其它改动所致，我没有证据，如实记为未归因。",
+    "**fixture 三份同哈希我只比了哈希，没比语义**：fixture / 发布报告 / P05-W04 报告同 sha256 5283530b…，说明三者未分叉；但它们是否等于当初（2026-10-06T18:11:05Z）的字节，我没有独立基准可对（无备份、无 git 跟踪）。",
+    "**台账文本自身的不一致我未修改**：decision.md 的『下一步』指向 tests/sky_deep.py（方向不对），且把『九视图』与『四投影面板』缝在一起。按纪律只登记不改写已提交记录。",
+    "**本记录自身的时效风险已知**：被测的 js/ 文件仍在被并行改写（js/sky/sky-deconstruction.js 09:51:39Z 刚被改过）。本版已把易变文件移出 evidence 以免重蹈上一版 evidence_stale 的覆辙，但若 js/ 继续漂移，本产物的 A/B 数值（1125/35/77、1237）会随源码变化而不再等于当日读数。",
+    "**待独立复核**：本产物是自证，需非同提交者复核 —— 尤其 (1)『九视图 ≠ 六投影面板、且该判据离线可验』这一面板归属判断，(2) A/B 方法本身（我用 HEAD 版 atlas-source.js 替代不可得的『前一版工作树版』，需核对这是否足以支撑结论），(3)『逐 view state 差异 = 0、唯一变化字段是 deconstruction.locator』这一量化结论，(4) 1237 处同章换位该由谁负责。反向验证建议：问『14 次标题重复有没有被我误读成 14 个不同判据』『所谓唯一变化字段是否因为我用的比对脚本恰好忽略了别的字段』。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/adopt_P12-W04.artifact.json"
+    ],
+    "note": "本任务未改 data/、未改任何受保护路径（js/ css/ index.html serve.py narrative.py scripts/ tests/ docs/ data/）、未执行 git checkout/reset/stash、未写仓库内 artifacts/。台账 P12-W04/ledger.json 动手前后同哈希（0da73aca…）。A/B 中间产物在仓库外 /tmp，可整目录删除。",
+    "notRestorable": "无。"
+  },
+  "submittedAt": "2026-10-08T10:24:27Z",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-08T10:24:27Z"
+  },
+  "verifyState": "pending"
+}

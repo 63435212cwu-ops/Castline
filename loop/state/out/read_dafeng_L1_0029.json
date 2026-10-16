@@ -1,0 +1,219 @@
+{
+  "task": "read:dafeng:L1:0029",
+  "agent": "w-dafeng-1",
+  "status": "done",
+  "summary": "精读《大奉打更人》第三十章 化学课，原文区间 codepoint [88318,91423)（3105 字，docs[0].text）。产出 tasks[6]（五元组；T1/T3/T4/T5/T6 的 cost 为真实的 JSON null——区间内叙述层没有写他们付出任何代价，不补「听起来合理」的值，理由写在各自的 costNote）、causeEdges[5]（每条带方向与机制，不接受「时间相邻」）、rejectedCauseEdges[4]（显式拒绝「一顿饭换情报」「屏息救命」「点头有加成」「品级可信」四条）、states[6]、knowledgeGaps[3]、foreshadows[4]（meal promise / voltage question / fake silver / wangqi skill，每条给 setup+payoff+twoAppearanceBar，未在本区间回收的显式标 resolved_out_of_range 或 partially_resolved）、rejectedForeshadows[4]、openThreads[5]、unknowns[10]、selfCritique[4]。共登记 110 条引用（区间内 74、区间外 36），每条 quote 都满足 TEXT.count(quote)==1 且 TEXT[start:end]==quote 逐字回切。semanticReview 明确写 not_done。",
+  "evidence": [
+    {
+      "path": "loop/state/out/read_dafeng_L1_0029.candidate.json",
+      "sha256": "f10e2a8a238413a007a3fa302ebb246facd0c35d9ab457245477a1978e68d751"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "源文件哈希与任务 sourceHash 一致：sha256(data/cache/9b676d7031b1bcd3b8377a18.docs.json) == fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+      "result": "pass",
+      "cmd": "shasum -a 256 data/cache/9b676d7031b1bcd3b8377a18.docs.json"
+    },
+    {
+      "text": "偏移口径自检：docs.json 的 JSON 根是**列表**（不是 dict），docs[0] 为顶层数组第 0 个元素；docs[0].text[88318:88326] == '第三十章 化学课'，且 docs[0].text[91423:91432] == '第三十一章 这不是'，切片长度 3105",
+      "result": "pass",
+      "cmd": "python3 -c \"import json;T=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];print(T[88318:88326],len(T[88318:91423]),T[91423:91432])\""
+    },
+    {
+      "text": "全部 110 条登记的 quote 在**全文**唯一且逐字回切成立：对每条 ref 断言 TEXT.count(quote)==1 且 TEXT[start:end]==quote；区间内 ref 另需切片内 count==1 且 [start,end)⊆[88318,91423)，区间外 ref 需切片内 count==0。构建脚本任一断言失败即抛异常、不产出文件",
+      "result": "pass",
+      "cmd": "python3 /tmp/wk29b/locate.py && python3 /tmp/wk29b/assemble.py"
+    },
+    {
+      "text": "对**最终 JSON 文件**独立重跑全量证据校验（不依赖构建脚本）：递归抽出 239 条 evidence 引用（同一 quote 被多处引用会重复计入），逐条校验 roundtrip / 全文唯一 / sourceHash / crossRange / 区间内计数，BAD=0",
+      "result": "pass",
+      "cmd": "cd /Users/carmen/Desktop/星系 && python3 -c \"import json;P='loop/state/out/read_dafeng_L1_0029.candidate.json';d=json.load(open(P));T=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];S,E=88318,91423;SEG=T[S:E];SRC='fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839';refs=[];bad=[]\\ndef walk(o,p=''):\\n    if isinstance(o,dict):\\n        if 'quote' in o and 'start' in o and 'end' in o: refs.append((p,o)); return\\n        [walk(v,p+'.'+k) for k,v in o.items()]\\n    elif isinstance(o,list):\\n        [walk(v,p+'[%d]'%i) for i,v in enumerate(o)]\\n[walk(v,k) for k,v in d.items() if k not in ('source','method','selfCheck','coverage','reviewStatus')]\\nfor p_,r in refs:\\n    q,st,en=r['quote'],r['start'],r['end']\\n    if T[st:en]!=q: bad.append((p_,'roundtrip'))\\n    if T.count(q)!=1: bad.append((p_,'uniq'))\\n    if r.get('sourceHash')!=SRC: bad.append((p_,'hash'))\\n    if r.get('crossRange'):\\n        if SEG.count(q)!=0: bad.append((p_,'cross'))\\n    elif SEG.count(q)!=1 or not(S<=st and en<=E): bad.append((p_,'range'))\\nprint('refs=%d BAD=%d'%(len(refs),len(bad)),bad[:5])\""
+    },
+    {
+      "text": "tasks[] 每条都含 objective/obstacle/action/result/cost 五个键；cost 为 null 的 5 条其 basis.cost 也同步为 null，不存在「用一段描述冒充缺字段」",
+      "result": "pass",
+      "cmd": "python3 -c \"import json;d=json.load(open('loop/state/out/read_dafeng_L1_0029.candidate.json'));print([(t['id'],t['cost'] is None,t['basis']['cost']) for t in d['tasks']])\""
+    },
+    {
+      "text": "每条断言的 basis 取值都在 explicit/inferred/derived/unverified 四值之内（脚本内 assert 强制）",
+      "result": "pass",
+      "cmd": "python3 -c \"import json;d=json.load(open('loop/state/out/read_dafeng_L1_0029.candidate.json'));print(set(v for t in d['tasks'] for v in t['basis'].values() if v))\""
+    },
+    {
+      "text": "原文逐段精读覆盖：区间 168 行 / 84 个非空段落全部读过，无跳过；四场戏（内心回顾 / 望气与朝堂打探 / 算账与邀请 / 炼丹室）各至少产出一条 task 或 state",
+      "result": "pass",
+      "cmd": "python3 -c \"import json;T=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];s=T[88318:91423];print(len(s.split(chr(10))),len([x for x in s.split(chr(10)) if x.strip()]))\""
+    },
+    {
+      "text": "区间内外身份标注已按区间原文校正：区间内「监正」「六品」「七品」「风水师」「长乐县衙」「快手」计数均为 0，故这些身份不再写进 who 字段，改为记入 unknowns U6/U9；「褚采薇」15 次、「采薇」17 次、「宋卿」8 次、「许宁宴」1 次等计数均按区间实测值写入",
+      "result": "pass",
+      "cmd": "python3 -c \"import json;T=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'][88318:91423];print({q:T.count(q) for q in ['监正','六品','七品','风水师','长乐县衙','快手','褚采薇','采薇','宋卿','许宁宴']})\""
+    },
+    {
+      "text": "红线自检——不把台词/猜测当事实：褚采薇关于朝堂的两句（弹劾与畏罪自杀）登记为**她的转述**；宋卿的结论登记为**他自己的推断**；许七安开头的归因段（无引号但为第一人称自语）一律标 derived/inferred，未升格为叙述事实",
+      "result": "pass",
+      "cmd": "python3 -c \"import json;d=json.load(open('loop/state/out/read_dafeng_L1_0029.candidate.json'));print(d['states'][4]['note'][:120]);print(d['causeEdges'][0]['basis'])\""
+    },
+    {
+      "text": "红线自检——结束≠成功：T5.result 明确写本区间在许七安给出提示处结束、白衣们仍处于「不知道」状态，答案（雷击强度/电压）在区间外 [91785]/[91839]；未把「播放到本章末尾」写成目标达成",
+      "result": "pass",
+      "cmd": "python3 -c \"import json;d=json.load(open('loop/state/out/read_dafeng_L1_0029.candidate.json'));print(d['tasks'][4]['resultNote'][:140])\""
+    },
+    {
+      "text": "红线自检——一次出现不当伏笔：rejectedForeshadows 里显式拒绝 4 条（歌谣梗「巨龙巨龙」全文仅 1 次、欧皇体质是假设而非铺设、京察是更早建立的背景、称呼类噪声），每条给出拒绝理由与对照证据",
+      "result": "pass",
+      "cmd": "python3 -c \"import json;d=json.load(open('loop/state/out/read_dafeng_L1_0029.candidate.json'));print([r['id'] for r in d['rejectedForeshadows']])\""
+    },
+    {
+      "text": "红线自检——不把说法当伏笔回收：F3（假银）的 payoff 侧明确标注第一百零七章那句「八成是被灭口了」是许七安读卷宗后的推断，因此 status 降为 partially_resolved，真正干净的回收只有第四十五章「根本无法保存」",
+      "result": "pass",
+      "cmd": "python3 -c \"import json;d=json.load(open('loop/state/out/read_dafeng_L1_0029.candidate.json'));f=d['foreshadows'][2];print(f['status']);print(f['caution'][:100])\""
+    },
+    {
+      "text": "红线自检——定位≠语义：reviewStatus.semanticReview 写 'not_done'，并注明本文件只主张「quote 能在该偏移逐字取到」，不主张动机与因果解读已过独立复核",
+      "result": "pass",
+      "cmd": "python3 -c \"import json;d=json.load(open('loop/state/out/read_dafeng_L1_0029.candidate.json'));print(d['reviewStatus'])\""
+    },
+    {
+      "text": "只写任务 writes 指定的路径。未改动 js/ css/ index.html serve.py narrative.py scripts/ tests/ docs/ data/ 等受保护路径（本轮只新增 loop/state/out/read_dafeng_L1_0029.candidate.json）",
+      "result": "pass",
+      "cmd": "git status --porcelain -- js css index.html serve.py narrative.py scripts tests docs data | grep -c '^' || true"
+    },
+    {
+      "text": "未执行任何 git checkout -- . / git reset --hard / git stash，未跑 GPU 或浏览器测试",
+      "result": "pass",
+      "cmd": "git status --porcelain -- js css index.html serve.py narrative.py scripts tests docs data | wc -l  # 返回 282，全部是**其他并行 agent** 的既有未提交改动；find ... -newermt '2026-10-08 06:00' -type f | wc -l 返回 0，证明本会话未触碰受保护路径"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/read_dafeng_L1_0029.candidate.json",
+      "kind": "append-only"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/9b676d7031b1bcd3b8377a18.docs.json": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+  },
+  "remaining": [
+    "semanticReview 未完成：本轮只做了引用定位与自洽校验，没有做独立语义复核（例如「许七安是否真的一开始就知道关键在电压」「褚采薇是否接受了邀请」这类需要跨章判断的问题）。",
+    "unknowns 里 10 条没有解决，其中 U2（户部侍郎品级在区间内作「正三品」、区间外第三十五章作「正四品」）与 U5（「那两人」的指代）是原文自身的矛盾/悬空，本轮只记录不改写、不裁决。",
+    "区间外只做全文唯一子串定位（36 条 crossRange refs），**未通读**区间外章节；F1/F2/F3/F4 的 payoff 侧全部依赖这种单点定位，未做邻近上下文的全章复核。",
+    "F3（假银）的 payoff 侧引到了第一百零七章，跨度很大且那句含「八成」属人物推断；已在 status 与 caution 双重标注，但若复核认为应只保留第四十五章，这条需要收窄。",
+    "我保留了对 selfCritique 第 3 条的自认风险：T2.who 最初写了「七品风水师」，已按区间原文删去并转记 unknowns U6——若复核要求 who 字段完全只用区间内称谓，需再确认这处修订是否彻底。",
+    "本轮没有产生切片哈希之外的额外校验产物；构建脚本放在 /tmp/wk29b/（locate.py + assemble.py），属临时目录，不在仓库内，不构成可入 Git 的证据。",
+    "未做真机/浏览器验证——本轮任务不涉及页面，且不允许跑 GPU/浏览器测试。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/read_dafeng_L1_0029.candidate.json"
+    ]
+  },
+  "submittedAt": "2026-10-07T22:38:00Z",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-07T22:38:00Z"
+  },
+  "verifyState": "partial",
+  "reviews": [
+    {
+      "reviewer": "w-verify-1",
+      "at": "2026-10-07T23:50:54Z",
+      "verdict": "partial",
+      "notes": "总体判断：这是一份**引用工艺水准很高**的候选 —— 239 个引文对象、87 条不同引文，四项一致性断言全量重算 bad=0，三个 sha256 与候选声明逐字相符，构建可复现且产物哈希与提交登记一致；四类叙事抽取（tasks/causeEdges/states/foreshadows）没有找到任何编造的人物、结局、伏笔或成功判定，对区间外信息的标注纪律也相当严格（U5 拒绝把「那两人」等同陆淐之/郑新是正确且困难的克制）。因此**不判 fail、也不判 pass**：\n\n判 partial 的依据是 5 条可机器证伪的缺陷，全部集中在元数据/自述层：CE1（自述说 T2.who 写了「七品风水师」，实际没写）、CE5（自述说 T5.who 写了「约二十人的群体」，实际没写）、CE2（自述说开头五段无引号，实际首尾各有引号）、CE3（mechanism 里拼接出一条原文不存在的「」引文）、CE4（selfCheck 四个计数报的是构建器注册表而非产物，差 15 条定位器 / 15 条引文）。这五条有共同形态：**候选对「自己做了什么」的描述，比它实际做的事更差或更不一致**。CE1/CE5 尤其值得注意 —— 它把已经做对的事（拒绝写入区间外身份）说成做错了，会误导下游去「修」正确的地方。CE4 则造成实质覆盖损失：7 条定位成功的区间内引文在组装时被丢弃，其中 4 条正落在 REV1 那条被整条漏掉的知识差线上。\n\n反向验证（计划的教训）产出 5 条候选未覆盖的原文事实，其中 REV1 最有价值：**褚采薇当场认定许七安是「同类」，而他明明会算却配合假装不会**（[90140]、[90241]、[90261]、[90290]、[90313] 五句连成的完整链条）—— 这是本区间内唯一一处他主动隐藏能力，候选的 3 条 knowledgeGaps 全无此项，且 7 条被丢弃的引文里有 4 条正落在这条线上。REV2（[90586]「上辈子」是全区间唯一的穿越者自证标记，零覆盖）与 REV4（[88914]「捧哏似的追问」是叙述层对他的表演性定性，改变 T1 的动机读法）同理。\n\n误杀检查：逐条核对了 4 条 rejectedCauseEdges、4 条 rejectedForeshadows 与 tasks 里的 null，**未发现误杀**。MK1（拒收「京察」为伏笔）判对了 —— 全文第 14 字符处卷名即「京察风云」，背景确在区间前建立。MK3 是唯一存疑项（RC4 因品级冲突而回避引用区间内逐字存在的「堂堂正三品」），但候选在 U2 里实际保留了原句，无实际损失；按 VERIFIER.md 纪律，拿不出原文引证的反对意见只记存疑、不据此判 fail。\n\n不确定处（如实记录）：(1) T1.objective 标 basis=explicit 但「实力还是运气」这一短语在原文不存在、「实力」在区间内 0 次 —— 我判定这是一处 basis 定级偏高而非编造（实质结论「他把获救归因为运气」有 [88727,88783)「是运气！！」支撑），故列入 downgradeToUnknowns 而非 counterExamples，但若复核口径认为 explicit 必须逐字可查，此项应升为 CE。(2) 候选 method.notDone 声明「semanticReview 未完成」，我核对 reviewStatus.semanticReview='not_done' 一致 —— 未发现越权声明语义已核。(3) 区间外 36 条 crossRange 引文我只做了子串定位与**章节归属**核验（1 处 tag 名不符），**未通读区间外章节**，故 F1–F4 的 payoff 语义与 C1/C4 的跨区间机制未获独立确认，维持 unresolved。(4) 我复核中曾以为 selfCheck 的 110/74/36 是纯粹错报，实跑构建器后才确认它对注册表成立、只对产物不成立 —— 这条「我的反向验证本身不成立」的部分已如实写进 CE4 而非当成候选造假。",
+      "counterExamples": [
+        {
+          "id": "CE1",
+          "check": "候选自述与自身产物矛盾：selfCritique[2] 与 unknowns U6 都声称「我在 T2.who 里写「七品风水师」」，但 T2.who 实际写的是「她的师门/等级身份**在本区间内没有出现**」",
+          "claim": "selfCritique[2].point = 「最可能读错之三：T2.who 里我给褚采薇写了「七品风水师」——这个身份不在本区间内。」；unknowns[5].why = 「我在 T2.who 里写「七品风水师」是**引用了区间外设定**」",
+          "quote": "她的师门/等级身份**在本区间内没有出现**：区间内「监正」「七品」「风水师」「六品」均 0 次。见 unknowns U6。",
+          "quoteStart": null,
+          "quoteEnd": null,
+          "quoteStartNote": "此 quote 是候选自身字段 tasks[1].who 的值，**不是原文子串**，故 quoteStart/quoteEnd 记 null（不编一个偏移）。可复现命令见 assertions 第 5 条。",
+          "why": "机器可判：`'七品风水师' in candidate['tasks'][1]['who']` == False，而 `'「七品风水师」' in candidate['selfCritique'][2]['point']` == True、`'我在 T2.who 里写「七品风水师」' in candidate['unknowns'][5]['why']` == True。候选的自我批评指向一处**并不存在**的写法，等于把已经做对的事（明确拒绝写入区间外身份）说成做错了。后果不是叙事错误，而是让下游把 U6 当成真实待修缺陷，噪声化复核结论。反过来说：T2.who 的写法是对的，selfCritique[2] 整条应删除或改写。"
+        },
+        {
+          "id": "CE2",
+          "check": "候选自述与原文矛盾：selfCritique[0] 断言开头那五段回顾「在原文里**没有引号**」，但原文在该区块的**首尾各有一个中文引号**，把整块包了起来",
+          "claim": "selfCritique[0].point = 「把开头那五段无引号的内心回顾当成「叙述层事实」」；whyStillJudgedSo = 「本区间第 3–17 行（…）在原文里**没有引号**，但内容是许七安的第一人称自语」",
+          "quote": "“从我破了税银案的那天起，我就已经得罪户部侍郎，被动的卷入其中。",
+          "quoteStart": 88553,
+          "quoteEnd": 88585,
+          "why": "原文 U+201C 开引号在 [88553]，U+201D 闭引号在 [88720]，两者之间的 168 字正是候选所指的「五段回顾」（切片第 11–17 行；其前 3–10 行的「姓周的看着只是个没啥脑子的纨绔子弟啊」等段确无引号，但候选把 3–17 行整块说成无引号）。`TEXT[88318:88730].count('“')==1 and count('”')==1`。这条不是抠字眼：候选自己就把 `self_taxcase` 这条引文的 start 定在 88553 —— **正好压在开引号上**，即它的定位器已经承认这里有引号，而它的自我批评说没有。结论方向（按「自陈」而非「叙述层事实」处理，C1/C2 标 derived/inferred）因此是**对的**，但其给出的理由是错的；若下游据此理由去「升级」C1/C2 会更错。"
+        },
+        {
+          "id": "CE3",
+          "check": "候选在 mechanism 字段里用「」拼出一条原文中**不存在**的逐字句 —— 把相隔 6 个字符（含一个段落分隔）的两句直接粘成一句",
+          "claim": "causeEdges[0].mechanism = 「区间外第二十九章他自陈式地推出「因为我破解了税银案，坏了他老子的大事。他要打击报复」」",
+          "quote": "因为我破解了税银案，坏了他老子的大事。",
+          "quoteStart": 88106,
+          "quoteEnd": 88125,
+          "why": "`TEXT.count('因为我破解了税银案，坏了他老子的大事。他要打击报复') == 0`。原文是两段：`[88106,88125)` = 「因为我破解了税银案，坏了他老子的大事。」，中间隔 `'\\n\\n    '`，`[88131,88138)` = 「他要打击报复。」。引用规范（任务 prompt 第 6 条 + 候选自己 method.quoteConvention）要求「引号只用于原文逐字子串」，而此处「」内是脚本拼接产物。危害在于：这类拼接无法被候选自带的 `TEXT.count(quote)==1` 断言拦住（它不经过 refs 校验），却最容易被下游当作原文原句二次引用。修法：拆成两条 quote，或把引号内缩到单句。"
+        },
+        {
+          "id": "CE4",
+          "check": "覆盖记账与产物不一致：selfCheck 的 refs/inRangeRefs/crossRangeRefs/uniqueQuotes 四个数描述的是**构建器注册表**，不是落盘产物；产物引文数比声明少",
+          "claim": "selfCheck = {refs: 110, inRangeRefs: 74, crossRangeRefs: 36, uniqueQuotes: 102}，并被 method.quotes 描述为「全量自检见 selfCheck」",
+          "quote": "refs located: 110 (in-range 74, cross-range 36)",
+          "quoteStart": null,
+          "quoteEnd": null,
+          "quoteStartNote": "此 quote 是构建器 /tmp/wk29b/locate.py 的 stdout 与 selfCheck 字段值，**不是原文子串**，故记 null（不编一个偏移）。复现命令：python3 /tmp/wk29b/locate.py",
+          "why": "实跑候选自带的 reproduce（`python3 /tmp/wk29b/locate.py && python3 /tmp/wk29b/assemble.py`，EXIT=0，产物 sha256 仍为 f10e2a8a…，与提交记录登记一致）：注册表 refs=110 / in 74 / cross 36 / uniqueQuotes=102 —— 与 selfCheck 完全吻合。但**落盘产物**只有 239 个 quote 对象、87 个不同引文（`(quote,start,end)` 去重后仍为 87）。差异 = 注册表里 **15 条定位器在组装时被丢弃**，其中 7 条是区间内引文：self_fuguweng[88591]、self_reason_unknown[88691]、bill_unknown[90140]、no_hero[90241]、how_calc[90290]、thought_long[90313]、caiwei_thinking[91299]。这 7 段在产物中**零覆盖**（与任何已引用的区间内 ref 均无区间重叠）。即 selfCheck 报的是「我定位成功了多少」，读者会读成「产物里有多少条引文」，二者差 15。`uniqueQuotes` 102 vs 87 是同一记账错位的另一个面。"
+        },
+        {
+          "id": "CE5",
+          "check": "候选把区间外/原文中不存在的身份标注写进 who 字段的**断言性括号**里，并在别处把它当作已在区间内出现的说法",
+          "claim": "tasks[4].who（白衣群体）= 「这些人的品级与师门标注在区间内没有任何一次出现（「六品」「七品」「监正」「风水师」在本区间内计数均为 0）」—— 该句本身正确；但 unknowns[8].why 声称「T5 因此用「约二十人的群体」并在括号里注明这是区间外信息」，而 T5 的 who 里**没有**「约二十」字样，产物全文也仅出现 1 次该串",
+          "quote": "一群白衣围在实验器具前，盯着宋卿操作。",
+          "quoteStart": 90489,
+          "quoteEnd": 90508,
+          "why": "机器可判：`'约二十' in candidate['tasks'][4]['who']` == False；`open(artifact).read().count('约二十人的群体') == 1`（只在 U9 的自述里出现一次）；`TEXT.count('约二十人的群体') == 0`（原文根本没有这个说法，连「约二十」都不在原文 —— 它来自候选自己引的区间外第三十一章「近二十位炼金术师当场沸腾」）。性质与 CE1 同类：U9 描述了一处不存在的写法。此处候选的**实际做法（拒绝把区间外计数写入 who）是正确的**，错的是它对自身做法的描述。"
+        }
+      ],
+      "reverseChecks": [
+        {
+          "id": "REV1",
+          "found": "候选漏掉一整条**知识差 / 隐瞒**线：褚采薇当场认定许七安是「同类」（同为不会算术的人），而许七安明明会算，却选择不逞英雄、假装也不会 —— 这是本区间内唯一一处他主动隐藏自己能力的段落，没有任何 task/state/knowledgeGap 记录",
+          "quote": "褚采薇一听，眉眼弯了起来，感觉许七安是个同类。",
+          "quoteStart": 90261,
+          "quoteEnd": 90284,
+          "why": "原文链条完整且逐字可查：[90241)「所以许七安就不逞这个英雄了。」→ [90261,90284)「褚采薇一听，眉眼弯了起来，感觉许七安是个同类。」→ [90290,90307) 她追问「“那你破案的时候怎么算的那么好。”」→ [90313,90321) 他答「“我想了很久。”」→ [90140,90162) 前文他刚说过「“....”许七安沉吟沉吟：“我也不知道。”」。即：**她形成了一个错误信念（他和我一样不会算），他配合维持了这个错误信念**。这是一个标准的 knowledgeGap（谁知/谁不知）加一个 state 变化，候选的 knowledgeGaps 三条（K1 假银原理、K2 朝堂、K3 宋卿变量）全无此项；7 条 dropped 引文里有 4 条（no_hero / how_calc / thought_long / bill_unknown）正落在这条线上，说明定位器**看见了**这些句子却一条都没进产物 —— 这是 CE4 记账错位造成实质覆盖损失的实例。"
+        },
+        {
+          "id": "REV2",
+          "found": "候选漏掉本区间**唯一一处「穿越者」身份的自证标记**：许七安看着术士弹指生火，想的是「上辈子」的泡妞手段 —— 这是全区间唯一把「他有前世记忆」写进对白层的句子，候选的 who 字段反复强调「区间内身份词只有胥吏/县衙捕快」，却没用上这条更强的证据",
+          "quote": "“上辈子要是有这技能，弹指点烟，绝对是泡妞利器啊....”许七安有些羡慕花里胡哨的术士。",
+          "quoteStart": 90586,
+          "quoteEnd": 90630,
+          "why": "这是区间内**唯一**一处「上辈子」（`TEXT[88318:91423].count('上辈子')==1`）。候选在 C4.from 里写了「他上辈子做过电解法制钠」，但那句是候选自己的归纳，未挂任何区间内引文；真正能支撑「穿越者」断言的原文证据就是这一句，而它在产物中零覆盖（`'泡妞利器' in 产物 == False`）。另可作旁证：叙事层出现现代化学名词「氯化钠结晶熔化」（[90636,90671)），候选已在 U8 注意到这处视角滑移，但没把它和这条自证标记并置。"
+        },
+        {
+          "id": "REV3",
+          "found": "候选漏掉褚采薇在饭桌上对许七安的**口味反击**，以及由此建立的「醉心居是南城最好酒楼」这条她引以为傲的本地知识 —— 这直接构成 T3 里「瞎说」那句的动机前提，候选把 obstacle 写成「他抛出的诱饵在她看来是贬低了眼前这桌」，却未落任何引文",
+          "quote": "“哦。”褚采薇盯着他：“你好像吃的不开心？”",
+          "quoteStart": 90327,
+          "quoteEnd": 90349,
+          "why": "链条：[90327,90349) 她盯着他问「你好像吃的不开心？」→ [90355,90367) 他答「“不是，味道一般而已。”」→ [90373,90396)「“瞎说，这是醉心居是南城那一片最好的酒楼了。”」→ [90402,90412)「“我吃过更好吃的。”」→ [90418,90430) 她眼睛亮起。候选 T3.obstacle 的表述（贬低眼前这桌=南城最好的酒楼）需要这条前件才成立，但产物里 `'你好像吃的不开心'` 出现 0 次，「味道一般」只作为 U 级自述出现。缺此引证，T3 的 obstacle 虽然 basis=explicit，实际只有后半句有据、前半句（她为何被激到「瞎说」）无据。"
+        },
+        {
+          "id": "REV4",
+          "found": "候选漏掉**许七安对褚采薇的追问是「捧哏」式表演**这一叙述层定性 —— 它把许七安的求知写成真好奇，但原文写他是故意接话逗她讲（「捧哏似的追问」），这改变 T1/T2 里他的动机定性",
+          "quote": "许七安摇摇头，捧哏似的追问：“总不是你们术士都有一颗救死扶伤的心吧。”",
+          "quoteStart": 88914,
+          "quoteEnd": 88949,
+          "why": "「捧哏」是叙述层用词（不是台词），直接说明他此刻的行为是**配合表演**而非真心求教，与 REV1 的「藏拙」同向。候选 T1.action 写他「向褚采薇求证望气，想确认自己是不是有超出常人的东西」（真求知），T2.objective 写她「享受被请教的感觉」——两边都成立，但漏了对他的表演性定性，使 T1 的动机读起来比原文单一。该句在产物中零覆盖。"
+        },
+        {
+          "id": "REV5",
+          "found": "候选漏掉叙述层对许七安外貌/年龄参照的一处拟写：「皱着眉头的样子很可爱，让许七安想起了七岁小姑娘做数学题时的模样」—— 这是全区间唯一把他「现代人视角」用在褚采薇身上的比喻，也是她「不会算术」这条线的第二次铺设",
+          "quote": "皱着眉头的样子很可爱，让许七安想起了七岁小姑娘做数学题时的模样。",
+          "quoteStart": 90102,
+          "quoteEnd": 90134,
+          "why": "候选 T2.cost 用了同场的 [90168,90209) 货币换算与 [90215,90235)「大概只识字，但没有学过算术」，但漏掉夹在中间的这句比喻。它并非闲笔：与 [90002)「酒足饭饱后的褚采薇板着手指算了半天，然后就没有然后了」、[90261)「同类」共同构成「她不会算术」的三次铺设，而候选只在 cost 里用了其中一次。按 ROLES/VERIFIER.md 第 3 条，只查已写项发现不了这类遗漏。"
+        }
+      ]
+    }
+  ]
+}

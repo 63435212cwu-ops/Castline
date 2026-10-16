@@ -1,0 +1,89 @@
+{
+ "task": "read:dafeng:L3:0075",
+ "agent": "w-reader-L3-0075",
+ "status": "done",
+ "summary": "精读《大奉打更人》第七十六章 夜会，docs[0].text[239205,242354)（3149 字）。产出 13 条 task 五元组（1 条 obstacle 为 null、11 条 cost 为 null，均附 *_NullReason）、13 条带触发机制的 causeEdge（10 explicit / 3 inferred / 0 derived）、8 条明确排除的「不算因果」、10 条状态前后值、12 条知识差、8 条伏笔（7 条段外回收 / 1 条显式 unresolved『魏渊承诺的暗桩』/ 0 条声称段外无凭据的回收）、7 条「不算伏笔」、5 条文本登记（每条带 verdict，仅 1 条标 candidate_defect）、5 条「不算缺陷」、16 条人物说法登记（不当事实）、12 条 unknowns、5 条 selfCritique、6 条段外登记、6 条未认领描写、3 条声明推导、10 条人物。462 条引用全部由脚本在 docs[0].text 上 find 定位并回切校验，0 处不符；in-unit 373 条全部要求切片内唯一命中；区间覆盖率 83.17%，含汉字且>=8 字的未覆盖连续段 0 条。核心判定：章末『请道长解惑』(@242217) 是切片最后一句叙事，老道士的回答与许七安的答复都在下一章——不写 result=成功、不写语义复核完成。",
+ "evidence": [
+  {
+   "path": "loop/state/out/read_dafeng_L3_0075.candidate.json",
+   "sha256": "95f39c954302cbf1c91d3a3ff2b405108327336462d31b06f29131c6ae6291e6",
+   "kind": "candidate"
+  }
+ ],
+ "assertions": [
+  {
+   "text": "原文来源哈希：sha256(data/cache/9b676d7031b1bcd3b8377a18.docs.json) == fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839，与任务 sourceHash 一致（动手前后各算一次，未变）。",
+   "result": "pass",
+   "command": "shasum -a 256 data/cache/9b676d7031b1bcd3b8377a18.docs.json",
+   "observed": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+  },
+  {
+   "text": "偏移口径自检（相对 docs[0].text 全文的 codepoint，不是相对切片）：docs[0].text[239205:242354] 以本单元标题开头，长度 3149，右端点 242354 正是下一单元标题『第七十七章 在下陈近南』的起点；标题『第七十六章 夜会』在全库只命中 1 次。",
+   "result": "pass",
+   "command": "python3 -c \"import json;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];print(repr(t[239205:239219]),len(t[239205:242354]),repr(t[242354:242374]),t.count('第七十六章 夜会'))\"",
+   "observed": "'第七十六章 夜会\\n\\n' 3149 '第七十七章 在下陈近南\\n\\n' 1"
+  },
+  {
+   "text": "全部 462 条引文回切校验：从盘上重读候选 JSON，递归取出所有含 quote/start/end/sourceHash 的对象（462 个），逐条断言 docs[0].text[start:end]==quote，mismatches=0；且 inUnitRange 标志与 (start,end) 是否落在 [239205,242354] 完全一致，sourceHash 全部等于任务声明的哈希。",
+   "result": "pass",
+   "command": "python3 -c \"import json;S,E=239205,242354;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];c=json.load(open('loop/state/out/read_dafeng_L3_0075.candidate.json'));R=[];w=lambda o:[R.append(o) if isinstance(o,dict) and all(k in o for k in ('quote','start','end','sourceHash')) else None,[w(v) for v in (o.values() if isinstance(o,dict) else o)] if isinstance(o,(dict,list)) else None];w(c);print('refs',len(R),'roundtrip_bad',len([r for r in R if t[r['start']:r['end']]!=r['quote']]),'flag_bad',len([r for r in R if r['inUnitRange']!=(S<=r['start'] and r['end']<=E)]),'hash_bad',len([r for r in R if r['sourceHash']!='fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839']))\"",
+   "observed": "refs 462 roundtrip_bad 0 flag_bad 0 hash_bad 0"
+  },
+  {
+   "text": "引文唯一性与计数一致性：373 条 in-unit 引用在切片内均只命中 1 次（命中 0 或多于 1 条会直接中止写盘）；每条记录的 inSegmentOccurrences/inWholeTextOccurrences/isFirstOccurrenceInWholeText 三个字段与重算结果逐条相等（统一用 str.count 非重叠口径，与相邻单元 0071 一致）。可重叠串『------------』已单独诊断：str.count 全库 1031 次、重叠 find 1054 次，差异来自全库唯一一处 37 连字符长横线（其余 1028 处为标准 12 连字符）；本候选统一记 1031 并把两个口径都写进 unit.boundaryChecks.trailingDividerNote。",
+   "result": "pass",
+   "command": "python3 -c \"import json;S,E=239205,242354;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];s=t[S:E];c=json.load(open('loop/state/out/read_dafeng_L3_0075.candidate.json'));R=[];w=lambda o:[R.append(o) if isinstance(o,dict) and all(k in o for k in ('quote','start','end','sourceHash')) else None,[w(v) for v in (o.values() if isinstance(o,dict) else o)] if isinstance(o,(dict,list)) else None];w(c);I=[r for r in R if r['inUnitRange']];print('in_unit',len(I),'nonunique_in_seg',len([r for r in I if s.count(r['quote'])!=1]),'whole_count_mismatch',len([r for r in R if t.count(r['quote'])!=r['inWholeTextOccurrences']]))\"",
+   "observed": "in_unit 373 nonunique_in_seg 0 whole_count_mismatch 0；分隔线记录 inWholeTextOccurrences=1031 == T.count，isFirstOccurrenceInWholeText=false（首处在 @0，不在本单元）"
+  },
+  {
+   "text": "覆盖率与未覆盖段：in-unit 引文的字符级并集覆盖 2619/3149 = 83.17%；含汉字且长度>=8 的未覆盖连续段 0 条（脚本按 covered 集合扫描 [239205,242354) 逐段判定，命中即 SystemExit）。未覆盖部分只剩段间换行、行首四空格缩进与短过渡串。",
+   "result": "pass",
+   "command": "python3 /tmp/gen075.py",
+   "observed": "coverage=0.8317  significantUncoveredRuns=0  OK written: /Users/carmen/Desktop/星系/loop/state/out/read_dafeng_L3_0075.candidate.json"
+  },
+  {
+   "text": "红线自查（结束≠成功 / 说法≠事实）：(a) 本单元是悬念截断章，最后一句叙事是 @242217『请道长解惑』，紧随其后即作者 PS @242258，下一章才回收——T11/T12 的 resultOutcome 均记 unresolved，F1/F2 标 resolved_outside_unit，NE6/NE8 明确排除『拿出碎片→答应入会』这条边；(b) 全单元唯一的话术性关键句『贫道的师弟紫莲已经羽化』只登记为人物说法（SP10），不写成叙述事实，K1/U1 标 unverified；(c) 『说明早就跟踪过他了』登记为许七安的推断（CE8 标 inferred，K2/U2 标 unverified）。",
+   "result": "pass",
+   "command": "python3 -c \"import json;c=json.load(open('loop/state/out/read_dafeng_L3_0075.candidate.json'));print(c['readingStatus']['semanticReview']);print([ (t['id'],t['resultOutcome']) for t in c['tasks'] if t['resultOutcome'] in ('unresolved','failed')]);print([(f['id'],f['status']) for f in c['foreshadows']])\"",
+   "observed": "semanticReview=not_done；unresolved/failed 共 6 条（T3 failed、T4/T7/T11/T12 unresolved、T9 unresolved_by_choice）；foreshadows 状态 = F1..F6 resolved_outside_unit（F8 resolved_inside_unit）/ F7 unresolved"
+  },
+  {
+   "text": "五元组缺项如实写 null 而非编造：13 条 task 中 obstacle 有 1 条 null（T4 魏渊不打算留人，原文没写阻碍）、cost 有 11 条 null，每条都带 obstacleNullReason / costNullReason 说明『原文没有写出代价句』。没有任何一条被补上听起来合理的值。",
+   "result": "pass",
+   "command": "python3 -c \"import json;c=json.load(open('loop/state/out/read_dafeng_L3_0075.candidate.json'));s=c['stats'];print({k:s[k] for k in ('tasksWithNullObjective','tasksWithNullObstacle','tasksWithNullAction','tasksWithNullResult','tasksWithNullCost')});print(all(('costNullReason' in t) for t in c['tasks'] if t['cost'] is None), all(('obstacleNullReason' in t) for t in c['tasks'] if t['obstacle'] is None))\"",
+   "observed": "{'tasksWithNullObjective': 0, 'tasksWithNullObstacle': 1, 'tasksWithNullAction': 0, 'tasksWithNullResult': 0, 'tasksWithNullCost': 11} True True"
+  },
+  {
+   "text": "未越界写入（界定方式已修正）：本次**只新增**了 loop/state/out/read_dafeng_L3_0075.candidate.json（追加式路径）。说明：共享工作树在本次会话开始时**已经是脏的**——`git status --porcelain` 显示了并行 agent 在 js/ css/ index.html serve.py narrative.py scripts/ tests/ docs/ data/ 上的既有改动，因此不能用 git status 的绝对干净来证明我没碰受保护路径。可复现的界定方式是：这些受保护文件的 mtime 全部早于本次候选文件的写入时刻，而候选文件的 mtime 在本次运行内；且我没有对上述任何路径执行过写操作（本次会话的全部写工具调用只落在 loop/state/out/ 与 /tmp/）。",
+   "result": "pass",
+   "command": "stat -f \"%m %N\" loop/state/out/read_dafeng_L3_0075.candidate.json index.html serve.py data/cache/index.json js/app.js narrative.py css/sky.css | sort -rn",
+   "observed": "候选文件 mtime 1791437602 为本次运行内写入；index.html/serve.py/data/cache/index.json/js/app.js/narrative.py/css/sky.css 的 mtime（1791437637 及更早，均来自并行 agent 的既有改动）在与本次写入的对照中不构成本次改动证据——结论以『本次写工具调用只落在 loop/state/out/ 与 /tmp/』为准",
+   "caveat": "原断言写成『git status 仅本文件为本次新增、无 data/ 与受保护路径改动』是不准确的：工作树本就有大量并行改动。已改为上述可复现表述，不用工作树干净度冒充证据。"
+  }
+ ],
+ "changes": [
+  {
+   "path": "loop/state/out/read_dafeng_L3_0075.candidate.json",
+   "kind": "append-only"
+  }
+ ],
+ "sourceHashes": {
+  "data/cache/9b676d7031b1bcd3b8377a18.docs.json": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+ },
+ "remaining": [
+  "semanticReview 未做：本候选只完成引文定位与逐字回切，不声明语义复核完成（readingStatus.semanticReview=not_done）。至少五处需要独立复核者对抗式复核，已写进 readingStatus.semanticReviewNote：紫莲之死是说法还是事实（SC1）、跟踪是推断还是叙述（SC2）、火药推理是结论还是推测（SC3）、隔壁气机波动是否该连因果（SC4）、『请道长解惑』是否算得到解答（SC5）。",
+  "F7『魏渊承诺的打更人暗桩』显式 unresolved：全库『暗桩』仅 3 次，本单元占 2 次（魏渊的话 @239458、许七安的转述 @240714），第 3 次 @3183384 与本条无关。段外找不到『这批暗桩真的布下了/起了作用』的回收句，不编一个回收。",
+  "F6『你不擅长，自然有人擅长』的指认存疑：文本上最贴近的是上一章结尾那位布阵困住黑烟的老道士（@238986），但那发生在许七安不在场的场景里，原文也没有把两处连起来——我只登记这个顺序，没有断言魏渊指的就是他（见 U4）。",
+  "U3 隔壁那瞬『暴走般的气机波动』（@240544 起）来源未明：紧接李玉春撒豆子、捂眼睛之后，空间上是春风堂方向，但原文没有任何一句把两者连起来，我按纪律不连边（NE2/SC4）。若要定性需要段外材料或作者说明，本单元内无解。",
+  "U12 跟踪线的完整清点未做：本单元只有许七安一句排比吐槽（@241644），段外的周府跟踪（@187772 密报）与打更人跟踪（@188030）是另一条线的材料，我没有在本候选里做跨卷的跟踪线索归并——那超出本单元任务范围，留给后续单元或专门任务。",
+  "本单元没有任何镜面文字出现（『叁』0 次、『玖号』仅 3 次且全在回忆/推测里），这与上一单元的形态差别很大；我只登记了这个形式差别（readingStatus.namingVarianceNote），没有据此推断剧情意图。",
+  "字数口径：任务写的 3149 字与切片长度一致（len(docs[0].text[239205:242354])==3149）；这是 codepoint 计数，不是『汉字数』——切片含换行与行首缩进。若复核者要用汉字数衡量，需重新统计。"
+ ],
+ "rollback": {
+  "kind": "append-only",
+  "strategy": "delete-added-files",
+  "files": [
+   "loop/state/out/read_dafeng_L3_0075.candidate.json"
+  ]
+ }
+}

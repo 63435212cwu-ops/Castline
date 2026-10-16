@@ -1,0 +1,121 @@
+{
+  "task": "read:dafeng:L1:0041",
+  "agent": "w-dafeng-1",
+  "status": "done",
+  "summary": "精读《大奉打更人》第四十二章「亚圣和他的妻子」原文区间 codepoint [125178,127792)（2614 字 / 59 个非空段落，逐段读完），产物含 5 条任务五元组、9 条带方向与机制的 causeEdges、7 条带前值/后值与事件锚点的 states、7 条知识差、5 条伏笔（4 条 resolved_out_of_range + 1 条 partially_resolved_out_of_range）、13 条 unknowns、4 条 selfCritique，另列 3 条 rejectedCauseEdges 与 6 条 rejectedForeshadows 说明为何不连边/不算伏笔。全部 204 条引用由真实 text 定位，回验 TEXT[start:end]==quote 且 TEXT.find(quote)==start，0 处不符；区间内 162 条全部落在本单元内，区间外 42 条一律标 crossRange=true。semanticReview 未做，不声明完成。",
+  "evidence": [
+    {
+      "path": "loop/state/out/read_dafeng_L1_0041.candidate.json",
+      "sha256": "604e49589341f5b77fb29df0a512c335b61197fc7910242abc81a2e408f8d250",
+      "kind": "candidate",
+      "note": "本轮精读产物（任务 writes 指定路径）"
+    },
+    {
+      "path": "data/cache/9b676d7031b1bcd3b8377a18.docs.json",
+      "sha256": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+      "kind": "source",
+      "note": "原文来源；sha256(整个文件) 与 task.sourceHash 一致"
+    },
+    {
+      "path": "data/cache/9b676d7031b1bcd3b8377a18.json",
+      "sha256": "3c2fae1d399d6768719f2d5476fa0cfd88fb4fbbc12abdf080323fa4b846ebdf",
+      "kind": "graph-cache",
+      "note": "图谱缓存，仅用于对照已有结论，未作为任何断言的证据来源"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "原文区间与切片：docs[0].text[125178:127792] 长度 2614 字，与任务 sourceRange 一致，且切片以本章标题「第四十二章 亚圣和他的妻子」开头，尾端落在本章末（不含下一章）",
+      "result": "pass",
+      "command": "python3 -c \"import json;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];print(len(t[125178:127792]),repr(t[125178:125200]),repr(t[127750:127792]))\""
+    },
+    {
+      "text": "sourceHash 对得上：任务声明 fdde5558…39839 == sha256(data/cache/9b676d7031b1bcd3b8377a18.docs.json) 实际值（动手前后各测一次，未变，说明无并行写入）",
+      "result": "pass",
+      "command": "shasum -a 256 data/cache/9b676d7031b1bcd3b8377a18.docs.json"
+    },
+    {
+      "text": "全部 204 条引用逐字命中且偏移自洽：TEXT[start:end]==quote 且 TEXT.find(quote)==start，0 处不符",
+      "result": "pass",
+      "command": "python3 -c \"import json;T=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];C=json.load(open('loop/state/out/read_dafeng_L1_0041.candidate.json'));B=('tasks','causeEdges','rejectedCauseEdges','states','knowledgeGaps','foreshadows','rejectedForeshadows','openThreads','unknowns');Q=[o for b in B for i in C[b] for o in (i.get('evidence') or [])+(i.get('payoffEvidence') or [])];bad=[o for o in Q if T[o['start']:o['end']]!=o['quote'] or T.find(o['quote'])!=o['start']];print('quotes',len(Q),'distinct',len({o['quote'] for o in Q}),'bad',len(bad));print('ALL VERBATIM' if not bad else 'MISMATCH')\""
+    },
+    {
+      "text": "区间内外不混：162 条 crossRange=false 的引用全部落在 [125178,127792) 内；42 条 crossRange=true 的引用无一落进本单元",
+      "result": "pass",
+      "command": "python3 -c \"import json;T=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];C=json.load(open('loop/state/out/read_dafeng_L1_0041.candidate.json'));B=('tasks','causeEdges','rejectedCauseEdges','states','knowledgeGaps','foreshadows','rejectedForeshadows','openThreads','unknowns');Q=[o for b in B for i in C[b] for o in (i.get('evidence') or [])+(i.get('payoffEvidence') or [])];inr=[o for o in Q if not o['crossRange']];xr=[o for o in Q if o['crossRange']];print('inRange',len(inr),all(125178<=o['start'] and o['end']<=127792 for o in inr));print('crossRange',len(xr),all(not(125178<=o['start']<127792) for o in xr))\""
+    },
+    {
+      "text": "【本轮独立复核的主要发现】上一轮运行 2700s 超时后由 worker 代为提交、因 sourceHashes 为空被拒（见 loop/state/out/REJECTED__read_dafeng_L1_0041.json，其登记的产物哈希 aa6d13a7… 与本轮动手前的产物哈希逐字相同）。我据此对产物做反向复核，机器判定出 3 处引用章号误标：2 条被写成「第一百九十九章 浮香的小故事」的引文实际落在第两百零九章与第两百四十五章（第一百九十九章全文不含「钱钟/龙脉/国亡/以身陨」任一词），另有 1 处叙述性 prose 把引文出处写成第八十五章而实际是第一百零三章。已按 start 偏移经 narrative.chapter_spans 机器判定后重写章号，quote/start/end 一律未改，修正台账写在产物 correctionsApplied（8 个子项）。",
+      "result": "pass",
+      "command": "python3 -c \"import json,narrative;T=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];sp=narrative.chapter_spans(T);f=lambda o:[c['head'] for c in sp if c['start']<=o<c['end']][0];C=json.load(open('loop/state/out/read_dafeng_L1_0041.candidate.json'));B=('tasks','causeEdges','rejectedCauseEdges','states','knowledgeGaps','foreshadows','rejectedForeshadows','openThreads','unknowns');Q=[o for b in B for i in C[b] for o in (i.get('evidence') or [])+(i.get('payoffEvidence') or [])];bad=[(o['start'],o.get('chapter'),f(o['start'])) for o in Q if o.get('chapter') and o['chapter']!=f(o['start'])];bad2=[(i,e['start'],e.get('chapter'),f(e['start'])) for i,e in enumerate(C['evidenceRegistry']) if 'start' in e and e.get('chapter') and e['chapter']!=f(e['start'])];print('payload mislabels:',len(bad),bad);print('registry mislabels:',len(bad2),bad2);print('correctionsApplied:',len(C['correctionsApplied']['items']))\""
+    },
+    {
+      "text": "【计数类断言全部实测】产物里写的全书词频均已用 TEXT.count 复核：钱钟 13、指鹿为马 3、争国本 12、立命境 15、白鹿 14、国子监 162、程晦 2、大爱无疆 1、屠龙术 7、牛逼 18、白鹿书院 10，全部相符。本轮另修正 1 处计数错误：unknowns[7] 原写「第十九章 3 次」，实测该章「白鹿书院」为 5 次（全书 10 次：第一章 1、第十九章 5、第二十章 2、第一百六十章 2）。",
+      "result": "pass",
+      "command": "python3 -c \"import json;T=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];print({w:T.count(w) for w in ('钱钟','指鹿为马','争国本','立命境','白鹿','国子监','程晦','大爱无疆','屠龙术','牛逼','白鹿书院')})\""
+    },
+    {
+      "text": "出处归属的语义边界自查：第两百零九章那句是钟璃（人物之言，且他转述的是术士说法），第两百四十五章那句是叙述层评断，第一百一十六章「效仿前辈」是赵守自述。产物把前两者放进 F1.payoff 与 O5 时保留了「由钟璃补出」「叙述层给出」的区别，未把人物之言升格为叙述事实。",
+      "result": "pass",
+      "command": "python3 -c \"import json;T=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];i=T.find('大周末年，云鹿书院大儒钱钟');print(repr(T[i-70:i+10]))\""
+    },
+    {
+      "text": "红线自查·结束≠成功：本单元在「涉及到的官员多达两百余名」处结束，争国本的结局没有讲到；T4.result 与 T5.result 都只记「拿到开头/讲到规模为止」，未写任何「讲完/解决/成功」。",
+      "result": "pass",
+      "command": "python3 -c \"import json;C=json.load(open('loop/state/out/read_dafeng_L1_0041.candidate.json'));print([t['result'] for t in C['tasks'] if t['id'].startswith(('T4','T5'))])\""
+    },
+    {
+      "text": "红线自查·不把说法当事实：许新年引号内的「大儒有两种意思」「两百年来最多只出过三品」「《云鹿志》里记载…是妖…结为夫妻」「圣人说：大爱无疆」及整段争国本口述，在产物里一律记作「他得到了这些说法」（claimTypeNotes 明列），未当叙述事实。",
+      "result": "pass",
+      "command": "python3 -c \"import json;C=json.load(open('loop/state/out/read_dafeng_L1_0041.candidate.json'));print(len(C['claimTypeNotes']));print([c['id'] for c in C['rejectedCauseEdges']])\""
+    },
+    {
+      "text": "红线自查·一次出现不算伏笔：列 5 条伏笔均带 setup+payoff 两侧逐字引文与 twoAppearanceBar 计数；另列 6 条 rejectedForeshadows 逐条说明为何不算（大爱无疆全书仅 1 次、反正都是骑仅 1 次、亡灵骑士/草莽英雄的同形词实为不同所指等）。",
+      "result": "pass",
+      "command": "python3 -c \"import json;C=json.load(open('loop/state/out/read_dafeng_L1_0041.candidate.json'));print([(f['id'],f['status'],len(f.get('evidence') or []),len(f.get('payoffEvidence') or [])) for f in C['foreshadows']]);print('rejected:',len(C['rejectedForeshadows']))\""
+    },
+    {
+      "text": "红线自查·不越权声明语义核验：reviewStatus.semanticReview == not_performed，仅有 quoteLocationVerified=true（引用定位正确 ≠ 语义已核验）。",
+      "result": "pass",
+      "command": "python3 -c \"import json;C=json.load(open('loop/state/out/read_dafeng_L1_0041.candidate.json'));print(C['reviewStatus'])\""
+    },
+    {
+      "text": "未越权写入：只写了任务 writes 指定的 loop/state/out/read_dafeng_L1_0041.candidate.json（git status 显示为 untracked 新文件）；js/ css/ index.html serve.py narrative.py scripts/ tests/ docs/ data/ 一律未改，也未执行 git checkout/reset/stash。",
+      "result": "pass",
+      "command": "cd /Users/carmen/Desktop/星系 && git status --porcelain loop/state/out/read_dafeng_L1_0041.candidate.json"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/read_dafeng_L1_0041.candidate.json",
+      "kind": "append-only"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/9b676d7031b1bcd3b8377a18.docs.json": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "data/cache/9b676d7031b1bcd3b8377a18.json": "3c2fae1d399d6768719f2d5476fa0cfd88fb4fbbc12abdf080323fa4b846ebdf",
+    "loop/state/out/read_dafeng_L1_0041.candidate.json": "604e49589341f5b77fb29df0a512c335b61197fc7910242abc81a2e408f8d250",
+    "note": "三个哈希在动手前后各测一次，均未变化（无并行写入）。"
+  },
+  "remaining": [
+    "semanticReview 未做：本轮只做了引用定位与结构自洽校验，没有做独立语义复核。引用定位正确 ≠ 语义已核验。",
+    "U1 未决：许新年所指「瀑布边有一块石碑，记载了那位前辈的生平」与下一段「潭边……钱钟」碑是否为同一块、同一人，原文无一句把「书院一位前辈」与「钱钟」等同，故未合并（也未据此连因果边）。",
+    "U2 未决：「三位大儒/三位老先生」具体是哪三位，本区间未列名；坐实需跨章合并（区间外第三十七至四十一章），本轮未做。",
+    "U10 未决：「仁宗」属大周还是大奉，本区间与所引区间外片段均未点明。",
+    "U3 未决：钱钟「生于六百年前，活跃与大奉朝开国之初」与「撞散大周国运（在大奉立国之前）」的时间关系；原文「活跃与」疑为「活跃于」之误，句意因此不稳。",
+    "U9 未决：开篇「寒风的山峰掠过林间」中「山峰」疑为「山风」之误（山风才能「掠过林间」），本轮不改写原文。",
+    "F5 只到 partially_resolved：〔立命境是什么〕在区间外第四十五章有叙述层定义，但〔三位老先生性格变化由立命境引起〕从未被原文连成因果，维持部分回收。",
+    "F2 的回收只覆盖「妻子」与「指鹿为马」这一诨号，不覆盖「白鹿是妖、化形成人」那层来历——区间外未找到再次交代（记为 O4）。",
+    "O1 未结：争国本中「接替了内阁首辅的位置」的那位云鹿书院读书人始终没有名字（区间内外都只写「一位云鹿书院的读书人」）。",
+    "O3 未回填：云鹿书院创始人（亚圣）本人的品级本区间未提；区间外第一百一十七章有一句「是一品亚圣」，距本单元约 345 万字，本轮只用它登记为 openThread，未据此回填本区间的品级判断。",
+    "产物中所有引用与哈希已机器复核；但「本区间是否还漏了别的伏笔/因果」只能靠独立复核者反向查，本轮的自查不能替代复核。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/read_dafeng_L1_0041.candidate.json"
+    ],
+    "note": "本轮动手前的产物已备份到 /tmp/0041.orig.backup.json（sha256 aa6d13a76af21747d20f6c63480d8a90e8a0a2e23ef50a1092fd1e6414dafea0，与 REJECTED__ 记录登记的哈希一致），如需回退可直接取回。"
+  }
+}

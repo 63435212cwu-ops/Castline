@@ -1,0 +1,556 @@
+{
+  "task": "read:sanguo:L1:0009",
+  "agent": "w-xiyou-1",
+  "status": "done",
+  "summary": "精读《三国演义》第十回「勤王室马腾举义 报父仇曹操兴师」docs[0].text[44448,48731)（4283 字，8 个正文段落 + 2 行整理者附加行）。产出 22 条 task 五元组（objective/obstacle/action/result/cost，缺项写 null 并逐个说明理由；9 条 notSuccess=true，1 条 result=null）、47 条带触发机制的 causeEdge（4 条 derived、14 条带 hedge）、12 条明确拒收的伪因果边、25 条状态（20 条前后值 + 5 条知识差）、7 条伏笔（4 resolved_in_unit / 2 partial / 1 unresolved_in_unit）、7 条「不算伏笔」、16 条「人物话语只作线索不作事实」、43 条连词审计、5 条跨单元对照、9 条段落锚点、26 条 minorFacts（装不进四类结构但原文确写的零碎事实，避免静默遗漏）、13 条 unknowns、4 条 selfCritique。407 条 quoteRefs 全部由生成脚本在真实切片上按「切片内唯一命中 marker → 取偏移 → 回切」派生，回切不符/越界/哈希不符/全文不唯一都会当场 assert 失败而不写文件；43 处引语全部登记归属并由引语跨度覆盖。",
+  "evidence": [
+    {
+      "path": "loop/state/out/read_sanguo_L1_0009.candidate.json",
+      "sha256": "6089861b326294304b7dbef54485b5e5f2f9c92ec5a6a22d8dd5e22b6728805f",
+      "kind": "candidate"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "原文来源哈希：sha256(data/cache/152e2a6eed94f1075e7e7070.docs.json) == 2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff，与任务 sourceHash 逐字一致；生成脚本第一步就断言该哈希，不符则不产出文件。",
+      "result": "pass",
+      "command": "shasum -a 256 data/cache/152e2a6eed94f1075e7e7070.docs.json",
+      "observed": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff"
+    },
+    {
+      "text": "偏移口径自检（任务点名的踩坑点）：start/end 是相对 docs[0].text 全文的 codepoint 偏移，不是相对切片。docs[0].text[44448:44448+19] == '第十回\\u3000勤王室马腾举义\\u3000报父仇曹操兴师'，即切片以本单元回目行开头；右端 find('第十一回') == 48731 == rangeEnd。切片 4283 字，切片 sha256 = 82d3938d710dda6a57a903dea8799d29e7671fa300adeea7c69694501ec05121（另起字段 sliceSha256 记录，未覆盖 sourceHash）。",
+      "result": "pass",
+      "command": "python3 -c \"import json;t=json.load(open('data/cache/152e2a6eed94f1075e7e7070.docs.json'))[0]['text'];print(repr(t[44448:44467]), t.find('第十一回'), len(t[44448:48731]))\"",
+      "observed": "'第十回\\u3000勤王室马腾举义\\u3000报父仇曹操兴师' 48731 4283"
+    },
+    {
+      "text": "全部 407 条带偏移引文回切校验：递归取出候选 JSON 中所有含 quote/start/end 的对象，逐条断言 docs[0].text[start:end]==quote；405 条 in-range 全部落于 [44448,48731)，2 条 outsideRange（第九回末、第十一回开头）显式标了 outsideRange 标志。mismatch=0、越界=0、sourceHash 不符=0。",
+      "result": "pass",
+      "command": "python3 -B -s - <<'PY'\nimport json\nfull=json.load(open('data/cache/152e2a6eed94f1075e7e7070.docs.json'))[0]['text']\nS,E=44448,48731; SHA='2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff'\nc=json.load(open('loop/state/out/read_sanguo_L1_0009.candidate.json'))\nrefs=[]\ndef w(o):\n    if isinstance(o,dict):\n        if 'quote' in o and 'start' in o and 'end' in o: refs.append(o)\n        for v in o.values(): w(v)\n    elif isinstance(o,list):\n        for v in o: w(v)\nw(c)\ninr=[r for r in refs if not r.get('outsideRange')]\nprint('refs',len(refs),'in',len(inr),'out',len(refs)-len(inr))\nprint('mismatch',len([r for r in inr if full[r['start']:r['end']]!=r['quote']]))\nprint('oob',len([r for r in inr if not(S<=r['start']<r['end']<=E)]))\nprint('hash',len([r for r in refs if r.get('sourceHash')!=SHA]))\nprint('nonuniq',len([r for r in refs if full.count(r['quote'])!=1]))\nPY",
+      "observed": "refs 407 in 405 out 2 / mismatch 0 / oob 0 / hash 0 / nonuniq 0"
+    },
+    {
+      "text": "引文唯一性：生成脚本对每条 in-range 引文断言 FULL.count(quote)==1（全文唯一）+ 区间内命中 + 回切一致之后才取偏移，任一条不满足就 assert 失败、不写文件。本单元实测确实抓到并当场拒收了 6 条手写时想当然的 marker（'众皆应允' 全书 2 次、'后人有诗曰' 35 次、'军马列成阵势' 2 次、'各自收兵' 6 次、'操择精锐者，号为「青州兵」' / '只今所使两枝铁戟，重八十斤' 等右端截短导致不唯一），全部改写为更长的完整句后重跑通过——不存在「引文在别处也命中、偏移却指向我要的语义」这种错配。",
+      "result": "pass",
+      "command": "python3 -B -s /tmp/cl-read-0009/gen.py",
+      "observed": "{\"written\": \".../read_sanguo_L1_0009.candidate.json\", \"quoteRefs\": 407, \"inRange\": 405, \"outOfRange\": 2, \"roundTripFailures\": 0, \"speechSpans\": 43, \"uncovered\": 0, \"charCoveragePercent\": 78.47, \"sliceSha256\": \"82d3938d710dda6a57a903dea8799d29e7671fa300adeea7c69694501ec05121\"}"
+    },
+    {
+      "text": "引语清单口径：本单元扫描出 43 个「…”」引语跨度（左右引号各 43、无未闭合左引号），全部逐条人工判定说话人、叙述动词与 kind（speech / appellation / verse），生成脚本断言人工归属表的偏移集合与扫描结果完全一致（多一条少一条都失败）。43 条全部被至少一条 quoteRef 覆盖（speechSpansUncovered=0）。识别出两处不能当话语的：'青州兵'是命名（kind=appellation）、'后人有诗曰'一首是后人评断（kind=verse）；末尾进言者姓名原文未给，speaker 记为「未指名的一人」。",
+      "result": "pass",
+      "command": "python3 -c \"import json;c=json.load(open('loop/state/out/read_sanguo_L1_0009.candidate.json'));print(len(c['speechInventory']), c['coverage']['speechSpansUncovered'], sorted(set(s['kind'] for s in c['speechInventory'])))\"",
+      "observed": "43 0 ['appellation', 'speech', 'verse']"
+    },
+    {
+      "text": "所有断言条目都有 basis（explicit/inferred/derived/unverified），没有一条判断躲在无 basis 的字段里。递归扫描候选里所有含 text/why/claim/fact/finding/what/item/risk 键的对象，缺 basis 的对象数 = 0；分布 explicit 251 / inferred 28 / derived 14 / unverified 6。连 blocked 性质的 rejectedEdges、notForeshadows、speechAsClueNotFact、crossUnitRefs、selfCritique 也各自带了 basis + basisNote（说明该判断是直述还是推导）。",
+      "result": "pass",
+      "command": "python3 -c \"import json,collections;c=json.load(open('loop/state/out/read_sanguo_L1_0009.candidate.json'));cnt=collections.Counter();bad=[]\ndef s(o,p=''):\n    if isinstance(o,dict):\n        k=set(o)\n        if any(x in k for x in ('text','why','claim','fact','finding','what','item','risk')) and 'basis' not in k: bad.append(p)\n        if 'basis' in k: cnt[o['basis']]+=1\n        for a,v in o.items(): s(v,p+'/'+a)\n    elif isinstance(o,list):\n        for i,v in enumerate(o): s(v,p+'[%d]'%i)\ns(c);print('no-basis',len(bad),dict(cnt))\"",
+      "observed": "no-basis 0 {'explicit': 251, 'inferred': 28, 'derived': 14, 'unverified': 6}"
+    },
+    {
+      "text": "未把人物话语/预测/自辩/指控写成叙述事实：16 条 speechAsClueNotFact 逐条登记并说明用法，覆盖曹操「陶谦纵兵杀吾父」（指控）、陶谦「实不干陶谦之故」（自辩）与「我获罪于天」（自我归因）、李傕「樊稠谋反」（杀人名目）、贾诩「不过百日，彼兵粮尽」（预测，事后由「果然」兑现但说话时点只是预测）、夏侯敦转述的典韦旧事（逐虎过涧/提头出闹市）、后人诗（报应论）等。曹操的信息差单列为 K1（他知道的 vs 他说的），陈宫当面反驳的话也一并引了。",
+      "result": "pass",
+      "command": "python3 -c \"import json;c=json.load(open('loop/state/out/read_sanguo_L1_0009.candidate.json'));print(len(c['speechAsClueNotFact']),[s['id'] for s in c['states'] if s['kind']=='knowledge_gap'])\"",
+      "observed": "16 ['K1', 'K2', 'K3', 'K4', 'K5']"
+    },
+    {
+      "text": "未把「读到本段结束」当「成功」：9 条 notSuccess=true 逐条写明目标未达成——T1 弑帝未执行、T2 献帝退军目标被置换（人出城但「同秉朝政」）、T3 三次改葬皆不能葬、T4 举义以粮尽+内应泄露+退军大败收场、T7 李蒙王方立斩之誓反成两条性命、T11 樊稠放弃奉令要办的事、T18 接父目标彻底失败、T19 徐州未破且仇人张闿已逃奔淮南、T20 陈宫说情被拒。另 5 条 notSuccess=null 并写明为何无法判定（T5/T9/T10/T21/T22）。",
+      "result": "pass",
+      "command": "python3 -c \"import json;c=json.load(open('loop/state/out/read_sanguo_L1_0009.candidate.json'));print([(t['id'],t['notSuccess']) for t in c['tasks']])\"",
+      "observed": "T1..T22：True×9 / False×8 / None×5；T22.result=null 且 resultNote 写明「结果被推到下文」"
+    },
+    {
+      "text": "缺项一律 null、不补默认值：12 个 null 字段被 coverage.nullFields 逐个点名（11 个 cost + T22.result），每处都在同 task 的 nullNotes/resultNote 里写明「原文未写」的理由。典型：T22.result=null 是因为回末「毕竟此人是谁，且听下文分解」把结果推给下文，而不是写「献计成功」。",
+      "result": "pass",
+      "command": "python3 -c \"import json;c=json.load(open('loop/state/out/read_sanguo_L1_0009.candidate.json'));print(c['coverage']['nullFields'])\"",
+      "observed": "['T1_shidi_zhiyi.cost', 'T3_dongzhuo_gaizang.cost', 'T4_mateng_juYi.cost', 'T8_lishi_baixing.cost', 'T10_zhuiji_xiliang.cost', 'T13_zhangji_anfu.cost', 'T14_zhujun_baoju.cost', 'T16_caocao_zhaoxian.cost', 'T17_dianwei_yujin.cost', 'T21_taoqian_yingzhan.cost', 'T22_taoqian_zifu_jice.result', 'T22_taoqian_zifu_jice.cost']"
+    },
+    {
+      "text": "因果边都有方向与触发机制，且拒绝「时间相邻当因果」：47 条 causeEdge 每条都写了 mechanism（A 导致 B 的机制）与 marker（触发词/触发句），其中 14 条附 hedge 说明该边可能被推翻的方式；另有 12 条 rejectedEdges 专门记录我拒收的伪因果（「言未绝」「声犹未绝」式紧接 3 条、场景相邻、时序倒置、以诗证事、把「酒半阑」当杀人原因等）。本单元三处「言未绝/声犹未绝」全部进了拒收区，未连边。",
+      "result": "pass",
+      "command": "python3 -c \"import json;c=json.load(open('loop/state/out/read_sanguo_L1_0009.candidate.json'));print(len(c['causeEdges']),len([e for e in c['causeEdges'] if e.get('hedge')]),len(c['rejectedEdges']))\"",
+      "observed": "47 14 12"
+    },
+    {
+      "text": "伏笔判定按「铺设+回收两端」：7 条 foreshadows 每条都写明 setup / payoff / status / whyItCounts，并区分 resolved_in_unit(4) / partially_resolved_in_unit(2) / unresolved_in_unit(1)。未回收的 F7（回末「愿施小策，教曹操死无葬身之地」）显式标 unresolved_in_unit，且 externalPayoffNote 只用区间外信息标注回收位置、不作为本单元证据；另 7 条被明确排除（含「青州兵」这一单次命名、白旗、铁戟、岌岌欲倒的大旗、两句评语），避免「一次出现当伏笔」。",
+      "result": "pass",
+      "command": "python3 -c \"import json;c=json.load(open('loop/state/out/read_sanguo_L1_0009.candidate.json'));print([(f['id'],f['status']) for f in c['foreshadows']], len(c['notForeshadows']))\"",
+      "observed": "[('F1','resolved_in_unit'),('F2','partially_resolved_in_unit'),('F3','resolved_in_unit'),('F4','resolved_in_unit'),('F5','partially_resolved_in_unit'),('F6','resolved_in_unit'),('F7','unresolved_in_unit')] 7"
+    },
+    {
+      "text": "没有写 semanticReview 完成：semanticReview 与 claimVerification 都写 not_performed，并在 semanticReviewNote 里注明「本候选只保证引文逐字命中与偏移一致（定位层），不声称语义已核验」。coverage.charCoverageNote 也写明机械覆盖率不代表语义已核验、不能当质量分。",
+      "result": "pass",
+      "command": "python3 -c \"import json;c=json.load(open('loop/state/out/read_sanguo_L1_0009.candidate.json'));print(c['semanticReview'],c['claimVerification'],c['coverage']['charCoveragePercentExcludingArtifact'])\"",
+      "observed": "not_performed not_performed 79.49"
+    },
+    {
+      "text": "只在任务 writes 指定的路径写文件：git status 显示 loop/state/out/read_sanguo_L1_0009.candidate.json 为未跟踪新增（??），本轮没有修改任何受保护路径（js/ css/ index.html serve.py narrative.py scripts/ tests/ docs/ data/ 下的大量 M/D 是共享树里他人未提交的工作，非本 agent 所为；本 agent 对 data/cache 只读）。生成脚本本身写在系统临时目录 /tmp/cl-read-0009/gen.py，不在仓库内。",
+      "result": "pass",
+      "command": "git status --porcelain -- loop/state/out/read_sanguo_L1_0009.candidate.json",
+      "observed": "?? loop/state/out/read_sanguo_L1_0009.candidate.json"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/read_sanguo_L1_0009.candidate.json",
+      "kind": "append-only"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/152e2a6eed94f1075e7e7070.docs.json": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff"
+  },
+  "remaining": [
+    "语义未核验：本候选只做到「引文逐字命中 + 偏移一致 + 话语分层 + 因果机制标注」的定位与结构层，人物动机与因果读法是否正确属 read-verify 通道，本 agent 未做也未声称。",
+    "E9（先结连内应→引军来）、E11（李蒙王方请战→贾诩改口）、E33（四级引荐链并为一条边）、E46（曹豹请战→迎敌）4 条为 derived，推的那一步已写在 hedge 里；T19.result 也标 derived（「城未破/张闿未被追」是据「原文未写」推得）。复核可据此降级而不影响其余条目。",
+    "「贾翊」异文（46002 处，全书仅此 1 次，同回其余 4 处作「贾诩」）只记入 unknowns U2 并照原文逐字引用，未校改、未判定正误；版本校勘本轮未做。",
+    "区间外材料（第九回末、第十一回开头）只用于 crossUnitRefs 与 F7 的回收位置标注，crossUnitRefs 第 3、4 条记 unverified，未读那些回的整章。",
+    "图谱缓存 data/cache/152e2a6eed94f1075e7e7070.json 本轮未用作任何证据（已在 source.notReadAsEvidence 写明），也未与其已有结论逐条对照。",
+    "机械字符覆盖率 79.49%（剔除切片末尾整理者附加行后）；未覆盖部分主要是段落之间的连接句、排比式外貌/籍贯铺陈等。该指标只说明被引用过，不代表语义覆盖。",
+    "U4（盩厔山二百里 vs 下寨二百八十里）、U5（三个兵力数字的口径）、U9（密诏由谁拟）等 13 条 unknowns 原文确未交代，未替原文补答案。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/read_sanguo_L1_0009.candidate.json"
+    ]
+  },
+  "submittedAt": "2026-10-07T21:24:00Z",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-07T21:24:00Z"
+  },
+  "verifyState": "partial",
+  "reviews": [
+    {
+      "reviewer": "q-verify",
+      "at": "2026-10-07T21:33:01Z",
+      "verdict": "pass",
+      "notes": "独立复核。**内容层引文 407/407 逐字对上原文**，自审计层失配 0；覆盖率 78.5%（按自称区间裁剪后计）。反向验证：补集逐段核对并反查 tasks/causeEdges/states/foreshadows 字段，未发现整拍漏抽；报出的疑似段均属「引文取句不同、该拍仍被记录」。另按第 47/51 条做了第二层检查：本候选内**偏移字段与引文自洽**（1.5 万条全量检查中仅 1 处不自洽，且不在本候选）。",
+      "counterExamples": [
+        {
+          "check": "低覆盖率是否等于漏抽",
+          "method": "反查该拍在四类字段中的记录",
+          "finding": "未见整拍缺失；覆盖率低源于引文短、叙述密"
+        }
+      ],
+      "reverseChecks": [
+        {
+          "question": "这一段里还漏了什么？",
+          "method": "补集逐段 + 字段反查 + 偏移自洽性",
+          "finding": "未发现真实漏抽"
+        }
+      ]
+    },
+    {
+      "reviewer": "w-verify-4",
+      "at": "2026-10-09T15:08:51Z",
+      "verdict": "partial",
+      "notes": "## 总体判断：partial（可用为主，两处必须修正，四处遗漏需补）\n\n### 一、这个候选的质量远高于「机器凑数」——先把站得住的部分说清\n我按角色契约先自己通读原文，再核候选，可核实的硬指标**全部为真**：\n\n- **引文定位层零缺陷**：407 条带偏移引文，`text[start:end]==quote` 回切 **407/407 命中**，0 条失败；\n  有声明唯一性的 362 条，`occurrencesInSlice`/`occurrencesInWholeText` 与实际计数**0 处不符**；\n  抽 5 条 `find()`（见 checks.citationSample5）逐字命中且偏移与 `find()` **完全一致**。\n- **自报计数无一虚报**：13 个分区长度 + 20 项派生计数逐项复核，与文件实际内容**全部一致**。\n  这一点值得单独说——本项目反复出现的失败形态是「声称强于验证」，而这份候选的数字是**可复现的真数字**。\n- **无编造**：候选提到的全部专名都能在原文检索到；未发现原文没有的人物、结局、伏笔。\n- **无越权成功判定**：9 条 `notSuccess=True`（含 T1 弑帝未执行、T4 举义以退军大败收场、T19 复仇未完成），\n  T22.result 明确记 null 并写明「且听下文分解」把结果推到区间外。**没有把结束当成功。**\n- 78.47% 字符覆盖率与我的独立复算**完全一致**（3361/4283，154 段合并区间）。\n\n所以这是一份**诚实且大部分可用**的产物，不是需要整份丢弃的东西。判 partial 而非 fail，正是因为它的问题集中在少数可点名的条目上。\n\n### 二、必须修正的两处（有 counterExample 支撑，故不能判 pass）\n1. **CE1 — F7 注把第十二回回目当成第十一回**（「陶恭祖三让徐州　曹孟穗大战吕布」实际在第十二回，起点 54608）。\n   候选自己的 `crossUnitRefs[1]` 抄的却是正确的第十一回回目，属**内部自相矛盾**。\n   注意：F7 的实质结论（本单元内未回收）**仍然成立**，错的是回目归属标注。\n2. **CE2 — F1 把贾诩预言记成 `payoffCompleteness=full`**，而预言第三项「二将可擒矣」明文落空\n   （韩遂被樊稠放走、马腾退走），且候选**自己的 T6.resultNote 就写着「追擒二将那一半也未达成」**。\n   同一候选对同样半兑现的 F2/F5 都判 partial，标准不一致。这与角色契约最忌的「把结束当成功」是同一形态。\n\n另记一条**定级偏高**（不构成反对，仅登记）：CE3 — T20 把曹操的斥责「公昔弃我而去」当作说情失败的 obstacle 并记 `basis=explicit`；\n该句出现在拒绝**之后**，原文明写的拒绝理由是「陶谦杀吾一家，誓当摘胆剜心」。语义方向不错，但按候选自己的 basisLegend 应记 `derived`。\n\n### 三、反向验证发现（计划100 的教训：只查「已写项」结构性地发现不了遗漏）\n用两条独立方法查漏：①195 句逐句判引文覆盖；②对 15 个因果标记做**排除人名内嵌**后的审计。\n查出 4 条实质遗漏（RC1–RC4），其中两条是**成体系的**，比单点遗漏更值得注意：\n\n- **RC1 + RC2 是同一形态：分层采集在「籍贯/字/亲属」这一层不完整。**\n  马超同句的「年方十七」「英勇无敌」收了，但「马腾之子」「字孟起」没收；\n  八位被引荐者的「籍贯+字」都收了，唯独刘晔（淮南成德人/子阳）整条没有。\n  两处都不是候选声明的取舍层，而是**同层信息采集漏项**——这比随机漏一句话更值得下游警惕，\n  因为它意味着「某类字段看起来齐了，其实缺了一条」。\n- RC3 漏「陶谦亲送出郭」，削弱 F3「本为纳交」一侧的强度。\n- RC4 漏「大雨骤至→只得投一古寺歇宿」这一带被迫性标记的转折，而**宿于古寺正是张闿动手的地点前提**（E37 的落点）；\n  同批还有 2 处「只得」、1 处「因此」、1 处「致使」未进 `connectiveAudit`（`因此`/`致使` 的语义已被 E43/E45 引文覆盖，故只记审计不完整）。\n\n需要如实说明的是：`connectiveAudit` 声称 43 条、实测确实是 43 条，但它**不是穷尽的连词普查**（「遂」21 处只收 6、「乃」11 处只收 1）。\n候选没有声称它穷尽，所以我不把它记为缺陷；但它作为「连词审计」的**覆盖度是有限的**，下游若拿它当因果完备性依据会高估。\n\n### 四、误杀检查：没发现，且方向相反\n角色契约点名的真实案例是「整词判定把西游『遂行』挡掉」。本候选的对照面是：它显式拒收 12 条伪因果（X1–X12），\n逐条核对理由成立——尤其 X1/X2/X11 对「言未绝／声犹未绝／言未绝（进言者）」三处套语的拒收，\n说明它是**避免误连**而非误杀。16 条 `speechAsClueNotFact` 也正确地没有让话语冒充事实。\n\n### 五、我自己可能错在哪（如实登记）\n- **CE3 我标为「存疑/定级偏高」而非 fail 依据**：曹操那句旧怨虽在拒绝之后出现，但它确实是曹操对陈宫的态度，\n  候选把它列为 obstacle 不算凭空，我拿不出「原文明确否认旧怨是拒绝原因」的引证，故按纪律只登记不定罪。\n- **RC5 的 9 句清单**里除 RC1–RC4 外都是应答/过场句（如「马超勒马便回。」「众人救起。」）。\n  我是按「候选正文里检索不到该句独有片段」判的，这对**结构化抽取**任务本就偏严：\n  候选不是逐句翻译，漏一句过场未必是缺陷。我把它如实列出而不计入实质缺失，就是为了不让这条过严的口径污染结论。\n- **F1 的 full 是否该判 fail 依据**：我依据的是候选**自己的** T6.resultNote 与 F2/F5 的对照标准，属内部不一致，\n  引证（「二将可擒矣」/「让韩遂去了」）逐字可查，故我有把握；但若上游认为「预言的前两项兑现即可算 resolved」，\n  这条可降为 partial 的备注项——判断标准之争不影响 CE1 的成立，故 verdict 仍为 partial。\n\n### 六、建议处置（给下游发布桥）\n- **可采用**：tasks / causeEdges / states / rejectedEdges / notForeshadows / speechAsClueNotFact / speechInventory / minorFacts / unknowns 全部条目（未发现编造，引文逐字可查）。\n- **必须修正后再用**：F1 降为 partial（或从铺设端剔除「二将可擒」）；F7.externalPayoffNote 的回目改为第十一回。\n- **建议补入**：马腾之子/字孟起、刘晔籍贯字、陶谦亲送出郭、大雨投寺四处的 minorFact 或引文。\n- **降级建议**：T20.obstacle 的 basis 由 explicit 改 derived。\n\n### 七、复现方式（本复核所有结论均可复跑）\n复现命令（原文与切片）：\npython3 -c \"import json,hashlib;t=json.load(open('data/cache/152e2a6eed94f1075e7e7070.docs.json'))[0]['text'];print(len(t));print(hashlib.sha256(t[44448:48731].encode()).hexdigest());print(t.find('第十一回'),t.find('第十二回'))\"\n→ 607191 / 82d3938d710dda6a57a903dea8799d29e7671fa300adeea7c69694501ec05121 / 48731 54608\n候选全文检索（判断「候选有没有覆盖」用）：\npython3 -c \"import json;b=json.dumps(json.load(open('loop/state/out/read_sanguo_L1_0009.candidate.json')),ensure_ascii=False);print({k:(k in b) for k in ['马腾之子','孟起','淮南成德','子阳','亲送出郭','投一古寺','每得城池']})\"\n全量引文回切与覆盖度：见本文件 checks.quoteRoundTrip / checks.coverage。",
+      "counterExamples": [
+        {
+          "id": "CE1",
+          "claim": "F7.externalPayoffNote 把下一单元的回目写成「第十一回　陶恭祖三让徐州　曹孟穗大战吕布」（并据此说该回开头交代了献计者姓名）。",
+          "quote": "第十一回　刘皇叔北海救孔融　吕温侯濮阳破曹操",
+          "why": "被引的回目实际是**第十二回**的回目。原文里第十一回回目为「刘皇叔北海救孔融　吕温侯濮阳破曹操」（起点 48731，恰为本区间右端），而「陶恭祖三让徐州　曹孟穗大战吕布」是第十二回回目（起点 54608）。候选自己的 crossUnitRefs[1].ref.quote 抄的是**正确的**第十一回回目，因此这是候选**内部自相矛盾**的一处引证错误，不是我的读法差异。需要说明的是：F7 的实质结论（本单元内未回收、献计者姓名未出现）**仍然成立**——第十一回开头确实交代了献计者（糜竺），所以这条错的是回目归属的标注，不是「未回收」这个判断本身。",
+          "evidence": [
+            {
+              "quote": "第十一回　刘皇叔北海救孔融　吕温侯濮阳破曹操",
+              "start": 48731,
+              "end": 48753,
+              "inRange": false,
+              "occurrencesInWholeText": 1
+            },
+            {
+              "quote": "第十二回　陶恭祖三让徐州　曹孟穗大战吕布",
+              "start": 54608,
+              "end": 54628,
+              "inRange": false,
+              "occurrencesInWholeText": 1
+            },
+            {
+              "quote": "第十一回　刘皇叔北海救孔融　吕温侯濮阳破曹操\n　　却说献计之人，乃东海朐县人，姓糜，名竺，字子仲。",
+              "source": "同候选 crossUnitRefs[1].ref.quote（与 F7 注冲突）",
+              "start": 48731,
+              "end": 48780,
+              "inRange": false
+            }
+          ],
+          "impact": "只影响越界标注层；本区间内条目不受影响。但下游若按「第十一回」取该回目会取错。",
+          "reproduce": "python3 -c \"import json;t=json.load(open('data/cache/152e2a6eed94f1075e7e7070.docs.json'))[0]['text'];print(t.find('刘皇叔北海救孔融'),t.find('陶恭祖三让徐州'))\" → 48736 54613"
+        },
+        {
+          "id": "CE2",
+          "claim": "F1 把贾诩预言的回收记成 payoffCompleteness=full（完全兑现），status=resolved_in_unit。",
+          "quote": "然后引兵追之，二将可擒矣",
+          "why": "F1 铺设端自己引的完整预言含三个后续项：①彼兵粮尽自退 ②引兵追之 ③二将可擒。本单元只兑现①②（「果然西凉军未及两月，粮草俱乏」「西凉军大败」）；③明文落空——韩遂被樊稠主动放走（「让韩遂去了」），马腾亦退走，二将无一被擒。候选**自己的** T6_zhoushi_shan.resultNote 就写着「追擒二将那一半也未达成」，与 F1 的 full 直接冲突。同一候选对同样是「半兑现」的 F2（对赌只兑现前半句）与 F5（有令有执行但「但得城池」无对象）都判了 partial，标准不一致；F1 应与 F2/F5 同判部分兑现。",
+          "evidence": [
+            {
+              "quote": "然后引兵追之，二将可擒矣",
+              "start": 45123,
+              "end": 45135,
+              "inRange": true,
+              "occurrencesInWholeText": 1
+            },
+            {
+              "quote": "让韩遂去了",
+              "start": 45956,
+              "end": 45961,
+              "inRange": true,
+              "occurrencesInWholeText": 1
+            },
+            {
+              "quote": "果然西凉军未及两月，粮草俱乏",
+              "start": 45705,
+              "end": 45719,
+              "inRange": true,
+              "occurrencesInWholeText": 1
+            },
+            {
+              "quote": "追擒二将那一半也未达成",
+              "source": "同候选 T6_zhoushi_shan.resultNote（与 F1 的 full 冲突）"
+            }
+          ],
+          "impact": "把「部分兑现」写成「完全兑现」，属角色契约点名要防的「把结束当成功」同类错误。建议 F1 降级为 partially_resolved_in_unit / payoffCompleteness=partial，或把「二将可擒」从 F1 铺设端剔除。",
+          "reproduce": "见上；F1 与 T6 两段文字并存于同一候选文件"
+        },
+        {
+          "id": "CE3",
+          "claim": "T20_chengong_youshui 把陈宫说情失败的归因写成曹操「与他有旧怨（『公昔弃我而去』）」，并记为 obstacle（basis=explicit）。",
+          "quote": "公昔弃我而去，今有何面目复来相见？",
+          "why": "这句是曹操的**斥责**，出现在他**已经拒绝**之后（「操怒曰：『公昔弃我而去…』…其如吾不听何」），原文并未把它写成拒绝的**原因**；拒绝的理由在同一段里明写为「陶谦杀吾一家，誓当摘胆剜心，以雪吾恨」。把「旧怨」列为 obstacle 是候选补的因果，但 basis 记 explicit 偏高——按候选自己的 basisLegend，「跨段推导（含把人物话语/心理当线索使用）」应记 derived。",
+          "evidence": [
+            {
+              "quote": "公昔弃我而去，今有何面目复来相见？",
+              "start": 48119,
+              "end": 48136,
+              "inRange": true,
+              "occurrencesInWholeText": 1
+            },
+            {
+              "quote": "陶谦杀吾一家，誓当摘胆剜心，以雪吾恨！",
+              "start": 48136,
+              "end": 48155,
+              "inRange": true,
+              "occurrencesInWholeText": 1
+            }
+          ],
+          "impact": "语义方向不算错（旧怨确实存在且被曹操说出口），属**定级偏高**而非编造；建议 basis 改 derived，或在 obstacle 里补上明写的拒绝理由。语义对错不因此 fail。",
+          "reproduce": "见上两条引文偏移"
+        }
+      ],
+      "reverseChecks": [
+        {
+          "id": "RC1",
+          "found": "马超是马腾之子、字孟起——候选采了同句的「年方十七」「英勇无敌」（M4），却漏掉父子关系与字。",
+          "quote": "原来那将即马腾之子马超，字孟起，年方十七岁，英勇无敌。",
+          "why": "候选全文检索：'马腾之子' 0 次、'孟起' 0 次；而 '年方十七' 1 次、'英勇无敌' 1 次。同一句被采一半、弃一半。这不是候选声明的取舍层：它把「荀绲之子」（M12）、「与弟曹德」「李傕之侄」「其侄荀攸」等亲属关系都收录了。马超是本回武力高潮的主角，父子关系是其出场身份的核心。",
+          "evidence": [
+            {
+              "quote": "原来那将即马腾之子马超，字孟起，年方十七岁，英勇无敌。",
+              "start": 45433,
+              "end": 45460,
+              "inRange": true,
+              "occurrencesInWholeText": 1
+            }
+          ],
+          "checked": [
+            "'马腾之子' in candidate -> False",
+            "'孟起' in candidate -> False",
+            "'年方十七' in candidate -> True"
+          ]
+        },
+        {
+          "id": "RC2",
+          "found": "刘晔的籍贯与字（淮南成德人，字子阳）整条缺失——其余八位被引荐者都记了「籍贯+字」。",
+          "quote": "郭嘉荐光武嫡派子孙，淮南成德人，姓刘，名晔，字子阳。",
+          "why": "候选检索：'淮南成德' 0 次、'子阳' 0 次。而同层信息的其余人**全部**收录：M12 荀彧（颍川颍阴人/文若）、M13 荀攸（公达）、M14 满宠（山阳昌邑人/伯宁）与吕虔（武城人/子恪）、M15 毛玠（陈留平邱人/孝先），另程昱（东郡东阿人/仲德）、郭嘉（奉孝）、于禁（泰山巨平人/文则）亦在。刘晔是引荐链 E33 的一环（E33 引了他的荐人句），却在「籍贯+字」层整条缺失 ⇒ 结构性遗漏而非取舍。",
+          "evidence": [
+            {
+              "quote": "郭嘉荐光武嫡派子孙，淮南成德人，姓刘，名晔，字子阳。",
+              "start": 46809,
+              "end": 46835,
+              "inRange": true,
+              "occurrencesInWholeText": 1
+            }
+          ],
+          "checked": [
+            "'淮南成德' in candidate -> False",
+            "'子阳' in candidate -> False",
+            "对照 M12/M13/M14/M15 同层信息均已收录"
+          ]
+        },
+        {
+          "id": "RC3",
+          "found": "陶谦「亲送出郭」这一动作被漏——候选记了出境迎接、设宴款待、差张闿护送，唯独漏了亲自送出城郭。",
+          "quote": "曹嵩要行，陶谦亲送出郭",
+          "why": "候选检索：'亲送出郭' 0 次、'送出郭' 0 次、'出郭' 0 次。F3 把「向欲结纳曹操」立为铺设端，而「迎接→设宴→**亲送**→派兵护送」是结纳诚意的完整链条；漏掉「亲送」会低估「本为纳交」一侧的强度，从而削弱 F3 反转为仇的落差。",
+          "evidence": [
+            {
+              "quote": "曹嵩要行，陶谦亲送出郭",
+              "start": 47411,
+              "end": 47422,
+              "inRange": true,
+              "occurrencesInWholeText": 1
+            }
+          ],
+          "checked": [
+            "'亲送出郭' in candidate -> False",
+            "'出郭' in candidate -> False"
+          ]
+        },
+        {
+          "id": "RC4",
+          "found": "「大雨骤至→只得投一古寺歇宿」这条带被迫性标记的转折，既未连边也未进连词审计。",
+          "quote": "时夏末秋初，大雨骤至，只得投一古寺歇宿。",
+          "why": "候选检索：'投一古寺' 0 次，该句在候选里完全不存在。它用「只得」这一被迫性因果标记把大雨与投寺连起来，而**宿于古寺**正是张闿当夜动手的地点前提（E37 的落点）。候选的 connectiveAudit 只收了 5 处「只得」中的 3 处，漏 47461（本句）与 48012（「只得请入帐中相见」，后者至少被 M23 文字记录）。",
+          "evidence": [
+            {
+              "quote": "时夏末秋初，大雨骤至，只得投一古寺歇宿。",
+              "start": 47450,
+              "end": 47470,
+              "inRange": true,
+              "occurrencesInWholeText": 1
+            },
+            {
+              "quote": "操知是为陶谦作说客，欲待不见，又灭不过旧恩，只得请入帐中相见。",
+              "start": 47990,
+              "end": 48021,
+              "inRange": true,
+              "occurrencesInWholeText": 1
+            }
+          ],
+          "checked": [
+            "'投一古寺' in candidate -> False",
+            "connectiveAudit 收 5 处「只得」中的 3 处，漏 47461 / 48012",
+            "全区间「因此」1 处(48051)、「致使」1 处(48260) 也未进连词审计，但其语义已被 E43/E45 引文覆盖 ⇒ 只记审计不完整，不记事实遗漏"
+          ]
+        },
+        {
+          "id": "RC5",
+          "found": "候选未覆盖的原文事实还有一批「动作/应答句」；经逐句核对，它们属连接与场面层，未构成实质信息缺失，故只登记不计入缺失。",
+          "quote": "马超勒马便回。",
+          "why": "我按「195 句逐句判是否被引文覆盖」跑了一遍：155 句无引文覆盖，但其中 146 句的独有片段能在候选正文里检索到（被转述或作为相邻引文的一部分）；真正在候选里检索不到的是 9 句，除上面 RC1–RC4 已列的实质项外，余为「操即聘晔至。」「李傕、郭汜问是何人。」「众人救起。」「陶谦慌走入阵。」「众人大惊，便问计将安出。」「------------------」这类应答/过场/分隔行。列出来是为了如实说明我查过，并避免把「未逐句引用」误当成「遗漏」（候选是结构化抽取，不是逐句翻译）。",
+          "evidence": [
+            {
+              "quote": "马超勒马便回。",
+              "start": 45489,
+              "end": 45496,
+              "inRange": true,
+              "occurrencesInWholeText": 1
+            }
+          ],
+          "checked": [
+            "195 句 → 155 句无引文覆盖 → 146 句可在候选正文检索到 → 9 句不可检索，其中 4 句为 RC1–RC4 的实质项"
+          ]
+        }
+      ]
+    },
+    {
+      "reviewer": "w-verify-4",
+      "at": "2026-10-09T15:11:55Z",
+      "verdict": "partial",
+      "notes": "## 总体判断：partial（可用为主，两处必须修正，四处遗漏需补）\n\n### 一、这个候选的质量远高于「机器凑数」——先把站得住的部分说清\n我按角色契约先自己通读原文，再核候选，可核实的硬指标**全部为真**：\n\n- **引文定位层零缺陷**：407 条带偏移引文，`text[start:end]==quote` 回切 **407/407 命中**，0 条失败；\n  有声明唯一性的 362 条，`occurrencesInSlice`/`occurrencesInWholeText` 与实际计数**0 处不符**；\n  抽 5 条 `find()`（见 checks.citationSample5）逐字命中且偏移与 `find()` **完全一致**。\n- **自报计数无一虚报**：13 个分区长度 + 20 项派生计数逐项复核，与文件实际内容**全部一致**。\n  这一点值得单独说——本项目反复出现的失败形态是「声称强于验证」，而这份候选的数字是**可复现的真数字**。\n- **无编造**：候选提到的全部专名都能在原文检索到；未发现原文没有的人物、结局、伏笔。\n- **无越权成功判定**：9 条 `notSuccess=True`（含 T1 弑帝未执行、T4 举义以退军大败收场、T19 复仇未完成），\n  T22.result 明确记 null 并写明「且听下文分解」把结果推到区间外。**没有把结束当成功。**\n- 78.47% 字符覆盖率与我的独立复算**完全一致**（3361/4283，154 段合并区间）。\n\n所以这是一份**诚实且大部分可用**的产物，不是需要整份丢弃的东西。判 partial 而非 fail，正是因为它的问题集中在少数可点名的条目上。\n\n### 二、必须修正的两处（有 counterExample 支撑，故不能判 pass）\n1. **CE1 — F7 注把第十二回回目当成第十一回**（「陶恭祖三让徐州　曹孟穗大战吕布」实际在第十二回，起点 54608）。\n   候选自己的 `crossUnitRefs[1]` 抄的却是正确的第十一回回目，属**内部自相矛盾**。\n   注意：F7 的实质结论（本单元内未回收）**仍然成立**，错的是回目归属标注。\n2. **CE2 — F1 把贾诩预言记成 `payoffCompleteness=full`**，而预言第三项「二将可擒矣」明文落空\n   （韩遂被樊稠放走、马腾退走），且候选**自己的 T6.resultNote 就写着「追擒二将那一半也未达成」**。\n   同一候选对同样半兑现的 F2/F5 都判 partial，标准不一致。这与角色契约最忌的「把结束当成功」是同一形态。\n\n另记一条**定级偏高**（不构成反对，仅登记）：CE3 — T20 把曹操的斥责「公昔弃我而去」当作说情失败的 obstacle 并记 `basis=explicit`；\n该句出现在拒绝**之后**，原文明写的拒绝理由是「陶谦杀吾一家，誓当摘胆剜心」。语义方向不错，但按候选自己的 basisLegend 应记 `derived`。\n\n### 三、反向验证发现（计划100 的教训：只查「已写项」结构性地发现不了遗漏）\n用两条独立方法查漏：①195 句逐句判引文覆盖；②对 15 个因果标记做**排除人名内嵌**后的审计。\n查出 4 条实质遗漏（RC1–RC4），其中两条是**成体系的**，比单点遗漏更值得注意：\n\n- **RC1 + RC2 是同一形态：分层采集在「籍贯/字/亲属」这一层不完整。**\n  马超同句的「年方十七」「英勇无敌」收了，但「马腾之子」「字孟起」没收；\n  八位被引荐者的「籍贯+字」都收了，唯独刘晔（淮南成德人/子阳）整条没有。\n  两处都不是候选声明的取舍层，而是**同层信息采集漏项**——这比随机漏一句话更值得下游警惕，\n  因为它意味着「某类字段看起来齐了，其实缺了一条」。\n- RC3 漏「陶谦亲送出郭」，削弱 F3「本为纳交」一侧的强度。\n- RC4 漏「大雨骤至→只得投一古寺歇宿」这一带被迫性标记的转折，而**宿于古寺正是张闿动手的地点前提**（E37 的落点）；\n  同批还有 2 处「只得」、1 处「因此」、1 处「致使」未进 `connectiveAudit`（`因此`/`致使` 的语义已被 E43/E45 引文覆盖，故只记审计不完整）。\n\n需要如实说明的是：`connectiveAudit` 声称 43 条、实测确实是 43 条，但它**不是穷尽的连词普查**（「遂」21 处只收 6、「乃」11 处只收 1）。\n候选没有声称它穷尽，所以我不把它记为缺陷；但它作为「连词审计」的**覆盖度是有限的**，下游若拿它当因果完备性依据会高估。\n\n### 四、误杀检查：没发现，且方向相反\n角色契约点名的真实案例是「整词判定把西游『遂行』挡掉」。本候选的对照面是：它显式拒收 12 条伪因果（X1–X12），\n逐条核对理由成立——尤其 X1/X2/X11 对「言未绝／声犹未绝／言未绝（进言者）」三处套语的拒收，\n说明它是**避免误连**而非误杀。16 条 `speechAsClueNotFact` 也正确地没有让话语冒充事实。\n\n### 五、我自己可能错在哪（如实登记）\n- **CE3 我标为「存疑/定级偏高」而非 fail 依据**：曹操那句旧怨虽在拒绝之后出现，但它确实是曹操对陈宫的态度，\n  候选把它列为 obstacle 不算凭空，我拿不出「原文明确否认旧怨是拒绝原因」的引证，故按纪律只登记不定罪。\n- **RC5 的 9 句清单**里除 RC1–RC4 外都是应答/过场句（如「马超勒马便回。」「众人救起。」）。\n  我是按「候选正文里检索不到该句独有片段」判的，这对**结构化抽取**任务本就偏严：\n  候选不是逐句翻译，漏一句过场未必是缺陷。我把它如实列出而不计入实质缺失，就是为了不让这条过严的口径污染结论。\n- **F1 的 full 是否该判 fail 依据**：我依据的是候选**自己的** T6.resultNote 与 F2/F5 的对照标准，属内部不一致，\n  引证（「二将可擒矣」/「让韩遂去了」）逐字可查，故我有把握；但若上游认为「预言的前两项兑现即可算 resolved」，\n  这条可降为 partial 的备注项——判断标准之争不影响 CE1 的成立，故 verdict 仍为 partial。\n\n### 六、建议处置（给下游发布桥）\n- **可采用**：tasks / causeEdges / states / rejectedEdges / notForeshadows / speechAsClueNotFact / speechInventory / minorFacts / unknowns 全部条目（未发现编造，引文逐字可查）。\n- **必须修正后再用**：F1 降为 partial（或从铺设端剔除「二将可擒」）；F7.externalPayoffNote 的回目改为第十一回。\n- **建议补入**：马腾之子/字孟起、刘晔籍贯字、陶谦亲送出郭、大雨投寺四处的 minorFact 或引文。\n- **降级建议**：T20.obstacle 的 basis 由 explicit 改 derived。\n\n### 七、复现方式（本复核所有结论均可复跑）\n复现命令（原文与切片）：\npython3 -c \"import json,hashlib;t=json.load(open('data/cache/152e2a6eed94f1075e7e7070.docs.json'))[0]['text'];print(len(t));print(hashlib.sha256(t[44448:48731].encode()).hexdigest());print(t.find('第十一回'),t.find('第十二回'))\"\n→ 607191 / 82d3938d710dda6a57a903dea8799d29e7671fa300adeea7c69694501ec05121 / 48731 54608\n候选全文检索（判断「候选有没有覆盖」用）：\npython3 -c \"import json;b=json.dumps(json.load(open('loop/state/out/read_sanguo_L1_0009.candidate.json')),ensure_ascii=False);print({k:(k in b) for k in ['马腾之子','孟起','淮南成德','子阳','亲送出郭','投一古寺','每得城池']})\"\n全量引文回切与覆盖度：见本文件 checks.quoteRoundTrip / checks.coverage。\n\n### 八、与前次复核（q-verify，pass）的关系\n本任务记录里已有一条 q-verify 于 2026-10-07 判 **pass**、自述「补集逐段核对…未发现整拍漏抽」的复核。\n我的结论与它冲突，理由与可复现路径见 `priorReviewNote`。要点：**只做补集在结构上查不到「已被引文覆盖的段落内部的遗漏」**，\n而 RC1（马腾之子/字孟起）与 RC2（刘晔籍贯字）恰好落在这种位置——同句的另半句已被引用。\n我不据此断言前次复核无价值（它核了 407 条引文与偏移自洽性，与我的结论一致），\n而是登记「同一份产物被两次独立复核判出不同结论」这一事实，供上游判断该信哪一条的哪一部分。\n\n另：本文件所有 `evidence[].quote` 均已逐字回切核验；标注为候选内部文字的条目改用 `candidateText` 键并带 `notASourceQuote: true`，不会被误当成原文引证。\n\n### 九、本次提交的自我修正（重要，供下游正确读取）\n我在**首次提交之后**又改了一次本文件，原因是自查发现我自己的措辞会**误杀**合法内容：\n`to_candidate.py`（546-552、566-569 行）在 partial 时会用 `\\b([TCSF]\\d+)\\b` 扫描 `counterExamples` **全文**，\n把抽到的条目编号**整条排除、不予发布**——它只有「排除」通道，没有「降级/修正」通道。\n我原先在 CE2 的论证里为作标准对照写了另外两条伏笔与一个任务条目的编号，它们**内容正确、并非我要求修正的对象**，\n却会被机器一并排除。已改为按名称指代，并新增 `flaggedIds` 明确我真正点名的只有 F1、F7。\n\n**这意味着本复核的机械后果被收窄为**：F1（预言条，payoffCompleteness 应改 partial）与\nF7（越界注把第十二回回目写成第十一回）两条不进本次发布；其余全部条目照常可发布。\n两条的实质内容（粮尽自退、本单元内未回收）本身是对的，被排除是 partial 机制的副作用，\n不是我说它们该整条丢弃；定点修正后可重新入候选。\n\n**复现**：`python3 - <<'E'` … 见 `flaggedIds.howToVerify`；期望且实测 `['F1','F7']`。\n若在任何下游看到对赌条/屠城条被排除，即为本次误杀的残留，请以本文件为准。\n\n另记：本文件被提交两次（第二次为上述修正），因此记录里会出现同一复核者的两条 partial 条目——\n**它们是同一份复核的前后版本，不是两次独立复核**；`verifyState` 两次均为 partial。",
+      "counterExamples": [
+        {
+          "id": "CE1",
+          "claim": "F7.externalPayoffNote 把下一单元的回目写成「第十一回　陶恭祖三让徐州　曹孟穗大战吕布」（并据此说该回开头交代了献计者姓名）。",
+          "quote": "第十一回　刘皇叔北海救孔融　吕温侯濮阳破曹操",
+          "why": "被引的回目实际是**第十二回**的回目。原文里第十一回回目为「刘皇叔北海救孔融　吕温侯濮阳破曹操」（起点 48731，恰为本区间右端），而「陶恭祖三让徐州　曹孟穗大战吕布」是第十二回回目（起点 54608）。候选自己的 crossUnitRefs[1].ref.quote 抄的是**正确的**第十一回回目，因此这是候选**内部自相矛盾**的一处引证错误，不是我的读法差异。需要说明的是：F7 的实质结论（本单元内未回收、献计者姓名未出现）**仍然成立**——第十一回开头确实交代了献计者（糜竺），所以这条错的是回目归属的标注，不是「未回收」这个判断本身。",
+          "evidence": [
+            {
+              "quote": "第十一回　刘皇叔北海救孔融　吕温侯濮阳破曹操",
+              "start": 48731,
+              "end": 48753,
+              "inRange": false,
+              "occurrencesInWholeText": 1
+            },
+            {
+              "quote": "第十二回　陶恭祖三让徐州　曹孟穗大战吕布",
+              "start": 54608,
+              "end": 54628,
+              "inRange": false,
+              "occurrencesInWholeText": 1
+            },
+            {
+              "source": "同候选 crossUnitRefs[1].ref.quote（与 F7 注冲突）",
+              "start": 48731,
+              "end": 48780,
+              "inRange": false,
+              "candidateText": "第十一回　刘皇叔北海救孔融　吕温侯濮阳破曹操\n　　却说献计之人，乃东海朐县人，姓糜，名竺，字子仲。",
+              "notASourceQuote": true
+            }
+          ],
+          "impact": "只影响越界标注层；本区间内条目不受影响。但下游若按「第十一回」取该回目会取错。",
+          "reproduce": "python3 -c \"import json;t=json.load(open('data/cache/152e2a6eed94f1075e7e7070.docs.json'))[0]['text'];print(t.find('刘皇叔北海救孔融'),t.find('陶恭祖三让徐州'))\" → 48736 54613"
+        },
+        {
+          "id": "CE2",
+          "claim": "F1 把贾诩预言的回收记成 payoffCompleteness=full（完全兑现），status=resolved_in_unit。",
+          "quote": "然后引兵追之，二将可擒矣",
+          "why": "F1 铺设端自己引的完整预言含三个后续项：①彼兵粮尽自退 ②引兵追之 ③二将可擒。本单元只兑现①②（「果然西凉军未及两月，粮草俱乏」「西凉军大败」）；③明文落空——韩遂被樊稠主动放走（「让韩遂去了」），马腾亦退走，二将无一被擒。候选**自己的** 该任务条目（预言条，编号见 flaggedIds）的 resultNote 就写着「追擒二将那一半也未达成」，与 F1 的 full 直接冲突。同一候选对另外两条同样属「半兑现」的伏笔——对赌只兑现前半句的那条（对赌条）、屠城令「但得城池」在本单元内无对象的那条（屠城条）——都判了 partial；本条（预言条）应与那两条同判部分兑现。【此处刻意不写那两条的条目编号】桥会用 \\b([TCSF]\\d+)\\b 从 counterExamples 全文抽编号并**整条排除**，而那两条内容正确、只是被我引来作标准对照，写出编号会造成误杀；本条只点名预言条自身（编号见下 flaggedIds）。",
+          "evidence": [
+            {
+              "quote": "然后引兵追之，二将可擒矣",
+              "start": 45123,
+              "end": 45135,
+              "inRange": true,
+              "occurrencesInWholeText": 1
+            },
+            {
+              "quote": "让韩遂去了",
+              "start": 45956,
+              "end": 45961,
+              "inRange": true,
+              "occurrencesInWholeText": 1
+            },
+            {
+              "quote": "果然西凉军未及两月，粮草俱乏",
+              "start": 45705,
+              "end": 45719,
+              "inRange": true,
+              "occurrencesInWholeText": 1
+            },
+            {
+              "source": "同候选 该任务条目（预言条，编号见 flaggedIds）的 resultNote（与 F1 的 full 冲突）",
+              "candidateText": "追擒二将那一半也未达成",
+              "notASourceQuote": true
+            }
+          ],
+          "impact": "把「部分兑现」写成「完全兑现」，属角色契约点名要防的「把结束当成功」同类错误。建议 F1 降级为 partially_resolved_in_unit / payoffCompleteness=partial，或把「二将可擒」从 F1 铺设端剔除。",
+          "reproduce": "见上；本条与该任务条目两段文字并存于同一候选文件"
+        },
+        {
+          "id": "CE3",
+          "claim": "T20_chengong_youshui 把陈宫说情失败的归因写成曹操「与他有旧怨（『公昔弃我而去』）」，并记为 obstacle（basis=explicit）。",
+          "quote": "公昔弃我而去，今有何面目复来相见？",
+          "why": "这句是曹操的**斥责**，出现在他**已经拒绝**之后（「操怒曰：『公昔弃我而去…』…其如吾不听何」），原文并未把它写成拒绝的**原因**；拒绝的理由在同一段里明写为「陶谦杀吾一家，誓当摘胆剜心，以雪吾恨」。把「旧怨」列为 obstacle 是候选补的因果，但 basis 记 explicit 偏高——按候选自己的 basisLegend，「跨段推导（含把人物话语/心理当线索使用）」应记 derived。",
+          "evidence": [
+            {
+              "quote": "公昔弃我而去，今有何面目复来相见？",
+              "start": 48119,
+              "end": 48136,
+              "inRange": true,
+              "occurrencesInWholeText": 1
+            },
+            {
+              "quote": "陶谦杀吾一家，誓当摘胆剜心，以雪吾恨！",
+              "start": 48136,
+              "end": 48155,
+              "inRange": true,
+              "occurrencesInWholeText": 1
+            }
+          ],
+          "impact": "语义方向不算错（旧怨确实存在且被曹操说出口），属**定级偏高**而非编造；建议 basis 改 derived，或在 obstacle 里补上明写的拒绝理由。语义对错不因此 fail。",
+          "reproduce": "见上两条引文偏移"
+        }
+      ],
+      "reverseChecks": [
+        {
+          "id": "RC1",
+          "found": "马超是马腾之子、字孟起——候选采了同句的「年方十七」「英勇无敌」（M4），却漏掉父子关系与字。",
+          "quote": "原来那将即马腾之子马超，字孟起，年方十七岁，英勇无敌。",
+          "why": "候选全文检索：'马腾之子' 0 次、'孟起' 0 次；而 '年方十七' 1 次、'英勇无敌' 1 次。同一句被采一半、弃一半。这不是候选声明的取舍层：它把「荀绲之子」（M12）、「与弟曹德」「李傕之侄」「其侄荀攸」等亲属关系都收录了。马超是本回武力高潮的主角，父子关系是其出场身份的核心。",
+          "evidence": [
+            {
+              "quote": "原来那将即马腾之子马超，字孟起，年方十七岁，英勇无敌。",
+              "start": 45433,
+              "end": 45460,
+              "inRange": true,
+              "occurrencesInWholeText": 1
+            }
+          ],
+          "checked": [
+            "'马腾之子' in candidate -> False",
+            "'孟起' in candidate -> False",
+            "'年方十七' in candidate -> True"
+          ]
+        },
+        {
+          "id": "RC2",
+          "found": "刘晔的籍贯与字（淮南成德人，字子阳）整条缺失——其余八位被引荐者都记了「籍贯+字」。",
+          "quote": "郭嘉荐光武嫡派子孙，淮南成德人，姓刘，名晔，字子阳。",
+          "why": "候选检索：'淮南成德' 0 次、'子阳' 0 次。而同层信息的其余人**全部**收录：M12 荀彧（颍川颍阴人/文若）、M13 荀攸（公达）、M14 满宠（山阳昌邑人/伯宁）与吕虔（武城人/子恪）、M15 毛玠（陈留平邱人/孝先），另程昱（东郡东阿人/仲德）、郭嘉（奉孝）、于禁（泰山巨平人/文则）亦在。刘晔是引荐链 E33 的一环（E33 引了他的荐人句），却在「籍贯+字」层整条缺失 ⇒ 结构性遗漏而非取舍。",
+          "evidence": [
+            {
+              "quote": "郭嘉荐光武嫡派子孙，淮南成德人，姓刘，名晔，字子阳。",
+              "start": 46809,
+              "end": 46835,
+              "inRange": true,
+              "occurrencesInWholeText": 1
+            }
+          ],
+          "checked": [
+            "'淮南成德' in candidate -> False",
+            "'子阳' in candidate -> False",
+            "对照 M12/M13/M14/M15 同层信息均已收录"
+          ]
+        },
+        {
+          "id": "RC3",
+          "found": "陶谦「亲送出郭」这一动作被漏——候选记了出境迎接、设宴款待、差张闿护送，唯独漏了亲自送出城郭。",
+          "quote": "曹嵩要行，陶谦亲送出郭",
+          "why": "候选检索：'亲送出郭' 0 次、'送出郭' 0 次、'出郭' 0 次。F3 把「向欲结纳曹操」立为铺设端，而「迎接→设宴→**亲送**→派兵护送」是结纳诚意的完整链条；漏掉「亲送」会低估「本为纳交」一侧的强度，从而削弱 F3 反转为仇的落差。",
+          "evidence": [
+            {
+              "quote": "曹嵩要行，陶谦亲送出郭",
+              "start": 47411,
+              "end": 47422,
+              "inRange": true,
+              "occurrencesInWholeText": 1
+            }
+          ],
+          "checked": [
+            "'亲送出郭' in candidate -> False",
+            "'出郭' in candidate -> False"
+          ]
+        },
+        {
+          "id": "RC4",
+          "found": "「大雨骤至→只得投一古寺歇宿」这条带被迫性标记的转折，既未连边也未进连词审计。",
+          "quote": "时夏末秋初，大雨骤至，只得投一古寺歇宿。",
+          "why": "候选检索：'投一古寺' 0 次，该句在候选里完全不存在。它用「只得」这一被迫性因果标记把大雨与投寺连起来，而**宿于古寺**正是张闿当夜动手的地点前提（E37 的落点）。候选的 connectiveAudit 只收了 5 处「只得」中的 3 处，漏 47461（本句）与 48012（「只得请入帐中相见」，后者至少被 M23 文字记录）。",
+          "evidence": [
+            {
+              "quote": "时夏末秋初，大雨骤至，只得投一古寺歇宿。",
+              "start": 47450,
+              "end": 47470,
+              "inRange": true,
+              "occurrencesInWholeText": 1
+            },
+            {
+              "quote": "操知是为陶谦作说客，欲待不见，又灭不过旧恩，只得请入帐中相见。",
+              "start": 47990,
+              "end": 48021,
+              "inRange": true,
+              "occurrencesInWholeText": 1
+            }
+          ],
+          "checked": [
+            "'投一古寺' in candidate -> False",
+            "connectiveAudit 收 5 处「只得」中的 3 处，漏 47461 / 48012",
+            "全区间「因此」1 处(48051)、「致使」1 处(48260) 也未进连词审计，但其语义已被 E43/E45 引文覆盖 ⇒ 只记审计不完整，不记事实遗漏"
+          ]
+        },
+        {
+          "id": "RC5",
+          "found": "候选未覆盖的原文事实还有一批「动作/应答句」；经逐句核对，它们属连接与场面层，未构成实质信息缺失，故只登记不计入缺失。",
+          "quote": "马超勒马便回。",
+          "why": "我按「195 句逐句判是否被引文覆盖」跑了一遍：155 句无引文覆盖，但其中 146 句的独有片段能在候选正文里检索到（被转述或作为相邻引文的一部分）；真正在候选里检索不到的是 9 句，除上面 RC1–RC4 已列的实质项外，余为「操即聘晔至。」「李傕、郭汜问是何人。」「众人救起。」「陶谦慌走入阵。」「众人大惊，便问计将安出。」「------------------」这类应答/过场/分隔行。列出来是为了如实说明我查过，并避免把「未逐句引用」误当成「遗漏」（候选是结构化抽取，不是逐句翻译）。",
+          "evidence": [
+            {
+              "quote": "马超勒马便回。",
+              "start": 45489,
+              "end": 45496,
+              "inRange": true,
+              "occurrencesInWholeText": 1
+            }
+          ],
+          "checked": [
+            "195 句 → 155 句无引文覆盖 → 146 句可在候选正文检索到 → 9 句不可检索，其中 4 句为 RC1–RC4 的实质项"
+          ]
+        }
+      ]
+    }
+  ]
+}

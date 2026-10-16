@@ -1,0 +1,105 @@
+{
+ "task": "read:dafeng:L2:0118",
+ "agent": "w-sanguo-0",
+ "role": "READER",
+ "status": "done",
+ "summary": "精读《大奉打更人》第一百一十九章「社交三要素」（docs[0].text 全文 codepoint [402669,406211)，3542 字）：产出 4 条任务五元组（每栏各自带逐字引文，五栏之间零共用引文；T1.cost 与 T4.cost 为 null 并各带 costNote 说明为什么没有）、6 条因果边（每条给 from/to/trigger/mechanism，其中 CE3/CE4 标 confidence=medium 并写明这是人物推理/她的推测）、4 条 rejectedEdges（拒掉「时间相邻当因果」「把守卫的推测当结果」等 4 组连边）、6 条状态变化（前值/后值/事件锚点；S4 记的是「他的判断」而不是「人宗是凶手」这个事实）、3 条知识差（写清谁知/不知，KD2 标 inferred）、3 条伏笔（F1/F2 显式标 resolved-out-of-range 并给章名与区间外回收端引文，F3 显式标 unresolved 并给出两次逐字检索的判据与一个 nearAnalogue 反例）、3 条 rejectedForeshadows、10 条 worldSettings（rule 3 / place 5 / item 2：place 严格区分 arrived 与 mentioned——宫城记 mentioned 因为原文写明「进不去」；item 四态分开写，金牌=hold+use、三钱银子=transfer）、2 条 excludedSettings、2 条主题解读（各带 perspective/support/counter，TH2 的 counter 指出他并非真「不动声色」）、6 条 characterClaims（narratorConfirmed 全 false）、4 条区间外对照、11 条 unknowns、5 条 selfCritique。全部 122 个引文节点由构建脚本在 docs[0].text 上现切（锚点限定在本区间内，避免全书别处的同句串位），再用**独立实现**的审计脚本从磁盘重读成品复算：逐字切片、sourceHash、offsetUnit/offsetBase、occurrencesInFullText/InUnit、inRange 标记、paragraphInUnit、chapterAtOffset、区间内引文首现即本处、五栏三把尺子（精确区间/互为子串/同一原文段落）零命中、null 必带 Note、枚举合法（basis/kind/placeState/itemStates/institution/foreshadows.status）、六个分区齐备、semanticReview 保持 not-performed —— problems=0。构建期另有一次真实拦截：T1.action 与 T1.result 起初落在同一原文段落（第 10 段），被三把尺子抓出后我删掉了 action 里那道命令的引文并在 actionNote 里写明这处取舍，而不是放宽校验。语义未核验。",
+ "evidence": [
+  {
+   "path": "loop/state/out/read_dafeng_L2_0118.candidate.json",
+   "sha256": "6ea03ed14c44dde32c88254bfae4773779a17d1597e30d567242c9512f60fb4d",
+   "kind": "candidate",
+   "note": "本轮唯一写入物，即任务 writes 指定路径"
+  }
+ ],
+ "assertions": [
+  {
+   "text": "docs.json sha256 == 任务 sourceHash：shasum -a 256 data/cache/1063b17ca65ec1b76f30e460.docs.json",
+   "result": "pass",
+   "detail": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839（与任务 JSON sourceHash 逐字相同）"
+  },
+  {
+   "text": "切片边界自检：docs[0].text[402669:402682] == '第一百一十九章 社交三要素'，len(切片)==3542；右边界 docs[0].text[406211:406220] 起为「第一百二十章 即兴作诗」",
+   "result": "pass",
+   "detail": "切片 sha256 = 3fa02ec58bd0ae89439778ec82d87c2b44b474fcdf9fcbbce210d86aeaf28002（与候选 source.sliceSha256 相同）"
+  },
+  {
+   "text": "全部 122 个引文节点逐字回切：text[start:end]==quote；sourceHash 一致；标 inRange 的 111 条全部落在 [402669,406211) 内且无一条跨边界",
+   "result": "pass",
+   "detail": "独立审计脚本 /tmp/clb0118/audit_0118.py（不 import 构建脚本，从磁盘重读成品复算同一量）报 PROBLEMS: 0"
+  },
+  {
+   "text": "区间内引文 111 条全部满足 text.find(quote)==start（首次出现即本处），不会因全书别处有同句而落到错位置",
+   "result": "pass",
+   "detail": "构建期即把锚点搜索限定在 [402669,406211) 内：起初有两个锚点（「想到这里，许七安不再犹豫」「我进宫一趟」）因全书别处也有同句而报 not unique，改为区间内限定后通过；审计复算 find != start 的条数为 0"
+  },
+  {
+   "text": "候选自带的 reproduce 命令原样可跑：输出 docs sha256 相符、quotes 122 bad []、inRange 111 / outOfRange 11",
+   "result": "pass",
+   "detail": "已把候选 verification.reproduce 里的脚本原样复制执行一次，输出与声明一致；该命令只读 docs.json 与候选文件，不依赖 /tmp 产物"
+  },
+  {
+   "text": "任务五栏不共用引文：4 条任务 × 5 栏，用三把尺子（精确 (start,end) 相同／互为子串／落在同一原文段落）判重，0 命中",
+   "result": "pass",
+   "detail": "构建期断言命中即抛错终止；本项确实触发过一次并已按纪律修数据：T1.action 与 T1.result 同落第 10 段，我删除 action 中那道命令的引文、保留 result 的判断句，并在 T1.actionNote 里写明取舍，未放宽校验规则"
+  },
+  {
+   "text": "每个 null 栏位都带同名的 <栏位>Note 写明为什么没有依据（T1.cost、T4.cost 共 2 处）",
+   "result": "pass",
+   "detail": "T1.costNote 逐条排除「罚俸/受伤/夺权/倒贴财物」，并说明「陛下命我半月内查出真相」是任务期限（约束）而非已付代价、「线索断了」已记入 result；T4.costNote 说明她没有任何已支付的代价，疑问属障碍而非代价"
+  },
+  {
+   "text": "worldSettings 枚举合法且三态区分写进字段：kind ∈ {rule,place,item}；place.placeState ∈ {arrived,mentioned}；item.itemStates ⊆ {hold,transfer,use,lose}；rule.institution ∈ {declared,executed,misunderstood}",
+   "result": "pass",
+   "detail": "10 条逐条核对：宫城=mentioned（原文「宫城的话，许七安是进不去的」，无进入动作）、大黄山=mentioned、怀庆府/皇城/府衙=arrived；金牌=[hold,use]、三钱银子=[transfer] 四态分写；三条 rule 的 institution 分别 executed/executed/declared，declared 那条另带 institutionNote 标明「原文无诏令原文」的口径分歧"
+  },
+  {
+   "text": "foreshadows 状态合法：有铺设+回收的记 resolved-out-of-range，未回收的显式记 unresolved 且 payoff=null 并给判据",
+   "result": "pass",
+   "detail": "F1/F2 回收端均在区间外，逐条带 payoffWhere 章名与区间外逐字引文；F3 unresolved 的判据是两次逐字检索（「准时汇报」全书仅命中本区间 403698 一处；「司天监」与「小宦官」在区间后 ±200 字共存 0 处），并如实登记了一个形态相近但来源不同的 nearAnalogue（第二卷监督小宦官线）而不是拿它充回收端"
+  },
+  {
+   "text": "semanticReview.performed == false：本文件只做引文定位与分层，不声称语义已核验",
+   "result": "pass",
+   "detail": "候选 semanticReview 明确写「定位正确不等于语义已核验」；UNKNOWN U11 同样声明语义核验未完成"
+  },
+  {
+   "text": "受保护路径未在本轮被改动：本轮只在 loop/state/out/ 下新建 2 个文件（candidate + 本提交记录），未写 js/ css/ index.html serve.py narrative.py scripts/ tests/ docs/ data/",
+   "result": "pass",
+   "detail": "复核命令：git status --porcelain -- js css index.html serve.py narrative.py scripts tests docs data → 316 个已跟踪改动项，其中 mtime 晚于本会话开始时刻（2026-10-10 00:17:25 本地）的只有 2 个：docs/QUALITY.md（00:54:24）与 data/cache/index.json（00:18:41），均不是本 agent 写入（我本轮的写入只有 loop/state/out/ 下两个文件，候选文件 mtime 00:55:32），属其他并行 agent/守护轮的既有未提交改动；loop.py classify() 对本轮两个路径均判 append-only"
+  }
+ ],
+ "changes": [
+  {
+   "path": "loop/state/out/read_dafeng_L2_0118.candidate.json",
+   "kind": "append-only"
+  },
+  {
+   "path": "loop/state/out/read_dafeng_L2_0118.submit.w-sanguo-0.json",
+   "kind": "append-only"
+  }
+ ],
+ "reworkOf": "loop/state/out/REJECTED__read_dafeng_L2_0118.json",
+ "reworkReason": "该任务此前有两次 rc=124 超时（FAILED-TASKS.json: consecutive=2，lastAgent=w-sanguo-0），机器记录为 rejected：agent 未产出 writes 路径文件。本轮从头重读原文切片并补齐全部分区。",
+ "sourceHashes": {
+  "data/cache/1063b17ca65ec1b76f30e460.docs.json": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+ },
+ "remaining": [
+  "未做语义核验：candidate.semanticReview.performed=false，只完成引文定位与 explicit/inferred/derived 分层。",
+  "F1、F2 的回收端全部在本区间之外，只核了关键词命中点与相邻章节原文，未逐章通读中间过程；F2 的人宗→巫师转向在第一百二十三章，我只读了该处上下文而未经由全书推理链复核。",
+  "F3（司天监小宦官要求准时汇报）标 unresolved，判据是两次逐字检索；「司天监今日来了个小宦官」是否与第二卷「元景帝派来监督的小宦官」是同一人，我无法确认，已登记 nearAnalogue 与 UNKNOWN U7 而不是裁决。",
+  "原文疑有三处讹字（「他如桑泊案」「不算大人物之间」「追求陈府尹」），我按可读义理解但未修补原文，全部照原文引用并登记 UNKNOWN U3；用字裁决不在本轮范围。",
+  "陈府尹「完全不见刚睡醒的模样」是否只是许七安的观察（他此前「得知陈府尹还在睡觉」是衙役通传的二手信息），我无法从区间内判定，已登记 UNKNOWN U10。",
+  "guard 一侧的确认缺失：第二辆马车是长公主的、太子/二皇子/二公主座次，全部只有守卫一人的说法（「估摸着」），本区间没有车队一侧的验证，已登记 UNKNOWN U8。",
+  "那三钱银子的最终归属（守卫是否收下）原文没写，已登记 UNKNOWN U4。",
+  "「司天监小宦官」这条义务与全书唯一的近似物（第二卷监督小宦官线）之间的形态相似性由我人工比对，未做全量自动化对齐。"
+ ],
+ "rollback": {
+  "kind": "append-only",
+  "strategy": "delete-added-files",
+  "files": [
+   "loop/state/out/read_dafeng_L2_0118.candidate.json",
+   "loop/state/out/read_dafeng_L2_0118.submit.w-sanguo-0.json"
+  ]
+ }
+}

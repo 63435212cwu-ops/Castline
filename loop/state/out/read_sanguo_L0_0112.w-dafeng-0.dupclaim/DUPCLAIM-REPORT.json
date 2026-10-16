@@ -1,0 +1,240 @@
+{
+ "agent": "w-dafeng-0",
+ "role": "READER",
+ "task": "read:sanguo:L0:0112",
+ "kind": "duplicate-claim investigation (no submit, deliberately)",
+ "outcome": "NOT SUBMITTED —— 本任务在我领取前 **3 秒** 已由 w-read-3 提交并通过机器校验，且证据仍新鲜（done_ids() 命中、evidence_stale=[]）。若我按常规 submit 交出第二份候选，cmd_submit 会**整文件覆盖** loop/state/out/read_sanguo_L0_0112.json（loop.py:1077 write_json_atomic，函数体内不引用 done_ids/validated/evidence_stale —— 实测皆 False），把候选的著作权记到我名下而候选并非我写。所以本轮产出是**独立复核 + 取证**，不是第二份候选。",
+ "iDidNotWrite": [
+  "loop/state/out/read_sanguo_L0_0112.candidate.json —— 本任务 writes 指定的唯一路径，未触碰（前后 sha256 均 42aa057bd70b82e5…）",
+  "loop/state/out/read_sanguo_L0_0112.json —— 未提交、未覆盖（前后 sha256 均 b3c50945e3125840…）",
+  "未向 read:sanguo:L0_0112 提交任何东西；未创建 REJECTED__ 旁路文件（不做 near-miss 探针，见 whyNoProbe）"
+ ],
+ "raceForensics": {
+  "contendedPath": "loop/state/out/read_sanguo_L0_0112.candidate.json",
+  "contendedPathSha256": "42aa057bd70b82e5d88464cb1db92ec74075bc19aa734f439c6cacd4c4785cdd",
+  "contendedPathBytes": 339594,
+  "contendedPathMTimeLocal": "2026-10-15 08:34:51",
+  "contendedPathAuthor": "w-read-3",
+  "contendedRecordPath": "loop/state/out/read_sanguo_L0_0112.json",
+  "contendedRecordSha256": "b3c50945e31258408f7e45e0054d9097234db50eecb3a4dad91aa2ef018405ad",
+  "priorSubmitAt": "2026-10-15T00:35:37Z",
+  "myLeaseStartedAt": "2026-10-15T00:35:40Z",
+  "deltaSeconds": 3,
+  "priorRecordStillValid": {
+   "validated": true,
+   "evidence_stale": [],
+   "in_done_ids": true,
+   "verifyState": "pending",
+   "verifyTaskNotYetRun": "loop/state/out/verify_sanguo_L0_0112.verdict.json 不存在，也无 verify:sanguo:L0:0112 租约（截至 2026-10-15T00:55Z）"
+  },
+  "myWorkerProcess": "pid 43423 (worker.py --agent w-dafeng-0 --stream read)；其 dsh 子进程 pid 47316，启动于 2026-10-15 08:35:40（= 本 agent 的 harness，父进程链已核：47316 PPID=43423）。故本任务确为该 worker 派给我的活，不是我自行挑活。",
+  "otherAgentProcess": "w-read-3 = worker pid 43547（--stream read）。它已在 00:35:37 提交并释放租约，提交后不再持有本任务租约。",
+  "codePaths": [
+   "loop/bin/worker.py:519 one_round(): task, why = loopmod.pick(tasks, agent, streams)",
+   "loop/bin/worker.py:525 if loopmod.claim(task, agent) != 0: return 'lease-lost'",
+   "loop/bin/loop.py:653 pick(): done = done_ids()  ← **快照**",
+   "loop/bin/loop.py:654 pick(): leases = active_leases()  ← **快照**",
+   "loop/bin/loop.py:663 pick(): if tid in done or tid in leases: continue",
+   "loop/bin/loop.py:715-744 claim(): 只判 lease_alive(existing)，不复查 done",
+   "loop/bin/loop.py:1077 cmd_submit(): write_json_atomic(OUT / output_name(tid), rec) —— 整文件覆盖，无「已完成」闸门"
+  ],
+  "rootCause": "与前 4 次（read_dafeng_L3_0267、verify_dafeng_L1_0229、read_sanguo_L0_0104、read_sanguo_L0_0108）记录的**同一个 TOCTOU**：worker.one_round 先 pick()（内含 done_ids()/active_leases() 快照）再 claim()；claim() 只查租约目录、不重新检查 done。两者之间是长窗口。",
+  "windowMeasured": {
+   "method": "在同一共享树上实跑 loop.py 的 done_ids()/record_files()（本机，1012 条规范记录）",
+   "record_files": 1012,
+   "done_ids_result_size": 994,
+   "done_ids_seconds": 80.9,
+   "implication": "窗口实测 ~81 秒（0108 轮独立测得 62.2/62.0 秒），远大于本轮 3 秒的派工间隔；pick 的快照与实际占用之间足以插入一次完整提交。本轮我甚至**更晚**才拿到租约（提交后 3 秒），说明不是任何一方抢跑，而是快照本身已经过时。",
+   "note": "done_ids() 耗时随记录数增长；996 条时 62 秒，1012 条时 81 秒。窗口没有变小。"
+  },
+  "whyThisIsNotAWitnessOfBadFaith": "本任务对 w-dafeng-0 而言在 pick() 时刻是**合法可领**的（快照生成时它尚未在 done 里，w-read-3 也未持租约）。我未挑活、未改校验、未覆写。这是调度层的 TOCTOU，不是任何一方的违规。"
+ },
+ "whyNoProbe": "0108 轮的 w-xiyou-1 用一次**真实提交**（故意字段不全）实证了「cmd_submit 没有已完成闸门」，代价是留下一个旁路文件 loop/state/out/REJECTED__read_sanguo_L0_0108.json（惰性，但在记录失效时会伪装成真实积压）。我不重复这一手法：该结论本轮已可由**静态判据**独立复算（对 cmd_submit 函数体做子串检查），不需要再制造一个旁路文件。少一个假积压源，比多一次实证更有价值。",
+ "independentAudit": {
+  "script": "loop/state/out/read_sanguo_L0_0112.w-dafeng-0.dupclaim/audit_0112.py",
+  "report": "loop/state/out/read_sanguo_L0_0112.w-dafeng-0.dupclaim/audit_0112_report.json",
+  "scriptSha256": "533c3f4182e0a8ffffa076834cfed6c696e22eccbde6e467370d8c354814dea3",
+  "independence": "不 import 产出方的 build_0112.py / verify_0112.py，也不读它们的 content_*.json；只读候选 JSON 与 docs.json，其余在本脚本内重算。",
+  "result": {
+   "quoteObjects": 392,
+   "textSliceEqualsQuote": 392,
+   "badEquality": 0,
+   "badRange": 0,
+   "badSourceHash": 0,
+   "badLength": 0,
+   "badReverseFind": 0,
+   "badGlobalOccurrences": 0,
+   "exactIntervalOverlapsAcrossColumns": 0,
+   "sharedNaturalSentenceAcrossColumns": 0,
+   "nullColumns": 26,
+   "nullColumnsMissingOrPlaceholderNote": 0,
+   "worldSettings": 35,
+   "worldSettingsViolations": 0,
+   "themeReadings": 2,
+   "themeReadingsMissingCounterOrSupport": 0,
+   "declaredCountMismatches": 0,
+   "illegalBasis": 0,
+   "codepointCoverage": 0.9861,
+   "zeroCoveredParagraphs": 7,
+   "proseLayerPlaceholders": 1,
+   "coarseRuleDeclaredVsWrittenDef": "declared 1 == 代码实现 1，但 != 散文定义 25（口径分裂）"
+  },
+  "quoteLayerVerdict": "PASS —— 引文定位层无可复现缺陷（逐字往返 text[start:end]==quote 392/392、反向 find 392/392、区间⊆切片、sourceHash 全等实测文件哈希、end-start==len(quote)、globalOccurrences==text.count）。",
+  "semanticVerdict": "NOT PERFORMED —— 本审计**只**覆盖定位/结构层。引文定位正确 ≠ 语义已核验；本文件不主张 semanticReview 完成。被审候选自己也写了 semanticReview.performed=false，与此一致。",
+  "reportSha256Note": "本报告**不自报自身哈希**：任何自哈希在写入后立即失效，留一个必然过时的数字比不留更坏。请用 shasum -a 256 现场复算。",
+  "auditReportSha256Command": "shasum -a 256 loop/state/out/read_sanguo_L0_0112.w-dafeng-0.dupclaim/audit_0112_report.json"
+ },
+ "myOwnFindings": [
+  {
+   "id": "MF01",
+   "severity": "defect(minor)",
+   "where": "candidate.quotationConvention.unitRuleSensitivity",
+   "what": "该字符串里有一个**未替换的 printf 占位符 `%d`**：原文为「会出现 **%d 处相交，全部列在 columnRuleSensitivity.coarseRuleCollisions 里」。它本该被 build_0112.py:381-383 的 `%` 拼接替换为实际计数（实际为 1）。",
+   "why": "产出方在 build_0112.py:381-383 用括号字符串拼接写了 `**%d 处相交`，但**没有对它做 % 格式化**（该表达式由相邻字符串字面量隐式连接，不是 `% (...)` 运算）；同一 dict 里另有独立的 `coarseRuleCollisionCount: 1` 字段承载真值，所以读者仍能读到数字。",
+   "verdict": "真缺陷，但**影响有限**：它污染散文层的一个数字，不污染任何引文、偏移或内容分区。正确数字在相邻字段 columnRuleSensitivity.coarseRuleCollisionCount=1。机器校验（B1–B16）查不出它 —— 因为它不是引文对象。",
+   "reproduce": "python3 -c \"import json;c=json.load(open('loop/state/out/read_sanguo_L0_0112.candidate.json'));print('%d' in c['quotationConvention']['unitRuleSensitivity'])\"  → True"
+  },
+  {
+   "id": "MF02",
+   "severity": "defect(documentation)",
+   "where": "candidate.quotationConvention.columnRuleSensitivity.coarseRuleDefinition vs build_0112.py:130-151",
+   "what": "**散文定义与代码实现不一致**。columnRuleSensitivity.coarseRuleDefinition 写「断言单元边界只取：引号外的 。！？、换行（**不切引语边界**、不切引号内句末标点）」。但产出方真正跑的「粗口径」`units_of(text, cut_inside_quotes=False)` 在 `“` 与 `”` 处**无条件**切边界（build_0112.py:140-145 的 `marks.append(i)` 不受 cut_inside_quotes 约束）——即它**仍然切引语边界**。",
+   "measured": "按**代码实现**（units_of(text,False)，仍切引语边界）：278 个单元、粗口径相交 **1** 处 —— 与 declared coarseRuleCollisionCount=1 一致（我独立复现，fragments 逐字相同）。按**散文定义**（真的不切引语边界）：137 个单元、相交 **25** 处。两者相差 25 倍，见 audit_0112_report.json 的 I_proseLayer.I2_coarseRuleDefinitionVsImpl。",
+   "why": "所以那个被公示的「粗口径对照」**没有它声称的那么粗**：读者以为看到的是「连引语边界都不切」的最坏情况，实际看到的是「只放开引号内句末标点」的中间情况。两者差 25 倍（1 vs 25）。这不改变主口径 0 相交的结论，但让「不隐藏、不辩解」的自我承诺打了折扣。",
+   "verdict": "真缺陷（陈述与实现不符）。**我不主张被审候选的 tasks 内容因此有问题**：主口径（更严）0 相交仍是成立的。这是**说明层**与**代码层**的口径分裂。",
+   "reproduce": "python3 -B -s loop/state/out/read_sanguo_L0_0112.w-dafeng-0.dupclaim/audit_0112.py → 读输出的 I_proseLayer.I2_coarseRuleDefinitionVsImpl（asImplemented_* 与 asWrittenDef_* 两组数字与 sampleCollisionsUnderWrittenDef 清单）"
+  },
+  {
+   "id": "MF03",
+   "severity": "info",
+   "where": "任务 JSON 的 sourceHash 字段",
+   "what": "任务 JSON 声明 sourceHash=2988ce6e…，而 prompt 正文与候选一致使用 8ab7298a…。",
+   "verdict": "**不是缺陷** —— 我独立复算确认：2988ce6e… = data/cache/f0b45e85aac6c95e584075a2.docs.json 与 data/cache/152e2a6eed94f1075e7e7070.docs.json 的 sha256（两者同哈希）；且这两份与 fe42d01f3826fe8096f86614.docs.json 的 docs[0].text **逐字符相同**（len 均 607191，a==b、a==c 皆 True，切片亦相同）。故不影响任何引文定位。这是对既有结论（0108 轮 MF03）的独立旁证。",
+   "reproduce": "shasum -a 256 data/cache/f0b45e85aac6c95e584075a2.docs.json data/cache/152e2a6eed94f1075e7e7070.docs.json  → 均为 2988ce6e…"
+  },
+  {
+   "id": "MF04",
+   "severity": "info",
+   "where": "candidate.notModeled / reverseCoverage",
+   "what": "我的逐码点覆盖重算得 0.9861、最长无引文段 15 码点、7 个**零覆盖自然段** —— 与候选自报的 0.9861/15 一致；那 7 段经逐段检查**全部只是单独一个换行符**（head 均为 '\\n'，长度 1）。",
+   "verdict": "不是缺陷。候选还把最长段（『次日，孙楷、董朝至，拜请回都。』@570978）单列进 uncoveredUnitsMinVisible12，没有藏。"
+  },
+  {
+   "id": "MF05",
+   "severity": "self-correction",
+   "where": "我自己的审计脚本第一版",
+   "what": "我的 B 判据第一版报了 **16 处「同句跨栏」**，并据此判 FAIL。**是我的判据错了**：它把 `；` 与句末引号也当边界，于是句末的 `”` 会**单独成为一个「句子」**，再与相邻句的引文区间相交。逐条检查那 16 对：**字符区间相交全部为 0**，共享的只是句末标点。",
+   "verdict": "**我的探针错，被审对象没错**。改用自然句切分（以 。！？ 与换行为界，并把随后的收尾引号吸进同一句）后重算：精确区间重叠 0、自然句共享 0，与候选自报一致。第一版的错误判据已保留在 audit_0112.py 的 build_units() docstring 里，作为与我自己的 MF06 同形的记录。",
+   "note": "这正是 0108 轮 MF05 的同一形态：假阳性探针比漏报更容易让人去找错东西。"
+  },
+  {
+   "id": "MF06",
+   "severity": "self-correction",
+   "where": "我自己的 D 判据启发式探针",
+   "what": "我的粗启发式（placeState=arrived 但引文不含 ARRIVAL_MARKERS 里的动词）报了 2 条：WS-PLACE-07 五凤楼（『布请孙休**升**五凤楼』）、WS-PLACE-14 山后（『引一万兵**去**山后埋伏』）。",
+   "verdict": "**两条都是我的假阳性，被审对象没错**。『升』（登楼）与『去…埋伏』（移动并在彼处部署）都是货真价实的到达/部署动作，只是不在我那份粗糙的标记表里。我把这两条留在报告的 arrivedHeuristicProbes 里并明确标注「命中≠缺陷、仅供人工裁决」，不把它们算进 violationCount —— 因为把探针命中当缺陷，就是用我自己词表的漏洞去判别人的错。"
+  },
+  {
+   "id": "MF07",
+   "severity": "info",
+   "where": "candidate 散文层『』逐字承诺（angleBracketRule）",
+   "what": "我按其自定规则扫描全部 2855 条散文串、499 个『』片段：4 个含省略号（其规则已豁免节引），11 处片段不在切片内（其中 9 个去重后为：因为/忠烈/知道/被杀/说法/赦免/迎来/里应外合/防守 —— 全部长度 2 且都在全文命中，只是不在本切片）。",
+   "verdict": "**不是缺陷** —— 逐条看上下文，这 9 处全部是**元层用法**（拿词来讨论词），不是引文：例如 causeEdges[0].note 写「原文没有写『因为』」、states[13].note 写「不据此给他加『忠烈』一类属性」、rejectedCauseEdges[6].why 写「两者都是『说法』」。候选的 angleBracketRule 已把「」划为元层标记、并对『』声明逐字承诺；这些是它在『』里做**否定/讨论**，与引文承诺无冲突。另有 2 处（tasks[17].costNote/result.note 的『被杀』）是**改述自己的栏位内容**。",
+   "note": "我把它记为 info 而非 defect：若复核者认为元层也应改用「」，那是文风取舍，不是编造 —— 因为这些词没有一条被当作原文证据使用。"
+  },
+  {
+   "id": "MF08",
+   "severity": "structural",
+   "where": "loop/bin/loop.py cmd_submit()",
+   "what": "cmd_submit 函数体内**不引用** done_ids / validated( / evidence_stale / record_files（实测四者皆 False），而 loop.py:1077 是 `write_json_atomic(OUT / output_name(tid), rec)` —— **整文件覆盖**。",
+   "verdict": "**真缺陷**（属受保护路径 loop/bin/，我不改）。含义：若我在任务已被他人做完后交出一份字段齐全、可过校验的记录，submit 会照单全收并静默抹掉 w-read-3 的 summary/assertions/remaining/自曝块与证据归属，**没有任何告警**。这不是假设：本轮我若照常流程走一遍（claim 已在 00:35:40 归我），覆盖就会发生。",
+   "whyItDidNotHappen": "挡住它的**不是代码，是 agent 自觉**（我选择不提交）。这是本形态连续第 5 次靠自觉兜住。",
+   "note": "与 0108 轮 MF04 同一结论，我独立复算确认。"
+  }
+ ],
+ "semanticSpotChecks": {
+  "declaredScope": "**未做**语义层复核（semanticReview.performed=false 与我一致）。以下只是我在定位层审计之外**顺手看到的、需要 read-verify 通道裁决的疑点**，不是我的判决。",
+  "items": [
+   {
+    "id": "SS01",
+    "target": "T12.result",
+    "claim": "text 写「…使魏兵大败、**邓艾身被四箭**舍命突出」，但该栏唯一 quotes 是『邓艾大惊，急勒兵退时，张翼引一军杀到。两下夹攻，魏兵大败。』——**不含**「身被四箭」。",
+    "found": "『艾舍命突出，身被四箭。』在候选里确有引文对象，但挂在 **T07.cost**（邓艾自己的任务）与 states[4]/unknowns[8]，不在 T12.result。",
+    "why": "这属「引文为真但不支持该栏」的形态（机器判据结构性地看不见）：T12.result 的引文支持「两下夹攻、魏兵大败」，不支持「邓艾身被四箭」这一附加断言。请复核者裁决：是应补引 T07.cost 那句，还是把该短语从 T12.result 删去。"
+   },
+   {
+    "id": "SS02",
+    "target": "T16.result",
+    "claim": "text 写「流言生效：成都人人所说皆同，**后主随即遣人星夜宣姜维入朝**」，但该栏唯一 quotes 是『于是成都人人所说皆同。』——**不含**后半句。",
+    "found": "『黄皓奏知后主，即遣人星夜宣姜维入朝。』在候选里引于 **T16.action**（同任务另一栏）与 T15.action。",
+    "why": "同上形态：result 的引文支持「流言传开」，不支持「后主遣人」这一步（那一步的证据在同任务 action 栏）。跨栏复用证据本身被候选的规则允许（columnRule 只禁同栏），但 result 的 text 断言超出了它自己的 quotes。"
+   },
+   {
+    "id": "SS03",
+    "target": "T03.objective",
+    "claim": "text 写「**保住并继续把持权位**：废掉图谋他的孙亮，另立由自己迎请的君主」，basis=explicit，但唯一 quote 是『主上荒淫久病，昏乱无道，不可以奉宗庙，今当废之。』",
+    "found": "该 quote 是孙綝**公开给出的废立名义**，其中没有「保住」「把持权位」字样；「迎请孙休」另引在 T03.action（『孙綝遣宗正孙楷、中书郎董朝，往虎林迎请琅琊王孙休为君。』）。",
+    "why": "把「保住并继续把持权位」标为 explicit（原文直述）偏高：它是从「废立 + 另立由自己迎请的君」**推得**的动机，原文未直述。候选自己在 objectiveNote 里也承认「不据此认定孙亮真的荒淫」（立场正确），但没有把动机降级为 inferred。请复核者裁决是否应改 basis=inferred。"
+   }
+  ],
+  "note": "以上三条我都给了「claim/found/why」且每条 quote 均逐字可查；但按 VERIFIER.md 的纪律，**这类语义裁决不属于 READER 的自签范围**，我把它交出而不是自行判 fail/partial。read-verify 通道（verify:sanguo:L0:0112）仍未跑，本文件不能替代它。"
+ },
+ "hashes": {
+  "candidate(read_sanguo_L0_0112.candidate.json)": "42aa057bd70b82e5d88464cb1db92ec74075bc19aa734f439c6cacd4c4785cdd",
+  "record(read_sanguo_L0_0112.json)": "b3c50945e31258408f7e45e0054d9097234db50eecb3a4dad91aa2ef018405ad",
+  "priorSubmit(read_sanguo_L0_0112.submit.json)": "6e4338fbf3067b8f07f7a6947f8eb158b867e84353961a94d8ee1c84c2834a39",
+  "docsJson(fe42d01f3826fe8096f86614.docs.json)": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+  "slice(569822:574413) sha256": "e6f572a9e8f87b44c32de429d2068a4118d09bff2a1fa72ed39447a50dc5fa87",
+  "taskJsonDeclaredSourceHash": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+  "taskJsonDeclaredSourceHashResolvesTo": [
+   "data/cache/f0b45e85aac6c95e584075a2.docs.json",
+   "data/cache/152e2a6eed94f1075e7e7070.docs.json"
+  ],
+  "myAuditScript": "533c3f4182e0a8ffffa076834cfed6c696e22eccbde6e467370d8c354814dea3"
+ },
+ "reproduce": [
+  "读切片：python3 -c \"import json;t=json.load(open('data/cache/fe42d01f3826fe8096f86614.docs.json'))[0]['text'];print(t[569822:574413][:40])\"",
+  "跑独立审计：python3 -B -s loop/state/out/read_sanguo_L0_0112.w-dafeng-0.dupclaim/audit_0112.py",
+  "证 MF01：python3 -c \"import json;c=json.load(open('loop/state/out/read_sanguo_L0_0112.candidate.json'));print('%d' in c['quotationConvention']['unitRuleSensitivity'])\"",
+  "证 MF02：见 audit_0112.py 内 units_impl / units_prose 两份实现与 collisions() 对照（代码口径 1 处、散文口径 25 处）",
+  "证 MF08：把 loop.py 的 cmd_submit 函数体裁下来做子串检查，done_ids/validated(/evidence_stale/record_files 四者皆 False",
+  "证任务已被他人完成：python3 -B -s -c \"import sys;sys.path.insert(0,'loop/bin');import loop as L;d=L.done_ids();print('read:sanguo:L0:0112' in d)\" → True",
+  "证派工时序：cat 'loop/state/leases/read:sanguo:L0:0112.d/lease.json'（startedAt=2026-10-15T00:35:40Z）对比 loop/state/out/read_sanguo_L0_0112.json 的 submittedAt=2026-10-15T00:35:37Z"
+ ],
+ "untouched": {
+  "gitDestructive": false,
+  "gpuOrBrowserTests": false,
+  "protectedPaths": true,
+  "sharedCandidate": true,
+  "sharedRecord": true,
+  "otherAgentsFiles": true
+ },
+ "changes": [
+  {
+   "path": "loop/state/out/read_sanguo_L0_0112.w-dafeng-0.dupclaim/audit_0112.py",
+   "kind": "append-only (new file)"
+  },
+  {
+   "path": "loop/state/out/read_sanguo_L0_0112.w-dafeng-0.dupclaim/audit_0112_report.json",
+   "kind": "append-only (new file)"
+  },
+  {
+   "path": "loop/state/out/read_sanguo_L0_0112.w-dafeng-0.dupclaim/DUPCLAIM-REPORT.json",
+   "kind": "append-only (new file, 本文件)"
+  }
+ ],
+ "recommendationsForMainline": [
+  "（最高优先，不自行实施——属受保护路径 loop/bin/，须合并任务 + GATE.lock）cmd_submit 应在写入前加一道「该任务已完成」闸门：若 tid ∈ done_ids() 且既有记录 evidence 不 stale，则拒绝覆盖并提示走 rework 路径（或改为合并/追加式）。实测该闸门完全不存在（MF08）。",
+  "（同上）loop.py 的 claim() 应在建立租约前复查 done_ids()；或让 pick() 与 claim() 共用一次快照并以文件锁串行化。实测窗口 ~81 秒（done_ids() 本身耗时），本轮派工间隔仅 3 秒。",
+  "（同上）cmd_submit 的 release 在租约易主时只打一行 stderr（『租约属于 X，拒绝释放』），容易被忽略 —— 建议升级为记录内显式字段或非零退出。",
+  "（产出方侧，非受保护路径）修 build_0112.py:381-383 的 `%d` 未格式化（MF01）；并把 coarseRuleDefinition 的散文改成与 units_of() 实际行为一致，或让 cut_inside_quotes 真的约束引语边界（MF02）。",
+  "本形态已第 5 次出现（0267/0229/0104/0108/本轮）。前 4 次也是靠 agent 自觉不覆写兜住的；这说明修 pick/claim 与 cmd_submit 的收益是**结构性的**，不是个案。"
+ ],
+ "remaining": [
+  "read:sanguo:L0_0112 的**语义**复核仍未做（verifyState=pending，verify:sanguo:L0_0112 无产出、无租约）。本文件不能替代它；SS01–SS03 是我交给复核通道的疑点，不是判决。",
+  "TOCTOU 根因未修（loop/bin/loop.py 属受保护路径，我不改）。",
+  "我未向 read:sanguo:L0_0112 提交任何东西 —— 这是**刻意的**。若复核者认为仍应留下一条我方记录，请先确认 loop.py 的 submit 是否应改为合并式，否则重提交必然覆盖 w-read-3 的已接受记录。",
+  "MF02 的「散文口径」25 处相交：脚本已给出**前 10 条**样本（audit_0112_report.json → I_proseLayer.I2_coarseRuleDefinitionVsImpl.sampleCollisionsUnderWrittenDef，每个样本带 sliceRange/globalRange/fragment）。全量 25 条未逐条落盘 —— 若复核者要完整清单，把脚本里 `sorted(col_doc)[:10]` 的切片上限去掉即可原样复跑得到，我不预先多写文件。",
+  "我未做跨版本比对之外的第三方原文校验（只用 fe42d01f3826fe8096f86614.docs.json 一份 + 两份同文本旁证，见 MF03）。"
+ ]
+}

@@ -1,0 +1,371 @@
+{
+  "schema": "castline.verify-verdict/1",
+  "task": "verify:sanguo:L0:0034",
+  "reviewedTask": "read:sanguo:L0:0034",
+  "role": "VERIFIER",
+  "agent": "w-sanguo-1",
+  "book": "sanguo",
+  "lane": 0,
+  "unitIndex": 34,
+  "unitHead": "第三十五回　玄德南漳逢隐沧　单福新野遇英主",
+  "verdict": "partial",
+  "reviewedArtifact": {
+    "path": "loop/state/out/read_sanguo_L0_0034.candidate.json",
+    "sha256": "9e6c154a645c0d034ea9ed0de8bad8686cc6ae9149a7b257a84cb4475ad7eb2f",
+    "bytes": 251520,
+    "producedBy": "w-dafeng-1",
+    "unchangedThisRound": true
+  },
+  "sourceUnderReview": {
+    "path": "data/cache/fe42d01f3826fe8096f86614.docs.json",
+    "fileSha256": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+    "range": [
+      176133,
+      180031
+    ],
+    "codepoints": 3898,
+    "segmentSha256": "0c86d83127bc771a6584689b673b4dd16886fc3dd72876b4adc4f8e1080ade07",
+    "offsetBase": "docs[0].text 全文 codepoint 偏移（非切片偏移）",
+    "taskDeclaredSourceHash": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+    "taskDeclaredSourceHashResolves": "data/cache/152e2a6eed94f1075e7e7070.docs.json",
+    "dualHashChecked": "任务顶层 sourceHash 指向 data/cache/152e2a6eed94f1075e7e7070.docs.json（实测 sha256 2988ce6e…），任务 prompt 与 read 任务正文指向 data/cache/fe42d01f3826fe8096f86614.docs.json（实测 8ab7298a…）。我逐字比对两份 docs[0].text：完全相等（各 607191 codepoint），键集合相同，差异仅 JSON 键顺序（前者 kind/name/path/text，后者 path/name/text/kind）⇒ 同文本两种序列化，不是版本冲突。候选 U16 的自述核实为真。",
+    "boundaryCheck": "docs[0].text[176133:176154] == '第三十五回　玄德南漳逢隐沧　单福新野遇英主'（自检式成立）；正文止于 179978，其后为站点样板（分隔线与「枫林晚 整理校对…」导航）。"
+  },
+  "method": "按 ROLES/VERIFIER.md 顺序，未换序：① 先把 docs[0].text[176133,180031) 整段独立读完（9 个非空行：1 行回目 + 8 行正文 + 1 行站点导航）后才打开候选，避免只检查「他写的对不对」；② 抽取项全量核对：递归抽出 387 个带偏移 quote 对象 / 169 条去重引文，逐条复算 T[start:end]==quote、text.find(quote)、globalOccurrences/inUnitOccurrences、inRange 标记与 sourceHash；③ 反向验证：另用「该原文串是否在断言层出现过」这一与候选结论无关的口径，把 tilingBlocks / quoteIndex / coverage / outOfRangeCitations 四个搬运层排除后逐条找遗漏；④ 误杀检查：逐条读 6 条 rejectedCauseEdges 与 4 条 rejectedForeshadows 的拒因是否被区间原文支持；⑤ 幻觉/越权检查：区间内 0 次的专名逐个查是否被限定为「区间外」，并查有无把结束当成功；⑥ 引用核验：random.seed(20261009) 从 quoteIndex 抽 5 条 find 一次。全部脚本只读，未写仓库。",
+  "mechanicalAudit": {
+    "positionedQuoteObjects": 387,
+    "uniqueQuotes": 169,
+    "sliceMismatch": 0,
+    "findMiss": 0,
+    "sourceHashMismatch": 0,
+    "inRangeFlagMismatch": 0,
+    "globalOccurrencesMismatch": 0,
+    "inUnitOccurrencesMismatch": 0,
+    "outOfRangeDeclared": 19,
+    "outOfRangeUndeclared": 0,
+    "selfReportedMetricsMismatch": 0,
+    "fabricatedExtractionItems": 0,
+    "crossColumnQuoteReuse": 0,
+    "nullsWithoutNote": 0,
+    "segmentSha256Recomputed": "0c86d83127bc771a6584689b673b4dd16886fc3dd72876b4adc4f8e1080ade07"
+  },
+  "counterExamples": [
+    {
+      "id": "CE-A_quote_anchor_and_transcription",
+      "claim": "候选 TC4_quote_imbalance / U4_quote_imbalance 断言「可定位处即此句（『玄德曰：“愿闻禳法。』缺右引号）」，锚点记为 [178926,178937)。",
+      "quote": "玄德曰：“愿闻禳法。”",
+      "quoteOffsets": [
+        178926,
+        178937
+      ],
+      "why": "引证逐字可查，但引证本身证伪了它要证明的命题：候选自己打印的这条 quote 第 9 位就是右引号 U+201D（178936），该句右引号存在。栈式配对扫描（遇 U+201C 入栈、遇 U+201D 出栈）在整个区间只剩 1 个未闭合的左引号，位置 178902，属前一句「福曰：“此乃救主，非妨主也；终必妨一主。某有一法可禳。」（[178899,178926)）。⇒ 现象（净 +1）真实，归因锚点错误。",
+      "severity": "证据字段自相矛盾（现象对、定位错）",
+      "verdictImpact": "不判 fail：可复现的证据质量问题，不改变任何抽取项真伪；但也不能 pass。"
+    },
+    {
+      "id": "CE-B_transcription_typo",
+      "claim": "U4_quote_imbalance 的 what 字段把原文用字写成「愿闻禴法」。",
+      "quote": "某有一法可禳。",
+      "quoteOffsets": [
+        178919,
+        178926
+      ],
+      "why": "原文字符实测：t[178924] 与 t[178933] 均为「禳」= U+79B3；全篇底本 U+79B4「禴」出现 0 次。候选 JSON 里 U+79B4 出现恰 1 次，位于 $.unknowns[3].what（已用遍历器定位到唯一字段）。候选自己声明「照原文引用、不改字」，此处却在叙述文字里改了字。注意：同条目 quotes[].quote 字段（TC4.text 与 U4.quotes[0]）逐字正确，故只是 prose 层笔误。",
+      "severity": "自述纪律与实际不符（低危）",
+      "verdictImpact": "同上，不判 fail。"
+    },
+    {
+      "id": "CE-C_truncated_evidence_text",
+      "claim": "coverage.assertionLayerGaps[] 每条自带 text 字段，声称是未覆盖片段原文，chars 声明其长度。",
+      "quote": "两边各射住阵角。玄德出马于旗门下，大呼曰：“来者何人，敢犯吾境？”",
+      "quoteOffsets": [
+        179439,
+        179509
+      ],
+      "why": "42 条里有 10 条 text 被静默截断为 60 字，而 chars 声明到 125：idx0(chars87) idx3(91) idx7(89) idx8(88) idx10(109) idx11(86) idx17(98) idx34(70) idx35(95) idx40(125)。逐条比对确认这 10 条 text 都是 t[start:end] 的真前缀（10/10 是 prefix、0 条错位）⇒ start/end/chars 本身正确，缺陷只在字段内容不完整，后果是这些证据片段无法被直接引用复核（如 idx34 只到「敢犯吾境？」而 chars 声明 70）。",
+      "severity": "证据字段不完整（可复现）",
+      "verdictImpact": "不判 fail：不影响抽取项，且 start/end 可自行取原文复算。"
+    },
+    {
+      "id": "CE-D_overreaching_absolute_negative",
+      "claim": "FS3_dilu_fangzhu 的 note 与 U13_dilu_no_payoff 断言「全书没有一处写这匹马害死某位主人」。",
+      "quote": "遂与庞统更换所骑之马。",
+      "quoteOffsets": [
+        315723,
+        315734
+      ],
+      "why": "该绝对否定的检索口径只是字面「的卢」（全篇 8 次，候选已列全：172690 172917 175212 175444 175653 175656 178857 341672）。但第六十三回 [315694,316090) 有一段：玄德把自己的白马换给庞统（「吾所骑白马，性极驯熟，军师可骑，万无一失」）→ 张任军「骑白马者必是刘备」→「可怜庞统竟死于乱箭之下」。就叙事而言这正是「妨一主」的兑现，而这段一个字都不含「的卢」。⇒ 候选的检索口径窄于其结论口径。但按 VERIFIER 纪律，我无法逐字证明该「白马」就是的卢（原文在此只称「白马」），故只记为存疑并降级该条结论强度，不据此判 fail。",
+      "severity": "结论强度超出证据（存疑，非 fail 级）",
+      "verdictImpact": "FS3/U13 必须从「全书没有一处」降级为「按字面『的卢』检索未见回收；第六十三回白马换主致庞统死一段为本口径外待查项」。"
+    }
+  ],
+  "reverseChecks": [
+    {
+      "found": "吕旷在两军阵前自称奉曹操之命而来 —— 候选 KG9 却断言这次出击是「部将的自发行动」",
+      "quote": "吾乃大将吕旷也。奉丞相命，特来擒汝！",
+      "quoteOffsets": [
+        179479,
+        179497
+      ],
+      "why": "这条区间内原文事实在候选里只出现在搬运层（coverage / quoteIndex / tilingBlocks），从未进入任何断言层（已用遍历器逐字段确认：tasks/causeEdges/states/knowledgeGaps/foreshadows/worldSettings/themeReadings/characterClaims/sceneNotes/textCritical/crossUnitRefs/unknowns/rejected* 全部不含此串）。而 KG9 的结论正是「原文没有曹操下令进攻新野的一句，所以这次出击在区间内是部将的自发行动」。吕旷的当众宣称不等于叙述者确认（属 characterClaims 层），所以 KG9 未必被推翻 —— 但它是一条直接相关的反向证据，候选既未收录也未在 KG9 里处理，使 KG9 的 basis=derived 结论看起来比实际更强。CE13 亦只写「愿以五千精兵取刘备之头」而略去「奉丞相命」。"
+    },
+    {
+      "found": "玄德对牧童生活的羡慕「吾不如也」—— 一条明确的人物心理事实，断言层完全未覆盖",
+      "quote": "玄德叹曰：“吾不如也！”遂立马观之。",
+      "quoteOffsets": [
+        176593,
+        176611
+      ],
+      "why": "全区间只此 1 次（该短句「吾不如也！」全篇 3 次，区间内 1 次）。这是玄德在逃难途中对「牧童跨牛背吹短笛」的自由状态的直接反应（原文「叹曰」），也是本回隐逸主题的一个支点。候选只在 coverage/quoteIndex/tilingBlocks 出现该串，tasks/states/characterClaims/themeReadings 均无。TH1 以「信息不对称」为轴、TH2 以「同一匹马」为轴，都没纳入这条；characterClaims 收了玄德多处心声（CC23），却漏了这一处带「叹曰」的。"
+    },
+    {
+      "found": "水镜庄的环境与人物形象描写整段未被断言层覆盖：松形鹤骨、架上满堆书卷、清气飘然",
+      "quote": "玄德见架上满堆书卷，窗外盛栽松竹，横琴于石床之上，清气飘然。",
+      "quoteOffsets": [
+        177138,
+        177168
+      ],
+      "why": "另有「松形鹤骨，器宇不凡。」[177070,177080)。这两处是本区间唯一对水镜其人其居的正面描写，且与「琴声—听琴—水镜听出窃听」那一场直接相连。候选仅在 quoteIndex/tilingBlocks 出现；sceneNotes 的 SN2 概括为「南漳遇隐士」但未把任何一条断言落到这些文字上；worldSettings 也未收「草堂」。既非地点（按候选口径）也非人物状态，属结构性空白。"
+    },
+    {
+      "found": "战阵程序与交战触发动作未入断言层：射住阵角 / 玄德大怒使赵云出马 / 余众四散奔走",
+      "quote": "两边各射住阵角。",
+      "quoteOffsets": [
+        179439,
+        179447
+      ],
+      "why": "「射住阵角」是古代战阵的固定程序（双方列阵、以箭矢定住阵脚），是本区间唯一一次正面野战的开始动作；「玄德大怒，使赵云出马。」[179498,179509) 是赵云出战的直接触发；「余众四散奔走。」[179645,179652) 是二吕部队的最终处置。三条均只在 quoteIndex/tilingBlocks。T13 只写结果，CE15 只写三路部署机制，均未落到交战过程。"
+    },
+    {
+      "found": "蔡瑁以职责话术自辩与赵云三问三答的「信息对峙」机制未被登记为因果",
+      "quote": "九郡四十二州县官僚俱在此，吾为上将，岂可不防护？",
+      "quoteOffsets": [
+        176348,
+        176372
+      ],
+      "why": "候选 unknowns 收了「九郡四十二州县」这条数字（U12），characterClaims CC2 也收了这句台词，但没有任何一条 causeEdge 或 state 处理「三问三答问不出实情」这个机制。T1 的 obstacle 写「问不出结果」，其证据只引「令三百军四散观望，并不见踪迹」与「云再回马时，蔡瑁已入城去了」，真正让三问落空的机制（蔡瑁用「防护」职责顶回）未被登记。这是最接近「遗漏机制」的一条。"
+    }
+  ],
+  "misKillCheck": {
+    "checked": [
+      "RCE1 蔡夫人哭求→释放蔡瑁：拒因正确。原文紧接着「表怒犹未息」，当场未改判；真正改判在孙乾那句利害论证之后。判不误杀。",
+      "RCE2 「好！好！」→玄德明白伏龙、凤雏是谁：拒因正确，方向相反，两次追问均未得姓名。判不误杀。",
+      "RCE3 玄德暗忖→夜客确是伏龙/凤雏：拒因正确（拿人物猜测当事实）。判不误杀。",
+      "RCE4 跃马过溪→的卢不再妨主：拒因正确。单福只说「此乃救主，非妨主也；终必妨一主」，未取消妨主。判不误杀。",
+      "RCE5 牧童认出玄德→此前见过：拒因正确，童子自述是听师父描述外貌才对上号。判不误杀。",
+      "RCE6 吕翔「引军便走」→得以逃脱：拒因正确，中间隔着关羽截杀与张飞第二道拦截，最终落马而死。判不误杀。",
+      "RFS1「英雌」、RFS2「单富/稿赏」、RFS4「琴声」：以「单次出现 + 无铺设无回收」排除，符合契约。RFS4 的琴声其实出现两次（「忽闻琴声甚美」与「琴声忽住而不弹」），候选正文亦写「出现两次」却仍在标题称其单次，属表述瑕疵；但「当场被解释完、无悬置」的实质理由成立，判不误杀。",
+      "RFS3 的卢：候选自己声明「无论按哪种口径都不是伏笔」，理由成立（另立 FS3）。判不误杀。"
+    ],
+    "conclusion": "未发现误杀：10 条 rejected* 的拒因逐条回溯原文均可支持。唯一表述瑕疵是 RFS4 标题称「单次」而正文写「两次」，不影响结论。未发现因词表/正则把合法因果挡掉的情形。"
+  },
+  "hallucinationCheck": {
+    "checked": [
+      "区间内 0 次的专名逐个查限定语：司马徽(0)、诸葛亮(0)、徐庶(0)、孔明(0)、关羽(0)。候选全部带「区间外」限定：U6 明写「司马徽三字连写 0 次（全书 3 次全在区间外）」；FS1 的 payoff、CU2、CU3 均标 inRange=false 并给章名；KG2/KG3 把徐庶/元直的真名放在区间外。核实为无幻觉。",
+      "区间内实际用名与候选一致：关公(1)/云长(2)/张飞(2)/翼德(2)，候选用「关、张」「关公」称呼；「庞统」5 次全在牧童转述里（KG7 判定正确）。",
+      "越权成功判定：T11 曹操取荆州 result=null（未写得到荆州）；T14 曹仁报仇止于出师并明写「胜负未写」；T5 孙乾书信 result 明写「蔡瑁没被杀」；ST6 刘琦危机明写「威胁没有解除」；FS3 标 unresolved。未发现把结束当成功。",
+      "KG8 明写「探看虚实」是任务不是结果（引「屯樊城，虎视荆襄，就探看虚实。」[179175,179190)）。核实为真。",
+      "semanticReview 保持 not-performed，未越权声称语义已核验。核实为真。"
+    ],
+    "conclusion": "未发现原文没有的人物、结局、伏笔或成功判定。"
+  },
+  "citationSample": {
+    "method": "random.seed(20261009) 从 quoteIndex 的 169 条去重引文中抽 5 条，逐条执行 T.find(quote) 并比对声明偏移",
+    "samples": [
+      {
+        "quote": "玄德再问时，水镜曰：“天色已晚，将军可于此暂宿一宵，明日当言之。”即命小童具饮馔相待，马牵入",
+        "declared": [
+          177721,
+          177825
+        ],
+        "find": 177721,
+        "verbatim": true,
+        "offsetConsistent": true
+      },
+      {
+        "quote": "玄德曰：“愿闻禳法。”",
+        "declared": [
+          178926,
+          178937
+        ],
+        "find": 178926,
+        "verbatim": true,
+        "offsetConsistent": true
+      },
+      {
+        "quote": "水镜曰：“吾观公气色，已知之矣。”",
+        "declared": [
+          177241,
+          177258
+        ],
+        "find": 177241,
+        "verbatim": true,
+        "offsetConsistent": true
+      },
+      {
+        "quote": "表大怒，急唤蔡瑁责骂曰：“汝焉敢害吾弟！”",
+        "declared": [
+          178402,
+          178423
+        ],
+        "find": 178402,
+        "verbatim": true,
+        "offsetConsistent": true
+      },
+      {
+        "quote": "吾师覆姓司马，名徽，字德操，颍川人也。道号水镜先生。",
+        "declared": [
+          176750,
+          176776
+        ],
+        "find": 176750,
+        "verbatim": true,
+        "offsetConsistent": true
+      }
+    ],
+    "result": "5/5 逐字命中，5/5 偏移与 find 一致。"
+  },
+  "usableItems": {
+    "usableAsIs": [
+      "tasks[] 全部 14 条的五元组与分栏引证（跨栏复用同一句 = 0；cost 仅 T12 有值且引证正确）",
+      "causeEdges[] 17 条（方向与触发机制均有原文支撑）",
+      "states[] 13 条（before/after + 事件锚点齐备）",
+      "knowledgeGaps[] 12 条（知识差写清了谁知/不知）",
+      "worldSettings[] 16 条（place 的 arrived/mentioned 区分正确，尤其「取荆州」记为 mentioned 而非 arrived，符合硬性红线；item 四态分写）",
+      "characterClaims[] 23 条（台词与叙述者直述分栏，narratorConfirmed 标注正确）",
+      "textCritical[] 的 TC1/TC2/TC3/TC5 四条",
+      "unknowns[] 16 条中的 U1/U2/U3/U5/U6/U7/U8/U9/U10/U12/U14/U15/U16"
+    ],
+    "usableWithDowngrade": [
+      "TC4 与 U4：现象（区间引号净 +1，94/93）可用；锚点 [178926,178937) 必须改为 [178899,178926)（真正未闭合的左引号在 178902）；U4 的「愿闻禴法」须改回「愿闻禳法」",
+      "coverage.assertionLayerGaps[]：start/end/chars 可用；其中 10 条的 text 须补全为 t[start:end] 或改名（如 truncText）以名副其实",
+      "FS3 与 U13：降级为「按字面『的卢』（全篇 8 次）检索未见回收；第六十三回 [315694,316090) 白马换主致庞统死一段为本口径外待查项」",
+      "RFS4 标题「单次出现」改为「出现两次」",
+      "KG9 补记反向证据「吾乃大将吕旷也。奉丞相命，特来擒汝！」[179479,179497)，并说明它是人物当众宣称、非叙述者确认"
+    ],
+    "mustDiscard": []
+  },
+  "mustFixOrDowngrade": [
+    "TC4/U4 锚点 178926→178899；U4 中「禴」(U+79B4) 改回「禳」(U+79B3)",
+    "coverage.assertionLayerGaps 10 条截断 text 补全或改名",
+    "FS3/U13 绝对否定降级为存疑并登记第六十三回待查",
+    "KG9 补记「奉丞相命」反向证据",
+    "RFS4 的「单次出现」表述与正文「出现两次」对齐"
+  ],
+  "notes": "## 判定：partial\n\n### 一、先说候选做得对的地方（逐条复算过，不是客套）\n1. 引用层零缺陷：387 个带偏移 quote 对象 / 169 条去重引文，T[start:end]==quote 387/387、find 命中 387/387、sourceHash 387/387、inRange 标记 0 处不符、globalOccurrences 与 inUnitOccurrences 0 处不符。19 条越界引文全部显式登记，越界未声明 = 0。\n2. 抽取项无编造：14 task / 17 causeEdge / 13 state / 5 foreshadow / 16 worldSetting / 12 knowledgeGap / 23 characterClaim 逐条回溯原文，0 条找不到对应文字。\n3. 五元组分栏纪律：专门查了「同一句同时当多栏依据」这个计划点名的高发缺陷（旧图谱 714/1664）——本候选 0 条跨栏复用；19 处 null 全部带 note；cost 只在 T12 有值且引证正确（其余 13 条如实写 null + 理由）。\n4. 自报指标全对：15 个分区计数、19 处 null、伏笔 4 resolved / 1 unresolved、worldSettings 8 place/5 item/3 rule、双哈希对账说明 —— 独立复算全部一致。\n5. 红线执行到位：semanticReview=not-performed；「取荆州」记 mentioned 而非 arrived；人物猜测/诈问留在 characterClaims；结束不当成功。\n\n### 二、为什么是 partial 而不是 pass\n四条可复现的证据质量缺陷（见 counterExamples），都不影响任何抽取项的真伪，所以不判 fail；但都是字段级可复现的问题，所以不能 pass。其中 CE-A 最值得记：候选打印的引文自己带着它声称缺失的右引号 —— 这类「现象对、归因错」的缺陷只有把引文重新拿去 find 一次才会暴露。\n\n### 三、为什么不是 fail\n没有找到一条编造。唯一接近错误结论的是 CE-D（FS3/U13 的绝对否定）：第六十三回确有「白马换主→庞统死于乱箭」一段，但原文在该处只称「白马」，从不逐字写它是的卢。按 VERIFIER.md 纪律「拿不出原文引证的反对意见只能记为存疑，不能据此判 fail」，我据此只降级该条，不判 fail。\n\n### 四、反向验证（本文件最有价值的部分）\n口径与候选结论无关：把 tilingBlocks / quoteIndex / coverage / outOfRangeCitations 四个搬运层排除后，对断言层未覆盖的原文片段逐条问「这个事实被解释了吗」。最实质的一条是「奉丞相命，特来擒汝！」——它直接关系到 KG9「部将的自发行动」这一 derived 结论，却从未进入任何断言层，候选也未在 KG9 里处理这条反向证据。其余四条（吾不如也 / 水镜形象与庄院环境 / 战阵程序细节 / 蔡瑁职责话术与信息对峙机制）同样是「只被搬运、未被解释」。\n\n### 五、本次复核是重复派发（必须说明）\n我接手时 verify:sanguo:L0:0034 已在 done_ids() 中（记录 loop/state/out/verify_sanguo_L0_0034.json，agent=w-dafeng-2，status=done，validation.problems=[]），loop/state/out/verify_sanguo_L0_0034.verdict.json 亦已存在（26,765 字节，sha256 7240313f2d3c3ae638b4bc5b663c5205a2e944bda62409f7fcedb65d20346160）。按任务 writes 我是本路径的指定写入者且持有效租约，故照常产出；但上一份 verdict 文件的内容被本次写入取代。为可追溯，在此登记它的哈希与归属，并说明其实质内容并未丢失：notes / counterExamples / reverseChecks 三者逐字保存在 loop/state/out/read_sanguo_L0_0034.json 的 reviews[0] 中（已校验三者相等）。我的独立结论与上一份同判 partial，但独立得出了 CE-D 的降级理由与全部 5 条反向验证，并补了 CE-A 的精确锚点 178902。同理，cmd_submit 会把 loop/state/out/verify_sanguo_L0_0034.json 这一记录文件更新为本次提交（agent=w-sanguo-1）。\n\n### 六、我未做的部分（如实登记，不编）\n无第二版本可比对 TC1「英雌」/TC2「单富·稿赏」/TC3「入城？」/CE-B「禳」四处异文的底本原样；语义层（各任务五元组的动机强弱、因果强度、TH1/TH2 两种读法的优劣）未复核，仍待语义复核通道；未核实第六十七回 341672「的卢当日跳檀溪」之外的用典语境。\n\n### 七、可复现命令\nshasum -a 256 data/cache/fe42d01f3826fe8096f86614.docs.json data/cache/152e2a6eed94f1075e7e7070.docs.json loop/state/out/read_sanguo_L0_0034.candidate.json\npython3 -B -c \"import json;t=json.load(open('data/cache/fe42d01f3826fe8096f86614.docs.json'));t=(t[0] if isinstance(t,list) else t['docs'][0])['text'];b=t[176133:180031];s=[];u=[]\\nfor i,c in enumerate(b):\\n    (s.append(i) if c=='“' else (s.pop() if s else u.append(i)))\\nprint('unclosed',[176133+x for x in s],'unmatched',u)\"\n# 期望 unclosed [178902] unmatched [] —— 即 CE-A 的锚点\npython3 -B -c \"r=open('loop/state/out/read_sanguo_L0_0034.candidate.json',encoding='utf-8').read();print('U+79B4',r.count(chr(0x79b4)),'U+79B3',r.count(chr(0x79b3)))\"\n# 期望 U+79B4 1 U+79B3 18 —— 即 CE-B 的 1 处笔误",
+  "evidence": [
+    {
+      "path": "data/cache/fe42d01f3826fe8096f86614.docs.json",
+      "sha256": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+      "kind": "原文（只读引用，未修改）"
+    },
+    {
+      "path": "data/cache/152e2a6eed94f1075e7e7070.docs.json",
+      "sha256": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+      "kind": "任务顶层 sourceHash 指向的同文本文件（只读，用于双哈希对账）"
+    },
+    {
+      "path": "loop/state/out/read_sanguo_L0_0034.candidate.json",
+      "sha256": "9e6c154a645c0d034ea9ed0de8bad8686cc6ae9149a7b257a84cb4475ad7eb2f",
+      "kind": "被复核候选（只读，未修改）"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "387 个带偏移 quote 对象逐条 T[start:end]==quote：387/387 成立，0 条不符",
+      "result": "pass"
+    },
+    {
+      "text": "169 条去重引文逐条 text.find(quote)：169/169 命中；globalOccurrences/inUnitOccurrences 独立复算 0 处不符",
+      "result": "pass"
+    },
+    {
+      "text": "387 条 sourceHash 与 docs.json 实测 sha256 比对 387/387 一致；inRange 标记 0 处不符；越界未声明 = 0（已声明 19 条）",
+      "result": "pass"
+    },
+    {
+      "text": "抽取项核对：14 task/17 causeEdge/13 state/5 foreshadow/16 worldSetting/12 knowledgeGap/23 characterClaim 逐条回溯原文，编造 0 条",
+      "result": "pass"
+    },
+    {
+      "text": "五元组分栏纪律：跨栏复用同一句 = 0；19 处 null 全部带 note；cost 仅 T12 有值且引证正确",
+      "result": "pass"
+    },
+    {
+      "text": "自报指标独立复算：15 个分区计数、19 处 null、伏笔 4/1、worldSettings 8/5/3，全部一致",
+      "result": "pass"
+    },
+    {
+      "text": "误杀检查：6 条 rejectedCauseEdges + 4 条 rejectedForeshadows 拒因逐条回溯原文均可支持，误杀 0 条",
+      "result": "pass"
+    },
+    {
+      "text": "幻觉/越权检查：区间内 0 次的专名 100% 带「区间外」限定；无把结束当成功",
+      "result": "pass"
+    },
+    {
+      "text": "引用核验 random.seed(20261009) 抽 5 条：5/5 逐字命中、5/5 偏移与 find 一致",
+      "result": "pass"
+    },
+    {
+      "text": "双哈希对账：fe42d01f… 与 152e2a… 的 docs[0].text 逐字相等（各 607191 cp），差异仅 JSON 键顺序",
+      "result": "pass"
+    },
+    {
+      "text": "CE-A 引号锚点：候选自己打印的引文自带右引号；栈式扫描未闭合左引号在 178902，候选锚 178926 错误",
+      "result": "fail"
+    },
+    {
+      "text": "CE-B 用字：候选 U4 正文把原文「禳」(U+79B3) 写作「禴」(U+79B4) 1 处，与自述「不改字」不符",
+      "result": "fail"
+    },
+    {
+      "text": "CE-C coverage.assertionLayerGaps 42 条中 10 条 text 被截断为 60 字（chars 声明至 125），10/10 为真前缀、start/end 正确",
+      "result": "fail"
+    },
+    {
+      "text": "CE-D FS3/U13 绝对否定超出检索口径（只查字面「的卢」）：第六十三回白马换主致庞统死一段口径外待查，但无法逐字证明是同一匹马 ⇒ 记存疑，不判 fail",
+      "result": "unknown"
+    },
+    {
+      "text": "反向验证：排除搬运层后发现 5 条区间内事实从未进入断言层，含与 KG9 直接相关的「奉丞相命，特来擒汝！」(179479)",
+      "result": "fail"
+    },
+    {
+      "text": "重复派发登记：接手时任务已在 done_ids()，前一份 verdict 文件 sha256 7240313f… 被本次写入取代，其 notes/counterExamples/reverseChecks 逐字保存于 read_sanguo_L0_0034.json reviews[0]",
+      "result": "unknown"
+    }
+  ],
+  "changes": [],
+  "protectedPaths": {
+    "touched": [],
+    "note": "只写 loop/state/out/verify_sanguo_L0_0034.verdict.json（任务 writes 指定）；cmd_submit 会更新同任务的记录文件 loop/state/out/verify_sanguo_L0_0034.json。data/cache/*.docs.json 与候选只读，sha256 与动手前一致。未运行 git checkout/reset/stash；未跑 GPU/浏览器测试；未改 js/ css/ index.html serve.py narrative.py distill.py scripts/ tests/ tools/ docs/ data/。"
+  },
+  "sourceHashes": {
+    "data/cache/fe42d01f3826fe8096f86614.docs.json": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+    "data/cache/152e2a6eed94f1075e7e7070.docs.json": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+    "loop/state/out/read_sanguo_L0_0034.candidate.json": "9e6c154a645c0d034ea9ed0de8bad8686cc6ae9149a7b257a84cb4475ad7eb2f",
+    "loop/state/out/verify_sanguo_L0_0034.verdict.json@replacedByThisWrite": "7240313f2d3c3ae638b4bc5b663c5205a2e944bda62409f7fcedb65d20346160"
+  },
+  "remaining": [
+    "read 侧返工（若采纳）：改锚 TC4 到 [178899,178926) 并修「禴→禳」；FS3/U13 绝对否定降级并登记第六十三回待查；补全 coverage.assertionLayerGaps 10 条截断 text；KG9 补记「奉丞相命」反向证据；RFS4 表述对齐",
+    "环境侧（非本候选缺陷，建议核 build_plan.py 取值口径）：read:sanguo 任务的顶层 sourceHash 指向 152e2a…，而 prompt 正文指向 fe42d01f…，两文件同文本不同序列化",
+    "环境侧（本复核发现）：verify:sanguo:L0_0034 已在 done_ids() 且已有 verdict 文件的情况下被再次派发并领取租约（agent=w-sanguo-1），导致同一产出路径被二次写入；建议核 pick()/派发侧对 verify 任务的去重与租约释放",
+    "本复核未做：第二版本异文比对（英雌/单富·稿赏/入城？/禳）；语义层（五元组动机强弱、因果强度、TH1/TH2 优劣）未复核，仍待语义复核通道"
+  ],
+  "rollback": [
+    "删除 loop/state/out/verify_sanguo_L0_0034.verdict.json（注意：会同时移除本次复核与上一份 w-dafeng-2 的 verdict 文件；上一份的实质内容仍在 read_sanguo_L0_0034.json 的 reviews[0] 中）",
+    "从 loop/state/out/read_sanguo_L0_0034.json 的 reviews[] 移除 reviewer=w-sanguo-1 的条目并把 verifyState 还原为写入前的值",
+    "原文与候选未被修改，无需回滚"
+  ],
+  "status": "done",
+  "summary": "独立反向复核《三国演义》第三十五回 [176133,180031)（3898 codepoint）。先自己通读原文、后看候选。【引用层与抽取层干净】387 个带偏移 quote 对象逐条 T[start:end]==quote 与 find 全部命中；sourceHash/inRange/出现次数 0 处不符；越界未声明 = 0；14 task/17 causeEdge/13 state/5 foreshadow/16 worldSetting/12 knowledgeGap/23 characterClaim 逐条回溯原文，编造 0 条；五元组跨栏复用 = 0；15 个自报指标独立复算全一致；误杀 0、幻觉 0、抽 5 条 quote 5/5 逐字命中。【判 partial 的四条实据】① 候选打印的引文「玄德曰：“愿闻禳法。”」自己就带着它声称缺失的右引号——栈式扫描显示真正未闭合的左引号在 178902（属前一句 福曰：…可禳。），锚点 178926 指错；② 同一条 U4 的正文把原文「禳」(U+79B3) 误写作「禴」(U+79B4)，与它自述的「不改字」不符；③ coverage.assertionLayerGaps 42 条中 10 条 text 被静默截断为 60 字（声明至 125），10/10 为真前缀故 start/end 正确；④ FS3/U13 的绝对否定「全书没有一处写这匹马害死某位主人」超出它只检索字面「的卢」的口径——第六十三回有白马换主致庞统死一段，但原文只称「白马」，按纪律记存疑、不判 fail。【反向验证 5 条】最有价值的是「吾乃大将吕旷也。奉丞相命，特来擒汝！」(179479)：它直接关系到 KG9「部将的自发行动」这一 derived 结论，却从未进入任何断言层；其余为「吾不如也」(176593)、水镜形象与庄院环境(177070/177138)、战阵程序(179439/179498/179645)、蔡瑁职责话术与三问三答的信息对峙机制(176348)。【一并登记】本任务接手时已在 done_ids() 且已有 verdict 文件（sha256 7240313f…），属重复派发；我按 writes 与租约照常产出，并登记被取代哈希，其 notes/counterExamples/reverseChecks 逐字保存于 read_sanguo_L0_0034.json reviews[0]（已校验相等）。未做部分已如实写入 remaining。",
+  "submittedAt": "2026-10-09T22:30:24Z",
+  "wallClockSeconds": 1706,
+  "wallClockFrom": "lease.startedAt",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-09T22:30:24Z"
+  },
+  "verifyState": "pending"
+}

@@ -1,0 +1,373 @@
+{
+ "verdict": "partial",
+ "reviewedTask": "read:sanguo:L1:0043",
+ "reviewedArtifact": "loop/state/out/read_sanguo_L1_0043.candidate.json",
+ "reviewedArtifactSha256": "2545071bdcb6deae6e04adb266c1f4d999641facacb94d4e0bfb9fb77205ef48",
+ "candidateAgent": "w-read-3",
+ "source": {
+  "path": "data/cache/152e2a6eed94f1075e7e7070.docs.json",
+  "sha256": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+  "range": [
+   219066,
+   223801
+  ],
+  "codepoints": 4735,
+  "segmentSha256": "ee3c29eba9674f681f0ecedc3f39544ca270d37453d57c79ffe5814d6c2e7e5e",
+  "boundaryHead": "第四十四回　孔明用智激周瑜　孙权决计破曹操",
+  "sourceHashNote": "任务 JSON 冻结的 sourceHash=2988ce6e… 与 data/cache/152e2a6eed94f1075e7e7070.docs.json 逐字相符。候选声明读取的是 data/cache/fe42d01f3826fe8096f86614.docs.json（sha256=8ab7298a…，与任务 sourceHash 不同）。我独立核实：两文件 docs[0].text 逐字相等（均为 607191 字），切片 [219066,223801) 也逐字相等，故候选的引文定位**未受影响**；候选已在 unknowns.U1 如实登记该冲突。"
+ },
+ "summary": "判 partial。**引用层是干净的**：候选 218 条带偏移引文全部满足 text[start:end]==quote（0 条不符）、全部落在区间内、find(quote)==start 全部成立（218/218）、全文出现次数全部为 1；固定种子抽 5 条复核逐字命中且偏移一致。**零编造**：65 个专名/结局串在原文切片内逐一核对，候选未引入原文外的人物、地点或结局；未把回末悬念当成功（F2 自标 resolved=false，worldSettings 中三江口/夏口/汉上诚实记 mentioned 而非 arrived）。因此**不能判 fail**。但对抗性复核拿到硬反例：**① 6 条引文的 quotedSpanChars 大于引文自身长度，导致 quotedSpanFraction > 1.0（在候选自己给出的定义下算术上不可能）**；② 这 6 条同时**违反候选自己的 voiceRule**（其规则为 chars≥长度 ⇒ speech，实际却标 mixed）；③ **「瑜善其言。」被标为 voice=speech、insideQuotedSpan=true，而它是紧接后引号之后的纯叙述句**（此条与配对方案无关，任何把底本缺失的那个后引号正确归位的读法下都成立）。根因已定位并**精确复现 218/218**：段落局部 FIFO 配对 + 段末强行闭合未配对的左引号 + 求交时**逐区间相加而不先取并集**，使两个重叠引语区间的重叠部分被重复计入。该缺陷**不触及** tasks/causeEdges/states 的文本依据，也不影响 to_candidate.py（该脚本不消费 voice 字段），故判 partial 而非 fail：重算或删除 voice/quotedSpanChars/quotedSpanFraction 三项、并把底本引号失衡登记为 unknowns 后，候选主体可用。",
+ "counterExamples": [
+  {
+   "claim": "6 条引文的 quotedSpanChars 大于引文自身长度，quotedSpanFraction>1.0。按候选自述定义 quotedSpanChars=|[s,e)∩⋃[o,c]|，它是引文区间与引语区间并集的交集大小，**不可能超过 |[s,e)|**。",
+   "quote": "肃曰：“不可。今操贼未破，先杀贤士，是自去其助也。”",
+   "why": "该引文 [222841,222867) 长 26，候选报 quotedSpanChars=49、quotedSpanFraction=1.8846。同型共 6 条：'瑜曰：“此人助刘备，必为江东之患。”'（长18报33，1.8333）、'肃曰：“诸葛瑾乃其亲兄，可令招此人同事东吴，岂不妙哉？”'（长28报53，1.8929）、'肃曰：“诸葛瑾乃其亲兄，可令招此人同事东吴，岂不妙哉？”瑜善其言。'（长33报58，1.7576），以及前两条在 tasks[9]/causeEdges[12] 下的重复出现。机制已确证：该段落局部 FIFO 配对产生两个重叠区间 (222788,222867) 与 (222844,222885)，求交时逐区间相加把重叠段重复计入。复现脚本对 218 个 quotedSpanChars 命中 218/218。",
+   "reproduce": "python3 -B -s '/Volumes/资源库/我的资源/回滚点/verify-0043/mechanism.py'  →  [1] 复现 218 个 quotedSpanChars：218/218 → 机制确证"
+  },
+  {
+   "claim": "这 6 条同时违反候选自己写下的 voiceRule（『speech⟺全覆盖』，即 quotedSpanChars≥引文长度时应为 speech），实际却标为 mixed —— 用候选自身的数字即可判定，不依赖任何配对选择。",
+   "quote": "瑜曰：“此人助刘备，必为江东之患。”",
+   "why": "该条自报 len=18、quotedSpanChars=33（33≥18 ⇒ 按其规则应为 speech），实际标 mixed、fraction=1.8333。selfcontradiction.py 独立复算：同类自相矛盾共 6 条。",
+   "reproduce": "python3 -B -s '/Volumes/资源库/我的资源/回滚点/verify-0043/selfcontradiction.py'  →  '自报 chars ≥ 长度、按自己的规则应为 speech 却不是 speech：6 条'"
+  },
+  {
+   "claim": "『瑜善其言。』被标为 voice=speech、insideQuotedSpan=true、quotedSpanChars=5，但它是叙述句。此反例**与配对方案无关**。",
+   "quote": "瑜善其言。",
+   "why": "决定性检验有两条，均可直接跑命令复现：① 该句紧接在后引号之后（seg[3846]=='”'，U+201D），任何把底本缺失的那个后引号正确归位的读法下它都在引语之外；② 该处底本**缺失一个后引号**：『言欲杀孔明之事。』之后直接接『肃曰：“不可。』，中间没有 ”（段落局部 “=39、”=38，唯一不平衡段）。候选的段末强行闭合把最后一个左引号（222888）延伸到段末，于是把位于 222913 的叙述句吞进幽灵区间。正确归属下 voice=narration、quotedSpanChars=0。该引文在候选里出现 3 处（tasks[9]/action、causeEdges[12]/to、causeEdges[14]/from），3 处均标错。",
+   "reproduce": "python3 -B -s '/Volumes/资源库/我的资源/回滚点/verify-0043/voice_truth.py'  →  『瑜善其言』正确: narration 交=0/5 ；『瑜善其言。』前一个字符: '”' (U+201D)"
+  }
+ ],
+ "reverseChecks": [
+  {
+   "found": "鲁肃在本区间是**主要行动者**（引孔明入场、当场驳周瑜降论、提出招诸葛瑾的替代方案），却在候选 tasks 的 13 条里**一条都没有**——actor 列表为「吴国太, 周瑜×8, 孔明, 孙权, 程普, 诸葛瑾」，零条鲁肃。候选仅在 causeEdges[12]/causeEdges[13] 里把他当因果端点。",
+   "quote": "鲁肃与瑜最厚，先来接着，将前项事细述一番。",
+   "note": "候选 selfCritique.SC5 已自陈「众数人物区分」是风险点，但没有把鲁肃纳入；这是反向验证查出的结构性遗漏（主体分配口径问题，不是编造）。"
+  },
+  {
+   "found": "鲁肃驳周瑜降论的三句关键台词**全部零引文覆盖**，候选只在 rejectedEdges/prose 里提过：『君言差矣』『伯符遗言，外事付托将军。』『操未必便能得志也』。其中『伯符遗言，外事付托将军』正是全回授权链（伯符遗言→周瑜决断）的第二处文本依据，而候选只引了吴国太转述的那一次。",
+   "quote": "鲁肃愕然曰：“君言差矣！江东基业，已历三世，岂可一旦弃于他人？伯符遗言，外事付托将军。今正欲仗将军保全国家，为泰山之靠，奈何从懦夫之议耶？”",
+   "note": "coverage-union.json 记录：零覆盖 22 条，部分覆盖 0 条。"
+  },
+  {
+   "found": "激将戏的**反衬句**零覆盖——周瑜在孔明抛出二乔之计前说『孔明乃识时务之士，必与吾有同心』，这句是后面勃然大怒的直接对照物；候选的 causeEdges[4]/CE5 只取了赋文与发怒两端，中间的反衬句未落证据。",
+   "quote": "瑜曰：“孔明乃识时务之士，必与吾有同心。”"
+  },
+  {
+   "found": "周瑜读檄文后**第一次公开表态**零覆盖，候选的 T7 直接从孙权问『君之意若何』跳到堂上驳张昭，漏掉了周瑜本人对檄文的第一反应。",
+   "quote": "瑜看毕，笑曰：“老贼以我江东无人，敢如此相侮耶！”"
+  },
+  {
+   "found": "孙权斫案后的**两项承诺**零覆盖：亲与操贼决战、以及给周瑜留的退路（『卿前军倘不如意，便还就孤』）。候选 T8 只引到斫案与赐剑；这两句是孙权从『狐疑』转为『更无他疑』的收束语，也是 S2 after 的完整依据。",
+   "quote": "卿前军倘不如意，便还就孤。孤当亲与操贼决战，更无他疑。”"
+  },
+  {
+   "found": "候选在**论据字段**里引用、却**没有落成 quoteRef** 的原文片段共 10 条（独立扫描：抽出自述字段里所有「」『』引用，逐条求 quoteRef 覆盖）。这正是候选自己在 reverseCheck.whatWasAddedBecauseOfThisScan 里承认过的缺陷类型（它当时补了『孔明佯作惶恐之状』），同类问题**仍然存在**。",
+   "quote": "愿闻先生所以主降之意",
+   "note": "10 条及所在论据字段：tasks[6].obstacle.text（主公尊意若何 / 主公曾与众文武商议否？）、tasks[7].costNote（孤当亲与操贼决战）、causeEdges[5].mechanism（愿闻先生所以主降之意）、rejectedEdges[6].why 与 foreshadows[1].unresolvedNote（且看下回分解 / 毕竟周瑜定何计伏孔明…）、worldSettings[10].explain（孔明即时诵《铜雀台赋》云）、unknowns[13].text（------------------）、selfCritique[4].text（程普、黄盖、韩当等一班战将）。**需区分**：候选的 reverseCheck.uncoveredSentencesList 已诚实登记了这些句子未被引文覆盖（这是它查漏机制的产物），所以不是隐瞒；问题在于它们**被当作论据写进了论据字段，却没有绑定证据指针**——按候选自己承认的标准，这类应当补 quoteRef。见 selfcontradiction.json。"
+  }
+ ],
+ "misKillCheck": "未发现误杀。逐条复核候选 rejectedEdges 的 9 条排除理由，均成立且引证可查：RE7 拒绝据后文给『吾自有伏孔明之计』连边（回末明写『且看下回分解』，本区间确无内容）是正确克制；RE8 指出孙权怀惧的文本来源是檄文而非张昭当面那句话，方向正确；RE2/RE5 拒绝把『都在场』当机制，符合 notMereAdjacency 口径。notForeshadows 排除『七禁令五十四斩』『范蠡献西施』等一次出现项亦符合其自述红线。反向验证另确认：候选**没有**因为词表/正则把任何真实因果边挡掉。",
+ "hallucinationCheck": "未发现编造。核对 65 个专名（含马腾、韩遂、董卓、袁绍、袁术、刘表、夷齐、范蠡、西施、单于、顾雍、张纮、步骘、程咨、蒋钦、周泰、凌统、潘璋、太史慈、陆逊、董袭、朱治等）在原文切片中的出现次数，候选未使用任何原文外人物；『赤壁』『曹操败』『周瑜死』『纳降成功』『孔明被害』等区间外结局串在候选文本中出现 0 次。原文中 0 次的名字（『夷齐』）为我把『夷、齐』连写所致的检索假阳性，候选使用的是原文写法『夷、齐』。未把结束当成功：F2 明标 resolved=false，三江口/夏口/汉上记 mentioned（有军令或话音但无到达动作），worldSettings 的 institution 分记 executed/declared。",
+ "citationSample": [
+  {
+   "locator": "/causeEdges[7]/from/quoteRefs[0]",
+   "quote": "瑜曰：“臣为将军决一血战，万死不辞。只恐将军狐疑不定。”",
+   "declared": [
+    222170,
+    222198
+   ],
+   "find": 222170,
+   "verbatim": true,
+   "offsetMatches": true,
+   "sliceEqual": true,
+   "occurrencesInWholeDoc": 1
+  },
+  {
+   "locator": "/tasks[0]/action/quoteRefs[0]",
+   "quote": "先姊遗言云：‘伯符临终有言：内事不决问张昭，外事不决问周瑜。’",
+   "declared": [
+    219109,
+    219140
+   ],
+   "find": 219109,
+   "verbatim": true,
+   "offsetMatches": true,
+   "sliceEqual": true,
+   "occurrencesInWholeDoc": 1
+  },
+  {
+   "locator": "/speechAsClueNotFact[2]/quoteRefs[0]",
+   "quote": "彼因自欲雪愤，特下说词以激主公。",
+   "declared": [
+    219415,
+    219431
+   ],
+   "find": 219415,
+   "verbatim": true,
+   "offsetMatches": true,
+   "sliceEqual": true,
+   "occurrencesInWholeDoc": 1
+  },
+  {
+   "locator": "/tasks[2]/action/quoteRefs[0]",
+   "quote": "瑜曰：“吾亦欲降久矣。公等请回，明早见主公，自有定议。”",
+   "declared": [
+    219473,
+    219501
+   ],
+   "find": 219473,
+   "verbatim": true,
+   "offsetMatches": true,
+   "sliceEqual": true,
+   "occurrencesInWholeDoc": 1
+  },
+  {
+   "locator": "/tasks[0]/objective/quoteRefs[0]",
+   "quote": "今何不请公瑾问之？",
+   "declared": [
+    219140,
+    219149
+   ],
+   "find": 219140,
+   "verbatim": true,
+   "offsetMatches": true,
+   "sliceEqual": true,
+   "occurrencesInWholeDoc": 1
+  }
+ ],
+ "quoteAudit": {
+  "quoteRefs": 218,
+  "sliceFindFail": 0,
+  "wholeDocFindFail": 0,
+  "findNotEqualStart": 0,
+  "textSliceNotEqualQuote": 0,
+  "outOfRange": 0,
+  "occurrencesGreaterThanOne": 0,
+  "randomSampleSize": 5,
+  "randomSampleSeed": 20261012,
+  "randomSampleAllVerbatim": true,
+  "note": "由 verify.py 独立实现（未复用候选的 assemble.py）。218 条全部满足 text[start:end]==quote 且 find(quote)==start。"
+ },
+ "coverage": {
+  "independentlyRecomputed": true,
+  "sentences": 260,
+  "uncoveredSentences": 88,
+  "uncoveredChars": 1467,
+  "unionCoveredChars": 3184,
+  "charCoverageUnion": 0.6724,
+  "candidateDeclared": {
+   "sentences": 258,
+   "uncoveredSentences": 86,
+   "uncoveredChars": 1457,
+   "charCoverage": 0.6724
+  },
+  "note": "我的断句口径（260/88/1467）与候选（258/86/1457）差 2 句 10 字，已核对为**分段前导空白归属**差异（候选把段落前的 \\n\\n 与全角空格并入未覆盖句，我不并入），非缺陷。候选 charCoverage=0.6724 与并集口径重算一致（3184/4735），说明它用的是正确口径。**但 charCoverage 与 uncoveredChars 不同基**：3184+1457=4641≠4735，差 94 字为既不在任何句子内、也不被引文覆盖的空白/段落标记。两个数字各自成立却未说明口径差异，属**报告自描述不足**，非硬缺陷，记为存疑。"
+ },
+ "selfContradiction": {
+  "ruleViolations": 6,
+  "note": "候选 voiceRule 自述 speech⟺全覆盖，但 6 条自报 chars≥长度者标为 mixed。用候选自身数字即可判定，不依赖配对选择。"
+ },
+ "usableVsDiscard": {
+  "usable": [
+   "tasks[13] / causeEdges[20] / states[10] / foreshadows[2] / notForeshadows[6] / worldSettings[15] / notWorldSettings[5] / unknowns[15] / selfCritique[6] 的**文本依据与引文定位**：218 条引文全部逐字可查、偏移自洽、区间内唯一命中。",
+   "rejectedEdges[9]：9 条排除理由逐条成立，无误杀。",
+   "F2 的 resolved=false 与 unknowns.U6：对『吾自有伏孔明之计』保持未回收，未据后文补写，符合红线。",
+   "unknowns.U1：如实登记 sourceHash 口径冲突（我已独立证实两文件正文逐字相等，候选的处理未影响引文定位）。"
+  ],
+  "discardOrDowngrade": [
+   "218 条引文上的 quotedSpanChars / quotedSpanFraction：**必须整体重算**（求交前先对引语区间取并集），或直接删除这两个派生字段。当前有 15 条数值错误、其中 6 条 fraction>1.0。",
+   "3 处『瑜善其言。』的 voice：speech→narration、insideQuotedSpan true→false、quotedSpanChars 5→0。",
+   "『周瑜谢出，暗忖曰：“…言欲杀孔明之事。』及其后续同段引文的 voice：受底本**缺失后引号**影响，候选的段末强行闭合口径不可用；正确配对下该段 4 条引文的 voice 应为 mixed/narration（见 voice-verdict.json），quotedSpanChars 为 0/23/15/25。",
+   "metrics.voiceByClass：按正确配对重算为 {speech:37, mixed:117, narration:64}，与自报 {41,122,55} 不符，随上述修正一并更新。",
+   "新增一条 unknowns：本区间第 8 段引号失衡（“=39、”=38，缺失处为『言欲杀孔明之事。』之后），该底本缺陷应在 unknowns 里显式登记，而不是用段末强行闭合悄悄吸收。"
+  ]
+ },
+ "notes": "判定为 partial 而非 fail 的理由：三条反例**没有一条是编造**——所有被引文字都在原文逐字可查，被断言的语义（周瑜试探两派、孙权斫案授权、程普因程咨回报而折服、诸葛瑾招揽失败）在原文里都成立。缺陷集中在**派生标注层**（quotedSpanChars/Fraction/voice），且该层不被下游消费（grep 确认 to_candidate.py 与 verify_evidence.py 均不读取 voice/quotedSpan* 字段），因此不动摇候选的主体内容。判 fail 的门槛是「有 counterExample 且 quote 逐字可查」——本反例满足门槛，但按角色契约『判 partial 时要说清哪些条目可以用、哪些必须丢弃或降级』，此处降级处理比整体否决更准确：主体的文本依据经 218 条逐字核验是可靠的，需修的是一个可机械重算的标注口径。\n\n**我自己的不确定处，如实登记**：(1) 我用于给出『正确 voice』的右对齐配对，本身是对一份**底本已损坏**（缺一个后引号）的文本的解释，不是原文事实；CE3 中『瑜善其言。』= narration 这一条不依赖该解释（紧接后引号之后即可判定），但同段另 3 条引文的 voice 正确值依赖我的配对选择，应视为**存疑**而非定论。候选把该段标为 mixed 在语义上也可辩护（引文确实跨了叙述框架与引语内部），真正的硬错误是 chars 数值越界与由此产生的 fraction>1，而非 mixed 这个标签本身。(2) 我的首轮覆盖度量曾把重叠区间重复计数，得出『300% 覆盖』的假结果，与我在候选身上抓到的缺陷是同一类错；已改用并集口径（coverage_union.py）并据此更正了全部反向验证结论。\n\n未做的事：未运行任何 GPU/浏览器测试（本任务为纯文本复核，不需要）；未运行 accept.sh；未改动 js/ css/ index.html serve.py narrative.py scripts/ tests/ docs/ data/ 等受保护路径；未修改被复核的候选文件。语义正确性只覆盖我抽到的反例与反向检查点，不是对 218 条引文的逐条语义复核；未涉及的部分不因本判 partial 而被认证。",
+ "candidateVerdict": null,
+ "independenceNote": "复核者 w-dafeng-3 ≠ 原提交者 w-read-3（loop.py verify 会拒绝自签）。复核流程：先自行通读原文切片 [219066,223801)（未先看候选结论），再逐条核对；全部脚本独立实现于 /Volumes/资源库/我的资源/回滚点/verify-0043/，未复用候选的 assemble.py。",
+ "task": "verify:sanguo:L1:0043",
+ "agent": "w-dafeng-3",
+ "role": "VERIFIER",
+ "status": "done",
+ "book": "sanguo",
+ "lane": 1,
+ "unitIndex": 43,
+ "unitHead": "第四十四回　孔明用智激周瑜　孙权决计破曹操",
+ "evidence": [
+  {
+   "path": "/Users/carmen/Desktop/星系/loop/state/out/read_sanguo_L1_0043.candidate.json",
+   "sha256": "2545071bdcb6deae6e04adb266c1f4d999641facacb94d4e0bfb9fb77205ef48",
+   "kind": "被复核候选（只读，未修改）"
+  },
+  {
+   "path": "/Users/carmen/Desktop/星系/data/cache/152e2a6eed94f1075e7e7070.docs.json",
+   "sha256": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+   "kind": "原文（只读引用，未修改；sha256 与任务 sourceHash 逐字相符）"
+  },
+  {
+   "path": "/Volumes/资源库/我的资源/回滚点/verify-0043/verify.py",
+   "sha256": "292c9e4ef29a0a9e48f2afab2da41511fe8322410f85e368aa161e727736a49a",
+   "kind": "独立引文核验脚本：218 条 quote 的 text[s:e]==quote / find(s)==start / 出现次数（未复用候选 assemble.py）"
+  },
+  {
+   "path": "/Volumes/资源库/我的资源/回滚点/verify-0043/mechanism.py",
+   "sha256": "9fd8547c5843441c865e0e830a961e1ce9dd9bc26414994859b1689232a79e5b",
+   "kind": "机制确证脚本：复现全部 218 个 quotedSpanChars（218/218），证明段末强行闭合+逐区间重复计数"
+  },
+  {
+   "path": "/Volumes/资源库/我的资源/回滚点/verify-0043/voice_truth.py",
+   "sha256": "b7f62b8e0e7fc55c775940bf6c00634b459e79c3fe99be170948f3b02e24b1bf",
+   "kind": "引号失衡定位与正确配对下的 voice 重算（『瑜善其言。』紧接后引号之后）"
+  },
+  {
+   "path": "/Volumes/资源库/我的资源/回滚点/verify-0043/selfcontradiction.py",
+   "sha256": "ecaca4c951bd12ac021e56a412e2e80e95dabb1221ab286f96c74529c627b34a",
+   "kind": "自洽性检验：用候选自身数字判定 6 条违反其自述 voiceRule；prose 引用零覆盖扫描"
+  },
+  {
+   "path": "/Volumes/资源库/我的资源/回滚点/verify-0043/coverage_union.py",
+   "sha256": "2df4c2c6a7f60b3cfaabe9e1d40941086393d3b52465d29bcd23504954771b45",
+   "kind": "并集口径的覆盖重算（修正我自己首轮的重叠重复计数错误）"
+  },
+  {
+   "path": "/Volumes/资源库/我的资源/回滚点/verify-0043/sample5.py",
+   "sha256": "df00fa64c9bfecc4b35887d2e6ec38b1c1086456ab65315eabbb98afab5ec5e7",
+   "kind": "固定种子(20261012)随机抽 5 条 quote 复核定点核查"
+  },
+  {
+   "path": "/Volumes/资源库/我的资源/回滚点/verify-0043/halluc.py",
+   "sha256": "6a880a3806f9ffd91c5a43e35918052171f1b9a782d431f6b2260eee81c92a1e",
+   "kind": "幻觉/越权检查：65 个专名与结局串逐一对原文切片计数"
+  },
+  {
+   "path": "/Volumes/资源库/我的资源/回滚点/verify-0043/verify-out.json",
+   "sha256": "c603d8ad272b7a9aaa89d32a1a504f84427c346d5707c3c80578cbb612239b96",
+   "kind": "引文核验输出（findFail=0 / findNotStart=0 / sliceEqFail=0 / outOfRange=0）"
+  },
+  {
+   "path": "/Volumes/资源库/我的资源/回滚点/verify-0043/voice-verdict.json",
+   "sha256": "09243bdafa05be117fbbf87ac7ed9e06afa733f1efa498c9b1d208bd67ac5840",
+   "kind": "正确配对下 voice 错误清单与 voiceByClass 重算 {speech:37, mixed:117, narration:64}"
+  },
+  {
+   "path": "/Volumes/资源库/我的资源/回滚点/verify-0043/final-findings.json",
+   "sha256": "d6d4e6e1d6fb6b64f50646c1832de994aed0d6eae9f200ca21f81339524b7c1a",
+   "kind": "6 条 quotedSpanChars 越界明细 + 19 条零覆盖原文事实"
+  },
+  {
+   "path": "/Volumes/资源库/我的资源/回滚点/verify-0043/selfcontradiction.json",
+   "sha256": "fc7d381b7949a8d57a7d14c67d044fca70e314f750628ed9abbac1b28cd15ab2",
+   "kind": "6 条规则自相矛盾明细 + 10 条论据字段引用零引文覆盖明细"
+  },
+  {
+   "path": "/Volumes/资源库/我的资源/回滚点/verify-0043/coverage-union.json",
+   "sha256": "48d0a67a0dfe7976574c007117a48a8ccd35f9c3f7355eb628f3ef8599cf166a",
+   "kind": "定点反向验证结果（零覆盖 22 条 / 部分覆盖 0 条）"
+  },
+  {
+   "path": "/Volumes/资源库/我的资源/回滚点/verify-0043/sample5.json",
+   "sha256": "8a765146ebf1a050acae39c965046e79c16eb8274469cd658b7b0169577e98ee",
+   "kind": "5 条抽样结果与定点反向核查"
+  }
+ ],
+ "assertions": [
+  {
+   "text": "源文件哈希与任务 sourceHash 逐字一致（独立重算整文件 sha256）",
+   "result": "pass",
+   "cmd": "python3 -c \"import hashlib;print(hashlib.sha256(open('data/cache/152e2a6eed94f1075e7e7070.docs.json','rb').read()).hexdigest())\"",
+   "observed": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff"
+  },
+  {
+   "text": "切片 [219066,223801) 长 4735 且以本单元回目开头",
+   "result": "pass",
+   "observed": "sliceSha256=ee3c29eba9674f681f0ecedc3f39544ca270d37453d57c79ffe5814d6c2e7e5e，head=『第四十四回　孔明用智激周瑜　孙权决计破曹操』"
+  },
+  {
+   "text": "候选 218 条引文全部 text[start:end]==quote、find(quote)==start、切片内唯一命中",
+   "result": "pass",
+   "cmd": "python3 -B -s '/Volumes/资源库/我的资源/回滚点/verify-0043/verify.py'",
+   "observed": "切片内找不到 0 / 全文中找不到 0 / find!=start 0 / 偏移越界 0 / 全文出现>1次 0 / text[s:e]!=quote 0"
+  },
+  {
+   "text": "固定种子随机抽 5 条 quote 逐字命中且偏移一致",
+   "result": "pass",
+   "cmd": "python3 -B -s '/Volumes/资源库/我的资源/回滚点/verify-0043/sample5.py'",
+   "observed": "seed=20261012，5/5 逐字命中、偏移一致、切片相等、全文出现 1 次"
+  },
+  {
+   "text": "反例①：6 条引文的 quotedSpanChars 大于引文长度，fraction>1.0（定义上不可能）",
+   "result": "pass",
+   "cmd": "python3 -B -s '/Volumes/资源库/我的资源/回滚点/verify-0043/mechanism.py'",
+   "observed": "复现 218 个 quotedSpanChars：218/218 → 机制确证；越界 6 条，最大 fraction=1.8929"
+  },
+  {
+   "text": "反例②：用候选自身数字判定其违反自述 voiceRule（chars≥长度应为 speech，实标 mixed）",
+   "result": "pass",
+   "cmd": "python3 -B -s '/Volumes/资源库/我的资源/回滚点/verify-0043/selfcontradiction.py'",
+   "observed": "自相矛盾 6 条"
+  },
+  {
+   "text": "反例③：『瑜善其言。』是叙述句（与配对无关的判定）",
+   "result": "pass",
+   "cmd": "python3 -B -s '/Volumes/资源库/我的资源/回滚点/verify-0043/voice_truth.py'",
+   "observed": "前一字='”'(U+201D)，正确 voice=narration、quotedSpanChars=0；候选标 speech/True/5"
+  },
+  {
+   "text": "幻觉检查：65 个专名与区间外结局串均未出现在候选",
+   "result": "pass",
+   "cmd": "python3 -B -s '/Volumes/资源库/我的资源/回滚点/verify-0043/halluc.py'",
+   "observed": "『赤壁』『曹操败』『周瑜死』『纳降成功』『孔明被害』候选出现 0 次"
+  },
+  {
+   "text": "反向验证：候选 tasks 的 13 条 actor 中无一条鲁肃（结构性遗漏）",
+   "result": "pass",
+   "observed": "actors=['吴国太','周瑜'×8,'孔明','孙权','程普','诸葛瑾']；鲁肃仅作 causeEdges 端点"
+  },
+  {
+   "text": "候选内部数字自洽（分区计数、quoteRefs、uniqueQuotes、worldSettingsByKind 等）",
+   "result": "pass",
+   "cmd": "python3 -B -s '/Volumes/资源库/我的资源/回滚点/verify-0043/consistency.py'",
+   "observed": "全部一致；唯一不一致项 charCoverage 经复核为并集口径正确值（0.6724），非缺陷"
+  },
+  {
+   "text": "候选自述的两项零违规断言独立复算成立",
+   "result": "pass",
+   "cmd": "python3 -B -s '/Volumes/资源库/我的资源/回滚点/verify-0043/selfcheck_audit.py'",
+   "observed": "taskFieldsSharingQuoteWithinTask=0 违规；nullFieldsMissingNote=0 违规"
+  }
+ ],
+ "sourceHashes": {
+  "data/cache/152e2a6eed94f1075e7e7070.docs.json": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+  "data/cache/fe42d01f3826fe8096f86614.docs.json": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+  "loop/state/out/read_sanguo_L1_0043.candidate.json": "2545071bdcb6deae6e04adb266c1f4d999641facacb94d4e0bfb9fb77205ef48",
+  "loop/state/out/read_sanguo_L1_0043.json": "record-mutated-by-loop-verify-command"
+ },
+ "sourceHashesNote": "任务冻结的 sourceHash=2988ce6e… 属于 152e2a6eed94f1075e7e7070.docs.json（也与 f0b45e85aac6c95e584075a2.docs.json 的 sha256 相同）；候选声明它读的是 fe42d01f3826fe8096f86614.docs.json（8ab7298a…）。两者整文件哈希不同，但 docs[0].text 逐字相等（607191 字），切片 [219066,223801) 亦逐字相等 —— 已独立核实，故引文定位不受影响。read_sanguo_L1_0043.json 会被 `loop.py verify` 追加 reviews[] 与 verifyState，内容必然改变，故按其既有哨兵约定标 record-mutated-by-loop-verify-command，不写固定哈希。",
+ "changes": [
+  {
+   "path": "loop/state/out/verify_sanguo_L1_0043.verdict.json",
+   "kind": "append-only",
+   "note": "本轮唯一由我直接写入的路径（任务 writes 指定）。未改 js/ css/ index.html serve.py narrative.py scripts/ tests/ docs/ data/ 等受保护路径；未修改被复核的候选文件。`loop.py submit` 会按环境自身机制另写 loop/state/out/verify_sanguo_L1_0043.json（任务记录），`loop.py verify` 会向 read_sanguo_L1_0043.json 追加一条 review —— 两者都是环境命令的行为，与既有 verifier 记录（如 verify_xiyou_L1_0053）同型。"
+  }
+ ],
+ "remaining": [
+  "语义正确性未逐条核验：本轮语义判据只覆盖我抽到的反例与反向检查点，不是对 218 条引文的逐条语义复核；未涉及的部分不因本判 partial 而被认证。",
+  "复核只覆盖原文区间 [219066,223801)；区间外（含第四十三回末与第四十五回首）未阅读、未作为任何证据。区间内无法判定的悬置项沿用候选 unknowns，未据后文补写。",
+  "候选 unknowns（15 条）我未逐条重判，只核对了 U1（sourceHash 冲突）与 U6/U14；其余沿用候选，未认证。",
+  "『正确 voice』的右对齐配对是对一份**底本已损坏**（该段 “=39、”=38，缺失处为『言欲杀孔明之事。』之后）文本的解释，不是原文事实：『瑜善其言。』=narration 不依赖该解释，但同段另 3 条引文的正确 voice 值依赖配对选择，应视为存疑。",
+  "候选把该段引文标为 mixed 在语义上可辩护（引文确实跨了叙述框架与引语内部）；真正的硬错误是 quotedSpanChars 越界与 fraction>1，而非 mixed 标签本身。",
+  "未运行任何 GPU/浏览器测试（本任务为纯文本复核，不需要）；未运行 accept.sh；未做发布侧验证。",
+  "本轮未复核候选的 themeReadings（2 条）与 notForeshadows（6 条）的语义质量，只核了其引文定位。"
+ ],
+ "rollback": "删除 loop/state/out/verify_sanguo_L1_0043.verdict.json 即完全回滚。本复核全程只读候选与原文，未修改任何被复核文件，未触碰受保护路径。若已执行 `loop.py verify`，需从 loop/state/out/read_sanguo_L1_0043.json 的 reviews[] 中移除 reviewer=w-verify-4 的那条并把 verifyState 复位为 pending。",
+ "reproduce": [
+  "python3 -B -s '/Volumes/资源库/我的资源/回滚点/verify-0043/verify.py'          # 218 条引文逐字核验",
+  "python3 -B -s '/Volumes/资源库/我的资源/回滚点/verify-0043/mechanism.py'       # 复现 218/218，机制确证",
+  "python3 -B -s '/Volumes/资源库/我的资源/回滚点/verify-0043/voice_truth.py'     # 引号失衡与正确 voice",
+  "python3 -B -s '/Volumes/资源库/我的资源/回滚点/verify-0043/selfcontradiction.py'  # 自相矛盾 + prose 零覆盖",
+  "python3 -B -s '/Volumes/资源库/我的资源/回滚点/verify-0043/coverage_union.py'  # 并集口径覆盖重算",
+  "python3 -B -s '/Volumes/资源库/我的资源/回滚点/verify-0043/sample5.py'         # 5 条抽样",
+  "python3 -B -s '/Volumes/资源库/我的资源/回滚点/verify-0043/halluc.py'          # 幻觉/越权检查"
+ ],
+ "evidenceNote": "本轮证据含被复核候选、原文、以及 9 个独立复核脚本与 6 个 JSON 输出（全部现算 sha256）。**刻意不把 loop/state/out/read_sanguo_L1_0043.json 列为 evidence**： 会向它追加 reviews[] 并改 verifyState，任何固化其哈希的条目都会在 verify 执行后必然漂移，被 evidence_stale() 判为 hash-changed（is_evolving 对 loop/state/out/ 返回 False）。该文件的状态改由 sourceHashes 的 sentinel 记录，与既有 verifier 记录（verify_xiyou_L1_0053）同型。"
+}

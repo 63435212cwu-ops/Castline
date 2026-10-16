@@ -1,0 +1,190 @@
+{
+ "task": "verify:dafeng:L0:0056",
+ "verifierRole": "loop/ROLES/VERIFIER.md",
+ "verdict": "partial",
+ "reviewedCandidate": {
+  "path": "loop/state/out/read_dafeng_L0_0056.candidate.json",
+  "sha256": "f1a8639ec2cbf14e48160c22344bec448e94ec3ab5e85051d4fe96a5b4d51e36",
+  "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+  "range": [
+   171385,
+   175389
+  ]
+ },
+ "method": [
+  "1) 先自己通读 docs[0].text[171385:175389] 全文（未先看候选结论）。",
+  "2) 抽取项核对：候选文件内 273 个 in-range quote 对象逐条复算 T[start:end]==quote、len==end-start、find==start、inRange 标记。",
+  "3) 反向验证：对 111 个非分隔段落做独立覆盖度复算；另按可疑词表全量扫描候选未登记项。",
+  "4) 误杀检查：复算 paraphraseMarking 的 65 条自动『』转换，找出把真实原文误判为概括的情况。",
+  "5) 幻觉/越权检查：正文词元与切片对账；核对结局/成功判定与章号归属。",
+  "6) 引用核验：随机抽 5 条 quote 复算。"
+ ],
+ "counterExamples": [
+  {
+   "claim": "source.boundaryBefore 声明 `docs[0].text[171373:171385] == '在上架后。\\n------------\\n'`（宣称由脚本从磁盘现算并断言）。该断言为假。",
+   "quote": {
+    "quote": "在上架后。\n------------\n\n",
+    "findOffset": 171365,
+    "inRange": false,
+    "note": ""
+   },
+   "why": "实测 docs[0].text[171373:171385] == '----------\\n\\n'，与声明字面不符；声明的那段文字实际位于 [171365:171385]，偏移量错了 8 个 codepoint。这不是措辞问题：文件 provenanceNote 自称『脚本从磁盘重读 docs.json，对每条 quote 现算绝对 codepoint 偏移并逐字断言，断言失败即中止』，而这两条边界断言恰恰没有被断言过。",
+   "severity": "metadata/provenance 层；不污染抽取项本身（上一章确实以那段 PS 结尾）"
+  },
+  {
+   "claim": "source.boundaryAfter 声明 `docs[0].text[175389:175400] == '第五十八章 flag'`。该断言为假（切片多含一个换行）。",
+   "quote": {
+    "quote": "第五十八章 flag",
+    "findOffset": 175389,
+    "inRange": false,
+    "note": ""
+   },
+   "why": "实测 docs[0].text[175389:175400] == '第五十八章 flag\\n'（12 字符），声明字面只有 10 字符；正确切片是 [175389:175399]。与上一条同属『自称机器核验、实际未核验』的边界断言。",
+   "severity": "metadata/provenance 层；不影响本单元内容"
+  },
+  {
+   "claim": "tasks[4].obstacle 正文写『区间外的第三十章已由他自己讲明（但我也失败了……）』，把猫树实验失败的自述系于第三十章。",
+   "quote": {
+    "quote": "“但我也失败了，因为它彻底变成了树木，不会动，不会思考，只能养在水里。”",
+    "findOffset": 95935,
+    "inRange": false,
+    "note": ""
+   },
+   "why": "该引文实际位于第三十二章（章头 94332『第三十二章』，引文起于 95935）。同一文件在该 quote 对象的结构化字段里写的是 `\"chapter\": \"第三十二章\"`——正文的章号与自己的结构化标签互相矛盾。只影响区间外对照的叙述，不构成本单元抽取项的编造。",
+   "severity": "prose 章号错误（区间外对照）"
+  },
+  {
+   "claim": "foreshadows[4].setup 正文写『同类手法有区间外第二十五章的蓝皮书序言（等价交换……）』。",
+   "quote": {
+    "quote": "等价交换，炼金术不变的原则——爱德华·艾尔利克。",
+    "findOffset": 73933,
+    "inRange": false,
+    "note": ""
+   },
+   "why": "『蓝皮书』是第二十四章（章头 71277『第二十四章 蓝皮书』），该引文起于 73933；第二十五章是『救兵』（74003 起）。同一 quote 对象的结构化 chapter 字段写的正是『第二十四章 蓝皮书』，正文与之矛盾。",
+   "severity": "prose 章号错误（区间外对照）"
+  }
+ ],
+ "reverseChecks": [
+  {
+   "found": "未登记的疑似文本讹误之一：『东瞻西望』。全书『东张西望』2 处，『东瞻西望』仅此 1 处（即本区间）。这与候选自己登记的 tc_re_laizhu（『极惹来注视』全书 1 处、无可比样本）属同一类，候选给了后者一条 textCritical，却没给这一条。",
+   "quote": {
+    "quote": "东瞻西望一阵，银牙一咬，跑出这辈子从未有过的速度，冲到院子门口，拉开门栓。",
+    "findOffset": 174460,
+    "inRange": true,
+    "note": ""
+   },
+   "counts": {
+    "东瞻西望(全书)": 1,
+    "东张西望(全书)": 2
+   }
+  },
+  {
+   "found": "未登记的疑似文本讹误之二：『轿子瞬间翻到』。表『翻覆』义全书用『翻倒』（仅 1 处，且不在本区间），『翻到』全书 6 处、其余 5 处都是『翻到下一页/第347页/开头』（翻阅义）。本区间这处是唯一把『翻到』当『翻倒』用的地方。候选在 textCritical 里登记了『两匹马车』『睁开了捆绑』『极惹来注视』三条同类项，却把这一条在正文里直接用『轿子翻倒』复述掉了——即在改写中静默校正，而非登记。",
+   "quote": {
+    "quote": "扈从们人手不够，只拦截了一辆，另一辆撞飞了两名轿夫，轿子瞬间翻到。",
+    "findOffset": 173115,
+    "inRange": true,
+    "note": ""
+   },
+   "counts": {
+    "翻到(全书)": 6,
+    "翻倒(全书)": 1,
+    "辆马车": 38,
+    "匹马车": 1
+   }
+  },
+  {
+   "found": "候选把院外说荤话的两人按『身份未交代』挂进 unknowns u10 并拒绝归类，但没有使用原文给出的最强线索：两人离场后紧接着就是许大郎当面拿『荤话』打趣二郎——这句玩笑只有在那段荤话是二郎（许新年）自己说出来的前提下才成立。候选确实引了这句话，但只标注为『照旧拿话刺堂弟』，没有把它与前一幕接起来。（这是关联性证据，不是叙述者断言；我按 inferred 记录，不据此指候选编造。）",
+   "quote": {
+    "quote": "“荤话说的不错哦。”许大郎习惯性的刺激二郎。",
+    "findOffset": 174591,
+    "inRange": true,
+    "note": ""
+   },
+   "supportingQuote": {
+    "quote": "脚步声远去，继而院门合拢的声音，两人似乎出门喝酒去了。",
+    "findOffset": 174087,
+    "inRange": true,
+    "note": ""
+   }
+  },
+  {
+   "found": "区间内 PS 行自称『这章3200字』，与实测不符：本切片 4004 codepoints / 3340 个非空白字符。候选只在 segmentTail 里带了这行，没有对它做过任何登记或核验，也没有进 textCritical。（字数口径因统计方式而异，故只作事实登记，不作讹误判定。）",
+   "quote": {
+    "quote": "PS：这章3200字，又长又硬。",
+    "findOffset": 175358,
+    "inRange": true,
+    "note": ""
+   },
+   "measurement": {
+    "codepoints": 4004,
+    "nonWhitespace": 3340,
+    "psClaim": 3200
+   }
+  },
+  {
+   "found": "【跨区间，非本单元遗漏，明确标注】候选在 rejectedCauseEdges[1] 写『宵禁鼓声与住客栈之间是否存在因果，原文没写』，并把 ot_that_night『他为什么不能回家』留作 unresolved。但全书在第五十章已把内城宵禁立为规则：黄昏击鼓之后街上不能再有人；这正是他不能回家、只能住客栈的规则依据。规则文本在区间外，故这是补证而不是对候选的编造指控。",
+   "quote": {
+    "quote": "内城和外城不同，后者没有宵禁。",
+    "findOffset": 149887,
+    "inRange": false,
+    "note": ""
+   },
+   "supportingQuote": {
+    "quote": "而前者因为住的都是体面人，为了达官显贵们的安全，黄昏击鼓之后，街上就不能再有人了。",
+    "findOffset": 149908,
+    "inRange": false,
+    "note": ""
+   }
+  }
+ ],
+ "checksPassed": {
+  "quotesSliceExact": 273,
+  "quotesFindEqualsStart": "272/273（唯一例外『“但说无妨。”』全书 6 处，候选已如实声明 globalOccurrences=6 并给出 in-range 偏移，非缺陷）",
+  "inRangeFlagWrong": 0,
+  "structuredChapterLabelsWrong": 0,
+  "structuredChapterLabelsChecked": 44,
+  "coverageRecomputed": "106/106（111 段 − 章标题 − 3 处省略号分隔行 − PS 行 = 106，与候选声明逐字一致）",
+  "graphCacheEventsInRange": 3,
+  "graphCacheScopeClaim": "成立：characterStates 7 条、tasks 5 条均不落在第五十七章（tasks 的 fieldEvidence 偏移全部在第一章至第六章）",
+  "segmentSha256": "一致（f68c9be0…）",
+  "textCriticalCountClaims": "7/7 全部复算一致（睁开273／挣开2／睁开了捆绑1／辆马车38／匹马车1／惹来注视1／惹人注视0）"
+ },
+ "itemsUsable": [
+  "tasks[0..5]：五元组与 basis 标注可用；t_zhou_unseen 明确写『区间内不出场』，未越权判罪。",
+  "causeEdges[0..7]、rejectedCauseEdges[0..5]：方向、机制、basis 可用；『恰好此时』判为巧合与我的独立复核一致。",
+  "states[0..8]、knowledgeGaps[0..5]、sceneNotes[0..3]、openThreads[0..4]：可用。",
+  "foreshadows / rejectedForeshadows：可用（fs_periodic_table 标 unresolved-in-unit 是正确的）。",
+  "characterClaims[0..12]：narratorConfirmed 的区分正确，未把台词当叙述事实。",
+  "quoteIndex 的 in-range 部分：逐字与偏移全部可复算，可直接当引用坐标用。"
+ ],
+ "itemsMustFix": [
+  "source.boundaryBefore：偏移应为 [171365:171385]，不是 [171373:171385]。",
+  "source.boundaryAfter：切片应为 [175389:175399]，不是 [175389:175400]。",
+  "tasks[4].obstacle 正文『区间外的第三十章』→ 应为第三十二章（结构化标签本身是对的）。",
+  "foreshadows[4].setup 正文『区间外第二十五章的蓝皮书序言』→ 应为第二十四章 蓝皮书。",
+  "metrics.quoteCount=142：可按两种口径复算为 141（quoteIndex 条目数=body 去重 135 + registeredButUnused 6）或 135（body 去重）；142 与两者都不符。",
+  "countingConvention.globalOccurrences 自述为『overlapping-find（含自重叠）』，但 16075 是 str.count 的非重叠值（自重叠为 58140）；同理 quoteIndex 里『.....』的 inRangeOccurrences 声明 6，重叠口径应为 7（『......』@173318 内含『.....』@173319）。标签与实际算法不一致。",
+  "已登记的 textCritical 建议补两条同类项：『东瞻西望』、『轿子瞬间翻到』（见 reverseChecks）。"
+ ],
+ "notes": "判 partial，不判 fail：抽取项本身没有发现任何编造。273 个 in-range 引文全部逐字命中且偏移自洽，独立复算的段落覆盖度 106/106 与候选声明完全一致；没有原文之外的人物、结局或伏笔；对『结束≠成功』的执行是本文件最强的地方——张玉英当众指认后停在『明天回家等消息』，候选明确拒写『计划成功』，并把跨区间的第五十八章回收单独标为 resolved-outside-unit。图谱缓存对照也属实（3 条事件、scope 缺口如实披露）。判 partial 的唯一理由：文件在元数据层自称『机器逐条断言』，实测有两条边界断言为假，另有两处正文章号与自己的结构化标签互相矛盾——这正是本项目反复出现的失败形态（声称强于验证），不能判 pass 去背书它。但这两类问题都不改变本单元的任何一条抽取结论，因此也不该判 fail 整份作废。\n关于我自己：第一次跑章号核对脚本时，我自己的 chap() 辅助函数把元组当字符串索引，误报了『44/44 章号全部不符』；修正后为 0 处不符。上面记录的 0 是修正后的结果，特此说明，以免复核者以为候选真有大面积章号错误。\n存疑（不作为 fail 依据）：reverseChecks 里『两个身影即许七安与许新年』一条是关联性推断，原文没有任何一句直述二人身份；我按 inferred 记录，若下游要采信需另行确证。\n复现命令（不需要我的任何临时文件）：\n  python3 - <<'EOF'\n  import json,hashlib,pathlib,re\n  T=json.loads(pathlib.Path('data/cache/9b676d7031b1bcd3b8377a18.docs.json').read_bytes())[0]['text']\n  print(hashlib.sha256(pathlib.Path('data/cache/9b676d7031b1bcd3b8377a18.docs.json').read_bytes()).hexdigest())\n  print(repr(T[171373:171385]), repr(T[171365:171385]))      # 证 boundaryBefore 偏移错\n  print(repr(T[175389:175400]), repr(T[175389:175399]))      # 证 boundaryAfter 多一字符\n  h=[(m.start(),m.group(0)) for m in re.finditer(r'第[零一二三四五六七八九十百千]+章[^\\n]*',T)]\n  print([x for x in h if x[0]<95935][-1], [x for x in h if x[0]<73933][-1])   # 第三十二章 / 第二十四章\n  print(T.count('东瞻西望'), T.count('东张西望'), T.count('翻到'), T.count('翻倒'), len(re.sub(r'\\s','',T[171385:175389])))\n  EOF\n辅助脚本（临时目录，非仓库路径，可能被清理）：/tmp/verify0056_evidence.py，输出 /tmp/verify0056_evidence.out。",
+ "evidenceArtifacts": [
+  {
+   "path": "/tmp/verify0056_evidence.py",
+   "role": "独立复算脚本（不导入候选生成器）"
+  },
+  {
+   "path": "/tmp/verify0056_evidence.out",
+   "role": "该脚本输出"
+  },
+  {
+   "path": "loop/state/out/read_dafeng_L0_0056.candidate.json",
+   "sha256": "f1a8639ec2cbf14e48160c22344bec448e94ec3ab5e85051d4fe96a5b4d51e36"
+  },
+  {
+   "path": "data/cache/9b676d7031b1bcd3b8377a18.docs.json",
+   "sha256": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+  }
+ ]
+}

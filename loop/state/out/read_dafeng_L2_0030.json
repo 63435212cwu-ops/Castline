@@ -1,0 +1,171 @@
+{
+  "task": "read:dafeng:L2:0030",
+  "agent": "w-dafeng-3",
+  "status": "done",
+  "summary": "精读《大奉打更人》第三十一章 这不是薅羊毛，这是等价交换（原文区间 codepoint [91423,94332)，2909 字 / 75 个非空段落）。本轮是同一任务第 13 轮：第 12 轮（w-dafeng-3，00:15:29Z）已产出 436KB 候选，但 worker 代提交时因模板 sourceHashes 为空被校验器拒绝。我先独立复核既有产物：全部 568 条 {quote,start,end} 逐条对 docs[0].text 回切 → 568/568 逐字命中、偏移/occurrences/inSourceRange 零错；75/75 段落覆盖、6 个图谱角色 id、3 个 event 锚点偏移、全部章节归属与计数断言实测复算。随后修掉两类共 8 处真实缺陷（全部为编号/计数/归属措辞，无一处触及引文、偏移、basis 或语义结论）：第一类（内部一致性，4 处）：7 条 foreshadows 的 id 全被构建脚本硬编码为 F1（/tmp/cl_30/build_content.py:849 等 7 处），与正文自称的 F1–F7 不符；redLines 计数过期（8→7、11→12）；selfCritique 引用已不存在的 F8；quoteCountNote 登记副本算术错（289 应为 198，且 370+289=659≠全文件 568）。第二类（独立对抗式复核查出，4 处）：(a) 原 F6「炼金术岂是银子可以衡量的／五钱银子」的 payment.value 为 null，即自身结论就是「无回收端」，却仍留在 foreshadows 数组内、违反本候选自身「有铺设与回收才算伏笔」的契约 —— 已移入 singleAppearanceNotForeshadow 并规范为与同类条目一致的扁平 quotes 结构；(b) CE1.to / K1.knows / S1.after 把「6—15伏」当作许七安所说的事实陈述，而 SC1/U2 明确说该句无引号无提示语、归属不能判定 —— 三处已降级为「紧随命名出现、归属存疑（U2/SC1）」；(c) F-4 的 note 把 @13924 的「电压大概在6—15伏」说成第三十章，实为第五章（与候选自身 X_CH05_6V 标签矛盾）—— 已改正为第五章 @13924；(d) singleAppearanceNotForeshadow 第 2 项的「另一人物」说法错误：全文第二处「迪化」@1312252 仍是许七安在说话 —— 已改正。修复后 16 项机器自检全 PASS；568 条引文再次全量回切仍 568/568 命中。产物保持 semanticReview=not-performed：引用定位正确≠语义已核验。",
+  "evidence": [
+    {
+      "path": "loop/state/out/read_dafeng_L2_0030.candidate.json",
+      "sha256": "9f07a4085eac2dd676b492e5348df5410d57f395cb42e9d5547a8e68be02cd6d",
+      "kind": "worker-output",
+      "note": "本轮修复后的候选（第三版）。哈希沿革：d5ae8436…（第 12 轮原产物）→ 4db9cd33…（修复 4 类编号/计数缺陷）→ 9f07a408…（按独立对抗式复核结论再修 4 处 live 缺陷并规范移出项结构）。备份：/tmp/reader0030/candidate.before-repair.json、/tmp/reader0030/candidate.before-repair2.json"
+    },
+    {
+      "path": "loop/state/out/read_dafeng_L2_0030.submit.json",
+      "kind": "submit-record",
+      "note": "本提交记录自身；其 sha256 无法在文件内自指，故不声明哈希，仅作留存"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "源文件 sha256 == 任务 sourceHash：python3 -c \"import hashlib;print(hashlib.sha256(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json','rb').read()).hexdigest())\" → fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839（与任务 JSON 的 sourceHash 逐字相同；动手前后各测一次，值未变）",
+      "result": "pass"
+    },
+    {
+      "text": "偏移口径自检（全文偏移，不是相对切片）：python3 -c \"import json;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];print(repr(t[91423:91442]),t.count('第三十一章 这不是薅羊毛，这是等价交换'),repr(t[94332:94342]))\" → '第三十一章 这不是薅羊毛，这是等价交换' 1 '第三十二章\\n\\n'；切片长 2909 codepoint，与任务声明一致",
+      "result": "pass"
+    },
+    {
+      "text": "切片哈希（另起 sliceSha256 字段，未覆盖 sourceHash）：sha256(TEXT[91423:94332]) = 72ba279513c2313024290ff5fa6c9827a80595ac21a8880679e077d5a8562748；docs[0].text 全文 sha256 = bc8b75ee120009f4bf6a8e235a7ff133b8ac727a8612067496a0440eaf3fc612，均与本候选 source.* 字段一致",
+      "result": "pass"
+    },
+    {
+      "text": "全量引文回切（本轮实测，非沿用他人结论）：脚本 /tmp/reader0030/verify_quotes.py 递归收集候选内全部 568 条 {quote,start,end}，逐条断言 docs[0].text[start:end]==quote → 568/568 命中，offset mismatch 0，quote not in source 0，no start/end 0；其中 73 条落在 [91423,94332) 之外且全部自带 inSourceRange=false + outsideChapter 标注，未被当作本区间证据",
+      "result": "pass"
+    },
+    {
+      "text": "修复后一致性复核：脚本 /tmp/reader0030/audit_final.py 输出 16 项 PASS —— 文件格式与 write_json_atomic 规范逐字一致（json.dumps(ensure_ascii=False,indent=2)+换行，回写后 raw==重新 dump）、568 条引文偏移全在文内、sourceHash 全等于任务值、foreshadows id 唯一且恰为 F1..F7、redLines 两处计数与实测相符（7 / 12）、redLines 的 F 引用可解析、selfCritique 无残留 F8 且引用 F7、quoteCountNote 的 198 与实测登记副本数相符且 370+198=568 == 全文件实例总数、semanticReview 仍为 not-performed",
+      "result": "pass"
+    },
+    {
+      "text": "覆盖台账实测（不信候选自述，重新复算）：coverageNote.paragraphRows 共 75 行，逐行断言 docs[0].text[row.start:row.start+row.length]==row.text → 75/75 命中；相邻行之间 74 处空隙全部为纯空白（0 处含非空白字符）；用候选内全部 inSourceRange=true 的引文偏移反查所属段落 → 覆盖 75/75，无遗漏段落",
+      "result": "pass"
+    },
+    {
+      "text": "计数型断言复算（全文口径）：'电压' 共 14 处且分布为 本区间 10 / 第五章 3 / 第二十四章 1 / 本区间之后 0；'心魔' 13；'哗！' 5；'水至清则无鱼' 2；'迪化' 2（另一处在第七十章 赴会 @1312252）；'百户' 101；'许铃音' 704 而本区间 0 次；'万事万物的本质' 1；'教坊司' 551；本区间 '薅羊毛' 1（仅章标题）、'青楼' 0、'白嫖' 0、'铜板' 0、'法器' 0 —— 与候选各条 why 中引用的数字逐项相符",
+      "result": "pass"
+    },
+    {
+      "text": "graphIdHint 与 event 锚点核验：候选引用的 6 个角色 id（ch_bdf0741c9b89fe3b 许七安 / ch_91337f3688dccbc7 宋卿 / ch_08335abc7e34f3b7 褚采薇 / ch_561390b2e24a7578 许玲月 / ch_f0280f975974f31a 王捕头 / ch_c1c19ba118eaae20 许平志）在 data/cache/9b676d7031b1bcd3b8377a18.json 的 characters[] 中真实存在且名字相符；publishBridgeNotes 声明的三个 event 锚点 ev_6aa59b0b8944c805@91852-91860、ev_84e0d4c6d3210104@93032-93051、ev_33fb034d8b5da7f8@93754-93765 与图谱 quoteRef 的 start/end 逐一相同，且三个区间都落在 [91423,94332) 内",
+      "result": "pass"
+    },
+    {
+      "text": "修复的定点性与无副作用：对修复前后两份 JSON 做递归 diff → 恰好 10 处值变化，分别是 foreshadows[1..6].id（F1→F2..F7）、quoteCountNote、redLines.noSingleAppearanceForeshadow、selfCritique.items[2].whyIStillJudgeSo、singleAppearanceNotForeshadow[0].why；无任何新增/删除键，无任何 quote/start/end/basis/status 被改动（568 条引文在修复后再次全量回切仍 568/568 命中）",
+      "result": "pass"
+    },
+    {
+      "text": "受保护路径未动：本轮只写 loop/state/out/ 下两个文件（git status 显示 ?? loop/state/out/read_dafeng_L2_0030.candidate.json 为未跟踪新增）；data/ js/ css/ index.html serve.py narrative.py scripts/ tests/ docs/ 全未改动，源缓存 sha256 动手前后一致",
+      "result": "pass"
+    },
+    {
+      "text": "独立对抗式复核（subagent，非原提交者）按编造/台词当事实/相邻当因果/单次当伏笔/未知填默认值/越界引文六类反向查原文切片，结论：类别 1 编造 0、类别 2 台词当事实 0、类别 3 假因果 0（10 条 causeEdge 机制均在原文写明，NC8 显式拒绝把「.......」场景分隔当因果）、类别 5 未知填默认值 0（17 条 unknowns 全带理由的 null）、类别 7 越界引文当区间证据 0（568 条四处断言全过）；类别 4 报出 1 处 live（原 F6 无回收端却留在 foreshadows）、类别 6 报出 1 处 live 的内部矛盾（6—15伏 归属）+ 1 处章号错误 + 1 处说话人错误。上述 4 处已全部按原文核实并修复。",
+      "result": "pass"
+    },
+    {
+      "text": "第二类修复的定点性与无副作用：对修复前后两份 JSON 递归 diff → 9 处值变化，全部落在 foreshadows/singleAppearanceNotForeshadow 数组长度与 4 条说明性字符串上；触及 quote/start/end/basis/match/sourceHash/inSourceRange/occurrencesInSource 的差异为 0 处",
+      "result": "pass"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/read_dafeng_L2_0030.candidate.json",
+      "kind": "append-only"
+    },
+    {
+      "path": "loop/state/out/read_dafeng_L2_0030.submit.json",
+      "kind": "append-only"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/9b676d7031b1bcd3b8377a18.docs.json": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "data/cache/9b676d7031b1bcd3b8377a18.json": "3c2fae1d399d6768719f2d5476fa0cfd88fb4fbbc12abdf080323fa4b846ebdf"
+  },
+  "remaining": [
+    "semanticReview 仍未做：本轮核验的是「引文定位」「内部一致性」与「一处独立对抗式复核」，没有第三方对 2909 字做语义盲审。引用定位正确 ≠ 语义已核验，不得据本记录认为语义完成。",
+    "对抗式复核已登记其全部发现并逐条处置；但复核本身也可能有误，仍需 verify:dafeng:L2:0030 的独立复核者做反向验证（尤其「还漏了什么」）。",
+    "复核指出的 2 处 LOW 措辞已登记未改（仍在候选内）：T1.who 的「四师兄」与 T7.who 的「二叔」都是图谱 canonical 别名，但在本区间内出现 0 次，属跨区间称谓，读起来像本区间事实。",
+    "复核指出的 3 处 LOW 记账问题未改：quoteUsageById[*].uses 恒为 1（真实复用次数 2–12，73/91 不符，字段无定义）；unusedRegisteredQuotes 两个列表为空但 X_CH30_ASK(91337)/X_CH05_SUCCESS(13893) 实际零断言引用；selfCritique.minorRisks[3] 的「两个无名个体」措辞与 charactersInRange 实际分组不符。",
+    "上一轮被拒的直接原因是 worker 的 auto-submit 模板硬编码 sourceHashes={}（loop/bin/worker.py 第 250 行附近），凡 agent 未自行提交就必然被拒。这是环境侧可复现缺陷，修它要动 loop/bin/worker.py，不在本任务 writes 内，故只如实登记。",
+    "候选文件 437270 字节、10086 行，远大于 2909 字原文；体量大不等于质量高，本轮未以体量作为任何通过依据。",
+    "图谱 event 与关系层的完整覆盖（是否有本区间事件未被登记）未做穷举，只核验了候选声明的 3 个锚点。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/read_dafeng_L2_0030.candidate.json",
+      "loop/state/out/read_dafeng_L2_0030.submit.json"
+    ]
+  },
+  "submittedAt": "2026-10-08T00:55:47Z",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-08T00:55:47Z"
+  },
+  "verifyState": "pass",
+  "reviews": [
+    {
+      "reviewer": "w-verify-1",
+      "at": "2026-10-08T05:15:23Z",
+      "verdict": "pass",
+      "notes": "**总判 pass。** 这是一份高质量的候选，我按对抗者立场反复找，没有找到任何一条可判 fail 的 hard counterExample：\n\n**1) 抽取项核对——未发现编造。** 候选 8 条任务、10 条因果、7 条状态、6 条伏笔、6 条知识差、17 条 unknowns、15 条 notCauseEdges、13 条 singleAppearanceNotForeshadow 全部能在原文找到对应文字。我把图谱 characters[].aliases 全集（含「四师兄」「二叔」「许二叔」「周公子」「二郎」等）回到区间内 find，凡出现在 basis=explicit 断言里却在区间内 0 命中的只有「四师兄」（见 RC5）与「许铃音」（候选自己在 U9 里明确拒绝写这个名字，属**主动避让**而非编造）。\n\n**2) 幻觉/越权检查——干净。** 没有原文没有的人物、结局、伏笔。最值得注意的是候选主动拒绝了三类越权：①不给「幼妹」安名字（U9，且核对「许铃音」在本区间 0 次、全文 704 次属实）；②不把许七安的自述（「只有我看过」）当事实（NC2/U5）；③不把区间末「终于赶回」读成救人成功（NC12、T7.whyObjectiveStatus）。8 条任务里 3 条 achieved（且都是「在场内闭环」的小目标）、3 条 partial、2 条 undetermined，**没有一条靠「写到结尾」判成功**——这正是不符合「结束≠成功」红线的高发点，候选把 T5/T7 的 partial/achieved 边界拆得很清楚。\n\n**3) 误杀检查——未发现合法项被词表/正则挡掉。** 候选的 notCauseEdges 15 条逐条读过，每条都是**真的不该连**（台词当事实、情绪当真理、承诺当交付、相邻当因果），没有一条是把真实因果误杀。反过来我找到的遗漏（RC2）是**该连没连**，不是被挡住。CE9 明确拒绝了「因为跟王捕头聊过天所以崇拜大哥」这种最诱人的错边，并给出可验证的位移序列（崇拜二哥→税银案→转移→平等→超越），这是本题里最难判的一处，判得对。\n\n**4) 引用核验——568/568 全量通过。** 不止抽 5 条：我把全文件所有 {quote,start,end} 实例（断言区 370 + 登记副本 198）全部做了 T[start:end]==quote，0 处不符；91 条 registry 的 occurrencesInSource 全部等于 T.count()，包括反直觉的长尾（SCENE_BREAK「    .......」全文 2488 次、SEP「------------」1031 次、NARR_HUA「哗！」5 次）——候选没有把非唯一串谎报成 1。两项 text.find()!=start 的（SCENE_BREAK、SEP）是**字符串非唯一**所致，切片与偏移本身仍精确，不构成问题。\n\n**5) 我自己的反向验证有一条要如实修正。** 我最初用「区间内 CJK n-gram 是否出现在候选里」做覆盖扫描，得到「0 处遗漏」——这个结论**是错的**：候选 coverageNote.paragraphRows 把全部 75 段原文逐字内嵌了，任何 n-gram 都能在里面命中，该扫描因此**结构性失效**（正是「机制存在但不产生信息」的形态）。我改用「剥掉所有引文对象、只留解释层散文」重扫，才得出 RC1–RC6。这条教训记在这里，供后续复核者不要重踩。\n\n**6) RC1–RC6 全部是遗漏/粒度/口径问题，无一是编造，故不判 partial。** 严格说 RC5（T1.who 写「司天监四师兄」而该称谓区间内 0 次、且未像 U15 那样披露）最接近「应当降级」，若要按最严口径处理，建议把 T1.who 改成「宋卿（司天监，师弟们称其『宋师兄』）」并把「四师兄」移入 outOfRangeContext。但该信息来源是图谱别名+全书事实，不是本区间结论，且候选在 redLines.graphAliasNotSource 里已声明 graphIdHint 只作对照——**够不上 fail，也不足以否定整份候选**，故记为「存疑/建议修正」。同理 RC4（unusedRegisteredQuotes 自报为空但实有 2 条）是自述字段与实况不符，属低危元数据问题。\n\n**7) 不确定处。** ①候选 U2 把「炼制金属钠的电压要控制在6—15伏」判为「无引号即叙述层」，这是一个**口径选择**；我核对原文该句确实无引号无提示语，紧邻前句是带引号的台词，两种读法都成立，候选已把口径选择本身写进 U2/SC1，处理得当，我不另判。②区间外 16 条对照引文我全部做了逐字核验（含 X_CH171_SECRET@618195、X_CH94_DISCIPLE@3063062 这类超远偏移），全部命中且在合理章属内；候选对「回收端在区间外」一律标 inSourceRange=false 且反复声明不作本区间证据，这个纪律执行得完整。③我未复核图谱缓存里三个挂在第三十一章的 event（ev_6aa59b0b8944c805 / ev_84e0d4c6d3210104 / ev_33fb034d8b5da7f8）的语义正确性——它们不在本任务范围（图谱摘要不算原文证据），候选也只把它们当锚点候选并明确「summary 措辞不得作为原文引文发布」。",
+      "counterExamples": [],
+      "reverseChecks": [
+        {
+          "id": "RC1",
+          "found": "「蓝皮书」在本区间内出现 **2 次**，两次都指同一实物，且第一次（宋卿心理层）已经以定指+内容引用预设了这本书**已在司天监手中**——这与第二次（许七安「我给司天监的那本蓝皮书，是你们救我的谢礼」）互证。候选把两处分别登记（前者进 singleAppearanceNotForeshadow「万事万物的本质」、后者进 tasks[2]/foreshadows），但没有把这一对**区间内自证**的关系写出来，反而在 U5 里说「本区间内……没有出现实物，也没有第三方证词。两者是不是同一本，本区间没有交代」。",
+          "quote": "本能的，他觉得这是一个了不起的知识点，就像那本蓝皮书上写的万事万物的本质一样的深奥。",
+          "quoteStart": 91940,
+          "quoteEnd": 91982,
+          "why": "宋卿在区间内说「**那本**蓝皮书」（定指）并引用其内容（「写的万事万物的本质」），说明他见过这本书——这是区间内的第一人称旁证，不是区间外第二十四章的信息。候选 U5 的措辞把它让给了区间外，属**漏检**（不是编造：候选并未写出相反的事实断言）。可复现：`python3 -c \"import json;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'][91423:94332];print(t.count('蓝皮书'))\"` → 2。",
+          "severity": "遗漏（未覆盖的区间内事实）"
+        },
+        {
+          "id": "RC2",
+          "found": "区间内存在一条**未被任何 causeEdge 覆盖**的完整因果链：快手们「激愤的表情不似做伪」→ 许玲月「有几分诧异」→ 王捕头「**仿佛看出了她的惊讶**，笑了笑：『宁宴是个值得让人尊敬的人。』」→ 她发问「能与我说说我大哥的事吗」。这条链的每一环都有原文，且「仿佛看出了她的惊讶」是明确的**因果触发语**（看出→回应）。候选 10 条 causeEdges 里没有它；WANG_RESPECT 这句只被引用了 1 次，且只挂在 tasks[5].objective.quotes[3]（当作王捕头的目标），不是因果边。",
+          "quote": "仿佛看出了她的惊讶，王捕头笑了笑：“宁宴是个值得让人尊敬的人。”",
+          "quoteStart": 93471,
+          "quoteEnd": 93503,
+          "why": "这是本章「许玲月重新认识大哥」的实际起点：CE8 把 trigger 写成「许玲月问『王捕头，能与我说说我大哥的事吗』」（93536），但原文顺序是**先** 93471 王捕头看出惊讶并主动给出「值得让人尊敬」这一定性，**后** 93536 她才发问。把 trigger 放在发问上会丢掉「王捕头主动起头」这一环。可复现：`t.find('仿佛看出了她的惊讶')` → 93471，`t.find('能与我说说我大哥的事吗')` → 93536（93471 < 93536）。",
+          "severity": "遗漏（未覆盖的区间内因果）"
+        },
+        {
+          "id": "RC3",
+          "found": "第二场（长乐县衙偏厅）里，「许七安」三字出现 **0 次**——全场只用「许宁宴」（1 次）与「宁宴」（3 次）指称他，另用「大哥」11 次。候选 charactersInRange[0].note 只报了区间总体次数（「许七安」13 次、「许宁宴」3 次），把两场合并计数，因而**看不出第一场用本名、第二场只用字号/亲属称谓**这个可核对的文本事实。",
+          "quote": "“许小姐莫急，百户大人会想办法救出宁宴的。”",
+          "quoteStart": 93378,
+          "quoteEnd": 93400,
+          "why": "这是下游做「谁在什么场合怎么称呼他」以及别名归一时的直接依据；合并计数会把这条信息抹平。可复现：切出偏厅场景（自 93162「.......」到 94332）后 `seg2.count('许七安')==0`、`seg2.count('宁宴')==3`。",
+          "severity": "遗漏（粒度不足，非错误）"
+        },
+        {
+          "id": "RC4",
+          "found": "候选自称 unusedRegisteredQuotes.inRange=[] 与 outOfRange=[]，但机器复算显示：登记在册的 16 条区间外引文里，有 **2 条从未被任何断言/因果/状态/伏笔/unknown 引用**，只存在于 quoteRegistry / quoteUsageById / outOfRangeContext 三处登记副本中——即 X_CH30_ASK（第三十章末「这个问题不该问我……」）与 X_CH05_SUCCESS（第五章「竟然一次性就成功了，电压刚刚好」）。",
+          "quote": "许七安负手而立，笑了笑：“这个问题不该问我，一个成熟的炼金术师，应该学会独立思考问题。”",
+          "quoteStart": 91337,
+          "quoteEnd": 91381,
+          "why": "候选的 unusedRegisteredQuotes 用「字符串包含」判定并自注「可能低估」，实际它给出的是**空列表**（高估了自己的覆盖），与机器复算不符。影响有限（多登记 2 条对照引文不构成编造，且两条引文本身逐字可查、inSourceRange=false 标注正确），但下游若据该字段判断「登记即已使用」会被误导。可复现：枚举全文件带 start+end 的引文实例、把落在 quoteRegistry/quoteUsageById/outOfRangeContext 之外的出现记为「被使用」，余下恰为这 2 条。",
+          "severity": "自述与实况不符（低危）"
+        },
+        {
+          "id": "RC5",
+          "found": "宋卿在区间内被师弟们称「宋师兄」、他向「师弟们」讲话（「环顾师弟们」「代表师弟们发问」），原文给出了**明确的同门辈分关系**；但宋卿「四师兄」这个具体排位在本区间出现 0 次（全文仅 2 次，最近一次在偏移 4389209）。候选 T1.who 直接写成「宋卿（司天监四师兄）」，把区间外/图谱别名放进了任务主体，却没有任何一处披露该称谓不在区间内——对比候选对同类问题（U15「炼丹室」三字在本区间出现 0 次）是**显式披露**的，此处口径不一致。",
+          "quote": "宋卿咳嗽一声，环顾师弟们，沉声道：“是雷击的强度。”",
+          "quoteStart": 91785,
+          "quoteEnd": 91811,
+          "why": "「四师兄」在全文 2 次，均不在 [91423,94332)：最近一次 4389209（差距 400 万 codepoint 量级），可核对高程；另一次在 134979。区间内可支撑的只有「师兄/师弟」的辈分事实。这属于**跨区间信息未标注**，不是编造（图谱 characters[ch_91337f3688dccbc7].aliases 确实含「四师兄」）。可复现：`t[91423:94332].count('四师兄')` → 0；`t.count('四师兄')` → 2。",
+          "severity": "越权边缘（口径不一致，低危）"
+        },
+        {
+          "id": "RC6",
+          "found": "区间内「电压」这个词被**引入两次**且措辞不同：「我把它**命名**为电压」（91852，命名行为）与「我把这种现象**叫做**电压」（92278 附近，比喻收束处的再指称）。候选对后者只作为 XU_CUP 引文使用，没有登记「同场第二次定义」这一事实，也未讨论两处是否同一所指。",
+          "quote": "电也是如此，我把这种现象叫做电压。",
+          "quoteStart": 92290,
+          "quoteEnd": 92307,
+          "why": "两处措辞差异（命名 vs 叫做）在原文里是同一场内的重复引入，属可核对事实；候选的 states[0] 只用了「我把它命名为电压」作为「拿到词」的锚点，未提第二次。影响：下游若只取「命名为」，会漏掉叙述层在比喻末尾对同一术语的再确认。属**粒度不足**，非错误。可复现：`seg.count('命名为电压')==1`、`seg.count('叫做电压')==1`，两者都在区间内。",
+          "severity": "遗漏（粒度不足，低危）"
+        }
+      ]
+    }
+  ]
+}

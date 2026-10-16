@@ -1,0 +1,304 @@
+{
+ "schema": "castline.verify.verdict.v1",
+ "task": "verify:dafeng:L0:0036",
+ "agent": "w-verify-0",
+ "reviewerRole": "VERIFIER（独立反向复核者，loop/ROLES/VERIFIER.md）",
+ "reviewedTask": "read:dafeng:L0:0036",
+ "reviewedArtifact": "loop/state/out/read_dafeng_L0_0036.candidate.json",
+ "reviewedArtifactSha256": "bc5543fb319b042dc1499650f173dbc3753bd653ec10a525fefab76fdb4a95a5",
+ "book": "dafeng",
+ "lane": 0,
+ "unitIndex": 36,
+ "unitHead": "第三十七章 劝学",
+ "verdict": "partial",
+ "status": "done",
+ "source": {
+  "path": "data/cache/9b676d7031b1bcd3b8377a18.docs.json",
+  "docIndex": 0,
+  "range": [
+   110506,
+   113766
+  ],
+  "codepoints": 3260,
+  "fileSha256": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+  "segmentSha256": "e7b67de5f6755736a2f544e346147f1cac46d37c8fcb199a1b239e5365815f35"
+ },
+ "method": "按 VERIFIER 契约顺序执行：① 先自己读原文切片（110506:113766 全文 94 个非空段），不看候选结论；② 抽取项逐条回原文 find；③ 反向验证（问『还漏了什么』）；④ 误杀检查；⑤ 幻觉/越权检查；⑥ 随机抽 5 条 quote 做 find。所有数字与引文均用独立复算脚本取得，未采用候选给出的结论。",
+ "mechanicalChecks": {
+  "quoteInstancesWalked": 497,
+  "quoteSliceFailures": 0,
+  "quoteLengthFailures": 0,
+  "inRangeFlagMismatches": 0,
+  "quoteIndexEntries": 124,
+  "quoteIndexBad": 0,
+  "chapterLabelsChecked": 157,
+  "chapterLabelMismatches": 0,
+  "outOfRangeCorroborationEntries": 25,
+  "outOfRangeBad": 0,
+  "boundaryBeforeVerbatim": true,
+  "boundaryAfterVerbatim": true,
+  "globalCountsReproduced": 15,
+  "globalCountMismatches": 0,
+  "characterLevelParagraphCoverage": "94/94（每段 100% 字符被 in-range 引文覆盖）",
+  "randomCitationSample": "5/5 逐字命中且偏移一致",
+  "selfCheckCheckedQuoteRefs": 490,
+  "selfCheckReconciled": "490 = 497 个引文实例 − 7 条 coverageDisclosure 自身条目，口径自洽，非缺陷。",
+  "note": "引用层与计数层未发现任何失败项。判 partial 的原因全部在语义归属层，见 counterExamples。"
+ },
+ "counterExamples": [
+  {
+   "id": "CE1",
+   "severity": "编造（地点）",
+   "target": "tasks[0] (task_xu_breakfast_pay).summary",
+   "claim": "候选写：「许七安在**县城外**的早餐摊吃了一顿四五人量的早餐。」",
+   "quote": "    京城繁花似锦，街上早点摊子到处都是，许七安在离县衙两街之外的早餐摊子里解决温饱。",
+   "quoteStart": 110516,
+   "quoteEnd": 110560,
+   "why": "「县城」二字在本区间 3260 码点内 **find = -1，一次都不存在**。原文写的是**京城**内的摊位（「京城繁花似锦……在离县衙两街之外的早餐摊子里解决温饱」）。候选自己的 states[st_xu_location].before 也写对了「京城：离县衙两街之外的早餐摊 → 县衙 → 许府」，两处自相矛盾。这不是引文定位错误（所引原文逐字正确），而是**概述层凭空补出了一个原文没有的地点词**——按本角色契约第 2 条属「找不到对应文字」的编造。",
+   "impact": "仅影响该条 summary 的地点措辞，不影响事件链、因果边或状态迁移；改一个词即可修复。",
+   "reproduce": "python3 -c \"import json;T=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];print(T.find('县城',110506,113766))\""
+  },
+  {
+   "id": "CE2",
+   "severity": "过度概括（文本层结论被证伪）",
+   "target": "paratext[3] (pt_rule).text",
+   "claim": "候选写：「区间末尾的 '------------'（113752）是**章级**分隔线（书中 1028 条，全部 913 个章标题前各有一条），**不是卷级分隔**。」",
+   "quote": "------------\n\n京察风云\n\n\n------------\n\n第一章 牢狱之灾",
+   "quoteStart": 0,
+   "quoteEnd": 43,
+   "why": "前提为真、结论为假。我独立复算：913 个章标题**全部**紧邻其前有一条 '------------'（0 例外），故前提成立；但同一条分隔线**并非只用于章**——全书 1028 条 '------------' 中有 **115 条其后不是章标题**，其中包括文档开头由两条分隔线夹住的卷/篇题『京察风云』（offset 0 与 21，见引文），以及『完本感言』『番外一：劫后』『番外二：一统天下』『番外三 庆功宴』『上架感言』『实体书上线了』等。因此『不是卷级分隔』这一断言被原文直接证伪：它至少同时是**卷/篇题分隔**与**作者附言分隔**。",
+   "impact": "不影响本区间右边界判定（『右端点 113766 之后就是第三十八章标题』仍然正确）；影响的是对该分隔符语义的全局描述，会误导下游按『章级』写解析正则。",
+   "reproduce": "python3 -c \"import re,json;T=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];d=[(m.start(),m.end()) for m in re.finditer(r'(?m)^-+$',T)];ts=[m.start() for m in re.finditer(r'(?m)^第[^\\n]{1,30}章[^\\n]{0,30}$',T)];import bisect;print(sum(1 for a,b in d if (lambda j:(j>=len(ts)) or T[b:ts[j]].strip()!='')(bisect.bisect_left(ts,b))),'/',len(d))\"  # -> 115 / 1028"
+  },
+  {
+   "id": "CE3",
+   "severity": "低（计数口径与标签不符，非编造）",
+   "target": "textCritical[8] (tc_separator).text",
+   "claim": "候选写：「区间内含两条**排版分隔行** '    ......'（111355 与 112396）……全语料该串出现 **2625** 次，区间内是第 **37、38** 次（0-based 索引 36、37）。」",
+   "quote": "    ......",
+   "quoteStart": 111355,
+   "quoteEnd": 111365,
+   "why": "两个区间内偏移（111355／112396）**正确**，且 2625 与索引 36／37 **在候选自己的口径下可复现**（把 '    ......' 当**任意位置子串**计数）。但候选把它称作『排版分隔行』，而真正的独立分隔行（正则 ^    \\.{6}$，即该串独占一行）全语料只有 **120** 条，对应索引应为 **29／30**。也就是说：数字没编，但**标签与计数口径不一致**——子串计数包含了更长省略号串内部的片段，不能用来数『行』。",
+   "impact": "自述统计口径误导；不影响任何抽取项（区间内两条分隔行的位置本身是对的）。",
+   "reproduce": "python3 -c \"import re,json;T=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];print(T.count('    ......'));print(len(re.findall(r'(?m)^    \\\\.{6}$',T)))\"  # -> 2625 / 120",
+   "offsetNote": "'    ......' 在全语料重复出现，裸 T.find() 返回首次出现 4383 而非 111355；本条的定位正确性由 T[111355:111365]==quote 保证（切片相等），不依赖 find 首次命中。"
+  },
+  {
+   "id": "CE4",
+   "severity": "低（自报指标与自述口径不自洽）",
+   "target": "coverageDisclosure.note / metrics.paragraphCoverageRatio",
+   "claim": "候选自报「覆盖率 0.9255（87/94）」，并列 7 段为 uncovered。",
+   "quote": "最后重建一次 quoteIndex，因此本表自身的引文也计入覆盖。",
+   "quoteStart": null,
+   "quoteEnd": null,
+   "why": "候选自述口径明写『本表自身的引文也计入覆盖』。按该口径复算：只用 tasks/causeEdges/states/knowledgeGaps/foreshadows/characterClaims/openThreads/unknowns/textCritical/paratext 等**实质条目**时，确有 7 段无覆盖（与候选列出的 7 段**完全一致**，我逐段复现）；一旦把它自己的 coverageDisclosure／quoteIndex 引文计入，未覆盖段为 **0**，即 94/94。故 87 这个数**与它自己写下的口径不自洽**，只与『不含自表』的口径自洽。",
+   "impact": "纯自报数值问题，方向偏保守（低报覆盖率），不影响抽取内容。"
+  }
+ ],
+ "reverseChecks": [
+  {
+   "id": "RC1",
+   "found": "**跨边界的直接成因未登记**：本区间开头『许七安……在早餐摊子里解决温饱』有一个写在区间外的起因——第三十六章末尾许铃音在房里疯跑，许七安才『今天早饭不打算在家里吃了』。候选把这句话**逐字抄进了自己的 source.boundaryBefore 字段**（证明它读到了），却没有任何 tasks/causeEdges 条目登记这条因果。候选为弱得多的相邻关系（如『支开摊主 → 背身付钱』）都立了边，唯独漏掉这条有明确动机句的。",
+   "quote": "    许七安默默关上房门，今天早饭不打算在家里吃了。",
+   "quoteStart": 110464,
+   "quoteEnd": 110491,
+   "why": "inRange=false（落在区间左端之前 42 字）。是否应立条取决于本 lane 对『区间外起因』的口径；按候选自己在 outOfRangeCorroboration 里对『铺设/回收落点』的用法，这条**同属跨区间证据且更硬**（同一人物、紧邻、含显式动机），故记为缺口而非错误。"
+  },
+  {
+   "id": "RC2",
+   "found": "**人物别名未在本区间内绑定**：区间内出现称呼『辞旧』（许七安对堂弟说话），候选把它收进 quoteIndex 并在 coverageDisclosure 里标注为『招呼语……故只引了问句』，但**没有任何条目说明『辞旧』是谁**。别名定义在区间外：原文有『辞旧是许新年的字，字是名的补充。』——下游若只拿本候选建人物档案，无法把『辞旧』绑到许新年身上。",
+   "quote": "辞旧是许新年的字，字是名的补充。",
+   "quoteStart": 49926,
+   "quoteEnd": 49942,
+   "why": "候选在别处一律用『堂弟』『许新年』『许二郎』，说明它知道指代关系，只是未登记这条称名事实。属**身份事实缺口**，不是编造。"
+  },
+  {
+   "id": "RC3",
+   "found": "**候选的一条自述排除理由被原文证伪**：rejectedForeshadows.rej_xiangao_as_foreshadow 以『我没有找到回指本句的原文』为由，拒绝把区间末句『大奉儒林，诗词衰弱已久』立为伏笔。原文在其后**两处直接回指并反转**这条不利条件——陈泰『都说诗词无用，殊不知，诗词最动人心』（反用『动人心』），以及学子『难道我大奉儒林的诗词之道，要再次崛起了吗？』（直接回应『衰弱已久』）。",
+   "quote": "    不远处，大坪边缘位置，三位大儒旁观着这一幕，陈泰抚须大笑：“都说诗词无用，殊不知，诗词最动人心。许宁宴，当真是绝世诗才。”",
+   "quoteStart": 119262,
+   "quoteEnd": 119327,
+   "why": "『找不到回指』是可证伪的事实性理由，且已被证伪。须注意：这只推翻**排除理由**，不替下游裁定该句是否算伏笔——若环境对『回收』要求悬念被解决而非仅被反用，候选的最终归类（不立伏笔）仍可辩护，只需改理由。"
+  },
+  {
+   "id": "RC4",
+   "found": "**候选主动做对的高价值克制（反向验证未发现越权）**：区间内只有官职『户部侍郎』，没有任何姓名。候选 openThreads[ot_zhou] 明确写『区间内没有出现「周显平」「周立」等名字，只有「户部侍郎」这一官职；不得把区间外的姓名直接当成区间内已给出的信息』。我独立复核：区间内 find('周显平')=find('周立')=-1，而区间外确有二者与户部侍郎的同一性证据。故这条**不是缺口，是正确的边界自律**，特此记录以免下游误判为遗漏。",
+   "quote": "    他们决定在展开行动前，把家中女眷送到云鹿书院来，这样哪怕真被户部侍郎报复，云鹿书院也能庇护许府女眷。",
+   "quoteStart": 112236,
+   "quoteEnd": 112290,
+   "why": "inRange=true；姓名证据在区间外（如『隐瞒了自己要报复户部侍郎的想法，只说税银案幕后主使极有可能是周侍郎』@114825）。"
+  }
+ ],
+ "misKillCheck": {
+  "examined": "rejectedCauseEdges 12 条 + rejectedForeshadows 8 条 = 20 条排除",
+  "result": "未发现词表/正则式的机械误杀（计划100『遂行』那类整词判定误杀）。候选的排除全部是语义口径判断，且多数附有可核理由。",
+  "notable": [
+   {
+    "id": "rej_fs_ten_wen",
+    "candidateText": "全语料里「十文钱」另有三处（1672212／1672427／1672786 等）",
+    "myInitialFlag": "我最初把它记为『计数不完整』：裸 find('十文钱') 全语料有 6 个命中，减去区间内 1 个应为 5 处。",
+    "recheck": "复验后撤回：多出的两处（3134301／3134375）位于『先给二十文钱』『摸出二十文钱递过去』之中，是 **「二十文钱」的子串**，并非独立出现的『十文钱』。候选所列三处才是独立的其余出现，故该条**正确**。",
+    "verdict": "候选无误；我的首轮反向发现是子串误报，已按契约『你可以判自己错』记入 selfCorrection。"
+   }
+  ]
+ },
+ "selfCorrection": {
+  "item": "rej_fs_ten_wen 的『十文钱另有三处』",
+  "what": "我先按裸子串计数判为漏计 2 处，随后用同段落上下文复核，确认那 2 处是「二十文钱」的内部子串。",
+  "conclusion": "我的反向验证本身不成立，撤回该条；候选此条正确。这也说明**裸 find 计数会高估**，与候选 countingConvention 里『不靠出现次数自证』的谨慎一致。"
+ },
+ "citationSample": [
+  {
+   "path": "states[7].anchor.quotes[0]",
+   "start": 111617,
+   "end": 111653,
+   "find": 111617,
+   "verbatim": true,
+   "offsetMatch": true,
+   "quote": "    兄弟俩离开许府，花了三两银子租了两匹黄骠马，风驰电掣的离开京城。"
+  },
+  {
+   "path": "tasks[3].objective.quotes[1]",
+   "start": 111877,
+   "end": 111892,
+   "find": 111877,
+   "verbatim": true,
+   "offsetMatch": true,
+   "quote": "    “你说圣人是一品吗？”"
+  },
+  {
+   "path": "tasks[0].result.quotes[2]",
+   "start": 111330,
+   "end": 111353,
+   "find": 111330,
+   "verbatim": true,
+   "offsetMatch": true,
+   "quote": "    这么多年，他第一次遇到吃饭给钱的胥吏。"
+  },
+  {
+   "path": "quoteIndex[71]",
+   "start": 112830,
+   "end": 112876,
+   "find": 112830,
+   "verbatim": true,
+   "offsetMatch": true,
+   "quote": "    四位大儒各有特色，李慕白是棋，张慎精通兵法，出任青州布政使的紫阳居士杨恭，擅长治学。"
+  },
+  {
+   "path": "quoteIndex[65]",
+   "start": 112676,
+   "end": 112687,
+   "find": 112676,
+   "verbatim": true,
+   "offsetMatch": true,
+   "quote": "    “难道不是？”"
+  }
+ ],
+ "usableVsDiscard": {
+  "usable": "tasks/causeEdges/states/knowledgeGaps/foreshadows/characterClaims/openThreads/unknowns 的**抽取内容**全部可用：497 个引文实例逐字命中、偏移自洽、章号归属 0 错、15 项全局计数可独立复现、无编造人物与结局。特别是三条最易犯的红线候选主动守对：tasks[4].result 直写『没有结果』、tasks[2].result 写『没有得到书院的入住许可』、semanticReview 保持 not-performed。",
+  "mustFix": "CE1『县城外』应改为『京城』（或『离县衙两街之外』）。",
+  "shouldFix": "CE2『不是卷级分隔』应删除或改为『章级与卷/篇题、作者附言共用同一分隔符（1028 条中 115 条其后不是章标题）』；CE3 应统一为行计数（120 条，索引 29／30）或明确写『子串任意位置计数』；CE4 覆盖率应改为 94/94（含自表口径）或注明 87/94 为『不含自表』口径。",
+  "downgrade": "RC3 不要求改结论，但『我没有找到回指本句的原文』这句理由必须删改。",
+  "discard": "无整条需要丢弃的条目。"
+ },
+ "notes": "总判 **partial**。这是一份引用层几乎无懈可击的候选：497 个引文实例（124 个不同 span）逐字/长度/偏移/inRange 四项核验 0 失败；固定种子抽 5 条 5/5 逐字命中且偏移一致；157 条带章号的引文与独立行首标题索引 0 错位；25 条区间外佐证 0 错；15 项自报全局计数全部独立复现；94 个非空段**逐段 100% 字符被区间内引文覆盖**、0 段零覆盖；无编造人物（区间内没有的名字它明确拒绝引入）、无把结束当成功。判 partial 而非 pass 的原因是有 **1 条可被原文直接证伪的编造（CE1 地点『县城外』）** 与 3 条自述/描述层缺陷（CE2 文本层结论被证伪、CE3 计数口径与标签不符、CE4 自报覆盖率与自述口径不自洽）。判 partial 而非 fail 的原因：CE1 是概述层单个地点词、已被候选自己另一处字段写对，不触及事件链与引文层；CE2–CE4 均不影响任何抽取项。\n\n不确定处（仅记为存疑，不据此判 fail）：① RC1 是否需要登记区间外起因，取决于本 lane 对边界的口径——原文与偏移我都能给出，但『该不该收』是契约问题不是事实问题；② RC3 只证伪候选的**排除理由**，是否因此改判伏笔取决于环境对『回收』的定义（是否要求悬念被解决），我不替下游裁定；③ CE3 的 2625 与 36／37 在『子串任意位置』口径下确实成立，我判的是**标签与口径不一致**，不是数值造假；④ CE4 我复现出 87（不含自表）与 94（含自表）两个数，只能证『与自述口径不自洽』，不能证数值造假。\n\n我没有做的事：未核验 25 条区间外佐证的**语义**（只核了逐字、长度、偏移、章号、inRange 标志）；未复核区间外的其他统计口径（如 913 标题数、1028 分隔数我复算了，更远的语料统计未做）；未跑任何 GPU/浏览器测试；未修改被复核的 candidate 文件（只在 writes 指定路径写本复核）。\n\n写入说明：本文件是任务 writes 指定的唯一路径。上一轮复核者的内容仍完整保存在 loop/state/out/read_dafeng_L0_0036.json 的 reviews[] 里（loop.py verify 会追加而非覆盖），故此处覆盖不丢失历史。",
+ "reproduceCommands": [
+  "python3 -c \"import json,hashlib;raw=open('data/cache/9b676d7031b1bcd3b8377a18.docs.json','rb').read();print(hashlib.sha256(raw).hexdigest())\"  # fdde5558…",
+  "python3 -c \"import json,hashlib;T=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];print(hashlib.sha256(T[110506:113766].encode()).hexdigest())\"  # e7b67de5…",
+  "python3 -c \"import json;T=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];print(T.find('县城',110506,113766))\"  # -1  => CE1",
+  "python3 -c \"import re,json;T=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];print(repr(T[0:43]))\"  # 卷/篇题分隔 => CE2",
+  "python3 -c \"import re,json;T=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];print(T.count('    ......'),len(re.findall(r'(?m)^    \\\\.{6}$',T)))\"  # 2625 120 => CE3"
+ ],
+ "remaining": [
+  "未核验 25 条 outOfRangeCorroboration 的语义正确性（只核了定位层四项）。",
+  "未复核区间外的语料级统计（除 913 标题／1028 分隔／115 非章分隔外）。",
+  "RC1／RC3 的最终归类取决于环境口径，留给下游裁定。"
+ ],
+ "summary": "独立反向复核《大奉打更人》第三十七章 劝学（区间 [110506,113766)，3260 码点）。按 VERIFIER 契约顺序执行：先自己读完原文切片（94 个非空段）后才打开候选。总判 **partial**。引用层零编造：497 个带偏移引文实例（124 个不同 span）的切片相等/长度/偏移/inRange 四项核验 **0 失败**；124 条 quoteIndex **0 失败**；157 条带章号引文与独立行首标题索引 **0 错位**；25 条区间外佐证 **0 错**；固定种子抽 5 条 **5/5 逐字命中且偏移一致**；15 项自报全局计数全部独立复现；94 个非空段**逐段 100% 字符被区间内引文覆盖**、0 段零覆盖；_selfCheck 490 已对账（=497−7 条自表条目），非缺陷。无编造人物、无把结束当成功（tasks[4].result 直写「没有结果」、tasks[2].result 写「没有得到许可」、semanticReview 保持 not-performed）。判 partial 的原因：1 条可被原文逐字证伪的**编造**（CE1『县城外』——『县城』在区间内 find=-1，原文写的是京城，且候选自己的 st_xu_location 写对了京城）＋3 条自述层缺陷（CE2『不是卷级分隔』被原文证伪：1028 条分隔行中 115 条其后不是章标题，含卷/篇题『京察风云』与番外/感言；CE3 2625／36-37 是**子串任意位置**口径，与『排版分隔行』标签不符，行口径应为 120／29-30；CE4 自报 87/94 与自述『本表自身引文计入覆盖』口径不自洽，按该口径应为 94/94）。4 条反向发现：RC1 漏掉区间外直接成因（第三十六章末『今天早饭不打算在家里吃了』，候选已抄进 boundaryBefore 却未立条）；RC2 别名『辞旧』未在区间内绑定到许新年；RC3 候选『找不到回指本句的原文』的排除理由被原文两处回指证伪（陈泰『都说诗词无用，殊不知，诗词最动人心』@119262 等）；RC4 记录候选一处**正确的边界自律**（拒绝把区间外姓名周显平/周立引入区间内）以免下游误判为遗漏。误杀检查：审 20 条排除，未发现词表/正则式机械误杀；我首轮把 rej_fs_ten_wen 记为漏计 2 处，复核后确认那 2 处是『二十文钱』的子串，**撤回并记入 selfCorrection**。",
+ "assertions": [
+  {
+   "text": "原文切片哈希与任务声明一致",
+   "command": "python3 -c \"import json,hashlib;T=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];print(hashlib.sha256(T[110506:113766].encode()).hexdigest())\"",
+   "result": "e7b67de5f6755736a2f544e346147f1cac46d37c8fcb199a1b239e5365815f35（= 任务 sourceHash 的 segment 值）"
+  },
+  {
+   "text": "源文件哈希",
+   "command": "python3 -c \"import hashlib;print(hashlib.sha256(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json','rb').read()).hexdigest())\"",
+   "result": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+  },
+  {
+   "text": "全部 497 个引文实例四项核验（切片相等/长度/偏移/inRange）",
+   "command": "见 notes 中的复算脚本；对每个含 quote+start+end 的字典断言 T[start:end]==quote 且 end-start==len(quote)",
+   "result": "0 失败"
+  },
+  {
+   "text": "CE1 地点词证伪",
+   "command": "python3 -c \"import json;T=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];print(T.find('县城',110506,113766))\"",
+   "result": "-1（区间内不存在『县城』）"
+  },
+  {
+   "text": "CE2 分隔行分类证伪",
+   "command": "见 reproduceCommands 第 4 条",
+   "result": "1028 条分隔行中 115 条其后不是章标题；文档开头 offset 0/21 夹住卷题『京察风云』"
+  },
+  {
+   "text": "CE3 行口径计数",
+   "command": "python3 -c \"import re,json;T=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];print(T.count('    ......'),len(re.findall(r'(?m)^    \\\\.{6}$',T)))\"",
+   "result": "2625 120（子串口径 2625；行口径 120，索引 29/30）"
+  },
+  {
+   "text": "CE4 覆盖率双口径复算",
+   "command": "按候选自述口径（含 coverageDisclosure/quoteIndex）与实质条目口径分别复算",
+   "result": "含自表 94/94；不含自表 87/94（与候选所列 7 段完全一致）"
+  },
+  {
+   "text": "随机 5 条 quote 的 find 核验",
+   "command": "random.seed(36); 抽 5 条做 T.find(q) 比对",
+   "result": "5/5 逐字命中且偏移一致"
+  },
+  {
+   "text": "本复核文件自身所有引文逐字可查",
+   "command": "对 counterExamples/reverseChecks/citationSample 每条断言 T[start:end]==quote 且 T.find(quote)==start",
+   "result": "0 失败（3 处初版偏移错误已在提交前修正：RC3→119262、RC4→112236-112290、CE3 加重复串说明）"
+  },
+  {
+   "text": "未修改被复核候选与原文",
+   "command": "sha256 提交前后对比",
+   "result": "候选 bc5543fb…、原文 fdde5558… 均未变"
+  }
+ ],
+ "evidence": [
+  {
+   "path": "loop/state/out/read_dafeng_L0_0036.candidate.json",
+   "sha256": "bc5543fb319b042dc1499650f173dbc3753bd653ec10a525fefab76fdb4a95a5",
+   "kind": "被复核候选（只读，未修改）"
+  },
+  {
+   "path": "data/cache/9b676d7031b1bcd3b8377a18.docs.json",
+   "sha256": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+   "kind": "原文（只读引用，未修改）"
+  },
+  {
+   "path": "loop/state/out/verify_dafeng_L0_0036.verdict.json",
+   "sha256": null,
+   "kind": "本复核交付物（writes 指定路径；自身条目不校验哈希，避免自指）"
+  }
+ ],
+ "sourceHashes": {
+  "data/cache/9b676d7031b1bcd3b8377a18.docs.json": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+  "loop/state/out/read_dafeng_L0_0036.candidate.json": "bc5543fb319b042dc1499650f173dbc3753bd653ec10a525fefab76fdb4a95a5"
+ },
+ "changes": [
+  {
+   "path": "loop/state/out/verify_dafeng_L0_0036.verdict.json",
+   "kind": "artifact",
+   "what": "新增本复核结论"
+  }
+ ],
+ "rollback": {
+  "how": "本任务只新增一个追加式复核文件；如需回退，删除 loop/state/out/verify_dafeng_L0_0036.verdict.json 即可，不影响被复核候选与原文。",
+  "risk": "无（未触碰候选/原文/受保护路径）",
+  "note": "本复核文件本身是 writes 指定的交付物，故不作为自己的 evidence 条目（自指哈希无法自洽）。"
+ },
+ "independence": "复核者 w-verify-0 ≠ 被复核候选提交者 w-dafeng-0（见 read_dafeng_L0_0036.json 的 agent 字段），非自签。复核期间未修改候选、原文与本任务定义。"
+}

@@ -1,0 +1,85 @@
+{
+  "task": "read:xiyou:L1:0019",
+  "agent": "w-xiyou-1",
+  "role": "READER",
+  "status": "done",
+  "summary": "精读《西游记》第十九回「云栈洞悟空收八戒 浮屠山玄奘受心经」（docs[0].text 全文 codepoint [129251,136016)，6765 字 / 29 个非空段落）：产出 tasks 8 条（五元组；6 条 cost 原文无记载写 JSON null 且 basis.cost 同为 null，3 条 resultIsSuccess=false 并逐条写明失败机制，5 条 true 全部在 resultNote 里限定为『objective 在本单元内达成』并同时写出失败面、不把播放到结尾当成功）、causeEdges 17 条（16 条 explicit + 1 条自标 derived；每条带 direction + mechanismKind + mechanismOwner + caveat，mechanism 全部写成机制而非时间相邻）、rejectedAsCauseEdge 10 条（主动否掉的并置关系，含『天亮→败走』『偈语→骂』『田产许诺→拿住』『金银→降妖』）、states 8 条（前值/后值 + 事件锚点 + 谁知情）、knowledgeDiffs 7 条、foreshadows 7 条（3 条 resolved、4 条显式 unresolved 且 payoff/payoffAnchor 为 null；FS6 自标 inferred）、rejectedAsForeshadow 8 条、unknowns 14 条、gapAnchors 26 条（只登记位置、claim 与 basis 皆 null）。共 304 个引文节点（178 条不同引文）；构建脚本对每条引文断言 text.count(quote)==1 且 text[start:end]==quote 且落在区间内，任一不成立即中止不落盘；另写独立复核脚本（verify.py，不复用构建逻辑）从磁盘重算 A1-A9 得 problems=0。本轮真实抓出并修掉自己 6 类缺陷（见候选 selfCritique.defectsFoundInMyOwnWork 与下面 assertions 第 5/6 条）。未声明 semanticReview 完成。",
+  "evidence": [
+    {
+      "path": "loop/state/out/read_xiyou_L1_0019.candidate.json",
+      "sha256": "f6a1d86d0c8421533c1edd5060700ea7c04d4a9e5cde2eaf3640147f13217b3f",
+      "kind": "candidate",
+      "note": "任务 writes 指定的唯一产物。"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "区间与标题自检：docs[0].text[129251:129273] == '第十九回 云栈洞悟空收八戒 浮屠山玄奘受心经'；TEXT.find('第十九回')==129251==区间起点；TEXT.find('第二十回')==136016==区间终点；len(slice)==6765，与任务 prompt 声明的字数一致。命令：python3 -B -s -c \"import json;t=json.load(open('data/cache/df959d743e53206f56db2f92.docs.json'))[0]['text'];print(t.find('第十九回'),t.find('第二十回'),len(t[129251:136016]),t[129251:129273])\" → 129251 136016 6765 第十九回 云栈洞悟空收八戒 浮屠山玄奘受心经。",
+      "result": "pass"
+    },
+    {
+      "text": "sourceHash 口径：任务声明 c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2；实测 shasum -a 256 data/cache/df959d743e53206f56db2f92.docs.json == 该值（**整文件**哈希）。切片自身哈希另记在 source.sliceSha256，构建脚本断言两者是不同的字段、不互相冒充。",
+      "result": "pass"
+    },
+    {
+      "text": "引文逐字校验：构建脚本对每条被引用的 quote 断言 TEXT.count(quote)==1（全文 722176 字内唯一）、完全落在 [129251,136016) 内、TEXT[start:end]==quote、sourceHash 正确、crossRange==false，任一不成立即抛异常、整体不落盘。实跑输出 'WROTE … quoteNodes(distinct)=178'（exit 0）。命令：python3 -B -s /tmp/rd0019/build.py。",
+      "result": "pass"
+    },
+    {
+      "text": "独立复核（不复用构建脚本逻辑，另写一套显式路径栈遍历）：/tmp/rd0019/verify.py 从磁盘读候选 JSON 与 docs.json，重算 A1 文件哈希与区间边界、A2 全部 304 个引文节点的 count/find/偏移/sourceHash/crossRange/wholeTextOccurrences、A3 全部 basis 合法性、A4 gapAnchors 不带断言（claim 与 basis 皆 null）、A5 覆盖率四栏从候选自身重算并按 0.06 容差比对声明值、A6 foreshadows 的 status/payoff/payoffAnchor 一致性、A7 causeEdges 结构、A8 rejectedAs* 必须各带 why_rejected、A9 各节 id 唯一与语义未声称完成。实跑 'RESULT: PASS (problems=0)'。命令：python3 -B -s /tmp/rd0019/verify.py。",
+      "result": "pass"
+    },
+    {
+      "text": "散文引文卫生（本轮真实抓出并修掉的一类缺陷）：我原先在散文里用 「」 同时包装原文引文与我自己的术语/转述，共出现 10 处『看起来像引文、其实在切片内 find 不到』的片段（如『三年前』『整做了这三年女婿』『教他写了退亲文书』属第十八回区间外文字；『行者没有回答』『禅师骂了他兄弟两个』『第一次为什么收手』纯属我自造；『拿住那怪』『端的』等短术语）。另写 /tmp/rd0019/prose_audit.py 独立扫描候选全部字符串字段、抽出所有 「...」 片段并断言其在**切片**内 find 得到，逐条修掉：区间外原文改入 crossUnitReferences（以 text/textStart 为键、显式标 inThisUnitRange=false）、自造与术语改『』。修后实跑 200/200 逐字命中，'RESULT: PASS (find 不到且非省略号的片段=0)'。命令：python3 -B -s /tmp/rd0019/prose_audit.py。",
+      "result": "pass"
+    },
+    {
+      "text": "引文唯一性自查（另一类真实抓出的缺陷）：我最初准备的 70 余条候选引文里有 6 条在全书非唯一——『好，好，好！』2 处、『师兄息怒』2 处、『何尝骂你』2 处、『谨遵师命』3 处、『饶他去罢』3 处，以及公共前缀『行者喝道』19 处。构建期 count==1 断言全部挡下，我逐一换成更长的唯一窗口（『禅师大喜道：“好，好，好！”』『八戒道：“师兄息怒。这禅师也晓得过去未来之事』『他讲的西天路径，何尝骂你？』『那呆子欢欢喜喜道：“谨遵师命。”』『但看他水怪前头遇这句话，不知验否，饶他去罢』『行者喝道：“夯货，却莫胡说！”』）。另有三条（『可怜，可怜』2 处、『三藏又道』2 处、『好山！但见那』2 处）直接弃用。副词『那怪王』全书 3 处且断句读不通，未换掉，如实登记为 U7 存疑。",
+      "result": "pass"
+    },
+    {
+      "text": "红线自检：(1) **不把人物之言当叙述事实**——全部引文节点里 161 条标 factStatus=utterance（人物之言），只用于『某人说了这话』；最典型的是 KD3/U11：整条皈依链（菩萨劝善、受戒、起名悟能、命他等取经人）**只有那怪自己的话**，本单元观音未出场，我因此不写成已证实事实，并在 T2.caveat 与 FS1.caveat 里各写明一次。(2) **结束≠成功**——T5/T6/T7 显式 resultIsSuccess=false 并各给机制（路程问与答没对上、力气对祥雾无效、保留退路的主诉求被否）；T1/T2/T3/T4/T8 的 true 全部限定为『objective 在本单元内达成』并同时写出失败面（T1 头一夜一无所获、怪是自己投降的；T4 路程那一问同单元未获答复；T8 同时拒了开斋）。(3) **未编造人物/事件/结局**——nameUsageAudit 抽查『高翠兰』『翠兰』『沙僧』『流沙』『红孩儿』『花果山』『水帘洞』在本切片内全部为 0，我因此不写女儿的名字（只用原文通称『女儿／浑家／拙荆』，见 U10）、不把『水怪前头遇』指认为沙僧（见 U5）。(4) **时间相邻不当因果**——rejectedAsCauseEdge 10 条主动否掉（天明→败走、写景→禅师出场、八戒旧识→禅师识人、拜菩萨→得经、偈语→骂、田产许诺→拿住、金银→降妖、回末联→后文灾难、天明→回庄、挂脚粮→给鞋）；保留的 17 条每条都有 mechanismKind + mechanism + caveat，CE17 自标 derived 并写明若判抢白应移出。(5) **一次出现当伏笔**——rejectedAsForeshadow 8 条（还俗一句、挂脚粮、青锦袈裟、回末联、野猪挑担子→八戒担担子的形似、悟空悟能同派、石碣洞名、焚香拜菩萨）；保留的 7 条里 4 条显式 unresolved 且 payoff/payoffAnchor 为 null。(6) **不用未知填默认值**——6 处 cost 与 4 处 payoff/payoffAnchor 为 null，逐条列在 nullFieldsRule 与各条 caveat 里说明原文为何读不出。(7) **定位≠语义**——semanticReview=not_performed，未声称语义已核验；verify.py 的 A9 反向断言该字段必须为 not_performed。",
+      "result": "pass"
+    },
+    {
+      "text": "只写指定路径：本轮唯一写入的共享树文件是 loop/state/out/read_xiyou_L1_0019.candidate.json（任务 writes 指定路径）与提交记录 loop/state/out/read_xiyou_L1_0019.submit.json（loop/ 属追加式路径）。可复现检查：find js css index.html serve.py narrative.py scripts tests docs data -newermt '-30 minutes' -type f | wc -l → 0（未在共享树触碰任何受保护路径）；未运行 GPU/浏览器测试（任务未声明要跑）；未执行 git checkout/reset/stash。构建、复核、卫生三个脚本都放在 /tmp/rd0019/，不入库、不影响并行 agent。",
+      "result": "pass"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/read_xiyou_L1_0019.candidate.json",
+      "kind": "append-only",
+      "note": "任务 writes 指定的候选文件，本轮新增。"
+    },
+    {
+      "path": "loop/state/out/read_xiyou_L1_0019.submit.json",
+      "kind": "append-only",
+      "note": "本提交记录，本轮新增。"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/df959d743e53206f56db2f92.docs.json": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+    "loop/state/out/read_xiyou_L1_0019.candidate.json": "f6a1d86d0c8421533c1edd5060700ea7c04d4a9e5cde2eaf3640147f13217b3f"
+  },
+  "remaining": [
+    "语义未独立复核：本文件只保证引文逐字可定位、字段结构可由脚本重算、计数与覆盖可复现，不保证引文被放在正确的条目下，也不保证语义读对。semanticReview=not_performed，需 read-verify 由别的 agent 反向复核。",
+    "最可能被推翻的三处已写进 selfCritique.mostLikelyMisread：(1) CE6 把第一夜战果的机制归给体力（『两膊觉酸麻』）而非天明；(2) CE17 标 derived 的『那相识＝行者』接续；(3) ST6/U3 对『亲事是否解除』的保守写法（只写名义上仍是女婿）。复核可优先攻击这三条。",
+    "causeEdges 里有 3 条自标较弱：CE4（『不再以钯决胜』是从后文行为归纳）、CE14（『用离场终止对话』是顺序归纳，若判并置应降级）、CE17（derived）。verify.py 对这 3 条走的是另一条判据（只校验结构，不校验语义强度）。",
+    "FS2 把整首偈当作一个未回收伏笔，口径偏宽（它是多项预告的并列）；FS6 标 inferred。这两条若被判为不成立，应从 foreshadows 移入 rejectedAsForeshadow。",
+    "unknowns 14 条多为原文自身的落差，本单元内无解：U7『那怪王』三字断句（另 2 处在第八十九回，非本单元孤例）；U8 心经自称『五十四句，共计二百七十字』与机械计数不符（含题名 271 个汉字/去题名 259 个/按标点 53 段/按句末标点 15 句）且段中夹私用区字符 U+E485；U9 时间口径（前年／这几年／三年）无法换算；U10 高家女儿的名字不在本区间；U11 菩萨嘱托无旁证；U12 引号配对不规则。",
+    "gapAnchors 26 条只登记位置、claim 与 basis 都是 null，不计入引文节点、也不承担任何断言；它们的用途是让复核者能按图索骥去问『这一段里还漏了什么』。覆盖率四栏分报（tasks 20.1% / 全部引文节点 31.3% / 加 gapAnchors 37.2% / 加整段区间 99.1%），并写明覆盖率不是分数。",
+    "crossUnitReferences 3 条（第十八回『三年前被一个妖精占了』偏移 124883、『整做了这三年女婿』偏移 124896、『教他写了退亲文书』偏移 126846）刻意不用 quote/start 键名，以免被任何遍历逻辑误当成本单元引文节点；它们只作时间口径与退亲文书的对照，不承担断言。",
+    "未做：不跑 GPU/浏览器测试（任务未声明要跑）；不写回任何受保护路径；不做语义评审（属 read-verify 流）；不推算绝对日期、里程、里程换算（原文只给相对时间词与不含距离的偈）；不对《多心经》正文做义理解读。",
+    "图谱缓存 data/cache/df959d743e53206f56db2f92.json 未用于任何断言，也未做与本单元的差异对照（任务要求它只能用来对照已有结论）。",
+    "本轮是 read:xiyou:L1:0019 的第二次尝试：上一轮 w-sanguo-0 被记 rejected（未产出文件）。本轮重新通读原文并另建候选，未复用上一轮任何内容。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/read_xiyou_L1_0019.candidate.json",
+      "loop/state/out/read_xiyou_L1_0019.submit.json"
+    ]
+  }
+}

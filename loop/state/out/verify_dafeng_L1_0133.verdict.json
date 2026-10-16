@@ -1,0 +1,199 @@
+{
+  "task": "verify:dafeng:L1:0133",
+  "reviewer": "w-verify-0",
+  "reviewedCandidate": "loop/state/out/read_dafeng_L1_0133.candidate.json",
+  "reviewedCandidateSha256": "b5732a1e93942ac407d3b87fa5c59683bf9b23f1a31cdb4e116cb32a279d2174",
+  "source": {
+    "docsJson": "data/cache/1063b17ca65ec1b76f30e460.docs.json",
+    "docIndex": 0,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "sliceRange": [
+      462381,
+      466477
+    ],
+    "sliceSha256": "82969a8844d38aef6ed2a472f8e2948e16ef2968e9de18b1e553596e9f6f5f2e",
+    "unitChars": 4096,
+    "unitHead": "第一百三十四章 塑料父子情",
+    "method": "先独立通读 T[462381:466477) 全文（205 行 / 102 个非空段），再打开候选逐项核对；反向验证按「分段未被引文触及」的机器判据做，不依赖候选自己的 coverage 数字。"
+  },
+  "verdict": "partial",
+  "verdictRationale": "候选的抽取主体是干净的：250 个引文节点逐字、区间内、全库唯一、sourceHash 一致，0 处编造；8 条任务、10 条因果、7 条状态、6 条知识差、4 条伏笔、14 条世界设定每一条都能在原文找到对应文字，人物/事件/结局无幻觉，没有把人物说法当叙述事实，没有把「走到石像前」「区间收束」写成成功。但它有 3 处可复现的**自称与实际不符**（coverage 的未覆盖清单错 8 段、quoteNodes 写 90 实为 250、tasksWithAnnotatedNull 写 8 实为 6），且这 3 处**恰恰是候选自己用来声称「没有静默丢弃」的完整性证据**。加上 reverseCoverage/reverseCoverageNote 两个候选声称存在的字段实际缺失、provenance 引用的 _build_0133.py 实际跑不通且与其描述不符。抽取结论可用，完整性自证不可用 —— 故判 partial 而非 pass，也不到 fail（无编造、无越权、无事实性错误）。",
+  "counterExamples": [
+    {
+      "claim": "候选 coverage 与 untouchedParagraphList 声称「102 个非空段中 19 段未被任何引文触及」，remaining 里另称「102 个非空段中有 27 段没有任何引文触及」；两处自相矛盾，且按候选自己的判据（任一段与任一引文区间有重叠即记为触及）实测未覆盖段既不是 19 也不是 27。",
+      "quote": "102 个非空段中有 27 段没有任何引文触及（含标题、省略号段与若干描写句），未覆盖段落全部登记在 untouchedParagraphList，未做静默丢弃。",
+      "quoteLocation": "candidate.remaining[6]",
+      "why": "实测（脚本见 reproduce.cmd_coverage）分三类：① 误报 1 段 —— 第 3 段 [462413,462461) 被列入 untouchedParagraphList（\"paragraph\": 3），但它实际被 /tasks[1]/whoDerivation/quotes[0]（start=462417,end=462461）覆盖，该引文是提交者本人新增的，说明清单是新增字段之前的**陈旧快照**；② 漏报 7 段 —— 第 2、8、12、32、76、79、80 段确实没有任何引文触及，却没被登记进 untouchedParagraphList，正是候选声称「不做静默丢弃」时丢掉的那批；③ 正确登记的 18 段。真实未覆盖数 = 25（既非 19 也非 27）。coverage.quoteNodes=90 同样是陈旧值：实测引文节点为 250（metrics.quoteNodes 与 verification.quoteNodeCount 写的 238 也对不上，238 是「去掉 knowledgeDiffs 的 12 个节点」这一非候选自身口径的子集，候选没有任何一处声明过这个口径）。第 ① 类还证明 coverage.untouchedParagraphs=19 与 touchedParagraphs=83 这对数字来自旧版本：去掉 whoDerivation 后未覆盖为 27、误报消失，与 coverage 的 19 和 remaining 的 27 各差一半，两组数字互不相等且都不等于任何单一版本的真实值。"
+    },
+    {
+      "claim": "provenance.authoredBy 声称候选由 `loop/state/out/_build_0133.py` 构建，并称「builder 占位名，见 loop/state/out/_build_0133.py:18」；但该脚本既不能构建出现存候选，第 18 行也不是占位名。",
+      "quote": "w-xiyuu-0（builder 占位名，见 loop/state/out/_build_0133.py:18；实际产出会话为 worker w-xiyou-0 于 2026-10-11T14:24:30Z 启动的那一轮）",
+      "quoteLocation": "candidate.provenance.authoredBy",
+      "why": "逐条实测：① _build_0133.py:18 的实际内容是 `SLICE = T[S:E]`，与「占位名」无关；② 全文 grep `w-xiyuu-0` 在该脚本中出现 0 次，脚本里唯一的 agent 赋值是第 1266 行 `\"agent\": \"w-dafeng-1\"`，而候选实际写的是 `\"agent\": \"w-xiyuu-0\"` —— 现存候选不可能是该脚本原样产出的；③ 把脚本 OUT 重定向到仓库外临时路径后运行，在第 32 行 `assert n == 1` 处抛 AssertionError 退出（`引文在原文中出现 41 次，不唯一: '“....”'`），即该脚本**根本跑不通**；④ 脚本会产出的 nonEdges / narrativeFacts / speakerStatements / deliberatelyNotAsserted / notForeshadows / reverseCoverage / reverseCoverageNote 七个字段，现存候选一个都没有；候选的 coverage 块（含 method 与 quoteNodes）也不在该脚本里，脚本另写 reverseCoverage 与 reverseCoverageNote。结论：provenance 指向的构建路径不可复现，且与候选实际内容不一致；这不影响抽取结论本身（引文仍逐字可查），但使「候选如何生成」这一可追溯性声明失效。"
+    },
+    {
+      "claim": "提交记录 read_dafeng_L1_0133.json 的 assertion #9 声称「4 条任务有 null 栏位」，metrics.tasksWithAnnotatedNull 写 8；实测 null 栏位落在 6 条任务上，带同名 Note 的 null 栏位也是 6 处。",
+      "quote": "\"tasksWithNullColumn\": 6, \"tasksWithAnnotatedNull\": 8",
+      "quoteLocation": "candidate.metrics（提交记录 assertion #9 另写「4 条任务有 null 栏位」）",
+      "why": "实测：null 栏位共 6 处，分布在 6 条任务上（T1/T2/T3/T7/T8 的 cost、T4 的 objective），每处都带同名 <栏位>Note —— 这一条**内容上是对的**（提示词要求的「不写理由的 null 会被判为未标注的未知」没有违反）。但 tasksWithNullColumn=6 被定义成「栏位个数」、tasksWithAnnotatedNull=8 被定义成「栏位个数」，同一字段名里一个按栏位计、一个按别的口径计，且 8 这个数与实测的 6 都对不上；提交记录里又出现第三种说法「4 条任务」。同一份证据里三个互不相等的数字，落进台账后无法判断哪个成立。"
+    }
+  ],
+  "reverseChecks": [
+    {
+      "found": "第 8 段：丽娜对天蛊婆婆激烈反应的动机判断与她自身的不适 —— 候选的 states 只写天蛊婆婆（ST1）与丽娜的「好奇→察觉有异」（ST2），完全没有这一段的「丽娜因为天蛊婆婆的激烈反应，有些不适」，也没有她心里那个半开玩笑的归因（把婆婆的急联系到「三号的朋友天天捡银子」）。这是本区间里丽娜与捡银子话题之间唯一的**情绪反应**陈述。",
+      "quote": "婆婆有些急....她这是怎么了，也想和三号的朋友一样天天捡银子么？丽娜因为天蛊婆婆的激烈反应，有些不适。",
+      "start": 462640,
+      "end": 462692,
+      "whyItMatters": "候选 T3.costNote 引了「有些不适」这个词来论证「反应不是损失」，却始终没有把这一段的引文正式收进任何一条抽取项；该段在 untouchedParagraphList 里也没出现（属漏报的 7 段之一）。同一处文本被用来做否定论证、却不进证据清单，这是覆盖链上的一个断点。"
+    },
+    {
+      "found": "第 32 段：天蛊婆婆听到「大奉京城」之后的持续表情变化 —— 候选 CE2 只连了「丽娜说出地点 → 婆婆当场否定」这一条边，ST1 的状态迁移是「激烈反应 → 树下平静」。原文在否定之后还有一段**未接入任何状态或因果**的表情描写：她并没有因为给出否定就结束反应，而是继续处在恍然与惊疑之间，直到走到树下才平静。",
+      "quote": "天蛊婆婆白眉紧皱，时而恍然，时而惊疑，表情变化不定。",
+      "start": 463570,
+      "end": 463596,
+      "whyItMatters": "ST1 把 before→after 写成「激烈反应 → 平静」两点式，漏掉中间这一段持续的不稳定态；CE2 的机制栏写「机制是「京城不可能发生这种事」这条她自己的预设」，原文其实**没有**把否定与任何预设连起来（候选自己在 CE2.note 和 U3 承认理由缺失）。把这段表情变化补进来，ST1 才是三态（激动 → 恍然惊疑不定 → 平静），而候选的两态写法会让读者以为她在原地就平静了。该段同样未被登记。"
+    },
+    {
+      "found": "第 12 段：另外五部首领的动作 —— 候选 T2 的 action 栏只引「首领们准头看向身后。」，把首领们的动作缩成「转头求证的瞬间」；原文在此之前写他们**汇聚到龙图身边、与他并肩眺望离开的一老一少**，是一个具体的观望场景，且与 T2.costNote 里「只写他们汇聚、发问、并肩眺望」的措辞对应。",
+      "quote": "另外五部的首领汇聚过来，走到龙图身边，与他并肩眺望离开的一老一少。",
+      "start": 462868,
+      "end": 462901,
+      "whyItMatters": "候选在 costNote 的散文里用了「并肩眺望」这个细节，却从未把它作为引文收进任何抽取项；该段也未登记进未覆盖清单。这是「散文里用到的原文事实没有对应的可核验引文」的又一例，复核者若只看引文清单会以为这段没被读过。"
+    },
+    {
+      "found": "第 76、79、80 段：许七安在金莲道长给出「地书被封印」与「三十丈感应」之后的连续内心反应 —— 候选 T6 只写金莲道长的搜寻（objective/obstacle/action/result/cost），许七安这一侧的三段反应全部无引文、未登记：从「被封印的话该怎么办」的懵，到拿「位格/逼格」打趣并松口气，再到「法子虽然蠢，但有效就好」的接受。",
+      "quote": "法子虽然蠢，但有效就好。最怕的是一点办法都没有。",
+      "start": 465571,
+      "end": 465595,
+      "whyItMatters": "候选的 states 有 ST5（许七安对魏渊的认知）却没有「许七安对搜寻方案的态度」；knowledgeDiffs 的 KD3 只把「三十丈感应」记成金莲道长告知许七安的知识，没记许七安听完之后的接受。而这句「有效就好」是本区间里唯一一处**对方案可行性的评估**，也是许七安从「懵」到「接受」的状态迁移锚点。三段全部漏登记（属漏报的 7 段中的 3 段）。"
+    },
+    {
+      "found": "第 2 段：开场天蛊婆婆的主动发问「“天蛊婆婆，怎么了。”」—— 这是全章第一句台词，也是唯一一处由**天蛊婆婆自己**发起话题的语句；候选 T1 把 objective 定为「弄清丽娜口中「天天捡银子」到底怎么回事」，引的是后面的「好生说说，到底怎么回事」与「事无巨细，你跟我说清楚」。",
+      "quote": "“天蛊婆婆，怎么了。”",
+      "start": 462400,
+      "end": 462411,
+      "whyItMatters": "这一句的说话人归属在原文里**没有明写**（只有引号内的呼语「天蛊婆婆」，随后第 5 段写「丽娜听见父亲的声音」——但父亲的声音不等于这一句）。候选没有为它建任何条目，也没有登记为 unknown；如果说话人是丽娜，那 T1 的 objective 起点应前移到这一问；如果是旁人（大部队中的某人），T1 的 objective 就多了一个外部触发。候选对此既未取用也未存疑，属于「该写 unknowns 而没写」的空档。"
+    },
+    {
+      "found": "第 63 段：裂谷深处的蛊虫多样性清单 —— 候选 T4.obstacle 只引到「怪叫四起、男人女人都抱住树」为止，第 63 段整段（体壮如牛的大虫子／艳丽缤纷的蝴蝶／十二只眼睛的蛇／行尸走肉的动物群／三个生殖器的雄性野狗）无引文、未登记；worldSettings 的 excludedSettings[1] 把「养殖场／原材料」排除时理由是「队伍只是路过」，但这段恰好是「队伍在路过途中实际遭遇的物种」的正文。",
+      "quote": "越往裂谷深处走，遇到的蛊虫越多，且种类丰富。比如体壮如牛的大虫子；浑身艳丽缤纷的蝴蝶；长着十二只眼睛的蛇；行尸走肉的动物群；有着三个生殖器的雄性野狗等等。",
+      "start": 464861,
+      "end": 464938,
+      "whyItMatters": "候选对极渊的资源设定做了「不影响行动就不写」的排除，但这段是 T4.obstacle「毒虫猛兽」那一栏的**具体兑现**，不是装饰层；排除养殖场那条时若引用这段，「队伍只是路过」的理由会被削弱（他们明确在途中遭遇并描述了物种）。这是误杀检查里唯一一处我认为需要重新权衡的排除。"
+    }
+  ],
+  "misKillCheck": {
+    "summary": "候选排除了 3 条世界设定，其中 2 条我认为排除正确，1 条理由偏弱（见 reverseChecks 第 6 条）。文本层没有发现「因为词表/正则把真实因果挡掉」的情况：候选的 causeEdges 用的是机制描述而不是关键词匹配，未出现计划100 那种整词判定误杀。",
+    "details": [
+      {
+        "excluded": "蛊族七部的部族结构",
+        "myAssessment": "排除正确。部名都嵌在动作里（谁施治、谁被问），单独立条是术语装饰层。"
+      },
+      {
+        "excluded": "九尺身高与北魏尺度的作者注",
+        "myAssessment": "排除正确。作者附注解释的是计量，不影响行动与后果。"
+      },
+      {
+        "excluded": "蛊虫养殖场（毒障裂谷为蛊族提供原材料）",
+        "myAssessment": "理由偏弱，见 reverseChecks 第 6 条。该句同时被 T4.obstacle 引作依据，说明候选自己认为它承载行动；却在 excludedSettings 里以「队伍只是路过」排除。同一句话被一处取用、一处排除，口径不一致。这不是 fail 级问题（该句确实也提供了阻碍信息），但建议在合并时统一为「取用」或补一句「已并入 T4.obstacle，故不另立条目」。",
+        "quote": "裂谷中弥漫出毒障，催生出富含毒性的植被，以及各种毒虫猛兽。这是一个天然的蛊虫养殖场，为蛊族提供了源源不绝的“原材料”。",
+        "start": 464153,
+        "end": 464212
+      }
+    ]
+  },
+  "hallucinationCheck": {
+    "result": "未发现幻觉或越权。",
+    "evidence": [
+      "人物：候选散文里出现的全部专名（天蛊婆婆/丽娜/龙图/莫桑/许七安/金莲道长/魏渊/恒远/恒慧/元景帝/平远伯/三号/六号/九号/镇北王/桑浦案）逐个在原文区间内出现，无区间外新增人物。",
+      "结局：候选 T4.result.note 写「结果只是「走到了」，不是任务成功——本区间没有写他们此行的成败」；T6.result.note 写「这不是成功：人还没找到」；T8.result.note 写「明确不是成功」。三处最容易被写成成功的地方都主动写成了未完成。",
+      "说法/事实分离：CL1-CL17 的 claimLedger 把天蛊婆婆的否定、她的「应该」推断、金莲道长的「我猜」与「恐怕」、许七安的辩解与内心反问逐条标成人物说法；WS12/WS13/WS14 三条规则全部记为 institution=misunderstood 而不是 declared。这与提示词「不许把人物说的话当成叙述事实」一致。",
+      "伏笔：4 条伏笔都给了铺设+回收两端的引文；rejectedForeshadows 主动挡掉 3 条「一次出现」（(﹁﹁) 表情、位格说、蚂蟥治毒），符合「一次出现不叫伏笔」。"
+    ]
+  },
+  "quoteSpotCheck": {
+    "method": "按复核契约随机抽 5 条 quote（seed=133，样本含 foreshadows/states/textualNotes 三类节点），对每条做 T.find(quote) 与 T.count(quote)，并比对声明偏移。",
+    "command": "python3 -c \"import json,random;c=json.load(open('loop/state/out/read_dafeng_L1_0133.candidate.json'));T=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];(lambda qs:[print(T.find(o['quote'])==o['start'],T.count(o['quote']),T[o['start']:o['end']]==o['quote'],o['quote'][:24]) for _,o in random.Random(133).sample(qs,5)])([(p,o) for p,o in [(p,o) for p,o in []] ] )\"",
+    "results": [
+      {
+        "node": "/foreshadows[3]/payoff/quotes[1]",
+        "quote": "天蛊婆婆没有解释，重复着说是很重要很重要的东西。",
+        "declaredStart": 464077,
+        "declaredEnd": 464101,
+        "find": 464077,
+        "count": 1,
+        "verbatim": true,
+        "offsetMatches": true
+      },
+      {
+        "node": "/states[4]/quotes[1]",
+        "quote": "“不对，魏渊是有些袖手旁观，但顶多是放任自流，不关心也不插手，凭我自己本事去办。”",
+        "declaredStart": 466014,
+        "declaredEnd": 466055,
+        "find": 466014,
+        "count": 1,
+        "verbatim": true,
+        "offsetMatches": true
+      },
+      {
+        "node": "/foreshadows[2]/payoff/quotes[1]",
+        "quote": "他顿了顿，语气带着敬重：“儒家圣人。”",
+        "declaredStart": 465162,
+        "declaredEnd": 465181,
+        "find": 465162,
+        "count": 1,
+        "verbatim": true,
+        "offsetMatches": true
+      },
+      {
+        "node": "/states[1]/quotes[0]",
+        "quote": "丽娜出于好奇心，想着天蛊部能观测万物，知道很多很多事情，便随口问了一嘴。",
+        "declaredStart": 463380,
+        "declaredEnd": 463416,
+        "find": 463380,
+        "count": 1,
+        "verbatim": true,
+        "offsetMatches": true
+      },
+      {
+        "node": "/textualNotes[5]/quotes[0]",
+        "quote": "按理说，六号失踪至今，接近一旬，金莲道长本该已经找到他。",
+        "declaredStart": 465329,
+        "declaredEnd": 465357,
+        "find": 465329,
+        "count": 1,
+        "verbatim": true,
+        "offsetMatches": true
+      }
+    ],
+    "conclusion": "5/5 逐字命中、偏移一致、全库唯一。另对全部 250 个节点做穷举复核：verbatimFailures=0、rangeFailures=0、hashFailures=0、firstOccurrenceMismatches=0（T.count(quote)==1 且 T.find(quote)==start）。"
+  },
+  "extractionCheck": {
+    "result": "抽取项全部可回溯，0 处编造。",
+    "method": "对 tasks（8×5 栏）/causeEdges（10）/states（7）/knowledgeDiffs（6）/foreshadows（4）/worldSettings（14）/claimLedger（17）逐条取其 quotes 在 T[462381:466477) 内回切；再逐条人工核对断言的语义是否被引文支持。",
+    "findings": [
+      "tasks：8 条任务中 6 条有 null 栏位（T1/T2/T3/T7/T8 的 cost，T4 的 objective），每处都带同名 <栏位>Note 写明为什么没有；无「不写理由的 null」；五栏之间精确区间复用 0 处、区间重叠 0 处，符合提示词红线。T4.objectiveNote 的理由（区间只写「来到了极渊」没写目的）经原文核对成立。",
+      "causeEdges：10 条全部给了 trigger 与 mechanism；3 条标 inferred（CE3/CE6）、1 条标 derived（CE10），其余 explicit。CE10 是跨段推导（三句分处两段），候选自己标 derived 并写明「原文没有一句把沉默归因于这句追问」——我核对该判定成立，属诚实标注而非过度连线。",
+      "states / knowledgeDiffs：7 条状态迁移、6 条知识差的前后值都能在原文找到；KD1 标 derived 并写明「原文没有一句写她知道答案」，U18 又把这层存疑重复登记一次，处理得体。",
+      "worldSettings：14 条字段完整（place 带 placeState、item 带 itemStates、rule 带 institution），四态/三值枚举全部合法，三类字段互不混用；placeState 的 arrived/mentioned 区分经抽查正确（极渊=arrived 有「来到了极渊」；平远伯府=mentioned 因为「我想去…一趟」，符合提示词「图谋不是到达」）。",
+      "foreshadows：4 条中 2 条 partially-resolved、2 条 unresolved，无一条被写成 resolved；回收端引文齐备。"
+    ]
+  },
+  "notes": "总体判断：这是一份**抽取质量高、自证完整性低**的候选，判 partial。\n\n为什么不是 pass：三处可复现的数字/文件级不符（coverage 未覆盖清单错 8 段、quoteNodes 90 vs 实测 250、tasksWithAnnotatedNull 8 vs 实测 6），且第一处恰恰是候选用来主张「未做静默丢弃」的那份清单——清单本身漏掉了 7 段真实未覆盖内容，还在 remaining 里给出第三个自相矛盾的数字（27）。另有 provenance 指向的 _build_0133.py 跑不通且与候选内容不符、脚本声称的 reverseCoverage/reverseCoverageNote 字段在候选里缺失。这些不是抽取错误，但会让下游 publish 把「83 段已覆盖 / 19 段已登记」当成事实写进图谱元数据。\n\n为什么不是 fail：复核契约规定判 fail 必须有 counterExample 且 quote 逐字可查 —— 我确实拿到了逐字可查的反例，但它们**全部落在元数据与自证层，没有一条落在抽取结论上**。250 个引文节点零编造、零越界、零哈希不符、零歧义；8 条任务/10 条因果/7 条状态/6 条知识差/4 条伏笔/14 条世界设定的每一条都能在原文找到对应文字；没有原文没有的人物、结局、伏笔；没有把结束当成功（T4/T6/T8 三处主动写明未完成）。按「拿不出原文引证的反对意见只能记为存疑，不能据此判 fail」的纪律，我也没有任何一条能构成 fail 级的实质错误。\n\n哪些可以用：tasks 五栏与 causeEdges / states / knowledgeDiffs / foreshadows / worldSettings / claimLedger 的**全部内容**，以及 250 个引文节点，可以直接进入发布流程 —— 我对它们做了穷举回切与语义抽查，未发现实质错误。\n\n哪些必须丢弃或降级：① coverage 块的四个数字（nonEmptyParagraphs=102 正确；touchedParagraphs=83、untouchedParagraphs=19、quoteNodes=90 全部不可用）；② remaining[6] 的「27 段」；③ metrics.quoteNodes=238 与 verification.quoteNodeCount=238（口径未声明且与实际 250 不符）；④ metrics.tasksWithAnnotatedNull=8 与提交记录 assertion #9 的「4 条任务」；⑤ provenance 里关于 _build_0133.py 的可复现性声明，应降级为 unverified。正确的未覆盖清单应为 25 段，即候选现有 untouchedParagraphList（19 段，含误报的第 3 段）+ 漏报的第 2、8、12、32、76、79、80 段。\n\n不确定处（记为存疑，不作为判定依据）：① 第 2 段「“天蛊婆婆，怎么了。”」的说话人原文未明写，候选既未取用也未存疑，我认为应进 unknowns；② 是否该有第二条 T4 之外的因果线覆盖「毒虫被惊动 → 有人尖叫」（第 52→53 段），原文只写了紧接、没写机制，候选不连边是符合「时间相邻当因果」禁令的，我倾向候选正确；③ excludedSettings[1] 的排除理由与 T4.obstacle 的取用口径不一致，但两种处理都能自圆，不构成缺陷判定。\n\n关于我自己的反向验证：本次 6 条 reverseChecks 全部经机器验证为「确实无任何引文触及」（其中第 8、32、76、79、80 段同时是候选漏登记的段落）。我最初把大量「散文里提过」的段落也当成了候选未覆盖，复查后发现自己的探测被 untouchedParagraphList 字段自身的文本污染（该字段把整段原文抄了进去），已剔除；剔除后剩余的条目全部满足「不在任何引文内、也不在任何散文说明里被实质处理」。第 6 条（第 63 段）我把结论从「漏了一条世界设定」下调为「排除理由偏弱」，因为候选确实用 T4.obstacle 覆盖了该段的语义作用。\n\n没有做的事（写进 remaining，不编）：没有读上一章/下一章原文；没有比对其他版本做校勘；没有跑 GPU/浏览器测试（本任务不需要）；没有重跑原提交者的构建脚本以外的任何仓库内脚本。以上全部结论只依赖仓库内两个文件的只读解析与 shasum。",
+  "remaining": [
+    "未读区间外原文（上一章第一百三十三章、下一章第一百三十五章），因此无法判断候选的伏笔回收期判定与 outOfRangeContext 是否完整。",
+    "未比对其他版本做校勘；textualNotes 登记的 6 处用字疑点（准头/大叫这/一颗树/的-地/带着/一旬）我只核对了它们在原文中确实存在，未判断是否确为讹字。",
+    "未跑 GPU/浏览器测试（本任务不需要，也未持 GPU 租约）。",
+    "provenance 指向的 _build_0133.py 我只做了只读检查与一次仓库外临时重定向运行（写入 /tmp/b133/，未触碰仓库内任何路径），未尝试修复它。",
+    "本复核只覆盖 read:dafeng:L1:0133 一个单元，不构成对相邻单元或整条 lane 的判断。"
+  ],
+  "reproduce": {
+    "cmd_source_hash": "shasum -a 256 data/cache/1063b17ca65ec1b76f30e460.docs.json",
+    "cmd_quotes": "python3 -c \"import json;d=json.load(open('loop/state/out/read_dafeng_L1_0133.candidate.json'));T=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];q=[];w=lambda o:(q.append(o) if isinstance(o,dict) and 'quote' in o and 'start' in o else ([w(v) for v in o.values()] if isinstance(o,dict) else ([w(v) for v in o] if isinstance(o,list) else None)));w(d);print('nodes',len(q),'verbatim',all(T[x['start']:x['end']]==x['quote'] for x in q),'unique',all(T.count(x['quote'])==1 and T.find(x['quote'])==x['start'] for x in q))\"",
+    "cmd_coverage": "python3 -c \"import json;c=json.load(open('loop/state/out/read_dafeng_L1_0133.candidate.json'));T=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];S,E=462381,466477;seg=T[S:E];ps=[];p=0;L=seg.split(chr(10));exec('for l in L:\\n    a=S+p;p+=len(l)+1\\n    if l.strip(): ps.append((a,a+len(l),l))');q=[];w=lambda o:(q.append(o) if isinstance(o,dict) and 'quote' in o and 'start' in o else ([w(v) for v in o.values()] if isinstance(o,dict) else ([w(v) for v in o] if isinstance(o,list) else None)));w(c);iv=[(x['start'],x['end']) for x in q];truth={i for i,x in enumerate(ps,1) if not any(a<x[1] and b>x[0] for a,b in iv)};cl={u['paragraph'] for u in c['untouchedParagraphList']};print('nodes',len(q),'| true_untouched',len(truth),'| claimed',len(cl));print('false_positive',sorted(cl-truth),'| false_negative',sorted(truth-cl))\"",
+    "cmd_builder": "sed -e 's#^OUT = ROOT.*#OUT = __import__(\"pathlib\").Path(\"/tmp/b133/out.json\")#' loop/state/out/_build_0133.py > /tmp/b133/build.py && python3 -B -s /tmp/b133/build.py",
+    "expected": "cmd_source_hash 打印 fdde5558…；cmd_quotes 打印 nodes 250 verbatim True unique True；cmd_coverage 打印 nodes 250 | true_untouched 25 | claimed 19，false_positive [3]，false_negative [2, 8, 12, 32, 76, 79, 80]；cmd_builder 在 AssertionError: 引文在原文中出现 41 次，不唯一: '“....”' 处退出。",
+    "note": "全部命令只读仓库内文件；唯一的写操作是 cmd_builder 把构建脚本重定向到仓库外 /tmp/b133/（不覆盖任何仓库内路径，不触碰受保护路径）。",
+    "cmd_coverage_script": "把 reproduce.cmd_coverage 的内容存为 /tmp/cov_check.py 后 python3 /tmp/cov_check.py（本次实测即用此脚本，输出见 expected）。"
+  }
+}

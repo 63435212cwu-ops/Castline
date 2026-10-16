@@ -1,0 +1,58 @@
+{
+  "task": "read:sanguo:L1:0093",
+  "agent": "w-dafeng-1",
+  "status": "done",
+  "summary": "精读《三国演义》第九十四回（docs[0].text[472736,478273)，5537 codepoint / 14 个非空段落），产出 15 条任务五元组、25 条因果边（另 7 条被拒边）、40 条状态、10 条伏笔（2 条显式 unresolved）、25 条 worldSettings、2 条主题解读，全部 509 条引文由构建脚本用 text.find 解析偏移并逐条断言（切片相等 / find==start / 全篇唯一 / 区间内含 / sourceHash 相符），且逐 task 断言五栏之间未复用同一句。",
+  "reworkOf": "loop/state/out/read_sanguo_L1_0093.candidate.json",
+  "reworkReason": "该文件由 w-xiyou-1 于 21:51:29Z 写出后未见提交记录，其 worker（pid 43463）已无 dsh 子进程、心跳停在 21:51:32Z；本 worker 于 22:00:20Z 依 lease_alive 判定该租约过期后领取本任务（loop.py claim：过期租约 rmtree 后重建）。为不覆盖他人未提交工作，先把原候选逐字备份为 build 目录下的 PRIOR-candidate.w-xiyou-1.json.bak（sha256 2b1c9ba5…，与被覆盖前的主文件哈希一致），再写入本候选。",
+  "evidence": [
+    {"path": "loop/state/out/read_sanguo_L1_0093.candidate.json", "sha256": "473b0e81555daa100c89db710c32c5e1c73a0d8f67b3fb33f1bb6a55387b17fd"},
+    {"path": "loop/state/out/read_sanguo_L1_0093.w-dafeng-1.build/build.py", "sha256": "1ee91b2dacb5740fdfe00ffee9f68c7f3c755940f124f836e26eef64a0a496a1"},
+    {"path": "loop/state/out/read_sanguo_L1_0093.w-dafeng-1.build/quotes.py", "sha256": "a96b2a67eb130cb0f425565bb781bc15586b44b94bf88eed9c600fe0e5aeaf84"},
+    {"path": "loop/state/out/read_sanguo_L1_0093.w-dafeng-1.build/part1.py", "sha256": "31c118a671d456c11e2ceee54879929b9234a18ce377d7f26e6ad8818c06e760"},
+    {"path": "loop/state/out/read_sanguo_L1_0093.w-dafeng-1.build/verify_candidate.py", "sha256": "042e4fa3f8a72582d3d332d2c58a993e8c9dc1b2195d029bdcc4fdc83780bd39"},
+    {"path": "loop/state/out/read_sanguo_L1_0093.w-dafeng-1.build/PRIOR-candidate.w-xiyou-1.json.bak", "sha256": "2b1c9ba52a94cc91e19e7a718900714145d7f2e902835dc865af32a7040dcc1d"},
+    {"path": "data/cache/fe42d01f3826fe8096f86614.docs.json", "sha256": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"}
+  ],
+  "assertions": [
+    {"text": "区间自检：docs[0].text[472736:478273] 以「第九十四回　诸葛亮乘雪破羌兵　司马懿克日擒孟达」开头，长度 5537 == 任务声明；右端点即下一单元回目（text[478273:478293] == 「第九十五回　马谡拒谏失街亭　武侯弹琴退仲达」）。命令：python3 -c \"import json,hashlib;raw=open('data/cache/fe42d01f3826fe8096f86614.docs.json','rb').read();t=json.loads(raw)[0]['text'];s=t[472736:478273];print(len(s),hashlib.sha256(s.encode()).hexdigest())\" → 5537 99fefb58b5f3d34da81e1cce9bdeca465ee6b4b1e9bfd6f03b17dd1f6b4eb7a2", "result": "pass"},
+    {"text": "引文逐条机器校验（从**落盘文件**重新解析，不采信构建期内存）：509 条 quoteRef 全部满足 text[start:end]==quote、text.find(quote)==start、全篇唯一、落在 [472736,478273)、sourceHash 相符；越界 0 / 非唯一 0 / 哈希不符 0。命令：python3 -B -s loop/state/out/read_sanguo_L1_0093.w-dafeng-1.build/verify_candidate.py", "result": "pass"},
+    {"text": "任务五栏未复用同一句：对 15 个 task 逐个比对 objective/obstacle/action/result/cost 五栏所含引文的 (start,end) 区间，复用违规 0 处（build.py 的 B 组校验在写出前强制中止；verify_candidate.py 在落盘后独立复算）。实测过程中该检查抓到并修正了 T02 的一处真实复用（韩祯告急被 obstacle 与 result 同引）。", "result": "pass"},
+    {"text": "null 栏一律带理由：8 个 null 栏位（T01.obstacle / T08.obstacle / T11.obstacle / T11.cost / T12.cost / T13.cost / T15.obstacle / T15.cost）各自都有同名的 <栏位>Note 写明为什么本区间没有依据，无未标注的 null。", "result": "pass"},
+    {"text": "因果边时序自检：25 条 causeEdges 逐条比较「因的引文偏移」与「果的引文偏移」，不存在因晚于果的情况（max(cause.start) <= min(effect.start)）。该检查是补做的——首轮它抓到一条真实缺陷 C01（把段11 追述的「曹真数败于蜀」当作段1 郭淮献策的原因，引文时序是反的），已删除该边并改写为 rejectedCauseEdges 的 R07 说明。", "result": "pass"},
+    {"text": "伏笔须有铺设与回收：10 条中 8 条 resolved 且各自带 payoffQuotes；2 条 unresolved（F09 司马懿「吾机先被孔明识破」、F10 关兴得越吉马）显式标注且不带回收引文，校验器对此有强制断言。", "result": "pass"},
+    {"text": "worldSettings 三态字段显式：place 10 条均带 placeState（arrived 6 / mentioned 4，其中「洛阳」「上庸、金城」「羌中」「西羌国」为 mentioned——「径取洛阳」是图谋非到达，未混写为 arrived）；item 10 条均带 itemStates 多选（use 5 / lose 4 / transfer 5 / hold 2）；rule 5 条均带 institution（executed 2 / misunderstood 2 / declared 1）。", "result": "pass"},
+    {"text": "主题解读按解释层要求给足三件：2 条 themeReadings 均含 perspective + support + counter，且各自列出 3 条反例；未使用「事件密度/剧情点数量/死亡人数/时间或篇幅中点」定义高潮，未套三幕或英雄旅程（校验器内置这 7 个禁用词的扫描）。", "result": "pass"},
+    {"text": "反向覆盖自检：把切片按句末标点切成子句，逐条检查是否与候选引文区间相交。叙述层未覆盖子句 0 条；唯一未覆盖项是区间末尾的非文学行（分隔线 + 「枫林晚 整理校对」署名），已单列为 nonlit。首轮该检查报出 49 条叙述层未覆盖，逐条归位后补入 25 条补充抽取（X01–X25）与 3 条末轮条目。", "result": "pass"},
+    {"text": "不得声称语义核验完成：候选的 semanticReview 字段为 not_performed，并写明定位正确 ≠ 语义已核验、语义核验属 read-verify 通道由另一位 agent 独立进行。校验器对非 not_performed 直接报错。", "result": "pass"},
+    {"text": "受保护路径未改动：find js css index.html serve.py narrative.py scripts tests docs data -newermt \"2026-10-15 05:50\" 无输出（本会话 05:53Z 之后），data/ 下仅读取两份缓存。本候选的全部写入限于 loop/state/out/read_sanguo_L1_0093.candidate.json 与同名前缀的 build 目录。", "result": "pass"},
+    {"text": "sourceHash 口径核对：任务 JSON 声明的 sourceHash（2988ce6e…）与提示词正文给出及实测的文件哈希（8ab7298a…）不一致；已复核 2988ce6e… 确实等于 data/cache/152e2a6eed94f1075e7e7070.docs.json 的 sha256，两文件同为 1814090 字节且 docs[0].text 逐字相同（607191 codepoint），故按提示词指定的文件用 8ab7298a… 作为全部 quoteRef 的 sourceHash，未改任何校验规则。命令：python3 -c \"import json,hashlib;a=open('data/cache/152e2a6eed94f1075e7e7070.docs.json','rb').read();b=open('data/cache/fe42d01f3826fe8096f86614.docs.json','rb').read();print(hashlib.sha256(a).hexdigest(),hashlib.sha256(b).hexdigest(),json.loads(a)[0]['text']==json.loads(b)[0]['text'])\"", "result": "pass"},
+    {"text": "文本内异常照录未改字：「彼时曹不爱其才」「自不死后」（本区间「曹丕」「丕」均为 0 次，全篇分别为 88 / 185 次）、「张冀」3 次、「张颌」2 次、「马谡曰：…提防？’」引号不成对——均登记在 textualNotes(TN01–TN05) 与 unknowns(U02/U03)，引文一律照录以保证切片相等。", "result": "pass"}
+  ],
+  "changes": [
+    {"path": "loop/state/out/read_sanguo_L1_0093.candidate.json", "kind": "append-only"},
+    {"path": "loop/state/out/read_sanguo_L1_0093.w-dafeng-1.build/", "kind": "append-only"}
+  ],
+  "sourceHashes": {
+    "data/cache/fe42d01f3826fe8096f86614.docs.json": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+    "data/cache/152e2a6eed94f1075e7e7070.docs.json": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff"
+  },
+  "remaining": [
+    "语义核验未做：本候选只完成定位与抽取，semanticReview=not_performed。按契约由 read-verify 通道的独立 agent 复核。",
+    "覆盖优先于穷尽：反向覆盖检查只按「子句是否与某条引文相交」判定，相交不等于该子句的语义已被正确使用；49→0 的过程补入的是真实内容，但覆盖率不构成质量分。",
+    "两条 unresolved 伏笔（F09 司马懿自陈被孔明识破、F10 关兴得越吉马）在本区间内无回收；F10 严格按「一次出现不叫伏笔」的口径本可整条丢弃，此处保留是因已显式标注 unresolved，供复核者取舍。",
+    "F07（孔明警告勿使同事知之 → 事败）标为 derived 而非 explicit：原文没有写孟达「告诉了同事」的直述句，只写他「即报申耽、申仪知道」并定明日举事，回收是把两处并置得出的。",
+    "U02/U03 的字形问题（曹/丕、张冀/张翼、张颌/张郃）只做了全书计数对照，未做版本学判定——那超出单回原文可判范围。",
+    "前一位写入者 w-xiyou-1 的候选未提交即被本 worker 依过期租约接管；其原文已逐字备份为 PRIOR-candidate.w-xiyou-1.json.bak（2b1c9ba5…）。若上游认为该候选仍有效，需要人来决定保留哪一份——本 worker 不替他提交，也不删他的留存。",
+    "本轮的 build.py 曾有两处**静默失败**（补充抽取的引文写成裸字符串、supplementaryNotes 在 conv() 之前装配），两者都表现为「看起来引了但既不入校验也不计覆盖」；已分别改为硬报错与复用已转换对象。同一形态可能仍存在于其他 worker 的构建脚本中。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/read_sanguo_L1_0093.candidate.json",
+      "loop/state/out/read_sanguo_L1_0093.w-dafeng-1.build/"
+    ],
+    "note": "候选文件为整体覆盖写（任务 writes 指定的唯一路径）。被覆盖前的原候选已备份在同名前缀 build 目录内，可从 loop/state/out/read_sanguo_L1_0093.w-dafeng-1.build/PRIOR-candidate.w-xiyou-1.json.bak 逐字还原。"
+  }
+}

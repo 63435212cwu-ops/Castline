@@ -1,0 +1,420 @@
+{
+  "task": "ops:gpu-serial-check",
+  "agent": "w-ops",
+  "role": "SENTINEL",
+  "status": "done",
+  "decision": "GPU_SERIAL_DISCIPLINE_HELD__BOTH_LOCKS_JUDGED",
+  "summary": "核验结论三条。(1) **本轮守护轮开始时确有 GPU 测试在跑，但它不是本队列的、也不是我的**：00:32:07 实测锚定路径命中 headless Chrome 主进程 PID 12082（`--headless=new --use-angle=metal --ignore-gpu-blocklist`，即 Metal 实 GPU 路径），其父进程 12081 为 `python3 -B -s tests/sky_story_browser.py --chapter-lens --width 390 --base http://127.0.0.1:8002/`，逐级回溯祖先链到 `codex app-server`(18010) ← `Mirasim server.cjs`(46216) ← Mirasim(46204) ← launchd(1)，属**另一个 agent 会话**。该测试于我取证期间正常结束（00:34:24 复测 12082/12081/12096/93321 全部退出），全程未被本 agent 触碰。至 00:47:12Z 终检，三法交叉（任务指定宽松式、GPU-LOCK 规定的锚定式、ps 直查）一致为 0，且 GPU 测试脚本进程为 0。(2) **`loop/state/leases/GATE.lock` 不陈旧，是活跃占用**：holder pid 20615 实测存活（state=Ss），心跳连续推进（16:38:32→16:39:02→16:40:32→16:47:02Z），mtime 与 heartbeatAt 同步刷新，远未触及 policy.gateLockTtlSeconds=5400s。按纪律不接管、不强删。(3) **`artifacts/plan100/GPU-LOCK` 文件确实陈旧但不是有害的锁**：mtime 2026-10-07 13:01:26（约 5.5 天前），0 行 RUNNING（3 DONE / 1 IDLE / 2 QUEUED），最后登记与 mtime 自洽，无未释放名额。它是**人工追加台账而非互斥锁**（无 PID/无心跳/无 TTL）。此处我更正了自己第一版的措辞错误：loop 运行时确实完全不读它（`grep -n GPU-LOCK loop/bin/loop.py loop/bin/sentinel.py` 无匹配 exit=1），但**并非没有程序读它** —— `tools/plan100/perf_gpu_stage.py:74 lock_running_owner()` 会取 RUNNING 行做准入拦截（:157）。因当前 RUNNING=0 返回 None，不会拦住任何新任务。真正的缺口是**反向**的：本轮那次 CL_GPU=1 占用既未登记 RUNNING 也未登记交还，台账失去了其唯一机器用途所依赖的输入。",
+  "gpuTestRunningAtStart": true,
+  "gpuTestRunningNow": false,
+  "occupants": [
+    {
+      "role": "headless Chrome 主进程（GPU 测试载体）",
+      "pid": 12082,
+      "startedAt": "2026-10-13T00:32:07+08:00",
+      "argv": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome --headless=new --use-angle=metal --ignore-gpu-blocklist --autoplay-policy=no-user-gesture-required --window-size=390,844 --user-data-dir=/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261013-001906-199843-93321/临时/wave02-audit-6vnbcsos --remote-debugging-port=0 --no-first-run --disable-background-networking about:blank",
+      "gpuEvidence": "--use-angle=metal + --ignore-gpu-blocklist ⇒ 走 Metal 实 GPU，非 SwiftShader 软渲染；即任务所言「GPU 测试」",
+      "childGpuProcess": {
+        "pid": 12096,
+        "type": "gpu-process",
+        "note": "Chrome 自己的 GPU 进程，非独立测试"
+      },
+      "statusNow": "已退出（正常结束）"
+    },
+    {
+      "role": "测试驱动脚本（12082 的直接父进程）",
+      "pid": 12081,
+      "argv": "python3 -B -s tests/sky_story_browser.py --chapter-lens --width 390 --base http://127.0.0.1:8002/",
+      "gpuGate": "tests/sky_story_browser.py:519 `if os.environ.get('CL_GPU')!='1':raise SystemExit('CL_GPU=1 required; serial GPU slot')` ⇒ 该路径硬要求 GPU 串行名额，确属本守则管辖范围",
+      "statusNow": "已退出"
+    },
+    {
+      "role": "测试的祖父进程",
+      "pid": 93321,
+      "argv": "python3 -B -u -",
+      "statusNow": "已退出"
+    },
+    {
+      "role": "会话宿主（另一 agent 会话，非本队列成员）",
+      "pid": 18010,
+      "argv": "/Users/carmen/.local/bin/codex app-server -c model_context_window=2000000 -c model_auto_compact_token_limit=784800 -c model_providers.mirasim.name=mirasim -c model_providers.mirasim.base_url=http://127.0.0.1:61652",
+      "statusNow": "仍存活（该会话在跑别的活）",
+      "note": "归属判据：写入足迹/进程血缘，非「需求听起来像」"
+    }
+  ],
+  "ancestorChain": [
+    {
+      "level": 1,
+      "pid": 12082,
+      "command": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome --headless=new --use-angle=metal ... about:blank"
+    },
+    {
+      "level": 2,
+      "pid": 12081,
+      "command": "python3 -B -s tests/sky_story_browser.py --chapter-lens --width 390 --base http://127.0.0.1:8002/"
+    },
+    {
+      "level": 3,
+      "pid": 93321,
+      "command": "python3 -B -u -"
+    },
+    {
+      "level": 4,
+      "pid": 18010,
+      "command": "/Users/carmen/.local/bin/codex app-server -c model_context_window=2000000 ..."
+    },
+    {
+      "level": 5,
+      "pid": 46216,
+      "command": "/Applications/Mirasim.app/Contents/MacOS/Mirasim /Users/carmen/.mirasim/app/0.0.395/server.cjs serve --port 4970 --no-open"
+    },
+    {
+      "level": 6,
+      "pid": 46204,
+      "command": "/Applications/Mirasim.app/Contents/MacOS/Mirasim"
+    },
+    {
+      "level": 7,
+      "pid": 1,
+      "command": "/sbin/launchd"
+    }
+  ],
+  "attributionMethod": "逐级 `ps -o ppid= -p <pid>` 回溯祖先链（GPU-LOCK 明文规定的正确写法），再核对测试脚本里的 CL_GPU 门槛；不以「文件里含某关键词」或「谁的需求听起来像」推断归属。本体自身血缘另行实测：本 agent 的 lease pid=43559 直接挂在 launchd(1) 下 ⇒ 与上述 18010 会话**无血缘关系**。",
+  "pgrepTrap": {
+    "bsdPgrepHasNoDashC": true,
+    "evidence": "`pgrep -c 'Google Chrome'` → 打印 usage 且 exit=2（不是 0 个进程，是参数非法）",
+    "correctForm": "`pgrep -fl '<pattern>' | wc -l`",
+    "emptyIsNotZero": "本次终检 exit=1 且行数=0；但取证早期同一命令返回 2 行 ⇒ 命令本身有效，空结果是真为 0，不是语法失败",
+    "loosePatternFalsePositiveRisk": "宽松式 'Google Chrome.*headless' 会匹配轮询脚本自身命令行；故同时用锚定路径与 ps 直查交叉验证"
+  },
+  "locks": [
+    {
+      "path": "loop/state/leases/GATE.lock",
+      "exists": true,
+      "stale": false,
+      "verdict": "ACTIVE_HOLD__DO_NOT_TOUCH",
+      "holder": {
+        "agent": "motion-e1-merge-20261010T162850Z",
+        "pid": 20615,
+        "host": "carmendeMac-mini.local",
+        "startedAt": "2026-10-12T15:26:54Z"
+      },
+      "measured": {
+        "holderAlive": true,
+        "holderState": "Ss",
+        "heartbeatSamples": [
+          "2026-10-12T16:38:32Z",
+          "2026-10-12T16:39:02Z",
+          "2026-10-12T16:40:02Z",
+          "2026-10-12T16:40:32Z",
+          "2026-10-12T16:47:02Z"
+        ],
+        "heartbeatAdvancing": true,
+        "mtimeAtCheck": "2026-10-13 00:40:02 +0800",
+        "ttlSeconds": 5400
+      },
+      "reasoning": "锁文件不足以判定占用，必须实测进程（角色契约明文）。实测 holder 存活且心跳持续推进 ⇒ 活跃占用，不是陈旧。按纪律不接管、不强删、不改写。它属另一个 merge 任务，与本 GPU 核验无冲突。",
+      "sha256AtCheck": "6c1a77070f7cf10d2e2299c8b28567adae7463e5046231b5505337c69afa56e7",
+      "sha256Note": "GATE.lock 是瞬态路径（心跳每 30s 重写），故此哈希只作「检查时刻」记录，不作为 evidence 条目 —— validate() 会拒绝瞬态路径做证据"
+    },
+    {
+      "path": "artifacts/plan100/GPU-LOCK",
+      "exists": true,
+      "stale": true,
+      "verdict": "STALE_BUT_HARMLESS_LEDGER__NO_UNRELEASED_SLOT",
+      "mtime": "2026-10-07 13:01:26 +0800",
+      "ageDays": 5.5,
+      "sha256": "deb8afa91a3676d24cbdeb57c8c8b195791db56a0ae947c4c1dbd53710cb3944",
+      "runningLines": 0,
+      "statusLineCensus": {
+        "DONE": 3,
+        "IDLE": 1,
+        "QUEUED": 2,
+        "RUNNING": 0
+      },
+      "lastRegistration": "DONE P10-agent 2026-10-07T12:00:00Z（与 mtime 自洽）",
+      "isMutualExclusionLock": false,
+      "lockSemantics": "人工追加台账：无 PID、无心跳、无 TTL 字段；不含任何供超时判定的机器字段",
+      "readByMachines": [
+        {
+          "file": "tools/plan100/perf_gpu_stage.py",
+          "line": 74,
+          "what": "lock_running_owner()：逐行 `line.startswith('RUNNING')`，取 parts[1] 作 owner"
+        },
+        {
+          "file": "tools/plan100/perf_gpu_stage.py",
+          "line": 157,
+          "what": "`owner not in (None,'IDLE',args.agent)` ⇒ blockers，准入拦截"
+        }
+      ],
+      "notReadBy": {
+        "file": "loop/bin/loop.py, loop/bin/sentinel.py",
+        "evidence": "`grep -n 'GPU-LOCK' loop/bin/loop.py loop/bin/sentinel.py` → 无匹配 (exit=1)",
+        "implication": "loop 运行时（reap/claim/gate/stats）从不读它，故它没有机器 TTL，陈旧与否只能人工判读"
+      },
+      "harmAssessment": "当前 RUNNING=0 ⇒ lock_running_owner() 返回 None ⇒ `None in (None,'IDLE',agent)` 为真 ⇒ 不会拦住任何新 GPU 任务。5.5 天 mtime 只影响人工可读性，不构成未释放名额。",
+      "realGap": "反向缺口：本轮 00:32 那次 CL_GPU=1 占用既未登记 RUNNING、也未在结束登记交还 ⇒ 台账失去了其唯一机器用途（准入拦截）所依赖的输入。属登记纪律失守，非文件损坏。",
+      "selfCorrection": "我第一版证据写「程序不会去读它」是**错的**，已用上面两处可复现引用推翻并更正。"
+    }
+  ],
+  "methodCrossCheck": {
+    "at": "2026-10-12T16:47:12Z",
+    "taskPrescribedLoose": {
+      "cmd": "pgrep -fl 'Google Chrome.*headless' | wc -l",
+      "result": 0
+    },
+    "gpuLockAnchored": {
+      "cmd": "pgrep -f 'Google Chrome.app/Contents/MacOS/Google Chrome --headless' | wc -l",
+      "result": 0
+    },
+    "psDirectBypassingPgrep": {
+      "cmd": "ps -eo pid,ppid,command | grep -E 'Google Chrome\\.app/Contents/MacOS/Google Chrome( |$)' | grep -v grep | grep -- '--headless' | wc -l",
+      "result": 0
+    },
+    "gpuTestScripts": {
+      "cmd": "ps -eo command | grep -E 'tests/sky_[a-z_]+\\.py|perf_gpu_stage' | grep -v grep | wc -l",
+      "result": 0
+    },
+    "agreement": "三法一致为 0 ⇒ 现在确无 GPU 测试在跑"
+  },
+  "environmentLimits": [
+    "`ps -Eww -p <pid>` 无法读取**非自身子进程**的环境变量：对 PID 15808 返回 0 字节，而对自身(control)可正常读出 CL_TEST_MARKER=hello ⇒ 该方法在此平台不可用于验证他人测试的 CL_GPU 取值。故「00:35:03 那次 trace-group-keyboard.py 驱动的 headless Chrome 是否为 CL_GPU=1」**未能验证**，如实记为未验证，不用推测冒充。",
+    "本轮未跑任何 GPU/浏览器测试（任务未声明要跑，且 GPU 全局串行）。本报告的全部结论来自进程/文件实测，不含仿真结果。"
+  ],
+  "processCensus": {
+    "allChromeMainProcesses": [
+      {
+        "pid": 28306,
+        "started": "Fri Oct 9 21:24:43 2026",
+        "argv": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+        "note": "人类桌面 GUI Chrome，非 headless、非测试"
+      }
+    ],
+    "note": "`pgrep -x 'Google Chrome'` 命中 1 个（桌面 GUI）；宽松式 headless 与锚定式均为 0 ⇒ 无自动化驱动的浏览器残留，也无孤儿 headless（GPU-LOCK 历史上最关心的事故形态）"
+  },
+  "readOnlyGuarantee": {
+    "killedAnyProcess": false,
+    "wroteProtectedPaths": false,
+    "commandsUsed": [
+      "cat",
+      "grep",
+      "shasum",
+      "stat",
+      "ps",
+      "pgrep",
+      "python3 只读解析",
+      "loop.py stats/reap",
+      "sentinel.py --once --no-spawn"
+    ],
+    "destructiveCommandsNotUsed": [
+      "git checkout -- .",
+      "git reset --hard",
+      "git stash",
+      "kill",
+      "pkill"
+    ],
+    "reapResult": "{\"reaped\": []} —— 无回收、无 kill，跑两次结果一致",
+    "gpulockHashUnchanged": "deb8afa91a3676d24cbdeb57c8c8b195791db56a0ae947c4c1dbd53710cb3944（取证开始与终检两次独立采集逐字节相同）"
+  },
+  "sentinelRound": {
+    "cmd": "python3 -B -s loop/bin/sentinel.py --once --no-spawn",
+    "stdout": "守护轮完成：完成 639/2421，worker 19 个，正常（连续同值 0 轮）",
+    "jsonSummary": {
+      "progress": {
+        "tasks": 2421,
+        "done": 640
+      },
+      "reaped": [],
+      "strayWorkers": [],
+      "stall": "正常（连续同值 0 轮）",
+      "disk": {
+        "freeGB": 109.17,
+        "low": false,
+        "writable": true,
+        "ok": true
+      }
+    },
+    "note": "用 --no-spawn 只观察，不拉起 worker、不干扰并行任务；两次数值 639→640 属正常推进，非停滞"
+  },
+  "crossCheckPriorRecord": {
+    "path": "loop/state/out/ops_gpu-serial-check.json",
+    "submittedAt": "2026-10-07T18:33:36Z",
+    "note": "本任务的上一轮记录（同一 agent 名 w-ops，10-08 05:40 文件时间）。它被判 staleEvidence：其 16 条证据指向 /tmp/cl-sentinel-w-ops/*，/tmp 已被系统清理 ⇒ 全部 missing。这正是 AGENTS.md 要求运行产物落外置盘的原因。本轮我把证据放在 $CL_ARTIFACTS 下，且全部带 sha256，不再重犯。",
+    "evidenceStillValidInPriorRecord": [
+      "loop/state/out/ops_gpu-serial-check.json 自身",
+      "loop/ROLES/SENTINEL.md",
+      "artifacts/plan100/GPU-LOCK",
+      "loop/state/policy.json",
+      "loop/bin/loop.py",
+      "loop/bin/sentinel.py"
+    ],
+    "evidenceMissingInPriorRecord": 16
+  },
+  "assertions": [
+    {
+      "text": "BSD pgrep 无 -c，空输出不等于 0 进程",
+      "how": "`pgrep -c 'Google Chrome'` → 打印 usage，exit=2（用 `-fl ... | wc -l` 替代）"
+    },
+    {
+      "text": "取证期间确有 GPU 测试在跑，且已定位到具体占用者与祖先链",
+      "how": "00:32:53 `pgrep -fl 'Google Chrome.*headless'` 返回 2 行（PID 12082 主进程 + 12096 gpu-process）；逐级 `ps -o ppid=` 回溯 12082→12081→93321→18010→46216→46204→1"
+    },
+    {
+      "text": "该 GPU 占用属另一 agent 会话，不是本 worker",
+      "how": "祖先链落在 codex app-server(18010)；本 agent lease pid=43559 的父进程是 launchd(1)，两边无血缘"
+    },
+    {
+      "text": "CL_GPU 门槛证明该测试确属 GPU 串行管辖",
+      "how": "`grep -n CL_GPU tests/sky_story_browser.py` → :519 硬拒非 CL_GPU=1（'serial GPU slot'）"
+    },
+    {
+      "text": "GATE.lock 不陈旧（活跃占用）",
+      "how": "holder pid 20615 实测 state=Ss 存活；心跳连采 5 次持续推进（16:38:32→16:47:02Z）；对照 policy.gateLockTtlSeconds=5400s"
+    },
+    {
+      "text": "GPU-LOCK 陈旧但无害，其唯一机器读者不会误拦",
+      "how": "`grep -cE '^[[:space:]]*RUNNING'` → 0；`tools/plan100/perf_gpu_stage.py:74` 取 RUNNING 行 ⇒ 返回 None ⇒ :157 判定放行；`grep -n GPU-LOCK loop/bin/*.py` 无匹配"
+    },
+    {
+      "text": "现在确无 GPU 测试在跑（三法交叉，避免单一命令语义误判）",
+      "how": "任务宽松式=0、GPU-LOCK 锚定式=0、ps 直查=0、GPU 测试脚本进程=0"
+    },
+    {
+      "text": "未杀任何进程、未改任何受保护文件",
+      "how": "`loop.py reap` → {\"reaped\": []}（两次一致）；GPU-LOCK 与 5 个源文件在取证早期/终检两次独立 sha256 采集逐字节相同（见证据 07）"
+    },
+    {
+      "text": "全程只做只读与追加式写入，写入面严格等于任务 writes",
+      "how": "仅写 loop/state/out/ops_gpu-serial-check.artifact.json + 外置盘 $CL_ARTIFACTS/ops-gpu-serial-check/ 证据；未跑 GPU/浏览器测试"
+    }
+  ],
+  "evidence": [
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/ops-gpu-serial-check/01-pgrep-no-c.txt",
+      "sha256": "576cd6749a8d29417a22e7a4d49814e62b0fdb506490332d5e4527a6ea3b0ead",
+      "kind": "BSD pgrep 无 -c 的原始输出（usage + exit=2）",
+      "reproduce": "pgrep -c 'Google Chrome'"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/ops-gpu-serial-check/02-census.txt",
+      "sha256": "591b00059fab8d68419eec6a32cb6797b0fe8a395455dd4cbc35db7b827903a7",
+      "kind": "终检普查：任务宽松式 0 行 / GPU-LOCK 锚定式 0 行 / -x 精确匹配命中 1 个桌面 GUI Chrome(28306)",
+      "reproduce": "pgrep -fl 'Google Chrome.*headless' | wc -l ; pgrep -f 'Google Chrome.app/Contents/MacOS/Google Chrome --headless' | wc -l ; pgrep -x 'Google Chrome'"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/ops-gpu-serial-check/03-occupancy-live.txt",
+      "sha256": "707e6d02e47a89dacccfbb924bebf3b3b37e2d74c9aa881d14c85cdb50d4823d",
+      "kind": "**正控制**：占用当时的原始证据（PID 12082 argv、完整祖先链到 launchd、CL_GPU 门槛、00:34:24 退出复测）",
+      "whyItMatters": "若无此件，只剩终检的 0 结果，就无法区分「没发现问题」与「没检查」"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/ops-gpu-serial-check/04-gate-lock.txt",
+      "sha256": "c1b2f2e0cbb1b893f3d20732d37eb2f1dea08a84afa77c4593794fc8e4dce339",
+      "kind": "GATE.lock 陈旧性判定：文件 stat + holder 20615 存活实测 + 心跳连采 3 次推进 + holder 祖先链",
+      "reproduce": "stat -f '%N %Sm' loop/state/leases/GATE.lock ; ps -o pid=,ppid=,stat= -p 20615 ; 间隔 15s 三读 heartbeatAt"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/ops-gpu-serial-check/05-gpulock.txt",
+      "sha256": "331c67159e26e16fcf39b0ba0d1506d6be250b5926955ad76ca18c6e8c657342",
+      "kind": "GPU-LOCK 陈旧性判定：stat/sha256、RUNNING 行普查、状态行逐条、全仓引用扫描（含对我第一版错误措辞的更正 [18][19]）",
+      "reproduce": "grep -cE '^[[:space:]]*RUNNING' artifacts/plan100/GPU-LOCK ; sed -n '60,90p;145,162p' tools/plan100/perf_gpu_stage.py ; grep -n GPU-LOCK loop/bin/loop.py loop/bin/sentinel.py"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/ops-gpu-serial-check/06-final-state.txt",
+      "sha256": "d866777ce831effd0a3f72aef53a100d983ddcab193eac74af495ef256e6442f",
+      "kind": "终检：三法交叉=0、GPU 测试脚本=0、未杀进程/未改受保护路径自查",
+      "reproduce": "见文件内 [20][21] 三条命令"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/ops-gpu-serial-check/07-integrity.txt",
+      "sha256": "97e91c39f1b47cd49f4d5d99456b829d2fd09d79363b15e0a9113b591d2088ef",
+      "kind": "只读性证明：5 个源文件终检哈希 + [27] 更早一次独立采集（逐字节相同）+ 写入清单 + 未用破坏性命令自查",
+      "reproduce": "for f in artifacts/plan100/GPU-LOCK loop/ROLES/SENTINEL.md loop/state/runs/task-ops_gpu-serial-check.json tests/sky_story_browser.py tests/sky_chaos.py; do shasum -a 256 \"$f\"; done"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/ops-gpu-serial-check/08-sentinel-once.txt",
+      "sha256": "954e2c0c9b02c75aa64477a0dc3ad92b6fd6f4d13d0ae9296672f0b8c7a9b44a",
+      "kind": "角色契约规定的守护轮动作输出（--no-spawn 只观察）",
+      "reproduce": "python3 -B -s loop/bin/sentinel.py --once --no-spawn"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/ops-gpu-serial-check/09-sentinel-json.txt",
+      "sha256": "be33ba321a475e1529542bc16a9dd1b719ac044a0de6454da16c18c24067b600",
+      "kind": "守护轮结构化报告：progress/reaped/strayWorkers/stall/disk/doctor",
+      "reproduce": "python3 -B -s loop/bin/sentinel.py --once --no-spawn --json"
+    },
+    {
+      "path": "artifacts/plan100/GPU-LOCK",
+      "sha256": "deb8afa91a3676d24cbdeb57c8c8b195791db56a0ae947c4c1dbd53710cb3944",
+      "kind": "被核验对象本体（永不漂移的不可变路径证据；取证早期与终检两次采集一致）",
+      "reproduce": "shasum -a 256 artifacts/plan100/GPU-LOCK"
+    },
+    {
+      "path": "loop/ROLES/SENTINEL.md",
+      "sha256": "6a10c138a374af2505c55adb89266b5464a7ebea55fee4868709895c81585aa1",
+      "kind": "本角色契约（判定纪律来源：pgrep -c 陷阱、锁文件不足以判定占用、归因基于写入足迹）",
+      "reproduce": "shasum -a 256 loop/ROLES/SENTINEL.md"
+    },
+    {
+      "path": "loop/bin/build_plan.py",
+      "sha256": "2178745505b1109efd0e8d310419d583cc37f6374901c729467b511bc8bfc9a0",
+      "kind": "本轮任务定义在仓库里的**留存**来源（writes 白名单、验收方式）。原来我引的是 loop/state/runs/task-ops_gpu-serial-check.json，被 validate() 正确拒绝——该前缀是瞬态路径，租约回收后会消失；此文件是生成它的模板，永久留存。",
+      "reproduce": "sed -n '376,384p' loop/bin/build_plan.py   # mk(\"ops:gpu-serial-check\", ...) 与 writes 清单"
+    },
+    {
+      "path": "tests/sky_story_browser.py",
+      "sha256": "dcb8d9570f7f92bf1330569825909b9072aea6a148ab7d0b6ef367e06dcbcf25",
+      "kind": "CL_GPU=1 硬门槛所在（:519），证明被观察的测试确属 GPU 串行管辖",
+      "reproduce": "grep -n CL_GPU tests/sky_story_browser.py"
+    },
+    {
+      "path": "tests/sky_chaos.py",
+      "sha256": "8f93578fa9f17746b8f2615e7cc536bc50dc4fefb573693acf8cd7f796b29257",
+      "kind": "对照：sky_chaos 默认走 --use-angle=swiftshader（CPU 软渲染），仅 CL_GPU=1 才用 metal ⇒ 说明「headless Chrome」不等于「GPU 测试」，等级需看 GL 标志",
+      "reproduce": "sed -n '713,720p' tests/sky_chaos.py"
+    }
+  ],
+  "sourceHashes": [
+    {
+      "path": "artifacts/plan100/GPU-LOCK",
+      "sha256": "deb8afa91a3676d24cbdeb57c8c8b195791db56a0ae947c4c1dbd53710cb3944",
+      "state": "before-and-after-identical"
+    },
+    {
+      "path": "loop/ROLES/SENTINEL.md",
+      "sha256": "6a10c138a374af2505c55adb89266b5464a7ebea55fee4868709895c81585aa1",
+      "state": "before-and-after-identical"
+    },
+    {
+      "path": "loop/state/runs/task-ops_gpu-serial-check.json",
+      "sha256": "1aa22b7d393eb60ef128e46b664286050f03bc850252fdd10073b3546e23b865",
+      "state": "瞬态：任务定义文件，租约回收后消失 ⇒ 仅作检查时刻记录，未列入 evidence（validate 会拒绝瞬态路径）"
+    },
+    {
+      "path": "tests/sky_story_browser.py",
+      "sha256": "dcb8d9570f7f92bf1330569825909b9072aea6a148ab7d0b6ef367e06dcbcf25",
+      "state": "before-and-after-identical"
+    },
+    {
+      "path": "tests/sky_chaos.py",
+      "sha256": "8f93578fa9f17746b8f2615e7cc536bc50dc4fefb573693acf8cd7f796b29257",
+      "state": "before-and-after-identical"
+    },
+    {
+      "path": "loop/state/leases/GATE.lock",
+      "sha256": "6c1a77070f7cf10d2e2299c8b28567adae7463e5046231b5505337c69afa56e7",
+      "state": "瞬态：由持有者每 30s 重写，故哈希只记检查时刻；本 agent 未写该文件"
+    }
+  ],
+  "changes": [],
+  "remaining": [
+    "**未验证**：00:35:03 另一次 headless Chrome（父进程 `python3 -B -s .../20261013-003358-061267-14290/测试产物/trace-group-keyboard.py`，PID 15808，同样带 --use-angle=metal --ignore-gpu-blocklist）是否为 CL_GPU=1。原因：`ps -Eww` 在本平台读不到非自身子进程的环境（对 PID 15808 返回 0 字节，而自身对照可读出 marker）⇒ 无法验证，如实留白。该进程在 00:37:07 复测时已退出。",
+    "**未验证**：这两次 GPU 测试的实际帧率/画面质量不受并发污染 —— 本守护轮不跑 GPU 测试，无帧率数据；仅能证明「同一时刻未观察到 >1 个 headless Chrome」。按 00:32–00:35 的采样，两次占用（12082 于 00:32:07 起、15808 于 00:35:03 起）**没有重叠**（12082 在 00:34:24 已退出），但这只是 1 分钟粒度的采样结论，不是全程连续监测。",
+    "**未修**：`artifacts/plan100/GPU-LOCK` 未追加本轮登记。它不在本任务 writes 内（writes 只有一个文件），且由 plan100 人工维护；按纪律不越权改。建议后续由持 GPU 名额的任务自己登记 RUNNING/交还。",
+    "**未处理**：`loop/state/leases/GATE.lock` 被 merge 任务活跃持有（pid 20615）——按纪律不接管、不强删。若该 merge 任务最终失败退出，其门锁回收属 `loop.py reap` 的职责范围。",
+    "**未跑**：本轮未执行任何 GPU/浏览器测试、未执行 `sh scripts/accept.sh`、未跑 version_stamp（任务未声明要跑，且无 GPU 名额）。",
+    "**未解释**：`loop.py stats` 的 staleEvidence 名单含本任务（因上一轮 10-07 记录的 16 条证据在 /tmp 被清理）。本轮提交后该条应转新；但**存量其他 16 条**（read/verify 系列）的失效证据不在本任务 writes 内，未处理。"
+  ],
+  "rollback": "无需回滚：本任务未改动任何受保护路径，changes 为空。唯一写入是 loop/state/out/ops_gpu-serial-check.artifact.json（本轮产物，可由 loop.py 重新生成）与外置盘证据目录 $CL_ARTIFACTS/ops-gpu-serial-check/（追加式，不入 Git）。取证全程只读，未杀进程、未 git checkout/reset/stash。若需撤销：删除该 artifact.json 即可，不影响其他并行任务。",
+  "verifierHint": "建议独立复核者优先复算这三点：① `grep -cE '^[[:space:]]*RUNNING' artifacts/plan100/GPU-LOCK` 是否为 0（决定「陈旧但无害」是否成立）；② `ps -o stat= -p 20615` 与 GATE.lock heartbeatAt 是否仍在推进（决定「活跃占用」是否成立）；③ 抽查 evidence 中 03-occupancy-live.txt 的 sha256 与祖先链是否与 `ps` 实测一致。注意：GATE.lock 与运行期进程状态**会随时间变化**，复核时若与本文不同，先看采集时刻（16:47:12Z）再判，不要直接判 fail。"
+}

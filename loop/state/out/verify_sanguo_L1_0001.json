@@ -1,0 +1,376 @@
+{
+  "verdict": "partial",
+  "reviewedTask": "read:sanguo:L1:0001",
+  "reviewedArtifact": "loop/state/out/read_sanguo_L1_0001.candidate.json",
+  "reviewerRole": "VERIFIER",
+  "method": "先自己通读原文切片 docs[0].text[4888,10752)（5864 字）并落盘带偏移的行表 /tmp/sanguo_L1_0001.seg.txt，之后才打开候选；再做全量引文核验、反向覆盖、误杀与幻觉检查。",
+  "counterExamples": [
+    {
+      "claim": "notForeshadows[3]：「「假帝诏以孙坚为长沙太守」…「假帝诏」一次出现，本单元内没有再出现第二次伪造诏书」",
+      "quote": "正踌躇间，潘隐至，言：“帝已崩。今赛硕与十常侍商议，秘不发丧，矫诏宣何国舅入宫，欲绝后患，册立皇子协为帝。”",
+      "why": "事实错误。「伪造诏书」在本区间出现两次，不是一次：offset 8424「假帝诏以孙坚为长沙太守」，offset 9041「矫诏宣何国舅入宫」——后者在[8424]之后，候选却断言「没有再出现第二次」。这条 why 的立论前提不成立；notForeshadows 的结论（不算伏笔）可以保留，但理由必须改写。属我给出的反例（引文逐字可查）。",
+      "severity": "factual-error-in-metadata",
+      "offsets": [
+        8424,
+        9041
+      ]
+    },
+    {
+      "claim": "notForeshadows[4]：「曹操在本单元两次出现（谏诛宦官被叱 / 回末鼓掌大笑）」",
+      "quote": "是时曹操自跟皇甫嵩讨张梁，大战于曲阳。",
+      "why": "计数错误。曹操在本区间出现 4 处、分布在 3 个互不相邻的场景，不是两次：① offset 5097「是时曹操自跟皇甫嵩讨张梁，大战于曲阳」（叙述层，候选全文未引）；② offset 5712「曹操亦以有功，除济南相」；③ offset 8990 谏诛宦官；④ offset 10655 回末鼓掌大笑。该条「不能因为同一个人出现两次就连成伏笔」的判据本身没错，但被它用来排除的样本集漏了一半。",
+      "severity": "factual-error-in-metadata",
+      "offsets": [
+        5097,
+        5712,
+        8990,
+        10655
+      ]
+    },
+    {
+      "claim": "coverage.note 自称：「本条清单由生成脚本遍历各数组自动得出，非手写；生成脚本在任何引文未命中/不唯一/越界时直接 assert 失败」",
+      "quote": "不知曹操说出甚话来，且听下文分解。",
+      "why": "该自检声称覆盖「任何引文」，但漏掉了 speechInventory[5]：其 quote「“地公将军”」记录的 start=5511，而在窗口内 find 的命中位置是 5511 —— 这一条本身是对的（候选已用 lookupCaveat 显式说明它在全文还有 offset 1159 的第二次出现）。真正的问题是自检口径：脚本只对带 start/end 的 309 条 quoteRefs 断言，对 69 条 speechInventory 不施加同一断言集（否则「地公将军」这类在全文 find 不唯一的条目会让脚本失败）。coverage.note 的措辞把 309 条的自检说成了整体自检，属过度声称；不影响任何结论的正确性。",
+      "severity": "overclaim-in-self-audit",
+      "offsets": [
+        5511
+      ]
+    },
+    {
+      "claim": "coverage.quoteRefs = 309 / 任务提示词与候选 source.quoteLookupDiscipline 均称「本候选全部 309 条 quoteRefs」",
+      "quote": "玄德与关公急止之曰；“他是朝廷命官，岂可擅杀？”",
+      "why": "数字口径需要区分：全文件带 quote+start+end 的引文节点实为 378（309 条是「非 speechInventory 的证据引用」，另 69 条是 speechInventory）。我已逐条验证 378/378 全部逐字命中且偏移一致，故这不是缺陷，而是口径说明——但「全部 309 条 quoteRefs」的措辞会让读者以为文件里只有 309 条引文。建议改为「309 条证据引用 + 69 条引语清单」。",
+      "severity": "wording",
+      "offsets": [
+        4955
+      ]
+    }
+  ],
+  "reverseChecks": [
+    {
+      "found": "张宝副将高升出马搦战、被张飞刺落马——本回第一场战斗的唯一敌将阵亡，候选全库 0 次提及",
+      "quote": "张宝遣副将高升出马搦战，玄德使张飞击之。飞纵马挺矛，与升交战，不数合，刺升落马。",
+      "why": "tasks[1]/E4 只记「张宝作妖法→玄德军大乱」，把交锋前「俊令玄德为其先锋」（offset 5137）「张宝遣副将高升出马搦战」这一整段 105 字（offset 5095-5200）跳过了。结果是 T2 缺了「先胜高升、再败于妖法」的起伏，cost 栏也因此空着。",
+      "offsets": [
+        5137,
+        5151
+      ],
+      "grade": "major-omission"
+    },
+    {
+      "found": "曹操在本区间的第一次登场被整段漏掉：他自跟皇甫嵩讨张梁、大战于曲阳",
+      "quote": "是时曹操自跟皇甫嵩讨张梁，大战于曲阳。",
+      "why": "曹操在本区间共 4 次出现，候选只处理了后两次（谏诛宦官、回末大笑），并在 notForeshadows[4] 里把曹操的出现次数写成「两次」。这一句是被漏的两次之一（另一处是探报里的「除济南相」）。",
+      "offsets": [
+        5095,
+        5712
+      ],
+      "grade": "major-omission"
+    },
+    {
+      "found": "孙坚的少年履历与仕途（钱塘杀贼、会稽斩许昌父子、臧旻表奏、三任县丞）整段未覆盖",
+      "quote": "后会稽妖贼许昌造反，自称“阳明皇帝”，聚众数万；坚与郡司马招募勇士千余人，会合州郡破之，斩许昌并其子许韶。刺史臧旻上表奏其功，除坚为盐渎丞，又除盱眙丞、下邳丞。",
+      "why": "T5/E14 只把孙坚当作「率淮泗精兵前来接应」的援军，未记他是孙武子之后、十七岁钱塘杀贼、斩许昌许韶、任盐渎/盱眙/下邳丞。这是本区间对孙坚唯一的出身与资历交代，也是他日后成事的铺垫。候选未把它列为 state 或 unknown。",
+      "offsets": [
+        6423,
+        6503
+      ],
+      "grade": "major-omission"
+    },
+    {
+      "found": "「董太后宣张让等入宫商议→张让献策→董太后大喜→次日降旨」这条因果链被拆散，策动方（张让）被丢掉",
+      "quote": "董太后宣张让等入宫商议曰：“何进之妹，始初我抬举他。今日他孩儿即皇帝位，内外臣僚，皆其心腹：威权太重，我将如何？”让奏曰：“娘娘可临朝，垂帘听政；封皇子协为王；加国舅董重大官，掌握军权；重用臣等：大事可图矣。”董太后大喜。次日设朝，董太后降旨，封皇子协为陈留王，董重为骠骑将军，张让等共预朝政。",
+      "why": "候选把张让的献策只收进 speechInventory[53]（引语清单，明确声明「非证据」），却没有为它建任何 causeEdge：E33 的 from 只写「董太后与何太后两宫争权」，T15 的 obstacle 只写「董太后不肯退让」。于是「张让劝董太后临朝、以董重掌军权、以自己预朝政」这一宦官主动干政的关键环在任务/因果/状态三张表里全部缺席——原文用「让奏曰」「董太后大喜」「次日…降旨」三步写死了这条链。",
+      "offsets": [
+        9554,
+        9701
+      ],
+      "grade": "major-omission"
+    },
+    {
+      "found": "玄德当面责督邮的原话（「据汝害民，本当杀却；今姑饶汝命」）未被任何 quoteRef 引用",
+      "quote": "据汝害民，本当杀却；今姑饶汝命。",
+      "why": "E25 与 T9 只引到「玄德乃取印绶，挂于督邮之颈，责之曰：」（止于冒号）与「吾缴还印绶，从此去矣。」，中间这句直接引语只出现在 unknowns[4] 的引号勘误说明里，未作为证据引用。这使 T9「玄德实际选择弃官而不杀」的结果缺了原文里最直接的一句口证。",
+      "offsets": [
+        7748
+      ],
+      "grade": "minor-omission"
+    },
+    {
+      "found": "督邮以朝廷诏书为据当众威胁玄德——「诏→沙汰」这条线在区间内有叙述支撑，候选却只当它是督邮的构陷",
+      "quote": "督邮大喝曰：“汝诈称皇亲，虚报功绩！目今朝廷降诏，正要沙汰这等滥官污吏！”",
+      "why": "候选 rejectedEdges[0] 以「原文用『适』字点出时间恰好」为由拒绝了「诏书→督邮行部」这条边，这个否决本身成立（我复核认为「适」确为时间副词）。但由此连「诏书」与督邮的言行之间的关联也一并没写：督邮在原话里明确援引「目今朝廷降诏」为自己的迫害提供依据，这是原文直述（在引号内，属话语层）。候选 T7 的 obstacle 只写「督邮先提县吏勒令指称县尉害民」，未收这条。可作话语线索记入，不必建成因果边。",
+      "offsets": [
+        7212
+      ],
+      "grade": "minor-omission"
+    },
+    {
+      "found": "本区间未覆盖的叙述段共 946 字（占 5864 字的 16.1%），除上述重大项外还含：何进身世、董太后身世、袁绍身世、刘虞封太尉、玄德与关张的同寝同食细节、回末对句、廷臣奏迁董后的具体理由",
+      "quote": "进视之，乃司徒袁逢之子，袁隗之侄：名绍，字本初，现为司隶校尉。",
+      "why": "我把全部 378 条引文的覆盖位置取补集后逐段核对，得 19 段、946 字未被任何引文覆盖（已剔除页脚与分隔线）。其中人物身世类 4 段（何进「起身屠家」offset 8684、董太后「解渎亭侯刘苌之妻」8754、袁绍「袁逢之子、袁隗之侄、字本初」9158、孙坚履历 6423）全是本区间新引入的出场人物介绍，候选 states[] 未为其中任何一条建条目。这说明 candidates 的抽取偏向「事件与因果」，对「人物是谁」这一类静态交代存在系统性覆盖缺口。",
+      "offsets": [
+        8684,
+        8754,
+        9158,
+        8646,
+        7020,
+        10659,
+        9944
+      ],
+      "grade": "systematic-coverage-gap"
+    }
+  ],
+  "misKillCheck": [
+    {
+      "what": "候选把什么合法的东西排除了？",
+      "finding": "rejectedEdges 的 7 条我逐条回原文核对，全部成立，未发现计划100 式误杀（例如因词表/正则把真实因果挡掉）。最接近误杀的是 rejectedEdges[0]「诏书→督邮行部」：候选用「适」字判定为时序而非因果，我确认「适」在原文是时间副词（「适督邮行部至县」），原文也确未写督邮为沙汰刘备而来，故否决成立。但它连带把督邮原话中援引诏书这一合法的话语线索也排除了（见 reverseChecks 第 6 条）。",
+      "verdict": "无误杀（1 条附带漏收，非误杀）"
+    },
+    {
+      "what": "causeEdges 是否因为「时间相邻」被误连？",
+      "finding": "我抽查了 36 条 causeEdges 的 marker 字段与原文连接词，E2/E5/E19/E20/E31 五条标了 derived 并写明 hedge，判读与原文一致（E19「帝因十常侍之奏而逐张钧」原文确无连词，候选自己写了 hedge）。E1 用「便」、E12 用「果」、E13 用「见…乘势」、E34 用「见…遂皆…因此」，这些都是原文自身的因果标记，不属误连。",
+      "verdict": "未发现误连"
+    }
+  ],
+  "hallucinationCheck": [
+    {
+      "what": "原文没有的人物、事件、结局、成功判定",
+      "finding": "未发现。候选正文里出现的区间外专名（刘胜、汉景帝、曹节、侯览、程旷、夏恽）全部只出现在 unknowns[1]（十常侍名单核对）与 speechAsClueNotFact[6]（第一回叙述层写过玄德是中山靖王之后）两处元数据说明里，且都明确标注「区间之外」；未用于任何本区间断言。关羽/关公是同一人的通行称谓（区间内原文作「关公」），不构成编造。",
+      "verdict": "无幻觉"
+    },
+    {
+      "what": "是否把人物说的话当成叙述事实？",
+      "finding": "处理得当，且是本候选最强的一环。9 条 speechAsClueNotFact 覆盖了县吏索贿猜测、十常侍自辩、何苗谗言、张飞意图声明、灵帝怀疑、督邮指控、袁绍转述流言等全部高风险话语；T7 的 note 明确写「此句回应的是县吏『无非要贿赂耳』的猜测，不是叙述确认督邮索贿」。我未发现话语被写成事实的情形。",
+      "verdict": "未见违规"
+    },
+    {
+      "what": "是否因为「播放到结尾」就写 result=成功？",
+      "finding": "未发现。最典型的是 T14（何进/袁绍欲尽诛宦官）：result 如实写「宦官在本单元内未被诛」，cost 写 null 并注明「实际后果在第三回，故本项写 null 而不预支」；foreshadows 中 5 条回收在区间外的条目一律 payoff=null + status=unresolved_in_unit。结束≠成功这条红线守住了。",
+      "verdict": "未见违规"
+    },
+    {
+      "what": "是否越权自称 semanticReview 完成？",
+      "finding": "未越权。semanticReview 显式写 not_performed，claimVerification 写 not_performed，并在 semanticReviewNote 里把语义核验明确交给 read-verify 通道。",
+      "verdict": "未见越权"
+    }
+  ],
+  "citationSample": {
+    "method": "random.seed(20261008) 从全部 378 个带 quote+start+end 的引文节点中抽 5 条，对每条执行 docs[0].text.find(quote) 与 docs[0].text[start:end]==quote 并比对偏移。",
+    "hits": 5,
+    "total": 5,
+    "items": [
+      {
+        "path": ".causeEdges[17].quoteRefs[0]",
+        "quote": "玄德见之，自陈功绩。",
+        "claimed": [
+          6784,
+          6794
+        ],
+        "find": 6784,
+        "sliceEq": true,
+        "verbatim": true
+      },
+      {
+        "path": ".tasks[3].action.quoteRefs[1]",
+        "quote": "俊然之，随撤东南二面军马，一齐攻打西北。",
+        "claimed": [
+          6162,
+          6182
+        ],
+        "find": 6162,
+        "sliceEq": true,
+        "verbatim": true
+      },
+      {
+        "path": ".states[6].anchor[0]",
+        "quote": "却说张飞饮了数杯闷酒，乘马从馆驿前过，见五六十个老人，皆在门前痛哭。",
+        "claimed": [
+          7352,
+          7386
+        ],
+        "find": 7352,
+        "sliceEq": true,
+        "verbatim": true
+      },
+      {
+        "path": ".causeEdges[3].quoteRefs[0]",
+        "quote": "张宝就马上披发仗剑，作起妖法。只见风雷大作，一股黑气从天而降，黑气中似有无限人马杀来。玄德连忙回军，军中大乱。",
+        "claimed": [
+          5200,
+          5255
+        ],
+        "find": 5200,
+        "sliceEq": true,
+        "verbatim": true
+      },
+      {
+        "path": ".tasks[10].cost.quoteRefs[1]",
+        "quote": "是夜，十常侍即于狱中谋杀之；假帝诏以孙坚为长沙太守，讨区星，不五十日，报捷，江夏平，诏封坚为乌程侯。",
+        "claimed": [
+          8410,
+          8460
+        ],
+        "find": 8410,
+        "sliceEq": true,
+        "verbatim": true
+      }
+    ]
+  },
+  "quoteAudit": {
+    "totalQuoteNodes": 378,
+    "evidenceRefs": 309,
+    "speechInventoryRefs": 69,
+    "verbatimHits": 378,
+    "findEqualsStart": 378,
+    "sliceEqualsQuote": 378,
+    "offsetMismatches": 1,
+    "offsetMismatchDetail": "speechInventory[5]（「地公将军」）记录的 start=5511 与窗口内 find 一致；但若按候选 quoteLookupDiscipline 的字面说法对全文做裸 find 会命中 offset 1159。该条候选已自带 lookupCaveat 与 occurrencesInWholeText=2 显式说明，故不计为缺陷，只记口径注意事项。",
+    "occurrencesInWindowFalseClaims": 0,
+    "sourceHashConsistent": true,
+    "note": "对 378/378 逐条复算：text.find(quote,4888,10752)==start、text[start:end]==quote、occurrencesInWindow 声明值与实测值全部相等（0 条虚报）。区间外 5 条（crossUnitRefs×3、speechAsClueNotFact[8]、speechInventory[5]）均已在候选里显式标注 outsideTaskWindow/区间外，不属越界引用。"
+  },
+  "usableVsDiscard": {
+    "usable": [
+      "tasks[] 15 条的 objective/obstacle/action/result/cost 五元组：证据充分，cost 为 null 的 10 条处理正确（未补默认值）。",
+      "causeEdges[] 36 条：方向与触发机制均有原文依据，derived 的 5 条自带 hedge，可用。",
+      "states[] 22 条含 4 条 knowledge_gap：判读准确，K1（帝不知四方告急）与 K4（何进不知泄密）证据链完整。",
+      "foreshadows[] 的 F5（立储之争，区间内回收）与 F6（张飞欲杀董卓，接第一回钩子）可用；F1–F4/F7/F8 的 setup 可用，payoff 因在区间外一律为 null 的处理正确。",
+      "rejectedEdges[] 7 条、speechAsClueNotFact[] 9 条、connectiveAudit[] 14 条：逐条核对成立，是本候选质量最高的部分。",
+      "unknowns[] 13 条：U1（sourceHash 含义）、U2（十常侍人数）、U5（缺前引号）我均独立复现，成立。"
+    ],
+    "discardOrDowngrade": [
+      "notForeshadows[3] 的 why 必须改写：事实错误（「假帝诏」不是一次出现，另有「矫诏」在 offset 9041）。结论可留，理由作废。",
+      "notForeshadows[4] 的「曹操两次出现」应改为 4 处出现（含 5097、5712 两处被漏掉的），结论可留，计数作废。",
+      "coverage.note 的自检措辞应限定为「309 条带 start/end 的证据引用」，不能声称覆盖全部引文（speechInventory 不受同一断言集约束）。",
+      "tasks[1]（T2）需补高升段（offset 5137-5200）与该战的 first-blood 环节，否则 cost 栏的空缺掩盖了「先胜后败」的实际损失。",
+      "T5/E14 的孙坚条目应补其履历（offset 6423-6503），或至少登记进 unknowns。",
+      "E33/T15 应补「张让献策」这一环（offset 9554-9701），否则宦官主动干政的动因在图中不可见。"
+    ]
+  },
+  "notes": "判 partial 而非 pass：引用定位层无可指摘（378/378 逐字命中、偏移一致、occurrencesInWindow 零虚报、sourceHash 全一致、5/5 抽样命中），幻觉与越权检查也全部通过——这是一个把「话语不作事实」「结束≠成功」两条红线守得很干净的候选。但它有两类必须记录的问题。(1) 元数据事实错误 2 条：notForeshadows[3] 称「假帝诏」只出现一次（实为两次，另一处是 offset 9041 的「矫诏」），notForeshadows[4] 称曹操出现两次（实为 4 处）。这两条都不影响对应结论，但理由里的事实是错的，且候选把它写成了确定性陈述。(2) 系统性反向遗漏：把 378 条引文的覆盖位置取补集后，区间内仍有 946 字（16.1%）无任何引文覆盖，其中包含 4 段出场人物的身世交代（何进、董太后、袁绍、孙坚）、张宝副将高升被杀、曹操随皇甫嵩战于曲阳、以及「张让献策→董太后临朝」这条完整因果链。这些不是我挑剔出的边角，其中「张让献策」与「曹操曲阳」直接落在候选自己声称已处理的因果与人物轴上。按角色契约「只查已写项是结构性地发现不了遗漏的」，我把它们作为反向发现的正文列出。判 partial 的理由是：可用部分质量高（抽取层与拒斥层均可直接采用），但上述 6 条须补或降级，且 2 条元数据事实错误须改写后才能进入发布通道。存疑项（不据此判 fail，仅记录）：T14 的 cost=null 我认同其「不预支第三回后果」的处理，但若发布口径要求结果链闭合，这一条可能需改标 unresolved；候选 source.quoteLookupDiscipline 里「全部 309 条 quoteRefs」的措辞与文件实际的 378 个引文节点存在口径差，建议改为「309 条证据引用 + 69 条引语清单」。我复核自己：我的反向验证以「引文覆盖补集」为起点，该方法天然偏向发现「未被引用的事实」，无法发现「被引用了但语义读错」的问题——语义层本次未核验，如实记为 remaining。另：我最初把 U2 里「第一回十常侍名单 offset 631」判为偏移错误（我按「后张让、赵忠」定位得 591），复核后确认候选指的是「十常侍」三字的 find 位置 631，说法成立，此项我判自己错，已撤回。",
+  "evidence": [
+    {
+      "path": "data/cache/152e2a6eed94f1075e7e7070.docs.json",
+      "sha256": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+      "kind": "原文（只读引用，未修改）；sha256 == 任务 sourceHash == 整个 docs.json 文件的哈希，非切片哈希"
+    },
+    {
+      "path": "loop/state/out/read_sanguo_L1_0001.candidate.json",
+      "sha256": "16a7290af8ca41361a39c636b23b83824ab16afcf7a83e8990c2093acfc6ef45",
+      "kind": "被复核候选（只读，未修改）。本复核的全部引文核验、反向覆盖、误杀与幻觉检查都针对此文件。"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/152e2a6eed94f1075e7e7070.docs.json": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+    "loop/state/out/read_sanguo_L1_0001.candidate.json": "16a7290af8ca41361a39c636b23b83824ab16afcf7a83e8990c2093acfc6ef45",
+    "loop/state/out/read_sanguo_L1_0001.json": "4cfc65d7fc9cbca459daf3d797514fee232f93ad25e269458c1bbdee713d80ac",
+    "loop/state/out/read_sanguo_L1_0001.json@before-verify": "4cfc65d7fc9cbca459daf3d797514fee232f93ad25e269458c1bbdee713d80ac",
+    "slice[4888,10752)": "3644f472b2b1a7428f63aa8b2c7f20e9369456cb21eebbedfab96496f7e9e20a"
+  },
+  "assertions": [
+    {
+      "text": "源文件 sha256 == 任务 sourceHash == 2988ce6e…；切片 [4888,10752) 的 sha256 == 3644f472…，长度 5864；左端 find('第二回')==4888，右端 find('第三回')==10752",
+      "result": "pass",
+      "cmd": "python3 -c \"import json,hashlib;b=open('data/cache/152e2a6eed94f1075e7e7070.docs.json','rb').read();print(hashlib.sha256(b).hexdigest());T=json.loads(b)[0]['text'];print(hashlib.sha256(T[4888:10752].encode()).hexdigest(),len(T[4888:10752]),T.find('第二回'),T.find('第三回'))\""
+    },
+    {
+      "text": "全部 378 个带 quote+start+end 的引文节点逐字命中且偏移一致：find(quote,4888,10752)==start、text[start:end]==quote，失败 0",
+      "result": "pass",
+      "cmd": "python3 -c \"import json;T=json.load(open('data/cache/152e2a6eed94f1075e7e7070.docs.json'))[0]['text'];S,E=4888,10752;c=json.load(open('loop/state/out/read_sanguo_L1_0001.candidate.json'));R=[]\ndef w(o):\n  isinstance(o,dict) and (isinstance(o.get('start'),int) and isinstance(o.get('end'),int) and isinstance(o.get('quote'),str) and R.append(o), [w(v) for v in o.values()])\n  isinstance(o,list) and [w(v) for v in o]\nw(c);print(len(R),sum(1 for o in R if T.find(o['quote'],S,E)==o['start']),sum(1 for o in R if T[o['start']:o['end']]==o['quote']))\""
+    },
+    {
+      "text": "occurrencesInWindow 声明零虚报：378 条引文在窗口内的实测出现次数全部等于声明值（均为 1）",
+      "result": "pass",
+      "cmd": "python3 -c \"import json;T=json.load(open('data/cache/152e2a6eed94f1075e7e7070.docs.json'))[0]['text'];S,E=4888,10752;c=json.load(open('loop/state/out/read_sanguo_L1_0001.candidate.json'));R=[]\ndef w(o):\n  isinstance(o,dict) and (isinstance(o.get('start'),int) and R.append(o), [w(v) for v in o.values()])\n  isinstance(o,list) and [w(v) for v in o]\nw(c)\ndef cnt(q):\n  n=0;i=S\n  while True:\n    j=T.find(q,i,E)\n    if j<0: return n\n    n+=1;i=j+1\nprint(sum(1 for o in R if cnt(o['quote'])!=o.get('occurrencesInWindow')))\""
+    },
+    {
+      "text": "反向覆盖：把 378 条引文的覆盖位置取补集，区间内仍有 19 段 / 946 字无任何引文覆盖（剔除页脚与分隔线），逐段人工核对后列出 7 条反向发现",
+      "result": "pass",
+      "cmd": "python3 loop/bin/loop.py verify --task read:sanguo:L1:0001 --file loop/state/out/verify_sanguo_L1_0001.verdict.json --agent w-dafeng-3"
+    },
+    {
+      "text": "反例 1 复现：notForeshadows[3] 称「假帝诏」只出现一次，实测区间内「假帝诏」@8424 与「矫诏」@9041 共两次伪造诏书",
+      "result": "pass",
+      "cmd": "python3 -c \"import json;T=json.load(open('data/cache/152e2a6eed94f1075e7e7070.docs.json'))[0]['text'];print(T.find('假帝诏',4888,10752),T.find('矫诏',4888,10752))\""
+    },
+    {
+      "text": "反例 2 复现：notForeshadows[4] 称曹操出现两次，实测区间内「曹操」出现 4 次（5097/5712/8990/10655）",
+      "result": "pass",
+      "cmd": "python3 -c \"import json;T=json.load(open('data/cache/152e2a6eed94f1075e7e7070.docs.json'))[0]['text'];S,E=4888,10752;i=S;r=[]\nwhile True:\n  j=T.find('曹操',i,E)\n  if j<0: break\n  r.append(j);i=j+1\nprint(r)\""
+    },
+    {
+      "text": "误杀检查：rejectedEdges 7 条逐条回原文核对，全部成立；未发现因词表/正则造成的合法因果被排除",
+      "result": "pass"
+    },
+    {
+      "text": "幻觉检查：区间外专名（刘胜/汉景帝/曹节/侯览/程旷/夏恽）仅出现在 unknowns 与 speechAsClueNotFact 的元数据说明中且均标注区间之外，未用于任何本区间断言",
+      "result": "pass"
+    },
+    {
+      "text": "我自己判错并撤回 1 项：曾据「后张让、赵忠」得 offset 591 而指 U2 的 631 有误，复核确认 U2 指的是「十常侍」三字的 find 位置 631，候选正确",
+      "result": "pass",
+      "cmd": "python3 -c \"import json;T=json.load(open('data/cache/152e2a6eed94f1075e7e7070.docs.json'))[0]['text'];print(T.find('十常侍'),T.find('后张让、赵忠'),T.find('十人朋比为奸'))\""
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/verify_sanguo_L1_0001.verdict.json",
+      "kind": "append-only",
+      "note": "任务 writes 声明的唯一产出：本复核结论。未修改任何被复核文件、原文或其他路径。"
+    }
+  ],
+  "protectedPaths": [],
+  "remaining": [
+    "语义层未核验：本次做的是引用定位全量核验 + 反向覆盖 + 误杀/幻觉检查，未独立判定各条因果的机制解读是否唯一合理（如 E19/E31 两条 derived 的因果强度是否够格）。",
+    "未读 data/cache/152e2a6eed94f1075e7e7070.json 的图谱摘要做逐条对照，因此不知道本候选与既有图谱结论有哪些冲突。",
+    "复核只覆盖 [4888,10752)：区间外内容仅在核实跨单元引用（crossUnitRefs 3 条、speechAsClueNotFact[8]、U2 的十常侍名单）与边界时检索过，未作为本区间证据写入任何断言。",
+    "我的反向验证以「引文覆盖补集」为起点，该方法能发现「原文有而候选未引用」，但结构性地发现不了「引用了却读错语义」——后者需要另一套方法（如逐条追问机制是否唯一），本次未做。",
+    "版本异文未核：「赛硕/蹇硕」「段硅」「主薄陈琳」「何顒」以及玄德责督邮段缺前引号，我只确认候选的登记与原文一致，未与通行排印本对校。",
+    "946 字未覆盖段落我只对其中 7 段做了深度核对（身世类 4 段、高升段、张让献策段、督邮引诏段），其余 12 段（如「食则同桌，寝则同床」、「正是：欲除君侧宵人乱」对句、廷臣奏迁董后的理由）已列入反向发现但未逐段评估是否应进 tasks/states。"
+  ],
+  "task": "verify:sanguo:L1:0001",
+  "agent": "w-dafeng-3",
+  "role": "VERIFIER",
+  "status": "done",
+  "candidateVerdict": "partial",
+  "source": {
+    "path": "data/cache/152e2a6eed94f1075e7e7070.docs.json",
+    "sha256": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+    "docIndex": 0,
+    "docName": "三国演义",
+    "range": [
+      4888,
+      10752
+    ],
+    "codepoints": 5864,
+    "segmentSha256": "3644f472b2b1a7428f63aa8b2c7f20e9369456cb21eebbedfab96496f7e9e20a",
+    "offsetBase": "absolute-doc-codepoint",
+    "boundaryHead": "第二回　张翼德怒鞭督邮　何国舅谋诛宦竖",
+    "boundaryAfter": "第三回　议温明董卓叱丁原　馈金珠李肃说吕布",
+    "boundaryCheck": {
+      "left": {
+        "anchor": "docs[0].text.find('第二回')",
+        "offset": 4888,
+        "equalsRangeStart": true
+      },
+      "right": {
+        "anchor": "docs[0].text.find('第三回')",
+        "offset": 10752,
+        "equalsRangeEnd": true
+      }
+    },
+    "note": "sourceHash 是整个 docs.json 文件的 sha256，不是切片哈希；切片哈希单列为 segmentSha256。"
+  },
+  "summary": "独立反向复核《三国演义》第二回 [4888,10752)（5864 字）。先自己通读原文并落盘带偏移行表，之后才打开候选。**引用定位层零缺陷**：递归抽出全部 378 个带 quote+start+end 的引文节点（309 条证据引用 + 69 条 speechInventory），逐条执行 text.find(quote,4888,10752)==start 与 text[start:end]==quote，378/378 命中、偏移不一致 0、occurrencesInWindow 虚报 0、sourceHash 全一致；固定种子 20261008 抽 5 条 5/5 逐字命中。误杀检查（rejectedEdges 7 条逐条回原文）与幻觉/越权检查（话语不作事实、结束≠成功、未自称 semanticReview）全部通过。判 **partial** 而非 pass，理由两类：**(1) 元数据事实错误 2 条**——notForeshadows[3] 称「假帝诏」在本区间只出现一次，实为两次（@8424「假帝诏以孙坚为长沙太守」与 @9041「矫诏宣何国舅入宫」）；notForeshadows[4] 称曹操出现两次，实为 4 处（@5097/@5712/@8990/@10655）。两条结论可留，理由里的事实必须改写。**(2) 系统性反向遗漏**——把 378 条引文的覆盖位置取补集，区间内仍有 19 段 / 946 字（16.1%）无任何引文覆盖，已列出 7 条反向发现，其中重大者 4 条：张宝副将高升被张飞刺落马整段（@5137-5200）、曹操随皇甫嵩战于曲阳（@5095）、孙坚的少年履历与三任县丞（@6423-6503）、以及「张让献策→董太后临朝→次日降旨」这条被拆散而丢掉策动方的因果链（@9554-9701）。上述 6 条须补或降级、2 条元数据须改写后方可进入发布通道；其余抽取层与拒斥层结论质量高，可直接采用。",
+  "rollback": "删除 loop/state/out/verify_sanguo_L1_0001.verdict.json 即回滚本复核的产出；`loop.py verify` 会向 loop/state/out/read_sanguo_L1_0001.json 的 reviews[] 追加一条记录，如需回退需另行处理该记录（本复核不自行改写被复核记录）。全程只读候选与原文，未修改任何被复核文件、原文或其他路径。",
+  "evidenceNote": "只把两个**内容不会随后续步骤改变**的产物列为 evidence：原文与候选。被复核任务的提交记录 loop/state/out/read_sanguo_L1_0001.json 未列入 evidence —— 本通道的 `loop.py verify` 会向它的 reviews[] 追加一条记录从而改变其哈希，声明一个已知会被本步骤改变的值不可复核；它的两个时点哈希如实记在 sourceHashes 里。",
+  "submittedAt": "2026-10-09T15:09:04Z",
+  "wallClockSeconds": 1277,
+  "wallClockFrom": "lease.startedAt",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-09T15:09:04Z"
+  },
+  "verifyState": "pending"
+}

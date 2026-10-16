@@ -1,0 +1,3802 @@
+{
+ "schema": "castline/read-candidate/v1",
+ "task": "read:sanguo:L0:0092",
+ "agent": "w-read-2",
+ "role": "READER",
+ "book": "sanguo",
+ "bookTitle": "三国演义",
+ "lane": 0,
+ "unitIndex": 92,
+ "unitHead": "第九十三回　姜伯约归降孔明　武乡侯骂死王朝",
+ "readsSource": true,
+ "readWholeSlice": true,
+ "readMethod": "本候选由仓库外的构建脚本一次性生成（脚本自检通过后才落盘），全文分段读完：把 docs[0].text[467225,472736) 按换行切成 12 个正文自然段（另有 2 段整理标记），逐段通读后按场景切出 17 条任务。**引文偏移全部由脚本在全文 find 得到**，不手写：每条只写引文字符串，脚本断言 text[start:end]==quote、落在区间内、sourceHash 等于实测文件 sha256；任一断言失败则拒绝落盘。",
+ "semanticReview": "not-performed",
+ "semanticReviewNote": "本候选只做〔引文定位 + 五栏各自取证 + 栏内不共用引句 + 六个分区产出 + 地点/物件/规则三条区分字段化 + 人物语与叙述语分栏标注〕。全部引文可用 docs[0].text[start:end] == quote 复算，但这只证明定位成立，不证明语义已核验：我没有做独立复核，semanticReview 仍是 not-performed。",
+ "source": {
+  "path": "data/cache/fe42d01f3826fe8096f86614.docs.json",
+  "docIndex": 0,
+  "docName": "0014《三国演义》-罗贯中 著",
+  "docPath": "0014《三国演义》-罗贯中 著.TXT",
+  "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+  "fileSha256": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+  "sliceStart": 467225,
+  "sliceEnd": 472736,
+  "sliceLen": 5511,
+  "sliceSha256": "d968def8ab81c9ab97edc81affb4548a2e2cf863c060ff6deaccfdc9c27582fb",
+  "taskJsonDeclaredHash": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+  "taskJsonDeclaredHashNote": "任务 JSON 与 prompt 正文声明的 sourceHash 都是 2988ce6e…，而实测 data/cache/fe42d01f3826fe8096f86614.docs.json 的 sha256 是 8ab7298a…。实测 2988ce6e… 是 data/cache/152e2a6eed94f1075e7e7070.docs.json 的 sha256，该文件 docs[0].text 与本文件逐字符相同（607191 码点，`a == b` 为 True）。本候选的引文按 prompt 正文指定的 8ab7298a… 出（即实际读取的文件），并把两个值都记在这里。这与上一单元 read:sanguo:L0:0090 记录的是同一现象（其 source.taskJsonDeclaredHash 亦为 2988ce6e…）。",
+  "graphCache": {
+   "path": "data/cache/fe42d01f3826fe8096f86614.json",
+   "used": false,
+   "note": "按 prompt 要求，图谱缓存里的摘要只用于对照已有结论、不作原文证据。实测该文件的 events[] 共 1286 条，没有一条的偏移落在本单元区间内，tasks[] 里也没有姜维归降/王朗这一段的任务条目，故本候选未从图谱缓存取得任何结论。"
+  }
+ },
+ "basisLegend": {
+  "explicit": "原文直述（叙述语或人物语都在原文里，逐字可查）",
+  "inferred": "我的归纳：原文没有直接这么说，是我从动作/上下文中读出来的",
+  "derived": "跨段推导：需要把两处以上原文并读才成立",
+  "unverified": "存疑：我读不出结论，或原文自相矛盾"
+ },
+ "evidenceTypeLegend": {
+  "narrative": "叙述语",
+  "speech": "人物语（谁说的就记谁说的，不等于叙述事实）",
+  "report": "转述/传闻（如百姓之言）",
+  "mixed": "同一栏内同时用了叙述语与人物语"
+ },
+ "quotationConvention": {
+  "literalRule": "**唯一逐字证据**是带 quote/start/end 的对象（各栏 quotes[]、worldSettings 的 quoteRef/extraQuotes/itemStateQuotes）。它们 100% 满足 docs[0].text[start:end] == quote，start/end 是相对 docs[0].text 全文的 codepoint 偏移（不是相对切片），sourceHash 为整个 docs.json 文件的 sha256。",
+  "angleBracketRule": "散文（text/explain/why/summary/note 等说明字段）里的「」是**行内标记**，用于三类用法：①节引（可能含省略号、跨句拼接或语序调整）；②概念名与关系标签（如「名分」「同一条任务的五栏共用同一句」）；③我自己的措辞强调。**散文里的「」不保证逐字**；凡需逐字核对之处，一律以同一栏目里的 quotes[] 对象为准。本条规则是可机器复算的：见 angleBracketAudit。",
+  "columnRule": "同一条任务内 objective/obstacle/action/result/cost 的 quotes[] 区间两两不相交（0 违反，由构建脚本与独立复验脚本各算一次）；跨任务／跨分区复用允许，全部复用点登记在 crossSectionQuoteReuse。",
+  "angleBracketAuditNote": "angleBracketAudit 是**自曝**字段：它列出散文里全部无法在原文中逐字命中的「」片段。写出来是为了让复核者一眼看到散文标记与逐字证据的边界，而不是让复核者去猜哪些「」是原文。",
+  "angleBracketAudit": {
+   "proseFragments": 296,
+   "literalInSource": 214,
+   "notLiteral": 82,
+   "notLiteralExamples": [
+    "『降』这个名分与事实之间的时间差",
+    "两军相邻所以打起来",
+    "乘虚去劫蜀寨＋伏于寨外",
+    "亲眼所见＋当事人自认",
+    "他实际投降",
+    "他已被算作降将",
+    "代价",
+    "传言回传",
+    "冀城被袭取",
+    "初到之日鼓噪直上",
+    "初更蜀兵又来攻城",
+    "原来…乃孔明之计"
+   ],
+   "notLiteralAll": [
+    "『降』这个名分与事实之间的时间差",
+    "两军相邻所以打起来",
+    "乘虚去劫蜀寨＋伏于寨外",
+    "亲眼所见＋当事人自认",
+    "他实际投降",
+    "他已被算作降将",
+    "代价",
+    "传言回传",
+    "冀城被袭取",
+    "初到之日鼓噪直上",
+    "初更蜀兵又来攻城",
+    "原来…乃孔明之计",
+    "反国之贼…吾已知汝降蜀矣",
+    "取…至帐下",
+    "同一条任务的五栏共用同一句",
+    "名分",
+    "名分与事实谁先到",
+    "名分先于事实",
+    "名分天然胜过事实",
+    "因言语而死",
+    "图谋/去向≠到达",
+    "城中粮少 → 出城劫粮 → 城空",
+    "城已被袭",
+    "城虚",
+    "天命说词的对撞",
+    "太守出城、只留文官守城",
+    "太守带兵出城、只留文官守城",
+    "姜维与天水守军之间",
+    "姜维事母至孝",
+    "姜维亲口承认投降",
+    "姜维使人持书来说：但得驸马在，我愿归降",
+    "姜维已降",
+    "姜维归降孔明",
+    "姜维投降",
+    "姜维有书愿降",
+    "姜维有书来说：但得驸马在，我愿归降",
+    "姜维献城池",
+    "孔明得三城",
+    "孔明放夏侯楙",
+    "孔明起大军前来",
+    "孝与忠的冲突",
+    "对的读法被判错",
+    "尸首被盛贮送回长安",
+    "带三千军出城",
+    "恐母有失／兼保老母",
+    "打了败仗所以后来发生了一些事",
+    "打到最后自然就降了",
+    "托孤的名分构成约束",
+    "投…而去",
+    "推辞→受命",
+    "提供可验证的事实就能生效",
+    "收了姜维所以城就归了",
+    "放人是为了传话",
+    "文本在主张标签即事实",
+    "时间相邻",
+    "是孔明的安排",
+    "曹真因名分而不敢辞",
+    "本区间未出现…",
+    "来赚城门",
+    "枫林晚 整理校对后一页前一页回目录回首页…",
+    "此城（上邽）乃某亲弟梁虚守之",
+    "治丧之夜必被劫寨",
+    "王朗撞死",
+    "王朗死后打了一仗",
+    "百姓之言",
+    "被骂死",
+    "诈的手段靠什么生效",
+    "诈败弃粮",
+    "诈靠什么生效",
+    "说词失效 → 当场撞死",
+    "说词对撞",
+    "说词当众失效 → 当场撞死",
+    "谁主动",
+    "赵云败走",
+    "转述内容",
+    "这是他此行的代价",
+    "那是蜀军",
+    "靠诈取胜",
+    "马遵准请是因为孝",
+    "魏军军师之位空缺",
+    "魏廷",
+    "魏廷不知道姜维已降"
+   ],
+   "reason": "这些片段是节引（含省略号/拼接）、概念名、关系标签或我的措辞，不是逐字证据；逐字证据见各栏 quotes[]。"
+  }
+ },
+ "tasks": [
+  {
+   "id": "T01",
+   "character": "姜维／马遵（天水守方）",
+   "summary": "姜维预判孔明会伏兵袭城，反过来用「太守带兵出城、只留文官守城」做出城虚的假象，自请三千精兵伏于要路；赵云果然来乘虚袭城，被姜维与回师的马遵、梁虔夹攻而败走。",
+   "objective": {
+    "text": "姜维要的不是守住城，而是一场大胜：让蜀兵来攻，前后夹击；若孔明亲自来，就把他擒下。",
+    "basis": "explicit",
+    "evidenceType": "speech",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "但看火起为号，前后来攻，可获大胜。如诸葛亮自来，必为某所擒矣。",
+      "start": 467317,
+      "end": 467348,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 467317,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "obstacle": {
+    "text": "障碍是他自己预判出来的：孔明必定先伏兵于郡城之后，把守军赚出城，再乘虚袭城——所以不能只是守城。",
+    "basis": "explicit",
+    "evidenceType": "speech",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "诸葛亮必伏兵于郡后，赚我兵出城，乘虚袭我。",
+      "start": 467261,
+      "end": 467282,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 467261,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "action": {
+    "text": "他请三千精兵伏于要路；马遵用其计，交给他精兵，自己与梁虔引兵出城等候，城里只留梁绪、尹赏。",
+    "basis": "explicit",
+    "evidenceType": "mixed",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "某愿请精兵三千，伏于要路。",
+      "start": 467282,
+      "end": 467295,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 467282,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "遵用其计，付精兵与姜维去讫，然后自与梁虔引兵出城等候；只留梁绪、尹赏守城。",
+      "start": 467349,
+      "end": 467386,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 467349,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "result": {
+    "text": "赵云被打到首尾不能相顾，冲开一条路带败兵逃走，姜维追他；战绩到「赵云败走」为止——孔明本人没有来，所以「必为某所擒」没有发生。",
+    "basis": "explicit",
+    "evidenceType": "narrative",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "赵云首尾不能相顾，冲开条路，引败兵奔走，姜维赶来。",
+      "start": 467669,
+      "end": 467694,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 467669,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "cost": null,
+   "costNote": "本区间未出现姜维／马遵一方为这次设伏付出代价的叙述：没有伤亡数字、没有失将、也没有误期。「只留梁绪、尹赏守城」是把城交给文官的风险，但它是部署（已记入 action），原文没有把它写成已付的代价，我不替它折算。"
+  },
+  {
+   "id": "T02",
+   "character": "赵云（奉孔明预先埋伏之命）",
+   "summary": "孔明预先派赵云伏于山僻，只等天水人马离城就乘虚袭城；赵云引五千兵到城下，被姜维与马遵、梁虔夹攻，败走，靠张翼、高翔接应回去。",
+   "objective": {
+    "text": "赵云的任务是乘虚袭天水：孔明预先把他埋伏在山僻处，等的就是「天水人马离城」这个条件。",
+    "basis": "explicit",
+    "evidenceType": "narrative",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "原来孔明果遣赵云引一军埋伏于山僻之中，只待天水人马离城，便乘虚袭之。",
+      "start": 467386,
+      "end": 467420,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 467386,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "obstacle": {
+    "text": "障碍在城下才出现：喊声与四面火光，以及马遵、梁虔回师的夹攻。",
+    "basis": "explicit",
+    "evidenceType": "narrative",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "忽然喊声大震，四面火光冲天。",
+      "start": 467565,
+      "end": 467579,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 467565,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "正战时，两路军夹攻来，乃是马遵、梁虔引军杀回。",
+      "start": 467646,
+      "end": 467669,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 467646,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "action": {
+    "text": "他按细作回报的「城虚」判断行动：引五千兵径投天水郡城下，并挺枪直取姜维。",
+    "basis": "explicit",
+    "evidenceType": "mixed",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "却说赵云引五千兵，径投天水郡城下",
+      "start": 467487,
+      "end": 467503,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 467487,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "云挺枪直取姜维。战不数合，维精神倍长。",
+      "start": 467607,
+      "end": 467626,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 467607,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "result": {
+    "text": "结果是被接应回营，没有拿下城：亏得张翼、高翔两路军杀出，把他接应回去。",
+    "basis": "explicit",
+    "evidenceType": "narrative",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "亏得张翼、高翔两路军杀出，接应回去。",
+      "start": 467694,
+      "end": 467712,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 467694,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "cost": null,
+   "costNote": "本区间未写赵云部的伤亡、失将或失械，只有「引败兵奔走」这个败退动作（已记入 result 的上一栏）。没有数字就不写数字，所以 cost 留空并说明。"
+  },
+  {
+   "id": "T03",
+   "character": "孔明",
+   "summary": "赵云回报中计，孔明惊问来者是谁，得知姜维的籍贯、孝行与才具，又听赵云夸其枪法；他明说「吾今欲取天水，不想有此人」，随即起大军前来。",
+   "objective": {
+    "text": "孔明的目标是取天水；同一句里他紧接着说出新出现的障碍（不想有此人），障碍的独立依据另见 obstacle 栏，不用这一句。",
+    "basis": "explicit",
+    "evidenceType": "speech",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "孔明曰：“吾今欲取天水，不想有此人。”",
+      "start": 467815,
+      "end": 467834,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 467815,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "obstacle": {
+    "text": "障碍是姜维这个人：先有赵云「中了敌人之计」的回报，再有南安人对姜维「事母至孝，文武双全，智勇足备」的评价。",
+    "basis": "explicit",
+    "evidenceType": "mixed",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "赵云归见孔明，说中了敌人之计。",
+      "start": 467716,
+      "end": 467731,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 467716,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "此人姓姜名维，字伯约，天水冀人也；事母至孝，文武双全，智勇足备，真当世之英杰也。",
+      "start": 467757,
+      "end": 467797,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 467757,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "action": {
+    "text": "孔明的动作只有一个：起大军前来（具体部署在下一段才出现）。",
+    "basis": "explicit",
+    "evidenceType": "narrative",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "遂起大军前来。",
+      "start": 467834,
+      "end": 467841,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 467834,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "result": null,
+   "resultNote": "本区间在「遂起大军前来」处换段，孔明起兵的直接结果（城下受挫、收兵归寨）要到下一条任务的区间才写出，不在本条范围内，故 result 写 null 而不是提前借用后文。",
+   "cost": null,
+   "costNote": "本区间未写孔明为这次起兵付出的代价：没有粮耗、没有伤亡、没有误期。"
+  },
+  {
+   "id": "T04",
+   "character": "姜维（重新部署天水防务）",
+   "summary": "姜维回见马遵，判断孔明必然自来且会以为守军仍在城中；他把本部军马分作四枝，自己在城东伏击，马遵与梁虚、尹赏在城外埋伏，梁绪率百姓守城。部署刚定，孔明的夜攻就来了。",
+   "objective": {
+    "text": "姜维要把守军从城里挪出去：孔明必然自来，所以要在城外设伏、城上留人。",
+    "basis": "explicit",
+    "evidenceType": "speech",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "赵云败去，孔明必然自来。",
+      "start": 467856,
+      "end": 467868,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 467856,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "obstacle": {
+    "text": "障碍是敌人的预判本身：孔明会「料我军必在城中」，所以不能按常规守城。",
+    "basis": "explicit",
+    "evidenceType": "speech",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "彼料我军必在城中。",
+      "start": 467868,
+      "end": 467877,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 467868,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "action": {
+    "text": "他把本部军马分为四枝：自己伏于城东截击，马遵与梁虚、尹赏各引一军在城外埋伏，梁绪率百姓在城上守御；分拨已定。",
+    "basis": "explicit",
+    "evidenceType": "mixed",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "今可将本部军马，分为四枝：某引一军伏于城东，如彼兵到则截之。太守与梁虚、尹赏各引一军城外埋伏。梁绪率百姓在城上守御。”",
+      "start": 467877,
+      "end": 467936,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 467877,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "分拨已定。",
+      "start": 467936,
+      "end": 467941,
+      "globalOccurrences": 2,
+      "occurrenceIndex": 467936,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+      "occurrenceIndexNote": "全书 2 次出现；本候选指向本单元区间内的这一次 @467936"
+     }
+    ]
+   },
+   "result": {
+    "text": "这套部署在半夜生效：城上鼓噪呐喊着与城外的火光相应，蜀兵乱窜。",
+    "basis": "explicit",
+    "evidenceType": "narrative",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "只见城上亦鼓噪呐喊相应，蜀兵乱窜。",
+      "start": 468066,
+      "end": 468083,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 468066,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "cost": null,
+   "costNote": "本区间未写这次分拨付出代价：没有伤亡、没有失城（失城要到密书那一段才发生）。「梁绪率百姓在城上守御」是兵员安排（已记入 action），原文没有把它写成损失。"
+  },
+  {
+   "id": "T05",
+   "character": "孔明（攻天水）",
+   "summary": "孔明因忌姜维而自为前部进逼天水，传下「初到之日鼓噪直上」的攻城令；到城下见旗帜整齐未敢轻攻，半夜被四下火光与城上鼓噪夹住，蜀兵乱窜，他靠关兴、张苞杀出重围，收兵归寨。",
+   "objective": {
+    "text": "孔明的目标是打下天水：他自己做前部推进，大军跟着到了城下。",
+    "basis": "explicit",
+    "evidenceType": "narrative",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "却说孔明因虑姜维，自为前部，望天水郡进发。",
+      "start": 467945,
+      "end": 467966,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 467945,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "于是大军径到城下。",
+      "start": 468016,
+      "end": 468025,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 468016,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "obstacle": {
+    "text": "障碍有两层：城上旗帜整齐使他不敢轻攻；半夜四下的火光与喊声让他连敌人在哪都不知道。",
+    "basis": "explicit",
+    "evidenceType": "narrative",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "因见城上旗帜整齐，未敢轻攻。",
+      "start": 468025,
+      "end": 468039,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 468025,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "候至半夜，忽然四下火光冲天，喊声震地，正不知何处兵来。",
+      "start": 468039,
+      "end": 468066,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 468039,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "action": {
+    "text": "他的应对是上马突围，并派关兴探明来路，回报是姜维的兵。",
+    "basis": "explicit",
+    "evidenceType": "mixed",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "孔明急上马，有关兴；张苞二将保护，杀出重围。",
+      "start": 468083,
+      "end": 468105,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 468083,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "孔明令关兴探视，回报曰：“此姜维兵也。”",
+      "start": 468126,
+      "end": 468146,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 468126,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "result": {
+    "text": "这一夜的结果是没打下城：收兵归寨，并承认对方的调度之才。",
+    "basis": "explicit",
+    "evidenceType": "mixed",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "收兵归寨，思之良久",
+      "start": 468172,
+      "end": 468181,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 468172,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "孔明叹曰：“兵不在多，在人之调遣耳。此人真将才也！”",
+      "start": 468146,
+      "end": 468172,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 468146,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "cost": null,
+   "costNote": "本区间未写蜀军此夜的伤亡、失将或弃械；「蜀兵乱窜」「杀出重围」是败退过程（已记入 obstacle 与 action），没有数字可记，所以 cost 留空。"
+  },
+  {
+   "id": "T06",
+   "character": "孔明（改用断根之计）",
+   "summary": "孔明先问出姜维之母居冀县，派魏延虚张声势诈取冀县并交代「若姜维到，可放入城」；又问出天水钱粮都在上邽，派赵云去攻上邽，自己离城三十里下寨。",
+   "objective": {
+    "text": "孔明要拿到姜维的根：先把姜维之母的住处问出来，再派魏延诈取冀县，并预备好姜维一进城就把他关在城里。",
+    "basis": "explicit",
+    "evidenceType": "mixed",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "乃唤安定人问曰：“姜维之母，现在何处？”答曰：“维母今居冀县。”",
+      "start": 468182,
+      "end": 468214,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 468182,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "孔明唤魏延分付曰：“汝可引一军，虚张声势，诈取冀县。若姜维到，可放入城。”",
+      "start": 468214,
+      "end": 468251,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 468214,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "obstacle": null,
+   "obstacleNote": "这一段原文没有给孔明的分派设置阻力：问母所在有答、问要害有答、魏延与赵云领命即去。真正的困难出现在下一段（姜维果然引兵入冀城、闭门不出，见 T07/T10），不提前写进本条。",
+   "action": {
+    "text": "第二个动作指向粮道：孔明问出「天水钱粮，皆在上邽」后，教赵云引一军去攻上邽，自己离城三十里下寨。",
+    "basis": "explicit",
+    "evidenceType": "mixed",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "又问：“此地何处紧要？”安定人曰：“天水钱粮，皆在上邽；若打破上邽，则粮道自绝矣。”",
+      "start": 468251,
+      "end": 468293,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 468251,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "孔明大喜，教赵云引一军去攻上邽。",
+      "start": 468293,
+      "end": 468309,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 468293,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "孔明离城三十里下寨。",
+      "start": 468309,
+      "end": 468319,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 468309,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "result": {
+    "text": "结果是这套分派被对方看见并逼出反应：天水方面收到「蜀兵分为三路」的报告。",
+    "basis": "explicit",
+    "evidenceType": "narrative",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "早有人报入天水郡，说蜀兵分为三路：一军守此郡，一军取上邽，一军取冀城。",
+      "start": 468319,
+      "end": 468354,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 468319,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "cost": null,
+   "costNote": "本区间未写孔明为这次分兵付出代价：没有伤亡、失将或误期。「分为三路」是部署（已记入 action/result），兵力被摊薄是风险而不是原文写出的损失。"
+  },
+  {
+   "id": "T07",
+   "character": "姜维／马遵（救冀城）",
+   "summary": "蜀兵三路的报告送到天水，姜维哀告马遵，请求带一军去救母亲所在的冀城；马遵同意，给他三千军去保冀城，另给梁虔三千军去保上邽。他到冀城遇魏延，魏延诈败，他入城闭门守母，不再出战。",
+   "objective": {
+    "text": "姜维的目标很具体：母亲在冀城，他怕母亲有失，请求一支军去救城并保母。",
+    "basis": "explicit",
+    "evidenceType": "speech",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "姜维闻之，哀告马遵曰：“维母现在冀城，恐母有失。维乞一军往救此城，兼保老母。”",
+      "start": 468354,
+      "end": 468393,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 468354,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "obstacle": {
+    "text": "压力来自蜀兵三路并进的消息——它同时威胁郡城、上邽与冀城，迫使天水把兵力拆开。（这一句在 T06 已作结果引用，此处作本条的外部压力，跨任务复用已登记。）",
+    "basis": "explicit",
+    "evidenceType": "narrative",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "早有人报入天水郡，说蜀兵分为三路：一军守此郡，一军取上邽，一军取冀城。",
+      "start": 468319,
+      "end": 468354,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 468319,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "action": {
+    "text": "马遵同意并分兵：姜维三千军去保冀城，梁虔三千军去保上邽；姜维到冀城遇魏延，交手数合后魏延诈败。",
+    "basis": "explicit",
+    "evidenceType": "mixed",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "马遵从之，遂令姜维引三千军去保冀城；梁虔引三千军去保上邽。",
+      "start": 468393,
+      "end": 468422,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 468393,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "却说姜维引兵至冀城，前面一彪军摆开，为首蜀将，乃是魏延。二将交锋数合，延诈败奔走。",
+      "start": 468426,
+      "end": 468467,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 468426,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "result": {
+    "text": "他进了城、见到母亲，但代价是把自己关在城里：闭门守护，并不出战——这正合孔明「若姜维到，可放入城」的预设。",
+    "basis": "explicit",
+    "evidenceType": "narrative",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "维入城闭门，率兵守护，拜见老母，并不出战。",
+      "start": 468467,
+      "end": 468488,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 468467,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "cost": null,
+   "costNote": "本区间未写这次救援的代价：没有伤亡、没有失城，姜维顺利进城见到母亲。「带三千军出城」是抽调（已记入 action），他的实际损失要到劫粮那一段才被写出（见 T10.cost）。"
+  },
+  {
+   "id": "T08",
+   "character": "孔明／夏侯楙（招安之计）",
+   "summary": "孔明把夏侯楙从南安郡提到帐下，先问「汝惧死乎」，再诈称姜维有书愿降、只要驸马在就归降，问楙肯不肯去招安；楙情愿招安，孔明给他衣服鞍马、不派人跟随，放他自去。",
+   "objective": {
+    "text": "孔明要楙替他走一趟：他给出的说法是姜维现守冀城、有书来说「但得驸马在，我愿归降」，于是问楙肯不肯去招安；楙答情愿。",
+    "basis": "explicit",
+    "evidenceType": "speech",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "孔明曰：“目今天水姜维现守冀城，使人持书来说：但得驸马在，我愿归降。吾今饶汝性命，汝肯招安姜维否？”",
+      "start": 468538,
+      "end": 468588,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 468538,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "楙曰：“情愿招安。”",
+      "start": 468588,
+      "end": 468598,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 468588,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "obstacle": {
+    "text": "执行上的障碍很实在：楙出了蜀寨想找路走，却不知道路径。",
+    "basis": "explicit",
+    "evidenceType": "narrative",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "楙得脱出寨，欲寻路而走，奈不知路径。",
+      "start": 468618,
+      "end": 468636,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 468618,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "action": {
+    "text": "孔明先令人从南安郡把楙取到帐下，用「汝惧死乎」逼出他的乞命，再放他动身；楙随后纵马望天水而行。",
+    "basis": "explicit",
+    "evidenceType": "mixed",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "孔明乃令人去南安郡，取夏侯楙至帐下。",
+      "start": 468502,
+      "end": 468520,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 468502,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "孔明曰：“汝惧死乎？”楙慌拜伏乞命。",
+      "start": 468520,
+      "end": 468538,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 468520,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "楙闻之，纵马望天水而行。",
+      "start": 468734,
+      "end": 468746,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 468734,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "result": {
+    "text": "楙到了天水、被开门迎入，并把姜维之事与百姓的话都说了；马遵据此判定姜维已经反投蜀。",
+    "basis": "explicit",
+    "evidenceType": "mixed",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "楙细言姜维之事；又将百姓所言说了。遵叹曰：“不想姜维反投蜀矣！”",
+      "start": 468799,
+      "end": 468831,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 468799,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "cost": {
+    "text": "孔明付出的筹码是放人：他给衣服鞍马、撤掉跟随，把一个已擒的魏国驸马放走——此后诸将正是拿这件事问他「丞相何不去擒夏侯楙」（该句见 S06）。此处只据本句记其付出，不把收益也算成同一栏。",
+    "basis": "inferred",
+    "evidenceType": "narrative",
+    "basisNote": "inferred：付出（放弃一个俘虏／人质＋衣物鞍马）是我从动作里读出来的，原文没有用「代价」这类词来标注它。",
+    "quotes": [
+     {
+      "quote": "孔明乃与衣服鞍马，不令人跟随，放之自去。",
+      "start": 468598,
+      "end": 468618,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 468598,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   }
+  },
+  {
+   "id": "T09",
+   "character": "孔明（假姜维夜攻）",
+   "summary": "为了坐实「姜维已降」，孔明令部卒中形貌相似者假扮姜维，趁初更蜀兵又攻城的火光在城下叫话、打城至晓；天水守军全数登城应对，火光中不辨真伪。",
+   "objective": {
+    "text": "目标是让天水在火光的条件下把假姜维当真姜维——这句是叙述者事后交代孔明的布置与它为什么成立。",
+    "basis": "explicit",
+    "evidenceType": "narrative",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "原来夜间妆姜维者，乃孔明之计，令部卒形貌相似者，假扮姜维攻城，因火光之中，不辨真伪。",
+      "start": 469031,
+      "end": 469073,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 469031,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "obstacle": {
+    "text": "障碍是城里仍有人不信：梁绪认为姜维是为救夏侯楙而假意投降，夏侯楙则反驳说人已经降了。",
+    "basis": "explicit",
+    "evidenceType": "speech",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "梁绪曰：“彼意欲救都督，故以此言虚降。”",
+      "start": 468831,
+      "end": 468851,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 468831,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "楙曰：“今维已降，何为虚也？”",
+      "start": 468851,
+      "end": 468866,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 468851,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "action": {
+    "text": "动作是夜里的一场戏：蜀兵又来攻城，火光中「姜维」在城下挺枪勒马要求夏侯都督答话，并当众质问楙写书教他降蜀、事后又把他陷了；说完驱兵打城，到天亮才退。",
+    "basis": "explicit",
+    "evidenceType": "mixed",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "正踌躇间，时已初更，蜀兵又来攻城。",
+      "start": 468866,
+      "end": 468883,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 468866,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "火光中见姜维在城下挺枪勒马，大叫曰：“请夏侯都督答话！”",
+      "start": 468883,
+      "end": 468911,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 468883,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "维应曰：“汝写书教我降蜀，何出此言？汝要脱身，却将我陷了？我今降蜀，加为上将，安有还魏之理？”",
+      "start": 468971,
+      "end": 469018,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 468971,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "言讫，驱兵打城，至晓方退。",
+      "start": 469018,
+      "end": 469031,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 469018,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "result": {
+    "text": "结果是守军整夜只能登城应对，当场无人识破：夏侯楙与马遵等都到了城上，听「姜维」耀武扬威地质问。",
+    "basis": "explicit",
+    "evidenceType": "narrative",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "夏侯楙与马遵等皆到城上，见姜维耀武扬威大叫曰：“我为都督而降，都督何背前言？”",
+      "start": 468911,
+      "end": 468950,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 468911,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "cost": null,
+   "costNote": "本区间未写孔明为此付出代价：假扮者、火把与一夜攻城的损耗都没有记载；被牵制的天水一方也没有伤亡计数。"
+  },
+  {
+   "id": "T10",
+   "character": "姜维（劫粮—失冀城—被两城拒）",
+   "summary": "冀城粮少，姜维看见蜀军运粮的车队进魏延寨，就引三千兵出城劫粮；夺得粮车却入不了城，张翼、王平夹攻，冀城已被魏延袭取。他带十余骑奔天水被乱箭射回，又奔上邽再被乱箭射回，只剩匹马单枪，望长安而走。",
+   "objective": {
+    "text": "姜维要的是把粮弄进城：他夺得粮车之后的第一打算就是回城。",
+    "basis": "explicit",
+    "evidenceType": "narrative",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "姜维夺得粮车，欲要入城",
+      "start": 469150,
+      "end": 469161,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 469150,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "obstacle": {
+    "text": "障碍有三重：城中粮少军食不敷；回城路上被张翼拦住、王平又到两下夹攻；到了天水城下，马遵认定他是来赚城门的。上邽的梁虔同样以「吾已知汝降蜀矣」相拒。",
+    "basis": "explicit",
+    "evidenceType": "mixed",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "城中粮少，军食不敷。",
+      "start": 469087,
+      "end": 469097,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 469087,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "忽然一彪军拦住，为首蜀将张翼也。二将交锋，战不数合，王平引一军又到，两下夹攻。",
+      "start": 469162,
+      "end": 469201,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 469162,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "遵曰：“此是姜维来赚我城门也。”",
+      "start": 469289,
+      "end": 469305,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 469289,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "城上梁虔见了姜维，大骂曰：“反国之贼，安敢来赚我城池！吾已知汝降蜀矣！”",
+      "start": 469330,
+      "end": 469366,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 469330,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "action": {
+    "text": "他引三千兵出城劫粮，蜀兵弃了粮车就走；被拒之后又奔向蜀兵逼近的上邽，两处得到的都是乱箭。",
+    "basis": "explicit",
+    "evidenceType": "narrative",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "维引三千兵出城，径来劫粮。蜀兵尽弃了粮车，寻路而走。",
+      "start": 469124,
+      "end": 469150,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 469124,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "姜维回顾蜀兵至近，遂飞奔上邽城来。",
+      "start": 469313,
+      "end": 469330,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 469313,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "遂乱箭射下。",
+      "start": 469366,
+      "end": 469372,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 469366,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "result": {
+    "text": "结果是粮没入城、城也丢了，最后连分说的机会都没有：冀城城头已插蜀兵旗号，他只能望长安而走。",
+    "basis": "explicit",
+    "evidenceType": "narrative",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "维力穷抵敌不住，夺路归城；城上早插蜀兵旗号：原来已被魏延袭了。",
+      "start": 469201,
+      "end": 469232,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 469201,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "姜维不能分说，仰天长叹，两眼泪流，拨马望长安而走。",
+      "start": 469372,
+      "end": 469397,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 469372,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "cost": {
+    "text": "代价被逐级写出：三千兵出城，杀条路奔天水时只剩十余骑，再被张苞杀一阵，最后只剩匹马单枪。",
+    "basis": "explicit",
+    "evidenceType": "narrative",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "维杀条路奔天水城，手下尚有十余骑；又遇张苞杀了一阵，维止剩得匹马单枪，来到天水城下叫门。",
+      "start": 469232,
+      "end": 469276,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 469232,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   }
+  },
+  {
+   "id": "T11",
+   "character": "姜维／孔明（大树茂林前的收降）",
+   "summary": "姜维人困马乏，被关兴截住去路；孔明的小车从山坡转出，前后都无路，他下马投降。孔明下车执手，说自己出茅庐以来遍求贤者、要传平生之学，今天遇到伯约就满足了；姜维大喜拜谢。",
+   "objective": {
+    "text": "孔明这边要的是传人：他自述出茅庐以来一直在找可授平生之学的人，今天遇到姜维就满足；这句话是他执手当面对姜维说的。",
+    "basis": "explicit",
+    "evidenceType": "speech",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "孔明慌忙下车而迎，执维手曰：“吾自出茅庐以来，遍求贤者，欲传授平生之学，恨未得其人。今遇伯约，吾愿足矣。”",
+      "start": 469538,
+      "end": 469591,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 469538,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "obstacle": {
+    "text": "姜维这边的处境是彻底的：先被数千兵截住去路，人困马乏抵当不住，勒回马又走不脱——前有孔明、后有关兴，没有去路。",
+    "basis": "explicit",
+    "evidenceType": "mixed",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "行不数里，前至一派大树茂林之处，一声喊起，数千兵拥出：为首蜀将关兴，截住去路。",
+      "start": 469397,
+      "end": 469436,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 469397,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "维人困马乏，不能抵当，勒回马便走。",
+      "start": 469440,
+      "end": 469457,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 469440,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "维寻思良久，前有孔明，后有关兴，又无去路",
+      "start": 469510,
+      "end": 469530,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 469510,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "action": {
+    "text": "孔明的车从山坡转出（纶巾、鹤氅、羽扇），他开口只说一句「伯约此时何尚不降」；姜维想了很久，下马投降。",
+    "basis": "explicit",
+    "evidenceType": "mixed",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "忽然一辆小车从山坡中转出。",
+      "start": 469457,
+      "end": 469470,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 469457,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "其人头戴纶巾，身披鹤氅，手摇羽扇，乃孔明也。",
+      "start": 469470,
+      "end": 469492,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 469470,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "孔明唤姜维曰：“伯约此时何尚不降？”",
+      "start": 469492,
+      "end": 469510,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 469492,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "只得下马投降。",
+      "start": 469531,
+      "end": 469538,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 469531,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "result": {
+    "text": "结果是双方各自接受：孔明慌忙下车迎接，姜维大喜拜谢。",
+    "basis": "explicit",
+    "evidenceType": "mixed",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "维大喜拜谢。",
+      "start": 469591,
+      "end": 469597,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 469591,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "cost": null,
+   "costNote": "本区间未写姜维归降所付代价：原文写他「大喜拜谢」，没有追写他的损失；他此前失兵失城的代价已记在 T10.cost，不重复计入本条；孔明一方也没有支出记载。"
+  },
+  {
+   "id": "T12",
+   "character": "姜维／孔明（密书取天水）",
+   "summary": "回寨后孔明与姜维商议取天水、上邽，姜维提出给与自己至厚的尹赏、梁绪写两封密书射入城中制造内乱。密书被小校拾得呈给马遵，马遵大疑并与夏侯楙商议，楙主张杀二人；尹赏得知后劝梁绪纳城降蜀，二人当夜开城门放蜀兵入，马遵与夏侯楙弃城投羌胡城，梁绪、尹赏迎孔明入城。",
+   "objective": {
+    "text": "目标是拿下这两座城，办法由姜维提出：他与城中尹赏、梁绪交厚，要写密书射入城中使其内乱，城就可得。",
+    "basis": "explicit",
+    "evidenceType": "speech",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "孔明遂同姜维回寨，升帐商议取天水、上邽之计。",
+      "start": 469601,
+      "end": 469623,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 469601,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "维曰：“天水城中尹赏、梁绪，与某至厚；当写密书二封，射入城中，使其内乱，城可得矣。”",
+      "start": 469623,
+      "end": 469665,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 469623,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "obstacle": {
+    "text": "障碍是夏侯楙提出的处置：杀掉梁绪、尹赏二人。这条建议若被执行，姜维要策反的对象就没了。",
+    "basis": "explicit",
+    "evidenceType": "speech",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "楙曰：“可杀二人。”",
+      "start": 469743,
+      "end": 469753,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 469743,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "action": {
+    "text": "孔明从计，姜维写好密书拴在箭上射入城中；尹赏得到消息后劝梁绪纳城降蜀。",
+    "basis": "explicit",
+    "evidenceType": "mixed",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "孔明从之。姜维写了二封密书，拴在箭上，纵马直至城下，射入城中。",
+      "start": 469665,
+      "end": 469696,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 469665,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "尹赏知此消息，乃谓梁绪曰：“不如纳城降蜀，以图进用。”",
+      "start": 469753,
+      "end": 469780,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 469753,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "result": {
+    "text": "结果是内乱按计发生：二人料知事急，当夜开城门放蜀兵入，马遵与夏侯楙弃城出西门投羌胡城，梁绪、尹赏迎接孔明入城。",
+    "basis": "explicit",
+    "evidenceType": "narrative",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "二人料知事急，遂披挂上马，各执兵器，引本部军大开城门，放蜀兵入。",
+      "start": 469799,
+      "end": 469831,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 469799,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "夏侯楙、马遵惊慌，引数百人出西门，弃城投羌胡城而去。",
+      "start": 469831,
+      "end": 469857,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 469831,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "梁绪、尹赏迎接孔明入城。",
+      "start": 469857,
+      "end": 469869,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 469857,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "cost": null,
+   "costNote": "本区间未写姜维／孔明为这条计付出代价：只有两封密书与一次射书，没有伤亡或损失记载。失城的是马遵、夏侯楙（已记入 result），那是对方的损失，不记成本条的 cost。"
+  },
+  {
+   "id": "T13",
+   "character": "孔明（取上邽、定三城、进兵祁山）",
+   "summary": "入城安民后孔明问取上邽之计，梁绪说那是他亲弟梁虚（原文同段又作梁虔）守的，愿去招降；梁绪当日唤梁虔出城降。孔明重加赏劳，任梁绪为天水太守、尹赏为冀城令、梁虔为上邽令，整兵进发，得三城后威声大震，尽提汉中之兵前出祁山、兵临渭水之西。",
+   "objective": {
+    "text": "目标只剩上邽：安民已毕，孔明问取上邽之计。",
+    "basis": "explicit",
+    "evidenceType": "narrative",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "安民已毕，孔明问取上邽之计。",
+      "start": 469869,
+      "end": 469883,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 469869,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "obstacle": null,
+   "obstacleNote": "原文在取上邽这一段没有写阻力：梁绪一开口孔明就大喜，梁虔当日出城来降，没有条件、没有交战。梁虔此前拒过姜维（见 T10.obstacle 的乱箭），但那是更早的事，我不把它挪来当本条的障碍。",
+   "action": {
+    "text": "梁绪自请去招降守上邽的亲弟，孔明大喜；梁绪当日到上邽（原文作「上都」）唤梁虔出城投降。",
+    "basis": "explicit",
+    "evidenceType": "mixed",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "梁绪曰：“此城乃某亲弟梁虚守之，愿招来降。”",
+      "start": 469883,
+      "end": 469905,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 469883,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "孔明大喜。绪当日到上都唤梁虔出城来降孔明。",
+      "start": 469905,
+      "end": 469926,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 469905,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "result": {
+    "text": "结果是三城定局并进入下一阶段：孔明重加赏劳并任命三处官职，此后威声大震、远近州郡望风归降，他整顿军马尽提汉中之兵前出祁山、兵临渭水之西。",
+    "basis": "explicit",
+    "evidenceType": "narrative",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "孔明重加赏劳，就令梁绪为天水太守，尹赏为冀城令，梁虔为上邽令。",
+      "start": 469926,
+      "end": 469957,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 469926,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "孔明自得三城之后，威声大震，远近州郡，望风归降。",
+      "start": 470014,
+      "end": 470038,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 470014,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "孔明整顿军马，尽提汉中之兵，前出祁山，兵临渭水之西。",
+      "start": 470038,
+      "end": 470064,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 470038,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "cost": null,
+   "costNote": "本区间未写孔明为得三城付出的代价：任命三处官职是「重加赏劳」而不是损失，「尽提汉中之兵」是把后方兵力调空的风险，但原文只写了调兵动作、没有写任何代价，故留空。"
+  },
+  {
+   "id": "T14",
+   "character": "魏主曹睿（拜将御蜀）",
+   "summary": "细作报入洛阳，曹睿升殿，近臣奏夏侯楙已失三郡、逃窜羌中，蜀兵已到祁山、前军临渭水之西；睿大惊问谁可退蜀兵，王朗举曹真，睿以先帝托孤相责，曹真推辞后请一人为副将，保举郭淮；睿拜曹真为大都督、赐节钺，郭淮为副都督、王朗为军师，选拨东西二京军马二十万，当年十一月出师，睿亲送出西门，曹真到长安过渭河之西下寨。",
+   "objective": {
+    "text": "曹睿的目标是退蜀兵：他大惊之下问群臣谁能替他退敌。",
+    "basis": "explicit",
+    "evidenceType": "speech",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "睿大惊，乃问群臣曰：“谁可为朕退蜀兵耶？”",
+      "start": 470132,
+      "end": 470153,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 470132,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "obstacle": {
+    "text": "障碍是战局与推辞：三郡已失、蜀兵已到祁山渭水；被举荐的曹真先自陈「才疏智浅，不称其职」。",
+    "basis": "explicit",
+    "evidenceType": "mixed",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "近臣奏曰：“夏侯驸马已失三郡，逃窜羌中去了。今蜀兵已到祁山，前军临渭水之西，乞早发兵破敌。”",
+      "start": 470086,
+      "end": 470132,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 470086,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "真奏曰：“臣才疏智浅，不称其职。”",
+      "start": 470231,
+      "end": 470248,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 470231,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "action": {
+    "text": "曹睿准王朗之奏，以「先帝托孤」相责宣曹真；随后拜曹真为大都督、赐节钺，命郭淮为副都督、王朗为军师，并由曹真点定先锋。",
+    "basis": "explicit",
+    "evidenceType": "mixed",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "睿准奏，乃宣曹真曰：“先帝托孤与卿，今蜀兵入寇中原，卿安忍坐视乎？”",
+      "start": 470197,
+      "end": 470231,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 470197,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "睿从之，遂拜曹真为大都督，赐节钺；命郭淮为副都督，王朗为军师。",
+      "start": 470346,
+      "end": 470377,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 470346,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "真命宗弟曹遵为先锋，又命荡寇将军朱赞为副先锋。",
+      "start": 470402,
+      "end": 470425,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 470402,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "result": {
+    "text": "结果是魏方大军成行并到位：十一月出师，曹睿亲自送出西门才回；曹真领大军到长安、过渭河之西下寨。此处只到「下寨」为止，没有交战结果。",
+    "basis": "explicit",
+    "evidenceType": "narrative",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "当年十一月出师，魏主曹睿亲自送出西门之外方回。",
+      "start": 470425,
+      "end": 470448,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 470425,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "曹真领大军来到长安，过渭河之西下寨。",
+      "start": 470448,
+      "end": 470466,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 470448,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "cost": {
+    "text": "代价是把两京的机动兵力交出去：选拨东西二京军马二十万与曹真。原文只给这一个可核的投入量，没有写伤亡或损耗。",
+    "basis": "explicit",
+    "evidenceType": "narrative",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "选拨东西二京军马二十万与曹真。",
+      "start": 470387,
+      "end": 470402,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 470387,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   }
+  },
+  {
+   "id": "T15",
+   "character": "王朗（阵前说降）／孔明",
+   "summary": "王朗自请只凭一席话说降孔明。次日两军列阵于祁山之前，他纵马而出，先问孔明何故兴无名之兵，再以天数神器、顺逆之理劝降；孔明先在车上大笑说以为是汉朝大老元臣必有高论，再自陈奉诏讨贼，并把话题转为清算王朗的仕履（世居东海之滨、初举孝廉入仕，却反助逆贼同谋篡位），最后喝令老贼速退。王朗听罢气满胸膛，撞死于马下。",
+   "objective": {
+    "text": "王朗的目标是说降：他自请亲自出阵，只用一席话，让诸葛亮拱手而降、蜀兵不战自退。",
+    "basis": "explicit",
+    "evidenceType": "speech",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "朗曰：“来日可严整队伍，大展旌旗。老夫自出，只用一席话，管教诸葛亮拱手而降，蜀兵不战自退。”",
+      "start": 470480,
+      "end": 470526,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 470480,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "obstacle": {
+    "text": "障碍是对方的立场与反击：孔明先以「吾奉诏讨贼」否定「无名之兵」的指控，再在车上大笑，把王朗的说词定性为「鄙言」。",
+    "basis": "explicit",
+    "evidenceType": "speech",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "孔明曰：“吾奉诏讨贼，何谓无名？”",
+      "start": 470890,
+      "end": 470907,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 470890,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "孔明在车上大笑曰：“吾以为汉朝大老元臣，必有高论，岂期出此鄙言！",
+      "start": 471226,
+      "end": 471258,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 471226,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "action": {
+    "text": "两边的动作都在这几句话里：王朗乘马而出、开口质问；孔明先暗忖「王朗必下说词，吾当随机应之」，再逐条清算王朗的出身与所为，最后喝他退下。",
+    "basis": "explicit",
+    "evidenceType": "mixed",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "三军鼓角已罢，司徒王朗乘马而出。",
+      "start": 470612,
+      "end": 470628,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 470612,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "孔明暗忖曰：“王朗必下说词，吾当随机应之。”",
+      "start": 470782,
+      "end": 470804,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 470782,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "朗曰：“久闻公之大名，今幸一会。公既知天命、识时务，何故兴无名之兵？”",
+      "start": 470855,
+      "end": 470890,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 470855,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "吾素知汝所行：世居东海之滨，初举孝廉入仕；理合匡君辅国，安汉兴刘；何期反助逆贼，同谋篡位！",
+      "start": 471380,
+      "end": 471425,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 471380,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "老贼速退！可教反臣与吾共决胜负！”",
+      "start": 471541,
+      "end": 471558,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 471541,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "result": {
+    "text": "结果是说词当场以死收场：叙述语写他气满胸膛、大叫一声撞死于马下；后人诗把它写作「骂死老奸臣」。",
+    "basis": "explicit",
+    "evidenceType": "mixed",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "王朗听罢，气满胸膛，大叫一声，撞死于马下。",
+      "start": 471561,
+      "end": 471582,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 471561,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "后人有诗赞孔明曰：“兵马出西秦，雄才敌万人。轻摇三寸舌，骂死老奸臣。”",
+      "start": 471582,
+      "end": 471617,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 471582,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "cost": {
+    "text": "王朗付出的代价是他的性命：尸首由曹真用棺木盛贮、送回长安，本回不再有他的下文。本条只引这句处置语——「撞死于马下」是死法的叙述，已作 result 的依据，两栏不共用同一句。",
+    "basis": "explicit",
+    "evidenceType": "narrative",
+    "basisNote": "explicit 指的是「尸首被盛贮送回长安」这一处置有叙述语直证；「这是他此行的代价」是我对这处叙述的归类（代价栏的取舍），不是原文有「代价」二字。我没有把「魏军军师之位空缺」写进来：原文没有为这个位置写出任何接任或空缺的叙述。",
+    "quotes": [
+     {
+      "quote": "曹真将王朗尸首，用棺木盛贮，送回长安去了。",
+      "start": 471657,
+      "end": 471678,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 471657,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   }
+  },
+  {
+   "id": "T16",
+   "character": "郭淮／曹真（反劫寨之计）",
+   "summary": "郭淮判定孔明会趁魏军治丧来劫寨，提出分兵四路：两路从山僻小路乘虚劫蜀寨，两路伏在本寨外左右夹击；曹真称此计与己相合，传令曹遵、朱赞各引一万军抄出祁山之后，只等蜀兵望魏寨而来就进兵，蜀兵不动就撤回；他与郭淮各引一枝伏于寨外，寨中虚堆柴草、只留数人，放火为号。结果曹遵杀入的是空寨，火起后朱赞兵到自相掩杀，曹真、郭淮也按号火杀至自相掩杀，魏兵败走十余里、死者极多。",
+   "objective": {
+    "text": "郭淮要的是反过来吃掉来劫寨的蜀兵：分四路，两路去劫蜀寨、两路伏在本寨外夹击。",
+    "basis": "explicit",
+    "evidenceType": "speech",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "可分兵四路：两路兵从山僻小路，乘虚去劫蜀寨；两路兵伏于本寨外，左右击之。”",
+      "start": 471703,
+      "end": 471740,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 471703,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "obstacle": {
+    "text": "要处理的局面是敌人的预期：郭淮自己说出孔明会利用魏军治丧来劫寨——这正是他要设伏的理由。",
+    "basis": "explicit",
+    "evidenceType": "speech",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "诸葛亮料吾军中治丧，今夜必来劫寨。",
+      "start": 471686,
+      "end": 471703,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 471686,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "action": {
+    "text": "部署分三层：曹真传令两名先锋各引一万军抄出祁山之后并给足进退条件；曹真与郭淮各引一枝伏于寨外，寨中虚堆柴草、只留数人、以火为号；二将受计引兵而去。",
+    "basis": "explicit",
+    "evidenceType": "mixed",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "曹真大喜曰：“此计与吾相合。”",
+      "start": 471740,
+      "end": 471755,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 471740,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "遂传令唤曹遵、朱赞两个先锋分付曰：“汝二人各引一万军，抄出祁山之后。但见蜀兵望吾寨而来，汝可进兵去劫蜀寨。如蜀兵不动，便撤兵回，不可轻进。”",
+      "start": 471755,
+      "end": 471825,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 471755,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "真谓淮曰：“我两个各引一枝军，伏于寨外，寨中虚堆柴草，只留数人。如蜀兵到，放火为号。”",
+      "start": 471835,
+      "end": 471878,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 471835,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "二人受计，引兵而去。",
+      "start": 471825,
+      "end": 471835,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 471825,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "result": {
+    "text": "结果是这套计自己打自己：曹遵杀入的是空寨，刚撤军寨中火起，朱赞兵到就自相掩杀，两人交马才知道是自相践踏。",
+    "basis": "explicit",
+    "evidenceType": "narrative",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "到蜀寨时，将及三更。曹遵先杀入寨，却是空寨，并无一人。料知中计，急撤军回。",
+      "start": 472273,
+      "end": 472310,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 472273,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "寨中火起。朱赞兵到，自相掩杀，人马大乱。",
+      "start": 472310,
+      "end": 472330,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 472310,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "曹遵与朱赞交马，方知自相践踏。",
+      "start": 472330,
+      "end": 472345,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 472330,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "cost": {
+    "text": "代价写在败退的数字感上：魏兵败走十余里、魏将死者极多（原文没有给具体人数）。",
+    "basis": "explicit",
+    "evidenceType": "narrative",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "魏兵败走十余里，魏将死者极多。",
+      "start": 472544,
+      "end": 472559,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 472544,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   }
+  },
+  {
+   "id": "T17",
+   "character": "孔明（将计就计）",
+   "summary": "孔明回帐先派赵云、魏延去劫魏寨；魏延质疑曹真必会提防，孔明答「吾正欲曹真知吾去劫寨也」，并说明魏兵必伏于祁山之后来袭空寨，要二人过山脚后路远下营寨，以火为号分兵两路：魏延拒住山口、赵云杀回放魏兵走回再乘势攻，使其自相掩杀。他又派关兴、张苞伏于祁山要路，派马岱、王平、张翼、张嶷四将伏于寨外迎击，自己虚立寨栅、堆柴草备火号，退到寨后观动静。结果是三路蜀兵背后杀到，大杀一阵，孔明全获大胜收兵。",
+   "objective": {
+    "text": "孔明的目标是把敌人的提防算进来：他要曹真知道他来劫寨——敌人知情的本身，就是他计划的一部分。",
+    "basis": "explicit",
+    "evidenceType": "speech",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "孔明笑曰：“吾正欲曹真知吾去劫寨也。",
+      "start": 471956,
+      "end": 471974,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 471956,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "obstacle": {
+    "text": "障碍是自己的部下先看出来了：魏延指出曹真深明兵法、必料我军乘丧劫寨，岂能不防。",
+    "basis": "explicit",
+    "evidenceType": "speech",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "魏延进曰：“曹真深明兵法，必料我乘丧劫寨。他岂不提防？”",
+      "start": 471928,
+      "end": 471956,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 471928,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "action": {
+    "text": "动作是一整套分派：孔明归帐先唤赵云、魏延听令，交代过山脚后路远下营寨任魏兵来劫、以火为号分兵两路（魏延拒山口、赵云放走回兵再乘势攻）；又虚立寨栅、居中堆柴草备火号，自引诸将退到寨后观动静。",
+    "basis": "explicit",
+    "evidenceType": "mixed",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "却说孔明归帐，先唤赵云、魏延听令。",
+      "start": 471892,
+      "end": 471909,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 471892,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "彼必伏兵在祁山之后，待我兵过去，却来袭我寨；吾故令汝二人，引兵前去，过山脚后路，远下营寨，任魏兵来劫吾寨。",
+      "start": 471974,
+      "end": 472027,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 471974,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "汝看火起为号，分兵两路：文长拒住山口；子龙引兵杀回，必遇魏兵，却放彼走回，汝乘势攻之，彼必自相掩杀。可获全胜。”",
+      "start": 472027,
+      "end": 472083,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 472027,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "孔明乃虚立寨栅，居中堆起柴草，以备火号；自引诸将退于寨后，以观动静。",
+      "start": 472176,
+      "end": 472210,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 472176,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "result": {
+    "text": "结果是计成：三路蜀兵从背后杀到（中央魏延、左关兴、右张苞），大杀一阵，孔明全获大胜才收兵。",
+    "basis": "explicit",
+    "evidenceType": "narrative",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "背后三路蜀兵杀到：中央魏延，左边关兴，右边张苞，大杀一阵。",
+      "start": 472515,
+      "end": 472544,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 472515,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "孔明全获大胜，方始收兵。",
+      "start": 472559,
+      "end": 472571,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 472559,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "cost": null,
+   "costNote": "本区间未写孔明为这条计付出的代价：四将的伏兵、寨中的柴草、一夜的调动都没有损失或消耗记载，蜀方在最后一段里也没有伤亡叙述。"
+  }
+ ],
+ "causeEdges": [
+  {
+   "id": "CE01",
+   "frm": "姜维把「太守出城、只留文官守城」做成诱饵，自己伏于要路",
+   "to": "赵云引五千兵径投天水城下，被姜维与回师的马遵、梁虔夹攻而败走",
+   "trigger": "细作回报赵云「天水太守马遵，起兵出城，只留文官守城」，赵云因此判定可以乘虚袭城",
+   "mechanism": "孔明伏兵的前提条件是「天水人马离城」；姜维不是阻止这个条件，而是主动制造它，于是同一个条件对赵云生效。方向：制造条件 → 敌方按该条件行动 → 被夹攻。这不是「两军相邻所以打起来」，机制写在姜维的原话与细作回报里。",
+   "basis": "explicit",
+   "etype": "mixed",
+   "quotes": [
+    "诸葛亮必伏兵于郡后，赚我兵出城，乘虚袭我。",
+    "当日细作回报赵云，说天水太守马遵，起兵出城，只留文官守城。"
+   ]
+  },
+  {
+   "id": "CE02",
+   "frm": "孔明夜攻天水受挫、收兵归寨",
+   "to": "孔明改问姜维之母所在与天水要害，分兵诈取冀县、攻上邽",
+   "trigger": "孔明「收兵归寨，思之良久」之后立刻发问；问出「维母今居冀县」与「天水钱粮，皆在上邽」",
+   "mechanism": "正面攻不下城，就转向断其根：母亲是姜维必须去救的人，上邽是天水的粮道。方向：攻坚受阻 → 换目标（人质与粮道）。触发点是那句「思之良久」后的两个问题，不是「打了败仗所以后来发生了一些事」。",
+   "basis": "explicit",
+   "etype": "mixed",
+   "quotes": [
+    "收兵归寨，思之良久",
+    "乃唤安定人问曰：“姜维之母，现在何处？”答曰：“维母今居冀县。”"
+   ]
+  },
+  {
+   "id": "CE03",
+   "frm": "孔明放走夏侯楙，并诈称「姜维有书来说：但得驸马在，我愿归降」",
+   "to": "马遵判定姜维已反投蜀，此后姜维到天水城下被乱箭射回",
+   "trigger": "夏侯楙逃出蜀寨后先后遇到两批奔走的百姓，都被告知「姜维献了城池，归降诸葛亮」，他到天水后「又将百姓所言说了」",
+   "mechanism": "孔明要的不是楙本人，而是让一个魏国驸马去替这句诈言作证；楙在途中获得的「百姓之言」与孔明在他出发前说的话内容一致，于是马遵把传闻当成已确认的事实。方向：放人 → 传言经第三方之口回传 → 守将改变对姜维的判断。",
+   "basis": "derived",
+   "etype": "mixed",
+   "note": "derived：孔明放楙与马遵的判定之间隔着两处原文（P09 的百姓之言、P11 的「楙细言姜维之事」），要并读三处才成立。百姓之言本身是被转述的内容，不是叙述事实（见 U04）。",
+   "quotes": [
+    "孔明乃与衣服鞍马，不令人跟随，放之自去。",
+    "楙细言姜维之事；又将百姓所言说了。遵叹曰：“不想姜维反投蜀矣！”"
+   ]
+  },
+  {
+   "id": "CE04",
+   "frm": "孔明令部卒中形貌相似者假扮姜维，趁火光在城下叫话、驱兵打城",
+   "to": "姜维此后到天水、上邽两处叫门都被当作「来赚城门」而遭乱箭",
+   "trigger": "夜间火光之中不辨真伪——原文把这一点作为假扮能够成立的条件明写出来",
+   "mechanism": "假扮把「姜维已降」从口头传闻升级为守军亲眼所见，而且当众把降蜀的缘由归到夏侯楙头上（「汝写书教我降蜀」），使城中无人再敢替姜维开门。方向：制造目击 → 改变守军的敌我识别 → 真姜维被自己人拒之门外。",
+   "basis": "explicit",
+   "etype": "narrative",
+   "quotes": [
+    "原来夜间妆姜维者，乃孔明之计，令部卒形貌相似者，假扮姜维攻城，因火光之中，不辨真伪。",
+    "遵曰：“此是姜维来赚我城门也。”"
+   ]
+  },
+  {
+   "id": "CE05",
+   "frm": "魏延诈败、让姜维入冀城闭门守母，冀城粮少",
+   "to": "姜维出城劫粮，冀城被魏延乘虚袭取，姜维只剩十余骑",
+   "trigger": "姜维在城上看见蜀军大车小辆搬运粮草进魏延寨，「城中粮少，军食不敷」",
+   "mechanism": "出城劫粮使城中空虚，而粮车是蜀军故意弃下的；姜维夺得粮车却回不了城，因为城头已换旗号。方向：粮尽 → 出城 → 城空 → 被袭。机制由「城中粮少」与「蜀兵尽弃了粮车」两处叙述共同给出。",
+   "basis": "explicit",
+   "etype": "narrative",
+   "quotes": [
+    "城中粮少，军食不敷。",
+    "城上早插蜀兵旗号：原来已被魏延袭了。"
+   ]
+  },
+  {
+   "id": "CE06",
+   "frm": "姜维失冀城、又被天水与上邽两处乱箭拒纳，只剩匹马单枪",
+   "to": "姜维在大树茂林前下马投降孔明",
+   "trigger": "关兴截住去路之后，孔明的小车从山坡转出，「前有孔明，后有关兴，又无去路」",
+   "mechanism": "孔明先断其退路（两城拒纳、张苞截杀），再断其去路（关兴截住），最后亲自出面劝降；姜维在无路可走的条件下选择投降，孔明随即以「欲传授平生之学」相待。方向：退路被逐一封死 → 投降 → 被接纳。不是「打到最后自然就降了」。",
+   "basis": "explicit",
+   "etype": "mixed",
+   "quotes": [
+    "又遇张苞杀了一阵，维止剩得匹马单枪",
+    "维寻思良久，前有孔明，后有关兴，又无去路，只得下马投降。"
+   ]
+  },
+  {
+   "id": "CE07",
+   "frm": "姜维射入两封给尹赏、梁绪的密书",
+   "to": "尹赏、梁绪当夜大开城门放蜀兵入，马遵与夏侯楙弃城投羌胡城",
+   "trigger": "小校拾得密书呈与马遵后，马遵「大疑」并与夏侯楙商议；楙主张「可杀二人」；尹赏得知这个消息，且夏侯楙当夜数次使人请二人说话",
+   "mechanism": "密书制造猜疑，猜疑转化为可执行的处置（杀二人），处置的风声传回被点名者耳中，被点名者遂以开城自保。方向：离间 → 处置意图外泄 → 被离间者反投。触发句是「尹赏知此消息」——原文用它把因果接上，而不是靠场景相同。",
+   "basis": "explicit",
+   "etype": "mixed",
+   "quotes": [
+    "姜维写了二封密书，拴在箭上，纵马直至城下，射入城中。",
+    "尹赏知此消息，乃谓梁绪曰：“不如纳城降蜀，以图进用。”"
+   ]
+  },
+  {
+   "id": "CE08",
+   "frm": "王朗阵前以天数、顺逆、封侯之说劝孔明倒戈卸甲",
+   "to": "王朗撞死于马下，魏军以棺木盛贮其尸首送回长安",
+   "trigger": "孔明当众逐条清算王朗的仕履（世居东海之滨、初举孝廉入仕、反助逆贼同谋篡位），把王朗的说词定性为「鄙言」，并喝令「老贼速退」",
+   "mechanism": "王朗此行的全部筹码是「一席话」，他把话说在众军之前；话被逐条驳回之后，叙述只写他「气满胸膛，大叫一声，撞死于马下」。方向：说词当众失效 → 撞死 → 魏军治丧。机制一半由原文语序给出（听罢→撞死），一半（是否「被骂死」）出自后人诗，我不把它当叙述事实。",
+   "basis": "inferred",
+   "etype": "mixed",
+   "note": "inferred：原文叙述语没有写「因言语而死」这类因果句；「骂死」是紧接的后人诗措辞。我只主张「说词失效 → 当场撞死」这一方向，不主张医学或心理机制。",
+   "quotes": [
+    "老夫自出，只用一席话，管教诸葛亮拱手而降，蜀兵不战自退。”",
+    "王朗听罢，气满胸膛，大叫一声，撞死于马下。"
+   ]
+  },
+  {
+   "id": "CE09",
+   "frm": "王朗之死使魏军当夜治丧",
+   "to": "魏兵败走十余里、魏将死者极多，孔明全获大胜",
+   "trigger": "郭淮以「诸葛亮料吾军中治丧，今夜必来劫寨」为由设四路伏兵；孔明则说「吾正欲曹真知吾去劫寨也」",
+   "mechanism": "双方都拿「治丧」这个时间窗口做文章：郭淮要利用孔明的预期，孔明反过来利用郭淮的埋伏，把魏军的号火变成魏军自相掩杀的开关。方向：治丧 → 双方各自基于对方预期布阵 → 魏军自相掩杀 → 大败。机制由两个人的原话共同给出，不是「王朗死后打了一仗」。",
+   "basis": "explicit",
+   "etype": "mixed",
+   "quotes": [
+    "诸葛亮料吾军中治丧，今夜必来劫寨。",
+    "孔明笑曰：“吾正欲曹真知吾去劫寨也。"
+   ]
+  }
+ ],
+ "rejectedCauseEdges": [
+  {
+   "id": "RCE01",
+   "pair": "「王朗撞死」→「孔明全获大胜」",
+   "why": "两件事在原文里时间相邻（同一段），但中间隔着郭淮献计、曹真传令、孔明分派四将、曹遵朱赞夜行劫寨五步。魏兵的败是劫寨夜战的结果，不是王朗之死的结果。若连这条边，就是把「时间相邻」当因果。",
+   "quote": "孔明全获大胜，方始收兵。"
+  },
+  {
+   "id": "RCE02",
+   "pair": "「姜维投降」→「孔明得三城」",
+   "why": "投降之后还有：射密书、马遵大疑、楙主杀、尹赏劝降、二人开城、梁绪招降梁虔六步。得三城的直接机制是离间与内应，不是「收了姜维所以城就归了」。",
+   "quote": "孔明自得三城之后，威声大震，远近州郡，望风归降。"
+  },
+  {
+   "id": "RCE03",
+   "pair": "「赵云败走」→「孔明起大军前来」",
+   "why": "两句紧挨着（同一段末尾），但原文写的起兵理由是「孔明因虑姜维」以及「吾今欲取天水，不想有此人」，取天水本来就是既定目标。赵云败走是同一场交锋的结果，不是起兵的原因。",
+   "quote": "却说孔明因虑姜维，自为前部，望天水郡进发。"
+  },
+  {
+   "id": "RCE04",
+   "pair": "「魏延诈败」→「冀城被袭取」",
+   "why": "诈败放姜维入城，与后来袭取冀城是两个时点的动作：入城在守母之前，袭城在劫粮之后。把诈败直接连到失城，会跳过「城中粮少 → 出城劫粮 → 城空」这段机制（已记入 CE05）。",
+   "quote": "维入城闭门，率兵守护，拜见老母，并不出战。"
+  },
+  {
+   "id": "RCE05",
+   "pair": "「姜维事母至孝」→「姜维归降孔明」",
+   "why": "孝行是南安人对他的评价，与归降之间没有原文给出的机制；归降的直接条件是「前有孔明，后有关兴，又无去路」。把「孝」当投降的原因，是拿人物评价当因果。",
+   "quote": "此人姓姜名维，字伯约，天水冀人也；事母至孝，文武双全，智勇足备，真当世之英杰也。"
+  }
+ ],
+ "states": [
+  {
+   "id": "S01",
+   "who": "姜维",
+   "aspect": "阵营归属（魏→蜀）",
+   "before": "前值：魏方守冀城的将，与马遵共守天水；马遵拨他三千军去保冀城。",
+   "after": "后值：归降孔明，孔明执其手说「今遇伯约，吾愿足矣」；此后他为蜀方献取天水、上邽之策。",
+   "anchor": "大树茂林之前，关兴截住去路、孔明小车从山坡转出，姜维下马投降的那一刻。",
+   "basis": "explicit",
+   "etype": "mixed",
+   "quotes": [
+    "马遵从之，遂令姜维引三千军去保冀城；梁虔引三千军去保上邽。",
+    "只得下马投降。"
+   ]
+  },
+  {
+   "id": "S02",
+   "who": "姜维",
+   "aspect": "兵力",
+   "before": "前值：引三千兵出冀城劫粮，是成建制的一支部队。",
+   "after": "后值：止剩得匹马单枪，先后被天水、上邽两处乱箭射回。",
+   "anchor": "冀城被魏延袭取之后，奔天水途中又遇张苞杀了一阵。",
+   "basis": "explicit",
+   "etype": "narrative",
+   "quotes": [
+    "维引三千兵出城，径来劫粮。",
+    "维杀条路奔天水城，手下尚有十余骑；又遇张苞杀了一阵，维止剩得匹马单枪，来到天水城下叫门。"
+   ]
+  },
+  {
+   "id": "S03",
+   "who": "夏侯楙",
+   "aspect": "处境（俘虏→被放→报信者→弃城逃走）",
+   "before": "前值：被孔明从南安郡取到帐下，问「汝惧死乎」时慌拜伏乞命，是阶下囚。",
+   "after": "后值：先被放走、到天水报信，最后与马遵引数百人出西门、弃城投羌胡城而去。",
+   "anchor": "孔明给衣服鞍马、不令人跟随的那一次放行，以及初更蜀兵攻城的当夜。",
+   "basis": "explicit",
+   "etype": "mixed",
+   "quotes": [
+    "孔明曰：“汝惧死乎？”楙慌拜伏乞命。",
+    "夏侯楙、马遵惊慌，引数百人出西门，弃城投羌胡城而去。"
+   ]
+  },
+  {
+   "id": "S04",
+   "who": "天水郡城",
+   "aspect": "控制权（马遵守→梁绪尹赏纳城降蜀）",
+   "before": "前值：马遵为主守城；姜维曾在此设四枝伏兵，令梁绪率百姓在城上守御。",
+   "after": "后值：梁绪、尹赏引本部军大开城门放蜀兵入，并迎接孔明入城；孔明安民已毕，任梁绪为天水太守。",
+   "anchor": "是夜夏侯楙数次使人请梁、尹二人说话，「二人料知事急」之后开城。",
+   "basis": "explicit",
+   "etype": "narrative",
+   "quotes": [
+    "梁绪率百姓在城上守御。”",
+    "二人料知事急，遂披挂上马，各执兵器，引本部军大开城门，放蜀兵入。"
+   ]
+  },
+  {
+   "id": "S05",
+   "who": "上邽",
+   "aspect": "守将与归属（魏守→降）",
+   "before": "前值：梁虔引三千军去保上邽；孔明教赵云引一军去攻上邽。",
+   "after": "后值：梁绪自请去招降亲弟，梁虔出城来降孔明，孔明任梁虔为上邽令。",
+   "anchor": "孔明入天水城、安民已毕问取上邽之计之后。",
+   "basis": "explicit",
+   "etype": "mixed",
+   "quotes": [
+    "马遵从之，遂令姜维引三千军去保冀城；梁虔引三千军去保上邽。",
+    "绪当日到上都唤梁虔出城来降孔明。"
+   ]
+  },
+  {
+   "id": "S06",
+   "who": "冀城",
+   "aspect": "归属（魏→蜀，且是姜维失兵之地）",
+   "before": "前值：姜维之母所居；姜维引兵入城闭门守护，蜀将魏延在城下诈败。",
+   "after": "后值：被魏延袭取，城上插蜀兵旗号；后来尹赏被孔明任为冀城令。",
+   "anchor": "姜维出城劫粮、夺得粮车却回不了城的那一刻。",
+   "basis": "explicit",
+   "etype": "narrative",
+   "quotes": [
+    "维入城闭门，率兵守护，拜见老母，并不出战。",
+    "维力穷抵敌不住，夺路归城；城上早插蜀兵旗号：原来已被魏延袭了。"
+   ]
+  },
+  {
+   "id": "S07",
+   "who": "姜维与天水守军之间",
+   "whoLabelNote": "「姜维与天水守军之间」是**关系标签**，不是原文词：指姜维与天水城中守军（马遵、梁绪、尹赏）之间的认知错位；原文相应处作「天水城中乃马太守也」与「令城上乱箭射下」。",
+   "aspect": "知识差（谁把「姜维已降」当成事实）",
+   "before": "前值：梁绪认为姜维是为救夏侯楙而「以此言虚降」，即城中至少有一人当时不信。",
+   "after": "后值：夜间假姜维在火光中叫话之后，守军以「此是姜维来赚我城门也」为由乱箭射回真姜维；上邽梁虔也说「吾已知汝降蜀矣」。",
+   "anchor": "初更蜀兵攻城、火光中「姜维」要求夏侯都督答话的那一夜；以及叙述者事后交代「原来夜间妆姜维者，乃孔明之计」。",
+   "basis": "explicit",
+   "etype": "mixed",
+   "note": "知识差的方向：天水／上邽守军**以为**他们知道姜维已降（依据是火光中所见与百姓之言）；姜维**不知道**自己已被当成降将，直到两处乱箭射下才有分说无门的记载（「姜维不能分说」）；夏侯楙知道自己没有写过招降书（他当着城上反问「有何前言耶」），但他是被质问的一方，原文没有写他把这个矛盾说清。",
+   "quotes": [
+    "梁绪曰：“彼意欲救都督，故以此言虚降。”",
+    "姜维不能分说，仰天长叹，两眼泪流，拨马望长安而走。"
+   ]
+  },
+  {
+   "id": "S08",
+   "who": "魏主曹睿／魏廷",
+   "whoLabelNote": "「魏廷」是**集合标签**，不是原文词：指洛阳朝议中的魏主与群臣（曹睿、王朗）；原文相应处作「时魏主曹睿太和元年，升殿设朝」与「睿大惊，乃问群臣曰」。",
+   "aspect": "对战局的知识与应对（不知姜维已降）",
+   "before": "前值：细作报入洛阳前，魏廷对西线战事没有本区间的记载。",
+   "after": "后值：近臣奏「夏侯驸马已失三郡，逃窜羌中去了」，曹睿大惊问谁可退蜀兵；王朗举曹真，睿拜曹真为大都督、郭淮为副都督、王朗为军师，发二十万军。",
+   "anchor": "细作报入洛阳、曹睿升殿设朝的那一次朝议。",
+   "basis": "derived",
+   "etype": "mixed",
+   "note": "derived：奏文只提「已失三郡，逃窜羌中」，全篇没有提到姜维归降；魏廷此后的议论（王朗的天命说词、曹真的布阵）也没有把姜维当成蜀将。「魏廷不知道姜维已降」是我从奏文与后文的沉默推出的，不是原文直述。",
+   "quotes": [
+    "夏侯驸马已失三郡，逃窜羌中去了。今蜀兵已到祁山，前军临渭水之西，乞早发兵破敌。”",
+    "睿从之，遂拜曹真为大都督，赐节钺；命郭淮为副都督，王朗为军师。"
+   ]
+  },
+  {
+   "id": "S09",
+   "who": "王朗",
+   "aspect": "身份与生死",
+   "before": "前值：司徒、军师，时年七十六岁；自请只用一席话说降孔明。",
+   "after": "后值：听罢孔明的话，气满胸膛、大叫一声撞死于马下；曹真用棺木盛贮其尸首送回长安。",
+   "anchor": "祁山之前两军列阵、他与孔明在阵前对话的那一场。",
+   "basis": "explicit",
+   "etype": "mixed",
+   "quotes": [
+    "朗时年已七十六岁矣。",
+    "曹真将王朗尸首，用棺木盛贮，送回长安去了。"
+   ]
+  },
+  {
+   "id": "S10",
+   "who": "魏军（曹真、郭淮部）",
+   "aspect": "态势（二十万出师→败走十余里）",
+   "before": "前值：曹真领大军到长安、过渭河之西下寨；两军列阵于祁山之前，蜀军见魏兵甚是雄壮，与夏侯楙大不相同。",
+   "after": "后值：劫寨夜魏兵败走十余里、魏将死者极多；曹真与郭淮收拾败军回寨，改议「今魏兵势孤，蜀兵势大」。",
+   "anchor": "曹遵杀入空寨、朱赞自相掩杀，曹真与郭淮又按号火自相掩杀的那一夜。",
+   "basis": "explicit",
+   "etype": "mixed",
+   "quotes": [
+    "蜀军见魏兵甚是雄壮，与夏侯楙大不相同。",
+    "曹真、郭淮收拾败军回寨，商议曰：“今魏兵势孤，蜀兵势大，将何策以退之？”"
+   ]
+  },
+  {
+   "id": "S11",
+   "who": "赵云",
+   "aspect": "情报状态（以为城虚→确认中计）",
+   "before": "前值：细作回报「天水太守马遵，起兵出城，只留文官守城」，赵云大喜，认为可以乘虚袭城。",
+   "after": "后值：在城下被夹攻败走，回见孔明时说「中了敌人之计」。",
+   "anchor": "他在天水城下高叫「汝知中计，早献城池」之后，喊声与火光起来的那一刻。",
+   "basis": "explicit",
+   "etype": "mixed",
+   "quotes": [
+    "赵云大喜，又令人报与张翼、高翔，教于要路截杀马遵。",
+    "赵云归见孔明，说中了敌人之计。"
+   ]
+  }
+ ],
+ "foreshadows": [
+  {
+   "id": "F01",
+   "name": "孔明对魏延的交代「若姜维到，可放入城」",
+   "setup": "铺设：孔明在受挫后唤魏延，命他虚张声势诈取冀县，并预先交代一句「若姜维到，可放入城」——即姜维进城这件事本身是被允许的，城是要放他进去再关起来的。",
+   "payoff": "回收：姜维引兵到冀城，魏延诈败奔走，姜维果然入城闭门守护、并不出战；到他出城劫粮时，城已被魏延袭取、城头插上蜀兵旗号。",
+   "resolved": true,
+   "basis": "explicit",
+   "etype": "mixed",
+   "quotes": [
+    "孔明唤魏延分付曰：“汝可引一军，虚张声势，诈取冀县。若姜维到，可放入城。”",
+    "维力穷抵敌不住，夺路归城；城上早插蜀兵旗号：原来已被魏延袭了。"
+   ]
+  },
+  {
+   "id": "F02",
+   "name": "放走的夏侯楙（孔明说「如放一鸭耳」的那只鸭）",
+   "setup": "铺设：孔明饶楙性命、给衣服鞍马、不令人跟随，放他自去。此时看不出用处，只像一次处置。",
+   "payoff": "回收有两处：① 他逃出蜀寨后在途中从百姓口中听到「姜维献了城池，归降诸葛亮」，到天水后「又将百姓所言说了」，直接促成马遵判定姜维已反；② 诸将后来问「丞相何不去擒夏侯楙」，孔明答「吾放夏侯楙，如放一鸭耳。今得伯约，得一凤也」——把放人这件事实说成整笔交易里被放弃的那一半。",
+   "resolved": true,
+   "basis": "explicit",
+   "etype": "mixed",
+   "quotes": [
+    "孔明乃与衣服鞍马，不令人跟随，放之自去。",
+    "孔明曰：“吾放夏侯楙，如放一鸭耳。今得伯约，得一凤也！”"
+   ]
+  },
+  {
+   "id": "F03",
+   "name": "姜维之母在冀城（孔明问出来的那个地址）",
+   "setup": "铺设：孔明收兵归寨后第一个问题就是「姜维之母，现在何处」，答「维母今居冀县」；紧接着他把魏延派往冀县。天水那边，姜维听到蜀兵三路的消息后「哀告马遵」要去救母。",
+   "payoff": "回收：姜维入冀城、拜见老母、闭门不出战；他此后所有的被动（粮尽、劫粮、失城、被两城拒纳）都发生在他为母入城之后。",
+   "resolved": true,
+   "basis": "explicit",
+   "etype": "mixed",
+   "quotes": [
+    "姜维闻之，哀告马遵曰：“维母现在冀城，恐母有失。维乞一军往救此城，兼保老母。”",
+    "维入城闭门，率兵守护，拜见老母，并不出战。"
+   ]
+  },
+  {
+   "id": "F04",
+   "name": "王朗「只用一席话」的自信",
+   "setup": "铺设：王朗在曹真寨中自请出阵，说「老夫自出，只用一席话，管教诸葛亮拱手而降，蜀兵不战自退」；曹真大喜，当夜传令四更造饭、平明列阵，并先下战书。",
+   "payoff": "回收：次日阵前他把话说尽（天数、顺逆、带甲百万、封侯之位），孔明当众驳斥并清算其仕履，叙述随后写他「气满胸膛，大叫一声，撞死于马下」；那「一席话」成了他此行唯一的动作。",
+   "resolved": true,
+   "basis": "explicit",
+   "etype": "mixed",
+   "quotes": [
+    "朗曰：“来日可严整队伍，大展旌旗。老夫自出，只用一席话，管教诸葛亮拱手而降，蜀兵不战自退。”",
+    "王朗听罢，气满胸膛，大叫一声，撞死于马下。"
+   ]
+  },
+  {
+   "id": "F05",
+   "name": "郭淮回末的「某有一计」（本区间未回收）",
+   "setup": "铺设：曹真与郭淮收拾败军回寨，问「将何策以退之」，郭淮答「某有一计，使蜀兵首尾不能相顾，定然自走矣」；本区间最后以「正是：可怜魏将难成事，欲向西方索救兵。未知其计如何，且看下文分解」收束。",
+   "payoff": "本区间内**未回收**：计的内容、执行与结果都没有写出，回末只是套语式的悬念。",
+   "resolved": false,
+   "basis": "explicit",
+   "etype": "speech",
+   "unresolvedNote": "unresolved=true 是显式的：从「某有一计」到本区间结束，只有一句诗与一句「且看下文分解」，没有任何执行动作。我不能因为它在回末就把它当作已实现的转机。",
+   "quotes": [
+    "淮曰：“胜负乃兵家常事，不足为忧。某有一计，使蜀兵首尾不能相顾，定然自走矣。”",
+    "未知其计如何，且看下文分解。"
+   ]
+  },
+  {
+   "id": "F06",
+   "name": "夏侯楙「可杀二人」之议（威胁转化为反投）",
+   "setup": "铺设：马遵大疑，与夏侯楙商议「梁绪、尹赏与姜维结连，欲为内应，都督宜早决之」，楙答「可杀二人」。",
+   "payoff": "回收：这句处置意图的风声传到被点名的尹赏耳中，他立刻转告梁绪「不如纳城降蜀，以图进用」；当夜夏侯楙又数次使人请二人说话，二人「料知事急」，开城门放蜀兵入。",
+   "resolved": true,
+   "basis": "explicit",
+   "etype": "mixed",
+   "quotes": [
+    "楙曰：“可杀二人。”",
+    "是夜，夏侯楙数次使人请梁、尹二人说话。二人料知事急，遂披挂上马，各执兵器，引本部军大开城门，放蜀兵入。"
+   ]
+  },
+  {
+   "id": "F07",
+   "name": "火号为号（放火即约定的信号）",
+   "setup": "铺设：曹真与郭淮约定「寨中虚堆柴草，只留数人。如蜀兵到，放火为号」；孔明这边也「虚立寨栅，居中堆起柴草，以备火号」，并对赵云、魏延交代「汝看火起为号」。",
+   "payoff": "回收：这一夜火号三次被启动，且每次都把对方的判断带偏——蜀寨中火起（曹遵中计）、魏寨守军「只道蜀兵来劫寨，慌忙放起号火」（引得曹真、郭淮自相掩杀）、孔明以火起为号分兵两路。",
+   "resolved": true,
+   "basis": "explicit",
+   "etype": "mixed",
+   "quotes": [
+    "寨中虚堆柴草，只留数人。如蜀兵到，放火为号。”",
+    "守寨军士，只道蜀兵来劫寨，慌忙放起号火。"
+   ]
+  }
+ ],
+ "worldSettings": [
+  {
+   "id": "WS-PLACE-01",
+   "kind": "place",
+   "name": "天水郡城",
+   "explain": "本回的主城与争夺中心：城墙与旗帜决定了孔明第一次攻城的成败（「因见城上旗帜整齐，未敢轻攻」），城头换旗是控制权易手的唯一标志（姜维回城时「城上早插蜀兵旗号」即城已属蜀），城门则是接纳或拒绝的开关（开城门放蜀兵入／乱箭射下）。",
+   "basis": "explicit",
+   "evidenceType": "mixed",
+   "basisNote": null,
+   "quote": "却说赵云引五千兵，径投天水郡城下",
+   "quoteRef": {
+    "quote": "却说赵云引五千兵，径投天水郡城下",
+    "start": 467487,
+    "end": 467503,
+    "globalOccurrences": 1,
+    "occurrenceIndex": 467487,
+    "inSlice": true,
+    "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+   },
+   "extraQuotes": [
+    {
+     "quote": "因见城上旗帜整齐，未敢轻攻。",
+     "start": 468025,
+     "end": 468039,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 468025,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    }
+   ],
+   "placeState": "arrived",
+   "placeStateNote": "arrived：有多方到达与驻守的动作——赵云引兵径投城下、孔明大军径到城下、孔明最后被迎接入城并安民。",
+   "wid": "WS-PLACE-01"
+  },
+  {
+   "id": "WS-PLACE-02",
+   "kind": "place",
+   "name": "冀城（冀县）",
+   "explain": "姜维之母所在，也是姜维由主动转被动的地点：他因救母而请求入城，入城后「并不出战」，粮少又逼他出城劫粮，城因此被魏延袭取。孔明事前给魏延的命令「若姜维到，可放入城」说明这个地点是被算计好的。",
+   "basis": "explicit",
+   "evidenceType": "mixed",
+   "basisNote": null,
+   "quote": "孔明唤魏延分付曰：“汝可引一军，虚张声势，诈取冀县。若姜维到，可放入城。”",
+   "quoteRef": {
+    "quote": "孔明唤魏延分付曰：“汝可引一军，虚张声势，诈取冀县。若姜维到，可放入城。”",
+    "start": 468214,
+    "end": 468251,
+    "globalOccurrences": 1,
+    "occurrenceIndex": 468214,
+    "inSlice": true,
+    "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+   },
+   "extraQuotes": [
+    {
+     "quote": "城中粮少，军食不敷。",
+     "start": 469087,
+     "end": 469097,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 469087,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    }
+   ],
+   "placeState": "arrived",
+   "placeStateNote": "arrived：有明确的入城与驻守动作——「维入城闭门，率兵守护，拜见老母」；也有被袭取的换手动作。",
+   "wid": "WS-PLACE-02"
+  },
+  {
+   "id": "WS-PLACE-03",
+   "kind": "place",
+   "name": "上邽",
+   "explain": "天水的粮道所在（「天水钱粮，皆在上邽；若打破上邽，则粮道自绝矣」），因此成为孔明三路分兵中的一路；它同时也是拒绝姜维的第二座城（乱箭射下），最后由梁绪招降梁虔而定。",
+   "basis": "explicit",
+   "evidenceType": "mixed",
+   "basisNote": null,
+   "quote": "安定人曰：“天水钱粮，皆在上邽；若打破上邽，则粮道自绝矣。”",
+   "quoteRef": {
+    "quote": "安定人曰：“天水钱粮，皆在上邽；若打破上邽，则粮道自绝矣。”",
+    "start": 468263,
+    "end": 468293,
+    "globalOccurrences": 1,
+    "occurrenceIndex": 468263,
+    "inSlice": true,
+    "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+   },
+   "extraQuotes": [
+    {
+     "quote": "孔明大喜，教赵云引一军去攻上邽。",
+     "start": 468293,
+     "end": 468309,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 468293,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    }
+   ],
+   "placeState": "arrived",
+   "placeStateNote": "arrived：梁虔奉命引三千军去保上邽、赵云受命去攻、梁绪到上邽唤梁虔出降，均有到达/驻守动作（原文另有一处把守将写作「梁虎」、把城名写作「上都」，见 unknowns U01/U02）。",
+   "wid": "WS-PLACE-03"
+  },
+  {
+   "id": "WS-PLACE-04",
+   "kind": "place",
+   "name": "祁山",
+   "explain": "本回后段的战场正面：孔明得三城后前出祁山、兵临渭水之西；曹真大军到后两军列阵于祁山之前；魏方的伏兵与蜀方的伏兵都布置在祁山之后与祁山要路上，因此它决定了最后一夜的动线。",
+   "basis": "explicit",
+   "evidenceType": "narrative",
+   "basisNote": null,
+   "quote": "孔明整顿军马，尽提汉中之兵，前出祁山，兵临渭水之西。",
+   "quoteRef": {
+    "quote": "孔明整顿军马，尽提汉中之兵，前出祁山，兵临渭水之西。",
+    "start": 470038,
+    "end": 470064,
+    "globalOccurrences": 1,
+    "occurrenceIndex": 470038,
+    "inSlice": true,
+    "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+   },
+   "extraQuotes": [
+    {
+     "quote": "次日，两军相迎，列成阵势于祁山之前。",
+     "start": 470575,
+     "end": 470593,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 470575,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    }
+   ],
+   "placeState": "arrived",
+   "placeStateNote": "arrived：有到达与列阵驻守动作（前出祁山、列成阵势于祁山之前、曹遵朱赞抄出祁山之后）。",
+   "wid": "WS-PLACE-04"
+  },
+  {
+   "id": "WS-PLACE-05",
+   "kind": "place",
+   "name": "渭水之西（渭河之西）",
+   "explain": "蜀魏两军在此对峙的地理线：蜀兵前军临渭水之西，曹真领大军过渭河之西下寨，两军因此正面相接。",
+   "basis": "explicit",
+   "evidenceType": "narrative",
+   "basisNote": null,
+   "quote": "今蜀兵已到祁山，前军临渭水之西，乞早发兵破敌。”",
+   "quoteRef": {
+    "quote": "今蜀兵已到祁山，前军临渭水之西，乞早发兵破敌。”",
+    "start": 470108,
+    "end": 470132,
+    "globalOccurrences": 1,
+    "occurrenceIndex": 470108,
+    "inSlice": true,
+    "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+   },
+   "extraQuotes": [
+    {
+     "quote": "曹真领大军来到长安，过渭河之西下寨。",
+     "start": 470448,
+     "end": 470466,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 470448,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    }
+   ],
+   "placeState": "arrived",
+   "placeStateNote": "arrived：有到达与下寨动作——蜀方「兵临渭水之西」、魏方「过渭河之西下寨」。",
+   "wid": "WS-PLACE-05"
+  },
+  {
+   "id": "WS-PLACE-06",
+   "kind": "place",
+   "name": "长安",
+   "explain": "魏方的后方节点：曹真领大军来到长安；王朗的尸首也被盛殓送回长安——本区间里它是魏军的集结地与归葬地，不是战场。",
+   "basis": "explicit",
+   "evidenceType": "narrative",
+   "basisNote": null,
+   "quote": "曹真领大军来到长安，过渭河之西下寨。",
+   "quoteRef": {
+    "quote": "曹真领大军来到长安，过渭河之西下寨。",
+    "start": 470448,
+    "end": 470466,
+    "globalOccurrences": 1,
+    "occurrenceIndex": 470448,
+    "inSlice": true,
+    "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+   },
+   "extraQuotes": [
+    {
+     "quote": "曹真将王朗尸首，用棺木盛贮，送回长安去了。",
+     "start": 471657,
+     "end": 471678,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 471657,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    }
+   ],
+   "placeState": "arrived",
+   "placeStateNote": "arrived：曹真大军有「来到长安」的到达动作；王朗尸首也被「送回长安」（转移到达）。",
+   "wid": "WS-PLACE-06"
+  },
+  {
+   "id": "WS-PLACE-07",
+   "kind": "place",
+   "name": "羌胡城",
+   "explain": "马遵与夏侯楙弃城后的去向。原文只写「弃城投羌胡城而去」——只有投奔的方向，没有到达、没有驻守、也没有此后的任何叙述，所以只能记为 mentioned 而不是 arrived。",
+   "basis": "explicit",
+   "evidenceType": "narrative",
+   "basisNote": null,
+   "quote": "夏侯楙、马遵惊慌，引数百人出西门，弃城投羌胡城而去。",
+   "quoteRef": {
+    "quote": "夏侯楙、马遵惊慌，引数百人出西门，弃城投羌胡城而去。",
+    "start": 469831,
+    "end": 469857,
+    "globalOccurrences": 1,
+    "occurrenceIndex": 469831,
+    "inSlice": true,
+    "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+   },
+   "extraQuotes": [],
+   "placeState": "mentioned",
+   "placeStateNote": "mentioned：唯一一处只有「投…而去」的去向动作，原文未写到达或驻守。把它写成 arrived 就是「图谋/去向≠到达」的混淆。",
+   "wid": "WS-PLACE-07"
+  },
+  {
+   "id": "WS-PLACE-08",
+   "kind": "place",
+   "name": "洛阳",
+   "explain": "魏廷所在：细作把西线战报报入洛阳，曹睿升殿设朝、发兵拜将都在这里决定。它是本回魏方决策的地点。",
+   "basis": "explicit",
+   "evidenceType": "narrative",
+   "basisNote": null,
+   "quote": "细作报入洛阳。",
+   "quoteRef": {
+    "quote": "细作报入洛阳。",
+    "start": 470064,
+    "end": 470071,
+    "globalOccurrences": 2,
+    "occurrenceIndex": 470064,
+    "inSlice": true,
+    "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+    "occurrenceIndexNote": "全书 2 次出现；本候选指向本单元区间内的这一次 @470064"
+   },
+   "extraQuotes": [
+    {
+     "quote": "时魏主曹睿太和元年，升殿设朝。",
+     "start": 470071,
+     "end": 470086,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 470071,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    }
+   ],
+   "placeState": "mentioned",
+   "placeStateNote": "mentioned：原文只写「细作报入洛阳」与「升殿设朝」，没有一个具名人物在本区间内到达洛阳的动作，故不自作主张升级为 arrived（战报到达不等于人物到达）。",
+   "wid": "WS-PLACE-08"
+  },
+  {
+   "id": "WS-PLACE-09",
+   "kind": "place",
+   "name": "南安郡",
+   "explain": "夏侯楙在本区间出场时的所在：孔明「令人去南安郡，取夏侯楙至帐下」。它交代了这个人质从哪里被提来，但本区间没有人在南安郡驻守或到达南安郡的叙述。",
+   "basis": "explicit",
+   "evidenceType": "narrative",
+   "basisNote": null,
+   "quote": "孔明乃令人去南安郡，取夏侯楙至帐下。",
+   "quoteRef": {
+    "quote": "孔明乃令人去南安郡，取夏侯楙至帐下。",
+    "start": 468502,
+    "end": 468520,
+    "globalOccurrences": 1,
+    "occurrenceIndex": 468502,
+    "inSlice": true,
+    "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+   },
+   "extraQuotes": [],
+   "placeState": "mentioned",
+   "placeStateNote": "mentioned：动作是「取…至帐下」——被取的人到了帐下，叙述者没有写到南安郡这一地点本身，故记为提到而非到达。",
+   "wid": "WS-PLACE-09"
+  },
+  {
+   "id": "WS-ITEM-01",
+   "kind": "item",
+   "name": "姜维的两封密书",
+   "explain": "这是本回唯一一件被明确写全四态之一半的文书：姜维写、拴在箭上、射入城中、被小校拾得呈与马遵。它直接触发了马遵的疑心与夏侯楙「可杀二人」之议，进而逼反尹赏、梁绪。",
+   "basis": "explicit",
+   "evidenceType": "narrative",
+   "basisNote": null,
+   "quote": "姜维写了二封密书，拴在箭上，纵马直至城下，射入城中。",
+   "quoteRef": {
+    "quote": "姜维写了二封密书，拴在箭上，纵马直至城下，射入城中。",
+    "start": 469670,
+    "end": 469696,
+    "globalOccurrences": 1,
+    "occurrenceIndex": 469670,
+    "inSlice": true,
+    "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+   },
+   "extraQuotes": [],
+   "itemStates": [
+    "use",
+    "transfer"
+   ],
+   "itemStatesNote": "hold：原文有「写了二封密书」的持有起点，但没有停留状态可引，故不列 hold。use：作为离间手段被使用（射入城中、使其内乱）。transfer：拴在箭上射入城中、又被小校拾得「呈与马遵」，两次易手都有原文动作。lose：原文未写这两封书被销毁或失去，故不列。文言动词照录：写／拴／射入／拾得／呈与。",
+   "itemStateQuotes": {
+    "use": [
+     {
+      "quote": "当写密书二封，射入城中，使其内乱，城可得矣。”",
+      "start": 469642,
+      "end": 469665,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 469642,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ],
+    "transfer": [
+     {
+      "quote": "小校拾得，呈与马遵。",
+      "start": 469696,
+      "end": 469706,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 469696,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "wid": "WS-ITEM-01"
+  },
+  {
+   "id": "WS-ITEM-02",
+   "kind": "item",
+   "name": "蜀军弃下的粮车",
+   "explain": "冀城被围时蜀军运粮的车队：姜维在城上看见「大车小辆，搬运粮草，入魏延寨中去了」，出城劫粮时蜀兵却「尽弃了粮车」，姜维夺得粮车后回不了城。原文只写结果，没有写这是预设的诱饵（见 unknowns U05），但粮车的四态都有动作可引。",
+   "basis": "explicit",
+   "evidenceType": "narrative",
+   "basisNote": null,
+   "quote": "维引三千兵出城，径来劫粮。蜀兵尽弃了粮车，寻路而走。",
+   "quoteRef": {
+    "quote": "维引三千兵出城，径来劫粮。蜀兵尽弃了粮车，寻路而走。",
+    "start": 469124,
+    "end": 469150,
+    "globalOccurrences": 1,
+    "occurrenceIndex": 469124,
+    "inSlice": true,
+    "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+   },
+   "extraQuotes": [],
+   "itemStates": [
+    "use",
+    "lose",
+    "transfer"
+   ],
+   "itemStatesNote": "use：作为运粮手段出现（大车小辆搬运粮草入魏延寨）。lose：蜀兵「尽弃了粮车」——照录文言动词「弃」。transfer：「姜维夺得粮车」——照录「夺」。hold：姜维夺得后有短暂持有，但原文紧接着就写他回不了城，没有持有状态的独立引文，故不单列。",
+   "itemStateQuotes": {
+    "use": [
+     {
+      "quote": "见蜀军大车小辆，搬运粮草，入魏延寨中去了。",
+      "start": 469103,
+      "end": 469124,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 469103,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ],
+    "lose": [
+     {
+      "quote": "蜀兵尽弃了粮车，寻路而走。",
+      "start": 469137,
+      "end": 469150,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 469137,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ],
+    "transfer": [
+     {
+      "quote": "姜维夺得粮车，欲要入城",
+      "start": 469150,
+      "end": 469161,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 469150,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "wid": "WS-ITEM-02"
+  },
+  {
+   "id": "WS-ITEM-03",
+   "kind": "item",
+   "name": "孔明给夏侯楙的衣服鞍马",
+   "explain": "放走人质时给出的实物：孔明「乃与衣服鞍马，不令人跟随」。它使这次放行在表面上像一次寻常的遣返，也让楙能自行走脱（他随后「纵马望天水而行」）。",
+   "basis": "explicit",
+   "evidenceType": "narrative",
+   "basisNote": null,
+   "quote": "孔明乃与衣服鞍马，不令人跟随，放之自去。",
+   "quoteRef": {
+    "quote": "孔明乃与衣服鞍马，不令人跟随，放之自去。",
+    "start": 468598,
+    "end": 468618,
+    "globalOccurrences": 1,
+    "occurrenceIndex": 468598,
+    "inSlice": true,
+    "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+   },
+   "extraQuotes": [],
+   "itemStates": [
+    "transfer"
+   ],
+   "itemStatesNote": "transfer：从孔明一方「与」（给予）夏侯楙，照录文言动词「与」。hold/use/lose：原文没有写楙此后如何使用或失去这套鞍马，故不列。",
+   "itemStateQuotes": {
+    "transfer": [
+     {
+      "quote": "楙闻之，纵马望天水而行。",
+      "start": 468734,
+      "end": 468746,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 468734,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "wid": "WS-ITEM-03"
+  },
+  {
+   "id": "WS-ITEM-04",
+   "kind": "item",
+   "name": "赐给曹真的节钺",
+   "explain": "拜将仪式中实际交接的信物：「赐节钺」是曹真得以统率二十万军、行大都督权的凭据。它解释了曹真为什么能「传令唤曹遵、朱赞两个先锋分付」。",
+   "basis": "explicit",
+   "evidenceType": "narrative",
+   "basisNote": null,
+   "quote": "睿从之，遂拜曹真为大都督，赐节钺；命郭淮为副都督，王朗为军师。",
+   "quoteRef": {
+    "quote": "睿从之，遂拜曹真为大都督，赐节钺；命郭淮为副都督，王朗为军师。",
+    "start": 470346,
+    "end": 470377,
+    "globalOccurrences": 1,
+    "occurrenceIndex": 470346,
+    "inSlice": true,
+    "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+   },
+   "extraQuotes": [],
+   "itemStates": [
+    "transfer"
+   ],
+   "itemStatesNote": "transfer：由魏主「赐」给曹真，照录文言动词「赐」。hold：曹真持有节钺可从「遂拜曹真为大都督」推知，但原文没有单独的持有动作可引，故不自造引文。use/lose：本区间未写节钺被使用或被夺。",
+   "itemStateQuotes": {
+    "transfer": [
+     {
+      "quote": "睿从之，遂拜曹真为大都督，赐节钺；",
+      "start": 470346,
+      "end": 470363,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 470346,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "wid": "WS-ITEM-04"
+  },
+  {
+   "id": "WS-ITEM-05",
+   "kind": "item",
+   "name": "战书",
+   "explain": "王朗出阵前先送出的一步程序：「当时使人先下战书」。它把「只用一席话」的打算变成一次正式约战，使次日两军列阵于祁山之前成为约定行为，而不是遭遇。",
+   "basis": "explicit",
+   "evidenceType": "narrative",
+   "basisNote": null,
+   "quote": "当时使人先下战书。",
+   "quoteRef": {
+    "quote": "当时使人先下战书。",
+    "start": 470566,
+    "end": 470575,
+    "globalOccurrences": 1,
+    "occurrenceIndex": 470566,
+    "inSlice": true,
+    "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+   },
+   "extraQuotes": [],
+   "itemStates": [
+    "use",
+    "transfer"
+   ],
+   "itemStatesNote": "use：作为约战手段使用（先下战书→次日两军相迎、列成阵势）。transfer：由魏方使者送出（「使人先下」）。hold/lose：原文没有写谁持有多久或战书的下落，故不列。",
+   "itemStateQuotes": {
+    "use": [
+     {
+      "quote": "次日，两军相迎，列成阵势于祁山之前。",
+      "start": 470575,
+      "end": 470593,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 470575,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "wid": "WS-ITEM-05"
+  },
+  {
+   "id": "WS-ITEM-06",
+   "kind": "item",
+   "name": "孔明的四轮车（小车）与纶巾羽扇",
+   "explain": "两处出场用的是同一套物件：祁山阵前「中央一辆四轮车，孔明端坐车中，纶巾羽扇」，收降姜维时「一辆小车从山坡中转出。其人头戴纶巾，身披鹤氅，手摇羽扇」。它在两个场合都充当可辨认的身份标记，使对方一眼认出说话/劝降的是谁。",
+   "basis": "explicit",
+   "evidenceType": "narrative",
+   "basisNote": null,
+   "quote": "门旗影下，中央一辆四轮车，孔明端坐车中，纶巾羽扇，素衣皂绦，飘然而出。",
+   "quoteRef": {
+    "quote": "门旗影下，中央一辆四轮车，孔明端坐车中，纶巾羽扇，素衣皂绦，飘然而出。",
+    "start": 470711,
+    "end": 470746,
+    "globalOccurrences": 1,
+    "occurrenceIndex": 470711,
+    "inSlice": true,
+    "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+   },
+   "extraQuotes": [
+    {
+     "quote": "忽然一辆小车从山坡中转出。",
+     "start": 469457,
+     "end": 469470,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 469457,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    }
+   ],
+   "itemStates": [
+    "use"
+   ],
+   "itemStatesNote": "use：作为出场凭据被使用两次（阵前会话、山坡收降）。hold：孔明当然持有，但原文的写法是「端坐车中」「手摇羽扇」——是使用动作而非持有声明，故只列 use，不把持有与使用混成一态。transfer/lose：本区间未写此物易手或丢失。",
+   "itemStateQuotes": {
+    "use": [
+     {
+      "quote": "其人头戴纶巾，身披鹤氅，手摇羽扇，乃孔明也。",
+      "start": 469470,
+      "end": 469492,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 469470,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "wid": "WS-ITEM-06"
+  },
+  {
+   "id": "WS-ITEM-07",
+   "kind": "item",
+   "name": "两寨虚堆的柴草（火号燃料）",
+   "explain": "双方都把它当作信号资源：曹真与郭淮在寨中「虚堆柴草，只留数人。如蜀兵到，放火为号」；孔明也「虚立寨栅，居中堆起柴草，以备火号」。同一件东西在最后一夜被点燃三次，每次都改变了对方的判断。",
+   "basis": "explicit",
+   "evidenceType": "mixed",
+   "basisNote": null,
+   "quote": "寨中虚堆柴草，只留数人。如蜀兵到，放火为号。”",
+   "quoteRef": {
+    "quote": "寨中虚堆柴草，只留数人。如蜀兵到，放火为号。”",
+    "start": 471855,
+    "end": 471878,
+    "globalOccurrences": 1,
+    "occurrenceIndex": 471855,
+    "inSlice": true,
+    "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+   },
+   "extraQuotes": [
+    {
+     "quote": "孔明乃虚立寨栅，居中堆起柴草，以备火号；自引诸将退于寨后，以观动静。",
+     "start": 472176,
+     "end": 472210,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 472176,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    }
+   ],
+   "itemStates": [
+    "use"
+   ],
+   "itemStatesNote": "use：被堆起来备作火号并在当夜点燃（「寨中火起」「慌忙放起号火」）。hold：原文用「虚堆」「以备」是预备动作，不另立持有态。transfer/lose：未写易手或烧尽。",
+   "itemStateQuotes": {
+    "use": [
+     {
+      "quote": "寨中火起。朱赞兵到，自相掩杀，人马大乱。",
+      "start": 472310,
+      "end": 472330,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 472310,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "wid": "WS-ITEM-07"
+  },
+  {
+   "id": "WS-RULE-01",
+   "kind": "rule",
+   "name": "攻城之法：以初到之日鼓噪直上，迟延则锐气尽隳",
+   "explain": "孔明到天水城下时传的军令，是一条关于时机与士气的作战规则。它解释了孔明为什么急着在初到之日动手；但它在本区间**没有被执行**——大军到城下后「因见城上旗帜整齐，未敢轻攻」，直接违背了这条令。",
+   "basis": "explicit",
+   "evidenceType": "mixed",
+   "basisNote": null,
+   "quote": "孔明传令曰：“凡攻城池，以初到之日，激励三军，鼓噪直上。若迟延日久，锐气尽隳，急难破矣。”",
+   "quoteRef": {
+    "quote": "孔明传令曰：“凡攻城池，以初到之日，激励三军，鼓噪直上。若迟延日久，锐气尽隳，急难破矣。”",
+    "start": 467971,
+    "end": 468016,
+    "globalOccurrences": 1,
+    "occurrenceIndex": 467971,
+    "inSlice": true,
+    "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+   },
+   "extraQuotes": [
+    {
+     "quote": "因见城上旗帜整齐，未敢轻攻。",
+     "start": 468025,
+     "end": 468039,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 468025,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    }
+   ],
+   "institution": "declared",
+   "institutionNote": "declared：只有「传令」这一道军令与它自己的理由，本区间没有任何执行「鼓噪直上」的动作；紧接的一句反而是「未敢轻攻」。所以不能写 executed。",
+   "wid": "WS-RULE-01"
+  },
+  {
+   "id": "WS-RULE-02",
+   "kind": "rule",
+   "name": "先锋进退的成条军令：见蜀兵望寨而来则进兵，蜀兵不动则撤回",
+   "explain": "曹真给曹遵、朱赞的命令是带条件的：进兵的触发条件（蜀兵望吾寨而来）与撤退条件（蜀兵不动）都写明。它解释了曹遵为什么在「遥望山前隐隐有军行动」后催兵急进，也解释了他杀入空寨后立刻「急撤军回」。",
+   "basis": "explicit",
+   "evidenceType": "mixed",
+   "basisNote": null,
+   "quote": "遂传令唤曹遵、朱赞两个先锋分付曰：“汝二人各引一万军，抄出祁山之后。但见蜀兵望吾寨而来，汝可进兵去劫蜀寨。如蜀兵不动，便撤兵回，不可轻进。”",
+   "quoteRef": {
+    "quote": "遂传令唤曹遵、朱赞两个先锋分付曰：“汝二人各引一万军，抄出祁山之后。但见蜀兵望吾寨而来，汝可进兵去劫蜀寨。如蜀兵不动，便撤兵回，不可轻进。”",
+    "start": 471755,
+    "end": 471825,
+    "globalOccurrences": 1,
+    "occurrenceIndex": 471755,
+    "inSlice": true,
+    "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+   },
+   "extraQuotes": [
+    {
+     "quote": "曹遵先杀入寨，却是空寨，并无一人。料知中计，急撤军回。",
+     "start": 472283,
+     "end": 472310,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 472283,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    }
+   ],
+   "institution": "executed",
+   "institutionNote": "executed：条件与两种执行动作在本区间都出现了——进兵（奉令抄出祁山之后并催兵急进）与撤兵（中计后急撤军回）。",
+   "wid": "WS-RULE-02"
+  },
+  {
+   "id": "WS-RULE-03",
+   "kind": "rule",
+   "name": "「治丧之夜必被劫寨」这条交战常理（双方都据此行动）",
+   "explain": "郭淮把「诸葛亮料吾军中治丧，今夜必来劫寨」当作既定常理，据此设四路伏兵；孔明则说「吾正欲曹真知吾去劫寨也」，把对方的这条常理当作开关来用。它不是诏令法，而是双方共同默认的一条作战预期——本区间里它同时决定了魏方的埋伏部署与蜀方的反埋伏部署，也直接导致魏军自相掩杀。",
+   "basis": "derived",
+   "evidenceType": "mixed",
+   "basisNote": "derived：把郭淮的推断与孔明的反用并读才成立；单独任一句都只是一个人的说法。",
+   "quote": "诸葛亮料吾军中治丧，今夜必来劫寨。",
+   "quoteRef": {
+    "quote": "诸葛亮料吾军中治丧，今夜必来劫寨。",
+    "start": 471686,
+    "end": 471703,
+    "globalOccurrences": 1,
+    "occurrenceIndex": 471686,
+    "inSlice": true,
+    "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+   },
+   "extraQuotes": [
+    {
+     "quote": "孔明笑曰：“吾正欲曹真知吾去劫寨也。",
+     "start": 471956,
+     "end": 471974,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 471956,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    }
+   ],
+   "institution": "misunderstood",
+   "institutionNote": "misunderstood：这是**人物**对作战常理的判断（郭淮的推断、孔明的反用），原文没有诏令法把它写成制度。它之所以要收进来，是因为它实际解释了双方能做什么：魏方因此分四路、蜀方因此伏四将。注意这条常理本身并未在本区间被验证为普遍成立——它只在这两个人手里生效。",
+   "wid": "WS-RULE-03"
+  },
+  {
+   "id": "WS-RULE-04",
+   "kind": "rule",
+   "name": "拜将授兵的制度：大都督／副都督／军师＋节钺＋拨军",
+   "explain": "魏主用一套完整的任命把兵权交出去：拜曹真为大都督、赐节钺，命郭淮为副都督、王朗为军师，再「选拨东西二京军马二十万与曹真」，并由曹真自举副将、自点先锋。它解释了本回魏方的资源规模（二十万）与指挥层级（都督—副都督—军师—先锋），也解释了曹真为什么必须先「乞一人为副将」。",
+   "basis": "explicit",
+   "evidenceType": "narrative",
+   "basisNote": null,
+   "quote": "睿从之，遂拜曹真为大都督，赐节钺；命郭淮为副都督，王朗为军师。",
+   "quoteRef": {
+    "quote": "睿从之，遂拜曹真为大都督，赐节钺；命郭淮为副都督，王朗为军师。",
+    "start": 470346,
+    "end": 470377,
+    "globalOccurrences": 1,
+    "occurrenceIndex": 470346,
+    "inSlice": true,
+    "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+   },
+   "extraQuotes": [
+    {
+     "quote": "选拨东西二京军马二十万与曹真。",
+     "start": 470387,
+     "end": 470402,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 470387,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    }
+   ],
+   "institution": "executed",
+   "institutionNote": "executed：任命与拨军都有执行动作（拜、赐、命、选拨…与），随后曹真即以此权传令先锋、与郭淮分派伏兵。",
+   "wid": "WS-RULE-04"
+  },
+  {
+   "id": "WS-RULE-05",
+   "kind": "rule",
+   "name": "「先帝托孤」的名分可用来责成受托者出战",
+   "explain": "曹睿没有直接下令，而是以「先帝托孤与卿，今蜀兵入寇中原，卿安忍坐视乎」相责；曹真随即从推辞转为「臣受大恩，安敢推辞？但乞一人为副将」。这条名分解释了曹真为什么不能继续推辞，也解释了他为什么可以反提一个条件（要副将）。",
+   "basis": "inferred",
+   "evidenceType": "mixed",
+   "basisNote": "inferred：「托孤的名分构成约束」是我从「推辞→受命」这个转折读出来的；原文只写了这句话与这个转折，没有写「曹真因名分而不敢辞」。",
+   "quote": "睿准奏，乃宣曹真曰：“先帝托孤与卿，今蜀兵入寇中原，卿安忍坐视乎？”",
+   "quoteRef": {
+    "quote": "睿准奏，乃宣曹真曰：“先帝托孤与卿，今蜀兵入寇中原，卿安忍坐视乎？”",
+    "start": 470197,
+    "end": 470231,
+    "globalOccurrences": 1,
+    "occurrenceIndex": 470197,
+    "inSlice": true,
+    "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+   },
+   "extraQuotes": [
+    {
+     "quote": "真又奏曰：“臣受大恩，安敢推辞？但乞一人为副将。”",
+     "start": 470280,
+     "end": 470305,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 470280,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    }
+   ],
+   "institution": "executed",
+   "institutionNote": "executed：托孤之名被实际使用并产生了结果（推辞→受命并提条件）。它不是本区间颁布的法令，故不写 declared；把它写成 misunderstood 也不对——说话人曹睿并不是误解，而是在动用一条双方都认的名分。",
+   "wid": "WS-RULE-05"
+  },
+  {
+   "id": "WS-RULE-06",
+   "kind": "rule",
+   "name": "孝行优先：为救母可以请求分兵，且请求被准许",
+   "explain": "姜维听到蜀兵三路的消息后，用「恐母有失」为由「哀告马遵」请求一军；马遵「从之」，拨给他三千军去保冀城。这条被双方默认的价值解释了本回最关键的一次分兵——姜维因此离开天水、进入孔明预设的冀城；孔明那边也正是先把「姜维之母，现在何处」问出来，才定下诈取冀县之计。",
+   "basis": "inferred",
+   "evidenceType": "mixed",
+   "basisNote": "inferred：「马遵准请是因为孝」这一步原文未直述，原文只写「从之」。我据此条的理由是：请求的理由只有「恐母有失／兼保老母」一条，且它发生在姜维已经失过一次判断之后。",
+   "quote": "姜维闻之，哀告马遵曰：“维母现在冀城，恐母有失。维乞一军往救此城，兼保老母。”",
+   "quoteRef": {
+    "quote": "姜维闻之，哀告马遵曰：“维母现在冀城，恐母有失。维乞一军往救此城，兼保老母。”",
+    "start": 468354,
+    "end": 468393,
+    "globalOccurrences": 1,
+    "occurrenceIndex": 468354,
+    "inSlice": true,
+    "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+   },
+   "extraQuotes": [
+    {
+     "quote": "马遵从之，遂令姜维引三千军去保冀城；梁虔引三千军去保上邽。",
+     "start": 468393,
+     "end": 468422,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 468393,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    }
+   ],
+   "institution": "misunderstood",
+   "institutionNote": "misunderstood：这是**人物**共同认可的价值（姜维以孝为请、马遵因此准请），不是诏令法；它解释了姜维能做（抽兵出城）与不能做（他入城后并不出战，把守母置于出战之上）的事。前文另有旁证：南安人评价他「事母至孝」。",
+   "wid": "WS-RULE-06"
+  },
+  {
+   "id": "WS-RULE-07",
+   "kind": "rule",
+   "name": "天命归属之说（王朗：天数有变、神器更易而归有德之人／孔明：奉诏讨贼、天意不绝炎汉）",
+   "explain": "王朗把「顺天者昌，逆天者亡」当作劝降的依据，并列出曹魏「带甲百万，良将千员」的实力；孔明则以「吾奉诏讨贼，何谓无名」与「今幸天意不绝炎汉，昭烈皇帝继统西川」相对。两边用的是同一种论证形式（谁承天命），都直接决定了自己在阵前能说什么、不能退什么——王朗把一席话押在这上面，话被驳倒后当场撞死。",
+   "basis": "explicit",
+   "evidenceType": "speech",
+   "basisNote": null,
+   "quote": "朗曰：“天数有变，神器更易，而归有德之人，此自然之理也。",
+   "quoteRef": {
+    "quote": "朗曰：“天数有变，神器更易，而归有德之人，此自然之理也。",
+    "start": 470907,
+    "end": 470935,
+    "globalOccurrences": 1,
+    "occurrenceIndex": 470907,
+    "inSlice": true,
+    "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+   },
+   "extraQuotes": [
+    {
+     "quote": "孔明曰：“吾奉诏讨贼，何谓无名？”",
+     "start": 470890,
+     "end": 470907,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 470890,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    }
+   ],
+   "institution": "misunderstood",
+   "institutionNote": "misunderstood：这是**人物**各自的主张，双方互相否定，叙述者没有为任一方背书。把它当世界规则（declared）就是把人物语当事实——本区间唯一被叙述语确认的后果只有「王朗听罢，气满胸膛，大叫一声，撞死于马下」。",
+   "wid": "WS-RULE-07"
+  }
+ ],
+ "themeReadings": [
+  {
+   "id": "TR01",
+   "perspective": "以「诈的手段靠什么生效」为轴读本回：轴心是孔明，读法是逐次检查每一个骗局**给对方提供了什么**——是空话，还是一个对方可以自己验证（或以为自己验证了）的事实。",
+   "support": [
+    {
+     "point": "第一处：姜维对赵云的骗局，靠的是孔明的伏兵**真的存在**。姜维预判「诸葛亮必伏兵于郡后，赚我兵出城」；叙述随后确认「原来孔明果遣赵云引一军埋伏于山僻之中，只待天水人马离城，便乘虚袭之」。姜维不是阻止这个事实，而是让这个事实照常发生，再在城下把它变成夹击。",
+     "quotes": [
+      "诸葛亮必伏兵于郡后，赚我兵出城，乘虚袭我。",
+      "原来孔明果遣赵云引一军埋伏于山僻之中，只待天水人马离城，便乘虚袭之。"
+     ]
+    },
+    {
+     "point": "第二处：放夏侯楙，靠的是途中**别人替他说出**孔明要他信的话。孔明对楙说的「姜维有书来说：但得驸马在，我愿归降」在叙述里没有任何书信作证；楙出寨后遇到的百姓却说「今被姜维献了城池，归降诸葛亮」，他见到的第二批百姓「所说皆同」，于是到天水「将百姓所言说了」。",
+     "quotes": [
+      "孔明曰：“目今天水姜维现守冀城，使人持书来说：但得驸马在，我愿归降。",
+      "又见百姓携男抱女远来，所说皆同。"
+     ]
+    },
+    {
+     "point": "第三处：夜间的假姜维，提供的是**火光中的亲见**。原文把成立条件写得极明确——「令部卒形貌相似者，假扮姜维攻城，因火光之中，不辨真伪」；同一夜里真姜维正在别处，而城中「夏侯楙与马遵等皆到城上」看他叫话。",
+     "quotes": [
+      "原来夜间妆姜维者，乃孔明之计，令部卒形貌相似者，假扮姜维攻城，因火光之中，不辨真伪。",
+      "夏侯楙与马遵等皆到城上，见姜维耀武扬威大叫曰：“我为都督而降，都督何背前言？”"
+     ]
+    },
+    {
+     "point": "第四处把这条读法推到反面：孔明对魏营的劫寨，靠的是曹真**正确地**推断出他会来。魏延当面点破「曹真深明兵法，必料我乘丧劫寨」，孔明的回答是「吾正欲曹真知吾去劫寨也」——敌方的正确判断本身被当成开关。",
+     "quotes": [
+      "魏延进曰：“曹真深明兵法，必料我乘丧劫寨。他岂不提防？”",
+      "孔明笑曰：“吾正欲曹真知吾去劫寨也。"
+     ]
+    }
+   ],
+   "counter": [
+    {
+     "point": "不利证据一：同一手法在敌方手里失效。郭淮也设了一套「乘虚去劫蜀寨＋伏于寨外」的骗局，还配了「寨中虚堆柴草，只留数人。如蜀兵到，放火为号」，结果火号把自家先锋和自家伏兵串成了自相掩杀。所以「提供可验证的事实就能生效」并不成立——孔明对同一套材料做了反用才生效。",
+     "quotes": [
+      "寨中虚堆柴草，只留数人。如蜀兵到，放火为号。”",
+      "守寨军士，只道蜀兵来劫寨，慌忙放起号火。"
+     ]
+    },
+    {
+     "point": "不利证据二：本回最要紧的一次招降**不含任何诈**。姜维投降的条件是实打实的：先有关兴数千兵截住去路，再有孔明的小车从山坡转出，「前有孔明，后有关兴，又无去路」；孔明随后说的话（遍求贤者、欲传授平生之学）原文没有给出任何作伪的迹象。把全回读成「靠诈取胜」会漏掉这一步用的是兵与路，不是话。",
+     "quotes": [
+      "忽然一辆小车从山坡中转出。",
+      "孔明慌忙下车而迎，执维手曰：“吾自出茅庐以来，遍求贤者，欲传授平生之学，恨未得其人。今遇伯约，吾愿足矣。”"
+     ]
+    },
+    {
+     "point": "不利证据三：纯话术的一次当场失败。王朗的筹码是「只用一席话」，没有兵、没有伏、没有内应；他自己宣布「管教诸葛亮拱手而降，蜀兵不战自退」，而孔明的回应是当众清算他的仕履，叙述随即写他撞死。这一处说明「话」若要生效，前面必须有可验证的东西垫着。",
+     "quotes": [
+      "老夫自出，只用一席话，管教诸葛亮拱手而降，蜀兵不战自退。”",
+      "王朗听罢，气满胸膛，大叫一声，撞死于马下。"
+     ]
+    }
+   ],
+   "basis": "inferred",
+   "basisNote": "perspective、support 的组织方式与 counter 的三条都是我的归纳（inferred）；support／counter 里引的句子才是原文。同一批事实至少还能按「孝与忠的冲突」「天命说词的对撞」两种轴读，我在这里只给一条并把它自己的反例列全。"
+  },
+  {
+   "id": "TR02",
+   "perspective": "以「『降』这个名分与事实之间的时间差」为轴读本回：轴心是姜维，读法是按顺序记下「他已被算作降将」与「他实际投降」这两件事各发生在什么时候、由谁认定。",
+   "support": [
+    {
+     "point": "名分先于事实出现，而且出现得很早：夏侯楙在路上遇到的百姓已经说「今被姜维献了城池，归降诸葛亮」，此时姜维正在冀城闭门守母、并不出战。这句话不是叙述，是转述——原文把它记作「答曰」与「所说皆同」。",
+     "quotes": [
+      "答曰：“我等是冀县百姓；今被姜维献了城池，归降诸葛亮，蜀将魏延纵火劫财，我等因此弃家奔走，投上邽去也。”"
+     ]
+    },
+    {
+     "point": "名分随后被升级为「亲眼所见＋当事人自认」：火光中的假姜维当众说出「我为都督而降」「我今降蜀，加为上将」，而这句话是被寇在真姜维名下说出的。这是全回唯一一次「姜维亲口承认投降」——说话的人不是姜维。",
+     "quotes": [
+      "维应曰：“汝写书教我降蜀，何出此言？汝要脱身，却将我陷了？我今降蜀，加为上将，安有还魏之理？”",
+      "言讫，驱兵打城，至晓方退。"
+     ]
+    },
+    {
+     "point": "名分的后果先落地：真姜维到天水叫门被判为「来赚我城门」而乱箭射下，到上邽又被骂「反国之贼…吾已知汝降蜀矣」，原文只给他四个字「姜维不能分说」。他有降将之名时，还没有降将之实。",
+     "quotes": [
+      "遵曰：“此是姜维来赚我城门也。”",
+      "姜维不能分说，仰天长叹，两眼泪流，拨马望长安而走。"
+     ]
+    },
+    {
+     "point": "实际的投降发生在本回最后一次被围之后，标志是一个动作，不是一句话：他「寻思良久」后「只得下马投降」，孔明随即下车执手相接。到这里名分与事实才重合。",
+     "quotes": [
+      "维寻思良久，前有孔明，后有关兴，又无去路，只得下马投降。"
+     ]
+    }
+   ],
+   "counter": [
+    {
+     "point": "不利证据一：原文并没有让「名分」一直压着事实。城中当场就有人提出相反读法——梁绪说「彼意欲救都督，故以此言虚降」，即把姜维的降解释为救夏侯楙的权宜；这个读法在内容上更接近叙述所写的实情，却输给了楙的一句「今维已降，何为虚也？」。所以这一回呈现的是「对的读法被判错」，而不是「名分天然胜过事实」。",
+     "quotes": [
+      "梁绪曰：“彼意欲救都督，故以此言虚降。”",
+      "楙曰：“今维已降，何为虚也？”"
+     ]
+    },
+    {
+     "point": "不利证据二：本回另有两起归降是**按动作、有过程**地写成的，完全不含名分与事实的错位——尹赏、梁绪是「料知事急」后大开城门放蜀兵入，梁虔是亲兄到城下唤出而降；孔明对他们的处置也是照实授职（天水太守／冀城令／上邽令）。可见「降」在本回不总是标签先行。",
+     "quotes": [
+      "二人料知事急，遂披挂上马，各执兵器，引本部军大开城门，放蜀兵入。",
+      "孔明重加赏劳，就令梁绪为天水太守，尹赏为冀城令，梁虔为上邽令。"
+     ]
+    },
+    {
+     "point": "不利证据三：叙述者对读者是明说的。那句「原来夜间妆姜维者，乃孔明之计」把伪装的底交了出来，读者的知情与城中人的不知情被有意分开；若把本回读成「文本在主张标签即事实」，就无法解释叙述者为什么要把这条底牌翻开。",
+     "quotes": [
+      "原来夜间妆姜维者，乃孔明之计，令部卒形貌相似者，假扮姜维攻城，因火光之中，不辨真伪。"
+     ]
+    }
+   ],
+   "basis": "inferred",
+   "basisNote": "perspective 与三段 support 的分期都是我的归纳（inferred）；引文是原文。这条读法与 TR01 有重叠（假姜维同时属于两条），但不合并：TR01 问「诈靠什么生效」，TR02 问「名分与事实谁先到」。"
+  }
+ ],
+ "unknowns": [
+  {
+   "id": "U01",
+   "what": "「梁虚」「梁虔」「梁虎」是不是同一个人，我读不出来。",
+   "detail": "姜维分四枝时说「太守与梁虚、尹赏各引一军城外埋伏」；马遵派去保上邽的是「梁虔引三千军」；赵云「放过梁虎入上邽城去了」；梁绪后来说「此城乃某亲弟梁虚守之」，紧接着又写「绪当日到上都唤梁虔出城来降」。上邽守将一处作梁虚、一处作梁虔，另有梁虎一处，原文三形并存，我无法判定是异体字、传写之误，还是两个人（若是两人，梁绪的「亲弟」指谁也需要另说）。我按原文照录，不做统一。",
+   "quotes": [
+    "太守与梁虚、尹赏各引一军城外埋伏。”",
+    "梁绪曰：“此城乃某亲弟梁虚守之，愿招来降。”",
+    "绪当日到上都唤梁虔出城来降孔明。",
+    "赵云亦放过梁虎入上邽城去了。"
+   ]
+  },
+  {
+   "id": "U02",
+   "what": "「上邽」与「上都」是一地还是两地，我按一地处理但标出来。",
+   "detail": "本单元区间内「上邽」出现 11 处、「上都」出现 1 处（脚本实算）。唯「绪当日到上都唤梁虔出城来降孔明」一处作上都。上文梁绪说的是「此城（上邽）乃某亲弟梁虚守之」，紧接着的动作就是到「上都」唤人，所以我按同一地的异写处理；但这是判断不是原文，若视为两地，则梁绪的行程需要另作解释。",
+   "quotes": [
+    "孔明大喜，教赵云引一军去攻上邽。",
+    "绪当日到上都唤梁虔出城来降孔明。"
+   ]
+  },
+  {
+   "id": "U03",
+   "what": "回目作「武乡侯骂死王朝」，正文通篇作「王朗」——两处名字不同，我不改原文也不合并索引。",
+   "detail": "单元标题（docs[0].text[467225:467246]）与任务 unitHead 都作「王朝」，本单元区间内正文出现「王朗」10 处、全书 32 处。全书另有 2 处「王朝」都不是这个人：一处是「今王朝英俊鳞集」的朝字连读，一处是「望大王朝觐」的朝觐。我把正文人物记作王朗，并把标题的字面差异留在这里。",
+   "quotes": [
+    "第九十三回　姜伯约归降孔明　武乡侯骂死王朝"
+   ]
+  },
+  {
+   "id": "U04",
+   "what": "夏侯楙在路上听到的「百姓之言」与叙述事实冲突，我按「转述内容」记录，不当事实。",
+   "detail": "百姓说「今被姜维献了城池，归降诸葛亮，蜀将魏延纵火劫财」；而叙述写的是魏延诈败、姜维入城闭门并不出战、后来城才被魏延袭取，全区间没有任何「姜维献城池」的叙述，也没有「纵火劫财」的记载。这句话在文本里是作为一种口传证据来使用的，所以我在候选里只把它标成 report／speech 的来源，不用它支撑任何事实性结论（它支撑的是 CE03 里的「传言回传」这一环）。",
+   "quotes": [
+    "答曰：“我等是冀县百姓；今被姜维献了城池，归降诸葛亮，蜀将魏延纵火劫财，我等因此弃家奔走，投上邽去也。”",
+    "维入城闭门，率兵守护，拜见老母，并不出战。"
+   ]
+  },
+  {
+   "id": "U05",
+   "what": "「蜀兵尽弃了粮车」是不是预设的诱饵，原文没有说。",
+   "detail": "孔明对魏延有过明确的预设（「若姜维到，可放入城」），但对粮车只有一句「蜀兵尽弃了粮车，寻路而走」，随后姜维夺得粮车就回不了城。是诱饵还是遭遇战中的丢弃，我读不出来，所以 CE05 只用「城中粮少」与「城已被袭」这两处能引的机制，不把「诈败弃粮」写进去。",
+   "quotes": [
+    "蜀兵尽弃了粮车，寻路而走。",
+    "姜维夺得粮车，欲要入城，忽然一彪军拦住"
+   ]
+  },
+  {
+   "id": "U06",
+   "what": "孔明说「姜维使人持书来说：但得驸马在，我愿归降」——这封书在原文里从未出现。",
+   "detail": "全区间只有孔明这一句话提到「使人持书」，没有任何书信被写出、送到或展示；而孔明确实写过、射过的是**姜维后来写给尹赏梁绪的两封密书**，那是另一件事、另一个时点。我因此把「姜维有书愿降」记为孔明的话（speech），不记为事件。",
+   "quotes": [
+    "孔明曰：“目今天水姜维现守冀城，使人持书来说：但得驸马在，我愿归降。"
+   ]
+  },
+  {
+   "id": "U07",
+   "what": "马遵说「梁绪、尹赏与姜维结连，欲为内应」，这是他的判断还是已查明的事实，我读不出来。",
+   "detail": "原文只有马遵对夏侯楙说的这一句「遵大疑，与夏侯楙商议曰」，其中「结连」「欲为内应」都是他的说法；叙述没有独立交代二人此前与姜维有无联络（前文只有姜维自称与他们「至厚」）。二人后来确实开城降蜀，但那是「尹赏知此消息」之后的决定，不能倒推为早已结连。",
+   "quotes": [
+    "遵大疑，与夏侯楙商议曰：“梁绪、尹赏与姜维结连，欲为内应，都督宜早决之。”",
+    "尹赏知此消息，乃谓梁绪曰：“不如纳城降蜀，以图进用。”"
+   ]
+  },
+  {
+   "id": "U08",
+   "what": "王朗的死因，叙述只写了死法，没有写机制。",
+   "detail": "叙述语是「王朗听罢，气满胸膛，大叫一声，撞死于马下」——「听罢」在前，「撞死」在后，但叙述没有说这是因言致死；「骂死老奸臣」出自紧接的「后人有诗赞孔明曰」。我在 CE08 里只主张「说词当众失效 → 当场撞死」这一方向，并把「骂死」明确标为诗的措辞，不当叙述事实。",
+   "quotes": [
+    "王朗听罢，气满胸膛，大叫一声，撞死于马下。",
+    "后人有诗赞孔明曰：“兵马出西秦，雄才敌万人。轻摇三寸舌，骂死老奸臣。”"
+   ]
+  },
+  {
+   "id": "U09",
+   "what": "「军中治丧」是否真的举行过，原文只有郭淮的一句话。",
+   "detail": "叙述写到「曹真将王朗尸首，用棺木盛贮，送回长安去了」为止——尸首被送回长安，而郭淮说「诸葛亮料吾军中治丧」。营中是否设了丧、治了几天，本区间没有叙述。我在 CE09 里用「治丧」时指的是郭淮口中这个时间窗口，不是已核实的仪式。",
+   "quotes": [
+    "曹真将王朗尸首，用棺木盛贮，送回长安去了。",
+    "诸葛亮料吾军中治丧，今夜必来劫寨。"
+   ]
+  },
+  {
+   "id": "U10",
+   "what": "夏侯楙被放走是不是孔明的预设计策，原文没有直述。",
+   "detail": "放人时叙述只写「孔明乃与衣服鞍马，不令人跟随，放之自去」，没有写理由；后面孔明对诸将说「吾放夏侯楙，如放一鸭耳」解释的是价值取舍（鸭换凤），也没有说放他是为了让他去传话。CE03 因此标为 derived，并写明「传言回传」这一环由小说叙述的先后给出，而「放人是为了传话」是我把两处并读后的推断。",
+   "quotes": [
+    "孔明乃与衣服鞍马，不令人跟随，放之自去。",
+    "孔明曰：“吾放夏侯楙，如放一鸭耳。今得伯约，得一凤也！”"
+   ]
+  },
+  {
+   "id": "U11",
+   "what": "曹遵「郭都督真神机妙算」这句自思与他眼前的实情不符，我按人物语记录。",
+   "detail": "他看到的「山前隐隐有军行动」是蜀军的调动（孔明已令赵云、魏延引兵过山脚后路远下营寨），而他把这个动静读成了本方计策应验的征候，于是「催兵急进」，杀入的是空寨。原文没有说明那支军的身份，所以「那是蜀军」是我从孔明的分派推出的，不是直述。",
+   "quotes": [
+    "曹遵自思曰：“郭都督真神机妙算！”遂催兵急进。",
+    "过山脚后路，远下营寨，任魏兵来劫吾寨。"
+   ]
+  },
+  {
+   "id": "U12",
+   "what": "本单元首尾的整理标记不属于正文，我没有为它们建模。",
+   "detail": "切片末尾的「------------------」与「枫林晚 整理校对后一页前一页回目录回首页…」是电子文本的整理者标记，不是小说内容；它们落在任务区间内，所以在此显式声明不建模，以免被当成遗漏。",
+   "quotes": [
+    "枫林晚 整理校对后一页前一页回目录回首页后一页前一页回目录回首页"
+   ]
+  }
+ ],
+ "notModeled": [
+  {
+   "what": "两军列阵的仪仗与旗号细节（三个麾盖、旗上大书姓名、门旗开处、骁将分列）",
+   "why": "这是场面铺陈。我把它当作出场顺序的语境，没有单独建 place/item/rule；其中唯一影响行动的一点是「孔明举目见魏阵前三个麾盖，旗上大书姓名」，它使孔明预先认出了王朗（这一点已在 T15.action 的「暗忖」句中引用）。",
+   "quotes": [
+    "只见蜀兵门旗开处，关兴、张苞分左右而出，立马于两边；次后一队队骁将分列；门旗影下，中央一辆四轮车，孔明端坐车中，纶巾羽扇，素衣皂绦，飘然而出。"
+   ]
+  },
+  {
+   "what": "孔明历数汉室乱局的那一大段（桓灵以来、董卓傕汜、庙堂朽木、社稷丘墟）与王朗的天命论长篇",
+   "why": "这是两个人的说词内容，属于论证与修辞。我在 TR01.counter 与 WS-RULE-07（天命归属之说）里各引用了一句作为「说词对撞」的证据，但没有为其中的历史叙事单独建事件——它们讲的是本区间之外的事。",
+   "quotes": [
+    "因庙堂之上，朽木为官，殿陛之间，禽兽食禄；狼心狗行之辈，滚滚当道，奴颜婢膝之徒，纷纷秉政。"
+   ]
+  },
+  {
+   "what": "「汉丞相与司徒会话」这一句传话与两军鼓角、探子马请战的程序",
+   "why": "属会话程序。它决定了对话以何种身份进行（汉丞相／司徒），已在 T15 的语境里使用，未单列世界设定。",
+   "quotes": [
+    "令护军小校传曰：“汉丞相与司徒会话。”"
+   ]
+  },
+  {
+   "what": "曹真与郭淮「此计与吾相合」的互相推重，以及「诸将皆分左右，各自准备去了」",
+   "why": "属部署过程的过渡句，没有独立的方向或结果；伏兵部署本身已记入 T16.action。",
+   "quotes": [
+    "诸将皆分左右，各自准备去了。"
+   ]
+  },
+  {
+   "what": "回末的套语「正是：可怜魏将难成事，欲向西方索救兵。未知其计如何，且看下文分解」",
+   "why": "这是章回小说的收束套语，不是事件；郭淮那「一计」的内容在下一回，我已把它按未回收伏笔处理（F05）。",
+   "quotes": [
+    "正是：可怜魏将难成事，欲向西方索救兵。未知其计如何，且看下文分解。"
+   ]
+  }
+ ],
+ "selfCritique": [
+  {
+   "id": "SC01",
+   "what": "我最可能读错的一处：把「孔明放夏侯楙」读成一条策划好的传话链。",
+   "why": "我仍然这么判断，是因为孔明放人时说的话（姜维有书愿降）与楙途中听到的百姓之言在内容上指向同一结论，而楙到天水后第一件事就是「又将百姓所言说了」。但原文没有写孔明安排过百姓、也没有写放人的目的，所以我把这条边标成 derived 而不是 explicit，并把它写进 unknowns U10。",
+   "quotes": [
+    "孔明乃与衣服鞍马，不令人跟随，放之自去。"
+   ]
+  },
+  {
+   "id": "SC02",
+   "what": "第二处：T09 说「初更蜀兵又来攻城」是孔明的安排。",
+   "why": "原文只说「正踌躇间，时已初更，蜀兵又来攻城」，把攻城写成时机的巧合；「是孔明的安排」要到段末「原来夜间妆姜维者，乃孔明之计」才交代，且只交代了假扮者、没有交代攻城的时间选择。我把它算作同一计的一部分（objective 引的是段末那句），但如果严格按语序，攻城本身在原文里是先行发生、事后追认的。",
+   "quotes": [
+    "正踌躇间，时已初更，蜀兵又来攻城。"
+   ]
+  },
+  {
+   "id": "SC03",
+   "what": "第三处：T16/T17 的分工可能被我一分为二得过于整齐。",
+   "why": "郭淮的计与孔明的反计在原文里是连续写出的，我按「谁主动」切成两条任务（魏方设伏／蜀方反用）。但孔明的反用并不是对郭淮计的回应——他归帐后先派赵云魏延，是在完全按自己的节奏走；两边其实是同一夜的两个独立计划撞在一起。若读成一条一来一往的对手戏，就会把巧合读成应答。",
+   "quotes": [
+    "却说孔明归帐，先唤赵云、魏延听令。"
+   ]
+  },
+  {
+   "id": "SC04",
+   "what": "第四处（自审发现的自身缺陷）：T07.obstacle 与 T06.result 用了同一句引文。",
+   "why": "「早有人报入天水郡，说蜀兵分为三路」在 T06 里是孔明分兵的结果，在 T07 里是姜维请兵的外部压力。硬红线禁的是**同一条任务的五栏**共用一句，跨任务复用不禁止，但我还是在 crossSectionQuoteReuse 里登记了它，并让 T07.obstacle 的 text 明写这句话来自 T06 的同一处，便于复核者判它是否在被当两次依据用。",
+   "quotes": [
+    "早有人报入天水郡，说蜀兵分为三路：一军守此郡，一军取上邽，一军取冀城。"
+   ]
+  },
+  {
+   "id": "SC05",
+   "what": "第五处：TR02 的分期有把叙述顺序当成叙事意图的风险。",
+   "why": "「名分先于事实」这个读法依赖三处文本的先后（百姓之言 → 假姜维自认 → 真姜维被拒）。原文确实按这个顺序写，但叙述顺序不等于作者在主张名分决定事实；梁绪的反驳与叙述者主动翻开底牌（「原来…乃孔明之计」）都是不利于强读的证据，我把它们列在 counter 里。",
+   "quotes": [
+    "梁绪曰：“彼意欲救都督，故以此言虚降。”"
+   ]
+  },
+  {
+   "id": "SC06",
+   "what": "第六处（数字自述）：本候选的条数与空栏数一律由脚本在落盘前重算，不在此手写。",
+   "why": "这类自述数字在过去几轮复核里被查出过陈旧值（手写值在定稿前失效）。所以本轮不把任何计数写进散文，全部由 buildSelfCheck.counts 给出；本条也不写数字，读者请直接看 buildSelfCheck.counts 与 selfCritiqueCountNote。唯一的例外是正文明说「本区间未出现…」时对依据缺失的定性描述，那种描述不含计数。",
+   "quotes": []
+  }
+ ],
+ "crossSectionQuoteReuse": {
+  "rule": "硬红线只禁止「同一条任务的五栏共用同一句」。跨任务／跨分区复用不禁止，但全部登记在此，便于复核者判它是否在当多栏依据。",
+  "intraTaskOverlaps": [],
+  "count": 29,
+  "items": [
+   {
+    "quote": "却说赵云引五千兵，径投天水郡城下",
+    "start": 467487,
+    "usedAt": [
+     "$.tasks[1].action.quotes[0]",
+     "$.worldSettings[0].quoteRef"
+    ]
+   },
+   {
+    "quote": "因见城上旗帜整齐，未敢轻攻。",
+    "start": 468025,
+    "usedAt": [
+     "$.tasks[4].obstacle.quotes[0]",
+     "$.worldSettings[0].extraQuotes[0]",
+     "$.worldSettings[16].extraQuotes[0]"
+    ]
+   },
+   {
+    "quote": "孔明唤魏延分付曰：“汝可引一军，虚张声势，诈取冀县。若姜维到，可放入城。”",
+    "start": 468214,
+    "usedAt": [
+     "$.tasks[5].objective.quotes[1]",
+     "$.worldSettings[1].quoteRef"
+    ]
+   },
+   {
+    "quote": "孔明大喜，教赵云引一军去攻上邽。",
+    "start": 468293,
+    "usedAt": [
+     "$.tasks[5].action.quotes[1]",
+     "$.worldSettings[2].extraQuotes[0]"
+    ]
+   },
+   {
+    "quote": "早有人报入天水郡，说蜀兵分为三路：一军守此郡，一军取上邽，一军取冀城。",
+    "start": 468319,
+    "usedAt": [
+     "$.tasks[5].result.quotes[0]",
+     "$.tasks[6].obstacle.quotes[0]"
+    ]
+   },
+   {
+    "quote": "姜维闻之，哀告马遵曰：“维母现在冀城，恐母有失。维乞一军往救此城，兼保老母。”",
+    "start": 468354,
+    "usedAt": [
+     "$.tasks[6].objective.quotes[0]",
+     "$.worldSettings[21].quoteRef"
+    ]
+   },
+   {
+    "quote": "马遵从之，遂令姜维引三千军去保冀城；梁虔引三千军去保上邽。",
+    "start": 468393,
+    "usedAt": [
+     "$.tasks[6].action.quotes[0]",
+     "$.worldSettings[21].extraQuotes[0]"
+    ]
+   },
+   {
+    "quote": "孔明乃令人去南安郡，取夏侯楙至帐下。",
+    "start": 468502,
+    "usedAt": [
+     "$.tasks[7].action.quotes[0]",
+     "$.worldSettings[8].quoteRef"
+    ]
+   },
+   {
+    "quote": "孔明乃与衣服鞍马，不令人跟随，放之自去。",
+    "start": 468598,
+    "usedAt": [
+     "$.tasks[7].cost.quotes[0]",
+     "$.worldSettings[11].quoteRef"
+    ]
+   },
+   {
+    "quote": "楙闻之，纵马望天水而行。",
+    "start": 468734,
+    "usedAt": [
+     "$.tasks[7].action.quotes[2]",
+     "$.worldSettings[11].itemStateQuotes.transfer[0]"
+    ]
+   },
+   {
+    "quote": "城中粮少，军食不敷。",
+    "start": 469087,
+    "usedAt": [
+     "$.tasks[9].obstacle.quotes[0]",
+     "$.worldSettings[1].extraQuotes[0]"
+    ]
+   },
+   {
+    "quote": "维引三千兵出城，径来劫粮。蜀兵尽弃了粮车，寻路而走。",
+    "start": 469124,
+    "usedAt": [
+     "$.tasks[9].action.quotes[0]",
+     "$.worldSettings[10].quoteRef"
+    ]
+   },
+   {
+    "quote": "姜维夺得粮车，欲要入城",
+    "start": 469150,
+    "usedAt": [
+     "$.tasks[9].objective.quotes[0]",
+     "$.worldSettings[10].itemStateQuotes.transfer[0]"
+    ]
+   },
+   {
+    "quote": "忽然一辆小车从山坡中转出。",
+    "start": 469457,
+    "usedAt": [
+     "$.tasks[10].action.quotes[0]",
+     "$.worldSettings[14].extraQuotes[0]"
+    ]
+   },
+   {
+    "quote": "其人头戴纶巾，身披鹤氅，手摇羽扇，乃孔明也。",
+    "start": 469470,
+    "usedAt": [
+     "$.tasks[10].action.quotes[1]",
+     "$.worldSettings[14].itemStateQuotes.use[0]"
+    ]
+   },
+   {
+    "quote": "夏侯楙、马遵惊慌，引数百人出西门，弃城投羌胡城而去。",
+    "start": 469831,
+    "usedAt": [
+     "$.tasks[11].result.quotes[1]",
+     "$.worldSettings[6].quoteRef"
+    ]
+   },
+   {
+    "quote": "孔明整顿军马，尽提汉中之兵，前出祁山，兵临渭水之西。",
+    "start": 470038,
+    "usedAt": [
+     "$.tasks[12].result.quotes[2]",
+     "$.worldSettings[3].quoteRef"
+    ]
+   },
+   {
+    "quote": "睿准奏，乃宣曹真曰：“先帝托孤与卿，今蜀兵入寇中原，卿安忍坐视乎？”",
+    "start": 470197,
+    "usedAt": [
+     "$.tasks[13].action.quotes[0]",
+     "$.worldSettings[20].quoteRef"
+    ]
+   },
+   {
+    "quote": "睿从之，遂拜曹真为大都督，赐节钺；命郭淮为副都督，王朗为军师。",
+    "start": 470346,
+    "usedAt": [
+     "$.tasks[13].action.quotes[1]",
+     "$.worldSettings[12].quoteRef",
+     "$.worldSettings[19].quoteRef"
+    ]
+   },
+   {
+    "quote": "选拨东西二京军马二十万与曹真。",
+    "start": 470387,
+    "usedAt": [
+     "$.tasks[13].cost.quotes[0]",
+     "$.worldSettings[19].extraQuotes[0]"
+    ]
+   },
+   {
+    "quote": "曹真领大军来到长安，过渭河之西下寨。",
+    "start": 470448,
+    "usedAt": [
+     "$.tasks[13].result.quotes[1]",
+     "$.worldSettings[4].extraQuotes[0]",
+     "$.worldSettings[5].quoteRef"
+    ]
+   },
+   {
+    "quote": "次日，两军相迎，列成阵势于祁山之前。",
+    "start": 470575,
+    "usedAt": [
+     "$.worldSettings[3].extraQuotes[0]",
+     "$.worldSettings[13].itemStateQuotes.use[0]"
+    ]
+   },
+   {
+    "quote": "孔明曰：“吾奉诏讨贼，何谓无名？”",
+    "start": 470890,
+    "usedAt": [
+     "$.tasks[14].obstacle.quotes[0]",
+     "$.worldSettings[22].extraQuotes[0]"
+    ]
+   },
+   {
+    "quote": "曹真将王朗尸首，用棺木盛贮，送回长安去了。",
+    "start": 471657,
+    "usedAt": [
+     "$.tasks[14].cost.quotes[0]",
+     "$.worldSettings[5].extraQuotes[0]"
+    ]
+   },
+   {
+    "quote": "诸葛亮料吾军中治丧，今夜必来劫寨。",
+    "start": 471686,
+    "usedAt": [
+     "$.tasks[15].obstacle.quotes[0]",
+     "$.worldSettings[18].quoteRef"
+    ]
+   },
+   {
+    "quote": "遂传令唤曹遵、朱赞两个先锋分付曰：“汝二人各引一万军，抄出祁山之后。但见蜀兵望吾寨而来，汝可进兵去劫蜀寨。如蜀兵不动，便撤兵回，不可轻进。”",
+    "start": 471755,
+    "usedAt": [
+     "$.tasks[15].action.quotes[1]",
+     "$.worldSettings[17].quoteRef"
+    ]
+   },
+   {
+    "quote": "孔明笑曰：“吾正欲曹真知吾去劫寨也。",
+    "start": 471956,
+    "usedAt": [
+     "$.tasks[16].objective.quotes[0]",
+     "$.worldSettings[18].extraQuotes[0]"
+    ]
+   },
+   {
+    "quote": "孔明乃虚立寨栅，居中堆起柴草，以备火号；自引诸将退于寨后，以观动静。",
+    "start": 472176,
+    "usedAt": [
+     "$.tasks[16].action.quotes[3]",
+     "$.worldSettings[15].extraQuotes[0]"
+    ]
+   },
+   {
+    "quote": "寨中火起。朱赞兵到，自相掩杀，人马大乱。",
+    "start": 472310,
+    "usedAt": [
+     "$.tasks[15].result.quotes[1]",
+     "$.worldSettings[15].itemStateQuotes.use[0]"
+    ]
+   }
+  ]
+ },
+ "buildSelfCheck": {
+  "file_hash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+  "slice_hash": "d968def8ab81c9ab97edc81affb4548a2e2cf863c060ff6deaccfdc9c27582fb",
+  "slice_len": 5511,
+  "quote_objects": 176,
+  "quote_failures": 0,
+  "build_problems": [],
+  "null_without_note": 0,
+  "counts": {
+   "tasks": 17,
+   "causeEdges": 9,
+   "rejectedCauseEdges": 5,
+   "states": 11,
+   "foreshadows": 7,
+   "worldSettings": 23,
+   "worldSettingsByKind": {
+    "place": 9,
+    "item": 7,
+    "rule": 7
+   },
+   "themeReadings": 2,
+   "unknowns": 12,
+   "notModeled": 5,
+   "selfCritique": 6,
+   "nullColumns": 15,
+   "quoteObjects": 176
+  },
+  "countsNote": "本块全部数字由构建脚本在落盘前重新统计，不是手写。"
+ },
+ "selfCritiqueCountNote": "tasks 17 条，cost 为 null 的 12 条（脚本复算）。"
+}

@@ -1,0 +1,260 @@
+{
+ "task": "ops:accept-full",
+ "agent": "w-ops",
+ "status": "done",
+ "title": "全量离线门禁 + 哈希稳定性对账",
+ "summary": "跑了 4 次 `sh scripts/accept.sh`（离线门，无 --browser，未碰 GPU）：**4/4 全部 132/133 exit 1**，失败项恒为第 56 项 `python3 -B -s tests/p3_task_five_fields_contract.py --ratchet`。四次的门禁项清单逐条比对**完全一致**（133 项、零增零减；唯一差异是每轮 mktemp 目录名，已归一化后逐项相等）。受保护路径前后 sha256 对账跑满 4 个窗口（8 次快照，每次 3854 个文件 / 3,493,149,007 B）：**4/4 窗口零漂移 —— modified 0 / created 0 / deleted 0 / touched 0**，8 份快照的 manifest_sha256 全部等于 `76f0f9c3…b7911`。归因：唯一失败项**不是并行写入者造成的，也不是本轮的门禁环境问题，而是一个已被独立复核在案的真实内容缺陷**（`pendingAsCost` 1 > 基线 0），根因是一条真实候选里 `cost` 正文含未确证的「未知性命如何」，而该记录没写 `costNote`。本轮**没有**把它判死、**没有**改任何受保护路径、**没有**回滚任何人代码。另外实测纠正了一处容易被读错的语义：该 FAIL 的退出码**只**由棘轮分支决定，日志里同时出现的 ①②③ 三条 FAIL **不**参与 `--ratchet` 的退出码（变异实验：补上 costNote 后 rc 1→0，而 ①②③ 照旧 FAIL）。",
+ "agent_name_note": "任务租约 loop/state/leases/ops:accept-full.d/lease.json 声明 agent=w-ops（pid 43559，实测存活：`ps -eo pid=,ppid=,command=` 第 43559 行 = `python3 -B -s …/worker.py --agent w-ops --loop 0 --timeout 2700 --idle-sleep 120 --stream ops,adopt,expert,env`）；我是该 worker 拉起的 dsh 会话（pid 94128 的 ppid 即 43559），故沿用 w-ops 提交。",
+ "gate": {
+  "command": "sh scripts/accept.sh",
+  "wrapper": "python3 -B /Volumes/资源库/我的资源/回滚点/工具/run-with-storage.py --project /Users/carmen/Desktop/星系 -- sh scripts/accept.sh",
+  "mode": "offline (no --browser)",
+  "gpu": false,
+  "cwd": "/Users/carmen/Desktop/星系",
+  "head": "a008cb821b57f5d7813fecf9f81db4a7e3c6c698 (2026-10-04T14:37:52+08:00)",
+  "accept_sh": {
+   "path": "scripts/accept.sh",
+   "sha256_at_measurement": "40eaa842b4db37e2b774628ef19e43a1bd616348762f4bf585f73909984e4269",
+   "size": 49965,
+   "mtime_utc": "2026-10-13T02:12:38Z",
+   "note": "哈希在 4 个窗口内恒定（pre1..post4 八次快照全部落在同一 manifest 里）。mtime 早于本会话（16:03Z）约 14 小时 ⇒ 不是本轮我或我的 worker 写的。"
+  },
+  "item_list_stable": true,
+  "item_count": 133,
+  "item_list_check": "把 4 份日志的 `[N] <cmd>` 行取出（各 133 条），仅把每轮独有的 mktemp 目录 `…/临时//castline-accept.XXXXXX` 归一化为 `<TMP>` 后逐项比对：run2/3/4 与 run1 **完全相同**（集合差为空）。未归一化时唯一的差异行就是第 127 项 `python3 -B tests/contrast_audit.py --out <TMP>/contrast-report.json`。",
+  "runs": [
+   {"n": 1, "started_utc": "2026-10-13T16:10:43Z", "pre_snapshot_end_utc": "2026-10-13T16:10:49Z", "ended_utc": "2026-10-13T16:13:31Z", "wall_seconds": 174, "exit_code": 1, "total": 133, "passed": 132, "failed": 1, "failed_items": ["56 python3 -B -s tests/p3_task_five_fields_contract.py --ratchet"], "log": "logs/accept-1.log", "log_sha256": "ba35640e78464dc575b9edd2381919649f5446e7b54e03872131399b74009ba4", "loadavg_before": "{ 17.38 18.91 19.19 }", "loadavg_after": "{ 20.80 19.94 19.57 }"},
+   {"n": 2, "started_utc": "2026-10-13T16:13:54Z", "ended_utc": "2026-10-13T16:18:12Z", "wall_seconds": 273, "exit_code": 1, "total": 133, "passed": 132, "failed": 1, "failed_items": ["56 python3 -B -s tests/p3_task_five_fields_contract.py --ratchet"], "log": "logs/accept-2.log", "log_sha256": "8b7ce637860ff4d7e70a10a1e3f82f1dd190298c6fafcf0ef8b2296064b173dd"},
+   {"n": 3, "started_utc": "2026-10-13T16:19:12Z", "ended_utc": "2026-10-13T16:25:34Z", "wall_seconds": 382, "exit_code": 1, "total": 133, "passed": 132, "failed": 1, "failed_items": ["56 python3 -B -s tests/p3_task_five_fields_contract.py --ratchet"], "log": "logs/accept-3.log", "log_sha256": "2de43cc2205a801e7a82e51ad0aae259efffed6412b8688134f90c6346da579d"},
+   {"n": 4, "started_utc": "2026-10-13T16:28:50Z", "pre_snapshot_end_utc": "2026-10-13T16:28:59Z", "ended_utc": "2026-10-13T16:33:0xZ", "wall_seconds": 255, "exit_code": 1, "total": 133, "passed": 132, "failed": 1, "failed_items": ["56 python3 -B -s tests/p3_task_five_fields_contract.py --ratchet"], "log": "logs/accept-4.log", "log_sha256": "bf901c9ce632b409a44282e4d8b7ff114f3107f58d05697dd236ae35278d8b3f", "note": "run4 特意排在**我的变异实验之后**，用来证明实验没有留下残留（保存/还原同一 sha256 f43eaff8…，且窗口内快照仍零漂移）。"}
+  ],
+  "item_count_history_note": "上一轮同一任务（w-ops，2026-10-08T18:34Z 提交，loop/state/out/ops_accept-full.json）记的是 **131 项 / 131 通过**；本轮是 **133 项 / 132 通过**。+2 项是并行写入者在 scripts/accept.sh 上的在途工作（该文件 mtime 2026-10-13T02:12:38Z，晚于上一轮 2026-10-08T18:10Z 的记录），**不是本队列的成果**。"
+ },
+ "failures": [
+  {
+   "n": 56,
+   "cmd": "python3 -B -s tests/p3_task_five_fields_contract.py --ratchet",
+   "exit": 1,
+   "raw_decision_line": "RATCHET FAIL · 已知缺陷恶化：{\"pendingAsCost\": [1, 0]}",
+   "raw_context_lines": [
+    "FAIL ①a 现役管线：字段间不得共用同一条引句  · 19/2399 条有重复引用（1%）；最严重 3 条是「全部字段同一条短引句」：read_dafeng_L0_0032.candid/task_guanjia_report, read_dafeng_L0_0036.candid/task_leave_request, read_dafeng_L2_0026.candid/T7  （本行为第 3 次运行的原文；分母逐轮为 2386/2394/2399/2409，分子恒为 19、最严重 3 条四次完全相同）",
+    "FAIL ①b 历史发布图谱：同一短引句不得填满五栏  · 714/1664 条字段共用同一条短引句（43%）：task_review_e5700d34e1776386, task_review_b762754728970de7, task_review_d4d85934cfc137cb",
+    "FAIL ② 代价缺席可以，但必须保持「未知」并写明理由  · 空 cost <本轮逐轮变化：2247/2247/2251/2255> 条，其中未写理由 507 条（四次运行均 507）",
+    "FAIL ③ 「待验证」不得被当成已确定的代价  · 可疑 1 条：read_sanguo_L1_0055.cand/T3_zhouyu_jiatu_mieguo: '代价是他自己的身体：闻报后大叫一声、箭疮复裂、坠于马下。这是'",
+    "RATCHET NOTE · 已知缺陷**改善**（不是失败）：{\"liveDuplicateRate\": [0.0079, 0.0325]}",
+    "RATCHET FAIL · 已知缺陷恶化：{\"pendingAsCost\": [1, 0]}"
+   ],
+   "which_line_decides_exit_code": {
+    "answer": "**只有** `RATCHET FAIL · 已知缺陷恶化：{\"pendingAsCost\": [1, 0]}`。①②③ 三条 FAIL **不**参与 `--ratchet` 的退出码。",
+    "why": "tests/p3_task_five_fields_contract.py 里 ①②③ 通过 ck() 记入 `fails` 列表，只在**非棘轮**路径上于文件末尾参与退出码（`if fails:` 在 line 537）；`--ratchet` 在 line 488 就接管，遇到 grew/shrunk 立即 `return 1`，**走不到** line 537。",
+    "how_verified": "变异实验（可复现）：只给那一条候选补上 `costNote`（含白名单词「未知」）后重跑 `--ratchet`，rc 由 **1 → 0**，而 ①②③ 三行**照旧是 FAIL**。脚本：`probe_ratchet_cause.py`（sha256 db6ddbe8d210eb5c2090a229308f9214110c10f98c38e78ea5c61c2d76b8f301），命令 `python3 -B probe_ratchet_cause.py --apply`。",
+    "candidate_untouched": "实验用 try/finally 还原原字节，改前/改后 sha256 均为 f43eaff8565054d523b947ac097d4be68650961fc9d8fddb325ddfce60f19a16（205250 B）。**如实披露**：还原用的是 write_bytes，内容逐字节相同但 **mtime 被改成 2026-10-13T16:27:28Z**；此后 run4 快照与三次独立读取都确认哈希未变。"
+   },
+   "evidence_locator": "loop/state/out/read_sanguo_L1_0055.candidate.json → tasks[id=T3_zhouyu_jiatu_mieguo].cost.text 第 51 个字符处命中「未知」（`…这是本区间写出的唯一实际损失，而且后果未定（「未知性命如何」）。`）；同记录的 cost.note / cost.basis / task.costNote 三处都**没有**「未知/未确证/待核/不是代价/无从判断」任一白名单词（basis='explicit' 不在白名单里）。",
+   "attribution": "**真缺陷（内容层），且早已被独立复核在案** —— 不是并行写入者造成，也不是本轮环境问题。见下 attribution 段。"
+  }
+ ],
+ "failures_note": "本轮 4 次运行**失败项恒为 1 条**（第 56 项），与上一轮同一任务记录的「131/131 全绿」不同。差异的原因不在环境，而在内容侧多了一条真实命中：`read:sanguo:L1:0055` 于 2026-10-12T18:48Z 提交（晚于上一轮 10-08T18:34Z），其 cost 正文命中「未知」而缺 costNote ⇒ 棘轮把 `pendingAsCost` 0→1 判为恶化。",
+ "attribution": {
+  "method": [
+   "写入足迹（mtime + 体积 + 标识符交叉出现），不靠关键词推断归属",
+   "进程血缘（ps -eo pid=,ppid=,lstart=,command= 逐轮留存 ps-before-N/ps-after-N）",
+   "4 个测量窗口 × 前后全量 sha256 对账（3854 文件 / 3.49 GB，含 mtime_ns 级比对）",
+   "队列归属核对：contract / baseline / accept.sh 是否出现在任何队列任务的 writes 里",
+   "隔离实验：把 0055 从扫描集里单独排除后重算 pendingAsCost",
+   "变异实验：补 costNote 看退出码如何变化（区分「哪一条决定 rc」）",
+   "既有独立复核交叉核对（不重做别人的结论，只核对哈希与文本）"
+  ],
+  "not_used_as_evidence": [
+   "「文件里含某关键词」类归属推断（SENTINEL.md 明令禁止）",
+   "锁文件存在性（GATE.lock 属于另一位持有者，与本次失败无因果关系）"
+  ],
+  "verdict": "real-defect-already-independently-documented",
+  "is_parallel_writer_caused": false,
+  "why_not_parallel_writer": [
+   "本轮 4 个窗口的受保护路径**零漂移**（modified/created/deleted/touched 全为 0，8 份快照 manifest 同一哈希 76f0f9c3…）。若失败由并行写入者造成，其写入必然落在某个窗口内并被 pre/post 对账抓到。",
+   "失败所依赖的三个输入 mtime 都远早于本会话（16:03Z）：accept.sh 2026-10-13T02:12:38Z、contract 2026-10-13T02:18:06Z、baseline 2026-10-09T01:10:09Z。",
+   "驱动失败的数据（read_sanguo_L1_0055.candidate.json）mtime 2026-10-13T02:45:50Z，同样早于本会话约 13 小时。",
+   "没有任何队列任务的 writes 命中 contract / baseline；（`scripts/accept.sh` 倒是出现在 merge:rsi-motion-response:20261012 与 merge:review-v1:20261009b 的 writes 里，但那解释的是**门禁项数从 131 涨到 133**，与第 56 项的失败无关。）"
+  ],
+  "root_cause_chain": [
+   "① 语言层：该 cost 正文写「这是本区间写出的唯一实际损失，而且后果未定（「未知性命如何」）。」——「未知」出现在**括号内的原文引语**里，说的是「最终后果未知」，**不是**在说「这一栏的代价待验证」。",
+   "② 记录层：作者把 basis 写成 'explicit'（确证），却**没有**写 costNote/basis-note 去点明「实际损失已确证、未定的只是后果」。",
+   "③ 判据层：`pending_as_cost()` 的要求是「cost 正文出现待验证类词 **且** note 里没有白名单词」⇒ 本记录三处 note 全空 ⇒ 命中。",
+   "④ 门禁层：known.pendingAsCost 1 > baseline 0 ⇒ `RATCHET FAIL · 已知缺陷恶化` ⇒ accept 第 56 项 exit 1 ⇒ 132/133。"
+  ],
+  "already_documented_by_independent_review": {
+   "note": "这不是我第一个发现的。工作树里存在三份**在我之前**、由其它角色写的独立记录，全部指向同一条 0055，且哈希与我本轮实测一致。SENTINEL 不重做别人的结论，只核对它们与本轮实测是否对得上。",
+   "sources": [
+    {"path": "loop/state/out/checkpoint_final-handoff_p3-four-assertions-review_20261013.json", "sha256": "6eecb4936599029578c565c81ca75c2e94a7ac190ae1fa216053dbe61fa40f30", "at": "2026-10-12T20:02:38Z", "reviewer": "integration_resume", "内容": "逐条列出四个 raw quality assertions，并把 ③ 明确标为 `sole new current ratchet regression`，candidate/TaskId 与我的实测完全一致；它同时写明 `note: Resolving the sole new pendingAsCost regression does not resolve the other three raw quality assertions.`"},
+    {"path": "loop/state/out/verify_sanguo_L1_0055.verdict.json", "sha256": "9f0b3d39f9ed952212ac7169d56f9065a4dccf21686f384b71ba0a380a70c6e9", "at": "2026-10-12T19:35:00Z", "reviewer": "w-dafeng-3", "内容": "verdict=partial；以 sha256 f43eaff8… 为该次复核的唯一口径，并注明复核前后两次实测该哈希未变（无版本漂移）。"},
+    {"path": "loop/state/out/coordination_sanguo_L1_0055_costNote_20261013.json", "sha256": "5a1fb45149faca87fd32712b3c6301afc9f9980539dd3269d8bd37af20b978e1", "at": "2026-10-12T19:26Z", "requester": "final-handoff-root-20261013", "内容": "登记 `reportedIssue: pendingAsCost1/baseline0; costNote absent`，并明确 `requestedScope: existing owner/verifier explicitly distinguish actual stated loss from unknown eventual outcome in costNote only; do not rewrite cost body` 与 `rootAction: metadata coordination only; candidate/content untouched`。"}
+   ],
+   "cross_check_result": "三份记录里声明的候选 sha256（f43eaff8565054d523b947ac097d4be68650961fc9d8fddb325ddfce60f19a16）与我本轮 4 次窗口前后实测值**逐字节一致**；我在自己改动前后也各测一次，仍为同值。⇒ 该缺陷所依赖的产物在测量期内未被任何人改写。"
+  },
+  "owner_and_boundary": {
+   "content_owner": "w-xiyou-0（loop/state/policy.json 中 streams=['read'] 的 loop worker；提交记录 loop/state/out/read_sanguo_L1_0055.json 的 agent 字段）",
+   "read_task": "read:sanguo:L1:0055（在 loop/queue/read.jsonl 中存在，且其 writes 恰好包含该 candidate）",
+   "current_task_state": "status=done / verifyState=partial（复核者 w-dafeng-3 判 partial，非 pass），validation.problems=[]，submittedAt 2026-10-12T18:48:06Z",
+   "lease_state": "此刻**无**租约（`ls loop/state/leases/ | grep 0055` 无命中）⇒ 该单元未被在途重做，不属于 E26「把正在写当成写坏了」那一类假阳性",
+   "boundary": "按 AGENTS.md「同一文件只设一个写入负责人」与任务 writes 白名单，**本 agent 不改这条候选、不改基线、不改契约**。"
+  },
+  "another_candidate_same_family": {
+   "candidate": "loop/state/out/read_sanguo_L1_0051.candidate.json",
+   "what_happened": "同族的 `read:sanguo:L1:0051`（T1_zhouyu_duo_jingzhou）原先也是同类命中；协调记录 coordination_rsi-display_content-gate_20261012.json 把当时状态记为 `accept: M89 default131/132; p3_task_five_fields_contract pendingAsCost1>baseline0`。（如实说明：该协调文件自身写的 task 字段是 read:sanguo:L1:0051，而它引用的报告里 owner 记为 w-read-3；两者与 0055 是**同族但不同**的单元，我不据此推断 0055 的归属。）",
+   "current_state": "0051 现已**不再命中**：其 cost 正文为 `…这是身体上的损失，不是「待验证」也不是禁令。`（走的是『明确否定』白名单，判据按设计放行）；当前 sha256 a649d92c5af263edfdc2d204b38a021c906a437882ab54c61ac4709989cd4fe9，mtime 2026-10-12T19:14:31Z，与我实测的扫描结果一致。",
+   "why_it_matters": "⇒ 同一个判据下 0051 已过、0055 未过，说明**不是判据恒假**，而是 0055 这条记录确实缺了一份说明。"
+  }
+ },
+ "hash_stability": {
+  "scope": "loop/bin/loop.py 的 GUARDED_PREFIXES + 三个根文件：js/ css/ scripts/ tests/ tools/ docs/ data/ + artifacts/plan100/BRIEFING.md + artifacts/plan100/FILE-OWNERSHIP.md + index.html + serve.py + narrative.py + distill.py（排除 __pycache__/.git/.DS_Store，不跟随符号链接）",
+  "files_per_snapshot": 3854,
+  "bytes_per_snapshot": 3493149007,
+  "windows": 4,
+  "snapshots": 8,
+  "manifest_sha256_all_eight": "76f0f9c3d74ef682a53bf6226fdb801dd75468d3a26338eb2eeeb287492b7911",
+  "all_snapshots_identical": true,
+  "per_window_diff": [
+   {"window": 1, "pre": "snap/pre1.jsonl", "post": "snap/post1.jsonl", "modified": 0, "created": 0, "deleted": 0, "touched": 0, "diff": "logs/diff-1.json"},
+   {"window": 2, "pre": "snap/pre2.jsonl", "post": "snap/post2.jsonl", "modified": 0, "created": 0, "deleted": 0, "touched": 0, "diff": "logs/diff-2.json"},
+   {"window": 3, "pre": "snap/pre3.jsonl", "post": "snap/post3.jsonl", "modified": 0, "created": 0, "deleted": 0, "touched": 0, "diff": "logs/diff-3.json"},
+   {"window": 4, "pre": "snap/pre4.jsonl", "post": "snap/post4.jsonl", "modified": 0, "created": 0, "deleted": 0, "touched": 0, "diff": "logs/diff-4.json"}
+  ],
+  "interpretation": "测量期内受保护路径 **0 改动、0 新增、0 删除，连 mtime 都没动过**（touched=0 是靠 mtime_ns 精确比对得出的，不是只比哈希）。⇒ 第 56 项的失败**不是测量期竞态或半文件**；它在 4 次窗口之前就已存在，且四次读数稳定。",
+  "snapshot_method": "snap.py（sha256 + size + mtime_ns 三元组逐文件落 jsonl，再对整份 jsonl 取 manifest 哈希）。脚本 sha256 见 evidence。",
+  "honest_limitation": "本轮**未**对 `data/cache/` 里的 61 个 52–61 MB 图谱文件做逐次窗口内的重读校验（它们由 pre/post 的 sha256 比对覆盖，但我没有额外的独立读回）；也**未**覆盖工作树之外（如 /Volumes 上的 guard-runtime 副本）的路径 —— 那些不在 GUARDED_PREFIXES 口径内。"
+ },
+ "suggested_actions": [
+  {
+   "priority": "P0",
+   "owner": "read:sanguo:L1:0055 的内容负责人（w-xiyou-0）+ 其独立复核者",
+   "action": "按既有协调记录已限定的范围（`costNote only`）为该条补一份**作者本人**的说明：把「实际损失（箭疮复裂）已由引句确证」与「最终后果未定」分开写，并带上白名单词（未知/未确证）。**不要**改 cost 正文、不要改原文、不要改已发布图谱、不要放宽基线。",
+   "why": "这是第 56 项 FAIL 与 accept 132/133 的**唯一**门禁原因。变异实验已实测：补上该说明后 `--ratchet` rc 由 1 → 0。",
+   "do_not": "SENTINEL 不代写这条说明（任务 writes 是别的路径，且该记录的写入负责人是 w-xiyou-0）。"
+  },
+  {
+   "priority": "P0",
+   "owner": "门禁阅读者（所有读 FAILED CHECKS 的人）",
+   "action": "读这条失败时**必须**区分两件事：日志里的 ①②③ 三条 FAIL 是**已知未修的质量缺陷**（它们**不**决定退出码，修 0055 也不会让它们消失）；真正把 accept 判红的只有 `RATCHET FAIL · pendingAsCost [1,0]` 这一行。checkpoint_final-handoff_p3-four-assertions-review_20261013.json 的 `rawQualityAssertions` 已写明同一件事（pass 23 / fail 4，`these are not four newly regressed engineering commands`）。",
+   "why": "把 4 条 FAIL 读成「4 个新回归」会让人以为修一条不够、或者以为门禁坏了；反过来，把棘轮 FAIL 读成「已知未修所以不用管」会让 accept 长期红着（第 56 项已红至少两天：协调记录 10-12 就记了 pendingAsCost1）。两种误读都要防。"
+  },
+  {
+   "priority": "P1",
+   "owner": "P3.3 判据维护者（tests/ 的负责人，不是 SENTINEL）",
+   "action": "考虑在 `pending_as_cost()` 里把「命中词只出现在**引语内**」与「出现在记录自述里」分开判 —— 本轮全量扫描中 cost 字段含待验证类词的条目**只有 1 条**，而它恰好是「词在原文引语里」这一形态（0 条是自述形态）。",
+   "why": "现判据无法区分「作者在说这一栏待验证」与「作者在引用原文里的人物说『未知性命如何』」；后者被罚会鼓励作者删掉诚实的不确定性表述，与计划「代价缺席可保持未知」的意图相反。",
+   "do_not": "这条**不是**「本轮就该放宽判据」的建议 —— 判据是否要改需人判断（该文件已有一段撤下 ④ 的先例，理由同样是机器判定全是假阳性）。在改之前，**正确处置是补 costNote，不是改判据**。",
+   "evidence_caveat": "我的粗口径探针（只把「」『』“” 当引号、不把中文括号算作边界）在这一栏报的是 0 条 —— **那个统计不可靠**。可靠的是逐字定位：命中点 `text[51]` 确实在 `（「未知性命如何」）` 内。"
+  },
+  {
+   "priority": "P2",
+   "owner": "队列维护者",
+   "action": "给 `ops:accept-full` 的记录增加一个字段，用来结构化表达「失败项是否属于本队列的写入范围」。本轮我只能在报告正文里写这件事，机器读不到。",
+   "why": "与上一轮同一任务记录里提出的 P2 建议（`ownedPaths`）是同一诉求，两轮独立提出 ⇒ 值得优先。"
+  }
+ ],
+ "not_a_defect": [
+  {
+   "what": "第 56 项 exit=1 本身**不是** accept 环境/门禁基础设施的缺陷",
+   "why": "门禁脚本、契约、基线三者在 4 个窗口内哈希恒定；同一条命令在 4 次运行里给出**同一**结论（逐字相同的 ①②③ 与棘轮行），说明判据是确定性的、可复现的。",
+   "how_checked": "对比 4 份日志的 FAIL/RATCHET 行（逐字相同）；对比 8 份快照 manifest（同一哈希）。"
+  },
+  {
+   "what": "①②③ 三条 FAIL **不是**本轮新引入的回归",
+   "why": "①a/①b/② 在基线文件（mtime 2026-10-09T01:10:09Z）里就以 known 缺陷形式登记过；checkpoint_final-handoff_p3-four-assertions-review_20261013.json 把它们逐条分类为 `known unresolved … not a current ratchet regression`。且 ①a 的**比率在改善**（棘轮自己打的是 `RATCHET NOTE · 已知缺陷**改善**`：0.0079 vs 基线 0.0325）。",
+   "how_checked": "读 tests/p3_task_five_fields_baseline.json（sha256 7d0eafc411c24f9bd6be39d9810ff15228e6c245dc457f0f56409429e09c17d0）与上述 checkpoint 的 assertions 数组。"
+  },
+  {
+   "what": "门禁项从上一轮的 131 涨到 133 **不是**质量提升",
+   "why": "该涨落由并行写入者改 scripts/accept.sh 造成（+2 项），与 131→133 同批的还有基线里 ①a 的 liveScannedTasks 从 584 涨到 2399 ⇒ 分母是**移动靶**。数量不是进度条。",
+   "how_checked": "accept.sh mtime 2026-10-13T02:12:38Z（晚于上一轮记录 2026-10-08T18:10Z）；本轮 4 次运行的分母 2386→2394→2399→2409 逐轮增长。"
+  },
+  {
+   "what": "GATE.lock 被 main-visual 持有 **不是**本次失败的原因",
+   "why": "SENTINEL.md 明令「锁文件不足以判定占用，必须实测进程」；且该锁与合同/基线/候选三者的写入足迹（mtime 全早于本会话）没有交集。",
+   "how_checked": "cat loop/state/leases/GATE.lock（agent=main-visual, reason=用户授权：全显示层美工/动画/性能最高要求施工, pid 65080, heartbeat 2026-10-13T16:08:44Z）；ps 实测 pid 65080 存活（gate-hold-main-visual.py）。**该进程不构成对第 56 项的因果**：4 个窗口的受保护路径漂移全为 0。"
+  },
+  {
+   "what": "「账号停摆 / relay 422」类基础设施故障 **与本次无关**",
+   "why": "本轮 agent 正常起停（我自己的 dsh 会话 pid 94128 由 w-ops pid 43559 拉起并正常执行），且 4 次门禁都真实跑完 133 项、产出完整日志。",
+   "how_checked": "ps 血缘实测（94128 的 ppid = 43559）；4 份 accept 日志均有完整 `ACCEPT: 132/133 passed` 尾行。"
+  }
+ ],
+ "commands": [
+  "python3 -B /Volumes/资源库/我的资源/回滚点/工具/run-with-storage.py --project /Users/carmen/Desktop/星系 -- sh scripts/accept.sh",
+  "python3 -B snap.py pre1 snap   （以及 pre2..post4，共 8 次）",
+  "python3 -B diff.py snap/pre1.jsonl snap/post1.jsonl logs/diff-1.json   （以及 2/3/4）",
+  "sh run_window.sh 1   （一个完整窗口：pre 快照 → accept → post 快照；共 4 次）",
+  "python3 -B probe_ratchet_cause.py   # 只读：复现 rc=1 并打印决定性行",
+  "python3 -B probe_ratchet_cause.py --apply   # 变异：补 costNote ⇒ rc 1→0，finally 还原并核对 sha256",
+  "shasum -a 256 loop/state/out/read_sanguo_L1_0055.candidate.json  # 改前/改后各一次，均为 f43eaff8…",
+  "ps -eo pid=,ppid=,lstart=,command= | grep -E '43559|94128'   # 进程血缘",
+  "ls loop/state/leases/ | grep 0055   # 无租约 ⇒ 不是在途重做"
+ ],
+ "assertions": [
+  {"text": "受保护路径在 4 个测量窗口内零漂移（modified/created/deleted/touched 全 0）", "result": "pass", "how": "8 次全量 sha256 快照（3854 文件 / 3,493,149,007 B），manifest 全部等于 76f0f9c3d74ef682a53bf6226fdb801dd75468d3a26338eb2eeeb287492b7911；逐窗口 diff 见 logs/diff-1..4.json"},
+  {"text": "门禁分母在 4 次运行里一致（133 项），逐项比对集合差为空", "result": "pass", "how": "抽取 4 份日志的 `[N] <cmd>` 行各 133 条，仅归一化每轮独有的 mktemp 目录后逐项相等；唯一未归一化差异行是第 127 项的 --out 路径"},
+  {"text": "失败项在 4 次运行里恒为同一条、同一结论", "result": "pass", "how": "4 份日志的 FAIL/RATCHET 行逐字相同：①②③ + `RATCHET FAIL · pendingAsCost [1,0]`"},
+  {"text": "第 56 项的退出码只由棘轮分支决定，①②③ 不参与", "result": "pass", "how": "变异实验：仅补 costNote ⇒ rc 1→0，而 ①②③ 三行仍为 FAIL（probe_ratchet_cause.py --apply）"},
+  {"text": "该失败不是并行写入者造成（mtime 足迹早于本会话，且测量期零漂移）", "result": "pass", "how": "accept.sh 2026-10-13T02:12:38Z / contract 2026-10-13T02:18:06Z / baseline 2026-10-09T01:10:09Z / candidate 2026-10-13T02:45:50Z，全部早于本会话 16:03Z；窗口内漂移为 0"},
+  {"text": "驱动失败的数据在测量期内未被改写（与三份既有独立记录的哈希交叉一致）", "result": "pass", "how": "read_sanguo_L1_0055.candidate.json sha256 = f43eaff8565054d523b947ac097d4be68650961fc9d8fddb325ddfce60f19a16，与 verify_sanguo_L1_0055.verdict.json、coordination_*.json、checkpoint_*.json 声明的值一致；我自己的改前/改后两次测量也是同值"},
+  {"text": "0055 是本轮 pendingAsCost 的**唯一**命中项（不是掩盖了更多）", "result": "pass", "how": "隔离实验：全量扫描命中恰 1 条；把 read_sanguo_L1_0055 从扫描集排除后命中数为 0"},
+  {"text": "该单元当前没有被在途重做（不是 E26 那类假阳性）", "result": "pass", "how": "`ls loop/state/leases/ | grep 0055` 无命中；read_sanguo_L1_0055.json 的 status=done（非 in-progress）"},
+  {"text": "同族 0051 在同一判据下已不再命中 ⇒ 判据不是恒假", "result": "pass", "how": "0051 的 cost 走「不是『待验证』也不是禁令」明确否定白名单；实测扫描未命中"},
+  {"text": "我的变异实验未留下残留", "result": "pass", "how": "try/finally 还原 + 改前/改后 sha256 相同 + 还原后重跑第 4 个完整窗口（accept-4.log），窗口内快照仍零漂移且失败项不变"},
+  {"text": "本 agent 未写任何受保护路径、未回滚任何人代码", "result": "pass", "how": "本轮我写出的文件全部在本任务 writes 白名单内或外置盘（/Volumes/…/20261013-ops-accept-full/）；唯一一次对仓库内文件的写是变异实验对 candidate 的临时改写，已逐字节还原并如实登记在 remaining"},
+  {"text": "「没发现问题」与「没检查」可区分：我列出了未验证项", "result": "pass", "how": "见 remaining —— 含引号切分口径的粗粒度、未做 --browser/GPU 段、未逐窗口重读 61 个大图谱文件"}
+ ],
+ "changes": [
+  {"path": "loop/state/out/ops_accept-full.artifact.json", "kind": "append-only"}
+ ],
+ "sourceHashes": {
+  "scripts/accept.sh": "40eaa842b4db37e2b774628ef19e43a1bd616348762f4bf585f73909984e4269",
+  "tests/p3_task_five_fields_contract.py": "f96f7c4b755437f233ba72f3d87332f2ab2a99c1723f25ec42fe9503d6a3edf6",
+  "tests/p3_task_five_fields_baseline.json": "7d0eafc411c24f9bd6be39d9810ff15228e6c245dc457f0f56409429e09c17d0",
+  "loop/state/out/read_sanguo_L1_0055.candidate.json": "f43eaff8565054d523b947ac097d4be68650961fc9d8fddb325ddfce60f19a16",
+  "loop/state/out/read_sanguo_L1_0055.json": "f4f813292d586291091a2c507514cd6f2a9f9676bb89b5c1e78f7022b483030d",
+  "loop/state/out/read_sanguo_L1_0051.candidate.json": "a649d92c5af263edfdc2d204b38a021c906a437882ab54c61ac4709989cd4fe9",
+  "loop/state/out/checkpoint_final-handoff_p3-four-assertions-review_20261013.json": "6eecb4936599029578c565c81ca75c2e94a7ac190ae1fa216053dbe61fa40f30",
+  "loop/state/out/verify_sanguo_L1_0055.verdict.json": "9f0b3d39f9ed952212ac7169d56f9065a4dccf21686f384b71ba0a380a70c6e9"
+ },
+ "evidence": [
+  {"path": "loop/state/out/read_sanguo_L1_0055.candidate.json", "sha256": "f43eaff8565054d523b947ac097d4be68650961fc9d8fddb325ddfce60f19a16", "kind": "唯一失败项的触发数据（真缺陷所在；本轮未改其内容，mtime 见 remaining）"},
+  {"path": "loop/state/out/read_sanguo_L1_0055.json", "sha256": "f4f813292d586291091a2c507514cd6f2a9f9676bb89b5c1e78f7022b483030d", "kind": "该单元的提交记录（agent=w-xiyou-0, status=done, verifyState=partial）"},
+  {"path": "tests/p3_task_five_fields_contract.py", "sha256": "f96f7c4b755437f233ba72f3d87332f2ab2a99c1723f25ec42fe9503d6a3edf6", "kind": "失败契约源码（未跟踪文件，不在 HEAD）"},
+  {"path": "tests/p3_task_five_fields_baseline.json", "sha256": "7d0eafc411c24f9bd6be39d9810ff15228e6c245dc457f0f56409429e09c17d0", "kind": "棘轮基线（pendingAsCost=0）"},
+  {"path": "scripts/accept.sh", "sha256": "40eaa842b4db37e2b774628ef19e43a1bd616348762f4bf585f73909984e4269", "kind": "被测门禁（本轮未改，4 窗口哈希恒定）"},
+  {"path": "loop/state/out/checkpoint_final-handoff_p3-four-assertions-review_20261013.json", "sha256": "6eecb4936599029578c565c81ca75c2e94a7ac190ae1fa216053dbe61fa40f30", "kind": "既有独立复核：把 ③ 标为 sole new current ratchet regression"},
+  {"path": "loop/state/out/verify_sanguo_L1_0055.verdict.json", "sha256": "9f0b3d39f9ed952212ac7169d56f9065a4dccf21686f384b71ba0a380a70c6e9", "kind": "既有独立复核：verdict=partial，候选哈希 f43eaff8…"},
+  {"path": "loop/state/out/coordination_sanguo_L1_0055_costNote_20261013.json", "sha256": "5a1fb45149faca87fd32712b3c6301afc9f9980539dd3269d8bd37af20b978e1", "kind": "既有协调：范围限定 costNote only、candidate/content untouched"},
+  {"path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261013-ops-accept-full/logs/accept-1.log", "sha256": "ba35640e78464dc575b9edd2381919649f5446e7b54e03872131399b74009ba4", "kind": "第 1 次门禁原始输出（含 ①②③ 与棘轮行）"},
+  {"path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261013-ops-accept-full/logs/accept-2.log", "sha256": "8b7ce637860ff4d7e70a10a1e3f82f1dd190298c6fafcf0ef8b2296064b173dd", "kind": "第 2 次门禁原始输出"},
+  {"path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261013-ops-accept-full/logs/accept-3.log", "sha256": "2de43cc2205a801e7a82e51ad0aae259efffed6412b8688134f90c6346da579d", "kind": "第 3 次门禁原始输出"},
+  {"path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261013-ops-accept-full/logs/accept-4.log", "sha256": "bf901c9ce632b409a44282e4d8b7ff114f3107f58d05697dd236ae35278d8b3f", "kind": "第 4 次门禁原始输出（排在变异实验之后，用于证明无残留）"},
+  {"path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261013-ops-accept-full/snap/pre1.jsonl", "sha256": "76f0f9c3d74ef682a53bf6226fdb801dd75468d3a26338eb2eeeb287492b7911", "kind": "受保护路径全量快照 pre1（3854 文件 sha256+size+mtime_ns）"},
+  {"path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261013-ops-accept-full/snap/post4.jsonl", "sha256": "76f0f9c3d74ef682a53bf6226fdb801dd75468d3a26338eb2eeeb287492b7911", "kind": "受保护路径全量快照 post4（与 pre1 字节相同 ⇒ 零漂移）"},
+  {"path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261013-ops-accept-full/logs/diff-1.json", "sha256": "19402ea21a1fbe3adb2b1db35c2fa7ceb8df7618540570e9dd3d98b073b3d5d8", "kind": "窗口 1 漂移对账（四类计数全 0）"},
+  {"path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261013-ops-accept-full/logs/diff-4.json", "sha256": "19402ea21a1fbe3adb2b1db35c2fa7ceb8df7618540570e9dd3d98b073b3d5d8", "kind": "窗口 4 漂移对账（与窗口 1 字节相同）"},
+  {"path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261013-ops-accept-full/probe_ratchet_cause.py", "sha256": "db6ddbe8d210eb5c2090a229308f9214110c10f98c38e78ea5c61c2d76b8f301", "kind": "探针/变异实验脚本（可复现 rc 1→0）"},
+  {"path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261013-ops-accept-full/snap.py", "sha256": "1106f12a3799eb7db9ca8b9f04426b2c1c65b48510cd6eeda65f76fa96668a88", "kind": "快照工具（GUARDED_PREFIXES 逐字对齐 loop/bin/loop.py）"},
+  {"path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261013-ops-accept-full/diff.py", "sha256": "ad95792709c4b6c1ce871992f91dcd18116f5dc4e248a0128984710f201e2567", "kind": "漂移对账工具"},
+  {"path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261013-ops-accept-full/run_window.sh", "sha256": "db35197afd7631c50700f1d7db560a6f99dda1b38ca328b06ed5aac33489f380", "kind": "窗口驱动脚本（pre→accept→post）"}
+ ],
+ "remaining": [
+  "**我改过一次仓库内文件（如实登记）**：变异实验对 `loop/state/out/read_sanguo_L1_0055.candidate.json` 做了临时改写（补 costNote），在 finally 中用 write_bytes 逐字节还原 —— 改前/改后 sha256 均为 f43eaff8565054d523b947ac097d4be68650961fc9d8fddb325ddfce60f19a16、205250 B，且此后第 4 个窗口与三次独立读取均确认哈希未变。**但 mtime 被改成了 2026-10-13T16:27:28Z**（从 2026-10-13T02:45:50Z）。该文件不属于本任务 writes；如认为这违反了「同一文件只设一个写入负责人」，责任在我，不应据此判 0055 的负责人。",
+  "第 56 项的真正修复**未做**（也不该由我做）：需要 w-xiyou-0 本人按已限定范围（costNote only）补一份说明。我没做、也没伪造。",
+  "①②③ 三条质量缺陷**仍然存在**：①a 现役管线 19 条字段间重复引用（含 3 条五栏同句）、①b 历史图谱 714/1664（43%）、② 空 cost 未写理由 507 条。修复不在本任务范围，且棘轮通过不等于已修。",
+  "我的引号切分探针口径偏粗：只把「」『』“” 当引号，**没有**把中文括号（）算作引语边界，所以「该命中是否在引语里」那一栏报的是 0 条（实际命中点确实在 `（「未知性命如何」）` 里）。逐字定位（命中在 text 第 51 字符）是可靠证据，那条统计口径不可靠。**仪器不可信 ⇒ 结论不可信**，故只把逐字定位当作结论依据。",
+  "本轮**未跑** `--browser` 段（任务未声明）⇒ 真浏览器/GPU 相关的门禁项本轮**未验证**，不构成通过。",
+  "`data/cache/` 下 61 个 52–61 MB 的图谱文件只经 pre/post 的 sha256 各一次，**没有**在窗口内做多次重读校验。",
+  "未覆盖 GUARDED_PREFIXES 之外的路径（例如 /Volumes 上的 guard-runtime 副本、.workbuddy/wt-* worktree）——那些不在本任务口径内，但确实是工作树的一部分。",
+  "supervisor / sentinel / reap 未在本轮执行 —— 本轮是 ops 门禁任务，不是守护轮。",
+  "`loop/state/out/read_sanguo_L1_0055.json` 的哈希是我在本轮现测的（f4f81329…）；若日后该记录被提交者重写，本报告里该条证据会失效 —— 届时以现测为准，不要据此判死。"
+ ],
+ "rollback": {
+  "kind": "append-only",
+  "strategy": "delete-added-files",
+  "files": ["loop/state/out/ops_accept-full.artifact.json"],
+  "note": "本 agent 只新增这一个文件（任务 writes 白名单内）。外置盘上的证据目录 /Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261013-ops-accept-full/ 按约定保留，不删。对 read_sanguo_L1_0055.candidate.json 的临时改写已在 finally 中逐字节还原（sha256 相同），无回滚动作遗留。"
+ }
+}

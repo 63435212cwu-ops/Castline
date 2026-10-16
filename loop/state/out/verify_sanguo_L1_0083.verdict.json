@@ -1,0 +1,161 @@
+{
+ "verdict": "partial",
+ "task": "verify:sanguo:L1:0083",
+ "verifier": "w-dafeng-3 (独立复核; 非原提交者 w-dafeng-0)",
+ "reviewedCandidate": {
+  "path": "loop/state/out/read_sanguo_L1_0083.candidate.json",
+  "sha256": "94b8faa8cc3d18757f18a982f244988eebdb901a7955d4a5cd130f99d236f4fa"
+ },
+ "source": {
+  "path": "data/cache/fe42d01f3826fe8096f86614.docs.json",
+  "sha256": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+  "range": [
+   417635,
+   422649
+  ],
+  "segmentSha256": "9078d43ec60709f31151b11a4d467d17e4c0945a9479ff122534e2eac74fe3ce",
+  "segmentLen": 5014,
+  "note": "本次复核按提示词与实测文件用 8ab7298a…（fe42d01f…）；任务 JSON 的 sourceHash 2988ce6e… 实为另两份 docs.json 的哈希，已实测确认其 docs[0].text 与本文件逐字全同（607191 codepoint），见 counterExamples 之外的 notes.sourceHash。"
+ },
+ "counterExamples": [
+  {
+   "id": "CE1",
+   "claim": "notWorldSettings/NW02 的 name 把「李异斧」列为「区间内出现的兵器」的例子；同列的「张苞枪」在该区间也无任何依据。",
+   "quote": "李异见谢旌败了，慌忙拍马轮蘸金斧接战。",
+   "quoteStart": 410152,
+   "quoteEnd": 410171,
+   "why": "「李异」在整个原文区间 [417635,422649) 内出现 0 次（seg.count('李异')==0），其最近一处出现在全篇 offset 410611，位于本区间起点之前约 7000 codepoint，属第 83 回（孙桓部将，被关兴所杀）。把它写进本单元的「区间内出现的兵器」清单，是**区间外人物进入本条**。同列「张苞枪」亦无依据：区间内「枪」共 4 处（419426/419731/420795/421009），无一处与张苞相连，张苞在区间内的动作是「引五百骑出巡」「纵马冲突」「死据山口」。同列另三项（傅彤枪、程畿剑、赵云枪）经逐条核对成立。因该条整体是「不登记为设定」的否定性条目、且其 why 所举三个引例（「挺枪纵马」「拔剑自刎」「一枪刺朱然于马下」）全部逐字在区间内，故判为**局部事实错误**而非编造事件，不足以判 fail。",
+   "severity": "must-fix（删除「李异斧」，并把「张苞枪」换成区间内确有依据的兵器或删去）"
+  },
+  {
+   "id": "CE2",
+   "claim": "reverseSweep/RS2 称「区间内共 5 首诗赞」，并把清单写成「四处诗赞（陆逊一首、傅彤一首、程畿一首、张南冯习一首）与杜工部诗」。",
+   "quote": "尚论者作诗叹之曰：“先主兵归白帝城",
+   "quoteStart": 421519,
+   "quoteEnd": 421536,
+   "why": "区间内按引导语计共有 **7 个诗块**：「后人有诗赞曰」（418203，陆逊·虎帐谈兵）、「后人有诗赞陆逊曰」（420887，陆逊·持矛举火）、「后人赞傅彤诗曰」（421064）、「后人有诗赞曰」（421204，程畿）、「后人有诗赞曰」（421337，张南冯习）、「尚论者作诗叹之曰」（421519，孙夫人）、「后杜工部有诗曰」（422318）。RS2 的 5 既漏掉孙夫人一首（该诗块在候选 JSON 全文中出现 0 次：「尚论者」count=0、「犹著千秋烈女名」count=0），又把陆逊的两首并作「一首」而只计其一；它自己的候选 notWorldSettings/NW04 却列了 6 项（含孙夫人）——**同一份候选的两处自述互相矛盾，且两处都低于原文的 7**。这是可机器证伪的计数错误。按契约属事实性误述，不属编造（诗句本身未被虚构），故记 partial。",
+   "severity": "must-fix（RS2 的『5』与 name 的清单改为 7 个诗块，或明确改口径为『6 位作者』并与 NW04 统一）"
+  },
+  {
+   "id": "CE3",
+   "claim": "causeEdges/C11 的 effect 把赵云刺朱然、救出先主写在陆逊退兵之前：「他在接战中与朱然交锋，不一合一枪将其刺于马下，杀散吴兵，救出先主望白帝城而走；陆逊听到来将是赵云，急令军退。」",
+   "quote": "陆逊闻是赵云，急令军退。",
+   "quoteStart": 420762,
+   "quoteEnd": 420774,
+   "why": "原文次序与此相反：offset 420762 先写「陆逊闻是赵云，急令军退。」，420790 才写「不一合，一枪刺朱然于马下」，420808 写「救出先主，望白帝城而走」。候选用「；」把两个分句按『刺朱然→救出→陆逊退兵』排列，与原文的『陆逊退兵→刺朱然→救出』相反。两端引文都逐字可查、且候选另有 C12 单独登记「陆逊闻赵云→军退」这条正确方向，故属**叙述次序**错误而非因果编造；影响面是 effect 一句话，不牵连其它条目。",
+   "severity": "should-fix（把两个分句按原文次序对调，或去掉暗示次序的「；」）"
+  }
+ ],
+ "reverseChecks": [
+  {
+   "id": "RC1",
+   "found": "八阵图被原文明确写成**不可学、不可传**：陆逊当场问黄承彦是否学得此法，黄承彦答「变化无穷，不能学也」——这是本回对八阵图性质最直接的一句界定，候选全部 23 条 worldSettings、F01 伏笔、U01 unknowns 与 notWorldSettings/NW05 都没有覆盖它。",
+   "quote": "逊曰：“公曾学此阵法否？”黄承彦曰：“变化无穷，不能学也。”",
+   "start": 422278,
+   "end": 422308,
+   "whyItMatters": "候选把八阵图登记为 item（乱石八九十堆·use），又用「可比十万精兵」说明其效力，却漏掉原文自己给出的效力边界与不可复制性；下游若据此建『阵法可学/可布』的推断会与原文冲突。"
+  },
+  {
+   "id": "RC2",
+   "found": "陆逊入阵被迷之前，部将有一次**明确的当退预警**：「日暮矣，请都督早回。」他未听，紧接着就是狂风大作、无路可出。候选 T20 的 obstacle 只写「他自己走进去了出不来」，没有这一步。",
+   "quote": "部将曰：“日暮矣，请都督早回。”",
+   "start": 421932,
+   "end": 421948,
+   "whyItMatters": "原文把『有预警而不退』放在『被迷』正前一句；漏掉它会把 T20 的阻碍写成纯客观（阵的机关），而原文同时给了主观条件（不听劝）。"
+  },
+  {
+   "id": "RC3",
+   "found": "赵云救驾有一个明确的时间条件：「此时天色已微明」。候选 T14 详写了赵云出军、探视、刺朱然、救出，但未登记这个时间点——它正是通夜火攻与追击的收束时刻。",
+   "quote": "先主正慌急之间，此时天色已微明",
+   "start": 420641,
+   "end": 420656,
+   "whyItMatters": "T12 的 result 写到「次日，吴兵又四下放火烧山」为止，T14 接在夜色语境里；缺这一句会让『夜战』与『次日』之间少一个原文给定的过渡锚。"
+  },
+  {
+   "id": "RC4",
+   "found": "关兴是在**火光中杀上马鞍山归队**的：「忽然火光中一将引数骑杀上山来，视之，乃关兴也。」候选 T13 直接从他「伏地请曰…速奔白帝城」开始，未写他如何回到被围的山上。",
+   "quote": "忽然火光中一将引数骑杀上山来，视之，乃关兴也。",
+   "start": 420388,
+   "end": 420411,
+   "whyItMatters": "前文先主曾「令关兴往江北」探看虚实（419977 附近），中间没有他返回的交代；这一句是 T11→T13 之间唯一把人接回来的原文，漏掉会使 T13 的出场者来路不明。"
+  },
+  {
+   "id": "RC5",
+   "found": "火攻规模的一句总写：「江南、江北，照耀如同白日。」候选 T10/T12 引了「风紧火急，树木皆着」与「死尸重叠，塞江而下」，但未取这一句。",
+   "quote": "江南、江北，照耀如同白日。",
+   "start": 420125,
+   "end": 420138,
+   "whyItMatters": "原文用两岸同燃来交代火势覆盖面（与「四十屯只烧二十屯」的配额对照），是火攻效果的直接证据句。"
+  },
+  {
+   "id": "RC6",
+   "found": "傅彤在退路上先与先主**合兵一处**：「正行之间，前面一军又到，乃蜀将傅彤也，合兵一处而行。背后吴兵追至。」候选 T13 只写「留傅彤断后」与他的自请，未写他此前已归队。",
+   "quote": "正行之间，前面一军又到，乃蜀将傅彤也，合兵一处而行。背后吴兵追至。",
+   "start": 420255,
+   "end": 420288,
+   "whyItMatters": "这是傅彤能自请断后的前提（他手上有人、且在主队里）；缺它会把「臣愿以死当之」读成孤立表态，也会让 F05 的铺设少一环。"
+  },
+  {
+   "id": "RC7",
+   "found": "魏主在展开论证之前先有一声笑与一句短判词：「魏主闻之，仰面笑曰：『刘备将败矣！』」候选 T06 完整引了他的兵法论证与三路部署，但没有这一句。",
+   "quote": "魏主闻之，仰面笑曰：“刘备将败矣！”",
+   "start": 418542,
+   "end": 418560,
+   "whyItMatters": "F09 登记的是魏主「玄德必败于东吴陆逊之手，旬日之内，消息必至矣」这条预判；原文的预判其实**先有一句更短的版本**，两句是同一预判的两次发声。F09 的 setup 未提这一句，会让该伏笔的铺设看起来只有一次。"
+  }
+ ],
+ "notes": "【总判 partial】判 partial 而非 fail，理由与角色契约的判定纪律一致：全部反对意见都带逐字可查的原文引证（写盘前用 assert 把住 find>=0、切片相等、落区间），但没有一条触及『编造原文没有的人物/事件/结局/伏笔』这一最严重形态——三条反例分别落在「否定性条目的例子清单」、『自述计数』、『一句话的叙述次序』上，主线抽取（21 任务 / 17 因果边 / 14 状态 / 9 伏笔 / 23 设定）经逐条回原文核对全部成立。判 partial 而非 pass，理由同样具体：CE1 有区间外人物名进入本条，CE2 是可机器证伪且**与自身另一处自述互相矛盾**的计数错误，CE3 是与原文相反的次序陈述——三者都会被下游原样收录。\n\n【引文层：全量复算，非抽样】378 个带 quote+start+end 的对象逐条断言 text[start:end]==quote（378/378 通过、0 例外）、find(quote)==start 即首现位置（378/378）、全篇 count==1（0 虚报）、区间包含（0 越界）、sourceHash 单值一致（8ab7298a…）；另有 1 处 sourceHash 字段值为说明性文字而非哈希（source.sourceHashMeaning），属命名而非缺陷。固定种子 20261012 抽 5 条 find 核验 5/5 逐字命中且偏移一致。「」逐字片段 489 个（去重 328）全部能在原文 find 到，not-in-source=0。以上与候选自述完全一致。\n\n【结构断言复算】五栏共用同句 0、五栏区间相交 0、19 个空栏 19/19 带同栏 Note、crossTaskReuse 声明的复用实例经核对确实存在。\n\n【数字断言复算，含一处我自己的错】bodyCJK=4013、coveredCJK=3469、coveredRatio=0.8644、quoteObjects=378、distinctQuoteSpans=236、bodyRange=[417657,422592] 全部逐位复现；fieldCounts 里可机械复算的 16 项（tasks/causeEdges/states/foreshadows/notForeshadows/notWorldSettings/worldSettings/unknowns/speechAsClueNotFact/textualNotes/selfCritique/reverseSweep/themeReadings/knowledgeGaps/rejectedCauseEdges/foreshadowsResolved 等）全部相等。**我第一遍把 residualRuns=106 / residualRunsCJKge3=94 判为不符（我按全部 codepoint 计得 71/35），这是我读错了口径**：候选 method 明写『只统计汉字』，按该方法（以非汉字为分隔、只在汉字位上取未覆盖连续段）复算恰为 106 与 94，完全一致。现按契约把这条记为**我自己的复核错误**，不列为反例。\n\n【误杀检查：未发现误杀】6 条 rejectedCauseEdges（R01–R06）逐条回原文核对，拒绝理由全部成立且没有把合法边挡掉：R02 的「斩」在区间内只出现在「可斩此人」这一句威胁里（实测「斩」仅 1 处），R03 的旗幡确无任何回指，R05 区分了「急令军退」（420762，战场）与「于是下令班师」（422374，战略）两个不同事件——这一条是本回最容易连错的边，候选拒得正确，并另以 C12 保留了正确的短程边。R06 由陆逊本人当面否证（「吾非惧石阵而退」），拒得正确。\n\n【幻觉/越权检查：通过】32 个区间外三国人名（司马懿、曹操、关羽、张飞、蒋钦、李严等）在候选里全部 0 次出现；候选未引用任何区间外原文作为依据；未知项一律登记为 unknowns（10 条）而非补结局；F08 显式标 unresolved（「作用未回收」）而非按『后来会打』补一个结局；U04 明确停在「未知何意」并把回末收句引为证据——『结束≠成功』这条守住了。\n\n【sourceHash 差异：候选的处理诚实且正确】实测 data/cache/fe42d01f…=8ab7298a…，而任务 JSON 的 2988ce6e… 确为 data/cache/152e2a6eed… 与 data/cache/f0b45e85… 两份文件的哈希；我进一步核对这两份的 docs[0].text 与 fe42d01f… **逐字全同**（均 607191 codepoint，本单元切片亦相同），故候选按提示词与实测文件采用 8ab7298a… 并另立 segmentSha256 记录切片哈希，处理正确，不构成缺陷。\n\n【我的复核方法】全部脚本在 $CL_ARTIFACTS/verify-sanguo-L1-0083/ 下（check.py 引用核验、residual.py 覆盖掩码、facts.py 197 条事实清单、halluc.py 人名幻觉、findings.py 反向发现、structure.py 五栏互斥、numbers.py 数字复算、negative.py 否定性断言、prose_offsets.py 正文内偏移、final.py 最终确认）；均为独立实现，未复用候选作者的 build.py/selfcheck.py/q.py。\n\n【可用性结论】可用：tasks 21、causeEdges 17、rejectedCauseEdges 6、states 14、knowledgeGaps 6、foreshadows 9（含 1 条显式 unresolved）、notForeshadows 4、worldSettings 23、notWorldSettings 5、themeReadings 2、speechAsClueNotFact 12、unknowns 10、selfCritique 4、textualNotes 5、reverseSweep 10，以及全部 378 条引文定位——逐条回原文核验无编造。必须修：CE1（NW02 删「李异斧」并处理「张苞枪」）、CE2（RS2 的『5 首』与清单，或统一到 7 个诗块/6 位作者并与 NW04 对齐）。建议修：CE3（C11.effect 两句对调）。可补：RC1–RC7 七条原文明确而抽取层未覆盖的事实。semanticReview 如实标 not-performed，未越权声称语义已核验。",
+ "checks": {
+  "quotesChecked": 378,
+  "quotesVerbatim": 378,
+  "quotesOffsetMismatch": 0,
+  "quotesOutOfRange": 0,
+  "uniquenessClaimsFalse": 0,
+  "bracketFragments": 489,
+  "bracketFragmentsNotInSource": 0,
+  "sampleFindChecks": 5,
+  "sampleFindHits": 5,
+  "crossColumnSharedQuotes": 0,
+  "crossColumnOverlappingSpans": 0,
+  "nullColumnsWithNote": 19,
+  "nullColumnsWithoutNote": 0,
+  "coverageNumbersReproduced": [
+   "bodyCJK=4013",
+   "coveredCJK=3469",
+   "coveredRatio=0.8644",
+   "quoteObjects=378",
+   "distinctQuoteSpans=236",
+   "bodyRange=[417657,422592]",
+   "residualRuns=106(CJK口径)",
+   "residualRunsCJKge3=94(CJK口径)"
+  ],
+  "fieldCountsReproduced": 16,
+  "fieldCountsMismatch": 0,
+  "rejectedEdgesReviewed": 6,
+  "rejectedEdgesUnsound": 0,
+  "outOfIntervalNamesUsed": 1,
+  "artifacts": {
+   "dir": "$CL_ARTIFACTS/verify-sanguo-L1-0083/",
+   "scripts": {
+    "check.py": "fe2dd6fcddf75dc8c9c4ef01da498b40f48eae72d61a4ea0b9bc1532eba32105",
+    "residual.py": "6232c0e151d8f8a51053f10e0d09ec92f90aa86c7b198e19b8239329fc38001c",
+    "facts.py": "803dae8d4c0f6183bebfc041e093ed90dceefa486e542b1ea9cbc2948bd9f361",
+    "halluc.py": "e86a21bfa9b1cdbe0262bc5ba5e22579a03a6c8e7f906eb542c04965185f7a63",
+    "findings.py": "fe9969ab2d67656477431f884062de7ab6807b596e42c8a1369c86c538c8c95e",
+    "structure.py": "8f686823bb9c3f6d048298c08feb39731c36ec056489d15269fa6fc82ea12c28",
+    "numbers.py": "4e3b2e57dd871ad56562786f2fccc061f7ea81e449cb76e9f671a7c9af831421",
+    "negative.py": "0c7984127bce32ac25e95243ce7443354773d53d420e50a210df48471f6162fd",
+    "prose_offsets.py": "74a7e467bbaf8867a951a0d4e47389bede59b499968a46a9a961307fa61529f6",
+    "final.py": "ee8d3101e369591c5b93a20db0c8d52058ae07a4c267c1cf8a389c564276d658"
+   }
+  },
+  "reproduce": [
+   "cd /Users/carmen/Desktop/星系",
+   "python3 -B \"$CL_ARTIFACTS/verify-sanguo-L1-0083/check.py\" /tmp/check.json        # 378/378 逐字+偏移+区间+唯一",
+   "python3 -B \"$CL_ARTIFACTS/verify-sanguo-L1-0083/numbers.py\" /tmp/numbers.json    # 覆盖率与 fieldCounts 复算",
+   "python3 -B \"$CL_ARTIFACTS/verify-sanguo-L1-0083/structure.py\"                    # 五栏互斥 + 空栏 Note",
+   "python3 -B \"$CL_ARTIFACTS/verify-sanguo-L1-0083/final.py\"                        # CE/RC 逐字证据 + sourceHash 复现",
+   "python3 -c \"import json;t=json.load(open('data/cache/fe42d01f3826fe8096f86614.docs.json'))[0]['text'];print(t[417635:422649].count('李异'), t[417635:422649].count('尚论者'));print(t.find('陆逊闻是赵云，急令军退。'), t.find('不一合，一枪刺朱然于马下'))\""
+  ]
+ }
+}

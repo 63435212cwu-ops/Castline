@@ -1,0 +1,103 @@
+{
+  "task": "read:dafeng:L1:0257",
+  "agent": "w-read-4",
+  "role": "READER",
+  "status": "done",
+  "summary": "精读《大奉打更人》第二十八章 光宗耀祖（docs[0].text[1064547,1071287)，6740 codepoint），产出 loop/state/out/read_dafeng_L1_0257.candidate.json（sha256 6b6b8d6f…）：11 条任务五元组（每栏各自引文、栏间零共用）、9 条 causeEdges（每条带方向与触发机制）、4 条 rejectedEdges（写明为何只是时间相邻/同场景）、9 条 states（前值+后值+事件锚点；含 2 条知识差写明谁知/不知）、2 条 foreshadows（均显式 unresolved 带 payoffNote）、16 条 worldSettings（rule 8：declared 4/executed 4；place 5：arrived 4/mentioned 1；item 3，itemStates 多选）、2 条 themeReadings（各带 perspective/support/counter）、7 条 unknowns、3 条 selfCritique。**256 个引文实例**全部满足 text[start:end]==quote、切片内唯一、落在区间内、sourceHash=整个 docs.json 的 sha256（fdde5558…，实测复算）。**本轮是返工**：先独立复核上一轮未提交的产物，再补真实缺口并修好 5 处失效/未生效的判据（见 rework）。**未做语义核验**，semanticReview 保持 false。",
+  "evidence": [
+    {
+      "path": "loop/state/out/read_dafeng_L1_0257.candidate.json",
+      "sha256": "6b6b8d6ff636de3992e9fba61cb67ba8c6e1beb5d755786b50395ab3f4a6367a",
+      "kind": "candidate-read-output（本轮成品；两次构建字节级一致，可复现）"
+    },
+    {
+      "path": "loop/state/out/read_dafeng_L1_0257.w-read-4.build/quotes_0257.py",
+      "sha256": "609673440ddb32f5f20bb8cba2117e86dfc96681f3c9bb243ea08fe60dbaf6b6",
+      "kind": "构建脚本（str.find 现定位 + 逐字/区间/唯一性/栏位独立/null 带 Note/散文引述/源哈希 多重判据；任一不过即 exit 1 且不写盘）"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "原文来源与偏移口径：docs.json 实测 sha256 = fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839，与任务 sourceHash 一致；docs[0].text[1064547:1071287] 以本单元标题「第二十八章 光宗耀祖」开头，切片 6740 codepoint。命令：python3 -c \"import json,hashlib;b=open('data/cache/1063b17ca65ec1b76f30e460.docs.json','rb').read();print(hashlib.sha256(b).hexdigest());print(json.loads(b)[0]['text'][1064547:1064557])\"",
+      "result": "pass"
+    },
+    {
+      "text": "全量引文核验（含生成分区，非只查 BODY）：对产物 256 个引文实例逐条断言 text[start:end]==quote、切片内唯一命中、区间落在 [1064547,1071287) 内、sourceHash 为整文件 sha256。命令：python3 -B -s loop/state/out/read_dafeng_L1_0257.w-read-4.build/quotes_0257.py → rc=0；machineSelfCheck.finalAudit.quoteInstancesInFinalCandidate=256，四类 failures 均为空。",
+      "result": "pass"
+    },
+    {
+      "text": "栏位独立：同一条任务内 objective/obstacle/action/result/cost 的引文 (start,end) 互不重叠（taskColumnQuoteCollisions 为空，独立复算 0 冲突）——直接针对任务点名的『714/1664 条五栏共用一句』缺陷形态。null 栏位全部带同名 Note（nullColumnsMissingNote 为空，独立复算 0 缺失），未写理由的 null 不存在。",
+      "result": "pass"
+    },
+    {
+      "text": "反向遗漏检查（本轮的真实缺口）：本单元高潮是次日朝会裁决，一口气处置四个人（国舅斩立决／皇后闭门思过三月／太子闭门思过半年／陈贵妃降为陈妃），而上一轮产物只记了陈贵妃一人。已补 states s7/s8/s9，并把『四个受处置者都要有 state 且各自引到自己的处分句』做成机器判据 verdictFateCoverage —— 删掉任一条即 exit 1。实测 covered=[国舅,皇后,太子,陈贵妃]、missing=[]。",
+      "result": "pass"
+    },
+    {
+      "text": "阴性对照（证明判据真的会触发，不是装饰）：把构建脚本复制到 /tmp 隔离沙箱后逐个改坏 —— 删 s8 → rc=1『没有承接：太子』；删 s7 → rc=1『没有承接：皇后』；q() 偏移 +1 → rc=1（206 条逐字失败）；改一个引文字 → rc=1；sourceHash 改 64 个 0 → rc=1；改生成清单里的引文 → rc=1（finalAudit 抓到）；改散文「」引述 → rc=1；未改坏的基线 → rc=0 且 0 问题。全部对照在沙箱内跑，未落盘、未覆盖真实产物。",
+      "result": "pass"
+    },
+    {
+      "text": "本轮修好的 5 处失效/未生效判据（都是实测发现，不是推测）：① 散文逐字引述检查原写成 re.finditer(r\"『([^』]+)」\") —— 开括号『、闭括号」不是同一对，永远匹配不到，proseQuoteSegmentsChecked 恒为 0（『检查了 0 条』被当成没问题，实际该判据从未运行）；修正标记约定（「」=逐字引述）后实测 271 段、0 失配。② sourceHashMatchesTask 只被记录进 JSON、从未进 problems，阴性对照证明改坏哈希 rc 仍为 0 —— 已进闸门。③ 把 `+ [msg] if cond else []` 写成一行时，Python 条件表达式优先级会让**整个** problems 在 cond 为假时变成 []，逐字/区间/唯一性判据被静默丢弃（偏移 +1 的阴性对照因此 rc=0 通过）—— 已拆成独立变量相加。④ quoteReuseDisclosure 原为手写 6 条却声称『逐条列出』，实测有 49 个 span 被跨分区复用 —— 已改为从产物枚举生成（49/49）。⑤ 生成的分区自带 49 个 quoteRef 却不在只收集 BODY 的 all_refs 里（产物 256 实例而 quoteRefTotal 报 206）—— 已加 finalAudit 在写盘前对整个 candidate 复算。",
+      "result": "pass"
+    },
+    {
+      "text": "可复现性：重跑构建脚本，产物字节级一致（cmp 报相同）；两次 sha256 均为 6b6b8d6ff636de3992e9fba61cb67ba8c6e1beb5d755786b50395ab3f4a6367a。命令：cp 产物 /tmp/detA.json → 重跑构建（rc=0）→ cmp /tmp/detA.json 产物。",
+      "result": "pass"
+    },
+    {
+      "text": "工作区纪律：本轮只在 loop/state/out/ 下新建 2 项（候选 + 构建目录）。我的构建脚本全文只有 1 处写操作（行 2293 OUT.write_text），无任何跨目录写入。find js css index.html serve.py narrative.py scripts tests docs data -newermt '2026-10-15 18:50:32' 命中 3 个文件（js/atlas/atlas-cinema.js、js/atlas/atlas-motion-polish.js、index.html，mtime 18:54:29/18:54:48），经查属**另一个会话 main-visual**（持 GATE.lock，pid 65080，独立于我的进程链 65979→51791→43553），非本轮改动。我未执行任何 git checkout/reset/stash。",
+      "result": "pass"
+    },
+    {
+      "text": "诚实边界：semanticReview 保持 false，未声称语义已核验。太子与国舅在本区间都没有出场，s8/s9 的 before 只能引用他人（刑部尚书/魏渊）陈述，已在 remaining 写明『被陈述的内容本身未获叙述者确认』。写入 unknowns 7 条（含琅儿死因、陈贵妃降级原因等不可核项），未用编造结论替代。",
+      "result": "pass"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/read_dafeng_L1_0257.candidate.json",
+      "kind": "append-only"
+    },
+    {
+      "path": "loop/state/out/read_dafeng_L1_0257.w-read-4.build/quotes_0257.py",
+      "kind": "append-only"
+    },
+    {
+      "path": "loop/state/out/read_dafeng_L1_0257.submit.w-read-4.json",
+      "kind": "append-only"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/1063b17ca65ec1b76f30e460.docs.json": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+  },
+  "reworkOf": "loop/state/out/read_dafeng_L1_0257.candidate.json（2026-10-15 18:45 由同一 worker w-read-4 的上一轮写入、未提交即中断）",
+  "reworkReason": "上一轮产物未提交即被中断，本轮先独立复核再补缺口：漏记裁决对皇后/太子/国舅三人的处置；并修好 5 处失效或未生效的判据（散文引述正则括号不配对导致恒查 0 条、sourceHashMatchesTask 未进闸门、条件表达式优先级吞掉全部判据、复用清单自述与数据不符、生成分区绕过校验）。",
+  "remaining": [
+    "semanticReview 未完成：本候选只做了引用定位与结构自检；语义结论（含 themeReadings 的解释力、tasks 五元组的切分是否合理）必须由独立复核者判定。",
+    "t7.objective、t4.result、t10.result、t11.result、多条 cost 为 null —— 每一处都带同名 Note 说明为什么没有依据；若复核者认为某处其实有原文依据，请指出具体引文后补写。",
+    "t2.cost（被老太监训斥）是我的判断：若复核者按 0253『嗔怪不算代价』的先例认为口头训斥也不计入 cost，应把该栏降为 null 并保留 costNote 里的说明。",
+    "f1 的相对位置（「光宗耀祖」一词的两种口径）依赖把婶婶那段与结尾那段并读；若复核者认为两句不构成铺设—触发，f1 应移入 notForeshadows。",
+    "本轮补的 s7/s8/s9 依据同一段裁决文本；三人的处分词是分开的三句，但『裁决』这一事件只有一个。若复核者认为按主体拆分 state 过细，可合并为一条『朝会裁决改变四人的处置』，引文不会因此失效。",
+    "太子与国舅在本区间都没有出场，s8/s9 的 before 只能引用他人（刑部尚书/魏渊）的陈述；记为 explicit 是因为『某人如此陈述』本身是原文直述，但被陈述的内容本身未获叙述者确认。",
+    "散文引述判据修好后实测 271 段、仅 1 段不在本切片（『没有皇贵妃、一人之下众妃之上』，属相邻单元 0253）—— 已用显式白名单 PROSE_ALLOW_NOT_IN_SLICE 记录，未静默放过。",
+    "上一轮的中间产物 loop/state/out/read_dafeng_L1_0257.w-read-2.build/、w-xiyou-0.build/、w-xiyou-1.build/ 仍在目录下（属其他 worker 的构建目录，本轮未改动、未删除）；若需要清理应由其 owner 或运维流处理。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/read_dafeng_L1_0257.candidate.json",
+      "loop/state/out/read_dafeng_L1_0257.w-read-4.build/quotes_0257.py",
+      "loop/state/out/read_dafeng_L1_0257.submit.w-read-4.json"
+    ]
+  },
+  "submittedAt": "2026-10-15T11:19:03Z",
+  "wallClockSeconds": 1711,
+  "wallClockFrom": "lease.startedAt",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-15T11:19:03Z"
+  },
+  "verifyState": "pending"
+}

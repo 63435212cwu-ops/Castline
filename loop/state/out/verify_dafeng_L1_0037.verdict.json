@@ -1,0 +1,170 @@
+{
+  "schema": "castline/read-verdict/1",
+  "task": "verify:dafeng:L1:0037",
+  "reviewedTask": "read:dafeng:L1:0037",
+  "reviewedFile": "loop/state/out/read_dafeng_L1_0037.candidate.json",
+  "reviewedSha256": "aa4fc6eac48ac8f8d1e78f622cab2cc1013c01e70533ba18946dbe1700678526",
+  "reviewer": "w-verify-1",
+  "verdict": "partial",
+  "source": {
+    "path": "data/cache/9b676d7031b1bcd3b8377a18.docs.json",
+    "docIndex": 0,
+    "field": "text",
+    "range": [113766, 116337],
+    "rangeChars": 2571,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "sliceSha256": "e093c535927f8772bd78fe2236f944d60a7f83fde6151f7d6ba662d78ec61620",
+    "sliceHead": "第三十八章 诗成"
+  },
+  "method": {
+    "order": "先自己逐段读完 [113766,116337) 全文（未先看候选结论），再打开候选。130 条带偏移引文全部用 find()+切片重定位；另做反向扫描：把区间内引文覆盖合并成区间，列出所有长度>=12 的空洞（12 处）与候选文件里逐字缺席的句子，再逐条判断哪些承载信息。",
+    "reproduce": "python3 /tmp/cl-verify-dafeng-L1-0037/audit.py",
+    "reproduceNote": "审计脚本只读，不写仓库；脚本本身不是交付物，判据是它打印的数字与下面各条一致。",
+    "notDone": "没有通读区间外全部章节：只为核对候选已引用的章号而按偏移抽读第十九、二十九、三十二、三十七、三十九、四十二、四十七、四十九、五十四、五十七、五十九、一百八十七、一百八十八章的相邻片段。因此 F1/F4 的 status 若在更远处变化，我不作断言。"
+  },
+  "quoteVerification": {
+    "total": 130,
+    "inRange": 110,
+    "crossRange": 20,
+    "sliceMatches": 130,
+    "findMatchesStart": 130,
+    "occurrencesFieldConsistent": 130,
+    "failures": [],
+    "sampledFive": [
+      {"where": "states[0].evidence[2]", "start": 115298, "find": 115298, "sliceOk": true, "count": 1},
+      {"where": "tasks[1].evidence[6]", "start": 114428, "find": 114428, "sliceOk": true, "count": 1},
+      {"where": "foreshadows[1].payoffEvidence[0]", "start": 119474, "find": 119474, "sliceOk": true, "count": 1},
+      {"where": "causeEdges[3].evidence[7]", "start": 116211, "find": 116211, "sliceOk": true, "count": 1},
+      {"where": "causeEdges[0].evidence[1]", "start": 114931, "find": 114931, "sliceOk": true, "count": 1}
+    ],
+    "note": "固定种子 seed=20261008 抽 5 条，全部 slice_ok=True 且 find==start。候选 selfCheck 自报 130/110/20 与实算一致。另查到 tasks[1].evidence[1]（「你笑什么？」 occurrencesInFullText=4）——机器计数确为 4（偏移 114198/493642/2496756/3028874），该字段**正确**，不是缺陷。"
+  },
+  "counterExamples": [
+    {
+      "claim": "foreshadows[1].whyResolved 把「对外说辞」的出处写成第五十七章。注：同一对象的 payoff、T5_xuqian_bulupo 的 cost、以及候选自己的 selfCheck.crossRangeChapterMap 都写「第五十四章 截胡」——这三处是**正确**的，不在本反例范围内，不得连带排除。最小修法是把该从句的「第五十七章」改成「第五十四章」，F2 其余内容可用。",
+      "candidateField": "foreshadows[1].whyResolved",
+      "candidateText": "铺设（本区间：不会书法 + 请人代笔）与回收（区间外第三十九章被三儒反推、第五十七章被用作对外说辞）都有逐字原文。",
+      "quote": "“随手一句打油诗而已，我听那位公子说自己书法生疏，写不出好字，才劳烦这位公子帮忙代笔。”",
+      "why": "章号硬错，且是自相矛盾的定位错误。该引文真实偏移 162976，落在【第五十四章 截胡】（第三十九章区间 [116337,119802)，第五十四章区间 [162939,165570)，第五十七章区间 [171385,175389)）。第五十七章区间内「代笔」0 次、「书法」0 次。复现：python3 -c \"import json;T=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];print(T.find('“随手一句打油诗而已'), T.count('代笔',171385,175389), T.count('书法',171385,175389))\" → 162976 0 0",
+      "fix": "把 whyResolved 里的「第五十七章」改为「第五十四章」，与同对象 payoff、tasks[4].cost、crossRangeChapterMap 三处对齐。",
+      "evidence": [
+        {"quote": "“随手一句打油诗而已，我听那位公子说自己书法生疏，写不出好字，才劳烦这位公子帮忙代笔。”", "start": 162976, "end": 163020, "chapterActual": "第五十四章 截胡", "occurrencesInFullText": 1}
+      ]
+    },
+    {
+      "claim": "unknowns[9] 称杨子谦的完整身份「（云鹿书院大儒、青州知府、号紫阳居士）要到区间外第一百八十七章才写明」。",
+      "candidateField": "unknowns[9]",
+      "candidateText": "杨子谦的身份：本区间只出现名字（自称已赴任青州）。他的完整身份（云鹿书院大儒、青州知府、号紫阳居士）要到区间外第一百八十七章才写明。",
+      "quote": "杨恭，字子谦，号紫阳居士，元景14年的状元",
+      "why": "三处都错，逐字可查：(1)「字子谦」「号紫阳居士」早在【第十九章 送行诗】写明（偏移 55680），远早于第一百八十七章；(2)【第三十七章 劝学】已写明「出任青州布政使的紫阳居士杨恭，擅长治学」（偏移 112856）——而候选自己在 tasks[0].basisNote 与 F3.limits 里正引用了第三十七章，说明该章读过；(3) 官职对不上：第一百八十七章写的是「青州知府」（偏移 683843），与第十九/三十七章的「青州布政使」不是同一官职，把「知府」当作「完整身份」的出处属于误读原文（该章同段后文自述其衙门为「布政使司」，偏移 686921「应该就是青州布政使，云鹿书院大儒」）。复现：python3 -c \"import json;T=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];[print(T.find(q),q) for q in ('杨恭，字子谦，号紫阳居士，元景14年的状元','出任青州布政使的紫阳居士杨恭，擅长治学','青州知府是云鹿书院的大儒，杨恭杨子谦。')]\" → 55680 112856 683843",
+      "fix": "整条改写为：「『字子谦』『号紫阳居士』在第十九章（偏移 55680）已写明；第三十七章（偏移 112856）写明他是青州布政使兼云鹿书院大儒。第一百八十七章出现的是『青州知府』（偏移 683843），与布政使不是同一官职。」",
+      "evidence": [
+        {"quote": "杨恭，字子谦，号紫阳居士，元景14年的状元", "start": 55680, "end": 55701, "chapterActual": "第十九章 送行诗", "occurrencesInFullText": 1},
+        {"quote": "出任青州布政使的紫阳居士杨恭，擅长治学", "start": 112856, "end": 112875, "chapterActual": "第三十七章 劝学", "occurrencesInFullText": 1},
+        {"quote": "青州知府是云鹿书院的大儒，杨恭杨子谦。", "start": 683843, "end": 683862, "chapterActual": "第一百八十七章 青州故人？", "occurrencesInFullText": 1}
+      ]
+    }
+  ],
+  "reverseChecks": [
+    {
+      "id": "RC1",
+      "found": "「《劝学》是古文、不合诗题」这道**先于**「书中自有黄金屋」被否掉的选项，候选零覆盖。许七安先想到高中读的《劝学》，因体裁是「诗」而排除，之后才轮到「书中自有黄金屋」。causeEdges[3] 只建了「黄金屋→换诗」一条边，读者会以为那是唯一一次取舍。",
+      "quote": "劝学二字，最先让许七安想到的是高中读的《劝学》，但既然是诗，那这篇古文就不适用了。",
+      "evidence": [{"quote": "劝学二字，最先让许七安想到的是高中读的《劝学》，但既然是诗，那这篇古文就不适用了。", "start": 115615, "end": 115656, "inRange": true}],
+      "machineCheck": "『《劝学》』『古文』在候选文件里各出现 0 次"
+    },
+    {
+      "id": "RC2",
+      "found": "两位老师对许七安到访的**前值预期**（既意外又欣喜，并以为他是来献佳句），使紧接着的「学生来此，是有一事相求」成为一次请求转向。候选没有任何 task 或 state 覆盖这组前值：tasks[2] 直接从「求情」写起。",
+      "quote": "李慕白和张慎对视一眼，对许七安的到来既意外又欣喜。",
+      "alsoQuote": "“宁宴，你来学院，是因为有佳句要给为师鉴赏？”李慕白试探道。",
+      "evidence": [
+        {"quote": "李慕白和张慎对视一眼，对许七安的到来既意外又欣喜。", "start": 114684, "end": 114709, "inRange": true},
+        {"quote": "“宁宴，你来学院，是因为有佳句要给为师鉴赏？”李慕白试探道。", "start": 114730, "end": 114760, "inRange": true}
+      ],
+      "machineCheck": "『意外』『鉴赏』『试探』在候选文件里各出现 0 次"
+    },
+    {
+      "id": "RC3",
+      "found": "三儒在许七安久久沉默时的态度是**分化的**（张慎、李慕白期待，陈泰喝茶旁观）——这是叙述层对三人立场的唯一明写。候选 states[1] 只近似提到陈泰「笑吟吟」，从未引用这句原文，也未记录「期待／旁观」的两方对照。",
+      "quote": "见他久久沉默，许新年眉头愈发紧皱，三位大儒里，张慎和李慕白一直期待着，陈泰则笑眯眯的喝茶。",
+      "evidence": [{"quote": "见他久久沉默，许新年眉头愈发紧皱，三位大儒里，张慎和李慕白一直期待着，陈泰则笑眯眯的喝茶。", "start": 115915, "end": 115960, "inRange": true}],
+      "machineCheck": "『笑眯眯』『喝茶』『久久沉默』在候选文件里各出现 0 次"
+    },
+    {
+      "id": "RC4",
+      "found": "区间内对许新年的**称谓**「二郎」在候选全文出现 0 次，候选 coverage.namedEntitiesInRange 也没登记它（登记了「许辞旧／许新年」但没有「二郎」）。这是叙述层在本区间唯一一次用「二郎」指称他。",
+      "quote": "许七安差点笑出声，二郎的毒舌还是那么犀利。",
+      "evidence": [{"quote": "许七安差点笑出声，二郎的毒舌还是那么犀利。", "start": 115072, "end": 115093, "inRange": true}],
+      "machineCheck": "区间内『二郎』1 次；候选文件里 0 次"
+    },
+    {
+      "id": "RC5",
+      "found": "许七安的动机措辞是**交易性**的：「白嫖」在区间内出现两次，候选只锚定了后一次（「用这首诗白嫖三位大儒」），前一次「逼我白嫖你们」零覆盖；与之相连的自问自答节拍（「这很难吗？／这太难了。」）也零覆盖。这条贯穿全章的动机线没有任何条目或 unknowns 承接。",
+      "quote": "写诗？你们这是逼我白嫖你们？许七安没有立刻答应，而是斟酌着说：",
+      "alsoQuote": "果然不可能率性作诗，否则，我分分钟再拿出一首千古绝唱....许七安心里叹息一声。",
+      "evidence": [
+        {"quote": "写诗？你们这是逼我白嫖你们？许七安没有立刻答应，而是斟酌着说：", "start": 115452, "end": 115483, "inRange": true},
+        {"quote": "这很难吗？", "start": 115430, "end": 115435, "inRange": true},
+        {"quote": "这太难了。", "start": 115441, "end": 115446, "inRange": true},
+        {"quote": "果然不可能率性作诗，否则，我分分钟再拿出一首千古绝唱....许七安心里叹息一声。", "start": 115535, "end": 115575, "inRange": true}
+      ],
+      "machineCheck": "『白嫖』区间内 2 次、候选文件 1 次；『这很难吗』『这太难了』『千古绝唱』在候选文件里各 0 次"
+    },
+    {
+      "id": "RC6",
+      "found": "章题事件（那首四句诗）在**证据锚点上缺了中间两句**。四句里 L1、L4 各作为区间内引文被锚定；L2「正是男儿读书时」仅出现在区间外的更长引文里，区间内没有独立锚点；L3「黑发不知勤学早」的裸串在整个候选文件里出现 **0 次**，即从未以任何形式出现。tasks[3] 声称覆盖「依口述写下四句」，实际只锚定首尾。",
+      "quote": "“黑发不知勤学早。”",
+      "evidence": [
+        {"quote": "“正是男儿读书时。”", "start": 116179, "end": 116189, "inRange": true},
+        {"quote": "“黑发不知勤学早。”", "start": 116195, "end": 116205, "inRange": true}
+      ],
+      "machineCheck": "候选文件计数：三更灯火五更鸡=8、正是男儿读书时=4（全部在区间外长引文内）、黑发不知勤学早=0、白首方悔读书迟=3",
+      "caveat": "本单元最弱的一条：未被逐字引用 ≠ 未被概括。若认为 tasks[3] 的「依口述写下四句」已足够承载，RC6 可降为存疑；RC1–RC5 都指向候选完全没有立项的原文事实，不受此影响。"
+    },
+    {
+      "id": "RC7",
+      "found": "候选自报的自检命令**收不到** rejectedAsForeshadow 里的 5 条 quote：那 5 条只有 item/quote/reason，没有 start/end，而 method 里给出的 reproduce 命令只遍历 evidence/payoffEvidence/continuationEvidence 三个数组（实测收集 130 条，与 selfCheck.quotesChecked=130 相等）。即「130 条已核」这句不含那 5 条。我逐条补验：5 条全部逐字可查且落在区间内（find 分别 115099 / 113969 / 115001 / 115662 / 116271），所以**不是编造**，但自检声明的覆盖面小于文件里的引文总数。",
+      "quote": "李慕白摇了摇头，“谨言兄，你这学生，我倒有点期待他将来踏入立命境。”",
+      "evidence": [
+        {"quote": "李慕白摇了摇头，“谨言兄，你这学生，我倒有点期待他将来踏入立命境。”", "start": 115099, "end": 115133, "inRange": true},
+        {"quote": "许辞旧？他来干嘛，圣人语录三百遍抄完了？张慎点点头：“请他进来。”", "start": 113969, "end": 114002, "inRange": true},
+        {"quote": "书中自有黄金屋，书中自有颜如玉！", "start": 115662, "end": 115678, "inRange": true}
+      ],
+      "machineCheck": "自述命令收集 130 条；文件内带 quote 的对象共 135 条（130 + rejectedAsForeshadow 5）"
+    }
+  ],
+  "falseKillCheck": {
+    "result": "未发现误杀。逐条复核候选 rejectedAsForeshadow 的 5 项 + F3 自标：",
+    "items": [
+      "「期待踏入立命境」被拒——成立。区间内只出现一次（偏移 115099）；区间外第四十二章的 3 处「立命境」谈的是云鹿书院院长（三品立命，偏移 126014）与「紫阳居士只差半步便是立命」（偏移 126200），与许七安无关。",
+      "「圣人语录三百遍」被拒——成立。铺设确在区间外第二十九章（偏移 85936「回家把圣人语录抄录三百遍」），回收在第五十九章（偏移 181545「看来抄写圣人语录对你裨益甚深」）；按本单元口径不算本区间伏笔。",
+      "「长公主」两次顶撞被拒——成立。区间内只有即时反应（「这愣头青还是一如既往的不会说话」115034、「在场三位大儒气笑了」115056），无铺设—回收结构。",
+      "「书中自有黄金屋」被拒——成立。原文只出现一次（115662）且随即被本人弃用（115881「我抄这首诗，不是戳云鹿书院的心窝子嘛」）。",
+      "F3 自标 derived 并主动写明「若复核者认为属于剧情推进而非伏笔，应降级为 rejectedAsForeshadow」。我维持 resolved：第三十九章公告栏一段逐字可查（「一人高的巨幅纸张」118465、「米糊」118456），且候选已把「原文没有一句明写这两件事是同一件」写进 limits——属可接受的、克制的跨段推导，不是误杀。"
+    ]
+  },
+  "hallucinationCheck": {
+    "result": "未发现编造的人物、结局、伏笔或成功判定。",
+    "detail": "130 条带偏移引文零编造；区间内没有出现过的专名（魏渊／怀庆／许平志等）一律不出现，machineCheck 扫描「候选里有、区间内没有」的人名候选集为空。特别核对两处最易越权的地方：(1) 章题「诗成」没有被当成功——候选在 tasks[2].result、states[0].after、unknowns[5]、selfCritique[0] 四处一致拒绝把「三儒沉默」读成「满意」；我实测区间内 [116163,116337) 没有任何评价词（满意/好诗/绝妙/惊叹/赞赏/评语/叫好 全部 0 次），「满意」仅出现在 115263 与 115421 的条件句里，该克制正确。(2) F1/F4 的区间外状态没有被写成结局——F4 保留 unresolved，F1.limits 明确只覆盖「诗获认可」与「女眷入住书院」，不声称「周全」已证明。全文只有一处「成功」，是 tasks[2].basisNote 里「不因为『作到章末』就写成功」的自我约束。"
+  },
+  "mechanicalAudit": {
+    "quotesVerbatim": "130/130",
+    "offsetSelfConsistent": "130/130",
+    "occurrencesFieldConsistent": "130/130",
+    "inRangeBoundaryCorrect": "110 条 inRange=true 全在 [113766,116337)；20 条 inRange=false 无一落进本单元",
+    "crossRangeChapterMapConsistent": "16 个区间外偏移与 crossRangeChapterMap 的去重偏移集合一致",
+    "sourceMetadataCorrect": "sliceSha256 实算 e093c535… == 候选声明；rangeChars 2571 == 实算；docs sha256 == 任务 sourceHash",
+    "chapterContradictionScan": "对每个条目做「它点名的章号 vs 它的区间外引文实际落在哪章」交叉扫描：只有 foreshadows[1].whyResolved 一条不符（即 counterExamples[0]）"
+  },
+  "usableVsDiscardable": {
+    "usable": "5 条 tasks、7 条 causeEdges、6 条 states、4 条 foreshadows 的**故事内容**均能在原文找到对应文字，130 条引文零编造、偏移全对；basis 分级（explicit/inferred/derived）克制自洽；tasks[1] 与 tasks[3] 的 obstacle/cost 写 null 而不补一个「听起来合理」的值，是本项目最该保留的纪律。修掉下面两处后可直接使用。",
+    "mustFix": [
+      "foreshadows[1].whyResolved：「第五十七章」→「第五十四章」（与同对象 payoff、tasks[4].cost、crossRangeChapterMap 对齐）。",
+      "unknowns[9]：整条改写（见 counterExamples[1].fix）。"
+    ],
+    "shouldAdd": "RC1–RC5（RC1 最该补：它是一条先于 causeEdges[3] 的独立取舍，不补会让读者以为弃用黄金屋是唯一一次选择）。RC6 建议至少补 L3 的独立锚点，因为那是章题事件本身。RC7 建议把自检命令扩到 rejectedAsForeshadow，或把 quotesChecked 的口径写清。",
+    "downgradeToUnknowns": "无需降级的正向断言。"
+  },
+  "notes": "总判 partial：抽取内容本身可信，但有两处硬错必须修，另有 6 处承载信息的遗漏需要补。\n\n【为什么不是 pass】两条 counterExample 都是可复现的硬错，不是措辞分歧：① foreshadows[1].whyResolved 的「第五十七章」与同一对象的三处（payoff、tasks[4].cost、候选自己的 crossRangeChapterMap）自相矛盾，实测第五十七章区间内「代笔」「书法」各 0 次；② unknowns[9] 把「字子谦／号紫阳居士」的出处写成第一百八十七章，实际第十九章（偏移 55680）就已写明，第三十七章（偏移 112856）写明其为青州布政使，而第一百八十七章的「青州知府」是另一个官职。两处都在次级注释层，不在抽取主体，所以不是 fail。\n\n【为什么不是 fail】按角色纪律「判 fail 必须有 counterExample 且 quote 逐字可查」——反例我拿得出，但它们否定的是注脚的定位，不是抽取本身：130 条引文零编造、偏移全对、occurrences 计数全对、区间内外零混串；没有原文不存在的人物、结局、伏笔或成功判定；「诗成」未被当成功；F4 保留 unresolved。核心结论在修掉这两处后可直接使用，用章号错误否定整份可用产出会滑向「凭感觉否决」。\n\n【我复核了上一轮同任务结论】本任务此前已有一轮复核产物（loop/state/out/verify_dafeng_L1_0037.verdict.json，sha256 187e937c…），其提交记录因 sourceHashes 为空被机器拒绝。我独立重做了全流程：它的两条 counterExample 我逐条复现并确认成立（偏移 162976/55680/112856/683843 全部复核），它的 R1–R5 我也各自独立复算（关键词计数见 reverseChecks，R1/R3/R4/R5 完全一致，R2 我拆成 RC6 并加了 caveat）。本轮我新增 RC7（自检命令收不到 rejectedAsForeshadow 的 5 条 quote）——该条是对**自检覆盖面声明**的修正，5 条引文本身经补验全部逐字成立。\n\n【我自己可能错的地方】(1) 反向扫描用「区间内引文覆盖并集 → 找长度>=12 的空洞」定位遗漏，12 处空洞里有场景描写（山风入室）本就应当不立项，我按「是否改变任务/状态/因果的可读性」取舍，标准不是纯客观的。(2) RC6 最弱：未被逐字引用未必等于未被概括，已在条内标 caveat。(3) 我按 tasks[0].basisNote 与 F3 的说法把「这个活儿」读作书院劝学之事，但第三十七章原文确实给出了「得换个新颖的方式让学子自发苦读」「自古诗词动人心」的上下文，候选 unknowns[0] 也如实标了「本区间内读不出来」——这一条我认同候选的克制。(4) 我说「第一百八十七章的知府与布政使不是同一官职」，依据是同章后文自述衙门为「布政使司」（偏移 686921）；若作者本意是混用，这条应降为文档瑕疵而非事实错误——但无论哪种读法，unknowns[9] 的「要到第一百八十七章才写明」都不成立。\n\n【下游可达性（本轮实测，供发布环节用）】to_candidate.py 第 180 行找的是 loop/state/out/verify_dafeng_L1_0037.json（提交记录），不是本 .verdict.json 文件；该文件现在**不存在**（只有 REJECTED__ 前缀的拒绝记录）。我按 counterExamples[].claim 里写进可解析字段路径（foreshadows[1]、unknowns[9]）以便该桥的 fix_idx 正则可定位：foreshadows 映射到 LAYER_MAP 的 clues 层可被排除；unknowns 不在 LAYER_MAP 内，需下游人工处理。\n\n【未做的】没有通读区间外全部章节；F1/F4 的 status 我只核到被引用片段本身逐字成立，未独立追踪其弧线收束。未跑 GPU/浏览器测试（本任务不要求）。本文件仅为复核结论，未改动 writes 之外任何文件。"
+}

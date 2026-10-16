@@ -1,0 +1,133 @@
+{
+ "task": "read:dafeng:L2:0130",
+ "agent": "w-dafeng-1",
+ "role": "READER",
+ "status": "done",
+ "summary": "精读《大奉打更人》第一百三十一章「一夜致富」（docs[0].text codepoint [451421,454739)，3318 字，95 个非空段）。本轮的实质工作是**对抗性修补**：租约（2026-10-12T16:24:33Z 起）开始时 writes 路径上已存在一份上一轮中断留下的草稿（sha256 b80d05f3…，262633 字节，同任务上无任何 submit／REJECTED 记录），我先用独立脚本（不复用草稿构建逻辑）全量复算它的每一条机械声明，再逐节对原文读语义，保留内容、修掉 10 处实查到的缺陷（R1–R10，见 candidate.draftProvenance.repaired 与下方 assertions）。其中 3 处（F1/F2/F3 即 R8/R9/R10）是**我自己前几轮修补引入或遗留的**，由独立终检脚本抓出后一并修掉并登记。产出规模：7 条任务五元组（每栏自带 quotes；同任务内跨栏引文完全相同 0、区间部分重叠仍为 0；9 个空栏槽位全部带 <栏位>Note）、7 条因果边 + 6 条被拒边、10 条状态变化、6 条知识差、5 条伏笔（2 回收/3 unresolved）+ 5 条被拒伏笔、11 条世界设定（rule 4 / place 5=arrived 2·mentioned 3 / item 2 四态多选）、2 条主题读法（perspective+support+counter 齐全）、14 条说法台账、9 条文本校勘、14 条跨单元说明、19 条 unknowns、9 条 openThreads、7 条 selfCritique。共 243 处逐字引用（95 个唯一区间），修补后重跑机检 verbatim/range/hash/firstOccurrence/occurrence 五关全 0 失败；反向覆盖 95 段中 14 段未被引文触及，逐段登记且与列表一一对应。本候选**不声称**任何 semanticReview 完成。",
+ "evidence": [
+  {
+   "path": "loop/state/out/read_dafeng_L2_0130.candidate.json",
+   "sha256": "f7704c57fe1e1865e7d39e9efc8ed1634d94667ec0890528fe032a22bc6895a2",
+   "kind": "candidate",
+   "bytes": 277770
+  }
+ ],
+ "assertions": [
+  {
+   "text": "源哈希三方一致：`shasum -a 256 data/cache/1063b17ca65ec1b76f30e460.docs.json` = fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839，与 task.sourceHash、候选 source.sourceHash、以及全部 243 处引用节点各自的 sourceHash 完全相同（独立脚本逐节点比对 hashFailures=0）。可用 candidate.reproduce.cmd_source_hash 复现。",
+   "result": "pass"
+  },
+  {
+   "text": "区间口径自检（candidate.reproduce.cmd_slice 可复跑）：len(docs[0].text[451421:454739]) == 3318 == sourceRange 之差；切片以本单元标题开头（startswith('第一百三十一章 一夜致富') == task.unitHead）。切片 UTF-8 字节 sha256 = a77068a6807099eececc6f132b6d077010f4caa5c4f125337f3bf5a8fb976f04，另起字段 sliceSha256 保存，未覆盖 sourceHash。",
+   "result": "pass"
+  },
+  {
+   "text": "引文机械全量核验（candidate.reproduce.cmd_quotes 可复跑，实测输出：quotes 243 all_verbatim True all_in_range True hash_ok True first_ok True occ_ok True）。另用独立脚本（只读 docs.json 与候选成品，不复用任何构建/修补逻辑）逐节点复算五件事：T[start:end]==quote、全部落在 [451421,454739) 内、sourceHash 一致、T.find(quote)==firstOccurrenceAt、T.count(quote)==wholeTextOccurrences —— verbatim 0 / range 0 / hash 0 / firstOccurrence 0 / occurrence 0。",
+   "result": "pass"
+  },
+  {
+   "text": "五元组分栏独立性（candidate.reproduce.cmd_reuse 可复跑，实测 cross_column_equal 0 cross_column_overlap 0）：7 条任务 × 5 栏，同一任务内跨栏共用同一引文区间 = 0；加严到两栏引文区间**部分重叠**仍 = 0。该命令在本次会话中实际执行过，非声明。",
+   "result": "pass"
+  },
+  {
+   "text": "**本轮修正 R1：未编辑的模板与无依据的外推**。P4（内外城）的 explain 里留有尖括号模板，且紧挨的半句「母亲不知道许七安的日常」在本区间无依据。已删模板；该处改为只声明本区间可支持的范围，并明确写出本条**不**牵连宫中诸人（灵龙事件发生在宫中，与内外城之分无关）。被删掉的外推缺口另立 U19（陈贵妃的消息渠道，basis=unverified）。机检：去掉 draftProvenance/verification/reproduce 后全文尖括号模板 0 处。",
+   "result": "pass"
+  },
+  {
+   "text": "**本轮修正 R2/R10：metrics.basisCounts 与文件实际不符**。旧值 {explicit:40, null:19, inferred:6, derived:1} 把 null 栏位当成一种 basis 计入，且漏计 states/knowledgeDiffs/worldSettings/openThreads 等分区；R5 与新增 U19 之后又未重算。现按明写口径（只数带 basis 的条目：tasks 五栏对象值 + causeEdges/states/knowledgeDiffs/foreshadows/worldSettings/themeReadings/rejectedEdges/unknowns/openThreads）重算为 {explicit:74, inferred:7, derived:1, unverified:19}，并补 basisCountsNote 写明口径。candidate.reproduce.cmd_basis_counts 可复跑，实测打印 dict(bc) == metrics.basisCounts 为 True。",
+   "result": "pass"
+  },
+  {
+   "text": "**本轮修正 R3：四处「全书 1 次」与实测不符**（这是可被任何人在全书上复算的硬声明，写错即为不实陈述）。实测并已改正：TN1「是前天」全书 2 次（本区间 1 次）、TN3「卡姿兰」12 次、TN4「裱裱」386 次、TN5「做为」10 次；旧值一律写成「全书 1 次」。candidate.reproduce.cmd_occurrence_counts 可复跑：{'是前天': 2, '卡姿兰': 12, '裱裱': 386, '做为': 10, '我今天收了个小铜锣': 1, '知道呀。': 5, '啪！': 103}。",
+   "result": "pass"
+  },
+  {
+   "text": "**本轮修正 R4：TN5.handling 里留有带问号的未定稿短引用**（旧文写「C? 系列之外的 T3.obstacle」）。已改为点名实际使用该句的条目。机检全部短引用（T*/CE*/RE*/ST*/KD*/F*/RF*/W*/P*/I*/TH*/C*/TN*/O*/U*/OT*）是否都有对应条目定义：悬空引用数 0。",
+   "result": "pass"
+  },
+  {
+   "text": "**本轮修正 R5：ST3 顶层 basis 与它自己的 note 自相矛盾**。该条 note 本就写明「前值是从反面读出」，顶层却标 explicit。现顶层改 inferred，并补 beforeBasis=inferred / afterBasis=explicit 两个字段与 basisNote，说明不拿直述的那一半替整条背书。",
+   "result": "pass"
+  },
+  {
+   "text": "**本轮修正 R6：反向覆盖的归类说明漏列 8 段**。reverseCoverageNote.remainingAreNonNarrative 原只点名段 0/1/4/15/40/41 共 6 段，而 reverseCoverage 实有 14 条（另有 5/6/48/50/52/53/54/94 未解释）。现按四类逐段全列。独立复算：切片按非空段切开 95 段，未被任一引文区间触及者 14 段，与 coverage.untouchedParagraphs=14、reverseCoverage 的 14 条 start 集合完全相同（candidate.reproduce.cmd_reverse_coverage 可复跑：paras 95 untouched 14 listed 14 match True texts_ok True）。",
+   "result": "pass"
+  },
+  {
+   "text": "**本轮修正 R7/F1：themeReadings 的 support/counter 形状不统一且与同批候选不一致**。TH1 原用 {point, quotes}、TH2 原为裸引文节点数组（无 point）。已把两条统一为 {point, quotes}，point 逐条写明该引文在各自读数里承担什么；引文节点本身逐字搬运，未改写内容。机检：两条 themeReadings 的每个 support/counter 元素都有非空 point 与非空 quotes。",
+   "result": "pass"
+  },
+  {
+   "text": "**本轮修正 F2：reverseCoverage 末条口径不一**。para 94 原为 start 454724 / text '\\n------------'（含段首换行），与同列表其余 13 条（按非空段、不含换行）不一致。已统一为 start 454725 / text '------------' / chars 12，与该条 para=94 的段落边界一致，且 T[start:end]==text 逐字成立（cmd_reverse_coverage 的 texts_ok True 覆盖此项）。另补 reverseCoverageNote.conventionNote 写明切段口径。",
+   "result": "pass"
+  },
+  {
+   "text": "**自查抓出我自己引入的缺陷**：R8/R9/R10 三处（TH1 形状落单、reverseCoverage 末条口径、basisCounts 未重算）都不是草稿原有的，而是我前几轮修补后由独立终检脚本抓出来的。已修掉并在 candidate.draftProvenance.repaired 里如实登记为「本轮终检自查补做」，不混进对草稿的批评里。",
+   "result": "pass"
+  },
+  {
+   "text": "不把说法当事实：14 条 claimLedger 逐条标注说话人与证据等级。最易误读处已显式降级——C2 太子对灵龙发狂的转述标 unconfirmed（事件在区间外，叙述只写「太子提起了下午发生的事」这一动作）；C3 临安同一句里对日期当场改口标 self-contradicted；C5/C6 赏赐与数目标 hearsay（老张自己也用「说是」，是双重转述）；C8/C10 两句许诺标 promise-unperformed；C12 桑泊案标 guess-unconfirmed；C14 怀庆的态度标 unconfirmed（本区间她没有出场）。RE6 显式拒绝把「母妃不喜欢打更人」这句被引述的好恶当成已执行的态度。",
+   "result": "pass"
+  },
+  {
+   "text": "结束≠成功：章题「一夜致富」被显式拒绝当作结果——RE1 专门拒掉「绸缎进门 → 许家一夜致富」这条边，依据是本区间没有任何人说过这批绸缎值多少、能不能变卖，也没有一句写家境改变；U3 把它的价值与归属记为未知。T5.result 只写到「绸缎被搬进来」，不写「许府因此富了」。T7.result 写 null 并给出理由（该打算没有执行、没有开口、也没有被放弃）。F4 的 payoff 写 null 并说明为什么不把绸缎当回收点。",
+   "result": "pass"
+  },
+  {
+   "text": "不编因果：7 条 causeEdges 每条都有 direction + trigger + mechanism 并逐条标 basis（CE1/CE2/CE3 为 explicit，CE4/CE5/CE6/CE7 为 inferred）；6 条 rejectedEdges 专门拒绝「时间相邻当因果」与「同一物件出现两次就叫因果」两类形态（RE4 拒「拍筷→摔筷」、RE5 拒「苦笑摇头→追问」）。CE3 的依据是原文自带的连接词「所以」，CE2 的依据是「也」字的回指，两者都在 note 里写明「若复核认为不成立，正确处置是降级或移入 rejectedEdges，而不是改写机制去凑」。",
+   "result": "pass"
+  },
+  {
+   "text": "提及≠到达／图谋不是到达：3 条 place 记 mentioned（P3 陈贵妃的库房——「回头我派人到库房取」是计划，本区间无人前往；P4 内城外城的边界——只被叙述当作说明交代；P5 衙门——只作出发地出现，无到达动作），2 条记 arrived（P1 景秀宫有「进入」动作、P2 许府有「等到了许府」与「敲开大门」两个到达动作）。安排他人前往不记 arrived（P3 的 explain 明写这一口径）。",
+   "result": "pass"
+  },
+  {
+   "text": "伏笔口径：5 条 foreshadows 每条都带 setup 与 payoff 键，status 限定 resolved/unresolved，resolved 者 payoff 非空（F1 的回收在本区间内由临安亲口完成、F3 的回收是同道具第二次落桌）；3 条 unresolved 显式标注（F2 归属未被确认、F4 云锦被推到明年、F5 太子三问未得回答）。另有 5 条 rejectedForeshadows 记录只出现一次、不升格为伏笔的东西。机检结构问题数 0。",
+   "result": "pass"
+  },
+  {
+   "text": "世界设定三类的字段区分写进字段本身而非留给读者分辨：rule 各带 institution（declared 3 / executed 1）与 explain，place 各带 placeState，item 各带 itemStates（四态多选：transfer 1 / hold 1 / use 1；未把持有与丢失合成一条物品链）；泛泛的术语与装饰性设定不收录（rejectedForeshadows RF5 明确拒掉把「打更人是魏渊的人」扩成设定条目、U10 明确不猜「原则性的错误」的内容）。P4 与 W4 同引一句但已写明两者回答的问题不同（规则 vs 地点），并在 selfCritique 里标为最需要复核者重判之处。",
+   "result": "pass"
+  },
+  {
+   "text": "主题读法是解释层且有反面证据：2 条 themeReadings 每条都带 perspective + 非空 support + 非空 counter，无一条只列支持。TH1 的 counter 是叙述对规矩失效的**正面**评价（「后宫非常和谐」），TH2 的 counter 是三条不利证据（他问人在哪、铃音只顾吃饭、他第一反应是案子不是钱）。两条都标 inferred；note 写明「若复核认为证据不足，正确处置是删除该条而不是补证据——本候选宁缺勿造」。两条都没有用事件密度、剧情点数量、死亡人数或篇幅中点来定义任何「高潮」。",
+   "result": "pass"
+  },
+  {
+   "text": "本候选**不声称**语义已核验：semanticReview.performed=false、status=not-performed。引用定位正确 ≠ 语义已核验。草稿原有的三处语义分歧（W4 标 executed 而原文无执行动作、P4 与 W4 同引一句分列两条、三组共指「许七安＝许大郎＝宁宴」「二公主＝临安」「怀庆＝长公主」在本区间均无一句直述）我复核后**保留原判**，连同草稿自己的风险自陈（selfCritique 第 4/5/6/7 条）一并留给独立复核者裁定，不在提交里自行改标签掩盖分歧。",
+   "result": "pass"
+  },
+  {
+   "text": "受保护路径未动：本会话对仓库的写入只有 loop/state/out/read_dafeng_L2_0130.candidate.json（任务 writes 指定路径，追加式）。探针脚本、草稿备份与本轮全部核验产物都写在 $AGENT_ARTIFACTS 下的 verify0130/ 目录（/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/verify0130/），未写入 js/ css/ index.html serve.py narrative.py scripts/ tests/ docs/ data/ 中的任何一个文件。会话期间 js/scene.js、index.html、scripts/accept.sh、tests/* 的 mtime 变动来自另一持 GATE.lock 的合并任务（GATE.lock holder=motion-e1-merge-20261010T162850Z，心跳 2026-10-12T16:56:32Z），与本 agent 无关。",
+   "result": "pass"
+  },
+  {
+   "text": "可复现性：候选自带 7 条命令（cmd_source_hash / cmd_slice / cmd_quotes / cmd_reuse / cmd_occurrence_counts / cmd_basis_counts / cmd_reverse_coverage），全部不写盘、不改任何文件，本轮**逐条实际执行**过，rc 全为 0，输出与 reproduce.note 里写明的预期值一致。",
+   "result": "pass"
+  }
+ ],
+ "changes": [
+  {
+   "path": "loop/state/out/read_dafeng_L2_0130.candidate.json",
+   "kind": "append-only"
+  }
+ ],
+ "sourceHashes": {
+  "data/cache/1063b17ca65ec1b76f30e460.docs.json": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+ },
+ "remaining": [
+  "语义正确性未核验：本候选只做了引用定位的全量机械核验与自检，人物动机、因果读法与主题解释三层**都留待独立复核者判**（semanticReview.performed=false）。引用定位正确 ≠ 语义已核验。",
+  "本轮是**修补**而非重写：上一轮中断草稿（sha256 b80d05f3…）的语义判断我保留原状，只修掉 10 处可机检证伪的缺陷。凡我未复算过的语义结论，一律留在 unknowns／selfCritique 里，没有替它们补证据。",
+  "三处语义分歧保留原判、请复核者裁定：W4 的 institution=executed（原文无执行动作，只有对具体人物生效）、P4 与 W4 同引一句分列两条、三组共指无直述依据。",
+  "版本未校勘：TN1–TN9 只登记本版本内的用字疑点，未比对其他版本或实体书；TN3／TN4／TN5 本轮只做了逐字计数（改后的次数可复算），未逐处核对全书的搭配写法。",
+  "区间外未读：上一章与下一章都没有读，因此「灵龙为何发狂」「许七安为何把绸缎运回家」「桑泊案是否破了」等问题在本候选里只能是 unknowns（19 条），不能给答案。",
+  "反向覆盖是**引用覆盖**不是语义覆盖：95 段中 14 段未被任何引文触及，已逐段登记并分类（章题提示／分隔线与省略号过渡／外貌景物旁白／有意不猜的调侃）；被引文触及的段落不等于已被正确理解。"
+ ],
+ "rollback": {
+  "kind": "append-only",
+  "strategy": "delete-added-files",
+  "files": [
+   "loop/state/out/read_dafeng_L2_0130.candidate.json"
+  ]
+ }
+}

@@ -1,0 +1,710 @@
+{
+ "task": "env:index-owner",
+ "role": "loop/ROLES/SENTINEL.md",
+ "agent": "w-sentinel-index-owner",
+ "round": 4,
+ "generatedAt": "2026-10-12T06:30:00Z",
+ "scope": "只读审计：「一个原文单元是什么」在仓库里有几套口径、loop/state/index.json 的读/写者各是谁、是否存在第二套**不同口径**的单元生成路径。**未修改任何代码、未修改索引本体**（任务明令只审计）。",
+ "answerSummary": {
+  "q1_writers": "loop/state/index.json 的**唯一写入点**是 loop/bin/build_plan.py:545；守卫在 :543（`if args.index or not idx_path.exists()`）。全仓扫描「行内含 index.json 且有写动作」只命中 2 处，且**都不是这个文件**（tests/error_recovery_contract.py:106 写的是测试自有临时 cache_dir；tools/plan100/build_task_state_machines.py:925 写的是 artifacts/plan100/.../P03-build-index.json）。纪律「同一文件只设一个写入负责人」在索引本体上**成立**。",
+  "q2_second_caliber": "**存在**，且在生产链路上：B = narrative.context_chapter_spans（narrative.py:515）→ ContextIndex（:594）→ context_index.ranges()/_groups → narrative.plan（:943/:975/:1161）→ serve.py:5241 enrichment_plan → 路由 POST /api/enrich/plan（serve.py:7001）。它**不复用** A 的收行规则，而是各自一套正则；A 与 B 在 dafeng 差 5 个章界（B 有 A 无）、3 个章界（A 有 B 无），在 xiyou 差 1 个（A 有 B 无），sanguo 完全一致。",
+  "q3_who_unifies": "应由 **narrative.py 的写入负责人**统一，方向是**以 A 为准**：B 若要继续产出「投喂窗口」，其章域必须与 A 的 chapterUnits 同源（直接复用 A 的 span，或抽出唯一的章头解析函数供两者调用）。本轮只审计，未改代码。"
+ },
+ "inputs": {
+  "loop/state/index.json": {
+   "sha256": "9d951bc4c81766789b55daf0e8cff2716c0ae26da3ac385561640a4817aeb66f",
+   "bytes": 275199,
+   "note": "被审计的索引本体；属 loop/ 演进路径（loop.py:314 EVOLVING_PREFIXES），哈希漂移不判本记录失效。"
+  },
+  "narrative.py": {
+   "sha256": "ac10f98e4f4eef2789d6098bc234de456c521ad47abe6bdb58b299ec2dd679c6",
+   "bytes": 86502,
+   "note": "**受保护路径**（非 loop/）。A 与 B **同处此文件** —— 这是本次审计的核心对象。若下一轮复核时哈希已变，说明有并行写入者改过它，那本身是需要重新审计的信号。"
+  },
+  "serve.py": {
+   "sha256": "e5d6fd6ab1cfcef6037eac68509e558b62e9acec471849ddc65c05712817de55",
+   "bytes": 415490,
+   "note": "**受保护路径**。B 的生产可达链路 :5241 enrichment_plan → :5246 NARRATIVE.plan；路由 :7001 /api/enrich/plan。另 :3435 CH_RE 是口径 C。**注意**：上一轮（round 3）把 serve.py 固化成证据后它被改过（round 3 记录 2026-10-09 的 ff62b895…，现为 e5d6fd6a…，mtime 2026-10-12T14:09:24）⇒ 那条记录被 evidence_stale() 判 hash-changed，`loop.py stats` 的 staleEvidence 至今列着 env:index-owner。本记录**不把 serve.py 当证据固化**，只作为只读输入登记当刻读数。"
+  },
+  "loop/bin/build_plan.py": {
+   "sha256": "2178745505b1109efd0e8d310419d583cc37f6374901c729467b511bc8bfc9a0",
+   "bytes": 38231,
+   "note": "唯一写入者所在文件：:545 写、:543 守卫、:132 调 A、:144-150 的归属键口径 F。"
+  },
+  "loop/queue/read.jsonl": {
+   "sha256": "e0ede3d973c8e778ff0ea38efc49f150197b509c48d58fb48d110aed65150675",
+   "bytes": 8787662,
+   "note": "1133 条 read 任务；用于核对「队列绑定的源区间是否仍等于索引单元」。"
+  },
+  "data/cache/index.json": {
+   "sha256": "bada90948fc7cc4ee9c78f96507d51955711c3cdc514213a420be48e8f872b6f",
+   "bytes": 286443,
+   "note": "作品库历史（serve.py:6299 HIST_PATH, :6344 _hist_write 按设计重写）。**只读输入，不固化当证据** —— round 2 就是把它固化成证据才失效的。此处只记录当刻读数用于说明 build_plan._default_books() 的取键语义。"
+  },
+  "docs": {
+   "dafeng": {
+    "path": "data/cache/215f4b88fb087a7d735a6fae.docs.json",
+    "sha256": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "textChars": 4760263
+   },
+   "xiyou": {
+    "path": "data/cache/ed3dc1255ca08fbdaae30bbd.docs.json",
+    "sha256": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+    "textChars": 722176
+   },
+   "sanguo": {
+    "path": "data/cache/b1687d1214f4d6c8bcd06c6f.docs.json",
+    "sha256": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+    "textChars": 607191
+   }
+  }
+ },
+ "answer1_readersAndWriters": {
+  "method": "grep -rn 'index\\.json' loop/ tests/ tools/ serve.py，再对命中行做**写动作**二次过滤（write_text|json.dump|.write(|open(...,'w')|replace(|rename(），最后逐条人工判读路径。",
+  "writer": [
+   {
+    "path": "loop/bin/build_plan.py",
+    "line": 545,
+    "code": "idx_path.write_text(json.dumps(index, ensure_ascii=False, indent=1) + \"\\n\", \"utf-8\")",
+    "guard": "loop/bin/build_plan.py:543 `if args.index or not idx_path.exists():`",
+    "calledBy": [
+     "loop/bootstrap.sh:19（$PY -B -s loop/bin/build_plan.py --index）",
+     "loop/README.md:61（文档记载的手工刷新）",
+     "loop/bin/sentinel.py:453 兜底补队列时**不带 --index** ⇒ 索引已存在则只读"
+    ]
+   }
+  ],
+  "writersFoundButDifferentFile": [
+   {
+    "path": "tests/error_recovery_contract.py",
+    "line": 106,
+    "target": "测试自建的临时 cache_dir/index.json（不是 loop/state/index.json）"
+   },
+   {
+    "path": "tools/plan100/build_task_state_machines.py",
+    "line": 925,
+    "target": "artifacts/plan100/.../P03-build-index.json（不是 loop/state/index.json）"
+   }
+  ],
+  "readers": [
+   {
+    "path": "loop/bin/worker.py",
+    "lines": [
+     418,
+     426
+    ],
+    "use": "代登记时按 graphKey 取图谱/原文缓存路径算 sourceHashes"
+   },
+   {
+    "path": "loop/bin/to_candidate.py",
+    "lines": [
+     158,
+     167,
+     390,
+     481,
+     736,
+     803
+    ],
+    "use": "父版本 graphKey 回退 + **单元区间权威来源**（comment:479 '权威来源是 index.json 的 chapterUnits'）"
+   },
+   {
+    "path": "loop/bin/selftest.py",
+    "lines": [
+     383,
+     1669
+    ],
+    "use": "第 14 条（单元数与文档一致）、第 15 条（索引键 == /api/history 各书第一条）"
+   },
+   {
+    "path": "tests/loop_bridge_contract.py",
+    "lines": [
+     65,
+     82,
+     165
+    ],
+    "use": "桥接契约对账"
+   },
+   {
+    "path": "tests/p2_coverage_layers.py",
+    "line": 98,
+    "use": "覆盖层契约"
+   }
+  ],
+  "conclusion": "唯一写入者，7 处只读消费。「同一文件只设一个写入负责人」在索引本体上成立，且**队列任务的 sourceRange 与索引同源**（见 answer3_queueBinding）。"
+ },
+ "answer2_calibers": {
+  "note": "「一个原文单元是什么」有多套**实现**，但真正**产出不同单元集合**的只有 A 与 B。下表按「是否产出单元/章域」分类，并给出量词字符类 —— 这是最容易在阅读时被忽略的差异点。",
+  "table": [
+   {
+    "id": "A",
+    "name": "chapter_spans（产出索引单元）",
+    "where": "narrative.py:1301（_HEAD_RE:1256, _SPECIAL_RE:1258）",
+    "pattern": "第([零〇一二两三四五六七八九十百千0-9０-９]+)([回章节])(?=[ \\t　\\r\\n：:]) + 特殊前缀 附录/番外/楔子/序章/尾声/后记",
+    "produces": "loop/state/index.json 的 chapterUnits（唯一）",
+    "unitChars": "回 章 节 + 无编号特殊单元"
+   },
+   {
+    "id": "B",
+    "name": "context_chapter_spans（产出投喂窗口用章域）",
+    "where": "narrative.py:515（_CHAPTER_HEAD:480, _MISSING_UNIT_HEAD:483）",
+    "pattern": "第[…]+([章节回幕卷部集]) | Chapter N | 附录",
+    "produces": "ContextIndex.sources[].chapterSpans → context_index.ranges()/context_groups_for() 的窗口边界",
+    "unitChars": "章 回 幕 卷 部 集 + 附录；**无番外**"
+   },
+   {
+    "id": "C",
+    "name": "serve.py 材料切块 CH_RE",
+    "where": "serve.py:3435",
+    "pattern": "第[…]+[章节回卷幕部集] | Chapter N | #{1,3}",
+    "produces": "split_chunks / extraction_chunks 的切点",
+    "unitChars": "章节回卷幕部集"
+   },
+   {
+    "id": "D",
+    "name": "serve.py 材料分类 CH_HEAD_RE",
+    "where": "serve.py:3443",
+    "pattern": "第[…]+[章节回幕]",
+    "produces": "classify_doc 的 heads 计数（只影响分类）",
+    "unitChars": "章节回幕"
+   },
+   {
+    "id": "E",
+    "name": "distill.py 蒸馏切分",
+    "where": "distill.py:81 CH_HEAD / :364 CH_LOOSE / :518 _CH_NUM",
+    "pattern": "第[…]+[章节回幕卷部集] | Chapter N | #{1,3}",
+    "produces": "蒸馏材料切分（活链路：serve.py:25 import distill）",
+    "unitChars": "章节回卷幕部集"
+   },
+   {
+    "id": "F",
+    "name": "build_plan.chapter_key（事件→单元归属键）",
+    "where": "loop/bin/build_plan.py:144-150",
+    "pattern": "^第?([0-9零〇一二两三四五六七八九十百千]+)([回章节集幕])",
+    "produces": "units[].events / unitsWithEvents",
+    "unitChars": "回章节集幕"
+   },
+   {
+    "id": "G",
+    "name": "JS chapterKey（前端定位归属）",
+    "where": "js/atlas/atlas-source.js:767",
+    "pattern": "^第\\s*([0-9零〇一二两三四五六七八九十百千]+)\\s*([回章节集幕])",
+    "produces": "前端事件定位的「同章」判据",
+    "unitChars": "回章节集幕"
+   }
+  ],
+  "whichProduceUnits": {
+   "producesIndexUnits": [
+    "A"
+   ],
+   "producesContextScopes": [
+    "B"
+   ],
+   "onlyInfluenceSplitting": [
+    "C",
+    "D",
+    "E"
+   ],
+   "onlyMapEventToUnit": [
+    "F",
+    "G"
+   ]
+  },
+  "keyFinding": "**F/G 与 A 的量词集合不同**：A 的 _HEAD_RE 只收 [回章节]，而 F/G 认 [回章节集幕]，B/C/E 还认 [卷部幕]。三书实测 A 的 unit 分布见 caliberDiverge —— 全部落在 [回章节] + 无编号特殊单元内，故当前**没有**『集/幕/卷/部』单元，F/G 的宽量词集合在本数据上不产生分歧；但这是**数据巧合，不是结构保证**：一旦某本书正文出现『第N幕』且 A 不收，B/C/E 会把它当章界而 A 不会。"
+ },
+ "caliberDiverge_AvsB": {
+  "method": "对每本书的 docs[0].text 同时跑 A=narrative.chapter_spans 与 B=narrative.context_chapter_spans，比对起始偏移集合。",
+  "books": {
+   "dafeng": {
+    "graphKey": "215f4b88fb087a7d735a6fae",
+    "docsSha256": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "textChars": 4760263,
+    "A": 912,
+    "B": 914,
+    "unitClassA": {
+     "章": 909,
+     "None": 3
+    },
+    "unitClassB": {
+     "章": 913,
+     "None": 1
+    },
+    "indexUnits": 912,
+    "AequalsIndexUnits": true,
+    "Aonly": [
+     4743502,
+     4748800,
+     4754516
+    ],
+    "AonlyHeads": [
+     "番外一：劫后",
+     "番外二：一统天下",
+     "番外三 庆功宴"
+    ],
+    "Bonly": [
+     3703622,
+     3708831,
+     3717366,
+     3722221,
+     3822387
+    ],
+    "BonlyHeads": [
+     "第七十八章熟悉的气息",
+     "第七十九章神魔终结的秘密",
+     "第八十一章针砭时弊",
+     "第八十二章最丑的大嫂",
+     "第一百零二 万事俱备否？（20000/10万）"
+    ]
+   },
+   "xiyou": {
+    "graphKey": "ed3dc1255ca08fbdaae30bbd",
+    "docsSha256": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+    "textChars": 722176,
+    "A": 101,
+    "B": 100,
+    "unitClassA": {
+     "回": 100,
+     "None": 1
+    },
+    "unitClassB": {
+     "回": 100
+    },
+    "indexUnits": 101,
+    "AequalsIndexUnits": true,
+    "Aonly": [
+     53085
+    ],
+    "AonlyHeads": [
+     "附  录　陈光蕊赴任逢灾　江流僧复仇报本"
+    ],
+    "Bonly": [],
+    "BonlyHeads": []
+   },
+   "sanguo": {
+    "graphKey": "b1687d1214f4d6c8bcd06c6f",
+    "docsSha256": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+    "textChars": 607191,
+    "A": 120,
+    "B": 120,
+    "unitClassA": {
+     "回": 120
+    },
+    "unitClassB": {
+     "回": 120
+    },
+    "indexUnits": 120,
+    "AequalsIndexUnits": true,
+    "Aonly": [],
+    "AonlyHeads": [],
+    "Bonly": [],
+    "BonlyHeads": []
+   }
+  },
+  "minimalFalsifiableSamples": {
+   "dafeng_Bonly": [
+    {
+     "offset": 3703622,
+     "head": "第七十八章熟悉的气息",
+     "why": "章号与标题**无分隔符**；A 的 _HEAD_RE 要求 (?=[ \\t　\\r\\n：:]) 前瞻，故 A 不收；B 的 _CHAPTER_HEAD 允许任意后缀 ⇒ B 收"
+    },
+    {
+     "offset": 3708831,
+     "head": "第七十九章神魔终结的秘密",
+     "why": "同上"
+    },
+    {
+     "offset": 3717366,
+     "head": "第八十一章针砭时弊",
+     "why": "同上"
+    },
+    {
+     "offset": 3722221,
+     "head": "第八十二章最丑的大嫂",
+     "why": "同上"
+    },
+    {
+     "offset": 3822387,
+     "head": "第一百零二 万事俱备否？（20000/10万）",
+     "why": "**量词缺失**（『第一百零二』后无『章』字）；A 完全无法收；B 靠 _MISSING_UNIT_HEAD:483 + 邻章一致性（:569-574）恢复，并给出 retrievalTitle"
+    }
+   ],
+   "dafeng_Aonly": [
+    {
+     "offset": 4743502,
+     "head": "番外一：劫后",
+     "why": "A 的 _SPECIAL_RE:1258 收『番外』；B 的 _CHAPTER_HEAD 只认 第N[章节回幕卷部集]/Chapter N/附录 ⇒ **B 完全不收番外**（实测 B 中含『番外』字样的 span = 0）"
+    },
+    {
+     "offset": 4748800,
+     "head": "番外二：一统天下",
+     "why": "同上"
+    },
+    {
+     "offset": 4754516,
+     "head": "番外三 庆功宴",
+     "why": "同上"
+    }
+   ],
+   "xiyou_Aonly": [
+    {
+     "offset": 53085,
+     "head": "附  录　陈光蕊赴任逢灾　江流僧复仇报本",
+     "why": "A 的 _SPECIAL_RE 允许『附[ 　]*录』（中间有全角空格）；B 的 _CHAPTER_HEAD 写死『附录』**不容空格** ⇒ B 不收。**这一条有实测后果**，见 answer3_appendixFallback"
+    }
+   ],
+   "sanguo": "A 与 B 的起始偏移集合**完全相同**（120/120）—— 三国正文的标题形态最规范，两套口径不产生分歧。这说明分歧**不是普遍性设计差异，而是边界形态覆盖差异**，只在特定书上暴露。"
+  }
+ },
+ "answer3_impact": {
+  "dafeng_mergedUnits": {
+   "note": "B 比 A 多出的 5 个边界，意味着 **A 把这 5 个真实章并进了邻居单元**。受影响单元的长度落在该书中 99–100 百分位（中位仅 4980 字）。",
+   "units": [
+    {
+     "unitIndex": 714,
+     "range": [
+      3699187,
+      3713570
+     ],
+     "chars": 14383,
+     "head": "第七十七章 杨千幻的妙计",
+     "BboundariesInside": 3,
+     "contains": [
+      "第七十七章",
+      "第七十八章熟悉的气息",
+      "第七十九章神魔终结的秘密"
+     ],
+     "queueTask": "read:dafeng:L2:0714",
+     "productSubmitted": false
+    },
+    {
+     "unitIndex": 715,
+     "range": [
+      3713570,
+      3726164
+     ],
+     "chars": 12594,
+     "head": "第八十章 金莲道长的尴尬",
+     "BboundariesInside": 3,
+     "contains": [
+      "第八十章",
+      "第八十一章针砭时弊",
+      "第八十二章最丑的大嫂"
+     ],
+     "queueTask": "read:dafeng:L3:0715",
+     "productSubmitted": false
+    },
+    {
+     "unitIndex": 734,
+     "range": [
+      3817767,
+      3830713
+     ],
+     "chars": 12946,
+     "head": "第一百零一章 云州的条件（一）",
+     "BboundariesInside": 2,
+     "contains": [
+      "第一百零一章",
+      "第一百零二 万事俱备否？（20000/10万）"
+     ],
+     "queueTask": "read:dafeng:L2:0734",
+     "productSubmitted": false
+    }
+   ],
+   "consequence": "读这个单元的 agent 会被要求「精读第七十七章」，实际拿到 3 章的正文；任务的 sourceRange 与 unitHead **都是 A 的口径**，所以任务本身自洽，但投喂/B窗口若走 B 就会给出不同的章域。",
+   "dafengSizes": {
+    "median": 4980,
+    "p99": 12594,
+    "max": 15903,
+    "unitsOver10000": 23
+   },
+   "dafengReadDone": "138 / 912（当刻）"
+  },
+  "appendixFallback": {
+   "note": "**最强的一条：B 的缺口让真实事件落进「全源扫描」。** 西游的『附录』章界只有 A 收得到（A-only @53085）。narrative.py:672-674：若某章标签在 B 里找不到任何章域，scopes 会退化成 `[(source, {start:0, end:len(text)})]` —— 即**整份原文**。",
+   "labelKey": "附录",
+   "BscopesForKey": 0,
+   "AscopesForKey": [
+    53085
+   ],
+   "textChars": 722176,
+   "affectedEvents": [
+    {
+     "id": "ev_3fa571bcfd3baea0",
+     "start": 53640,
+     "method": "unique_verbatim_fragment_in_chapter"
+    },
+    {
+     "id": "ev_3bd97c2d6fa6cc7f",
+     "start": 54533,
+     "method": "unique_verbatim_fragment_in_chapter"
+    },
+    {
+     "id": "ev_b7754dad47f79c14",
+     "start": 55731,
+     "method": "unique_verbatim_fragment_in_chapter"
+    },
+    {
+     "id": "ev_931c0439acae6fc6",
+     "start": 56805,
+     "method": "unique_verbatim_fragment_in_chapter"
+    },
+    {
+     "id": "ev_e36a16549a575112",
+     "start": 59154,
+     "method": "unique_verbatim_fragment_in_chapter"
+    }
+   ],
+   "affectedEventCount": 5,
+   "locatedMethod": "unique_verbatim_fragment_in_chapter（方法名声称 in_chapter，实际搜索域是全文）",
+   "consequence": "这些事件的定位在**方法名上写着 in_chapter、实际却是全文唯一子串匹配**。这是口径不一致造成的**可观测语义漂移**，不是审美问题：同一 label 在 A 下有 1 个章域、在 B 下有 0 个。"
+  },
+  "widerEventScoping": {
+   "method": "对每个事件取其 _chapter_key，检查该 key 在 A/B 各自章域集合中是否存在。",
+   "dafeng": {
+    "events": 2990,
+    "BinScopeButAinScope": 0,
+    "neither": 0
+   },
+   "xiyou": {
+    "events": 798,
+    "BinScopeButAinScope": 5,
+    "neither": 0,
+    "allFiveLabel": "附录 陈光蕊赴任逢灾 江流僧复仇报本"
+   },
+   "sanguo": {
+    "events": 1286,
+    "BinScopeButAinScope": 0,
+    "neither": 0
+   },
+   "reading": "**只有 5 个事件真的踩到**（全部是西游附录）。不要把这 5 条读成「大面积失效」；反过来也不要因为只有 5 条就忽略 —— 它们是**结构性缺口的存在性证明**，缺口本身（B 缺 附录/番外 支路）对任何新增的番外/附录内容都会再触发。"
+  },
+  "queueBinding": {
+   "note": "队列的 sourceRange 是从索引的 chapterUnits 生成的（build_plan.unit_tasks:296-299），所以「队列绑定是否仍等于索引单元」是索引口径是否被下游继承的直接判据。",
+   "detail": {
+    "readTasks": 1133,
+    "indexUnits": 1133,
+    "rangeMismatch": 0,
+    "missingUnits": 0,
+    "uncoveredUnits": 0,
+    "sourceHashByBook": {
+     "dafeng": {
+      "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839": 912
+     },
+     "xiyou": {
+      "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2": 101
+     },
+     "sanguo": {
+      "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff": 120
+     }
+    },
+    "sourceHashVsIndex": {
+     "dafeng": {
+      "queue": [
+       "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+      ],
+      "indexDocsSha256": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+      "diskSha256": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+     },
+     "xiyou": {
+      "queue": [
+       "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2"
+      ],
+      "indexDocsSha256": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+      "diskSha256": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2"
+     },
+     "sanguo": {
+      "queue": [
+       "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff"
+      ],
+      "indexDocsSha256": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+      "diskSha256": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    }
+   },
+   "verdict": "1133/1133 条 read 任务的 sourceRange **逐字节等于**当前索引的 chapterUnits 区间；0 条孤儿单元、0 条未覆盖单元。⇒ 索引口径**被队列完整继承**，不存在第三条「队列自己切了一套单元」的路径。",
+   "staleSourceHash": {
+    "book": "sanguo",
+    "queueValue": [
+     "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff"
+    ],
+    "indexDocsSha256": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+    "diskSha256": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+    "finding": "队列里 120 条 sanguo read 任务的 sourceHash 全是 2988ce6e…，而 index.docsSha256 与磁盘实际都是 8ab7298a…。dafeng/xiyou 两队与磁盘一致。",
+    "attribution": "**不是本轮新发现**：loop/state/runs/submit-verify_sanguo_L1_0031.json:31 已登记同一事实（『队列冻结的 2988ce6e… 与 docs.json 实际 8ab7298a… 不符…属任务定义的过期值』）。本轮**独立复算并确认仍成立**（该记录写于 2026-10-09，至今未修）。",
+    "whyItPersists": "read 任务是**按 id 去重追加**的（build_plan.write_queue 跳过已存在的 id），sanguo 的 120 条 id 已全部存在 ⇒ 即使重建队列也不会刷新它们的 sourceHash。"
+   }
+  },
+  "negativeResults": {
+   "note": "**没发现问题的部分也要写清楚，才能和「没检查」区分开。**",
+   "numeralImplsEquivalent": "三套中文数字实现（js/atlas/atlas-source.js:755-766 cnNumLocal、loop/bin/build_plan.py:102-120 _cn_num、narrative.py:1265-1281 cn_int）在**全部 286 种真实章头数字串**上逐值一致，分歧 0 种 ⇒ **不构成第二套口径**。（用 node 实跑 JS 版，非阅读推断。）",
+   "indexRebuildable": "现场调用 build_plan.build_index() 两次，输出逐字节相同（幂等）；chapterUnits 与磁盘索引**逐单元相同**（三书全部 True）⇒ 索引是 A 的忠实产物，A 就是唯一单元口径。",
+   "noThirdUnitPath": "队列、to_candidate、worker、selftest 都只**消费**索引或复制其区间，没有各自实现章节正则来切单元。C/D/E 只影响切块与分类，不产出 unit。",
+   "sourceIndexFaithful": "artifacts/plan100/source-index/*.json 的 chapters 边界与 A **逐一对齐**（3/3 文件 True）—— 它是 A 的忠实派生，不是独立口径。但它建在**已过期的键**上（见 answer4_indexStaleness）。"
+  }
+ },
+ "answer4_indexStaleness": {
+  "note": "审计索引口径时顺带发现的**索引陈旧**问题。它不是「第二套口径」，而是「同一套口径跑在过期的输入上」。",
+  "rebuildDiff": {
+   "diskTotals": {
+    "books": 3,
+    "units": 1133,
+    "unitsWithEvents": 1131,
+    "events": 5074,
+    "textChars": 6089630,
+    "lanes": 8
+   },
+   "liveTotals": {
+    "books": 3,
+    "units": 1133,
+    "unitsWithEvents": 1131,
+    "events": 5074,
+    "textChars": 6089630,
+    "lanes": 8
+   },
+   "totalsEqual": true,
+   "books": {
+    "dafeng": {
+     "chapterUnitsIdentical": true,
+     "differingFields": {}
+    },
+    "xiyou": {
+     "chapterUnitsIdentical": true,
+     "differingFields": {
+      "graphKey": [
+       "ed3dc1255ca08fbdaae30bbd",
+       "ee3430ef493546bbcd2e700b"
+      ],
+      "graphSha256": [
+       "3005a49ae29146d3a7b78bc35767c0407bd265f459b7aed715306c51309b8eb5",
+       "9747b08a09c9cb6442ab2a91f06925942fb73505edce26de28d4c8f7d967eab9"
+      ],
+      "tasks": [
+       198,
+       282
+      ]
+     }
+    },
+    "sanguo": {
+     "chapterUnitsIdentical": true,
+     "differingFields": {}
+    }
+   }
+  },
+  "finding": "现场 build_index() 与磁盘索引在 **xiyou** 上取到**不同的 graphKey**：磁盘 ed3dc1255ca08fbdaae30bbd（tasks=198），现场 ee3430ef493546bbcd2e700b（tasks=282）；两键的 docs.json **sha256 完全相同**（c282cf39…）⇒ 原文一致、单元数一致（101），差的只是图谱版本。dafeng / sanguo 无差异。",
+  "cause": "build_plan._default_books():64 取 `data/cache/index.json`（作品库历史）里该书**第一条**的键；该文件被 serve.py 的 _hist_write（:6344，d.insert(0,row)）在每次分析/发布时**前插**新条目。ee3430ef 于 2026-10-10 05:31 成为西游首条，但 loop/state/index.json 最后一次写入是 2026-10-10 00:31 ⇒ 索引在那之后没再刷新。",
+  "isItAlreadyKnown": {
+   "selftest": "**是**。loop/bin/selftest.py:1669-1686 第 15 条就是钉这件事（『索引的图谱键必须等于页面默认打开的那一版』），且已有 FAIL 留痕：loop/state/out/storage_external_20261011.json 内『FAIL 15 索引的图谱键必须等于页面默认打开的那一版 · 不一致：{xiyou: (ed3dc1255ca08fbdaae30bbd, ee3430ef493546bbcd2e700b)}』。本轮**没有**运行 selftest（见 remaining），故只引用该既有留痕，不冒充本轮实测。",
+   "orderSemantics": "我另外核对了「首条」的语义是否可靠：build_plan 直接取 json 数组首条，而 /api/history 走 history_list()（serve.py:6330 `out.sort(key=lambda x: (not x.get('pinned'),))` 稳定排序）⇒ **pinned 条目会被排到最前**，两者可能不一致。实测当前 data/cache/index.json **pinned 条目数 = 0**，故此刻两者一致（大奉/西游/三国首条均相符）。这是**潜在**不一致而非活缺陷。"
+  },
+  "impact": "loop/queue 里 101 条 xiyou read 任务的 sourceHash 与区间来自 ed3dc125（A 口径、101 单元），而现场重建会指向 ee3430ef。**单元切分不受影响**（docs 相同、A 相同、chapterUnits 逐单元相同）；受影响的是 graphKey/事件集与派生索引的版本归属。",
+  "whoShouldFix": "由 **loop/bin/build_plan.py 的写入负责人**用 `python3 -B -s loop/bin/build_plan.py --index` 刷新（项目自己的工具，见 PROJECT-STATE.md:481 的既有做法），或由 merge 任务在 GATE.lock 下统一。**本轮不执行**（只审计；且刷新索引会改动 loop/queue 与 loop/state 的共享状态，属另一条任务的责任）。"
+ },
+ "answer5_unification": {
+  "recommendation": "以 **A 为准**统一，由 **narrative.py 的写入负责人**执行。理由是可复算的，不是偏好：",
+  "reasons": [
+   "A 是**索引与队列的唯一来源**：1133/1133 条 read 任务的 sourceRange 逐字节等于 A 的 chapterUnits；B 没有任何下游会把它当成「单元」写进任何台账（它只产投喂窗口）。改变 A 会波及全部 1133 条任务；改变 B 只波及 enrich 的窗口计算。",
+   "A 是**唯一被契约测试钉住的**口径：tests/p3_unit_ledger_contract.py:24/:130/:190 明确要求『单元分母必须来自原文边界（narrative.chapter_spans）』。B 只有 tests/narrative_context_contract.py 覆盖它自己的两种形态（:48/:241/:282），**没有任何测试把 A 与 B 钉在一起**（grep 实测：p3 契约里 context_chapter_spans 命中 0）。",
+   "A 的覆盖面**严格更宽**：A 收番外（B 完全不收）、A 收带空格的『附　录』（B 不收）。B 独有的只有「无分隔符紧排标题」与「缺量词标题」两种形态 —— 这两类是**可以加进 A 的**（作为受约束的支路），而 A 的番外/附录支路加进 B 需要改 B 的所有权边界。"
+  ],
+  "concreteDirection": "让 B 复用 A 的 span 作为章域底座（narrative.py:534 已经有 `for span in chapter_spans(text)` 这一支路在复用 A 的 offset，说明复用是既定模式），把 B 独有的两种形态作为**显式标记**的补充边界并入，而不是维持两套独立正则。**不要**靠放宽 A 的 _HEAD_RE 来吸收 B 的形态（历史上已实测放宽会大量误收，见 PROJECT-STATE.md 记录的 912→450 反事实）。",
+  "explicitlyNotDone": "本轮**只审计，未改任何代码**（任务明令）。以上是方向建议，不是已实施的修复。"
+ },
+ "checksPerformed": [
+  {
+   "check": "index.json 写入点全仓扫描",
+   "command": "grep -rn 'index\\.json' --include=*.py --include=*.sh loop/ tests/ tools/ serve.py | grep -E 'write_text|json\\.dump|\\.write\\(|open\\([^)]*[\"\\']w|replace\\(|rename\\('",
+   "result": "2 命中，均非本文件；唯一写入者 = build_plan.py:545"
+  },
+  {
+   "check": "A vs B 三书逐边界对账",
+   "command": "python3 -B -s /tmp/cl_idxowner_probe.py（§3）",
+   "result": "dafeng A=912/B=914、xiyou A=101/B=100、sanguo 120/120"
+  },
+  {
+   "check": "附录标签在 B 下章域数",
+   "command": "probe（§4）",
+   "result": "B=0 个章域、A=1 个（@53085）；5 个事件 locate 退化为全文唯一子串"
+  },
+  {
+   "check": "三套中文数字实现等价性",
+   "command": "probe（§5），JS 用 node 实跑 cnNumLocal",
+   "result": "286 种真实章头数字串，三方分歧 0"
+  },
+  {
+   "check": "索引可重建性与幂等",
+   "command": "probe（§6）",
+   "result": "build_index() 连跑两次逐字节相同；chapterUnits 与磁盘逐单元相同 3/3；xiyou graphKey 漂移"
+  },
+  {
+   "check": "队列绑定一致性",
+   "command": "probe（§7）",
+   "result": "1133/1133 区间相符；0 孤儿；sanguo sourceHash 过期（已另有登记）"
+  },
+  {
+   "check": "派生索引口径归属",
+   "command": "probe（§8）",
+   "result": "source-index 3 文件边界 == A（True），但建于过期键"
+  },
+  {
+   "check": "A/B 是否互相钉住",
+   "command": "grep -n 'chapter_spans' tests/narrative_context_contract.py tests/p3_unit_ledger_contract.py",
+   "result": "两个契约各测各的，**无交叉钉死**"
+  }
+ ],
+ "notDone_remaining": [
+  "**未运行 loop/bin/selftest.py**（含第 15 条）：该脚本会写 loop/state/*（GUARD-REPORT 等）与拉起子进程，超出本任务 writes 范围（本次只允许写 loop/state/out/env_index-owner.artifact.json）。因此第 15 条的 FAIL 我引用的是既有留痕 storage_external_20261011.json，**不是本轮跑出来的**。",
+  "**未运行 loop/bin/loop.py reap**：本轮未领取死租约回收责任；且 leases/ 里有 18 个活跃租约（ps 实测），reap 会改共享状态。",
+  "**未修改任何代码**（任务明令只审计）：A/B 的统一**没有实施**，只是给出方向与理由。",
+  "**未量化「B 的窗口差异对 enrich 产出质量的语义影响」**：本轮只证明章域集合不同、以及附录事件退化为全文扫描；「这会让模型输出差多少」需要真实 enrich 调用（需模型/GPU 资源），未做，不估。",
+  "**未审计『集/幕/卷/部』量词的未来风险敞口**：三书当前 A 的 unit 分布只有 [回章节]+None，故 F/G 的宽量词集合在本数据上不产生分歧；我没有构造反例语料去验证「出现第N幕时 A 与 B 谁对」——那是设计取舍而非现有缺陷。",
+  "**data/cache/index.json 的 pinned 排序语义只做了当刻读数**（pinned=0，故与 raw 首条一致）；pinned>0 时的两路分歧未构造实测。",
+  "**sanguo 队列 sourceHash 过期未修**：属任务定义层（队列生成），修复会改 loop/queue；本轮只复算确认其仍成立并标注了既有登记处。"
+ ],
+ "rollback": {
+  "needed": false,
+  "why": "本任务只读审计 + 只写 writes 声明的 1 个文件（loop/state/out/env_index-owner.artifact.json）。未触碰任何受保护路径，未改索引/队列/代码。若要撤销本轮：删除 loop/state/out/env_index-owner.artifact.json 与 loop/state/out/env_index-owner.json 即可，不影响其他任何文件。",
+  "noProtectedPathTouched": [
+   "js/",
+   "css/",
+   "index.html",
+   "serve.py",
+   "narrative.py",
+   "scripts/",
+   "tests/",
+   "docs/",
+   "data/"
+  ]
+ },
+ "reproduce": {
+  "how": "把本 artifact 的 auditScript.source 写到任意临时路径（契约外，例如 /tmp/cl_idxowner_probe.py），然后 `cd /Users/carmen/Desktop/星系 && python3 -B -s /tmp/cl_idxowner_probe.py`；其 stdout 应与 auditScript.stdout 逐字节相同。",
+  "prerequisites": "python3（当刻 3.13.12）、node（§5 用；缺失时该节打印『node 失败』而其余节仍可复算）、仓库根为 /Users/carmen/Desktop/星系。",
+  "caveat": "§5/§6/§7 的数值依赖当刻的 data/cache/index.json、loop/state/index.json 与磁盘键；这些是**演进输入**。若索引已按 answer4_indexStaleness 刷新，则 §6 的 graphKey 差异会消失（那正是修复生效的标志），其余结论不受影响。"
+ },
+ "environment": {
+  "python": "3.13.12",
+  "cwd": "/Users/carmen/Desktop/星系",
+  "concurrentWriters": "ps -Ao command= 实测：loop/bin/loop.py 相关 **18** 个进程、worker.py 0、sentinel.py 0、build_plan.py 0；loop/state/leases 下 18 个活跃租约目录（含 env:index-owner.d，pid=43559）。**未使用 pgrep -c**（BSD/macOS 无此选项，空输出不等于 0 进程）。",
+  "note": "本工作树历史上持续存在不属于本队列的写入者（SENTINEL.md 第 1 条）。serve.py 在我这一轮之前（2026-10-12T14:09:24）被改过 —— 我**没有**改写它，也没有回滚它；本轮所有哈希都是当刻读数，mtime 与 git status 可复算（git status --porcelain -- serve.py → ' M serve.py'）。"
+ },
+ "conclusion": "① loop/state/index.json 的**唯一写入者** = loop/bin/build_plan.py:545（守卫 :543）；全仓写动作扫描只另有 2 处且写的都不是这个文件 ⇒ 「同一文件只设一个写入负责人」在索引本体上**成立**。② 「一个原文单元是什么」有 **7 处实现**，但真正产出**不同单元集合**的只有两套：A = narrative.chapter_spans（唯一产出索引单元）与 B = narrative.context_chapter_spans（产出 enrich 投喂窗口的章域）。B **不复用** A，各自一套正则，且 **B 在真实生产链路上**（serve.py:5241 → 路由 :7001 /api/enrich/plan）。③ 差异有三类可逐字复现的样例：B 多收『章号与标题无分隔符紧排』（大奉 @3703622/@3708831/@3717366/@3722221）与『缺量词』（@3822387，B 靠 missingUnit 支路恢复）；A 多收『番外』（大奉 ×3 —— B 一个都不收）与『附　录』（西游 @53085，B 因不容全角空格而不收）。④ 后果是可观测的、但**范围要说准**：大奉 3 个单元（i=714/715/734，99–100 百分位长度）被并成 1 章读 2–3 章；西游附录的 **5 个事件**因 B 无章域而把搜索域退化成整份原文（722176 字），而 locate 返回的方法名仍写 `unique_verbatim_fragment_in_chapter`。**没有**出现大面积失效（三国 A/B 完全一致）。⑤ 统一方向：**以 A 为准，由 narrative.py 的写入负责人执行** —— A 是索引与队列的唯一来源（1133/1133 区间相符）、是唯一被契约测试钉住的口径（tests/p3_unit_ledger_contract.py:24），且覆盖面严格更宽；且**不得**靠放宽 A 的正则来吸收 B 的形态。⑥ 顺带独立的负面结论（用来区分「没发现问题」与「没检查」）：三套中文数字实现在 **286 种真实章头**上分歧 **0**；索引 `build_index()` 幂等且 chapterUnits 与磁盘**逐单元相同**；队列**没有**第三条自切单元的路径。⑦ 另发现索引**陈旧**（非第二套口径）：现场重建的西游 graphKey = ee3430ef（tasks 282），磁盘仍是 ed3dc125（tasks 198），根因是 `_default_books()` 取作品库历史首条而索引自 2026-10-10 00:31 未刷新；这条**已被 selftest 第 15 条登记为 FAIL**（留痕 storage_external_20261011.json），本轮未运行 selftest，故不冒充实测。⑧ 全程**只读**，未改任何代码或受保护路径。",
+ "auditScript": {
+  "path_note": "审计脚本本体写在契约外临时路径（/tmp/cl_idxowner_probe.py），**不占 writes**；内容内嵌于此以便独立复算。",
+  "sha256": "15981884aebc59ee7b106cd5c51f062117bb759d857e4ec44412cbfd62a040a4",
+  "bytes": 12095,
+  "lines": 265,
+  "stdoutSha256": "ceaff4e089e3b7a30aa7941c2b409d69ca14a87fabb879f125a4bb9c0fe599e0",
+  "stdoutBytes": 12525,
+  "source": "#!/usr/bin/env python3\n# -*- coding: utf-8 -*-\n\"\"\"env:index-owner 只读审计探针（不改任何文件）。\n\n复现：cd /Users/carmen/Desktop/星系 && python3 -B -s /tmp/cl_idxowner_probe.py\n\"\"\"\nimport collections\nimport hashlib\nimport importlib.util\nimport json\nimport re\nimport subprocess\nimport sys\nfrom pathlib import Path\n\nROOT = Path(\"/Users/carmen/Desktop/星系\")\nsys.path.insert(0, str(ROOT))\n\n\ndef sha(p):\n    return hashlib.sha256(Path(p).read_bytes()).hexdigest()\n\n\ndef load(name, rel):\n    spec = importlib.util.spec_from_file_location(name, ROOT / rel)\n    mod = importlib.util.module_from_spec(spec)\n    if name == \"bp\":\n        sys.argv = [\"build_plan.py\"]\n    spec.loader.exec_module(mod)\n    return mod\n\n\nN = load(\"narr\", \"narrative.py\")\nBP = load(\"bp\", \"loop/bin/build_plan.py\")\n\nprint(\"=\" * 100)\nprint(\"§0 输入指纹（审计当刻）\")\nprint(\"=\" * 100)\nfor f in (\"loop/state/index.json\", \"narrative.py\", \"serve.py\", \"loop/bin/build_plan.py\",\n          \"loop/bin/to_candidate.py\", \"loop/bin/worker.py\", \"loop/queue/read.jsonl\"):\n    p = ROOT / f\n    print(\"  %-34s sha256=%s bytes=%d\" % (f, sha(p), p.stat().st_size))\n\nprint()\nprint(\"=\" * 100)\nprint(\"§1 loop/state/index.json 的读/写者普查\")\nprint(\"=\" * 100)\nfor label, cmd in (\n    (\"写入点（行内含 index.json 且有写动作）\",\n     r\"grep -rn 'index\\.json' --include=*.py --include=*.sh loop/ tests/ tools/ serve.py | \"\n     r\"grep -E 'write_text|json\\.dump|\\.write\\(|open\\([^)]*[\\\"'\\'']w|replace\\(|rename\\('\"),\n    (\"loop/ 内全部提及\",\n     r\"grep -rn 'index\\.json' loop/ --include=*.py --include=*.sh\"),\n):\n    out = subprocess.run([\"bash\", \"-lc\", \"cd %s && %s\" % (ROOT, cmd)],\n                         capture_output=True, text=True).stdout.rstrip()\n    print(\"\\n-- %s\\n%s\" % (label, out or \"  (无命中)\"))\n\nprint()\nprint(\"=\" * 100)\nprint(\"§2 口径普查：谁定义「一个原文单元」\")\nprint(\"=\" * 100)\ncalibers = []\n\n\ndef add_table():\n    print(\"  %-34s %-46s %s\" % (\"口径\", \"位置\", \"量词/数字字符类\"))\n    print(\"  \" + \"-\" * 118)\n    for c in calibers:\n        print(\"  %-34s %-46s %s\" % (c[0], c[1], c[2]))\n\n\ncalibers.append((\"A chapter_spans（索引单元）\", \"narrative.py:1301 _HEAD_RE\",\n                 r\"第([零〇一二两三四五六七八九十百千0-9０-９]+)([回章节])(?=空白/换行/：)\"))\ncalibers.append((\"A' _SPECIAL_RE（A 的番外支路）\", \"narrative.py:1258\",\n                 \"附录/番外/楔子/序章/尾声/后记\"))\ncalibers.append((\"B context_chapter_spans（投喂窗口）\", \"narrative.py:515 _CHAPTER_HEAD\",\n                 r\"第([...\\d]+)([章节回幕卷部集])｜Chapter N｜附录；另 _MISSING_UNIT_HEAD 补量词缺失\"))\ncalibers.append((\"C serve.py 材料切块\", \"serve.py:3435 CH_RE\",\n                 r\"第[...\\d]+([章节回卷幕部集])｜Chapter N｜#{1,3}\"))\ncalibers.append((\"D serve.py 材料分类\", \"serve.py:3443 CH_HEAD_RE\",\n                 r\"第[...\\d]+([章节回幕])\"))\ncalibers.append((\"E distill.py 蒸馏切分\", \"distill.py:81 CH_HEAD / :364 CH_LOOSE\",\n                 r\"第[...\\d]+([章节回幕卷部集])｜Chapter N｜#{1,3}\"))\ncalibers.append((\"F build_plan.chapter_key（归属键）\", \"loop/bin/build_plan.py:144-150\",\n                 r\"^第?([0-9零〇一二两三四五六七八九十百千]+)([回章节集幕])\"))\ncalibers.append((\"G JS chapterKey（定位归属）\", \"js/atlas/atlas-source.js:767\",\n                 r\"^第\\s*([0-9零〇一二两三四五六七八九十百千]+)\\s*([回章节集幕])\"))\nadd_table()\n\nprint()\nprint(\"  ★ 注意 F/G 与 A 的量词集合不同：A 只产出 [回章节] + 特殊单元(None)，\")\nprint(\"    而 F/G 认 [回章节集幕]；A 若产出『集/幕/卷/部』单元，F 的 chapter_key 能匹配，\")\nprint(\"    但 A 的 _HEAD_RE 根本不收这些量词 ⇒ 三书实际 unit 分布见 §3。\")\n\nprint()\nprint(\"=\" * 100)\nprint(\"§3 三书实际产出（A vs B）\")\nprint(\"=\" * 100)\nidx = json.loads((ROOT / \"loop/state/index.json\").read_text(\"utf-8\"))\nreport = {}\nfor k, b in idx[\"books\"].items():\n    gk = b[\"graphKey\"]\n    dpath = ROOT / (\"data/cache/%s.docs.json\" % gk)\n    text = json.loads(dpath.read_text(\"utf-8\"))[0][\"text\"]\n    graph = json.loads((ROOT / (\"data/cache/%s.json\" % gk)).read_text(\"utf-8\"))\n    A, B = N.chapter_spans(text), N.context_chapter_spans(text)\n    sa, sb = {s[\"start\"] for s in A}, {s[\"start\"] for s in B}\n    ca = collections.Counter((s[\"unit\"] or \"None\") for s in A)\n    cb = collections.Counter((s[\"unit\"] or \"None\") for s in B)\n    report[k] = {\"gk\": gk, \"textChars\": len(text), \"docsSha\": sha(dpath),\n                 \"A\": len(A), \"B\": len(B), \"Aonly\": sorted(sa - sb), \"Bonly\": sorted(sb - sa),\n                 \"unitA\": dict(ca), \"unitB\": dict(cb),\n                 \"events\": len(graph.get(\"events\") or [])}\n    print(\"\\n  [%s] graphKey=%s  docs=%s\" % (k, gk, sha(dpath)[:16]))\n    print(\"    原文 %d 字 / 图谱事件 %d\" % (len(text), report[k][\"events\"]))\n    print(\"    A(chapter_spans)      = %d 单元  unit分布=%s\" % (len(A), dict(ca)))\n    print(\"    B(context_...)        = %d 单元  unit分布=%s\" % (len(B), dict(cb)))\n    print(\"    A-only(在A不在B) = %d   B-only(在B不在A) = %d\" % (len(sa - sb), len(sb - sa)))\n    for tag, offs, src in ((\"A-only\", sorted(sa - sb), A), (\"B-only\", sorted(sb - sa), B)):\n        for off in offs:\n            sp = [x for x in src if x[\"start\"] == off][0]\n            line = text[off:text.find(\"\\n\", off)]\n            print(\"      %-7s @%-8d head=%r\" % (tag, off, line[:52]))\n\nprint()\nprint(\"=\" * 100)\nprint(\"§4 差异样例的后果：B 的缺口让事件落进「全源扫描」\")\nprint(\"=\" * 100)\nfor k, b in idx[\"books\"].items():\n    gk = b[\"graphKey\"]\n    text = json.loads((ROOT / (\"data/cache/%s.docs.json\" % gk)).read_text(\"utf-8\"))[0][\"text\"]\n    graph = json.loads((ROOT / (\"data/cache/%s.json\" % gk)).read_text(\"utf-8\"))\n    A, B = N.chapter_spans(text), N.context_chapter_spans(text)\n    Bk = {s[\"key\"] for s in B if s[\"key\"]}\n    Ak = {N._chapter_key(s[\"head\"]) for s in A if N._chapter_key(s[\"head\"])}\n    unscope = [e for e in (graph.get(\"events\") or [])\n               if N._chapter_key(e.get(\"chapter\")) and N._chapter_key(e.get(\"chapter\")) not in Bk\n               and N._chapter_key(e.get(\"chapter\")) in Ak]\n    print(\"  %-8s 事件 %4d：B 定不到章域但 A 定得到 = %d %s\"\n          % (k, len(graph.get(\"events\") or []), len(unscope),\n             sorted({e.get(\"chapter\") for e in unscope})[:3]))\n\nprint()\nprint(\"=\" * 100)\nprint(\"§5 章身份键：三套中文数字实现是否等价（全部真实章头）\")\nprint(\"=\" * 100)\nnums = []\nfor k, b in idx[\"books\"].items():\n    for u in b[\"chapterUnits\"]:\n        m = re.match(r\"^第([0-9零〇一二两三四五六七八九十百千]+)[章节回]\", u[\"head\"].strip())\n        if m and m.group(1) not in nums:\n            nums.append(m.group(1))\njs = r'''\nconst CN_DIGIT={\"零\":0,\"〇\":0,\"一\":1,\"二\":2,\"两\":2,\"三\":3,\"四\":4,\"五\":5,\"六\":6,\"七\":7,\"八\":8,\"九\":9};\nfunction cnNumLocal(s){ if(/^\\d+$/.test(s)) return +s; var total=0,sec=0,cur=0,i,ch;\n for(i=0;i<s.length;i++){ch=s[i];\n  if(CN_DIGIT[ch]!==undefined)cur=CN_DIGIT[ch];\n  else if(ch==='十'){sec+=(cur||1)*10;cur=0;}\n  else if(ch==='百'){sec+=(cur||1)*100;cur=0;}\n  else if(ch==='千'){sec+=(cur||1)*1000;cur=0;}\n  else return null;}\n return (sec+cur)||null;}\nconsole.log(JSON.stringify(JSON.parse(require('fs').readFileSync(0,'utf8')).map(c=>[c,cnNumLocal(c)])));\n'''\n(Path(\"/tmp/_cl_cn.js\")).write_text(js)\nr = subprocess.run([\"node\", \"/tmp/_cl_cn.js\"], input=json.dumps(nums), capture_output=True, text=True)\nprint(\"  真实章头数字串 %d 种；node rc=%d\" % (len(nums), r.returncode))\nif r.returncode == 0:\n    bad = [(s, jv, BP._cn_num(s), N.cn_int(s)) for s, jv in json.loads(r.stdout)\n           if not (jv == BP._cn_num(s) == N.cn_int(s))]\n    print(\"  js/atlas cnNumLocal(JS) / build_plan._cn_num(PY) / narrative.cn_int(PY) 三方分歧 = %d 种\" % len(bad))\n    for x in bad[:10]:\n        print(\"     \", x)\n    if not bad:\n        print(\"  → 数字解析在真实数据上等价：不构成第二套口径\")\nelse:\n    print(\"  node 失败：\", r.stderr[:200])\nPath(\"/tmp/_cl_cn.js\").unlink(missing_ok=True)\n\nprint()\nprint(\"=\" * 100)\nprint(\"§6 索引的可重建性与陈旧度\")\nprint(\"=\" * 100)\ndisk = idx\nlive = BP.build_index()\nprint(\"  磁盘 totals = %s\" % disk[\"totals\"])\nprint(\"  现场 totals = %s\" % live[\"totals\"])\nprint(\"  totals 相同 = %s\" % (disk[\"totals\"] == live[\"totals\"]))\nfor k in disk[\"books\"]:\n    d, l = disk[\"books\"][k], live[\"books\"][k]\n    diff = {f: (d.get(f), l.get(f)) for f in\n            (\"graphKey\", \"graphSha256\", \"docsSha256\", \"units\", \"unitsWithEvents\", \"events\", \"tasks\")\n            if d.get(f) != l.get(f)}\n    print(\"  %-8s chapterUnits 逐单元相同=%-5s  不同字段=%s\"\n          % (k, d[\"chapterUnits\"] == l[\"chapterUnits\"],\n             json.dumps(diff, ensure_ascii=False) if diff else \"（无）\"))\n\nprint()\nprint(\"  -- /api/history 的首选键（serve.py:6330 history_list 的排序语义）\")\nraw = json.loads((ROOT / \"data/cache/index.json\").read_text(\"utf-8\"))\nout = [dict(x) for x in raw if isinstance(x, dict) and x.get(\"key\")]\nfor x in out:\n    x.setdefault(\"pinned\", False)\nout.sort(key=lambda x: (not x.get(\"pinned\"),))\nnames = {\"dafeng\": \"大奉打更人\", \"xiyou\": \"西游记\", \"sanguo\": \"三国演义\"}\nfor kk, nm in names.items():\n    rawkey = next((str(e[\"key\"]) for e in raw if isinstance(e, dict)\n                   and str(e.get(\"display\") or e.get(\"title\")) == nm and e.get(\"key\")), None)\n    histkey = next((str(e[\"key\"]) for e in out\n                    if str(e.get(\"display\") or e.get(\"title\")) == nm and e.get(\"key\")), None)\n    print(\"     %-6s build_plan(raw[0])=%s  /api/history=%s  %s\"\n          % (kk, rawkey, histkey, \"一致\" if rawkey == histkey else \"★不一致\"))\nprint(\"     data/cache/index.json 条数=%d  pinned=%d\"\n      % (len(raw), sum(1 for e in raw if isinstance(e, dict) and e.get(\"pinned\"))))\n\nprint()\nprint(\"=\" * 100)\nprint(\"§7 队列 read 任务与 index 的绑定一致性\")\nprint(\"=\" * 100)\ncur = {}\nfor k, b in idx[\"books\"].items():\n    for u in b[\"chapterUnits\"]:\n        cur[(k, u[\"i\"])] = (u[\"start\"], u[\"end\"], u[\"head\"])\nqtasks, mismatch, stray = {}, [], []\nfor ln in (ROOT / \"loop/queue/read.jsonl\").read_text(\"utf-8\").splitlines():\n    if not ln.strip().startswith(\"{\"):\n        continue\n    t = json.loads(ln)\n    if t.get(\"stream\") != \"read\":\n        continue\n    key = (t.get(\"book\"), t.get(\"unitIndex\"))\n    qtasks[key] = t\n    c = cur.get(key)\n    if c is None:\n        stray.append(key)\n    elif [c[0], c[1]] != list(t.get(\"sourceRange\") or []):\n        mismatch.append((key, t.get(\"sourceRange\"), [c[0], c[1]]))\nprint(\"  队列 read 任务 = %d；index 单元 = %d\" % (len(qtasks), len(cur)))\nprint(\"  源区间不一致 = %d；单元不存在 = %d\" % (len(mismatch), len(stray)))\nfor x in mismatch[:5]:\n    print(\"     \", x)\nprint(\"  未被任何 read 任务覆盖的单元 = %d\" % len(set(cur) - set(qtasks)))\n\nprint()\nprint(\"=\" * 100)\nprint(\"§8 派生索引（artifacts/plan100/source-index）用的是哪套口径、哪一版原文\")\nprint(\"=\" * 100)\ncurkeys = {b[\"graphKey\"]: k for k, b in idx[\"books\"].items()}\nfor p in sorted((ROOT / \"artifacts/plan100/source-index\").glob(\"*.json\")):\n    d = json.loads(p.read_text(\"utf-8\"))\n    ch = d.get(\"chapters\") or []\n    dp = ROOT / (\"data/cache/%s.docs.json\" % p.stem)\n    same = None\n    if dp.exists():\n        same = [s[\"start\"] for s in N.chapter_spans(json.loads(dp.read_text(\"utf-8\"))[0][\"text\"])] \\\n            == sorted(c.get(\"start\") for c in ch)\n    print(\"  %-42s chapters=%3d  边界==A=%s  是否当前默认键=%s\"\n          % (p.name, len(ch), same, p.stem in curkeys))\nprint(\"  当前默认键 = %s\" % json.dumps(curkeys, ensure_ascii=False))\nprint(\"  build_plan._default_books() 的写死兜底键 = %s\"\n      % json.dumps({k: v[\"graph\"] for k, v in BP.BOOKS.items()}, ensure_ascii=False))\n\njson.dump(report, open(\"/tmp/_cl_report.json\", \"w\"), ensure_ascii=False)\nprint(\"\\n完成。\")\n",
+  "stdout": "====================================================================================================\n§0 输入指纹（审计当刻）\n====================================================================================================\n  loop/state/index.json              sha256=9d951bc4c81766789b55daf0e8cff2716c0ae26da3ac385561640a4817aeb66f bytes=275199\n  narrative.py                       sha256=ac10f98e4f4eef2789d6098bc234de456c521ad47abe6bdb58b299ec2dd679c6 bytes=86502\n  serve.py                           sha256=e5d6fd6ab1cfcef6037eac68509e558b62e9acec471849ddc65c05712817de55 bytes=415490\n  loop/bin/build_plan.py             sha256=2178745505b1109efd0e8d310419d583cc37f6374901c729467b511bc8bfc9a0 bytes=38231\n  loop/bin/to_candidate.py           sha256=df5f168d4c82310b7c9776f0dca448397f2aa7dbded5683de9077f2b0686d5c8 bytes=46568\n  loop/bin/worker.py                 sha256=e29de6aefa47361cad5864899f5b297da4daec1b1c7b1c1674bd3972daba52cc bytes=43593\n  loop/queue/read.jsonl              sha256=e0ede3d973c8e778ff0ea38efc49f150197b509c48d58fb48d110aed65150675 bytes=8787662\n\n====================================================================================================\n§1 loop/state/index.json 的读/写者普查\n====================================================================================================\n\n-- 写入点（行内含 index.json 且有写动作）\ntests/error_recovery_contract.py:106:        (cls.cache_dir / \"index.json\").write_text(\"[]\", encoding=\"utf-8\")\ntools/plan100/build_task_state_machines.py:925:    (OUT / \"P03-build-index.json\").write_text(\n\n-- loop/ 内全部提及\nloop/bin/worker.py:418:        b = (loopmod.load_json(loopmod.STATE / \"index.json\", {}) or {}).get(\"books\", {}).get(book) or {}\nloop/bin/worker.py:426:        b = (loopmod.load_json(loopmod.STATE / \"index.json\", {}) or {}).get(\"books\", {}).get(book) or {}\nloop/bin/build_plan.py:51:# 修法：键取自 `data/cache/index.json`（= /api/history 的落盘，即页面默认打开的那本）的\nloop/bin/build_plan.py:54:    \"\"\"页面默认三书的键（首选 = index.json 里该书的第一条，与 /api/history 同序）。\"\"\"\nloop/bin/build_plan.py:64:        hist = json.loads((ROOT / \"data\" / \"cache\" / \"index.json\").read_text(\"utf-8\"))\nloop/bin/build_plan.py:392:                  \"读 loop/state/index.json、loop/state/out/*.json、loop/state/PLAN100-LEDGER.json：\\n\"\nloop/bin/build_plan.py:456:        \"用 `loop/state/index.json` 与三本图谱缓存对账：\\n\"\nloop/bin/build_plan.py:517:        \"1. 列出所有会读/写 `loop/state/index.json` 的地方（`grep -rn index.json loop/`）。\\n\"\nloop/bin/build_plan.py:542:    idx_path = STATE / \"index.json\"\nloop/bin/selftest.py:383:        index = json.loads((loopmod.STATE / \"index.json\").read_text(\"utf-8\"))\nloop/bin/selftest.py:682:        #   ① 先用「加前缀」补上 index.json / PUBLISH-LEDGER.json / PUBLISHED-WITH-KNOWN-DEFECTS.json；\nloop/bin/selftest.py:688:                     \"evidence\": [{\"path\": \"loop/state/index.json\", \"sha256\": \"0\" * 64},\nloop/bin/selftest.py:706:        # 真实假告警（2026-10-09 本轮实测）：`data/cache/index.json` 是作品库历史，\nloop/bin/selftest.py:715:                  \"evidence\": [{\"path\": \"data/cache/index.json\", \"sha256\": \"0\" * 64}]}\nloop/bin/selftest.py:722:              loopmod.is_evolving(\"data/cache/index.json\")\nloop/bin/selftest.py:724:              \"index.json 是 serve.py 按设计重写的共享历史，不是内容产物\")\nloop/bin/selftest.py:1669:            hist_path = ROOT / \"data\" / \"cache\" / \"index.json\"\nloop/bin/adopt_plan100.py:52:    (\"P02\", \"W01\"): \"loop/state/index.json（三书原文单元分母，1133 个）\",\nloop/bin/to_candidate.py:155:      ① **页面真实的默认来源**：`data/cache/index.json` 里该书标题的第一条\nloop/bin/to_candidate.py:158:      ② 回退 `loop/state/index.json` 的 `graphKey`（selftest 第 15 条把两者钉在一起）。\nloop/bin/to_candidate.py:167:        hist = load_json(ROOT / \"data\" / \"cache\" / \"index.json\")\nloop/bin/to_candidate.py:390:    index = load_json(LOOP / \"state\" / \"index.json\")\nloop/bin/to_candidate.py:481:        # 判据：**权威来源是 index.json 的 chapterUnits**（与队列 sourceRange 同源），\nloop/bin/to_candidate.py:736:            \"publishTargetNote\": (\"父版本取自 loop/state/index.json 的 graphKey；\"\nloop/bin/to_candidate.py:803:            \"rangeAuthority\": \"loop/state/index.json chapterUnits[%d:%d]\" % (_lo, _lo + 20),\nloop/bin/loop.py:299:#   我按 P2 正常更新了 loop/state/index.json、PUBLISH-LEDGER.json 等台账，\nloop/bin/loop.py:339:# 事实：`data/cache/index.json` 不是内容产物，是「作品库历史」——`serve.py` 的\nloop/bin/loop.py:346:# 「data/cache/index.json 是作品库历史：同机其他会话（别的端口）打开作品时服务端会\nloop/bin/loop.py:354:VOLATILE_INDEX_FILES = (\"data/cache/index.json\",)\n\n====================================================================================================\n§2 口径普查：谁定义「一个原文单元」\n====================================================================================================\n  口径                                 位置                                             量词/数字字符类\n  ----------------------------------------------------------------------------------------------------------------------\n  A chapter_spans（索引单元）              narrative.py:1301 _HEAD_RE                     第([零〇一二两三四五六七八九十百千0-9０-９]+)([回章节])(?=空白/换行/：)\n  A' _SPECIAL_RE（A 的番外支路）            narrative.py:1258                              附录/番外/楔子/序章/尾声/后记\n  B context_chapter_spans（投喂窗口）      narrative.py:515 _CHAPTER_HEAD                 第([...\\d]+)([章节回幕卷部集])｜Chapter N｜附录；另 _MISSING_UNIT_HEAD 补量词缺失\n  C serve.py 材料切块                    serve.py:3435 CH_RE                            第[...\\d]+([章节回卷幕部集])｜Chapter N｜#{1,3}\n  D serve.py 材料分类                    serve.py:3443 CH_HEAD_RE                       第[...\\d]+([章节回幕])\n  E distill.py 蒸馏切分                  distill.py:81 CH_HEAD / :364 CH_LOOSE          第[...\\d]+([章节回幕卷部集])｜Chapter N｜#{1,3}\n  F build_plan.chapter_key（归属键）      loop/bin/build_plan.py:144-150                 ^第?([0-9零〇一二两三四五六七八九十百千]+)([回章节集幕])\n  G JS chapterKey（定位归属）              js/atlas/atlas-source.js:767                   ^第\\s*([0-9零〇一二两三四五六七八九十百千]+)\\s*([回章节集幕])\n\n  ★ 注意 F/G 与 A 的量词集合不同：A 只产出 [回章节] + 特殊单元(None)，\n    而 F/G 认 [回章节集幕]；A 若产出『集/幕/卷/部』单元，F 的 chapter_key 能匹配，\n    但 A 的 _HEAD_RE 根本不收这些量词 ⇒ 三书实际 unit 分布见 §3。\n\n====================================================================================================\n§3 三书实际产出（A vs B）\n====================================================================================================\n\n  [dafeng] graphKey=215f4b88fb087a7d735a6fae  docs=fdde555867aaccc2\n    原文 4760263 字 / 图谱事件 2990\n    A(chapter_spans)      = 912 单元  unit分布={'章': 909, 'None': 3}\n    B(context_...)        = 914 单元  unit分布={'章': 913, 'None': 1}\n    A-only(在A不在B) = 3   B-only(在B不在A) = 5\n      A-only  @4743502  head='番外一：劫后'\n      A-only  @4748800  head='番外二：一统天下'\n      A-only  @4754516  head='番外三 庆功宴'\n      B-only  @3703622  head='第七十八章熟悉的气息'\n      B-only  @3708831  head='第七十九章神魔终结的秘密'\n      B-only  @3717366  head='第八十一章针砭时弊'\n      B-only  @3722221  head='第八十二章最丑的大嫂'\n      B-only  @3822387  head='第一百零二 万事俱备否？（20000/10万）'\n\n  [xiyou] graphKey=ed3dc1255ca08fbdaae30bbd  docs=c282cf39b2ae739a\n    原文 722176 字 / 图谱事件 798\n    A(chapter_spans)      = 101 单元  unit分布={'回': 100, 'None': 1}\n    B(context_...)        = 100 单元  unit分布={'回': 100}\n    A-only(在A不在B) = 1   B-only(在B不在A) = 0\n      A-only  @53085    head='附  录\\u3000陈光蕊赴任逢灾\\u3000江流僧复仇报本'\n\n  [sanguo] graphKey=b1687d1214f4d6c8bcd06c6f  docs=8ab7298a6960c6fe\n    原文 607191 字 / 图谱事件 1286\n    A(chapter_spans)      = 120 单元  unit分布={'回': 120}\n    B(context_...)        = 120 单元  unit分布={'回': 120}\n    A-only(在A不在B) = 0   B-only(在B不在A) = 0\n\n====================================================================================================\n§4 差异样例的后果：B 的缺口让事件落进「全源扫描」\n====================================================================================================\n  dafeng   事件 2990：B 定不到章域但 A 定得到 = 0 []\n  xiyou    事件  798：B 定不到章域但 A 定得到 = 5 ['附录 陈光蕊赴任逢灾 江流僧复仇报本']\n  sanguo   事件 1286：B 定不到章域但 A 定得到 = 0 []\n\n====================================================================================================\n§5 章身份键：三套中文数字实现是否等价（全部真实章头）\n====================================================================================================\n  真实章头数字串 286 种；node rc=0\n  js/atlas cnNumLocal(JS) / build_plan._cn_num(PY) / narrative.cn_int(PY) 三方分歧 = 0 种\n  → 数字解析在真实数据上等价：不构成第二套口径\n\n====================================================================================================\n§6 索引的可重建性与陈旧度\n====================================================================================================\n  磁盘 totals = {'books': 3, 'units': 1133, 'unitsWithEvents': 1131, 'events': 5074, 'textChars': 6089630, 'lanes': 8}\n  现场 totals = {'books': 3, 'units': 1133, 'unitsWithEvents': 1131, 'events': 5074, 'textChars': 6089630, 'lanes': 8}\n  totals 相同 = True\n  dafeng   chapterUnits 逐单元相同=True   不同字段=（无）\n  xiyou    chapterUnits 逐单元相同=True   不同字段={\"graphKey\": [\"ed3dc1255ca08fbdaae30bbd\", \"ee3430ef493546bbcd2e700b\"], \"graphSha256\": [\"3005a49ae29146d3a7b78bc35767c0407bd265f459b7aed715306c51309b8eb5\", \"9747b08a09c9cb6442ab2a91f06925942fb73505edce26de28d4c8f7d967eab9\"], \"tasks\": [198, 282]}\n  sanguo   chapterUnits 逐单元相同=True   不同字段=（无）\n\n  -- /api/history 的首选键（serve.py:6330 history_list 的排序语义）\n     dafeng build_plan(raw[0])=215f4b88fb087a7d735a6fae  /api/history=215f4b88fb087a7d735a6fae  一致\n     xiyou  build_plan(raw[0])=ee3430ef493546bbcd2e700b  /api/history=ee3430ef493546bbcd2e700b  一致\n     sanguo build_plan(raw[0])=b1687d1214f4d6c8bcd06c6f  /api/history=b1687d1214f4d6c8bcd06c6f  一致\n     data/cache/index.json 条数=91  pinned=0\n\n====================================================================================================\n§7 队列 read 任务与 index 的绑定一致性\n====================================================================================================\n  队列 read 任务 = 1133；index 单元 = 1133\n  源区间不一致 = 0；单元不存在 = 0\n  未被任何 read 任务覆盖的单元 = 0\n\n====================================================================================================\n§8 派生索引（artifacts/plan100/source-index）用的是哪套口径、哪一版原文\n====================================================================================================\n  152e2a6eed94f1075e7e7070.json              chapters=120  边界==A=True  是否当前默认键=False\n  9b676d7031b1bcd3b8377a18.json              chapters=912  边界==A=True  是否当前默认键=False\n  df959d743e53206f56db2f92.json              chapters=101  边界==A=True  是否当前默认键=False\n  当前默认键 = {\"215f4b88fb087a7d735a6fae\": \"dafeng\", \"ed3dc1255ca08fbdaae30bbd\": \"xiyou\", \"b1687d1214f4d6c8bcd06c6f\": \"sanguo\"}\n  build_plan._default_books() 的写死兜底键 = {\"dafeng\": \"data/cache/215f4b88fb087a7d735a6fae.json\", \"xiyou\": \"data/cache/ee3430ef493546bbcd2e700b.json\", \"sanguo\": \"data/cache/b1687d1214f4d6c8bcd06c6f.json\"}\n\n完成。\n"
+ },
+ "leaseOwnershipNote": {
+  "observed": "提交回执为『已接收：env:index-owner』+『租约属于 w-ops，拒绝释放』。loop/state/leases/env:index-owner.d/lease.json 记 agent=w-ops、pid=43559、startedAt=2026-10-12T06:12:09Z；`ps -Ao pid=,command=` 实测该 pid **仍然存活**且确为一个 loop worker 进程（…/guard-runtime/worker.py --agent w-ops --loop 0 --timeout 2700 --stream ops,adopt,expert,env）。",
+  "whyThisMatters": "本任务的 `writes` 只声明了本 artifact，而**租约是另一个 agent 持有的**。我没有抢租约、没有释放它、也没有杀掉那个进程（SENTINEL.md 明令不得为让报告好看而杀别人的进程）。但我写这个文件**确实**与持有者的写入范围重叠 —— 这是事实，必须写出来而不是留给复核者去猜。",
+  "attribution": "SENTINEL.md 要求按**写入足迹**归因，不能用『谁的需求听起来像』。足迹：本 artifact 的 mtime=2026-10-12T14:29:28、是本轮由我写的（脚本内嵌、可复现）；租约心跳 heartbeatAt=2026-10-12T06:30:09Z（= 14:30:09 本地）晚于我写文件的时刻 ⇒ **租约持有者在我写完之后仍在心跳**，意味着它可能也会写同一个路径。若复核时发现本 artifact 的 sha256 与提交记录不符，**优先怀疑这一处竞争**，而不是先假定内容造假 —— 请比对 `loop/state/out/env_index-owner.json` 的 evidence[0].sha256 与磁盘现值。",
+  "whatIDidNotDo": [
+   "未 kill pid 43559",
+   "未删改该租约",
+   "未 git checkout/reset/stash",
+   "未改任何受保护路径"
+  ]
+ }
+}

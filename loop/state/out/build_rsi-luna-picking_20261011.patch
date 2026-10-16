@@ -1,0 +1,839 @@
+--- a/js/sky/sky-shell.js
++++ b/js/sky/sky-shell.js
+@@ -19,6 +19,221 @@
+   var playing = false, playT = null, speed = 1, hoverInfo = null, selInfo = null;
+   var locSeq = 0;   /* M13：搜索定位确认的请求序号（新确认使旧到达回调失效） */
+   var hud = null, el = {};
++  /* M91/M99: one request snapshot, four independent identities, one host frame. */
++  var interaction = {hover:null,focus:null,selection:null,current:null}, interactionGraph = null, interactionKey = null;
++  var interactionPeople = Object.create(null), interactionNames = Object.create(null), interactionEvents = Object.create(null);
++  var interactionSVG = null, choiceSVG = null, choicePanel = null, choiceRequest = null, choiceSerial = 0, choiceProgress = 0;
++  var interactionScene = null, choicePointer = false, interactionKeyboard = false, interactionBound = false, interactionPose = '';
++  function stableId(item) { return item && item.id != null ? String(item.id) : item && item.entityId != null ? String(item.entityId) : null; }
++  function interactionWorkKey() { var A=app(); return A&&A.key?A.key():null; }
++  function setInteraction(kind, value) {
++    if (interaction[kind] === value) return;
++    var model=g.CLSkySelectionModel;
++    if (model) interaction=model.set(interaction,kind,value).state;
++  }
++  function personReference(name) {
++    var rows=interactionNames[name]||[],c=rows.length===1?rows[0]:null,id=stableId(c);
++    if(!c||!id||(interactionPeople[id]||[]).length!==1)return null;
++    if(c.id!=null&&c.entityId!=null&&String(c.id)!==String(c.entityId))return null;
++    return 'person:'+id;
++  }
++  function interactionEntity(ref) {
++    if(typeof ref!=='string')return null;
++    var sep=ref.indexOf(':'),kind=ref.slice(0,sep),id=ref.slice(sep+1);
++    var rows=(kind==='person'?interactionPeople:interactionEvents)[id]||[];
++    return rows.length===1?{kind:kind,id:id,item:rows[0]}:null;
++  }
++  function interactionPoint(ref) {
++    var e=interactionEntity(ref),S=scene();if(!e||!S)return null;
++    if(e.kind==='event') {
++      if(!plot||mode==='compass'||!disc||!disc.eventPoint)return null;
++      var index=G.events.indexOf(e.item),point=disc.eventPoint(index);return point?[point.x,point.y]:null;
++    }
++    if(mode==='compass') {
++      if(e.item.name!==compassName||!S.crownScreenBounds)return null;
++      var b=S.crownScreenBounds();return b?[(b.left+b.right)/2,(b.top+b.bottom)/2]:null;
++    }
++    var n=S.nodeOf&&S.nodeOf('c:'+e.item.name);
++    if(!n||!n.g||!n.g.visible||stableId(n.data)!==e.id)return null;
++    return (starScreens([e.item.name])||{})[e.item.name]||null;
++  }
++  function interactionLabel(ref) {var e=interactionEntity(ref);return e?(e.kind==='person'?e.item.name:(g.CLSkyEventLabel?g.CLSkyEventLabel.eventLabel(e.item):e.item.title||'当前事件')):'';}
++  function focusIsVisible(node) {return !!(node&&node.isConnected&&!node.hidden&&node.getClientRects&&node.getClientRects().length&&g.getComputedStyle(node).visibility!=='hidden');}
++  function focusReference(target) {
++    var row=target&&target.closest&&target.closest('[data-pick-ref]');if(row)return row.getAttribute('data-pick-ref')||null;
++    var person=target&&target.closest&&target.closest('[data-person-detail]'),event=target&&target.closest&&target.closest('[data-event-id]');
++    if(person){var pid=person.getAttribute('data-person-detail');if((interactionPeople[pid]||[]).length===1)return 'person:'+pid;}
++    if(event){var eid=event.getAttribute('data-event-id');if((interactionEvents[eid]||[]).length===1)return 'event:'+eid;}
++    var label=target&&target.closest&&target.closest('#labels .cl-lab.char');if(!label)return null;
++    var S=scene(),found=null;
++    (G&&G.characters||[]).some(function(c){var n=S&&S.nodeOf&&S.nodeOf('c:'+c.name);if(n&&n.el===label){found=personReference(c.name);return true;}return false;});
++    return found;
++  }
++  function pickKeyDeferred(e) {
++    var IA=g.CLInformationArchitecture,Chrome=g.CLSkyChrome;
++    return !!(e.__clPanelEsc||(g.CLModal&&g.CLModal.open&&g.CLModal.open())||doc.body.getAttribute('data-modal-active')||
++      (IA&&IA.isOpen&&IA.isOpen())||(Chrome&&Chrome.menuOpen&&Chrome.menuOpen()));
++  }
++  function closePickChoices(restore) {
++    var old=choiceRequest;if(!old)return;
++    choiceRequest=null;choicePointer=false;choiceSerial++;choiceProgress=0;
++    if(g.CLSkyMotion)g.CLSkyMotion.cancelAll('pick-choices');
++    if(choicePanel){choicePanel.hidden=true;choicePanel.textContent='';}
++    if(choiceSVG)choiceSVG.textContent='';
++    setInteraction('focus',null);setInteraction('hover',null);
++    if(restore&&old.returnFocus&&old.returnFocus.isConnected&&old.returnFocus.focus)old.returnFocus.focus({preventScroll:true});
++  }
++  function commitPickChoice(index) {
++    var q=choiceRequest,row=q&&q.rows[index],S=scene();
++    if(!q||!row||!row.ref||q.graph!==G||q.key!==interactionWorkKey()||q.scene!==S)return false;
++    var e=interactionEntity(row.ref),n=e&&S.nodeOf&&S.nodeOf('c:'+e.item.name);
++    if(!e||n!==row.node||stableId(n.data)!==e.id){closePickChoices(false);return false;}
++    if(!S.selectPickCandidate||!S.selectPickCandidate(e.id))return false;
++    setInteraction('selection',row.ref);closePickChoices(false);
++    if(interactionKeyboard){var destination=mode==='compass'?el.skyBack:(focusIsVisible(n.el)?n.el:el.skyPlot);if(focusIsVisible(destination)&&destination.focus)destination.focus({preventScroll:true});}
++    return true;
++  }
++  function focusPickChoice(index) {
++    var q=choiceRequest;if(!q||!q.rows.length)return;
++    index=Math.max(0,Math.min(q.rows.length-1,index));var row=q.rows[index];q.at=index;
++    if(row.button&&!row.button.disabled){row.button.tabIndex=0;row.button.focus({preventScroll:true});row.button.scrollIntoView({block:'nearest'});}
++    q.rows.forEach(function(other,i){if(other.button&&i!==index)other.button.tabIndex=-1;});
++    setInteraction('focus',interactionKeyboard?row.ref:null);
++  }
++  function pickChoiceKey(e) {
++    if(!choiceRequest)return false;
++    if(pickKeyDeferred(e))return false;
++    if(e.isComposing||e.ctrlKey||e.metaKey||e.altKey)return false;
++    if(e.key==='Escape'){e.preventDefault();e.stopPropagation();closePickChoices(true);return true;}
++    if(!choicePanel.contains(e.target))return false;
++    var q=choiceRequest,active=doc.activeElement&&doc.activeElement.closest&&doc.activeElement.closest('[data-pick-index]'),activeIndex=active?+active.getAttribute('data-pick-index'):q.at,next=activeIndex,step=0;
++    if(e.key==='ArrowDown'||e.key==='ArrowRight'){step=1;next=Math.min(q.rows.length-1,activeIndex+1);}
++    else if(e.key==='ArrowUp'||e.key==='ArrowLeft'){step=-1;next=Math.max(0,activeIndex-1);}
++    else if(e.key==='Home'){step=1;next=0;}
++    else if(e.key==='End'){step=-1;next=q.rows.length-1;}
++    else if(e.key==='Enter'||e.key===' '){e.preventDefault();e.stopPropagation();interactionKeyboard=true;if(e.target.closest('[data-pick-cancel]'))closePickChoices(true);else if(active)commitPickChoice(activeIndex);return true;}
++    else return false;
++    while(next>=0&&next<q.rows.length&&!q.rows[next].ref)next+=step;
++    e.preventDefault();e.stopPropagation();interactionKeyboard=true;if(next>=0&&next<q.rows.length)focusPickChoice(next);return true;
++  }
++  function openPickChoices(snapshot) {
++    if(!G||mode==='compass'||!snapshot||!snapshot.nodes||snapshot.nodes.length<2)return false;
++    closePickChoices(false);stopPlay();
++    if(g.CLSkyDeep&&g.CLSkyDeep.finishStructure)g.CLSkyDeep.finishStructure();
++    if(playerUnit.finishParticipants)playerUnit.finishParticipants();
++    var S=scene();if(S&&S.cancelCameraMotion)S.cancelCameraMotion();
++    var seen=Object.create(null),rows=[];
++    snapshot.nodes.forEach(function(n,index){
++      var name=n.data&&n.data.name||n.key.slice(2),ref=personReference(name);
++      if(ref&&stableId(n.data)!==ref.slice(7))ref=null;
++      var key=ref||('unresolved:'+index);if(seen[key])return;seen[key]=true;
++      rows.push({node:n,ref:ref,name:name,detail:n.data&&(n.data.identity||n.data.role||n.data.camp)||'',button:null});
++    });
++    if(rows.length<2)return false;
++    mountInteraction();
++    if(g.CLSkyDeconstruction&&g.CLSkyDeconstruction.suppressOutsideOnce)g.CLSkyDeconstruction.suppressOutsideOnce();
++    var request=++choiceSerial;
++    choiceRequest={id:request,graph:G,key:interactionWorkKey(),scene:S,rows:rows,at:0,source:snapshot.source,x:snapshot.x,y:snapshot.y,returnFocus:doc.activeElement};
++    choicePanel.innerHTML='<header><b id="skyPickTitle">这里有 '+rows.length+' 个候选人物</b><button type="button" data-pick-cancel aria-label="取消选择">×</button></header><p>确认其中一位后再打开人物；导线标示图中位置。'+(rows.length>6?'图中最多同时标注6位，完整名单可滚动查看。':'')+'</p><div class="sky-pick-list" role="listbox" aria-labelledby="skyPickTitle">'+rows.map(function(row,i){return '<button type="button" role="option" data-pick-index="'+i+'" data-pick-ref="'+esc(row.ref||'')+'" tabindex="'+(i===0?'0':'-1')+'" aria-selected="'+(row.ref===interaction.selection)+'"'+(row.ref?'':' disabled')+'><b>'+esc(row.name)+'</b><small>'+esc(row.ref?row.detail||'当前图中的人物':'身份待确认，不能自动归属')+'</small></button>';}).join('')+'</div><small class="sky-pick-key">方向键预览 · Enter确认 · Esc返回</small>';
++    rows.forEach(function(row,i){row.button=choicePanel.querySelector('[data-pick-index="'+i+'"]');});
++    choicePanel.hidden=false;
++    var width=Math.min(320,g.innerWidth-32),height=Math.min(410,g.innerHeight-32),top=doc.querySelector('.sky-top'),minTop=top?top.getBoundingClientRect().bottom+8:16;
++    choicePanel.style.width=width+'px';
++    choicePanel.style.left=Math.max(16,Math.min(g.innerWidth-width-16,snapshot.x+20))+'px';
++    var chosenTop=Math.max(minTop,Math.min(g.innerHeight-height-16,snapshot.y-24));
++    choicePanel.style.top=chosenTop+'px';choicePanel.style.maxHeight=Math.max(96,g.innerHeight-chosenTop-16)+'px';
++    choiceProgress=reduced()?1:0;choicePanel.style.setProperty('--sk-pick-progress',String(choiceProgress));
++    if(!reduced())g.CLSkyMotion.tween({from:0,to:1,dur:g.CLSkyTokens.DUR.soft,tag:'pick-choices',onUpdate:function(v){if(choiceRequest&&choiceRequest.id===request){choiceProgress=v;choicePanel.style.setProperty('--sk-pick-progress',String(v));}}});
++    var first=rows.findIndex(function(row){return !!row.ref;});
++    if(first>=0)focusPickChoice(first);else choicePanel.querySelector('[data-pick-cancel]').focus();
++    return true;
++  }
++  function mountInteraction() {
++    if(interactionSVG)return;
++    var ns='http://www.w3.org/2000/svg';
++    interactionSVG=doc.createElementNS(ns,'svg');interactionSVG.id='skyInteractionMarks';interactionSVG.setAttribute('class','sky-interaction-marks');interactionSVG.setAttribute('aria-hidden','true');hud.appendChild(interactionSVG);
++    choiceSVG=doc.createElementNS(ns,'svg');choiceSVG.id='skyPickLeaders';choiceSVG.setAttribute('class','sky-interaction-marks sky-pick-leaders');choiceSVG.setAttribute('aria-hidden','true');hud.appendChild(choiceSVG);
++    choicePanel=doc.createElement('aside');choicePanel.id='skyPickPanel';choicePanel.className='sky-pick-panel';choicePanel.hidden=true;choicePanel.setAttribute('aria-labelledby','skyPickTitle');doc.body.appendChild(choicePanel);
++    choicePanel.addEventListener('click',function(e){var row=e.target.closest('[data-pick-index]');if(row)commitPickChoice(+row.getAttribute('data-pick-index'));else if(e.target.closest('[data-pick-cancel]'))closePickChoices(true);});
++    choicePanel.addEventListener('pointerover',function(e){var row=e.target.closest('[data-pick-ref]');setInteraction('hover',row&&choicePanel.contains(row)?row.getAttribute('data-pick-ref')||null:null);});
++    choicePanel.addEventListener('focusin',function(e){var row=e.target.closest('[data-pick-index]');if(!row)return;var q=choiceRequest;if(!q)return;var index=+row.getAttribute('data-pick-index');q.at=index;q.rows.forEach(function(other,i){if(other.button)other.button.tabIndex=i===index?0:-1;});setInteraction('focus',row.getAttribute('data-pick-ref')||null);});
++    choicePanel.addEventListener('pointerenter',function(){choicePointer=true;});
++    choicePanel.addEventListener('pointerleave',function(){choicePointer=false;setInteraction('hover',null);});
++    choicePanel.addEventListener('focusout',function(e){if(e.relatedTarget&&!choicePanel.contains(e.relatedTarget))closePickChoices(false);});
++    if(interactionBound)return;interactionBound=true;
++    doc.addEventListener('focusin',function(e){if(choicePanel&&choicePanel.contains(e.target))return;setInteraction('focus',interactionKeyboard?focusReference(e.target):null);},true);
++    doc.addEventListener('focusout',function(){setInteraction('focus',null);},true);
++    g.addEventListener('pointerdown',function(e){interactionKeyboard=false;setInteraction('focus',null);if(choiceRequest&&!choicePanel.contains(e.target))closePickChoices(false);},true);
++    g.addEventListener('resize',function(){closePickChoices(false);});
++    g.addEventListener('blur',function(){closePickChoices(false);setInteraction('hover',null);setInteraction('focus',null);});
++    if(g.CLSkyTug&&g.CLSkyTug.on)g.CLSkyTug.on('grab',function(){closePickChoices(false);});
++  }
++  function syncInteractionGraph() {
++    closePickChoices(false);var key=interactionWorkKey(),oldKey=interactionKey;
++    interactionGraph=G;interactionKey=key;interactionPeople=Object.create(null);interactionNames=Object.create(null);interactionEvents=Object.create(null);
++    function add(map,key,value){if(key)(map[key]||(map[key]=[])).push(value);}
++    (G.characters||[]).forEach(function(c){add(interactionPeople,stableId(c),c);add(interactionNames,c.name,c);});
++    (G.events||[]).forEach(function(e){add(interactionEvents,stableId(e),e);});
++    if(oldKey!==key)interaction=g.CLSkySelectionModel?g.CLSkySelectionModel.empty():{hover:null,focus:null,selection:null,current:null};
++    else Object.keys(interaction).forEach(function(kind){if(kind!=='selection'||!interactionEntity(interaction[kind]))setInteraction(kind,null);});
++    mountInteraction();interactionSVG.textContent='';interactionPose='';
++    var S=scene();if(interactionScene===S)return;
++    if(interactionScene&&interactionScene.setPickChoiceHandler)interactionScene.setPickChoiceHandler(null);
++    interactionScene=S;if(S&&S.setPickChoiceHandler)S.setPickChoiceHandler(openPickChoices);
++    if(S&&S.on){
++      S.on('hover',function(d){if(S===scene()&&!(choiceRequest&&choicePointer&&!d))setInteraction('hover',d?personReference(d.name):null);});
++      S.on('select',function(d){if(S===scene()&&d)setInteraction('selection',personReference(d.name));});
++      S.on('background',function(){if(S===scene()){closePickChoices(false);setInteraction('selection',null);}});
++    }
++    if(S&&S.controls&&S.controls.addEventListener)S.controls.addEventListener('start',function(){closePickChoices(false);});
++  }
++  function invalidatePickChoicesAtLoad(e) {
++    var d=e&&(e.detail||{});
++    /* The real load chain announces a new transaction with stage=fetch; graph/key can still be old here. */
++    if(d.stage==='fetch'){closePickChoices(false);setInteraction('hover',null);setInteraction('focus',null);}
++  }
++  function frameInteraction() {
++    if(!interactionSVG||interactionGraph!==G)return;
++    var current=playerUnit.currentRef(),ref=current.graph===G&&current.eventLevel&&current.playback==='events'&&current.eventId?'event:'+current.eventId:null;
++    setInteraction('current',ref);
++    if(choiceRequest&&(choiceRequest.graph!==G||choiceRequest.key!==interactionWorkKey()||mode==='compass'))closePickChoices(false);
++    var grouped=Object.create(null),points=Object.create(null),ns='http://www.w3.org/2000/svg';
++    Object.keys(interaction).forEach(function(kind){var key=interaction[kind],point=key&&interactionPoint(key);if(!point||point[0]<0||point[1]<0||point[0]>g.innerWidth||point[1]>g.innerHeight)return;(grouped[key]||(grouped[key]=[])).push(kind);points[key]=point.map(function(v){return Math.round(v*4)/4;});});
++    var pose=JSON.stringify([grouped,points,g.innerWidth,g.innerHeight]);
++    if(pose!==interactionPose){
++      interactionPose=pose;interactionSVG.textContent='';interactionSVG.setAttribute('viewBox','0 0 '+g.innerWidth+' '+g.innerHeight);
++      Object.keys(grouped).forEach(function(key){
++        var point=points[key],group=doc.createElementNS(ns,'g');group.setAttribute('data-ref',key);group.setAttribute('transform','translate('+point.join(',')+')');
++        grouped[key].forEach(function(kind){var p=doc.createElementNS(ns,'path');p.setAttribute('data-state',kind);p.setAttribute('class','sky-mark-'+kind);
++          p.setAttribute('d',kind==='selection'?'M-14,0 a14,14 0 1,0 28,0 a14,14 0 1,0 -28,0':kind==='focus'?'M-20,-10 v-10 h10 M10,-20 h10 v10 M20,10 v10 h-10 M-10,20 h-10 v-10':kind==='hover'?'M-10,-7 v14 M10,-7 v14':'M0,-9 L9,0 0,9 -9,0 Z');group.appendChild(p);});
++        var legend=doc.createElementNS(ns,'text'),label=interactionLabel(key),states=grouped[key].map(function(kind){return g.CLSkySelectionModel.KINDS[kind].zh;}).join('/');
++        if(Array.from(label).length>22)label=Array.from(label).slice(0,21).join('')+'…';
++        var labelText=label+' · '+states,labelWidth=Array.from(labelText).length*12,labelAbsX=Math.max(6,Math.min(g.innerWidth-labelWidth-6,point[0]+12)),labelAbsY=Math.max(14,Math.min(g.innerHeight-4,point[1]-12));
++        legend.setAttribute('class','sky-mark-label');legend.setAttribute('x',String(labelAbsX-point[0]));legend.setAttribute('y',String(labelAbsY-point[1]));legend.textContent=labelText;group.appendChild(legend);
++        interactionSVG.appendChild(group);
++      });
++    }
++    if(!choiceRequest)return;
++    if(reduced()&&choiceProgress<1)g.CLSkyMotion.finishAll('pick-choices');
++    var leadRows=[],list=choicePanel.querySelector('.sky-pick-list').getBoundingClientRect();
++    choiceRequest.rows.slice(0,6).forEach(function(row,i){
++      var point=row.ref&&interactionPoint(row.ref),b=row.button&&row.button.getBoundingClientRect();
++      if(!point||!b||b.top<list.top||b.bottom>list.bottom)return;
++      var dur=g.CLSkyTokens.DUR,begin=Math.min(dur.soft-dur.participantStagger,dur.nudge+i*dur.participantStagger),amount=reduced()?1:Math.max(0,Math.min(1,(choiceProgress*dur.soft-begin)/(dur.soft-begin)));
++      leadRows.push({path:'M'+point.join(',')+' L'+b.left+','+(b.top+b.height/2),amount:amount});
++    });
++    var leadPose=JSON.stringify([leadRows,choiceProgress,g.innerWidth,g.innerHeight]);
++    if(leadPose!==choiceRequest.leadPose){
++      choiceRequest.leadPose=leadPose;choiceSVG.textContent='';choiceSVG.setAttribute('viewBox','0 0 '+g.innerWidth+' '+g.innerHeight);
++      leadRows.forEach(function(row){var line=doc.createElementNS(ns,'path');line.setAttribute('d',row.path);line.setAttribute('pathLength','1');line.setAttribute('stroke-dasharray','1');line.setAttribute('stroke-dashoffset',String(1-row.amount));choiceSVG.appendChild(line);});
++      var origin=doc.createElementNS(ns,'path'),x=choiceRequest.x,y=choiceRequest.y;origin.setAttribute('class','sky-pick-origin');origin.setAttribute('d','M'+(x-7)+','+(y-7)+' v14 M'+(x+7)+','+(y-7)+' v14');choiceSVG.appendChild(origin);
++    }
++  }
++  function interactionState() {
++    return {graphKey:interactionKey,hover:interaction.hover,focus:interaction.focus,selection:interaction.selection,current:interaction.current,
++      choice:choiceRequest?{requestId:choiceRequest.id,source:choiceRequest.source,total:choiceRequest.rows.length,focused:choiceRequest.at,ids:choiceRequest.rows.map(function(row){return row.ref;})}:null};
++  }
++
+   var PLOT_DIM = 0.62, layerBefore = null, inset = { right: 0, bottom: 0 };
+ 
+   var esc = g.CLSkyUtil.esc, reduced = g.CLSkyUtil.mediaReduced;
+@@ -230,6 +445,7 @@
+   /* ── 罗盘 ──────────────────────────────────────────── */
+   function openCompass(name) {
+     if (!G || !app()) return false;
++    closePickChoices(false);setInteraction('selection',personReference(name));
+     stopPlay();
+     var S0 = scene();
+     if (mode !== 'compass') {
+@@ -317,6 +533,7 @@
+   function focusReading(name) {
+     if (!G || mode !== 'constellation' || plot || !name) return false;
+     var S = scene(); if (!S || !S.camera || !S.controls) return false;
++    setInteraction('selection',personReference(name));
+     var switching = !!(readingFocus && readingFocus.name !== name && !($('skyDeconPanel') && $('skyDeconPanel').hidden));
+     /* ① 0–20%：选中环（M28 同源 locate 环；换人不重复闪同星脉冲） */
+     S.locate(name, { pulse: !switching });
+@@ -445,6 +662,8 @@
+   /* ── 键盘（keys.js 让行，见 handlesKey） ───────────── */
+   function typing(e) { var t = e.target || {}, tag = (t.tagName || '').toUpperCase(); return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || t.isContentEditable; }
+   function handlesKey(e) {
++    if(choiceRequest&&choicePanel&&choicePanel.contains(e.target)&&!e.isComposing&&!e.ctrlKey&&!e.metaKey&&!e.altKey&&
++      /^(Arrow(Left|Right|Up|Down)|Home|End|Enter|Escape| )$/.test(e.key)&&!pickKeyDeferred(e))return true;
+     if (ENABLED && g.CLSkySearch && CLSkySearch.handlesKey(e)) return true;
+     if (!ENABLED || !M || typing(e) || e.ctrlKey || e.metaKey || e.altKey) return false;
+     /* 解构面板拥有自己的 tab / Esc 键盘循环；壳层不能把方向键转成镜头旋转，也不能抢先收剧情。 */
+@@ -486,6 +705,10 @@
+     else if (k === 'ArrowUp') CLSkyDeep.nudge(0, -ROT_POL); else if (k === 'ArrowDown') CLSkyDeep.nudge(0, ROT_POL);
+   }
+   function onKey(e) {
++    if((choiceRequest&&pickKeyDeferred(e))||((g.CLModal&&g.CLModal.open&&g.CLModal.open())||e.__clPanelEsc))return;
++    interactionKeyboard=true;
++    if(pickChoiceKey(e))return;
++    if(e.key==='Tab')setInteraction('focus',focusReference(doc.activeElement));
+     if (ENABLED && g.CLSkySearch && CLSkySearch.handleKey(e)) return;
+     if (!handlesKey(e)) return;
+     var k = e.key;
+@@ -504,7 +727,7 @@
+   var loader = null, revealT = 0, curtainAt = 0;
+   /* 读取幕跟宿主档位（O7：low 档不下雨、不跑彗星，只留清单与日志）：开幕时读一次，之后跟 scene 的 degrade 事件 */
+   function curtainOn() { return loadUnit.curtainOn(); }
+-  function onLoading(e) { return loadUnit.onLoading(e); }
++  function onLoading(e) { invalidatePickChoicesAtLoad(e); return loadUnit.onLoading(e); }
+   /* onGraph 收尾：幕开着就按真实完成的步骤推进（排布 → 预编译着色器 → 揭幕），每步之间让出一帧；没开幕直接点火 */
+   function afterGraph() { return loadUnit.afterGraph(); }
+ 
+@@ -548,6 +771,7 @@
+       if (g.CLSkyField) field = CLSkyField.create({ scene: scene(), app: app(), stage: $('stage') });
+       hookOff = scene().registerFrameHook(function (dt, tAcc, tAnim, calm, degrade) {
+         disc.frame(); if (field) field.frame(); if (g.CLSkyCompass && mode === 'compass') CLSkyCompass.frame(); if (g.CLSkyDeep) CLSkyDeep.frame(dt, tAnim, degrade);
++        frameInteraction();
+         /* M04 会话回收：阅读态下落沿（关板/Esc/换图）清选中光标与相关显影——和身体类同一事实源 */
+         var rd = !!(doc.body && doc.body.classList && doc.body.classList.contains('sk-reading'));
+         if (readingFocus && wasReadingDom && !rd) clearReadingFocus();
+@@ -556,6 +780,7 @@
+     }
+     /* 图谱恒在画面中心：禁平移、右键 / 双指改成旋转，轨道目标跟着每次飞行的落点走（星座 / 星盘 = 盘心，罗盘 = 晶体） */
+     try { if (scene().setOrbitLock) { scene().setOrbitLock(true); applyCamLimits(); } } catch (eL) {}
++    syncInteractionGraph();
+     if (field) { field.rebuild(); field.setState('show'); }
+     disc.setModel(M); disc.setState('backdrop'); disc.setCursor(null);
+     /* 光层（WebGL）：星体光学 / 势力星云 / 组间束 / 星盘光环 / 罗盘星轨 / 后期虚化；须在星盘锚点建好（setModel）之后接入；不可用时 SVG 读层照常工作 */
+@@ -652,6 +877,7 @@
+   g.CLSky = {
+     enabled: function () { return ENABLED; }, isApplying: function () { return applying; }, handlesKey: handlesKey,
+     setPlot: setPlot, plot: function () { return plot; }, field: function () { return field; }, compassArea: compassArea, openCompass: openCompass, closeCompass: closeCompass, regroup: regroup, seek: seek, play: togglePlay, stop: stopPlay,
++    interactionState: interactionState,
+     finishParticipants: function () { return playerUnit.finishParticipants(); },
+     showParticipants: function (on) { return playerUnit.showParticipants(on); },
+     seekEvent: function (id) { return playerUnit.seekEvent(id); }, stepEvent: function (delta) { return playerUnit.stepEvent(delta); },
+--- a/js/scene.js
++++ b/js/scene.js
+@@ -2956,16 +2956,15 @@
+        只有落在空白处才交回射线。字盒取文字自身盒，不小于可见对象（契约允许更大、禁止更小）。
+        成本：只在已经节流过的拾取调用里跑一次，且只查 `.cl-lab.char.on`（可见集，实测 ≤ 数十枚）。
+        罗盘态星名整层隐藏（不是 `.on`），自然不会命中，不产生第二套语义。 */
+-    function labelNodeAt(clientX, clientY) {
++    function labelNodesAt(clientX, clientY) {
+       var els = labelLayer.querySelectorAll('.cl-lab.char.on');
+-      if (!els.length) return null;
+-      var best = null, bestArea = Infinity;
++      if (!els.length) return [];
++      var found = [];
+       for (var i = 0; i < els.length; i++) {
+         var r = els[i].getBoundingClientRect();
+         if (r.width < 1 || r.height < 1) continue;
+         if (clientX < r.left || clientX > r.right || clientY < r.top || clientY > r.bottom) continue;
+         var area = r.width * r.height;
+-        if (area >= bestArea) continue;
+         /* 只有**真的看得见**的星名才算同源命中区：LOD 在可见性切换的中间帧里会先摘 `.on` 再写
+            `opacity`，一个已经淡到 0 的名字不该继续抢点击（那正是「点到看不见的东西」）。
+            判据与标签预算契约的可见口径一致（visibility 非 hidden 且 opacity > 0.05）。 */
+@@ -2979,16 +2978,53 @@
+           if (c.el === els[i] && c.kind === 'char' && c.render !== false && c.g && c.g.visible) { n = c; break; }
+         }
+         if (!n) continue;
+-        best = n; bestArea = area;
+-      }
+-      return best;
+-    }
++        if (!found.some(function (item) { return item.node === n; })) found.push({ node: n, area: area, order: i });
++      }
++      return found.sort(function (a, b) { return a.area - b.area || a.order - b.order; }).map(function (item) { return item.node; });
++    }
++    function labelNodeAt(clientX, clientY) { return labelNodesAt(clientX, clientY)[0] || null; }
+     /* 指针位置的拾取：先认可见星名自己的字盒（同源），再认画布射线（星体本体与空白）。 */
+     function pickAt(clientX, clientY) {
+       return labelNodeAt(clientX, clientY) || core.pick(clientX, clientY);
+     }
+     /* 供 sky-tug 复用同一条同源判定：拖动被点名的那颗星，起点也必须是那颗星。 */
+     S.labelAt = pickAt;
++    var pickChoiceHandler = null;
++    var pickPointers = Object.create(null);
++    function clearPickHover() { pickLastKey = null; setHover(null); fire('hover', null); fire('hoverNode', null); }
++    function beginPickGesture(e) {
++      if (e && e.pointerId != null) delete pickPointers[String(e.pointerId)];
++      if (!e || e.pointerId == null || (e.button !== 0 && e.pointerType !== 'touch')
++          || !pickEventTargetOk(e.target) || isInteractiveTarget(e.target)) return false;
++      pickPointers[String(e.pointerId)] = { target: e.target, pointerType: e.pointerType, timeStamp: e.timeStamp, shiftKey: !!e.shiftKey };
++      return true;
++    }
++    function consumePickGesture(e) {
++      if (!e || e.pointerId == null) return null;
++      var key = String(e.pointerId), start = pickPointers[key] || null;
++      delete pickPointers[key];
++      return start;
++    }
++    function cancelPickGesture(e) { if (e && e.pointerId != null) delete pickPointers[String(e.pointerId)]; }
++    function clearPickGestures() { pickPointers = Object.create(null); }
++    function pickSnapshot(clientX, clientY) {
++      var named = labelNodesAt(clientX, clientY);
++      return { source: named.length ? 'labels' : 'sprites', nodes: named.length ? named : core.pickCandidates(clientX, clientY), x: clientX, y: clientY };
++    }
++    S.pickCandidatesAt = pickSnapshot;
++    S.setPickChoiceHandler = function (fn) { pickChoiceHandler = typeof fn === 'function' ? fn : null; };
++    S.selectPickCandidate = function (entityId) {
++      var matches = nodes.filter(function (n) { return n.kind === 'char' && n.data && String(n.data.id != null ? n.data.id : n.data.entityId) === String(entityId); });
++      if (matches.length !== 1 || matches[0].render === false || !matches[0].g.visible) return false;
++      var n = matches[0], name = n.data.name;
++      if (n.data.id != null && n.data.entityId != null && String(n.data.id) !== String(n.data.entityId)) return false;
++      if (nodes.filter(function (other) { return other.kind === 'char' && other.data && other.data.name === name; }).length !== 1) return false;
++      clearPickHover();
++      fire('select', { name: name, entityId: String(entityId) }); return true;
++    };
++    window.addEventListener('pointerdown', beginPickGesture, { passive: true });
++    window.addEventListener('pointercancel', cancelPickGesture, { passive: true });
++    window.addEventListener('blur', clearPickGestures);
+     window.addEventListener('pointermove', function (e) {
+       if (isDraggingWorld) return;
+       if (isInteractiveTarget(e.target) || !pickEventTargetOk(e.target)) {
+@@ -3006,10 +3042,12 @@
+       else { if (hoverName) setHover(null); fire('hover', null); fire('hoverNode', n); }
+     }, { passive: true });
+     window.addEventListener('pointerup', function (e) {
++      var start = consumePickGesture(e);
++      if (!start) return;
+       if (dragSuppressClick || dragMoved) return;
+       if (e.button !== 0 && e.pointerType !== 'touch') return;
+       if (isInteractiveTarget(e.target) || !pickEventTargetOk(e.target)) return;
+-      var n = pickAt(e.clientX, e.clientY, e.target);
++      var snapshot = pickSnapshot(e.clientX, e.clientY), n = snapshot.nodes[0] || null;
+       if (!n) { fire('background'); return; }
+       /* Shift+点击 = 钉住姓名（图例 / 提示条 / vieworb 三处宣称的手势）：接 labels 既有 pin 机制，
+        * 'pin' 事件链在 setPin 内自己发（app.js 的计数 / toast / 索引同步随之走），不进 select 聚焦链。
+@@ -3017,10 +3055,14 @@
+        * 星空壳星座态由 sky-tug 仲裁层先行消费并拦停这记抬指，
+        * 能走到这里说明牵引层不在场（罗盘 / 星盘 / 旧工作区）——静止由上方的拖动观察员裁定（>5px 已早退）。 */
+       if (n.kind === 'char') {
+-        if (e.pointerType === 'touch' && touchT0 && e.timeStamp - touchT0 >= longPressMs()
++        if (start.pointerType === 'touch' && e.timeStamp - start.timeStamp >= longPressMs()
+             && !(window.CLSkyTug && CLSkyTug.enabled && CLSkyTug.enabled())) { labels.togglePin(n.key.slice(2)); return; }
+         if (e.shiftKey) labels.togglePin(n.key.slice(2));
+-        else fire('select', { name: n.key.slice(2) });
++        else {
++          var choices = snapshot.nodes.filter(function (item) { return item.kind === 'char'; });
++          if (pickChoiceHandler && choices.length > 1 && pickChoiceHandler({ source: snapshot.source, nodes: choices, x: snapshot.x, y: snapshot.y }) === true) { clearPickHover(); return; }
++          fire('select', { name: n.key.slice(2) });
++        }
+       } else fire('selectNode', n);
+     }, { passive: true });
+ 
+--- a/css/sky-reading.css
++++ b/css/sky-reading.css
+@@ -943,6 +943,67 @@
+ @media (prefers-reduced-motion: reduce) {
+   .ssp-ctx-text { animation: none; }
+ }
++/* M91/M99: actual hit choices and independent, noninteractive state markers. */
++body.sky-shell svg.sky-interaction-marks {
++  position: fixed;
++  inset: 0;
++  width: 100vw;
++  height: 100vh;
++  max-width: none;
++  max-height: none;
++  overflow: hidden;
++  pointer-events: none;
++  z-index: var(--z-chart);
++}
++.sky-interaction-marks path { fill: none; stroke-width: 1.5px; }
++.sky-interaction-marks .sky-mark-label { fill: var(--skd-ink); stroke: var(--skd-void-1); stroke-width: 3px; paint-order: stroke fill; font: var(--skd-fs-sm)/1.2 var(--skd-font-sans); }
++.sky-mark-hover { stroke: var(--skd-ink-2); stroke-dasharray: 3 3; }
++.sky-mark-focus { stroke: var(--skd-ink); stroke-width: 2px; }
++.sky-mark-selection { stroke: var(--skd-brass); }
++.sky-mark-current { stroke: var(--skd-ink); }
++.sky-pick-leaders path { stroke: var(--skd-ink-3); stroke-width: 1px; }
++.sky-pick-panel {
++  position: fixed;
++  display: flex;
++  flex-direction: column;
++  box-sizing: border-box;
++  padding: 12px;
++  gap: 8px;
++  border: 1px solid var(--skd-hair-brass);
++  border-radius: var(--skd-radius);
++  background: var(--skd-void-1);
++  color: var(--skd-ink);
++  font: var(--skd-fs-base)/1.5 var(--skd-font-sans);
++  box-shadow: var(--skd-shadow-panel);
++  z-index: var(--z-tooltip);
++  pointer-events: auto;
++  opacity: var(--sk-pick-progress, 1);
++}
++.sky-pick-panel[hidden] { display: none; }
++.sky-pick-panel header { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex: none; }
++.sky-pick-panel header button { min-width: 44px; min-height: 44px; color: var(--skd-ink); border: 1px solid var(--skd-hair-2); background: transparent; }
++.sky-pick-panel p { margin: 0; color: var(--skd-ink-2); font-size: var(--skd-fs-sm); flex: none; }
++.sky-pick-list { min-height: 0; overflow: auto; overscroll-behavior: contain; }
++.sky-pick-list button {
++  display: block;
++  width: 100%;
++  min-height: 52px;
++  padding: 8px;
++  margin-block: 4px;
++  text-align: left;
++  white-space: normal;
++  overflow-wrap: anywhere;
++  background: transparent;
++  border: 1px solid var(--skd-hair-2);
++  border-radius: 4px;
++  color: var(--skd-ink);
++}
++.sky-pick-list b, .sky-pick-list small { display: block; }
++.sky-pick-list small, .sky-pick-key { color: var(--skd-ink-2); font-size: var(--skd-fs-sm); }
++.sky-pick-list button[aria-selected="true"] { border-color: var(--skd-brass); }
++.sky-pick-list button:disabled { color: var(--skd-ink-3); }
++.sky-pick-panel :focus-visible { outline: 2px solid var(--skd-ink); outline-offset: -3px; }
++body.sky-shell .sky-pick-panel [role="option"]:focus { outline: 2px solid var(--skd-ink); outline-offset: -3px; }
+ /* M83/M85: explanation overlays share the real viewport and never take pointer input. */
+ body.sky-shell svg.sky-story-participants {
+   position: fixed;
+--- a/js/sky/sky-selection-model.js
++++ b/js/sky/sky-selection-model.js
+@@ -205,20 +205,19 @@
+   }
+ 
+   /** 四种状态是否都在场（用于判断界面有没有把四种分开表达）。 */
+-  function audit(state) {
++  function audit(state, previous, changedKind) {
+     state = state && typeof state === 'object' ? state : empty();
+-    var out = { kinds: {}, present: 0, conflated: [] };
++    var out = { kinds: {}, present: 0, conflated: [], isolationChecked: !!(previous && KINDS[changedKind]) };
+     Object.keys(KINDS).forEach(function (k) {
+       out.kinds[k] = { value: state[k] === undefined ? null : state[k], has: present(state[k]) };
+       if (present(state[k])) out.present++;
+     });
+-    /* 混同检测：若 selection 与 current 是同一个值，很可能是同一份数据被两个名字用。 */
+-    if (present(state.selection) && present(state.current)
+-        && str(state.selection) === str(state.current)) {
+-      out.conflated.push('selection 与 current 取同一个值');
+-    }
++    /* Equal IDs are legal. Isolation is about which slots an operation changed. */
++    if (previous && KINDS[changedKind]) Object.keys(KINDS).forEach(function (kind) {
++      if (kind !== changedKind && state[kind] !== previous[kind]) out.conflated.push(changedKind + ' 操作改写了 ' + kind);
++    });
+     if (present(state.hover) && present(state.selection)
+-        && str(state.hover) === str(state.selection)) {
++        && state.hover === state.selection) {
+       /* 这条**不算错**：悬停到已选中的对象上时两者自然相同。
+          如实记录，不判红 —— 判据不能把正常情况当缺陷。 */
+       out.hoverOnSelection = true;
+--- a/tests/sky_selection_model_contract.js
++++ b/tests/sky_selection_model_contract.js
+@@ -114,16 +114,106 @@
+   assert.equal(none.fellBackToFirst, false);
+ });
+ 
+-test('audit：selection 与 current 取同一个值必须被点出（很可能是数据混同）', () => {
++test('audit：允许选中当前事件，按实际操作回写识别混同', () => {
+   const same = S.audit({ hover: null, focus: null, selection: 'ev_1', current: 'ev_1' });
+-  assert.equal(same.ok, false);
+-  assert.ok(same.conflated.length >= 1, '实际=' + JSON.stringify(same.conflated));
++  assert.equal(same.ok, true);
++  assert.equal(same.conflated.length, 0, '相同身份不证明状态混同');
++  assert.equal(same.isolationChecked, false);
+   const diff = S.audit({ hover: null, focus: null, selection: 'ev_1', current: 'ev_2' });
+   assert.equal(diff.ok, true);
+   /* 悬停到已选中的对象上是**正常**的，不得判红 */
+   const hoverSame = S.audit({ hover: 'ev_1', focus: null, selection: 'ev_1', current: null });
+   assert.equal(hoverSame.ok, true, '悬停在已选中对象上不得判红');
+   assert.equal(hoverSame.hoverOnSelection, true, '但要如实记录');
++  const previous={hover:null,focus:null,selection:'ev_1',current:'ev_2'};
++  assert.equal(S.audit({...previous,current:'ev_1'},previous,'current').ok,true);
++  const leaked=S.audit({...previous,selection:'ev_3',current:'ev_3'},previous,'current');
++  assert.equal(leaked.ok,false);assert.equal(leaked.isolationChecked,true);assert(leaked.conflated[0].includes('selection'));
++  assert.equal(S.audit({hover:{kind:'person',id:'a'},selection:{kind:'person',id:'b'},current:{kind:'event',id:'c'},focus:null}).hoverOnSelection,undefined);
++});
++
++test('实际射线保留所有重叠候选并保持原星心优先，隐藏节点不抢命中',()=>{
++  const fs=require('fs'),vm=require('vm'),T=require('../js/vendor/three.min.js');
++  const {block}=require('./scene_motion_clock_contract.js');
++  const source=fs.readFileSync('js/core/scene-core.js','utf8'),camera=new T.PerspectiveCamera(45,800/600,1,2000),group=new T.Group();
++  camera.position.set(0,0,200);camera.lookAt(0,0,0);
++  const nodes=[0,2,0].map((x,i)=>{const sp=new T.Sprite(new T.SpriteMaterial());sp.scale.set(30,30,1);sp.position.x=x;group.add(sp);const n={key:'c:'+i,kind:'char',render:true,alpha:i===2?.1:1,g:sp,sp:sp};sp.userData.node=n;return n;});
++  const ctx=vm.createContext({T,camera,group,nodes,canvas:{getBoundingClientRect:()=>({left:50,top:20,width:800,height:600})},ray:new T.Raycaster(),mouse:new T.Vector2(),pickV:null,core:{isSideHidden:()=>false}});
++  vm.runInContext(block(source,'pickCandidates')+';var result=pickCandidates(450,320);',ctx);
++  assert.equal(ctx.result.length,2);assert.equal(ctx.result[0],nodes[0]);assert.equal(ctx.result[1],nodes[1]);
++  nodes[0].g.visible=false;vm.runInContext('result=pickCandidates(450,320)',ctx);assert.equal(ctx.result.length,1);assert.equal(ctx.result[0],nodes[1]);
++});
++
++test('可见标签候选优先于背后sprite，标签不借用sprite透明度门槛',()=>{
++  const fs=require('fs'),vm=require('vm'),{block}=require('./scene_motion_clock_contract.js');
++  const source=fs.readFileSync('js/scene.js','utf8');
++  const elements=[{left:50,top:30,right:80,bottom:50,width:30,height:20},{left:40,top:25,right:100,bottom:65,width:60,height:40}].map(r=>({getBoundingClientRect:()=>r}));
++  const nodes=elements.map((el,i)=>({kind:'char',render:true,g:{visible:true},alpha:.1,el,key:'c:'+i}));let rayCalls=0;
++  const ctx=vm.createContext({labelLayer:{querySelectorAll:()=>elements},nodes,window:{getComputedStyle:()=>({visibility:'visible',opacity:'1'})},core:{pickCandidates(){rayCalls++;return ['background'];}}});
++  vm.runInContext(block(source,'labelNodesAt')+'\n'+block(source,'pickSnapshot')+';var result=pickSnapshot(70,40);',ctx);
++  assert.equal(ctx.result.source,'labels');assert.equal(ctx.result.nodes.length,2);assert.equal(ctx.result.nodes[0],nodes[0]);assert.equal(rayCalls,0);
++  vm.runInContext('result=pickSnapshot(200,200)',ctx);assert.equal(ctx.result.source,'sprites');assert.equal(rayCalls,1);
++});
++
++test('候选菜单键由菜单拥有，Enter/Space读取真实DOM焦点，Home/End按固定方向跳过禁用行',()=>{
++  const vm=require('node:vm'),{block}=require('./scene_motion_clock_contract.js'),source=fs.readFileSync('js/sky/sky-shell.js','utf8');
++  const buttons=[0,1,2,3].map(i=>({i,tabIndex:-1,focus(){ctx.doc.activeElement=this;},scrollIntoView(){},getAttribute(name){return name==='data-pick-index'?String(i):null;},closest(sel){return sel==='[data-pick-index]'?this:null;},disabled:i!==1&&i!==3}));
++  const q={at:3,rows:[null,'person:b',null,'person:d'].map((ref,i)=>({ref,button:buttons[i]}))};
++  const panel={contains:()=>true};let committed=null,closed=0;
++  const deferred={modal:false};
++  const ctx=vm.createContext({choiceRequest:q,choicePanel:panel,interactionKeyboard:false,doc:{activeElement:buttons[3],body:{getAttribute:()=>null}},g:{CLModal:{open:()=>false}},
++    pickKeyDeferred:e=>!!(e.__clPanelEsc||deferred.modal),
++    closePickChoices(){closed++;},commitPickChoice(i){committed=i;return true;},setInteraction(){},focusPickChoice(i){q.at=i;ctx.doc.activeElement=buttons[i];q.rows.forEach((r,j)=>{if(r.button)r.button.tabIndex=j===i?0:-1;});}});
++  vm.runInContext(block(source.replace(/^/gm,'  '),'pickChoiceKey'),ctx);
++  const key=(name,target=buttons[3])=>ctx.pickChoiceKey({key:name,target,preventDefault(){},stopPropagation(){}});
++  key('Home');assert.equal(q.at,1,'Home从首行向后找到首个可确认人物');
++  q.at=1;ctx.doc.activeElement=buttons[1];key('End');assert.equal(q.at,3,'End从末行向前找到末个可确认人物');
++  q.at=0;ctx.doc.activeElement=buttons[3];key('Enter');assert.equal(committed,3,'Enter提交真实焦点行，不读旧q.at');
++  q.at=0;ctx.doc.activeElement=buttons[1];key(' ');assert.equal(committed,1,'Space提交真实焦点行');
++  deferred.modal=true;assert.equal(key('Escape'),false,'顶层模态拥有Esc');assert.equal(closed,0);
++  const keyCtx=vm.createContext({choiceRequest:q,choicePanel:panel,ENABLED:true,M:{},g:{CLModal:{open:()=>false}},pickKeyDeferred:()=>false,
++    typing:()=>false,CLSkySearch:null,doc:{body:{getAttribute:()=>null}}});
++  vm.runInContext(block(source.replace(/^/gm,'  '),'handlesKey'),keyCtx);
++  assert.equal(keyCtx.handlesKey({key:' ',target:buttons[1]}),true,'window捕获阶段必须知道候选菜单拥有Space');
++});
++
++test('候选加载失效、四态同帧投影和四态可见名字有明确接线',()=>{
++  const source=fs.readFileSync('js/sky/sky-shell.js','utf8');
++  assert.match(source,/function invalidatePickChoicesAtLoad[\s\S]*?d\.stage==='fetch'[\s\S]*?closePickChoices\(false\)[\s\S]*?setInteraction\('hover',null\)[\s\S]*?setInteraction\('focus',null\)/);
++  assert.match(source,/function onLoading\(e\) \{ invalidatePickChoicesAtLoad\(e\); return loadUnit\.onLoading\(e\); \}/);
++  const hook=source.slice(source.indexOf('hookOff = scene().registerFrameHook'),source.indexOf('/* 图谱恒在画面中心'));
++  assert.ok(hook.indexOf('disc.frame()')<hook.indexOf('frameInteraction()'),'标记必须读完本帧星盘投影');
++  assert.match(source,/group\.appendChild\(legend\)/,'每个独立身份框必须显示对象名和状态');
++  assert.match(source,/setInteraction\('hover',row&&choicePanel\.contains\(row\)/,'移到标题或取消按钮须清候选hover');
++  assert.match(source,/q\.at=index;[\s\S]*?other\.button\.tabIndex=i===index\?0:-1/,'focusin须同步当前行与roving tabindex');
++});
++
++test('场景确认要求同指针画布起手、取消清快照，并清除上一hover卡',()=>{
++  const vm=require('node:vm'),{block}=require('./scene_motion_clock_contract.js'),source=fs.readFileSync('js/scene.js','utf8');
++  const ctx=vm.createContext({pickPointers:Object.create(null),pickEventTargetOk:t=>!!(t&&t.surface),isInteractiveTarget:t=>!!(t&&t.interactive)});
++  const padded=source.replace(/^/gm,'  ');
++  ['beginPickGesture','consumePickGesture','cancelPickGesture'].forEach(name=>vm.runInContext(block(padded,name),ctx));
++  const canvas={surface:true},button={surface:false,interactive:true};
++  assert.equal(ctx.beginPickGesture({pointerId:1,button:0,target:button}),false,'按钮起手不能在画布抬起时变成点选');
++  assert.equal(ctx.consumePickGesture({pointerId:1}),null);
++  assert.equal(ctx.beginPickGesture({pointerId:2,button:0,target:canvas,pointerType:'mouse',timeStamp:10}),true);
++  assert.equal(ctx.consumePickGesture({pointerId:3}),null,'另一指针抬起不能消费当前候选手势');
++  assert.equal(ctx.consumePickGesture({pointerId:2}).timeStamp,10,'同一指针完整点击保留原始手势');
++  assert.equal(ctx.beginPickGesture({pointerId:4,button:0,target:canvas,pointerType:'touch',timeStamp:20}),true);
++  assert.equal(ctx.beginPickGesture({pointerId:4,button:0,target:button,pointerType:'mouse'}),false,'同指针的新 UI 起手要覆盖可能陈旧的星场记录');
++  ctx.cancelPickGesture({pointerId:4});assert.equal(ctx.consumePickGesture({pointerId:4}),null,'pointercancel不得残留待选快照');
++  assert.match(source,/var start = consumePickGesture\(e\);\s*if \(!start\) return;/,'真实pointerup必须先核对起手快照');
++  const shell=source.replace('S.selectPickCandidate = function (','function selectPickCandidate(');
++  const events=[],node={kind:'char',render:true,g:{visible:true},data:{id:'ch_b',entityId:'ch_b',name:'B'}};
++  const selectCtx=vm.createContext({nodes:[node],pickLastKey:'c:A',setHover(value){events.push(['setHover',value]);},fire(type,value){events.push([type,value]);}});
++  vm.runInContext(block(source,'clearPickHover'),selectCtx);
++  vm.runInContext(block(shell,'selectPickCandidate'),selectCtx);
++  assert.equal(selectCtx.selectPickCandidate('ch_b'),true);
++  assert.deepEqual(events.map(e=>e[0]),['setHover','hover','hoverNode','select']);
++  assert.deepEqual(events.slice(0,3),[['setHover',null],['hover',null],['hoverNode',null]]);
++  assert.equal(events[3][0],'select');assert.equal(events[3][1].name,'B');assert.equal(events[3][1].entityId,'ch_b');
++  assert.equal(selectCtx.pickLastKey,null,'前一个鼠标hover不应在下一帧继续遮住确认对象');
++  assert.match(source,/pickChoiceHandler\([^;]+=== true\) \{ clearPickHover\(\); return; \}/,'候选菜单接收快照后也须清旧hover浮卡');
+ });
+ 
+ test('负例 · 非对象/数字/空值不抛异常', () => {
+--- a/tests/p4_selection_model_render_probe.py
++++ b/tests/p4_selection_model_render_probe.py
+@@ -19,6 +19,7 @@
+   CL_GPU=1 python3 -B -s tests/p4_selection_model_render_probe.py --base http://127.0.0.1:8781
+ """
+ import argparse
++import base64
+ import json
+ import os
+ import sys
+@@ -84,6 +85,64 @@
+   const els=[...document.querySelectorAll('.sd-person.is-focus')];
+   const vis=els.filter(e=>{const s=getComputedStyle(e);return s.display!=='none'&&s.visibility!=='hidden';});
+   return {tags:els.length, visible:vis.length};
++})()"""
++
++# 动态取样真正的场景射线，不依赖预先指定的屏幕坐标或伪造重叠。此模式只在主线程串行浏览器验收时运行。
++PICK_OVERLAP = r"""(()=>{
++  const S=CLApp&&CLApp.scene&&CLApp.scene(),graph=CLApp&&CLApp.graph&&CLApp.graph(),canvas=document.querySelector('#gl'),TH=window.THREE;
++  if(!S||!S.nodeOf||!S.camera||!S.pickCandidatesAt||!graph||!canvas||!TH)return {found:false,reason:'scene_projection_api_missing'};
++  const rect=canvas.getBoundingClientRect(),v=new TH.Vector3(),worldScale=new TH.Vector3(),right=new TH.Vector3(),up=new TH.Vector3(),rows=[];
++  S.camera.updateMatrixWorld(true);
++  right.setFromMatrixColumn(S.camera.matrixWorld,0);up.setFromMatrixColumn(S.camera.matrixWorld,1);
++  (graph.characters||[]).forEach(c=>{
++    const n=S.nodeOf('c:'+c.name);if(!n||!n.render||!n.g||!n.g.visible||!n.sp||n.alpha<=.3)return;
++    n.sp.getWorldPosition(v);const world=v.clone();n.sp.getWorldScale(worldScale);v.project(S.camera);
++    const x=rect.left+(v.x+1)*rect.width/2,y=rect.top+(-v.y+1)*rect.height/2;
++    if(x<rect.left||x>rect.right||y<rect.top||y>rect.bottom)return;
++    const box={left:Infinity,right:-Infinity,top:Infinity,bottom:-Infinity};
++    [-1,1].forEach(sx=>[-1,1].forEach(sy=>{
++      const corner=world.clone().addScaledVector(right,sx*worldScale.x/2).addScaledVector(up,sy*worldScale.y/2).project(S.camera);
++      const px=rect.left+(corner.x+1)*rect.width/2,py=rect.top+(-corner.y+1)*rect.height/2;
++      box.left=Math.min(box.left,px);box.right=Math.max(box.right,px);box.top=Math.min(box.top,py);box.bottom=Math.max(box.bottom,py);
++    }));
++    rows.push({node:n,x,y,box,id:String(c.id!=null?c.id:c.entityId),name:c.name});
++  });
++  const pairs=[];
++  for(let i=0;i<rows.length;i++)for(let j=i+1;j<rows.length;j++){
++    const a=rows[i],b=rows[j],left=Math.max(a.box.left,b.box.left),right=Math.min(a.box.right,b.box.right),top=Math.max(a.box.top,b.box.top),bottom=Math.min(a.box.bottom,b.box.bottom);
++    if(left<=right&&top<=bottom){const d=Math.hypot(a.x-b.x,a.y-b.y);pairs.push({a,b,d,x:(left+right)/2,y:(top+bottom)/2});}
++  }
++  pairs.sort((a,b)=>a.d-b.d);const candidates=[];
++  for(const pair of pairs){
++    const target=document.elementFromPoint(pair.x,pair.y);
++    if(!target||!(target===canvas||(target.closest&&target.closest('#labels'))))continue;
++    if(target.closest&&target.closest('button,a,input,select,textarea,[contenteditable="true"],[data-ev],[data-name],[data-line-id],.cl-o3-legend-item,.cl-orbit__card,.seg button,.btn'))continue;
++    const q=S.pickCandidatesAt(pair.x,pair.y);
++    if(!q||q.source!=='sprites'||!q.nodes.includes(pair.a.node)||!q.nodes.includes(pair.b.node))continue;
++    candidates.push({x:pair.x,y:pair.y,projected:[pair.a.name,pair.b.name],distance:pair.d});
++    if(candidates.length>=64)break;
++  }
++  return candidates.length?{found:true,candidates}:{found:false,reason:'no_projected_sprite_overlap',projected:rows.length,pairs:pairs.length,width:innerWidth,height:innerHeight};
++})()"""
++
++PICK_AT = r"""(()=>{
++  const S=CLApp&&CLApp.scene&&CLApp.scene();if(!S||!S.pickCandidatesAt)return {count:0,reason:'picker_missing'};
++  const q=S.pickCandidatesAt(%(x)s,%(y)s),rows=q&&q.nodes||[];
++  const canvas=document.querySelector('#gl'),target=document.elementFromPoint(%(x)s,%(y)s),interactive=target&&target.closest&&target.closest('button,a,input,select,textarea,[contenteditable="true"],[data-ev],[data-name],[data-line-id],.cl-o3-legend-item,.cl-orbit__card,.seg button,.btn');
++  return {source:q&&q.source,count:rows.length,targetValid:!!(canvas&&target&&!interactive&&(target===canvas||(target.closest&&target.closest('#labels')))),
++    rows:rows.filter(n=>n&&n.kind==='char'&&n.data).map(n=>({id:String(n.data.id!=null?n.data.id:n.data.entityId),name:n.data.name}))};
++})()"""
++
++PICK_STATE = r"""(()=>{
++  const panel=document.querySelector('#skyPickPanel'),rows=[...(panel?.querySelectorAll('[data-pick-ref]')||[])].filter(b=>b.getAttribute('data-pick-ref')&&!b.disabled);
++  if(!panel)return {opened:false,count:rows.length};
++  const back=document.querySelector('#skyBack'),style=back&&getComputedStyle(back),focused=document.activeElement;
++  const box=panel.getBoundingClientRect(),cancel=panel.querySelector('[data-pick-cancel]');
++  return {opened:!panel.hidden,count:rows.length,ids:rows.map(b=>b.getAttribute('data-pick-ref')),menuClosed:panel.hidden,
++    calm:CLApp.scene().calm(),current:CLSky.interactionState().current,
++    panelBounds:{left:box.left,top:box.top,right:box.right,bottom:box.bottom},cancelVisible:!!(cancel&&cancel.getClientRects().length),
++    mode:CLSky.state().mode,focusVisible:!!(focused&&focused.getClientRects().length&&getComputedStyle(focused).visibility!=='hidden'),
++    backVisible:!!(back&&!back.hidden&&style.visibility!=='hidden'),...CLSky.interactionState()};
+ })()"""
+ 
+ 
+@@ -124,13 +183,147 @@
+             pass
+ 
+ 
++def probe_interaction(base, out, width=1440, height=900, reduced=False, activation="Enter"):
++    runner = Wave2AuditRunner(width=width, height=height, dpr=1)
++    key = "ed3dc1255ca08fbdaae30bbd"
++    run_id = time.strftime("%Y%m%dT%H%M%SZ", time.gmtime()) + "-" + str(time.time_ns())
++    screenshots = []
++    try:
++        runner.start()
++        if reduced:
++            runner.ws.call("Emulation.setEmulatedMedia", features=[{"name": "prefers-reduced-motion", "value": "reduce"}])
++        runner.navigate("%s/?sky=1&data=data/cache/%s.json" % (base, key))
++        end = time.time() + 150
++        while time.time() < end:
++            if runner.eval("!!(window.CLApp&&CLApp.graph()&&window.CLSky&&CLSky.model()&&document.querySelector('#loader.off'))") is True:
++                break
++            time.sleep(0.4)
++        time.sleep(3)
++        overlap_attempts=[]
++        def capture(name):
++            data = runner.ws.call("Page.captureScreenshot", format="png").get("data")
++            if data:
++                path = out / (run_id + "-" + name)
++                path.write_bytes(base64.b64decode(data))
++                screenshots.append(str(path))
++        stable, rejected, overlap = None, [], {"found": False, "reason": "not_scanned"}
++        for projection_attempt in range(3):
++            sample=runner.eval(PICK_OVERLAP)
++            overlap_attempts.append(sample)
++            if isinstance(sample, dict) and sample.get("found"):
++                for candidate in sample.get("candidates", []):
++                    x, y = candidate["x"], candidate["y"]
++                    runner.ws.call("Input.dispatchMouseEvent", type="mouseMoved", x=x, y=y)
++                    time.sleep(0.2)  # allow the real hover, LOD and projection to settle
++                    actual = runner.eval(PICK_AT % {"x": repr(x), "y": repr(y)})
++                    if isinstance(actual, dict) and actual.get("targetValid") and actual.get("count", 0) > 1 and len({r.get("id") for r in actual.get("rows", [])}) > 1:
++                        stable = {"x": x, "y": y, "projected": candidate.get("projected"), "actual": actual,
++                                  "projectionAttempt": projection_attempt + 1}
++                        overlap=sample
++                        break
++                    rejected.append({"attempt": projection_attempt + 1, "projected": candidate.get("projected"), "actual": actual})
++            if stable:
++                break
++            if projection_attempt < 2:
++                runner.ws.call("Input.dispatchKeyEvent", type="keyDown", key="ArrowRight", code="ArrowRight", windowsVirtualKeyCode=39)
++                runner.ws.call("Input.dispatchKeyEvent", type="keyUp", key="ArrowRight", code="ArrowRight", windowsVirtualKeyCode=39)
++                time.sleep(0.35)
++        if stable:
++            x, y = stable["x"], stable["y"]
++            runner.ws.call("Input.dispatchMouseEvent", type="mousePressed", x=x, y=y, button="left", buttons=1, clickCount=1)
++            runner.ws.call("Input.dispatchMouseEvent", type="mouseReleased", x=x, y=y, button="left", buttons=0, clickCount=1)
++            time.sleep(0.3)
++            before_cancel = runner.eval("({choice:CLSky.interactionState().choice,selection:CLSky.interactionState().selection,calm:CLApp.scene().calm()})")
++            capture("candidate-opened.png")
++            runner.ws.call("Input.dispatchKeyEvent", type="keyDown", key="Escape", code="Escape", windowsVirtualKeyCode=27)
++            runner.ws.call("Input.dispatchKeyEvent", type="keyUp", key="Escape", code="Escape", windowsVirtualKeyCode=27)
++            time.sleep(0.2)
++            after_cancel = runner.eval("({choice:CLSky.interactionState().choice,selection:CLSky.interactionState().selection,calm:CLApp.scene().calm()})")
++            runner.ws.call("Input.dispatchMouseEvent", type="mouseMoved", x=x, y=y)
++            time.sleep(0.2)
++            reopened_hit = runner.eval(PICK_AT % {"x": repr(x), "y": repr(y)})
++            if not isinstance(reopened_hit, dict) or not reopened_hit.get("targetValid") or reopened_hit.get("count", 0) < 2:
++                stable = None
++            if stable:
++                runner.ws.call("Input.dispatchMouseEvent", type="mousePressed", x=x, y=y, button="left", buttons=1, clickCount=1)
++                runner.ws.call("Input.dispatchMouseEvent", type="mouseReleased", x=x, y=y, button="left", buttons=0, clickCount=1)
++                time.sleep(0.2)
++                opened = runner.eval(PICK_STATE)
++                capture("candidate-reopened.png")
++                runner.ws.call("Input.dispatchKeyEvent", type="keyDown", key="ArrowDown", code="ArrowDown", windowsVirtualKeyCode=40)
++                runner.ws.call("Input.dispatchKeyEvent", type="keyUp", key="ArrowDown", code="ArrowDown", windowsVirtualKeyCode=40)
++                focused = runner.eval("({ref:document.activeElement&&document.activeElement.getAttribute('data-pick-ref'),choice:CLSky.interactionState().choice,current:CLSky.interactionState().current})")
++                capture("candidate-focused.png")
++            else:
++                opened, focused = {"opened": False, "reason": "hit_changed_after_cancel"}, {}
++                capture("candidate-interaction-failed.png")
++            if stable:
++                activation_key = " " if activation == "Space" else "Enter"
++                activation_code = "Space" if activation == "Space" else "Enter"
++                activation_vk = 32 if activation == "Space" else 13
++                runner.ws.call("Input.dispatchKeyEvent", type="keyDown", key=activation_key, code=activation_code, windowsVirtualKeyCode=activation_vk)
++                runner.ws.call("Input.dispatchKeyEvent", type="keyUp", key=activation_key, code=activation_code, windowsVirtualKeyCode=activation_vk)
++                time.sleep(0.4)
++                confirm = runner.eval(PICK_STATE)
++                capture("candidate-confirmed.png")
++            else:
++                confirm = {}
++            result = {"bookKey": key, "viewport": [width, height], "reducedMotion": reduced, "activation": activation,
++                      "dynamicOverlap": overlap, "projectionAttempts": overlap_attempts,
++                      "stableAfterHover": stable, "rejectedAfterHover": rejected,
++                      "cancelBefore": before_cancel, "cancelAfter": after_cancel, "opened": opened,
++                      "focusedBeforeActivation": focused, "confirmation": confirm}
++        else:
++            result = {"bookKey": key, "viewport": [width, height], "dynamicOverlap": overlap, "projectionAttempts": overlap_attempts,
++                      "stableAfterHover": None, "rejectedAfterHover": rejected, "confirmation": {"opened": False}}
++            capture("candidate-interaction-failed.png")
++        health = runner.eval("(()=>{const h=window.__headlessHealth,S=CLApp.scene(),d=S.digest(),sh=S.shaderErrors(),f=d&&d.frameHooks;return {errors:h&&Array.isArray(h.jserr)?h.jserr:null,rejections:h&&Array.isArray(h.jsrej)?h.jsrej:null,shaderErrors:Array.isArray(sh)?sh:null,frameErrors:f&&typeof f.errors==='number'?f.errors:null}})()")
++        result["health"] = health
++        health_ok = bool(isinstance(health, dict) and not health.get("__evalError")
++                         and health.get("errors") == [] and health.get("rejections") == []
++                         and health.get("shaderErrors") == [] and health.get("frameErrors") == 0)
++        result["screenshots"] = screenshots
++        report_path = out / ("interaction-" + run_id + ".json")
++        report_path.write_text(json.dumps(result, ensure_ascii=False, indent=1), encoding="utf-8")
++        confirm = result["confirmation"]
++        cancel_ok = bool(result.get("cancelBefore", {}).get("choice") and not result.get("cancelAfter", {}).get("choice")
++                         and result.get("cancelAfter", {}).get("selection") == result.get("cancelBefore", {}).get("selection"))
++        selected=result.get("confirmation", {}).get("selection")
++        expected=result.get("focusedBeforeActivation", {}).get("ref")
++        ok = bool(result.get("stableAfterHover") and cancel_ok and result.get("opened", {}).get("opened")
++                  and not result.get("opened", {}).get("menuClosed") and confirm.get("menuClosed")
++                  and confirm.get("mode") in ("compass", "constellation") and confirm.get("focusVisible")
++                  and result.get("opened", {}).get("cancelVisible")
++                  and result.get("opened", {}).get("panelBounds", {}).get("left", -1) >= 0
++                  and result.get("opened", {}).get("panelBounds", {}).get("top", -1) >= 0
++                  and result.get("opened", {}).get("panelBounds", {}).get("right", width + 1) <= width
++                  and result.get("opened", {}).get("panelBounds", {}).get("bottom", height + 1) <= height
++                  and selected == expected and selected and confirm.get("current") == result.get("focusedBeforeActivation", {}).get("current")
++                  and confirm.get("calm") == result.get("cancelAfter", {}).get("calm")
++                  and health_ok)
++        print(json.dumps({"ok": ok, "result": str(report_path), "interaction": result}, ensure_ascii=False))
++        return 0 if ok else 1
++    finally:
++        try:
++            runner.close()
++        except Exception:
++            pass
++
++
+ def main() -> int:
+     ap = argparse.ArgumentParser()
+     ap.add_argument("--base", default=os.environ.get("CASTLINE_BASE", "http://127.0.0.1:8781"))
+     ap.add_argument("--out", default=str(Path(os.environ.get("CL_SHOTS", "/tmp/castline-shots")) / "p4-selection-model"))
++    ap.add_argument("--interaction", action="store_true", help="动态扫描西游真射线重叠并回放候选原生 Enter/Space确认；需串行真实浏览器")
++    ap.add_argument("--width", type=int, default=1440)
++    ap.add_argument("--height", type=int, default=900)
++    ap.add_argument("--reduced", action="store_true", help="模拟 prefers-reduced-motion: reduce")
++    ap.add_argument("--activation", choices=("Enter", "Space"), default="Enter")
+     args = ap.parse_args()
+     out = Path(args.out)
+     out.mkdir(parents=True, exist_ok=True)
++    if args.interaction:
++        return probe_interaction(args.base, out, args.width, args.height, args.reduced, args.activation)
+ 
+     problems, checks = [], []
+     def check(name, ok, detail):

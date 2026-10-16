@@ -1,0 +1,335 @@
+{
+  "task": "verify:xiyou:L1:0003",
+  "agent": "w-dafeng-2",
+  "role": "VERIFIER",
+  "reviewedTask": "read:xiyou:L1:0003",
+  "reviewedArtifact": {
+    "path": "loop/state/out/read_xiyou_L1_0003.candidate.json",
+    "sha256": "f9b08b10f03353a211573c922f64a3afd1ddf87793664590fcdf863742ad5948",
+    "bytes": 262855
+  },
+  "verdict": "partial",
+  "method": "按 loop/ROLES/VERIFIER.md 的顺序执行：先自己读原文（先把 docs[0].text[21362:28187) 落盘为 31 个自然段并通读），再打开候选。此后做机器可复算的锚点核验、反向覆盖（取已引位置的补集）、逐条事实核对、误杀检查与幻觉检查。所有反对意见都在下面给出逐字原文与偏移。",
+  "source": {
+    "docsPath": "data/cache/df959d743e53206f56db2f92.docs.json",
+    "fileSha256": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+    "textSha256": "ffcc680a63ca5180ced6e629fd3171ab2ed4dd4b92ddbf21c3a6fe80cfaef1aa",
+    "range": [
+      21362,
+      28187
+    ],
+    "codepoints": 6825,
+    "sliceSha256": "ec3d814ce5240d41c4cabe88acbae7e88dc8c8d9a1e1f9d2f06f03325b56a172",
+    "offsetBase": "absolute-doc-codepoint",
+    "note": "文件字节哈希与本轮任务 sourceHash 逐字一致；切片首段为本单元标题「第四回　官封弼马心何足　名注齐天意未宁」，末段止于「且听下回分解。」"
+  },
+  "mechanicalAudit": {
+    "anchorsTotal": 381,
+    "spanMismatch": 0,
+    "notFindable": 0,
+    "outOfRange": 0,
+    "sourceHashMismatch": 0,
+    "firstFindNotEqualStart": 0,
+    "zeroLengthSpans": 0,
+    "distinctQuotes": 150,
+    "note": "我对候选全文递归取 {quote,start,end,sourceHash} 锚点，共 381 个实例、150 个不同引文，逐条断言 docs[0].text[start:end]==quote、text.find(quote)==start、落在 [21362,28187) 内、sourceHash 与任务一致 —— 四项失败数全部为 0。这与候选 anchorReview 自述的 344 一致但不相等：344 = tasks(107)+causeEdges(104)+states(91)+foreshadows(17)+unknowns(26) 的**实例**数（不含 selfCritique 12 与 uncoveredDialogue 24，两者相加恰为 381）。anchorReview.quoteCount=123 与任何分区组合都对不上（实测 main5 的**去重**引文是 133 条，全部去重是 150 条），且未在候选内说明口径 ⇒ 记为存疑，不据此判 fail。",
+    "reproduceCmd": "python3 -c \"import json;t=json.load(open('data/cache/df959d743e53206f56db2f92.docs.json'))[0]['text'];c=json.load(open('loop/state/out/read_xiyou_L1_0003.candidate.json'));a=[]\ndef w(o):\n  if isinstance(o,dict):\n    if 'quote' in o and isinstance(o.get('start'),int):\n      q,s,e=o['quote'],o['start'],o['end']\n      if t[s:e]!=q or t.find(q)!=s: a.append(q[:20])\n    [w(v) for v in o.values()]\n  elif isinstance(o,list):\n    [w(v) for v in o]\nw(c);print('anchors',len(a) if 0 else 'checked');print('mismatch',len(a))\""
+  },
+  "citationSample": {
+    "seed": 20261009,
+    "sampled": 5,
+    "hit": 5,
+    "note": "固定种子 20261009 从全部 381 个锚点中 random.sample 抽 5 条，每条做 text.find(quote) 一次并比对声明的 start/end：5/5 逐字命中、偏移一致、sourceHash 一致、落点均在区间内。抽中项：unknowns[10].evidence[1]「弼马昼夜不睡，滋养马匹」[22941,22952)；tasks[15].evidence[0]「那猴王信受奉行，即日与五斗星君到府，打开酒瓶，同众尽饮」[28090,28117)；states[5].evidence[3]「又差五斗星君送悟空去到任，外赐御酒二瓶，金花十朵，着他安心定志，再勿胡为」[28053,28089)；tasks[10].evidence[3]「天王听谏，且教回营待罪管事」[25508,25521)；causeEdges[15].evidence[3]「正说间，班部中又闪出太白金星，奏道：“那妖猴只知出言，不知大小。欲加兵与他争斗，想一时不能收伏，反又劳师。不若万岁大舍恩慈，还降招安旨意，就教他做个齐天大圣。只是加他个空衔，有官无禄便了。”」[27135,27230)。"
+  },
+  "counterExamples": [
+    {
+      "id": "CE1",
+      "field": "causeEdges[ce27].mechanism 与 notes[2]",
+      "claim": "候选主张本单元时间账自洽：「按②换算，天上半月有馀≈下界十数日，与③相合」「半月≈十数日，与「十数年」吻合」。这个换算把「天上一日=下界一年」用反了单位：原文的规则是**下界的年数 = 天上的日数**，故天上「半月有馀」应换算为**下界十数年**，与③「上界去十数年」相合。候选算出「下界十数日」，与③「十数年」差约 365 倍，恰恰把它要消解的「两个数量级之差」又算了一遍；结论（不矛盾）侥幸正确，但给出的算式是错的，且被同时写进 notes 作为「核对结果」。",
+      "quote": "众猴道：“大王，你在天上，不觉时辰。天上一日，就是下界一年哩。请问大王，官居何职？”",
+      "start": 23534,
+      "end": 23576,
+      "supportingQuotes": [
+        {
+          "quote": "我才半月有馀，那里有十数年？",
+          "start": 23519,
+          "end": 23533
+        },
+        {
+          "quote": "上界去十数年",
+          "start": 23498,
+          "end": 23504
+        }
+      ],
+      "why": "这是候选唯一一处**算式与原文规则相反**的断言，且它是整条 ce27（derived）的全部内容、也是 notes 里那条「核对结果」的全部内容。注意：它属「说明性文字算错」，不是编造事实——三条引文本身都逐字正确、结论方向也对。但它会被下游当成「已核对」的实绩，因此必须修正而不能放过。判 partial 而非 fail 的理由见 notes。"
+    },
+    {
+      "id": "CE2",
+      "field": "uncoveredDialogue[4].disposition",
+      "claim": "候选自述「巨灵神公开自报身份与「奉玉帝旨意，到此收伏」。**已补入 t10 证据**」——这条自述与候选自身产物不符：该句并未出现在 t10 的 evidence 中。实际补入 t10 的是另一句（「巨灵神道：…今奉玉帝圣旨，到此收降你。」），而本条引文的字样只出现在 t10 的 objective 里（「巨灵神宣「奉玉帝旨意，到此收伏」」）。换言之：这一句确实被用到了，但用在 objective、不在 evidence，登记表的说法不准确。",
+      "quote": "这巨灵神喝道：“那业畜！快早去报与弼马温知道，吾乃上天大将，奉玉帝旨意，到此收伏；教他早早出来受降，免致汝等皆伤残也。”",
+      "start": 24481,
+      "end": 24541,
+      "why": "可机器复算：'奉玉帝旨意，到此收伏' in t10.objective == True，而 in json.dumps(t10.evidence) == False。这属「候选自述与自身产物不符」，不是原文层编造。同类自述我抽查了 6 条，只有这 1 条不符（其余 5 条「本轮补入 X 证据」均属实）。"
+    },
+    {
+      "id": "CE3",
+      "field": "tasks[xy4-t15].action 与 tasks[xy4-t16] 的表述",
+      "claim": "候选把悟空在灵霄殿的「唱个喏」当成第一次出现来叙述（t15 action：「灵霄殿下『亦止朝上唱个喏，道声谢恩』」），并在 t01 的 result 里把首次受封时的「唱个大喏」略去，导致**同一个人在同一单元内两次「唱喏」被读成一次**。原文里悟空受封弼马温时已有一次「他也只朝上唱个大喏」，受封齐天大圣时是第二次；两次同形，且都被原文以「谢恩」并置，构成一个可见的重复模式（他两次受封都不肯行朝礼）。候选把第二次的「亦」字（原文作「这猴**亦**止朝上唱个喏」）读作对前文的回指，但没有把这一次的锚点引出来。",
+      "quote": "众臣叫谢恩，他也只朝上唱个大喏。玉帝又差木德星君送他去御马监到任。",
+      "start": 22650,
+      "end": 22683,
+      "supportingQuotes": [
+        {
+          "quote": "猴王却才朝上唱个大喏",
+          "start": 22548,
+          "end": 22558
+        }
+      ],
+      "why": "严重度低：两次唱喏的事实都在候选里出现过（第一次的「猴王却才朝上唱个大喏」被 ce03 引用，第二次被 t15 引用），缺的是「第二次」这层关系，属覆盖不完整而非编造。单列出来是因为它落在「名注齐天」这一回目的核心动作上（受封而不行礼），漏掉会使该模式在后续单元的图谱里不可见。"
+    }
+  ],
+  "reverseChecks": [
+    {
+      "id": "R1",
+      "found": "受封弼马温后的第二次「谢恩」与木德星君送任、以及木德星官到任后回宫——本轮任命的完整闭环，候选无任何条目引用。原文在此处把「受封→送任→到任→送任者回宫」四步走完；候选 st01 只到「弼马温」官衔为止，t02 从「到任」直接开始，中间的送任环节（谁送、送到哪）整段落在覆盖之外。",
+      "quote": "众臣叫谢恩，他也只朝上唱个大喏。玉帝又差木德星君送他去御马监到任。",
+      "start": 22650,
+      "end": 22683,
+      "extraQuotes": [
+        {
+          "quote": "事毕，木德星官回宫。",
+          "start": 22704,
+          "end": 22714
+        }
+      ],
+      "note": "未被任何条目引用，也未登记进 uncoveredDialogue ⇒ 属「未覆盖且不可见」。"
+    },
+    {
+      "id": "R2",
+      "found": "哪吒「收了法，把六件兵器，依旧归身，败阵而回」与李天王「急欲提兵助战」——退兵过程的两步，候选只写了「负痛逃走」「不能复战」，把「收法归身」与主帅欲助战而未及这两个动作整段略去。ce15 的机制只落在「失去再战能力」，未引用这两句。",
+      "quote": "收了法，把六件兵器，依旧归身，败阵而回。",
+      "start": 26482,
+      "end": 26502,
+      "extraQuotes": [
+        {
+          "quote": "那阵上李天王早已看见，急欲提兵助战。",
+          "start": 26504,
+          "end": 26522
+        }
+      ],
+      "note": "未引用、未登记。"
+    },
+    {
+      "id": "R3",
+      "found": "天宫形胜的量化描述（三十三座天宫、七十二重宝殿）与赞诗收句「猴王有分来天境，不堕人间点污泥」整段未被引用也未登记。这是本单元最长的一段未覆盖文字（[21778,22351)，573 字，占切片 8.4%），候选的覆盖缺口里它最大。",
+      "quote": "这天上有三十三座天宫",
+      "start": 21964,
+      "end": 21974,
+      "extraQuotes": [
+        {
+          "quote": "又有七十二重宝殿",
+          "start": 22007,
+          "end": 22015
+        },
+        {
+          "quote": "猴王有分来天境，不堕人间点污泥",
+          "start": 22333,
+          "end": 22348
+        }
+      ],
+      "note": "未引用、未登记。它是景物赋，不含情节；但候选的 uncoveredDialogue 机制本应把它登记为「不立条目的理由」，实际漏登，说明该登记表的覆盖并不完整（见 R7 的量化）。"
+    },
+    {
+      "id": "R4",
+      "found": "首次受封时众仙卿「叫声谢恩！」——一个与猴子拒行朝礼并置的朝堂反应，候选未引。它与 R1 的「众臣叫谢恩」是同形重复：两次受封，两边仙卿都喊谢恩，而猴子两次都只唱喏。",
+      "quote": "众仙卿叫声“谢恩！”",
+      "start": 22538,
+      "end": 22548,
+      "note": "未引用、未登记；与 CE3 是同一模式的两次出现。"
+    },
+    {
+      "id": "R5",
+      "found": "悟空得胜归山后「在洞天福地，饮乐无比」——庆功的实际状态，候选只在 fs07/st16 里用了「俱来贺喜」与「七大圣自作自为」，把中间这句跳过。",
+      "quote": "在洞天福地，饮乐无比。",
+      "start": 26756,
+      "end": 26767,
+      "note": "未引用、未登记。"
+    },
+    {
+      "id": "R6",
+      "found": "「却说那李天王与三太子领着众将，直至灵霄殿。」——回奏的场景转换句，候选 t12 直接从「启奏道」开始，未引此句。属场景锚点缺失，严重度低。",
+      "quote": "却说那李天王与三太子领着众将，直至灵霄殿。",
+      "start": 26926,
+      "end": 26947,
+      "note": "未引用、未登记。"
+    },
+    {
+      "id": "R7",
+      "found": "反向覆盖的**量化结论**：切片被主条目（tasks/causeEdges/states/foreshadows/unknowns）引文覆盖 66.3%（4525/6825），未覆盖 2300 字；候选的 uncoveredDialogue 登记表只覆盖其中 572 字，**另有 1728 字（占未覆盖部分的 75%）既未被引用、也未登记**，对候选自己的反向覆盖机制不可见。其中 ≥20 字的整块有 13 处（最大 573 字，即 R3）。",
+      "quote": "同金星缓步入里观看。真个是：",
+      "start": 21779,
+      "end": 21793,
+      "why": "这不是「必须逐句立条目」的要求——景物赋与过程句可以不立条目；问题是候选在 notes 里把 uncoveredDialogue 描述为「记录「哪些原文句子没有被任何条目引用」及每段不立条目的理由」，而它对 75% 的未覆盖文字没有登记 ⇒ 该机制的完备性声明强于实际，属「机制存在但不产生信息」的形态。这条是我判 partial 的主要依据之一。",
+      "quantifiedBy": "python3 -c \"import json;t=json.load(open('data/cache/df959d743e53206f56db2f92.docs.json'))[0]['text'];S,E=21362,28187;c=json.load(open('loop/state/out/read_xiyou_L1_0003.candidate.json'))\ndef A(o,out):\n  if isinstance(o,dict):\n    if 'quote' in o and isinstance(o.get('start'),int): out.append((o['start']-S,o['end']-S))\n    [A(v,out) for v in o.values()]\n  elif isinstance(o,list):\n    [A(v,out) for v in o]\n  return out\nsl=t[S:E];m=[0]*len(sl);r=[0]*len(sl)\nfor s,e in A({k:v for k,v in c.items() if k!='uncoveredDialogue'},[]):\n  for i in range(max(0,s),min(len(sl),e)): m[i]=1\nfor s,e in A(c['uncoveredDialogue'],[]):\n  for i in range(max(0,s),min(len(sl),e)): r[i]=1\nu=[i for i in range(len(sl)) if not m[i]]\nprint('covered %.1f%%'%(100*(len(sl)-len(u))/len(sl)));print('uncovered',len(u));print('registered',sum(1 for i in u if r[i]));print('invisible',sum(1 for i in u if not r[i]))\""
+    }
+  ],
+  "misKillCheck": {
+    "result": "未发现误杀。",
+    "detail": "按 VERIFIER.md 第 4 步检查候选是否把合法内容挡掉。候选对人物话语与叙述事实的区分是本单元最容易被过度过滤的地方，实测它没有过度过滤：①ce01 把「你自来未曾到此天堂，却又无名」明确标为**金星的解释**（inferred），没有因为『人物话语』而把这条因果整条删掉，同时在 selfCritique 里写明「若复核者认为人物解释不足以立边，这条应降级或删除」——保留了边，只降了 basis，这个处置是对的；②ce13 曾被上一轮写成「旗号要求由巨灵神带到天庭」，本轮改为「没有带到」并另立 ce26 承载哪吒那条真实传递链，这**不是**误杀：我逐句核对原文，巨灵神回营的实际禀报确为「弼马温果是神通广大！末将战他不得，败阵回来请罪。」，确无旗号内容，改判有据；③H2 把「众武将还要支吾」从 t13.obstacle 移出，也未误杀——该语唯一出处是金星在花果山对悟空的自述（[27751,27782)），金殿现场原文只写「正说间，班部中又闪出太白金星，奏道」，未见武将反对。以上三处都是**该过滤的**，不是误杀。",
+    "nearMiss": "唯一接近误杀的是 ce27（见 CE1）：它被保留是对的（三条引文为真、结论方向也对），错的是换算算式，应改算式而非删条目。"
+  },
+  "hallucinationCheck": {
+    "result": "未发现编造。",
+    "detail": "① 人物核验：候选出现的全部人物名（孙悟空、太白金星、玉帝、武曲星君、木德星君、张天师、增长天王、托塔李天王、哪吒、巨灵神、独角鬼王、牛魔王、蛟魔王、鹏魔王、狮驼王、猕猴王、【犭禺】狨王、五斗星君、张、鲁二班、鱼肚将、药叉将、四健将、六弟兄、七十二洞妖王、监丞、监副、典簿、力士）我逐一在切片内 find，全部命中，无原文外人物；三个集合式 character 值（「天庭（玉帝一方）」「天门守军（增长天王与众天丁）」「花果山势力（七十二洞妖王与六弟兄）」）是分组名而非人物名，不构成编造。② 结局核验：未把「结束当成功」——t09/t10/t12 均明确写「本单元内收伏目标未达成」，t16 的 result 引叙述句但不外推为「此后不会再反」，fs02/fs03/fs06/fs07b/fs08 均显式标 unresolved，fs04 还自己写明「原文未写天庭对他穿赭黄袍有任何反应…所以这只算物件层面的呼应，不是情节层面的伏笔兑现」。③ 越权核验：semanticReview 保持 not_performed，anchorReview 自己写明「这不构成语义核验」，未冒充完成。④ 结构核验：16 条任务五元组（objective/obstacle/action/result/cost）键全部存在，缺失与越界写 null 的地方（t07.cost、t12.cost、t14.cost、t16.obstacle、t16.cost 等）确实都是原文未写，抽查 ce27 与 t16 未发现「用未知填默认值」。",
+    "contaminatedPriorReview": "另发现一条与候选无关但影响本任务可信度的事实：read 记录 loop/state/out/read_xiyou_L1_0003.json 的 reviews[0]（reviewer=q-verify，2026-10-07T21:12:23Z，verdict=pass）其 notes 写的是「该章的『张有瑞案破绽』一拍…已由候选的因果边（如 C12 逐条列出…）」，而「张有瑞」在西游全文 722176 字中 0 次命中、在候选与切片中均 0 次命中，候选的因果边 id 也全是 ce01..ce27、不存在 C12。即：该 pass 的正文证据描述与本单元产物不对应（疑似跨书串稿）。我**不推翻**其结论（它声称的 381/381、覆盖率 74.7% 与我的实测一致），但它作为「独立复核」的证据链是不可采信的，本任务的判据应以我这份可复算的复核为准。"
+  },
+  "usableVsDiscard": {
+    "usable": [
+      "全部 381 个锚点实例（150 条引文）：逐字、偏移、区间、sourceHash 四项全对，可直接用于发布与图谱锚定。",
+      "16 条任务 / 27 条因果 / 20 条状态 / 9 条伏笔的**事实内容**：我按原文逐条核对，未发现编造人物、事件、结局、假伏笔或成功误判，可整批保留。",
+      "states 与 knowledge 的知识差标注（st02 与 k01…k04）：把「谁知/谁不知」写清且把人物话语的出处写明，符合契约，可用。",
+      "selfCritique 的三条自陈风险（ce01 人物解释立边、k04 知识差、st07 与回目「意未宁」的张力）：与原文相符，且主动把冲突单列进 U1，这种处置应保留。",
+      "coverage 的全部自述计数（tasks 16 / causeEdges 27 / states 20 / foreshadows 9 / foreshadowsUnresolved 5 / unknowns 13 / paragraphsInSlice 31 / uncoveredDialogueSpans 24 / basisHistogram {explicit 64, inferred 5, derived 3}）：我逐项复算，**全部相符**。"
+    ],
+    "mustFix": [
+      "ce27.mechanism 与 notes[2] 的换算算式：须改为「天上半月有馀 ⇒ 下界十数年」（见 CE1）。结论可不改。",
+      "uncoveredDialogue[4].disposition 的「已补入 t10 证据」：须改为「已用于 t10.objective」（见 CE2）。",
+      "t15.action 的「亦止朝上唱个喏」应注明这是本单元内第二次（首次见 t01 阶段的「他也只朝上唱个大喏」[22650,22683)），见 CE3。",
+      "uncoveredDialogue 的完备性：要么把未登记的 1728 字（含 ≥20 字的 13 处整块）补登记，要么在 notes 里把该表的适用范围改小，不要声称它记录了「哪些原文句子没有被任何条目引用」（见 R7）。",
+      "anchorReview.quoteCount=123 无法复算：须补口径说明或改成可复算的数（main5 去重 133 / 全部去重 150 / 主条目实例 345）。"
+    ],
+    "discardOrDowngrade": [
+      "无条目需要丢弃。CE1/CE2/CE3 均为可定点修正的说明层缺陷，不涉及抽取内容真伪。",
+      "建议把 ce27 的 basis 维持 derived（它本来就是跨段推导），但把「已核对」的措辞降为「算式已更正后自洽」——现状是它被同时写进 notes 当核对结果，而算式是错的。"
+    ]
+  },
+  "unknownsLeftOpen": [
+    "候选 selfCritique 自陈、我复核后仍无法判定的：U2「朝上礼拜」的主语（原文语法确有歧义，我读原文后同样不能定，保留为 unknown 是正解）。",
+    "U1（回目「意未宁」vs 末句「无挂无碍」）：我读原文后的判断与候选一致——两句都是原文明写的，谁压谁原文未给依据，应保持并列。",
+    "本复核未做的：GPU/浏览器相关一律未跑（任务未要求，且全局串行）；未做跨单元核验（如 fs06 的蟠桃园、U10 的六弟兄是否即第三回那批）——这类同一性必须由后续单元独立取证，我在本单元内不代答。",
+    "未核实项：candidate 的 repairLog 自述「上一轮产物 sha256 c9411bf2…」我未找到该文件实体（现盘上只有 f9b08b10…），只在 REJECTED__read_xiyou_L1_0003.json 的 evidence[0].sha256 里见到同一哈希，两处一致，故采信其自述为真，但我无法重算那个已不存在的文件。"
+  ],
+  "reverseChecksOnMyself": {
+    "honest": "按契约我可以判自己错，如实记录两处自我限制：① 我的反向验证以**字符覆盖**为判据，景物赋/过程句这类本来就不必立条目的文字会被我算成「缺口」；R3/R5/R6 的具体条目严重度低，我已在各条 note 里注明「不含情节」，判 partial 的主要依据是 R7 的机制完备性（未登记 75%），不是这些条目本身。② 我一开始把 anchorReview 的 344 与 381 当成矛盾，核对后才确认 344 = 五个主分区的实例数、加上 selfCritique(12) 与 uncoveredDialogue(24) 恰为 381，两者不矛盾；我把这一点改记为「口径未说明」而不是「数字错误」。",
+    "limitsOfMyEvidence": "CE1 是我唯一称为「算式错误」的一条，它可由原文三句直接复算（天上一日=下界一年，半月有馀⇒十数年），证据充分；CE2 可由候选自身文件复算；CE3/R1–R7 均为「未覆盖」类发现，只证明遗漏，不证明候选写错。我没有找到任何一条「候选写了原文没有的东西」——本候选的引用层是干净的。"
+  },
+  "notes": "判 partial，不判 pass 也不判 fail。\n\n不判 fail：按判定纪律，fail 必须有 counterExample 且 quote 逐字可查——我的三条 CE 里，CE1 的引文逐字可查且可复算，但它证明的是**换算算式写反**，不是编造事实；CE2 是候选自述与自身产物不符（可机器复算）；CE3 是覆盖不完整。三条都不属于「编造人物/事件/结局」或「把结束当成功」。我逐条核对了全部 16 条任务、27 条因果、20 条状态、9 条伏笔所涉事实，**没有找到一条原文里不存在的断言**；引文层 381/381 四项核验全对。按「拿不出原文引证的反对意见只能记为存疑」的精神，也不应因为机制完备性不足而判 fail。\n\n不判 pass：三处可被原文/候选自身直接证伪的缺陷客观存在（CE1 算式反了、CE2 自述与产物不符、CE3 漏标第二次），且 R7 是结构性的——候选建立了一个「反向覆盖登记」机制并在 notes 里声称它记录「哪些原文句子没有被任何条目引用」，实测 75% 的未覆盖文字没进这个表。这正是本项目反复出现的失败形态（机制存在、有代码、有产出，但不产生信息），而它恰恰是最不该被 pass 静默盖章的一类。修掉这五条（usableVsDiscard.mustFix）后可以转 pass，无需重做。\n\n另需记录：本任务的上一份 pass 复核（reviews[0]，q-verify）其 notes 引用的是大奉的「张有瑞案/C12」，与西游第四回无关（该串在 722176 字全文中 0 命中），属跨书串稿；其结论声称的数字与我的实测一致，故我不推翻结论，但这条复核的证据链不可采信，本轮的发布决策应以本文件为准。\n\n最后一条与候选无关但影响我这份复核可用性的环境事实：本任务在 2026-10-09T04:28:32Z 有过一次 rc=1、耗时 0.1s 的失败（loop/state/runs/run-verify_xiyou_L1_0003.json），另一份 REJECTED__verify_xiyou_L1_0003.json（agent w-dafeng-2，无产出）也在盘上；本轮为重新执行，产物路径与任务 writes 一致。",
+  "status": "done",
+  "summary": "独立反向复核《西游记》第四回 [21362,28187)（6825 字）。先自己读原文（31 段）再读候选。**引用层零缺陷**：381 个锚点实例（150 条引文）的 text[start:end]==quote、find(quote)==start、区间内、sourceHash 一致四项核验失败数全为 0；固定种子抽 5 条 5/5 逐字命中且偏移一致；16 条任务五元组齐全、缺项均写 null；无原文外人物、无「结束=成功」、semanticReview 保持 not_performed；coverage 自述的全部计数（16/27/20/9/5/13/31/24 与 basisHistogram 64-5-3）逐项复算全部相符。但反向验证查出 3 处可被原文或候选自身证伪的缺陷 + 1 处结构性机制缺陷：①ce27 与 notes[2] 把「天上一日=下界一年」换算反了单位，把「半月有馀」算成「下界十数日」（应为下界十数年），恰恰把它要消解的数量级之差又算了一遍；②uncoveredDialogue[4] 自称「已补入 t10 证据」而实际只在 t10.objective；③漏标本单元内第二次「唱喏」（首次 [22650,22683)）；④反向覆盖登记表只覆盖未覆盖文字的 25%（572/2300 字），另有 1728 字对候选自己的机制不可见，而 notes 把该表描述为记录「哪些原文句子没有被任何条目引用」。判 partial 而非 fail：无一条属编造，抽取内容经原文核验为真；判 partial 而非 pass：上述 4 处可被直接证伪，且 ④ 属「机制存在但不产生信息」的形态。",
+  "evidence": [
+    {
+      "path": "loop/state/out/read_xiyou_L1_0003.candidate.json",
+      "sha256": "f9b08b10f03353a211573c922f64a3afd1ddf87793664590fcdf863742ad5948",
+      "kind": "被复核候选（只读，未修改）",
+      "bytes": 262855
+    },
+    {
+      "path": "data/cache/df959d743e53206f56db2f92.docs.json",
+      "sha256": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+      "kind": "原文缓存（只读；与任务 sourceHash 一致）"
+    },
+    {
+      "path": "loop/state/out/verify_xiyou_L1_0003.verdict.json",
+      "kind": "本复核结论（任务 writes 声明的产出）"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "源文件字节哈希与任务 sourceHash 逐字一致，且切片可复现：docs[0].text[21362:28187] 长 6825 字、首段为本单元标题、末段止于「且听下回分解。」",
+      "result": "pass",
+      "cmd": "shasum -a 256 data/cache/df959d743e53206f56db2f92.docs.json; python3 -c \"import json,hashlib;t=json.load(open('data/cache/df959d743e53206f56db2f92.docs.json'))[0]['text'];s=t[21362:28187];print(len(s),hashlib.sha256(s.encode()).hexdigest(),s[:19])\""
+    },
+    {
+      "text": "全量引文核验：381 个锚点实例四项断言（span==quote / find==start / 区间内 / sourceHash）失败数全为 0；zero-length span 0",
+      "result": "pass",
+      "cmd": "python3 -c \"import json;t=json.load(open('data/cache/df959d743e53206f56db2f92.docs.json'))[0]['text'];c=json.load(open('loop/state/out/read_xiyou_L1_0003.candidate.json'));S,E,H=21362,28187,'c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2';a=[]\ndef w(o):\n  if isinstance(o,dict):\n    if 'quote' in o and isinstance(o.get('start'),int):\n      q,s,e=o['quote'],o['start'],o['end']\n      if t[s:e]!=q or t.find(q)!=s or s<S or e>E or o.get('sourceHash')!=H: a.append(q[:20])\n    [w(v) for v in o.values()]\n  elif isinstance(o,list):\n    [w(v) for v in o]\nw(c);print('problems',len(a))\""
+    },
+    {
+      "text": "固定种子 20261009 抽 5 条引文，逐条 text.find(quote) 一次：5/5 逐字命中、声明偏移与 find 一致、落在区间内、sourceHash 一致",
+      "result": "pass"
+    },
+    {
+      "text": "反向覆盖量化（本复核的核心发现）：主条目引文覆盖切片 66.3%，未覆盖 2300 字；其中被 uncoveredDialogue 登记的仅 572 字，1728 字（75%）未登记",
+      "result": "pass"
+    },
+    {
+      "text": "CE1 可复算：原文规则「天上一日，就是下界一年」[23552,23563) ⇒ 天上半月有馀应换算为下界十数年，与「上界去十数年」[23498,23504) 相合；候选写「≈下界十数日」",
+      "result": "pass"
+    },
+    {
+      "text": "CE2 可机器复算：'奉玉帝旨意，到此收伏' in t10.objective == True，in json.dumps(t10.evidence) == False ⇒ 自述「已补入 t10 证据」与自身产物不符；同类自述抽查 6 条，仅此 1 条不符",
+      "result": "pass"
+    },
+    {
+      "text": "CE3 可复算：原文两处唱喏（[22548,22558)「猴王却才朝上唱个大喏」与 [22650,22683)「他也只朝上唱个大喏」）；候选 t15.action 用第二次的「亦止朝上唱个喏」但未标注它是第二次",
+      "result": "pass"
+    },
+    {
+      "text": "幻觉检查：候选出现的全部人物名（含牛魔王等六弟兄、五斗星君、张鲁二班、鱼肚将、药叉将）逐一在切片内 find，全部命中，无原文外人物；无「结束=成功」（t09/t10/t12 明写收伏目标未达成）；semanticReview=not_performed",
+      "result": "pass"
+    },
+    {
+      "text": "误杀检查：未发现误杀。ce01 把人物解释降 basis 但保留边、ce13 改判「内容未传递」另立 ce26、H2 移出金星自述——三处经逐句核对原文均为该过滤的，不是误杀",
+      "result": "pass"
+    },
+    {
+      "text": "结构核验：16 条任务 objective/obstacle/action/result/cost 键全部存在；coverage 自述计数逐项复算（16/27/20/9/5/13/31/24、basisHistogram 64-5-3）全部相符",
+      "result": "pass"
+    },
+    {
+      "text": "本复核产出的全部 17 条引文逐字自检：text[start:end]==quote、find(quote)==start、区间内 —— problems 0",
+      "result": "pass",
+      "cmd": "python3 -c \"import json;t=json.load(open('data/cache/df959d743e53206f56db2f92.docs.json'))[0]['text'];v=json.load(open('loop/state/out/verify_xiyou_L1_0003.verdict.json'));b=[]\ndef w(o):\n  if isinstance(o,dict):\n    if 'quote' in o and isinstance(o.get('start'),int):\n      q,s,e=o['quote'],o['start'],o['end']\n      if t[s:e]!=q or t.find(q)!=s: b.append(q[:20])\n    [w(v2) for v2 in o.values()]\n  elif isinstance(o,list):\n    [w(v2) for v2 in o]\nw(v);print('problems',len(b))\""
+    },
+    {
+      "text": "只读纪律：被复核候选哈希复核前后均为 f9b08b10…、源文件均为 c282cf39…，未改动受保护路径，未跑 GPU/浏览器测试",
+      "result": "pass"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/verify_xiyou_L1_0003.verdict.json",
+      "kind": "append-only",
+      "note": "任务 writes 声明的产出：本复核结论。"
+    },
+    {
+      "path": "loop/state/out/verify_xiyou_L1_0003.json",
+      "kind": "append-only",
+      "note": "由 `python3 loop/bin/loop.py verify --task read:xiyou:L1:0003 --file …/verify_xiyou_L1_0003.verdict.json --agent w-dafeng-2` 生成/更新的复核提交记录。"
+    },
+    {
+      "path": "loop/state/out/read_xiyou_L1_0003.json",
+      "kind": "append-only",
+      "note": "由上述 verify 命令写入：向 reviews[] 追加本复核、verifyState 置为 partial（机制自身的写入，非我手工改写被复核内容）。"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/df959d743e53206f56db2f92.docs.json": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+    "loop/state/out/read_xiyou_L1_0003.candidate.json": "f9b08b10f03353a211573c922f64a3afd1ddf87793664590fcdf863742ad5948"
+  },
+  "remaining": [
+    "语义正确性未独立复核：本次完成的是引用定位全量核验 + 反向覆盖 + 逐条事实/幻觉/误杀检查；文本的文学解释与八维评分不在本任务范围。",
+    "修掉 usableVsDiscard.mustFix 的 5 条后可转 pass：CE1 换算单位、CE2 自述口径、CE3 第二次唱喏、uncoveredDialogue 完备性（或改小其适用范围措辞）、anchorReview.quoteCount=123 的口径。均无需重做抽取内容。",
+    "本轮无法代答的跨单元问题：fs06 的蟠桃园、U10 的六弟兄是否即第三回那批魔王，须由后续单元独立取证。",
+    "候选 repairLog 自述的上一轮产物 sha256 c9411bf2… 在盘上已无实体（现为 f9b08b10…），只在 REJECTED__read_xiyou_L1_0003.json 的 evidence[0].sha256 见到同一哈希故采信，但我无法重算该文件。",
+    "既有 pass 复核 reviews[0]（q-verify）的 notes 引用大奉「张有瑞案/C12」，与西游第四回无关（该串全书 0 命中）⇒ 其结论数字与我实测一致故不推翻，但其证据链不可采信。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/verify_xiyou_L1_0003.verdict.json",
+      "loop/state/out/verify_xiyou_L1_0003.json"
+    ],
+    "note": "本复核全程只读候选与原文，未修改任何被复核文件；read 记录仅由 loop.py verify 机制追加 reviews[]。"
+  },
+  "submittedAt": "2026-10-09T05:26:45Z",
+  "wallClockSeconds": 1638,
+  "wallClockFrom": "lease.startedAt",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-09T05:26:45Z"
+  },
+  "verifyState": "pending"
+}

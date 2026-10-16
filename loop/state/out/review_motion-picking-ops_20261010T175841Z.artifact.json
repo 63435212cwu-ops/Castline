@@ -1,0 +1,184 @@
+{
+  "task": "review:motion-picking-ops:20261010T175841Z",
+  "agent": "motion-picking-ops-20261010T175841Z",
+  "createdAt": "2026-10-10T18:08:45.902968+00:00",
+  "verdict": "operational_diagnosis_complete_recovery_not_executed",
+  "summary": "监督者/守护/19 worker/8781均存活，但内容流水线近期留存16项run记录全为TRANSPORT后退避/熔断；已有1个活relay，新进程可发现，旧daemon未重载磁盘修复是强支持推断。只提出单个空闲read worker受控更替方案，未发信号。",
+  "facts": {
+    "processes": {
+      "supervisorPid": 43606,
+      "sentinelPid": 79468,
+      "workersAlive": 19,
+      "servicePid": 33896,
+      "serviceHttp": {
+        "httpStatus": 200,
+        "ok": true,
+        "build": "44913d77d8",
+        "build_disk": "44913d77d8"
+      }
+    },
+    "maintenanceRound": {
+      "command": "python3 -B -s loop/bin/sentinel.py --once --no-spawn --json",
+      "exitCode": 0,
+      "at": "2026-10-10T18:01:37Z",
+      "seconds": 30.2,
+      "reaped": [],
+      "workersAlive": 19,
+      "spawnedOrStopped": 0
+    },
+    "contentProgressSnapshot": {
+      "at": "2026-10-10T18:00:21Z",
+      "done": 494,
+      "tasks": 2375,
+      "readDone": 224,
+      "verifyDone": 217,
+      "publishedBatches": 7,
+      "note": "计数仅为该时间快照，非本任务恢复产出证明。"
+    },
+    "transport": {
+      "at": "2026-10-10T18:01:37.537228+00:00",
+      "windowSeconds": 1800,
+      "latestRunRecordsInWindow": 16,
+      "labels": {
+        "TRANSPORT": 16
+      },
+      "sampleDurationSeconds": [
+        18.3,
+        17.2,
+        17.6,
+        17.8
+      ],
+      "circuitOpen": true,
+      "circuitThreshold": "600秒窗口内至少4个不同任务基础设施失败",
+      "activeBackoffEntries": 16,
+      "accountErrorMarkers": 0,
+      "interpretation": "近期直接故障标记是TRANSPORT，不能沿旧H1文档称本轮账号422停机。"
+    },
+    "notReallyWorking": {
+      "reportedWorking": 10,
+      "reason": "worker.one_round在失败后_backoff(min(wait,300))仍持心跳，finally才release；doctor优先把新鲜租约判working。此轮working行无dsh子进程，后续18:05候选租约均自然释放；不是死租约待强制回收。",
+      "code": [
+        "loop/bin/worker.py:529",
+        "loop/bin/worker.py:544",
+        "loop/bin/doctor.py:206"
+      ]
+    },
+    "relay": {
+      "at": "2026-10-10T18:03:13.827212+00:00",
+      "candidates": 8,
+      "refused": 7,
+      "live": [
+        {
+          "pid": "81608",
+          "host": "127.0.0.1",
+          "port": 60560
+        }
+      ],
+      "freshDiscoveryEndpoint": "127.0.0.1:60560",
+      "credentialsPrinted": false
+    },
+    "codeGenerationInference": {
+      "confidence": "strong_support_not_direct_memory_proof",
+      "workerStartLocal": "2026-10-10 01:50:48/49 +08:00",
+      "workerSourceMtimeUtc": "2026-10-10T16:26:43.652837+00:00",
+      "sampleDaemonEnvironmentPort": 54448,
+      "meaning": "常驻Python不会自动重载磁盘函数；旧进程先于relay发现修复、环境指向已关端口，新导入可发现活端口，因此旧daemon执行代差是当前最具体恢复方向；尚未用新worker真实run确认。"
+    },
+    "schedule": "最近排期runState=incomplete的实际错误为session already owned by an active write handle；旧账号告警仍并列存在，不把它作为本轮TRANSPORT的已证原因。",
+    "selftest": {
+      "command": "python3 -B -s loop/bin/selftest.py",
+      "exitCode": 1,
+      "passed": 179,
+      "total": 183,
+      "failures": [
+        "12q13b/c：合成relay夹具未选中及配对断言失败；不等于真实relay全灭，真实TCP/lsof反证60560活着。",
+        "15：loop索引西游ed3dc1255ca08fbdaae30bbd落后于页面默认ee3430ef493546bbcd2e700b。",
+        "17d：本exec无DSH_HOME，自愈返回空；候选常驻w-read-2已有DSH_HOME且package/cordis两个profile文件非空。"
+      ]
+    }
+  },
+  "singleWorkerReplacementProposal": {
+    "status": "proposal_only_no_signal_sent",
+    "target": "w-read-2",
+    "observedPid": 36562,
+    "streams": [
+      "read"
+    ],
+    "snapshotAt": "2026-10-10T18:05:50.616299+00:00",
+    "observation": "无直接子进程、无租约；日志已从失败后300秒退避转全局熔断idle等待，不属于publish。",
+    "preconditions": [
+      "执行瞬间重新核对精确PID/agent/stream、全部子孙进程和租约；任一存在子agent或任务租约就延期。",
+      "既有GUARD轮在跑就等；借现有sentinel.single_instance获得本轮守护所有权并校验，避免自动守护和手工重复拉同名worker。",
+      "原进程DSH_HOME仅在内存中取回并验证既有package.json与cordis.patch.yml非空；用它设置本次维护进程的子进程环境，不改用户文件、凭据或profile。",
+      "调用现有restart_budget_ok(name)按既有每日预算记账，不绕过全局熔断和retryAfter。"
+    ],
+    "commandsSuggested": [
+      "sentinel.stop_worker(\"w-read-2\")  # 仅在上述即时检查都成立后调用；当前源码用SIGTERM置STOP_REQUESTED。",
+      "等待旧PID消失，最多先观察10秒；若未退出不升级SIGKILL、不重复拉起，保留状态再诊断。",
+      "确认sentinel.worker_alive(\"w-read-2\")为False，再用sentinel.spawn_worker(\"w-read-2\", [\"read\"])，沿既有PATH/profile发现入口只启动这一名。",
+      "退出维护段时只释放owner PID仍属本轮的GUARD锁；其余18 worker、监督者、出版进程与GATE不动。"
+    ],
+    "signalBoundary": "磁盘当前实现SIGTERM/SIGINT只设STOP_REQUESTED，_backoff每秒检查且finally释放租约；旧daemon内存版本未验证，因此仍坚持只有无子agent/无租约时才试点。",
+    "successCriteria": [
+      "新PID唯一且启动晚于worker源码修复，read流与profile有效；其他18名PID和服务/监督者不受影响。",
+      "新进程实际发现可连接relay；新真实run日志不再秒退TRANSPORT并出现实际工作增量，不能只凭活PID或心跳宣布修复。",
+      "最终新run rc=0且产物经loop submit校验通过，才可称该通道恢复产出；仍受熔断/退避时只记已换新进程、待真实run验证。",
+      "单名验证之前不扩大重启范围；不造任务、不清失败台账、不强行取消熔断来凑一次成功。"
+    ]
+  },
+  "operationsAndSideEffects": [
+    "未启动daemon、未发停止/终止信号、未用GPU、未改受保护文件/配置/凭据。",
+    "运行一次no-spawn守护，按既有实现更新GUARD/DOCTOR报告并追加历史。",
+    "selftest的reap用例回收了本任务及state审阅者已退出CLI PID的租约；未杀进程/删产物，已通知主线程并重新next领取本人任务。"
+  ],
+  "remaining": [
+    "内容流水线尚未证明恢复；单worker更替仅为待执行方案。",
+    "4项selftest失败及working误报应另设责任修复，本运维工单不修改调度代码/索引/配置。",
+    "排期活跃写句柄冲突仍在，常驻守护持续运行不代表跨会话排期已可产出。"
+  ],
+  "evidence": [
+    {
+      "path": "/tmp/castline-artifacts/motion-picking-20261010T175841Z/ops/runtime-diagnosis.json",
+      "sha256": "81abb07ba0ad75ae127252c1413c27dd7295f488757ee6211f33e484f41df9a2"
+    },
+    {
+      "path": "/tmp/castline-artifacts/motion-picking-20261010T175841Z/ops/sentinel-once.json",
+      "sha256": "ad09ad7185979157ee7d2e403a0f8a298080b4c17d10777f76921daf44059ba1"
+    },
+    {
+      "path": "/tmp/castline-artifacts/motion-picking-20261010T175841Z/ops/selftest.log",
+      "sha256": "8ff91d0e7d6a433c0a00426fbebc0e91e56e7db084a4d04aa09e9fb7ab745d36"
+    },
+    {
+      "path": "/tmp/castline-artifacts/motion-picking-20261010T175841Z/ops/relay-connectivity.json",
+      "sha256": "4a0a42a17fb92b401a4d903ff9f671e52f89b6e6faafe74b8322c5c3e64b7dbe"
+    },
+    {
+      "path": "/tmp/castline-artifacts/motion-picking-20261010T175841Z/ops/discovery-generation.json",
+      "sha256": "1daad5ae75be5de3e12fc7410e069231008df6c8510621b8e16713d337091088"
+    },
+    {
+      "path": "/tmp/castline-artifacts/motion-picking-20261010T175841Z/ops/restart-candidate-observation.json",
+      "sha256": "2c78959abe560b379959e41fd6e0486b80e2860c68848dcdd98b5cef48de1103"
+    },
+    {
+      "path": "/tmp/castline-artifacts/motion-picking-20261010T175841Z/ops/service-and-profile.json",
+      "sha256": "138044afe28524d6fe61b07ce564517b2009b9bcf1bf7e8b62c726d136d67d70"
+    }
+  ],
+  "sourceHashes": {
+    "loop/bin/worker.py": "e29de6aefa47361cad5864899f5b297da4daec1b1c7b1c1674bd3972daba52cc",
+    "loop/bin/sentinel.py": "cc216e8c83750c5acf17e96c05f9dfde90dd62f064595ed25cbf0fee0b557d6e",
+    "loop/bin/doctor.py": "ae548c3cc349f66df8080a078cc21229f53c3d3863ecff6f4581bcd75eaff2b0",
+    "loop/bin/selftest.py": "4cc9db153ae1769d220f3cbb1dcc67f70db7ff89e405a04cfbf2b44bc7805434",
+    "loop/bin/loop.py": "f16e39efb63e31849bd46b451a1d75153aa6401ebf1e8d0153af7f306b66d941",
+    "loop/state/policy.json": "eab2141df77a7156f18e3d5cefdc29c608fcd060ceeae5709ba8259ad8e21f30",
+    "loop/state/index.json": "9d951bc4c81766789b55daf0e8cff2716c0ae26da3ac385561640a4817aeb66f"
+  },
+  "changes": [
+    {
+      "path": "loop/state/out/review_motion-picking-ops_20261010T175841Z.artifact.json",
+      "kind": "append-only"
+    }
+  ]
+}

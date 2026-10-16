@@ -1,0 +1,54 @@
+{
+ "task": "merge:evolving-structural-rule:20261009",
+ "agent": "reform-lead",
+ "at": "2026-10-08T19:46:01Z",
+ "gateLock": "持有 GATE.lock（agent=reform-lead）",
+ "defect": {
+  "what": "「证据时效」误报**同一形态复发第二次**：上一轮我用『往 EVOLVING_PREFIXES 加前缀』修掉了 index.json / PUBLISH-LEDGER.json 等台账；本轮我按交接纪律更新 loop/PROJECT-STATE.md（活文档，每轮守护都该更新），expert:review-3 又因引用它被判失效。",
+  "why_it_matters": "QUALITY P0.2 明文禁止「用无关索引改动使整批阅读失效」。逐案加前缀是**永远补不完的补丁**：每漏一个文件就再误报一次，记录反复退回重做、完成数无故下降，而每次看起来都只是『数字波动』。",
+  "recurrence": "两次（03:0x 台账 / 03:4x 活文档），都是**环境自身文件被正常推进**造成的。"
+ },
+ "fix": {
+  "file": "loop/bin/loop.py",
+  "sha256": "ccc3b071fdcba0e96e3102032cd6a757f2dbf855f0f5f326688b3b80ba9dec91",
+  "rule": "改为**结构性判据**：`loop/` 下除 `loop/state/out/` 外全部属 evolving（环境自身的构造物，本就会被迭代）；`loop/state/out/` 是**审阅产物**，被改写仍判失效。scripts/ tests/ tools/ docs/ 保持 evolving。",
+  "whyThisShape": "不再枚举『哪些文件会变』（那需要预知未来），而是问『这是环境自身还是真产物』——一条判据覆盖全部现存与将来新增的环境文件。",
+  "reverseBoundary": "产品路径（data/、js/、css/、serve.py、narrative.py、index.html）**仍然**判失效 —— 绝不纳入 evolving，否则就成了用无关改动掩盖产物被改坏。",
+  "selftest": "12k2b 扩展为含 loop/PROJECT-STATE.md 与 loop/README.md；12k2c 扩展为 out/、data/、serve.py 三向都必须仍判失效。"
+ },
+ "verification": {
+  "boundaryCases": "13 个真实路径逐条核对（loop/ 内 7 个 evolving=True；out/、data/、js/、serve.py 4 类 False）→ mismatches 0",
+  "staleBefore": "2（expert:review-3 误报 + read:xiyou:L0:0022 真失效）",
+  "staleAfter": "1（只剩 read:xiyou:L0:0022）",
+  "genuineStillDetected": "read:xiyou:L0_0022 的候选文件确被重写 ⇒ 仍判失效，未被 evolving 掩盖",
+  "productDriftStillFails": "伪造 data/cache/9b676d70… 的哈希 ⇒ evidence_stale 仍返回 True",
+  "selftest": "116/116",
+  "productAccept": "132/132"
+ },
+ "assertions": [
+  {
+   "text": "环境自身文件不再让记录失效（含活文档）",
+   "command": "12k2b PASS；stale 2 → 1",
+   "result": "pass"
+  },
+  {
+   "text": "真产物漂移仍被判失效（两个方向都钉住）",
+   "command": "12k2c PASS；read:xiyou:L0:0022 仍 stale",
+   "result": "pass"
+  },
+  {
+   "text": "判据不再依赖枚举",
+   "command": "is_evolving 用 loop/ 前缀 + out/ 例外",
+   "result": "pass"
+  },
+  {
+   "text": "门禁全绿",
+   "command": "selftest 116/116；accept 132/132",
+   "result": "pass"
+  }
+ ],
+ "remaining": [
+  "read:xiyou:L0:0022 是**真实**失效（候选被重写），应由该流 worker 重做，不由我代改。",
+  "P3/P4/P5 未完成。"
+ ]
+}

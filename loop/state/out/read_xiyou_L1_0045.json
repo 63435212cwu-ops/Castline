@@ -1,0 +1,385 @@
+{
+  "task": "read:xiyou:L1:0045",
+  "agent": "w-read-2",
+  "status": "done",
+  "summary": "精读《西游记》第四十五回「三清观大圣留名　车迟国猴王显法」（docs[0].text codepoint [323712,330871)，7159 字）。产出 241 个引文节点的候选：7 条任务五元组（每栏自带 quotes；同一任务内**跨栏共用引文 0 条**；2 条 cost=null 且各自写明为何不补）、9 条因果边（各带方向+触发+机制）与 6 条被拒边（逐条说明为何不连边）、8 条状态变化（前值→后值+事件锚点）、5 条知识差、7 条伏笔（6 回收/部分回收，2 条显式 unresolved）、18 条世界设定（rule 5 / place 6 / item 7；place 分 arrived 5·mentioned 1，item 四态多选，rule 分 executed 3·declared 2·misunderstood 1）、2 条主题读法（perspective+support+counter 三件齐全）、11 条说法台账、20 条人物发言、10 条文本校勘、3 条跨单元说明、13 条 unknowns、6 条 openThreads、9 条 selfCritique。覆盖度 0.6192（未覆盖片段逐段登记，共 31 段 ≥25 codepoint）。本轮回改了四类**真实错误**（均由构建期机器校验拦下，见 assertions）。",
+  "evidence": [
+    {
+      "path": "loop/state/out/read_xiyou_L1_0045.candidate.json",
+      "sha256": "7ad2988beee7f7c17c975364fbe157260255c188f2a70b97b5e9b452184463ee",
+      "kind": "candidate",
+      "bytes": 224496
+    }
+  ],
+  "assertions": [
+    {
+      "text": "源哈希三方一致：`shasum -a 256 data/cache/a065244455cfb2221bcda94a.docs.json` = c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2，与 task.sourceHash、候选 source.sourceHash、241 个引文节点各自的 sourceHash 全部相同（逐节点比对 bad=0）。构建脚本在开工前先核对整个 docs.json 的 sha256，不符即拒绝运行。",
+      "result": "pass"
+    },
+    {
+      "text": "区间口径自检（三条，可用候选 reproduce.cmd_slice 复现）：`len(json.load(open('data/cache/a065244455cfb2221bcda94a.docs.json'))[0]['text'][323712:330871])` == 7159 == task 声明；`text[323712:323733]` == '第四十五回　三清观大圣留名　车迟国猴王显法'（切片以本单元标题开头）；`text[330871:330875]` == '第四十六回'（区间终点正是下一回起点）。切片 UTF-8 字节 sha256 = 92073f28e637ab8ae50a5635adf72a0ef39182597873871f34be3b093d5cfcce，另起字段 segmentSha256，未覆盖 sourceHash。",
+      "result": "pass"
+    },
+    {
+      "text": "241 个引文节点**机械全量**核验（独立脚本 /tmp/cl-r2/audit.py，不复用构建逻辑，只读 docs.json 与候选成品）：T[start:end]==quote 逐字成立、全部落在 [323712,330871) 内、T.find(quote)==start（全书首次出现即本处）、sourceHash 字段一致、wholeTextOccurrences 与 T.count(quote) 一致。实测输出：`nodes 241  mismatches {'verbatim': 0, 'range': 0, 'first': 0, 'hash': 0, 'occ': 0, 'empty': 0, 'nonstr': 0}`；241 条引文**全部全书唯一**（unique=241/241）。同一命令（候选 reproduce.cmd_quotes）可复算 `241 True`。",
+      "result": "pass"
+    },
+    {
+      "text": "五元组分栏独立性（同一独立脚本复核）：7 条任务 × 5 栏，**同一任务内跨栏共用同一引文的条数 = 0**（另加「同一切片被两栏引用」的检查，同样 0）。实现方式不是事后过滤：构建器 q() 只接受**在切片内唯一**的前缀锚，任何手打错字或歧义锚串都会进 FAILED 并阻止落盘。",
+      "result": "pass"
+    },
+    {
+      "text": "**构建期拦下四类真实错误**（本轮的实质修正，非事后自查）：① 锚串失败 2 条 —— RE3 的「行者厉声道：『陛下，龙神俱在家……』」实际原文无「行者厉声道：」这一前缀（该句前是叙述转折），CU1 的「我等被他蒙蔽了……偷吃了御赐供养。」落在**两个段落**里，跨段落切片不成句；② null 栏位缺 Note 2 条 —— T5/T7 的 cost 原先写成 `{\"text\": null, ...}` 而不是裸 `null` + 同级 `costNote`，与 metrics 的 nullFields 口径不一致；③ 伏笔状态与数据矛盾 1 条 —— F4 有 payoff 却标 unresolved；④ **note 里的交叉引用失效**（最严重的一类）：改稿后仍指向已重编的编号（T2.summary 不存在、「见 T6/T7」指错、SC3 自称「三栏里都出现欲诛四众」而数据里只在 1 条任务出现）。为此在构建器里新增**引用完整性校验**：把所有 note 里的 T/ST/WS/F/TN/CU/OT/SC/CE/RE/CL/SP/KD/TH 编号抽出，逐个核对是否真实存在；该检查已把上述失效引用全部拦下后才落盘。",
+      "result": "pass"
+    },
+    {
+      "text": "反向验证（不是只查已写项）：用独立脚本把区间按句切开，逐句判断它有没有被任何引文节点覆盖，列出**完全未覆盖**的句子（241 节点版：完全未覆盖句 64 条，其中含对话的 34 条）。据此补入了 9 条先前漏掉的原文事实：行者「我与你都上坛祈雨，知雨是你的，是我的？」、「那晚辈小仙，不须拜伏……」、「不是打你们，但看我这棍子往上一指」澄清、五凤楼下听事官策马冒雨来报「圣僧，雨彀了」、行者对龙王的「凭你怎么处治了罢」、国王「即去登坛，寡人还在此候雨」、八戒「他害你了……一把火了帐！」、文武「就是我国师求雨虽灵，若要晴，细雨儿还下半日」、坛场「每一桩边立两个道士各执铁锤伺候着打桩」；并据此新增 1 条因果边（CE9 提议验法→国王定规则）、1 条说法台账、8 条人物发言、1 条文本校勘、2 条 unknowns。",
+      "result": "pass"
+    },
+    {
+      "text": "空值已标注：2 条 null 栏位（T5_xingzhe_jieduo_zhushen.cost、T7_guowang_dusheng.cost）**全部**带同级 <栏位>Note 写明为何不补。T5 的 cost 写明「拔毫毛变假身、真身出元神是手段而非代价，毫毛事后收回，原文写明无损」；T7 的 cost 写明「『寡人改日醮谢』是未执行的口头承诺，按提示词口径未执行的承诺不算已执行的代价」。空值一律不填 0/0.5/『未提及』以外的编造值。",
+      "result": "pass"
+    },
+    {
+      "text": "不把说法当事实：11 条 claimLedger 逐条标注说话人与真假两半，其中最易误读的三条做了显式处理 —— CL2「今日龙神都不在家」（被行者当场反驳且龙王随即现身）、CL5「想是别方召请……所以就雨」（原文自带「想是」二字，明标猜测）、CL6「我僧乃东土之人，乍来此处，街道尚且不通」（**诈辩**：他正是昨夜闯进观中的人，同一区间内叙述与他这句直接冲突）。这三条都不进任何 result/states 的 after 值。",
+      "result": "pass"
+    },
+    {
+      "text": "结束≠成功：区间以「毕竟不知怎么除邪，且听下回分解」收束，且国王「正用御宝时」被道士阻住 —— 候选显式登记 OT1（关文未换成）、OT2/OT6（斗法未了、未出车迟国），并在 T3.result / T7.result 的 note 里写明「不因为区间结束就写 result=成功」；RE2 专门记录「雨下了→关文换成」这条被拒绝的边。",
+      "result": "pass"
+    },
+    {
+      "text": "语义核验未声明完成：候选 semanticReview.performed=false，note 写明「只做了引文定位核验与逐条人工比对，未做也不声称任何 semanticReview 完成；语义正确性由独立复核者判定」。定位正确没有被当成语义已核验。",
+      "result": "pass"
+    },
+    {
+      "text": "未越界引用：crossUnitContext 3 条全部只用**本区间内**的转述句与收束句说明前情与后续（道士告发词、回末套语、龙王口中「那厮」），明确写明「上一回/下一回原文未读、不引、不猜、不补」；F4 与 OT3 对区间外的旧妖怪发落显式标 unresolved。",
+      "result": "pass"
+    },
+    {
+      "text": "内容分区齐备：tasks / causeEdges / states / foreshadows / worldSettings / themeReadings 六个顶层分区全部产出（另附 rejectedEdges、knowledgeDiffs、claimLedger、speakerStatements、textualNotes、crossUnitContext、unknowns、openThreads、selfCritique、coverage、reverseCoverage、metrics、reproduce）。worldSettings 逐条检查 kind 专用字段：rule 必带 institution（executed 3 / declared 2 / misunderstood 1），place 必带 placeState（arrived 5 / mentioned 1），item 必带 itemStates 多选（hold/transfer/use/lose，无重复），且三类不混用字段。",
+      "result": "pass"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/read_xiyou_L1_0045.candidate.json",
+      "kind": "append-only"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/a065244455cfb2221bcda94a.docs.json": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2"
+  },
+  "remaining": [
+    "未做语义核验（候选 semanticReview.performed=false）：本候选是原文精读的**候选**，语义正确性由独立复核者判。",
+    "未读第四十四回／第四十六回原文补写前因后果；crossUnitContext 只用本区间内的转述句与收束句。",
+    "四篇韵文（风、云、雷、雨）未逐句纳入引文节点，只在 reverseCoverage 登记为未覆盖片段（景语不承载任务五元组，不拿它充当证据）。",
+    "「倥着脸」的「倥」（全书仅 1 次）与「有些酣郸之味」的「郸」（全书仅 1 次）两个孤例字未做版本校勘，已登记为 unknowns U1/U2，未据此推任何情节。",
+    "「打桩」陈设（每桩边两个道士各执铁锤伺候着）在本区间内从未执行，已登记 unknowns U9b，未写成已发生动作。",
+    "行者号令「多打死几个贪赃坏法之官、忤逆不孝之子」是否执行，区间内无下文，已登记 unknowns U9c，未写入任何因果或状态。",
+    "龙王口中「那厮」的旧妖怪发落属区间外，F4 标 partial（本区间只回收「龙王肯助力」那一半）/OT3 标 unresolved。",
+    "本候选未对任何跨单元因果下结论；241 个引文节点全部落在 [323712,330871) 内。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/read_xiyou_L1_0045.candidate.json"
+    ]
+  },
+  "submittedAt": "2026-10-10T20:00:43Z",
+  "wallClockSeconds": 2144,
+  "wallClockFrom": "lease.startedAt",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-10T20:00:43Z"
+  },
+  "verifyState": "partial",
+  "reviews": [
+    {
+      "reviewer": "w-sanguo-1",
+      "at": "2026-10-11T12:49:39Z",
+      "verdict": "partial",
+      "notes": "总体判断：这是一份**引文层近乎无可挑剔、语义层大体保守**的候选 —— 241 条引文全量逐字命中且偏移零误差，全书出现次数逐条相符，覆盖率数字可精确复算，metrics 内部自洽，unknowns/rejectedEdges/selfCritique 的质量高于本线平均水平。判 partial 而非 pass，只因 4 处可证伪的实质缺陷（CE1–CE4，CE1 最重）与 6 条未覆盖事实（RC1–RC6），其中最该修的是 T4.result 的全称断言：它把「召来了但被截夺」写成「召不来」，恰好抹掉本段最重要的机制，并与候选自己的 ST6/WS1/KD4 互相矛盾。判 partial 而非 fail：不存在编造，引文骨架可整段复用，被点名条目只需局部修正，符合「哪些可用、哪些须丢弃或降级」的分层要求。方法论上我自己的两点自查：(1) 我的第一版反向验证只比对『候选是否引过某句』，那会把「已用陈述句概括、未逐字引」误判成遗漏 —— 已改为对候选全文做 8 字窗口匹配，只有整句在候选里完全无对应才算遗漏（62 句，其中绝大多数是韵文）；(2) 我曾打算把「收晴链缺失」直接写成 fail 级证据，但复查发现 TN6 已意识到该因果并指向 T7.action —— 这是**交叉引用断了**而非完全无知，故降为 reverseCheck + mustFix。",
+      "counterExamples": [
+        {
+          "id": "CE1_T4_result_contradicts_source_and_itself",
+          "claim": "T4_huli_dengtan_qiyu.result.text 结尾断言：「他没能召来任何一样。」（claimStatus=explicit）",
+          "why": "与原文相反，且与候选自己的 ST6_zhongshen_tingming.before / KD4 相反：原文四次令牌**每一次都召来了对应的神将**——一声风起、二声云满、三声邓天君领雷公电母到当空、四声四海龙王一齐拥至。神将到场后才被行者喝住改令。候选 ST6.before 自己写「风、云先已应了道士的一声、二声令牌（「果然就刮风」）」，邓天君又说「那道士五雷法是个真的……我等奉旨前来」，WS1 也标 executed。所以「没能召来任何一样」把「召来了但被截夺」错写成「召不来」，正好抹掉本段最关键的机制（CE5 的立论基础）。该栏必须改为『召来的神将全被行者截住、改听棍号』；claimStatus=explicit 也要降级。",
+          "quote": {
+            "quote": "再一令牌打将下去，只见那南天门里，邓天君领着雷公电母到当空",
+            "start": 328082,
+            "end": 328111,
+            "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+            "offsetUnit": "codepoint",
+            "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+            "match": "exact",
+            "wholeTextOccurrences": 1,
+            "firstOccurrenceAt": 328082,
+            "inRange": true
+          },
+          "supportingQuotes": [
+            {
+              "quote": "那上面乒的一声令牌响，只见那半空里，悠悠的风色飘来",
+              "start": 327564,
+              "end": 327589,
+              "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+              "offsetUnit": "codepoint",
+              "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+              "match": "exact",
+              "wholeTextOccurrences": 1,
+              "firstOccurrenceAt": 327564,
+              "inRange": true
+            },
+            {
+              "quote": "令牌响了一下，果然就刮风",
+              "start": 327619,
+              "end": 327631,
+              "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+              "offsetUnit": "codepoint",
+              "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+              "match": "exact",
+              "wholeTextOccurrences": 1,
+              "firstOccurrenceAt": 327619,
+              "inRange": true
+            },
+            {
+              "quote": "扑的又打了一下，只见那空中云雾遮满",
+              "start": 327917,
+              "end": 327934,
+              "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+              "offsetUnit": "codepoint",
+              "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+              "match": "exact",
+              "wholeTextOccurrences": 1,
+              "firstOccurrenceAt": 327917,
+              "inRange": true
+            },
+            {
+              "quote": "又添香、烧符、念咒、打下令牌。半空中，又有四海龙王，一齐拥至",
+              "start": 328261,
+              "end": 328291,
+              "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+              "offsetUnit": "codepoint",
+              "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+              "match": "exact",
+              "wholeTextOccurrences": 1,
+              "firstOccurrenceAt": 328261,
+              "inRange": true
+            }
+          ]
+        },
+        {
+          "id": "CE2_SP11b_weiyi_self_contradicted_plus_dangling_ref",
+          "claim": "SP11b.note：「沙僧在本区间**唯一**的一句台词，是催促行者应付第二番拜祷。T4_shaseng 的 obstacle 栏就建立在这一句上。」",
+          "why": "同一份候选的 SP11c 就登记了沙僧的第二句台词（「不知一肚子筋节，还不曾拿出来哩！」），故「唯一」是自相矛盾的量化断言；且所引任务 id `T4_shaseng` 在 tasks[] 里**不存在**（实际 id 为 T4_huli_dengtan_qiyu），是悬空内部引用。应删「唯一」并改指真实 id。",
+          "quote": {
+            "quote": "沙僧听见，暗笑道：“不知一肚子筋节，还不曾拿出来哩！”",
+            "start": 327031,
+            "end": 327058,
+            "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+            "offsetUnit": "codepoint",
+            "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+            "match": "exact",
+            "wholeTextOccurrences": 1,
+            "firstOccurrenceAt": 327031,
+            "inRange": true
+          },
+          "supportingQuotes": [
+            {
+              "quote": "沙僧捻着行者，默默的道：“哥呀，要得紧，又来祷告了。”",
+              "start": 324454,
+              "end": 324481,
+              "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+              "offsetUnit": "codepoint",
+              "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+              "match": "exact",
+              "wholeTextOccurrences": 1,
+              "firstOccurrenceAt": 324454,
+              "inRange": true
+            }
+          ]
+        },
+        {
+          "id": "CE3_TN3_false_numeric_claim",
+          "claim": "TN3.note：「一壁厢」全书出现 40 次以上（`T.count('一壁厢')>=40`）。",
+          "why": "可复算的假断言：实测 T.count('一壁厢') == 38（<40）。候选把它写成带反引号的自检式，读者会当已核验的数字。按原文实际次数改写即可（或用「常见」这类定性说法）。区间内 2 次本身正确。",
+          "quote": {
+            "quote": "教：“徒弟们动乐诵经！一壁厢取法衣来，等我步罡拜祷。”",
+            "start": 324001,
+            "end": 324028,
+            "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+            "offsetUnit": "codepoint",
+            "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+            "match": "exact",
+            "wholeTextOccurrences": 1,
+            "firstOccurrenceAt": 324001,
+            "inRange": true
+          },
+          "computed": {
+            "T_count_yi_bixiang": 38,
+            "slice_count": 2,
+            "claimed_min": 40
+          }
+        },
+        {
+          "id": "CE4_unitHeadCheck_field_contradicts_its_own_note",
+          "claim": "unitHeadCheck.nextChapterEqualsEnd = false，而同结构 note 写「区间终点正是『第四十六回』起点」。",
+          "why": "自相矛盾且与原文不符：实测 T.find('第四十六') == 330871 == 区间终点 E，T[330871:330874] == '第四十六'。字段值与 note、与原文三者不一致。（存疑部分：兄弟候选 0043 有同形 False/find==end 的现象，故该字段的预期语义在本仓库内不统一 —— 这一条只作低置信缺陷登记，不作为判 partial 的主因。）",
+          "quote": {
+            "quote": "五凤楼下听事官策马冒雨来报：“圣僧，雨彀了。”行者闻言，将金箍棒往上又一指，只见霎时间，雷收风息，雨散云收。",
+            "start": 330026,
+            "end": 330080,
+            "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+            "offsetUnit": "codepoint",
+            "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+            "match": "exact",
+            "wholeTextOccurrences": 1,
+            "firstOccurrenceAt": 330026,
+            "inRange": true
+          },
+          "computed": {
+            "field": false,
+            "note_says": true,
+            "T_find_dishiliu": 330871,
+            "range_end": 330871
+          }
+        }
+      ],
+      "reverseChecks": [
+        {
+          "id": "RC1_shouqing_causal_chain_missing",
+          "found": "收晴的完整因果链在原文里是明写的三步（国王传旨「雨彀了」→ 五凤楼下听事官策马冒雨来报「圣僧，雨彀了」→ 行者闻言将金箍棒往上又一指 → 雷收风息、雨散云收），候选全程未引、也没有为它建因果边；「听事官」「策马冒雨」在整份候选里一次都不出现。更矛盾的是候选自己的 TN6 说该句「可作为收晴的触发（见 T7_guowang_dusheng.action）」，而 T7.action 的 quotes[] 里既无「彀了」也无「传旨」——交叉引用指向了一个不含该证据的字段。",
+          "quote": {
+            "quote": "五凤楼下听事官策马冒雨来报：“圣僧，雨彀了。”行者闻言，将金箍棒往上又一指，只见霎时间，雷收风息，雨散云收。",
+            "start": 330026,
+            "end": 330080,
+            "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+            "offsetUnit": "codepoint",
+            "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+            "match": "exact",
+            "wholeTextOccurrences": 1,
+            "firstOccurrenceAt": 330026,
+            "inRange": true
+          },
+          "alsoSee": {
+            "quote": "那国王传旨道：“雨彀了！雨彀了！十分再多，又渰坏了禾苗，反为不美。”",
+            "start": 329992,
+            "end": 330026,
+            "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+            "offsetUnit": "codepoint",
+            "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+            "match": "exact",
+            "wholeTextOccurrences": 1,
+            "firstOccurrenceAt": 329992,
+            "inRange": true
+          }
+        },
+        {
+          "id": "RC2_first_prayer_misclassified_as_scenery",
+          "found": "候选 coverage.note 把未覆盖片段统称为「四篇韵文（风、云、雷、雨）与部分过渡叙述……不拿景语充当证据」，但最大的未覆盖段之一（324065–324198，133 codepoint）是虎力大仙的**第一番祝祷词**，不是景语：它承载 T1 的目标原话（「望赐些金丹圣水，进与朝廷，寿比南山」）与 WS5 的政策自陈（「灭僧鄙俚，敬道光辉」）。把它归入「景语」是对未覆盖内容的误描述。",
+          "quote": {
+            "quote": "灭僧鄙俚，敬道光辉",
+            "start": 324119,
+            "end": 324128,
+            "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+            "offsetUnit": "codepoint",
+            "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+            "match": "exact",
+            "wholeTextOccurrences": 1,
+            "firstOccurrenceAt": 324119,
+            "inRange": true
+          },
+          "alsoSee": {
+            "quote": "望赐些金丹圣水，进与朝廷，寿比南山",
+            "start": 324179,
+            "end": 324196,
+            "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+            "offsetUnit": "codepoint",
+            "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+            "match": "exact",
+            "wholeTextOccurrences": 1,
+            "firstOccurrenceAt": 324179,
+            "inRange": true
+          }
+        },
+        {
+          "id": "RC3_wuxingzhe_decision_line_missing",
+          "found": "行者答应给水的决定句「与他些罢。」（324481–324492）未被任何引文覆盖 —— 而它正是 CE2 所述「以尿充圣水」这一决策的**直接触发句**（沙僧催促 → 行者说「与他些罢」→ 八戒问「那里有得？」→ 行者「你只看着我」）。候选引了后两句，独缺最先表态的那一句。",
+          "quote": {
+            "quote": "行者道：“与他些罢。”",
+            "start": 324481,
+            "end": 324492,
+            "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+            "offsetUnit": "codepoint",
+            "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+            "match": "exact",
+            "wholeTextOccurrences": 1,
+            "firstOccurrenceAt": 324481,
+            "inRange": true
+          }
+        },
+        {
+          "id": "RC4_F3_payoff_thin_execution_evidence_false_killed",
+          "found": "F3 payoff 声称五指令「由行者重建并真的执行」，但其唯一 quote 是**宣言**（「棍子第五指，就要大日晴天，却莫违误。」328726–328746），五指令的实际执行叙述三处（329478 风、329614 雷、329834 雨，句式均为「把金箍棒钻一钻，望空又一指，只见那……」）在候选里一处未被引用；它们落在候选登记的最大未覆盖段（329244–329956，712 codepoint）内，被 coverage.note 一句「韵文/景语」整体排除。这是**误杀**：被排除的是叙述句（执行动作+结果），不是景语 —— 只留下宣言，payoff 的证据强度就低于 selfCritique 所声称的水平。",
+          "quote": {
+            "quote": "行者却又把铁棒望上一指，只见那：龙施号令，雨漫乾坤。",
+            "start": 329834,
+            "end": 329860,
+            "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+            "offsetUnit": "codepoint",
+            "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+            "match": "exact",
+            "wholeTextOccurrences": 1,
+            "firstOccurrenceAt": 329834,
+            "inRange": true
+          },
+          "alsoSee": {
+            "quote": "正是那狂风大作，孙行者又显神通，把金箍棒钻一钻，望空又一指，只见那：推云童子，布雾郎君。",
+            "start": 329478,
+            "end": 329522,
+            "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+            "offsetUnit": "codepoint",
+            "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+            "match": "exact",
+            "wholeTextOccurrences": 1,
+            "firstOccurrenceAt": 329478,
+            "inRange": true
+          }
+        },
+        {
+          "id": "RC5_arrival_narration_not_quoted_for_CE5_ST6",
+          "found": "CE5/ST6 的立论是「道士的合法召请真的走通程序」，但候选只引了邓天君的**台词**（「那道士五雷法是个真的……我等奉旨前来」），没有引神将**到场**的叙述句（「再一令牌打将下去，只见那南天门里，邓天君领着雷公电母到当空」328082–328111）。台词单独作证会落回「把说法当事实」的形态；到场叙述才是把它变成叙述事实的那一条。",
+          "quote": {
+            "quote": "再一令牌打将下去，只见那南天门里，邓天君领着雷公电母到当空",
+            "start": 328082,
+            "end": 328111,
+            "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+            "offsetUnit": "codepoint",
+            "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+            "match": "exact",
+            "wholeTextOccurrences": 1,
+            "firstOccurrenceAt": 328082,
+            "inRange": true
+          }
+        },
+        {
+          "id": "RC6_guowang_acceptance_and_official_report_missing",
+          "found": "国王接受行者提议前的两句过渡未被覆盖：「即去登坛，寡人还在此候雨。」（328963）与「那官去回奏不题。」（329165）。前者是国王把「静功祈祷」当场的处置令（行者随即去扯唐僧上台），后者是关文线上唯一一处「回奏」的收束，二者都是行动链上的节点而非景语。",
+          "quote": {
+            "quote": "那官去回奏不题。",
+            "start": 329165,
+            "end": 329173,
+            "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+            "offsetUnit": "codepoint",
+            "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+            "match": "exact",
+            "wholeTextOccurrences": 1,
+            "firstOccurrenceAt": 329165,
+            "inRange": true
+          }
+        }
+      ]
+    }
+  ]
+}

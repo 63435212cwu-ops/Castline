@@ -1,0 +1,187 @@
+{
+  "agent": "w-xiyou-1",
+  "role": "READER",
+  "task": "read:sanguo:L0:0108",
+  "kind": "duplicate-claim investigation (no submit, deliberately)",
+  "outcome": "NOT SUBMITTED —— 本任务在我领取前 99 秒已由 w-xiyou-0 提交并通过机器校验，且证据仍新鲜。若我按常规 submit，cmd_submit 会**整文件覆盖** loop/state/out/read_sanguo_L0_0108.json，把候选的著作权记到我名下而候选并非我写；更坏的是「候选已改、提交未成功」的中间态会让旧记录的证据哈希失效，任务随即掉出 done_ids() 并被反复重领。所以本轮的产出是**独立复核 + 取证**，不是第二份候选。",
+  "raceForensics": {
+    "contendedPath": "loop/state/out/read_sanguo_L0_0108.candidate.json",
+    "contendedPathSha256": "437b1e76638c01fba9b884937d70863fcc2114d9fb7d8a6785561df78d6cc45b",
+    "contendedPathBytes": 224286,
+    "contendedPathMTimeLocal": "2026-10-15 06:52:38",
+    "contendedPathAuthor": "w-xiyou-0",
+    "contendedRecordPath": "loop/state/out/read_sanguo_L0_0108.json",
+    "contendedRecordSha256": "2a9b3bc3b1cb0565a375099c08879bf653b30eb6e7c6913d274311b1719e1bf2",
+    "priorSubmitAt": "2026-10-14T22:53:29Z",
+    "myLeaseStartedAt": "2026-10-14T22:55:08Z",
+    "deltaSeconds": 99,
+    "priorRecordStillValid": {
+      "validated": true,
+      "evidence_stale": [],
+      "in_done_ids": true,
+      "verifyState": "pending",
+      "verifyTaskNotYetRun": "loop/state/out/verify_sanguo_L0_0108.verdict.json 不存在，也无 verify:sanguo:L0:0108 租约（截至 2026-10-14T23:09:32Z）"
+    },
+    "myWorkerProcess": "pid 43463 (worker.py --agent w-xiyou-1 --stream read)；其 dsh 子进程 pid 86643 即本 agent 的 harness（本 agent 由该进程派生，故本任务确为本 worker 的被派任务，不是我自行挑活）",
+    "otherAgentProcess": "w-xiyou-0 = worker pid 43457，仍在运行，但**不持有任何租约**（其 0108 租约在提交成功时已由 cmd_submit → cmd_release 正常释放）",
+    "codePaths": [
+      "loop/bin/worker.py:519 one_round(): task, why = loopmod.pick(tasks, agent, streams)",
+      "loop/bin/worker.py:525 if loopmod.claim(task, agent) != 0: return 'lease-lost'",
+      "loop/bin/loop.py:653 pick(): done = done_ids()  ← **快照**",
+      "loop/bin/loop.py:654 pick(): leases = active_leases()  ← **快照**",
+      "loop/bin/loop.py:663 pick(): if tid in done or tid in leases: continue",
+      "loop/bin/loop.py:715-744 claim(): 只判 lease_alive(existing)，不复查 done"
+    ],
+    "rootCause": "与 read_dafeng_L3_0267、verify_dafeng_L1_0229、read_sanguo_L0_0104 记录的是**同一个 TOCTOU**：worker.one_round 先 pick()（内含 done_ids()/active_leases() 快照）再 claim()；claim() 只查租约目录、**不重新检查 done**。两者之间是长窗口。",
+    "windowMeasured": {
+      "method": "在同一共享树上实跑 loop.py 的 done_ids()（本机，996 条规范记录）",
+      "done_ids_seconds": [
+        62.2,
+        62.0
+      ],
+      "record_files": 996,
+      "done_ids_result_size": 978,
+      "implication": "课程窗口实测 ~62 秒，远大于本轮观察到的 99 秒派工间隔量级；pick 的快照与实际占用之间足以插入一次完整提交。"
+    },
+    "whyThisIsNotAWitnessOfBadFaith": "本任务对 w-xiyou-1 而言在 pick() 时刻是**合法可领**的（w-xiyou-0 的租约已释放、done 快照在提交前生成）；我并未挑活，也未改校验。这是调度层的 TOCTOU，不是任何一方的违规。"
+  },
+  "whyNotOverwrite": [
+    "loop/bin/loop.py:1018 cmd_submit() 对 OUT/output_name(tid) 是**整文件覆盖**（write_json_atomic），不合并既有内容；提交会抹掉 w-xiyou-0 的整条记录（含它的 summary/assertions/remaining/自曝块与来源旁注），且把候选的著作权记到我名下 —— 而候选不是我写的。",
+    "loop/bin/loop.py:390 is_evolving() 对 'loop/state/out/' 返回 False（MUTABLE_EXCEPTIONS）——审阅产物被改写就是真问题，不享 evolving 豁免。",
+    "**精确表述（我先前写得过满，此处更正）**：若我改写候选并**提交成功**，记录里的证据哈希会被一并更新为新候选的哈希，两者仍自洽 ⇒ 任务仍是 done（但内容换成我的）。真正会「掉出 done_ids()」的是**中间态**：候选已改、提交未成功（被拒/超时/进程中途死掉）的那段窗口，此时旧记录的证据哈希对不上新候选。实测（可复现）：把记录的候选证据哈希改成任意别的值后，evidence_stale(rec) 立刻返回 [{'path': 'loop/state/out/read_sanguo_L0_0108.candidate.json', 'why': 'hash-changed'}]，而 done_ids() 要求 `validated(rec) and not evidence_stale(rec)` ⇒ 任务被剔除、退化成没做完并被反复重领。",
+    "AGENTS.md：同一文件只设一个写入负责人；不得覆盖其他会话/agent 的已提交工作。",
+    "本任务 writes 指定的唯一路径，正是那条已通过记录的 evidence —— 覆写它等于改写别人已交付的产物。"
+  ],
+  "independentAudit": {
+    "script": "loop/state/out/read_sanguo_L0_0108.w-xiyou-1.dupclaim/audit_dupclaim.py",
+    "report": "loop/state/out/read_sanguo_L0_0108.w-xiyou-1.dupclaim/audit_dupclaim_report.json",
+    "independence": "不 import 产出方的 build_0108.py / content_0108.py；只读候选 JSON 与 docs.json，其余在本脚本内重算。",
+    "result": {
+      "quoteObjects": 233,
+      "textSliceEqualsQuote": 233,
+      "badEquality": 0,
+      "badRange": 0,
+      "badSourceHash": 0,
+      "badLength": 0,
+      "badGlobalOccurrences": 0,
+      "uniqueWithinSlice": "233/233",
+      "exactIntervalOverlapsAcrossColumns": 0,
+      "sharedSentenceUnitsAcrossColumns": 0,
+      "nullColumns": 14,
+      "nullColumnsMissingOrPlaceholderNote": 0,
+      "worldSettings": 28,
+      "worldSettingsViolations": 0,
+      "themeReadings": 2,
+      "themeReadingsMissingCounterOrSupport": 0,
+      "declaredCountMismatches": 0,
+      "basisValueViolations": 0,
+      "zeroCoveredParagraphs": 1
+    },
+    "quoteLayerVerdict": "PASS —— 引文定位层无可复现缺陷（逐字往返、区间、哈希、长度、重复次数全部自洽）。",
+    "semanticVerdict": "NOT PERFORMED —— 本审计**只**覆盖定位/结构层。引文定位正确 ≠ 语义已核验；本文件不主张 semanticReview 完成。"
+  },
+  "myOwnFindings": [
+    {
+      "id": "MF01",
+      "severity": "info",
+      "what": "唯一未被引文覆盖的自然段是 paraIndex 15（@557093『------------------』分隔行），属文本外壳，非原文叙事内容。",
+      "verdict": "不是缺陷 —— 被审候选已把该外壳连同版权行显式登记在 notModeled/NM03，理由充分（该串在全文 docs.json 出现 118 次）。"
+    },
+    {
+      "id": "MF02",
+      "severity": "info",
+      "what": "233 条引文中有 1 条在**全文**不唯一：页脚样板『枫林晚 整理校对后一页前一页回目录回首页…』（@557116，全文 118 次）。",
+      "verdict": "不是缺陷 —— 该条位于 notModeled，声明的 globalOccurrences=118 与 text.count() 一致，且**切片内**唯一命中。构建器如实登记了全文重复次数，没有把它伪装成唯一引用。"
+    },
+    {
+      "id": "MF03",
+      "severity": "info",
+      "what": "任务 JSON 的 sourceHash 字段（2988ce6e…）与本 prompt 正文声明的（8ab7298a…）不一致。",
+      "verdict": "已被 w-xiyou-0 在候选 source.taskJsonDeclaredHashNote 中主动登记。**我独立复算确认**：2988ce6e… = data/cache/f0b45e85aac6c95e584075a2.docs.json 与 data/cache/152e2a6eed94f1075e7e7070.docs.json 的 sha256（两者同哈希）；且这两份的 docs[0].text 与 fe42d01f3826fe8096f86614.docs.json 的**逐字符相同**（len 均 607191，a==c、b==c、切片相同）。故不影响任何引文定位。这是对既有结论的**独立旁证**，不是新缺陷。"
+    },
+    {
+      "id": "MF04",
+      "severity": "structural",
+      "what": "cmd_submit 没有「该任务已完成」闸门（函数体内不引用 done_ids/validated/evidence_stale，实测皆为 False）。我用一次真实提交实证了这一点。",
+      "verdict": "**真缺陷**（属 loop/bin/ 受保护路径，我不改）。详见 nearMissDisclosure。它是本形态第 4 次复发却始终没造成事故的**真正原因**：不是代码在防，是 agent 自觉在防。"
+    },
+    {
+      "id": "MF05",
+      "severity": "self-correction",
+      "what": "我的反向探针第一版把 王韬／李丰／王肃 报成『在切片里但从未被引用』。",
+      "verdict": "**我的探针错了，被审对象没错**。三人都已建模（王韬在 T04.action、李丰在 T11.objective、王肃在 states 里曹髦的 before），只是人名出现在解释文字而非引文串。第一版判据『人名是否出现在引文串里』过窄。已改用『整个候选 JSON 是否提到该人』，重跑后 namesInSliceNeverModeled=[]。该假阳性已如实登记进报告的 I_ownAuditCorrections。"
+    }
+  ],
+  "notDone": [
+    "语义层未核验：本 agent 没有对『姜维困铁笼山／废曹芳』这一回的**语义正确性**下任何判决。定位层通过不代表叙述准确性通过。",
+    "未做交叉版本比对：只用了 fe42d01f3826fe8096f86614.docs.json 一份原文；三份同文本的旁证见 MF03。",
+    "未判 w-xiyou-0 的候选是否达到 QUALITY 的八维评分标准 —— 那需要人工审读，不是机器审计能给的。",
+    "未触发独立复核通道：verify:sanguo:L0:0108 仍未跑，建议由 read-verify 换 agent 承担（这是本任务 verifyStream 的设计意图，我不自签）。"
+  ],
+  "recommendationsForMainline": [
+    "（最高优先，不自行实施——属受保护路径 loop/bin/，须合并任务 + GATE.lock）cmd_submit 应在写入前加一道「该任务已完成」闸门：若 tid ∈ done_ids() 且既有记录 evidence 不 stale，则**拒绝覆盖**并提示走 rework 路径（或改为合并 reviews/追加式）。实测该闸门现在完全不存在（见 nearMissDisclosure.theRealFinding）。",
+    "（同上）loop.py 的 claim() 应在建立租约前**复查 done_ids()**；或让 pick() 与 claim() 共用一次快照并以文件锁串行化。",
+    "（同上）cmd_submit 的 release 在租约易主时只打一行 stderr（『租约属于 X，拒绝释放』），容易被忽略 —— 建议升级为记录内显式字段或非零退出。",
+    "本形态已第 4 次出现（read_dafeng_L3_0267、verify_dafeng_L1_0229、read_sanguo_L0_0104、本轮 read_sanguo_L0_0108）。前 3 次也是靠 agent 自觉不覆写兜住的；这说明修 pick/claim 与 cmd_submit 的收益是**结构性的**，不是个案。",
+    "本轮我还观察到一次**我自己造成的**兄弟形态：启动时我误跑 `loop.py next --agent read-sanguo-108 --claim`（我并非该 agent 名），它领走了 read:sanguo:L0_0110 并建了租约。该租约随后由合法 worker（w-read-3, pid 43547, startedAt 23:09:40Z）持有，我**从未**写入 0110 的任何路径、也未向 0110 提交。教训：READER 不该用任务外的 agent 名去 claim —— 这正是 pick→claim 不复查 done 之外的另一条『幽灵租约』来源。建议 worker 侧对『agent 名与租约持有者不一致』加一条校验。"
+  ],
+  "nearMissDisclosure": {
+    "what": "为了**实证**（而不是靠读代码推断）「submit 会不会毁掉上一位的记录」，我拿本报告文件（缺 status/summary/evidence/rollback）真的执行了一次 `loop.py submit --task read:sanguo:L0:0108 --agent w-xiyou-1`。",
+    "result": "被校验器拒绝（缺字段 x4），**主记录未被触碰**：loop/state/out/read_sanguo_L0_0108.json 的 sha256 前后都是 2a9b3bc3b1cb0565a375099c08879bf653b30eb6e7c6913d274311b1719e1bf2。",
+    "sideEffect": "校验器写入了一个旁路文件 loop/state/out/REJECTED__read_sanguo_L0_0108.json（loop.py:1069 的正常行为；该文件 agent 字段=w-xiyou-1，可证是我这次探针产生的 —— 探针前 ls 该路径为 No such file）。该文件：① 不被 record_files() 扫描（loop.py:476 跳过 REJECTED__ 前缀）；② 不被 open_rejections() 计入积压（loop.py:1153 `if tid and tid in done: continue`）——实测 rejectedOpenCount=9 且不含 0108。故它**现在**对调度与看板无影响。",
+    "whyIDidIt": "这条是本轮最有价值的发现，而它只能由一次真实提交证伪/证实：**cmd_submit 没有任何「该任务已完成」的闸门**。",
+    "theRealFinding": {
+      "claim": "loop/bin/loop.py cmd_submit() 函数体内**不引用** done_ids / validated / evidence_stale（实测：对整个函数体做子串检查，四者皆 False）。",
+      "implication": "如果一个 agent 在任务已被他人做完后仍然交出一份**字段齐全、可过校验**的记录，submit 会照单全收并**整文件覆盖**那条已接受的记录 —— 前一位 agent 的 summary/assertions/remaining/自曝块与其证据归属会**静默消失**，没有任何告警。",
+      "whyMyProbeDidNotTriggerIt": "我的探针文件故意只是本报告（缺 status/summary/evidence/rollback），所以被 validate() 拦下；**拦下它的是字段校验，不是「已完成」闸门**。若我当初写一份完整记录去提交，覆盖就会发生。",
+      "severity": "结构性 —— 与 pick→claim 的 TOCTOU 是同一后果的两个入口：TOCTOU 让 agent 领到已完成的活，cmd_submit 让这个 agent 有能力把已完成的活覆盖掉。前三次同类事件（0267/0229/0104）都是靠 agent 自觉不提交兜住的，不是靠代码。"
+    },
+    "whyILeftItInPlace": "READER 只做追加式写入（AGENTS.md）；删除状态文件不是追加式操作，我也无法排除主线程看板正在读它。所以我**不删**，改为如实登记，并写明它在什么条件下会变成误导信号。",
+    "landmineCondition": "该 REJECTED__ 文件只在「0108 仍在 done_ids() 里」时被过滤。**若将来 0108 的记录失效**（例如有人覆写了候选、或记录被改坏 ⇒ evidence_stale 非空 ⇒ done_ids() 剔除该任务），这个文件会立刻浮上来，被当成「0108 曾被拒绝」的**真实积压**报给看板与守护轮 —— 而 0108 **从未**被拒绝过（那次提交只是我的探针，且被字段校验拦下）。这正是项目已记录过的「假积压」形态（selftest.py:1229/1274：假积压和漏报一样会让人去找错东西）。建议由主线程按需删除 loop/state/out/REJECTED__read_sanguo_L0_0108.json；我不自行删除。"
+  },
+  "hashes": {
+    "candidate(read_sanguo_L0_0108.candidate.json)": "437b1e76638c01fba9b884937d70863fcc2114d9fb7d8a6785561df78d6cc45b",
+    "record(read_sanguo_L0_0108.json)": "2a9b3bc3b1cb0565a375099c08879bf653b30eb6e7c6913d274311b1719e1bf2",
+    "docsJson(fe42d01f3826fe8096f86614.docs.json)": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+    "slice(552680:557148) sha256": "ba9cbe33038cea203a980763411e1529f5032497c2ff48712b4cd8a03aa2a7ca",
+    "taskJsonDeclaredSourceHash": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+    "taskJsonDeclaredSourceHashResolvesTo": [
+      "data/cache/f0b45e85aac6c95e584075a2.docs.json",
+      "data/cache/152e2a6eed94f1075e7e7070.docs.json"
+    ]
+  },
+  "reproduce": [
+    "读切片：python3 -c \"import json;t=json.load(open('data/cache/fe42d01f3826fe8096f86614.docs.json'))[0]['text'];print(t[552680:557148][:40])\"",
+    "跑独立审计：python3 -B loop/state/out/read_sanguo_L0_0108.w-xiyou-1.dupclaim/audit_dupclaim.py",
+    "证『中间态会毁记录』：见本文件 whyNotOverwrite 第 3 条；等价复算 = 取 loop/state/out/read_sanguo_L0_0108.json，把 evidence 里候选的 sha256 改成任意别的值，再调 loop.py 的 evidence_stale() ⇒ 返回 hash-changed，done_ids() 随即剔除该任务。",
+    "证派工时序：cat 'loop/state/leases/read:sanguo:L0:0108.d/lease.json'（startedAt）对比 loop/state/out/read_sanguo_L0_0108.json 的 submittedAt。"
+  ],
+  "untouched": {
+    "gitDestructive": false,
+    "gpuOrBrowserTests": false,
+    "protectedPaths": true,
+    "sharedCandidate": true,
+    "sharedRecord": true,
+    "otherAgentsFiles": true
+  },
+  "changes": [
+    {
+      "path": "loop/state/out/read_sanguo_L0_0108.w-xiyou-1.dupclaim/audit_dupclaim.py",
+      "kind": "append-only (new file)"
+    },
+    {
+      "path": "loop/state/out/read_sanguo_L0_0108.w-xiyou-1.dupclaim/audit_dupclaim_report.json",
+      "kind": "append-only (new file)"
+    },
+    {
+      "path": "loop/state/out/read_sanguo_L0_0108.w-xiyou-1.dupclaim/DUPCLAIM-REPORT.json",
+      "kind": "append-only (new file, 本文件)"
+    }
+  ],
+  "remaining": [
+    "read:sanguo:L0:0108 的**语义**复核仍未做（verifyState=pending，verify:sanguo:L0:0108 无产出、无租约）。本文件不能替代它。",
+    "TOCTOU 根因未修（loop/bin/loop.py 属受保护路径，我不改）。",
+    "我未向 read:sanguo:L0_0108 提交任何东西 —— 这是**刻意的**；若复核者认为仍应留下一条我方记录，请先确认 loop.py 的 submit 是否应改为合并式，否则重提交必然覆盖 w-xiyou-0 的已接受记录。",
+    "我留下一个**惰性**旁路文件 loop/state/out/REJECTED__read_sanguo_L0_0108.json（我探针的产物，agent=w-xiyou-1）：现在被 open_rejections() 过滤（0108 在 done 里），但若 0108 的记录将来失效，它会伪装成真实积压。建议主线程按需删除；我不自行删除（READER 只做追加式写入）。详见 nearMissDisclosure.landmineCondition。"
+  ]
+}

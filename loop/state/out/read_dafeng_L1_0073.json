@@ -1,0 +1,122 @@
+{
+  "task": "read:dafeng:L1:0073",
+  "agent": "w-sanguo-0",
+  "status": "done",
+  "summary": "精读《大奉打更人》第七十四章「只有勾栏听曲能抚慰我的心灵」（docs[0].text[231801,234954)，3153 字，逐段读完 93 个非空段），产出 loop/state/out/read_dafeng_L1_0073.candidate.json：6 条任务五元组（其中 2 条 objective 按缺项写 null，5 条 cost 为 null）、8 条带方向与机制的 causeEdges（另 5 条 rejectedEdges）、7 条带前值/后值/事件锚点的 states、4 条知识差、6 条伏笔（3 resolved／2 unresolved／1 partially_resolved，另 3 条 rejectedForeshadows）、10 条 speechActs、10 条 unknowns、5 条 reverseCoverage、6 条 selfCritique。239 条原文引证实例全部 text[start:end]==quote（0 处不符、0 处 inRange 标记错、0 处章号错、0 处计数错），其中 209 条落在本单元区间内。反向覆盖检查后仅剩 2 个非空段未被任何区间内引文覆盖（章题行与章节分隔线）。",
+  "evidence": [
+    {
+      "path": "loop/state/out/read_dafeng_L1_0073.candidate.json",
+      "sha256": "7af22e6cc0f171dc4d5415a8e7d821a867a63702a1b18b430b8b28f9d251e613",
+      "kind": "candidate",
+      "note": "本轮精读产物（任务 writes 指定路径）；239 条引文全部逐字可核、偏移为 docs[0].text 全文口径"
+    },
+    {
+      "path": "data/cache/9b676d7031b1bcd3b8377a18.docs.json",
+      "sha256": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+      "kind": "source",
+      "note": "原文来源；sha256(整个文件) 与 task.sourceHash 逐字一致"
+    },
+    {
+      "path": "data/cache/9b676d7031b1bcd3b8377a18.json",
+      "sha256": "3c2fae1d399d6768719f2d5476fa0cfd88fb4fbbc12abdf080323fa4b846ebdf",
+      "kind": "source",
+      "note": "图谱缓存；仅用于对照已有结论（本区间缓存事件 3 条），不作为原文证据"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "源文件哈希与任务声明一致：sha256(data/cache/9b676d7031b1bcd3b8377a18.docs.json) == fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839（候选 source.sourceHash 同值；成稿后复算一次，值不变）。",
+      "result": "pass",
+      "command": "shasum -a 256 data/cache/9b676d7031b1bcd3b8377a18.docs.json"
+    },
+    {
+      "text": "偏移口径自检：docs[0].text[231801:231820] == 「第七十四章 只有勾栏听曲能抚慰我的心灵」（切片以本单元章题开头），text[234954:] 以「第七十五章 枪意」开头；切片长度 3153 与任务 sourceRange 一致；切片 sha256 = ee8117e9790b8df224dab4f4bd90fa24bd833f55e9d753f93bd8d7a8acf0c33f（见候选 source.sliceSha256，另起字段给出，未覆盖 sourceHash）。",
+      "result": "pass",
+      "command": "python3 -c \"import json,hashlib;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];s=t[231801:234954];print(len(s),hashlib.sha256(s.encode()).hexdigest(),repr(s[:19]),repr(t[234954:234965]))\""
+    },
+    {
+      "text": "全部引文逐字可核：构建脚本 /tmp/cl0073/build.py 对每条 quote 先做 text.find 解析偏移再写入，逐字不等即拒绝出文件；成稿后用独立脚本 /tmp/cl0073/verify.py（从磁盘读回产物与原文，不 import 构建脚本）重算：239/239 满足 text[start:end]==quote，0 处 inRange 标记错、0 处 sourceHash 错、0 处 chapterAtOffset 错、0 处 occurrencesInFullText 不复算，inRange 209 条全部落在 [231801,234954) 内。",
+      "result": "pass",
+      "command": "python3 /tmp/cl0073/verify.py"
+    },
+    {
+      "text": "复核脚本自身做负向对照（避免「检查器永远打印 PASS」）：--mutate quote/offset/hash/inrange/prose 五种注入的产物副本全部被判 FAIL（分别触发 3/1/1/1/1 项失败），而我自己的干净副本 0 失败。",
+      "result": "pass",
+      "command": "for m in quote offset hash inrange prose; do python3 /tmp/cl0073/verify.py --mutate $m | tail -1; done"
+    },
+    {
+      "text": "散文引文口径（本轮被自己的复核脚本抓出并修掉的一个真缺陷）：把产物全部自由文本里的 “…” 片段按省略号拆开，每个非空部分都必须能在原文逐字命中，否则写盘前机械降级为「…」并逐条登记。第一版把归一化放在 selfCheck/coverage 生成之前，导致后加的两处说明文字绕过了归一化（复核脚本报 2 处失败）；改法不是放宽检查，而是把归一化移到所有自由文本写完之后。现复算：256 个 “…” 片段全部可查、0 处失败，本轮降级 72 处并登记在 quotingConvention.normalizedThisRun。",
+      "result": "pass",
+      "command": "python3 -c \"import json;c=json.load(open('loop/state/out/read_dafeng_L1_0073.candidate.json'));print(c['selfCheck']['proseQuoteFragments'], c['selfCheck']['proseQuoteFragmentsDemoted'])\""
+    },
+    {
+      "text": "反向覆盖检查（先读原文、再开候选）：把切片的 93 个非空段与全部 209 条 inRange 引文区间求交集，未覆盖的只剩 2 段——章题行与章节分隔线，逐条列在 coverage.uncoveredParagraphs。另有 5 条 reverseCoverage 记录「原文里读到、但刻意不升级为结论」的事实（魏渊外貌复述、京城威慑论、过场空间描写、章题呼应、地书机制的第二次自述）。",
+      "result": "pass",
+      "command": "python3 /tmp/cl0073/verify.py | grep -A4 '反向覆盖'"
+    },
+    {
+      "text": "红线自查①（台词不当事实）：陆号的整段说辞（地书归属、地宗是「凶狠残暴的疯子」、叁号碎片被封禁、地宗可通过玖号碎片锁定叁号、地书是一体的所以能看到通信）、玖号的催促、魏渊的规则声明与承诺、守卫的程序质问、许七安的借口与自我安慰，共 10 条全部单列 speechActs 并标注说话人；RX4 专门拒绝把陆号说法当叙述事实，U2/U3/U9 保留为未证实。",
+      "result": "pass"
+    },
+    {
+      "text": "红线自查②（结束≠成功 / 意图句不当结果）：T3 的 result 只写到「魏渊接手、镜子留下、功勋一字未提」，明确不写目标达成；RX2 拒绝把【玖：好！】当交易完成；RX3 拒绝把章末「打算去勾栏听听小曲」当行动已发生（跨区间第七十五章他实际去的是教坊司，且原文写明不是勾栏）。",
+      "result": "pass"
+    },
+    {
+      "text": "红线自查③（不因时间相邻连因果）：RX5 拒绝把开场的恐惧连到一千五百字后的「上交打更人」；CE3 标 derived 并写出三步机制（验证门槛落空→谁都不信→选择理由），该边删除不影响其他结论；CE8 只写到「被打更人接手」，不署名魏渊下令用替身。",
+      "result": "pass"
+    },
+    {
+      "text": "红线自查④（一次出现不当伏笔）：F1（杨水街地址）与 F2（功勋期待）显式标 unresolved 且按检查器要求不带 payoff 证据；三条 rejectedForeshadows 说明为何不算（四百两银票当场消费、法器取出无二次语义变化、地宗秘密无对应回收点）。全书检索复核：「杨水街」「张氏绸缎铺子」各 1 次、「枇杷树」3 次（另两次在云州）、「功勋」18 次（本区间 4 次全部出自许七安视角）、「陆号」22 次无一次点名真身。",
+      "result": "pass",
+      "command": "python3 -c \"import json;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];print({k:t.count(k) for k in ['杨水街','张氏绸缎铺子','枇杷树','功勋','陆号']})\""
+    },
+    {
+      "text": "红线自查⑤（不编造人物/事件/结局）：候选实体位只用原文出现过的名字（许七安、陆号、玖号、魏渊、李玉春、金锣/守卫/黑衣吏员）；跨区间引文一律标 inRange=false 并机器复算章号（crossRangeChapterMap）。本区间没有出现浮香、杨砚、金莲道长、紫莲；候选在 T5 初稿里写过一句「玖号并不知道对面已换成打更人操盘」，因原文无据已删除并改记入 U10。",
+      "result": "pass"
+    },
+    {
+      "text": "红线自查⑥（未越权声明语义核验）：semanticReview 字段为 null，并附 semanticReviewNote 说明「引用定位正确 ≠ 语义已核验」，语义核验留给 read-verify 流的独立复核者。",
+      "result": "pass",
+      "command": "python3 -c \"import json;c=json.load(open('loop/state/out/read_dafeng_L1_0073.candidate.json'));print(c['semanticReview'], c['semanticReviewNote'][:40])\""
+    },
+    {
+      "text": "只写任务 writes 指定路径：本轮我在仓库内的写入只有 loop/state/out/read_dafeng_L1_0073.candidate.json 与本次提交记录（均在 loop/ 追加式路径，classify() 判为 append-only）。受保护路径零写入——js/ css/ scripts/ tests/ docs/ data/ 下确有不少近一小时的改动，但那些是并行会话的未提交工作（例如 js/app.js 19:18、scripts/accept.sh 19:54），与本 worker 无关；我没有触碰、没有回滚它们，也没有跑 git checkout/reset/stash。",
+      "result": "pass",
+      "command": "find js css scripts tests docs data -type f -newermt '-60 minutes' | wc -l   # 17 项，全部属于并行写入者"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/read_dafeng_L1_0073.candidate.json",
+      "kind": "append-only"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/9b676d7031b1bcd3b8377a18.docs.json": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "data/cache/9b676d7031b1bcd3b8377a18.json": "3c2fae1d399d6768719f2d5476fa0cfd88fb4fbbc12abdf080323fa4b846ebdf"
+  },
+  "remaining": [
+    "semanticReview 未做：本产物只完成引用定位与结构自洽，「引用定位正确 ≠ 语义已核验」。请复核者优先看 T4.objective（null）、T5.objective（inferred）、CE3 与 CE8（derived）、F2（unresolved）、F6（partially_resolved），以及 CE1 用的 231826 那一处（该句在全文出现 2 次，另一次在第七十三章章末）。",
+    "F2（上交地书换功勋）是我最没把握的一条：我判 unresolved，因为全书没有一句把某次回报写成这笔功勋的兑现。跨区间第八十章魏渊让他去藏经阁挑绝学，最容易被读成那次回报——但挑绝学发生在他又交出一份地宗秘辛之后，原文没有连接句。若复核者找到连接句，应改判 resolved。",
+    "CE8 只能写到「赴约者是被打更人从死牢提出的死囚」：跨区间第七十五章只写「一位金锣」，没有点名；「魏渊下令用替身」是我的推导，标 derived 并写进 U6。",
+    "K1（玖号不知叁号身份）完全建立在魏渊一句评价上，标 inferred；区间内没有玖号视角可对照。若复核者不认这条间接依据，应降为 unknowns。",
+    "F6（淡化痕迹）我判 partially_resolved，因为跨区间材料正反两面（第七十六章老道士摸到他家＝失败；第七十七/七十八章假身份被误认＝成功），且成功的那一面与我写的「让地宗忽视他」并不是同一件事。按更严口径整条应移入 rejectedForeshadows。",
+    "跨区间引文只抽读了第六十、六十二、六十六、七十三、七十五、七十六、七十七、八十章的相邻段落用于判定伏笔与回收，没有通读这些章；因此「某线在别处另有回收」的否定性结论限定在我实际检索过的字面词（杨水街／张氏绸缎铺子／枇杷树／功勋／陆号／桂月楼／鸾凤和鸣）上。",
+    "图谱缓存只做了「区间内 3 条事件的 quote 逐字复核 + 一处角色归属异议」的对照，没有逐条比对全书已有结论与本次候选的一致性。",
+    "本区间没有出现浮香、杨砚、金莲道长、紫莲；他们在候选里只以跨区间引文出现，且都标 inRange=false。若复核者按「只许用本区间证据」的严格口径，F3/F4/F5 三条伏笔的回收端全部在区间外，只能保留 setup 并降为 unresolved。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/read_dafeng_L1_0073.candidate.json"
+    ]
+  },
+  "submittedAt": "2026-10-08T11:59:04Z",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-08T11:59:04Z"
+  },
+  "verifyState": "pending"
+}

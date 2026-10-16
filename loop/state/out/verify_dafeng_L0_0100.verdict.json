@@ -1,0 +1,340 @@
+{
+  "task": "verify:dafeng:L0:0100",
+  "reviewer": "w-dafeng-3",
+  "role": "VERIFIER",
+  "verdict": "partial",
+  "reviewedFile": "loop/state/out/read_dafeng_L0_0100.candidate.json",
+  "reviewedSha256": "f78788c9b814ed0182e95d5cc9119a378071fc91281d4c08f2e6a51502b06189",
+  "source": {
+    "path": "data/cache/1063b17ca65ec1b76f30e460.docs.json",
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "sourceHashKind": "sha256(整个 docs.json 文件)",
+    "range": [
+      323857,
+      328572
+    ],
+    "codepoints": 4715,
+    "segmentSha256": "14cd45c4880b6b1ed01ab82759ff38161c45dccc528a9ade04b4531fe7f4eeb3",
+    "segmentSha256Kind": "sha256(切片本身的 utf-8 字节)",
+    "nextChapterHeadAt": 328572,
+    "nextChapterHead": "第一百零二章 高于生命的东西",
+    "note": "复核者独立按任务口径复算；本节所有数字用 /tmp 脚本 reproduce 命令可复现。"
+  },
+  "method": "先自己读原文切片 [323857,328572)（未先看候选结论），再逐条核对候选的 94 个 quote 对象、抽取项、反向遗漏、误杀、幻觉与引用抽样。",
+  "quoteAudit": {
+    "totalQuoteNodes": 94,
+    "exactAtDeclaredOffset": 94,
+    "mismatches": 0,
+    "inRange": 89,
+    "outOfRange": 5,
+    "outOfRangeAllSelfDeclared": true,
+    "occurrencesInFullTextMismatches": 0,
+    "inUnitFlagMismatches": 0,
+    "metricsRecomputed": {
+      "quoteNodes": 94,
+      "inRangeQuoteNodes": 89,
+      "outOfRangeQuoteNodes": 5,
+      "distinctQuotes": 63,
+      "allMatchDeclared": true
+    },
+    "sourceHashMatch": true,
+    "segmentHashMatch": true,
+    "codepointsMatch": true,
+    "randomFiveFindAudit": {
+      "seed": 101,
+      "picked": 5,
+      "exact": 5,
+      "detail": [
+        {
+          "path": "/worldSettings[1]/effectQuote",
+          "start": 327420,
+          "sliceEqQuote": true,
+          "findEqStart": true
+        },
+        {
+          "path": "/causeEdges[1]/quotes[0]",
+          "start": 325944,
+          "sliceEqQuote": true,
+          "findEqStart": true
+        },
+        {
+          "path": "/worldSettings[0]/quote",
+          "start": 326778,
+          "sliceEqQuote": true,
+          "findEqStart": true
+        },
+        {
+          "path": "/states[2]/anchor/quote",
+          "start": 328229,
+          "sliceEqQuote": true,
+          "findEqStart": true
+        },
+        {
+          "path": "/foreshadows[1]/payoff/quote",
+          "start": 505622,
+          "sliceEqQuote": true,
+          "findEqStart": true,
+          "inUnit": false,
+          "selfDeclaredOutOfRange": true
+        }
+      ]
+    },
+    "fiveColumnSharedQuoteCheck": {
+      "T1": 0,
+      "T2": 0,
+      "T3": 0,
+      "note": "三条任务的五个栏位两两不共用同一句；T3 的 action 与 CE7 跨分区复用已在候选内显式标注。"
+    }
+  },
+  "counterExamples": [
+    {
+      "id": "CE1",
+      "severity": "fabrication-grade-false-in-range-attribution",
+      "kind": "本区间原文归属错误（把区间外文字说成区间内）",
+      "claim": "excludedSettings[1].why 原文写：「本区间提到『各种色彩缤纷闪烁』与『炼神境高手』『练气境怎么打炼神境』等」。即断言这三种文字出现在本区间 [323857,328572) 内。",
+      "candidateText": "本区间提到「各种色彩缤纷闪烁」与「炼神境高手」「练气境怎么打炼神境」等，但除了望气术的可视效果（已列入 W7）外，这些术语在本区间没有作为约束/资源被使用到",
+      "quote": "仍有不少炼神境高手会在黑市上寻找交易对象。",
+      "start": 54995,
+      "end": 55016,
+      "actualLocation": "第十八章 带着妹子逛街去（章首 52355）。片段『炼神境高手』全文首次出现在 54999，其所在句『仍有不少炼神境高手会在黑市上寻找交易对象。』起于 54995；『练气境怎么打炼神境』唯一一次出现在 331012（第一百零二章，本区间之后的紧邻章）。两者距本区间起点分别为 268858 / 268862 码点，都在本区间之前",
+      "why": "『炼神境』『练气境』在本区间出现 0 次（复核命令：t[323857:328572].count('炼神境')==0、count('练气境')==0、count('炼神境高手')==0）。『炼神境高手』全文首次出现在 54995（第十八章），『练气境怎么打炼神境』唯一一次出现在 331009（第一百零二章，即本区间**之后**的紧邻章）。三段被归属为『本区间提到』的文字里，只有『各种色彩缤纷闪烁』属实（325195，逐字命中）。这是任务提示词明确警告的失败形态——把区间外（含图谱缓存摘要）的文字当成区间内原文证据。",
+      "reproduce": "python3 -c \"import json;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];s=t[323857:328572];print(s.count('炼神境'),s.count('练气境'),t.find('炼神境高手'),t.find('练气境怎么打炼神境'))\"  # -> 0 0 54995 331009",
+      "impact": "结论（不把炼神境/练气境列为世界设定）碰巧正确——它们确实不在本区间；但给出的理由是可证伪的假归属。若该归属出现在图谱节点而非辅助排除说明里，本判即为 fail。"
+    },
+    {
+      "id": "CE2",
+      "severity": "false-in-range-attribution-secondary",
+      "kind": "同类缺陷第二例（措辞有歧义，记为存疑）",
+      "claim": "excludedSettings[0].what 把『皇城』列入『本区间只作背景提及』的地理名清单。",
+      "candidateText": "「大奉」「京城」「内城」「皇城」等地理名 | 本区间只作背景提及（如「铜锣只需三年就能在内城买个院子」）",
+      "quote": "铜锣只需三年就能在内城买个院子",
+      "start": 325678,
+      "end": 325693,
+      "actualLocation": "该示例句『铜锣只需三年就能在内城买个院子』确实在区间内（325678）；但『皇城』在本区间出现 0 次，全文首次出现在 151091。",
+      "why": "『大奉』『京城』『内城』在区间内各 1 次属实；『皇城』0 次。因句子可读作『这类地理名（无论出现在哪）都只是背景提及』而非『这几个词都出现在本区间』，我按契约只记为**存疑**，不据此单独判 fail；但与 CE1 并置看，候选存在把区间外术语一并列入『本区间』清单的系统性倾向。",
+      "reproduce": "python3 -c \"import json;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];s=t[323857:328572];print(s.count('皇城'),t.find('皇城'))\"  # -> 0 151091"
+    },
+    {
+      "id": "CE3",
+      "severity": "minor-paraphrase",
+      "kind": "区间外转述用词与原文不符（非引文，属叙述性转述）",
+      "claim": "F3.payoff.text 写他『最终拔刀将朱银锣劈成重伤』；F3.name 写『他真的抽刀放倒朱银锣』。",
+      "candidateText": "最终拔刀将朱银锣劈成重伤；随后被同僚以「铜锣许七安袭击上级，目无法纪」拿办",
+      "quote": "许宁宴一刀将朱银锣斩伤，命悬一线",
+      "start": 333929,
+      "end": 333945,
+      "actualLocation": "第一百零三章（区间外），另见叙述句『一刀将炼神境银锣斩成重伤』",
+      "why": "原文用『斩伤』『斩成重伤』，候选转述成『劈成』『放倒』。实质（斩伤、命悬一线、被拿办）与原文一致，且『铜锣许七安袭击上级，目无法纪，必须交由衙门审理。』（332795）逐字可查，故不构成编造；仅是转述用词不精确。因该段引文本身不在区间内、且候选已显式标 outOfRange，记为**轻微**，不建议据此判 fail。",
+      "reproduce": "python3 -c \"import json;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];print(t.find('许宁宴一刀将朱银锣斩伤，命悬一线'),t.find('铜锣许七安袭击上级，目无法纪，必须交由衙门审理。'))\"  # -> 333929 332795"
+    },
+    {
+      "id": "CE4",
+      "severity": "downgrade-recommended",
+      "kind": "人物判断被写成平铺结论（候选已自标）",
+      "claim": "T3.summary 平铺写『这是在针对许七安一个人。』",
+      "candidateText": "对随后赶来的其他铜锣却不管不问。这是在针对许七安一个人。",
+      "quote": "看到这一幕，许七安万分肯定这银锣是在针对他，纳闷的是，自己并没有得罪他。",
+      "start": 328156,
+      "end": 328192,
+      "why": "区间内这句话是**许七安的心理判断**（『万分肯定』是他的态度），不是叙述断言；叙述只给了可观察对照（『那位银锣不管不问，任由他们入列』328119）。候选把人物判断写成了平铺结论，属『把说法当事实』的轻度形态。减责情节：候选在 selfCritique[0] 主动点名这一风险，并把 T3.objective 标为 inferred 且写明可改 null；区间外叙述（『出发前，朱银锣特意针对、刁难许七安』）事后证实该判断为真，所以不是编造。建议：summary 改为『许七安据此万分肯定对方在针对他』。",
+      "reproduce": "python3 -c \"import json;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];print(repr(t[328119:328192]))\""
+    }
+  ],
+  "reverseChecks": [
+    {
+      "id": "RC1",
+      "found": "T3 全条的关键前提『迟到是借口』有两句决定性原文在区间内，候选一条都没引：李玉春当众给出的期限，以及许七安的自证。没有这两句，T3 的 objective『借迟到这个由头』就只是推断而不是可核事实。",
+      "quote": "“一刻钟后，在前院集合，跟着其他同僚一起过去。”",
+      "start": 326673,
+      "end": 326697,
+      "inUnit": true,
+      "pairedQuote": {
+        "quote": "收到消息他们就过来了，虽说路上谈话，走的不快，但绝对没有超过一刻钟。",
+        "start": 327641,
+        "end": 327675,
+        "inUnit": true
+      },
+      "delta": "候选对这两句既无 quote 节点，正文里也完全未提及（grep 候选全文 '一刻钟' 命中 0 次）。"
+    },
+    {
+      "id": "RC2",
+      "found": "区间末段（场景收束拍）整段未被候选引为证据：朱银锣一个眼神就让全体铜锣噤声。候选的 T3.result 停在『许七安三人入队』，TH2（制度在场却失效）也只引到『不管不问』，都没引这一句——而它是本章对『无人敢吭声』最直接的叙述。",
+      "quote": "这时，朱银锣目光锐利的扫视众人，铜锣当即噤声。",
+      "start": 328513,
+      "end": 328536,
+      "inUnit": true,
+      "delta": "无 quote 节点，候选正文未提及。"
+    },
+    {
+      "id": "RC3",
+      "found": "抄家分赃的伦理框架有一句叙述者断言被候选漏掉：银子本身不干净 + 许七安『不反对不赞同』的态度。候选 W2 只在 explain 里提到『不反对不赞同』，从未把这两句立为引文；而它们是解释『为何全员默许拿一点』的原文依据（后一句在候选正文出现、前一句完全没有）。",
+      "quote": "银子本身就不干净，薅的是大奉的羊毛，不是百姓的羊毛。",
+      "start": 327273,
+      "end": 327299,
+      "inUnit": true,
+      "pairedQuote": {
+        "quote": "许七安采取不反对不赞同的态度。",
+        "start": 327328,
+        "end": 327343,
+        "inUnit": true
+      },
+      "delta": "『银子本身就不干净』无 quote 节点、候选正文 0 次提及。"
+    },
+    {
+      "id": "RC4",
+      "found": "抄家程序的关键约束（吏员点齐造册、不参与搜刮）是宋廷风对制度的直述，也正是『灰色空间』的来源。候选只在 W2.explain 的散文里提了半句，未立为引文，导致 W2 的 executed 条款缺一条程序性依据。",
+      "quote": "“抄没家产时，吏员会在前院点齐值钱物件，记录在册，然后带回衙门。但他们是不参与搜刮的。”",
+      "start": 327021,
+      "end": 327065,
+      "inUnit": true,
+      "delta": "仅以散文转述出现（『吏员点齐值钱物件记录在册、不参与搜刮』），无 quote/start/end。"
+    },
+    {
+      "id": "RC5",
+      "found": "浮香『已不再陪客』这一状态变化被完全遗漏。它直接关系到 T1 的可信度：一个正当红、且已不接客的花魁急着求赎身，才构成叙述者点出的反常（『即使要从良，也早了些吧』）；候选 unknowns[0] 只问『为什么急着从良』，却没引这条支撑『反常』的原文。",
+      "quote": "听说已经不再陪客了，至少寻常人是不可能了。",
+      "start": 324228,
+      "end": 324249,
+      "inUnit": true,
+      "delta": "无 quote 节点，候选正文未提及。"
+    },
+    {
+      "id": "RC6",
+      "found": "望气术的施放机制句（『两道清气射穿黑夜』）被跳过：候选 T2/W7 从『跃上围墙…引燃』直接跳到『扫过教坊司上空』，漏掉中间实际产生观测能力的那一句。",
+      "quote": "他仰起头，两道清气射穿黑夜，一闪即逝。",
+      "start": 324967,
+      "end": 324986,
+      "inUnit": true,
+      "delta": "无 quote 节点，候选正文未提及。"
+    },
+    {
+      "id": "RC7",
+      "found": "叙述者对『浮香急着从良』反常的正面评述被漏掉：以她的段位，给四品大员做妾也绰绰有余。这是原文对『她本不必如此』的判断句，比候选 unknowns[0] 里的疑问句更接近答案。",
+      "quote": "再说，打更人虽然因为组织原因，让百官忌惮，可以浮香的段位，便是给四品大员做妾，也绰绰有余了。",
+      "start": 325892,
+      "end": 325938,
+      "inUnit": true,
+      "delta": "无 quote 节点，候选正文未提及。"
+    },
+    {
+      "id": "RC8",
+      "found": "朱银锣出场时的面相描写（三十岁出头、嘴唇偏薄、桀骜）被漏掉。它是『不是好相处的人』的唯一依据，也是候选 T3 把 objective 推断为『立威』时本该引的旁证；候选引的是同一段的动作句，却跳过了这句定性描写。",
+      "quote": "为首的是一名年轻的银锣，三十岁出头，嘴唇偏薄，眉眼间透着桀骜，单看面相就知道不是好相处的人。",
+      "start": 327493,
+      "end": 327539,
+      "inUnit": true,
+      "delta": "无 quote 节点，候选正文未提及。"
+    },
+    {
+      "id": "RC9",
+      "found": "『拔出萝卜带出的泥』这一因果比喻句被漏掉。它正是 CE4（李玉春提示→许七安理解为税银案后续）之后对『倒台牵连下属』机制的叙述性说明，候选 CE4 只引了提示句与理解句，机制句缺席。",
+      "quote": "一个朝堂大佬的倒台，必然伴随着依附于他的官员的革职、处罚。就像拔出萝卜带出的泥。",
+      "start": 326922,
+      "end": 326962,
+      "inUnit": true,
+      "delta": "无 quote 节点，候选正文未提及。"
+    },
+    {
+      "id": "RC10",
+      "found": "包场与离开酒席的动作链被漏掉：许七安给宋廷风打眼色后才起身离席。候选 S6 的 anchor 用『花魁娘子听说许七安包场』，把因果落在花魁的反应上，漏掉他自己安排的这一动作。",
+      "quote": "酒过三巡，许七安给宋廷风打了个眼色，起身道：“诸位同僚，许某不胜酒力，先休息了，你们玩。”",
+      "start": 324314,
+      "end": 324359,
+      "inUnit": true,
+      "delta": "无 quote 节点，候选正文未提及。"
+    },
+    {
+      "id": "RC11",
+      "found": "『隔三差五光顾浮香 / 院里早就认定他是相好』被漏掉：这是门房谄媚与后面包场顺利的既有关系前提，也是 S1（与浮香关系）的前史。",
+      "quote": "许七安隔三差五的光顾浮香，院里早就认定他是花魁娘子的相好，小门房对别的客人倨傲冷淡，但对许七安可不敢怠慢。",
+      "start": 323950,
+      "end": 324003,
+      "inUnit": true,
+      "delta": "无 quote 节点，候选正文未提及。"
+    },
+    {
+      "id": "RC12",
+      "found": "叙事对『请客手段奏效』的直接判词『效果甚好。』被漏掉（候选 S6 用的是下一段的『关系密切了许多』）。",
+      "quote": "效果甚好。",
+      "start": 326112,
+      "end": 326117,
+      "inUnit": true,
+      "delta": "无 quote 节点，候选正文未提及（occurrencesInFullText=2，非唯一，若引用应标重数）。"
+    }
+  ],
+  "misKills": [
+    {
+      "id": "MK1",
+      "what": "被合法排除但值得重议：望气术用的纸（W7）把 itemStates 只写成 hold+use，明确声明『lose / transfer 本区间没有』。但原文动作是『引燃』——纸张被烧掉即失去，按提示词『itemStates 从 hold/transfer/use/lose 里多选（可同时成立）』，use 与 lose 可同时成立。",
+      "quote": "许七安跃上围墙，从怀里抽出一张纸，引燃。",
+      "start": 324941,
+      "end": 324961,
+      "verdict": "记为**存疑**：『引燃』是否等价于四态里的 lose 属判读分歧（也可读作纯粹的使用耗材），候选并未因此丢掉原文事实，故不据此判 fail；建议发布前补 lose 或在 W7.note 里写明为何不计 lose。"
+    },
+    {
+      "id": "MK2",
+      "what": "被合法排除但建议降级：F5（『回头再教你们几个更有意思的玩法』）被放进 foreshadows[] 并标 status=unresolved / strength=unverified，候选自己在 note 里写『严格说它更接近未兑现的许诺而不是伏笔』。按提示词『只出现一次的东西不叫伏笔』，本条更宜移入 unknowns[] 而不是占一个 foreshadows 名额。",
+      "quote": "许七安耸耸肩，“回头再教你们几个更有意思的玩法。”",
+      "start": 326322,
+      "end": 326347,
+      "verdict": "记为**建议降级**：候选已自标 unverified 并给了理由，属已标注的未知，不是编造。"
+    },
+    {
+      "id": "MK3",
+      "what": "W6 把『牌票』与『凭票』认定为同一物件（两种叫法）。候选已显式声明这是判断而非原文事实（『原文没有一句把两个词并置同一物』）。",
+      "quote": "宋廷风领着两位同僚靠拢过去，迎向银锣，顺手取出怀里的凭票。",
+      "start": 327545,
+      "end": 327574,
+      "verdict": "记为**存疑**：两词在原文中确未并置；候选的合并是可用但有风险的读法，且已自我声明。不构成误杀。"
+    }
+  ],
+  "hallucinationCheck": {
+    "inventedCharacters": 0,
+    "inventedEvents": 0,
+    "inventedEndings": 0,
+    "detail": [
+      "区间外人物 明砚（foreshadows[1].payoff, 505622）只出现在显式标 outOfRange=True 的回收引文里，未被写成区间内人物。",
+      "区间外人物 杨凌（unknowns[11]）被显式标 inRange=False 并注明『由前文可知他初到教坊司时化名杨凌』；核对属实（全文首次出现 156016，语境为『在下长乐县秀才杨凌』）。",
+      "未出现 朱成铸/朱阳/魏渊/魏公 等区间外人物（候选全文 0 次）——即没有把下一章的家族名提前写进本章。",
+      "未主张 浮香 是妖族：deliberatelyNotAsserted[0] 显式拒绝，且区间内确实没有任何指向她的证据。",
+      "未把『教坊司妖孽已离开』当结论：T2.result 与 F2 都保留『离开 or 隐藏』两支并列。",
+      "未把章节结束当成功：T1.result=未达成、T3.result=打人者未付代价、deliberatelyNotAsserted 显式拒绝『抄家已执行完毕』。",
+      "未越权声称语义复核：semanticReview.performed=false，并写明『引文定位正确≠语义已核验』。",
+      "selfCritique 3 条全部指向真实风险点，其中第 1 条（T3 objective 是把人物心理当事实）与本复核 CE4 独立吻合。"
+    ]
+  },
+  "notes": "总判 **partial**。\n\n【为什么不是 fail】这份候选的引用层经全量复算后无可指摘：94 个 quote 对象全部 t[start:end]==quote 逐字成立、start 全部等于 str.find() 的真出现位置、零越界（89 条在区间内，5 条区间外全部自标 inRange=false）、sourceHash 与任务一致（fdde5558…）、切片哈希一致（14cd45c4…）、4715 码点一致、前后边界逐字命中、occurrencesInFullText 与 inUnit 两项 94/94 零失配、metrics 四项全量重算相符；固定种子 101 抽 5 条 5/5 命中且 find()==start；T1/T2/T3 五个栏位两两不共用同一句。三条红线（台词≠叙述事实、结束≠成功、一次出现≠伏笔）都有明确执行痕迹，semanticReview 保持 not-performed。\n\n【为什么不是 pass】存在 CE1 这一条**可被文件自身与原文直接证伪的假归属**：excludedSettings[1] 断言『本区间提到…「炼神境高手」「练气境怎么打炼神境」』，而这两个片段在本区间出现 0 次——前者在第十八章（54995），后者在紧邻的下一章第一百零二章（331009）。这正是本任务提示词点名警告的失败形态（把区间外/缓存摘要当区间内原文）。CE2（皇城，0 次）是同类第二例但措辞有歧义，按契约只记存疑。CE3（『劈成』vs 原文『斩伤』）与 CE4（把许七安的心理判断『万分肯定…是在针对他』写成平铺结论）是两处轻度问题。加上 12 条反向查得的真实遗漏（其中 RC1 使 T3 的核心前提失去可核证据，RC2 漏掉本章收束拍），不足以判 pass。\n\n【可用 / 必须修正 / 必须降级】\n· 可原样使用：全部 94 条引文及其偏移（零误差）；T1（赎身被敷衍，result=未达成）五栏；F1（两处区间外回收均逐字属实，512210 与 1107557）；F2（回收点 505622 属实，绿光首见第八十一章标题 254204）；F4（329516 属实）；W1/W3/W4/W5；S1/S2/S3/S5；CE4/CE6/CE7。\n· 必须修正：excludedSettings[1] 删去『炼神境高手』『练气境怎么打炼神境』两处归属（这两句不在本区间）；CE2 的『皇城』一并从『本区间』清单移出或改写为『全文层面的地理名』。\n· 建议降级/调整：T3.objective 按候选自己的承诺改 null（或改为『以迟到为由当众责打』），summary 去掉平铺的『这是在针对许七安一个人』；F5 移入 unknowns[]；W7 补 lose 或写明不计 lose 的理由；T2.cost（引『不作死就不会死』）证据偏弱，建议降为 null 或改标 unverified。\n· 建议补入（原文逐字可查，本复核已给偏移）：RC1→T3.obstacle/objective、RC2→TH2/T3.result、RC3+RC4→W2、RC5+RC7→T1 与 unknowns[0]、RC6→W7/T2.action。\n\n【不确定处】CE2/MK1/MK3 属判读分歧，按 VERIFIER 契约只记为存疑，未据此判 fail。F3 的转述用词（『劈成』）因引文在区间外且已显式标注，记为轻微。我未对区间外章节做逐字通读以外的上下文考证（例如 512210 所在章的完整语境），若要据此发布，建议发布者按既有发布工具再核一次区间外引用。\n\n【复核者自身可能的错】我的反向验证以『quote 节点 + 候选 JSON 散文』两层判断是否覆盖；若候选在未被我扫描的字段里有覆盖（我已全量 grep 候选 103435 字节文本），个别 RC 可能有偏严之处——但我对每条 RC 都做了 `inSeg` 与 `inProse` 双重判定，且只把两者皆 False 的记为遗漏。",
+  "reproduce": [
+    {
+      "cmd": "python3 -c \"import hashlib;print(hashlib.sha256(open('data/cache/1063b17ca65ec1b76f30e460.docs.json','rb').read()).hexdigest())\"",
+      "expect": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+      "what": "源文件哈希 == 任务 sourceHash"
+    },
+    {
+      "cmd": "python3 -c \"import json,hashlib;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];s=t[323857:328572];print(len(s),hashlib.sha256(s.encode()).hexdigest())\"",
+      "expect": "4715 14cd45c4880b6b1ed01ab82759ff38161c45dccc528a9ade04b4531fe7f4eeb3",
+      "what": "切片长度与哈希 == 候选 source.codepoints/segmentSha256"
+    },
+    {
+      "cmd": "python3 -c \"import json;c=json.load(open('loop/state/out/read_dafeng_L0_0100.candidate.json'));t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];n=[];f=lambda o:[n.append(o) if isinstance(o,dict) and isinstance(o.get('quote'),str) and o.get('start') is not None else None,[f(v) for v in (o.values() if isinstance(o,dict) else o)] if isinstance(o,(dict,list)) else None];f(c);print(len(n),sum(1 for o in n if t[o['start']:o['end']]==o['quote']))\"",
+      "expect": "94 94",
+      "what": "94 条引文全量逐字回切（0 失配）"
+    },
+    {
+      "cmd": "python3 -c \"import json;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];s=t[323857:328572];print('炼神境',s.count('炼神境'),'练气境',s.count('练气境'),'@',t.find('炼神境高手'),t.find('练气境怎么打炼神境'),'|皇城',s.count('皇城'),'@',t.find('皇城'))\"",
+      "expect": "炼神境 0 练气境 0 @ 54999 331012 |皇城 0 @ 151091",
+      "what": "CE1/CE2 反例：被候选归属为『本区间』的片段实际不在区间内（数字为 str.find 的片段起点）"
+    },
+    {
+      "cmd": "python3 -c \"import json;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];print(repr(t[328572:328586])+' / '+repr(t[323857:323866]))\"",
+      "expect": "'第一百零二章 高于生命的东西' / '第一百零一章 抄家'",
+      "what": "区间边界逐字命中：下一章标题恰起于 328572，本章标题恰起于 323857"
+    }
+  ],
+  "remaining": [
+    "区间外回收点（512210 / 1107557 / 505622 / 330917 / 329516）本轮只做逐字回切与有限上下文（各 ±260 字）核对，未逐字通读其所在整章。",
+    "CE2/MK1/MK3 属判读分歧，按契约记为存疑，未据以判 fail；需要发布者或下一轮复核裁定。",
+    "未运行任何 GPU/浏览器测试（本任务无此需求）。",
+    "本轮只写 loop/state/out/verify_dafeng_L0_0100.verdict.json，未改动任何受保护路径。"
+  ]
+}

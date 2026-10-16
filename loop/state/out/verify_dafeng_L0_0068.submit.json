@@ -1,0 +1,105 @@
+{
+ "task": "verify:dafeng:L0:0068",
+ "agent": "w-sanguo-1",
+ "status": "done",
+ "summary": "独立反向复核《大奉打更人》第六十九章：先自读原文区间 [210224,214449) 全 4225 字，再核对候选。548/548 条引文逐字命中（slice==quote 且 find==start、inSegmentHits 全对、inRange 标记 23 条全部诚实），抽取项 0 条编造，覆盖度复算一致（128/125/125/0）。判 partial：2 条 counterExample —— ①cacheCrossCheck.findings[1] 声称缓存偏移与 docs 口径不一致（find≈8527），实测 find=8553 与缓存声明完全一致且 11/11 全一致，8527 三种读法均不可复现，属凭空造出的缺陷；②两处『区间外第六十七章』章号错引，实测 203447 落在 [201191,204324)=第六十六章 突发任务。另给 4 条反向发现（吕青反向救许七安的语义欠登记、妖物首次吐舌落空未登记、缓存 events 层被整层跳过含 1 条伪引文、蚀骨毒容器前后不一致存疑）。",
+ "evidence": [
+  {
+   "path": "loop/state/out/verify_dafeng_L0_0068.verdict.json",
+   "sha256": "d01ad3a2fb6dc430e4d0c0c2e9bf8e6937b5cde9d3e889d0a4c659c5ad1be9c1"
+  },
+  {
+   "path": "loop/state/out/read_dafeng_L0_0068.candidate.json",
+   "sha256": "e3afd3c983aa7b4e39c5f80d407c5f471c21f75b1040945e85ae6fcf3153ac17"
+  },
+  {
+   "path": "data/cache/9b676d7031b1bcd3b8377a18.docs.json",
+   "sha256": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+  }
+ ],
+ "assertions": [
+  {
+   "text": "源哈希核验：shasum -a 256 data/cache/9b676d7031b1bcd3b8377a18.docs.json == 任务 sourceHash fdde5558…39839",
+   "result": "pass"
+  },
+  {
+   "text": "先读原文后看候选：自行把 [210224,214449) 切片落盘通读（4225 codepoints，标题/边界/切片 sha256 340b9648… 三项均与候选声明一致）",
+   "result": "pass"
+  },
+  {
+   "text": "全量引文复算 548 条：docs[0].text[start:end]==quote 且 end-start==len(quote) 且 find(quote)==start，sliceExactMismatches=0、findMismatches=0、inSegmentHitsMismatches=0、inRange 标记不诚实=0",
+   "result": "pass"
+  },
+  {
+   "text": "随机抽 5 条 quote（seed=68，含 in-range 过滤）逐条 find，5/5 逐字命中且偏移一致",
+   "result": "pass"
+  },
+  {
+   "text": "抽取项核对：tasks 11 / causeEdges 19 / states 14 / knowledgeGaps 8 / foreshadows 10 / characterClaims 20 逐条在原文找到对应文字，fabricatedItems=0",
+   "result": "pass"
+  },
+  {
+   "text": "覆盖度独立复算：nonEmpty=128、content=125、covered=125、uncovered=[]，与候选 coverage 完全一致；另按『任一引文为行子串』口径复算，未覆盖率 0",
+   "result": "pass"
+  },
+  {
+   "text": "误杀检查：6 条 rejectedEdges + 5 条 rejectedForeshadows 排除理由逐字可查且方向正确，未发现真实误杀；仅 3 处措辞不精确（野鸟/高铁次数）已记入 falseKillCheck.imprecision",
+   "result": "pass"
+  },
+  {
+   "text": "CE1 复现：T.find('根据卷宗描述，许七安在脑海里复盘着二叔押运税银的过程。')=8553，缓存 sourceRefs 声明 start=8553/end=8580 完全一致；声称的 8527 在 raw/去换行/折叠空白三读法下分别为 8553/8074/7139，均非 8527",
+   "result": "pass"
+  },
+  {
+   "text": "CE1 加强：缓存全部 11 条 sourceRefs 逐条复算 find(quote)==start，11/11 一致 ⇒『口径不一致』结论为假",
+   "result": "pass"
+  },
+  {
+   "text": "CE2 复现：T[201191:201215]='第六十六章 突发任务\\n\\n'，T[204324:204348]='第六十七章 案件分析\\n\\n'；203447∈[201191,204324) ⇒ 候选写『第六十七章』错；第六十七章正文『铜锣』仅 1 次且无护心镜规格说明",
+   "result": "pass"
+  },
+  {
+   "text": "反向发现 3 复现：缓存 events 中 quoteRef.start∈[210224,214449) 的有 order=131(start=210930,exact) 与 order=133(start=214210,exact)，slice==quote 均成立；order=132 引文在 docs 中 find=-1（match=none,reason=not_found）",
+   "result": "pass"
+  },
+  {
+   "text": "自我修正（契约第 6 条）：反向发现 1 初判『完全漏掉吕青救许七安』经复算不成立（引文已登记于 characterClaims[16].evidence[2] 与 sceneNotes[4].evidence[9]），已下调为『语义层欠登记』并如实写入 notes",
+   "result": "pass"
+  },
+  {
+   "text": "自审：本复核文件全部 quote/evidence 逐条 find 命中，non-verbatim=0；verdict=partial 属允许值；counterExamples 2 条各带逐字 quote 与 why",
+   "result": "pass"
+  },
+  {
+   "text": "受保护路径未改动：本次仅新增 loop/state/out/verify_dafeng_L0_0068.verdict.json（git status 确认为 ?? 未跟踪新文件）",
+   "result": "pass"
+  }
+ ],
+ "changes": [
+  {
+   "path": "loop/state/out/verify_dafeng_L0_0068.verdict.json",
+   "kind": "append-only"
+  }
+ ],
+ "sourceHashes": {
+  "data/cache/9b676d7031b1bcd3b8377a18.docs.json": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+  "data/cache/9b676d7031b1bcd3b8377a18.json": "3c2fae1d399d6768719f2d5476fa0cfd88fb4fbbc12abdf080323fa4b846ebdf",
+  "loop/state/out/read_dafeng_L0_0068.candidate.json": "e3afd3c983aa7b4e39c5f80d407c5f471c21f75b1040945e85ae6fcf3153ac17",
+  "loop/state/index.json": "232bdbc55a9d668b0ece8c9fcf7b748a3e50bcce6b50b4e6323d20a1829089a1"
+ },
+ "remaining": [
+  "本轮只核验『引用定位 + 抽取正确性 + 反向遗漏』，语义正确性（semanticReview）未做，候选自己也标了 not-performed —— 不得记为语义已核验。",
+  "CE1 只是『结论为假』：我没有考证 8527 这个数字是怎么产生的（不排除是某个中间版本的偏移或笔误），未读生成脚本 /tmp/gen0068.py 的历史，故不推断动机，只报结论不可复现。",
+  "反向发现 1/2 是『语义层欠登记』而非编造，判 partial 而非 fail 主要依据 CE1+CE2；若复核口径认为『引文已登记即算覆盖』，则 R1/R2 应降为改进建议。",
+  "反向发现 4（蚀骨毒容器 212337 小镜 vs 213195 怀里）可读作中途收回怀里而原文未写收回动作，仅记存疑，未据此判 fail。",
+  "未核验区间外第七十章起对『神来一箭』机制的其他说法是否与本章一致（只按候选登记做了逐字定位抽查，未通读第七十章）。",
+  "本次未跑任何 GPU/浏览器测试（任务未声明需要）。"
+ ],
+ "rollback": {
+  "kind": "append-only",
+  "strategy": "delete-added-files",
+  "files": [
+   "loop/state/out/verify_dafeng_L0_0068.verdict.json"
+  ]
+ }
+}

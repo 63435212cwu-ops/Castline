@@ -1,0 +1,158 @@
+{
+  "task": "verify:sanguo:L1:0071",
+  "agent": "w-sanguo-1",
+  "status": "done",
+  "summary": "独立反向复核《三国演义》第七十二回（诸葛亮智取汉中／曹阿瞒兵退斜谷，[363320,367615)，4295 码点）。按 VERIFIER.md 顺序：**先自读原文全文**（切片转存外置盘分段读完，含 2445 字长段）并自建 222 条原文事实偏移表，之后才打开候选。\n\n**机械层我独立复算，全部通过**：485 个带偏移引文逐条 t[start:end]==quote、区间内、sourceHash 正确（bad 0）；globalOccurrences/nthOccurrence 用 find 循环复核 485/485；同任务五栏共用同句 0、区间重叠 0；24 个 null 栏 24/24 带同栏 Note；tasks[] 跨任务引文复用 0；覆盖率用两套独立实现（区间并集求交／逐字符掩码）复算，与自报 3413/3354/0.98271/59/13 与 3477/3399/0.97757 逐位一致；duplicateQuotesAcrossSections=111/实例 324 一致；14 个分区计数全一致；随机 seed=20261013 抽 5 条 find 5/5 命中且偏移一致；textualNotes 的自报数字（夏侯敦6/夏侯惇0、许褚6/许诸5、1/1/2）逐条复算为真。\n\n**判 partial，不判 fail**：逐条对抗后**没有找到任何编造** —— 无原文没有的人物（本区间外人物逐个 grep 0 命中）、无越权结局（『取得/攻下/占领汉中』等串全为 False；班师不写完成；『破刘备必矣』记为未实现）、无一次出现当伏笔、14 条 speechAsClueNotFact 逐条标层。\n\n**与先前复核的关系**：本任务是环境再次派发给 w-sanguo-1 的同一 verify 任务（租约 startedAt=2026-10-13T11:11:37Z），writes 只有一个路径 ⇒ 覆盖不可避免。我先按字节留存原件到外置盘（22b218e0… 复算一致），未改动 read 记录里的 reviews[0]。独立复核结论：先前 10 条反例**9 条成立、1 条（CE6）不成立并撤回**，另加 4 条新反例。\n\n**新增反例 4 条**：NCE1 T26.costNote 有两处指针错位（先前只抓到第一处）——「与 T26 的 objective」不成立（T26.objective 仅两句无刺肩句），且「自相践踏」实测在 T27.**cost** 而非 T27.result；NCE2 coverageDeclaration.recomputedAfterFix 自述移除 T30.action，实测该栏 text+quotes **未变**，真正变的是 T30.result／T30.cost（只改 text）；NCE3 **推翻先前 CE6**：recompute.py／audit.py 真实存在且是**读任务自己声明的证据**（哈希逐条复算匹配），先前「仓库内不存在」是因为只 glob 仓库、而证据按约定存外置回滚盘 —— 该条不应记为缺陷，已从 mustFix 撤下；NCE4 下游过度排除风险：读记录顶层无 verdict/counterExamples（实测 None/0），排除名单 100% 来自 sidecar，而桥 to_candidate.py:566 用正则把所有 `T\\d+` 整条丢弃 ⇒ 先前反例里 S06/T16/T21/T23/T24 本身无缺陷、只是被当指针目标提到，却会被整条误杀。\n\n**反向验证 6 条**（含 1 条自查）：① 曹植「爱修之才，常邀修谈论，终夜不息」是本区间唯一既无逐字引文、也不被任何分区断言为事实的叙事句，而它是后两件事的人际前提；② 刘封、孟达请战动作被 T11.objective 两条引文整段跳过（断言与证据不同源）；③ 回目「智取汉中」在本区间并未兑现且从未作为 quote 被引用（正文只到手南郑/褒州/阳平关）；④ NCE1 的第二处在 T26.costNote；⑤ 王平「苦谏」的谏言内容未引用也未登记为 unknown（与 U02/U03 口径不一致）；⑥ 自查：我第一版按句号切句误报『众将努力向前』为盲区，实为我的切句错误、该句已被引用。\n\n**误杀检查**：6 条 rejectedCauseEdges 逐条读原文后认为排除理由成立、无误杀（R01 方向确应写作「南郑已失→退路失效」；R02 曹彰无受命环节；R03 杀修与中箭间无机制；R04 拆边保留中间机制；R05 观察非原因）；唯 R06 把一条**成立**的关系放进 rejected 只为附注，下游按 rejected 统计会误读，已列为建议。\n\n**自查留痕（我可以判自己错）**：我第一版 null 栏检查用错键路径，误报 6 处缺 Note；实际 Note 写在栏位对象内部，复算 24/24 齐全 —— 是我的方法错，已改正并写进 falseKillCheck。",
+  "evidence": [
+    {
+      "path": "loop/state/out/verify_sanguo_L1_0071.verdict.json",
+      "sha256": "b6f2dd0336d0d72b5f89d1a248ad729e92032ca855c98342269eda90aa2bb885",
+      "kind": "worker-output"
+    },
+    {
+      "path": "loop/state/out/read_sanguo_L1_0071.candidate.json",
+      "sha256": "cd42a4fa118a107cb24eb9e1ced7eff7d845375d80ee3de7942d2f1341ca7b64",
+      "kind": "reviewed-candidate"
+    },
+    {
+      "path": "data/cache/fe42d01f3826fe8096f86614.docs.json",
+      "sha256": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+      "kind": "source-text"
+    },
+    {
+      "path": "loop/state/out/read_sanguo_L1_0071.prior-unsubmitted.288d8dea.json",
+      "sha256": "288d8dead2571aaa331f4e56714b347e7ee5ee933c56d0110558f277790d1fea",
+      "kind": "prior-intermediate"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/verify_sanguo_L1_0071/prior/verdict.w-verify-4.22b218e0.json",
+      "sha256": "22b218e0d4af30f4147c7d6c90f44a4c954bb9138ac2599fdd5564ccbab2765d",
+      "kind": "preserved-prior-verdict"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/verify_sanguo_L1_0071/read-record-after-my-verify.json",
+      "sha256": "898e902e59225c707d48d0819f04ce1863d952cb8fa017f832f8335b737bfdff",
+      "kind": "read-record-snapshot"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/verify_sanguo_L1_0071/repro_all.json",
+      "sha256": "fefa802832a9090b503b8c3898ca380282a2799d905d65f0c2d35f29e2ee83d0",
+      "kind": "independent-recompute"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/verify_sanguo_L1_0071/bin/repro_all.py",
+      "sha256": "90d7e4cc307770d48405401d1e1d4173a841a15d3cdbea3b0a580f23dcf3936e",
+      "kind": "recompute-script"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/verify_sanguo_L1_0071/bin/landmark_cov.py",
+      "sha256": "d288b8cde92ffab033c2f8743fd57273a7f653b8747aecdf331be882cb7efd94",
+      "kind": "reverse-check-script"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/verify_sanguo_L1_0071/bin/bridge_read.py",
+      "sha256": "19bcdc3e7683ac253b14bc7531d1de86b55a16e1815abd7658b89e203ed296e1",
+      "kind": "bridge-read-simulation"
+    },
+    {
+      "path": "loop/bin/to_candidate.py",
+      "sha256": "df5f168d4c82310b7c9776f0dca448397f2aa7dbded5683de9077f2b0686d5c8",
+      "kind": "downstream-bridge-code"
+    },
+    {
+      "path": "loop/queue/read.jsonl",
+      "sha256": "d54b8852a9014d80ec18a063ee946f6b6098abdb4d43856420c1b6604c25f22b",
+      "kind": "task-definition-source"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "源文件 sha256=8ab7298a… 与任务提示词逐字相同、切片 [363320,367615) 长 4295 且以回目开头 —— 独立复算通过",
+      "result": "pass"
+    },
+    {
+      "text": "485 个带偏移引文逐条 t[start:end]==quote、落在区间内、sourceHash 正确 → verbatim/out-of-range/hash 三类不符均为 0",
+      "result": "pass"
+    },
+    {
+      "text": "globalOccurrences 与 nthOccurrence 对 485 条用 find 循环复核 → 不符 0",
+      "result": "pass"
+    },
+    {
+      "text": "同任务五栏共用同句 0、引文区间两两重叠 0；跨任务引文复用 0；24 个 null 栏 24/24 带同栏 Note → 0 缺失",
+      "result": "pass"
+    },
+    {
+      "text": "覆盖率两套独立实现（并集求交／逐字符掩码）结果一致，且与候选自报 3413/3354/0.98271/59/13 与 3477/3399/0.97757 逐位相同",
+      "result": "pass"
+    },
+    {
+      "text": "duplicateQuotesAcrossSections 复算 count=111、instanceCount=324 与自报一致；14 个分区计数与 fieldCounts 全一致",
+      "result": "pass"
+    },
+    {
+      "text": "随机 seed=20261013 抽 5 条 quote 做 find() → 5/5 逐字命中且 find 返回值等于 start",
+      "result": "pass"
+    },
+    {
+      "text": "NCE1–NCE4 每条都用原文逐字引证或可复算文件事实支撑；我写入 verdict 的 quote 全部经 t[start:end]==quote 自校验 → 不符 0",
+      "result": "pass"
+    },
+    {
+      "text": "推翻先前 CE6：读任务证据里 recompute.py／audit.py 存在且 sha256 与声明逐条匹配（我在仓库内 glob 不到是因为证据按约定存外置回滚盘）",
+      "result": "pass"
+    },
+    {
+      "text": "受保护路径未改：只写 loop/state/out/verify_sanguo_L1_0071.verdict.json（writes 指定）；未触碰 js/ css/ index.html serve.py narrative.py scripts/ tests/ docs/ data/；candidate.json 哈希仍为 cd42a4fa… 未被改动",
+      "result": "pass"
+    },
+    {
+      "text": "本次未跑 GPU／浏览器测试（任务未声明需要）；未运行格式桥（只只读复现其读取逻辑）",
+      "result": "pass"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/fe42d01f3826fe8096f86614.docs.json": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+    "loop/state/out/read_sanguo_L1_0071.candidate.json": "cd42a4fa118a107cb24eb9e1ced7eff7d845375d80ee3de7942d2f1341ca7b64",
+    "loop/state/out/verify_sanguo_L1_0071.verdict.json": "b6f2dd0336d0d72b5f89d1a248ad729e92032ca855c98342269eda90aa2bb885",
+    "loop/state/out/read_sanguo_L1_0071.json": "898e902e59225c707d48d0819f04ce1863d952cb8fa017f832f8335b737bfdff",
+    "loop/bin/to_candidate.py": "df5f168d4c82310b7c9776f0dca448397f2aa7dbded5683de9077f2b0686d5c8",
+    "loop/queue/read.jsonl": "d54b8852a9014d80ec18a063ee946f6b6098abdb4d43856420c1b6604c25f22b"
+  },
+  "changes": [
+    {
+      "path": "loop/state/out/verify_sanguo_L1_0071.verdict.json",
+      "kind": "append-only"
+    },
+    {
+      "path": "loop/state/out/read_sanguo_L1_0071.json",
+      "kind": "append-only",
+      "note": "由 loop.py verify 追加 reviews[1] 与 verifyState，未改动既有 reviews[0]"
+    }
+  ],
+  "remaining": [
+    "候选须修（改完即可用，不必重读原文）：NCE1 T26.costNote 两处；NCE2 recomputedAfterFix 清单；CE1 T12.costNote T16→T21；CE2 T14.costNote T21→T23；CE3 **栏位更正为 T26.costNote**；CE4 T04.result 改指 worldSettings 汉中条；CE5 TX06 第六十九回/前回→第七十回（且为前两回）；CE7 U17 补 5 段或改词；CE8 F04 补「操虽喜笑，而心恶之。」或改词；CE9 T11.objective 补引 [365703,365720) 或降级 basis；CE10 bodyRange 上界与自述终点矛盾须改口径。",
+    "**撤回**先前 CE6，不得据此改候选。",
+    "链路风险 NCE4（不在本任务 writes 内，未动手）：sidecar 是下游桥唯一排除来源，桥用正则把所有 `T\\d+` 整条丢弃 ⇒ 被当指针目标提到的无辜条目会被误杀。建议反例写成 `T12.cost` 形式，或让桥按 `层[下标]`/`id.字段` 精确排除。",
+    "建议（非必须）：R06 把成立的因果关系移出 rejectedCauseEdges；补登记「王平苦谏内容未写」为 unknown；补登曹植「爱修之才/常邀谈论/终夜不息」人际前提。",
+    "存疑（不作判据）：NCE2 以 prior-unsubmitted 作对照，若该中间版并非「本轮修复前」那一版则结论应弱化；但两文件哈希与读任务声明的证据一致，且 fix_minimal.py 的 A–D 四段与实测变化吻合。",
+    "存疑（不作判据）：F04「六事 vs 5 笔记账」中「某事算不算一忌」有解释空间，故只要求补引文或改词、不要求改数。",
+    "未做：未复算全书范围 2988ce6e… 的归属（只对本单元点名的两份 docs.json 实测）；未跑 GPU／浏览器测试。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/verify_sanguo_L1_0071.verdict.json"
+    ]
+  },
+  "wallClockNote": "由 loop.py submit 从租约 startedAt 计算",
+  "submittedAt": "2026-10-13T11:54:20Z",
+  "wallClockSeconds": 2563,
+  "wallClockFrom": "lease.startedAt",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-13T11:54:20Z"
+  },
+  "verifyState": "pending"
+}

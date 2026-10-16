@@ -1,0 +1,160 @@
+{
+  "task": "read:sanguo:L1:0059",
+  "agent": "w-read-2",
+  "status": "done",
+  "summary": "精读《三国演义》第六十回（docs[0].text[296379,303788)，7409 codepoint）并交付候选 loop/state/out/read_sanguo_L1_0059.candidate.json。本轮为**接手复核 + 修正**：上一轮同任务在 2700s 超时被杀（guard 日志 rc=124 06:28:50），磁盘上留下的候选与它自己声明的 reproduce.buildCommand 不一致（旧文件 339 引文/覆盖 0.9757，而脚本已改到第 6 轮）。我通读原文全文后：(1) 用自写的三支审计脚本独立复算——343 条带定位引文全部 TEXT[start:end]==quote 且全文唯一、全部落在区间内；五栏同任务零共用、跨任务零复用；11 个 null 栏全部带同名 Note；覆盖率断言 7355/7409=0.9927 逐位复算一致；(2) 修正三处真实缺陷——outOfRangeQuotesNote 里未代入的 `%d` 占位符、coverage 说明里写死且已过时的 0.9757、以及引用了并不存在的 selfCritique SC6；(3) 新增 SC6 如实登记「声明的构建命令不可复现」这一缺陷本身。修正后重建两次哈希一致（可复现）。未做语义核验，semanticReview=not-performed。",
+  "evidence": [
+    {
+      "path": "loop/state/out/read_sanguo_L1_0059.candidate.json",
+      "sha256": "516a51460783f9543f2fa3ed93efcbb12bd565c12bdee7670b7c8e393a8f6240"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-tools-20261012/cl0059-verify/audit_mine.py",
+      "sha256": "6b1910ff0e4c78a3ff8d5f7cef4b0d13824af1f14f257a8b07b6a00e26ad8761"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-tools-20261012/cl0059-verify/audit_coverage.py",
+      "sha256": "d33640efd3af78e56e1aa70e15692dbf9e46558d927c575434b3f2b2f37e1c20"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-tools-20261012/cl0059-verify/audit_reverse.py",
+      "sha256": "ab3475ecab41a93f04057c748181e546073048ce5218e9fa35ed022fe71b61eb"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-tools-20261012/cl0059-verify/redline_names.py",
+      "sha256": "72842ea53ac81a33b167eda06f8fe3a21a8bd8f393d6ee408c6af40561c388a4"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "全部 343 条带定位引文逐字复算：TEXT[start:end]==quote、quote 在全文唯一、且 start/end 落在 [296379,303788) 内；sourceHash 全部等于实读 docs.json 的 sha256（8ab7298a…）。命令：python3 -B -s …/cl0059-verify/audit_mine.py → FAIL(0)",
+      "result": "pass"
+    },
+    {
+      "text": "覆盖率是数量断言，独立重算而非采信：从 343 条引文重新求区间并集，得 covered=7355、fraction=0.9927、uncovered=54、gaps=20、merged=21，与候选 coverage 字段逐位一致。命令：python3 -B -s …/cl0059-verify/audit_coverage.py → PASS",
+      "result": "pass"
+    },
+    {
+      "text": "反向抽样（只查已写项发现不了遗漏）：固定 seed 从 13 个正文段抽 4 段，覆盖率 93.7%–99.6%，段内引文逐字复算全过。命令：python3 -B -s …/cl0059-verify/audit_reverse.py → PASS",
+      "result": "pass"
+    },
+    {
+      "text": "红线扫描：候选说明文字里出现的 61 个专名全部能在本区间找到，无原文外的人物/事件。唯一命中的「司马相如」是该条把原文简称「相如」展开的引文外注解，该条 why 已显式声明「不是原文用字，不能当原文证据」，引文栏仍为原文简称。命令：python3 -B -s …/cl0059-verify/redline_names.py → PASS",
+      "result": "pass"
+    },
+    {
+      "text": "五栏证据纪律：逐任务断言 objective/obstacle/action/result/cost 五栏两两不共用同一句、也不互相包含（本区间 20 条任务全部通过）；11 个 null 栏每个都有同名 <栏位>Note 说明为什么没有，没有未标注的未知。",
+      "result": "pass"
+    },
+    {
+      "text": "机器分区校验：required_sections(prompt)=tasks/causeEdges/states/foreshadows/worldSettings/themeReadings 六个分区全部存在（可为空数组），loop.validate_sections 返回 []。",
+      "result": "pass"
+    },
+    {
+      "text": "三区分写进字段：worldSettings 22 条 = place 10（placeState ∈ {arrived, mentioned}）+ item 5（itemStates 从 hold/transfer/use/lose 多选）+ rule 7（institution ∈ {declared, executed, misunderstood}），每条均带 explain；themeReadings 2 条各含 perspective/support/counter。",
+      "result": "pass"
+    },
+    {
+      "text": "可复现性：按候选自己声明的 reproduce.buildCommand 重建，连续两次产出哈希一致（516a51460783f9543f2fa3ed93efcbb12bd565c12bdee7670b7c8e393a8f6240），且与磁盘上的证据文件相同。",
+      "result": "pass"
+    },
+    {
+      "text": "发现并修正三处真实缺陷（上一轮超时被杀留下的半成品）：①outOfRangeQuotesNote 的 `[%d,%d)` 是未代入的格式占位符（漏了 % (A, B)）；②coverage.uncoveredNote 把「最终覆盖 0.9757」写死，第 6 轮补引后实测已是 0.9927；③该说明引用了并不存在的 selfCritique SC6。修正为占位符代入 + 数字构建时实测代入 + 补真实的 SC6 条目。",
+      "result": "pass"
+    },
+    {
+      "text": "未做语义核验：本候选 semanticReview=not-performed，仅在字段与说明里声明「引用定位正确 ≠ 语义已核验」。语义复核留给 read-verify 通道；本提交不作任何 semanticReview 完成的声明。",
+      "result": "pass"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/read_sanguo_L1_0059.candidate.json",
+      "kind": "append-only"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/fe42d01f3826fe8096f86614.docs.json": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+  },
+  "remaining": [
+    "语义未核验：本候选只证明「引文定位逐字正确 + 分栏各自有据 + 分区已产出」，不证明语义判断成立。重点待核的有：T17.result 写 null（刘备是否答应取涪城之计在本区间确实未给出）、F2/F3 标 unresolved、以及 rule=executed 的 WS16/WS17/WS18 三条三分类口径。",
+    "任务元数据 sourceHash 与提示词正文/实读文件不一致（已查清，非本 agent 造成）：task-read_sanguo_L1_0059.json 的 sourceHash=2988ce6e…，而 prompt 正文写的是 8ab7298a…，磁盘上 data/cache/fe42d01f3826fe8096f86614.docs.json 实测也是 8ab7298a…。2988ce6e… 实为 data/cache/152e2a6eed94f1075e7e7070.docs.json 的哈希；两份文件 docs[0].text 逐字符相同（607191 codepoint），仅 JSON 键序不同（152e 先 path 后 kind，fe42 先 kind 后 name），故两套偏移等价、引文不受影响。候选统一采用提示词正文写明的 8ab7298a…。建议由环境侧核对 build_plan 取 docsSha256 的来源（loop/state/index.json 里 sanguo.docsSha256 记的是 8ab7298a…，与任务字段不同源）。",
+    "被「引文必须全文唯一」规则挡下而未收的短句：「修领命。」等过短句只能附着在更长引文里，可能使个别位置只被间接覆盖——已在 coverage.uncoveredGaps 里如实列出未覆盖的 54 个 codepoint（换行/缩进与单字标点为主）。",
+    "世界设定只收影响行动/资源/约束/后果的明确设定，未扩地图、物品链或术语装饰层；本区间地理名词密集（张松夸蜀中一段）但全属人物语，已列入 notWorldSettings 而不是当作 place。",
+    "本人未跑 GPU/浏览器测试，未改动 js/ css/ index.html/ serve.py/ narrative.py/ scripts/ tests/ docs/ data/ 任何受保护路径。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/read_sanguo_L1_0059.candidate.json"
+    ]
+  },
+  "submittedAt": "2026-10-12T22:49:27Z",
+  "wallClockSeconds": 1032,
+  "wallClockFrom": "lease.startedAt",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-12T22:49:27Z"
+  },
+  "verifyState": "partial",
+  "reviews": [
+    {
+      "reviewer": "w-dafeng-2",
+      "at": "2026-10-12T23:27:33Z",
+      "verdict": "partial",
+      "notes": "结论：**partial**。可取的部分很大，必须修正的部分很小但明确。\n\n【凭据层：无瑕疵】343 条带偏移的引文全部逐字命中、start/end 与全文 TEXT.find 完全一致、全部落在 [296379,303788) 内、且全部全文唯一——NOTFOUND 0、偏移不符 0、越界 0、不唯一 0。随机抽 5 条复核（seed=20261013）5/5 命中且偏移一致。覆盖率 7355/7409=0.99271 与残余 20 个 gap 由我独立按引文区间并集复算，与自述完全一致，且 20 个 gap 无一含汉字。14 个分区条数、五栏 89/11 全部复算一致。\n\n【语义层：无编造】42 个专名逐一在切片内检索，全部命中，没有原文之外的人物；没有越权的结局（T17.result=null，RCE1/RCE2/RCE4 三处主动拒绝把「下令」当「已执行」、把「喝令斩之」当死亡、把「献计」当执行）；「结束≠成功」守得住，2 条伏笔显式标 unresolved 并写清回收止于何处；12 条被主动排除的因果边各有原文依据。这一层的自查密度（6 条 selfCritique、41 条 unknowns、28 条人物语标注）明显高于同类候选。\n\n【必须修正的】① CE-A：T1.result 的「曹操既没有答应取汉中」预设了一次从未发生的请求——许都觐见全段 1909 codepoint 内「汉中」「取汉中」「兴兵」「说曹操」各出现 0 次，使命根本没被提起。② CE-B：CE10 的「本区间没有任何叙述层证据支持它」把曹操当张松面说出的「吾即日下了江南，便来收川」排除在依据之外；该句候选自己在 T4.objective 引用过，但全文件 0 个字段同时出现「收川」与「取川」，两处从未并置。③ SR1/SR2/SR3 三处自述计数与说明文字不可复算或与文本相反（basisCounts explicit 少报 9、readMethod 段落算术 14+1+2≠16 且「47 行」不可复现、quotationConvention 关于「该句后无句号」的理由被现存文本推翻）。\n\n【反向验证：3 组遗漏】RC1 绿袍赏赐与密书相隔 225 codepoint 而从未并置（受赏者正是主谋、赏赐的由头正是密书指定的动手场合）；RC2 张松对杨修说蜀中「动以百数」、对刘璋说「各顾妻子…各有外意」，同一人两次相反描述从未对读；RC3 图本与金珠锦绮在许都全段一次也没出示（「图」与「进献」各 0 次），这解释了为什么「出使失败」的形态是「从未开始」而不是「被拒绝」。\n\n【误杀】MK1：CE10 的绝对措辞属误杀形态——规则（人物语≠叙述事实）没错，但把合法证据一起挡掉了。MK2：NF1 排除《孟德新书》的理由与候选自身 CE3/CE14 冲突（CE14 称本回后半全部冲突的入口就是那一场书院斗气），但结论仍可接受，按纪律只记存疑、不据此判 fail。\n\n【为什么不是 fail】没有一条 counterExample 指向编造：引文 100% 可核，人物/结局/伏笔无一处越界，两处实质问题分别是「预设未发生的事件」与「措辞过宽」，都是可定点修正的表述问题，且候选的 KG12/KG14/SC6 已经把相邻的正确观察写出来了。按 VERIFIER.md「判 partial 时要说清哪些条目可以用、哪些必须丢弃或降级」，本次判定为：**除 T1.result 的措辞与 CE10 的绝对断言在修正前不应被下游直接采信外，其余全部可用**；SR1–SR3 三处自述计数应改为构建时以实测值代入。\n\n【硬边界】本轮未改任何受保护路径，未改被复核的候选文件（其 sha256 复核前后一致 516a5146…）。本次复核不裁决——「张松献图是否预先设计」（候选 SC1/U5 已记未知）、「曹操『取川之心』是真意还是恫吓」（原文只给宣示，不给执行）、「刘备在本区间末是否已知密书」（KG4 已记未知）——这三处候选都如实标了未知，我不替它选定答案。",
+      "counterExamples": [
+        {
+          "id": "CE-A_t1result_presupposes_a_request_never_made",
+          "claim": "tasks[0].result.text 写「曹操既没有答应取汉中」——把出使失败表述为「请求被拒绝」，预设张松已在许都当面提出「说曹操兴兵取汉中」。",
+          "quote": "松曰：“为路途艰难，贼寇窃发，不能通进。”",
+          "quoteStart": 296751,
+          "quoteEnd": 296772,
+          "why": "许都全段 [296634,298543)（1909 codepoint）逐字检索：「汉中」0 次、「取汉中」0 次、「兴兵」0 次、「说曹操」0 次、「进献」0 次。其中**相府觐见那一场**（自「操坐于堂上，松拜毕」[296722] 至「遂拂袖而起」[296848)，126 codepoint）张松只说了两句——「为路途艰难，贼寇窃发，不能通进。」[296751,296772) 与「南有孙权，北有张鲁，西有刘备，至少者亦带甲十余万，岂得为太平耶？」[296789,296826)，两句都不是使命。他此后在西教场确曾对曹操说过两句（[298293]、[298383]），但那是炫耀军容引发的一问一答，与取汉中无关；「吾川中无诌佞之人也」[296905,296921) 的对象是曹操的左右而非曹操本人，本候选 T18 也如此归属。全区间「汉中」只出现两次（[296536] 张松对**刘璋**的献策、[299769] 张松对**刘备**的说辞），许都段内一次也没有。因此原文没有写出「曹操拒绝了取汉中」，它写的是这件事根本没被提起。候选在 KG12 已正确记下「他在许都做的最出格的事…没有一句被他对刘璋说起」，却把同一段的另一面（使命也未对曹操说起）读成了被拒绝。这一处落在 result 栏，是最容易被下游直接读取的位置。",
+          "severity": "中（预设未发生的事件，非编造人物或结局）",
+          "suggestedFix": "T1.result 改为「使命未及陈说，曹操既未闻取汉中之议，张松也未能献出西川」，并把「什么话说了、什么话没说」显式写出。"
+        },
+        {
+          "id": "CE-B_ce10_absolute_claim_contradicted_by_same_segment",
+          "claim": "causeEdges[9]（CE10）mechanism 写「注意「取川之心」的依据只有张松的一句话（人物语），本区间没有任何叙述层证据支持它」；speechAsClueNotFact[0].note 同旨。",
+          "quote": "教他回去传说：吾即日下了江南，便来收川。",
+          "quoteStart": 298163,
+          "quoteEnd": 298183,
+          "why": "这一句是曹操本人对杨修的交代，且交代的用途恰恰是让张松「回去传说」；同一句的完整形式「来日我于西教场点军，汝可先引他来，使见我军容之盛，教他回去传说：吾即日下了江南，便来收川。」被候选自己在 tasks[3].objective 里逐字引用并标 basis=explicit、voice=character——即候选承认它是本区间内可引的原文。但全文件 0 个字段同时出现「收川」与「取川」：这两处从未被并置。张松正是曹操指定的传话对象，他回报刘璋「彼已有取川之心」并非无源之词，而是把当场所闻转述出去。严格按项目「人物语≠叙述事实」的口径，曹操这句仍是人物语，所以本条**不构成编造**；但「本区间没有任何叙述层证据支持它」这一措辞把一处同段之内、说话人当面对张松说出的宣示排除掉了，属误杀（见 misKillCheck）。",
+          "severity": "中（措辞过宽导致一条真实因果链无法建立）",
+          "suggestedFix": "改为依据关系而非「无任何依据」：「取川之心的直接来源是曹操本人在西教场对张松的宣示；候选另有 RCE8 说明『操闻之而胆裂』才是张松的论断」。"
+        }
+      ],
+      "reverseChecks": [
+        {
+          "id": "RC1_green_robe_and_secret_letter_never_juxtaposed",
+          "found": "刘璋在涪城会后当众表彰张松「非张松则失之矣」，当场脱下自己身上穿的绿袍连同黄金五百两送往成都赐给他；而同一回稍前，张松的密书已经把「于涪城相会刘璋，便可图之」的动手时机与地点定好。赏赐与通敌谋划在原文里只隔 225 codepoint，受赏者正是主谋，赏赐的由头（涪城之会）正是密书指定的动手场合。候选分别记在 T16（赏赐）与 KG4/CE8（密书），但全文件同时含「密书」与「绿袍」／「黄金五百两」／「赐与张松」的字段数为 0（四种组合都试过）。",
+          "quote": "乃脱所穿绿袍，并黄金五百两，令人往成都赐与张松。",
+          "quoteStart": 303185,
+          "quoteEnd": 303209,
+          "evidence": "另一处引证：却说法正密谓庞统曰：“近张松有密书到此，言于涪城相会刘璋，便可图之。机会切不可失。” [302960,303002)。两段落相隔 225 codepoint（303185−302960）。并置检索在候选全文的递归字符串集合上执行，命中 0。",
+          "why": "这是本回反讽结构的落点——受赏的功劳与正在筹备的背叛是同一件事的两面。候选把两半都如实登记了，却没有让任何读者在一处同时看到它们，下游按字段消费时读不到这一层。"
+        },
+        {
+          "id": "RC2_zhangsong_describes_shu_officials_twice_in_opposite_terms",
+          "found": "张松对杨修说蜀中人才济济——「文武全才，智勇足备，忠义慷慨之士，动以百数」；对刘璋说蜀中官场已经烂掉——「今蜀中文官各顾妻子，不复为主公效力；诸将恃功骄傲，各有外意」。同一人对同一批人给出方向相反的评价，前者是对外夸胜（他当时正在与杨修争胜，「有心难之」），后者是对内动员（紧接着他就此把「不得刘皇叔…必败之道也」推给刘璋）。候选把前者记在 NE6/NWS7，把后者记在 KG14 并注意到被点名的诸将随后集体进言「还宜防之」与「各有外意」方向相反，但全文件 0 个字段同时含「动以百数」与「各顾妻子」：两次描述从未对读。",
+          "quote": "文武全才，智勇足备，忠义慷慨之士，动以百数。如松不才之辈，车载斗量，不可胜记。",
+          "quoteStart": 297312,
+          "quoteEnd": 297351,
+          "evidence": "另一处引证：今蜀中文官各顾妻子，不复为主公效力；诸将恃功骄傲，各有外意。 [302501,302531)。并置检索命中 0。",
+          "why": "这不是修辞差异而是同一人可核的自相矛盾，且两处都直接服务于他当时的目的。候选的 KG14 已把后者定性为「针对同僚的整体指控」，离这一步只差与前者对读；补上后 T8/KG14 的说服机制才完整。"
+        },
+        {
+          "id": "RC3_the_map_was_never_shown_once_at_xudu",
+          "found": "张松把西川地理图本「暗画…藏之」带往许都，但在许都觐见全段 [296634,298543) 内「图」出现 0 次、「图本」0 次——他带着此行最重要的实物筹码，却在曹操面前一次也没有拿出来；直到荆州 [299936,299978) 才「于袖中取出一图」。候选 F1 写「同一卷图跨了两条路线（许都→荆州）」，把图记成跨路线携带，但没有点出许都这一程它从未出示。同理，刘璋备下的「金珠锦绮」在许都段内「进献」出现 0 次，也从未献出（该项下落空白候选已在 KG12 覆盖，不计为遗漏）。",
+          "quote": "松乃暗画西川地理图本藏之，带从人数骑，取路赴许都。",
+          "quoteStart": 296584,
+          "quoteEnd": 296609,
+          "evidence": "取出处引证：松于袖中取出一图，递与玄德曰：“深感明公盛德，敢献此图。但看此图，便知蜀中道路矣。” [299936,299978)。两处相隔 3352 codepoint。",
+          "why": "「带着最重要的筹码却一次也没拿出来」是本回许都段的关键事实，它与 counterExample CE-A（使命也未出口）互为解释：张松在许都根本没有进入谈正事的阶段，所以「出使失败」不是被拒绝，而是从未开始。建议在 T1 或 F1 显式写出。"
+        }
+      ]
+    }
+  ]
+}

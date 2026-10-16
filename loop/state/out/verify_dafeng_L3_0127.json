@@ -1,0 +1,213 @@
+{
+  "task": "verify:dafeng:L3:0127",
+  "agent": "w-verify-0",
+  "role": "VERIFIER",
+  "status": "done",
+  "verdict": "partial",
+  "reviewedTask": "read:dafeng:L3:0127",
+  "reviewedArtifact": {
+    "path": "loop/state/out/read_dafeng_L3_0127.candidate.json",
+    "sha256": "960950c3d76bb4d685e7f8dc047e3a3c2e5d778c3d7e9d2397df265321dbe0d9",
+    "bytes": 175139,
+    "producedBy": "w-dafeng-1"
+  },
+  "summary": "独立反向复核《大奉打更人》第一百二十八章 左右逢源（原文区间 [437926,442307)，4381 codepoint）：先自己通读原文切片、之后才打开候选。判 **partial**。抽取项与引用层零缺陷：9 条任务五元组、8 条 causeEdges、6 条 states、6 条 knowledgeDiffs、4 条 foreshadows、26 条 narrativeFacts 逐条回原文全部命中，**0 条编造**；230 条带偏移引文 text.find 逐字命中 230/230、text[start:end]==quote 230/230、偏移 0 违例；11 条区间外引用全部正确标 inSegment=false 且逐字可查；219 条区间内引用全部真落在区间内；随机抽 5 条 quote 复核 5/5 命中且偏移一致；候选自报的 segmentSha256/coverage 84.46%/basisHistogram/13 个 *Count 全部独立复现一致；未发现原文没有的人物/事件/结局；未把结束当成功（T1=PARTIAL、T8/T9=FAILED、DNA1 专门拒绝写成功）；semanticReview 保持 not_done。判 partial 而非 pass：**候选顶层缺 worldSettings[] 与 themeReadings[] 两个分区**，而本任务的队列定义（第 4b/4c 条，也是校验器 validate_sections 认定的口径）明确要求这两项，`loop.py verify` 会对本条把 pass 静默降级为 partial。这正是本轮唯一影响 verdict 的硬缺陷。判 partial 而非 fail：其余 5 条 counterExample **无一条是否定原文事实或凭空造物** —— 2 条是 defectCandidates 的对照统计不成立（DF1 的『是过来向』全书 0 次；DF5 的『5 处说完他看见主语均为许七安』实为 2/5）、2 条是作者自述与产物不符（SC5 说 6 条 cost=null 实为 8 条且点名保留的 T6/T9 实为 null；quoteEntries 口径未命名 230 vs 254）、1 条是 T8 的 action 依据是 objective 依据的子串（破『同一句不得作多栏依据』纪律，重叠 8 字符），均可用原文或其自带复现命令直接证伪，且**不影响 tasks[] 主体数据的可用性**。另附 4 条反向发现（最重一条：『但他高估了二公主的智商，或者低估了她的任性和刁蛮』这叙述对 T1 那次站位的评断，只在 speechActs[7] 引文槽出现、未被任何断言吸收，使 T1 的 action 读起来像一步成功的棋，而原文恰是它的反证）。根因判定：审核发现 worker 端 build_prompt 只把 runs/task-*.json 路径交给 agent，而本轮 runs 定义（1754 字符）比队列定义（2799 字符）少了这两节 —— 全仓 184 个 read runs 中 17 个存在同类漂移，即**任务定义有两个版本、agent 只看得见短的那份、校验器只认长的那份**。故缺分区记 partial 并归因为环境缺陷，不判作者 fail。我自纠 2 处方法学失误（见 notes）。",
+  "method": "按 VERIFIER 契约顺序执行：①**先**自己读原文——把 docs[0].text[437926:442307) 落到 /tmp/dafeng_0127_slice.txt 通读 229 行，并自检切片以章题开头、长度 4381 与任务声明一致，之后才打开候选；②机械层：不依赖候选自报 stats，遍历候选全部 230 条 {quote,start,end} 做回切（find、text[s:e]==quote、inSegment 边界）；③抽取项核对：9 条 tasks 五栏、8 条 causeEdges、5 条 nonEdges、6 条 states、6 条 knowledgeDiffs、4 条 foreshadows、5 条 notForeshadows、26 条 narrativeFacts 的引文逐条回原文定位；④**反向验证**（不从已写项出发）：自行重算 coverage（合并 219 条区间内引用区间得 3700/4381=84.46%）、把原文按句切分 167 句后做『被引用 vs 被断言』差集与分区映射，找出只被 verbatimAnchors/defectCandidates/notForeshadows 引用、未被任何 claim 分区吸收的 9 句；⑤误杀检查：逐条回原文核对 NE2/NE3/NE4/NE5 与 notForeshadows[4] 排除了什么合法内容；⑥引用核验：seed=20261009 随机抽 5 条 quote 用 text.find 复核；⑦复核候选自身的可证伪声明（segmentSha256、13 个 *Count、basisHistogram、quoteEntries、全部全书频次声明），并实跑它给的全部 5 条 reproduce 命令（rc 均为 0）。",
+  "quotesLocated": {
+    "totalQuoteRefs": 230,
+    "totalQuoteFieldsIncludingLabels": 254,
+    "sliceEqualsQuote": "230/230",
+    "notFoundInDoc": 0,
+    "offsetMismatch": 0,
+    "outOfSegmentRefs": 11,
+    "outOfSegmentMislabeled": 0,
+    "inSegmentRefsOutOfRange": 0,
+    "nonVerbatimTopLevelLabels": 3,
+    "nonVerbatimLabelNote": "speechActs[0]/[3]/[17] 三条顶层 `quote` 标签是作者为阅读方便做的拼接或截断（并句、用「／」连接两处台词、去掉前引号），非原文子串；三处均自带逐字 evidence[]，任务要求的『引用是原文子串』由 evidence 满足，属可读性问题不构成编造。"
+  },
+  "counterExamples": [
+    {
+      "id": "CE1",
+      "severity": "partial级（非编造类）",
+      "claim": "候选缺提示词第 4b/4c 条要求的 worldSettings[] 与 themeReadings[] 两个内容分区",
+      "quote": "4b. `worldSettings[]`（P3.10）：**只提取影响行动、资源、约束或后果的明确设定**。",
+      "quoteSource": "任务定义文本（loop/queue/read.jsonl 第 1431 行条目 prompt，偏移 1266-1291），不是小说原文",
+      "reproduce": "python3 -c \"import sys;sys.path.insert(0,'loop/bin');import loop as L;t=L.load_tasks()['read:dafeng:L3:0127'];print(L.required_sections(t['prompt']));print(L.validate_sections(L.load_json(L.OUT/L.output_name('read:dafeng:L3:0127')),t))\""
+    },
+    {
+      "id": "CE2",
+      "severity": "证据瑕疵（对照项不成立）",
+      "claim": "defectCandidates[DF1] 的对照写法『是过来向』全书出现 0 次",
+      "quote": "过来是向",
+      "reproduce": "python3 -c \"import json;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];print('是过来向',t.count('是过来向'),'过来是向',t.count('过来是向'),'是过来',t.count('是过来'))\""
+    },
+    {
+      "id": "CE3",
+      "severity": "证据瑕疵（统计支撑不成立）",
+      "claim": "defectCandidates[DF5] 称 5 处『说完，他看见』主语均为许七安，实测仅 2/5",
+      "quote": "说完，他看见许七安脸上出现了剧烈的情绪波动，似感动，又似震惊。",
+      "reproduce": "python3 -c \"import json,re;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];print([(m.start(), t[max(0,m.start()-70):m.start()+6].replace(chr(10),' ')) for m in re.finditer('说完，他看见', t)])\""
+    },
+    {
+      "id": "CE4",
+      "severity": "自述与产物不一致（数据本身无误）",
+      "claim": "selfCritique[SC5] 称 6 条 cost=null 并点名 T2/T6/T9 保留代价，实测 8 条 null 且仅 T2 有值",
+      "quote": "不但化险为夷，还让二公主答应了替他求情，为将来买了一份商业险。",
+      "reproduce": "python3 -c \"import json;d=json.load(open('loop/state/out/read_dafeng_L3_0127.candidate.json'));print([(t['id'],'cost' if t.get('cost') else 'null') for t in d['tasks']])\""
+    },
+    {
+      "id": "CE5",
+      "severity": "partial级（纪律口径）",
+      "claim": "tasks[T8].action 的依据是 objective 依据的子串，破『同一句话不得同时充当多栏依据』",
+      "quote": "元景帝训斥灵龙。",
+      "reproduce": "python3 -c \"import json;d=json.load(open('loop/state/out/read_dafeng_L3_0127.candidate.json'));t=d['tasks'][7];o=t['objective']['evidence'][0];a=t['action']['evidence'][0];print(a['quote'] in o['quote'],a['start'],a['end'],o['start'],o['end'])\""
+    }
+  ],
+  "reverseChecks": [
+    {
+      "id": "RC1",
+      "found": "叙述对 T1 那次站位的直接评断未被任何断言吸收",
+      "quote": "但他高估了二公主的智商，或者低估了她的任性和刁蛮",
+      "offset": [
+        438131,
+        438155
+      ],
+      "note": "该句只在 speechActs[7] 的引文槽出现；T1 的 action 写『先以向长公主请教桑泊案把冲突降级成公务』，而此句正是它的反证（他这步当场被二公主截断）。"
+    },
+    {
+      "id": "RC2",
+      "found": "远古领域混居这一世界观前提未被任何 narrativeFacts/worldSettings 吸收",
+      "quote": "相传远古时代，妖族与人族的领域不像现在这般泾渭分明，是一种相对混居的状态。",
+      "offset": [
+        441840,
+        441877
+      ],
+      "note": "只在 verbatimAnchors[9] 出现；它是 narrativeFacts[14] 那条因果链（混居→人族被吞吃→不擅水性→依仗灵龙）的前提，恰是缺失的 worldSettings 分区最该收录的一类。"
+    },
+    {
+      "id": "RC3",
+      "found": "开篇『报应』这一自评注未被状态机吸收",
+      "quote": "昨天收了二公主的玉佩时，想过有朝一日或许会面临这种情况。只是没想到报应来的这么快。",
+      "offset": [
+        437958,
+        437999
+      ],
+      "note": "被用作 T1 objective 的依据，但没有任何状态记录『前一日的投机→本区间兑付』这一层。"
+    },
+    {
+      "id": "RC4",
+      "found": "玉佩的状态迁移在 states[] 六条里无记录",
+      "quote": "许七安当着二公主的面，小心翼翼的把玉佩收回怀里，仿佛那不是玉佩，而是珍宝。",
+      "offset": [
+        441164,
+        441201
+      ],
+      "note": "候选在 U4/notForeshadows[4] 承认它是同一物且此后长期作凭据使用，却未在 states[] 记其迁移。"
+    }
+  ],
+  "misKillCheck": "误杀检查未发现候选把合法内容错误排除。重点核对三处易误杀点，候选都判对：①NE2 拒绝把『训斥→发狂』连边（原文写『似乎受到了某种刺激』，确无机制）；②NE3 拒绝把太子回忆当因（原文自注『太子也不敢肯定』，观察者本人存疑）；③notForeshadows[4] 把玉佩排除出 foreshadows 而保留在 U4 讨论，未做整词误杀。唯一口径分歧：候选把玉佩判为道具而非伏笔（SC4 自陈），复核认为可接受且已留痕。",
+  "hallucinationCheck": "未发现原文没有的人物/事件/结局。抽检被断言的实名（许七安/临安/怀庆/元景帝/太子/灵龙/蛊神/裱裱/长公主/二公主）全部在原文区间内出场。洛玉衡、楚元缜二名出现在 notForeshadows[0] 对全书其余 4 处『死心塌地』的排除说明中（区间外对照，非本区间断言），核对属实：@3122834 为洛玉衡人格、@4755889 为李灵素与楚元缜对话场景（该处 speaker 归属另见 CE3 相关校正）。",
+  "evidence": [
+    {
+      "path": "loop/state/out/read_dafeng_L3_0127.candidate.json",
+      "sha256": "960950c3d76bb4d685e7f8dc047e3a3c2e5d778c3d7e9d2397df265321dbe0d9",
+      "bytes": 175139,
+      "kind": "被复核候选（只读，未修改）"
+    },
+    {
+      "path": "loop/state/out/verify_dafeng_L3_0127.verdict.json",
+      "sha256": "979e78be6df66e110e26cd68b10c6aac25af787fbf30b89fa273a627b83650f4",
+      "bytes": 30278,
+      "kind": "本复核的 verdict 产物"
+    },
+    {
+      "path": "data/cache/1063b17ca65ec1b76f30e460.docs.json",
+      "sha256": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+      "kind": "原文（任务指定路径；只读引用，未修改）"
+    },
+    {
+      "path": "data/cache/1063b17ca65ec1b76f30e460.json",
+      "sha256": "98370a39df4f8105063004d6bc8194e50aa8008e111a584ffec32f7ad14a14df",
+      "kind": "图谱缓存（对照用；未作为任何断言的证据，只读）"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "先自读原文后看候选：独立通读 docs[0].text[437926:442307) 全文 4381 codepoint / 229 行，自检切片以章题『第一百二十八章 左右逢源』开头且长度与任务声明一致，之后才打开候选",
+      "result": "pass"
+    },
+    {
+      "text": "全部 230 条带偏移引文逐字可查：text.find(quote)>=0 230/230，text[start:end]==quote 230/230，偏移违例 0",
+      "result": "pass"
+    },
+    {
+      "text": "区间归属零错：11 条 inSegment=false 全部真在 [437926,442307) 之外且逐字可查（如『保护临安！』@443655、『儿臣请你免了他的死罪。』@445603、『他可以凭借裱裱的腰玉进出皇城』@640462）；219 条 inSegment=true 全部真在区间内，0 违例",
+      "result": "pass"
+    },
+    {
+      "text": "随机抽 5 条 quote（seed=20261009）做 find()+切片双验：5/5 find==declared start 且 text[s:e]==quote（438218/437926/441517/439550/441531）",
+      "result": "pass"
+    },
+    {
+      "text": "候选自报统计独立复现：segmentSha256=72f2fe98…、coverage 3700/4381=84.46%（自算合并区间得同值）、basisHistogram(explicit65/inferred3/derived2)、13 个 *Count 全部一致、outOfSegmentQuoteEntries=11 一致",
+      "result": "pass"
+    },
+    {
+      "text": "候选自带的 5 条 reproduce 命令实跑 rc 均为 0，输出与其声明一致",
+      "result": "pass"
+    },
+    {
+      "text": "抽取项零编造：9 条 tasks 五元组 + 8 条 causeEdges + 6 条 states + 6 条 knowledgeDiffs + 4 条 foreshadows + 26 条 narrativeFacts 逐条回原文定位，全部命中，0 条找不到原文出处",
+      "result": "pass"
+    },
+    {
+      "text": "硬性红线检查：无人物台词被写成叙述事实（K2 明标『转述内容属于人物说法』）、无猜测写成真相（K6/U1 标不可判定）、无结束当成功（T1=PARTIAL、T8/T9=FAILED、DNA1 拒绝写成功）、semanticReview=not_done",
+      "result": "pass"
+    },
+    {
+      "text": "内容分区缺项确认：validate_sections 对本条报『内容分区未产出：worldSettings, themeReadings』",
+      "result": "fail"
+    },
+    {
+      "text": "verdict 已通过 loop.py verify 记录：verifyState=partial，reviewer=w-verify-0 ≠ 原提交者 w-dafeng-1（非自签）",
+      "result": "pass"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/verify_dafeng_L3_0127.verdict.json",
+      "kind": "append-only"
+    },
+    {
+      "path": "loop/state/out/verify_dafeng_L3_0127.json",
+      "kind": "append-only"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/1063b17ca65ec1b76f30e460.docs.json": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "data/cache/1063b17ca65ec1b76f30e460.json": "98370a39df4f8105063004d6bc8194e50aa8008e111a584ffec32f7ad14a14df"
+  },
+  "remaining": [
+    "本复核为 partial，不是 pass：CE1–CE5 需由原提交者或后续修复任务处置后才可视为通过；我未修改候选文件（只读）。",
+    "CE1（缺 worldSettings[]/themeReadings[]）必须补齐后才能进发布；本区间确有内容可填（灵龙食紫气而生/与妖族不同列/远古领域混居/历代皇帝水中坐骑→观赏性生物；主题层可写『投机者的当日兑付』与『姐妹争斗中的工具人处境』，各带 support+counter）。",
+    "根因不在作者：worker.build_prompt（loop/bin/worker.py:147）只把 runs 任务定义路径交给 agent，而本轮 runs 定义比队列定义少 worldSettings/themeReadings 两节；全仓 184 个 read runs 有 17 个存在同类漂移。建议在合并任务里修 worker 使 agent 拿到与校验器同源的 prompt —— 该文件属受保护路径，我无权修改。",
+    "口径待决议（非事实分歧）：候选把玉佩判为道具而非伏笔（SC4）。若项目口径认为『赐予→退还提议→收回→作凭据』构成铺设与回收，应升为 foreshadows；我未据此判 fail。",
+    "发布提醒：T7 的 result=SUCCESS 仅限『二公主答应求情』，兑现不在本区间，发布时不应简写成『许七安脱罪有望』。",
+    "发布提醒：foreshadows[2]/[3] 的 setup 部分取自区间外（F3 的『灵龙反应过于激烈』、F4 的两条回顾），候选均已标 inSegment=false；若发布工具按区间内伏笔聚合，需注意其锚点不在本区间。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/verify_dafeng_L3_0127.verdict.json",
+      "loop/state/out/verify_dafeng_L3_0127.json"
+    ]
+  },
+  "notes": "方法学自纠 2 处，如实记录：①我第一次做反向验证时用整串子串匹配查『高估了二公主的智商』等句是否被断言，得到 NOT-ASSERTED，据此差点把『T1 的 action 描述过度正面』写成一条较强反例；改用按句切分+分区映射后才确认该句确实只在 speechActs[7] 引文槽、未进任何 claim 分区——结论方向不变，但强度须降为『可补的解释层缺口』（RC1）。②我最初把 coverage 的验证写成『引用数一致』（254 vs 230）就差点报了虚报，实际是口径差异（230=带偏移引用数，254=含 24 个无偏移标签）。两处均已在 verdict 的 notes 中留痕：反向验证本身也会假阳性，凡结论我都固定了可复现命令而非凭印象。判定纪律遵守情况：判 partial 的两类依据都给了逐字可查的引证或机器可复现的命令；所有拿不出原文引证的反对意见（玉佩是否伏笔、T7 SUCCESS 口径、跨区间伏笔锚点）一律只记为『存疑/待决议』，未据此判 fail。",
+  "submittedAt": "2026-10-08T19:18:16Z",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-08T19:18:16Z"
+  },
+  "verifyState": "pending"
+}

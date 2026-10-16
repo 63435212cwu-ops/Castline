@@ -1,0 +1,338 @@
+{
+ "schemaVersion": "castline-read-verdict/1",
+ "task": "verify:dafeng:L2:0182",
+ "reviewedTask": "read:dafeng:L2:0182",
+ "reviewedCandidate": "loop/state/out/read_dafeng_L2_0182.candidate.json",
+ "reviewedCandidateSha256": "361bebd462139b3e51ec29ea60e7624581397d36c09ab4686f20aa7b8a103855",
+ "reviewedCandidateAgent": "w-dafeng-0",
+ "reviewer": "w-verify-0",
+ "roleFile": "loop/ROLES/VERIFIER.md",
+ "verdict": "partial",
+ "source": {
+  "path": "data/cache/1063b17ca65ec1b76f30e460.docs.json",
+  "docsJsonTopLevel": "list",
+  "slice": "docs[0].text[659355:663915]",
+  "sliceChars": 4560,
+  "fileSha256": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+  "segmentSha256": "bb5a0d3f1e9ede6d6d8c0c08009b113218564bc9546269174d721b96c8f746e4",
+  "taskSourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+  "sourceHashMatchesTask": true,
+  "method": "按 VERIFIER 契约**先自己读原文**（把切片按 108 个非空段逐段打印通读，未先看候选结论），再写**独立脚本**（verify_0182.py，不 import 候选的 build_candidate.py / verify_candidate.py）自己重切段/句、自己从 docs[0].text 取偏移，逐条与候选声明对账；随后做反向验证、误杀检查、幻觉检查、引文抽检。"
+ },
+ "extractionAudit": {
+  "quoteObjectsChecked": 364,
+  "verbatimFailures": 0,
+  "offsetMismatches": 0,
+  "outOfRange": 0,
+  "wrongSourceHash": 0,
+  "firstOccurrenceMismatches": 0,
+  "firstOccurrenceNote": "3 处 `startIsFirstOccurrence=False`（『......』@494、『许七安摇头。』@97274；前者的两处引用分别落在 rejectedEdges/R6 与 nullFieldCandidates/N8）经我复算**与候选声明逐条一致**，候选已如实标注 startIsFirstOccurrence=False 且 startIsFirstOccurrenceInRange=True，区间内正确，不算错。",
+  "declaredFieldRecompute": "我对全部 364 条独立重算了 wholeTextOccurrences / occurrencesInRange / firstOccurrenceAt / inRange / para / sentUnit：**0 处不符**（sentUnit 一栏我第一版自算 180 条、与候选差 4，查明是我自己的切句规则不同 —— 改用候选声明的 `split after 。！？…` 后恰好复现其声明的 184 条，按『复核者可以判自己错』如实记在 verify_0182.py 的 docstring 里，不计为候选缺陷）。",
+  "fabricatedExtractionItems": 0,
+  "fabricatedNote": "没有发现候选凭空造出的任务/因果/状态/伏笔条目：tasks[8] 的 who/label、causeEdges[12] 的 frm/to、states[5]、foreshadows[3] 的每一端，我都在原文找到对应文字。**唯一的事实性错误是 CE1**（把宋廷风的出场记到朱广孝名下），它属论据而非抽取项本身。",
+  "taskColumnIndependence": "独立复算：8 个任务内五栏引文**重复 0 处、字符区间重叠 0 处**，与候选断言一致。",
+  "nullColumns": "10 处空栏（T1–T7 的 cost、T4/T6 的 result 等）**全部带 <栏位>Note**，且均单列进 nullFieldCandidates；无未标注的未知。",
+  "inlineBracketConvention": "候选规定散文里「…」只能是原文逐字子串。我在**候选全部字段**（含未被其审计纳管的 meta 段）抽出 420 处「…」逐处 find：**non-verbatim = 0**。候选自称 397 处在受断言范围内，是可复算的准确数字。",
+  "coverageRecompute": "字符覆盖率我独立复算 = **0.8518**，与候选声明一致；非空段 108 与我重切结果一致。"
+ },
+ "instrumentValidation": {
+  "why": "本项目最贵的教训是『仪器不可信 ⇒ 结论不可信』（E24 的 17g 曾写出一个不会失败的检查）。所以我对自己的复核脚本也做了两件事：先修掉它自己的错，再做变异验证。",
+  "selfCorrection": "第一版把『已披露的 first-occurrence』判据写成 `text[S:E].find(qq) == start` —— 左边是**切片相对**偏移、右边是**全文绝对**偏移，两者永不相等 ⇒ 该判据恒为假，把 3 处**候选已如实标注**的合法情形误报成真错，脚本退出码恒为 1。这与本项目 E17g『不会失败的检查』是**反向同形**（一个是恒绿、一个是恒红），两者都让仪器失去信息量。已改为 `text.find(qq, S)`，并按『复核者可以判自己错』如实记录。",
+  "mutationTests": [
+   {
+    "mutation": "把 tasks[0].objective.quotes[0].start 挪 1 位",
+    "exitCode": 1,
+    "detected": "verbatimFailures=1, offsetFindMismatchesReal=1",
+    "verdict": "仪器会红 ✔"
+   },
+   {
+    "mutation": "把该引文替换成原文别处也存在的字符串（『许七安摇头。』@662638，全书另有 @97274）",
+    "exitCode": 1,
+    "detected": "offsetFindMismatchesReal=1（未被误判为 disclosed）",
+    "verdict": "仪器会红 ✔"
+   }
+  ],
+  "baseline": {
+   "exitCode": 0,
+   "meaning": "候选在全部真缺陷判据上 0 命中；3 处 first-occurrence 归入 disclosed 而非 real"
+  },
+  "sideEffectControl": "两次变异后都把候选还原并复算 sha256 = 361bebd462139b3e51ec29ea60e7624581397d36c09ab4686f20aa7b8a103855，与变异前逐字节一致（候选未被我的实验改动）。"
+ },
+ "counterExamples": [
+  {
+   "id": "CE1",
+   "severity": "factual-error",
+   "target": "foreshadows F1（朱广孝的彩礼缺口与「插旗」）",
+   "claim": "F1.unresolvedReason 写：「本区间没有任何回收：既有缺口没有兑现成结果（没拿到赏银、没成亲、也没受挫），**下一处提到他已经是六天后的甲板上**，而那句只是宋廷风在抱怨吃鱼。」",
+   "quote": "甲板上，宋廷风无精打采的眺望江面，看着过往的漕运船只，说道：“明日便能抵达禹州，姜金锣答应我们休整一天，老子吃鱼都要吃吐了。”",
+   "why": "复算：`t[662150:663915].count('朱广孝') == 0`、`.count('广孝') == 0`（我实测均为 0）。朱广孝在本区间**最后一处**是 @662041（「朱广孝微微颔首，建议道……」，我复算 find=662041）；他下一次出现要等 offset **664798**，即切片结束(663915)之后 883 字、属下一章。甲板那段出场的是**宋廷风**，同席只写「一位铜锣附和」。所以『下一处提到他已经是六天后的甲板上』是把另一个人的出场记到朱广孝名下 —— 候选在此处凭空补了一次原文没有的出场，并用它论证『这条线被留着』。同一说法未见于 T4.resultNote（那里写『他既没有拿到钱，也没有再提这件事』，正确），故为 F1 单点错误。",
+   "evidence": [
+    {
+     "quote": "朱广孝微微颔首，建议道：“这得看你对未来妻子的要求。”",
+     "start": 662041,
+     "end": 662068,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+     "verbatim": true,
+     "inRange": true
+    },
+    {
+     "quote": "甲板上，宋廷风无精打采的眺望江面，看着过往的漕运船只，说道：“明日便能抵达禹州，姜金锣答应我们休整一天，老子吃鱼都要吃吐了。”",
+     "start": 663118,
+     "end": 663181,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+     "verbatim": true,
+     "inRange": true
+    }
+   ],
+   "impact": "不推翻 F1 的结论（该线确实 unresolved、payoff=null 正确），但论据不成立：读者据 F1 会以为朱广孝在甲板场景出场过。按角色契约『找不到的逐条列出来』如实登记；因不影响 verdict 主体，不据此单独判 fail。"
+  },
+  {
+   "id": "CE2",
+   "severity": "cross-reference-error",
+   "target": "foreshadows F2（魏渊的不知情 → 姜律中的问句）",
+   "claim": "F2.note 写：「若复核认为这只是一次呼应、不构成回收，本条应降级为 unknowns——理由已写进 selfCritique.**SC4**。」",
+   "quote": "许七安耸耸肩：“若非如此，我问你这个作甚。嗯，我先告辞了。”",
+   "why": "SC4 的内容是『本单元最容易被读错的一处是结尾的血光，我可能仍然给了它过多暗示』，与 F2 无关；真正讨论 F2 是否过度解读的是 **SC2**（『把 F2（魏渊的不知情 → 姜律中的问句）登记成伏笔，可能是过度解读』）。复算：`'F2' in json.dumps(selfCritique[k])` 只有 SC2 命中，SC4 不命中。属指针偏移一位。",
+   "evidence": [],
+   "impact": "理由已写在别处，信息未丢失，只是复核者按 note 去读会读到无关内容。可修的小缺陷。**保留下游语义**：本条与 CE1 一起携带 id 记号 F1/F2，供发布桥按『被点名条目不发布』处理（见 notes 的回归警告）。"
+  },
+  {
+   "id": "CE3",
+   "severity": "cross-reference-error",
+   "target": "causeEdges C8（望气术定义＋血光 ⇒ 船上近期有人杀过人）",
+   "claim": "C8.note 写：「这条边的结论在本区间没有被任何人说出来……若复核认为这属于『用设定填未知』，这条应删（见 selfCritique.**SC1**）。」",
+   "quote": "在望气术的定义里，杀人者在杀完人后，会在一段时间里沾染上血光。",
+   "why": "SC1 的内容是『worldSettings 里 rule 的 institution 三态取值，是我这份候选里最勉强的一处』，通篇谈 declared/executed/misunderstood，**完全不涉及 C8**。复算：候选 6 条 selfCritique 中没有任何一条含 'C8' 或 '用设定填未知'。所以这不是指针偏移，而是**指向不存在的内容**——C8 自己提出的存废理由在候选里没有落地。",
+   "evidence": [
+    {
+     "quote": "在望气术的定义里，杀人者在杀完人后，会在一段时间里沾染上血光。",
+     "start": 663867,
+     "end": 663898,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+     "verbatim": true,
+     "inRange": true
+    }
+   ],
+   "impact": "与任务 prompt 第 3 项（误杀检查）直接相关：C8 是否该删，候选没有给出可读的判断记录。实质判断（不写『船上有人杀了人』）本身是稳妥的，见 partialDisposition.mustDowngrade。"
+  },
+  {
+   "id": "CE4",
+   "severity": "cross-reference-error",
+   "target": "speechVsNarration V15",
+   "claim": "V15.why 写：「本候选据它登记 **K3**（他另有前世经历，且他本人知道）」",
+   "quote": "“滚，我们不一样。”许七安躺在床上，双手枕着后脑勺，叹息道：“再适应一段时间吧。”",
+   "why": "K3 的 what 是『许七安的修为（已练气巅峰、只差契机入炼神境）』，引文为「这个契机怎么来……魏爸爸不知道……」与「一直以为自己看重的小铜锣还在搬运气机阶段。」——与『前世经历』无关。复算：`knowledgeDiffs 中含『前世/上辈子/电视』的条目` = **0 条**。这条『前世』信息实际只出现在 unknowns U5。",
+   "evidence": [],
+   "impact": "V15 的实质判断（不据此推断前世身份）稳妥，但『已登记 K3』是虚假归属；复核者按 V15 去 K3 查会查不到。"
+  },
+  {
+   "id": "CE5",
+   "severity": "cross-reference-error",
+   "target": "notWorldSettings NW6",
+   "claim": "NW6.why 写：「其中魏渊的「不知道」是本单元的一条知识差（**K1**），已在那里登记，不重复立成 rule。」",
+   "quote": "【四：嘿，三号，你最近有些怠惰啊。】",
+   "why": "K1 的 what 是『那句口号（佛门不灭，天下皆佛；以吾之命，断佛之路）的真义』，其 whoDoesNotKnow 是四号/许七安/五号，**通篇不含『魏渊』**（复算：`'魏渊' in json.dumps(K1)` = False）。魏渊的『不知道』实际登记在 **K3**（whoDoesNotKnow 首条即『魏渊——「魏渊也没告诉他，因为魏爸爸不知道……」』）。复算：全部 knowledgeDiffs 中含『魏渊』的条目**只有 K3**。此条为前一位复核者（w-verify-1）未查出的新增指针错误 —— 与 CE2/CE3/CE4 同一形态（指向错误目标）。",
+   "evidence": [
+    {
+     "quote": "【四：嘿，三号，你最近有些怠惰啊。】",
+     "start": 659934,
+     "end": 659952,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+     "verbatim": true,
+     "inRange": true
+    }
+   ],
+   "impact": "信息未丢失（K3 里写得很清楚），只是指针错；但它说明该候选的跨引用**四处中错四处**，读者按指针索骥的路径系统性地不可靠。可修，不据此单独判 fail。"
+  }
+ ],
+ "reverseChecks": [
+  {
+   "id": "RV1",
+   "found": "候选漏掉一条原文用**明写因果词**给出的因果边：褚采薇晋升炼金术师的要求 → 许七安受启发 → 回头审查武夫体系 → 发现炼精境升练气境也**有要求**（不得破身）。这是本区间唯一交代『他为什么会去问晋升条件』的动机链。",
+   "quote": "但从褚采薇晋升炼金术师的要求中，他得了启发，回顾武夫体系，发现从炼精境晋升练气境，也是有要求的：不得破身！",
+   "why": "原文用「得了启发」四字明写方向，不是相邻推断。复算：`'得了启发' in causeEdges/states/knowledgeDiffs/foreshadows/worldSettings` 全部为 False；它只出现在 notForeshadows NF2（论『不是伏笔』）与 unknowns U7（论『与流连教坊司是否冲突』）——两处都不是在登记这条因果。这是『引文被用却没有被断言』的遗漏形态；候选自己的零覆盖扫描（段/句/分句三级）结构上发现不了它，因为它并非零覆盖。"
+  },
+  {
+   "id": "RV2",
+   "found": "候选漏掉一处**知识状态**的原文直接动作：姜律中问「那你知道元神的极限吗？」，许七安的回答是摇头（即『不知道』）。这是后文整段机制解释（W14）的**前提**，也是 K 系列应收的一条知识差。",
+   "quote": "许七安摇头。",
+   "why": "复算：该句在切片内 @662638（`text.find('许七安摇头。', 659355)` = 662638），候选**确实引用了它**（sceneBeats[18].quotes[5]，候选自己标注 firstOccurrenceAt=97274、startIsFirstOccurrence=false），但没有把它登记进任何语义分区：`'许七安摇头' in 语义分区` = False，且 `knowledgeDiffs 中含『元神』的条目` = 0 条。这正是『引文被用却没有被断言』——与 RV1 同形，且同样不被零覆盖扫描发现。"
+  },
+  {
+   "id": "RV3",
+   "found": "候选漏掉一处**叙述层用词与所指不符**：叙述写「五号问的好！」，但五号发出的并非问句，而是一句陈述（「也许只是一句鼓舞人心的宣扬。」）。这是候选自设的 speechVsNarration 栏最该收的样本之一。",
+   "quote": "五号问的好！许七安笑了。",
+   "why": "复算：`'问的好' in speechVsNarration` = False（候选 16 条 V 无一覆盖）；它只出现在 sceneBeats B9 的引文池里。不作为 fail 依据——它也可以被读成口语化表达，属我的读法，登记为反向发现。"
+  },
+  {
+   "id": "RV4",
+   "found": "候选把 T7 读成『他们要问的香囊来历与有无未婚妻，本区间没有得到任何实质答案』，但朱广孝那一问『宁宴为何不娶妻？』在原文里**有直接答案**：许七安自己给了原因（「再适应一段时间吧」），叙述层随即补出『来到大奉满打满算才三个月……没有成家立室的心理准备』。",
+   "quote": "“滚，我们不一样。”许七安躺在床上，双手枕着后脑勺，叹息道：“再适应一段时间吧。”",
+   "why": "对 T7 的 objective（香囊来历／有无未婚妻）而言『没得到答案』成立；但『为何不娶妻』这一问是被回答了的，T7 的 result 因此漏掉『他没有成家的心理准备』这条原文明确给出的事实。复算：`'再适应一段时间吧' in 语义分区` = False。"
+  },
+  {
+   "id": "RV5",
+   "found": "V15 声称「本区间唯一一处**在文本内部**指认他另有一世经历的句子」，但这个『唯一』与候选自己的 V16 冲突：同一区间还有「老警探许七安心里狐疑的想着」与「简直就是他学习心理学时，最经典的心虚反应」两处，同样把现代身份/学科（警探、心理学）当作他已有的经验框架来用。",
+   "quote": "对面官船上吏员们的反应，简直就是他学习心理学时，最经典的心虚反应。",
+   "why": "复算：`'老警探'` 在切片内 @663557、`'学习心理学'` @663594，两者俱在。V16 确实引用了心理学那一句，但把它归为『他的归类，不是叙述层的确认』（谈的是『心虚是不是结论』），**没有**把它当作前世经历类证据处理；于是 V15 的『唯一一处』没有被对账。严格说：若把『明确写「上辈子」』作为判据，V15 的措辞（『在文本内部指认』）偏强；这条我拿得出原文引证，但它属**定义口径**之争，故与 RV3 一样只登记、不据此判 fail（见 notes 的存疑清单）。"
+  }
+ ],
+ "falsePositiveAudit": {
+  "summary": "误杀检查（计划100『遂行』案例的形态）：**未发现误杀**。结构性理由：该候选**全篇没有使用任何词表/正则做因果判定** —— 它按机制词与方向词人工判定，并在每条 mechanism 里写明方向依据（如 C1 的『可当我告之……之后』『让我不得不』『而后……再也没』）。因此『整词判定把真实因果挡掉』这一失败形态在本候选上不成立。",
+  "checkedRejectedEdges": [
+   {
+    "id": "R1",
+    "wouldBe": "西域人讨厌儒家 → 朝廷灭佛",
+    "myVerdict": "排除正确：原文写『这让我想到了以前读史书时的一段记载』——『想到』是联想，无机制。"
+   },
+   {
+    "id": "R2",
+    "wouldBe": "二号打探 → 二号要动手",
+    "myVerdict": "排除正确：区间内只有问、吐槽、叹息与一句假设语气的心里话，无部署。"
+   },
+   {
+    "id": "R3",
+    "wouldBe": "许七安断定灭佛正确 → 佛门确实该灭",
+    "myVerdict": "排除正确：原文以问号收尾（『说明灭佛的确是一个正面的、积极的目标？』），叙述层未确认。"
+   },
+   {
+    "id": "R4",
+    "wouldBe": "等赏银攒够彩礼 → 他能成亲",
+    "myVerdict": "排除正确：既不连成也不连成反面（『插旗』是人物话，不是机制）。"
+   },
+   {
+    "id": "R5",
+    "wouldBe": "血光 → 吏员刚杀了人",
+    "myVerdict": "排除正确：定义只给状态，原文未锁定船或人。"
+   },
+   {
+    "id": "R6",
+    "wouldBe": "「魏公，他知道吗？」→ 他要去问魏渊",
+    "myVerdict": "排除正确：原文停在问句，紧接分隔符与『一晃过了六天』。"
+   },
+   {
+    "id": "R7",
+    "wouldBe": "问晋升方法 → 他马上要冲关",
+    "myVerdict": "排除正确：姜律中明说「你还早呢」，他自陈的是现状。"
+   },
+   {
+    "id": "R8",
+    "wouldBe": "摘香囊 → 两人不快",
+    "myVerdict": "排除正确：原文写他『任由他摘了香囊』，随后夺回并哼曲子；皱眉的是宋廷风。"
+   }
+  ],
+  "killedButLegitimate": [],
+  "notWorldSettingsCheck": "NW1 把『中原』排除在 worldSettings 之外，理由是『传教是图谋不是到达』。我复核：原文只出现一次『佛门要传教中原』，区间内确无到达动作 —— 排除成立，**不是**误杀。反向边界也检查了：候选对真正的到达/驻守（甲板）给了 placeState=arrived（W1），口径前后一致。"
+ },
+ "hallucinationAudit": {
+  "outOfSliceEntities": 0,
+  "outOfSliceNote": "我把候选散文里的人名逐个回查：许七安/四号/五号/二号/三号/姜律中/朱广孝/宋廷风/魏渊/张慎/褚采薇/杜中书/浮香/周赤雄/宁宴/魏公 —— **全部**在切片内出现，无一来自区间外。（『一号』是本区间写作【一：】的群成员，候选以序数词称呼他，不是区间外人物。）",
+  "nextChapterContamination": 0,
+  "nextChapterNote": "『趸船』『全员恶人』『连绵成片』『络腮胡』在切片内**均不出现**，在候选里也**均不出现**。",
+  "fabricatedOutcomes": 0,
+  "fabricatedOutcomesNote": "未发现把未发生的事写成结果：T4.result=null（『赏银要等云州之行结束才发，而队伍连禹州都还没到』）、T3.cost=null（『同归于尽是假设的未来损失』）、T6.result=null 等，全部附理由并单列 nullFieldCandidates。",
+  "falseSuccessClaims": 0,
+  "falseSuccessNote": "候选全篇『成功/达成/胜利』计数：『成功』仅 1 处，且正是**拒绝**把它当结果的那句（『按纪律不写 result=成功，也不写失败——原文没有写他受阻或灰心』）。无结束当成功。",
+  "foreshadowInflation": "反向于灌水：foreshadows 只 3 条，其中 2 条 status=unresolved 并附 unresolvedReason，另有 notForeshadows[6] 专门登记被排除的候选伏笔（含章标题『血光』本身）。",
+  "overreachOnObjective": "多处标 basis=inferred 并注明『原文没有写这个目标句』（T1/T2/T3/T4 的 objective），未把归纳冒充直述。"
+ },
+ "citationSpotCheck": {
+  "method": "random.seed(20261014) 后从 364 个引文对象中抽 5 条，逐条做 text[start:end]==quote、text.find(quote)==start、出现次数复算。",
+  "sampled": [
+   {
+    "path": ".sceneBeats[16].quotes[6]",
+    "quote": "本身也到了娶妻生子的年纪。",
+    "declaredStart": 661884,
+    "declaredEnd": 661897,
+    "findOffset": 661884,
+    "textStartEndEqualsQuote": true,
+    "wholeTextOccurrencesDeclared": 1,
+    "wholeTextOccurrencesActual": 1,
+    "inRange": true
+   },
+   {
+    "path": ".states[0].quotes[2]",
+    "quote": "他用一种难以置信的目光盯着许七安，看了几秒，不悦道：“莫要说笑，我记得你加入打更人时，还是炼精境，哪有人三个月不到就练气巅峰...不会是真的吧？”",
+    "declaredStart": 662891,
+    "declaredEnd": 662964,
+    "findOffset": 662891,
+    "textStartEndEqualsQuote": true,
+    "wholeTextOccurrencesDeclared": 1,
+    "wholeTextOccurrencesActual": 1,
+    "inRange": true
+   },
+   {
+    "path": ".unknowns[3].quotes[0]",
+    "quote": "【四：嘿，三号，你最近有些怠惰啊。】",
+    "declaredStart": 659934,
+    "declaredEnd": 659952,
+    "findOffset": 659934,
+    "textStartEndEqualsQuote": true,
+    "wholeTextOccurrencesDeclared": 1,
+    "wholeTextOccurrencesActual": 1,
+    "inRange": true
+   },
+   {
+    "path": ".rejectedEdges[1].quotes[0]",
+    "quote": "“只有”两个字用的好....二号心里吐槽。",
+    "declaredStart": 660646,
+    "declaredEnd": 660667,
+    "findOffset": 660646,
+    "textStartEndEqualsQuote": true,
+    "wholeTextOccurrencesDeclared": 1,
+    "wholeTextOccurrencesActual": 1,
+    "inRange": true
+   },
+   {
+    "path": ".sceneBeats[11].quotes[1]",
+    "quote": "有了三号这位儒家学子背书，众人意识到了不对劲。佛门不灭，天下皆佛...这或许不是一句戏言。",
+    "declaredStart": 660468,
+    "declaredEnd": 660513,
+    "findOffset": 660468,
+    "textStartEndEqualsQuote": true,
+    "wholeTextOccurrencesDeclared": 1,
+    "wholeTextOccurrencesActual": 1,
+    "inRange": true
+   }
+  ],
+  "allVerbatim": true,
+  "allOffsetsConsistent": true,
+  "allInRange": true,
+  "occurrenceCountsMatch": true,
+  "note": "5/5 逐字命中、偏移与 find() 完全一致、出现次数与候选声明一致。此外我对**全部 364 条**做了同样复算（见 extractionAudit），0 处不符。"
+ },
+ "partialDisposition": {
+  "usableAsIs": [
+   "tasks[8]（含 T1–T7 的 cost=null 与 T4/T6 的 result=null 及其理由）：抽取项全部在原文可查，空栏判定符合『未发生不得填』的纪律。",
+   "causeEdges C1–C7、C9–C12 的方向与机制：每条 frm/to 我都找到对应文字，机制词引用逐字可查。",
+   "states S1–S5、worldSettings W1–W14、notWorldSettings NW1–NW6、notForeshadows NF1–NF6、nullFieldCandidates N1–N10、unknowns U1–U17、themeReadings TH1–TH2、speechVsNarration V1–V16、sceneBeats B1–B24：引文全部可复算，语义判断与原文不冲突。",
+   "machineAssertions 与 coverageDeclaration：我独立复算全部成立（字符覆盖率 0.8518 亦一致）。",
+   "rejectedEdges R1–R8：排除理由逐条成立（见 falsePositiveAudit）。"
+  ],
+  "mustFix": [
+   "CE1：F1.unresolvedReason 的『下一处提到他已经是六天后的甲板上』必须改写或删除 —— 朱广孝在甲板场景没有出场（末次 @662041，下次在切片外 @664798）。这是可验证的事实性错误。",
+   "CE2：F2.note 的指针 selfCritique.SC4 → 应为 SC2。",
+   "CE3：C8.note 的指针 selfCritique.SC1 → 6 条 selfCritique 中没有任何一条讨论 C8；要么补一条、要么删掉该指针。",
+   "CE4：V15.why 的『本候选据它登记 K3』→ K3 是修为条目，不含前世经历；应改指 U5，或补一条真正的知识差。",
+   "CE5（本次新查出）：NW6.why 的『魏渊的不知道……（K1）』→ 应为 K3；K1 是口号真义，通篇不含魏渊。"
+  ],
+  "mustDowngrade": [
+   "C8：候选自己承认『结论在本区间没有被任何人说出来』，且其存废理由无处可查（CE3）。我**不**要求删除（它标了 derived、note 已警告读者），但建议降级：移入 unknowns，或补上真正的自我质疑条目。",
+   "F2：候选 SC2 自己已提出『回收端只是另一个人把同一问题问出来，若回收须含兑现或转折则应降级』。我核对原文：姜律中问句之后即分隔符＋『一晃过了六天』，**没有任何回答或行动**，故同意 SC2 的自我怀疑 ——F2 宜降为 unknowns 或明确标为『呼应而非回收』。"
+  ],
+  "notVerified": [
+   "本复核**未**做语义正确性的最终裁定（如『灭佛是否正确』『血光指谁』这类原文本身留白的问题）；候选亦明确声明 semanticReview=not-performed。我只核验『候选所写是否有原文依据、是否遗漏、是否误杀』。",
+   "候选登记为 unknowns 的条目（许七安是否练气巅峰、二号问高手数量想做什么、杜中书之名是否可靠等），我未在区间内找到可判定它们的文字，与候选结论一致（保持 unknown）。"
+  ]
+ },
+ "regressionWarning": {
+  "what": "本任务同一写入路径上已有一份**前一位复核者（w-verify-1）**留下的草稿（sha256 92415e23…），其结论已进 `read_dafeng_L2_0182.json` 的 reviews[]（我复算：notes/counterExamples/reverseChecks 三栏**逐字节相同**）。我写本文件会**覆盖该草稿路径**，故先把它完整快照到外置回滚点并记录哈希。",
+  "whyItMatters": "`to_candidate.py` 同时读提交记录与 sidecar，并按 counterExamples 里出现的 id 记号（正则 `\\b([TCSF]\\d+)\\b`）**排除被点名条目**。前稿点名了 F1/F2/C8 等 id —— 若新 sidecar 丢掉这些记号，那两个被点名的 foreshadow 会重新进入发布候选。因此本稿**刻意保留 CE1（F1）、CE2（F2）、CE3（C8）** 三条，使下游排除行为不因换人复核而回退。",
+  "snapshot": {
+   "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/verify-dafeng-L2-0182/prior-verdict.w-verify-1.92415e23.json",
+   "sha256": "92415e237294ee8ddefdc14a680a00f6318c5c42697b1782a06c4531deedb871"
+  }
+ },
+ "notes": "总判 **partial**。三层结论：\n（1）**机器可复算层全绿**：364 个引文对象逐条 text[start:end]==quote、偏移与 find() 一致、出现次数一致、段号一致，**0 处不符**；候选自称的 397 处「…」逐字约束我扩到全部 420 处仍是 0 处非逐字；8 个任务五栏引文重复 0、区间重叠 0；字符覆盖率 0.8518 复算一致。**编造 = 0**。\n（2）**但有 1 条事实性论据错误 + 4 条指针/归属错误**：CE1 让一个没出场的角色出了场（可复算：`t[662150:663915].count('朱广孝')==0`）；CE2/CE3/CE4 为前稿已查出、我逐条独立复算成立；**CE5 是我新查出的第五处指针错误**（NW6→K1 应为 K3，复算 `'魏渊' in K1` = False、含魏渊的 knowledgeDiff 只有 K3）。四处跨引用**四处皆错**，说明按指针索骥的路径系统性地不可靠。\n（3）**反向验证查出 5 条遗漏**（RV1–RV5），其中两条与已写项无关、结构上不被候选自己的零覆盖扫描发现：RV1 是一条用『得了启发』明写的因果边只躺在引文池里没被断言；RV2 是『许七安摇头』这一知识状态动作被引用却未登记。这两条正是计划100 那句『机制存在、有产出，但不产生信息』的同形。\n**误杀 0、幻觉 0、越权 0**：全部人名在切片内可查，下一章污染词 0，无结束当成功，伏笔只有 3 条且 2 条标 unresolved，另有 notForeshadows[6] 专门登记被排除项 —— 这是反向于『伏笔灌水』的做法。\n**存疑（拿不出硬引证、故不据此判 fail）**：RV3（『问的好』与五号陈述不符）与 RV5（V15 的『唯一一处』口径）都可能只是口语化表达与定义宽严之争，我按角色契约只登记为反向发现。\n**我给 partial 而非 pass 的理由**：抽取项本身干净，但论据层有 1 处事实错误 + 4 处指针错误 + 2 条『引文被用却没被断言』的遗漏，足以要求修正后才发布；\n**我给 partial 而非 fail 的理由**：没有任何一条抽取项是编造的，全部引文逐字可查，空栏与存疑都按纪律显式标注 —— 按 VERIFIER 契约『拿不出原文引证的反对意见不能据此判 fail』，而我能拿出的引证全部指向**可修**的缺陷，不是内容不可用。",
+ "verdictRationaleShort": "编造 0、364 条引文全逐字、误杀 0、幻觉 0；但有 1 条事实性论据错误（CE1）＋4 条指针/归属错误（CE2–CE5，其中 CE5 为本轮新查出）＋5 条反向遗漏（RV1–RV5，含 1 条明写因果未登记、1 条知识状态动作被引用未断言），故 partial 而非 pass。"
+}

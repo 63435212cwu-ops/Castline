@@ -1,0 +1,55 @@
+{
+ "task": "read:sanguo:L1:0105",
+ "agent": "w-read-4",
+ "role": "READER（原文精读工作者）",
+ "unitHead": "第一百六回　公孙渊兵败死襄平　司马懿诈病赚曹爽",
+ "range": [537888, 543089],
+ "rangeCodepoints": 5201,
+ "writtenAt": "2026-10-15T06:14Z",
+ "artifacts": {
+  "candidate": {
+   "path": "loop/state/out/read_sanguo_L1_0105.candidate.json",
+   "sha256": "031201f9e0aef4355ae088562c98cca1393d24af196ff91ba29ac06243278118"
+  },
+  "auditScript": {
+   "path": "loop/state/out/read_sanguo_L1_0105.w-read-4.audit/verify_candidate.py",
+   "sha256": "d3528422a9699beab7956f7091143341218d02e7ab92d6ad507ab613654289e3"
+  },
+  "source": {
+   "path": "data/cache/fe42d01f3826fe8096f86614.docs.json",
+   "sha256": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+   "textCodepoints": 607191,
+   "rangeCheck": "docs[0].text[537888:543089] 以本单元标题开头，长度 5201，与任务声明一致"
+  }
+ },
+ "reproduce": {
+  "command": "python3 -B -s loop/state/out/read_sanguo_L1_0105.w-read-4.audit/verify_candidate.py",
+  "expectedOutput": "quote refs checked: 548 / sentences checked: 250 / sentences uncovered: 0 / structure problems: 0 / RESULT: PASS",
+  "observedOutput": "quote refs checked    : 548\nsentences checked     : 250\nsentences uncovered   : 0\nstructure problems    : 0\nRESULT: PASS"
+ },
+ "checks": [
+  {"id": "Q1", "what": "548 条引文逐字往返（T[start:end] == quote）", "result": "pass", "evidence": "verify_candidate.py 步骤 1-4；0 失败"},
+  {"id": "Q2", "what": "每条引文在本单元区间内有且仅有一次命中，且 start 正是那一次", "result": "pass", "evidence": "verify_candidate.py 唯一性检查；0 失败。这条同时排除了「同句在全文别处再出现，偏移抄到别处」的情形"},
+  {"id": "Q3", "what": "全部引文 sourceHash 等于实测 docs.json 文件哈希（非任务 JSON 字段）", "result": "pass", "evidence": "548/548 等于 8ab7298a…；与提示词正文给值一致"},
+  {"id": "Q4", "what": "全部引文落在 [537888,543089) 区间内", "result": "pass", "evidence": "0 越界"},
+  {"id": "Q5", "what": "任务五栏内部不共用同一引文（同一句同时当两栏依据＝该栏无独立依据）", "result": "pass", "evidence": "15 个任务 / 75 栏；脚本强制查重，0 复用。首轮自查曾报 8 处复用，已逐条改正：T05/T07/T09/T10/T11/T13 的 cost 栏与 action/result 栏撞句，T06 的 objective/obstacle/cost 三栏撞同一句群臣语——改为各栏引各自独立的原文依据"},
+  {"id": "Q6", "what": "五栏为 null 时必带同名 <栏位>Note（未标注的未知 ≠ 已确认无）", "result": "pass", "evidence": "本候选 75 栏中 null 数为 0，因此无 nullNote 需求；另有 5 处「非 null 但须写明边界」的栏位（T02.costNote、T04.costNote、T06.costNote、T09.obstacleNote、T10.costNote、T14.costNote、T15.resultNote/costNote），均写明了「按严格口径本区间其实没有依据」"},
+  {"id": "Q7", "what": "worldSettings 枚举合法（kind/placeState/itemStates/institution）", "result": "pass", "evidence": "29 条：place 8（arrived 7 / mentioned 1）、item 11、rule 10（declared 3 / executed 4 / misunderstood 3）；itemStates 多选合法，0 违规"},
+  {"id": "Q8", "what": "foreshadows：resolved 必有回收引文；unresolved 必显式标 note 且无 payoff", "result": "pass", "evidence": "8 条：resolved 6 / unresolved 2（F02、F06 均带 note 说明为何未回收）"},
+  {"id": "Q9", "what": "causeEdges 每条都有方向与机制，且 cause/effect 各有独立引文", "result": "pass", "evidence": "14 条全部带 mechanism ≥20 字与双向引文；另列 rejectedCauseEdges 7 条（含星象→死亡、暗喜→脱逃、拒罢兵→获胜等）"},
+  {"id": "Q10", "what": "反向覆盖：问「这一段里还漏了什么」，逐句核对是否被任一引文触及", "result": "pass", "evidence": "250 句（剥离说话人前缀、剔除整理者标记段）0 未覆盖。首轮实测 108 句未触及，逐条补齐后归零；补的是引文而非新条目，详见候选 reverseCoverage.howClosed"}
+ ],
+ "selfReportedLimitations": [
+  "semanticReview = not_performed：本候选只做定位、抽取与自证；引文定位正确 ≠ 语义已核验，语义核验属 read-verify 通道。",
+  "「未覆盖句 = 0」只说明引文层面没有整句遗漏，不等于逐句被正确理解。",
+  "sourceHashDiscrepancy：任务 JSON 的 sourceHash（2988ce6e…）实测对应另两个文件（f0b45e85…、152e2a6e…），其 docs[0].text 与本候选所读文件逐字相同（607191 codepoints，仅 JSON 键序不同）。本候选全部采用实测哈希，差异已在候选内与 remaining 中写明，未隐去。",
+  "本回跨越辽东战事与魏廷内争两条线，时间跨度较大（含建安十二年、太和二年两处回溯），本区间仅有三处明确纪年，未推时间轴（U12）。",
+  "跨分区引文复用 125 句、最大复用 8 次（quoteReuseReport 已报数）：同一句话可以同时是状态证据与因果证据，故未强行拆散，但已如实报数供复核抽查。"
+ ],
+ "protectedPathsTouched": false,
+ "writesPerformed": [
+  "loop/state/out/read_sanguo_L1_0105.candidate.json",
+  "loop/state/out/read_sanguo_L1_0105.w-read-4.audit/verify_candidate.py",
+  "loop/state/out/read_sanguo_L1_0105.w-read-4.audit/AUDIT-REPORT.json"
+ ]
+}

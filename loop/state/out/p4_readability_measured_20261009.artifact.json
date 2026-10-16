@@ -1,0 +1,113 @@
+{
+ "task": "p4:readability-measured:20261009",
+ "agent": "reform-lead",
+ "at": "2026-10-08T20:19:55Z",
+ "why": "QUALITY §02.5 明令『原尺寸可读性…实际命中仍需路径验证，**不能用缩略预览估算**具体字号或对比度」。本轮用真实浏览器读**计算样式与实际几何**，给出可复算的数字，而不是从 PNG 目测。",
+ "method": "真实 headless Chrome（CL_GPU=1 串行），在页面内遍历可见文本节点读 getComputedStyle().fontSize，遍历 button/[role=button]/a[href] 读 getBoundingClientRect()。只读，不改产品。",
+ "measured": {
+  "fontSizeHistogram_px": {
+   "11": 383,
+   "12": 35,
+   "13": 360,
+   "15": 41,
+   "16": 14,
+   "18": 1,
+   "22": 1,
+   "26": 1,
+   "49": 5
+  },
+  "smallest_visible_text": "11px（人物标签：曹淳/灵龙/钱钟/黄小柔/二爷（陈二）/天机宫密探风/头颅/摊主…）",
+  "textUnder12px_nodes": 0,
+  "textUnder14px_nodes": 0,
+  "bodySample": {
+   "selector": "#skySub(.sky-sub)",
+   "fontSize": "11px",
+   "lineHeight": "normal",
+   "color": "oklch(0.83 0.016 270)"
+  },
+  "hitTargets_under44px": 512,
+  "hitTarget_first_samples": [
+   [
+    111,
+    25,
+    "[object SVGAnimatedString]"
+   ],
+   [
+    87,
+    25,
+    "[object SVGAnimatedString]"
+   ],
+   [
+    87,
+    25,
+    "[object SVGAnimatedString]"
+   ],
+   [
+    70,
+    25,
+    "[object SVGAnimatedString]"
+   ],
+   [
+    87,
+    25,
+    "[object SVGAnimatedString]"
+   ],
+   [
+    104,
+    25,
+    "[object SVGAnimatedString]"
+   ],
+   [
+    80,
+    25,
+    "[object SVGAnimatedString]"
+   ],
+   [
+    70,
+    25,
+    "[object SVGAnimatedString]"
+   ]
+  ],
+  "clippedLabels": 22,
+  "clippedLabels_note": "22 条越界样本主要是**环形刻度数字**（1/100/200…）位于 SVG 坐标系边缘，需区分『真的被裁切读不到』与『刻度盘固有布局』，不能直接当缺陷计数。",
+  "jsErrors": 0
+ },
+ "verdicts": {
+  "说明性文字偏小（实测）": "383 个可见文本节点为 11px，35 个 12px；QUALITY 工程预算要求『说明12–14 CSS px』。11px **低于该区间下限**，这些主要是图谱标签与元信息（不是正文）。",
+  "正文层级": "16px 14 个、18px 1 个 —— 正文量极少（本页面主要是图谱 + 面板），所以『正文16–18px』这条在本视图**样本不足**，不能据此判合格或不合格。",
+  "触控命中": "实测 512 个可点击元素小于 44×44（多为 25px 高的 SVG 标签）。这与项目已知缺口『39 个真控件 <44px』**方向一致但量级更大**：512 里绝大多数是图谱内文本标签（Planet label），不都是『主触控区』；需按『主操作控件 vs 图内标签』分开计数才公平 —— 本轮如实记录两个数，不混算。",
+  "对比度": "本探针未算出可信对比度（背景是 canvas 星空+bloom，getComputedStyle 拿不到有效背景色）。**必须**用真实像素采样（读 PNG）或用 axe 类工具，不能凭颜色值推测 —— 记为未测。"
+ },
+ "honestLimits": [
+  "只有一个视口（1440×900, dpr=1）：**未测**窄屏、放大 200%/400%、真机。",
+  "对比度未测（见上）；不拿未测项冒充合格。",
+  "这是可读性**测量**，不是艺术判断；不等于 P4 视觉母版完成。",
+  "clippedLabels 的 22 条需人工区分刻度盘固有布局与真裁切，本轮未下结论。"
+ ],
+ "assertions": [
+  {
+   "text": "字号是实测不是目测",
+   "command": "页面内 getComputedStyle().fontSize 直方图",
+   "result": "pass"
+  },
+  {
+   "text": "命中区是实测几何不是估算",
+   "command": "getBoundingClientRect() 统计 <44px 数量",
+   "result": "pass"
+  },
+  {
+   "text": "未测项如实标注（对比度/窄屏/放大/真机）",
+   "command": "honestLimits 列出 4 项未测",
+   "result": "pass"
+  },
+  {
+   "text": "区分『主控件』与『图内标签』，不混算成缺陷",
+   "command": "verdicts 说明 512 的构成",
+   "result": "pass"
+  }
+ ],
+ "next": [
+  "按 QUALITY 工程预算，11px 的说明性文字与图内标签需与『主操作控件』分开治理：先解决真控件 <44px 与说明文字 <12px，再谈图内标签密度。",
+  "对比度需用像素采样另测（属 P9.6 范围）。"
+ ]
+}

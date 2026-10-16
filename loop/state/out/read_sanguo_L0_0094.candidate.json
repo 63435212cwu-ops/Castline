@@ -1,0 +1,4973 @@
+{
+ "schema": "castline/read-candidate/v1",
+ "task": "read:sanguo:L0:0094",
+ "agent": "w-sanguo-0",
+ "role": "READER",
+ "book": "sanguo",
+ "bookTitle": "三国演义",
+ "lane": 0,
+ "unitIndex": 94,
+ "unitHead": "第九十五回　马谡拒谏失街亭　武侯弹琴退仲达",
+ "readsSource": true,
+ "readWholeSlice": true,
+ "readMethod": "本候选由仓库外的构建脚本一次性生成（脚本自检通过后才落盘），全文分段读完：把 docs[0].text[478273,484338) 按换行切成 26 段（24 段正文/空行 + 2 段整理标记），逐段通读后按场景切出 14 条任务。**引文偏移全部由脚本在全文 find 得到**，不手写：每条只写引文字符串，脚本断言 text[start:end]==quote、落在区间内、sourceHash 等于实测文件 sha256；任一断言失败则拒绝落盘。",
+ "semanticReview": "not-performed",
+ "semanticReviewNote": "本候选只做〔引文定位 + 五栏各自取证 + 栏内不共用引句 + 六个分区产出 + 地点/物件/规则三条区分字段化 + 人物语与叙述语分栏标注〕。全部引文可用 docs[0].text[start:end] == quote 复算，但这只证明定位成立，不证明语义已核验：我没有做独立复核，semanticReview 仍是 not-performed。",
+ "source": {
+  "path": "data/cache/fe42d01f3826fe8096f86614.docs.json",
+  "docIndex": 0,
+  "docName": "0014《三国演义》-罗贯中 著",
+  "docPath": "0014《三国演义》-罗贯中 著.TXT",
+  "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+  "fileSha256": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+  "sliceStart": 478273,
+  "sliceEnd": 484338,
+  "sliceLen": 6065,
+  "sliceSha256": "ce040bc19715eae87d58297e61b39cb1c34057ca3b87bda914fff48e0471ed84",
+  "taskJsonDeclaredHash": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+  "taskJsonDeclaredHashNote": "任务 JSON 与 prompt 正文声明的 sourceHash 都是 2988ce6e…，而实测 data/cache/fe42d01f3826fe8096f86614.docs.json 的 sha256 是 8ab7298a…。实测 2988ce6e… 同时是 data/cache/152e2a6eed94f1075e7e7070.docs.json 与 data/cache/f0b45e85aac6c95e584075a2.docs.json 的 sha256，这两个文件的 docs[0].text 与本文件逐字符相同（均 607191 码点，`a == b` 为 True）。本候选的引文按 prompt 正文指定的 8ab7298a… 出（即实际读取的文件），并把两个值都记在这里。这与上一单元 read:sanguo:L0:0092 记录的是同一现象（其 source.taskJsonDeclaredHash 亦为 2988ce6e…）。",
+  "graphCache": {
+   "path": "data/cache/fe42d01f3826fe8096f86614.json",
+   "used": false,
+   "note": "按 prompt 要求，图谱缓存里的摘要只用于对照已有结论、不作原文证据。实测该文件 events[] 共 1286 条、causeEdges[] 339 条、tasks[] 178 条，带 start 偏移且落在本单元区间内的条目为 0 条；tasks[] 里也没有本单元的直接条目（仅有跨越多个单元的粗粒度条目，其中一条 character=马谡 的 cost 写「部队败散，本人被军法处死」，其「被军法处死」这一半不在本区间内，故本候选未采用）。"
+  }
+ },
+ "basisLegend": {
+  "explicit": "原文直述（叙述语或人物语都在原文里，逐字可查）",
+  "inferred": "我的归纳：原文没有直接这么说，是我从动作/上下文中读出来的",
+  "derived": "跨段推导：需要把两处以上原文并读才成立",
+  "unverified": "存疑：我读不出结论，或原文自相矛盾"
+ },
+ "evidenceTypeLegend": {
+  "narrative": "叙述语",
+  "speech": "人物语（谁说的就记谁说的，不等于叙述事实）",
+  "report": "转述/传闻（如细作回报、百姓之言）",
+  "mixed": "同一栏内同时用了叙述语与人物语"
+ },
+ "quotationConvention": {
+  "literalRule": "**唯一逐字证据**是带 quote/start/end 的对象（各栏 quotes[]、worldSettings 的 quoteRef/extraQuotes）。它们 100% 满足 docs[0].text[start:end] == quote，start/end 是相对 docs[0].text 全文的 codepoint 偏移（不是相对切片），sourceHash 为整个 docs.json 文件的 sha256。",
+  "angleBracketRule": "散文（text/explain/why/summary/note 等说明字段）里的「」是**行内标记**，用于三类用法：①节引（可能含省略号、跨句拼接或语序调整）；②概念名与关系标签；③我自己的措辞强调。**散文里的「」不保证逐字**；凡需逐字核对之处，一律以同一栏目里的 quotes[] 对象为准。本条规则是可机器复算的：见 angleBracketAudit。",
+  "columnRule": "同一条任务内 objective/obstacle/action/result/cost 的 quotes[] 区间两两不相交（0 违反，由构建脚本与独立复验脚本各算一次）；跨任务／跨分区复用允许，全部复用点登记在 crossSectionQuoteReuse。注意：T14 的 objective/obstacle/action 三栏是一组对照读法，其 quotes 区间与 T03/T04 的引句区间相邻但不相交（不同引句），脚本按区间相交判定而非按语义判定，符合红线要求。",
+  "angleBracketAuditNote": "angleBracketAudit 是**自曝**字段：它列出散文里全部无法在原文中逐字命中的「」片段。写出来是为了让复核者一眼看到散文标记与逐字证据的边界，而不是让复核者去猜哪些「」是原文。",
+  "angleBracketAudit": {
+   "proseFragments": 234,
+   "literalInSource": 182,
+   "notLiteral": 52,
+   "notLiteralExamples": [
+    "一次出现当伏笔",
+    "不听王平",
+    "丢失",
+    "亮平生谨慎，不曾弄险，今大开城门必有埋伏",
+    "他们去劫寨所以被围",
+    "传令与诸将：倘兵来，只见山顶上红旗招动，即四面皆下",
+    "兵法错了",
+    "判断被谁用",
+    "功劳竞争如何决定各路行动",
+    "同一句判断被谁用、用在哪一侧",
+    "同一条任务的五栏共用同一句",
+    "听到消息所以紧张"
+   ],
+   "notLiteralAll": [
+    "一次出现当伏笔",
+    "不听王平",
+    "丢失",
+    "亮平生谨慎，不曾弄险，今大开城门必有埋伏",
+    "他们去劫寨所以被围",
+    "传令与诸将：倘兵来，只见山顶上红旗招动，即四面皆下",
+    "兵法错了",
+    "判断被谁用",
+    "功劳竞争如何决定各路行动",
+    "同一句判断被谁用、用在哪一侧",
+    "同一条任务的五栏共用同一句",
+    "听到消息所以紧张",
+    "吾之咽喉之路",
+    "孔明平生谨慎",
+    "孔明派了他",
+    "孔明用空城计成功",
+    "守法之争：地形与补给决定成败",
+    "山南蜀兵大开寨门下山降魏",
+    "山坡后闪出红旗白字，上书『赵云』",
+    "弃城走必被擒",
+    "忽班内一人出奏曰：臣有一计，足可定蜀降吴",
+    "悔之不及，仰天叹曰：吾不如孔明也",
+    "把说法当事实",
+    "抢功者",
+    "提及≠到达",
+    "放—追—诱",
+    "时间上先布置后退兵",
+    "有兵守御即按兵不行",
+    "有回报就有控制",
+    "未遗失",
+    "没有依据就不扩",
+    "派任→失守",
+    "照常",
+    "皆言…",
+    "看起来照常",
+    "空城计",
+    "自任",
+    "蜀守",
+    "蜀将赵云，英勇无敌，汝可小心提防，彼军若退，必有计也",
+    "街亭虽失而蜀军主力与辎重得以回汉中",
+    "被军法处死",
+    "装饰性设定不要写",
+    "设伏导致被追",
+    "谁的判断有依据、依据从哪里来",
+    "谨慎之外",
+    "部署被执行",
+    "部队败散，本人被军法处死",
+    "问居民导致后悔",
+    "领兵五万往助曹真",
+    "高潮",
+    "魏军退去",
+    "魏据"
+   ],
+   "reason": "这些片段是节引（含省略号/拼接）、概念名、关系标签或我的措辞，不是逐字证据；逐字证据见各栏 quotes[]。"
+  }
+ },
+ "tasks": [
+  {
+   "id": "T01",
+   "character": "司马懿",
+   "characterNote": "魏军主帅。",
+   "summary": "司马懿判断诸葛亮必出斜谷取郿城、分兵取箕谷，于是先发檄文令曹真守郿城、孙礼辛毗截箕谷，自己与张颌径取街亭，目标是断蜀军粮道、逼孔明回汉中，再于小路击之或困死蜀军。",
+   "objective": {
+    "text": "司马懿的目标是断蜀军的咽喉要路与粮道，逼孔明连夜奔回汉中；然后二选一：回动就在小路击之取全胜，不归就把诸处小路垒断守死，一月无粮饿死蜀兵、擒住孔明。",
+    "basis": "explicit",
+    "evidenceType": "speech",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "亮若知吾断其街亭要路，绝其粮道，则陇西一境，不能安守，必然连夜奔回汉中去也。",
+      "start": 478588,
+      "end": 478626,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 478588,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "若不归时，吾却将诸处小路，尽皆垒断，俱以兵守之。一月无粮，蜀兵皆饿死，亮必被吾擒矣。",
+      "start": 478645,
+      "end": 478687,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 478645,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "obstacle": {
+    "text": "障碍是他自己先摆出来的前提：诸葛亮平生谨慎、未敢造次，不会走子午谷这条险路，所以魏方不能指望他露出破绽；且诸葛亮不比孟达，先锋不可轻进，必须循山西路远远哨探、确认无伏兵才可前进。",
+    "basis": "explicit",
+    "evidenceType": "speech",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "诸葛亮平生谨慎，未敢造次行事。",
+      "start": 478373,
+      "end": 478388,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 478373,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "虽然如此，诸葛亮不比孟达。将军为先锋，不可轻进。当传与诸将：循山西路，远远哨探。如无伏兵，方可前进。",
+      "start": 478711,
+      "end": 478761,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 478711,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "action": {
+    "text": "他先发檄文做两路部署（曹真守郿城不可出战、孙礼辛毗截箕谷道口出奇兵击之），再与张颌径取街亭；张颌受计引军而行。",
+    "basis": "explicit",
+    "evidenceType": "mixed",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "吾已发檄文，令子丹拒守郿城，若兵来不可出战；令孙礼、辛毗截住箕谷道口，若兵来则出奇兵击之。",
+      "start": 478455,
+      "end": 478500,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 478455,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "吾与汝径取街亭，望阳平关不远矣。",
+      "start": 478572,
+      "end": 478588,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 478572,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "张颌受计引军而行。",
+      "start": 478775,
+      "end": 478784,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 478775,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "result": {
+    "text": "结果是这套部署被付诸执行：张颌为先锋与司马懿一同征进，魏主另派辛毗、孙礼领兵五万往助曹真，二人奉诏而去。街亭是否被取，要到后文才写出——本条只到「部署被执行」为止。",
+    "basis": "explicit",
+    "evidenceType": "narrative",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "却说魏主曹睿令张颌为先锋，与司马懿一同征进；一面令辛毗、孙礼二人领兵五万，往助曹真。二人奉诏而去。",
+      "start": 478297,
+      "end": 478346,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 478297,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "cost": null,
+   "costNote": "本区间未写司马懿为这次部署付出任何代价：没有伤亡、没有失将、没有误期，也没有粮械损失。「领兵五万往助曹真」是魏主的增援而非代价，我不把兵力投入折算成 cost。"
+  },
+  {
+   "id": "T02",
+   "character": "孔明",
+   "characterNote": "蜀军主帅。",
+   "summary": "细作报来司马懿已破孟达、出关来拒，孔明立刻判定司马懿必取街亭断其咽喉，于是问谁敢去守街亭。",
+   "objective": {
+    "text": "孔明的目标是从细作回报中读出敌方的下一步并抢先布防：他判定司马懿出关必取街亭，街亭是要抢先守住的地方，所以当众问「谁敢引兵去守街亭」。",
+    "basis": "explicit",
+    "evidenceType": "mixed",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "今司马懿出关，必取街亭，断吾咽喉之路。",
+      "start": 478918,
+      "end": 478937,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 478918,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "便问：“谁敢引兵去守街亭？”",
+      "start": 478938,
+      "end": 478952,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 478938,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "obstacle": {
+    "text": "障碍是街亭本身的地形与敌方统帅的分量：街亭虽小却干系甚重，失则大军皆休；此地无城郭又无险阻，守之极难；对手司马懿非等闲之辈，还有魏之名将张颌为先锋。",
+    "basis": "explicit",
+    "evidenceType": "speech",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "街亭虽小，干系甚重：倘街亭有失，吾大军皆休矣。",
+      "start": 478973,
+      "end": 478996,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 478973,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "此地奈无城郭，又无险阻，守之极难。",
+      "start": 479003,
+      "end": 479020,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 479003,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "司马懿非等闲之辈；更有先锋张颌，乃魏之名将：恐汝不能敌之。",
+      "start": 479053,
+      "end": 479082,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 479053,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "action": {
+    "text": "他接受马谡自请并当众立下军令状；随后拨二万五千精兵、加派王平相助，并对王平交代守法的全部要点：下寨必当要道、安营既毕画四至八道地理图本来、凡事商议停当而行。",
+    "basis": "explicit",
+    "evidenceType": "mixed",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "孔明从之，谡遂写了军令状呈上。",
+      "start": 479142,
+      "end": 479157,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 479142,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "吾与汝二万五千精兵，再拨一员上将，相助你去。",
+      "start": 479162,
+      "end": 479184,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 479162,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "下寨必当要道之处，使贼兵急切不能偷过。",
+      "start": 479221,
+      "end": 479240,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 479221,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "安营既毕，便画四至八道地理形状图本来我看。",
+      "start": 479240,
+      "end": 479261,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 479240,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "result": {
+    "text": "结果是孔明把街亭一路的兵力全部派了出去：马谡王平引兵而去，又派高翔领一万兵屯列柳城、魏延引本部兵屯街亭之后、赵云邓芝各引一军出箕谷为疑兵，自统大军由斜谷取郿城、令姜维作先锋。到这一段末尾，防线已布成而胜负未定。",
+    "basis": "explicit",
+    "evidenceType": "mixed",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "二人拜辞引兵而去。",
+      "start": 479298,
+      "end": 479307,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 479298,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "高翔引兵而去。",
+      "start": 479377,
+      "end": 479384,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 479377,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "魏延大喜，引兵而去。",
+      "start": 479534,
+      "end": 479544,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 479534,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "二人受命而去。孔明令姜维作先锋，兵出斜谷。",
+      "start": 479635,
+      "end": 479656,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 479635,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "cost": null,
+   "costNote": "本区间未写孔明为这次布防付出代价：没有伤亡、没有失地（街亭之失与本条的动作不在同一段，且属后续结果），也没有粮械损失。军令状是马谡立下的（记入 action），不是孔明付出的代价。"
+  },
+  {
+   "id": "T03",
+   "character": "马谡",
+   "characterNote": "自请守街亭。",
+   "summary": "马谡自请引兵守街亭，以「熟读兵书」自任并立军令状；到街亭后不听王平的当道下寨之议，执意上山屯军，还以「凭高视下」「置之死地而后生」为据驳回王平的断水之忧，王平只得请分兵掎角、被拒后自带五千兵离山十里下寨。",
+   "objective": {
+    "text": "马谡的目标是接下守街亭这一重任并把它变成自己的功：他在孔明问「谁敢引兵去守街亭」时第一个应声自请。",
+    "basis": "explicit",
+    "evidenceType": "mixed",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "便问：“谁敢引兵去守街亭？”言未毕，参军马谡曰：“某愿往。”",
+      "start": 478938,
+      "end": 478968,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 478938,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "obstacle": {
+    "text": "障碍是孔明当面对他的资格提出的三重质疑：街亭无城郭无险阻守之极难、司马懿非等闲之辈、张颌乃魏之名将。",
+    "basis": "explicit",
+    "evidenceType": "speech",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "此地奈无城郭，又无险阻，守之极难。",
+      "start": 479003,
+      "end": 479020,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 479003,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "司马懿非等闲之辈；更有先锋张颌，乃魏之名将：恐汝不能敌之。",
+      "start": 479053,
+      "end": 479082,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 479053,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "action": {
+    "text": "他先以熟读兵书自任并立下军令状，再在街亭按自己的兵法主张部署：把军屯于侧边山上（称天赐之险），拒绝王平的分兵掎角之请，最后分给王平五千兵让他自去下寨，并传令「倘兵来，只见山顶上红旗招动，即四面皆下」。",
+    "basis": "explicit",
+    "evidenceType": "mixed",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "谡曰：“某自幼熟读兵书，颇知兵法。岂一街亭不能守耶？”",
+      "start": 479021,
+      "end": 479048,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 479021,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "此处侧边一山，四面皆不相连，且树木极广，此乃天赐之险也：可就山上屯军。",
+      "start": 479759,
+      "end": 479794,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 479759,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "马谡不从。",
+      "start": 480067,
+      "end": 480072,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 480067,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "传令与诸将：“倘兵来，只见山顶上红旗招动，即四面皆下。”",
+      "start": 480409,
+      "end": 480437,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 480409,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "result": {
+    "text": "结果是魏兵四面围定、断汲水道路之后军不得食、寨中大乱，山南蜀兵开门降魏而马谡禁止不住；他见事不谐先教军紧守寨门只等外应，最终驱残兵杀下山西逃奔，街亭失守、孔明退兵。马谡本人的处置不在本区间内。",
+    "basis": "explicit",
+    "evidenceType": "narrative",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "马谡见事不谐，教军紧守寨门，只等外应。",
+      "start": 480736,
+      "end": 480755,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 480736,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "山南蜀兵大开寨门，下山降魏。马谡禁止不住。",
+      "start": 480828,
+      "end": 480849,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 480828,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "马谡料守不住，只得驱残兵杀下山西逃奔。",
+      "start": 480868,
+      "end": 480887,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 480868,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "cost": {
+    "text": "代价是可数的：魏兵自辰时困至戌时，山上无水军不得食；魏延复夺街亭后中伏被围，折兵大半；到列柳城下三将又被郭淮截杀，蜀兵伤者极多。这些是已经发生的损失，不是风险或禁令。",
+    "basis": "explicit",
+    "evidenceType": "narrative",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "魏兵自辰时困至戌时，山上无水，军不得食，寨中大乱。",
+      "start": 480796,
+      "end": 480821,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 480796,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "魏延左冲右突，不得脱身，折兵大半。",
+      "start": 481033,
+      "end": 481050,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 481033,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "正遇三将，大杀一阵。蜀兵伤者极多。",
+      "start": 481451,
+      "end": 481468,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 481451,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   }
+  },
+  {
+   "id": "T04",
+   "character": "王平",
+   "characterNote": "马谡的副将。",
+   "summary": "王平反对上山屯军，主张当道下寨、伐木为栅以图久计；又指出此山是绝地、魏兵断汲水之道则军士不战自乱。被拒后他求分兵为掎角之势，得五千兵离山十里下寨，并把马谡山上下寨的情形画成图本星夜报给孔明。",
+   "objective": {
+    "text": "王平的目标是把街亭守成「贼兵急切不能偷过」的当道营寨：他提出就五路总口下寨、伐木为栅以图久计，并在被拒后求分兵为掎角之势，以便魏兵到时可以相应。",
+    "basis": "explicit",
+    "evidenceType": "speech",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "可就此五路总口下寨；却令军士伐木为栅，以图久计。",
+      "start": 479721,
+      "end": 479745,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 479721,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "若参军欲在山上下寨，可分兵与我，自于山西下一小寨，为掎角之势。倘魏兵至，可以相应。",
+      "start": 480025,
+      "end": 480066,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 480025,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "obstacle": {
+    "text": "障碍来自自己的主将：马谡不但不从，还以兵法与孙子之语驳回他的断水之忧，并嘲笑他是「女子之见」。",
+    "basis": "explicit",
+    "evidenceType": "mixed",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "马谡不从。",
+      "start": 480067,
+      "end": 480072,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 480067,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "谡大笑曰：“汝真女子之见！兵法云：凭高视下，势如劈竹。若魏兵到来，吾教他片甲不回！”",
+      "start": 479858,
+      "end": 479900,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 479858,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "action": {
+    "text": "他据实力争（指出此山乃绝地、魏兵断汲水之道则军士不战自乱），求分兵掎角被拒；最后引五千兵离山十里下寨，并画成图本星夜差人去禀孔明，具说马谡自于山上下寨。",
+    "basis": "explicit",
+    "evidenceType": "mixed",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "平曰：“吾累随丞相经阵，每到之处，丞相尽意指教。今观此山，乃绝地也：若魏兵断我汲水之道，军士不战自乱矣。”",
+      "start": 479900,
+      "end": 479953,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 479900,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "王平引兵离山十里下寨，画成图本，星夜差人去禀孔明，具说马谡自于山上下寨。",
+      "start": 480143,
+      "end": 480179,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 480143,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "result": {
+    "text": "结果是他的图本让孔明在读图之后立刻判定「马谡无知，坑陷吾军矣」；而他自己虽被张颌当住来路，却两度杀入重围救人——魏延被抄在背后时靠他解围（延大喜曰「吾得生矣」），高翔魏延在街亭被围时又是他杀入相救。",
+    "basis": "explicit",
+    "evidenceType": "mixed",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "孔明就文几上拆开视之，拍案大惊曰：“马谡无知，坑陷吾军矣！”",
+      "start": 481957,
+      "end": 481987,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 481957,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "正危急间，忽一彪军杀入，乃王平也。延大喜曰：“吾得生矣！”",
+      "start": 481050,
+      "end": 481079,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 481050,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "忽听得山坡后喊声若雷，一彪军杀入，乃是王平，救了高、魏二人，径奔列柳城来。",
+      "start": 481334,
+      "end": 481371,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 481334,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "cost": {
+    "text": "代价是具体的：他与张颌战数十余合后力穷势孤退去，营寨被魏兵占去（奔回寨时营中皆是魏兵旌旗），最后随众人望阳平关退走。",
+    "basis": "explicit",
+    "evidenceType": "narrative",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "平力穷势孤，只得退去。",
+      "start": 480785,
+      "end": 480796,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 480785,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "二将慌忙奔回寨时，营中皆是魏兵旌旗。",
+      "start": 481096,
+      "end": 481114,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 481096,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   }
+  },
+  {
+   "id": "T05",
+   "character": "司马昭",
+   "characterNote": "司马懿次子。",
+   "summary": "司马懿派司马昭探前路，交代「若街亭有兵守御，即当按兵不行」；司马昭探得街亭有兵守把，又在父亲叹服诸葛亮之后指出当道并无寨栅、军皆屯于山上，据此断定街亭易取。",
+   "objective": {
+    "text": "司马昭的目标是替父亲探明前路、判定街亭能不能打：他奉令探了一遍，回报「街亭有兵守把」，并在父亲因此叹服诸葛亮时主动给出可破的判断。",
+    "basis": "explicit",
+    "evidenceType": "mixed",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "令次子司马昭去探前路：若街亭有兵守御，即当按兵不行。",
+      "start": 480188,
+      "end": 480214,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 480188,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "男料街亭易取。",
+      "start": 480272,
+      "end": 480279,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 480272,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "obstacle": {
+    "text": "障碍是「街亭有兵守把」这一回报本身——按父亲事先给的规则，有兵守御就应当按兵不行；而且父亲当场叹「诸葛亮真乃神人，吾不如也」，等于自己先认了不可打。",
+    "basis": "explicit",
+    "evidenceType": "mixed",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "街亭有兵守把。",
+      "start": 480230,
+      "end": 480237,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 480230,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "懿叹曰：“诸葛亮真乃神人，吾不如也！”",
+      "start": 480238,
+      "end": 480257,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 480238,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "action": {
+    "text": "他不接受父亲的判断，拿亲见的事实反驳：男亲自哨见，当道并无寨栅，军皆屯于山上，故知可破也。",
+    "basis": "explicit",
+    "evidenceType": "speech",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "男亲自哨见，当道并无寨栅，军皆屯于山上，故知可破也。",
+      "start": 480298,
+      "end": 480324,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 480298,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "result": {
+    "text": "结果是他说服了父亲：懿大喜曰「若兵果在山上，乃天使吾成功矣」，随即更换衣服引百余骑亲自来看。",
+    "basis": "explicit",
+    "evidenceType": "mixed",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "懿大喜曰：“若兵果在山上，乃天使吾成功矣！”遂更换衣服，引百余骑亲自来看。",
+      "start": 480325,
+      "end": 480362,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 480325,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "cost": null,
+   "costNote": "本区间未写司马昭为这次哨探付出代价：没有受伤、没有被责、也没有误报的后果。他探得的「有兵守把」与后来「当道并无寨栅」并不矛盾（一个是有人守、一个是没寨栅），原文也没有把它写成他的过错。"
+  },
+  {
+   "id": "T06",
+   "character": "司马懿",
+   "characterNote": "破街亭一路。",
+   "summary": "司马懿夜巡山下确认马谡屯军山上后，先命张颌当住王平来路、申耽申仪围山断汲水道路，待蜀兵自乱再乘势击之；次日大驱军马四面围定，又沿山放火，放条大路让过马谡，最后命张颌追之。",
+   "objective": {
+    "text": "司马懿的目标是拿下街亭并擒住蜀军：他先按「待蜀兵自乱，然后乘势击之」的顺序布置围山断水，再于次日把山四面围定、沿山放火。",
+    "basis": "explicit",
+    "evidenceType": "mixed",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "又令申耽、申仪引两路兵围山，先断了汲水道路；待蜀兵自乱，然后乘势击之。",
+      "start": 480555,
+      "end": 480590,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 480555,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "司马懿大驱军马，一拥而进，把山四面围定。",
+      "start": 480613,
+      "end": 480633,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 480613,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "obstacle": {
+    "text": "障碍在动手之前已被司马昭排除，剩下的只是马谡据山这一点要利用：司马懿的判断是「若兵果在山上，乃天使吾成功矣」。山顶红旗招动而军将你我相推、无一人敢动，说明蜀军的指挥信号确实失效，不是障碍。",
+    "basis": "explicit",
+    "evidenceType": "mixed",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "懿大喜曰：“若兵果在山上，乃天使吾成功矣！”",
+      "start": 480325,
+      "end": 480347,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 480325,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "马谡将红旗招动，军将你我相推，无一人敢动。",
+      "start": 480675,
+      "end": 480696,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 480675,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "action": {
+    "text": "他的动作是分步执行的：夜巡——命张颌当住王平来路；令申耽申仪围山断汲水道路；次日大驱军马四面围定；又令人于沿山放火；马谡逃奔时放条大路让他过去，背后张颌引兵追来。",
+    "basis": "explicit",
+    "evidenceType": "narrative",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "是夜天晴月朗，直至山下，周围巡哨了一遍，方回。",
+      "start": 480362,
+      "end": 480385,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 480362,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "懿乃命张颌引一军，当住王平来路。",
+      "start": 480539,
+      "end": 480555,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 480539,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "司马懿又令人于沿山放火，山上蜀兵愈乱。",
+      "start": 480849,
+      "end": 480868,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 480849,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "司马懿放条大路，让过马谡。背后张颌引兵追来。",
+      "start": 480887,
+      "end": 480909,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 480887,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "result": {
+    "text": "结果是街亭到手：马谡守不住而逃奔，王平力穷退去，魏延复夺街亭后又被司马懿与司马昭抄在背后围在垓心、折兵大半；蜀军营寨被魏兵占去，二将奔回时「营中皆是魏兵旌旗」。",
+    "basis": "explicit",
+    "evidenceType": "narrative",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "赶到五十余里，一声喊起，两边伏兵齐出：左边司马懿，右边司马昭，却抄在魏延背后，把延困在垓心。",
+      "start": 480974,
+      "end": 481020,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 480974,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "二将慌忙奔回寨时，营中皆是魏兵旌旗。",
+      "start": 481096,
+      "end": 481114,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 481096,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "cost": null,
+   "costNote": "本区间未写司马懿在破街亭一役中付出代价：没有折将、没有写明本部伤亡、也没有被追责。「蜀兵伤者极多」「折兵大半」都是蜀方的损失，不能算成司马懿的 cost。"
+  },
+  {
+   "id": "T07",
+   "character": "郭淮",
+   "characterNote": "魏将，与曹真一路。",
+   "summary": "郭淮与曹真商议，怕司马懿独得全功，于是分兵来取街亭；听说司马懿、张颌已成功，便改径袭列柳城，与蜀三将大杀一阵，随后对左右说虽不得街亭却取了列柳城亦是大功。",
+   "objective": {
+    "text": "郭淮的目标是抢功：他与曹真商议，恐司马懿得了全功，乃分淮来取街亭；听说司马懿张颌成了此功，遂改目标引兵径袭列柳城。",
+    "basis": "explicit",
+    "evidenceType": "narrative",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "原来郭淮与曹真商议，恐司马懿得了全功，乃分淮来取街亭；闻知司马懿、张颌成了此功，遂引兵径袭列柳城。",
+      "start": 481402,
+      "end": 481451,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 481402,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "obstacle": {
+    "text": "障碍是他要抢的那件功劳已归别人：他收军后对左右说的第一句就是「吾虽不得街亭」——街亭这条功路已经关闭，他手上只剩列柳城。",
+    "basis": "explicit",
+    "evidenceType": "mixed",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "却说郭淮收了军马，乃谓左右曰：“吾虽不得街亭，却取了列柳城，亦是大功。”",
+      "start": 481494,
+      "end": 481530,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 481494,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "action": {
+    "text": "他在列柳城下与蜀三将大杀一阵，随后收军引兵径到城下叫门——这一叫门撞上的是已据城的司马懿。",
+    "basis": "explicit",
+    "evidenceType": "narrative",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "正遇三将，大杀一阵。蜀兵伤者极多。",
+      "start": 481451,
+      "end": 481468,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 481451,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "result": {
+    "text": "结果是他被司马懿当面点破「郭伯济来何迟也」，自认「仲达神机，吾不及也」并入城——即他抢来的城其实早已在司马懿手里。",
+    "basis": "explicit",
+    "evidenceType": "mixed",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "引兵径到城下叫门，只见城上一声炮响，旗帜皆竖，当头一面大旗，上书“平西都督司马懿”。",
+      "start": 481530,
+      "end": 481572,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 481530,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "淮大惊曰：“仲达神机，吾不及也！”遂入城。",
+      "start": 481601,
+      "end": 481622,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 481601,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "cost": {
+    "text": "代价是从「抢功者」变成听令的一方：他入城相见已毕，就从司马懿口中受命「公可速与子丹星夜追之」，并从其言出城而去。这是原文写出的处境变化，不是我的评价。",
+    "basis": "explicit",
+    "evidenceType": "mixed",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "相见已毕，懿曰：“今街亭已失，诸葛亮必走。公可速与子丹星夜追之。”郭淮从其言，出城而去。",
+      "start": 481622,
+      "end": 481666,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 481622,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   }
+  },
+  {
+   "id": "T08",
+   "character": "孔明",
+   "characterNote": "读图与退军部署。",
+   "summary": "王平的图本送到，孔明拆开一看拍案大惊，判定马谡失却要路、占山为寨，魏兵一围断水则二日内自乱，于是问「若街亭有失，吾等安归」；杨仪请替马谡去，孔明正分付安营之法时街亭列柳城尽失的消息到了，他跌足长叹「此吾之过也」，随即做了一整套退军与搬迁的部署。",
+   "objective": {
+    "text": "孔明的目标是补救街亭：他读图后立刻看出必败之势，杨仪请替马幼常回，孔明就把安营之法一一分付与杨仪，准备让他去把要路重新守住。",
+    "basis": "explicit",
+    "evidenceType": "mixed",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "长史杨仪进曰：“某虽不才，愿替马幼常回。”孔明将安营之法，一一分付与杨仪。",
+      "start": 482061,
+      "end": 482098,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 482061,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "obstacle": {
+    "text": "障碍是他从图本上读出的既成部署：马谡失却要路、占山为寨；魏兵大至四面围合、断汲水道路，不须二日军自乱。而这一点已经无法在图上改回来。",
+    "basis": "explicit",
+    "evidenceType": "mixed",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "吾观此图本，失却要路，占山为寨。",
+      "start": 482006,
+      "end": 482022,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 482006,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "倘魏兵大至，四面围合，断汲水道路，不须二日，军自乱矣。",
+      "start": 482022,
+      "end": 482049,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 482022,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "action": {
+    "text": "他的动作分两步。补救未成即转为撤退：关兴张苞各引三千精兵投武功山小路作疑兵、张冀引军修理剑阁以备归路、密传号令收拾行装、马岱姜维断后先伏山谷、差心腹报三郡官吏军民入汉中、遣人到冀县搬取姜维老母。",
+    "basis": "explicit",
+    "evidenceType": "mixed",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "急唤关兴、张苞分付曰：“汝二人各引三千精兵，投武功山小路而行。如遇魏兵，不可大击，只鼓噪呐喊，为疑兵惊之。彼当自走，亦不可追。待军退尽，便投阳平关去。”",
+      "start": 482146,
+      "end": 482222,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 482146,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "又令张冀先引军去修理剑阁，以备归路。",
+      "start": 482222,
+      "end": 482240,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 482222,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "又令马岱、姜维断后，先伏于山谷中，待诸军退尽，方始收兵。",
+      "start": 482261,
+      "end": 482289,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 482261,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "又遣心腹人到冀县搬取姜维老母，送入汉中。",
+      "start": 482319,
+      "end": 482339,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 482319,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "result": {
+    "text": "结果是撤退被执行并生效：关兴张苞的疑兵让魏兵弃甲抛戈、尽弃辎重而走，二人多得军器粮草而归；三郡官吏军民陆续而来；孔明自认「大事去矣！此吾之过也」。",
+    "basis": "explicit",
+    "evidenceType": "mixed",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "魏兵皆弃甲抛戈而走。",
+      "start": 483246,
+      "end": 483256,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 483246,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "兴、苞二人皆遵将令，不敢追袭，多得军器粮草而归。",
+      "start": 483330,
+      "end": 483354,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 483330,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "天水、安定、南安三郡官吏军民，陆续而来。",
+      "start": 483143,
+      "end": 483163,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 483143,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "cost": {
+    "text": "代价是明确写出的：街亭与列柳城两处要地尽失，孔明跌足长叹并把责任归到自己身上；三郡得而复弃，军民须随军迁入汉中。",
+    "basis": "explicit",
+    "evidenceType": "mixed",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "忽报马到来，说：“街亭、列柳城，尽皆失了！”孔明跌足长叹曰：“大事去矣！此吾之过也！”",
+      "start": 482103,
+      "end": 482146,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 482103,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "遂下令，教西城百姓，随军入汉中；司马懿必将复来。",
+      "start": 483106,
+      "end": 483130,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 483106,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   }
+  },
+  {
+   "id": "T09",
+   "character": "孔明",
+   "characterNote": "西城。",
+   "summary": "孔明先引五千兵退去西城县搬运粮草，忽然飞马报到司马懿引大军十五万望西城蜂拥而来；此时他身边别无大将、只剩二千五百军。他传令隐匿旌旗、各守城铺、大开四门、以军士扮百姓洒扫，自己披鹤氅戴纶巾携琴登城焚香操琴。",
+   "objective": {
+    "text": "孔明的目标是让司马懿相信城中有埋伏而退兵：他传令大开四门、每门二十军士扮作百姓洒扫，并说「如魏兵到时，不可擅动，吾自有计」，随即登城操琴——这一套是为「退敌」而做的。",
+    "basis": "explicit",
+    "evidenceType": "mixed",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "如魏兵到时，不可擅动，吾自有计。",
+      "start": 482545,
+      "end": 482561,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 482545,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "孔明乃披鹤氅，戴纶巾，引二小童携琴一张，于城上敌楼前，凭栏而坐，焚香操琴。",
+      "start": 482562,
+      "end": 482599,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 482562,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "obstacle": {
+    "text": "障碍是兵力的绝对劣势与时间的紧迫：司马懿引大军十五万望西城蜂拥而来，而孔明身边别无大将，只有一班文官，所引五千兵已分一半先运粮草去了，只剩二千五百军在城中，众官听得这个消息尽皆失色。",
+    "basis": "explicit",
+    "evidenceType": "mixed",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "司马懿引大军十五万，望西城蜂拥而来！",
+      "start": 482378,
+      "end": 482396,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 482378,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "时孔明身边别无大将，只有一班文官，所引五千兵，已分一半先运粮草去了，只剩二千五百军在城中。众官听得这个消息，尽皆失色。",
+      "start": 482397,
+      "end": 482456,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 482397,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "action": {
+    "text": "他下了一整套「看起来照常」的令并亲自执行最后一环：将旌旗尽皆隐匿、诸军各守城铺、妄行出入及高言大语者斩、大开四门、每门二十军士扮百姓洒扫；自己披鹤氅戴纶巾携琴登城凭栏焚香操琴。",
+    "basis": "explicit",
+    "evidenceType": "mixed",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "孔明传令，教“将旌旗尽皆隐匿；诸军各守城铺，如有妄行出入，及高言大语者，斩之！大开四门，每一门用二十军士，扮作百姓，洒扫街道。",
+      "start": 482482,
+      "end": 482545,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 482482,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "果见孔明坐于城楼之上，笑容可掬，焚香操琴。",
+      "start": 482654,
+      "end": 482675,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 482654,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "result": {
+    "text": "结果是司马懿止住三军、远远望之，看毕大疑，教后军作前军、前军作后军望北山路而退，两路兵尽皆退去。孔明见魏军远去抚掌而笑，并对众官说明对方是「料吾生平谨慎，必不弄险」才退；他随即下令西城百姓随军入汉中，自己离西城望汉中而走。",
+    "basis": "explicit",
+    "evidenceType": "mixed",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "于是两路兵尽皆退去。孔明见魏军远去，抚掌而笑。",
+      "start": 482826,
+      "end": 482849,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 482826,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "此人料吾生平谨慎，必不弄险；见如此模样，疑有伏兵，所以退去。",
+      "start": 482901,
+      "end": 482931,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 482901,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "于是孔明离西城望汉中而走。",
+      "start": 483130,
+      "end": 483143,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 483130,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "cost": {
+    "text": "代价是没有选择余地：孔明事后自己说明，兵止二千五百，若弃城而走必不能远遁、必为司马懿所擒——他是在「弃城走必被擒」与「弄险」之间选了后者（吾非行险，盖因不得已而用之）；西城百姓则须随军迁入汉中。",
+    "basis": "explicit",
+    "evidenceType": "mixed",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "吾兵止有二千五百，若弃城而走，必不能远遁。得不为司马懿所擒乎？",
+      "start": 483008,
+      "end": 483039,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 483008,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "吾非行险，盖因不得已而用之。",
+      "start": 482931,
+      "end": 482945,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 482931,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   }
+  },
+  {
+   "id": "T10",
+   "character": "司马懿",
+   "characterNote": "西城退兵。",
+   "summary": "司马懿前军哨到城下不敢进，他笑而不信、飞马远望，看到孔明坐城楼焚香操琴、二童子捧剑执麈尾、城门内外二十余百姓低头洒扫，看毕大疑，便教后军作前军望北山路而退；对司马昭的质疑，他以「亮平生谨慎，不曾弄险，今大开城门必有埋伏」作答。",
+   "objective": {
+    "text": "司马懿的目标是不中埋伏：他把孔明摆出的模样当作需要判读的证据，判定「必有埋伏」后选择退兵。他的目标与理由写在同段的对答里——我兵若进中其计也、汝辈岂知、宜速退。",
+    "basis": "explicit",
+    "evidenceType": "speech",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "今大开城门，必有埋伏。我兵若进，中其计也。汝辈岂知？宜速退。”",
+      "start": 482795,
+      "end": 482826,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 482795,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "obstacle": {
+    "text": "障碍是他根本无法核实城内虚实：前军哨到城下「见了如此模样」就再不敢前进，只能急报给他——没有人替他确认城里到底有没有兵。",
+    "basis": "explicit",
+    "evidenceType": "narrative",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "见了如此模样，皆不敢进，急报与司马懿。",
+      "start": 482615,
+      "end": 482634,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 482615,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "action": {
+    "text": "他的动作是一整套：先笑而不信、止住三军、自飞马远远望之，看毕大疑之后到中军把后军作前军、前军作后军，望北山路而退，于是两路兵尽皆退去。",
+    "basis": "explicit",
+    "evidenceType": "narrative",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "懿笑而不信，遂止住三军，自飞马远远望之。",
+      "start": 482634,
+      "end": 482654,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 482634,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "懿看毕大疑，便到中军，教后军作前军，前军作后军，望北山路而退。",
+      "start": 482719,
+      "end": 482750,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 482719,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "于是两路兵尽皆退去。",
+      "start": 482826,
+      "end": 482836,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 482826,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "result": {
+    "text": "结果是他一无所获而事后才知道真相：他复到西城问遗下居民及山僻隐者，皆言孔明止有二千五百军在城中、又无武将、别无埋伏；武功山小民又告关兴张苞各只三千军、只转山呐喊并不敢厮杀。",
+    "basis": "explicit",
+    "evidenceType": "mixed",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "皆言孔明止有二千五百军在城中，又无武将，只有几个文官，别无埋伏。",
+      "start": 484043,
+      "end": 484075,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 484043,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "武功山小民告曰：“关兴、张苞，只各有三千军，转山呐喊，鼓噪惊追，又无别军，并不敢厮杀。”",
+      "start": 484075,
+      "end": 484119,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 484075,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "cost": {
+    "text": "代价是他的判断被事后的证词否证、本人追悔：原文写他「悔之不及」，并仰天叹「吾不如孔明也」。这是已发生的处境，不是风险。",
+    "basis": "explicit",
+    "evidenceType": "narrative",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "懿悔之不及，仰天叹曰：“吾不如孔明也！”",
+      "start": 484119,
+      "end": 484139,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 484119,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   }
+  },
+  {
+   "id": "T11",
+   "character": "赵云",
+   "characterNote": "箕谷退兵。",
+   "summary": "赵云邓芝伏兵箕谷，闻孔明传令回军，赵云预判魏军必追，安排自己引一军伏于其后、让邓芝打自己的旗号徐徐而退；郭淮派苏顒来追，苏顒先见红旗白字「赵云」急收兵，再被赵云一枪刺死，余军溃散。",
+   "objective": {
+    "text": "赵云的目标是全军而退：他对邓芝说「吾一步步自有护送也」，做法是自引一军伏于其后、让邓芝打自己的旗号徐徐而退，等魏军来追时从背后接应。",
+    "basis": "explicit",
+    "evidenceType": "speech",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "吾先引一军伏于其后，公却引兵打吾旗号，徐徐而退。吾一步步自有护送也。",
+      "start": 483507,
+      "end": 483541,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 483507,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "obstacle": {
+    "text": "障碍是敌方已经预判到他会退：郭淮唤先锋苏顒分付「蜀将赵云，英勇无敌，汝可小心提防，彼军若退，必有计也」，随后苏顒引前部三千兵奔入箕谷来追。",
+    "basis": "explicit",
+    "evidenceType": "speech",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "蜀将赵云，英勇无敌。汝可小心提防，彼军若退，必有计也。",
+      "start": 483568,
+      "end": 483595,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 483568,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "action": {
+    "text": "他让自己的旗号继续前进、自己伏兵在后：苏顒看到山坡后闪出红旗白字「赵云」急收兵退走，行不到数里被赵云撞出大喝「汝识赵子龙否」，一枪刺死；对万政他又勒马挺枪立于路口，等天色黄昏方才拨回马缓缓而进；在大林处大喝一声惊得魏兵落马者百余人，又一箭射中万政盔缨。",
+    "basis": "explicit",
+    "evidenceType": "mixed",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "只见山坡后闪出红旗白字，上书“赵云”。苏顒急收兵退走。",
+      "start": 483638,
+      "end": 483665,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 483638,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "云见魏兵追急，乃勒马挺枪，立于路口，待来将交锋。",
+      "start": 483764,
+      "end": 483788,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 483764,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "行至一大林，忽听得背后大喝一声曰：“赵子龙在此！”惊得魏兵落马者百余人，余者皆越岭而去。",
+      "start": 483868,
+      "end": 483912,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 483868,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "result": {
+    "text": "结果是追兵被打退、辎重无损：苏顒被刺死、余军溃散，万政脱命而回、郭淮不敢近前；赵云护送车仗人马望汉中而去，沿途并无遗失。代价一栏另见。",
+    "basis": "explicit",
+    "evidenceType": "mixed",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "措手不及，被云一枪刺死于马下。余军溃散。",
+      "start": 483722,
+      "end": 483742,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 483722,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "云护送车仗人马，望汉中而去，沿途并无遗失。",
+      "start": 483965,
+      "end": 483986,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 483965,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "cost": {
+    "text": "代价在原文里没有写成损失：赵云一路「沿途并无遗失」，仅在苏顒交锋处「蜀兵已去三十余里」是他为等敌将而放掉的距离。除此之外本区间未写赵云部伤亡、失将或失械——所以我只写这条已写出的代价（掉队距离），不补伤亡数字。",
+    "basis": "explicit",
+    "evidenceType": "narrative",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "蜀兵已去三十余里。万政认得是赵云，不敢前进",
+      "start": 483788,
+      "end": 483809,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 483788,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "云等得天色黄昏，方才拨回马缓缓而进。",
+      "start": 483810,
+      "end": 483828,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 483810,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   }
+  },
+  {
+   "id": "T12",
+   "character": "曹真",
+   "characterNote": "魏将，追赶蜀军。",
+   "summary": "曹真听说孔明退兵，急引兵追赶，山背后一声炮响，蜀兵漫山遍野而来，为首是姜维、马岱；真大惊急退，先锋陈造已被马岱所斩，真引兵鼠窜而还。",
+   "objective": {
+    "text": "曹真的目标是趁蜀军退兵时追击获利：他听知孔明退兵，急引兵追赶。",
+    "basis": "explicit",
+    "evidenceType": "narrative",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "此时曹真听知孔明退兵，急引兵追赶。",
+      "start": 483381,
+      "end": 483398,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 483381,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "obstacle": {
+    "text": "障碍是蜀军早已备好伏兵等他来追：山背后一声炮响，蜀兵漫山遍野而来，为首大将是姜维、马岱。",
+    "basis": "explicit",
+    "evidenceType": "narrative",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "山背后一声炮响，蜀兵漫山遍野而来：为首大将，乃是姜维、马岱。",
+      "start": 483398,
+      "end": 483428,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 483398,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "action": {
+    "text": "他的动作只有急退军：真大惊，急退军时。",
+    "basis": "explicit",
+    "evidenceType": "narrative",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "真大惊，急退军时",
+      "start": 483428,
+      "end": 483436,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 483428,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "result": {
+    "text": "结果是他退军而还、先锋被斩：真引兵鼠窜而还。蜀兵连夜皆奔回汉中。",
+    "basis": "explicit",
+    "evidenceType": "narrative",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "真引兵鼠窜而还。蜀兵连夜皆奔回汉中。",
+      "start": 483448,
+      "end": 483466,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 483448,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "cost": {
+    "text": "代价是折了先锋：先锋陈造已被马岱所斩。这是原文写出的已发生损失，有明确对象（陈造）与动作（斩），不是风险。",
+    "basis": "explicit",
+    "evidenceType": "narrative",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "先锋陈造已被马岱所斩。",
+      "start": 483437,
+      "end": 483448,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 483437,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   }
+  },
+  {
+   "id": "T13",
+   "character": "司马懿",
+   "characterNote": "收尾：请兵收川。",
+   "summary": "蜀兵尽回汉中后，司马懿引一军复到西城、问明真相，安抚诸处官民后引兵径还长安朝见魏主；曹睿称复得陇西诸郡皆卿之功，司马懿却奏请并力收川以报陛下，睿大喜令其即便兴兵，班内一人出奏「臣有一计，足可定蜀降吴」。",
+   "objective": {
+    "text": "司马懿的目标不是守住已得的陇西，而是继续进兵灭蜀：他当面奏请大兵并力收川，以报陛下。",
+    "basis": "explicit",
+    "evidenceType": "speech",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "臣乞大兵并力收川，以报陛下。",
+      "start": 484198,
+      "end": 484212,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 484198,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "obstacle": {
+    "text": "障碍是他自己在同一段里说出的：蜀兵皆在汉中而未尽剿灭——即前一轮的战果不含蜀方主力的消灭，所以需要再请大兵才能收川。",
+    "basis": "explicit",
+    "evidenceType": "speech",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "今蜀兵皆在汉中，未尽剿灭。",
+      "start": 484185,
+      "end": 484198,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 484185,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "action": {
+    "text": "他复到西城、向遗下居民与山僻隐者问明孔明兵数、安抚诸处官民，然后引兵径还长安朝见魏主，并当面奏请收川。",
+    "basis": "explicit",
+    "evidenceType": "mixed",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "此时蜀兵尽回汉中去了，懿引一军复到西城，因问遗下居民及山僻隐者",
+      "start": 484011,
+      "end": 484042,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 484011,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "遂安抚了诸处官民，引兵径还长安，朝见魏主。",
+      "start": 484139,
+      "end": 484160,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 484139,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "result": {
+    "text": "结果是他的请求被当场批准：睿大喜，令懿即便兴兵；但同一段的结尾立刻把结果悬置——班内一人出奏「臣有一计，足可定蜀降吴」，未知献计者是谁，且看下文分解。",
+    "basis": "explicit",
+    "evidenceType": "mixed",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "睿大喜，令懿即便兴兵。",
+      "start": 484213,
+      "end": 484224,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 484213,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "忽班内一人出奏曰：“臣有一计，足可定蜀降吴。”",
+      "start": 484224,
+      "end": 484247,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 484224,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "cost": null,
+   "costNote": "本区间未写司马懿为请兵收川付出代价：没有折兵、没有被驳、也没有受罚。「今日复得陇西诸郡，皆卿之功也」是魏主的褒奖而非代价；下一轮战事的结果不在本区间内。"
+  },
+  {
+   "id": "T14",
+   "character": "马谡",
+   "characterNote": "自任与拒谏的对照面。",
+   "summary": "本区间的两次「自任」构成对照：马谡以「某自幼熟读兵书，颇知兵法」自任并请立军令状，又以「吾素读兵书，丞相诸事尚问于我」驳回王平；孔明则以「吾非行险，盖因不得已而用之」自认弄险，并当面把失败归到「此吾之过也」。",
+   "objective": {
+    "text": "马谡的目标是以兵法权威压过副将的反对、把自己的部署执行下去：他自陈「吾素读兵书，丞相诸事尚问于我」，用来质问王平「汝奈何相阻耶」。",
+    "basis": "explicit",
+    "evidenceType": "speech",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "吾素读兵书，丞相诸事尚问于我，汝奈何相阻耶！",
+      "start": 479998,
+      "end": 480020,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 479998,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "obstacle": {
+    "text": "障碍是副将据实提出的地形反驳：王平说此山乃绝地、魏兵若断汲水之道则军士不战自乱；也说出了正确的守法（当道筑城垣则贼兵十万不能偷过）。",
+    "basis": "explicit",
+    "evidenceType": "speech",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "今观此山，乃绝地也：若魏兵断我汲水之道，军士不战自乱矣。",
+      "start": 479924,
+      "end": 479952,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 479924,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "action": {
+    "text": "他的动作是以古兵法与孙子之语驳回，并动怒训斥：先笑「汝真女子之见」，再引「兵法云：凭高视下，势如劈竹」，又引「孙子云：置之死地而后生」，最后以「汝莫乱道」收束。",
+    "basis": "explicit",
+    "evidenceType": "mixed",
+    "basisNote": null,
+    "quotes": [
+     {
+      "quote": "谡大笑曰：“汝真女子之见！兵法云：凭高视下，势如劈竹。若魏兵到来，吾教他片甲不回！”",
+      "start": 479858,
+      "end": 479900,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 479858,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     },
+     {
+      "quote": "谡曰：“汝莫乱道！孙子云：置之死地而后生。若魏兵绝我汲水之道，蜀兵岂不死战？以一可当百也。",
+      "start": 479953,
+      "end": 479998,
+      "globalOccurrences": 1,
+      "occurrenceIndex": 479953,
+      "inSlice": true,
+      "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+     }
+    ]
+   },
+   "result": null,
+   "resultNote": "本区间在「马谡不从」「与汝五千兵自去下寨」处收束这一段的对峙，马谡这套自任的最终结算（失街亭后如何被处置）不在本区间内——本区间只写到街亭已失、孔明退兵，没有马谡被斩或自贬的叙述，故 result 写 null，不提前借用后文。",
+   "cost": null,
+   "costNote": "本区间未写马谡为这次拒谏付出代价：他失街亭后的处置（军法、自贬）不在本区间内。已写出的损失（山上无水、折兵大半、蜀兵伤者极多）记在 T03/T04/T06 的 cost，属于战役损失而非本条「拒谏」动作的代价，不重复计入。"
+  }
+ ],
+ "causeEdges": [
+  {
+   "id": "CE01",
+   "frm": "细作回报司马懿倍道而行、八日到新城、孟达被乱军所杀，今同张颌引兵出关来拒",
+   "to": "孔明判定司马懿出关必取街亭断其咽喉，当众问谁敢引兵去守街亭，马谡自请",
+   "trigger": "细作报告里给出的两个事实：司马懿已到新城、孟达措手不及被杀；司马懿撤兵到长安见魏主后同张颌引兵出关。",
+   "mechanism": "机制在孔明的原话里写明：出关之后必然是取街亭——因为街亭是蜀军的咽喉之路，断此处即断粮道。方向：敌方出关（事实）→ 判定其必取街亭（推演）→ 抢先派人去守（动作）。不是「听到消息所以紧张」，而是由地理决定的下一个必争点。",
+   "basis": "explicit",
+   "etype": "mixed",
+   "quotes": [
+    {
+     "quote": "司马懿倍道而行，八日已到新城，孟达措手不及；又被申耽、申仪、李辅、邓贤为内应：孟达被乱军所杀。",
+     "start": 478822,
+     "end": 478869,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 478822,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    },
+    {
+     "quote": "今司马懿出关，必取街亭，断吾咽喉之路。",
+     "start": 478918,
+     "end": 478937,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 478918,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    }
+   ]
+  },
+  {
+   "id": "CE02",
+   "frm": "孔明把守街亭的要点交代给王平：下寨必当要道、安营既毕画四至八道地理图本来",
+   "to": "王平离山十里下寨后画成图本星夜差人禀孔明；孔明拆开视之即判定马谡坑陷吾军",
+   "trigger": "「安营既毕，便画四至八道地理形状图本来我看」这条事先给定的回报义务，加上孔明「凡事商议停当而行」的约束。",
+   "mechanism": "机制是一条事先约定的信息通道：孔明在派兵时规定了回报什么（地理形状图本）与回报时机（安营既毕）。王平照此把马谡山上下寨这件事写进图本送回，孔明因此能在街亭失守之前从图上读出「失却要路，占山为寨」的败势。方向：事后指定回报物 → 下属照办 → 上级据图判定。",
+   "basis": "explicit",
+   "etype": "mixed",
+   "quotes": [
+    {
+     "quote": "安营既毕，便画四至八道地理形状图本来我看。",
+     "start": 479240,
+     "end": 479261,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 479240,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    },
+    {
+     "quote": "王平引兵离山十里下寨，画成图本，星夜差人去禀孔明，具说马谡自于山上下寨。",
+     "start": 480143,
+     "end": 480179,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 480143,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    },
+    {
+     "quote": "孔明就文几上拆开视之，拍案大惊曰：“马谡无知，坑陷吾军矣！”",
+     "start": 481957,
+     "end": 481987,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 481957,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    }
+   ]
+  },
+  {
+   "id": "CE03",
+   "frm": "司马昭亲自哨见回报「当道并无寨栅，军皆屯于山上，故知可破也」",
+   "to": "司马懿大喜、更换衣服引百余骑亲自来看，当夜巡哨山下，随后定下围山断水的调度",
+   "trigger": "司马昭的亲见证词与「若街亭有兵守御，即当按兵不行」这条事先规则的反面：既然当道无寨栅，按兵不行的条件就不成立。",
+   "mechanism": "机制是主帅对情报的复核：司马昭给的是「可破」的结论与依据（当道无寨栅、军屯山上），司马懿没有直接采信，而是换衣服亲自巡哨一遍才落定。方向：下属亲见的情报 → 主帅现场复核 → 依复核结果布置围山断水。",
+   "basis": "explicit",
+   "etype": "mixed",
+   "quotes": [
+    {
+     "quote": "男亲自哨见，当道并无寨栅，军皆屯于山上，故知可破也。",
+     "start": 480298,
+     "end": 480324,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 480298,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    },
+    {
+     "quote": "遂更换衣服，引百余骑亲自来看。是夜天晴月朗，直至山下，周围巡哨了一遍，方回。",
+     "start": 480347,
+     "end": 480385,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 480347,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    }
+   ]
+  },
+  {
+   "id": "CE04",
+   "frm": "马谡弃当道要路而屯军于四面不相连的山上，并传令只以山顶红旗为号",
+   "to": "魏兵围山断汲水道路后山上无水无食、寨中大乱，红旗招动而军将你我相推无一人敢动，山南蜀兵开门降魏",
+   "trigger": "围山与断汲水道路这两个动作（申耽申仪引两路兵围山，先断了汲水道路）。",
+   "mechanism": "机制是补给链被切断：山是四面不相连的孤山，军士与水源之间只有汲水道路这一条联系；司马懿先断这条路，于是「山上无水，军不得食」，再由乱而散。指挥信号（山顶红旗）失效是在同一链条上的第二环：士兵不敢下山，号令就不再产生动作。两句原文各自写明了前因与后果，不是因为它们挨着才连边。",
+   "basis": "explicit",
+   "etype": "mixed",
+   "quotes": [
+    {
+     "quote": "此处侧边一山，四面皆不相连，且树木极广，此乃天赐之险也：可就山上屯军。",
+     "start": 479759,
+     "end": 479794,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 479759,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    },
+    {
+     "quote": "又令申耽、申仪引两路兵围山，先断了汲水道路；待蜀兵自乱，然后乘势击之。",
+     "start": 480555,
+     "end": 480590,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 480555,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    },
+    {
+     "quote": "山上无水，军不得食，寨中大乱。",
+     "start": 480806,
+     "end": 480821,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 480806,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    },
+    {
+     "quote": "马谡将红旗招动，军将你我相推，无一人敢动。",
+     "start": 480675,
+     "end": 480696,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 480675,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    }
+   ]
+  },
+  {
+   "id": "CE05",
+   "frm": "司马懿放条大路让过马谡，背后张颌引兵追来；魏延引兵杀出拦住张颌、复夺街亭并追赶到五十余里",
+   "to": "司马懿与司马昭的伏兵抄在魏延背后把他困在垓心，张颌复来三路合兵，魏延折兵大半",
+   "trigger": "魏延复夺街亭之后继续追击五十余里这一动作——追击使他离开街亭、进入伏兵预设的地段。",
+   "mechanism": "机制是「放—追—诱」的三段配合：先放马谡过去，再让张颌追，追击把蜀方的接应部队（魏延）吸引出来并拉离据点，最终进入两边伏兵（左司马懿、右司马昭）抄其后路的位置。方向：放走 → 追击 → 接应方被诱出 → 被抄后路合围。三句原文分别给出放、追、抄背后的动作。",
+   "basis": "explicit",
+   "etype": "narrative",
+   "quotes": [
+    {
+     "quote": "司马懿放条大路，让过马谡。背后张颌引兵追来。",
+     "start": 480887,
+     "end": 480909,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 480887,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    },
+    {
+     "quote": "延驱兵赶来，复夺街亭。赶到五十余里，一声喊起，两边伏兵齐出：左边司马懿，右边司马昭，却抄在魏延背后，把延困在垓心。",
+     "start": 480963,
+     "end": 481020,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 480963,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    }
+   ]
+  },
+  {
+   "id": "CE06",
+   "frm": "高翔提议当晚去劫魏寨再复街亭，三人在山坡下商议已定、兵分三路，魏延先进",
+   "to": "魏兵齐出把魏延、高翔围在垓心，二人不得脱身，靠王平杀入才得救",
+   "trigger": "魏延引兵先进、径到街亭后见「不见一人」而「心中大疑，未敢轻进」，又遇高翔兵到、二人共说魏兵不知在何处，队伍在路口停滞等候。",
+   "mechanism": "机制是劫寨计划的前提（知道魏寨在哪、有可劫的目标）在本段被原文否定：街亭「不见一人」而魏兵「不知在何处」，于是三路兵在黑暗中失去目标并在路口停留，炮响之后被同一处伏兵一并围住。方向：目标消失 → 行动方在路口滞留 → 被伏兵围住。这里的关键证据是原文自己写的「不见一人」与「未敢轻进」两个否定，而不是「他们去劫寨所以被围」。",
+   "basis": "explicit",
+   "etype": "mixed",
+   "quotes": [
+    {
+     "quote": "高翔曰：“不如今晚去劫魏寨，再复街亭。”当时三人在山坡下商议已定。待天色将晚，兵分三路。",
+     "start": 481178,
+     "end": 481222,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 481178,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    },
+    {
+     "quote": "魏延引兵先进，径到街亭，不见一人，心中大疑，未敢轻进，且伏在路口等候",
+     "start": 481222,
+     "end": 481256,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 481222,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    },
+    {
+     "quote": "忽然一声炮响，火光冲天，鼓起震地：魏兵齐出，把魏延、高翔围在垓心。",
+     "start": 481289,
+     "end": 481322,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 481289,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    }
+   ]
+  },
+  {
+   "id": "CE07",
+   "frm": "郭淮与曹真商议「恐司马懿得了全功，乃分淮来取街亭」，闻知司马懿张颌已成此功后改袭列柳城",
+   "to": "郭淮在城下叫门撞上已据城的司马懿，自认「仲达神机，吾不及也」，随后奉命与曹真星夜追蜀",
+   "trigger": "「闻知司马懿、张颌成了此功」这条消息——它使原本的抢功目标（街亭）失去意义，郭淮因此改袭列柳城。",
+   "mechanism": "机制是功劳竞争的替代路径：抢不到街亭就换一个可抢的目标（列柳城），而列柳城恰好已被司马懿留申耽申仪守住并亲自据城。方向：抢功动机 → 原目标失去 → 改袭新目标 → 撞上已据该城的同僚 → 转为听令的一方。司马懿的开城与一句「郭伯济来何迟也」是这条边的落点。",
+   "basis": "explicit",
+   "etype": "mixed",
+   "quotes": [
+    {
+     "quote": "原来郭淮与曹真商议，恐司马懿得了全功，乃分淮来取街亭；闻知司马懿、张颌成了此功，遂引兵径袭列柳城。",
+     "start": 481402,
+     "end": 481451,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 481402,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    },
+    {
+     "quote": "引兵径到城下叫门，只见城上一声炮响，旗帜皆竖，当头一面大旗，上书“平西都督司马懿”。",
+     "start": 481530,
+     "end": 481572,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 481530,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    },
+    {
+     "quote": "淮大惊曰：“仲达神机，吾不及也！”遂入城。",
+     "start": 481601,
+     "end": 481622,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 481601,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    }
+   ]
+  },
+  {
+   "id": "CE08",
+   "frm": "司马懿判定「今街亭已失，诸葛亮必走」，并定下不去取阳平关（怕中计）而从小路抄箕谷、自引兵当斜谷、只在中途截辎重的方针",
+   "to": "蜀方各路的退军部署：张颌引兵一半抄箕谷、司马懿自领大军望斜谷进发，蜀兵尽回汉中",
+   "trigger": "「归师勿掩，穷寇莫追」这条兵法与他自己的推演：魏延王平马谡高翔必先去据阳平关，若去取关则诸葛亮随后掩杀。",
+   "mechanism": "机制是先排除一个目标再选定另两个：不去取阳平关（因为会中掩杀之计），改为从小路抄箕谷退兵、自当斜谷之兵，且「若彼败走，不可相拒，只宜中途截住」以求辎重。方向：判定蜀军必退 → 排除阳平关 → 选箕谷/斜谷两路截击。这解释了为什么蜀军能退走而只丢辎重——魏方的目标被主动限制在辎重上。",
+   "basis": "explicit",
+   "etype": "mixed",
+   "quotes": [
+    {
+     "quote": "今街亭已失，诸葛亮必走。",
+     "start": 481631,
+     "end": 481643,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 481631,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    },
+    {
+     "quote": "吾料魏延、王平、马谡、高翔等辈，必先去据阳平关。吾若去取此关，诸葛亮必随后掩杀，中其计矣。兵法云：归师勿掩，穷寇莫追。",
+     "start": 481706,
+     "end": 481765,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 481706,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    },
+    {
+     "quote": "若彼败走，不可相拒，只宜中途截住：蜀兵辎重，可尽得也。",
+     "start": 481786,
+     "end": 481813,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 481786,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    }
+   ]
+  },
+  {
+   "id": "CE09",
+   "frm": "孔明事先给关兴张苞的将令：只鼓噪呐喊为疑兵惊之、彼当自走、亦不可追、待军退尽便投阳平关",
+   "to": "魏兵皆弃甲抛戈而走、尽弃辎重而去，兴苞二人多得军器粮草而归",
+   "trigger": "山坡后喊杀连天鼓声震地，以及山谷中喊声震地鼓角喧天、两面大旗分别写着张苞与关兴的名号。",
+   "mechanism": "机制是疑兵针对的是判断而非兵力：原文写明「山谷应声，不知蜀兵多少；更兼魏军心疑，不敢久停」，可见起作用的是魏军自己无法确定兵数。而兴苞「皆遵将令，不敢追袭」是这条边的另一半——正因为不追，魏军才只是弃辎重而走，蜀军才多得军器粮草。方向：限定动作范围的将令 → 只造声势不接战 → 敌方因不确定而弃辎重。",
+   "basis": "explicit",
+   "etype": "mixed",
+   "quotes": [
+    {
+     "quote": "汝二人各引三千精兵，投武功山小路而行。如遇魏兵，不可大击，只鼓噪呐喊，为疑兵惊之。彼当自走，亦不可追。",
+     "start": 482158,
+     "end": 482209,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 482158,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    },
+    {
+     "quote": "山谷应声，不知蜀兵多少；更兼魏军心疑，不敢久停，只得尽弃辎重而去。",
+     "start": 483297,
+     "end": 483330,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 483297,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    },
+    {
+     "quote": "兴、苞二人皆遵将令，不敢追袭，多得军器粮草而归。",
+     "start": 483330,
+     "end": 483354,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 483330,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    }
+   ]
+  },
+  {
+   "id": "CE10",
+   "frm": "孔明在街亭未失之前已开始布置退路：张冀修理剑阁以备归路、密传号令收拾行装、马岱姜维断后先伏山谷、报三郡军民入汉中、搬取姜维老母",
+   "to": "蜀军撤退时未出现溃散，三郡官吏军民陆续而来，赵云一路沿途并无遗失",
+   "trigger": "王平的图本送到、孔明拆图后判定「马谡无知，坑陷吾军矣」，随后又在杨仪请行时接到街亭列柳城尽失的消息（跌足长叹「此吾之过也」），于是把补救改为撤退。",
+   "mechanism": "机制是提前指定归路与断后：剑阁被修（归路）、行装被收拾（可动）、马岱姜维伏于山谷断后（追兵被阻）、三郡军民被预先通知（人口与资源随军）、姜维老母被搬取（人质/家眷不落敌手）。方向：读图判定必败 → 立即转入撤退准备 → 撤退因此按序执行。这条边解释了「街亭虽失而蜀军主力与辎重得以回汉中」，不是「时间上先布置后退兵」。",
+   "basis": "explicit",
+   "etype": "mixed",
+   "quotes": [
+    {
+     "quote": "吾观此图本，失却要路，占山为寨。",
+     "start": 482006,
+     "end": 482022,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 482006,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    },
+    {
+     "quote": "又令张冀先引军去修理剑阁，以备归路。",
+     "start": 482222,
+     "end": 482240,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 482222,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    },
+    {
+     "quote": "又令马岱、姜维断后，先伏于山谷中，待诸军退尽，方始收兵。",
+     "start": 482261,
+     "end": 482289,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 482261,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    },
+    {
+     "quote": "天水、安定、南安三郡官吏军民，陆续而来。",
+     "start": 483143,
+     "end": 483163,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 483143,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    }
+   ]
+  },
+  {
+   "id": "CE11",
+   "frm": "孔明把西城做成「照常」的样子：尽匿旌旗、各守城铺、妄行出入者斩、大开四门、每门二十军士扮百姓洒扫，自己披鹤氅戴纶巾携琴于城楼上凭栏焚香操琴",
+   "to": "司马懿看毕大疑，教后军作前军、前军作后军望北山路而退，两路兵尽皆退去",
+   "trigger": "司马懿远望所见的三件事：孔明坐城楼之上笑容可掬焚香操琴；左一童子捧宝剑、右一童子执麈尾；城门内外二十余百姓低头洒扫、傍若无人。",
+   "mechanism": "机制是他的推断被这组景象触发，而不是被兵力触发：原文写明「亮平生谨慎，不曾弄险。今大开城门，必有埋伏。我兵若进，中其计也」——他拿「孔明平生谨慎」这条经验去解释「城门大开」这个异常，得出必有埋伏的结论。方向：异常景象＋对敌方性格的经验 → 判定有伏 → 退兵。孔明事后对众官的解释与此对应（此人料吾生平谨慎，必不弄险；见如此模样，疑有伏兵，所以退去），两边的话互为印证。本条即本回回目「武侯弹琴退仲达」的因果链。",
+   "basis": "explicit",
+   "etype": "mixed",
+   "quotes": [
+    {
+     "quote": "孔明乃披鹤氅，戴纶巾，引二小童携琴一张，于城上敌楼前，凭栏而坐，焚香操琴。",
+     "start": 482562,
+     "end": 482599,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 482562,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    },
+    {
+     "quote": "懿曰：“亮平生谨慎，不曾弄险。今大开城门，必有埋伏。我兵若进，中其计也。",
+     "start": 482780,
+     "end": 482816,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 482780,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    },
+    {
+     "quote": "此人料吾生平谨慎，必不弄险；见如此模样，疑有伏兵，所以退去。",
+     "start": 482901,
+     "end": 482931,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 482901,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    }
+   ]
+  },
+  {
+   "id": "CE12",
+   "frm": "赵云对邓芝交代退兵办法：自己引一军伏于其后，让邓芝引兵打他的旗号徐徐而退",
+   "to": "苏顒急收兵退走并被赵云一枪刺死、余军溃散；万政认得是赵云不敢前进；魏兵越岭而去；赵云护送车仗人马望汉中而去沿途并无遗失",
+   "trigger": "「山坡后闪出红旗白字，上书『赵云』」——追兵看到的是旗号而不是赵云本人。",
+   "mechanism": "机制是旗号先于本人生效：赵云把「赵云在此」这个信息交给旗号去传递，追兵据此决定进退（苏顒急收兵退走、万政不敢前进），而赵云本人此时伏在后方，等对方因旗号而迟疑或停顿时再出手（一枪刺死苏顒、大喝惊落百余人、一箭射中盔缨）。方向：旗号制造「赵云在此」的判断 → 追兵迟疑 → 赵云本人从伏处出手 → 追兵溃散、辎重无损。",
+   "basis": "explicit",
+   "etype": "mixed",
+   "quotes": [
+    {
+     "quote": "吾先引一军伏于其后，公却引兵打吾旗号，徐徐而退。吾一步步自有护送也。",
+     "start": 483507,
+     "end": 483541,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 483507,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    },
+    {
+     "quote": "只见山坡后闪出红旗白字，上书“赵云”。苏顒急收兵退走。",
+     "start": 483638,
+     "end": 483665,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 483638,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    },
+    {
+     "quote": "万政认得是赵云，不敢前进",
+     "start": 483797,
+     "end": 483809,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 483797,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    }
+   ]
+  }
+ ],
+ "rejectedCauseEdges": [
+  {
+   "id": "RC01",
+   "pair": [
+    "孔明派马谡守街亭",
+    "街亭失守"
+   ],
+   "why": "这两件事时间相邻（先派后失），但原文给出的失守机制是马谡弃当道要路、屯军于四面不相连的山上，再被断汲水道路——即失守的直接前因是马谡的具体部署与魏方的围山断水，不是「孔明派了他」。把派任当原因等于用结果反推动机，且会掩盖原文写明的那条机制（见 CE04）。",
+   "quote": "又令申耽、申仪引两路兵围山，先断了汲水道路；待蜀兵自乱，然后乘势击之。"
+  },
+  {
+   "id": "RC02",
+   "pair": [
+    "马谡在山上大笑「彼若有命，不来围山」",
+    "魏兵次日围山"
+   ],
+   "why": "时间相邻但方向相反：马谡那句话是对着山下巡哨的司马懿说的轻敌之语（人物语），它既没有产生魏方的围山决定，原文也把围山决定写在司马昭的哨探与司马懿的调度之后。把人物语当因果触发是「把说法当事实」的典型形态。",
+   "quote": "马谡在山上见之，大笑曰：“彼若有命，不来围山！”"
+  },
+  {
+   "id": "RC03",
+   "pair": [
+    "后人有诗赞曰「瑶琴三尺胜雄师」",
+    "司马懿退兵"
+   ],
+   "why": "诗是叙述者对事件的评赞，出现在退兵之后，不是退兵的原因。原文把退兵机制写在司马懿的原话里（亮平生谨慎不曾弄险、今大开城门必有埋伏），因此真正的边是 CE10 之外的另一条判断链，而不是这首诗。",
+   "quote": "后人有诗赞曰：“瑶琴三尺胜雄师，诸葛西城退敌时。十五万人回马处，土人指点到今疑。”"
+  },
+  {
+   "id": "RC04",
+   "pair": [
+    "司马懿复到西城问居民",
+    "司马懿悔之不及"
+   ],
+   "why": "这两件事因果方向是反的：悔来自他先前在城下判断错误这一既成事实，问居民只是使他得知真相的途径。若写成「问居民导致后悔」，就把取证动作混成了原因；原文的写法是「皆言…」之后紧接「懿悔之不及」，悔的对象是既成的误判。",
+   "quote": "懿悔之不及，仰天叹曰：“吾不如孔明也！”"
+  },
+  {
+   "id": "RC05",
+   "pair": [
+    "赵云在箕谷设伏",
+    "郭淮改令万政追赶"
+   ],
+   "why": "同一场景内的两个动作，但原文没有把郭淮的追赶决定与赵云的设伏连起来：郭淮传令教军急赶发生在「万政言赵云英勇如旧，因此不敢近前」之后，触发是万政的回报，不是赵云的设伏本身。方向接错了会得出「设伏导致被追」这种反因果。",
+   "quote": "郭淮兵到，万政言赵云英勇如旧，因此不敢近前。淮传令教军急赶，政令数百骑壮士赶来。"
+  }
+ ],
+ "states": [
+  {
+   "id": "S01",
+   "who": "街亭",
+   "whoKind": "place",
+   "whoNote": "本条记的是**街亭这个要地**的控制权变化，不是某个人物的状态。原文的「蜀」「魏」作为阵营名可查（如「魏兵」「蜀兵」），但我在初稿里把「蜀守」「魏据」压成标签，那是我自拟的措辞、不是原文用词，现改为直接引用原文的归属写法（见各条引文）。",
+   "aspect": "要地控制权",
+   "before": "前值：蜀方据守。孔明判定街亭是咽喉要路，派马谡王平引兵去守，另派高翔屯列柳城、魏延屯街亭之后接应。",
+   "after": "后值：魏方据有。魏兵四面围定、断汲水道路，马谡逃奔；魏延复夺街亭后中伏被围折兵大半，二将奔回时「营中皆是魏兵旌旗」；孔明随后退兵，街亭与列柳城尽失。",
+   "anchor": "马谡驱残兵杀下山西逃奔、魏延被抄在背后困于垓心之后，二将慌忙奔回寨时营中已尽是魏兵旌旗。",
+   "basis": "explicit",
+   "etype": "narrative",
+   "quotes": [
+    {
+     "quote": "马谡料守不住，只得驱残兵杀下山西逃奔。",
+     "start": 480868,
+     "end": 480887,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 480868,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    },
+    {
+     "quote": "二将慌忙奔回寨时，营中皆是魏兵旌旗。",
+     "start": 481096,
+     "end": 481114,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 481096,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    },
+    {
+     "quote": "忽报马到来，说：“街亭、列柳城，尽皆失了！”",
+     "start": 482103,
+     "end": 482125,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 482103,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    }
+   ]
+  },
+  {
+   "id": "S02",
+   "who": "孔明",
+   "whoNote": "本条的状态变化是：从派兵时说的「取长安第一功」到失街亭后的「此吾之过也」。",
+   "whoKind": "person",
+   "aspect": "对街亭之败的责任归属",
+   "before": "前值：他在派兵时把话说得很满——守街亭是「取长安第一功」，并当面交代王平「如所守无危，则是取长安第一功也」。",
+   "after": "后值：他当众把责任归到自己身上——先跌足长叹「大事去矣！此吾之过也」，后在西城对众官自认「吾非行险，盖因不得已而用之」。",
+   "anchor": "忽报马到来，说街亭、列柳城尽皆失了，孔明跌足长叹「此吾之过也」的那一刻。",
+   "basis": "explicit",
+   "etype": "mixed",
+   "quotes": [
+    {
+     "quote": "如所守无危，则是取长安第一功也。戒之！戒之！",
+     "start": 479275,
+     "end": 479297,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 479275,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    },
+    {
+     "quote": "忽报马到来，说：“街亭、列柳城，尽皆失了！”孔明跌足长叹曰：“大事去矣！此吾之过也！”",
+     "start": 482103,
+     "end": 482146,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 482103,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    }
+   ]
+  },
+  {
+   "id": "S03",
+   "who": "司马懿",
+   "whoNote": "本条的状态变化是：对诸葛亮「平生谨慎」这条判断的运用，从当作推演前提到处处受它约束，最后自认不如。",
+   "whoKind": "person",
+   "aspect": "对敌方主帅的评估",
+   "before": "前值：他基于「诸葛亮平生谨慎，未敢造次行事」断言对方必出斜谷取郿城，并判定诸葛亮欺曹真无备定从街亭进——即他把孔明的谨慎当作可预测的规则。",
+   "after": "后值：他先在西城下按同一规则（亮平生谨慎，不曾弄险）退兵，事后从居民与山僻隐者处得知城中只有二千五百军、别无埋伏，遂「悔之不及，仰天叹曰：吾不如孔明也」。",
+   "anchor": "司马懿复到西城、问过遗下居民及山僻隐者与武功山小民之后，仰天叹「吾不如孔明也」的那一刻。",
+   "basis": "explicit",
+   "etype": "mixed",
+   "quotes": [
+    {
+     "quote": "诸葛亮平生谨慎，未敢造次行事。",
+     "start": 478373,
+     "end": 478388,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 478373,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    },
+    {
+     "quote": "懿曰：“亮平生谨慎，不曾弄险。今大开城门，必有埋伏。我兵若进，中其计也。",
+     "start": 482780,
+     "end": 482816,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 482780,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    },
+    {
+     "quote": "懿悔之不及，仰天叹曰：“吾不如孔明也！”",
+     "start": 484119,
+     "end": 484139,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 484119,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    }
+   ]
+  },
+  {
+   "id": "S04",
+   "who": "司马昭",
+   "whoNote": "本条的状态变化是：他在军中判断地位的变化（先被质问「汝安敢出此大言」，其后哨探结果被采纳）。",
+   "whoKind": "person",
+   "aspect": "在军中的判断地位",
+   "before": "前值：他提出「男料街亭易取」时被父亲质问「汝安敢出此大言」；在西城他又质疑退兵，被斥「汝辈岂知？宜速退」。",
+   "after": "后值：街亭一路他的判断被采纳并写成战果——司马懿依他的哨探结果巡山、围山断水而取街亭；西城一路他的质疑则被事后证实（城中确实只有二千五百军、别无埋伏），但原文未写他因此被重新评价。",
+   "anchor": "司马昭回报「当道并无寨栅，军皆屯于山上，故知可破也」之后，司马懿大喜并亲自巡山的那一刻。",
+   "basis": "explicit",
+   "etype": "mixed",
+   "quotes": [
+    {
+     "quote": "懿问曰：“汝安敢出此大言？”",
+     "start": 480280,
+     "end": 480294,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 480280,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    },
+    {
+     "quote": "男亲自哨见，当道并无寨栅，军皆屯于山上，故知可破也。",
+     "start": 480298,
+     "end": 480324,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 480298,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    },
+    {
+     "quote": "次子司马昭曰：“莫非诸葛亮无军，故作此态？父亲何故便退兵？”",
+     "start": 482750,
+     "end": 482780,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 482750,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    }
+   ]
+  },
+  {
+   "id": "S05",
+   "who": "马谡",
+   "whoNote": "本条的状态变化是：从自任「岂一街亭不能守耶」到守不住而逃奔。",
+   "whoKind": "person",
+   "aspect": "对自己守街亭能力的判断",
+   "before": "前值：他以「某自幼熟读兵书，颇知兵法。岂一街亭不能守耶」自任，立军令状，并在山上说「若魏兵到来，吾教他片甲不回」。",
+   "after": "后值：魏兵围定断水后山上无水无食、寨中大乱，山南蜀兵开门降魏而他「禁止不住」，只好驱残兵杀下山西逃奔。",
+   "anchor": "魏兵自辰时困至戌时、山上无水军不得食之后，马谡见事不谐教军紧守寨门只等外应、继而逃奔的那一刻。",
+   "basis": "explicit",
+   "etype": "mixed",
+   "quotes": [
+    {
+     "quote": "谡曰：“某自幼熟读兵书，颇知兵法。岂一街亭不能守耶？”",
+     "start": 479021,
+     "end": 479048,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 479021,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    },
+    {
+     "quote": "马谡见事不谐，教军紧守寨门，只等外应。",
+     "start": 480736,
+     "end": 480755,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 480736,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    },
+    {
+     "quote": "山南蜀兵大开寨门，下山降魏。马谡禁止不住。",
+     "start": 480828,
+     "end": 480849,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 480828,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    }
+   ]
+  },
+  {
+   "id": "S06",
+   "who": "王平",
+   "whoNote": "本条的状态变化是：从被斥「汝真女子之见」到他的图本成为孔明判定败势的判据。",
+   "whoKind": "person",
+   "aspect": "在街亭一路的实际作用",
+   "before": "前值：他主张当道下寨被马谡斥为「汝真女子之见」，分兵掎角之请也被拒（马谡不从），只能引五千兵离山十里下寨。",
+   "after": "后值：他画的图本送到后，孔明拆开即「拍案大惊」并据图判定败势；他又在魏延、高翔两次被围时杀入救人（延大喜曰「吾得生矣」），最后随众望阳平关退走。",
+   "anchor": "王平离山十里下寨、画成图本星夜差人去禀孔明，孔明就文几上拆开视之拍案大惊的那一刻。",
+   "basis": "explicit",
+   "etype": "mixed",
+   "quotes": [
+    {
+     "quote": "谡大笑曰：“汝真女子之见！",
+     "start": 479858,
+     "end": 479871,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 479858,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    },
+    {
+     "quote": "马谡不从。",
+     "start": 480067,
+     "end": 480072,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 480067,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    },
+    {
+     "quote": "孔明就文几上拆开视之，拍案大惊曰：“马谡无知，坑陷吾军矣！”",
+     "start": 481957,
+     "end": 481987,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 481957,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    }
+   ]
+  },
+  {
+   "id": "S07",
+   "who": "郭淮",
+   "whoNote": "本条的状态变化是：从抢功者（恐司马懿得了全功）到听令者（郭淮从其言，出城而去）。",
+   "whoKind": "person",
+   "aspect": "在魏军内部的处境",
+   "before": "前值：他与曹真商议，「恐司马懿得了全功，乃分淮来取街亭」，并把取列柳城称作「亦是大功」。",
+   "after": "后值：列柳城下他叫门撞见已据城的司马懿，自认「仲达神机，吾不及也」而入城，随即从司马懿口中受命「公可速与子丹星夜追之」并从其言出城。",
+   "anchor": "郭淮引兵径到列柳城下叫门、城上一声炮响旗帜皆竖、当头大旗上书「平西都督司马懿」的那一刻。",
+   "basis": "explicit",
+   "etype": "mixed",
+   "quotes": [
+    {
+     "quote": "吾虽不得街亭，却取了列柳城，亦是大功。",
+     "start": 481510,
+     "end": 481529,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 481510,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    },
+    {
+     "quote": "淮大惊曰：“仲达神机，吾不及也！”遂入城。",
+     "start": 481601,
+     "end": 481622,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 481601,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    },
+    {
+     "quote": "公可速与子丹星夜追之。”郭淮从其言，出城而去。",
+     "start": 481643,
+     "end": 481666,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 481643,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    }
+   ]
+  },
+  {
+   "id": "S08",
+   "who": "西城",
+   "whoKind": "place",
+   "whoNote": "本条记的是**西城这座城**的归属与人口去向，不是某个人物的状态。原文可查的写法是「西城虽山僻小县，乃蜀兵屯粮之所」「孔明离西城望汉中而走」。",
+   "aspect": "城池的归属与人口去向",
+   "before": "前值：西城是蜀兵屯粮之所，又是南安天水安定三郡总路（司马懿以此判定若得此城三郡可复）；孔明引五千兵退去西城搬运粮草，分一半先运走、只余二千五百军在城中。",
+   "after": "后值：蜀军未在此城交战即撤走——孔明见魏军远去后下令西城百姓随军入汉中并自离西城望汉中而走；司马懿事后引一军复到西城，问居民得知孔明兵数。",
+   "anchor": "孔明见魏军远去抚掌而笑、随即下令西城百姓随军入汉中并离西城望汉中而走的那一刻。",
+   "basis": "explicit",
+   "etype": "mixed",
+   "quotes": [
+    {
+     "quote": "西城虽山僻小县，乃蜀兵屯粮之所，又南安、天水、安定三郡总路。",
+     "start": 481842,
+     "end": 481872,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 481842,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    },
+    {
+     "quote": "遂下令，教西城百姓，随军入汉中；司马懿必将复来。于是孔明离西城望汉中而走。",
+     "start": 483106,
+     "end": 483143,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 483106,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    },
+    {
+     "quote": "此时蜀兵尽回汉中去了，懿引一军复到西城",
+     "start": 484011,
+     "end": 484030,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 484011,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    }
+   ]
+  },
+  {
+   "id": "S09",
+   "who": "司马懿",
+   "whoNote": "本条记的是知识差：对西城虚实的知情状态从不知到知。",
+   "whoKind": "person",
+   "aspect": "知识差",
+   "before": "前值：不知。他在城下只见「孔明坐于城楼之上，笑容可掬，焚香操琴」，左有童子捧宝剑、右有童子执麈尾，城门内外二十余百姓低头洒扫，看毕大疑，据此推定「今大开城门，必有埋伏」。他自己的儿子司马昭当面提出「莫非诸葛亮无军，故作此态」，他仍答「汝辈岂知？宜速退」。",
+   "after": "后值：知。蜀兵尽回汉中之后，他引一军复到西城，问遗下居民及山僻隐者，「皆言孔明止有二千五百军在城中，又无武将，只有几个文官，别无埋伏」；武功山小民又告关兴张苞各只三千军、只转山呐喊并不敢厮杀。他的反应是「悔之不及」。",
+   "anchor": "司马懿复到西城、发问遗下居民及山僻隐者与武功山小民，得到「别无埋伏」的回答的那一刻。",
+   "basis": "explicit",
+   "etype": "mixed",
+   "quotes": [
+    {
+     "quote": "懿笑而不信，遂止住三军，自飞马远远望之。",
+     "start": 482634,
+     "end": 482654,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 482634,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    },
+    {
+     "quote": "次子司马昭曰：“莫非诸葛亮无军，故作此态？父亲何故便退兵？”",
+     "start": 482750,
+     "end": 482780,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 482750,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    },
+    {
+     "quote": "皆言孔明止有二千五百军在城中，又无武将，只有几个文官，别无埋伏。",
+     "start": 484043,
+     "end": 484075,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 484043,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    }
+   ]
+  },
+  {
+   "id": "S10",
+   "who": "蜀军各路退军",
+   "whoKind": "collective",
+   "whoNote": "本条记的是**蜀军各路退军这件事**，主语是一个行动集合而非单个人物；「蜀兵」在原文可查（如「蜀兵连夜皆奔回汉中」），我按原文用「蜀兵」指代。",
+   "aspect": "退军执行情况",
+   "before": "前值：孔明在读图后即开始布置退路（修剑阁、收行装、马岱姜维断后、报三郡军民入汉中、搬姜维老母），并给关兴张苞限定动作范围的疑兵令。",
+   "after": "后值：各路按此退出——三郡官吏军民陆续而来，西城百姓随军入汉中，赵云护送车仗人马望汉中而去沿途并无遗失，诸葛亮自离西城望汉中而走；魏方曹真郭淮复夺三郡以为己功。",
+   "anchor": "「真引兵鼠窜而还。蜀兵连夜皆奔回汉中」与「天水、安定、南安三郡官吏军民，陆续而来」这两处同段叙述。",
+   "basis": "explicit",
+   "etype": "mixed",
+   "quotes": [
+    {
+     "quote": "真引兵鼠窜而还。蜀兵连夜皆奔回汉中。",
+     "start": 483448,
+     "end": 483466,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 483448,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    },
+    {
+     "quote": "天水、安定、南安三郡官吏军民，陆续而来。",
+     "start": 483143,
+     "end": 483163,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 483143,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    },
+    {
+     "quote": "云护送车仗人马，望汉中而去，沿途并无遗失。",
+     "start": 483965,
+     "end": 483986,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 483965,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    }
+   ]
+  }
+ ],
+ "foreshadows": [
+  {
+   "id": "F01",
+   "name": "军令状：从「若有差失，乞斩全家」到街亭尽失后的「此吾之过也」",
+   "setup": "铺设：马谡在孔明面前自任并立下军令状——「若有差失，乞斩全家」，孔明回以「军中无戏言」，马谡即写呈上。",
+   "payoff": "回收（部分）：街亭与列柳城果然尽失，孔明跌足长叹「大事去矣！此吾之过也」。但本区间没有把军令状兑现到马谡身上——原文到「此吾之过也」为止就转入退军部署，马谡本人的处置不在本区间内，故这条伏笔在本区间内只回收了「差失」这一半。",
+   "resolved": false,
+   "unresolvedNote": "本区间内未回收：军令状的兑现对象是马谡（乞斩全家），而原文在本区间只写到街亭失守与孔明自责退兵，没有马谡被军法处置的叙述。我不替原文补一个结局，故标 unresolved 并写明缺的是哪一半。",
+   "basis": "explicit",
+   "etype": "mixed",
+   "quotes": [
+    {
+     "quote": "谡曰：“休道司马懿、张颌，便是曹睿亲来，有何惧哉！若有差失，乞斩全家。”孔明曰：“军中无戏言。”谡曰：“愿立军令状。”孔明从之，谡遂写了军令状呈上。",
+     "start": 479083,
+     "end": 479157,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 479083,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    },
+    {
+     "quote": "孔明跌足长叹曰：“大事去矣！此吾之过也！”",
+     "start": 482125,
+     "end": 482146,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 482125,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    }
+   ]
+  },
+  {
+   "id": "F02",
+   "name": "「安营既毕，便画四至八道地理形状图本来我看」——事先指定的回报物",
+   "setup": "铺设：孔明在派王平相助马谡时，把守法与回报义务一并交代：下寨必当要道之处、安营既毕便画四至八道地理形状图本来我看、凡事商议停当而行。",
+   "payoff": "回收：王平离山十里下寨后「画成图本，星夜差人去禀孔明，具说马谡自于山上下寨」；孔明就文几上拆开视之，立刻读出「失却要路，占山为寨」并推定魏兵一围断水则二日内自乱。",
+   "resolved": true,
+   "basis": "explicit",
+   "etype": "mixed",
+   "quotes": [
+    {
+     "quote": "安营既毕，便画四至八道地理形状图本来我看。",
+     "start": 479240,
+     "end": 479261,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 479240,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    },
+    {
+     "quote": "王平引兵离山十里下寨，画成图本，星夜差人去禀孔明，具说马谡自于山上下寨。",
+     "start": 480143,
+     "end": 480179,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 480143,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    },
+    {
+     "quote": "吾观此图本，失却要路，占山为寨。",
+     "start": 482006,
+     "end": 482022,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 482006,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    }
+   ]
+  },
+  {
+   "id": "F03",
+   "name": "「待军退尽，便投阳平关去」——事先指定的集结点",
+   "setup": "铺设：孔明给关兴张苞的疑兵令里预先写明退路终点：不可大击、只鼓噪呐喊、彼当自走亦不可追，最后「待军退尽，便投阳平关去」。",
+   "payoff": "回收：兴苞二人依令只作声势不追袭，魏兵尽弃辎重而去、二人多得军器粮草而归；蜀兵尽回汉中之后司马懿引一军复到西城，蜀方各路已按预定路线退出。",
+   "resolved": true,
+   "basis": "explicit",
+   "etype": "mixed",
+   "quotes": [
+    {
+     "quote": "汝二人各引三千精兵，投武功山小路而行。如遇魏兵，不可大击，只鼓噪呐喊，为疑兵惊之。彼当自走，亦不可追。待军退尽，便投阳平关去。",
+     "start": 482158,
+     "end": 482221,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 482158,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    },
+    {
+     "quote": "兴、苞二人皆遵将令，不敢追袭，多得军器粮草而归。",
+     "start": 483330,
+     "end": 483354,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 483330,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    }
+   ]
+  },
+  {
+   "id": "F04",
+   "name": "司马懿事先的两路部署（守郿城、截箕谷）在蜀军退时被用到",
+   "setup": "铺设：司马懿在出关前就对张颌说明已发檄文——令曹真拒守郿城、兵来不可出战；令孙礼辛毗截住箕谷道口、兵来则出奇兵击之。",
+   "payoff": "回收（部分）：蜀军退兵时，箕谷一路确有郭淮、苏顒、万政的追兵，赵云在箕谷道中设伏退敌；但郿城一路的曹真「兵来不可出战」这条约束在本区间没有被写成一次执行，郿城本身也未再出现。",
+   "resolved": false,
+   "unresolvedNote": "本区间内部分未回收：箕谷一路有追兵与赵云的交战（可视为该部署所在方向的战事），但「令子丹拒守郿城，若兵来不可出战」这一条在本区间没有任何执行动作，也未再提郿城。两条部署同出一句，我不能因为其中一条有下文就算两条都已回收，故标 unresolved 并写明缺的是郿城那一条。",
+   "basis": "explicit",
+   "etype": "mixed",
+   "quotes": [
+    {
+     "quote": "吾已发檄文，令子丹拒守郿城，若兵来不可出战；令孙礼、辛毗截住箕谷道口，若兵来则出奇兵击之。",
+     "start": 478455,
+     "end": 478500,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 478455,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    },
+    {
+     "quote": "却说郭淮提兵再回箕谷道中，唤先锋苏顒分付曰：“蜀将赵云，英勇无敌。汝可小心提防，彼军若退，必有计也。”",
+     "start": 483545,
+     "end": 483596,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 483545,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    }
+   ]
+  },
+  {
+   "id": "F05",
+   "name": "「西城虽山僻小县，乃蜀兵屯粮之所，又南安、天水、安定三郡总路」——司马懿选西城的理由",
+   "setup": "铺设：司马懿在定下从小路抄箕谷、自当斜谷之后，特别说明为什么取西城：它是蜀兵屯粮之所，又是南安、天水、安定三郡总路，若得此城三郡可复。",
+   "payoff": "回收：他确实引大军望西城蜂拥而来（蜀方飞马报的正是「司马懿引大军十五万，望西城蜂拥而来」），西城成为空城计的发生地；孔明退兵后他又引一军复到西城、问居民以核实。",
+   "resolved": true,
+   "basis": "explicit",
+   "etype": "mixed",
+   "quotes": [
+    {
+     "quote": "西城虽山僻小县，乃蜀兵屯粮之所，又南安、天水、安定三郡总路。若得此城，三郡可复矣。",
+     "start": 481842,
+     "end": 481883,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 481842,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    },
+    {
+     "quote": "司马懿引大军十五万，望西城蜂拥而来！",
+     "start": 482378,
+     "end": 482396,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 482378,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    }
+   ]
+  },
+  {
+   "id": "F06",
+   "name": "「赵子龙在此」的喝声与赵云旗号：先以旗号诱敌，再以喝声惊敌",
+   "setup": "铺设：赵云对邓芝交代退兵办法——「吾先引一军伏于其后，公却引兵打吾旗号，徐徐而退。吾一步步自有护送也」；苏顒追来先看到的是「山坡后闪出红旗白字，上书『赵云』」。",
+   "payoff": "回收：同一手旗号在下一段继续生效——万政认得是赵云不敢前进；赵云在大林处大喝「赵子龙在此」惊得魏兵落马者百余人；万政勉强来敌被一箭射中盔缨跌于涧中，云以枪指之「吾饶汝性命回去」。",
+   "resolved": true,
+   "basis": "explicit",
+   "etype": "mixed",
+   "quotes": [
+    {
+     "quote": "吾先引一军伏于其后，公却引兵打吾旗号，徐徐而退。吾一步步自有护送也。",
+     "start": 483507,
+     "end": 483541,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 483507,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    },
+    {
+     "quote": "只见山坡后闪出红旗白字，上书“赵云”。苏顒急收兵退走。",
+     "start": 483638,
+     "end": 483665,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 483638,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    },
+    {
+     "quote": "行至一大林，忽听得背后大喝一声曰：“赵子龙在此！”惊得魏兵落马者百余人，余者皆越岭而去。",
+     "start": 483868,
+     "end": 483912,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 483868,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    }
+   ]
+  },
+  {
+   "id": "F07",
+   "name": "「未知献计者是谁，且看下文分解」——本区间末的悬念（未回收）",
+   "setup": "铺设：本区间以魏主曹睿大喜、令司马懿即便兴兵收川收束，随即「忽班内一人出奏曰：臣有一计，足可定蜀降吴」，并明写「未知献计者是谁，且看下文分解」。",
+   "payoff": "回收：无——本区间到「且看下文分解」为止，献计者是谁、计策内容与是否生效都不在本区间内。",
+   "resolved": false,
+   "unresolvedNote": "本区间未回收且原文自己声明了下文才分解：献计者身份、计策内容、执行结果三项皆缺。按「一次出现当伏笔」的红线，这一条我标注为**已铺设未回收**而不是伏笔成立；如果下一单元不接这条，它在本区间就只是一句收束语。",
+   "basis": "explicit",
+   "etype": "narrative",
+   "quotes": [
+    {
+     "quote": "忽班内一人出奏曰：“臣有一计，足可定蜀降吴。”正是：蜀中将相方归国，魏地君臣又逞谋。未知献计者是谁，且看下文分解。",
+     "start": 484224,
+     "end": 484281,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 484224,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    }
+   ]
+  }
+ ],
+ "worldSettings": [
+  {
+   "kind": "place",
+   "name": "祁山",
+   "explain": "蜀军主帅的驻地与情报入口：孔明在祁山寨中接到新城探细人的回报，才知道司马懿已破孟达、出关来拒——本回蜀方全部决策（派谁守街亭、如何布置接应、何时转入退军）都是在这个驻地作出的。",
+   "basis": "explicit",
+   "evidenceType": "narrative",
+   "basisNote": null,
+   "quote": "却说孔明在祁山寨中，忽报新城探细人来到。",
+   "extraQuotes": [
+    {
+     "quote": "孔明急唤入问之，细作告曰：“司马懿倍道而行，八日已到新城，孟达措手不及；",
+     "start": 478808,
+     "end": 478844,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 478808,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    }
+   ],
+   "placeState": "arrived",
+   "placeStateNote": "arrived：原文写明孔明「在祁山寨中」驻守，且在此处接见细作、发出全部将令——是明确的驻守动作，不是提及或图谋。",
+   "id": "WS-PLACE-01",
+   "wid": "WS-PLACE-01",
+   "quoteRef": {
+    "quote": "却说孔明在祁山寨中，忽报新城探细人来到。",
+    "start": 478788,
+    "end": 478808,
+    "globalOccurrences": 1,
+    "occurrenceIndex": 478788,
+    "inSlice": true,
+    "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+   }
+  },
+  {
+   "kind": "place",
+   "name": "街亭",
+   "explain": "本回第一处决定性的地点：原文把它定为「汉中咽喉」「吾之咽喉之路」，断此处即断蜀军粮道。它的地形属性（山僻之处、无城郭、无险阻）直接决定了守法只能当道筑城垣，而马谡改屯山上后，四面不相连这一属性又决定了水源一旦被断便无救。",
+   "basis": "explicit",
+   "evidenceType": "speech",
+   "basisNote": null,
+   "quote": "吾素知秦岭之西，有一条路，地名街亭；傍有一城，名列柳城：此二处皆是汉中咽喉。",
+   "extraQuotes": [
+    {
+     "quote": "街亭虽小，干系甚重：倘街亭有失，吾大军皆休矣。",
+     "start": 478973,
+     "end": 478996,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 478973,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    },
+    {
+     "quote": "此地奈无城郭，又无险阻，守之极难。",
+     "start": 479003,
+     "end": 479020,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 479003,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    },
+    {
+     "quote": "下寨必当要道之处，使贼兵急切不能偷过。",
+     "start": 479221,
+     "end": 479240,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 479221,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    }
+   ],
+   "placeState": "arrived",
+   "placeStateNote": "arrived：有明确的驻守与到达动作——孔明派马谡王平引兵去守、魏延引本部兵去街亭之后屯扎、马谡王平兵到街亭看了地势、魏兵四面围定、魏延复夺街亭、魏延劫寨时「径到街亭」。",
+   "id": "WS-PLACE-02",
+   "wid": "WS-PLACE-02",
+   "quoteRef": {
+    "quote": "吾素知秦岭之西，有一条路，地名街亭；傍有一城，名列柳城：此二处皆是汉中咽喉。",
+    "start": 478520,
+    "end": 478558,
+    "globalOccurrences": 1,
+    "occurrenceIndex": 478520,
+    "inSlice": true,
+    "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+   }
+  },
+  {
+   "kind": "place",
+   "name": "列柳城",
+   "explain": "街亭旁的另一处咽喉，作用是屯兵接应：孔明派高翔领一万兵去此城屯扎，交代「但街亭危，可引兵救之」；实战中这里是王平魏延败后的投奔点与高翔起兵救应的出发点，最后被魏方占据（司马懿留申耽申仪守之）。",
+   "basis": "explicit",
+   "evidenceType": "speech",
+   "basisNote": null,
+   "quote": "街亭东北上有一城，名列柳城，乃山僻小路，此可以屯兵扎寨。与汝一万兵，去此城屯扎。但街亭危，可引兵救之。",
+   "extraQuotes": [
+    {
+     "quote": "高翔引兵而去。",
+     "start": 479377,
+     "end": 479384,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 479377,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    },
+    {
+     "quote": "王平、魏延径奔列柳城，来投高翔。",
+     "start": 481125,
+     "end": 481141,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 481125,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    },
+    {
+     "quote": "于是司马懿留申耽、申仪守列柳城，自领大军望斜谷进发。",
+     "start": 481884,
+     "end": 481910,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 481884,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    }
+   ],
+   "placeState": "arrived",
+   "placeStateNote": "arrived：有到达、驻守与易手的动作——高翔引兵而去屯扎、王平魏延径奔列柳城来投、郭淮引兵径袭列柳城、司马懿留申耽申仪守列柳城。",
+   "id": "WS-PLACE-03",
+   "wid": "WS-PLACE-03",
+   "quoteRef": {
+    "quote": "街亭东北上有一城，名列柳城，乃山僻小路，此可以屯兵扎寨。与汝一万兵，去此城屯扎。但街亭危，可引兵救之。",
+    "start": 479325,
+    "end": 479376,
+    "globalOccurrences": 1,
+    "occurrenceIndex": 479325,
+    "inSlice": true,
+    "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+   }
+  },
+  {
+   "kind": "place",
+   "name": "西城县",
+   "explain": "空城计的舞台，它的资源属性是解释层的关键：原文写明它是「蜀兵屯粮之所」且是南安天水安定三郡总路，所以司马懿判定若得此城三郡可复——这解释了他为何亲自引大军来；同时孔明引五千兵来此正是为了搬运粮草，辎重与兵力的分离（一半先运走）造成了他手上只剩二千五百军这个条件。",
+   "basis": "explicit",
+   "evidenceType": "narrative",
+   "basisNote": null,
+   "quote": "西城虽山僻小县，乃蜀兵屯粮之所，又南安、天水、安定三郡总路。若得此城，三郡可复矣。",
+   "extraQuotes": [
+    {
+     "quote": "先引五千兵退去西城县搬运粮草。",
+     "start": 482350,
+     "end": 482365,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 482350,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    },
+    {
+     "quote": "时孔明身边别无大将，只有一班文官，所引五千兵，已分一半先运粮草去了，只剩二千五百军在城中。",
+     "start": 482397,
+     "end": 482442,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 482397,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    }
+   ],
+   "placeState": "arrived",
+   "placeStateNote": "arrived：孔明引兵退去西城县搬运粮草、司马懿引大军望西城蜂拥而来、事后司马懿引一军复到西城问居民——三处都有到达动作。",
+   "id": "WS-PLACE-04",
+   "wid": "WS-PLACE-04",
+   "quoteRef": {
+    "quote": "西城虽山僻小县，乃蜀兵屯粮之所，又南安、天水、安定三郡总路。若得此城，三郡可复矣。",
+    "start": 481842,
+    "end": 481883,
+    "globalOccurrences": 1,
+    "occurrenceIndex": 481842,
+    "inSlice": true,
+    "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+   }
+  },
+  {
+   "kind": "place",
+   "name": "阳平关",
+   "explain": "蜀方的退军集结点与魏方主动放弃的目标：孔明给关兴张苞的将令以「待军退尽，便投阳平关去」收束；司马懿则判定魏延王平马谡高翔必先去据阳平关，并因怕中掩杀之计而明确不去取此关。这条设定直接解释了蜀军为何能退走。",
+   "basis": "explicit",
+   "evidenceType": "speech",
+   "basisNote": null,
+   "quote": "吾料魏延、王平、马谡、高翔等辈，必先去据阳平关。吾若去取此关，诸葛亮必随后掩杀，中其计矣。",
+   "extraQuotes": [
+    {
+     "quote": "待军退尽，便投阳平关去。",
+     "start": 482209,
+     "end": 482221,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 482209,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    },
+    {
+     "quote": "魏延恐阳平关有失，慌与王平、高翔望阳平关来。",
+     "start": 481468,
+     "end": 481490,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 481468,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    }
+   ],
+   "placeState": "arrived",
+   "placeStateNote": "arrived：魏延恐阳平关有失而慌与王平高翔望阳平关来，且有明确的到达方向动作；孔明的将令也把它定为退军终点。",
+   "id": "WS-PLACE-05",
+   "wid": "WS-PLACE-05",
+   "quoteRef": {
+    "quote": "吾料魏延、王平、马谡、高翔等辈，必先去据阳平关。吾若去取此关，诸葛亮必随后掩杀，中其计矣。",
+    "start": 481706,
+    "end": 481751,
+    "globalOccurrences": 1,
+    "occurrenceIndex": 481706,
+    "inSlice": true,
+    "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+   }
+  },
+  {
+   "kind": "place",
+   "name": "箕谷",
+   "explain": "蜀方用来出疑兵、魏方用来截击的两用通路：孔明派赵云邓芝各引一军出箕谷以为疑兵（如逢魏兵或战或不战以惊其心），司马懿则令张颌从小路抄箕谷退兵，郭淮又提兵再回箕谷道中派苏顒追击——同一地点对双方都是通道。",
+   "basis": "explicit",
+   "evidenceType": "speech",
+   "basisNote": null,
+   "quote": "汝二人各引一军出箕谷，以为疑兵。如逢魏兵，或战、或不战，以惊其心。",
+   "extraQuotes": [
+    {
+     "quote": "汝可从小路抄箕谷退兵。吾自引兵当斜谷之兵。",
+     "start": 481765,
+     "end": 481786,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 481765,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    },
+    {
+     "quote": "却说郭淮提兵再回箕谷道中，唤先锋苏顒分付曰：“蜀将赵云，英勇无敌。",
+     "start": 483545,
+     "end": 483578,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 483545,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    },
+    {
+     "quote": "遂引前部三千兵，奔入箕谷。",
+     "start": 483618,
+     "end": 483631,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 483618,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    }
+   ],
+   "placeState": "arrived",
+   "placeStateNote": "arrived：赵云邓芝引军出箕谷、苏顒引前部三千兵奔入箕谷、郭淮提兵再回箕谷道中，三处都是到达动作。",
+   "id": "WS-PLACE-06",
+   "wid": "WS-PLACE-06",
+   "quoteRef": {
+    "quote": "汝二人各引一军出箕谷，以为疑兵。如逢魏兵，或战、或不战，以惊其心。",
+    "start": 479576,
+    "end": 479609,
+    "globalOccurrences": 1,
+    "occurrenceIndex": 479576,
+    "inSlice": true,
+    "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+   }
+  },
+  {
+   "kind": "place",
+   "name": "郿城",
+   "explain": "孔明自统大军由斜谷要取的目标，也是司马懿预判他会来取的地方：司马懿说「今必出军斜谷，来取郿城」，并预先发檄文令曹真拒守、兵来不可出战；孔明对赵云邓芝也说自己统大军由斜谷径取郿城、若得郿城长安可破。",
+   "basis": "explicit",
+   "evidenceType": "speech",
+   "basisNote": null,
+   "quote": "吾自统大军，由斜谷径取郿城；若得郿城，长安可破矣。",
+   "extraQuotes": [
+    {
+     "quote": "今必出军斜谷，来取郿城。",
+     "start": 478425,
+     "end": 478437,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 478425,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    },
+    {
+     "quote": "吾已发檄文，令子丹拒守郿城，若兵来不可出战；",
+     "start": 478455,
+     "end": 478477,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 478455,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    }
+   ],
+   "placeState": "mentioned",
+   "placeStateNote": "mentioned：本区间只有双方的议论与图谋（司马懿预判孔明来取、发檄文令曹真拒守；孔明说径取郿城），没有任何一方到达郿城、或在郿城交战、或驻守该城的动作。按「提及≠到达」，记为 mentioned 而非 arrived。",
+   "id": "WS-PLACE-07",
+   "wid": "WS-PLACE-07",
+   "quoteRef": {
+    "quote": "吾自统大军，由斜谷径取郿城；若得郿城，长安可破矣。",
+    "start": 479609,
+    "end": 479634,
+    "globalOccurrences": 1,
+    "occurrenceIndex": 479609,
+    "inSlice": true,
+    "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+   }
+  },
+  {
+   "kind": "place",
+   "name": "剑阁",
+   "explain": "孔明预先指定的归路节点：街亭失守后他令张冀先引军去修理剑阁以备归路——修的是退军通道本身，这解释了他为何在败局中仍能有序撤回汉中。",
+   "basis": "explicit",
+   "evidenceType": "narrative",
+   "basisNote": null,
+   "quote": "又令张冀先引军去修理剑阁，以备归路。",
+   "extraQuotes": [
+    {
+     "quote": "又密传号令，教大军暗暗收拾行装，以备起程。",
+     "start": 482240,
+     "end": 482261,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 482240,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    }
+   ],
+   "placeState": "mentioned",
+   "placeStateNote": "mentioned：只有「令张冀先引军去修理剑阁」这条派遣与图谋，本区间没有任何到达剑阁或从剑阁通过的叙述。按「提及≠到达」记为 mentioned。",
+   "id": "WS-PLACE-08",
+   "wid": "WS-PLACE-08",
+   "quoteRef": {
+    "quote": "又令张冀先引军去修理剑阁，以备归路。",
+    "start": 482222,
+    "end": 482240,
+    "globalOccurrences": 1,
+    "occurrenceIndex": 482222,
+    "inSlice": true,
+    "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+   }
+  },
+  {
+   "kind": "item",
+   "name": "军令状（马谡所写）",
+   "explain": "约束马谡本人的文书：他在孔明面前以「若有差失，乞斩全家」自任，孔明以「军中无戏言」确认，马谡遂写呈上。它影响的是马谡敢不敢违令、以及孔明事后如何交代——本区间内孔明把责任归到自己身上（此吾之过也），兑现不在本区间。",
+   "basis": "explicit",
+   "evidenceType": "mixed",
+   "basisNote": null,
+   "quote": "谡曰：“休道司马懿、张颌，便是曹睿亲来，有何惧哉！若有差失，乞斩全家。”孔明曰：“军中无戏言。”谡曰：“愿立军令状。”孔明从之，谡遂写了军令状呈上。",
+   "extraQuotes": [
+    {
+     "quote": "若有差失，乞斩全家。",
+     "start": 479108,
+     "end": 479118,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 479108,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    }
+   ],
+   "itemStates": [
+    "hold",
+    "transfer"
+   ],
+   "itemStatesNote": "hold：马谡写呈上后由孔明收执（「孔明从之，谡遂写了军令状呈上」——呈上即交出，但原文未写递交的具体动作动词）；transfer：以「呈上」记其转移方向（马谡 → 孔明）。原文用文言动词「写」「呈上」，我照录不改写成现代汉语。本区间没有 use（未写凭此状处置任何人）与 lose（未写遗失），故不列这两态。",
+   "id": "WS-ITEM-01",
+   "wid": "WS-ITEM-01",
+   "quoteRef": {
+    "quote": "谡曰：“休道司马懿、张颌，便是曹睿亲来，有何惧哉！若有差失，乞斩全家。”孔明曰：“军中无戏言。”谡曰：“愿立军令状。”孔明从之，谡遂写了军令状呈上。",
+    "start": 479083,
+    "end": 479157,
+    "globalOccurrences": 1,
+    "occurrenceIndex": 479083,
+    "inSlice": true,
+    "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+   }
+  },
+  {
+   "kind": "item",
+   "name": "红旗（山顶指挥信号）",
+   "explain": "马谡唯一的指挥手段：他传令「倘兵来，只见山顶上红旗招动，即四面皆下」。这件物件直接决定了山上蜀军能否协同——实战中马谡将红旗招动而军将你我相推无一人敢动，信号失效。",
+   "basis": "explicit",
+   "evidenceType": "narrative",
+   "basisNote": null,
+   "quote": "传令与诸将：“倘兵来，只见山顶上红旗招动，即四面皆下。”",
+   "extraQuotes": [
+    {
+     "quote": "马谡将红旗招动，军将你我相推，无一人敢动。",
+     "start": 480675,
+     "end": 480696,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 480675,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    }
+   ],
+   "itemStates": [
+    "hold",
+    "use",
+    "lose"
+   ],
+   "itemStatesNote": "hold：红旗在马谡手上（他传令由山顶招动，临阵时由他本人将红旗招动）；use：以「招动」为使用动作（马谡将红旗招动）；lose：以「无一人敢动」记其失效——原文写的是信号发出而无响应，我按原文照录为失效，不改写成「丢失」；本区间没有 transfer（未写红旗易手）。",
+   "id": "WS-ITEM-02",
+   "wid": "WS-ITEM-02",
+   "quoteRef": {
+    "quote": "传令与诸将：“倘兵来，只见山顶上红旗招动，即四面皆下。”",
+    "start": 480409,
+    "end": 480437,
+    "globalOccurrences": 1,
+    "occurrenceIndex": 480409,
+    "inSlice": true,
+    "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+   }
+  },
+  {
+   "kind": "item",
+   "name": "琴（孔明所携）",
+   "explain": "空城计的核心道具：孔明引二小童携琴一张，于城上敌楼前凭栏而坐焚香操琴；司马懿远望所见正是「孔明坐于城楼之上，笑容可掬，焚香操琴」。琴在这里的作用不是乐器而是给远望者看的事实——它使司马懿有理由把城门大开解释成有埋伏。",
+   "basis": "explicit",
+   "evidenceType": "narrative",
+   "basisNote": null,
+   "quote": "孔明乃披鹤氅，戴纶巾，引二小童携琴一张，于城上敌楼前，凭栏而坐，焚香操琴。",
+   "extraQuotes": [
+    {
+     "quote": "果见孔明坐于城楼之上，笑容可掬，焚香操琴。",
+     "start": 482654,
+     "end": 482675,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 482654,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    }
+   ],
+   "itemStates": [
+    "hold",
+    "use"
+   ],
+   "itemStatesNote": "hold：由孔明携来（引二小童携琴一张）并由他操；use：以「操琴」为使用动作，原文两处都写「焚香操琴」。本区间没有 transfer（未写琴易手）与 lose（未写琴失），故不列。",
+   "id": "WS-ITEM-03",
+   "wid": "WS-ITEM-03",
+   "quoteRef": {
+    "quote": "孔明乃披鹤氅，戴纶巾，引二小童携琴一张，于城上敌楼前，凭栏而坐，焚香操琴。",
+    "start": 482562,
+    "end": 482599,
+    "globalOccurrences": 1,
+    "occurrenceIndex": 482562,
+    "inSlice": true,
+    "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+   }
+  },
+  {
+   "kind": "item",
+   "name": "赵云旗号（红旗白字「赵云」）",
+   "explain": "赵云退兵术的关键：他让邓芝引兵打自己的旗号徐徐而退，自己伏兵在后。旗号的作用在原文里被写成两次直接的敌方反应——苏顒见「山坡后闪出红旗白字，上书『赵云』」即急收兵退走，万政认得是赵云不敢前进。",
+   "basis": "explicit",
+   "evidenceType": "mixed",
+   "basisNote": null,
+   "quote": "吾先引一军伏于其后，公却引兵打吾旗号，徐徐而退。吾一步步自有护送也。",
+   "extraQuotes": [
+    {
+     "quote": "只见山坡后闪出红旗白字，上书“赵云”。苏顒急收兵退走。",
+     "start": 483638,
+     "end": 483665,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 483638,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    },
+    {
+     "quote": "万政认得是赵云，不敢前进",
+     "start": 483797,
+     "end": 483809,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 483797,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    }
+   ],
+   "itemStates": [
+    "hold",
+    "transfer",
+    "use"
+   ],
+   "itemStatesNote": "hold：旗号本属赵云（打吾旗号）；transfer：原文写明旗号被交给邓芝所领之兵使用（「公却引兵打吾旗号」——打即举用，方向赵云部 → 邓芝所领之兵）；use：以「打吾旗号」「闪出红旗白字」为使用动作。本区间没有 lose（未写旗号被夺或遗失）。",
+   "id": "WS-ITEM-04",
+   "wid": "WS-ITEM-04",
+   "quoteRef": {
+    "quote": "吾先引一军伏于其后，公却引兵打吾旗号，徐徐而退。吾一步步自有护送也。",
+    "start": 483507,
+    "end": 483541,
+    "globalOccurrences": 1,
+    "occurrenceIndex": 483507,
+    "inSlice": true,
+    "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+   }
+  },
+  {
+   "kind": "item",
+   "name": "魏军辎重（弃于武功山小路）",
+   "explain": "疑兵战的直接战果：魏兵「尽弃辎重而去」，兴苞二人因遵令不追而「多得军器粮草而归」。这件物件解释了疑兵为何有价值——它换来的不是杀伤而是物资，且原文用「弃」记其转移方向（魏 → 蜀方获得）。",
+   "basis": "explicit",
+   "evidenceType": "narrative",
+   "basisNote": null,
+   "quote": "山谷应声，不知蜀兵多少；更兼魏军心疑，不敢久停，只得尽弃辎重而去。",
+   "extraQuotes": [
+    {
+     "quote": "兴、苞二人皆遵将令，不敢追袭，多得军器粮草而归。",
+     "start": 483330,
+     "end": 483354,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 483330,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    }
+   ],
+   "itemStates": [
+    "lose",
+    "transfer"
+   ],
+   "itemStatesNote": "lose：以「弃」记魏军失去辎重（原文动词是「弃」）；transfer：以「多得军器粮草而归」记其转入蜀方之手（方向魏 → 蜀）。本区间没有 hold（未写谁收执）与 use（未写这批物资被用于何事），故不列这两态。",
+   "id": "WS-ITEM-05",
+   "wid": "WS-ITEM-05",
+   "quoteRef": {
+    "quote": "山谷应声，不知蜀兵多少；更兼魏军心疑，不敢久停，只得尽弃辎重而去。",
+    "start": 483297,
+    "end": 483330,
+    "globalOccurrences": 1,
+    "occurrenceIndex": 483297,
+    "inSlice": true,
+    "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+   }
+  },
+  {
+   "kind": "item",
+   "name": "赵云护送的辎重车仗",
+   "explain": "赵云退兵要保住的东西：他一路护送车仗人马望汉中而去，原文以「沿途并无遗失」收束——即这批物资是这次退兵中确实被完整带走的。",
+   "basis": "explicit",
+   "evidenceType": "narrative",
+   "basisNote": null,
+   "quote": "云护送车仗人马，望汉中而去，沿途并无遗失。",
+   "extraQuotes": [
+    {
+     "quote": "蜀兵已去三十余里。万政认得是赵云，不敢前进",
+     "start": 483788,
+     "end": 483809,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 483788,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    }
+   ],
+   "itemStates": [
+    "hold",
+    "transfer"
+   ],
+   "itemStatesNote": "hold：由赵云护送（「云护送车仗人马」）；transfer：以「望汉中而去」记其转移方向（前线 → 汉中）。本区间没有 use 与 lose（原文正好写的是「沿途并无遗失」，即未失），故不列这两态——把「未遗失」写成 lose 会与原文相反。",
+   "id": "WS-ITEM-06",
+   "wid": "WS-ITEM-06",
+   "quoteRef": {
+    "quote": "云护送车仗人马，望汉中而去，沿途并无遗失。",
+    "start": 483965,
+    "end": 483986,
+    "globalOccurrences": 1,
+    "occurrenceIndex": 483965,
+    "inSlice": true,
+    "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+   }
+  },
+  {
+   "kind": "rule",
+   "name": "军令状制度（军中无戏言）",
+   "explain": "它解释了马谡为何敢在明显不利的条件下自任、以及孔明为何接受他：孔明以「军中无戏言」确认了立状的严肃性，马谡则以「乞斩全家」把全家性命押在守街亭上。这条规则约束的是马谡的行动空间——他不能以「守不住」为退路；本区间内孔明把责任归到自己身上，规则的兑现不在本区间。",
+   "basis": "explicit",
+   "evidenceType": "speech",
+   "basisNote": null,
+   "quote": "孔明曰：“军中无戏言。”谡曰：“愿立军令状。”孔明从之，谡遂写了军令状呈上。",
+   "extraQuotes": [
+    {
+     "quote": "若有差失，乞斩全家。",
+     "start": 479108,
+     "end": 479118,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 479108,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    }
+   ],
+   "institution": "declared",
+   "institutionNote": "declared：本区间只有立状与接受（「军中无戏言」「愿立军令状」「孔明从之」）这三步声明性动作，没有任何依状执行的处罚动作（未写马谡被斩、被贬或全家被处）。按三分法记为 declared 而不是 executed——把禁令/文书本身写成已执行结果是本条要避免的错。",
+   "id": "WS-RULE-01",
+   "wid": "WS-RULE-01",
+   "quoteRef": {
+    "quote": "孔明曰：“军中无戏言。”谡曰：“愿立军令状。”孔明从之，谡遂写了军令状呈上。",
+    "start": 479119,
+    "end": 479157,
+    "globalOccurrences": 1,
+    "occurrenceIndex": 479119,
+    "inSlice": true,
+    "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+   }
+  },
+  {
+   "kind": "rule",
+   "name": "守街亭的军令：下寨必当要道、凡事商议停当而行",
+   "explain": "孔明给王平的交代是可执行的约束：下寨必当要道之处使贼兵急切不能偷过、安营既毕画图本、凡事商议停当而行、不可轻易。它解释了后来为何能从图本上判定败势——守法被事先写定并指定了回报物，所以偏离是可读的。",
+   "basis": "explicit",
+   "evidenceType": "speech",
+   "basisNote": null,
+   "quote": "汝可小心谨守此地：下寨必当要道之处，使贼兵急切不能偷过。",
+   "extraQuotes": [
+    {
+     "quote": "凡事商议停当而行，不可轻易。",
+     "start": 479261,
+     "end": 479275,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 479261,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    },
+    {
+     "quote": "安营既毕，便画四至八道地理形状图本来我看。",
+     "start": 479240,
+     "end": 479261,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 479240,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    }
+   ],
+   "institution": "misunderstood",
+   "institutionNote": "misunderstood：这条令是孔明对王平下的，而马谡作为主将把它理解成可选建议——他反以「当道岂是下寨之地」另立主张，并在被质疑时以兵法权威压制（吾素读兵书，丞相诸事尚问于我，汝奈何相阻耶）。这里记的是**人物**（马谡）的理解，不是世界的规则本身；它解释了马谡为何敢不用这条令。",
+   "id": "WS-RULE-02",
+   "wid": "WS-RULE-02",
+   "quoteRef": {
+    "quote": "汝可小心谨守此地：下寨必当要道之处，使贼兵急切不能偷过。",
+    "start": 479212,
+    "end": 479240,
+    "globalOccurrences": 1,
+    "occurrenceIndex": 479212,
+    "inSlice": true,
+    "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+   }
+  },
+  {
+   "kind": "rule",
+   "name": "归师勿掩，穷寇莫追（司马懿据此不取阳平关）",
+   "explain": "这条兵法约束了魏方的追击范围，直接解释了蜀军为何能退走：司马懿判定魏延王平马谡高翔必先去据阳平关，若去取关则诸葛亮必随后掩杀而中计，因此改为从小路抄箕谷、自当斜谷，且下令「若彼败走，不可相拒，只宜中途截住」以求辎重。",
+   "basis": "explicit",
+   "evidenceType": "speech",
+   "basisNote": null,
+   "quote": "吾若去取此关，诸葛亮必随后掩杀，中其计矣。兵法云：归师勿掩，穷寇莫追。",
+   "extraQuotes": [
+    {
+     "quote": "若彼败走，不可相拒，只宜中途截住：蜀兵辎重，可尽得也。",
+     "start": 481786,
+     "end": 481813,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 481786,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    }
+   ],
+   "institution": "executed",
+   "institutionNote": "executed：有执行动作——他确实没有去取阳平关，而是令张颌引兵一半从小路抄箕谷、自领大军望斜谷进发，并把目标限定为中途截辎重。这是被付诸行动的约束，不是仅被引用的格言。",
+   "id": "WS-RULE-03",
+   "wid": "WS-RULE-03",
+   "quoteRef": {
+    "quote": "吾若去取此关，诸葛亮必随后掩杀，中其计矣。兵法云：归师勿掩，穷寇莫追。",
+    "start": 481730,
+    "end": 481765,
+    "globalOccurrences": 1,
+    "occurrenceIndex": 481730,
+    "inSlice": true,
+    "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+   }
+  },
+  {
+   "kind": "rule",
+   "name": "「凭高视下，势如劈竹」／「置之死地而后生」（马谡所引兵法）",
+   "explain": "马谡用这两句兵法解释自己为何弃当道而屯山上：他以「凭高视下，势如劈竹」断定从山上冲下必胜，又用「置之死地而后生」把断水之危解释成让士兵死战的条件。这两句是他能做（敢做）这个部署的直接依据，而结果与他的推论相反——山上无水军不得食、寨中大乱、山南蜀兵开门降魏。",
+   "basis": "explicit",
+   "evidenceType": "speech",
+   "basisNote": null,
+   "quote": "谡大笑曰：“汝真女子之见！兵法云：凭高视下，势如劈竹。若魏兵到来，吾教他片甲不回！”",
+   "extraQuotes": [
+    {
+     "quote": "谡曰：“汝莫乱道！孙子云：置之死地而后生。若魏兵绝我汲水之道，蜀兵岂不死战？以一可当百也。",
+     "start": 479953,
+     "end": 479998,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 479953,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    }
+   ],
+   "institution": "misunderstood",
+   "institutionNote": "misunderstood：这是**马谡这个人物**对兵法的理解与运用（原文两处都标明是「谡大笑曰」「谡曰」），不是原文宣布的世界规则。原文把结果写在后面（山上无水、军不得食、寨中大乱、山南蜀兵降魏），可以读出他的理解与结果相反，但我不替原文写「兵法错了」这个结论；它解释的是马谡为何能驳回王平——他手里有一整套可引用的依据。",
+   "id": "WS-RULE-04",
+   "wid": "WS-RULE-04",
+   "quoteRef": {
+    "quote": "谡大笑曰：“汝真女子之见！兵法云：凭高视下，势如劈竹。若魏兵到来，吾教他片甲不回！”",
+    "start": 479858,
+    "end": 479900,
+    "globalOccurrences": 1,
+    "occurrenceIndex": 479858,
+    "inSlice": true,
+    "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+   }
+  }
+ ],
+ "themeReadings": [
+  {
+   "id": "TR01",
+   "perspective": "以「同一句判断被谁用、用在哪一侧」为轴读本回：轴心是「谨慎」这条对诸葛亮的公共判断。读法是逐处检查这句话被哪一方说出、它给对方带去了什么——是同等的风险规避，还是可被反用的开关。",
+   "support": [
+    {
+     "point": "第一处：司马懿在出关前把「诸葛亮平生谨慎，未敢造次行事」当作推演前提，据此断言孔明必出斜谷取郿城、必分兵取箕谷，并因此断定孔明会从街亭进——这条判断本身是准确的，他由此定下径取街亭的方略。",
+     "quotes": [
+      {
+       "quote": "诸葛亮平生谨慎，未敢造次行事。",
+       "start": 478373,
+       "end": 478388,
+       "globalOccurrences": 1,
+       "occurrenceIndex": 478373,
+       "inSlice": true,
+       "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+      },
+      {
+       "quote": "今必出军斜谷，来取郿城。若取郿城，必分兵两路，一军取箕谷矣。",
+       "start": 478425,
+       "end": 478455,
+       "globalOccurrences": 1,
+       "occurrenceIndex": 478425,
+       "inSlice": true,
+       "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+      }
+     ]
+    },
+    {
+     "point": "第二处（反用）：孔明在西城正是靠同一条公共判断退敌——司马懿对司马昭的质问回答「亮平生谨慎，不曾弄险。今大开城门，必有埋伏」；而孔明事后对众官说明的也是这一条（此人料吾生平谨慎，必不弄险），并补上自己的实情（吾非行险，盖因不得已而用之）。即：同一条判断在西城被反过来用成了对方的行动依据。",
+     "quotes": [
+      {
+       "quote": "懿曰：“亮平生谨慎，不曾弄险。今大开城门，必有埋伏。我兵若进，中其计也。",
+       "start": 482780,
+       "end": 482816,
+       "globalOccurrences": 1,
+       "occurrenceIndex": 482780,
+       "inSlice": true,
+       "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+      },
+      {
+       "quote": "此人料吾生平谨慎，必不弄险；见如此模样，疑有伏兵，所以退去。",
+       "start": 482901,
+       "end": 482931,
+       "globalOccurrences": 1,
+       "occurrenceIndex": 482901,
+       "inSlice": true,
+       "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+      },
+      {
+       "quote": "吾非行险，盖因不得已而用之。",
+       "start": 482931,
+       "end": 482945,
+       "globalOccurrences": 1,
+       "occurrenceIndex": 482931,
+       "inSlice": true,
+       "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+      }
+     ]
+    },
+    {
+     "point": "第三处：这条判断被叙述者用一句诗点成公开的疑问——「十五万人回马处，土人指点到今疑」，并且孔明自己补了一句「吾若为司马懿，必不便退也」，等于承认按同一判断本该不退。",
+     "quotes": [
+      {
+       "quote": "瑶琴三尺胜雄师，诸葛西城退敌时。十五万人回马处，土人指点到今疑。",
+       "start": 483048,
+       "end": 483080,
+       "globalOccurrences": 1,
+       "occurrenceIndex": 483048,
+       "inSlice": true,
+       "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+      },
+      {
+       "quote": "吾若为司马懿，必不便退也。",
+       "start": 483092,
+       "end": 483105,
+       "globalOccurrences": 1,
+       "occurrenceIndex": 483092,
+       "inSlice": true,
+       "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+      }
+     ]
+    }
+   ],
+   "counter": [
+    {
+     "point": "不利证据一：本回决定胜负的一步并不靠这条判断。街亭之失的直接机制是马谡弃当道要路、屯军于四面不相连的山上，再被申耽申仪围山断汲水道路；原文把因果写在地形与补给上（山上无水、军不得食、寨中大乱），与「谨慎」这条公共判断无关。把它当全回主轴会盖掉这条更硬的机制。",
+     "quotes": [
+      {
+       "quote": "又令申耽、申仪引两路兵围山，先断了汲水道路；待蜀兵自乱，然后乘势击之。",
+       "start": 480555,
+       "end": 480590,
+       "globalOccurrences": 1,
+       "occurrenceIndex": 480555,
+       "inSlice": true,
+       "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+      },
+      {
+       "quote": "山上无水，军不得食，寨中大乱。",
+       "start": 480806,
+       "end": 480821,
+       "globalOccurrences": 1,
+       "occurrenceIndex": 480806,
+       "inSlice": true,
+       "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+      }
+     ]
+    },
+    {
+     "point": "不利证据二：同一回里另有一个「谨慎之外」的判断链被明文否证——马谡的两句兵法（凭高视下势如劈竹、置之死地而后生）也是被当作可依循的判断用的，结果与推论相反：山南蜀兵大开寨门下山降魏。可见「判断被谁用」并不足以解释成败，判断与条件是否相符才是。",
+     "quotes": [
+      {
+       "quote": "谡曰：“汝莫乱道！孙子云：置之死地而后生。若魏兵绝我汲水之道，蜀兵岂不死战？以一可当百也。",
+       "start": 479953,
+       "end": 479998,
+       "globalOccurrences": 1,
+       "occurrenceIndex": 479953,
+       "inSlice": true,
+       "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+      },
+      {
+       "quote": "山南蜀兵大开寨门，下山降魏。马谡禁止不住。",
+       "start": 480828,
+       "end": 480849,
+       "globalOccurrences": 1,
+       "occurrenceIndex": 480828,
+       "inSlice": true,
+       "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+      }
+     ]
+    },
+    {
+     "point": "不利证据三：魏方自己的功劳叙事与这条判断无关。曹睿把战果记成「今日复得陇西诸郡，皆卿之功也」，司马懿却紧接着奏请并力收川；而郭淮一路的动机写的是「恐司马懿得了全功」——本回里另一条更明显的动力是功劳竞争，不是谨慎与弄险的对峙。",
+     "quotes": [
+      {
+       "quote": "睿曰：“今日复得陇西诸郡，皆卿之功也。”",
+       "start": 484160,
+       "end": 484180,
+       "globalOccurrences": 1,
+       "occurrenceIndex": 484160,
+       "inSlice": true,
+       "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+      },
+      {
+       "quote": "原来郭淮与曹真商议，恐司马懿得了全功，乃分淮来取街亭；",
+       "start": 481402,
+       "end": 481429,
+       "globalOccurrences": 1,
+       "occurrenceIndex": 481402,
+       "inSlice": true,
+       "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+      }
+     ]
+    }
+   ],
+   "basis": "inferred",
+   "basisNote": "perspective、support 的分处组织与 counter 的三条都是我的归纳（inferred）；support／counter 里引的句子才是原文。同一批事实至少还能按「守法之争：地形与补给决定成败」「功劳竞争如何决定各路行动」两种轴读，我在这里只给一条，并把它自己的反例列全。本条不主张西城退敌是「高潮」——原文没有给出任何可判定高潮的标记，我按事件密度/篇幅中点之类的判据去定义高潮是计划明令禁止的。"
+  },
+  {
+   "id": "TR02",
+   "perspective": "以「谁的判断有依据、依据从哪里来」为轴读本回：读法是看每一处关键决定所依赖的是亲见、回报、还是引用权威，以及这三种依据各自在哪里失效。",
+   "support": [
+    {
+     "point": "亲见生效的一处：司马昭不采信父亲「有兵守御即按兵不行」的规则，用「男亲自哨见，当道并无寨栅，军皆屯于山上」给出可复核的观察，司马懿再亲自巡哨一遍才落定——两重亲见叠加后判断被采纳。",
+     "quotes": [
+      {
+       "quote": "男亲自哨见，当道并无寨栅，军皆屯于山上，故知可破也。",
+       "start": 480298,
+       "end": 480324,
+       "globalOccurrences": 1,
+       "occurrenceIndex": 480298,
+       "inSlice": true,
+       "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+      },
+      {
+       "quote": "遂更换衣服，引百余骑亲自来看。是夜天晴月朗，直至山下，周围巡哨了一遍，方回。",
+       "start": 480347,
+       "end": 480385,
+       "globalOccurrences": 1,
+       "occurrenceIndex": 480347,
+       "inSlice": true,
+       "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+      }
+     ]
+    },
+    {
+     "point": "回报生效的一处：王平按事先指定的回报物画成图本星夜送去，孔明拆开即读出「失却要路，占山为寨」并推演出断水二日自乱的后果——回报之所以有效，是因为回报物（地理形状图本）被事先规定过。",
+     "quotes": [
+      {
+       "quote": "安营既毕，便画四至八道地理形状图本来我看。",
+       "start": 479240,
+       "end": 479261,
+       "globalOccurrences": 1,
+       "occurrenceIndex": 479240,
+       "inSlice": true,
+       "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+      },
+      {
+       "quote": "吾观此图本，失却要路，占山为寨。",
+       "start": 482006,
+       "end": 482022,
+       "globalOccurrences": 1,
+       "occurrenceIndex": 482006,
+       "inSlice": true,
+       "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+      }
+     ]
+    },
+    {
+     "point": "引用权威失效的一处：马谡的两处依据都是引书（兵法云、孙子云），而王平的两处依据都是地形与后果（当道筑城垣则贼兵十万不能偷过；此山乃绝地，断汲水之道则军士不战自乱）。原文没有评判谁在引书，只写了结果：山上无水军不得食、寨中大乱。",
+     "quotes": [
+      {
+       "quote": "平曰：“参军差矣。若屯兵当道，筑起城垣，贼兵总有十万，不能偷过；",
+       "start": 479795,
+       "end": 479827,
+       "globalOccurrences": 1,
+       "occurrenceIndex": 479795,
+       "inSlice": true,
+       "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+      },
+      {
+       "quote": "今观此山，乃绝地也：若魏兵断我汲水之道，军士不战自乱矣。",
+       "start": 479924,
+       "end": 479952,
+       "globalOccurrences": 1,
+       "occurrenceIndex": 479924,
+       "inSlice": true,
+       "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+      }
+     ]
+    }
+   ],
+   "counter": [
+    {
+     "point": "不利证据一：亲见也不是充分条件。司马懿在西城是亲见的——他止住三军、自飞马远远望之，看到孔明坐城楼焚香操琴、二童子捧剑执麈尾、城门内外二十余百姓低头洒扫，「看毕大疑」后仍判断错误。可见亲见只保证看到，不保证看懂。",
+     "quotes": [
+      {
+       "quote": "懿看毕大疑，便到中军，教后军作前军，前军作后军，望北山路而退。",
+       "start": 482719,
+       "end": 482750,
+       "globalOccurrences": 1,
+       "occurrenceIndex": 482719,
+       "inSlice": true,
+       "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+      },
+      {
+       "quote": "皆言孔明止有二千五百军在城中，又无武将，只有几个文官，别无埋伏。",
+       "start": 484043,
+       "end": 484075,
+       "globalOccurrences": 1,
+       "occurrenceIndex": 484043,
+       "inSlice": true,
+       "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+      }
+     ]
+    },
+    {
+     "point": "不利证据二：回报链在本回也断过一次。孔明在派兵后「犹豫不定」，直到王平的图本送到才拍案大惊；而街亭、列柳城尽失的消息随后才到——即回报能让他提前判读败势，却没能让他及时改变结果。把「有回报就有控制」当结论会忽略这个时滞。",
+     "quotes": [
+      {
+       "quote": "却说孔明自令马谡等守街亭去后，犹豫不定。忽报王平使人送图本至。",
+       "start": 481914,
+       "end": 481945,
+       "globalOccurrences": 1,
+       "occurrenceIndex": 481914,
+       "inSlice": true,
+       "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+      },
+      {
+       "quote": "正待要行，忽报马到来，说：“街亭、列柳城，尽皆失了！”",
+       "start": 482098,
+       "end": 482125,
+       "globalOccurrences": 1,
+       "occurrenceIndex": 482098,
+       "inSlice": true,
+       "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+      }
+     ]
+    },
+    {
+     "point": "不利证据三：本回里最有决定性的一次行动依据是敌方给的事实，不是自己的观察。姜氏一路不在本区间，但司马懿取街亭用的正是孔明布的局——马谡把军屯在山上这件事，是蜀方自己造成的可乘之隙；这一处说明依据的来源与它的正确性无关。",
+     "quotes": [
+      {
+       "quote": "懿大喜曰：“若兵果在山上，乃天使吾成功矣！”",
+       "start": 480325,
+       "end": 480347,
+       "globalOccurrences": 1,
+       "occurrenceIndex": 480325,
+       "inSlice": true,
+       "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+      },
+      {
+       "quote": "马谡料守不住，只得驱残兵杀下山西逃奔。",
+       "start": 480868,
+       "end": 480887,
+       "globalOccurrences": 1,
+       "occurrenceIndex": 480868,
+       "inSlice": true,
+       "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+      }
+     ]
+    }
+   ],
+   "basis": "inferred",
+   "basisNote": "perspective、support 与 counter 都是我的归纳（inferred）；引句是原文。这条读法与 TR01 不互斥：TR01 讲一条公共判断如何被反用，TR02 讲依据的类型与它的效力边界。我不用三幕或英雄旅程框架，也不主张本回有唯一主题——本区间完全看不出主题也允许写空数组，这里给两条是因为两处的原文依据确实各自成链。"
+  }
+ ],
+ "unknowns": [
+  {
+   "id": "U01",
+   "what": "街亭的地形描述里「五路总口」与后文「当道」是不是同一处，我读不出来。",
+   "detail": "王平主张「可就此五路总口下寨」，马谡反驳「当道岂是下寨之地」，随后司马昭回报「当道并无寨栅」。原文没有说明「五路总口」就是「当道」，也没有给出两者的位置关系；我按原文分别照录，不做合并。",
+   "quotes": [
+    {
+     "quote": "可就此五路总口下寨；却令军士伐木为栅，以图久计。",
+     "start": 479721,
+     "end": 479745,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 479721,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    },
+    {
+     "quote": "谡曰：“当道岂是下寨之地？",
+     "start": 479746,
+     "end": 479759,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 479746,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    },
+    {
+     "quote": "男亲自哨见，当道并无寨栅，军皆屯于山上，故知可破也。",
+     "start": 480298,
+     "end": 480324,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 480298,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    }
+   ]
+  },
+  {
+   "id": "U02",
+   "what": "「张冀」是不是「张翼」，我读不出来。",
+   "detail": "本区间作「又令张冀先引军去修理剑阁，以备归路」。全书「张翼」出现 95 次、「张冀」5 次，本区间只出现「张冀」这一形；我无法判定是异体字、传写之误还是另一人，故按原文照录「张冀」，不统一为「张翼」。",
+   "quotes": [
+    {
+     "quote": "又令张冀先引军去修理剑阁，以备归路。",
+     "start": 482222,
+     "end": 482240,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 482222,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    }
+   ]
+  },
+  {
+   "id": "U03",
+   "what": "马谡传令的红旗与司马懿「只见山顶上红旗招动」的观察，原文没有写司马懿是否据此判断蜀军指挥失灵。",
+   "detail": "本区间写了「传令与诸将：倘兵来，只见山顶上红旗招动，即四面皆下」与「马谡将红旗招动，军将你我相推，无一人敢动」，但司马懿一方的动作（围山、断水、放火、放条大路）都写在先或同段，原文没有一句把魏方的动作与红旗信号联系起来。我因此在 causeEdges 里没有为红旗单列一条边，只在 states/CE04 中记它作为指挥链的一环。",
+   "quotes": [
+    {
+     "quote": "马谡将红旗招动，军将你我相推，无一人敢动。",
+     "start": 480675,
+     "end": 480696,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 480675,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    },
+    {
+     "quote": "司马懿又令人于沿山放火，山上蜀兵愈乱。",
+     "start": 480849,
+     "end": 480868,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 480849,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    }
+   ]
+  },
+  {
+   "id": "U04",
+   "what": "司马懿放条大路让过马谡是有意还是战术结果，我读不出来。",
+   "detail": "原文只写「司马懿放条大路，让过马谡。背后张颌引兵追来」这一句，没有写他为何放路，也没有写这是为了诱魏延（下一句才写到魏延拦住张颌）。CE05 里我把这条边限定在「放—追—诱」的可观察顺序上，没有把动机写成事实。",
+   "quotes": [
+    {
+     "quote": "司马懿放条大路，让过马谡。背后张颌引兵追来。",
+     "start": 480887,
+     "end": 480909,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 480887,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    }
+   ]
+  },
+  {
+   "id": "U05",
+   "what": "「魏兵自辰时困至戌时」的时长与「马谡禁止不住」「山南蜀兵大开寨门下山降魏」的先后，原文没有给小时刻。",
+   "detail": "原文把「魏兵自辰时困至戌时，山上无水，军不得食，寨中大乱」与「嚷到半夜时分，山南蜀兵大开寨门，下山降魏」分写两句，中间还夹了王平与张颌的交战。我能确定的是降魏发生在半夜、困山自辰至戌，但无法确定无水是从辰时还是戌时开始的，故不写更细的时序。",
+   "quotes": [
+    {
+     "quote": "魏兵自辰时困至戌时，山上无水，军不得食，寨中大乱。",
+     "start": 480796,
+     "end": 480821,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 480796,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    },
+    {
+     "quote": "嚷到半夜时分，山南蜀兵大开寨门，下山降魏。",
+     "start": 480821,
+     "end": 480842,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 480821,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    }
+   ]
+  },
+  {
+   "id": "U06",
+   "what": "司马懿「看毕大疑」之后到下令退兵之间是否还有别的考虑，原文只给出他对司马昭的那段回答。",
+   "detail": "本区间写他止住三军、飞马远望、看毕大疑、到中军教后军作前军望北山路而退；他的理由只在与司马昭的对答里出现（亮平生谨慎不曾弄险、今大开城门必有埋伏）。原文没有写他是否派人试探、是否考虑过围城，故 unknowns 记这一缺口。",
+   "quotes": [
+    {
+     "quote": "懿看毕大疑，便到中军，教后军作前军，前军作后军，望北山路而退。",
+     "start": 482719,
+     "end": 482750,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 482719,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    },
+    {
+     "quote": "今大开城门，必有埋伏。我兵若进，中其计也。汝辈岂知？宜速退。”",
+     "start": 482795,
+     "end": 482826,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 482795,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    }
+   ]
+  },
+  {
+   "id": "U07",
+   "what": "「曹真、郭淮复夺三郡，以为己功」中的三郡是哪三郡、何时夺回，原文在本区间没有交代。",
+   "detail": "本区间同段前文提到的是天水、安定、南安三郡官吏军民陆续而来（随蜀军入汉中），末句才写曹真郭淮复夺三郡以为己功。原文没有说明这「三郡」是否即前句那三郡，也没有写夺回的时间与过程，故我只照录这一句，不做推演。",
+   "quotes": [
+    {
+     "quote": "天水、安定、南安三郡官吏军民，陆续而来。",
+     "start": 483143,
+     "end": 483163,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 483143,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    },
+    {
+     "quote": "曹真、郭淮复夺三郡，以为己功。",
+     "start": 483986,
+     "end": 484001,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 483986,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    }
+   ]
+  },
+  {
+   "id": "U08",
+   "what": "诸葛亮的「空城计」是否有意被叙述者写成计，原文的措辞与后人评赞并不一致，我无法给出唯一读法。",
+   "detail": "孔明自己说的是「吾非行险，盖因不得已而用之」，即他否认这是主动弄险；但同一段又有后人诗赞「瑶琴三尺胜雄师」与他自己补的「吾若为司马懿，必不便退也」。三种说法（不得已、诗赞其为胜、假设对方不退）指向不同的评价，原文没有仲裁，我按原文分别记录，不合并成「孔明用空城计成功」这一句结论。",
+   "quotes": [
+    {
+     "quote": "吾非行险，盖因不得已而用之。",
+     "start": 482931,
+     "end": 482945,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 482931,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    },
+    {
+     "quote": "后人有诗赞曰：“瑶琴三尺胜雄师，诸葛西城退敌时。十五万人回马处，土人指点到今疑。”",
+     "start": 483040,
+     "end": 483081,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 483040,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    },
+    {
+     "quote": "吾若为司马懿，必不便退也。",
+     "start": 483092,
+     "end": 483105,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 483092,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    }
+   ]
+  }
+ ],
+ "notModeled": [
+  {
+   "what": "马良（马谡之兄）",
+   "why": "本区间只在司马懿打听守将时以身份说明出现一次——「乃马良之弟马谡也」，此外没有任何动作、言语或后果。一次出现的身份说明既不是任务也不是伏笔，按「没有依据就不扩」不建条目，如实登记在此以免复核者以为漏读。",
+   "quotes": [
+    {
+     "quote": "回报曰：“乃马良之弟马谡也。”",
+     "start": 480463,
+     "end": 480478,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 480463,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    }
+   ]
+  },
+  {
+   "what": "魏主的诏令与辛毗孙礼「领兵五万往助曹真」的后续",
+   "why": "本区间只写到二人奉诏而去，之后没有他们的任何动作、到达或战果。没有动作可挂，所以不建任务条目，也不建 causeEdge。",
+   "quotes": [
+    {
+     "quote": "一面令辛毗、孙礼二人领兵五万，往助曹真。二人奉诏而去。",
+     "start": 478319,
+     "end": 478346,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 478319,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    }
+   ]
+  },
+  {
+   "what": "马谡「自杀二将」这一处置的细节（被杀者是谁、依何令）",
+   "why": "原文只有「谡大怒，自杀二将」一句，没有写二将姓名、职衔或依据。缺字段就留空，不补默认值。",
+   "quotes": [
+    {
+     "quote": "谡大怒，自杀二将。",
+     "start": 480696,
+     "end": 480705,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 480696,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    }
+   ]
+  },
+  {
+   "what": "司马昭在西城的质疑是否改变了魏军内部的评价",
+   "why": "本区间只写到他提出疑问、被父亲以「汝辈岂知？宜速退」驳回，之后其在西城一路的作用没有下文；事后居民之言虽证实了他的疑问，但原文没有写他因此被重新评价。无据不推。",
+   "quotes": [
+    {
+     "quote": "次子司马昭曰：“莫非诸葛亮无军，故作此态？父亲何故便退兵？”",
+     "start": 482750,
+     "end": 482780,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 482750,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    }
+   ]
+  },
+  {
+   "what": "曹真「兵来不可出战」这条檄文约束的执行情况",
+   "why": "司马懿发檄文令曹真拒守郿城、若兵来不可出战，但本区间郿城一路再无叙述；曹真只在本区间末以「听知孔明退兵，急引兵追赶」出现，且那是追击而非守城。故只在 foreshadows F04 记它未回收。",
+   "quotes": [
+    {
+     "quote": "吾已发檄文，令子丹拒守郿城，若兵来不可出战；",
+     "start": 478455,
+     "end": 478477,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 478455,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    }
+   ]
+  },
+  {
+   "what": "本区间内的天气与月相（「是夜天晴月朗」）对司马懿夜巡的作用",
+   "why": "原文只写「是夜天晴月朗，直至山下，周围巡哨了一遍，方回」，没有把天晴与巡哨成功写成因果。天气在这里是场景描写而非影响行动的约束，按「装饰性设定不要写」不设 worldSettings 条目。",
+   "quotes": [
+    {
+     "quote": "是夜天晴月朗，直至山下，周围巡哨了一遍，方回。",
+     "start": 480362,
+     "end": 480385,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 480362,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    }
+   ]
+  }
+ ],
+ "selfCritique": [
+  {
+   "id": "SC01",
+   "what": "我最可能读错的一处：把「空城计」读成一次成功的计谋。",
+   "why": "我仍然没有这么写，是因为原文里孔明自己否认了「弄险」这一主动定性（吾非行险，盖因不得已而用之），而司马懿的退兵理由也只是他自己的推断（必有埋伏），原文并未替他确认城中有伏兵——事后的居民之言恰恰证明没有埋伏。所以我在 T09/T10 与 TR01 里把「退兵」写成司马懿的判断结果、把「成功」限定为「魏军退去」这一可观察事实，并在 U08 登记三种说法的不一致。",
+   "quotes": [
+    {
+     "quote": "吾非行险，盖因不得已而用之。",
+     "start": 482931,
+     "end": 482945,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 482931,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    },
+    {
+     "quote": "皆言孔明止有二千五百军在城中，又无武将，只有几个文官，别无埋伏。",
+     "start": 484043,
+     "end": 484075,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 484043,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    }
+   ]
+  },
+  {
+   "id": "SC02",
+   "what": "我最可能读错的第二处：把马谡的失败归因于「不听王平」这一条因果，而漏掉地形与补给链。",
+   "why": "我仍然把机制写成围山断水（CE04），是因为原文把后果写得很具体：山上无水、军不得食、寨中大乱、山南蜀兵开门降魏。「不听王平」是人物层级的前因，但如果只写它，就会漏掉司马懿为何要「先断了汲水道路」这一步。两条我都写了，且把「派任→失守」明确列入 rejectedCauseEdges RC01，避免用结果反推。",
+   "quotes": [
+    {
+     "quote": "又令申耽、申仪引两路兵围山，先断了汲水道路；待蜀兵自乱，然后乘势击之。",
+     "start": 480555,
+     "end": 480590,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 480555,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    },
+    {
+     "quote": "山上无水，军不得食，寨中大乱。",
+     "start": 480806,
+     "end": 480821,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 480806,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    }
+   ]
+  },
+  {
+   "id": "SC03",
+   "what": "我最可能读错的第三处：把司马懿「放条大路，让过马谡」读成为了诱魏延。",
+   "why": "我仍然只写了可观察的顺序（放 → 张颌追 → 魏延拦 → 魏延被抄后路），没有写动机，是因为原文那一句只有动作、下一句才写魏延出现，因果链在文本里是断开的。我在 U04 明确规定这一处读不出来，并在 CE05 的 mechanism 里把机制限定在「放—追—诱」的顺序上，不替原文补意图。",
+   "quotes": [
+    {
+     "quote": "司马懿放条大路，让过马谡。背后张颌引兵追来。",
+     "start": 480887,
+     "end": 480909,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 480887,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    },
+    {
+     "quote": "赶到三十余里，前面鼓角齐鸣，一彪军出，放过马谡，拦住张颌；视之，乃魏延也。",
+     "start": 480909,
+     "end": 480946,
+     "globalOccurrences": 1,
+     "occurrenceIndex": 480909,
+     "inSlice": true,
+     "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    }
+   ]
+  }
+ ],
+ "crossSectionQuoteReuse": {
+  "rule": "硬红线只禁止「同一条任务的五栏共用同一句」。跨任务／跨分区复用不禁止，但全部登记在此，便于复核者判它是否在当多栏依据。",
+  "intraTaskOverlaps": [],
+  "count": 69,
+  "items": [
+   {
+    "quote": "诸葛亮平生谨慎，未敢造次行事。",
+    "start": 478373,
+    "usedAt": [
+     "$.tasks[0].obstacle.quotes[0]",
+     "$.states[2].quotes[0]",
+     "$.themeReadings[0].support[0].quotes[0]"
+    ]
+   },
+   {
+    "quote": "吾已发檄文，令子丹拒守郿城，若兵来不可出战；令孙礼、辛毗截住箕谷道口，若兵来则出奇兵击之。",
+    "start": 478455,
+    "usedAt": [
+     "$.tasks[0].action.quotes[0]",
+     "$.foreshadows[3].quotes[0]"
+    ]
+   },
+   {
+    "quote": "吾已发檄文，令子丹拒守郿城，若兵来不可出战；",
+    "start": 478455,
+    "usedAt": [
+     "$.worldSettings[6].extraQuotes[1]",
+     "$.notModeled[4].quotes[0]"
+    ]
+   },
+   {
+    "quote": "今司马懿出关，必取街亭，断吾咽喉之路。",
+    "start": 478918,
+    "usedAt": [
+     "$.tasks[1].objective.quotes[0]",
+     "$.causeEdges[0].quotes[1]"
+    ]
+   },
+   {
+    "quote": "街亭虽小，干系甚重：倘街亭有失，吾大军皆休矣。",
+    "start": 478973,
+    "usedAt": [
+     "$.tasks[1].obstacle.quotes[0]",
+     "$.worldSettings[1].extraQuotes[0]"
+    ]
+   },
+   {
+    "quote": "此地奈无城郭，又无险阻，守之极难。",
+    "start": 479003,
+    "usedAt": [
+     "$.tasks[1].obstacle.quotes[1]",
+     "$.tasks[2].obstacle.quotes[0]",
+     "$.worldSettings[1].extraQuotes[1]"
+    ]
+   },
+   {
+    "quote": "谡曰：“某自幼熟读兵书，颇知兵法。岂一街亭不能守耶？”",
+    "start": 479021,
+    "usedAt": [
+     "$.tasks[2].action.quotes[0]",
+     "$.states[4].quotes[0]"
+    ]
+   },
+   {
+    "quote": "司马懿非等闲之辈；更有先锋张颌，乃魏之名将：恐汝不能敌之。",
+    "start": 479053,
+    "usedAt": [
+     "$.tasks[1].obstacle.quotes[2]",
+     "$.tasks[2].obstacle.quotes[1]"
+    ]
+   },
+   {
+    "quote": "谡曰：“休道司马懿、张颌，便是曹睿亲来，有何惧哉！若有差失，乞斩全家。”孔明曰：“军中无戏言。”谡曰：“愿立军令状。”孔明从之，谡遂写了军令状呈上。",
+    "start": 479083,
+    "usedAt": [
+     "$.foreshadows[0].quotes[0]",
+     "$.worldSettings[8].quoteRef"
+    ]
+   },
+   {
+    "quote": "若有差失，乞斩全家。",
+    "start": 479108,
+    "usedAt": [
+     "$.worldSettings[8].extraQuotes[0]",
+     "$.worldSettings[14].extraQuotes[0]"
+    ]
+   },
+   {
+    "quote": "下寨必当要道之处，使贼兵急切不能偷过。",
+    "start": 479221,
+    "usedAt": [
+     "$.tasks[1].action.quotes[2]",
+     "$.worldSettings[1].extraQuotes[2]"
+    ]
+   },
+   {
+    "quote": "安营既毕，便画四至八道地理形状图本来我看。",
+    "start": 479240,
+    "usedAt": [
+     "$.tasks[1].action.quotes[3]",
+     "$.causeEdges[1].quotes[0]",
+     "$.foreshadows[1].quotes[0]",
+     "$.worldSettings[15].extraQuotes[1]",
+     "$.themeReadings[1].support[1].quotes[0]"
+    ]
+   },
+   {
+    "quote": "高翔引兵而去。",
+    "start": 479377,
+    "usedAt": [
+     "$.tasks[1].result.quotes[1]",
+     "$.worldSettings[2].extraQuotes[0]"
+    ]
+   },
+   {
+    "quote": "可就此五路总口下寨；却令军士伐木为栅，以图久计。",
+    "start": 479721,
+    "usedAt": [
+     "$.tasks[3].objective.quotes[0]",
+     "$.unknowns[0].quotes[0]"
+    ]
+   },
+   {
+    "quote": "此处侧边一山，四面皆不相连，且树木极广，此乃天赐之险也：可就山上屯军。",
+    "start": 479759,
+    "usedAt": [
+     "$.tasks[2].action.quotes[1]",
+     "$.causeEdges[3].quotes[0]"
+    ]
+   },
+   {
+    "quote": "谡大笑曰：“汝真女子之见！兵法云：凭高视下，势如劈竹。若魏兵到来，吾教他片甲不回！”",
+    "start": 479858,
+    "usedAt": [
+     "$.tasks[3].obstacle.quotes[1]",
+     "$.tasks[13].action.quotes[0]",
+     "$.worldSettings[17].quoteRef"
+    ]
+   },
+   {
+    "quote": "今观此山，乃绝地也：若魏兵断我汲水之道，军士不战自乱矣。",
+    "start": 479924,
+    "usedAt": [
+     "$.tasks[13].obstacle.quotes[0]",
+     "$.themeReadings[1].support[2].quotes[1]"
+    ]
+   },
+   {
+    "quote": "谡曰：“汝莫乱道！孙子云：置之死地而后生。若魏兵绝我汲水之道，蜀兵岂不死战？以一可当百也。",
+    "start": 479953,
+    "usedAt": [
+     "$.tasks[13].action.quotes[1]",
+     "$.worldSettings[17].extraQuotes[0]",
+     "$.themeReadings[0].counter[1].quotes[0]"
+    ]
+   },
+   {
+    "quote": "马谡不从。",
+    "start": 480067,
+    "usedAt": [
+     "$.tasks[2].action.quotes[2]",
+     "$.tasks[3].obstacle.quotes[0]",
+     "$.states[5].quotes[1]"
+    ]
+   },
+   {
+    "quote": "王平引兵离山十里下寨，画成图本，星夜差人去禀孔明，具说马谡自于山上下寨。",
+    "start": 480143,
+    "usedAt": [
+     "$.tasks[3].action.quotes[1]",
+     "$.causeEdges[1].quotes[1]",
+     "$.foreshadows[1].quotes[1]"
+    ]
+   },
+   {
+    "quote": "男亲自哨见，当道并无寨栅，军皆屯于山上，故知可破也。",
+    "start": 480298,
+    "usedAt": [
+     "$.tasks[4].action.quotes[0]",
+     "$.causeEdges[2].quotes[0]",
+     "$.states[3].quotes[1]",
+     "$.themeReadings[1].support[0].quotes[0]",
+     "$.unknowns[0].quotes[2]"
+    ]
+   },
+   {
+    "quote": "懿大喜曰：“若兵果在山上，乃天使吾成功矣！”",
+    "start": 480325,
+    "usedAt": [
+     "$.tasks[5].obstacle.quotes[0]",
+     "$.themeReadings[1].counter[2].quotes[0]"
+    ]
+   },
+   {
+    "quote": "遂更换衣服，引百余骑亲自来看。是夜天晴月朗，直至山下，周围巡哨了一遍，方回。",
+    "start": 480347,
+    "usedAt": [
+     "$.causeEdges[2].quotes[1]",
+     "$.themeReadings[1].support[0].quotes[1]"
+    ]
+   },
+   {
+    "quote": "是夜天晴月朗，直至山下，周围巡哨了一遍，方回。",
+    "start": 480362,
+    "usedAt": [
+     "$.tasks[5].action.quotes[0]",
+     "$.notModeled[5].quotes[0]"
+    ]
+   },
+   {
+    "quote": "传令与诸将：“倘兵来，只见山顶上红旗招动，即四面皆下。”",
+    "start": 480409,
+    "usedAt": [
+     "$.tasks[2].action.quotes[3]",
+     "$.worldSettings[9].quoteRef"
+    ]
+   },
+   {
+    "quote": "又令申耽、申仪引两路兵围山，先断了汲水道路；待蜀兵自乱，然后乘势击之。",
+    "start": 480555,
+    "usedAt": [
+     "$.tasks[5].objective.quotes[0]",
+     "$.causeEdges[3].quotes[1]",
+     "$.themeReadings[0].counter[0].quotes[0]",
+     "$.selfCritique[1].quotes[0]"
+    ]
+   },
+   {
+    "quote": "马谡将红旗招动，军将你我相推，无一人敢动。",
+    "start": 480675,
+    "usedAt": [
+     "$.tasks[5].obstacle.quotes[1]",
+     "$.causeEdges[3].quotes[3]",
+     "$.worldSettings[9].extraQuotes[0]",
+     "$.unknowns[2].quotes[0]"
+    ]
+   },
+   {
+    "quote": "马谡见事不谐，教军紧守寨门，只等外应。",
+    "start": 480736,
+    "usedAt": [
+     "$.tasks[2].result.quotes[0]",
+     "$.states[4].quotes[1]"
+    ]
+   },
+   {
+    "quote": "魏兵自辰时困至戌时，山上无水，军不得食，寨中大乱。",
+    "start": 480796,
+    "usedAt": [
+     "$.tasks[2].cost.quotes[0]",
+     "$.unknowns[4].quotes[0]"
+    ]
+   },
+   {
+    "quote": "山上无水，军不得食，寨中大乱。",
+    "start": 480806,
+    "usedAt": [
+     "$.causeEdges[3].quotes[2]",
+     "$.themeReadings[0].counter[0].quotes[1]",
+     "$.selfCritique[1].quotes[1]"
+    ]
+   },
+   {
+    "quote": "山南蜀兵大开寨门，下山降魏。马谡禁止不住。",
+    "start": 480828,
+    "usedAt": [
+     "$.tasks[2].result.quotes[1]",
+     "$.states[4].quotes[2]",
+     "$.themeReadings[0].counter[1].quotes[1]"
+    ]
+   },
+   {
+    "quote": "司马懿又令人于沿山放火，山上蜀兵愈乱。",
+    "start": 480849,
+    "usedAt": [
+     "$.tasks[5].action.quotes[2]",
+     "$.unknowns[2].quotes[1]"
+    ]
+   },
+   {
+    "quote": "马谡料守不住，只得驱残兵杀下山西逃奔。",
+    "start": 480868,
+    "usedAt": [
+     "$.tasks[2].result.quotes[2]",
+     "$.states[0].quotes[0]",
+     "$.themeReadings[1].counter[2].quotes[1]"
+    ]
+   },
+   {
+    "quote": "司马懿放条大路，让过马谡。背后张颌引兵追来。",
+    "start": 480887,
+    "usedAt": [
+     "$.tasks[5].action.quotes[3]",
+     "$.causeEdges[4].quotes[0]",
+     "$.unknowns[3].quotes[0]",
+     "$.selfCritique[2].quotes[0]"
+    ]
+   },
+   {
+    "quote": "二将慌忙奔回寨时，营中皆是魏兵旌旗。",
+    "start": 481096,
+    "usedAt": [
+     "$.tasks[3].cost.quotes[1]",
+     "$.tasks[5].result.quotes[1]",
+     "$.states[0].quotes[1]"
+    ]
+   },
+   {
+    "quote": "原来郭淮与曹真商议，恐司马懿得了全功，乃分淮来取街亭；闻知司马懿、张颌成了此功，遂引兵径袭列柳城。",
+    "start": 481402,
+    "usedAt": [
+     "$.tasks[6].objective.quotes[0]",
+     "$.causeEdges[6].quotes[0]"
+    ]
+   },
+   {
+    "quote": "正遇三将，大杀一阵。蜀兵伤者极多。",
+    "start": 481451,
+    "usedAt": [
+     "$.tasks[2].cost.quotes[2]",
+     "$.tasks[6].action.quotes[0]"
+    ]
+   },
+   {
+    "quote": "引兵径到城下叫门，只见城上一声炮响，旗帜皆竖，当头一面大旗，上书“平西都督司马懿”。",
+    "start": 481530,
+    "usedAt": [
+     "$.tasks[6].result.quotes[0]",
+     "$.causeEdges[6].quotes[1]"
+    ]
+   },
+   {
+    "quote": "淮大惊曰：“仲达神机，吾不及也！”遂入城。",
+    "start": 481601,
+    "usedAt": [
+     "$.tasks[6].result.quotes[1]",
+     "$.causeEdges[6].quotes[2]",
+     "$.states[6].quotes[1]"
+    ]
+   },
+   {
+    "quote": "若彼败走，不可相拒，只宜中途截住：蜀兵辎重，可尽得也。",
+    "start": 481786,
+    "usedAt": [
+     "$.causeEdges[7].quotes[2]",
+     "$.worldSettings[16].extraQuotes[0]"
+    ]
+   },
+   {
+    "quote": "西城虽山僻小县，乃蜀兵屯粮之所，又南安、天水、安定三郡总路。若得此城，三郡可复矣。",
+    "start": 481842,
+    "usedAt": [
+     "$.foreshadows[4].quotes[0]",
+     "$.worldSettings[3].quoteRef"
+    ]
+   },
+   {
+    "quote": "孔明就文几上拆开视之，拍案大惊曰：“马谡无知，坑陷吾军矣！”",
+    "start": 481957,
+    "usedAt": [
+     "$.tasks[3].result.quotes[0]",
+     "$.causeEdges[1].quotes[2]",
+     "$.states[5].quotes[2]"
+    ]
+   },
+   {
+    "quote": "吾观此图本，失却要路，占山为寨。",
+    "start": 482006,
+    "usedAt": [
+     "$.tasks[7].obstacle.quotes[0]",
+     "$.causeEdges[9].quotes[0]",
+     "$.foreshadows[1].quotes[2]",
+     "$.themeReadings[1].support[1].quotes[1]"
+    ]
+   },
+   {
+    "quote": "忽报马到来，说：“街亭、列柳城，尽皆失了！”孔明跌足长叹曰：“大事去矣！此吾之过也！”",
+    "start": 482103,
+    "usedAt": [
+     "$.tasks[7].cost.quotes[0]",
+     "$.states[1].quotes[1]"
+    ]
+   },
+   {
+    "quote": "又令张冀先引军去修理剑阁，以备归路。",
+    "start": 482222,
+    "usedAt": [
+     "$.tasks[7].action.quotes[1]",
+     "$.causeEdges[9].quotes[1]",
+     "$.worldSettings[7].quoteRef",
+     "$.unknowns[1].quotes[0]"
+    ]
+   },
+   {
+    "quote": "又令马岱、姜维断后，先伏于山谷中，待诸军退尽，方始收兵。",
+    "start": 482261,
+    "usedAt": [
+     "$.tasks[7].action.quotes[2]",
+     "$.causeEdges[9].quotes[2]"
+    ]
+   },
+   {
+    "quote": "司马懿引大军十五万，望西城蜂拥而来！",
+    "start": 482378,
+    "usedAt": [
+     "$.tasks[8].obstacle.quotes[0]",
+     "$.foreshadows[4].quotes[1]"
+    ]
+   },
+   {
+    "quote": "孔明乃披鹤氅，戴纶巾，引二小童携琴一张，于城上敌楼前，凭栏而坐，焚香操琴。",
+    "start": 482562,
+    "usedAt": [
+     "$.tasks[8].objective.quotes[1]",
+     "$.causeEdges[10].quotes[0]",
+     "$.worldSettings[10].quoteRef"
+    ]
+   },
+   {
+    "quote": "懿笑而不信，遂止住三军，自飞马远远望之。",
+    "start": 482634,
+    "usedAt": [
+     "$.tasks[9].action.quotes[0]",
+     "$.states[8].quotes[0]"
+    ]
+   },
+   {
+    "quote": "果见孔明坐于城楼之上，笑容可掬，焚香操琴。",
+    "start": 482654,
+    "usedAt": [
+     "$.tasks[8].action.quotes[1]",
+     "$.worldSettings[10].extraQuotes[0]"
+    ]
+   },
+   {
+    "quote": "懿看毕大疑，便到中军，教后军作前军，前军作后军，望北山路而退。",
+    "start": 482719,
+    "usedAt": [
+     "$.tasks[9].action.quotes[1]",
+     "$.themeReadings[1].counter[0].quotes[0]",
+     "$.unknowns[5].quotes[0]"
+    ]
+   },
+   {
+    "quote": "次子司马昭曰：“莫非诸葛亮无军，故作此态？父亲何故便退兵？”",
+    "start": 482750,
+    "usedAt": [
+     "$.states[3].quotes[2]",
+     "$.states[8].quotes[1]",
+     "$.notModeled[3].quotes[0]"
+    ]
+   },
+   {
+    "quote": "懿曰：“亮平生谨慎，不曾弄险。今大开城门，必有埋伏。我兵若进，中其计也。",
+    "start": 482780,
+    "usedAt": [
+     "$.causeEdges[10].quotes[1]",
+     "$.states[2].quotes[1]",
+     "$.themeReadings[0].support[1].quotes[0]"
+    ]
+   },
+   {
+    "quote": "今大开城门，必有埋伏。我兵若进，中其计也。汝辈岂知？宜速退。”",
+    "start": 482795,
+    "usedAt": [
+     "$.tasks[9].objective.quotes[0]",
+     "$.unknowns[5].quotes[1]"
+    ]
+   },
+   {
+    "quote": "此人料吾生平谨慎，必不弄险；见如此模样，疑有伏兵，所以退去。",
+    "start": 482901,
+    "usedAt": [
+     "$.tasks[8].result.quotes[1]",
+     "$.causeEdges[10].quotes[2]",
+     "$.themeReadings[0].support[1].quotes[1]"
+    ]
+   },
+   {
+    "quote": "吾非行险，盖因不得已而用之。",
+    "start": 482931,
+    "usedAt": [
+     "$.tasks[8].cost.quotes[1]",
+     "$.themeReadings[0].support[1].quotes[2]",
+     "$.unknowns[7].quotes[0]",
+     "$.selfCritique[0].quotes[0]"
+    ]
+   },
+   {
+    "quote": "吾若为司马懿，必不便退也。",
+    "start": 483092,
+    "usedAt": [
+     "$.themeReadings[0].support[2].quotes[1]",
+     "$.unknowns[7].quotes[2]"
+    ]
+   },
+   {
+    "quote": "天水、安定、南安三郡官吏军民，陆续而来。",
+    "start": 483143,
+    "usedAt": [
+     "$.tasks[7].result.quotes[2]",
+     "$.causeEdges[9].quotes[3]",
+     "$.states[9].quotes[1]",
+     "$.unknowns[6].quotes[0]"
+    ]
+   },
+   {
+    "quote": "山谷应声，不知蜀兵多少；更兼魏军心疑，不敢久停，只得尽弃辎重而去。",
+    "start": 483297,
+    "usedAt": [
+     "$.causeEdges[8].quotes[1]",
+     "$.worldSettings[12].quoteRef"
+    ]
+   },
+   {
+    "quote": "兴、苞二人皆遵将令，不敢追袭，多得军器粮草而归。",
+    "start": 483330,
+    "usedAt": [
+     "$.tasks[7].result.quotes[1]",
+     "$.causeEdges[8].quotes[2]",
+     "$.foreshadows[2].quotes[1]",
+     "$.worldSettings[12].extraQuotes[0]"
+    ]
+   },
+   {
+    "quote": "真引兵鼠窜而还。蜀兵连夜皆奔回汉中。",
+    "start": 483448,
+    "usedAt": [
+     "$.tasks[11].result.quotes[0]",
+     "$.states[9].quotes[0]"
+    ]
+   },
+   {
+    "quote": "吾先引一军伏于其后，公却引兵打吾旗号，徐徐而退。吾一步步自有护送也。",
+    "start": 483507,
+    "usedAt": [
+     "$.tasks[10].objective.quotes[0]",
+     "$.causeEdges[11].quotes[0]",
+     "$.foreshadows[5].quotes[0]",
+     "$.worldSettings[11].quoteRef"
+    ]
+   },
+   {
+    "quote": "只见山坡后闪出红旗白字，上书“赵云”。苏顒急收兵退走。",
+    "start": 483638,
+    "usedAt": [
+     "$.tasks[10].action.quotes[0]",
+     "$.causeEdges[11].quotes[1]",
+     "$.foreshadows[5].quotes[1]",
+     "$.worldSettings[11].extraQuotes[0]"
+    ]
+   },
+   {
+    "quote": "蜀兵已去三十余里。万政认得是赵云，不敢前进",
+    "start": 483788,
+    "usedAt": [
+     "$.tasks[10].cost.quotes[0]",
+     "$.worldSettings[13].extraQuotes[0]"
+    ]
+   },
+   {
+    "quote": "万政认得是赵云，不敢前进",
+    "start": 483797,
+    "usedAt": [
+     "$.causeEdges[11].quotes[2]",
+     "$.worldSettings[11].extraQuotes[1]"
+    ]
+   },
+   {
+    "quote": "行至一大林，忽听得背后大喝一声曰：“赵子龙在此！”惊得魏兵落马者百余人，余者皆越岭而去。",
+    "start": 483868,
+    "usedAt": [
+     "$.tasks[10].action.quotes[2]",
+     "$.foreshadows[5].quotes[2]"
+    ]
+   },
+   {
+    "quote": "云护送车仗人马，望汉中而去，沿途并无遗失。",
+    "start": 483965,
+    "usedAt": [
+     "$.tasks[10].result.quotes[1]",
+     "$.states[9].quotes[2]",
+     "$.worldSettings[13].quoteRef"
+    ]
+   },
+   {
+    "quote": "皆言孔明止有二千五百军在城中，又无武将，只有几个文官，别无埋伏。",
+    "start": 484043,
+    "usedAt": [
+     "$.tasks[9].result.quotes[0]",
+     "$.states[8].quotes[2]",
+     "$.themeReadings[1].counter[0].quotes[1]",
+     "$.selfCritique[0].quotes[1]"
+    ]
+   },
+   {
+    "quote": "懿悔之不及，仰天叹曰：“吾不如孔明也！”",
+    "start": 484119,
+    "usedAt": [
+     "$.tasks[9].cost.quotes[0]",
+     "$.states[2].quotes[2]"
+    ]
+   }
+  ]
+ },
+ "buildSelfCheck": {
+  "file_hash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+  "slice_hash": "ce040bc19715eae87d58297e61b39cb1c34057ca3b87bda914fff48e0471ed84",
+  "slice_len": 6065,
+  "quote_objects": 301,
+  "quote_failures": 0,
+  "build_problems": [],
+  "null_without_note": 0,
+  "counts": {
+   "tasks": 14,
+   "causeEdges": 12,
+   "rejectedCauseEdges": 5,
+   "states": 10,
+   "foreshadows": 7,
+   "worldSettings": 18,
+   "worldSettingsByKind": {
+    "place": 8,
+    "item": 6,
+    "rule": 4
+   },
+   "themeReadings": 2,
+   "unknowns": 8,
+   "notModeled": 6,
+   "selfCritique": 3,
+   "nullColumns": 7,
+   "quoteObjects": 301
+  },
+  "countsNote": "本块全部数字由构建脚本在落盘前重新统计，不是手写。"
+ },
+ "selfCritiqueCountNote": "tasks 14 条，cost 为 null 的 6 条（脚本复算）。"
+}

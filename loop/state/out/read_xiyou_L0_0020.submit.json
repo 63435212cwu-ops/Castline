@@ -1,0 +1,81 @@
+{
+ "task": "read:xiyou:L0:0020",
+ "agent": "w-sanguo-1",
+ "status": "done",
+ "summary": "精读《西游记》第二十回 黄风岭唐僧有难 半山中八戒争先：读 docs[0].text[136016,143025) 全部 7009 字原文，产出 tasks(7)/causeEdges(13)/rejectedEdges(12)/states(13)/knowledgeDiffs(8)/foreshadows(10)/rejectedForeshadows(8)/crossUnitEchoes(8)/unknowns(15)/selfCritique(5)；并对上一轮（同 agent 超时被代提交）的产物做自审，修掉 7 类可证缺陷。",
+ "evidence": [
+  {
+   "path": "loop/state/out/read_xiyou_L0_0020.candidate.json",
+   "sha256": "b1cd295fc6e9539a3995be011071bd54f265c28c02431f2a6ee5061f0d8db719",
+   "kind": "candidate-json"
+  }
+ ],
+ "assertions": [
+  {
+   "text": "切片口径：docs[0].text[136016:143025] 长度 7009，与任务 prompt 一致；TEXT.find('第二十回')==136016，TEXT.find('第二十一回')==143025；切片以本单元回目标题开头。",
+   "command": "python3 -c \"import json;T=json.load(open('data/cache/df959d743e53206f56db2f92.docs.json'))[0]['text'];print(len(T[136016:143025]),T.find('第二十回'),T.find('第二十一回'))\"",
+   "result": "pass"
+  },
+  {
+   "text": "sourceHash 口径：整份 docs.json 文件 sha256 = c282cf39…52a2，与任务声明相同；切片 sha256 另记 segmentSha256=1cb39931…e534（两者不相等，未互相冒充）。",
+   "command": "shasum -a 256 data/cache/df959d743e53206f56db2f92.docs.json",
+   "result": "pass"
+  },
+  {
+   "text": "全部 392 个引文节点逐条断言 TEXT[start:end]==quote、全文字串唯一（count==1）、sourceHash 与会话一致；失败 0。",
+   "command": "python3 -B -s /tmp/cl20/verify_final.py",
+   "result": "pass"
+  },
+  {
+   "text": "无未定义的占位 token（原文件里的 buji/dai_guixia/… 等 15 个无定义拼音 token 已全部换成可 find 的 {start,end,quote}）；剩余唯一 ascii 值是 book='xiyou'。",
+   "command": "python3 -B -s /tmp/cl20/tokens.py",
+   "result": "pass"
+  },
+  {
+   "text": "修掉的可证缺陷 7 类，逐条 before/after/why/proof 记在文件 repairLog.repairs 里。",
+   "command": "python3 -c \"import json;d=json.load(open('loop/state/out/read_xiyou_L0_0020.candidate.json'));print(len(d['repairLog']['repairs']))\"",
+   "result": "pass"
+  },
+  {
+   "text": "未声称 semanticReview 完成：semanticReview.performed=false，语义是否读对仍由 read-verify 流的别的 agent 判定。",
+   "command": "python3 -c \"import json;print(json.load(open('loop/state/out/read_xiyou_L0_0020.candidate.json'))['semanticReview']['performed'])\"",
+   "result": "pass"
+  },
+  {
+   "text": "未改任何受保护路径：本任务只写 loop/state/out/ 下两个文件。",
+   "command": "git status --porcelain -- js css index.html serve.py narrative.py scripts tests docs data",
+   "result": "pass"
+  }
+ ],
+ "changes": [
+  {
+   "path": "loop/state/out/read_xiyou_L0_0020.candidate.json",
+   "kind": "overwrite-in-writes-path"
+  },
+  {
+   "path": "loop/state/out/read_xiyou_L0_0020.submit.json",
+   "kind": "append-only"
+  }
+ ],
+ "sourceHashes": {
+  "data/cache/df959d743e53206f56db2f92.docs.json": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+  "data/cache/df959d743e53206f56db2f92.json": "744a9718ac49efcc27bbf4710fb0dd475282e24ee2defae94752f32e7e9d9208"
+ },
+ "remaining": [
+  "原 quoteAudit.crossesPairBoundary 的分组判据不可复原：12 个拼音 token 按拼音还原出 11 条引文，但五种机械判据没有一条能复现 11 条。本轮改为显式判据（与错配区间相交=5 条）并记入 U15；原 11 条的猜测偏移留在 repairLog.legacyTokenGuess，标 unverified。",
+  "factStatusConvention 声明 factStatus 是机械位置判定，但原有 371 个节点里有 13 个与该机械判据不符（8 个 narrated→mixed、5 个 mixed→utterance）。本轮只保证同一句话全文件唯一标签、且新增节点与既有共识一致，**没有**改动这 13 个原有节点；口径与实现的落差记在 repairLog.factStatusRuleGap，留给复核者裁量。",
+  "causeEdges[C13] 的方向在本轮被改正（原先把果当因）；改正后的机制是「应对方式分歧 → 行者取证」。这是自审结论，仍需 read-verify 独立判定。",
+  "本单元仍有 5 段无引文覆盖（回目标题行、138723 斋饭对答、139922/139978 两段韵语、141307 行者揭穿金蝉脱壳的半句），coverage 里已列出，未补写。",
+  "unknowns 15 条里 U1/U2/U3/U5/U7/U8/U15 在本单元内不可判定，未给出结论。",
+  "本轮另起的独立对抗审计 subagent 在超时前未返回任何结论（被中断、无收尾消息），故全部修复均为自查，不构成独立复核；read-verify 流仍是唯一独立判定环节。"
+ ],
+ "rollback": {
+  "kind": "append-only",
+  "strategy": "delete-added-files",
+  "files": [
+   "loop/state/out/read_xiyou_L0_0020.submit.json"
+  ],
+  "note": "candidate.json 覆盖了上一轮同路径产物（上一轮被机器拒绝、且同为本 agent 所写），如需回退到上一版哈希为 0e56ab1a491e913a9a4ed5e9ed1542e71eace3211af92b8ceba612b3e6418c78。"
+ },
+ "submittedAt": "2026-10-08T00:49:03Z"
+}

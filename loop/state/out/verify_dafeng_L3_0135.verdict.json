@@ -1,0 +1,338 @@
+{
+ "task": "verify:dafeng:L3:0135",
+ "reviewedTask": "read:dafeng:L3:0135",
+ "reviewedCandidate": "loop/state/out/read_dafeng_L3_0135.candidate.json",
+ "reviewedSubmitter": "w-xiyou-0",
+ "reviewer": "w-sanguo-1",
+ "source": {
+  "path": "data/cache/1063b17ca65ec1b76f30e460.docs.json",
+  "docsSha256": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+  "segmentSelector": "docs[0].text[470430:474300]",
+  "segmentSha256": "31b6b423a7eceb2655baa5fb56b5388ffed5041446b9adba878d6ada367b4bbd",
+  "codepoints": 3870,
+  "offsetUnit": "codepoint",
+  "selfCheck": "docs[0].text[470430:470456] == '第一百三十六章 真相（为盟主“小海豚的翎小晨”加更）'；docs[0].text[474286:474300] == '------------\\n\\n'；474300 起为下一章标题 '第一百三十六章 女子国师'。"
+ },
+ "method": [
+  "1) 先独立读原文切片（未先看候选结论），再读候选；",
+  "2) 254 条引文全量机器回切：text[start:end]==quote、find(quote) 是否等于 start、inSegment 与 [470430,474300) 是否一致、inWholeTextOccurrences 与 str.count 是否一致；",
+  "3) 抽取项逐条回原文核对（任务五元组/因果/非因果/状态/知识差/伏笔/设定/主题/台词/人物说法/瑕疵/unknowns）；",
+  "4) 反向验证：区间 3-5gram 与候选文本差集、实体清单扫描、段落→引用映射、零覆盖文本段扫描，再逐条回原文求证；",
+  "5) 误杀检查：检查被排除项（notForeshadows 5 条、unknowns 12 条、coverage 分母）是否有合法内容被挡掉；",
+  "6) 引用核验：随机抽 5 条 quote 做 find 核对；并单独核验候选全部 15 条区间外引用与全部行内 @ 指针。"
+ ],
+ "verdict": "partial",
+ "counterExamples": [
+  {
+   "id": "CE1",
+   "claim": "行内定位指针错误（低）：worldSettings[5]（浩气楼）的说明写「真正的登楼奏对在下一章（@475603「魏公，铜锣许七安求见」）」，但该句实际在 @475585；@475603 起是另一句「魏渊笑了一下，“正好，传他上来。”」。",
+   "severity": "low",
+   "quote": "魏公，铜锣许七安求见。",
+   "why": "引文逐字存在，但候选给的 @ 指针偏 +18，落在另一句话上。本任务要求「引用定位正确」，故这是候选唯一确定的事实性错误（不影响语义，只影响可复现性）。复现：python3 -c \"import json;T=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];print(T.find('魏公，铜锣许七安求见'), repr(T[475603:475621]))\" → 475585 / '魏渊笑了一下，“正好，传他上来。”\\n'",
+   "evidence": [
+    {
+     "quote": "魏公，铜锣许七安求见。",
+     "start": 475585,
+     "end": 475596,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+     "inSegment": false,
+     "offsetUnit": "codepoint"
+    },
+    {
+     "quote": "魏渊笑了一下，“正好，传他上来。”\n",
+     "start": 475603,
+     "end": 475621,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+     "inSegment": false,
+     "offsetUnit": "codepoint"
+    }
+   ]
+  },
+  {
+   "id": "CE2",
+   "claim": "行内定位指针错误（低）：worldSettings[11]（地书）的说明写「区间外（@478900）洛玉衡才问他『手持几号地书』」，实际该句在 @478892，@478900 起是「洛玉衡的嗓音很好听…」。",
+   "severity": "low",
+   "quote": "手持几号地书？",
+   "why": "同为指针偏（+8）。复现：print(T.find('手持几号地书'), repr(T[478900:478918])) → 478892 / '洛玉衡的嗓音很好听，有质感，有磁性，'",
+   "evidence": [
+    {
+     "quote": "手持几号地书？",
+     "start": 478892,
+     "end": 478899,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+     "inSegment": false,
+     "offsetUnit": "codepoint"
+    },
+    {
+     "quote": "洛玉衡的嗓音很好听，有质感，有磁性，",
+     "start": 478900,
+     "end": 478918,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+     "inSegment": false,
+     "offsetUnit": "codepoint"
+    }
+   ]
+  },
+  {
+   "id": "CE3",
+   "claim": "结果栏措辞越权（低-中）：tasks[0]（T1）在 result 正文写「……他交代一句『我先回去养伤』后脱离现场，增援接手」，objective 也写「把追兵交给赶来的增援」；但原文只在祈使句里出现「支援」，没有任何一句写增援到场或接手。",
+   "severity": "low-medium",
+   "quote": "“我先回去养伤，你们再次等待支援，若是遇到穿黑袍的人....不包括我，记得一定要躲避。",
+   "why": "提示词明令「不许因为『播放到结尾』就写 result=成功；结束≠成功」。全区间「增援」出现 0 次，「支援」仅此 1 次且是命令对方等待。候选自己在同栏括号里补了「没有写增援是否到场、追兵是否被拦」（属 hedged），但正文断言「增援接手」仍无据。应降级为「示警已发出；增援是否接手本区间未写」。",
+   "evidence": [
+    {
+     "quote": "“我先回去养伤，你们再次等待支援，若是遇到穿黑袍的人....不包括我，记得一定要躲避。",
+     "start": 471024,
+     "end": 471067,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+     "inSegment": true,
+     "offsetUnit": "codepoint"
+    }
+   ]
+  }
+ ],
+ "reverseChecks": [
+  {
+   "id": "R1",
+   "found": "遗漏可登记的动机：许七安接受跑腿的动机被漏掉——「许七安正愁怎么回报救命之恩」是本区间唯一交代他为何当场答应的句子；候选只在 speechActs[SA16] 把它当台词登记，tasks/causeEdges/states/knowledgeDiffs 全都没有用它。于是 CE1（金莲舍身救命）与 T2（金莲托他求丹）之间那条「欠命→还债→答应」的因果链在本候选里是断的。",
+   "quote": "    “道长请说。”许七安正愁怎么回报救命之恩。",
+   "why": "已验证：candidate JSON 中 '救命之恩' 仅在 speechActs 命中一次；causeEdges / tasks / states / knowledgeDiffs / foreshadows / narrativeFacts 命中数均为 0。复现：python3 -c \"import json;c=json.load(open('loop/state/out/read_dafeng_L3_0135.candidate.json'));print([s for s in c if '救命之恩' in json.dumps(c[s],ensure_ascii=False)])\" → ['speechActs']",
+   "evidence": [
+    {
+     "quote": "    “道长请说。”许七安正愁怎么回报救命之恩。",
+     "start": 471756,
+     "end": 471781,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+     "inSegment": true,
+     "offsetUnit": "codepoint"
+    }
+   ]
+  },
+  {
+   "id": "R2",
+   "found": "遗漏未登记的跨单元线：「牙子」线在区间内有回响、且下一章立刻接续，但候选的 foreshadows / notForeshadows / unknowns 三处都没有它（'牙子' 在候选全文仅 4 次命中，全部落在引文内部，无一处说明）。区间内写「六号恒远又信誓旦旦的说师弟是被牙子拐走的」，紧接着的下一章就由魏渊推进为「平远伯嫡子继承了牙子组织」。",
+   "quote": "青龙寺的恒慧和尚本身就可能涉及到桑泊案，六号恒远又信誓旦旦的说师弟是被牙子拐走的。",
+   "why": "候选在 F1/F2/F4 用的判据是「区间内铺设 + 区间外回收」；按同一把尺子，这条至少应进 unknowns 或跨单元关系，而现在它连「未登记」都没被说明。诚实边界：该线首次铺设更早（@260942 六号自述、@466384 许七安的盘算），所以它更准确的性质是「跨单元旧线在本区间的一次回响」，不是本区间新埋的伏笔 —— 这一点候选没写，我也只按「应登记而未登记」记，不按「漏伏笔」判错。",
+   "evidence": [
+    {
+     "quote": "青龙寺的恒慧和尚本身就可能涉及到桑泊案，六号恒远又信誓旦旦的说师弟是被牙子拐走的。",
+     "start": 473852,
+     "end": 473893,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+     "inSegment": true,
+     "offsetUnit": "codepoint"
+    },
+    {
+     "quote": "“知道了，让你抓捕的牙子组织，可有进展？”",
+     "start": 475252,
+     "end": 475273,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+     "inSegment": false,
+     "offsetUnit": "codepoint"
+    },
+    {
+     "quote": "“这么看来，平远伯嫡子继承了牙子组织。”魏渊轻笑一声，有着实施尽在掌握的淡然，吩咐道：",
+     "start": 475352,
+     "end": 475395,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+     "inSegment": false,
+     "offsetUnit": "codepoint"
+    }
+   ]
+  },
+  {
+   "id": "R3",
+   "found": "遗漏的约束类设定：打更人品级链没被提取。本区间的勘查戏整个建立在谁向谁禀报、谁能传唤谁之上——银锣两次口称「姜金锣」向姜律中禀报，姜律中一句「喊他们过来」就把两名值守铜锣传来。候选 worldSettings 收了 13 条（连「金疮药与纱布」「示警铜管」都收了），却没有这条品级规则，金锣/银锣/铜锣的上下级关系在候选里一次都没被当成设定写出（'金锣' 的 5 次命中全在引文内部）。",
+   "quote": "“姜金锣，屋里还有一个生还者。”一位银锣从屋里出来，高声道。",
+   "why": "全库明文给出该阶梯（@189925「银锣之上是金锣，是最高层次的职位…直接听令于魏公。」）。按提示词「只提取影响行动、资源、约束或后果的明确设定」，这条决定了本区间两处行动（银锣禀报、铜锣被传唤）为何成立，比已收的两条一次性道具更贴「约束」判据。是否必须收属判据边界 —— 我按「遗漏候选」记，不据此判 fail（见 notes 存疑）。",
+   "evidence": [
+    {
+     "quote": "“姜金锣，屋里还有一个生还者。”一位银锣从屋里出来，高声道。",
+     "start": 472301,
+     "end": 472331,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+     "inSegment": true,
+     "offsetUnit": "codepoint"
+    },
+    {
+     "quote": "“姜金锣，没有找到平远伯嫡子的尸体。”一位银锣匆匆禀告。",
+     "start": 472760,
+     "end": 472788,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+     "inSegment": true,
+     "offsetUnit": "codepoint"
+    },
+    {
+     "quote": "“银锣之上是金锣，是最高层次的职位。大奉京城只有十位金锣，直接听令于魏公。”",
+     "start": 189924,
+     "end": 189962,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+     "inSegment": false,
+     "offsetUnit": "codepoint"
+    }
+   ]
+  },
+  {
+   "id": "R4",
+   "found": "遗漏的预设事实：「平远伯府又闹刺客了」这句的预设（平远伯府此前已出过事、且平远伯本人先于本案被杀）没有在候选里被点出。该句被引用了两次（T1.cost、S2.after），但「又」这个预设、以及同段残句「姜律中心里一万头羊驼狂奔，平远伯被杀时，」指向的「平远伯早于本案被杀」，既没进 knowledgeDiffs/states，也没进 unknowns（候选只把残句当 D4 文本瑕疵）。全库可证预设为真。",
+   "quote": "    夜闯平远伯府，斩杀平远伯，重创打更人，从容藏身。这绝对是中品的高手，甚至更强。",
+   "why": "这不是文风问题：它正是姜律中听到「没有找到平远伯嫡子的尸体」却答「不用找了」、以及他判断「除了凶手之外，当时还有其他人在场」的背景。候选把「又」当普通字面引用了两次而未登记预设，属结构性遗漏（不是编造）。",
+   "evidence": [
+    {
+     "quote": "    平远伯府又闹刺客了....两名铜锣相视一眼，旋即注意到许七安鲜血淋漓的虎口，以及微微发抖的手臂。",
+     "start": 470873,
+     "end": 470925,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+     "inSegment": true,
+     "offsetUnit": "codepoint"
+    },
+    {
+     "quote": "    姜律中心里一万头羊驼狂奔，平远伯被杀时，",
+     "start": 472271,
+     "end": 472295,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+     "inSegment": true,
+     "offsetUnit": "codepoint"
+    },
+    {
+     "quote": "    夜闯平远伯府，斩杀平远伯，重创打更人，从容藏身。这绝对是中品的高手，甚至更强。",
+     "start": 260438,
+     "end": 260481,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+     "inSegment": false,
+     "offsetUnit": "codepoint"
+    }
+   ]
+  },
+  {
+   "id": "R5",
+   "found": "口径未写导致数字不可复现：coverage 分区的 nonEmptyParagraphs=96 / uncoveredCount=2 无法按字面复现。区间按「非空段落」的真实计数是 108 块；只有再叠一条未声明的「len>=12」过滤才得到 96（穷举 0–40 各阈值 × 各规则后，唯一能复现 96 的规则就是 len>=12 且不过滤 CJK/分隔线）。同一过滤器把「咻...」「......」「.......」排除在分母之外，所以真正的零覆盖块是 5 块（章节标题、咻...、......、.......、------------），而候选只报 2 块。",
+   "quote": "    咻...",
+   "why": "这正是本环境最警惕的失败形态：字段在、数字在、看起来算过了，但第三方无法复现，且 uncoveredCount 与自己的 note「未覆盖段落多为『......』分隔行」互相矛盾（那两块恰恰被排除在分母外）。影响有限：94/96=97.9% 与真实的 106/108=98.1% 几乎同值，不构成误导性结论，但口径必须写进字段。复现：seg=T[470430:474300]; len([b for b in seg.split('\\n\\n') if b.strip()])==108；加 len>=12 → 96。",
+   "evidence": [
+    {
+     "quote": "    咻...",
+     "start": 470974,
+     "end": 470982,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+     "inSegment": true,
+     "offsetUnit": "codepoint"
+    },
+    {
+     "quote": "\n    .",
+     "start": 472099,
+     "end": 472105,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+     "inSegment": true,
+     "offsetUnit": "codepoint"
+    },
+    {
+     "quote": "\n    ..",
+     "start": 473158,
+     "end": 473165,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+     "inSegment": true,
+     "offsetUnit": "codepoint"
+    },
+    {
+     "quote": "------------",
+     "start": 474286,
+     "end": 474298,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+     "inSegment": true,
+     "offsetUnit": "codepoint"
+    }
+   ]
+  }
+ ],
+ "citationAudit": {
+  "quoteObjects": 254,
+  "distinctQuotes": 124,
+  "inSegmentObjects": 239,
+  "outOfSegmentObjects": 15,
+  "roundTripFail": 0,
+  "findMiss": 0,
+  "inSegmentMismatch": 0,
+  "inWholeTextOccurrencesMismatch": 0,
+  "outOfSegmentVerify": "15 条区间外引用全部逐字命中且偏移精确（含 @470320 黑猫分崩离析 / @475462 姜律中报告 / @476135 死状一致 / @493934 一只断手 / @494229 屏蔽气息法器 / @486004 聚元丹已拿到 / @487401 方丈西行）。",
+  "randomSample5": [
+   {
+    "path": "worldSettings[6].quote",
+    "quote": "金莲道长恍然，沉默片刻，道：“那你猜错了，桑泊底下封印着的，不是初代监正。”",
+    "declared": [
+     471530,
+     471568
+    ],
+    "find": 471530,
+    "verbatim": true,
+    "offsetMatch": true
+   },
+   {
+    "path": "knowledgeDiffs[5].quotes[1]",
+    "quote": "盘树方丈说过青龙寺的职责是盯着桑泊底下的封印物，那天他就表露过西行的打算。",
+    "declared": [
+     473520,
+     473557
+    ],
+    "find": 473520,
+    "verbatim": true,
+    "offsetMatch": true
+   },
+   {
+    "path": "notForeshadows[1].quotes[1]",
+    "quote": "“把地书给她看便成，”橘猫露出了人性化的苦笑：“至于能不能取来，看她心情吧。”",
+    "declared": [
+     471925,
+     471964
+    ],
+    "find": 471925,
+    "verbatim": true,
+    "offsetMatch": true
+   },
+   {
+    "path": "tasks[2].obstacle.quotes[0]",
+    "quote": "“盘树方丈去西域了？”",
+    "declared": [
+     473420,
+     473431
+    ],
+    "find": 473420,
+    "verbatim": true,
+    "offsetMatch": true
+   },
+   {
+    "path": "foreshadows[0].payoff[0]",
+    "quote": "平远伯嫡子被杀时，许七安也在场",
+    "declared": [
+     475462,
+     475477
+    ],
+    "find": 475462,
+    "verbatim": true,
+    "offsetMatch": true,
+    "inSegment": false
+   }
+  ],
+  "citationVerdict": "pass：抽样 5 条与全量 254 条均逐字命中且偏移一致；未发现编造引文。"
+ },
+ "fabricationCheck": {
+  "result": "未发现编造",
+  "detail": "候选出现的全部人物（许七安/金莲道长/姜律中/平远伯妾室/恒清监院/盘树方丈/恒慧/恒远/洛玉衡/魏渊/监正/镇北王/银锣/铜锣）、地点（平远伯府/青龙寺/浩气楼/桑泊/西域/小院/城门口/京城）、物件（金牌/恒慧画像/示警铜管/地书/金疮药与纱布）均可在原文区间内逐字查到；未出现原文没有的人物、事件、结局或伏笔。10 处 null 栏位（result 1 + cost 5 + 其余）每处都带同名 <栏位>Note 说明为何为空，符合提示词「不写理由的 null 会被判为未标注的未知」。",
+  "redLineCheck": {
+   "人物说的话当叙述事实": "未违反：characterClaims 11 条逐条标注 whyNotFact（C1 奉旨查案、C2/C6 封印物猜测、C7 镇北王、C8 妾室口供均为说话人自述）。",
+   "诈问/猜测写成真相": "未违反：S8.note 明写「两值都是假设层，不是被证实的事实」；CE7/CE9 的 truthStatus 标注「人物推断，非叙述定性」。",
+   "结束当成功": "基本未违反：T6.result=null 并写明「不把『走到了楼下』写成上报成功」；T2/T5 显式 UNRESOLVED。唯一瑕疵见 CE3（T1 的「增援接手」）。",
+   "原文没有的人物/事件/结局": "未违反。",
+   "引用定位正确≠语义已核验": "未违反：readingStatus.semanticReview=not_done，并在 semanticReviewNote 说明不得视为已核验。"
+  }
+ },
+ "missKillCheck": {
+  "result": "未发现对实质内容的误杀",
+  "checked": [
+   "notForeshadows 5 条逐条回原文核对：NF1（收猴子当徒弟）经全库检索 79 处「猴子」无一与盘树方丈构成回收，判为非伏笔正确；NF2（橘猫眼神/苦笑）、NF4（容貌描写）、NF5（城门禁止错字）判断亦成立。",
+   "unknowns 12 条逐条核对，均为本区间确实无解的开放项（U1 嫡子尸体去向 / U2 痕迹归属 / U9 妾室口供真假 等），未见把已知事实错误推入 unknowns。",
+   "coverage 分母虽被未声明的 len>=12 过滤（见 R5），但被过滤的 12 块中有 10 块仍以引文形式被抽取覆盖，另 2 块为标点块（『咻...』『......』『.......』），未造成内容漏抽 —— 即：口径有瑕疵，内容无缺口。"
+  ]
+ },
+ "notes": "总判 partial。可取用的部分：本候选的取证骨架可靠 —— 254 条引文全部满足 text[start:end]==quote 且 find(quote)==start，区间外 15 条同样精确，occurrence 计数与 inSegment 判定零错；task 五元组 34 个栏位中 24 个各有独立引文（未复用同一句充当多栏依据，taskColumnQuoteDisjointness 自查属实），10 个 null 全部带理由 Note；对「猜测/台词/成功判定」三条红线的隔离做得比一般候选更严（characterClaims 11 条、deliberatelyNotAsserted 8 条、semanticReview=not_done）。必须丢弃或降级的：① CE1/CE2 两处行内 @ 指针（@475603→应为 @475585、@478900→应为 @478892）应改正，这是本候选唯一确定的事实性错误；② CE3 中 T1 的「增援接手」应降级为「示警已发出，增援是否接手本区间未写」；③ R5 的 coverage 口径必须写进字段，否则 96/2 这两个数第三方无法复现、且与自己的 note 矛盾。应补记而非判错的：R1（「正愁怎么回报救命之恩」应作为 T2 的接受动机或一条因果边）、R2（牙子线未登记）、R3（打更人品级链未收为设定）、R4（「又闹刺客」的预设未登记）。判 fail 不成立：没有任何一条编造引文或原文不存在的人物/结局，红线的实质部分未被突破，缺陷集中在定位指针、一处结果措辞与口径说明。存疑（不据此判错，仅记录）：R3 是否「必须」收进 worldSettings 属判据边界 —— 我倾向应收（它决定了本区间两处行动的成立），但该主张本身可争。我自己的反向验证有两处被原文/数据否证，如实登记：① 我曾假设「连续两章同号」是『(为盟主…加更)』章节的系统性编号错位；数据否证 —— 全库 21 个带「加更」的章标题里 20 个章号连续，833 个章标题中只有 3 处相邻同号（136/192/122），故 D5 的「孤例异常 + 原因不可判定」表述准确，是我的假设错了。② 我第一版脚本报出「@2171265『带回打更人衙门』偏 +1698532」「@470320『分崩离析』偏 +93162」，我一度当作候选错误；复核确认是我的正则把短串在全文的首次命中误当所指位置 —— 这两处候选给的偏移（@2171265 的「妾室」、@470320 的「黑猫的身躯在半空中分崩离析」）经逐字核对均正确，是检查方法出错，不是候选出错。同一原因还导致我第一版脚本对 quotes 的断言失败（我手打的「穿黑袍的人」漏字），已改为从 docs[0].text 现切偏移，本文件全部引文均由切片现算，可复现。复现命令（全部只读，未改候选）：python3 -c \"import json,hashlib;P='data/cache/1063b17ca65ec1b76f30e460.docs.json';T=json.load(open(P))[0]['text'];print(hashlib.sha256(open(P,'rb').read()).hexdigest());print(hashlib.sha256(T[470430:474300].encode()).hexdigest())\" → fdde5558…9839 / 31b6b423…bbd。"
+}

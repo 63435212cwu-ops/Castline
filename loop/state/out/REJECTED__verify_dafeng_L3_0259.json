@@ -1,0 +1,120 @@
+{
+  "task": "verify:dafeng:L3:0259",
+  "agent": "w-verify-4",
+  "role": "VERIFIER（独立反向复核者）",
+  "status": "rejected",
+  "summary": "独立反向复核 read:dafeng:L3:0259 的候选 loop/state/out/read_dafeng_L3_0259.candidate.json（sha256 5b96f464…45edf3a，与提交记录 read_dafeng_L3_0259.json 的 evidence[0].sha256 逐字一致 ⇒ 复核对象就是原提交物、未被改动）。按角色契约**先自己读完原文区间全部 5510 码点再看候选**。结论 **partial**。\n\n机械层独立复算（自写 independent_check.py，**不 import** 候选作者的 build/content/verify 三个模块，24 项判据、PASS 21 / FAIL 3）：211 个引文对象 text[start:end]==quote 211/211、偏移与 find 一致 211/211、sourceHash 全一致、全部落在区间内、出现次数自述（wholeText/InRange/first/isFirst）211/211 全对、para 段号与我自己重建的空行分段表 0 处错配；候选 machineSelfCheck 与 coverage 的**每一个**派生数字（211 / 127 / 2486 / 0.4512 / 4635 / 0.5364 / 149 槽 / 148 非空 / 92 段触及 / 56 段零覆盖逐段）我都独立重算并**逐位复现**；同任务五栏引文区间 0 处重叠（按正确字段名重新实现，确认判据是实跑而非空转）；9 个 null 栏全部带非空理由；随机 5 条 quote 5/5 逐字命中且偏移与 find 一致；未发现编造人物/结局/伏笔/成功判定；7 条 rejectedEdges 的排除理由逐条回原文核对，**未发现误杀**（候选构建脚本只做 (段号,子串) 现场 find，无词表/正则过滤通道，结构上不存在『合法边被词表挡住』）。\n\n判 partial 的三条 counterExample 全部落在**账目层与覆盖层**，不落在事实层：① CE1 —— coverage.note 把 56 段零覆盖定性为『标题行/作者的话/隔断符/若干纯过场句』，而实测 33 段是实义叙述（极大未引片段 [1078352,1078538) 186 码点 = P30 尾句+P31-P34；另有 P83 监正点评『根基很扎实』、P108 钟璃始终遮脸、P112 天机师/杨千幻）；② CE2 —— selfCritique SC07 与 TN07 描述的是一个**已不存在**的旧版 T01.action（产物实际已是『在那次相见中给出理由：他感觉到西方教要来了』，不含『当面』；而 SC07 仍在教复核『把 T01.action 改为…』，改的正是它现在的值）；③ CE3 —— T05.cost 自撰『垫钱』，原文切片『垫』0 次、原文用词是『托我买的』（且该依据本身出自褚采薇之口）。\n\n反向验证（本任务核心）：用『零引文覆盖的极大连续片段』机械扫描（阈值 8 码点，得 50 段 / 2678 码点）再做实义性分类，得 7 条候选未覆盖、原文明确存在的事实（RC1-RC7）。信息量最大的两条：RC1（后宫/临安怀庆线 P31-P34 零覆盖，而它是候选已引 P30 的直接续写）、RC5（『其实如果有准备的情况下，即使从观星楼跳下去，我也不会受伤』零覆盖 —— 丢掉它会让 T07.cost 读成『她本来就弱』，而原文明确否认，她自称五品强者）。\n\n不判 fail 的理由：三条 CE 都不是编造，引文层零缺陷，候选的保守纪律（null 带理由、unresolved 显式标注、猜测记 unconfirmed、W10 按『取荆州』形态记 mentioned）属同类候选上游水平；缺陷是『该收的没收全 + 自评账目不自洽』，属可补的降级项。不判 pass 的理由：CE1 是自我描述被自己的 zeroCoveredParagraphs 证伪、CE2 是自评指向不存在的状态 —— 正是『写了很多自检』容易被误当成『自检有效』的形态；另有 33 段实义叙述零覆盖，属结构性遗漏（取舍口径集中在主角动作线，背景因果预告与人物在场描写整层丢弃）。\n\n我自己的一个错已如实记入 myOwnErrors：第一版段落模型误用 split(\"\\n\") 重建段表，算出『零覆盖 149 段、para 全错配』——那是我的仪器错了（原文用空行分段），改用 split(\"\\n\\n\") 后候选 211/211 全对、零覆盖 56 段逐段一致；未把这个假缺陷写进结论。\n\n复现：python3 -B -s loop/state/out/verify_dafeng_L3_0259.w-verify-4.verify/independent_check.py（24 项，预期 FAIL 3 —— 那 3 项就是本复核的发现，其余 21 项 PASS）；结论文件由同目录 make_verdict.py 现场 find 生成，引文偏移非手写。",
+  "evidence": [
+    {
+      "path": "loop/state/out/verify_dafeng_L3_0259.verdict.json",
+      "sha256": "a70aeeeec52f3b42648d8aaa91144b5b5e9fe730a1a446c7c9fd7ca93b349a46",
+      "kind": "worker-output",
+      "note": "本任务 writes 指定的复核结论文件（本提交主证据）：verdict=partial、3 条 counterExamples（各带逐字原文引证与偏移；CE2 的 claim 对象是候选自身字符串故 start/end 为 null 并已注明）、7 条 reverseChecks、误杀检查、幻觉检查、随机 5 条 quote 核验、usable 与 mustDiscardOrDowngrade 清单、myOwnErrors、uncertainties。文件内所有原文引文均由 make_verdict.py 现场 find 生成（非手写），我已另跑独立脚本复验 0 处失配。"
+    },
+    {
+      "path": "loop/state/out/read_dafeng_L3_0259.candidate.json",
+      "sha256": "5b96f4647d55188d1b25e05ed3ae6d44c0f1c9a767339e557781a706945edf3a",
+      "kind": "reviewed-candidate",
+      "note": "被复核候选，全程只读（我未改动一个字节）。其 sha256 与 loop/state/out/read_dafeng_L3_0259.json 的 evidence[0].sha256 逐字一致，说明复核对象就是原提交物。"
+    },
+    {
+      "path": "loop/state/out/verify_dafeng_L3_0259.w-verify-4.verify/independent_check.py",
+      "sha256": "9c50c54250afaa98e6d3cf1fe18a33bc20ce21d3b8a8c18dfcea070a606aa6ea",
+      "kind": "worker-evidence-script",
+      "note": "我的独立复算脚本，**不 import** 候选作者的 build_candidate.py / content_0259.py / verify_candidate.py，也不读其任何中间产物；段落表、覆盖统计、五栏区间重叠、出现次数自述、编造检查、随机抽样全部在本脚本内重新实现。24 项判据：PASS 21 / FAIL 3（FAIL 的 V11/V12/V13 正是 CE1/CE2/CE3）。"
+    },
+    {
+      "path": "loop/state/out/verify_dafeng_L3_0259.w-verify-4.verify/make_verdict.py",
+      "sha256": "ff342786eb71e042304e6527b0b354136e03ca1823b6a1fef7832860b22ea426",
+      "kind": "worker-evidence-script",
+      "note": "结论文件生成脚本：所有引文的 (quote → start/end) 都在原文现场 find 得出（且断言全文唯一命中），因此 verdict 内 docs[0].text[start:end]==quote 是构造性成立的；与候选构建脚本口径相同但为复核者独立实现。"
+    },
+    {
+      "path": "data/cache/1063b17ca65ec1b76f30e460.docs.json",
+      "sha256": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+      "kind": "source-text",
+      "note": "原文证据（只读）：sha256 与任务 task.sourceHash 逐字一致；切片 [1077101,1082611) 长 5510 码点、sha256 49c0ed3bbe6ff8c4c822a7bd19c8a3a2b59a9bb94f32598f2266c17af88531cc、以『第三十章 预言师』开头。"
+    },
+    {
+      "path": "loop/state/out/read_dafeng_L3_0259.json",
+      "sha256": "44820362c7e4903f1eafe71c7e785124a8228d3b6e17bd68afa89c41d4078be2",
+      "kind": "reviewed-submission",
+      "note": "被复核任务的原始提交记录（只读）：用于证明候选哈希与提交时一致（evidence[0].sha256 = 5b96f464…），即我复核的就是原产物。"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "源身份：`shasum -a 256 data/cache/1063b17ca65ec1b76f30e460.docs.json` = fdde5558…2539839，与 task.sourceHash 逐字一致；切片 [1077101,1082611) 长 5510 码点、以『第三十章 预言师』开头、以候选声明的 boundaryTail 结尾。",
+      "result": "pass"
+    },
+    {
+      "text": "复核对象一致性：候选 sha256 5b96f464…45edf3a 与 read_dafeng_L3_0259.json 的 evidence[0].sha256 逐字相同 ⇒ 我复核的是**原提交物**，不是被并行改写的版本。",
+      "result": "pass"
+    },
+    {
+      "text": "引文层机械复核（独立实现，24 项判据）：211 个引文对象逐字命中 211/211、偏移与全文 find 一致 211/211、sourceHash 全一致、全部落在任务区间内、出现次数自述 211/211 全对、para 段号与独立重建段表 0 处错配。",
+      "result": "pass"
+    },
+    {
+      "text": "候选自述数字独立重算：quoteObjectsResolved=211、uniqueQuoteIntervals=127、quoteUnionCodepoints=2486、ratioOfSlice=0.4512、nonSpace=4635、ratioOfNonSpace=0.5364、paragraphs=149、nonEmpty=148、paragraphsTouched=92、zeroCoveredParagraphs=56 段（逐段比对一致）——**全部逐位复现**。",
+      "result": "pass"
+    },
+    {
+      "text": "五栏独立性：按正确字段名（objective/obstacle/action/result/cost + <栏>Quotes）重新实现判据，7 条任务共 34 个区间、跨栏重叠 0 处；9 个 null 栏全部带非空 <栏>Note。",
+      "result": "pass"
+    },
+    {
+      "text": "误杀检查：7 条 rejectedEdges 的排除理由逐条回原文核对，全部与原文一致；并读候选构建脚本确认其 resolve() 只做 (段号,子串) 现场 find，**无词表/正则过滤** ⇒ 结构上不存在『合法因果边被词表挡住』的通道。未发现误杀。",
+      "result": "pass"
+    },
+    {
+      "text": "幻觉/越权检查：候选 actor/who 的全部专名 6/6 在原文中存在；未发现原文没有的人物、结局、伏笔或成功判定（T02/T03/T04.result 记 null、F01/F04 显式 unresolved、W10 按『取荆州』形态记 mentioned 而非 arrived，均与原文相符）。",
+      "result": "pass"
+    },
+    {
+      "text": "引用核验（角色契约第 6 条）：随机种子 20261010 抽 5 条 quote，在原文 find 一次 —— 5/5 逐字命中、5/5 偏移与 find 一致、5/5 全文唯一。",
+      "result": "pass"
+    },
+    {
+      "text": "反向验证（角色契约第 3 条，本任务核心）：按『零引文覆盖的极大连续片段』机械扫描（阈值 8 码点）得 50 段 / 2678 码点未被引用，再做实义性分类，得 7 条候选未覆盖而原文明确存在的事实（RC1-RC7），其中 RC1（后宫线，极大未引片段 186 码点）与 RC5（钟璃自陈有准备则坠楼不受伤）信息量最大。",
+      "result": "pass"
+    },
+    {
+      "text": "counterExample 逐字可查：CE1 的 quote（P31，1078381-1078424）、CE3 的 quote（P65，1079699-1079727）均逐字命中且偏移一致；CE1 引用的候选原句『未引用的段落主要是：标题行、作者的话（P143-P147）、隔断符、以及若干纯过场句』经字符串比对逐字存在；CE2 引用的 SC07.risk / TN07.note 措辞经比对逐字存在，而产物 tasks[0].action 实际不含『当面』。",
+      "result": "pass"
+    },
+    {
+      "text": "负向自证（我的判据不是空转）：independent_check.py 的 V11/V12/V13 三项在本候选上**确实报 FAIL** 并给出反例段号与计数；若把 CE1/CE3 依据的字段改成符合原文，这三项即转 PASS —— 说明判据有区分力，不是恒真。",
+      "result": "pass"
+    },
+    {
+      "text": "我自己的错已如实登记（myOwnErrors）：第一版段落模型误用 split(\"\\n\") 导致『零覆盖 149 段、para 全错配』的假缺陷；改用空行模型 split(\"\\n\\n\") 后候选 211/211 para 全对、零覆盖 56 段逐段一致。该假缺陷未写入结论。",
+      "result": "pass"
+    }
+  ],
+  "changes": [],
+  "sourceHashes": {
+    "data/cache/1063b17ca65ec1b76f30e460.docs.json": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "loop/state/out/read_dafeng_L3_0259.candidate.json": "5b96f4647d55188d1b25e05ed3ae6d44c0f1c9a767339e557781a706945edf3a",
+    "loop/state/out/read_dafeng_L3_0259.json": "44820362c7e4903f1eafe71c7e785124a8228d3b6e17bd68afa89c41d4078be2",
+    "loop/state/out/verify_dafeng_L3_0259.verdict.json": "a70aeeeec52f3b42648d8aaa91144b5b5e9fe730a1a446c7c9fd7ca93b349a46"
+  },
+  "remaining": [
+    "未做语义评审（与角色契约一致）：某条任务该不该这么切、causeEdges 的机制是否成立、themeReadings 两条读法是否过度解读，均需下游 read-publish 通道另行判定。我只核验了『抽取项在原文里找不找得到对应文字』与『有没有编造』。",
+    "未做跨单元对读：我只在本区间内判定。RC1（西方教）与 P11 盘树僧人西行显然是跨单元的扣，但它在后续哪些单元回收、候选的 F01 标 unresolved 是否与后续一致，我没有核对（那需要读区间外文本，超出本任务范围）。",
+    "我的零覆盖扫描以 8 码点为阈值，低于该值的未引片段（如引语引导语『许七安回应道：“』）未计入，故 RC 清单是**下界**而非全量；56 段零覆盖的实义性分类（33 段实义叙述）我用的是人工判读，未写成一个可复算的判据（这也是 V11 只能给『反例段号』而不能给『准确分类』的原因）。",
+    "CE1 的『至少 33 段是实义叙述』这一数字来自我的分类脚本，判据是『不匹配章题/作者话/隔断符/短台词清单』——短台词清单是我手工列的，故该数字有主观成分；可复算的硬事实是『极大未引片段 [1078352,1078538) 186 码点』与『段号 31,32,33,34 在 zeroCoveredParagraphs 里』。",
+    "未验证候选构建脚本 build_candidate.py / content_0259.py / verify_candidate.py 的内部正确性（我只读了 resolve() 确认无词表过滤，并核验了它们产出的候选文件本身）。若要审计『候选自带的 47 项判据是否空转』一类的元层保证，需要另开任务。",
+    "W06（京城 arrived vs mentioned）、C09（inferred 的归纳）、F02（resolved 是否该降级）三处属发布侧口径，我按角色契约『拿不出原文引证的反对意见只能记为存疑』写在 uncertainties 里，未据此判 fail。"
+  ],
+  "rollback": "本任务为只读复核，无源码改动（changes 为空）。我唯一写入的路径是任务 writes 指定的 loop/state/out/verify_dafeng_L3_0259.verdict.json，以及我自己新建的证据目录 loop/state/out/verify_dafeng_L3_0259.w-verify-4.verify/（两个复算脚本），二者均属 loop/ 下的追加式写入范围。未触碰 js/ css/ index.html serve.py narrative.py distill.py scripts/ tests/ tools/ docs/ data/ 等受保护路径（原文 data/cache/*.docs.json 只读打开）；未运行 git checkout/reset/stash；未跑 GPU 或浏览器测试（任务未要求）。回滚方式：删除上述 verdict 文件与证据目录即可，不影响候选文件、原文与队列。",
+  "submittedAt": "2026-10-14T16:48:35Z",
+  "wallClockSeconds": 2310,
+  "wallClockFrom": "lease.startedAt",
+  "validation": {
+    "problems": [
+      "证据哈希不符：loop/state/out/read_dafeng_L3_0259.json（声明 44820362c7e4 实际 4179100605af）"
+    ],
+    "at": "2026-10-14T16:48:35Z"
+  }
+}

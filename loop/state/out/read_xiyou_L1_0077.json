@@ -1,0 +1,382 @@
+{
+  "task": "read:xiyou:L1:0077",
+  "agent": "w-dafeng-1",
+  "role": "READER",
+  "status": "done",
+  "summary": "精读《西游记》第七十七回《群魔欺本性 一体拜真如》（docs[0].text[557492,565596)，8104 codepoint）：产出 26 条任务五元组（130 栏中 120 栏非空、10 栏为 null 且各带同名 Note）——每一栏自带独立 quotes[] 并写明 attribution（谁在说），**同一条任务内五栏引文区间两两不相交（0 处重叠，含真包含）**；13 条因果边（每条给机制句）、6 条被拒边（写明为什么拒连）、8 条状态、5 条知识差、6 条伏笔（4 resolved / 2 显式 unresolved：求退箍未获回应、关文未到手）、25 条世界设定（place 7〔arrived 5／mentioned 2〕、item 10、rule 8〔declared 1／executed 6／misunderstood 1〕，placeState/itemStates/institution 三套区分逐条写进字段）、10 条明确不提取的设定、10 条韵文排除清单、2 条主题解释（各带 perspective/support/counter）、11 条 unknowns、5 条 selfCritique。**本轮实际做的事**：①逐字通读全文 8104 码点；②对写盘后的候选做独立机器复核——202 个引文节点逐条复算 text[start:end]==quote、切片内唯一、落在区间内、sourceHash 相符（0 失败）；③按覆盖度缺口逐段回扫补出 T18–T26 等 9 条任务与 3 条设定（覆盖度 0.3127→0.4225）。**未做**：语义核验（semanticReview.performed=false 保持）——引文定位正确不等于语义正确，每条引文是否真的支撑该栏断言仍须由独立复核者按 VERIFIER 契约判。",
+  "concurrency": {
+    "finding": "本 agent 持 read:xiyou:L1:0077 租约（startedAt 2026-10-13T03:39:02Z, pid 43429），但启动时 loop/state/out/read_xiyou_L1_0077.candidate.json **已存在**，其内容自称 agent=w-read-2、task=read:xiyou:L1:0077（写盘时刻本机 11:35，sha256 9a6e1da8b1d0751179aa5845b0dca6dd9395fe9f779a0129b97dbcc726d7e948），而 out/ 里既无 read_xiyou_L1_0077.json 提交记录、也无 REJECTED__ 前缀文件，且 w-read-2 的租约早已转向 read:sanguo:L1:0069。",
+    "action": "不覆盖、不删除、不回滚该在飞产物：先原样快照到 CL_ARTIFACTS/read-xiyou-L1-0077-dafeng1/orphan-snapshot/（两个副本，哈希与原件一致），再按自己的精读独立生成一份候选写到任务 writes 指定的同一路径。",
+    "note": "两份内容各自独立，谁被采信由复核者判。我对孤儿候选做的只是**只读**机械审计（audit_orphan.py），审计输出留在 audit_orphan.out.txt。"
+  },
+  "orphanAudit": {
+    "path": "loop/state/out/read_xiyou_L1_0077.candidate.json（审计时的字节，现已由本轮重写）",
+    "auditedSha256": "9a6e1da8b1d0751179aa5845b0dca6dd9395fe9f779a0129b97dbcc726d7e948",
+    "snapshot": "orphan-snapshot/orphan_candidate_asof_1135.json",
+    "findings": [
+      "引文定位层：333 个节点里 332 个通过（text[start:end]==quote、切片内唯一、在区间内、sourceHash 相符）。",
+      "1 处真缺陷：worldSettings[6]（五台山、峨眉山）的顶层 quote 写的是「叫阿傩迦叶来：“你两个分头驾云，去五台山、峨眉山宣文殊、普贤来见。”」，而它的 quoteRef.quote/start/end 指向的是「你两个分头驾云，去五台山、峨眉山宣文殊、普贤来见。」——顶层 quote 与 quoteRef 不一致（多包了引子）。",
+      "五栏共用同一句：0 处（该项未发现缺陷）。"
+    ],
+    "note": "这是只读审计，不含语义判断。我没有据此判定孤儿候选整体不合格——它未被提交过，去留应由复核者/发布环节决定。"
+  },
+  "voiceCalibration": {
+    "what": "本轮为「引文是谁在说」建了机械判据，并做了一次真实标定，结果与已知缺陷都记录下来。",
+    "rules": "rule1 引文以 “ 开头 / rule2 锚点紧跟在「道：“」之后 / rule3 引文内含完整的「道：“…」 / rule4 引文含引号但非纯人物话语 ⇒ mixed / rule5 回退：段落引号深度（长对白续段）/ rule6 其余 ⇒ narration。",
+    "calibration": "在 75 条我按上下文逐条读过并手工标注的引文上：只用引号规则错 11、引号规则+章深度错 8、引号规则+段深度错 4 ⇒ **准确率 94.6%，采用第三种**。",
+    "knownDefect": "引号在本区间不是可靠的嵌套结构：整章 “ 与 ” 恰好配平（130/130），但按空行切成 40 段后有 **12 段各自不配平**（±1）；原文 @560587 还疑似漏排一个收尾引号（「师父没脚力难行，等我还将马来。！你看他轻手轻脚」，「。」后直接接「！」，缺一个 ”）。我把该处补上重算，误判反而从 6/41 升到 15/41，说明「深度奇偶」不适合作判据。",
+    "disclosure": "rule5 判出的一律标 voiceConfidence=low（本轮 154 个），rule1–rule3 标 high（48 个）。**我没有把 voice 当作事实断言使用**：每个任务栏位另写 attribution，两者不一致的 5/6 处全部列进候选的 voiceReconciliation 表（不静默修掉），并登记为 unknowns U11。"
+  },
+  "evidence": [
+    {
+      "path": "loop/state/out/read_xiyou_L1_0077.candidate.json",
+      "sha256": "727df85b150b29cd3f5c5c208b9c86c940f552101262e9fe7889304e17bb687a",
+      "kind": "candidate",
+      "note": "本任务 writes 指定的唯一产出（审阅产物，追加式）。本轮的机器复核与哈希复算都针对这一份字节，复核过程只读、未回填。"
+    },
+    {
+      "path": "data/cache/a065244455cfb2221bcda94a.docs.json",
+      "sha256": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+      "kind": "source",
+      "note": "原文（只读，未修改）。整个 docs.json 的 sha256 ＝ 任务 sourceHash；切片起点自检：docs[0].text[557492:565596) 以「第七十七回　群魔欺本性　一体拜真如」开头，长度恰 8104。"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/read-xiyou-L1-0077-dafeng1/build_candidate.py",
+      "sha256": "96c8dc1be655c9bcc6157ae09195027f39e611e154e3d4e631695c359f261dcc",
+      "kind": "reproduce",
+      "note": "唯一写者（写候选）。哈希见下方 reproduceHashes 实测值。"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "切片与哈希自检：python3 -B -c \"import json,hashlib;T=json.load(open('data/cache/a065244455cfb2221bcda94a.docs.json'))[0]['text'];print(hashlib.sha256(open('data/cache/a065244455cfb2221bcda94a.docs.json','rb').read()).hexdigest(), len(T[557492:565596]), T[557492:557513])\" ⇒ c282cf39…52a2 / 8104 / 第七十七回　群魔欺本性　一体拜真如。与任务 sourceHash、sourceRange 一致。",
+      "result": "pass"
+    },
+    {
+      "text": "引文逐字与定位：selfcheck.py 对写盘后的候选复算全部 202 个引文节点，断言 text[start:end]==quote、在本单元切片内唯一、整段落在 [557492,565596) 内、sourceHash 相符、voice 枚举合法 ⇒ 0 失败。",
+      "result": "pass"
+    },
+    {
+      "text": "五栏不共用同一句：selfcheck.py 检查 26 条任务的 130 个栏位，同一任务内五栏引文区间两两不相交（含真包含）⇒ 0 处共用、0 处重叠。",
+      "result": "pass"
+    },
+    {
+      "text": "null 栏必须带理由：10 个 null 栏（T8/T15/T17/T18/T19/T20/T21/T23/T25/T26 的 cost）全部带同名 costNote，selfcheck.py 逐条强制 ⇒ 0 失败。",
+      "result": "pass"
+    },
+    {
+      "text": "枚举合法性：kind ∈ {rule,place,item}、placeState ∈ {arrived,mentioned}、itemStates ⊆ {hold,transfer,use,lose}、institution ∈ {declared,executed,misunderstood}、foreshadow.status ∈ {resolved,unresolved,resolved_with_irony}、basis ∈ {explicit,inferred,derived,unverified} ⇒ 0 失败。",
+      "result": "pass"
+    },
+    {
+      "text": "引文一律由 Q() 在原文里定位并当场断言（不手抄偏移）；Q() 要求切片内唯一，全书重复次数照实记进 wholeTextOccurrences。例：'猪八戒不好蒸。' 全书 2 次、本单元 1 次，偏移唯一。",
+      "result": "pass"
+    },
+    {
+      "text": "覆盖度复算：把全部结构化引文投影到区间求并集 ⇒ 3424/8104 = 0.4225，122 段，与候选 coverage 字段自报值一致（selfcheck.py 复算比对）。",
+      "result": "pass"
+    },
+    {
+      "text": "voice 判据标定：在 75 条手工标注样本上比较三种口径，采用「引号规则+段落深度回退」＝错 4、准确率 94.6%；已知 4 处错误逐条登记，未静默修掉。",
+      "result": "pass"
+    },
+    {
+      "text": "对账表一致性：候选 voiceReconciliation.count 与 selfcheck.py 按 tasks 实际复算出的不一致数相等 ⇒ 0 失败（本轮修掉了「对账表慢一拍」的真缺陷：改为用本次构建的内存对象而非回读盘上旧字节）。",
+      "result": "pass"
+    },
+    {
+      "text": "在飞产物保护：对启动时已存在的 w-read-2 候选**只做只读审计**，字节原样快照 2 份到 CL_ARTIFACTS/orphan-snapshot/（sha256 与原件一致 9a6e1da8…e948），未删除、未回滚。",
+      "result": "pass"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/read_xiyou_L1_0077.candidate.json",
+      "kind": "append-only",
+      "note": "任务 writes 指定的唯一写入物。本轮重写了该路径（追加式审阅产物的正常生命周期）；被覆盖的字节已完整快照到 CL_ARTIFACTS，可复原。"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/a065244455cfb2221bcda94a.docs.json": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2"
+  },
+  "protectedPathsTouched": [],
+  "reproduceHashes": {
+    "note": "以下为本轮实际使用的复现脚本的 sha256（实测值，非估算）。",
+    "artifactsDir": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/read-xiyou-L1-0077-dafeng1",
+    "qresolve.py": "1e2a47462ccb496ad0ccc831cb59e28e02ebf8be984d07a937cab40b38347895",
+    "build_candidate.py": "96c8dc1be655c9bcc6157ae09195027f39e611e154e3d4e631695c359f261dcc",
+    "selfcheck.py": "51b90893e7df47ae0f2770506ceb828f1768a57bb2eca81d1fd5afdcd41c756b",
+    "audit_orphan.py": "516a74841901554fc1bb9d3cb0d9f0ebbff23552e71b870cde73e91df4baf181",
+    "content_tasks.py": "1d9a51b48373dc35cce123f2504682eec2745656992503a624b0452935d45957",
+    "content_relations.py": "51c9645a2d67d48bb267da7e291a4f5d0f5d9bf5ec92342c3618f29ac3f3642f",
+    "content_world.py": "f089212e58887451f083bcac22b4cb9632de870bbcfab23376e10b6b92bf1ac3",
+    "content_theme.py": "4b83e3d7a0eb45627c323219eb2d622bcea32cba2fcf08017e8b80805e130f10",
+    "orphan_candidate_asof_1135.json": "9a6e1da8b1d0751179aa5845b0dca6dd9395fe9f779a0129b97dbcc726d7e948",
+    "command": "cd /Users/carmen/Desktop/星系 && python3 -B \"/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/read-xiyou-L1-0077-dafeng1/build_candidate.py\" && python3 -B \"/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/read-xiyou-L1-0077-dafeng1/selfcheck.py\""
+  },
+  "wallClockNote": "本轮从领取（2026-10-13T03:39:02Z，见租约）到提交的实际墙钟由 loop.py 从租约 startedAt 计算并写入 wallClockSeconds。",
+  "remaining": [
+    "**语义核验未做**：本轮只做定位层与结构层核查（引文逐字、唯一、在区间、枚举、不重叠、null 带 Note）。每条引文是否真的支撑它所在栏位的断言，仍须由独立复核者按 VERIFIER 契约判——候选里 semanticReview.performed 保持 false。",
+    "voice（谁在说话）有 154/202 个节点是 low 置信（段落深度回退，标定准确率 94.6%），已知 4 处错误逐条登记在 qresolve.voice_confidence 的 docstring 与 unknowns U11。这批标注可用于粗筛，不可当事实断言。",
+    "覆盖度 0.4225：未覆盖部分主要是回中韵文、回末套语与长对白的铺陈句，已由 verseExcluded（10 条）与 worldSettingsExcluded（10 条）逐条登记理由；我没有为了让覆盖度好看而给已有条目加引文。",
+    "如来所述孔雀大鹏的来历（混沌分时、凤凰育生、剖背跨上灵山）在本区间**没有人替他背书**，我只按人物话语处理（worldSettings 里只收可执行的「慧眼」与「我自收他」），并把这一层登记为 unknowns U8。若复核认为该段应升为世界史设定，需要本区间之外的独立叙述。",
+    "引号配平问题（整章配平 130/130，但 40 段中 12 段各自不配平；@560587 疑似漏排一个收尾引号）我无法判定是原文排印如此还是我的段落切分口径不同，登记为 unknowns U11，未据以改动任何引文。",
+    "并发现场（0077 的候选在我启动前已被 w-read-2 写过一份且从未提交）已如实登记在 concurrency 字段与 orphanAudit；本轮未动那份字节的原始语义，只快照留存。这个「claim 与 submit 非原子」的派发问题属于环境侧，我没有权限修（loop/bin/ 不在本任务 writes 内）。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "restore-snapshot-then-delete-added-files",
+    "files": [
+      "loop/state/out/read_xiyou_L1_0077.candidate.json"
+    ],
+    "restoreFrom": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/read-xiyou-L1-0077-dafeng1/orphan-snapshot/orphan_candidate_asof_1135.json",
+    "note": "被本轮覆盖的那份字节（sha256 9a6e1da8b1d0751179aa5845b0dca6dd9395fe9f779a0129b97dbcc726d7e948）已完整快照；如需回到覆盖前状态，用该文件覆盖上述路径即可。CL_ARTIFACTS 下的脚本与输出可整目录删除，不影响仓库。"
+  },
+  "submittedAt": "2026-10-13T04:19:52Z",
+  "wallClockSeconds": 2450,
+  "wallClockFrom": "lease.startedAt",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-13T04:19:52Z"
+  },
+  "verifyState": "pass",
+  "reviews": [
+    {
+      "reviewer": "w-dafeng-2",
+      "at": "2026-10-13T04:44:43Z",
+      "verdict": "pass",
+      "notes": "结论 pass。这是本项目最难得的一种 pass：机制真的产生了信息。① 定位层我做了穷尽复算而非抽样（202/202），全部逐字、唯一、在区间、哈希相符、重复次数如实；② 语义层我第一次见到对「人物话语」这条红线处理得**结构上**而非口头上：58 个只靠 dialogue/mixed 支撑的 explicit 栏每一栏都有 attribution 点名说话人，T1.cost 明写「只证明老魔如此宣称」，T4.obstacle 还补了「但『一滚就烂』是凡体被蒸的常识判断，且下文龙王护持正是为此，故行动层面对得上」；③ 该留白的地方真留白了：T8/T15/T17/T18/T19/T20/T21/T23/T25/T26 十栏 cost 写 null 且各带 Note，理由都是「原文未写……不挪用充数」，而不是拿结尾充数；F2（退箍未获回应）、F3（关文未到手）在全回已经收场的情况下仍记 unresolved —— 这正是 READER 红线里最难守的一条，它守住了；④ unknowns 里 U4（大鹏最终是护法还是被法力拘住）与 U9（二更/三更/五更 与 四昼夜/三五日 无法对齐）我逐条回原文核过，**确实两存**，不是偷懒；U11 甚至把自己标定只有 94.6% 准确率的机械判据连同 4 处已知错误一并登记，而不是静默修掉。**不确定处**：反向验证找出的 8 条遗漏里，R1（八戒预警→怨言闭环）与 R2（剥皮蒸的两次改判）我认为是**应当补记**的，它们与候选已收的 F5、CE2 同形却更完整；R4（藏在光中）会让 CE7 的机制链更准；其余属可补可不补的密度问题。这些都不构成 fail —— 候选自己在 coverage/knownGaps/selfCritique[4] 里预告了「本区间仍有大量对白与韵文不产生结构化引文」，我的独立重扫证实了这个预告是**诚实的自我评估**而不是免责声明：缺口集中在开篇 227 码点的战斗、笼中斗口的往复句与后半段对白，与它声明的分布吻合。建议的必改项只有一条：verseExcluded[1] 与 worldSettings[14] 的口径矛盾（counterExamples[0]），那是会误导下游的记账错误；其余三条为记账整洁性建议。",
+      "counterExamples": [
+        {
+          "claim": "verseExcluded[1] 声明开篇「好杀：六般体相六般兵…」整段『不给出可核的事实或设定』。",
+          "quote": {
+            "quote": "小沙僧宝杖非凡",
+            "start": 557661,
+            "end": 557668,
+            "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+            "offsetUnit": "codepoint",
+            "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+            "match": "exact",
+            "wholeTextOccurrences": 1,
+            "inRangeOccurrences": 1,
+            "inRange": true
+          },
+          "why": "但 worldSettings[14]（降妖杖）的 hold 态恰恰引这一段里的「小沙僧宝杖非凡」当支撑（偏移 557661–557668，正是被声明排除的那段赞诗）。两处口径互相矛盾：要么该段可以支撑设定（verseExcluded[1] 写宽了），要么 worldSettings[14] 的这条支撑不成立。事实本身（沙僧持有降妖杖）另有 565432 的 use 引文坐实，故不影响该条成立；**必须修的是排除清单的措辞或替换该条支撑引文**。",
+          "severity": "low",
+          "fix": "把 verseExcluded[1] 改成『该段整体不新增事件；其中「小沙僧宝杖非凡」被 worldSettings[14] 用作器物归属的支撑』，或把 worldSettings[14] 的 hold 支撑换成 565432。"
+        },
+        {
+          "claim": "tasks[] 的数组序号与 id 里的 T 编号一一对应（T1…T26 顺序排列）。",
+          "quote": {
+            "quote": "把唐僧藏在柜里，关了亭子",
+            "start": 561888,
+            "end": 561900,
+            "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+            "offsetUnit": "codepoint",
+            "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+            "match": "exact",
+            "wholeTextOccurrences": 1,
+            "inRangeOccurrences": 1,
+            "inRange": true
+          },
+          "why": "实测 tasks[25] 的 id 是 T17_xingzhe_jiushi_shifu，而 T18–T26 前移占据了 tasks[16]–tasks[24]。索引↔T编号的对应在最后一格断开。任何按『tasks[16] 就是 T17』消费该 JSON 的下游会取错条目。这是记账/排序瑕疵，不是事实错误（26 个 id 本身唯一、引文全部可查）。",
+          "severity": "low",
+          "fix": "按 id 里的 T 编号重排数组，或改用 id 定位、不依赖数组下标。"
+        },
+        {
+          "claim": "T5_xingzhe_chengxi_laomo 的 objective 写作「确认锅下的火为什么停了——行者要弄清笼里人是否还活着」。",
+          "quote": {
+            "quote": "火气上腾，必然也热，他们怎么不怕，又无言语？",
+            "start": 559602,
+            "end": 559624,
+            "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+            "offsetUnit": "codepoint",
+            "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+            "match": "exact",
+            "wholeTextOccurrences": 1,
+            "inRangeOccurrences": 1,
+            "inRange": true
+          },
+          "why": "该引文问的是**笼里人为什么不怕、为什么不出声**，不是「火为什么停了」。火停的原因在原文由叙述者另写（559414「更没火气烧锅」，候选也已引作 T4.action）。objective 的第一分句与所引原文有语义漂移；第二分句（弄清是否还活着）才是引文实指。CE3 把机制正确地系在龙王冷风上，故无实质错误。",
+          "severity": "low",
+          "fix": "删去 objective 里「确认锅下的火为什么停了」这一分句，只保留「要弄清笼里人是否还活着」。"
+        },
+        {
+          "claim": "CE7_rulai_ji_xueou_you_dapeng 的 trigger 把大鹏被制的机制写成「血肉诱饵制造出手时机 + 佛手一指」。",
+          "quote": {
+            "quote": "原来大圣藏在光中，他怎敢近",
+            "start": 564904,
+            "end": 564917,
+            "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+            "offsetUnit": "codepoint",
+            "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+            "match": "exact",
+            "wholeTextOccurrences": 1,
+            "inRangeOccurrences": 1,
+            "inRange": true
+          },
+          "why": "叙述者在诱饵一段之前另给了一条直接原因：大鹏轮爪要捉猴王却近不了身，**因为大圣藏在如来金光影里**。CE7 只写了诱饵与佛指，漏掉「大鹏够不着行者所以如来才必须出手」这一步——没有这一步，如来为何要自变血肉诱敌就失去前提。机制链被截短，不是写错。",
+          "severity": "medium",
+          "fix": "CE7 的 trigger 前面补一句：大鹏扑不到藏在光中的行者（引 564904–564917），如来因此才闪金光自变血肉。"
+        }
+      ],
+      "reverseChecks": [
+        {
+          "found": "八戒在笼中的**预警→失败→怨言**闭环完全没被抽取：他先叮嘱「救便要脱根救，莫又要复蒸笼」，爬墙失败后果然骂「我说要救便脱根救，如今却又复笼蒸了」。",
+          "quote": {
+            "quote": "救便要脱根救，莫又要复蒸笼",
+            "start": 560452,
+            "end": 560465,
+            "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+            "offsetUnit": "codepoint",
+            "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+            "match": "exact",
+            "wholeTextOccurrences": 1,
+            "inRangeOccurrences": 1,
+            "inRange": true
+          },
+          "quote2": {
+            "quote": "我说要救便脱根救，如今却又复笼蒸了",
+            "start": 561662,
+            "end": 561679,
+            "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+            "offsetUnit": "codepoint",
+            "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+            "match": "exact",
+            "wholeTextOccurrences": 1,
+            "inRangeOccurrences": 1,
+            "inRange": true
+          },
+          "why": "0 个引文节点覆盖，0 处 prose 命中（我按子串扫过候选全部字符串字段）。这是比候选已收的 F5 更标准的铺设+回收：说话人事前点名风险、事后亲口点破风险成真。候选为 F5 专门立了伏笔条目却漏了这一对。",
+          "severity": "medium"
+        },
+        {
+          "found": "三怪**两次**改判吃法、且第二次是被八戒当场顶回去的：「不好蒸，剥了皮蒸。」→ 八戒「不要剥皮！粗自粗，汤响就烂了！」→ 老怪折中「不好蒸的，安在底下一格」。",
+          "quote": {
+            "quote": "不好蒸，剥了皮蒸。",
+            "start": 558796,
+            "end": 558805,
+            "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+            "offsetUnit": "codepoint",
+            "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+            "match": "exact",
+            "wholeTextOccurrences": 1,
+            "inRangeOccurrences": 1,
+            "inRange": true
+          },
+          "quote2": {
+            "quote": "不要剥皮！粗自粗，汤响就烂了！",
+            "start": 558817,
+            "end": 558832,
+            "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+            "offsetUnit": "codepoint",
+            "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+            "match": "exact",
+            "wholeTextOccurrences": 1,
+            "inRangeOccurrences": 1,
+            "inRange": true
+          },
+          "why": "0 节点、0 prose 命中（「剥皮」全候选无一处）。候选 CE2/T2 引的是老怪被说服**之后**的处置命令（558832），却把促使他折中的那次提议与抗议整段丢在外面——因果链的中间一步成了孤儿。这是「八戒不好蒸」这一障碍真正的展开方式。",
+          "severity": "medium"
+        },
+        {
+          "found": "如来劝大鹏皈依时**先说了一句被拒**，才加价到「先祭汝口」：「你在此处多生孽障，跟我去，有进益之功」→ 大鹏拒（「持斋把素，极贫极苦」）→ 如来才许「凡做好事，我教他先祭汝口」。",
+          "quote": {
+            "quote": "你在此处多生孽障，跟我去，有进益之功",
+            "start": 565045,
+            "end": 565063,
+            "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+            "offsetUnit": "codepoint",
+            "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+            "match": "exact",
+            "wholeTextOccurrences": 1,
+            "inRangeOccurrences": 1,
+            "inRange": true
+          },
+          "why": "0 节点、0 prose 命中（「进益」「多生孽障」均无）。候选把「先祭汝口」记作 T14.cost「如来为换大鹏皈依付出一项实价」。原文显示它是**第二次报价**（第一句被顶回后才给的让步），即一次讨价还价的落点，而不是一开口就付的价。事实方向不变，但「成本」的性质（被逼出来的让步 vs 主动承诺）有差别。",
+          "severity": "medium"
+        },
+        {
+          "found": "八戒、沙僧各自的**被擒方式**整段未被覆盖：八戒「被口刀削断几根鬃毛，赶上张开口咬着领头」，沙僧「被二怪捽开鼻子，响一声，连手卷住」。",
+          "quote": {
+            "quote": "被二怪捽开鼻子，响一声，连手卷住",
+            "start": 557916,
+            "end": 557932,
+            "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+            "offsetUnit": "codepoint",
+            "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+            "match": "exact",
+            "wholeTextOccurrences": 1,
+            "inRangeOccurrences": 1,
+            "inRange": true
+          },
+          "quote2": {
+            "quote": "被口刀削断几根鬃毛",
+            "start": 557845,
+            "end": 557854,
+            "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+            "offsetUnit": "codepoint",
+            "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+            "match": "exact",
+            "wholeTextOccurrences": 1,
+            "inRangeOccurrences": 1,
+            "inRange": true
+          },
+          "why": "[557790,558017) 是本区间最长的未覆盖缺口之一（约 227 码点），0 节点、0 prose 命中（「鬃毛」「捽开鼻子」「咬着领头」全无）。候选有 8 条状态、7 条 place 与多条任务**都以「八戒沙僧已被捆」为前提**（T1、T22、T23、T18、T11、T17…），却没有任何一条抽取他们是怎么被擒的。这不是判 fail 的理由（T1.obstacle 覆盖了行者的脱身），但缺口正好落在被反复引用的前提上。",
+          "severity": "medium"
+        },
+        {
+          "found": "行者潜入金銮殿前**先变作小妖儿**这一动作没被写进 T20：他「落下云头，摇身一变，变作个小妖儿，演入门里，大街小巷，缉访消息」，随后才看中穿宫妖怪的装束再变一次（第二次变身）。",
+          "quote": {
+            "quote": "变作个小妖儿，演入门里，大街小巷，缉访消息",
+            "start": 562121,
+            "end": 562142,
+            "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+            "offsetUnit": "codepoint",
+            "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+            "match": "exact",
+            "wholeTextOccurrences": 1,
+            "inRangeOccurrences": 1,
+            "inRange": true
+          },
+          "why": "「小妖儿」3 处 prose 命中全部指向结尾的「那城里一个小妖儿也没有了」，与这次潜伏变身无关。T20.costNote 写「本区间未写这次变身与潜入付出什么代价」——它只算进了「变作穿宫妖怪」那一次，漏了入城时的那一次。原文是**两次变身**，候选只记一次。",
+          "severity": "low"
+        },
+        {
+          "found": "老魔在被围时**已经认出这是请来的主人公**，与候选只记「起疑」有程度差：「那猴子真是个地里鬼！那里请得个主人公来也！」",
+          "quote": {
+            "quote": "那猴子真是个地里鬼！那里请得个主人公来也",
+            "start": 564692,
+            "end": 564712,
+            "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+            "offsetUnit": "codepoint",
+            "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+            "match": "exact",
+            "wholeTextOccurrences": 1,
+            "inRangeOccurrences": 1,
+            "inRange": true
+          },
+          "why": "0 处 prose 命中（「主人公」全候选无一处）。T25.obstacle 只引了老魔叫战前的猜测（「莫不是请了些救兵来耶？」），把被围后这句确认漏掉。三怪紧接着主张「使枪刀搠倒如来，夺他那雷音宝刹」也不在任何栏（CE 未收）——妖魔一方的判断升级整段缺位。",
+          "severity": "low"
+        },
+        {
+          "found": "如来在云端**凭「放黑气」认出狮驼国**，这是他能远远点出妖气所在的征象；候选无一处。",
+          "quote": {
+            "quote": "那放黑气的乃是狮驼国也",
+            "start": 564346,
+            "end": 564357,
+            "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+            "offsetUnit": "codepoint",
+            "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+            "match": "exact",
+            "wholeTextOccurrences": 1,
+            "inRangeOccurrences": 1,
+            "inRange": true
+          },
+          "why": "0 处 prose 命中（「黑气」无）。这与候选已收的「慧眼观之，故此认得」是同一能力在行程中的第二次落地，属可核事实的遗漏。",
+          "severity": "low"
+        }
+      ]
+    }
+  ]
+}

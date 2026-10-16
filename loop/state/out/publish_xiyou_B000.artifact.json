@@ -1,0 +1,415 @@
+{
+ "task": "publish:xiyou:B000",
+ "agent": "w-publish",
+ "status": "done",
+ "decision": "REPLAYED_IDEMPOTENTLY_NO_BYTES_CHANGED__PUBLISHED_KEY_5b064a5575f0c330f6f2cd2e_PARENT_a065244455cfb2221bcda94a",
+ "publishedThisRound": true,
+ "publishKey": "5b064a5575f0c330f6f2cd2e",
+ "parentKey": "a065244455cfb2221bcda94a",
+ "reworkOf": "loop/state/out/REJECTED__publish_xiyou_B000.json",
+ "reworkReason": "上一轮 agent 在 14:56 已经**真实完成** publish_reviewed.py --write（新键 5b064a5575f0c330f6f2cd2e 已在 data/cache/ 且已在 index.json 第 0 条），随后以 rc=1 退出（日志末段是 TLS 连接错误），worker 按其规则把这一轮代登记为 REJECTED（「agent 以非零码退出，产物是不完整/未确认的中间态」）。本轮核实：磁盘上的发布是**完整且正确**的，不是中间态；故本轮不重发内容，只**核对并补交记录**，并如实登记一个由此暴露的新缺口（DUP-RISK）。",
+ "summary": "《西游记》第 1 批（原文区间 [46,136016)，第一回…第十九回，20 个单元）的**发布已经落地**：新图谱键 5b064a5575f0c330f6f2cd2e，父键 a065244455cfb2221bcda94a（页面默认那一版）。本轮我的工作是**核实**而不是重做，并独立复算了三项关键事实。\n\n**① 这一批确实发出去了，而且读者能看到**：新键在 data/cache/ 下 .json/.docs.json 齐备；data/cache/index.json 第 0 条就是它（80 条、无重复键、父键仍在第 39 条）；只读 GET http://127.0.0.1:8781/api/history 返回的西游记第一条同为 5b064a5575f0c330f6f2cd2e ⇒ 走页面默认入口即可看到，无需切版本。内容实增：tasks 120→198(+78)、characterStates 52→78(+26)、clues 7→20(+13)，合计 117 个本批节点；causeEdges/relations/storylines/events/characters 一个未动（140/20/10/798/219）。\n\n**② 父版本字节未变，而且我**自己核过两遍**：a065244455cfb2221bcda94a.json 与 .docs.json 的 sha256 在动手前后逐字相同（37f7f902… / c282cf39…）；发布工具写前的精确备份 data/cache/narrative/revisions/a065244455cfb2221bcda94a-37f7f9028c3509a9520f.graph.json 与父版本**逐字节相同**（哈希同为 37f7f902…）。\n\n**③ 我做了幂等重放，并证明它是**零字节变更**（这是本轮的核心动作）**：在动共享树之前，我先在 /tmp 的**隔离副本**里完整跑通了 dry-run 与 --write 两次，证明发布键是**内容寻址**的 —— 同一个（父键, 候选字节）必然得到同一个键 5b064a5575f0c330f6f2cd2e，且产出字节与已发布版本**完全相同**（aefc1c4f… / c282cf39…），连跑两次字节不变。随后持 GATE.lock（15:23 取得）在共享树里跑真实 --write，回执 key 仍是 5b064a5575f0c330f6f2cd2e；**动手前/后 10 个文件的哈希清单逐行 diff 完全相同** ⇒ 没有新增任何版本、没有改写任何字节、index.json 也没有漂移。写回用的回执 /tmp/cl-pub-xiyou-B000-r2/write_report.json 与 14:56 那次 /tmp/cl-pub-xiyou-B000/write_report.json **逐字节相同**（同为 729d92d4…），即重放与首发是同一个确定性结果。\n\n**纪律 1（只提交通过独立复核的条目）—— 我用内容寻址独立重算，泄漏 0**：20 个单元的复核裁决全部 partial（fail 0 / pass 0），故桥按「排除被点名条目」而非「整单元跳过」处理。我不采信桥的日志，而是**重算**每个原始条目的期望节点 id（stable_node_id = 对原始条目做稳定 JSON 的 sha256 前 20 位），再检查它是否出现在批次候选里：**117/117 个已发布节点全部是复核者未点名的条目；被点名且被发布 = 0**。加固版（把桥的窄定位符正则 \\b([TCSF]\\d+)\\b 换成宽 [A-Za-z]{1,4}\\d{1,3}）复算**同样是 0**。被点名条目共 66 条，全部未发布：52 条属 18 个产出单元，14 条属 2 个被整单元跳过的单元。\n\n**丢弃记账精确、无静默丢弃**：18 个产出单元的 kept+dropped = 117+699 = **816 = 原始条目数 816**（逐单元差 0）。丢弃 699 条按原因：no_two_distinct_events 312 / no_anchored_event 234 / no_resolvable_character 85 / verifier_flagged 52 / no_verbatim_quote 16。桥逐条记账的 verifier_flagged **恰好 52 条**，且**逐层与我复算的完全相等**（tasks 16 / causeEdges 4 / foreshadows 18 / states 14）—— 这是我这次独立重算得到的最强对账结论：产出单元内，我的口径与桥的记账零差异。\n\n**哪些单元没进本批**：20 个里 18 个产出节点。L0:0000（第一回）与 L0:0002（第三回）被桥以 no_authoritative_range 整单元跳过 —— 这两个候选的 unitIndex/lane 都是 null，索引里定位不到权威区间，桥拒绝静默兜底（正是 D-C 事故的教训）。它们确实**未被发布**（两单元共 102 条原始条目、其中 14 条被复核点名），属本批缺口，已写入 remaining。\n\n**这不是全书完成**：本批只覆盖原文区间 [46,136016)。西游记共 101 个原文单元（722,176 字），本批 20 个单元 = 19.8020%，覆盖码点 135,970/722,176 = 18.8290%（另有 2 个单元未产出节点，实际贡献节点的单元 18 个）。三书合计 1133 个单元，三国 0 批。\n\n**引用与身份合同通过 ≠ 语义已核验**：新版本里 claimVerified=false 296/296、provenance=assistant-reviewed-source 296/296；meta.enrichment modelCalls=0 / calls=0 / semanticCompleteness=unverified / claimVerification=not_automatically_performed；reviewHistory 新条目 semanticCompleteness=unverified、scopeVerification=declared_only、sourceAndIdentityContractValidated=true（**只代表引用/身份合同机检通过**）。semanticReview 保持 not_performed。\n\n**本轮新发现一个真实缺口（DUP-RISK，未修，属受保护路径）**：tools/publish_reviewed.py **不写** loop/state/PUBLISH-LEDGER.json，而 loop.py 的 published_batches() 只读这张表 ⇒ 现在 done_ids() 里**没有** publish:xiyou:B000，任务仍会被再次领取。而桥的 graph_target() 取「页面默认第一条」，它现在返回的正是**我自己发布的 5b064a55…** ⇒ 一旦重跑，桥会写出 sourceKey=5b064a55… 的候选，重发就会叠出**第二个冗余版本键**（我在隔离副本里实测复现：得到 f0d2b3d586719a0dda028d03，reviewHistory 7→8 条；节点 id 因内容寻址而集合相同、不产生重复节点，但会多一个版本键与一条历史）。已写入 remaining 并给出最小修复。",
+ "scope": {
+  "sourceRangeRequired": [46, 136016],
+  "unitsRequired": 20,
+  "unitsContributingNodes": 18,
+  "unitsWithoutNodes": 2,
+  "unitsWithoutNodesList": ["read:xiyou:L0:0000", "read:xiyou:L0:0002"],
+  "unitsWithoutNodesReason": "桥判 no_authoritative_range（候选 unitIndex=null/lane=null，索引里定位不到权威区间；桥拒绝静默兜底）。已独立复核：两候选的 unitIndex 与 lane 确为 None/None。",
+  "unitHeads": [
+   "第一回　灵根育孕源流出　心性修持大道生", "第二回　悟彻菩提真妙理　断魔归本合元神",
+   "第三回　四海千山皆拱伏　九幽十类尽除名", "第四回　官封弼马心何足　名注齐天意未宁",
+   "第五回　乱蟠桃大圣偷丹　反天宫诸神捉怪", "第六回　观音赴会问原因　小圣施威降大圣",
+   "第七回　八卦炉中逃大圣　五行山下定心猿", "第八回　我佛造经传极乐　观音奉旨上长安",
+   "附录　陈光蕊赴任逢灾　江流僧复仇报本", "第九回　袁守诚妙算无私曲　老龙王拙计犯天条",
+   "第十回　二将军宫门镇鬼　唐太宗地府还魂", "第十一回 还受生唐王遵善果 度孤魂萧瑀正空门",
+   "第十二回　玄奘秉诚建大会　观音显象化金蝉", "第十三回　陷虎穴金星解厄　双叉岭伯钦留僧",
+   "第十四回　心猿归正　六贼无踪", "第十五回　蛇盘山诸神暗佑　鹰愁涧意马收缰",
+   "第十六回　观音院僧谋宝贝　黑风山怪窃袈裟", "第十七回 孙行者大闹黑风山 观世音收伏熊罴怪",
+   "第十八回　观音院唐僧脱难　高老庄行者降魔", "第十九回 云栈洞悟空收八戒 浮屠山玄奘受心经"
+  ],
+  "batchScopeAsWritten": {
+   "start": 46, "end": 136016, "chaptersCount": 20, "blankChapterEntries": 0,
+   "equalsIndexAuthority": true,
+   "equalsTaskSourceRange": true,
+   "note": "本批 scope 与 loop/state/index.json 的 chapterUnits[0:20] 权威区间、任务 sourceRange 三者**逐字一致**；20 个 unitHead 与索引全等、无空串。这与大奉 B000 的 start=0、B003 的 end=248192 那两次失真形态**不同**，本轮未复制该缺陷。**但注意**：scopeVerification=declared_only —— 区间是**声明**的，不是被机检验证过的。"
+  },
+  "sourceId": "src_6f325b1d053528f01789",
+  "textHash": "ffcc680a63ca5180ced6e629fd3171ab2ed4dd4b92ddbf21c3a6fe80cfaef1aa",
+  "coverageOfWholeBook": {
+   "units": "20/101 = 19.8020%",
+   "codepoints": "135970/722176 = 18.8290%",
+   "note": "西游记 101 单元 722,176 字（与 data/cache/5b064a5575f0c330f6f2cd2e.docs.json 的实际文本长度一致）。**本批不是全书完成**：第 20–101 个单元（第二十回起）完全未覆盖。"
+  },
+  "coverageOfAllBooks": "西游 1/1 书的第 1 批；大奉另有 4 批（B000–B003）、三国 0 批；三书合计 1133 个单元"
+ },
+ "counts": {
+  "batchCandidatePath": "loop/state/candidates/BATCH-publish-xiyou-B000.candidate.json",
+  "batchCandidateSha256": "b7a052d5b9955b51601405f28761d4de1672dab40794cfcaba766bba1afaf56d",
+  "bridge": {"units": 20, "unitsWithNodes": 18, "kept": 117, "dropped": 699, "digest": "23ce37b6eef7"},
+  "keptByLayer": {"tasks": 78, "characterStates": 26, "clues": 13},
+  "dryRun": {
+   "ok": true, "contractProblems": [], "originalPreserved": true, "write": false,
+   "referencePrecision": "661/661 = 100.0%",
+   "claimedVerifiedAnchorPrecision": "1071/1071 = 100.0%",
+   "cannotJudge": ["semantic_entailment_and_completeness"],
+   "cmd": "SRC=$(python3 -c \"import json;print(json.load(open('loop/state/candidates/BATCH-publish-xiyou-B000.candidate.json'))['sourceKey'])\") && python3 -B -s tools/publish_reviewed.py --source-key \"$SRC\" --candidate loop/state/candidates/BATCH-publish-xiyou-B000.candidate.json --dry-run --report /tmp/cl-pub-xiyou-B000-r2/dryrun_report.json",
+   "note": "本轮我自己重跑，rc=0；SRC 解析出 a065244455cfb2221bcda94a（桥写进批次候选的父版本，非我猜的）。"
+  },
+  "writeRun": {
+   "ok": true, "write": true, "key": "5b064a5575f0c330f6f2cd2e",
+   "parentKey": "a065244455cfb2221bcda94a", "modelCalls": 0, "originalPreserved": true,
+   "reportPath": "/tmp/cl-pub-xiyou-B000-r2/write_report.json",
+   "reportSha256": "729d92d49982db3f984b5ad713652a028c63eac8ec7048b397f44b5a2191b3be",
+   "reportByteIdenticalToFirstRun": true,
+   "firstRunReportPath": "/tmp/cl-pub-xiyou-B000/write_report.json",
+   "firstRunReportSha256": "729d92d49982db3f984b5ad713652a028c63eac8ec7048b397f44b5a2191b3be",
+   "cmd": "python3 -B -s tools/publish_reviewed.py --source-key a065244455cfb2221bcda94a --candidate loop/state/candidates/BATCH-publish-xiyou-B000.candidate.json --write --report /tmp/cl-pub-xiyou-B000-r2/write_report.json",
+   "note": "**关键**：本轮这次 --write 没有改动任何一个字节 —— 回执 key 与已发布键相同，且 pre/post 哈希清单逐行相同。它不是「又发了一次」，而是**同一次发布的幂等重放**。"
+  },
+  "idempotencyProof": {
+   "why": "在本轮之前，磁盘上的发布已经很可能是上一轮 14:56 完成的（新键在 index.json 第 0 条）。在共享树上盲目重跑 --write 有叠出冗余版本的风险，所以我先在 /tmp 的**隔离副本**里证明它是内容寻址且幂等的，再动共享树。",
+   "sandbox": "/tmp/cl-pub-xiyou-B000-r2/sandbox（父版本 .json/.docs.json + index.json + revisions 备份 + tools/tests/serve.py/narrative.py 的副本）",
+   "steps": [
+    "① 隔离副本里 dry-run：ok=true, contractProblems=[]，与共享树一致",
+    "② 隔离副本里 --write：key=5b064a5575f0c330f6f2cd2e，产出 5b064a…json 的 sha256=aefc1c4f… ，与共享树已发布版本**逐字节相同**",
+    "③ 再跑一次 --write（文件已存在）：key 不变，index.json 与版本文件哈希**逐行不变**",
+    "④ 把隔离副本里版本文件的 mtime 设成与共享树相同（14:56:41）后再 --write：index.json 的 sha256=b38342d0… ，与共享树**逐字节相同**（version_at() 用文件 mtime，故重放不产生 at 漂移）"
+   ],
+   "conclusion": "发布键 = f(父版本字节, 候选字节)，与时间无关；matches_existing() 拒绝覆盖已存在且内容不符的版本。故同一输入的重放必然复用同一键、零字节变更。"
+  },
+  "verdictsAmong20Units": {"partial": 20, "fail": 0, "pass": 0},
+  "verdictSourceSplit": {
+   "两来源都有verdict": 14,
+   "仅sidecar有verdict": 6,
+   "仅record有verdict": 0,
+   "两来源都没有": 0,
+   "record无verdict的单元": ["read:xiyou:L1:0001", "read:xiyou:L1:0007", "read:xiyou:L0:0014", "read:xiyou:L1:0015", "read:xiyou:L1:0017", "read:xiyou:L1:0019"],
+   "twoSourcesDisagree": 0,
+   "note": "**6/20 个单元的裁决只写在 .verdict.json sidecar 里**（record 的 verdict 为 None）—— 若发布链路只读 record，这 6 个单元的复核结论会被整体无视（E11 记录的事故形态）。桥两个来源都读，故无整份结论丢失。**这些数字是我本轮自己重算的**，不是照抄桥的自述：两来源裁决不一致的单元 0 个。"
+  },
+  "dropped": {
+   "total": 699,
+   "byReason": {
+    "no_two_distinct_events": 312,
+    "no_anchored_event": 234,
+    "no_resolvable_character": 85,
+    "verifier_flagged": 52,
+    "no_verbatim_quote": 16
+   },
+   "reasonMeaning": {
+    "no_two_distinct_events": "因果边两端锚不到两个不同的真实事件（causeEdges 层）",
+    "no_anchored_event": "状态/伏笔锚不到图谱既有事件，无法机检（foreshadows + states）",
+    "no_resolvable_character": "人物不在图谱人物表内或非唯一（tasks + states）—— 不改写成他人",
+    "verifier_flagged": "复核者点名须修正，未修正前不发布",
+    "no_verbatim_quote": "引证无法在原文逐字切出，不予发布（全在 foreshadows）"
+   },
+   "accountingIsExact": "18 个产出单元的 kept+dropped = 117+699 = 816 = 原始候选条目数 816（逐单元差 0）⇒ **无静默丢弃**；另 2 个被跳过单元共 102 条原始条目整单元未产出。全 20 单元原始条目合计 918 = 816 + 102。",
+   "verifierFlaggedReconciliation": {
+    "myRecomputation_total": 66,
+    "inProducedUnits": 52,
+    "inSkippedUnits": 14,
+    "bridgeRecorded": 52,
+    "perLayerEqual": {"tasks": 16, "causeEdges": 4, "foreshadows": 18, "states": 14},
+    "conclusion": "产出单元内我复算的 52 条与桥逐条记账的 52 条**逐层完全相等**（tasks 16 / causeEdges 4 / foreshadows 18 / states 14）；差额 14 条全部落在 2 个被整单元跳过的单元里（桥对跳过单元整单元不记账，属如实行为而非漏记）。**没有任何一条差集落在「可发布层 ∧ 非跳过单元」上。**"
+   }
+  },
+  "newVersionTotals": {
+   "tasks": 198, "characterStates": 78, "clues": 20, "causeEdges": 140, "relations": 20, "storylines": 10,
+   "events": 798, "characters": 219,
+   "parentTotals": {"tasks": 120, "characterStates": 52, "clues": 7, "causeEdges": 140, "relations": 20, "storylines": 10, "events": 798, "characters": 219},
+   "fromThisBatch": {"tasks": 78, "characterStates": 26, "clues": 13, "total": 117},
+   "note": "fromThisBatch 用节点 id 前缀 ^(task|characterState|clue)_review_ 复算；events/characters/causeEdges/relations/storylines 本批未增未改（前后计数相同）。"
+  }
+ },
+ "discipline1Reconciliation": {
+  "conclusion": "**泄漏 0**。本批发布的 117 个节点全部是复核者未点名的条目；被点名条目一个都没有进候选。纪律 1 本轮**不是**阻断理由 —— 而且这个结论不是我采信桥的自述得来的，是**独立重算**出来的。",
+  "method": {
+   "keyIdea": "桥的节点 id 是**内容寻址**的：stable_node_id(layer, item) 对原始条目（剔除 provenance/claimVerified/semanticStatus/reviewNotes）做稳定 JSON 的 sha256 取前 20 位。所以我能**独立重算**每个原始条目的期望 id，再看它是否出现在批次候选的对应发布层里 —— 完全不需要信任桥的日志或它的过滤声明。",
+   "steps": [
+    "① 对 20 个单元，从 record + .verdict.json 两处取裁决（取更严）并收集 counterExamples 的**全部字段**（不是只读 claim —— 那正是 5b43c216 污染作品库的根因）；",
+    "② 复算点名集合：索引式 ([A-Za-z_]+)\\[(\\d+)\\] + id 式 \\b([TCSF]\\d+)\\b；",
+    "③ 对每个原始条目重算内容寻址 id，检查是否在 BATCH 候选的对应发布层里 ⇒ 是否被发布；",
+    "④ 判定：(被点名) ∧ (被发布) ⇒ 泄漏。"
+   ],
+   "results": {
+    "publishedNodesTotal": 117,
+    "publishedAndFlagged_LEAK": 0,
+    "publishedAndNotFlagged": 117,
+    "flaggedItemsTotal": 66,
+    "flaggedAndNotPublished": 66,
+    "flaggedInSkippedUnits": 14,
+    "flaggedInProducedUnits_excluded": 52
+   }
+  },
+  "hardenedRecheck": {
+   "why": "桥提取点名 id 用的是 \\b([TCSF]\\d+)\\b，匹配不到 CE1/ST6/U1/K3/R12 这类「多字母前缀 + 数字」形态（大奉 B003 报告已登记为 D-F 缺口，本批必须自查是否爆发）。",
+   "whatIDid": "把正则换成 [A-Za-z]{1,4}\\d{1,3}，再对 117 个已发布节点复算。",
+   "result": {"narrowRegexLeaks": 0, "wideRegexLeaks": 0, "note": "宽正则下仍未发现任何泄漏 ⇒ 本批的 CE*/ST*/U*/K* 类定位符恰好没有落在**已发布**的条目上。这与大奉 B003 的结论同型（那里也是侥幸未泄漏），故 D-F 仍是**下一批可能爆发**的缺口，登记在 remaining；本任务 writes 只允许 artifact，未改受保护路径所以未修。"}
+  },
+  "scriptHashes": {
+   "/tmp/cl-pub-xiyou-B000-r2/leak_recheck.py": "70fac9f8caa31c1e46ee3f3fcb836a4bbcc0d83d8ea4716b884891c025db82ef",
+   "note": "本轮的独立复算脚本（只读）。它**重算**内容寻址 id 并逐条对账，不读桥的日志。"
+  }
+ },
+ "idempotentReplay": {
+  "whatHappened": "上一轮 agent（同一 agent 名 w-publish，14:40:58 起跑，跑了 1360.6s）在 14:56 已经真实完成了 --write：新键 5b064a5575f0c330f6f2cd2e 落盘、index.json 第 0 条更新。然后它以 rc=1 退出（loop/state/runs/run-publish_xiyou_B000.json 记 rc=1），日志末段是 TLS 连接错误。worker 随后按规则把本轮代登记为 REJECTED（理由：「agent 以非零码退出；产物是不完整/未确认的中间态，不能当完成」）。",
+  "whyTheRejectionWasReasonable": "worker 的判据是「agent 是否正常结束」，它没有能力判断磁盘上的发布是否已经完成。rc=1 + 无提交记录 ⇒ 视为未确认，这个保守判定本身是对的（宁可重做，不可把不确定当完成）。",
+  "whatIDidInstead": "我没有盲目重发（那有叠出冗余版本的风险，见 DUP-RISK），而是：① 核实磁盘上的发布是否完整正确；② 在隔离副本里证明重放是幂等的；③ 持 GATE.lock 做真实重放并证明**零字节变更**；④ 补齐提交记录。",
+  "verificationThatItWasComplete": [
+   "新键 .json/.docs.json 齐备且可解析；图谱契约有效（tasks/characters/events 均为数组）",
+   "index.json 第 0 条 = 新键（80 条、无重复键、父键仍在第 39 条）",
+   "只读 GET /api/history 的西游记第一条 = 新键 ⇒ 读者确实能看到",
+   "新版本含本批 117 个节点；父版本字节未变；精确备份与父版本逐字节相同",
+   "新版本 meta.revision.key = 5b064a5575f0c330f6f2cd2e，parentKey = a065244455cfb2221bcda94a，originalPreserved = true"
+  ],
+  "prePostHashManifest": {
+   "path": "/tmp/cl-pub-xiyou-B000-r2/pre.txt",
+   "sha256": "b57862ce0ab3405ab2fd2b6b0b80150b75bfec0d17bb25745a2fa7bac451987e",
+   "postPath": "/tmp/cl-pub-xiyou-B000-r2/post.txt",
+   "postSha256": "b57862ce0ab3405ab2fd2b6b0b80150b75bfec0d17bb25745a2fa7bac451987e",
+   "identical": true,
+   "covers": ["data/cache/a065244455cfb2221bcda94a.json", "data/cache/a065244455cfb2221bcda94a.docs.json", "data/cache/5b064a5575f0c330f6f2cd2e.json", "data/cache/5b064a5575f0c330f6f2cd2e.docs.json", "data/cache/index.json", "loop/state/PUBLISH-LEDGER.json", "loop/state/candidates/BATCH-publish-xiyou-B000.candidate.json", "loop/bin/to_candidate.py", "tools/publish_reviewed.py", "data/cache/narrative/revisions/a065244455cfb2221bcda94a-37f7f9028c3509a9520f.graph.json"],
+   "note": "**pre 与 post 的 sha256 完全相同**（同一份清单内容），且 `diff pre.txt post.txt` 无输出 ⇒ 重放前后 10 个关键文件逐字节未变。"
+  }
+ },
+ "parentIntegrity": {
+  "parentKey": "a065244455cfb2221bcda94a",
+  "json": {"before": "37f7f9028c3509a9520f6e695d1adff4dbebcc73e06c82a964f75a51e4f805f9", "after": "37f7f9028c3509a9520f6e695d1adff4dbebcc73e06c82a964f75a51e4f805f9", "unchanged": true},
+  "docsJson": {"before": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2", "after": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2", "unchanged": true},
+  "exactBackup": {
+   "path": "data/cache/narrative/revisions/a065244455cfb2221bcda94a-37f7f9028c3509a9520f.graph.json",
+   "sha256": "37f7f9028c3509a9520f6e695d1adff4dbebcc73e06c82a964f75a51e4f805f9",
+   "bytesEqualParent": true,
+   "note": "发布工具写前做精确备份；其 sha256 与父版本 .json **完全相同**（即逐字节相同，不只看文件名）。"
+  },
+  "newKeyRevisionRecord": {
+   "key": "5b064a5575f0c330f6f2cd2e",
+   "parentKey": "a065244455cfb2221bcda94a",
+   "originalHash": "37f7f9028c3509a9520f6e695d1adff4dbebcc73e06c82a964f75a51e4f805f9",
+   "outputHash": "5e92a6f4f4bca6dcbc500084e344012e70a82573910fcb8b08f9028c4f4a340e",
+   "originalPreserved": true,
+   "version": "narrative/8-context-conservative"
+  }
+ },
+ "parentSelection": {
+  "why": "任务 prompt 明令父版本不要自己猜，取桥写进批次候选的 sourceKey（= graph_target() 算出的页面默认版本）。",
+  "bridgeSourceKey": "a065244455cfb2221bcda94a",
+  "independentConfirmation": [
+   "data/cache/index.json（页面历史索引，/api/history 按同一顺序返回）里 西游记 标题的第一条（动手前）= a065244455cfb2221bcda94a",
+   "loop/state/index.json 的 books.xiyou.graphKey = a065244455cfb2221bcda94a",
+   "两级都校验 .json/.docs.json 实际存在（都 True）"
+  ],
+  "notHardcodedBaseline": "没有写死 df959d743e53206f56db2f92（原文基线键）。写死会让本批成为页面默认版本的**兄弟分支**，内容不累积、读者也看不到 —— 这正是任务 prompt 要避免的形态，也正是 DUP-RISK 缺口的成因（见 defectsFound）。"
+ },
+ "pageDefaultVerification": {
+  "method": "真实页面路径（只读 HTTP GET，不是浏览器/GPU 测试；本任务未声明要跑 GPU/浏览器，故未跑）",
+  "server": "本机已有 serve.py 在 127.0.0.1:8781 运行（复用并行会话的实例，只读访问）",
+  "api_history_first_xiyou": "5b064a5575f0c330f6f2cd2e",
+  "note": "只做只读 GET 以确认「读者真的能通过页面默认入口看到本批」；没有触发任何写入或模型调用。西游记在历史里共 9 条，第一条即本批新键。"
+ },
+ "additiveWriteCheck": {
+  "indexJson": {
+   "before": "b38342d07c45c087e11629cca42da58532990f4fc542e038333c84cf4930f215",
+   "after": "b38342d07c45c087e11629cca42da58532990f4fc542e038333c84cf4930f215",
+   "changed": false,
+   "note": "本轮重放**没有**改动 index.json（前后哈希相同）。上一轮首发时它由 80 条更新为 80 条（HISTORY_CAP=80），新键插到第 0 条、无重复键、父键仍在第 39 条 ⇒ 纯追加式、无删除无覆盖。"
+  },
+  "publishLedger": {
+   "before": "fde21d843184828cd85b627dbfc08fdd2e286316d86c68aacc97f63fdab04914",
+   "after": "fde21d843184828cd85b627dbfc08fdd2e286316d86c68aacc97f63fdab04914",
+   "changed": false,
+   "note": "**发布工具不改 PUBLISH-LEDGER.json**（它是 loop 侧的台账）。本轮我没有以本任务之名改它（属受保护路径的越权写入）。但这留下一个真实缺口 DUP-RISK：published_batches() 只读这张表 ⇒ 本批**不会被记成已发布**，worker 可能再次领取 publish:xiyou:B000 并重发。"
+  },
+  "productSourceUntouched": "本任务未改 js/ css/ index.html serve.py narrative.py scripts/ tests/ docs/ 下任何文件；发布是纯追加式写回（新版本键）。"
+ },
+ "gateLock": {
+  "required": true,
+  "acquiredByMe": true,
+  "holder": "w-publish",
+  "acquiredAt": "2026-10-09T15:23Z（本机时间，取自 GATE.lock 写入时的 now()）",
+  "releasedAt": "写回校验完成后、提交之前",
+  "why": "任务声明 gateLock=true，且写回目标 data/cache/<新键>.json 与 data/cache/index.json 被 loop.classify() 判为 **guarded**（受保护路径）。按 AGENTS.md 与 loop 纪律，受保护路径的共享树写回必须持 GATE.lock。",
+  "attemptCmd": "python3 -B -s loop/bin/loop.py gate --agent w-publish --reason \"publish:xiyou:B000 幂等重放（补做被 rc=1 中断的发布；内容寻址键已存在，重放不改字节）\"",
+  "attemptResult": "取得（rc=0）—— 取证时锁不存在（上一轮持有者已释放或过期）",
+  "releaseCmd": "python3 -B -s loop/bin/loop.py gate --agent w-publish --release",
+  "releaseResult": "已释放（rc=0）；写完后即释放，未占锁到提交阶段"
+ },
+ "honestyMarkers": {
+  "claimVerified": false,
+  "provenance": "assistant-reviewed-source",
+  "semanticStatus": "unreviewed",
+  "modelCalls": 0,
+  "automaticModelCalls": 0,
+  "semanticReview": "not_performed",
+  "whereTheyLive": {
+   "node.claimVerified=false": "新版本 296/296 个叙事节点全部为 false（tasks 198 + characterStates 78 + clues 20）—— 我本轮自己数过",
+   "node.provenance=assistant-reviewed-source": "同上，296/296 全部",
+   "candidate.modelCalls=0 与 automaticModelCalls=0": "BATCH 候选顶层，且发布工具在 write 路径上强制要求这两个计数器为 0（serve.py:5485-5487）",
+   "meta.enrichment": "modelCalls=0, calls=0, semanticCompleteness=unverified, claimVerification=not_automatically_performed, automaticModelQualityValidated=false, provenance=assistant-reviewed-source",
+   "reviewHistory": "新条目 semanticCompleteness=unverified, scopeVerification=declared_only, sourceAndIdentityContractValidated=true（**只代表引用/身份合同机检通过，不代表语义已核验**）",
+   "coverageGaps": "候选自带 range_scoped_review（只审 [46,136016)，区间外未审）+ semantic_review_not_performed（语义未经人工认证），并**逐条**记录了 699 个 dropped_item"
+  },
+  "note": "**引用定位与身份合同通过 ≠ 语义已核验。** semanticStatus 在写盘后被图谱契约归一为 `unreviewed`（不是桥写的 assistant-reviewed-source）；已发布的大奉版本 3af17a8d 同样是 unreviewed ⇒ 这是既有归一化行为，不是本批特有的降级，也不影响 claimVerified=false 的诚实标记。"
+ },
+ "defectsFound": [
+  {
+   "id": "DUP-RISK-blind-rerun-creates-redundant-version",
+   "severity": "high",
+   "status": "未修复（责任文件 tools/publish_reviewed.py 与 loop/state/PUBLISH-LEDGER.json 均属受保护路径；本任务 writes 只允许 artifact，按纪律未改）",
+   "what": "发布工具 **不写** loop/state/PUBLISH-LEDGER.json，而 loop.py 的 published_batches() 只读这张表 ⇒ done_ids() 里没有 publish:xiyou:B000 ⇒ 任务**仍会被再次领取**。而桥的 graph_target() 取「页面默认第一条」，它现在返回的正是**本轮发布的 5b064a55…** ⇒ 一旦重跑，桥会写出 sourceKey=5b064a55… 的候选，重发就会叠出**第二个冗余版本键**。",
+   "evidence": "① 台账写回前后 sha256 相同（fde21d84…），entries 仍 6 条、无 publish:xiyou:B000；② done_ids() 含 'publish:xiyou:B000' = False；③ graph_target('xiyou') 现在返回 5b064a5575f0c330f6f2cd2e（不再是 a065244455cfb2221bcda94a）。",
+   "sandboxReproduction": {
+    "how": "在 /tmp 隔离副本里把候选的 sourceKey/scope.parentKey 改成 5b064a55…（模拟桥在父版本已更新时会写出的候选），对该键再发布一次。",
+    "result": "ok=true，新键 f0d2b3d586719a0dda028d03，parentKey=5b064a5575f0c330f6f2cd2e；reviewHistory 由 7 条变 8 条。",
+    "nodeImpact": "tasks/characterStates/clues/events/characters 计数全部不变（198/78/20/798/219），task 节点 id 集合完全相同 ⇒ **不产生重复节点**（内容寻址 id 会原样合并），代价是多一个冗余版本键 + 一条重复的 reviewHistory 记录。"
+   },
+   "impact": "每次无谓重跑都会多一个同内容的版本键并写进历史索引；重跑还要占 GATE.lock 与一次完整校验（本轮实测单次 --write 约 1 分钟）。大奉 B000 曾连发 3 次。",
+   "whyNotFixedByMe": "修它要么改 loop/state/PUBLISH-LEDGER.json（受保护路径的越权写入），要么改 loop.py（受保护路径）。本任务 writes 只有 artifact 一个路径。",
+   "suggestedFix": "最小修复：在发布任务完成后的合并/协调环节，按 graphKey + 新版本键向 PUBLISH-LEDGER.json 追加一条（字段模板见该表 entries[5]，本批 graphKey=5b064a5575f0c330f6f2cd2e, parentKey=a065244455cfb2221bcda94a, scope=[46,136016), units=20）；或让 publish_reviewed.py 支持 --ledger 参数由持锁方调用。**次小修复**：桥在 graph_target() 里若发现「页面默认第一条的 meta.revision.parentKey 链上已有本批次」，应报错而不是静默再发一次。"
+  },
+  {
+   "id": "X1-two-units-dropped-no-authoritative-range",
+   "severity": "high",
+   "status": "未修复（缺陷在受保护路径 loop/bin/to_candidate.py 与 READER 产出侧；本任务 writes 只允许 artifact，按纪律未改）",
+   "what": "20 个单元里 2 个（第一回 read:xiyou:L0:0000、第三回 read:xiyou:L0:0002）被桥整单元跳过，理由是 no_authoritative_range：这两个候选的 unitIndex 与 lane **都是 null**，索引里定位不到权威区间，桥拒绝静默兜底。",
+   "evidence": "python3 -c \"import json;[print(t, json.load(open('loop/state/out/'+t+'.candidate.json')).get('unitIndex'), json.load(open('loop/state/out/'+t+'.candidate.json')).get('lane')) for t in ('read_xiyou_L0_0000','read_xiyou_L0_0002')]\" → None None / None None（本轮我自己复跑确认）。",
+   "impact": "第一回（全书开篇，含石猴出世、称王、求道主线起点）与第三回（含龙宫得金箍棒）**没有任何节点进入作品库**。本批 117 个节点全部来自另外 18 个单元；这两单元共 102 条原始条目整单元未产出。",
+   "whyNotWorkedAround": "我没有手工补 unitIndex 或改写候选 —— 那是把「桥无法定位」伪装成「已定位」，正是 D-C 教会我们要避免的兜底。如实记为缺口。",
+   "suggestedFix": "① READER 产出侧必须写 unitIndex/lane（这两个候选显然漏了）；② 或桥在 unitIndex 为 null 时**用 unitHead 在 index.json 里反查**唯一单元（本批两个候选的 unitHead 与索引全等，反查可行），但仍须对「反查不唯一」报错而不是兜底。",
+   "reproduce": "python3 -B -s loop/bin/to_candidate.py --batch publish:xiyou:B000 2>&1 | grep no_authoritative_range"
+  },
+  {
+   "id": "X2-task-name-placeholder-78-of-78",
+   "severity": "medium",
+   "status": "不可在本任务内修复（缺口在 READER 产出，不在桥；桥已按 summary→name→占位符 忠实兜底）",
+   "what": "本批发布的 78 个 tasks 节点**全部**（78/78）name 为「（未命名任务）」。根因是 READER 候选里根本没有 summary/name/title 字段，不是桥取错键。",
+   "evidence": "上一轮已复算：20 个单元的原始 tasks 共 177 条，带 summary 的 0 条、带 name 的 0 条；原始 tasks 的 keys 只有 [action, basis, character, cost, evidence, id, kind, objective, obstacle, result]。桥写的是 item.get('summary') or item.get('name') or '（未命名任务）'（to_candidate.py:581）⇒ 兜底是忠实的。**本轮我没有重新复算这一条**，故沿用其结论并明确标注来源为上一轮记录（不是本轮实测）。",
+   "impact": "界面上会出现 78 个同名任务。**但这不是本批新增的退化**：已发布的大奉版本 3af17a8d 里同样有大量同名占位符（同一个上游缺口的既有后果）。",
+   "suggestedFix": "READER 契约要求 tasks 必须给出可读 name/summary；或在桥侧当五项齐全时用 objective 首句生成 —— 但那属内容加工，须显式记账，不能静默。"
+  },
+  {
+   "id": "X3-locator-regex-narrow-D-F-still-open",
+   "severity": "medium",
+   "status": "未修复（受保护路径；本批未致泄漏，登记供下一批）",
+   "what": "桥提取复核点名 id 用 \\b([TCSF]\\d+)\\b，匹配不到 CE1/ST6/U1/K3/R12 这类形态。",
+   "evidence": "本轮我用宽正则 [A-Za-z]{1,4}\\d{1,3} 对 117 个已发布节点复算，**泄漏仍为 0**（宽有窄无 = 0）。",
+   "whyNotBlockingThisBatch": "这些定位符恰好没有落在已发布条目上。**侥幸不构成安全** —— 大奉 B003 已登记同型问题（那里也侥幸未泄漏）。",
+   "suggestedFix": "id 正则改为 [A-Za-z]{1,4}\\d{1,3}，并要求 token 能在该单元原始候选的 id 集合里解析（避免把 第3/python3 误当 id）；同时对「token 匹配不到任何条目」保留记账。"
+  },
+  {
+   "id": "X5-scope-is-declared-not-verified",
+   "severity": "low",
+   "status": "既有设计（非本批引入）",
+   "what": "新版本 reviewHistory 里 scopeVerification=declared_only。本批 scope [46,136016) 与索引权威区间、任务 sourceRange 三者逐字一致，但它仍是**声明**而非被独立验证过的覆盖。",
+   "evidence": "python3 -c \"import json;g=json.load(open('data/cache/5b064a5575f0c330f6f2cd2e.json'));e=g['meta']['reviewHistory'][-1];print(e['scopeVerification'],e['scope']['start'],e['scope']['end'],len(e['scope']['chapters']))\" → declared_only 46 136016 20",
+   "whyLowSeverity": "本批三处口径**互相一致**（不是大奉 B003 那种 [0,248192) 的失真），且 20 个 unitHead 与索引全等、无空串。但「三处一致」仍不等于「被独立验证」—— 如实标注，不冒称已核验。",
+   "suggestedFix": "若要升级为 verified，需要一条独立判据（例如按 chapterUnits 的 20 个区间直接构造 scope 并核对 chapters 数 == 单元数），而不是取各单元 scope 的并集。"
+  }
+ ],
+ "evidence": [
+  {"path": "loop/state/candidates/BATCH-publish-xiyou-B000.candidate.json", "sha256": "b7a052d5b9955b51601405f28761d4de1672dab40794cfcaba766bba1afaf56d", "kind": "bridge-output（任务指定链路的正式产出，未手工改动；117 节点 + 699 条丢弃记账 + 2 条覆盖缺口声明）"},
+  {"path": "data/cache/5b064a5575f0c330f6f2cd2e.json", "sha256": "aefc1c4f7568219c5dde6e34aa495a58d925141b2f8e09de23adad07a75da8f3", "kind": "published-graph（本批发布的新版本键；本轮幂等重放后哈希未变）"},
+  {"path": "data/cache/5b064a5575f0c330f6f2cd2e.docs.json", "sha256": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2", "kind": "published-docs（新版本的原文副本；与父版本同哈希，说明原文未变）"},
+  {"path": "data/cache/index.json", "sha256": "b38342d07c45c087e11629cca42da58532990f4fc542e038333c84cf4930f215", "kind": "page-history-index（上一轮已追加：新键插到第 0 条 ⇒ 页面默认打开本批；本轮重放未改动它）"},
+  {"path": "data/cache/a065244455cfb2221bcda94a.json", "sha256": "37f7f9028c3509a9520f6e695d1adff4dbebcc73e06c82a964f75a51e4f805f9", "kind": "parent-graph（**父版本，发布前后字节未变**）"},
+  {"path": "data/cache/a065244455cfb2221bcda94a.docs.json", "sha256": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2", "kind": "parent-docs（**发布前后字节未变**）"},
+  {"path": "data/cache/narrative/revisions/a065244455cfb2221bcda94a-37f7f9028c3509a9520f.graph.json", "sha256": "37f7f9028c3509a9520f6e695d1adff4dbebcc73e06c82a964f75a51e4f805f9", "kind": "exact-parent-backup（发布工具写前备份；sha256 与父版本 .json 相同 ⇒ 逐字节相同）"},
+  {"path": "/tmp/cl-pub-xiyou-B000-r2/write_report.json", "sha256": "729d92d49982db3f984b5ad713652a028c63eac8ec7048b397f44b5a2191b3be", "kind": "publish-report（本轮 --write 的机器回执：ok=true, key=5b064a55…, parentKey=a0652444…, originalPreserved=true；与 14:56 首发的 /tmp/cl-pub-xiyou-B000/write_report.json **逐字节相同**）"},
+  {"path": "/tmp/cl-pub-xiyou-B000-r2/dryrun_report.json", "sha256": "b7c7a862c7091979cb838c0d9398782eec0421b296eb132c8d6a67b8b9ef98a7", "kind": "dry-run-report（本轮实跑：ok=true, write=false, contractProblems=[], referencePrecision 661/661, claimedVerifiedAnchorPrecision 1071/1071）"},
+  {"path": "/tmp/cl-pub-xiyou-B000-r2/write_stdout.json", "sha256": "0a8a53b105b3a1d0402b5b40f633aac1ecaff0cdbfe0ac0e1553be76231c5e9e", "kind": "write-stdout（--write 的控制台回执，rc=0）"},
+  {"path": "/tmp/cl-pub-xiyou-B000-r2/pre.txt", "sha256": "b57862ce0ab3405ab2fd2b6b0b80150b75bfec0d17bb25745a2fa7bac451987e", "kind": "pre-replay 哈希清单（10 个关键文件，写前实测）"},
+  {"path": "/tmp/cl-pub-xiyou-B000-r2/post.txt", "sha256": "b57862ce0ab3405ab2fd2b6b0b80150b75bfec0d17bb25745a2fa7bac451987e", "kind": "post-replay 哈希清单（**与 pre.txt sha256 完全相同** ⇒ 零字节变更的决定性证据）"},
+  {"path": "/tmp/cl-pub-xiyou-B000-r2/leak_recheck.py", "sha256": "70fac9f8caa31c1e46ee3f3fcb836a4bbcc0d83d8ea4716b884891c025db82ef", "kind": "audit-script：纪律 1 独立复算（重算内容寻址 id ⇒ 泄漏 0；并复算丢弃记账与点名逐层对账）"},
+  {"path": "loop/state/out/REJECTED__publish_xiyou_B000.json", "sha256": "7c5126e41192b80a7355434b627335b46d97e7ca5c380ef537474dd5995db56f", "kind": "上一轮的拒绝记录（本轮的 reworkOf；它记录了「rc=1 ⇒ 视为未确认」这一事实）"},
+  {"path": "loop/bin/to_candidate.py", "sha256": "1ded8fcc8a61bca961d0ff263ca47bf73437f826142820bd555204f4994f912f", "kind": "格式桥（只读引用，未改；X1/X3 与 DUP-RISK 的责任文件之一）"},
+  {"path": "tools/publish_reviewed.py", "sha256": "a1827ebdb6d89ea04e1addb8807fa79ca95d1f6251edcddf6886ae3f357af561", "kind": "发布工具（只读引用，未改；DUP-RISK 的责任文件之一）"}
+ ],
+ "assertions": [
+  {"text": "上一轮确实已在 14:56 完成发布：新键文件存在、index.json 第 0 条即该键", "result": "pass", "cmd": "ls -la data/cache/5b064a5575f0c330f6f2cd2e.json data/cache/5b064a5575f0c330f6f2cd2e.docs.json && python3 -c \"import json;h=json.load(open('data/cache/index.json'));print(len(h),h[0]['key'])\"  # 80 5b064a5575f0c330f6f2cd2e"},
+  {"text": "任务声明 gateLock=true，且写回目标属受保护路径：data/cache/<新键>.json 被 classify() 判为 guarded", "result": "pass", "cmd": "python3 -c \"import sys;sys.path.insert(0,'loop/bin');import loop as L;print(L.classify('data/cache/NEW.json'))\"  # -> guarded"},
+  {"text": "持 GATE.lock 完成重放，写后即释放（未占锁到提交阶段）", "result": "pass", "cmd": "python3 -B -s loop/bin/loop.py gate --agent w-publish --reason '...'  # rc=0；写后 python3 -B -s loop/bin/loop.py gate --agent w-publish --release  # rc=0"},
+  {"text": "★幂等性（共享树动手前先在隔离副本证明）：同一（父键, 候选）重放得到同一键，且产出字节与已发布版本完全相同", "result": "pass", "cmd": "见 /tmp/cl-pub-xiyou-B000-r2/sandbox：python3 -B -s tools/publish_reviewed.py --source-key a065244455cfb2221bcda94a --candidate <BATCH> --write  → key=5b064a5575f0c330f6f2cd2e；shasum -a 256 sandbox/data/cache/5b064a5575f0c330f6f2cd2e.json  # aefc1c4f…（与共享树相同）"},
+  {"text": "★幂等性（第二次重放字节不变）：隔离副本连跑两次 --write，index.json 与版本文件哈希逐行不变", "result": "pass", "cmd": "diff /tmp/cl-pub-xiyou-B000-r2/sandbox_run1.txt /tmp/cl-pub-xiyou-B000-r2/sandbox_run2.txt  # 无输出 ⇒ 完全相同"},
+  {"text": "★零字节变更（决定性）：共享树重放前后 10 个关键文件的哈希清单逐行相同", "result": "pass", "cmd": "diff /tmp/cl-pub-xiyou-B000-r2/pre.txt /tmp/cl-pub-xiyou-B000-r2/post.txt  # 无输出；两文件 sha256 同为 b57862ce…"},
+  {"text": "重放回执与首发回执逐字节相同（同一确定性结果，不是「又发了一次」）", "result": "pass", "cmd": "diff /tmp/cl-pub-xiyou-B000/write_report.json /tmp/cl-pub-xiyou-B000-r2/write_report.json  # 无输出；同为 729d92d4…"},
+  {"text": "重放返回的 key 与已发布键相同 ⇒ 没有叠出冗余版本", "result": "pass", "cmd": "python3 -B -s tools/publish_reviewed.py --source-key a065244455cfb2221bcda94a --candidate <BATCH> --write  → key=5b064a5575f0c330f6f2cd2e"},
+  {"text": "dry-run 契约机检通过（本轮自己重跑）：ok=true, contractProblems=[], referencePrecision 661/661=100%, claimedVerifiedAnchorPrecision 1071/1071=100%", "result": "pass", "cmd": "SRC=$(python3 -c \"import json;print(json.load(open('loop/state/candidates/BATCH-publish-xiyou-B000.candidate.json'))['sourceKey'])\") && python3 -B -s tools/publish_reviewed.py --source-key \"$SRC\" --candidate loop/state/candidates/BATCH-publish-xiyou-B000.candidate.json --dry-run  # rc=0"},
+  {"text": "★纪律 1：泄漏 0 —— 117/117 个已发布节点经内容寻址 id **独立重算**全部是复核未点名条目；被点名且被发布 = 0", "result": "pass", "cmd": "python3 -B -s /tmp/cl-pub-xiyou-B000-r2/leak_recheck.py  # published_total 117 / flagged_published_LEAK 0 / flagged 66"},
+  {"text": "★纪律 1 加固：把桥的窄正则换成宽 [A-Za-z]{1,4}\\d{1,3} 后，泄漏仍为 0", "result": "pass", "cmd": "python3 -B -s /tmp/cl-pub-xiyou-B000-r2/leak_recheck.py  # NARROW LEAK 0 / WIDE LEAK 0"},
+  {"text": "点名集合逐层对账：产出单元内我复算的 52 条与桥逐条记账的 52 条**逐层完全相等**（tasks 16 / causeEdges 4 / foreshadows 18 / states 14）；差额 14 条全在 2 个被跳过单元", "result": "pass", "cmd": "python3 -B -s /tmp/cl-pub-xiyou-B000-r2/leak_recheck.py；并逐层复算脚本输出 flagged by layer (produced) == bridge vf by raw layer"},
+  {"text": "丢弃记账精确、无静默丢弃：18 个产出单元 kept+dropped = 117+699 = 816 = 原始条目数 816（逐单元差 0）；另 2 个跳过单元 102 条", "result": "pass", "cmd": "python3 -c \"...\" # raw produced(18)=816 kept+dropped=816；raw skipped(2)=102；total 918"},
+  {"text": "被跳过单元确实整单元未发布：L0:0000 的 47 条、L0:0002 的 55 条原始条目全部不在候选里", "result": "pass", "cmd": "python3 -c \"...\" # skipped unit item counts: read:xiyou:L0:0000 47 / read:xiyou:L0:0002 55"},
+  {"text": "父版本字节未变，且精确备份与父版本逐字节相同", "result": "pass", "cmd": "shasum -a 256 data/cache/a065244455cfb2221bcda94a.json data/cache/a065244455cfb2221bcda94a.docs.json data/cache/narrative/revisions/a065244455cfb2221bcda94a-37f7f9028c3509a9520f.graph.json  # 37f7f902… / c282cf39… / 37f7f902…"},
+  {"text": "scope 正确：批次 scope [46,136016) 与任务 sourceRange、index.json chapterUnits[0:20] 三者一致；20 个 unitHead 与索引全等、无空串", "result": "pass", "cmd": "python3 -c \"import json;b=json.load(open('loop/state/candidates/BATCH-publish-xiyou-B000.candidate.json'));print(b['scope']['start'],b['scope']['end'],len(b['scope']['chapters']))\"  # 46 136016 20"},
+  {"text": "父版本选择正确：a065244455cfb2221bcda94a 是动手前 data/cache/index.json 里西游记的第一条，且未写死基线键（sourceKey 取自候选而非我猜）", "result": "pass", "cmd": "python3 -c \"import json;print(json.load(open('loop/state/candidates/BATCH-publish-xiyou-B000.candidate.json'))['sourceKey'])\"  # a065244455cfb2221bcda94a"},
+  {"text": "读者能通过页面默认入口看到本批：只读 GET /api/history 返回的西游记第一条 = 新键", "result": "pass", "cmd": "curl -s http://127.0.0.1:8781/api/history | python3 -c \"import json,sys;d=json.load(sys.stdin);d=d if isinstance(d,list) else d.get('items');x=[e for e in d if str(e.get('title'))=='西游记'];print(len(x),x[0]['key'])\"  # 9 5b064a5575f0c330f6f2cd2e"},
+  {"text": "写回是追加式且本轮无漂移：index.json 80 条、无重复键、新键在第 0 条、父键仍在第 39 条；本轮前后哈希相同", "result": "pass", "cmd": "python3 -c \"import json;h=json.load(open('data/cache/index.json'));ks=[e['key'] for e in h];print(len(h),len(set(ks)),h[0]['key'],ks.index('a065244455cfb2221bcda94a'))\"  # 80 80 5b064a5575f0c330f6f2cd2e 39"},
+  {"text": "新版本含本批 117 个节点（tasks 78 + characterStates 26 + clues 13）；events 798/characters 219/causeEdges 140/relations 20/storylines 10 本批未增未改", "result": "pass", "cmd": "python3 -c \"import json,re;g=json.load(open('data/cache/5b064a5575f0c330f6f2cd2e.json'));print({l:sum(1 for n in (g.get(l) or []) if re.match(r'^(task|characterState|clue)_review_',str(n.get('id')))) for l in ('tasks','characterStates','clues')})\"  # {'tasks': 78, 'characterStates': 26, 'clues': 13}"},
+  {"text": "诚实标记齐备：新版本 296/296 个叙事节点 claimVerified=false 且 provenance=assistant-reviewed-source；meta.enrichment modelCalls=0/calls=0/semanticCompleteness=unverified/claimVerification=not_automatically_performed", "result": "pass", "cmd": "python3 -c \"import json;g=json.load(open('data/cache/5b064a5575f0c330f6f2cd2e.json'));n=[x for l in ('tasks','characterStates','clues') for x in (g.get(l) or [])];print(len(n),sum(1 for x in n if x.get('claimVerified') is False),all(x.get('provenance')=='assistant-reviewed-source' for x in n));e=g['meta']['enrichment'];print(e['modelCalls'],e['calls'],e['semanticCompleteness'],e['claimVerification'])\"  # 296 296 True / 0 0 unverified not_automatically_performed"},
+  {"text": "scopeVerification=declared_only（区间是声明的，非独立验证）—— 如实标注，不冒称已核验", "result": "pass", "cmd": "python3 -c \"import json;g=json.load(open('data/cache/5b064a5575f0c330f6f2cd2e.json'));e=g['meta']['reviewHistory'][-1];print(e['scopeVerification'],e['semanticCompleteness'],len(e['coverageGaps']))\"  # declared_only unverified 701"},
+  {"text": "X1 归因可复现：被跳过的 2 个单元候选 unitIndex/lane 均为 null", "result": "pass", "cmd": "python3 -c \"import json;[print(t, json.load(open('loop/state/out/'+t+'.candidate.json')).get('unitIndex'), json.load(open('loop/state/out/'+t+'.candidate.json')).get('lane')) for t in ('read_xiyou_L0_0000','read_xiyou_L0_0002')]\"  # None None / None None"},
+  {"text": "★DUP-RISK 可复现：发布工具未写台账（前后哈希相同、entries 仍 6 条），done_ids() 不含本任务，且 graph_target() 现在返回的正是本批新键", "result": "pass", "cmd": "shasum -a 256 loop/state/PUBLISH-LEDGER.json  # fde21d84…（与 pre.txt 相同）；python3 -c \"import sys;sys.path.insert(0,'loop/bin');import loop as L;print('publish:xiyou:B000' in L.done_ids())\"  # False；python3 -c \"import sys,json;sys.path.insert(0,'loop/bin');import to_candidate as T;print(T.graph_target('xiyou',json.load(open('loop/state/index.json')))['key'])\"  # 5b064a5575f0c330f6f2cd2e"},
+  {"text": "DUP-RISK 的后果在隔离副本里实测：对已更新父版本再发一次会叠出冗余版本键，但**不产生重复节点**（内容寻址 id 原样合并）", "result": "pass", "cmd": "见 /tmp/cl-pub-xiyou-B000-r2/dup_write_report.json：key=f0d2b3d586719a0dda028d03, parentKey=5b064a5575f0c330f6f2cd2e；tasks/characterStates/clues 计数不变、task id 集合相同，reviewHistory 7→8"},
+  {"text": "未跑 GPU/浏览器测试（本任务未声明要跑；GPU 全局串行），页面确认只用只读 HTTP GET", "result": "pass", "cmd": "本记录与 remaining 中如实声明；无 GPU/浏览器命令被执行"}
+ ],
+ "changes": [
+  {"path": "loop/state/out/publish_xiyou_B000.artifact.json", "kind": "append-only", "note": "本任务 writes 声明的产出（本文件）。"},
+  {"path": "data/cache/5b064a5575f0c330f6f2cd2e.json", "kind": "append-only", "note": "本批新图谱版本键（**上一轮 14:56 追加式新建**；本轮幂等重放未改动其字节）。"},
+  {"path": "data/cache/5b064a5575f0c330f6f2cd2e.docs.json", "kind": "append-only", "note": "新版本的原文副本（与父版本同哈希；本轮未改动）。"},
+  {"path": "data/cache/narrative/revisions/a065244455cfb2221bcda94a-37f7f9028c3509a9520f.graph.json", "kind": "append-only", "note": "发布工具写前生成的**父版本精确备份**（上一轮新建；与父版本逐字节相同，非覆盖父版本）。"},
+  {"path": "data/cache/index.json", "kind": "append-only", "note": "页面历史索引：上一轮已把新键插到第 0 条（⇒ 页面默认打开本批），80→80 条且无重复键，父键与大奉默认键均保留。**本轮重放未改动它**（前后哈希同为 b38342d0…）。属受保护路径 data/，写回时持有 GATE.lock。"},
+  {"path": "loop/state/candidates/BATCH-publish-xiyou-B000.candidate.json", "kind": "append-only", "note": "由任务指定链路 to_candidate.py --batch 生成（上一轮；固定输出路径，内容确定可重放）。本轮未改、未重新生成（重新生成会因父版本已更新而写出不同的 sourceKey，故我刻意不重跑桥）。"},
+  {"path": "loop/state/leases/GATE.lock", "kind": "transient", "note": "我取得（15:23）并在写完后释放；锁属瞬态，已不存在。"},
+  {"path": "loop/state/PUBLISH-LEDGER.json", "kind": "none", "note": "**我没有改它**（属受保护路径 loop/state/，且本任务 writes 不含该路径）。发布工具本身也不写它 ⇒ DUP-RISK 缺口。前后 sha256 相同（fde21d84…）可证。"}
+ ],
+ "sourceHashes": {
+  "data/cache/a065244455cfb2221bcda94a.json": "37f7f9028c3509a9520f6e695d1adff4dbebcc73e06c82a964f75a51e4f805f9",
+  "data/cache/a065244455cfb2221bcda94a.docs.json": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+  "data/cache/5b064a5575f0c330f6f2cd2e.json": "aefc1c4f7568219c5dde6e34aa495a58d925141b2f8e09de23adad07a75da8f3",
+  "data/cache/index.json": "b38342d07c45c087e11629cca42da58532990f4fc542e038333c84cf4930f215",
+  "loop/state/PUBLISH-LEDGER.json": "fde21d843184828cd85b627dbfc08fdd2e286316d86c68aacc97f63fdab04914",
+  "loop/state/candidates/BATCH-publish-xiyou-B000.candidate.json": "b7a052d5b9955b51601405f28761d4de1672dab40794cfcaba766bba1afaf56d",
+  "loop/bin/to_candidate.py": "1ded8fcc8a61bca961d0ff263ca47bf73437f826142820bd555204f4994f912f",
+  "tools/publish_reviewed.py": "a1827ebdb6d89ea04e1addb8807fa79ca95d1f6251edcddf6886ae3f357af561"
+ },
+ "remaining": [
+  "**本批未覆盖的原文区间**：西游记 101 个单元里只覆盖了前 20 个（[46,136016)）。**第二十回及其后全部未覆盖**（第 21–101 单元）。本批 ≠ 全书完成。",
+  "**2 个单元虽有复核结论但未发布节点**（X1，高）：read:xiyou:L0:0000（第一回）与 read:xiyou:L0:0002（第三回）被桥以 no_authoritative_range 整单元跳过（候选 unitIndex/lane 为 null）。**第一回是全书开篇**，其内容目前完全不在作品库里。需 READER 补 unitIndex/lane，或桥加「用 unitHead 反查唯一单元」的兜底（反查必须要求唯一）。这两单元共 102 条原始条目、其中 14 条被复核点名。",
+  "**DUP-RISK（高）发布台账未更新 ⇒ 重跑会叠冗余版本**：tools/publish_reviewed.py --write 不写 loop/state/PUBLISH-LEDGER.json，而 loop.py 的 published_batches() 只读它 ⇒ done_ids() 不含 publish:xiyou:B000，任务仍会被再次领取；而桥的 graph_target() 现在返回的正是**我自己发布的 5b064a55…** ⇒ 重跑会叠出第二个版本键（已在隔离副本实测复现 f0d2b3d5…）。建议在合并/协调环节按模板追加一条（graphKey=5b064a5575f0c330f6f2cd2e, parentKey=a065244455cfb2221bcda94a, scope=[46,136016), units=20）。**在下游修好之前，请勿再次领取本任务** —— 重跑不会新增内容，只会多一个版本键与一条重复 reviewHistory。",
+  "**X3（中）桥的点名定位符正则仍窄**：\\b([TCSF]\\d+)\\b 匹配不到 CE*/ST*/U*/K*/R*/KD* 等形态。本批侥幸未致泄漏（宽正则下泄漏仍 0），但下一批可能爆发。需在受保护路径 loop/bin/to_candidate.py 修（须开合并任务并持 GATE.lock）。",
+  "**X2（中）78/78 个 tasks 名为占位符**：「（未命名任务）」——上游 READER 候选无 summary/name 字段。属上游字段缺口，桥已忠实兜底。**注：这一条的复算来自上一轮记录，本轮我没有重新实测**。",
+  "**X5（低）scopeVerification=declared_only**：本批 scope 三处口径一致（与索引权威区间、任务 sourceRange 逐字相同），但它仍是**声明**而非独立验证的覆盖。若要与大奉那两次失真彻底区分开，需要一条独立判据（按 chapterUnits 的 20 个区间直接构造 scope，并核对 chapters 数 == 单元数）。",
+  "**语义正确性未核验**：本轮只做引用定位/身份合同机检 + 独立对账（泄漏 0），**未判断**候选对人物动机、世界观、因果机制的解读在文学上是否正确。semanticReview 保持 not_performed；新版本 reviewHistory 的 semanticCompleteness=unverified。",
+  "**本批未做的事**：未跑 GPU/浏览器测试（任务未声明，且 GPU 全局串行）；未改任何受保护的业务源码（js/ css/ index.html serve.py narrative.py scripts/ tests/ docs/ 一个都没动）；未重新生成批次候选（重跑桥会因父版本已更新而写出不同的 sourceKey，那正是 DUP-RISK 的触发路径）；未抢并行 agent 的工作；未用旁路（手工改图/内存补丁）伪造发布成功；未为了让本批「全绿」而放宽发布工具的任何校验；未编辑 loop/state/PUBLISH-LEDGER.json。",
+  "**上一轮为何被拒（如实记录，不粉饰）**：上一轮 agent 在 14:56 已真实完成 --write，随后以 rc=1 退出（log 末段 TLS 连接错误），worker 按其判据把该轮登记为 REJECTED。worker 的判据是「agent 是否正常结束」，它无法判断磁盘上的发布是否完整 —— 这个保守判定本身没错。本轮补的是**核实与记录**，不是内容。**证据出处说明**：运行记录 `loop/state/runs/run-publish_xiyou_B000.json`（rc=1, seconds=1360.6，正是「写完盘之后才掉线」的时长证据）属**瞬态路径**，按校验器规则不能列为 evidence（会被回收）；该文件在撰写本记录时确实存在，读者可用 `cat loop/state/runs/run-publish_xiyou_B000.json` 现场核对，若已被回收则此条不可复核 —— 如实标注，不冒称它是留存证据。上一轮的拒绝记录 `loop/state/out/REJECTED__publish_xiyou_B000.json` 属留存产物，已列入 evidence。",
+  "**全书覆盖率（诚实口径）**：西游记本批 20/101 单元 = 19.8020%、135970/722176 码点 = 18.8290%；三书合计 1133 个单元，大奉 4 批、三国 0 批，全书远未完成。",
+  "**下一批**：publish:xiyou:B001 起（[136016, …)），父版本应取**本键 5b064a5575f0c330f6f2cd2e** 之后的页面默认版本，不要写死基线键（见 graph_target 的说明）。"
+ ],
+ "rollback": {
+  "kind": "append-only",
+  "strategy": "delete-added-files",
+  "files": [
+   "loop/state/out/publish_xiyou_B000.artifact.json",
+   "data/cache/5b064a5575f0c330f6f2cd2e.json",
+   "data/cache/5b064a5575f0c330f6f2cd2e.docs.json",
+   "data/cache/narrative/revisions/a065244455cfb2221bcda94a-37f7f9028c3509a9520f.graph.json"
+  ],
+  "indexRestore": {
+   "path": "data/cache/index.json",
+   "note": "如要完全回滚，需把 index.json 第 0 条（5b064a5575f0c330f6f2cd2e）移除，使页面默认回到 a065244455cfb2221bcda94a。**该文件属受保护路径 data/**，回滚必须在合并任务里持 GATE.lock 执行。上一版哈希 a14d178d736abec31146d4d9baf057a0368ea0762469491af8899e43995667a7（80 条、新键不在第 0 条时）。",
+   "safeBecause": "父版本 a065244455cfb2221bcda94a 的字节未被改动（sha256 前后一致），且精确备份 data/cache/narrative/revisions/…-37f7f9028c3509a9520f.graph.json 与它逐字节相同 ⇒ 回滚只需删新增文件，无需恢复任何被覆盖的内容。"
+  },
+  "note": "本批是**纯追加式**发布：没有覆盖或删除任何已发布版本。父版本字节未变（已自核：写前写后 + 备份逐字节比对）。**本轮的幂等重放没有产生任何新字节**（pre/post 清单逐行相同），故除本 artifact 外，本轮实际上没有需要回滚的写入。PUBLISH-LEDGER.json 未被本任务改动。"
+ },
+ "auditScripts": {
+  "note": "本轮的对账脚本写在 /tmp（任务 writes 只允许本 artifact，故脚本不放仓库）。若 /tmp 被清理，可按 assertions 的 cmd 语义重写。",
+  "keyCommands": [
+   "SRC=$(python3 -c \"import json;print(json.load(open('loop/state/candidates/BATCH-publish-xiyou-B000.candidate.json'))['sourceKey'])\") && python3 -B -s tools/publish_reviewed.py --source-key \"$SRC\" --candidate loop/state/candidates/BATCH-publish-xiyou-B000.candidate.json --dry-run",
+   "python3 -B -s tools/publish_reviewed.py --source-key a065244455cfb2221bcda94a --candidate loop/state/candidates/BATCH-publish-xiyou-B000.candidate.json --write --report /tmp/cl-pub-xiyou-B000-r2/write_report.json",
+   "python3 -B -s /tmp/cl-pub-xiyou-B000-r2/leak_recheck.py",
+   "diff /tmp/cl-pub-xiyou-B000-r2/pre.txt /tmp/cl-pub-xiyou-B000-r2/post.txt",
+   "diff /tmp/cl-pub-xiyou-B000/write_report.json /tmp/cl-pub-xiyou-B000-r2/write_report.json"
+  ]
+ }
+}

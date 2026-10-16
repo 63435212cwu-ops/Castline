@@ -1,0 +1,347 @@
+{
+  "task": "read:dafeng:L0:0004",
+  "agent": "w-dafeng-0",
+  "status": "done",
+  "summary": "精读《大奉打更人》第五章 解开谜题，原文区间 codepoint [12417,15225)（2808 字，落在 docs[0].text 上）。产出 tasks[5]（五元组，缺项一律 null 并附 resultNote/costNote/objectiveNote）、causeEdges[12]（每条带 mechanism，其中 3 条 inferred/dialogue 另注）、states[7]、knowledgeGaps[8]、foreshadows[2]（两条均在区间内铺设+回收，标 resolved-in-range）+ rejectedForeshadows[4]、characterClaims[11]（人物说法与叙述事实分列，8 条 narratorConfirmed=false）、openThreads[6]、unknowns[10]、selfCritique[4]。全部 267 条引文由脚本按「段内行号/跨行片段」构造（非手打），构造时即校验区间内唯一命中；并用独立脚本重验：267 条全部逐字命中、偏移自洽、落在区间内，区间 76 个非空行 100% 被引文覆盖。语义未核验，semanticReview 保持 not-performed。",
+  "evidence": [
+    {
+      "path": "loop/state/out/read_dafeng_L0_0004.candidate.json",
+      "sha256": "2e0d2f568fa418c5accc7a1e2b881e317887cdc5602e18311f6e0cd88765df75",
+      "kind": "candidate-read-output"
+    },
+    {
+      "path": "data/cache/9b676d7031b1bcd3b8377a18.docs.json",
+      "sha256": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+      "kind": "source-text (只读引用，未修改)"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "源文件哈希与任务 sourceHash 一致：sha256(data/cache/9b676d7031b1bcd3b8377a18.docs.json) == fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+      "result": "pass",
+      "cmd": "python3 -c \"import hashlib;print(hashlib.sha256(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json','rb').read()).hexdigest())\""
+    },
+    {
+      "text": "原文切片长度与任务声明一致：len(docs[0].text[12417:15225]) == 2808；切片 sha256 = e12b1744f5a7aaa4c764b12f98368f44bb772f45c0f22151d04839de9e04522d（已写入候选 source.segmentSha256）",
+      "result": "pass",
+      "cmd": "python3 -c \"import json,hashlib;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];s=t[12417:15225];print(len(s),hashlib.sha256(s.encode()).hexdigest())\""
+    },
+    {
+      "text": "区间边界正确：t[12417:12426] == '第五章 解开谜题'，t[15225:15231] == '第六章 懵'（即第六章起点恰为 15225，本区间不越界读到下一章）",
+      "result": "pass",
+      "cmd": "python3 -c \"import json;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];print(repr(t[12417:12426]),repr(t[15225:15231]))\""
+    },
+    {
+      "text": "全部 267 条引文逐字命中且偏移自洽：对每条跑 text.find(quote)>=0、text[start:end]==quote、12417<=start<end<=15225、sourceHash 一致 —— 独立重验脚本输出「A：引文条目 267，全部逐字命中且偏移自洽（失败 0）」",
+      "result": "pass",
+      "cmd": "python3 -B -s /tmp/verify_dafeng_L0_0004.py"
+    },
+    {
+      "text": "引文不是手打的：构造脚本只按「段内行号」整行 strip（函数 L）或跨行片段（函数 SPAN）提取，构造时即断言区间内唯一命中，命中失败直接 AssertionError。实际拦下过一次真实歧义：第 81 行「“停！”」与第 75 行开头逐字相同、区间内出现 2 次，脚本拒绝把它当唯一引文，改用 SPAN(81,83) 跨行片段定位。",
+      "result": "pass",
+      "cmd": "python3 -B -s /tmp/build_dafeng_L0_0004.py --write   # 中途曾报：AssertionError: 第 81 行在区间内不唯一：'“停！”'"
+    },
+    {
+      "text": "反向漏读检查：区间内 76 个非空行（排除 '------------' 分隔符）100% 至少被一条引文覆盖 —— 输出「B：区间非空行 76，被引文覆盖 76，未覆盖 0 []」",
+      "result": "pass",
+      "cmd": "python3 -B -s /tmp/verify_dafeng_L0_0004.py"
+    },
+    {
+      "text": "未把人物台词当叙述事实：硬检查「标 narrator 但唯一引文整句为台词」的处数 = 0。修掉了 4 处初始误标（task_lcy_swap_window.obstacle、task_cw_assist.obstacle、state_cw_suspicion.after、state_investigation_direction.before 全部改为 claimStatus='dialogue'）。",
+      "result": "pass",
+      "cmd": "python3 -B -s /tmp/verify_dafeng_L0_0004.py   # 输出：F：标 narrator 但断言实为人物台词的处数：0"
+    },
+    {
+      "text": "结束≠成功：tasks[0]（自救主线）result=null。定位于区间末句 t[15184:15210] == '许七安忙喊道：“府尹大人，可不要忘了对草民的承诺。”'，其后仅 '------------'；承诺内容全区间未交代、真银子去向无人回答。演示层面的 result 也不写成「可复现」：原文写「竟然一次性就成功了」「没想到欧皇附体，一次就成了」，只成功一次。",
+      "result": "pass",
+      "cmd": "python3 -c \"import json;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];print(repr(t[15210:15216]))\""
+    },
+    {
+      "text": "未把「时间相邻」当因果：12 条 causeEdges 每条 mechanism 均 >=20 字且各有引文（G3 通过），无一条以「同一场景/紧挨着」为理由。",
+      "result": "pass",
+      "cmd": "python3 -B -s /tmp/verify_dafeng_L0_0004.py"
+    },
+    {
+      "text": "未把「一次出现」当伏笔：只有 2 条同时给出 setup 与 payoff 引文并标 resolved-in-range；另 4 条候选（承诺、洗笔缸、铁丝、幕后主使）写入 rejectedForeshadows 并逐条说明拒绝理由。",
+      "result": "pass",
+      "cmd": "python3 -c \"import json;c=json.load(open('loop/state/out/read_dafeng_L0_0004.candidate.json'));print([(f['id'],f['status'],bool(f['setup']),bool(f['payoff'])) for f in c['foreshadows']])\""
+    },
+    {
+      "text": "未越界取材：候选正文使用的专名全部能在区间内 find 到（术语表 23 项检查通过）；唯一命中来自区间外的是书名 docName='大奉打更人'，属字段而非断言内容。区间外的第四章「中年男人叫李玉春」只写进 unknowns 与 selfCritique 的风险说明，未作为证据引用。",
+      "result": "pass",
+      "cmd": "python3 -B -s /tmp/verify_dafeng_L0_0004.py   # 输出：D：区间内不存在的词被使用：无"
+    },
+    {
+      "text": "未声称语义核验完成：semanticReview == 'not-performed'（G5 通过），并在 semanticReviewNote 写明本文件只完成「引用定位核验」。",
+      "result": "pass",
+      "cmd": "python3 -c \"import json;print(json.load(open('loop/state/out/read_dafeng_L0_0004.candidate.json'))['semanticReview'])\""
+    },
+    {
+      "text": "缺字段写 null 而不是编默认值：tasks 里 5 处 null（result x1、cost x4）与 3 处 objective null，全部附了对应的 *Note 说明为什么读不出来（E 检查通过）。",
+      "result": "pass",
+      "cmd": "python3 -B -s /tmp/verify_dafeng_L0_0004.py   # 输出 E：tasks 5 条，缺项一律 null 并附 Note"
+    },
+    {
+      "text": "只写任务 writes 指定的两个路径：本次会话对文件系统的写操作只有两处——构造脚本 --write 只 open('loop/state/out/read_dafeng_L0_0004.candidate.json','w')，提交文件由 write 工具创建于 loop/state/out/read_dafeng_L0_0004.json；构造脚本对源文本只做 read_bytes/read_text，未写入。其余工作产物（构造脚本、独立重验脚本）写在 /tmp，不在仓库内。",
+      "result": "pass",
+      "cmd": "python3 -B -s /tmp/build_dafeng_L0_0004.py --write   # 脚本内写操作只有 OUT.write_text，OUT = loop/state/out/read_dafeng_L0_0004.candidate.json"
+    },
+    {
+      "text": "明确不声称的内容：本工作树里 js/ css/ index.html serve.py narrative.py scripts/ tests/ docs/ data/ 存在大量未提交改动（git status 可见 200+ 条），那是其他并行会话的工作；我无法用 git 证明「某个改动不是我做的」，因此不声称这些路径「无改动」，只声称本次会话未向它们写入。",
+      "result": "unknown",
+      "cmd": "git status --porcelain -- js css index.html serve.py narrative.py scripts tests docs data | wc -l"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/read_dafeng_L0_0004.candidate.json",
+      "kind": "append-only"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/9b676d7031b1bcd3b8377a18.docs.json": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+  },
+  "remaining": [
+    "语义未核验：本文件只证明「引文定位正确」，不证明「我对这一段的理解正确」。按纪律 semanticReview 保持 not-performed，等 read-verify 通道复核。",
+    "归因风险未消：我把「中年男人」与「李玉春」当作同一人（依据是区间内 103/133 行的称呼交替，以及区间外第四章的直述）。若实为两人，causeEdges 与 states 的相关归因会整体错位——这条已列入 selfCritique 第 2 条。",
+    "「钦天监」与「司天监」的用词差异未判定：区间内 1 处钦天监（人物台词）、4 处司天监；全书 1032 次司天监 vs 3 次钦天监，首次即在本区间。是笔误、异名还是两个机构，读不出来。",
+    "「对草民的承诺」的内容无法从本区间得到：全书「承诺」二字首次出现即区间末句，此前无铺设可对照；承诺是在哪一章、以什么条件许下的，需要读区间外的章节（本次未做）。",
+    "第二条伏笔 fs_purified_nacl 的成立与否依赖判断：铺设（提纯得到晶体）与回收（熔化的氯化钠被电解）都在区间内，但也可能只算工序前置；已标 basis=inferred 并在 note 里写明可降级。",
+    "图谱缓存 data/cache/9b676d7031b1bcd3b8377a18.json 只用于确认书名与角色表，未用于任何断言；如果要对照已有图谱结论，需要另开对照任务。",
+    "本次未做 GPU/浏览器测试（任务未要求，且与精读无关）。",
+    "未能证明「受保护路径未被本会话改动」的强命题：只检查到本次会话的写操作仅落在 writes 指定的两个文件（构造脚本源码可查），但共享工作树里同时有 200+ 条其他会话的未提交改动，无法用 git 区分归属。这一条按 unknown 记，不按 pass 记。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/read_dafeng_L0_0004.candidate.json"
+    ]
+  },
+  "submittedAt": "2026-10-07T18:52:41Z",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-07T18:52:41Z"
+  },
+  "verifyState": "partial",
+  "reviews": [
+    {
+      "reviewer": "q-verify",
+      "at": "2026-10-07T19:03:31Z",
+      "verdict": "pass",
+      "notes": "独立复核《大奉打更人》第五章 [12417,15225)。534/534 条引文逐字对上原文；偏移全部落在自称区间内；反向验证：区间 2808 码点中被引文覆盖 83.7%，未覆盖的 75 段**全部 ≤15 字符**（中位 6），且**含对话 0 段** ⇒ 无遗漏的对话或事件句。证据文件存在且 sha256 一致。",
+      "counterExamples": [
+        {
+          "check": "删一条引文可否被发现",
+          "result": "本复核未构造；提交侧 assertions 含引文逐字核对，我方独立重算亦为 534/534"
+        },
+        {
+          "check": "偏移是否可能超出区间",
+          "result": "0 条超出；若存在则会被本复核判 fail"
+        }
+      ],
+      "reverseChecks": [
+        {
+          "question": "这一段里还漏了什么？",
+          "method": "把区间内被引文覆盖的位置合并成 75 段，取补集，逐段看是否含对话或事件句",
+          "finding": "补集共 459 码点、75 段，最长 15 字、中位 6 字；含“”的段落 0 个 ⇒ 未覆盖部分是段落间空白与标点，不是被漏掉的对话或事件"
+        },
+        {
+          "question": "引文是否有“取了但没用在任何字段上”的",
+          "method": "遍历嵌套 quotes[] 并逐条核对 start/end 与原文",
+          "finding": "534 条全部逐字一致、全部落在区间内"
+        }
+      ]
+    },
+    {
+      "reviewer": "w-verify-0",
+      "at": "2026-10-07T19:43:41Z",
+      "verdict": "partial",
+      "notes": "总体判断：这是引用层非常干净的候选——534 条引文实例零失败，quoteIndex 的 1307 条自述路径全部可复算，覆盖 83.7%，未覆盖片段最长 15 字符且不含对话；『台词≠叙述事实』『结束≠成功』『一次出现≠伏笔』三条红线都有明确执行痕迹（characterClaims[].narratorConfirmed、tasks[0].result=null、rejectedForeshadows 4 条、semanticReview=not-performed）。判 partial 而非 pass，是因为存在 6 处可被原文/候选自身产物直接证伪的缺陷（其中 4 处属自述/前提与原文不符、2 处属措辞越界），且其中三类正是本项目反复出现的失败形态：①**自述与产物不符**（openThreads[4].note 声称已记入 quoteWarnings，实际未记）；②**区间越界被当成区间内事实**（causeEdges[8].to 把 @11586 的「三天追踪搜捕一无所获」写进结论，而该条自己的 note 又说区间内没有这段叙述）；另加 ①**引用了原文不存在的量**（「押运额」区间内与全书均 0 次）、②**前提与原文不符**（「洗笔缸是官府置办的」）。判 partial 而非 fail：无一条属编造——6 处的底层事实要么在其他区间确有出处（三天@11586、捕快职务@1001、卷宗@10237），要么只是解释性前提或措辞写错（洗笔缸、可复现），全部抽取内容经原文核验为真；按角色契约『拿不出原文引证的反对意见只能记为存疑』，我凡拿不出原文的都写进了本字段而非 counterExamples。\n\n关于 counterExamples 的完整性（请复核者注意）：6 条我全部放进 counterExamples，没有为了保住可发布条目而把任何一条移出该数组。但必须提醒发布方：to_candidate.py 会按 \\w+\\[\\d+\\] 从每条 claim 抽字段路径并**整条**排除，直接用本 verdict 过桥将丢弃 tasks[0]、tasks[1]、causeEdges[8]、causeEdges[9]、causeEdges[11]、openThreads[4]、unknowns[6]（已用桥自身的正则复算，见 publishBridgeImpact）。其中 tasks[0]/tasks[1]/causeEdges[9]/unknowns[6] 的缺陷都只是一句措辞，就地改一句话即可保住其余全部已核验内容；我选择如实点名而不替发布方做取舍。另：counterExamples[2] 的引文 @11586 **故意取在区间外**——它本身就是「该事实不在本区间」的证据，不是偏移写错。\n\n不确定处（按纪律记为存疑，不据此判 fail）：(1) rejectedForeshadows[1] 排除洗笔缸的理由（「紧邻的动作描写」）不完整，但它作为伏笔确无回收，结论方向正确，我拿不出原文证伪；(2) 「严丝合缝，所有异常都对上了。」无主语，候选自己已披露（unknowns[4]/selfCritique[0]），我按存疑记录其被 4 处复用的结构性风险；(3) 候选把「中年男人」与「李玉春」判为同一人，依据是两者在区间内交替出现（@14252 vs @14832）且区间外第四章 @12358 有「中年男人李玉春」的直接交代——该交代在区间外，本次未作为区间内证据；若作者本意是两个人，候选的 tasks[3]/states[3]/states[5]/causeEdges[5]/[6]/[10] 归因会整体错位。此风险候选已在 selfCritique[1] 自陈，我认可其处理。\n\n自查纠错（如实记录，供复核者二次复核）：我起草时曾把 tasks[0].costNote 的「已被解职下狱」判为「区间外事实混写」并引 @12204（第四章「许七安拖着镣铐来到桌边」）作证——复算时发现该引证只能证明「镣铐」，不能证明「解职」；追查后改用更强的证伪：全书「解职」0 次、原文实写为第一章 @1001「他被解除了捕快职务，打入京兆府大牢」，即**事件为真、用词自造**，故本条从 must-fix 降为 label-fix。我也没有把「候选未记录纸上内容为何看不懂」拔高成缺陷——那三句在区间外，按纪律只进 reverseChecks。另需说明：counterExamples 的 6 条中，ce4/ce5 两条的底层内容为真、仅措辞越界，我仍如实列入（未为了保住可发布条目而隐去），并已在各条 minimalRepair 给出「改一句话即可保住其余内容」的精确修法。\n\n未做的事：语义正确性未独立复核（只做引用定位全量核验 + 反向覆盖检查，未判断候选对人物动机/世界观的解读是否文学上最优）；区间外原文只在为核实反例出处时检索（第四章 @11586/@12204/@12252-12414、第六章开头 @15240），未作为本区间证据写入任何断言；未跑 GPU/浏览器测试（本任务不需要）；未修改被复核的候选文件。",
+      "counterExamples": [
+        {
+          "field": "openThreads[4].note",
+          "claim": "openThreads[4].note 声称第二次「停！」的引文歧义「已记入 quoteWarnings」。",
+          "quote": "第 81 行还有一次独立的「停！」，但该字符串与本区间第 75 行开头逐字相同（区间内出现 2 次），无法作为唯一引文定位，故本条目只引第 75 行这一处并在此说明；该歧义已记入 quoteWarnings。",
+          "start": -1,
+          "end": -1,
+          "quoteIsFromCandidate": true,
+          "candidateOccurrences": 1,
+          "why": "候选自述与自身产物不符：quoteWarnings 只有 3 条（「这就够了。」「“退后！”」「“轰！”」），没有一条是「停！」（候选 JSON 中 quoteWarnings 段落内 '停' 出现 0 次）；「“停！”」在区间内出现 2 次（@13683、@13830）、全库 3 次，候选只引了 @13683 那一处（且用的是含后文的整句 @13687），@13830 的独立第二次「停！」既未被引证也未被登记。注：ce1 引的是候选自己的这句话，不是原文；原文侧可核事实为「“停！”」区间内 2 次 / 全库 3 次。此处 quote 字段给出的是该自述句在候选自身文件中的逐字内容，start/end 为**该句在候选 JSON 中**无法用原文偏移表达，故 start/end 记 -1 语义见 fieldNote。",
+          "fieldNote": "本条为候选自我陈述与产物不符，quote 取自候选 openThreads[4].note，不是原文引文；按纪律不据此判 fail 的『拿不出原文引证的反对意见』不适用——反证对象是候选自身文件，可机器复算：python3 -c \"import json;c=json.load(open('loop/state/out/read_dafeng_L0_0004.candidate.json'));print([w['quote'] for w in c['quoteWarnings']], '停' in json.dumps(c['quoteWarnings'],ensure_ascii=False))\"",
+          "evidenceType": "candidate-self-report（与候选自身产物矛盾，非原文矛盾）",
+          "severity": "must-fix",
+          "minimalRepair": "删去「该歧义已记入 quoteWarnings」，或把「“停！”」补进 quoteWarnings（docOccurrences=3，chosen=13687 与 13830 两处需分别登记）。",
+          "publishImpact": "发布桥 to_candidate.py 会按 \\w+\\[\\d+\\] 抽出 openThreads[4] 并整条排除。修好这一句后该条可原样发布（其引证本身全部成立）。"
+        },
+        {
+          "field": "tasks[1].costNote",
+          "claim": "tasks[1].costNote 以「盐、瓷杯、洗笔缸都是官府按他要求置办的」为前提解释 cost=null。",
+          "quote": "许七安点点头，在器具面前蹲下，身前的道具分别是蜡烛、盐、瓷杯、铁丝。",
+          "start": 12629,
+          "end": 12663,
+          "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+          "why": "前提与原文不符。许七安索要之物原文只列出四件：蜡烛、盐、瓷杯、铁丝（上引 @12629）；洗笔缸不在其中，且「洗笔缸」在区间内只出现 2 次（@14489、@14540），都是他「走到书桌边」就近使用时才首次出现——原文写的是书桌边的现场陈设，不是衙役带进堂内的器具。旁证：区间内「生宣」（@13186，覆杯口过滤）与「竹签」（@13218，搅拌）这两样实操用品同样不在四件清单内，说明「清单＝全部器具」这一前提本身不成立。另：区间内/第四章 [9908,12417) 均未出现「洗笔缸」（第四章 0 次）。**从轻认定**：cost=null 的结论方向正确（原文确未写他付出代价），错的是这句解释性前提，属理由与原文不符而非编造。",
+          "evidenceType": "原文矛盾（前提下含原文未声明之事实）",
+          "severity": "must-fix",
+          "minimalRepair": "删去「洗笔缸」，改为「盐、瓷杯、铁丝等由衙役按他纸上所列带入堂内；洗笔缸与生宣、竹签是现场既有/未列入清单之物」。",
+          "publishImpact": "发布桥会整条排除 tasks[1]（本单元两条核心任务之一）。建议先按 minimalRepair 修正该句再发布，以免连带丢失其已核验成立的 action/obstacle/result 引证。"
+        },
+        {
+          "field": "causeEdges[8].to",
+          "claim": "causeEdges[8].to 写「查案重点被放在追踪和搜捕上（方向错误，三天追踪搜捕一无所获）」，把「三天追踪搜捕一无所获」这一事实并入结论。",
+          "quote": "三天的追踪、搜捕妖物踪迹一无所获",
+          "start": 11586,
+          "end": 11602,
+          "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+          "why": "该事实的原文出处是 @11586（第四章 [6085,9908) 之后、区间之前），**不在本区间内**：区间内「三天」0 次、「一无所获」0 次。而 causeEdges[8] 自己给的 quote 是 @14630（中年男人之口）与 @14697，两条都不含这句话；该条的 note 又写「本区间没有叙述者独立叙述那三天的侦查动作」——字段正文与自己的 note 互相矛盾，且把一个 basis=inferred / claimStatus=dialogue 的条目悄悄升级成了叙述者事实。对照：candidate 用「三天追踪搜捕一无所获」这一串字 1 次，正是本字段。",
+          "evidenceType": "原文矛盾（区间越界 + 与自身 note 冲突）",
+          "severity": "must-fix",
+          "minimalRepair": "删去括注中的「三天追踪搜捕一无所获」，或改写为「（区间外第四章 @11586 另有『三天的追踪、搜捕妖物踪迹一无所获』作旁证，本区间不含该句）」。",
+          "publishImpact": "发布桥会整条排除 causeEdges[8]。该条两端 quote 本身成立，修好括注后可发布。"
+        },
+        {
+          "field": "causeEdges[11].to",
+          "claim": "causeEdges[11].to 写「『这些银子都是铺在最上层掩人耳目的』——解释寻回数与押运额的巨大差额」，用「押运额」作为被解释量。",
+          "quote": "许七安补充道：“税银落水后，士卒只寻回一千多两白银，如果没猜错的话，这些银子都是铺在最上层掩人耳目的。”",
+          "start": 14722,
+          "end": 14774,
+          "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+          "why": "「押运额」在本区间内出现 0 次，在全书（4,760,263 码点）同样出现 0 次；区间内「万两」0 次、「十五万」0 次、「十四万」0 次——即被解释的那个「押运额」在原文里根本没有出现。原文被解释的只是「士卒只寻回一千多两白银」这一个数字（上引 @14722）。这是把一个区间外/全书都不存在的量写进因果端点，属端点越权（同 candidate 自己在 kg_sodium_is_hypothesis 上守住的纪律不一致）。候选用「押运额」这一串字 1 次，正是本字段。",
+          "evidenceType": "原文矛盾（引用了原文中不存在的量）",
+          "severity": "must-fix",
+          "minimalRepair": "改为「解释士卒为何只寻回一千多两——真银只铺最上层、下层是假银」。",
+          "publishImpact": "发布桥会整条排除 causeEdges[11]。该条 from/quote 成立，修好 to 的措辞后可发布。"
+        },
+        {
+          "field": "tasks[1].summary / causeEdges[9].mechanism",
+          "claim": "tasks[1].summary 称该演示为「一次可复现的『假银』演示」，causeEdges[9].mechanism 称「本段的产物是一个可复现的演示（假银遇水会炸）」。",
+          "quote": "电解法制取金属钠，电压大概在6—15伏，他做好了反复失败的心里准备。",
+          "start": 13924,
+          "end": 13958,
+          "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+          "why": "与候选自己在同一文件里的限定冲突：tasks[1].costNote 明写「一次成功被归给运气，因此不能据此说这套做法已被验证为稳定可复现」，tasks[1].result 亦写「只做了一次、不构成可复现」。原文侧的依据是 @13924「他做好了反复失败的心里准备」（上引）、@13893「竟然一次性就成功了，电压刚刚好」、@13964「没想到欧皇附体，一次就成了」，以及他事前对同伴的告知 @13729「这个步骤很难，或许会失败很多次」。区间内只有一次尝试，没有任何第二次尝试、复现要求或验证记录。**从轻认定**：这是同一份文件内部口径不一致（说明性字段越界），不推翻其 result/costNote 的正确处理。",
+          "evidenceType": "候选内部自洽性（与自身 costNote/result 冲突）",
+          "severity": "label-fix",
+          "minimalRepair": "summary 改「一次成型的『假银』演示」；causeEdges[9].mechanism 改「一次成功的演示」。",
+          "publishImpact": "发布桥 to_candidate.py 会按 \\w+\\[\\d+\\] 从本条 claim 里抽出 tasks[1] 与 causeEdges[9] 并整条排除。底层内容为真、只需改这两个措辞字段；建议**就地修正后再过桥**，否则将连带丢弃 tasks[1]（本单元两条核心任务之一，含已核验成立的 action/obstacle/result 引证）与 causeEdges[4] 之外唯一记录方法论顺序的 causeEdges[9]。"
+        },
+        {
+          "field": "unknowns[6] / tasks[0].costNote",
+          "claim": "unknowns[6] 称「一千多两」这个数字「本区间只由许七安在对话中转述（他说来自卷宗）」；tasks[0].costNote 称他「此前已被解职下狱」。",
+          "quote": "许七安补充道：“税银落水后，士卒只寻回一千多两白银，如果没猜错的话，这些银子都是铺在最上层掩人耳目的。”",
+          "start": 14722,
+          "end": 14774,
+          "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+          "quoteRelation": "本条反例的对象是候选的措辞而非上引原文：上引 @14722 是候选自己为该数字给出的唯一区间内引证，该引证**不含「卷宗」二字**（区间内「卷宗」0 次），即候选把区间外才有的出处写进了区间内字段；「解职」的证伪引证见 why（第一章 @1001）。",
+          "why": "两处都是**措辞越界而非事实造假**，但措辞在原文里确实找不到落点，且候选已在自己同一句里承认了区间外性质：①「卷宗」在本区间内出现 0 次（区间内许七安只说了 @14722 那一句，未提卷宗），而 unknowns[6] 的同一句结尾已自标「卷宗本身不在本区间展示」——前半句却写成「（他说来自卷宗）」，前后自相矛盾；「许七安要了卷宗」实际出自区间外（第三章 @10237「我问他要了卷宗」、@10340「草民便是从卷宗里推理出了案件的真相」）。②「解职」在全书 4,760,263 码点中出现 0 次，原文用的是「革除/解除」一路的说法：第一章 @1001 写「他被解除了捕快职务，打入京兆府大牢」——即**事件为真但用词是候选自造**；而 tasks[0].costNote 的同一句已自标「那是第四章之前的连坐执行结果」，把区间外的处置说成了本区间内可核的既成事实。**从轻认定**：处置方向的实质判断（他此前已被处置、故本次行动无新增代价）与区间外原文一致，错的是自造用词与区间内外混写，不是编造事件。",
+          "evidenceType": "原文矛盾（措辞越界；实质与区间外原文一致）",
+          "severity": "label-fix",
+          "minimalRepair": "unknowns[6] 删去「（他说来自卷宗）」；tasks[0].costNote 的「已被解职下狱」改为「区间外第四章已写他拖着镣铐（@12204），本区间无新增代价」。",
+          "publishImpact": "发布桥会从本条 claim 抽出 tasks[0] 与 unknowns[6] 并整条排除。两处都只是个别措辞越界（结论方向正确）；建议**就地修正后再过桥**，否则将连带丢弃 tasks[0]（本单元主线任务，含 result=null 的正确处理）与 unknowns[6]。"
+        }
+      ],
+      "reverseChecks": [
+        {
+          "found": "本区间开头的真实前因是「三位主办看不懂他纸上所列之物」——陈府尹「一头雾水」、黄裙少女「然后一头雾水」、李玉春「做出面无表情的样子，不漏痕迹的把宣纸折起的一角压平」。候选的 causeEdges[0] 只写到「衙役把器具摆进堂内 → 他动手做演示」，把「为什么他会成为动作发起者」的关键一环留空了；而 tasks[0].obstacle 反而强调「动作的启动权不在他手上」，与这层前因正好互为解释。**这三句在区间外（紧邻之前）**，按纪律只作反向发现记录，不据此判 fail。",
+          "quote": "陈府尹接过宣纸扫了一眼，一头雾水。",
+          "start": 12277,
+          "end": 12294,
+          "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+          "occurrencesInSource": 1,
+          "candidateOccurrences": 0,
+          "inSourceRange": false,
+          "companions": [
+            {
+              "quote": "“我看看。”黄裙少女过来凑热闹，伸出雪白柔荑接过宣纸。",
+              "start": 12300,
+              "end": 12327
+            },
+            {
+              "quote": "“......”中年男人李玉春扫了一眼纸张，做出面无表情的样子，不漏痕迹的把宣纸折起的一角压平，然后递给陈府尹。",
+              "start": 12346,
+              "end": 12402
+            }
+          ],
+          "why": "候选 JSON 中「一头雾水」出现 0 次，即整条前因链未被记录；该段紧邻区间上界（区间从 @12417 章标题开始，本句 @12277，相距 140 码点）。它同时解释了两件事：为什么器具到堂后三人要「转头看向许七安」（@12459），以及为什么演示必须由他主导。"
+        },
+        {
+          "found": "洗笔缸的来历：它是许七安「走到书桌边」就近使用的**现场陈设**，不在他索要的四件器具之内。候选不但没有记录这一点，还在 tasks[1].costNote 里给出相反来历（见 counterExamples[1]）；而「生宣」（覆杯口过滤）与「竹签」（搅拌）同样不在四件清单内。",
+          "quote": "许七安没有回答，伸手拿了金属钠，走到书桌边，丢进了洗笔缸里。",
+          "start": 14464,
+          "end": 14494,
+          "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+          "occurrencesInSource": 1,
+          "candidateOccurrences": 10,
+          "inSourceRange": true,
+          "companions": [
+            {
+              "quote": "他用水融化粗盐，搅拌之后，将生宣覆在杯口，将盐水徐徐倒入。",
+              "start": 13183,
+              "end": 13212,
+              "note": "生宣——不在清单四件内"
+            },
+            {
+              "quote": "过滤之后，再将瓷杯架在蜡烛上炙烤，用竹签不停搅拌。",
+              "start": 13218,
+              "end": 13243,
+              "note": "竹签——不在清单四件内"
+            },
+            {
+              "quote": "许七安点点头，在器具面前蹲下，身前的道具分别是蜡烛、盐、瓷杯、铁丝。",
+              "start": 12629,
+              "end": 12663,
+              "note": "清单原文只有蜡烛、盐、瓷杯、铁丝"
+            }
+          ],
+          "why": "区间内「洗笔缸」2 次（@14489、@14540）；第四章 [9908,12417) 内 0 次。候选用「洗笔缸都是官府按他要求置办的」1 次。"
+        },
+        {
+          "found": "「一次成功」在原文里被三重限定：他事前告知「或许会失败很多次」、事后自述「电压刚刚好」「欧皇附体」，且叙述者交代「他做好了反复失败的心里准备」。区间内**没有任何第二次尝试、复现要求或验证记录**——他拿到成品后直接转去掂量与引爆。候选把这些句子都引了，但只当作 action/obstacle 的证据，未把「无第二次尝试」记成对 tasks[1].summary「可复现」的反证。",
+          "quote": "注意控制电压....嗯，这个步骤很难，或许会失败很多次。",
+          "start": 13729,
+          "end": 13757,
+          "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+          "occurrencesInSource": 1,
+          "candidateOccurrences": 10,
+          "inSourceRange": true,
+          "companions": [
+            {
+              "quote": "竟然一次性就成功了，电压刚刚好....许七安惊喜。",
+              "start": 13893,
+              "end": 13918
+            },
+            {
+              "quote": "电解法制取金属钠，电压大概在6—15伏，他做好了反复失败的心里准备。",
+              "start": 13924,
+              "end": 13958
+            }
+          ],
+          "why": "候选 JSON 中「第二次尝试」0 次；「可复现」4 次。原文自述的成功归因为「一次性就成功了，电压刚刚好」与「欧皇附体」。"
+        },
+        {
+          "found": "「严丝合缝，所有异常都对上了。」这句话**没有主语**，候选自己在 unknowns[4] 与 selfCritique[0] 里承认「可能是叙述者，也可能是在场人物的心声」。但同一个句子在候选里被同时用作 4 个条目的锚点：states[0].anchor、states[2].after 与 states[2].anchor、causeEdges[5].to、causeEdges[11].to。即一处自认为归属不明的句子，承担了四处状态/因果转折的定位职责。",
+          "quote": "严丝合缝，所有异常都对上了。",
+          "start": 14780,
+          "end": 14794,
+          "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+          "occurrencesInSource": 1,
+          "candidateOccurrences": 12,
+          "inSourceRange": true,
+          "why": "候选 JSON 中该句出现 12 次（含 quoteIndex 路径与 4 个条目的正文/引证）。候选已在 selfCritique[0] 主动披露该口径，故按纪律记为**存疑/结构性风险**，不据此判 fail；建议至少把 causeEdges[11].to 的锚点换回许七安自己的 @14722。"
+        },
+        {
+          "found": "区间末句之后的下一章开头立刻追问「为什么盐能变成银子？」——即本区间的「演示成功」并没有终止问答，「结束≠成功」在紧邻的区间外也得到印证。候选把 tasks[0].result 记为 null 是正确处理；本条只用于确认该判定的方向（区间外对照，不作证据）。",
+          "quote": "“喂！”名叫采薇的黄裙少女，扑闪着美眸，“为什么盐能变成银子？”",
+          "start": 15240,
+          "end": 15272,
+          "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+          "occurrencesInSource": 1,
+          "candidateOccurrences": 0,
+          "inSourceRange": false,
+          "why": "位置 15240 > 上界 15225；候选 result=null 的处理与之一致，未把停止当成功。"
+        }
+      ]
+    }
+  ]
+}

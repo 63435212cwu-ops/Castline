@@ -1,0 +1,321 @@
+{
+ "schema": "castline/verify-verdict/1",
+ "task": "verify:xiyou:L1:0039",
+ "agent": "w-dafeng-2",
+ "reviewerRole": "VERIFIER",
+ "reviewedTask": "read:xiyou:L1:0039",
+ "reviewedArtifact": {
+  "path": "loop/state/out/read_xiyou_L1_0039.candidate.json",
+  "sha256": "d29de2123165e8e0180a12745d94cc0670d8365b2188fcf8175a4137fbb05dfc",
+  "producedBy": "w-dafeng-0",
+  "readOnly": true,
+  "hashUnchangedDuringReview": true
+ },
+ "book": "xiyou",
+ "lane": 1,
+ "unitIndex": 39,
+ "unitHead": "第三十九回　一粒金丹天上得　三年故主世间生",
+ "source": {
+  "path": "data/cache/a065244455cfb2221bcda94a.docs.json",
+  "sha256": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+  "docIndex": 0,
+  "docName": "西游记",
+  "range": [
+   276325,
+   284148
+  ],
+  "codepoints": 7823,
+  "segmentSha256": "a88baee98e838e8e3492178d6bdd31c7b4061aeea8439ceca5c0ad9c7c433941",
+  "offsetBase": "docs[0].text 全文绝对 codepoint 偏移",
+  "taskSourceHashMatches": true,
+  "duplicateCacheNote": "任务 sourceHash 同时命中 data/cache/a065244455cfb2221bcda94a.docs.json 与 data/cache/ed3dc1255ca08fbdaae30bbd.docs.json（两者 sha256 相同、docs[0].text 均为 722176 codepoint 且逐字一致，sha256(concat)=ffcc680a…）。候选引用其中一条不构成路径错误；两条的 [276325,284148) 切片字节相同。",
+  "boundaryHead": "第三十九回　一粒金丹天上得　三年故主世间生",
+  "boundaryAfter": "第四十回　婴儿戏化禅心乱　猿马刀归木母空",
+  "boundaryNote": "T[276325:276346] == 回目；T[284148:284148+21] 正是下一回回目 ⇒ 区间终点即章界。"
+ },
+ "verdict": "partial",
+ "candidateVerdict": "partial",
+ "summary": "独立反向复核《西游记》第三十九回 [276325,284148)（7823 codepoint）。按 VERIFIER 契约顺序执行：先从 docs[0].text 切出区间并独立读完全文，之后才打开候选。**引用层零编造、零错位**：228 条引文实例全量核验 t[start:end]==quote / find(quote)==firstOccurrenceAt / sourceHash 一致 / 落在区间内 / occurrences 相符，失败数全部为 0；固定种子 20261010 抽 5 条 5/5 逐字命中、偏移一致。自述数字可复算：引文并集覆盖 5815/7823=0.7433 与声明一致；未覆盖片段 ≥25 codepoint 复算 32 段，与 reverseCoverage 逐段列出的 32 段**集合完全相同**（不隐藏缺口）。源文件 sha256 与任务 sourceHash 一致，切片 7823 codepoint = 声明值，切片 sha256 与声明一致，区间终点正是第四十回起点。红线执行有痕迹：semanticReview.performed=false（不冒称语义已核）、tasks[3].result 明写擒妖**未遂**、ST9 标「前后值相同」拒绝把收妖读成复位、区间外人物（观音／皇后／正宫／夜游神）只作 unknowns 与转述使用。判 partial 而非 fail：无一条编造，全部抽取内容经原文核验为真，没有原文没有的人物/结局/伏笔，也没有把「结束」当「成功」。判 partial 而非 pass：查出 2 处可被自身产物直接证伪的缺陷（CE-3 数字自相矛盾、CE-4 交叉引用指错），另有 5 条原文明确存在而候选无任何载体的事实（reverseChecks R1–R5），其中 R1（六甲金身救文殊归西→奏与如来→如来差狮下井）是 WS7「菩萨不可原身相见直接造成本回祸根」这条因果链的中间环节，缺它则该链在本区间内少一环原文锚点。",
+ "counterExamples": [
+  {
+   "id": "CE-3",
+   "kind": "self-inconsistent-number",
+   "field": "remaining[5]",
+   "claim": "remaining[5] 称「区间内仍有 42 段（≥25 codepoint）未被引文覆盖」。",
+   "quote": "区间内仍有 42 段（≥25 codepoint）未被引文覆盖，已逐段列在 reverseCoverage 里",
+   "quoteSource": "candidate:loop/state/out/read_xiyou_L1_0039.candidate.json → remaining[5]（候选自身文本，逐字）",
+   "why": "同一份候选内的 reverseCoverage.uncoveredCount=32、uncoveredSegments 长度为 32，我用候选自己的 228 条引文重算 [276325,284148) 的未覆盖补集亦为 **32** 段（阈值 ≥25 codepoint），且声明列表与复算集合完全相同。42 无法由任何合理口径复现：全部未覆盖片段（任意长度）为 87 段，≥20 为 44、≥21 为 41、≥22 为 38、≥24/≥25 均为 32 —— 42 落在 41 与 44 之间，不对应任何阈值；按段落统计（31 行）或按未合并间隙（87 个）也都不是 42。属候选自述与自身产物冲突。",
+   "reproduce": "python3 -B -s /tmp/cl-verify-xiyou-L1-0039/audit.py  # == 2. 覆盖 / 未覆盖 自述复算 ==",
+   "severity": "minor-but-concrete",
+   "fix": "remaining[5] 的 42 应为 32（与 reverseCoverage.uncoveredCount 及逐段列表一致）。"
+  },
+  {
+   "id": "CE-4",
+   "kind": "cross-reference-misattribution",
+   "field": "selfCritique[0].why_still 与 rejectedEdges[5](RE6).reason",
+   "claim": "selfCritique[0] 把机制短语「同形＋混入人群＋善腾云雾抢先」标注为 (CE7)；RE6 称照镜与念咒「拆成 CE9 的两端」。",
+   "quote": "我把机制写成「同形＋混入人群＋善腾云雾抢先」（CE7）",
+   "quoteSource": "candidate:selfCritique[0].why_still（候选自身文本，逐字）",
+   "quote2": "故拆成 CE9 的两端而不是合成一条。",
+   "quote2Source": "candidate:rejectedEdges[5](RE6).reason（候选自身文本，逐字）",
+   "why": "实际指向相反：该短语逐字只出现在 **CE9_tongxing_bunan**（机器核对：causeEdges 中命中该短语的边为 CE9，selfCritique[0] 是唯一书写处），而 **CE7_jiaoKou_chu_ce** 是「八戒冷笑→八戒反唇献策」的口角边，与「同形／善腾云雾」无关；照妖镜与念咒两端则由 **CE12_zhaoyaojing_xianyuanxing** 承载（CE12.from=「文殊取出照妖镜照住那怪」、to=「众人看清原身是青毛狮子、文殊念咒令其皈正」），而 **CE9** 是「魔王变作三藏模样并两次混入人丛 → 行者两次举棒都打不下去，识别失败」。候选自带自检脚本 /tmp/cl39/verify.py 的 dangling-CE-refs 输出为 []，因为它只判断 id 是否在 _valid 集合内，不校验**语义指向**，所以这两处指错结构性不会被自检发现。",
+   "reproduce": "python3 -B -s /tmp/cl-verify-xiyou-L1-0039/audit.py  # == 3. counterExamples 的 CE-4 段",
+   "severity": "minor-but-concrete",
+   "fix": "selfCritique[0] 的 (CE7) 应为 (CE9)；RE6 的「CE9 的两端」应为「CE12 的两端」。"
+  }
+ ],
+ "reverseChecks": [
+  {
+   "id": "R1",
+   "found": "文殊被救归西并奏报如来的环节：乌鸡国王把文殊浸了三日三夜后，是六甲金身救他归西、由他奏与如来，如来才差青毛狮子推王下井。候选的 WS7 只写「被捆、结怨、三年篡位」，这条补报链在本区间内没有任何载体。",
+   "quote": "多亏六甲金身救我归西，奏与如来、如来将此怪令到此处推他下井，浸他三年，以报吾三日水灾之恨。",
+   "start": 283765,
+   "end": 283810,
+   "inRange": true,
+   "candidateCarrier": "无（候选全文不含「六甲金身」「奏与如来」「救我归西」）",
+   "whyItMatters": "WS7_buke_yuanshen 的 explain 断言「这条约束**直接造成了本回的祸根**」，其因果链是「不可原身相见→化凡僧→被浸→（?）→如来差狮」。中间这一环缺失后，如来为何差狮在本区间内没有原文锚点；且这是文殊自述中唯一把「私仇」升格为「佛旨」的转接句，也是行者随后反驳「你虽报了甚么一饮一啄的私仇」的语境。"
+  },
+  {
+   "id": "R2",
+   "found": "定身法生效前的对象动作：魔王喝令「拿下这野和尚去」后，多官是「一齐踊跃」扑上来的，行者才喝一声、用手一指定住他们。候选完整引用了定身法与其结果（「众官俱莫能行动」「校尉阶前如木偶，将军殿上似泥人」），却跳过了「多官一齐踊跃」这一句。",
+   "quote": "说声叫“拿”，你看那多官一齐踊跃。",
+   "start": 280691,
+   "end": 280708,
+   "inRange": true,
+   "candidateCarrier": "无（候选全文不含「一齐踊跃」）",
+   "whyItMatters": "少了它，「众官俱莫能行动」就没有可对照的**动作前值**——定身法拦下的是一次正在发生的扑拿。这也关系到 WS6_dingshenfa 的效果强度判断（它挡的是「踊跃」上前的多官，而非静止站立的朝班）。"
+  },
+  {
+   "id": "R3",
+   "found": "老君追溯行者履历时的一句：「你如今幸得脱身，皈依佛果，保唐僧往西天取经」。候选引用了同段的老君旧账（五百年前偷丹、平顶山宝贝、四十九日丹炉），但这一句被跳过。",
+   "quote": "你如今幸得脱身，皈依佛果，保唐僧往西天取经，",
+   "start": 277353,
+   "end": 277375,
+   "inRange": true,
+   "candidateCarrier": "无（候选全文不含「幸得脱身」「皈依佛果」）",
+   "whyItMatters": "RE1 用「偷丹的贼又来也」判定老君提防行者的动机，CL8 记了五百年前旧事；但老君这段话里同时承认行者已「皈依佛果」——即他的提防与认可是并存的。只留旧账会把这层并存读丢。"
+  },
+  {
+   "id": "R4",
+   "found": "行者代供前的身段描写：「好大圣，趋步上前，对怪物厉声高叫道」。候选引用了供词全文与「我尽知之」「一节儿起落根本」，但未引这句动作与语气的叙述。",
+   "quote": "好大圣，趋步上前，对怪物厉声高叫道：",
+   "start": 281569,
+   "end": 281587,
+   "inRange": true,
+   "candidateCarrier": "无（候选全文不含「趋步上前」「厉声高叫」）",
+   "whyItMatters": "T4 的 action 把代供写成一次策略性开口；这句叙述给出的**公开高声**才解释了为什么这一篇供状能当殿生效、并直接触发 CE5 的「心头撞小鹿」。缺它，供状的效果只剩魔王一侧的反应而没有行者的当众动作。"
+  },
+  {
+   "id": "R5",
+   "found": "魔王催供的威胁语：「趁早实实的替他供来，免得取罪」。候选引用了魔王索供的问句（「那行童断然是拐来的…拿他上来取供」），但未引这句追加的压力。",
+   "quote": "魔王道：“趁早实实的替他供来，免得取罪。”",
+   "start": 281655,
+   "end": 281676,
+   "inRange": true,
+   "candidateCarrier": "无（候选全文不含「免得取罪」）",
+   "whyItMatters": "ST7b 记真国王「战战兢兢」、由行者代供。这句威胁正是「战战兢兢」与「我却怎的供」的**直接压力来源**，也是行者必须立刻替他开口的时机；略去后 ST7b 的前值缺少触发句。"
+  }
+ ],
+ "citationCheck": {
+  "method": "对候选全部 228 条引文实例做四项全量核验：T[start:end]==quote、T.find(quote)==firstOccurrenceAt、T.count(quote)==wholeTextOccurrences、sourceHash==任务 sourceHash 且落在 [276325,284148) 内。",
+  "totalQuoteInstances": 228,
+  "failures": {
+   "verbatim": 0,
+   "range": 0,
+   "firstOccurrence": 0,
+   "sourceHash": 0,
+   "occurrences": 0
+  },
+  "randomSample": {
+   "seed": 20261010,
+   "n": 5,
+   "hits": 5,
+   "items": [
+    {
+     "path": ".rejectedEdges[2].evidence[0]",
+     "start": 281136,
+     "end": 281180,
+     "findEqStart": true,
+     "sliceEqQuote": true,
+     "quote": "那魔王果信其言，立在龙床前面，大喝一声道：“那和尚是几时离了东土？唐王因甚事着你求经？”"
+    },
+    {
+     "path": ".tasks[5].result.quotes[1]",
+     "start": 278872,
+     "end": 278910,
+     "findEqStart": true,
+     "sliceEqQuote": true,
+     "quote": "三藏甚不过意，搀起那皇帝来，同入禅堂，又与八戒、行者、沙僧拜见了，方才按座。"
+    },
+    {
+     "path": ".worldSettings[12].quotes[1]",
+     "start": 283542,
+     "end": 283558,
+     "findEqStart": true,
+     "sliceEqQuote": true,
+     "quote": "镜里观真象，原是文殊一个狮猁王。"
+    },
+    {
+     "path": ".speakerStatements[6].quote",
+     "start": 280795,
+     "end": 280835,
+     "findEqStart": true,
+     "sliceEqQuote": true,
+     "quote": "猴王暗喜道：“好！正合老孙之意，这一来就是个生铁铸的头，汤着棍子，也打个窟窿！”"
+    },
+    {
+     "path": ".tasks[0].result.quotes[0]",
+     "start": 278458,
+     "end": 278484,
+     "findEqStart": true,
+     "sliceEqQuote": true,
+     "quote": "有半个时辰，只听他肚里呼呼的乱响，只是身体不能转移。"
+    }
+   ]
+  },
+  "conclusion": "228/228 逐字命中、偏移一致；抽检 5/5。引用层零编造、零错位。"
+ },
+ "hallucinationCheck": {
+  "result": "pass",
+  "outOfRangeEntities": {
+   "checked": [
+    "观音",
+    "皇后",
+    "正宫",
+    "夜游神"
+   ],
+   "inRangeCounts": {
+    "观音": 0,
+    "皇后": 0,
+    "正宫": 0,
+    "夜游神": 0
+   },
+   "handling": "「观音」出现在 K3/CE8 的机制说明中，指向原文「传与观世音菩萨」（区间内实有「观世音菩萨」2 次），非新增人物；「皇后／正宫／夜游神」只出现在 unknowns[0](U1) 与 remaining，候选明写「本区间通篇没有出现皇后」——与原文一致（区间内 0 次），属如实标注区间外，不是幻觉。"
+  },
+  "noInventedPersons": "未发现原文没有的人物、结局或伏笔。",
+  "endNotTreatedAsSuccess": [
+   "tasks[3].result 明写擒妖「未遂」，并指出收尾由文殊完成。",
+   "states[9](ST9) 前后值相同，明写本区间内未复位，拒绝把「妖被收」读成「江山已还」。",
+   "foreshadows[4](F5) 把「这江山不久就还归你也」标 unresolved，理由是区间内无法确认回收。"
+  ],
+  "semanticReviewHonest": "candidate.semanticReview.performed=false，且 remaining 首条明写语义正确性交独立复核者判 —— 未冒称语义已核。"
+ },
+ "misKillCheck": {
+  "result": "未发现误杀（false-negative）",
+  "checked": "逐条审 rejectedEdges RE1–RE7 是否把合法的因果/伏笔挡掉。",
+  "notes": [
+   "RE1（旧账→拒丹）：理由用的是老君的直接动作是「各要仔细，偷丹的贼又来也」（吩咐防备）而非拒绝给药，且拒丹话头是嫌一千丸太多。拆分为二正确。",
+   "RE5（佛旨→饶命）：原文「若不是菩萨亲来，决不饶他性命」把饶命条件写在「菩萨亲来」上。判 RE5 不成立有原文支撑。",
+   "RE6（照镜→念咒收伏）：拆成两端而非合一，理由是「念咒是可指认的独立触发」。判读合理（虽然 reason 里的编号写成 CE9，见 CE-4）。",
+   "RE2（八戒的哭→国王复活）：这是最接近误杀的一条 —— 行者亲口说「你若不哭，我也医不成」。但候选给出了反向原文依据（三藏解释复活机制时只提丹与气，见 CE3/CE4），并把它定性为支开八戒的说辞。判读可辩护，记**存疑**而非缺陷。",
+   "未发现因词表/正则把真实因果整条挡掉的情形（本区间不含「遂行」等易被整词判定误伤的词，「遂」在区间内 0 次）。"
+  ]
+ },
+ "usableVsDiscard": {
+  "usable": [
+   "全部 228 条引文与它们的 start/end/sourceHash —— 逐字可查，可直接用于发布。",
+   "tasks[]（含 T4 的「未遂」判定）、causeEdges CE1–CE12 的主体机制、states[]（含 ST9 的同值判定）、foreshadows[]、claimLedger[]、speakerStatements[]、textualNotes[]、crossUnitContext[]、unknowns[]、openThreads[]、selfCritique[] —— 其事实断言逐条经原文核验成立。",
+   "coverage/reverseCoverage 的 0.7433 与 32 段（列表与复算集合完全相同）—— 数字可信，缺口未被隐藏。"
+  ],
+  "mustFix": [
+   "remaining[5] 的「42 段」→ 32（CE-3）。",
+   "selfCritique[0].why_still 的 (CE7) → (CE9)；rejectedEdges[5].reason 的「CE9 的两端」→「CE12 的两端」（CE-4）。"
+  ],
+  "downgradeOrAdd": [
+   "R1–R5 五条原文事实在本区间内被引文跳过。它们**不推翻**任何已有条目，但 WS7 的因果链（R1）与 WS6 的效果强度（R2）、ST7b 的前值触发（R5）在被当作完整论证引用前，应补为对应条目的引文或至少记入 unknowns。",
+   "RE2（八戒的哭）保留为 rejected，但建议在 note 中把「行者亲口以哭为条件」与「三藏给出的机制只含丹＋气」两说并置，标为存疑，以免读者以为原文从未把哭与救活相连。"
+  ],
+  "discard": "无整条需要丢弃的条目。"
+ },
+ "assertions": [
+  {
+   "text": "源文件 sha256 == 任务 sourceHash（c282cf39…）；两条同哈希缓存副本的 docs[0].text 逐字一致（722176 codepoint）",
+   "result": "pass",
+   "cmd": "shasum -a 256 data/cache/a065244455cfb2221bcda94a.docs.json data/cache/ed3dc1255ca08fbdaae30bbd.docs.json"
+  },
+  {
+   "text": "切片 = 7823 codepoint（与任务声明一致），切片 sha256 = a88baee9…（与候选声明一致），区间终点 t[284148:] 正是「第四十回…」回目",
+   "result": "pass",
+   "cmd": "python3 -B -s /tmp/cl-verify-xiyou-L1-0039/audit.py  # == 0. 源 / 区间 / 边界 =="
+  },
+  {
+   "text": "候选 228 条引文实例全量核验：verbatim 0 失败、range 0 失败、find==start 0 失败、sourceHash 0 失败、occurrences 0 失败",
+   "result": "pass",
+   "cmd": "python3 -B -s /tmp/cl-verify-xiyou-L1-0039/audit.py  # == 1. 引用全量核验 =="
+  },
+  {
+   "text": "固定种子 20261010 随机抽 5 条 quote：5/5 逐字命中、find==start、occurrences 相符",
+   "result": "pass",
+   "cmd": "python3 -B -s /tmp/cl-verify-xiyou-L1-0039/audit.py  # == 1b. 固定种子抽 5 条 =="
+  },
+  {
+   "text": "覆盖自述复算：引文并集 5815/7823=0.7433 与候选一致；未覆盖 ≥25 codepoint 复算 32 段，与 reverseCoverage 列表集合完全相同；remaining[5] 的 42 与二者互斥",
+   "result": "pass",
+   "cmd": "python3 -B -s /tmp/cl-verify-xiyou-L1-0039/audit.py  # == 2. 覆盖 / 未覆盖 自述复算 =="
+  },
+  {
+   "text": "counterExamples CE-3/CE-4 逐条复现：42 落于任何阈值口径之外（全 87 段、≥20:44、≥21:41、≥22:38、≥24/≥25:32）；「同形＋混入人群＋善腾云雾抢先」只存在于 selfCritique[0] 而 CE9 才是同形边、CE12 才是照镜/念咒两端",
+   "result": "pass",
+   "cmd": "python3 -B -s /tmp/cl-verify-xiyou-L1-0039/audit.py  # == 3. counterExamples =="
+  },
+  {
+   "text": "reverseChecks R1–R5 五条均在区间内逐字可查（@283765 / @280691 / @277353 / @281569 / @281655），且候选全文均无对应载体",
+   "result": "pass",
+   "cmd": "python3 -B -s /tmp/cl-verify-xiyou-L1-0039/audit.py  # == 4. 反向覆盖 =="
+  },
+  {
+   "text": "幻觉/越权：区间内「观音／皇后／正宫／夜游神」出现次数均为 0，候选只作转述或 unknowns；semanticReview.performed=false；tasks[3].result 写未遂；ST9 前后值相同",
+   "result": "pass",
+   "cmd": "python3 -B -s /tmp/cl-verify-xiyou-L1-0039/audit.py  # == 5. 幻觉 / 越权 =="
+  }
+ ],
+ "evidence": [
+  {
+   "path": "data/cache/a065244455cfb2221bcda94a.docs.json",
+   "sha256": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+   "kind": "原文（只读引用，未修改）"
+  },
+  {
+   "path": "loop/state/out/read_xiyou_L1_0039.candidate.json",
+   "sha256": "d29de2123165e8e0180a12745d94cc0670d8365b2188fcf8175a4137fbb05dfc",
+   "kind": "被复核候选（只读，未修改；复核前后哈希一致）"
+  },
+  {
+   "path": "/tmp/cl-verify-xiyou-L1-0039/audit.py",
+   "sha256": "24ceb8480a43aafe5a77e1b6f25d1303ac8e90d9fb6d7d6ab4c37d0676f46a83",
+   "kind": "可复现审计脚本（只读原文与候选，不写仓库；全文见 auditScript 字段）"
+  }
+ ],
+ "sourceHashes": {
+  "data/cache/a065244455cfb2221bcda94a.docs.json": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+  "loop/state/out/read_xiyou_L1_0039.candidate.json": "d29de2123165e8e0180a12745d94cc0670d8365b2188fcf8175a4137fbb05dfc",
+  "/tmp/cl-verify-xiyou-L1-0039/audit.py": "24ceb8480a43aafe5a77e1b6f25d1303ac8e90d9fb6d7d6ab4c37d0676f46a83"
+ },
+ "auditCmd": "python3 -B -s /tmp/cl-verify-xiyou-L1-0039/audit.py",
+ "auditScriptPath": "/tmp/cl-verify-xiyou-L1-0039/audit.py",
+ "auditScriptSha256": "24ceb8480a43aafe5a77e1b6f25d1303ac8e90d9fb6d7d6ab4c37d0676f46a83",
+ "auditScript": "#!/usr/bin/env python3\n\"\"\"独立反向复核审计：西游记 第三十九回 [276325,284148)。\n\n只读原文与候选，不写仓库。分节输出，每节可单独核对。\n用法: python3 -B -s /tmp/cl-verify-xiyou-L1-0039/audit.py\n\"\"\"\nimport json, hashlib, random, sys, re\n\nROOT = \"/Users/carmen/Desktop/星系\"\nSRC  = ROOT + \"/data/cache/a065244455cfb2221bcda94a.docs.json\"\nCAND = ROOT + \"/loop/state/out/read_xiyou_L1_0039.candidate.json\"\nA, B = 276325, 284148\nTASK_SRC_HASH = \"c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2\"\n\ndef sha_file(p):\n    return hashlib.sha256(open(p, \"rb\").read()).hexdigest()\n\ndef quotes_of(cand):\n    \"\"\"递归收集所有 {quote,start,end,...} 节点。\"\"\"\n    out = []\n    def walk(o, path=\"\"):\n        if isinstance(o, dict):\n            if isinstance(o.get(\"quote\"), str) and \"start\" in o and \"end\" in o:\n                out.append((path, o))\n            for k, v in o.items():\n                walk(v, path + \".\" + k)\n        elif isinstance(o, list):\n            for i, v in enumerate(o):\n                walk(v, path + \"[%d]\" % i)\n    walk(cand)\n    return out\n\ndef uncovered(t, spans, a, b, th):\n    m = []\n    for s, e in sorted(spans):\n        s, e = max(s, a), min(e, b)\n        if e <= s: continue\n        if m and s <= m[-1][1]: m[-1][1] = max(m[-1][1], e)\n        else: m.append([s, e])\n    un, prev = [], a\n    for s, e in m:\n        if s > prev: un.append((prev, s))\n        prev = max(prev, e)\n    if prev < b: un.append((prev, b))\n    return [(s, e) for s, e in un if e - s >= th]\n\nt    = json.load(open(SRC))[0][\"text\"]\ncand = json.load(open(CAND))\nseg  = t[A:B]\nQ    = quotes_of(cand)\n\nprint(\"== 0. 源 / 区间 / 边界 ==\")\nprint(\"src sha256           :\", sha_file(SRC))\nprint(\"task sourceHash match:\", sha_file(SRC) == TASK_SRC_HASH)\nprint(\"segment codepoints   :\", len(seg), \"| declared:\", cand[\"source\"][\"codepoints\"])\nprint(\"segment sha256       :\", hashlib.sha256(seg.encode()).hexdigest())\nprint(\"declared segmentHash :\", cand[\"source\"][\"segmentSha256\"])\nprint(\"head                 :\", repr(seg[:21]), \"matches unitHead:\",\n      seg[:21] == cand[\"unitHeadCheck\"][\"headQuote\"])\nprint(\"next chapter at end  :\", t[B:B + 12] == \"第四十回\\u3000婴儿戏化禅心乱\")\n\nprint()\nprint(\"== 1. 引用全量核验（%d 条实例）==\" % len(Q))\nbad = dict(verbatim=0, range=0, first=0, hash=0, occ=0)\nfor p, q in Q:\n    s, e, txt = q[\"start\"], q[\"end\"], q[\"quote\"]\n    if not (A <= s < e <= B):        bad[\"range\"] += 1\n    if t[s:e] != txt:                bad[\"verbatim\"] += 1\n    if t.find(txt) != q.get(\"firstOccurrenceAt\"): bad[\"first\"] += 1\n    if t.count(txt) != q.get(\"wholeTextOccurrences\"): bad[\"occ\"] += 1\n    if q.get(\"sourceHash\") != TASK_SRC_HASH: bad[\"hash\"] += 1\nprint(\"failures:\", bad)\n\nprint()\nprint(\"== 1b. 固定种子 20261010 抽 5 条 ==\")\nrandom.seed(20261010)\nfor p, q in random.sample(Q, 5):\n    s, e = q[\"start\"], q[\"end\"]\n    print(\"  %-34s find==start:%s slice==quote:%s occ:%d\"\n          % (p[:34], t.find(q[\"quote\"]) == s, t[s:e] == q[\"quote\"], t.count(q[\"quote\"])))\n\nprint()\nprint(\"== 2. 覆盖 / 未覆盖 自述复算 ==\")\nspans = [(q[\"start\"], q[\"end\"]) for _, q in Q]\nuni = uncovered(t, spans, A, B, 0)\ncov = sum(e - s for s, e in uni)\nprint(\"union covered        :\", B - A - cov, \"/\", B - A, \"= %.4f\" % ((B - A - cov) / (B - A)))\nprint(\"declared coveredRatio:\", cand[\"coverage\"][\"coverageRatio\"])\nge25 = uncovered(t, spans, A, B, 25)\nprint(\"uncovered >=25       :\", len(ge25), \"| declared:\",\n      cand[\"reverseCoverage\"][\"uncoveredCount\"],\n      \"| list len:\", len(cand[\"reverseCoverage\"][\"uncoveredSegments\"]))\ndecl = {(x[\"start\"], x[\"end\"]) for x in cand[\"reverseCoverage\"][\"uncoveredSegments\"]}\nprint(\"declared list == computed list:\", decl == set(ge25))\nprint(\"remaining[5] claims  : 42 段（>=25 codepoint）→ 与 32 不符，见 counterExample CE-3\")\n\nprint()\nprint(\"== 3. counterExamples：候选自述与原文/自身产物冲突 ==\")\n# CE-1: 六甲/奏与如来 因果链缺失\nfrag1 = \"多亏六甲金身救我归西，奏与如来、\"\ni1 = seg.find(frag1)\nblob = json.dumps(cand, ensure_ascii=False)\nprint(\"CE-1 原文 @%d : %r\" % (A + i1, frag1))\nprint(\"     in-range=%s | 候选全文含「六甲金身」=%s 「奏与如来」=%s\"\n      % (i1 >= 0, \"六甲金身\" in blob, \"奏与如来\" in blob))\nprint(\"     → 补报链（文殊被六甲金身救回→奏与如来→如来差狮下井）在候选内无任何载体\")\n\n# CE-2: 多官一齐踊跃 被跳过\nfrag2 = \"说声叫“拿”，你看那多官一齐踊跃。\"\ni2 = seg.find(frag2)\nprint(\"CE-2 原文 @%d : %r\" % (A + i2, frag2))\nprint(\"     「一齐踊跃」in 候选 =\", \"一齐踊跃\" in blob,\n      \"| 候选所引下一句 =\", \"定身法，众官俱莫能行动\" in blob)\nprint(\"     → 定身法的**对象动作**（多官踊跃上前）被略去，法术结果失去对照\")\n\n# CE-3: 42 vs 32\nprint(\"CE-3 remaining[5] =\", repr([r for r in cand[\"remaining\"] if \"42\" in r][0][:60]))\nprint(\"     reverseCoverage.uncoveredCount =\", cand[\"reverseCoverage\"][\"uncoveredCount\"],\n      \"| 复算 =\", len(ge25))\nprint(\"     → 同一份候选内两个数字互斥（多处阈值变体均无法复现 42，见 == 2 与扫描）\")\n\n# CE-4: 自检脚本的 dangling 检查结构性看不见 CE7/CE9 错引\nce_ids = [e[\"id\"] for e in cand[\"causeEdges\"]]\nvalid  = {i.split(\"_\")[0] for i in ce_ids}\nprint(\"CE-4 _valid 集合 =\", sorted(valid)[:3], \"... 共\", len(valid), \"个\")\nprint(\"     「同形＋混入人群＋善腾云雾抢先」出现在 causeEdges =\",\n      any(\"同形＋混入人群＋善腾云雾抢先\" in json.dumps(e, ensure_ascii=False)\n          for e in cand[\"causeEdges\"]))\nprint(\"     该短语实际只在 selfCritique[0]，却被标为 (CE7)；CE7 实为八戒口角献策边\")\nprint(\"     RE6 称「拆成 CE9 的两端」，CE9 实为『魔王变三藏→识别失败』，\")\nprint(\"     照镜/念咒的两端实为 CE12 —— 自检只查 id 是否存在，不查语义指向\")\n\nprint()\nprint(\"== 4. 反向覆盖：被引文跳过但原文明确存在的事实 ==\")\nrev = [\n    (\"R1 六甲金身救文殊归西、奏与如来\", \"多亏六甲金身救我归西，奏与如来、\"),\n    (\"R2 多官一齐踊跃（定身法前的对象动作）\", \"说声叫“拿”，你看那多官一齐踊跃。\"),\n    (\"R3 老君追溯行者脱身皈依佛果的履历\", \"你如今幸得脱身，皈依佛果，保唐僧往西天取经，\"),\n    (\"R4 行者代供前的动作与厉声高叫\", \"好大圣，趋步上前，对怪物厉声高叫道：\"),\n    (\"R5 魔王催供的威胁语\", \"魔王道：“趁早实实的替他供来，免得取罪。”\"),\n]\nfor label, frag in rev:\n    i = seg.find(frag)\n    print(\"  %-34s @%d in-range=%s in-候选=%s\"\n          % (label, A + i, i >= 0, frag[:12] in blob))\n\nprint()\nprint(\"== 5. 幻觉 / 越权 ==\")\nprint(\"semanticReview.performed :\", cand[\"semanticReview\"][\"performed\"])\nprint(\"区间外实体（观音/皇后/正宫/夜游神）in 区间:\",\n      {k: seg.count(k) for k in (\"观音\", \"皇后\", \"正宫\", \"夜游神\")},\n      \"→ 候选仅作 unknowns/转述使用\")\nprint(\"tasks[3].result 写未遂 :\", \"未遂\" in json.dumps(cand[\"tasks\"][3], ensure_ascii=False))\nprint(\"ST9 前后值相同(未复位) :\", [s[\"id\"] for s in cand[\"states\"] if s[\"id\"] == \"ST9\"] != [])\n",
+ "changes": [
+  {
+   "path": "loop/state/out/verify_xiyou_L1_0039.verdict.json",
+   "kind": "append-only",
+   "note": "本轮唯一写入：新增复核结论。未改 js/ css/ index.html serve.py narrative.py scripts/ tests/ docs/ data/ 等受保护路径；原文与候选全程只读。"
+  }
+ ],
+ "remaining": [
+  "本次只做引用定位全量核验 + 反向覆盖 + 误杀 + 幻觉四类检查；未判候选对人物动机与世界观的文学解读是否最优，semanticReview 保持 not-performed。",
+  "复核只覆盖原文区间 [276325,284148)。区间外内容（第三十七／三十八回、第四十回、平顶山旧事）只在候选自标为区间外的转述句范围内阅读，未作为本区间任何事实的证据。",
+  "R1–R5 是本轮反向发现，复核者不代改候选：补写与否由发布/编辑流决定。其中 R1 影响 WS7 的因果链完整性，建议优先处理。",
+  "CE-3 的 42 无法由任何口径复现，故记为候选自述缺陷；若作者能给出生成该数字的脚本与口径，可推翻本条，但当前产物内不存在这样的口径。",
+  "RE2（八戒的哭→国王复活）标为存疑而非缺陷：行者亲口以哭为条件，候选以三藏所述的丹＋气机制判其为说辞。两说并存，本轮不替原文择一。",
+  "发布前须落实 usableVsDiscard.mustFix 的 2 处编号/数字修正，并决定 R1–R5 是补引文还是记入 unknowns。"
+ ],
+ "rollback": {
+  "kind": "append-only",
+  "strategy": "delete-added-files",
+  "files": [
+   "loop/state/out/verify_xiyou_L1_0039.verdict.json"
+  ]
+ },
+ "notes": "结论：partial。这是一份**引用层完全干净**的候选 —— 228/228 逐字命中，覆盖数字可复算且缺口逐段公开，红线（说法≠事实、结束≠成功、一次出现≠伏笔、工作量≠质量、定位≠语义）都有执行痕迹。判 partial 的两条硬理由都可被候选自身产物直接证伪：remaining[5] 的 42 与 reverseCoverage 的 32 互斥（CE-3）；selfCritique[0] 与 RE6 的 CE 编号指错，且候选自带自检的 dangling 检查只验 id 存在、不验语义指向，因此这类错误结构性不会被自检发现（CE-4）。另据反向验证列出 R1–R5 五条原文明确存在而候选无载体的事实；其中 R1（六甲金身→奏与如来）是 WS7 因果链的中间环节，R5 是 ST7b「战战兢兢」的直接压力来源。诚实边界：我没有做语义层优劣判断（semanticReview 仍未完成）；我的反向清单是「至少 5 条」而非穷尽 —— 区间内仍有 87 段未被任何引文触及，我只挑出会改变已有条目论证强度的几条，其余属过场句与诗赞，不影响结论。复核者非原提交者（原提交 w-dafeng-0，本轮 w-dafeng-2），且未自签。"
+}

@@ -1,0 +1,292 @@
+{
+  "task": "read:dafeng:L0:0124",
+  "agent": "w-xiyou-0",
+  "status": "done",
+  "summary": "精读《大奉打更人》第一百二十五章 秘辛（区间 codepoint [426079,429891)，3812 字；叙事正文到 429874，其后只有一行分隔线「------------」，本区间没有作者 PS，候选对 paratext 零提取）。本轮**接手**上一轮 w-dafeng-0 留下的候选（mtime 2026-10-13T01:55:44Z，该轮 agent 始终没有 submit，任务在 done 台账里缺席），按 READER 契约的要求**独立复核**它的每一条引文与自报计数，然后**定点更正**、并把更正过程写进文件的 provenance 段。**独立复核做了什么**：从磁盘重读 docs.json 与候选，遍历全部 183 个引文节点（非 crossRef 181 + crossRef 2），逐条复算 docs[0].text[start:end]==quote、start/end 是否落在 [426079,429891)、sourceHash 是否等于 fdde5558…、occurrencesInFullText/occurrencesInUnit/firstOccurrenceInFullText 是否与 text.count()/text.find() 一致 —— 全部 0 错。另复算：同任务五栏 0 处共用引文、0 处区间重叠；9 处 null 栏全部带顶层 <栏位>Note；worldSettings 的 place/item/rule 三档枚举无一非法（placeState∈{arrived,mentioned}、itemStates⊆{hold,transfer,use,lose}、institution∈{declared,executed,misunderstood}）；coverage 从 426079 铺到 429891 且 31 处缝隙全为空白字符；segmentSha256 复算与声明一致；metrics 的 19 个计数项 + worldSettingsByKind 逐项复算全等；系统校验器 loop.required_sections(task.prompt) 要求的 6 个分区（tasks/causeEdges/states/foreshadows/worldSettings/themeReadings）在候选里全部存在。**查出并修掉 2 条真缺陷**（都是「自报计数与原文不符」，与复核判定 L0:0120 partial 的缺陷①同一形态）：① W8（京城）原写「只在…逃离了京城时出现一次」，实际切片内出现 2 次（426152「在京城传的沸沸扬扬的桑泊案」＋428237「逃离了京城」）；② W9（西域）原写「出现在两处」，实际 3 处（428653 传承句、428795「西域佛门可有相关记载？」、429209「纷纷退回西域」）。两条都**只改 explain 里的计数口径、不动 placeState 结论、不动任何引文**——因为复算证明 mentioned 的判断本身成立（两处/三处都只是提到，场景仍在青龙寺内），并把可复算的原文绝对偏移写进 explain 供复核逐条验证。**没有做的事**（写进 remaining，不编）：没有重跑上一轮的生成器、没有改它的断言代码、没有声称语义已核验（semanticReview.performed 仍为 false）。",
+  "evidence": [
+    {
+      "path": "loop/state/out/read_dafeng_L0_0124.candidate.json",
+      "sha256": "f165f6926996bb5d8824d7272c5c95fff53847a2ede7c767653ad594e88dfba0",
+      "kind": "candidate-read-output（任务 writes 指定的唯一写入路径；本轮的 2 处更正 + provenance 段都在此文件内）"
+    },
+    {
+      "path": "data/cache/1063b17ca65ec1b76f30e460.docs.json",
+      "sha256": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+      "kind": "source-text（只读引用，未修改；与 task.sourceHash 及角色契约给的哈希一致）"
+    },
+    {
+      "path": "data/cache/1063b17ca65ec1b76f30e460.json",
+      "sha256": "98370a39df4f8105063004d6bc8194e50aa8008e111a584ffec32f7ad14a14df",
+      "kind": "graph-cache（只读对照，**不作为原文证据**；候选的 crossRef 段已声明其摘要不算原文）"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "源哈希与区间口径：shasum -a 256 data/cache/1063b17ca65ec1b76f30e460.docs.json 得 fdde5558…，与 task.sourceHash 逐字一致；docs[0].text[426079:429891] 以「第一百二十五章 秘辛」开头、以分隔线「------------」结尾，长度 3812 codepoint 与任务声明一致；下一章标题「第一百二十六章 长公主召唤」恰在 429891（=区间终点）。",
+      "result": "pass"
+    },
+    {
+      "text": "引文逐字与偏移：遍历候选全部 183 个引文节点，逐条断言 docs[0].text[start:end]==quote、start/end 落在区间内、sourceHash==fdde5558…、occurrencesInFullText==text.count(quote)、occurrencesInUnit==slice.count(quote)、firstOccurrenceInFullText==text.find(quote) —— 0 处不符。",
+      "result": "pass"
+    },
+    {
+      "text": "提示词点名的「五栏共用一句」：对 7 条任务逐条检查五个栏位的引文字面串与区间，0 处共用引文、0 处区间重叠；9 处 null 栏（T2.objective/obstacle/cost、T3.objective/cost、T4.cost、T5.cost、T6.cost、T7.cost）全部带顶层 <栏位>Note 写明为什么没有依据。",
+      "result": "pass"
+    },
+    {
+      "text": "P3.10 三条区分写进字段：placeState 只出现 arrived(青龙寺)/mentioned(桑泊、京城、西域、永镇山河庙)，无「图谋写成到达」；item 只有那件法器，itemStates=[lose,transfer] 四态分开且原文动词照抄「盗走了/不在/逃离」，未合成物品链；rule 的 institution 分 declared(W1/W3)/executed(W4)/misunderstood(W2/W5) 且逐条 explain 写明它如何解释人物能做或不能做。枚举值无一非法。",
+      "result": "pass"
+    },
+    {
+      "text": "本轮 2 处更正的复算：python3 -c \"import json;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'][426079:429891];print(t.count('京城'))\" → 2（原写「出现一次」）；同法 print(t.count('西域')) → 3（原写「出现在两处」）。两条 explain 已改为真值并写入绝对偏移 426152/428237 与 428653/428795/429209。",
+      "result": "pass"
+    },
+    {
+      "text": "分区完整性与 metrics 自洽：loop.required_sections(task.prompt) 要求 tasks/causeEdges/states/foreshadows/worldSettings/themeReadings 六个顶层分区，validate_sections() 返回空（无缺失）；metrics 的 codepointsInRange/paragraphs/paragraphsUncited/tasks/causeEdges/notCauseEdges/states/foreshadows/foreshadowsResolved/notForeshadows/worldSettings/excludedSettings/themeReadings/unknowns/deliberatelyNotAsserted/quoteNodes/quoteNodesUnique/crossRefQuoteNodes/taskColumnQuotes 共 19 项，外加 worldSettingsByKind（rule/place/item 三档计数）—— 逐项复算全等。",
+      "result": "pass"
+    },
+    {
+      "text": "没有把「定位正确」写成「语义已核验」：semanticReview.performed 仍为 false，note 明确写「本文件未做任何 semanticReview；语义是否读对由独立复核者拿原文判」。本轮的 work 只到「引文定位 + 自报计数复算 + 定点更正」，没有替复核者下语义结论。",
+      "result": "pass"
+    },
+    {
+      "text": "受保护路径未动：本轮的写入只有 loop/state/out/read_dafeng_L0_0124.candidate.json（loop/ = append-only）与本次提交记录本身；js/ css/ index.html serve.py narrative.py scripts/ tests/ docs/ data/ 一律未改（data/cache 两个文件按证据只读引用，sha256 与任务声明一致，可证明未被改动）。未跑 GPU/浏览器测试、未 git checkout/reset/stash。",
+      "result": "pass"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/read_dafeng_L0_0124.candidate.json",
+      "kind": "append-only",
+      "note": "任务 writes 指定的唯一写入路径。本轮改动：worldSettings[7]（W8 京城）与 worldSettings[8]（W9 西域）两条 explain 的计数口径改为复算真值；顶层 agent 改为 w-xiyou-0 并新增 originalAuthor/agentNote 如实登记原作者；新增 provenance 段（接手方式、2 条更正的前值/后值/理由/复现命令、本轮没做什么）。全部 183 个引文节点的 quote 与 start/end **一个字节都没动**。"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/1063b17ca65ec1b76f30e460.docs.json": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "data/cache/1063b17ca65ec1b76f30e460.json": "98370a39df4f8105063004d6bc8194e50aa8008e111a584ffec32f7ad14a14df"
+  },
+  "reworkOf": "loop/state/out/read_dafeng_L0_0124.candidate.json",
+  "reworkReason": "上一轮 agent（w-dafeng-0）产出了候选但从未 submit（loop/state/out/ 下没有 read_dafeng_L0_0124.json 这条规范记录，也无 REJECTED__ 记录），任务因此一直不在 done 台账里；本轮按 READER 契约重新领取，独立复核该候选后定点更正 2 条自报计数缺陷并提交。不是重新生成：引文层原样保留。",
+  "remaining": [
+    "语义层未核验：本文件只保证引文逐字与定位正确、自报计数经复算，**不主张**这些引文在语义上已足够支撑结论。「引用定位正确 ≠ 语义已核验」，本轮没有写 semanticReview 完成。",
+    "本区间是断章（第 125 章末）：恒清为何变色、法器下落、封印内容、恒清最终去向都在区间之外；未回收项已标 unresolved（F1/F2）并列入 unknowns，未跨区间取证。",
+    "T1.cost 记的是「重述旧事时的两难与痛苦纠结」，归因是上一轮的判断（basis=inferred）；若复核要求代价必须是原文明确的损失，该栏应改判 null 并保留 note。",
+    "T7.objective 也是 inferred（原文只写她的进食动作，没有一句话交代她「想要什么」）；已在栏内 note 写明改判 null 的条件。",
+    "C6 是跨段推导（basis=derived），原文没有明写机制句；若复核要求机制句，应降级到 notCauseEdges。",
+    "F3 是把「先交代境界、后写凭空来去」读成铺设—回收（basis=inferred），已在 caveat 里写明它也能被读成单纯背景交代；留给复核判定。",
+    "W9（西域）的 placeState 记 mentioned 是判断：灭佛后「退回西域」确有移动动作，但发生在方丈口述的过去、本区间无人身处西域；若复核要求「有到达动作即 arrived」，该条需单独讨论。",
+    "W1 的 institution 记 declared、W4 记 executed 都是判断（前者只有叙述层体系说明，后者依据方丈口述的寺史、无第三方佐证）；理由已写进各自 explain 与上一轮 remaining。",
+    "T2（执事）与 T3（盘树）的 objective 都是 null：原文只写动作与台词，没有写这两人的目的；按纪律留 null 并写明理由，没有替原文补动机。",
+    "「蒸之间淋了芝麻油」与「盘树僧人」两处疑为原文用字/脱字问题，本文件逐字保留、未作改动；是否属错字需比对其他版本。",
+    "U2 涉及一件本区间内无法判定的事：许七安的自陈是否属实。本文件既没有采信也没有否定；若后续区间给出独立证据，该条应重估。",
+    "本轮**没有**重跑上一轮的生成器 gen_candidate.py 与校验器 check_candidate.py（它们在外置盘 /Volumes/资源库/…/测试产物/read-0124-w0/，属上一轮的运行产物）。本轮的复核是我自己重写的独立复算脚本，不复用上一轮的断言代码；上一轮自报的「PASS 41 / FAIL 0 / 变异测试 24/24」我**没有**复现，因此不作为本轮证据。",
+    "本轮发现的两条缺陷（京城计数、西域计数）提示同一形态可能存在于其它已提交候选的自报计数里——那属于跨单元的横切检查，不在本任务范围内，未做。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/read_dafeng_L0_0124.submit.w-xiyou-0.json"
+    ],
+    "note": "候选文件 loop/state/out/read_dafeng_L0_0124.candidate.json 是任务 writes 指定的产出、且上一轮已存在，本轮的改动是就地更正而非新增文件；若要回退本轮改动，需把 W8/W9 两条 explain 恢复为「出现一次」/「出现在两处」并删除 provenance 段与 agentNote（改前的完整内容见上一轮生成器 /Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/read-0124-w0/gen_candidate.py 第 667/670 行）。"
+  },
+  "submittedAt": "2026-10-12T19:21:44Z",
+  "wallClockSeconds": 1473,
+  "wallClockFrom": "lease.startedAt",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-12T19:21:44Z"
+  },
+  "verifyState": "partial",
+  "reviews": [
+    {
+      "reviewer": "w-sanguo-1",
+      "at": "2026-10-12T20:07:23Z",
+      "verdict": "partial",
+      "notes": "总体判断：这是一份**引用层近乎无瑕**的精读（183 条引文零错、13 项自报计数全等、7 处 null 全部带理由、区间外零引用），主要缺陷集中在**散文层的因果方向与引证配对**上，属可定点修复。\n\n判 partial 的四条反例里，CE1 最实质：它把「改口」的原因写成了一句更晚出现的追问，而正确触发句在同一文件里已被 S4/C1 写对——即自证矛盾。CE2 是唯一一处**编造**（地名「斋堂」，全书 0 次），范围虽小但属红线，故点名。CE3/CE4 是同类：引文定位正确，但不含其名目所指的事实，复核者按 quotes 核不上名目。\n\n**我自己的两处更正（如实记）**：①我的第一版全量偏移判据用**全文** `str.find()`，于是报出 `.tasks[3].result.quotes[2]`（「“！！！”」）的 start=428315 与全文首次出现 88016 不符——复查后确认**候选是对的、我的判据是错的**：候选 `quoteNodeConvention` 明写「start 取该引文在**本单元区间内**的第一次出现；全文多次出现时另给 firstOccurrenceInFullText/occurrenceIndexInFullText 供无歧义重定位」，而 428315 在全文 21 次出现里索引确为 6（=其自报 occurrenceIndexInFullText），区间内亦是首次。改按候选自报的规则后全量 0 处不符。这正是本项目「仪器不可信⇒结论不可信」的同形事故：判据不与自报口径对齐，就会造出一条**看起来像真缺陷的假缺陷**；我没有把它写进 counterExamples。②我一度疑心「斋堂」是别的地名变体，实测全书 0 次后才敢定性为编造。\n\n**不判 fail 的理由**：反例都属于「理由层失实/引证错位/一个描述词编造」，不构成「核心结论与原文相反且不可局部修复」；同时第 3 步反向验证未找到任何**被整段漏掉的叙事事实**（0 条未被任何引文覆盖的句子，5 条未被引的段落全部是标题/分隔行/paratext）。计划100 的教训要求问「还漏了什么」——本轮的答案是：漏的是**机制句与收窄未知的证据**（R1/R3），不是漏事件。\n\n**不确定处**：W2 的 institution 取值、F3 的 setup 排序两处属口径判断，我记存疑而不据此否决（复核纪律：拿不出原文引证的反对意见只能记存疑）。R2（禅室/静室）我倾向是原文同场异名，但也不排除作者有意区分「禅室（方丈居处）」与「静室（会客/问话处）」；两种读法都不影响候选结论，故只列为反向发现。",
+      "counterExamples": [
+        {
+          "id": "CE1_causal_order_inverted_in_T1_obstacle",
+          "claim": "tasks[0]（T1）obstacle.text：「即使开口也始终在回避正面判断——先给一句「问心无愧便可不沾因果」，**被追问到「可为何朝廷要判我死罪？」才改口说「何错之有」**。」",
+          "fact": "「改口」发生在「追问」**之前**：恒清改口 [426772,426799) 早于许七安追问 [426805,426824)。触发改口的原文动作是许七安那句黯淡的「大师也觉得我做错了。」[426747,426766)——候选**自己**的 states[3]（S4）.after 与 causeEdges[0]（C1）.mechanism 都写对了这个顺序（「被许七安以『大师也觉得我做错了』逼了一句之后」「前面几拍（黯淡、恒清改口『何错之有』）构成逼问的梯度」）⇒ 同一文件内自相矛盾。",
+          "counterExample": {
+            "quote": "恒清犹豫了一下，道：“施主心善，慈悲救人，何错之有。”",
+            "start": 426772,
+            "end": 426799,
+            "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+            "offsetUnit": "codepoint",
+            "offsetBase": "docs[0].text 全文（0-based，左闭右开）",
+            "sliceEq": true,
+            "wholeTextOccurrences": 1,
+            "inUnit": true,
+            "note": "改口句在 426772；被候选指为触发句的追问在 426805（许七安追问：“可为何朝廷要判我死罪？”）——触发句比结果句晚 6 个 codepoint。"
+          },
+          "alsoQuotes": [
+            {
+              "quote": "“大师也觉得我做错了。”许七安黯淡道。",
+              "start": 426747,
+              "end": 426766,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "offsetUnit": "codepoint",
+              "offsetBase": "docs[0].text 全文（0-based，左闭右开）",
+              "sliceEq": true,
+              "wholeTextOccurrences": 1,
+              "inUnit": true
+            },
+            {
+              "quote": "许七安追问：“可为何朝廷要判我死罪？”",
+              "start": 426805,
+              "end": 426824,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "offsetUnit": "codepoint",
+              "offsetBase": "docs[0].text 全文（0-based，左闭右开）",
+              "sliceEq": true,
+              "wholeTextOccurrences": 1,
+              "inUnit": true
+            }
+          ],
+          "why": "这不是「时间相邻当因果」，而是**因果顺序倒置**：把后发生的追问写成先发生的原因。下游若照 T1.obstacle 建边，会得到一条方向错误的因果边（追问→改口），而正确方向是（黯淡的逼问→改口）、（改口之后才有新的追问→苦海安慰语）。",
+          "severity": "medium（可自证、局部可修：把 T1.obstacle 的触发句改成「大师也觉得我做错了。」并重排）"
+        },
+        {
+          "id": "CE2_fabricated_place_name_zhaitang",
+          "claim": "tasks[6]（T7）.label：「在青龙寺**斋堂**吃斋饭、被人打趣」",
+          "fact": "「斋堂」在**全书 4,760,263 字里出现 0 次**，本区间 0 次。原文只写「青龙寺的斋饭」「留青龙寺享用斋饭」，从未给出斋饭地点的名称。同一 label 所附的 objective/quotes 全部逐字正确 ⇒ 缺陷只在 label 这个描述字段。",
+          "counterExample": {
+            "quote": "“青龙寺的斋饭真好吃。”褚采薇一口气吃了两碗，捧着第三碗，心满意足的夸赞起来。",
+            "start": 429478,
+            "end": 429517,
+            "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+            "offsetUnit": "codepoint",
+            "offsetBase": "docs[0].text 全文（0-based，左闭右开）",
+            "sliceEq": true,
+            "wholeTextOccurrences": 1,
+            "inUnit": true,
+            "note": "这是本区间唯一交代「在哪里吃」的文字，未出现任何地点名。复现：python3 -c \"import json;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];print(t.count('斋堂'))\" → 0"
+          },
+          "why": "READER 契约红线「编造：原文里没有的人物、事件」。地名同属此类捏造；它会被下游当成真实场景名写进图谱的地点层。范围极小（一个 label 词），但性质是编造，必须点名。",
+          "severity": "low-medium（可复算、改一个词即可）"
+        },
+        {
+          "id": "CE3_citation_does_not_support_its_claim",
+          "claim": "notForeshadows[6].name：「恒清监院『要下大狱』的指控」；其 why 写「这是执事转述的指控口径」，并以此条作为该说法的**唯一**引证。",
+          "fact": "该条唯一引文是 [427333,427353)「盘树方丈睁开了眼，声音温和：“知道了。”」——它既不含「恒清监院」，也不含「要下大狱」，更不含「指控」，而是方丈**听到报信之后**的应答。真正的指控口径在 [427296,427327)「打更人，把恒清监院给绑了，说他诋毁朝廷，蔑视皇室，要下大狱。”」（执事的转述）。引文与它要支撑的名目对不上，而正确引文就在同区间、且已被候选自己引用在 tasks[1]/causeEdges[2] 里。",
+          "counterExample": {
+            "quote": "盘树方丈睁开了眼，声音温和：“知道了。”",
+            "start": 427333,
+            "end": 427353,
+            "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+            "offsetUnit": "codepoint",
+            "offsetBase": "docs[0].text 全文（0-based，左闭右开）",
+            "sliceEq": true,
+            "wholeTextOccurrences": 1,
+            "inUnit": true,
+            "note": "候选 notForeshadows[6] 唯一引文，不含其名目中的任何关键词。"
+          },
+          "alsoQuotes": [
+            {
+              "quote": "打更人，把恒清监院给绑了，说他诋毁朝廷，蔑视皇室，要下大狱。”",
+              "start": 427296,
+              "end": 427327,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "offsetUnit": "codepoint",
+              "offsetBase": "docs[0].text 全文（0-based，左闭右开）",
+              "sliceEq": true,
+              "wholeTextOccurrences": 1,
+              "inUnit": true,
+              "note": "该名目真正对应的原文（执事转述的指控口径）。"
+            }
+          ],
+          "why": "复核契约第 1 条「抽取项核对」：引文必须在原文里找到**对应**文字。定位正确≠支撑正确。此条属可自证缺陷：候选在 tasks[1].action.quotes[0] 与 causeEdges[2].quotes[0] 里引的正是 [427296,427327) 那一句，却在 notForeshadows 里引了另一句不相关的。",
+          "severity": "medium（可自证、换引文即可）"
+        },
+        {
+          "id": "CE4_citation_is_reaction_not_revelation",
+          "claim": "notForeshadows[2].name：「平阳郡主」；why：「她是在本区间里被**揭示**的事实（方丈答道女香客是她），不是先铺设后回收的钩子」。",
+          "fact": "该条唯一引文是 [428326,428341)「许七安脑海里仿佛一道雷劈下来。」——这是许七安的**反应**，不是揭示本身，也不含「平阳郡主」四字。揭示句在 [428281,428309)「盘树方丈双手合十，低声念诵佛号，无奈回答：“平阳郡主。”」。候选把「揭示」记在 why 里，却在 quotes 里放了反应句，引文与名目错位（与 CE3 同形）。",
+          "counterExample": {
+            "quote": "许七安脑海里仿佛一道雷劈下来。",
+            "start": 428326,
+            "end": 428341,
+            "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+            "offsetUnit": "codepoint",
+            "offsetBase": "docs[0].text 全文（0-based，左闭右开）",
+            "sliceEq": true,
+            "wholeTextOccurrences": 1,
+            "inUnit": true,
+            "note": "候选 notForeshadows[2] 唯一引文：是反应句，不含「平阳郡主」。"
+          },
+          "alsoQuotes": [
+            {
+              "quote": "盘树方丈双手合十，低声念诵佛号，无奈回答：“平阳郡主。”",
+              "start": 428281,
+              "end": 428309,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "offsetUnit": "codepoint",
+              "offsetBase": "docs[0].text 全文（0-based，左闭右开）",
+              "sliceEq": true,
+              "wholeTextOccurrences": 1,
+              "inUnit": true,
+              "note": "该名目真正对应的揭示句（方丈的回答）。"
+            }
+          ],
+          "why": "结论（不列为伏笔）本身仍成立，缺陷是**引证与名目错位**：复核者按 quotes 去核对「平阳郡主被揭示」会核不上。",
+          "severity": "low-medium（可自证、换引文即可）"
+        }
+      ],
+      "reverseChecks": [
+        {
+          "id": "R1_deferred_retribution_clause_is_the_missing_mechanism",
+          "found": "候选漏掉的原文事实：「它虽会迟到，却不会缺席」这一**延后报应**分句。候选 causeEdges[0]（C1）把恒清答话里可被抽出的措辞只列为「人世间如苦海」与「桑泊案乃冥冥中自有的天数」，并断言「恒清原话中没有『报应』二字」（属实）。但恒清答话里还有一句更贴近「报应」的措辞——「善心未必能有善果。然，它虽会迟到，却不会缺席」——它才是许七安把「天数」换成「皇室的报应」时真正借用的语义桥（善果/迟到而不缺席＝报应）。",
+          "quote": {
+            "quote": "然，它虽会迟到，却不会缺席。",
+            "start": 426874,
+            "end": 426888,
+            "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+            "offsetUnit": "codepoint",
+            "offsetBase": "docs[0].text 全文（0-based，左闭右开）",
+            "sliceEq": true,
+            "wholeTextOccurrences": 1,
+            "inUnit": true,
+            "note": "恒清安慰语中的延后报应分句，候选的全部字段均未单独引用或提及（prose 命中 0）。"
+          },
+          "why": "这是「机制存在但不产生信息」的典型缺口：抽出了两条措辞却漏掉第三条，导致 C1 只能写成「改写」，而看不出改写的**具体手法**是把「善果终会到来」倒转为「报应落到皇室」。下游若据此建「篡改」类因果边，会缺少可引用的机制句。"
+        },
+        {
+          "id": "R2_chanshi_jingshi_same_room_unremarked",
+          "found": "候选漏掉的原文事实：方丈这一场的房间在原文里被**两个名字**指称——场景小标题写「禅室。」[427029,427036)，同一场的下一段却写「静室的门自动敞开，盘树方丈消失在室内。」[427355,427378)。候选的 worldSettings[5]（W6）把「禅室、静室」并列登记为同一地点的两个组成部分，未指出这处同场异名，而候选的 textArtifacts 已经为另两处（「蒸之间淋了芝麻油」「盘树僧人」）做过同类「疑为原文用字」登记——这一处被漏掉了。",
+          "quote": {
+            "quote": "静室的门自动敞开，盘树方丈消失在室内。",
+            "start": 427359,
+            "end": 427378,
+            "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+            "offsetUnit": "codepoint",
+            "offsetBase": "docs[0].text 全文（0-based，左闭右开）",
+            "sliceEq": true,
+            "wholeTextOccurrences": 1,
+            "inUnit": true,
+            "note": "同一场（小标题「禅室。」）里的第二个房间名；候选未登记该不一致。"
+          },
+          "why": "与候选自己已做的两处 textArtifacts 属同一责任：要么登记为第三处疑名，要么在 W6 里说明两个名字指同一场；两者都没做，等于把一处可复算的文本现象静默掉了。"
+        },
+        {
+          "id": "R3_inrange_evidence_bearing_on_U12_is_left_unused",
+          "found": "候选漏掉的原文事实（与它自己的 unknowns[11]/U12 直接相关）：U12 写「恒清最终有没有被带回打更人衙门：……本区间没有处置结果」。但**本区间内**有一句直接相关的事实——恒清在章末仍以「身为监院的恒清大师」的身份**送客到寺庙门口**，即他并未在本章被押走。候选在 W6 里引用了这一整句（作为地点依据），却没有把它回接到 U12。",
+          "quote": {
+            "quote": "身为监院的恒清大师将众人送到寺庙门口，城市人套路太深，恒清监院生气了，一路上都没有说话。",
+            "start": 429776,
+            "end": 429820,
+            "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+            "offsetUnit": "codepoint",
+            "offsetBase": "docs[0].text 全文（0-based，左闭右开）",
+            "sliceEq": true,
+            "wholeTextOccurrences": 1,
+            "inUnit": true,
+            "note": "章末恒清以监院身份送客——本区间内与 U12（是否被带走）直接相关的事实，候选引了但未用于收窄 U12。"
+          },
+          "why": "U12 因此比原文允许的更空：可确定的是「本章内押送未完成、恒清仍在寺中履行监院职务」，未确定的只是「后续（区间外）有无处置」。把可判定的一部分一并写成未知，正是复核契约要问的「这一段里他还漏了什么」。"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,273 @@
+{
+  "task": "read:dafeng:L3:0015",
+  "agent": "w-xiyou-0",
+  "status": "done",
+  "summary": "精读《大奉打更人》第十六章 许七安的日记 docs[0].text[46353,48870)（2517 字，本单元为全第一人称日记，无第三人称叙述）。产出 15 条 task 五元组、14 条带触发机制的 causeEdge、7 条状态前后值、4 条具铺设+回收判定的伏笔（全部 unresolved，并限定 statusScope 在本单元内）、3 条明确排除的「不算伏笔」、14 条 unknowns、4 条 selfCritique。156 条引用全部由脚本在切片上 str.find 唯一定位后取 start=46353+命中下标，并回切校验 docs[0].text[start:end]==quote，0 处不符。",
+  "evidence": [
+    {
+      "path": "loop/state/out/read_dafeng_L3_0015.candidate.json",
+      "sha256": "b92ca9093ea72a631104f3f6ece69c529adddd5b5b53a6771b6edb58a835a9ce",
+      "kind": "candidate"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "原文来源哈希：sha256(data/cache/9b676d7031b1bcd3b8377a18.docs.json) == fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839，与任务 sourceHash 一致。",
+      "result": "pass",
+      "command": "python3 -c \"import hashlib;print(hashlib.sha256(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json','rb').read()).hexdigest())\""
+    },
+    {
+      "text": "偏移口径自检：docs[0].text[46353:46364] == '第十六章 许七安的日记'，即切片以本单元标题开头，偏移是相对 docs[0].text 全文的 codepoint 偏移（非相对切片）。",
+      "result": "pass",
+      "command": "python3 -c \"import json;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];print(repr(t[46353:46364]))\""
+    },
+    {
+      "text": "全部 156 条引文回切校验：递归取出候选 JSON 中所有含 quote/start/end 的对象，逐条断言 docs[0].text[start:end]==quote，mismatches=0；且全部 start/end 落在 [46353,48870) 内（生成脚本内 assert）。",
+      "result": "pass",
+      "command": "python3 -c \"import json;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];c=json.load(open('loop/state/out/read_dafeng_L3_0015.candidate.json'));R=[];w=lambda o:[R.append((o['quote'],o['start'],o['end'])) if isinstance(o,dict) and 'quote' in o and 'start' in o and 'end' in o else None,[w(v) for v in (o.values() if isinstance(o,dict) else o)] if isinstance(o,(dict,list)) else None];w(c);print('refs=%d mismatches=%d'%(len(R),len([r for r in R if t[r[1]:r[2]]!=r[0]])))\"",
+      "observed": "refs=156 mismatches=0"
+    },
+    {
+      "text": "引文唯一性：生成脚本对每条 quote 断言 SEG.count(quote)==1（切片内唯一命中）后才取偏移，命中不唯一或找不到直接 SystemExit；因此不存在「引文在别处也能命中、偏移却指向我想要的语义」这种错配。",
+      "result": "pass",
+      "command": "python3 /tmp/gen_cand_0015.py  # 输出 OK quotes=156"
+    },
+    {
+      "text": "「捡钱」计数的可复现口径：切片内 '一钱银子' 命中 6 次、'捡到' 命中 6 次，但其中 1 次是否定句（10月27日 '今天没有捡到银子'），故正面捡到为 5 次 + 11月5日 '又见到' 1 次。已在 F1.setup.caution 与 F1.counterCounter 写明，避免把 6 次说成 6 次正面捡钱。",
+      "result": "pass",
+      "command": "python3 -c \"import json;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];s=t[46353:48870];print('一钱银子',s.count('一钱银子'),'捡到',s.count('捡到'),'没有捡到',s.count('没有捡到'),'见到',s.count('见到'))\"",
+      "observed": "一钱银子 6 捡到 6 没有捡到 1 见到 1"
+    },
+    {
+      "text": "未把人物台词/猜测/转述写成叙述事实：本单元为全第一人称日记，已在 readingStatus.framing 统一声明 basis=explicit 只表示「原文逐字这样写」，不表示「故事世界里被独立证实」；王妃美貌（U7，李典史←县令老爷、二叔均为转述）、采薇是否想要炼金秘术（T11 caution/U6，为反问式猜测）、'小贪便是好官'（C11 caution）均加了 caution 或降级。",
+      "result": "pass"
+    },
+    {
+      "text": "未把「读到本章结束」当成功：T2（辞职未执行）、T5（纸张计划弃因未写）、F4（五条变现路线本单元内全部无下文）均写 status=unresolved/result 未成功，并在 F4.statusScope 限定为 within unit [46353,48870)，明确不把章节结束读成计划结局。",
+      "result": "pass"
+    },
+    {
+      "text": "未用未知填默认值：tasks 中缺项一律写 null 并附 xxxNote（如 T1.cost=null、T3.action=null、T5.result=null、T10.objective=null）；金额缺口（U9 存款余额/物价）写 unknown 而非补数字。",
+      "result": "pass"
+    },
+    {
+      "text": "未声明语义复核完成：readingStatus.semanticReview == 'not_done'，并写明「定位逐字正确 ≠ 语义已核验」，语义交由 read-verify 通道对抗式复核。",
+      "result": "pass",
+      "command": "python3 -c \"import json;print(json.load(open('loop/state/out/read_dafeng_L3_0015.candidate.json'))['readingStatus']['semanticReview'])\"",
+      "observed": "not_done"
+    },
+    {
+      "text": "图谱缓存未当证据：readingStatus.graphCacheUsedAsEvidence == false；data/cache/9b676d7031b1bcd3b8377a18.json 仅用于对照实体写法（采薇=褚采薇、二叔=许平志），其摘要与任务条目均未引用。",
+      "result": "pass"
+    },
+    {
+      "text": "写入范围：本任务只写了 loop/state/out/read_dafeng_L3_0015.candidate.json 一个文件（任务 writes 指定的路径）。共享树里 js/ css/ index.html serve.py narrative.py scripts/ tests/ docs/ data/ 确实有 282 条未提交改动，但那些是并行写入者的既有足迹，不是我造成的：以本 agent 进程（pid 40566）启动时刻为界限，`find <受保护路径> -newermt <我的启动时刻> -type f` 计数为 0，即我启动之后没有任何受保护路径文件被改动。未执行 git checkout -- . / git reset --hard / git stash；未跑 GPU/浏览器测试。",
+      "result": "pass",
+      "command": "ps -p 40566 -o lstart= ; find js css index.html serve.py narrative.py scripts tests docs data -newermt \"$(ps -p 40566 -o lstart= | xargs -I{} date -j -f '%a %b %d %T %Y' '{}' '+%Y-%m-%d %H:%M:%S')\" -type f | wc -l",
+      "observed": "进程启动 Thu Oct 8 03:08:31 2026；受保护路径在我启动后改动数 = 0（git status 里那 282 条为该时刻之前并行写入者的既有改动）"
+    },
+    {
+      "text": "本轮开始前我的租约由 w-xiyou-0（pid 97713）持有；确认 pid 40566 为本 agent 自身 dsh 进程、其父进程即该 worker，故以 w-xiyou-0 提交，避免出现非租约持有者提交导致的歧义。",
+      "result": "pass",
+      "command": "ps -eo pid,ppid,command | grep 'task-read_dafeng_L3_0015'"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/read_dafeng_L3_0015.candidate.json",
+      "kind": "append-only"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/9b676d7031b1bcd3b8377a18.docs.json": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "docs[0].text": "bc8b75ee120009f4bf6a8e235a7ff133b8ac727a8612067496a0440eaf3fc612",
+    "docs[0].text[46353:48870]": "e0c0a1cdeb63e8b08219bf494607daec8a21e5db3b1075b45d807c323534de43"
+  },
+  "remaining": [
+    "semanticReview 未做：本候选只保证 156 条引文逐字定位与偏移正确，不声明语义已核验。日记体特有的「自述 vs 叙述事实」分层需要 read-verify 通道对抗式复核。",
+    "本单元内 4 条伏笔（F1 高频捡钱 / F2 采薇与炼金秘术 / F3 镇北王妃 / F4 知识变现连续失败）在本单元区间内全部 unresolved。我未使用 [48870, ...) 的章外文本（如紧邻下一章他试探「系统爸爸」、'辞旧是许新年的字'）来补结论，因此 F1/F2/F3 的跨章回收状态在本次产出中是未知，不能据此说「全书未回收」。",
+    "unknowns 14 条未解决，其中较关键的：U13『穿越一旬』与『第一个月』自相矛盾、U5 勾栏各次消费谁付钱、U4 二叔是否知道私房钱被捡走、U8『二郎=许新年』在本单元内无明写。",
+    "T9.cost 的存款金额、U9 的物价换算在原文中没有数字，保持 null/unknown；若后续单元给出物价，可回填但不得在本单元凭推测补。",
+    "F1 的「6 次」与 F4 的「五条路线」是我按切片计数/归并得出的 derived 结论，原文没有给计数或编号；若复核口径不同（例如是否把 11月5日『又见到』计入），应以原文重数。",
+    "未做：跨单元一致性核对（如与第十四、十五章关于炼精境/采薇/司天监的既有结论对齐）。本次范围为单单元精读，未读其它单元候选。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/read_dafeng_L3_0015.candidate.json"
+    ]
+  },
+  "submittedAt": "2026-10-07T19:21:56Z",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-07T19:21:56Z"
+  },
+  "verifyState": "partial",
+  "reviews": [
+    {
+      "reviewer": "q-verify",
+      "at": "2026-10-07T19:36:14Z",
+      "verdict": "pass",
+      "notes": "独立复核。**内容层引文 156/156 逐字对上原文**，自审计层失配 0，边界自称与原文一致；覆盖率 73.5%。反向验证：把区间内被引文覆盖位置取补集逐段核对，未发现被漏掉的对话或事件（疑似段经逐条反查，均属\"引文取了别的句子、该拍仍被记录\"）。",
+      "counterExamples": [
+        {
+          "check": "「疑似未覆盖对话」是否等于漏抽",
+          "method": "把疑似段里的引号句子在候选引文集合与任务/状态字段中反查",
+          "finding": "多为引文取句不同、该拍已由其他引文或字段承载 ⇒ 判据有系统假阳性，故只作线索"
+        }
+      ],
+      "reverseChecks": [
+        {
+          "question": "这一段里还漏了什么？",
+          "method": "补集逐段核对 + 疑似段反查",
+          "finding": "未发现真实漏抽"
+        }
+      ]
+    },
+    {
+      "reviewer": "w-dafeng-2",
+      "at": "2026-10-08T05:35:57Z",
+      "verdict": "partial",
+      "notes": "总判 partial。\n\n能用、且质量明显高于均值的部分：全部 156 条引文的逐字性与偏移**零缺陷**——这是机器可复核的硬事实，我独立重跑候选自带的第 5 条 reproduce 命令得到 refs=156 mismatches=0，并另写遍历脚本对 sourceHash、inSegmentOccurrences、inWholeTextOccurrences、isFirstOccurrenceInWholeText 逐条复核，全部一致。sourceHash 与任务 sourceRange 对得上：docs.json 文件 sha256 = fdde5558…39839，切片 sha256 = e0c0a1cd…4de43，长度 2517 与任务声明一致。无编造人物/事件/结局，无误杀，无图谱缓存泄漏（图谱实体名只出现在自述免责句里），未把「播放到章末」当成功，semanticReview 如实写 not_done，缺字段一律 null 不补数字。候选的 selfCritique 四条准确预判了本段真正的三类风险，unknowns 14 条（尤其 U1 日期口径、U12 无第三人称交叉验证、U13「一旬」与「第一个月」自相矛盾）是有价值的产出，应保留。\n\n必须修或降级的：\n1) CE1（唯一一条硬伤）C6 的 basis=explicit 与 trigger 里的「投进」机制，原文无据，必须降为 derived。这一条单独看不足以推翻整份候选（它只影响 14 条边里 1 条的 basis 标注，且同条 caution 已自我否认），但它命中 READER.md 明列的「时间相邻当因果」红线，所以不能判 pass。\n2) CE2 T3.result 的日期/对象错配，改引 10月28日那句即可。\n3) RC1–RC6 六条补录：其中 RC1（10月25日立誓→10月26日破戒）与 RC3（金子/商贾前提）是内容缺口，RC5 的 3 个零覆盖条目建议至少补 10月26日一条，因为它是 RC1 的另一半。\n\n不确定处（我自己可能错的地方）：\n- CE1 我判「原文未写存款去向」，但「折腾」一词本身含贬义的消耗义，把它读成「被这些计划折腾掉」并非无理由的联想；我否定的是 basis=explicit 这个标注强度与「投进」这个具体机制动词，不是否定该因果边本身作为 derived 的成立。\n- 覆盖度「1849/2517 字符」是按引文区间并集算的，偏保守：候选的 prose 里还有大量对原文的转述未计入，所以这个数字不能读成「漏了 27% 的内容」，它只用来定位 RC5 那三个零覆盖条目。\n- 我未读本单元以外的章节来判语义（只读了紧邻章界以确认第十六章范围与「(本章完)」归属），因此 RC1–RC6 都是「本单元内原文明确存在而候选未覆盖」，不涉及章外回收。\n- 本次复核不涉及受保护路径，未运行 GPU/浏览器测试，未改动 loop/ 以外的任何文件。",
+      "counterExamples": [
+        {
+          "id": "CE1",
+          "severity": "defect-must-fix",
+          "claim": "causeEdges C6（basis=explicit）的 trigger 写：「他把存款投进自认为能成的计划；计划接连失败，现金被消耗到需要外借。」",
+          "quote": {
+            "quote": "这几天把存款折腾光了",
+            "start": 47766,
+            "end": 47776,
+            "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+            "offsetUnit": "codepoint",
+            "inSegmentOccurrences": 1,
+            "inWholeTextOccurrences": 1
+          },
+          "why": "原文只有「这几天把存款折腾光了，找二叔借钱，二叔个穷逼也没钱。」一句结果，全切片没有「投进/投入/投资/花光」任何一个词（实测 seg 计数均为 0），也没有写存款是被哪几条计划消耗的。候选自己在同一条的 caution 里写「原文只给『折腾光了』这个结果，没有逐项账目」，trigger 却补出一个原文没有的机制并标 basis=explicit —— 这正是 READER.md 红线「时间相邻当因果」：A 和 B 挨着不等于 A 导致 B，要有机制。而且切片内至少还有另一条花钱路径被明确写出（10月27日「我支付了一钱的piao资」）与多次勾栏消费，把存款归因于「计划接连失败」是读者的推断，不是原文直述。",
+          "requiredAction": "C6 的 basis 必须从 explicit 降为 derived；trigger 里的「他把存款投进自认为能成的计划」须删除或改写为「原文未写存款去向」。"
+        },
+        {
+          "id": "CE2",
+          "severity": "minor-attribution",
+          "claim": "tasks T3（香皂计划）的 result 写：「计划泡汤，10月29日他改为『得另谋出路』」，并以该句为 result.evidence。",
+          "quote": {
+            "quote": "哦，玻璃也有了，我得另谋出路。",
+            "start": 47414,
+            "end": 47429,
+            "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+            "offsetUnit": "codepoint",
+            "inSegmentOccurrences": 1,
+            "inWholeTextOccurrences": 1
+          },
+          "why": "这一句在原文里是 10月29日条目开头对**玻璃**计划被否的反应（上一段 10月28日已用「这样香皂计划也泡汤了」把香皂计划的结果写完了）。候选把同一句同时当作 T3（香皂）与 T4（玻璃）两个任务的 result 证据，属于跨条目错配：香皂的结果在 10月28日，玻璃的结果在 10月29日。不改变结论方向，但 result 的日期归属与所指对象不准。",
+          "requiredAction": "T3.result 改用 10月28日「这样香皂计划也泡汤了」定位，去掉对 10月29日那句的二次占用。"
+        }
+      ],
+      "reverseChecks": [
+        {
+          "id": "RC1",
+          "found": "候选漏掉本单元最规整的一组自相矛盾：10月25日立誓不再堕落，**次日 10月26日立刻又去勾栏**。候选只引了 10月25日的尾巴「先订个小目标，赚一个亿。」并把它归入 notForeshadows 说成「自我激励口号，只有这一次」，既没记 10月25日的自责，也完全没提 10月26日——而候选在 S4 里恰好记录了结构完全相同的另一组矛盾（10月27日「再也不来了」→ 10月30日/11月14日又去）。同一段里同类事实，记了一组、漏了一组。",
+          "quote": {
+            "quote": "许七安啊许七安，你怎可如此堕落，不能这样下去了，你忘记自己的目标了吗？",
+            "start": 47174,
+            "end": 47209,
+            "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+            "offsetUnit": "codepoint",
+            "inSegmentOccurrences": 1,
+            "inWholeTextOccurrences": 1
+          },
+          "corroboratingQuote": {
+            "quote": "“10月26日，勾栏听曲。”",
+            "start": 47228,
+            "end": 47242,
+            "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+            "offsetUnit": "codepoint",
+            "inSegmentOccurrences": 1,
+            "inWholeTextOccurrences": 1
+          },
+          "whyItMatters": "这是「立誓→次日破戒」的显式文本，比 10月27日那组更短更硬（间隔仅一天，原文相邻两句）。"
+        },
+        {
+          "id": "RC2",
+          "found": "漏掉全章唯一的穿越设定前提：他之所以能推算干支、能知道大奉的衙门与官场细节，原文给的理由是「继承了原主的记忆」。候选在 U1 讨论了首条日记的日期算不算原文日期，却没有记录这条记忆继承的来路。",
+          "quote": {
+            "quote": "好在继承了原主的记忆",
+            "start": 46406,
+            "end": 46416,
+            "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+            "offsetUnit": "codepoint",
+            "inSegmentOccurrences": 1,
+            "inWholeTextOccurrences": 1
+          },
+          "whyItMatters": "它是本单元里「许七安为什么知道这些」的唯一内证，也是 S7（知识差）维度缺的前置事实。"
+        },
+        {
+          "id": "RC3",
+          "found": "漏掉 10月19日给出的价值序与择业理由：「比银子更可靠的是金子」「商贾没地位」。候选记了 10月18日的结论（做中产阶级），却没记这条支撑它的前提，也没记它是 10月19日「我必须要有钱」的动因。",
+          "quote": {
+            "quote": "我必须要有钱，这世上比银子更可靠的是金子，虽然商贾没地位，只能说有得必有失吧。",
+            "start": 46644,
+            "end": 46683,
+            "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+            "offsetUnit": "codepoint",
+            "inSegmentOccurrences": 1,
+            "inWholeTextOccurrences": 1
+          },
+          "whyItMatters": "没有这条，「为什么不去经商而要当中产」在本单元里就断了链；候选 T2/S6 只留了结论。"
+        },
+        {
+          "id": "RC4",
+          "found": "漏掉本单元唯一一段对具名人物的外貌描写：褚采薇「可爱娇俏的鹅蛋脸，眼睛又大又好看」。候选 T11/F2 记了他想追她、想等她来，却没有记他凭什么这么想（外貌与「不比玲月妹子差」的比较）。",
+          "quote": {
+            "quote": "那姑娘颜值不比玲月妹子差，可爱娇俏的鹅蛋脸，眼睛又大又好看",
+            "start": 48346,
+            "end": 48375,
+            "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+            "offsetUnit": "codepoint",
+            "inSegmentOccurrences": 1,
+            "inWholeTextOccurrences": 1
+          },
+          "whyItMatters": "T11 的 objective 建立在「颜值」判断上，证据链缺了外貌这一环。"
+        },
+        {
+          "id": "RC5",
+          "found": "机械覆盖度量出 3 个**完整日记条目零引文覆盖**：10月22日、10月23日、10月26日（各 20 字符，全部是「勾栏听曲。」）。其中 10月23日与10月26日在候选全文里连字符串都没有出现，10月22日只在 U5 的斜杠列表「10月22/23/24/26/30日」里被顺带提到，没有被引。",
+          "quote": {
+            "quote": "“10月22日，勾栏听曲。”",
+            "start": 47085,
+            "end": 47099,
+            "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+            "offsetUnit": "codepoint",
+            "inSegmentOccurrences": 1,
+            "inWholeTextOccurrences": 1
+          },
+          "corroboratingQuote": {
+            "quote": "“10月23日，勾栏听曲。”",
+            "start": 47105,
+            "end": 47119,
+            "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+            "offsetUnit": "codepoint",
+            "inSegmentOccurrences": 1,
+            "inWholeTextOccurrences": 1
+          },
+          "whyItMatters": "这三条本身信息量极低，但 10月26日正是 RC1 的破戒日；低信息量不等于可省略——省略掉它，RC1 的自相矛盾就看不见了。"
+        },
+        {
+          "id": "RC6",
+          "found": "天气标签（天气阴×2 / 天气晴 / 天气雨 / 多云）与首条的干支纪日（庚子年、丙戌月、甲午日）全无引文覆盖。",
+          "quote": {
+            "quote": "“10月19日，天气阴，",
+            "start": 46632,
+            "end": 46644,
+            "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+            "offsetUnit": "codepoint",
+            "inSegmentOccurrences": 1,
+            "inWholeTextOccurrences": 1
+          },
+          "whyItMatters": "权重低，仅作补全记录；但它与 U1 讨论的「日期算不算原文日期」直接相关（干支是他换算成公历的原料）。"
+        }
+      ]
+    }
+  ]
+}

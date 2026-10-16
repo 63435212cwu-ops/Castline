@@ -1,0 +1,266 @@
+{
+ "verdict": "partial",
+ "task": "verify:dafeng:L3:0151",
+ "reviewedTask": "read:dafeng:L3:0151",
+ "reviewedCandidate": "loop/state/out/read_dafeng_L3_0151.candidate.json",
+ "reviewedCandidateSha256": "b9fbba0e486b37a4472cf4bfff85bd098dc4c11c027954fab076ad8dac7722d7",
+ "reviewedCandidateAgent": "w-dafeng-1",
+ "reviewer": "w-verify-4",
+ "source": {
+  "docsJson": "data/cache/215f4b88fb087a7d735a6fae.docs.json",
+  "docsJsonSha256": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+  "sourceHashMatchesTask": true,
+  "range": [
+   535813,
+   539816
+  ],
+  "sliceSha256": "1a25cf2ef103c8e244a3b2f6669aa4187a66dba92bb96449cfa3162c844f388f",
+  "sliceSha256MatchesCandidate": true,
+  "sliceCodepoints": 4003,
+  "sliceHead": "第一百五十一章 申猴和守秘",
+  "note": "我自己先从 docs[0].text 切出 [535813,539816) 逐段读完（89 个非空段，段落表见 reverseChecks.paragraphTable），再回头看候选结论。"
+ },
+ "mechanicalAudit": {
+  "method": "把候选里所有含 (quote,start,end) 的条目抓出来（169 条），逐条做 text.find(quote) 与 text[start:end]==quote 两条独立断言；再独立重算覆盖率并集。",
+  "quoteInstancesWithOffsets": 169,
+  "verbatimInFullText": 169,
+  "sliceEqualsQuote": 169,
+  "occurrenceCountClaimsWrong": 0,
+  "sourceHashMismatches": 0,
+  "inUnitInstances": 162,
+  "outOfUnitInstances": 7,
+  "partitionMatchesClaim": true,
+  "coverageRecomputed": {
+   "coveredCodepoints": 3296,
+   "ratio": 0.8234,
+   "uncoveredParagraphs": 5
+  },
+  "coverageMatchesClaim": true,
+  "distinctInUnitSpans": 108,
+  "maximalNonContainedSpans": 84,
+  "note": "候选自称的 169/162/7、3296、0.8234、未覆盖 5 段，全部逐项复算成立。其 coverage.distinctQuoteSpans=84 指的是**极大区间数**（去掉被包含的短区间后剩 84），不是去重区间数 108 —— 口径未在文件里写明，但数值成立，不算错。"
+ },
+ "counterExamples": [
+  {
+   "id": "CE-1",
+   "severity": "high",
+   "kind": "字面假等式（可机器否证）",
+   "claim": "docs[0].text[539816:539829] == '第一百五十二章 审问恒远'（并据此声明 nextHeadVerified: true）",
+   "where": "candidate.unit.nextHeadCheck / candidate.unit.nextHeadVerified",
+   "quote": "第一百五十二章 审问恒远",
+   "quoteStart": 539816,
+   "quoteEnd": 539828,
+   "why": "该断言取的是 13 个 codepoint 的窗口 [539816,539829)，而要比较的章名只有 12 个字。实测 docs[0].text[539816:539829] == '第一百五十二章 审问恒远\\n'，末位是换行符，**该等式为假**；正确的窗口是 [539816,539828)。原文本身完全支持「下一章是第一百五十二章 审问恒远」这个语义，所以这不是编造，是**窗口宽度写错一位**：同块的 headCheck 取 [535813,535826)（13 字，标题「第一百五十一章 申猴和守秘」正好 13 字，等式为真），作者把 13 这个宽度直接复用到了只有 12 字的下一章标题上。后果：任何按字面复核 nextHeadCheck 的下游脚本会得到 AssertionError，而 nextHeadVerified: true 是一个机器无法复现的断言。",
+   "repro": "python3 -c \"import json;T=json.load(open('data/cache/215f4b88fb087a7d735a6fae.docs.json'))[0]['text'];print(repr(T[539816:539829]), T[539816:539829]=='第一百五十二章 审问恒远');print(repr(T[539816:539828]), T[539816:539828]=='第一百五十二章 审问恒远')\"",
+   "reproExpected": "'第一百五十二章 审问恒远\\n' False / '第一百五十二章 审问恒远' True",
+   "fix": "把窗口改成 [539816,539828)，或把等式改成 startswith。"
+  },
+  {
+   "id": "CE-2",
+   "severity": "high",
+   "kind": "同一文件两套段号（下游会错位一段）",
+   "claim": "候选用「第 N 段」在散文字段里互相指引，同时用 paragraphIndex1Based 在引文里标注段号——两套编号不是同一个口径。",
+   "where": "全部 145 条结构化 paragraphIndex1Based vs 全部 15 处散文「第N段」",
+   "quote": "“守秘！”",
+   "quoteStart": 539776,
+   "quoteEnd": 539781,
+   "why": "结构化字段一律**把章标题算作第 1 段**（145/145 条成立）；散文字段一律**跳过章标题**（15/15 条成立，0 条例外）。同一个「守秘！」：structural 说第 87 段，selfCritique[3]/risk 的散文说「第 86 段」。同理「在脑海里响起」structural=86 而 states[3]/note 散文写「第 85 段」。两套口径各自内部自洽，合起来差 1。原文引证：T.find('“守秘！”')=539776 落在第 87 个非空段（把标题计为第 1 段）。后果：下游若用 paragraphIndex1Based 的口径去解析散文里的「第N段」，每一条都会落到**上一段**——正是那种不会报错、只会静默读错的缺陷。",
+   "repro": "python3 - <<'PY'\nimport json\nT=json.load(open('data/cache/215f4b88fb087a7d735a6fae.docs.json'))[0]['text']\nC=json.load(open('loop/state/out/read_dafeng_L3_0151.candidate.json'))\nS,E=535813,539816\nA={};i=0\nfor p in T[S:E].split('\\n'):\n    if p.strip(): i+=1; A[i]=p.strip()\nprint('A87 =',A[87]); print('A86 =',A[86])\nprint('prose in selfCritique[3]:',C['selfCritique'][3]['risk'][:40])\nPY",
+   "reproExpected": "A87 = “守秘！” / A86 = 这时，他听见神殊僧人温和的声音在脑海里响起：",
+   "fix": "二选一并写进口径说明；建议散文字段改用结构化同口径（标题=1），或直接引用偏移而不是段号。"
+  },
+  {
+   "id": "CE-3",
+   "severity": "medium",
+   "kind": "自述不变量被自身内容否证（作用域未声明）",
+   "claim": "candidate.verification.taskColumnsShareNoQuote == true；taskColumnsSharedQuotes == []；taskColumnsCheckedWith == 「精确 (start,end) 相同 / 互为子串 / 落在同一原文段落；任一命中即抛错终止构建」。",
+   "where": "candidate.verification / candidate.tasks[*].{result,cost}.checkedButRejected",
+   "quote": "在这个过程中，贫僧会给予施主一定的助力",
+   "quoteStart": 538231,
+   "quoteEnd": 538250,
+   "why": "按该字段自己写下的判据（**没有限定作用域**），同一 task 的两栏里存在 (start,end) 精确相同的引文：T1.result.checkedButRejected[1] 与 T1.cost.checkedButRejected[1] 都是 (538231,538250)——同一句「在这个过程中，贫僧会给予施主一定的助力。」。另有 3 处互为子串（T2 objective⊃cost、T3 result⊃cost、T4 result⊃cost）。若把作用域缩到「只算各栏的 quotes[] 主引文」，该断言成立（我复算 0 命中），但文件里**没有写这个作用域**。所以这是「结论对、自述的作用域不诚实」：一个下游若照字面复算这个不变量，会得到 false。",
+   "repro": "python3 - <<'PY'\nimport json,itertools\nC=json.load(open('loop/state/out/read_dafeng_L3_0151.candidate.json'))\ndef ins(c):\n    r=[]\n    def w(x):\n        if isinstance(x,dict):\n            if isinstance(x.get('quote'),str) and isinstance(x.get('start'),int): r.append((x['start'],x['end']))\n            for v in x.values(): w(v)\n        elif isinstance(x,list):\n            for v in x: w(v)\n    w(c); return r\nfor t in C['tasks']:\n    for a,b in itertools.combinations(('objective','obstacle','action','result','cost'),2):\n        for x in ins(t[a]):\n            for y in ins(t[b]):\n                if x==y: print(t['id'],a,b,x,'EXACT DUP')\nPY",
+   "fix": "把 taskColumnsCheckedWith 明确写成「各栏 quotes[] 之间」，或把 checkedButRejected/extraQuotes 纳入检查后如实体现在 taskColumnsSharedQuotes 里。"
+  },
+  {
+   "id": "CE-4",
+   "severity": "medium",
+   "kind": "统计数字与项目权威口径不符（自证式复算）",
+   "claim": "本书 833 个章节标题里有 199 个章号重复（例如「第一百五十一章」出现 3 次：偏移 535813……（并给出可复算命令）",
+   "where": "candidate.citationDisambiguation.detail",
+   "quote": "第一百五十一章 申猴和守秘",
+   "quoteStart": 535813,
+   "quoteEnd": 535826,
+   "why": "该命令用正则 `第[一二三四五六七八九十百千零]+章`，**字符集里没有「两」**。实测它匹配到 833 个章节标题，而项目自己的章法切分 narrative.chapter_spans 对同一份 text 得到的是 912 段（与 loop/state/index.json 里 dafeng.units=912 一致）；漏掉的 102 个标题里有 99 个含「两」（第两百章…）。后果：章号重复数被系统性低估——候选报 199，按项目口径是 232（重复章号出现 874 次）。（我另试了去括号/去重标题等变体，都得不到 199，确认 199 就是这条缺「两」的正则的产物。）**注意**：这不是编造，该数字确可由它自己给出的命令复现；错的只是「把自证当成核验」。该字段的真正目的（提醒不要只按章号检索、要用偏移）是对的，而且举的例子——「第一百五十一章」在全文出现 3 次：535813「申猴和守秘」、1811073「暗流汹涌」、4111572「天下掉下一个伽罗树」——三个偏移逐字核实**完全正确**。",
+   "repro": "python3 -c \"import json,re,collections,sys;sys.path.insert(0,'.');import narrative;T=json.load(open('data/cache/215f4b88fb087a7d735a6fae.docs.json'))[0]['text'];H=[m.group(0).strip() for m in re.finditer(r'第[一二三四五六七八九十百千零]+章[^\\n]*',T)];print('candidate regex heads',len(H));hs=[s['head'] for s in narrative.chapter_spans(T)];print('project chapter_spans',len(hs));print('heads with 两 the regex cannot match',sum(1 for h in hs if '两' in h and not re.match(r'第[一二三四五六七八九十百千零]+章',h)))\"",
+   "reproExpected": "candidate regex heads 833 / project chapter_spans 912 / heads with 两 the regex cannot match 99",
+   "fix": "字符集补「两」（和「〇」），或在字段里注明用的是哪个口径。"
+  }
+ ],
+ "reverseChecks": [
+  {
+   "id": "RC-1",
+   "found": "许七安**当场就怀疑**僧人就是那只断手，并且原文用「惊疑不定」明确标出这只是怀疑——候选把这个中间态整段漏掉了，只登记了前后的两个端点（寄生前把它比作寄生恒慧的那只 → CE1「才确认」）。",
+   "quote": "....他就是那只魔物断手？许七安惊疑不定，试探道：",
+   "quoteStart": 536752,
+   "quoteEnd": 536778,
+   "whyItMatters": "「他就是那只魔物断手？」是他自己提出的问题，「惊疑不定」说明他此刻并不确定；确认要等到第 27 段凭气息。缺了这一步，候选的 S3（认知状态变化）把 before 写成「只知道床上那只断手要寄生他」，after 写成「确认对方是…神殊」，中间那次**试探性怀疑**没有前值。",
+   "inCandidate": "json 里 '许七安惊疑不定' 出现 0 次；'他就是那只魔物断手' 出现 0 次（只有名词「魔物断手」在 tasks[0].actorNote 的称呼表里出现 1 次）。"
+  },
+  {
+   "id": "RC-2",
+   "found": "神殊提出请托时「轻叹一声」——这是他全区间唯一一次非语言的情绪泄露，恰好挂在那句请托前面。候选引的 SA8 从「贫僧想拜托施主一件事。」开始，把这一声叹留在引文之外。",
+   "quote": "这时，年轻僧人轻叹一声：",
+   "quoteStart": 537985,
+   "quoteEnd": 537997,
+   "whyItMatters": "候选 T1.obstacle 判 null 的理由之一是「本区间没有写出任何阻挠他达成目标的外部力量或内部条件」。这一声叹是原文里唯一能反证「他毫无阻力/毫无情绪代价」的细节（无奈的请求 vs 单方面侵入）。它不一定推翻 null，但它是一个必须被检查并写进 checkedButRejected 的候选，而候选里没有出现。",
+   "inCandidate": "json 里 '轻叹' 出现 0 次（'无奈和痛苦' 出现 2 次，指的是第 30 段，不是这里）。"
+  },
+  {
+   "id": "RC-3",
+   "found": "他不敢把断手的事告诉魏渊的**实质理由**——「这件事涉及到桑泊的封印物」——没有任何字段登记。候选 T4.obstacle 只引了他对魏渊为人的评估（「再赏识也有个限度」）和对监正的评估。",
+   "quote": "而这件事涉及到桑泊的封印物",
+   "quoteStart": 539290,
+   "quoteEnd": 539303,
+   "whyItMatters": "两个理由不同类：一个是「关系不够近」，一个是「事情的等级本身会把我一起卷进去」。漏掉后者，T4.obstacle 的理由就只剩人情冷暖，而这句才是与 T4.result 里「会不会连同我一起封印在桑泊」呼应的那一条。该句所在段 [539256,539307) 的覆盖率只有 24%，只在 tasks[3]/cost/checkedButRejected[2] 里引了同段末尾 8 个字（「再赏识也有个限度」）。",
+   "inCandidate": "json 里 '这件事涉及到桑泊的封印物' 出现 0 次。"
+  },
+  {
+   "id": "RC-4",
+   "found": "第 14 段整段（「这个过程很快…通过了口腔、通过了喉咙。」）在候选里**只以「错字诊断」的身份存在**，没有任何字段登记它的叙述内容。",
+   "quote": "这个过程很快，因为断手压根不考虑许七安的承受能力，像异性一样，粗暴简单的通过了口腔、通过了喉咙。",
+   "quoteStart": 536451,
+   "quoteEnd": 536499,
+   "whyItMatters": "该段是本区间唯一交代**侵入速度与它对许七安承受能力的态度**的段落。候选把它放进 defectCandidates[1].text（论证「异性」疑为「异形」），于是覆盖率统计把它算作已覆盖，但语义上它没有进入 narrativeFacts / causeEdges / tasks 任何一处。我按句复核：该句覆盖率 0.10。这正是「覆盖率是并集口径、不等于内容被读出来」的实例，也是我复核 candidate.coverage 那句「没有一条是『没读出来』的遗漏」时找到的反例。",
+   "inCandidate": "整段文本出现 1 次，位置是 /defectCandidates[1]/text（缺陷锚点），非叙述字段。"
+  },
+  {
+   "id": "RC-5",
+   "found": "候选用了「识海」这个**本区间原文一次都没有出现**的词来给场景命名（13 处，例：causeEdges[0].from「断手在识海中以『年轻僧人』形象现身」、states[1].before「在识海中经历交谈期间…」）。",
+   "quote": "断手进入体内的刹那，许七安痛苦的哀嚎一声，意识仿佛炸成无数碎片，朦胧中不知过了多久，他看见一座寺庙，庙里没有供奉佛陀法相，蒲团上盘坐着一位年轻的僧人。",
+   "quoteStart": 536505,
+   "quoteEnd": 536580,
+   "whyItMatters": "原文本区间对这段只有「意识仿佛炸成无数碎片…他看见一座寺庙」与后文的「在脑海里响起」，没有用「识海」二字。我没有判它是编造：全书「识海」出现 23 次、是既有的设定词，最近的一处「在识海里呼唤神殊和尚」（偏移 847982，区间外）用法完全吻合。所以这是一个**合理的框架词，但它是从区间外带进来的**——候选自己的 rules 要求「引用定位正确≠语义已核验」，这类术语迁移应当显式标注来源或改用原文措辞。记为存疑，不据此判 fail。",
+   "inCandidate": "「识海」inSegment=0，inJSON=13。"
+  }
+ ],
+ "miskillCheck": {
+  "summary": "我没有找到「因为词表/正则把真实因果挡掉」的误杀实例；反向抽检了候选排除掉的 4 条 nonEdges、4 条 notForeshadows、4 条 excludedSettings，逐条回原文核对，**结论都站得住**，但其中两条的**理由**部分不成立（结论对、论证错），按契约记为存疑、不作为判 fail 的依据。",
+  "items": [
+   {
+    "id": "MK-1",
+    "target": "notForeshadows[1] 排除「申猴」",
+    "quote": "神殊僧人不讲道理的申猴，所带来的伤口已经消失。",
+    "quoteStart": 539132,
+    "quoteEnd": 539155,
+    "whySuspect": "它给的理由之一是「该词在全文另有含义（第一百三十七章 洛玉衡指许七安生辰八字暗合的形象、第一百五十五章『我是申猴他是未羊』）」——**别处有同形词并不能否证此处是伏笔**，这是无效理由（homonymy ≠ no setup/payoff）。真正成立的是它给的另一条：「标题与正文同词不算回收」。我另核了这两处区间外用法：偏移 479185/479206 的「申猴」确指生肖（洛玉衡算命），552439 的「我是申猴他是未羊」也确指生肖，候选转述准确。结论（不登记为伏笔）我同意，故只记存疑。",
+    "verdict": "存疑（结论可接受，理由部分无效）"
+   },
+   {
+    "id": "MK-2",
+    "target": "excludedSettings[1] 排除「永镇山河庙炸毁的第三天／第二天」",
+    "quote": "许七安眼睛猛的亮起，他想起了桑泊案时的几个细节：永镇山河庙炸毁的第三天，魏渊告诉他，元景帝开启了城禁止。",
+    "quoteStart": 537551,
+    "quoteEnd": 537603,
+    "whySuspect": "该字段称这组时间标记「本身不构成影响行动、资源、约束或后果的设定」。但它们其实是 CE4 那条排除法推理的**排序骨架**（候选自己在 CE4.mechanism 里写「三条细节各自只说明…合起来才排除掉这两方、剩下佛门」）。从 worldSettings 排除可辩护（它是推理前提不是世界设定），但「不构成影响行动」这句偏强。",
+    "verdict": "存疑（排除本身可辩护，理由偏强）"
+   }
+  ]
+ },
+ "hallucinationCheck": {
+  "fabricatedCharacters": [],
+  "fabricatedEvents": [],
+  "fabricatedEndings": [],
+  "falseSuccessClaims": [],
+  "method": "把本区间出现的全部人物/地点/器物专名（50 个候选 token，含 许七安/神殊/魏渊/魏公/监正/元景帝/金莲道长/周赤雄/周百户/褚采薇/浮香/恒慧/楚人美/盘树方丈/灰狐狸/九尾天狐/万妖国/司天监/青龙寺/教坊司/桑泊/西域 等）逐个回查候选 JSON，**没有一个是原文没有的**：全部 token 命中率 50/50。另查「成功/已完成/达成/顺利完成」等词 0 次；verification.semanticReview 如实写 not-performed，未把定位正确冒充语义核验。",
+  "successJudgementCheck": "三处最容易写成「成功」的地方候选都守住了：(1) T1.result=null（侵入完成≠温养/找回记忆达成）；(2) T2.result 只写到「盘问完成＋心里认可」，明说「不是协议达成」；(3) 四条任务 outcomeCertainty 全为 unresolved-in-unit。原文确实没有一句写许七安答应或神殊获益，这个判断我认同。",
+  "outOfRangeUseCheck": "候选引了 7 条区间外引文（全部 role=out-of-unit-payoff），逐条核实偏移落在哪一章：896463/896522 → unit#230『第一章 监正的馈赠』、2045995/2046024 → unit#418『第一百八十九章 保护』、658883/658991 → unit#181『第一百八十一章 一号的身份？』、1266521 → unit#292『第六十三章 禅机』。**候选标注的章名与实测章号全部一致**（注意大奉在 896463 处换卷重排章号，不是笔误）。它把这些一律标成区间外、且 F1/F2 的 status 写 resolved-out-of-range / partially-resolved-out-of-range，没有回填到本区间，处置正确。"
+ },
+ "usableAndDiscardable": {
+  "usableAsIs": [
+   "tasks[0..3] 的四条任务结构、objective/action/result 三栏及其引文（对「不写成功」的克制是本候选最强的地方）",
+   "causeEdges[0..6]（CE6/CE7 已自带 inferred/derived 降级标注，诚实）",
+   "states[0..4]、knowledgeDiffs[0..2]、characterClaims[0..4]（把人物说法与叙述事实分开这一点做得干净）",
+   "speechActs 全部 19 条（引文逐字、说话人标注正确）",
+   "narrativeFacts[0..9]（NF 编号跳到 11 但内容无缺，见 notes）",
+   "unknowns[0..9]（U1/U2/U3/U9 是我认为最有价值的四条，与我的独立阅读一致）",
+   "selfCritique[0..5]（主动交代口径偏严之处，且给出「若复核不同意应改哪个字段」）"
+  ],
+  "mustCorrect": [
+   "unit.nextHeadCheck 的字面等式与 nextHeadVerified（CE-1）——必须改成 [539816,539828) 或 startswith，否则该断言机器不可复现",
+   "全部 15 处散文「第N段」（CE-2）——必须统一到 paragraphIndex1Based 的口径，或在字段里写明散文用的是另一套编号",
+   "verification.taskColumnsCheckedWith 的作用域（CE-3）——必须写明「只算各栏 quotes[]」",
+   "citationDisambiguation.detail 的 833/199（CE-4）——正则补「两」后重算，或注明口径"
+  ],
+  "mustDowngradeToUnknowns": [
+   "coverage.gapDispositionNote 末句「没有一条是『没读出来』的遗漏」——这是一句**绝对断言**，已被 RC-1..RC-4 否证，必须撤回或改成「未发现遗漏」。撤回后，这 4 条应补进相应字段或进 unknowns。",
+   "notForeshadows[1] 关于「申猴」的排除理由（MK-1）——结论保留，理由中「别处有同形词」那半句应删。",
+   "themeReadings[1].counter 里「侵入动作在第 10 段」的段号（CE-2 的具体受害点之一）。"
+  ],
+  "doNotDiscard": [
+   "169 条引文、全部偏移与哈希——我逐条复算，**没有一条错**，这是我判 partial 而不是 fail 的主要依据。",
+   "D1/D2/D3 三条原文缺陷候选——D1（字面 `**`）与 D3（寅时一刻 vs 晚上九点十五分）我都独立复算过，证据成立（见下）。"
+  ]
+ },
+ "spotChecksOfCandidateDefects": {
+  "D1_maskedChars": {
+   "claim": "空有一身**的体魄",
+   "myCheck": "T[536050:536056] == '一身**的体'，全文 T.count('**')==68",
+   "holds": true
+  },
+  "D2_异形_vs_异性": {
+   "claim": "「像异性一样」疑为「异形」",
+   "myCheck": "全文「异形」0 次、「异性」7 次；7 处里 6 处用于爵位或两性语境，只有本段这一处是异物侵入的比喻",
+   "holds": true,
+   "note": "候选自己标了 severity=should-fix-in-source 且写「疑为」，未改原文，处置得当。"
+  },
+  "D3_寅时矛盾": {
+   "claim": "「寅时一刻，也就是晚上九点十五分」自相矛盾",
+   "myCheck": "全文「寅时」10 次，带钟点的三处都指凌晨：「寅时就要在午门等着了，也就是凌晨四五点」(403208)、「寅时初就要起床（凌晨三点）」(3079602)、「寅时便在午门外等候的文武百官」(390299)；而晚上九点全书写作亥时：「一直喝到亥时二刻（晚上九点半）」(565933)、「打茶围维持到亥时初（晚上九点）」(1107117)",
+   "holds": true,
+   "note": "候选给的 5 个旁证偏移我逐个 find 过，全部命中且语义无误。"
+  }
+ },
+ "citationSpotCheck": {
+  "method": "固定种子 random.seed(20261009)，从 169 条带偏移引文里抽 5 条，各做一次 text.find(quote) 并比对记录偏移。",
+  "sampled": [
+   {
+    "path": "/causeEdges[0]/extraQuotes[0]",
+    "find": 536586,
+    "recorded": 536586,
+    "verbatim": true,
+    "sliceEq": true
+   },
+   {
+    "path": "/worldSettings[3]/quotes[0]",
+    "find": 536072,
+    "recorded": 536072,
+    "verbatim": true,
+    "sliceEq": true
+   },
+   {
+    "path": "/tasks[2]/cost/checkedButRejected[0]",
+    "find": 537933,
+    "recorded": 537933,
+    "verbatim": true,
+    "sliceEq": true
+   },
+   {
+    "path": "/states[4]/quotes[0]",
+    "find": 538987,
+    "recorded": 538987,
+    "verbatim": true,
+    "sliceEq": true
+   },
+   {
+    "path": "/tasks[1]/cost/checkedButRejected[0]",
+    "find": 536355,
+    "recorded": 536355,
+    "verbatim": true,
+    "sliceEq": true
+   }
+  ],
+  "result": "5/5 逐字命中，偏移与记录完全一致（把样本放大到全部 169 条，结论相同：0 条不一致）。"
+ },
+ "notes": "总判 partial。**被复核的候选质量很高，但不是没有问题，问题全部集中在「自述层」而不是「抽取层」**。抽取层我逐条回原文核过：169 条引文 5/5 抽检 + 169/169 全量断言全部逐字命中且 text[start:end]==quote，sourceHash 全对，覆盖率并集我独立重算得 3296/0.8234、未覆盖 5 段，与候选自述分毫不差；没有一个人物、事件、结局是原文没有的（50/50 专名回查全中）；三处最容易写成「成功」的地方都守住了不写成功。这些是实打实的，所以我不会判 fail——判 fail 会丢掉一份引文纪律近乎完美的精读。\n\n但自述层有四条**可机器否证**的缺陷（counterExamples CE-1..CE-4）：nextHeadCheck 是一个字面为假的等式却声明 verified:true（窗口宽度 13 复用到 12 字标题上，差一个换行符）；散文「第N段」与结构化 paragraphIndex1Based 是两套编号，差 1，15 处散文引用全部落在结构化口径的上一段；taskColumnsShareNoQuote 只在「只算 quotes[]」的作用域下成立，而字段没写作用域，按字面复算会得到 false（T1 的 result 与 cost 用了同一个精确区间）；章号统计 833/199 是缺「两」的正则的产物，项目自己的 narrative.chapter_spans 给的是 912/232。这四条都不是编造，而且 CE-4 的数字确能由候选自己给出的命令复现——问题恰恰在于**把自证当成了核验**，这正是这个项目反复出现的失败形态的一个小号版本。\n\n反向验证（这次复核最有价值的部分）：候选 coverage.gapDispositionNote 写了一句绝对断言「没有一条是『没读出来』的遗漏」。按「覆盖率是并集口径、不等于内容被读出来」去查，我找到 4 条反例（RC-1..RC-4）：许七安当场「惊疑不定」的试探性怀疑整段没登记；神殊请托前那一声「轻叹」没登记（而它恰好是 T1.obstacle=null 该被检查的反证候选）；他不敢告诉魏渊的实质理由「这件事涉及到桑泊的封印物」没登记（该段覆盖率只有 24%）；第 14 段整段只以「错字诊断」的身份存在，叙述内容没有进入任何字段——这一条最能说明问题：**它被算作已覆盖，但没被读出来**。另有 RC-5 记一条存疑：候选用「识海」给场景命名 13 处，而该词在本区间原文出现 0 次（全书 23 次，是既有设定词，最近一处用法吻合），我判它是从区间外带进来的框架词而非编造，故只记存疑。\n\n误杀检查：我没有找到词表/正则挡掉真实因果的实例。抽检候选排除掉的 4 条 nonEdges、4 条 notForeshadows、4 条 excludedSettings，结论都站得住；其中两条理由部分无效（MK-1 用「别处有同形词」否证「申猴」是伏笔，这是无效理由，但它另给的理由成立；MK-2 说那组时间标记「不构成影响行动」，偏强）。按契约，拿不出原文引证的反对只能记存疑，这两条我记存疑，不作为判 fail 依据。\n\n我复核自己：我最初怀疑 nextHeadVerified 是编造，查清后确认是窗口宽度复用导致的差一字符，语义正确、原文支持——所以我在 counterExamples 里把它写成「字面假等式」而不是「编造」，并同时说明正确窗口。我对 CE-2 也确认过不是我看错：我按「标题算不算第 1 段」两种方案各跑了一遍 15 处散文引用，Scheme B（跳过标题）15/15 命中，Scheme A 0/15，而结构化字段反过来是 A 145/145、B 0/145——两套编号的分离是干净的、可复现的，不是我的口径猜测。\n\n不确定处：(1) 候选 narrativeFacts 的编号从 NF9 直接跳到 NF11，缺 NF10，但内容连贯无缺口，我判为编号笔误而非漏项——若原提交者本意是有第 10 条，那是我没找到。(2) feasibility of 「识海」：我倾向于认定为合理的既有设定词，但如果复核口径要求「本区间用词必须本区间有据」，RC-5 就应升级为 counterExample。(3) 我未能确定 84 这个数在候选作者心里的确切定义，只能证明它与「极大区间数」和「重叠连通分量数」都相等——两个口径在本文数据上恰好同值，所以无法区分，我按成立处理。\n\n工作目录与可复现性：全部复算在仓库根 /Users/carmen/Desktop/星系 下执行，只读命令，未写任何受保护路径（本轮只写 loop/state/out/verify_dafeng_L3_0151.verdict.json）。"
+}

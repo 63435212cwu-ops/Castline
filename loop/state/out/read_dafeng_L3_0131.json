@@ -1,0 +1,171 @@
+{
+  "task": "read:dafeng:L3:0131",
+  "agent": "w-dafeng-1",
+  "status": "done",
+  "summary": "worker 代为登记产物（agent 未自行提交）。",
+  "evidence": [
+    {
+      "path": "loop/state/out/read_dafeng_L3_0131.candidate.json",
+      "sha256": "e794cadd758c8147a8aac1baf52fd82d53a996f048890e084bc973d6377c9fb3",
+      "kind": "worker-output"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "逐条检查 writes 路径是否真实存在并记录哈希",
+      "result": "pass"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/read_dafeng_L3_0131.candidate.json",
+      "kind": "append-only"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/1063b17ca65ec1b76f30e460.json": "98370a39df4f8105063004d6bc8194e50aa8008e111a584ffec32f7ad14a14df",
+    "data/cache/1063b17ca65ec1b76f30e460.docs.json": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+  },
+  "remaining": [
+    "由 worker 代提交，agent 未写自述；复核时优先看产物本身"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/read_dafeng_L3_0131.candidate.json"
+    ]
+  },
+  "submittedAt": "2026-10-08T17:55:34Z",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-08T17:55:34Z"
+  },
+  "verifyState": "partial",
+  "reviews": [
+    {
+      "reviewer": "w-dafeng-2",
+      "at": "2026-10-08T19:48:01Z",
+      "verdict": "partial",
+      "notes": "判 partial，不是 fail 也不是 pass。\n\n【为什么不是 fail】角色契约规定『判 fail 必须有 counterExample，且 quote 逐字可查』，且『拿不出原文引证的反对意见只能记为存疑』。本候选在**事实层与引用层是干净的**：154/154 引文逐字命中、偏移 0 违例、0 条编造、0 条幻觉、0 条越权、硬性红线全过。我尝试用『反向验证』找编造（契约要求的第 3 步），找到的是**遗漏**（RC1–RC5，原文确有而候选未覆盖的事实），不是捏造。遗漏不构成 fail —— 若按遗漏判 fail，等于要求一份精读覆盖整章每一个细节，这既非任务要求，也会把可用结论一起丢掉。\n\n【为什么不是 pass】判 partial 的实质理由是一条**会产生错误信息**的缺陷，而非格式瑕疵：候选的 coverage/metrics 记分卡是用『写了但没落盘』的引文清单算的。我重建其构建脚本的 Q 注册表后，能精确复现它自报的 0.567/70/47 与 85/74/84；但产物里只有 154 条引文、覆盖 62/117 段（0.5223）。也就是说：**这份记分卡展示的是意图覆盖，不是实际覆盖**。差额正好是 9 条注册了却从未写入产物的引文。这正是计划100 反复出现的失败形态的一个变体——机制在跑、数字在生成，但数字描述的不是产物本身。若照此发布，读者会拿到一个高于实际的覆盖率。此外还有 3 处局部硬错误：foreshadows[2] 把两条引文的章号标错（会挂到错误章节节点）、deliberatelyNotAsserted 引用了原文不存在的『熟练的哭』、以及候选自报的 reproduce 命令实跑 exit code 1（它自己就报出 6 条问题）。\n\n【我的反向验证本身也有过一次误报，如实记录】我第一次做『遗漏检测』时，用候选产物 JSON 的『』引号片段做探针，得到 14 条『原文有、候选无锚定引文』的片段，其中包含『赔钱货』『东摸摸，西摸摸』『别碰脏了』等。复查发现这个判据**过严**：这些词虽无独立引文对象，但已被包含在更长的锚定引文里（或已被候选的 prose 明确讨论）。我改用两级判据（①是否被任何锚定引文以子串吸收 ②是否在产物 prose 里 0 命中）后，14 条降到 5 条，即 RC1–RC5。同理，我最初把 CE8 当作一条真缺陷，复查后确认那句自述属于另一单元，已降为存疑并从判定依据中剔除。两处修正都写在对应条目里，未用于加重 verdict。\n\n【一处方法学限度，必须说明】CE3/CE4 我判为『记分卡不可复现』，但我**无法排除**一种辩护：候选可能认为 Q 注册表才是『本区间实际读到的引文全集』，产物只是它的一个投影。我不接受这个辩护，理由是：任务 prompt 第 6 条要求『每条引用给 quote + start/end + sourceHash』并且『引文必须是原文里能 text.find(quote) 找得到的』——能被下游（to_candidate 的 collect_refs）消费的只有产物里的引文；注册表在 /tmp 下，是瞬态路径，不属于交付物。但我如实标出这是一个可争辩的口径问题，且它**不改变引用层零缺陷这个事实**。\n\n【对发布流的建议】7 条 must-fix 中只有 CE3/CE4 需要重新计算或补写引文，其余 5 条是字段级替换（章号、措辞、偏移），不触动 154 条引文中的任何一条。建议定向修复后由原提交者重交、再走一次独立复核。RC1–RC5 是**建议补充**而非缺陷（RC2 的『灵感似有触动』最值得补，它解释了他为何在门口停顿）。",
+      "counterExamples": [
+        {
+          "id": "CE1",
+          "severity": "partial级（自报统计与产物不符）",
+          "claim": "metrics.quoteInstances=85、metrics.inRangeQuoteInstances=74、verification.quotesChecked=85、verification.inUnitQuoteInstances=74 均不可复现：产物里实际有 154 条带偏移引文，其中 inSegment=true 143 条",
+          "quote": "他本意是朝地面喷，奈何幼女太小个，正好喷她脑瓜和脸上。",
+          "why": "『85』是候选构建脚本 /tmp/castline-0131/build.py 里 Q 注册表的条目数（len(Q.values())），不是落盘产物里的引文实例数。同一条注册项会被多个分区复用（例如同一句既进 tasks 又进 causeEdges），所以产物实例数远大于注册表条目数。引用本身全部逐字可查，属**记分卡口径未命名**导致的数字不可复现，不是伪造：如实复算命令见 reproduce。",
+          "reproduce": "python3 -c \"import json;c=json.load(open('loop/state/out/read_dafeng_L3_0131.candidate.json'));o=[];st=[c]\nwhile st:\n x=st.pop()\n if isinstance(x,dict):\n  (o.append(x) if all(k in x for k in ('quote','start','end','offsetUnit')) else None);st.extend(x.values())\n elif isinstance(x,list): st.extend(x)\nprint('emitted',len(o),'inSeg',sum(1 for v in o if v['inSegment']),'| declared',c['metrics']['quoteInstances'],c['metrics']['inRangeQuoteInstances'])\""
+        },
+        {
+          "id": "CE2",
+          "severity": "partial级（记分卡不可复现）",
+          "claim": "metrics.uniqueQuoteStrings=84 不可复现：产物 154 条引文只对应 75 个不同字符串（候选自己的复检脚本也算出 75）",
+          "quote": "许七安纵身翻过高墙，将箱子收入地书碎片。",
+          "why": "84 同样是 Q 注册表的不同字符串数（85 条注册项、84 个不同串），产物只有 75 个不同串。候选自带的 check_independent.py 自己也打印 unique=75，与它自己写进候选的 84 直接冲突 —— 即**候选自报值连它自己的复检脚本都不认**。",
+          "reproduce": "python3 -c \"import json;c=json.load(open('loop/state/out/read_dafeng_L3_0131.candidate.json'));o=[];st=[c]\nwhile st:\n x=st.pop()\n if isinstance(x,dict):\n  (o.append(x) if all(k in x for k in ('quote','start','end','offsetUnit')) else None);st.extend(x.values())\n elif isinstance(x,list): st.extend(x)\nprint('unique',len({v['quote'] for v in o}),'| declared',c['metrics']['uniqueQuoteStrings'])\""
+        },
+        {
+          "id": "CE3",
+          "severity": "partial级（coverage 记分卡不可复现、且偏高）",
+          "claim": "coverage 三项（charCoverage=0.567、paragraphsCoveredByInRangeQuote=70、uncoveredCount=47）不是由产物里的引文算出的：用产物的 143 条 in-range 引文现算得 charCoverage=0.5223、covered=62、uncovered=55",
+          "quote": "五百匹....婶婶一颗芳心砰砰狂跳",
+          "why": "0.567/70/47 是用构建脚本的 Q 注册表算的（我重建后复现为 2433/4291=0.567、70/47，与其自报完全吻合），而注册表里有 9 条引文**从未出现在产物中**（见 CE4）。也就是说：候选把自己的覆盖率记在了一份『写了但没落盘』的引文清单上，产物本身只覆盖 62/117 段。差集正好是那 9 条所在的 8 个段落。这是本轮最实质的缺陷：**记分卡展示的是意图覆盖，不是实际覆盖**。",
+          "reproduce": "python3 -c \"import json;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];S,E=454739,459030;c=json.load(open('loop/state/out/read_dafeng_L3_0131.candidate.json'));o=[];st=[c]\nwhile st:\n x=st.pop()\n if isinstance(x,dict):\n  (o.append(x) if all(k in x for k in ('quote','start','end','offsetUnit')) else None);st.extend(x.values())\n elif isinstance(x,list): st.extend(x)\nm=[]\nfor a,b in sorted((v['start'],v['end']) for v in o if v['inSegment']):\n (m.append([a,b]) if not m or a>m[-1][1] else m[-1].__setitem__(1,max(m[-1][1],b)))\np=[];i=S\nwhile i<E:\n j=t.find(chr(10),i)\n if j<0 or j>=E: j=E\n if t[i:j].strip(): p.append((i,j))\n i=j+1\ncov=[q for q in p if any(not(q[1]<=x or q[0]>=y) for x,y in m)]\nprint('chars',sum(y-x for x,y in m),'cov',round(sum(y-x for x,y in m)/float(E-S),4),'covered',len(cov),'uncovered',len(p)-len(cov),'| declared',c['coverage']['charCoverage'],c['coverage']['paragraphsCoveredByInRangeQuote'],c['coverage']['uncoveredCount'])\""
+        },
+        {
+          "id": "CE4",
+          "severity": "partial级（引文被计入统计但未落盘）",
+          "claim": "构建脚本 Q 注册表里有 9 条引文被计入 coverage/metrics，却从未作为任何带偏移引文出现在产物中",
+          "quote": "许七安返回小院，灵感似有触动，站在门口停顿了几秒，轻轻推开。",
+          "why": "9 条为：silk_shock『五百匹....婶婶一颗芳心砰砰狂跳』、silk_all『而这样昂贵精美的料子，竟然有五百匹....婶婶感觉自己被突如其来的幸福砸晕了。』、aunt_deadpan『“瞎了....”』、ask_egg『“想吃蒸蛋。”』、aunt_sigh『说着说着，她叹息一声：“不知不觉就长出息了。”』、knock『敲门声响起，门口传来许七安的声音：“二叔，有件事忘了和你说。”』、return_yard『许七安返回小院，灵感似有触动，站在门口停顿了几秒，轻轻推开。』、taoist『床榻，盘坐着一个头发花白的老道士，虽有道簪扎着，仍然垂下一缕缕凌乱的发丝。』、x_aunt_joke『婶婶一指头戳的许玲月一个踉跄。』。我逐条核过：这 9 条在原文中**确实逐字存在**（不是编造），但产物里既没有以这 9 条本身、也没有以包含它们的更长引文出现 —— 即『注册了但没写出去』。这 9 条落在 8 个段落上，正好是 CE3 的 coverage 差额。",
+          "reproduce": "python3 -c \"import json,re,ast;src=open('/tmp/castline-0131/build.py').read();reg=[]\nfor m in re.finditer(r'Q\\[\\\"([^\\\"]+)\\\"\\]\\s*=\\s*ref\\(',src):\n k=m.group(1); i=m.end()\n for j in range(i+1,min(i+4000,len(src))):\n  try:\n   v=ast.literal_eval(src[i:j])\n   if isinstance(v,str) and src[j:j+1] in (')',','):\n    reg.append((k,v)); break\n  except Exception: pass\nc=json.load(open('loop/state/out/read_dafeng_L3_0131.candidate.json'));o=[];st=[c]\nwhile st:\n x=st.pop()\n if isinstance(x,dict):\n  (o.append(x) if all(k in x for k in ('quote','start','end','offsetUnit')) else None);st.extend(x.values())\n elif isinstance(x,list): st.extend(x)\nL={v['quote'] for v in o}\nprint('registry',len(reg),'emitted-unique',len(L));print('registered-but-never-emitted:',[k for k,q in reg if q not in L])\""
+        },
+        {
+          "id": "CE5",
+          "severity": "partial级（章号归属错误）",
+          "claim": "foreshadows[2]（F3）的 payoffWhere 把 @2499647 与 @2502565 标为『第两百五十九章 臭婆娘』，但这两条引文实际都落在**第两百五十八章 父子博弈**内",
+          "quote": "气运，不是任何人都能承受的。你是最好的容器，不仅因为你是我血脉，同时，你也是大奉皇室的血脉。",
+          "why": "『第两百五十九章 臭婆娘』的章头在 @2502685，而 @2502565 < 2502685，仍属第两百五十八章（章头 @2497077）。只有 @2497165 那一条标对了（父子博弈）。后果：发布时这两条引文会被挂到错误的章节节点上。三条引文的**逐字内容与偏移全部正确**，错的是章节标签。",
+          "reproduce": "python3 -c \"import json,re;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];hs=[(m.start(),m.group(0)) for m in re.finditer(r'(?m)^第[一二三四五六七八九十百千万零两0-9]+章[^\\n]*',t)];print([(o,[h for h in hs if h[0]<=o][-1][1]) for o in (2497165,2499647,2502565)])\""
+        },
+        {
+          "id": "CE6",
+          "severity": "partial级（依据引文与断言不符）",
+          "claim": "states[1]（S2）的 before 写『家里人当着他的面把他叫「赔钱货」』，但它挂的两条引文都不含『赔钱货』；真正含该词的原句（@455793）没有被任何引文锚定",
+          "quote": "许玲月点点头：“嗯，挺好的，大哥是你的养的赔钱货。”",
+          "why": "S2 的两条引文是『许玲月幽幽道：“娘是在开心什么？…」』(@455631) 与『扬眉吐气！…执念，终于散去。』(@456431)，都不含『赔钱货』。原文说这句的是**许玲月**（妹妹），而 before 写的是『家里人』这一泛称。候选自己在 S2.note 里承认『before 的引文是许玲月的当面调侃』，但没说明该引文并不支持『赔钱货』这个具体措辞。另需指出：『赔钱货』在本区间只出现 1 次，且**不是**『前一天』——TH1 的『前一天还是被当面叫「赔钱货」的侄儿』给该词加了原文没有的时间定位（『前一天』在区间内出现 0 次）。此条判 partial 级：断言方向不错，是引证与时间限定不严谨。",
+          "reproduce": "python3 -c \"import json;c=json.load(open('loop/state/out/read_dafeng_L3_0131.candidate.json'));s=[x for x in c['states'] if x['id']=='S2'][0];print('before:',s['before']);print('quotes contain 赔钱货:',[('赔钱货' in q['quote']) for q in s['quotes']]);t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];print('赔钱货 count',t.count('赔钱货'),'@',t.find('赔钱货'),'| 前一天 in-seg',t[454739:459030].count('前一天'))\""
+        },
+        {
+          "id": "CE7",
+          "severity": "partial级（引文失实：原文不存在该措辞）",
+          "claim": "deliberatelyNotAsserted 写『不把「熟练的哭」「喷酒」之类的失态一律读成心虚/真相』，但『熟练的哭』在全书出现 0 次（本区间也是 0 次）——该措辞在原文中不存在",
+          "quote": "小豆丁都懵了，不知道自己做错了什么。她坚强的没有哭，舌头舔了舔脸上的酒水，感觉不好喝，这才“哇”一下哭起来。",
+          "why": "原文对许铃音这场哭的描写是『她坚强的没有哭…这才“哇”一下哭起来』，全句无『熟练』二字；『熟练的哭』全书 0 次。『喷酒』同样不在本区间（全书唯一一次在 @1461003，属区间外）。该条本意是拒绝过度解读（方向正确、值得肯定），但它拒绝的措辞是候选自己造的词，读者会以为原文里有『熟练的哭』这个说法。建议改写为引用原文真有的『她坚强的没有哭…这才“哇”一下哭起来』。",
+          "reproduce": "python3 -c \"import json;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];print('熟练的哭',t.count('熟练的哭'),'| 喷酒',t.count('喷酒'),'@',t.find('喷酒'),'| 本区间内 喷酒',t[454739:459030].count('喷酒'))\""
+        },
+        {
+          "id": "CE8",
+          "severity": "存疑（不作为判 partial 或 fail 的依据）",
+          "claim": "selfCritique SC2 自陈『实测 6 条 cost=null』的说法与产物不符——产物实际是 8 条 null；而候选 metrics.costNull=8 又是对的",
+          "quote": "（本条不引用原文：这是候选内部自述之间的一致性核对，不涉及小说原文事实）",
+          "why": "我核对的是候选自身两个字段：metrics.costNull=8（正确，实算 8）与 SC2 的散文自述『6 条』（错误）。注意：本候选的 selfCritique 数组里**并没有**这条文字——SC2 实际写的是 F4/浮香赎身，且写的是『6 条 cost=null』这句出现在前一份同类候选（L3_0127）里。我为避免把别单元的缺陷栽给本单元，明确将此条**降为存疑、不计入 verdict 依据**，仅记录我在核对过程中曾产生过这一疑问、复查后确认不属于本候选。",
+          "reproduce": "python3 -c \"import json;c=json.load(open('loop/state/out/read_dafeng_L3_0131.candidate.json'));print('costNull declared',c['metrics']['costNull'],'actual',sum(1 for t in c['tasks'] if t['cost'] is None));print([s[:40] for s in c['selfCritique']])\""
+        }
+      ],
+      "reverseChecks": [
+        {
+          "id": "RC1",
+          "found": "二叔在饭桌上被问『你老哥呢？』之后，实际先反问了一句『那你是老子』，这段叔侄问答的错位（听岔→纠正→才进入正题）没有被任何 tasks/notCauseEdges 吸收",
+          "quote": "许二叔愣了一下，才反应过来，没好气道：“那你是老子。”",
+          "offset": [
+            457227,
+            457254
+          ],
+          "note": "T4 的 obstacle 提到了这句，但只当『话题顿了一下』；原文紧接着的『连忙顿住，差点习惯性的怼侄儿。』（@457175，T4 之后的婶婶段）才是这一场景真正的互文：婶婶差点习惯性怼侄儿、二叔差点把侄儿的话听成挑衅——两条『习惯性反应』构成同一节的对称，候选只记了前者所在的场景，未记录这条呼应。"
+        },
+        {
+          "id": "RC2",
+          "found": "许七安回小院时有『灵感似有触动』的预感，是原文对他『察觉屋里有异样』的铺垫，候选完全没有覆盖（该句在产物 JSON 里 0 命中）",
+          "quote": "许七安返回小院，灵感似有触动，站在门口停顿了几秒，轻轻推开。",
+          "offset": [
+            458301,
+            458331
+          ],
+          "note": "这句直接解释了他为何『站在门口停顿了几秒』才推门——即他事先察觉了金莲道长的存在。候选的 worldSettings[1]（许七安的小院）只用『纵身翻过高墙』作到达证据，T7 的 objective 直接跳到『按约密会』，把一次有预感的入场读成了纯粹的履约。这是本区间最值得补的一条遗漏：它让『你来了/我来了/你不该来』那组古龙式玩笑有了物理前提。"
+        },
+        {
+          "id": "RC3",
+          "found": "『六十斤』这个物理约束的来源在区间外（@450319），候选把『（六十斤）』写进了物件名，却没有任何区间内引文支持该数字",
+          "quote": "一千两黄金差不多六十斤，装在一只大箱子里。",
+          "offset": [
+            450319,
+            450334
+          ],
+          "note": "worldSettings[5] 的 name 是『装满金锭的箱子（六十斤）』，但其 quotes 里无一句含『六十斤』，区间内唯一相关句是『许七安单手拖着六十斤的小箱子』（@455437）——这句**确实**含『六十斤』且逐字可查，却没有被锚定为该物件的引文。也就是说数字本身在区间内有据，只是没挂上证；而『一千两黄金差不多六十斤』这句在区间外。按『区间外引用只用于 foreshadows 回收端』的纪律，此处若要保留重量依据，应当锚定区间内的 @455437。"
+        },
+        {
+          "id": "RC4",
+          "found": "『或者指着许二郎说：“你家闺女真漂亮。”』——这句是『二叔同僚认错孩子性别』的笑点，也是许七安推导『五官相似＝有血缘』的第二半证据，候选只在 tasks[T3].result 的引文里以『这是你儿子？』截断收录，未覆盖后半句",
+          "quote": "或者指着许二郎说：“你家闺女真漂亮。”",
+          "offset": [
+            456982,
+            457001
+          ],
+          "note": "原文的推理链是**两句并置**：同僚把许七安认成二叔的儿子、把许二郎认成二叔的闺女——两个方向都指向『这一家孩子跟二叔像』。候选 T3 的引文停在『这是你儿子？』，紧接着的『代表什么？代表许七安和许二叔五官相似。』『从遗传学角度来说，这两是有血缘关系的。』两段（@457003、@457028）也没有被任何断言吸收。结论方向不受影响，但『遗传学』这条自陈的推理依据缺了一半。"
+        },
+        {
+          "id": "RC5",
+          "found": "金莲道长出场时的外貌描写（花白头发、道簪、垂下的凌乱发丝、眉目祥和）完全没有被覆盖，产物 JSON 里 0 命中",
+          "quote": "床榻，盘坐着一个头发花白的老道士，虽有道簪扎着，仍然垂下一缕缕凌乱的发丝。",
+          "offset": [
+            458387,
+            458424
+          ],
+          "note": "整段对老道士的肖像（含『他五官深刻，眉目祥和。』@458426）在候选里既未作 worldSettings，也未进任何断言。对一个身份成谜、许七安当场把他列为『可能灭口赵县令的人』（K3/U5）的角色来说，这是他本区间唯一的实体出场，遗漏使 U5 的怀疑对象在产物里没有形象锚点。"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,202 @@
+{
+ "verdict": "partial",
+ "task": "verify:sanguo:L1:0079",
+ "reviewer": "w-verify-2",
+ "reviewedCandidate": {
+  "path": "loop/state/out/read_sanguo_L1_0079.candidate.json",
+  "sha256": "b4f2a82fa767b9251cb6d848da0342a7294ae3fb9af4a8ed569273008941ab6d",
+  "submittedBy": "w-sanguo-0",
+  "note": "复核者 w-verify-2 ≠ 原提交者 w-sanguo-0，非自签。"
+ },
+ "source": {
+  "path": "data/cache/fe42d01f3826fe8096f86614.docs.json",
+  "sha256": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+  "range": [
+   398786,
+   403246
+  ],
+  "rangeCodepoints": 4460,
+  "segmentSha256": "53508572fabe6a629e7dbc26cc720e0acd7ac97d0c9d8dacdb79ab897080c4a3",
+  "reproduce": "python3 -c \"import json,hashlib;t=json.load(open('data/cache/fe42d01f3826fe8096f86614.docs.json'))[0]['text'];s=t[398786:403246];print(len(s),hashlib.sha256(s.encode()).hexdigest())\""
+ },
+ "counterExamples": [
+  {
+   "id": "CE1",
+   "type": "evidence-not-co-located-with-claim / duplicate-fill",
+   "severity": "mustFix",
+   "claim": "T05.cost（华歆请旨安置刘氏→献帝被封山阳公并当日逐出）的 quote 数组自称有两层证据（人物话语＋叙述层执行记录），voice 标为 mixed，栏位正文点名「后者才是叙述层对执行的记录」；但 quotes 里只有人物话语那一句，且**同一句被放了两遍**，被点名的叙述句没有登记。",
+   "quote": "今日便行，非宣召不许入朝！",
+   "quoteStart": 401257,
+   "quoteEnd": 401270,
+   "missingQuote": "献帝含泪拜谢，上马而去。",
+   "missingQuoteStart": 401271,
+   "missingQuoteEnd": 401283,
+   "why": "我用自己的实现复算（不读候选结论）：T05.cost.quotes 长度 2，两条的 quote/start/end/sourceHash 完全相同（均 401257–401270），即同一句占满两格；而候选自己的 voiceLegend 定义 mixed=「同栏兼有叙述与人物话语」，该标签在 quotes 层面无支撑。被点名的叙述句「献帝含泪拜谢，上马而去。」在原文逐字存在（find=401271，count=1，区间内），且候选在别处（foreshadows[1].payoffQuotes[0]、worldSettings[17].quotes[1]）确实登记过它，说明这不是定位能力问题，而是本栏漏登记＋重复填充。连带：候选 quotationConvention.distinctColumnPolicy 自称「同一 task 内五栏的引文区间两两不相交，且字符串两两不相等…本轮 11 条任务逐对复算，违规 0 处」——该自审结论被本条证伪（实际违规 1 处）。",
+   "reproduce": "python3 -c \"import json;d=json.load(open('loop/state/out/read_sanguo_L1_0079.candidate.json'));print(len(d['tasks'][4]['cost']['quotes']),d['tasks'][4]['cost']['quotes'][0]==d['tasks'][4]['cost']['quotes'][1])\""
+  },
+  {
+   "id": "CE2",
+   "type": "assertion-clause-without-evidence",
+   "severity": "shouldFix",
+   "claim": "S08（刘备 名义身份：汉中王→皇帝备）的 after 断言含「封王」，但支撑该分句的句子在整份候选里 0 次出现；afterQuotes 三条只覆盖改元、立后立太子、封丞相。",
+   "quote": "封次子刘永为鲁王，三子刘理为梁王；",
+   "quoteStart": 402973,
+   "quoteEnd": 402990,
+   "why": "全量扫描：字符串「刘永」「刘理」「鲁王」「梁王」在候选整个 JSON（含所有正文字段）0 命中；而该句在原文逐字存在（find=402973，count=1，区间内），是 after 中「封王」一词的唯一依据。性质与 CE1 同类（断言含无引证分句），程度较轻：断言为真，且相邻分句已引。",
+   "reproduce": "python3 -c \"import json;t=json.load(open('data/cache/fe42d01f3826fe8096f86614.docs.json'))[0]['text'];d=json.dumps(json.load(open('loop/state/out/read_sanguo_L1_0079.candidate.json')),ensure_ascii=False);print(t.count('封次子刘永为鲁王，三子刘理为梁王；'),'刘永' in d,'刘理' in d)\""
+  },
+  {
+   "id": "CE3",
+   "type": "误杀（合法内容被排除）",
+   "severity": "shouldFix",
+   "claim": "notWorldSettings/NW01 把「符宝郎」列进「官名与人称」的装饰性排除清单，理由写「没有一条写着它约束了谁的行动或分配了什么资源」——这与候选自己的 T02 直接矛盾：T02.obstacle 的正文写明「符宝郎祖弼以职守拒交…这是本条任务遇到的直接阻碍」。",
+   "quote": "祖弼叱曰：“玉玺乃天子之宝，安得擅索！",
+   "quoteStart": 399881,
+   "quoteEnd": 399900,
+   "why": "误杀检查（计划100 教训：整词判定把西游「遂行」挡掉，误杀了一条合法因果边）。此处同一份候选同时主张两件互斥的事：①（T02.obstacle 正文）符宝郎的职守构成阻碍、并直接导致祖弼被斩；②（NW01）符宝郎只是标识身份的装饰性称谓，不约束任何人的行动。原文支持①：「玉玺乃天子之宝，安得擅索」是**以职守为理由**的拒绝，其后「洪喝令武士推出斩之」是该约束引发的后果。故 NW01 的概括对「符宝郎」一项不成立（其余官名我未逐条质疑，且其中「山阳公」的约束已由 worldSettings[17] 单独登记，未被误杀）。",
+   "reproduce": "python3 -c \"import json;d=json.load(open('loop/state/out/read_sanguo_L1_0079.candidate.json'));print(d['notWorldSettings'][0]['item'][:12]);print(d['tasks'][1]['obstacle']['text'][:40])\""
+  }
+ ],
+ "reverseChecks": [
+  {
+   "found": "【空缺1】华歆扯袍逼问的引文被从中间切开：「帝大惊，拂袖而起，王朗以目视华歆。」整段无任何引文覆盖（我按码点掩码算出 [399787,399804) 是空段，候选引文恰好止于 399787 之前、起于 399804 之后）。",
+   "quote": "帝大惊，拂袖而起，王朗以目视华歆。",
+   "quoteStart": 399787,
+   "quoteEnd": 399804,
+   "why": "探针「以目视」「王朗以目视」「帝大惊」在候选整个 JSON 里 0 命中。「王朗以目视华歆」是本区间内**唯一**把胁迫写成预谋协同（而非华歆个人激动）的叙述句，且王朗随后与华歆同列三公（封华歆为司徒，王朗为司空）。它直接影响 C03 的 mechanism——候选把 C03 的机制写成「杀拒命者以立威」的单线，缺这条协同证据。",
+   "impact": "C03.mechanism 与 TH1（对称读法，以「强制」为反证）各缺一条文本证据。"
+  },
+  {
+   "found": "【空缺2】祖弼评诗的**前联**「奸宄专权汉室亡，诈称禅位效虞唐。」零覆盖；候选只引了同一首诗的后联。",
+   "quote": "后人有诗赞曰：“奸宄专权汉室亡，诈称禅位效虞唐。",
+   "quoteStart": 399921,
+   "quoteEnd": 399945,
+   "why": "探针「奸宄专权」「诈称禅位效虞唐」在候选 0 命中；候选用的是同诗后两句「满朝百辟皆尊魏，仅见忠臣符宝郎。」（@399945–399961，见 themeReadings[0].counterQuotes[3]）。这不是普通漏引：TH1 的核心反证正是「叙述层并不中立」，而「诈称禅位」是叙述者对这次禅让**最直接的否定性命名**，比后联的褒忠贬魏更贴题。",
+   "impact": "TH1.counter② 的论据弱于文本实际强度。"
+  },
+  {
+   "found": "【空缺3】刘备第二次拒绝中定性最强的一句「孤岂效逆贼所为！」零覆盖——候选的 T08/C10/R05 引了同一场的另两句，唯独跳过这句。",
+   "quote": "”汉中王勃然变色曰：“孤岂效逆贼所为！”拂袖而起，入于后宫。",
+   "quoteStart": 401809,
+   "quoteEnd": 401839,
+   "why": "探针「孤岂效逆贼所为」「勃然变色」在候选 0 命中。候选 T08.obstacle 引「卿等欲陷孤为不忠不义之人耶」，C10/R05 引「今一旦自立为帝，与篡窃何异」，而这一句夹在两者之间（同段 401809–401848）。它是刘备把曹丕直呼为「逆贼」并拒绝效法的唯一表述，是 C10.trigger「名分层面的理由不再起作用」这一判断的强度顶点：理由在此达到最强，之后孔明才改用后果施压。",
+   "impact": "T08.obstacle／C10.trigger 的强度依据偏弱（不改变方向判断）。"
+  },
+  {
+   "found": "【空缺4】孔明劝进的另两条真实杠杆——旧情与利诱——原文写明而候选未引：「臣自出茅庐，得遇大王，相随至今，言听计从」与「灭魏兴刘，共图功名」。",
+   "quote": "目今曹丕篡位，汉祀将斩，文武官僚，咸欲奉大王为帝，灭魏兴刘，共图功名；",
+   "quoteStart": 402163,
+   "quoteEnd": 402198,
+   "why": "探针「茅庐」「言听计从」「灭魏兴刘」「共图功名」在候选 0 命中（「臣自出茅庐，得遇大王，相随至今，言听计从；」@402124–402145 亦 0 覆盖）。C10 把机制写成「把拒绝的对象从道理换成后果」，但其列出的后果只有〔众官将散／两川难保〕这类**威胁**；原文同时给了**利诱**（众官的功名）与**关系**（二十年言听计从）两条独立杠杆，且是「叙旧→陈利害→引格言」三段递进。",
+   "impact": "C10.mechanism 与 T09 的劝说链解释不完整（覆盖了后两段，漏了第一段）。"
+  },
+  {
+   "found": "【空缺5】华歆在次日开场把「从议」直接定价为免祸：「陛下可依臣等昨日之议，免遭大祸。」零覆盖——而这正是 C01「同一诉求只是换了手段」的连续性锚点。",
+   "quote": "华歆奏曰：“陛下可依臣等昨日之议，免遭大祸。”",
+   "quoteStart": 399619,
+   "quoteEnd": 399642,
+   "why": "探针「陛下可依臣等昨日之议」「免遭大祸」「昨日之议」在候选 0 命中（候选 C02 引的是同一场的「恐旦夕萧墙祸起」@399678）。这句比 C02 所用的那句更明确地把禅位定价为**避祸手段**，并用「昨日之议」把首日与次日显式连起来——恰是 C01 所称〔请求没有撤回，只是换了手段〕在原文里的直接文字依据。",
+   "impact": "C01/C02 的触发语可以更精确；不改变结论。"
+  },
+  {
+   "found": "【空缺6】劝进名单被「引一半」：前半 13 人逐字引用，后半 6 人（尹默、秦宓、殷纯、张裔、王谋、伊籍）在候选全 JSON 里 0 命中。",
+   "quote": "权、祭酒何宗、学士尹默、司业谯周、大司马殷纯、偏将军张裔、少府王谋、昭文博士伊籍、从事郎秦宓等众也。",
+   "quoteStart": 402440,
+   "quoteEnd": 402490,
+   "why": "这不是盲目区：候选**确实处理了**这份名单（引文停在「…光禄卿黄权、祭酒何宗、」@402415–402440），其后整段落在 117 字缺口 [402377,402494) 内；逐个探针确认尹默/秦宓/殷纯/张裔/王谋/伊籍 0 命中。「引一半」比整段不引更容易被下游误读为名单已完整登记。候选 U11 已把该缺口登记为「未逐句引证的残段」并给了区间，属已申报，故不构成隐瞒。",
+   "impact": "若下游据该名单建人物/劝进者节点，会得到不完整集合。建议补齐或在该处显式标「名单未完整引用」。"
+  },
+  {
+   "found": "【空缺7】即位祭文的收束句「惟神飨祚汉家，永绥历服！」零覆盖。",
+   "quote": "谨择吉日，登坛告祭，受皇帝玺绶，抚临四方。惟神飨祚汉家，永绥历服！”",
+   "quoteStart": 402809,
+   "quoteEnd": 402843,
+   "why": "探针「惟神飨祚汉家」在候选 0 命中；候选对祭文只引到「率土式望，在备一人。」(@402780–402790) 与「曩者王莽篡盗…」(@402653–402674)，中间 [402790,402843) 53 字空缺含祭文结尾的告神祈愿。属候选 U11 已申报的「仪式文本铺陈句」类型，故为申报过的残余，不是隐瞒。",
+   "impact": "轻微：祭文作为 use 类文书，其收束句未登记。"
+  },
+  {
+   "found": "【空缺8】献帝驳祥瑞的整句只引了前半，后半「奈何以虚妄之事，而遽欲朕舍祖宗之基业乎？」零覆盖。",
+   "quote": "奈何以虚妄之事，而遽欲朕舍祖宗之基业乎？”",
+   "quoteStart": 399284,
+   "quoteEnd": 399305,
+   "why": "候选 R04 用「帝曰：“祥瑞图谶，皆虚妄之事；」(@399269–399284) 作为「祥瑞被当场斥退」的证据，而该句在同一引号内继续了反诘的后半（斥其为虚妄＋拒绝因此舍弃祖宗基业）。缺后半使 R04 的拒绝力度弱于原文，但 R04 的方向判断（祥瑞未导致禅位）仍然成立。",
+   "impact": "轻微：R04 引证不完整，结论不受影响。"
+  }
+ ],
+ "quoteSpotChecks": {
+  "method": "random.seed(20261012) 从全部 370 个引文对象中随机抽 5 条，对 docs[0].text 各做一次 find()。",
+  "sample": [
+   {
+    "path": "/states[11]/afterQuotes[1]",
+    "quote": "孔明听罢，从榻上跃然而起，将屏风一击，外面文武众官皆入，拜伏于地曰：“王上既允，便请择日以行大礼。",
+    "declaredStart": 402328,
+    "findResult": 402328,
+    "sliceEqual": true,
+    "offsetMatch": true
+   },
+   {
+    "path": "/tasks[0]/result/quotes[0]",
+    "quote": "帝大哭，入后殿去了。",
+    "declaredStart": 399377,
+    "findResult": 399377,
+    "sliceEqual": true,
+    "offsetMatch": true
+   },
+   {
+    "path": "/tasks[5]/action/quotes[0]",
+    "quote": "丕方下拜",
+    "declaredStart": 401380,
+    "findResult": 401380,
+    "sliceEqual": true,
+    "offsetMatch": true
+   },
+   {
+    "path": "/tasks[0]/objective/quotes[0]",
+    "quote": "群臣会议，言汉祚已终，望陛下效尧、舜之道，以山川社稷，禅与魏王",
+    "declaredStart": 398864,
+    "findResult": 398864,
+    "sliceEqual": true,
+    "offsetMatch": true
+   },
+   {
+    "path": "/tasks[4]/cost/quotes[1]",
+    "quote": "今日便行，非宣召不许入朝！",
+    "declaredStart": 401257,
+    "findResult": 401257,
+    "sliceEqual": true,
+    "offsetMatch": true
+   }
+  ],
+  "result": "5/5 逐字命中，偏移一致。另做全量复算：370/370 引文满足 text[start:end]==quote，370/370 的 globalOccurrences 声明与实际 count 一致，370/370 inRange 声明与实际一致。"
+ },
+ "selfReportDiscrepancies": [
+  {
+   "field": "quotationConvention.bracketConvention.selfAudit",
+   "declared": "全部字符串字段里的逐字括号片段共 370 个",
+   "measured": "「([^」]*)」口径 381 个；「([^」]{2,})」口径 374 个；370 恰等于 fieldCounts.quoteObjects，疑为串用了另一个计数。",
+   "substanceSafe": "实质安全声明（not-in-source = 0）在两种口径下均为真，bracketFragmentsNotInSource.count=0 成立。"
+  },
+  {
+   "field": "coverageDeclaration.quoteUnion.distinctQuoteSpans",
+   "declared": 182,
+   "measured": 153,
+   "substanceSafe": "因全部引文在全书唯一（count==1），去重后的区间数必然等于去重后的字符串数（实测两者均为 153）。182 与 fieldCounts.quotesRegisteredKeys（登记表键数，含别名键）同值，疑为串用。"
+  },
+  {
+   "field": "quotationConvention.distinctColumnPolicy",
+   "declared": "本轮 11 条任务逐对复算，违规 0 处",
+   "measured": "违规 1 处（T05.cost 内两条引文的区间相交且字符串相等）",
+   "substanceSafe": "仅此 1 处，见 counterExamples/CE1。"
+  }
+ ],
+ "checksPerformed": {
+  "fabricationScan": "未发现编造。候选提到的每一个人物、结局、伏笔都能在原文找到对应文字；未出现原文没有的人物（如无「司马昭」「刘禅即位」等越界断言）。",
+  "hallucinationOutcomeScan": "「结束≠成功」在 4 处被主动拒绝：T11.result=null（赵云谏阻无结果，原文「未知子龙所谏若何，且看下文分解」）、F02 unresolved（入朝禁令后半无召见事件可验）、F03 unresolved（「司马将来作样看」在区间外）、F04 unresolved（谏阻理由与结果在区间外）。K05 明确拒绝把「曹洪索要玉玺」当得手。",
+  "rejectedEdgesReRead": "6 条 rejectedCauseEdges 的排除理由我逐条回原文核对，全部成立（尤以 R03 的地点不一致〔坛在繁阳／疑的是许昌宫室〕与 R04 的方向相反〔祥瑞被当场斥退〕为准确）。",
+  "sourceHashDiscrepancyClaim": "候选登记的任务 JSON sourceHash（2988ce6e…）与实测文件（8ab7298a…）不一致一事，我独立复核为真：2988ce6e… 实测属于 data/cache/152e2a6eed94f1075e7e7070.docs.json 与 data/cache/f0b45e85aac6c95e584075a2.docs.json，且这两份的 docs[0].text[398786:403246] 与本单元切片逐字相同。候选按提示词与实测文件采用 8ab7298a… 并另设字段登记差异、未改动任何校验规则或任务元数据，处理正确。",
+  "coverageRecompute": "我用自己的掩码实现独立复算，与候选自报逐位一致：bodyRange[398809,403189) 汉字 3556、已覆盖 2432、占比 0.6839、残段 223（其中 ≥3 汉字 218、<3 汉字 5 段共 10 字）；整切片口径 2432/3605=0.6746。U11 所称「长缺口(>60cp) 共 5 处」在 bodyRange 口径下复算为 5，成立；整切片口径为 6，多出的是回目标题行 [398786,398864)，候选已在 wholeSliceResidualNote 写明该差异，非漏报。",
+  "selfReportFieldCounts": "fieldCounts 全部计数复算一致：tasks 11、causeEdges 15、rejectedCauseEdges 6、states 12、knowledgeGaps 8、foreshadows 7、notForeshadows 4、worldSettings 23（place 9/item 5/rule 9）、notWorldSettings 4、themeReadings 2、speechAsClueNotFact 15、unknowns 11、selfCritique 4、textualNotes 6、quoteObjects 370、distinctQuotes 153、foreshadows resolved 3/unresolved 4。11 个空栏 11/11 带同名 <栏位>Note。跨任务复用引文 0 处与自报一致。",
+  "provenanceCheck": "provenanceNote 所述构建脚本 build.py 在 /Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/read-sanguo-L1-0079-w-sanguo-0/build.py 实测存在（外置盘可用）。submitted 记录 evidence 里的候选哈希 b4f2a82f… 与我实测的候选文件哈希一致。"
+ },
+ "notes": "**判 partial，不判 fail**：逐条对抗后没有找到任何编造——370/370 引文逐字命中、偏移一致、370/370 全局唯一性声明成立、跨任务复用 0 处、11 个空栏 11/11 带同栏理由、越界人物 0 命中、结束≠成功在 4 处被主动拒绝、6 条反向因果边的排除理由我回原文逐条核对后全部成立。这份候选的机械层（引用定位）质量良好，来源哈希差异的处理也诚实且正确。按「拿不出原文引证的反对意见只能记为存疑、不能据此判 fail」，我不判 fail。\n\n**必须修（1 条）**：CE1 — T05.cost 的 quotes 只有人物话语且同一句重复两次，栏位正文自己点名的叙述句「献帝含泪拜谢，上马而去。」未登记，voice=mixed 在 quotes 层无支撑（证据与断言不同源）。同时证伪了 distinctColumnPolicy 自报的「违规 0 处」。修法二选一：把该叙述句登记进 quotes 并删去重复项；或把 voice 降回 character，并把 worldSettings[17] 的 institution 从 executed 降为 declared（候选 SC2 已预告第二种处置）。**连带必须同步**：worldSettings[17] 标 executed 与 F02 标 unresolved 互相冲突（F02 的理由正是「不许入朝」需召见/不召见事件才能验证，而该事件不在区间内）——我倾向 executed 降为 declared，或至少把执行证据限定为「即日便行」那一半。\n\n**应当修（2 条）**：CE2 — S08.after 的「封王」无任何引文支撑（依据句 @402973–402990 在候选里 0 命中）。CE3（误杀）— NW01 把「符宝郎」列为不约束行动的装饰性官名，与 T02.obstacle 正文「符宝郎祖弼以职守拒交…这是本条任务遇到的直接阻碍」自相矛盾；建议把符宝郎移出 NW01，或把该项登记为约束行动的制度性职守。\n\n**哪些可以用**：tasks 全 11 条（T05 除 cost 栏外可用）、causeEdges 全 15 条、rejectedCauseEdges 全 6 条、states 12 条（S08 需补 CE2 的引证）、knowledgeGaps 8 条（K01/K02 把「传言→已被所弑」的升格辨得准；K05 拒绝把索玺当得手是对的）、foreshadows 7 条（F02/F03/F04/F07 标 unresolved 是正确处置；F06 的 resolved 我认可，理由见其 note 已区分人物话语与叙述层兑现）、notForeshadows 4 条、worldSettings 23 条中 22 条（第 17 条需按 CE1 处置；place 的 arrived/mentioned 区分严格，东吴判 mentioned、许昌判 mentioned 均正确）、notWorldSettings 4 条中 3 条（NW01 需按 CE3 处置）、themeReadings 2 条（都带 counter 且 counter 强于 support，符合解释层要求）、speechAsClueNotFact 15 条、unknowns 11 条、textualNotes 6 条、selfCritique 4 条。**必须降级**：仅 worldSettings[17] executed→declared。**必须丢弃**：无。\n\n**存疑（只记录，不作 fail 依据）**：① 8 条反向发现里，空缺 1–4 影响 mechanism 完整性（C03 的协同证据、TH1 的叙述者定性强度、C10 的第一段杠杆、T08/C10 的拒绝强度顶点），建议由 READER 补引而非重做；空缺 5–8 属候选 U11 已申报的残余类型（仪式文本、名录、礼节套语），不构成隐瞒。② 三处自报数字不准（selfAudit 370 vs 实测 374／381；quoteUnion.distinctQuoteSpans 182 vs 实测 153；distinctColumnPolicy 违规 0 vs 实测 1），实质安全声明在三种口径下仍全部为真，故只是自报数字不可信，不影响内容结论——但下游若引用这些数字应当自行复算。\n\n**我自己的方法错（如实留痕）**：我第一版长缺口统计按整切片口径得到 6 处，与候选自报的 5 处不符，一度准备记为漏报；复核发现候选报的是 bodyRange（排除回目标题行与页脚），且它已在 wholeSliceResidualNote 写明该差异——是**我的口径没对齐**，不是候选漏报，已撤回。另：我第一版「引文区间相交」判定写错过一次（把同栏内重复项判成不违规），修正后才发现 CE1；错误版本让我差点漏掉本轮唯一一条 mustFix。\n\n**独立性留痕**：我在读候选之前先自行通读了原文切片（docs[0].text[398786:403246]，4460 字，segment sha256 53508572…），反向发现由自己的探针与掩码实现产出。完成自己的复核后，我才读取 loop/state/out/read_sanguo_L1_0079.json 里已存在的 w-verify-0 复核记录作对照：CE1、CE2 与其结论一致（我独立复现）；空缺 1–4、8 与其 reverseChecks 有部分重叠（我独立得出，此处如实披露重叠以免读者误以为全部为我首见）；空缺 5、6 与其第 5、6 条一致；CE3（NW01 误杀符宝郎）与三处自报数字不符为我本轮新增、未见于既有复核。既有复核判 partial，我独立判 partial，结论一致但依据与新增项不同。"
+}

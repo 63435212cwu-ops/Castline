@@ -1,0 +1,80 @@
+{
+  "task": "audit:rsi-display-response:20261012",
+  "agent": "rsi-luna-display-response-20261012",
+  "status": "done",
+  "summary": "完成显示性能与键盘响应定向只读审查，发现现有 4K 分段性能采样器首段双计、1x中帧率自动降档空档、calm仍逐帧渲染及Space长按重复触发风险；未跑测试/GPU。",
+  "evidence": [
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-185019-044725-59520/测试产物/display-response-audit.json",
+      "sha256": "0e468aef9c138f91cc2e1c4aff4ad5728a0b40723cd98162730360ff575e89bb"
+    },
+    {
+      "path": "loop/state/out/audit_rsi-display-response_20261012.pointer.json",
+      "sha256": "8a6264853b52144519a8dfdb56665625d18877e813bc41cd965e4c3de80ca554"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "只读取指定场景、性能和键盘源码及职责测试；定位精确触发与最小两段数学反例。",
+      "result": "pass"
+    },
+    {
+      "text": "用当前 scene-core SHA 对照历史 native4k 报告，确认报告版本不同，不作为当前帧率结论。",
+      "result": "pass"
+    },
+    {
+      "text": "未读取小说、未运行浏览器/GPU/测试、未修改共享代码；报告范围明确标成局部审查。",
+      "result": "pass"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/audit_rsi-display-response_20261012.pointer.json",
+      "kind": "append-only"
+    }
+  ],
+  "sourceHashes": {
+    "external/display-response-audit.json": "0e468aef9c138f91cc2e1c4aff4ad5728a0b40723cd98162730360ff575e89bb",
+    "loop/state/out/audit_rsi-display-response_20261012.pointer.json": "8a6264853b52144519a8dfdb56665625d18877e813bc41cd965e4c3de80ca554",
+    "loop/queue/rsi-display-performance-20261012.jsonl": "7e64e259efd0f961ed1e47df41663ece4b7055c348313c383c6f01932cc151d0"
+  },
+  "remaining": [
+    "需先修复既有scene_native4k_perf_browser.py分段汇总，再测真实连续4K窗口；当前审核未测全画质或跨设备持续FPS。",
+    "根据信息决定后续QUALITY唯一计划中的制作卡优先级；本任务没有新增质量计划或源码改动。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "remove-added-pointer-only; external report and submission record remain archived",
+    "files": [
+      "loop/state/out/audit_rsi-display-response_20261012.pointer.json"
+    ]
+  },
+  "submittedAt": "2026-10-12T10:50:34Z",
+  "wallClockSeconds": 535,
+  "wallClockFrom": "lease.startedAt",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-12T10:50:34Z"
+  },
+  "verifyState": "pass",
+  "reviews": [
+    {
+      "reviewer": "motion-e1-merge-20261010T162850Z",
+      "at": "2026-10-12T11:32:22Z",
+      "verdict": "pass",
+      "notes": "Root source-reviewed selected findings; M90 legitimately changed player since audit. Correct report wording: even one segment doubles counts/duration/animation, although its FPS ratio stays unchanged. Audit is a scoped diagnosis, no measured FPS or cinematic signoff. Meter independently verified separately.",
+      "counterExamples": [
+        {
+          "report": "default one segment does not hit double-add",
+          "correction": "alias-add also duplicates single segment; FPS ratio unchanged, duration/frame/animation wrong"
+        }
+      ],
+      "reverseChecks": [
+        "historical core hash differs from current; old FPS cannot certify current build",
+        "1x canBoost false and 38fps degrade threshold verified",
+        "calm still runs hooks/composer verified; do not remove until profile",
+        "one-shot ownership currently lacks repeat gates verified"
+      ]
+    }
+  ]
+}

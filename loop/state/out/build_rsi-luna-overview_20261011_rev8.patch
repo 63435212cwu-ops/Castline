@@ -1,0 +1,93 @@
+--- a/js/sky/sky-deconstruction.js
++++ b/js/sky/sky-deconstruction.js
+@@ -623,7 +623,7 @@
+   }
+   function close(refocus) {
+     cancelM84(true);
+-    m84.returning = false; m84.returnOpen = false; m84.returnScroll = null; m84.returnLayer = null;
++    clearM84Return();
+     if (g.CLSky && g.CLSky.clearNeighborCompare) g.CLSky.clearNeighborCompare();
+     browse.neighbors.bId = ''; browse.neighbors.result = null; browse.neighbors.demoCounts = null; browse.neighbors.origin = null; browse.neighbors.returnAfterBasis = false;
+     state.open = false; syncButton();
+@@ -1203,6 +1203,9 @@
+     }
+     m84.trigger = null; m84.openScroll = null;
+   }
++  function clearM84Return() {
++    m84.returning = false; m84.returnOpen = false; m84.returnScroll = null; m84.returnLayer = null;
++  }
+   function stageMarkup(f) {
+     var keys = ['characters', 'groups', 'relations', 'events'], labels = {characters:'人物',groups:'群组',relations:'关系',events:'事件'}, positions = {};
+     var mobile = g.innerWidth <= 680;
+@@ -1619,6 +1622,7 @@
+   }
+   function render() {
+     if (!root || !state.ready) return;
++    if (state.mode !== 'overview' && m84.open) cancelM84(true);
+     var title = state.mode === 'lines' ? '故事线骨架' : state.mode === 'people' ? '人物弧线' : state.mode === 'evidence' ? '原文证据层' : state.mode === 'mechanics' ? '情节证据' : state.mode === 'causal' ? '因果网络' : state.mode === 'foreshadow' ? '伏笔生命周期' : state.mode === 'states' ? '状态与视野' : '全书叙事 DNA';
+     setText('skyDeconTitle', title);
+     setText('skyDeconSub', state.mode === 'overview' ? '从全书形状进入故事线、人物和证据' : state.mode === 'lines' ? '完整线名、章节跨度与目标声明；自动分段单独收纳' : state.mode === 'people' ? '完整人物表、材料给出的角色弧与出现事件' : state.mode === 'mechanics' ? '目标、障碍、代价与状态声明逐条回到事件证据' : state.mode === 'causal' ? '显式前因、后果、伏笔与未解析引用' : state.mode === 'foreshadow' ? '每条显式伏笔声明的埋伏、兑现、待回收与断裂' : state.mode === 'states' ? '状态、变化、知情范围与转折逐条回到原文' : '已核验引文、未核验引文、归纳与推导分别呈现');
+@@ -1667,7 +1671,7 @@
+     if (!nextGraph || !nextModel || !nextModel.ok) return false;
+     if (nextGraph !== graph) {
+       cancelM84(true);
+-      m84.returning = false; m84.returnOpen = false; m84.returnScroll = null; m84.returnLayer = null;
++      clearM84Return();
+       if (searchTimer != null) { g.clearTimeout(searchTimer); searchTimer = null; }
+       Object.keys(browse).forEach(function (key) { browse[key].page = 0; if (browse[key].query != null) browse[key].query = ''; if (browse[key].filter != null) browse[key].filter = 'all'; });
+       browse.evidence.kind = 'all'; browse.evidence.person = ''; personDetail = null; state.focus = null;
+@@ -1677,6 +1681,11 @@
+     graph = nextGraph; model = nextModel; index = buildIndex(); state.ready = true; ensure(); render(); syncButton(); return true;
+   }
+   doc.addEventListener('cl:sky-deconstruct-toggle', toggle);
++  doc.addEventListener('cl:graph-loading', function (event) {
++    if (!event || !event.detail || event.detail.stage !== 'fetch') return;
++    cancelM84(true); clearM84Return();
++    if (state.open) render();
++  });
+   doc.addEventListener('cl:sky-structure-state', function (event) {
+     var ready = !!(event && event.detail && event.detail.ready === true);
+     if (!ready && m84.open) cancelM84(true);
+@@ -1722,6 +1731,7 @@
+     if (!index || !index.people) return false;
+     var p = index.people.filter(function (x) { return x.name === name; })[0];
+     if (!p) return false;
++    cancelM84(true);
+     if (browse.neighbors.origin !== personKey(p)) { if (g.CLSky && g.CLSky.clearNeighborCompare) g.CLSky.clearNeighborCompare(); browse.neighbors.origin = null; browse.neighbors.bId = ''; browse.neighbors.result = null; browse.neighbors.demoCounts = null; }
+     personDetail = personKey(p); browse.arc.page = 0;
+     state.restore = { attr: 'data-person-detail', value: personDetail };
+--- a/tests/sky_story_browser.py
++++ b/tests/sky_story_browser.py
+@@ -170,6 +170,32 @@
+   check('four layer copies show their real sample denominators and group member coverage','(()=>{let s=document.querySelector(".sd-structure-stage").textContent;return s.includes("1 / 219")&&s.includes("1 / 20")&&s.includes("1 / 798")&&/成员已解析并展示 [1-4] \/ \d+/.test(s);})()')
+   check('four desktop copies fit the clear canvas, stay left of the reading panel and do not overlap','(()=>{let p=document.querySelector("#skyDeconPanel").getBoundingClientRect(),cs=Array.from(document.querySelectorAll(".sd-structure-stage .sd-structure-copy")),bs=cs.map(x=>x.getBoundingClientRect());return bs.length===4&&bs.every(b=>b.width>0&&b.height>0&&b.left>=0&&b.right<=p.left-8)&&bs.every((a,i)=>bs.slice(i+1).every(b=>a.right<=b.left||b.right<=a.left||a.bottom<=b.top||b.bottom<=a.top));})()')
+   check('desktop layer controls meet the forty-four-pixel touch target','Array.from(document.querySelectorAll(".sd-structure-layer")).every(b=>b.getBoundingClientRect().height>=44)')
++  ev('window.__m84Person=CLSkyDeconstruction.showPerson(CLApp.graph().characters[0].name)')
++  check('production showPerson entry cancels the M84 stage and changes to the person reader','__m84Person===true&&!document.querySelector(".sd-structure-stage")&&document.querySelector("#skyDeconPanel").textContent.includes("人物弧线")')
++  ev('CLSkyDeconstruction.setMode("overview")')
++  click('#skyDeconBody [data-action="structure-stage"]');time.sleep(1.05)
++  ev('window.__m84FetchStage=CLApp.openVersion(CLApp.key())')
++  check('production openVersion fetch synchronously cancels an open M84 stage','!document.querySelector(".sd-structure-stage")')
++  ev('window.__m84FetchStage',True);ready()
++  ev('CLSkyDeconstruction.setMode("overview")')
++  end=time.time()+8
++  while time.time()<end and ev('CLSkyDeep.stats().structure.moving'):time.sleep(.1)
++  if not ev('CLSkyDeep.stats().structure.progress===1&&!CLSkyDeep.stats().structure.moving'):click('#skyStructure')
++  end=time.time()+8
++  while time.time()<end and not ev('CLSkyDeep.stats().structure.progress===1&&!CLSkyDeep.stats().structure.moving'):time.sleep(.1)
++  click('#skyDeconBody [data-action="structure-stage"]');time.sleep(1.05)
++  click('#skyDeconBody [data-structure-nav="people"]')
++  check('structure navigation created its explicit return snapshot before graph loading','!!document.querySelector("#skyDeconBody [data-action=structure-return]")')
++  ev('window.__m84FetchReturn=CLApp.openVersion(CLApp.key())')
++  check('production fetch clears the saved structure return action at load start','!document.querySelector("#skyDeconBody [data-action=structure-return]")')
++  ev('window.__m84FetchReturn',True);ready()
++  ev('CLSkyDeconstruction.setMode("overview")')
++  end=time.time()+8
++  while time.time()<end and ev('CLSkyDeep.stats().structure.moving'):time.sleep(.1)
++  if not ev('CLSkyDeep.stats().structure.progress===1&&!CLSkyDeep.stats().structure.moving'):click('#skyStructure')
++  end=time.time()+8
++  while time.time()<end and not ev('CLSkyDeep.stats().structure.progress===1&&!CLSkyDeep.stats().structure.moving'):time.sleep(.1)
++  click('#skyDeconBody [data-action="structure-stage"]');time.sleep(1.05)
+   ev('window.__m84Scroll=document.getElementById("skyDeconBody").scrollTop')
+   click('#skyDeconBody [data-structure-layer="events"]')
+   ev('document.querySelector("#skyDeconBody [data-structure-nav=people]").scrollIntoView({block:"center"})')

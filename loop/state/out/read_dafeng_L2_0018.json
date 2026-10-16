@@ -1,0 +1,89 @@
+{
+  "task": "read:dafeng:L2:0018",
+  "agent": "w-dafeng-3",
+  "status": "done",
+  "summary": "精读《大奉打更人》第十九章 送行诗（docs[0].text 的 [55440,58189) 切片，2749 codepoint / 68 段）并产出候选 loop/state/out/read_dafeng_L2_0018.candidate.json：6 条任务五元组、11 条因果边（每条带 mechanism 与 notMereAdjacency）、8 条显式拒绝的伪因果、5 条人物状态（before/after + 事件锚点）、4 条知识差、4 条伏笔（回收端全在区间外，逐条标 inSourceRange=false）、3 条未收束线、11 条 unknowns；494 个 quote 字典全部由脚本按「段落下标+段内唯一子串」定位后回切，text[start:end]==quote 逐字成立。",
+  "evidence": [
+    {
+      "path": "loop/state/out/read_dafeng_L2_0018.candidate.json",
+      "sha256": "7fe728b14647b8a58ccb51f620ecb6aab8182a3d4ccf0fa1651412fd9353d050",
+      "kind": "reader-output",
+      "bytes": 343628
+    }
+  ],
+  "assertions": [
+    {
+      "text": "源哈希：动手前后各算一次 sha256(data/cache/9b676d7031b1bcd3b8377a18.docs.json) 均为 fdde5558…39839，与任务 sourceHash 逐字一致；图缓存 3c2fae1d…6ebdf 亦未变。命令：shasum -a 256 data/cache/9b676d7031b1bcd3b8377a18.docs.json",
+      "result": "pass"
+    },
+    {
+      "text": "偏移口径：docs[0].text[55440:55448]=='第十九章 送行诗' 且全文仅 1 次；docs[0].text.find('第二十章 半阙七律惊大儒')==58189==rangeEnd；区间末非空白内容是分隔线 '------------'。命令：python3 -c \"import json;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];print(t[55440:55448],t.find('第二十章 半阙七律惊大儒'))\"",
+      "result": "pass"
+    },
+    {
+      "text": "逐字命中：独立复算脚本 /tmp/cl_l2_0018/recheck.py（不复用生成脚本代码）遍历候选 JSON 里全部 494 个 quote 字典，断言 text[start:end]==quote、occurrencesInSource 与全书实算一致、inSourceRange 与真实区间一致、区间内引文在切片内 seg.count(quote)==1；38 项检查全部 pass（exit 0）。命令：python3 /tmp/cl_l2_0018/recheck.py（输出 /tmp/cl_l2_0018/recheck.json）",
+      "result": "pass"
+    },
+    {
+      "text": "反向验证：/tmp/cl_l2_0018/reverse.py 回答「还漏了什么」——A 68 个段落非空白正文全部被引文覆盖（uncoveredBodyFragments 为空）；B 区间内出现的 22 个实体（人物/机构/地名/名目）无一在候选里缺失；C 候选叙述里出现的区间外人物名（张巡抚 X24、赵守 X25）都同条目附了区间外逐字引文；D 无纪律违规（无 notSuccess=false、无非空值无引文、无 null 无 why）。exit 0。命令：python3 /tmp/cl_l2_0018/reverse.py",
+      "result": "pass"
+    },
+    {
+      "text": "发现并修掉自己的三处真实缺陷（不是改校验）：①F3 的区间外回收端原本误引 X15（李慕白不下棋），实为 X21（第二十章李慕白击掌赞诗）；②U05 提到区间外人物「张巡抚」却无引文 → 补注册 X24（第一百八十八章原文）；③OT1 提到「赵守说」却无引文 → 补注册 X25（第五十九章原句）。另把一条用 null 占位的 states 条目（S6）删掉，改为登记的 statesOmitted 说明（避免用未知填默认值）。",
+      "result": "pass"
+    },
+    {
+      "text": "区间内引文零重复：对 quoteRegistry+readParagraphRegistry 内全部 111 条区间内引文复算 seg.count(quote)，无一条在切片内出现超过 1 次（区间内定位唯一）。",
+      "result": "pass"
+    },
+    {
+      "text": "未声称语义核验：semanticReview='not-performed'，semanticReviewNote 明示「引用定位正确≠语义已核验」；候选不包含任何 semanticReview 完成声明。",
+      "result": "pass"
+    },
+    {
+      "text": "只写了 writes 指定的 1 个文件：git status --porcelain 对 loop/ 只见 '?? loop/'（loop 整体未跟踪），未触碰 js/ css/ index.html serve.py narrative.py scripts/ tests/ docs/ data/ 任何受保护路径（源文件哈希动手前后一致即为证）。",
+      "result": "pass"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/read_dafeng_L2_0018.candidate.json",
+      "kind": "append-only"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/9b676d7031b1bcd3b8377a18.docs.json": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "data/cache/9b676d7031b1bcd3b8377a18.json": "3c2fae1d399d6768719f2d5476fa0cfd88fb4fbbc12abdf080323fa4b846ebdf"
+  },
+  "remaining": [
+    "语义未独立复核：本轮只做了引用定位的机器校验（逐字命中+偏移+唯一性），没有做任何语义核验；候选对 CE4（紫玉寓意）、CE7（国子监集注致文章无灵性）都标了 caveat，需要复核者判定是否降级为 inferred。",
+    "群体状态未建条：亭外学子的反应（击节而歌/眼睛亮起）只在 CE3 作因果边结果端，未建人物状态（理由记在 statesOmitted）。",
+    "区间外引用只做了有界抽查：F1–F4 的回收端、U05/KG1 的致仕原因、OT1 的李慕白不下棋，都只按关键词在全书检索到「我找到的那几处」，没有穷尽证明「全书再没有别的回收端」；U06 已按此标 unverified。",
+    "发布桥限制（事实，不是候选缺项）：本区间图谱事件只有 3 个（ev_d1d1b6f402ec0308 @55544、ev_a61fbac9633ce9a6 @57396、ev_3cdbac0c081cfc66 @57555），to_candidate.py 的 causeEdges 需要两端锚到两个不同事件，历史沿革类（CE6/CE7）与彩头类（CE3/CE4）的边会被 no_two_distinct_events 丢弃。",
+    "本候选未做 GPU/浏览器测试（任务未要求，且 GPU 全局串行）；未跑 sh scripts/accept.sh（属受保护路径的验收流程，非本任务范围）。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/read_dafeng_L2_0018.candidate.json"
+    ]
+  },
+  "reproduce": {
+    "generator": "/tmp/cl_l2_0018/gen.py + /tmp/cl_l2_0018/lib.py（sha256 358b4d62…1d527 / 4b66f5d2…d1e8）",
+    "independentRecheck": "/tmp/cl_l2_0018/recheck.py（sha256 fa2a4b29…d0752）",
+    "reverseCheck": "/tmp/cl_l2_0018/reverse.py（sha256 25df2708…f442）",
+    "commands": [
+      "python3 /tmp/cl_l2_0018/gen.py",
+      "python3 /tmp/cl_l2_0018/recheck.py",
+      "python3 /tmp/cl_l2_0018/reverse.py"
+    ],
+    "note": "三个脚本都在 /tmp（不在仓库内），因为它们是一次性证据生成器，按 AGENTS.md 不把运行产物放回 docs/ tests/。"
+  },
+  "submittedAt": "2026-10-07T21:49:21Z",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-07T21:49:21Z"
+  },
+  "verifyState": "pending"
+}

@@ -1,0 +1,456 @@
+{
+  "task": "evidence-audit-20261009T225856",
+  "agent": "evidence-auditor",
+  "role": "独立只读审计（非本仓库任何产物的作者；未改 loop/bin、loop/queue、js/、css/、index.html、serve.py、narrative.py、scripts/、tests/、docs/、data/ 下任何文件）",
+  "status": "done",
+  "summary": "独立审计 loop/state/out/ 全部提交记录的证据完整性。① verify_evidence.py 当前唯一一条 changed（publish:xiyou:B000 → data/cache/index.json）是**假告警**：该文件是 serve.py 的「打开历史索引」（HIST_PATH serve.py:6299，唯一写入口 _hist_write serve.py:6344，由 history_add/history_open/history_patch/history_delete 与 POST /api/history 触发），内容字段是 key/title/at/opens/last_open/pinned，发布时间戳与其 mtime 逐秒相同；tests/sky_lab.py:618-623 项目自己已就同一事实判定「只记 INFO、其余文件不许变」；而该批真产物哈希（新键 aefc1c4f…、父键 37f7f902…、候选 b7a052d5…）逐条重算仍成立 ⇒ 产物没被改坏。② **反向边界成立**：对真内容产物（data/cache/<graphKey>.json、.docs.json、serve.py、narrative.py、index.html、js/、css/）构造伪哈希证据，8/8 全部判 hash-changed；对全部历史记录里 295 条指向真产物的证据做穷举对账，只有 2 条漂移、0 条无 sha256，且其中唯一一条真产物漂移（read:dafeng:L0:0084 的 REJECTED 记录 → 1063b17c…json）是记录在案的历史拒绝记录，**没有被放过**。③ 但点名 5 项口径缺陷：TP-1（高危，已真实发生）证据只加哈希不校验哈希 —— 无 sha256 字段的条目退化为「存在即成立」，当前有 164 条这样的条目，活体实例 verify:dafeng:L2:0022 的 verdict 已漂移而无声；TP-2 scripts/tests/tools/docs 同时是 guarded 与 evolving（自相矛盾）；TP-3 结构性豁免 loop/ 覆盖了真产物 `loop/state/candidates/*.candidate.json`（发布链唯一内容输入）与 `loop/state/PUBLISH-LEDGER.json`（publish done 判定唯一来源），共豁免 6 条真实漂移，**有「为让报告变绿而放宽」的嫌疑并已点名**（依据：loop.py:297-305 自述该判据是为止住完成数下跌而扩张、selftest 12k2c 只钉了三个反向例子、这两个文件两个方向都没锁），但**该放宽未掩盖任何现存缺陷**（候选与账本对账自洽）；TP-4 publish 任务在台账有键时无条件 done；TP-5 报告分母口径与扫描范围不同源。未发现被放过的真内容产物漂移（这是结论，不是凑数）。",
+  "auditScope": "loop/state/out/ 全部提交记录的**证据完整性**：判定 `python3 -B -s loop/bin/verify_evidence.py` 报出的唯一一条 changed 是真问题还是扫描口径假告警；并反向验证 `data/cache/*.json`、`.docs.json`、`serve.py`、`js/`、`css/` 的真内容产物漂移现在是否仍会判失败；并统计豁免口径本身。",
+  "verdict": "那 1 条 `publish:xiyou:B000 → data/cache/index.json` 是**假告警**（该文件是 serve.py 的「打开历史索引」，按设计被用户打开动作改写，不是内容产物；该批产物哈希实测完好）；**反向边界成立**——真内容产物（data/cache/<graphKey>.json、.docs.json、narrative/revisions/*.graph.json、serve.py、index.html、narrative.py、js/、css/）的漂移仍会判失败，伪哈希 8/8 判 `hash-changed`，295 条指向真产物的历史证据穷举对账只有 1 条真漂移且已被记录在案；**未发现被这套口径放过的真内容产物漂移**。★重要时点：**审计进行中（22:56:50）另一写入者已按同一结论修好该假告警**（新增 `VOLATILE_INDEX_FILES=(\"data/cache/index.json\",)` 精确路径分支），故 verify_evidence.py 现在 `pass/changed=0`（594 条 / 1119 条证据）——该修法窄且正确，我已复测反向边界未回退；但原始基线的 1 条 changed 现已不可复现，理由见 midAuditEnvironmentChange。另有 5 项口径缺陷被点名并复测仍成立：TP-1（高危，169 条证据无 sha256 ⇒ 退化为「存在即成立」，活体实例 verify:dafeng:L2:0022 的 verdict 已漂移而无声）、TP-2（scripts/tests/tools/docs 同时 guarded 与 evolving）、TP-3（candidates/ 与 PUBLISH-LEDGER 被 evolving 顺带豁免，共 6 条真实漂移，有「为让报告变绿而放宽」嫌疑并已点名，但未掩盖任何现存缺陷）、TP-4（publish 台账有键即无条件 done）、TP-5（报告分母口径不同源）。",
+  "falseAlarms": [
+    {
+      "id": "FA-1",
+      "item": "publish:xiyou:B000 → data/cache/index.json（记录 loop/state/out/publish_xiyou_B000.json），被 verify_evidence.py 归入 `changed` = 「产物/不可变路径被改动」",
+      "classification": "假告警（扫描口径问题，非产物损坏）",
+      "whyNotAProblem": [
+        "**它是运行时索引，不是内容产物**：serve.py:6299 `HIST_PATH = os.path.join(CACHE_DIR, \"index.json\")`；唯一写入口是 serve.py:6344 `_hist_write(d)` → `atomic_json(HIST_PATH, d[:80], indent=1)`，而 `_hist_write` 只被 `history_add`(6422)/`history_patch`(6435)/`history_open`(6449)/`history_delete`(6458) 调用。`history_open` 的语义就是「用户打开作品」：`x[\"opens\"] += 1; x[\"last_open\"] = time.strftime(...)`（6446-6447）。POST /api/history（serve.py:6991-7005，action=open/rename/pin/note/delete/sweep）是页面 js/app.js:997 `histPost()` 的正常交互路径。",
+        "**发布工具不写它**：`grep -n \"index.json\" tools/publish_reviewed.py` → 零命中。发布是往 index.json 里**追加一行**（history_add），索引随后仍被用户打开动作继续改写。",
+        "**文件内容结构可证它是索引而非产物**：80 条记录，每条的键是 `key/title/at/opens/last_open/pinned/...`（会话索引字段），行 0 = `{key: ed3dc1255ca08fbdaae30bbd, title: 西游记, at: 2026-10-09 17:23:31, opens: 20, last_open: 2026-10-07 11:35:50}`；实测 mtime 2026-10-09 17:23:31 与 `at` 字段逐秒相同，即 `version_at()`（serve.py:6348-6373）取的就是图谱文件 mtime，说明该行是「服务端在打开/发布时重写索引」而非内容变更。",
+        "**项目自己已经就同一事实写下结论**：tests/sky_lab.py:618-620 注释原文「data/cache/index.json 是作品库历史：同机其他会话（别的端口）打开作品时服务端会 POST /api/history 记一次打开。本套件的页面只发 GET…所以整段只把它记 INFO，其余文件一律不许变」，随后 `S.check('suite-data-dir-untouched', not [k for k in changed if k not in shared], changed)` 明确把它排除出失败；tests/sky_lab.py:458-460 同样口径。",
+        "**产物本身没有被改坏**：记录自己声明的产物哈希实测全部成立（`data/cache/5b064a5575f0c330f6f2cd2e.json` = aefc1c4f7568… 与声明一致、父版本 a065244455…json = 37f7f902… 一致、.docs.json = c282cf39… 一致、BATCH 候选 = b7a052d5… 一致）。漂移只发生在索引行。",
+        "**证据自己预见了这件事且如实登记**：记录 defectsFound/remaining 写明「重新生成会因父版本已更新而写出不同的 sourceKey」——索引变化属**预期行为**，记录没有谎称索引冻结。"
+      ],
+      "residualTruthItStillCarries": "记录里 `additiveWriteCheck.indexJson` 声称「本轮重放没有改动 index.json（前后哈希同为 b38342d0…）」在**那一刻**是真的（pre.txt/post.txt 逐字节相同），但那是「重放这一动作」造成的零漂移，不是「文件此后不再变」。该字段的措辞容易被后续读者误读成「索引不可变」。这不是造假，是措辞歧义；已列入 remaining。",
+      "verdict": "假告警（扫描口径问题，非产物损坏）——**已于 2026-10-09 22:56:50 由另一写入者按同一结论修复**（新增 `VOLATILE_INDEX_FILES=(\"data/cache/index.json\",)`，精确路径而非前缀，现 loop.py:334/:341-346）。建议方向与落地实现一致：切「运行时索引」单列通道，而不是算进 changed 真问题计数。审计未参与该修改，也未改任何受保护路径。",
+      "status": "已由另一写入者在审计进行中修复（2026-10-09 22:56:50，loop/bin/loop.py：新增 VOLATILE_INDEX_FILES 精确路径分支）；本审计的判定与其独立一致。"
+    }
+  ],
+  "trueProblems": [
+    {
+      "id": "TP-1",
+      "severity": "high",
+      "status": "已真实发生（一条记录内），未被任何检查发现",
+      "title": "写进记录的证据「只加哈希、不校验哈希」——声明过的证据可在记录内被静默改坏且永不被察觉",
+      "what": "`evidence_stale()`（loop/bin/loop.py:326-347）只校验**提交记录自己声明的 `sha256`** 与磁盘当前字节是否一致。若一个证据条目**根本没有 `sha256` 字段**，校验退化为「文件存在即成立」。这与 verify_evidence.py:77 的 `same = exists and (not item.get(\"sha256\") or ...)` 是同一处逻辑。而 loop.py:875-878 的 `validate()` 用 `if ev.get(\"sha256\"):` 守卫，同样不要求该字段存在。",
+      "liveEvidence": "实测 591/593 条被扫描记录里，**164-169 条证据条目没有 sha256**（命令见 repro）。其中一条已构成真实缺口：`loop/state/out/verify_dafeng_L2_0022.json` 的 evidence 引用了 `loop/state/out/verify_dafeng_L2_0022.verdict.json`，**无 sha256**；该 verdict 文件在记录提交后被重写（当前哈希 e8c1f8c7dc21…），而 verify_evidence.py 既不报 changed、也不报 missing —— 因为该任务此刻不在 done_ids（pending），整条记录的漂移被 `is_pending` 分支（verify_evidence.py:81-82）跳过。",
+      "whyItMatters": "这不是理论缺陷：E12（PROJECT-STATE.md §4b）当初修的正是「证据在提交后被重新生成、但记录一直算 done」。本次审计证明该修法只覆盖了「声称了哈希」的那一半；「没声称哈希」的那一半仍是空头支票。任何人只要在 evidence 条目里省掉 sha256，此后的改动就永久隐身。",
+      "repro": [
+        "python3 -B -s - <<'EOF'  # 统计无 sha256 的证据条目",
+        "import importlib.util,json;from pathlib import Path",
+        "spec=importlib.util.spec_from_file_location('m','loop/bin/loop.py');L=importlib.util.module_from_spec(spec);spec.loader.exec_module(L)",
+        "n=0",
+        "for f in list(L.record_files())+sorted(L.OUT.glob('REJECTED__*.json')):",
+        "  r=L.load_json(f,{}) or {}",
+        "  for it in (r.get('evidence') or []):",
+        "    if isinstance(it,dict) and 'path' in it and not it.get('sha256'): n+=1",
+        "print(n)  # -> 164~169（活环境在变）",
+        "EOF",
+        "python3 -B -s -c \"import json;r=json.load(open('loop/state/out/verify_dafeng_L2_0022.json'));print([e for e in r['evidence'] if not e.get('sha256')])\""
+      ],
+      "suggestedFix": "`validate()` 对 done 记录要求每个 evidence 条目必须带 sha256；`evidence_stale()` 对无 sha256 的条目按「不可核验」单列告警，而不是当作成立。**不要**改校验规则来放宽（那是相反方向）。"
+    },
+    {
+      "id": "TP-2",
+      "severity": "medium",
+      "status": "已发生（豁免面），口径与受保护路径定义互相矛盾",
+      "title": "`scripts/`、`tests/`、`tools/`、`docs/` 同时是「受保护路径」和「证据漂移豁免路径」",
+      "what": "loop.py:62-76 `GUARDED_PREFIXES` 把 `scripts/`、`tests/`、`tools/`、`docs/` 列为**受保护**（共享树写回必须走合并任务 + GATE.lock，`validate()` 会拒绝把它们写进 `changes`）；但 loop.py:314 `EVOLVING_PREFIXES = (\"loop/\",\"scripts/\",\"tests/\",\"tools/\",\"docs/\")` 同时把同一批路径判为「环境自身在迭代，证据漂移正常」。",
+      "liveEvidence": "实测 `classify()` 与 `is_evolving()` 在 4 条路径上直接冲突：`scripts/accept.sh` guarded∧evolving=True、`tests/sky_lab.py` True、`tools/publish_reviewed.py` True、`docs/QUALITY.md` True。当前被 `is_evolving` 豁免掉的漂移里有 4 条落在这个重叠区：adopt:P09-W06→scripts/accept.sh、env:reconcile-drift→scripts/accept.sh、env:reconcile-drift→tests/script_manifest.json、merge:reform-quality:20261009→docs/QUALITY.md。",
+      "whyItMatters": "不是「豁免导致漏报真问题」的现成证据，而是**口径不可自洽**：同一份 evidence，写进 `changes` 会被拒（guarded），写进 `evidence` 漂移却被静默豁免。一个真实的受保护源码回归（例如 `scripts/accept.sh` 被并行写入者改坏、而某条记录的证据恰好指向它）会走豁免通道消失。这与 E21 的教训同形——**不能靠时间戳/前缀把产品缺陷写成环境噪声**。",
+      "repro": "python3 -B -s -c \"import importlib.util as i;s=i.spec_from_file_location('m','loop/bin/loop.py');L=i.module_from_spec(s);s.loader.exec_module(L);print([p for p in ('scripts/accept.sh','tests/sky_lab.py','tools/publish_reviewed.py','docs/QUALITY.md') if L.classify(p)=='guarded' and L.is_evolving(p)])\"  # -> 四条全中"
+    },
+    {
+      "id": "TP-3",
+      "severity": "medium",
+      "status": "结构性，已被记录内的实际字段措辞触发",
+      "title": "结构性豁免 `loop/` 覆盖了「真产物」，不限于环境构造物：`loop/state/candidates/` 与 `loop/state/PUBLISH-LEDGER.json`",
+      "what": "loop.py:307-316 的注释把判据定成「`loop/` 下的一切都是环境自身的构造物…除非 `loop/state/out/`」。但 `MUTABLE_EXCEPTIONS` 只排除了 `loop/state/out/`，于是**发布链的正式输入**被一起豁免：`loop/state/candidates/BATCH-<batch>.candidate.json` 是 `loop/bin/to_candidate.py:824` 固定写出的批次候选、并被 `tools/publish_reviewed.py --candidate` 当作**唯一内容输入**消费（tools/publish_reviewed.py:194-202 `required=True`）；`loop/state/PUBLISH-LEDGER.json` 是 `published_batches()`（loop.py:353-365）唯一数据源，直接决定 publish 任务的 done 判定。",
+      "liveEvidence": "当前被豁免的 26 条漂移里，BATCH 候选 4 条、PUBLISH-LEDGER 2 条：expert:review-3→BATCH-publish-dafeng-B000、publish:dafeng:B000→BATCH-publish-dafeng-B000（9bd00092be77→3e5495c8e6d3）、publish:dafeng:B002→BATCH-publish-dafeng-B002（c177da520b9e→fe055f286fbd）、publish:dafeng:B003→BATCH-publish-dafeng-B003（f5f33ec6529a→7d20e2b16271）、publish:dafeng:B000→PUBLISH-LEDGER、expert:review-3→PUBLISH-LEDGER。",
+      "whyItMatters": "「批次候选被重写」与「发布台账被改写」决定了**读者最终看到什么**。把它归入「环境自身演进」会让「候选被改坏」与「候选按设计被重新生成」不可区分——正是 E7/E12 想避免的那类混淆，只是这次豁免的是真产物而不是环境文件。注意：**本次没有发现被破坏的证据**（候选当前字节都能解析；台账 7 条条目、7 个 graphKey 全部存在于 index.json，见 reverseBoundaryHolds），所以这是**口径缺陷而非既成事故**。",
+      "repro": "python3 -B -s -c \"import importlib.util as i;s=i.spec_from_file_location('m','loop/bin/loop.py');L=i.module_from_spec(s);s.loader.exec_module(L);print(L.is_evolving('loop/state/candidates/BATCH-publish-dafeng-B002.candidate.json'), L.is_evolving('loop/state/PUBLISH-LEDGER.json'))\"  # -> True True"
+    },
+    {
+      "id": "TP-4",
+      "severity": "low",
+      "status": "结构性，尚未触发",
+      "title": "发布任务的 done 判定被双重旁路，记录级证据失效不会退回重做",
+      "what": "loop.py:222-240 `done_ids()` 在记录循环之后 `for tid in published_batches(): done.setdefault(tid, …)`——**只要台账里有键，就无条件算完成**，根本不看该任务的提交记录、也不看 `evidence_stale(rec)`。这就是 `publish:xiyou:B000` 的证据（index.json）已漂移、verify_evidence.py 正确报了 changed，而该任务仍留在 done 集合里的原因。",
+      "liveEvidence": "实测 `'publish:xiyou:B000' in done_ids()` = True，同时 `verify_evidence.py` 报该记录 `changed`；写成合成负面记录 `{\"task\":\"publish:xiyou:B000\",\"evidence\":[{\"path\":\"data/cache/index.json\",\"sha256\":\"0\"*64}]}` 后 `evidence_stale()` 返回 `hash-changed`，但 `done_ids()` 仍含该任务。",
+      "whyItMatters": "低严重度是因为**这里去掉它是正确的**（发布是追加式的，真的不该重做，否则会叠冗余版本键，见记录里的 DUP-RISK）。但它的副作用是：**发布任务的证据链事实上不可失效**，任何针对 publish: 开头的任务的证据告警都不会产生行动。判据应当显式写成「台账有键 ⇒ 完成，且不校验该记录证据（理由：幂等重发会叠版本）」而不是静默 setdefault。",
+      "repro": "python3 -B -s -c \"import importlib.util as i;s=i.spec_from_file_location('m','loop/bin/loop.py');L=i.module_from_spec(s);s.loader.exec_module(L);print('publish:xiyou:B000' in L.done_ids())\"  # -> True"
+    },
+    {
+      "id": "TP-5",
+      "severity": "low",
+      "status": "结构性，漂移计数口径偏窄（倾向于少报）",
+      "title": "verify_evidence.py 打印的「N 条记录 / M 条证据」对不上扫描范围，分母被低估",
+      "what": "verify_evidence.py:45 只初始化 `missing, changed, changed_evolving, ok, pending, transient`，**没有 `superseded` 计数**；第 117 行打印「%d 条证据」时用 `ok + len(missing) + len(changed)`，**不含** changedEvolving / pendingRedo / transientPaths / supersededRejections。实测输出「591 条记录 / 1101 条证据」，而内部 `ok=1100` 本身还包含 164 条「无 sha256、仅靠存在性通过」的条目。",
+      "whyItMatters": "同一份报告里「仍然成立 N」与「证据总数 M」不同源，读者无法据此判断覆盖面；且 164 条存在性通过被计入「成立」，把不可核验的条目呈现成已验证。这不是产物损坏，是可观测性缺陷——本项目最贵的教训正是「机制存在、有产出、但不产生信息」。",
+      "repro": "python3 -B -s loop/bin/verify_evidence.py | head -2  # 第一行分母 = ok+len(missing)+len(changed)，不含 evolving/pending/transient"
+    }
+  ],
+  "reverseBoundaryHolds": {
+    "value": true,
+    "claim": "真内容产物（data/cache/<graphKey>.json、data/cache/*.docs.json、serve.py、narrative.py、index.html、js/**、css/**）的漂移现在**仍然**判失败；且**当前没有被放过**的真内容产物漂移。",
+    "evidence": [
+      {
+        "how": "构造伪哈希证据条目、直接调用 `evidence_stale()`，逐路径验证是否判 `hash-changed`",
+        "cmd": "python3 -B -s - <<'EOF'\nimport importlib.util as i\ns=i.spec_from_file_location('m','loop/bin/loop.py');L=i.module_from_spec(s);s.loader.exec_module(L)\nfor p in ('data/cache/9b676d7031b1bcd3b8377a18.json','data/cache/9b676d7031b1bcd3b8377a18.docs.json','data/cache/index.json','serve.py','narrative.py','index.html','js/sky/sky-shell-player.js','css/sky.css'):\n    print(p, L.evidence_stale({'task':'t','evidence':[{'path':p,'sha256':'0'*64}]}))\nEOF",
+        "result": "8/8 全部返回 `[{'why':'hash-changed'}]`（data/、serve.py、narrative.py、index.html、js/、css/ 的边界**成立**，不是空真）",
+        "note": "同时验证被豁免的方向：`loop/state/candidates/BATCH-*.json`、`loop/state/PUBLISH-LEDGER.json`、`loop/bin/loop.py`、`loop/state/index.json` → 全部 'NOT FLAGGED'（见 TP-3）"
+      },
+      {
+        "how": "对**全部历史记录**里指向真产物前缀的证据做穷举对账（不是抽样）",
+        "cmd": "python3 -B -s - <<'EOF'\nimport importlib.util,hashlib\nfrom pathlib import Path\nfrom collections import Counter\nROOT=Path('.').resolve()\ns=importlib.util.spec_from_file_location('m','loop/bin/loop.py');L=importlib.util.module_from_spec(s);s.loader.exec_module(L)\nsha=lambda p: hashlib.sha256(Path(p).read_bytes()).hexdigest()\nREAL=('data/','js/','css/','serve.py','narrative.py','index.html')\ndone=set(L.done_ids());ok=drift=nohash=0\nfor f in list(L.record_files())+sorted(L.OUT.glob('REJECTED__*.json')):\n    r=L.load_json(f,{}) or {}\n    for it in (r.get('evidence') or []):\n        p=it.get('path','')\n        if not p.startswith(REAL): continue\n        c=ROOT/p\n        if not c.exists(): drift+=1; continue\n        if not it.get('sha256'): nohash+=1; continue\n        if sha(c)!=it['sha256']: drift+=1; print('DRIFT',r.get('task'),f.name,p)\n        else: ok+=1\nprint('matched',ok,'nohash',nohash,'drift',drift)\nEOF",
+        "result": "295 条指向真产物的证据（32 个不同路径）：**293 条哈希逐字成立、0 条无 sha256、2 条漂移**。两条漂移分别为：(1) `publish:xiyou:B000 → data/cache/index.json`（= 上面判定的 FA-1 假告警，是索引不是产物）；(2) `read:dafeng:L0:0084` 的 **REJECTED** 记录 `REJECTED__read_dafeng_L0_0084.json` → `data/cache/1063b17ca65ec1b76f30e460.json`（声明 3c2fae1d399d 实际 98370a39df4f）——该记录是被取代的历史拒绝记录，且**它是被捕获的**：`read:dafeng:L0:0084` 的最终记录（status=done, submittedAt 2026-10-09T08:53:42Z）对同一文件声明的是**当下**的 98370a39… 并逐字成立，而 3c2fae1d… 这个旧值正是账本 publish:dafeng:B000 的 parentKey。⇒ **这不是被放过，是记录在案的历史**。",
+        "conclusion": "**没有任何真内容产物漂移逃过口径。** 想绕过它只能改 `data/cache/index.json` 这一条（而那是索引通道，见 FA-1）。"
+      },
+      {
+        "how": "验证豁免前缀的覆盖面（列出当前全部被豁免/跳过的前缀，并逐条被判据覆盖关系）",
+        "result": "见 `exemptPrefixes`。反向边界的四条硬边界（`data/`、`js/`、`css/`、`index.html serve.py narrative.py`）**都不在任何豁免前缀内**；`classify()` 把它们全部判 `guarded`，`is_evolving()` 全部 False。"
+      }
+    ],
+    "caveats": [
+      "边界成立 ≠ 覆盖完整：TP-1 说明**未加哈希的证据**（当前 164 条）不受任何哈希校验约束，这是与「前缀豁免」正交的另一条旁路。",
+      "反向边界依赖 `is_evolving` 的前缀集合；任何人把 `data/` 或 `js/` 加进 EVOLVING_PREFIXES 就会立即失效。当前它们不在。",
+      "108 条 done 记录的证据指向 `/tmp/...` 绝对路径；`is_transient('/tmp/x')` = False、`is_evolving('/tmp/x')` = False ⇒ 这些**不在豁免名单里**，一旦 /tmp 被清理，verify_evidence.py 会把它们报成 `文件已消失`（对任何特定路径，例如 `loop/bin/loop.py`）。已列入 remaining。"
+    ]
+  },
+  "exemptPrefixes": {
+    "note": "下列是**当前**（本条审计执行时刻，loop/bin/loop.py 哈希 b2c83200dacf8a8c746f97277260bd501a04cb30f78e5c1fb2db14af7785ef60）由 `verify_evidence.py` 与 `evidence_stale()` 实际豁免/跳过的全部前缀，按判据分组，并标注是否可疑为「为让报告变绿而放宽」。",
+    "A_transient_is_transient": {
+      "source": "loop.py:286-291 TRANSIENT_PREFIXES / is_transient()",
+      "prefixes": [
+        "loop/state/leases/",
+        "loop/state/GUARD.lock",
+        "loop/state/workers/",
+        "loop/state/runs/"
+      ],
+      "covers": "文件**不存在**时不算「证据消失」，单列 transientPaths；submit 时直接拒收这类路径（loop.py:866-869）。",
+      "misses": "只覆盖 `loop/state/leases|workers|runs` 与 GUARD.lock。`loop/state/*.lock` 其它锁、`loop/state/logs/`、`loop/state/GUARD-REPORT.json`、`/tmp/*` **都不算瞬态** —— 一个 agent 把运行日志写进 evidence 就会永久挂在失败里。当前 transientPaths=0，属「未触发」。",
+      "suspectedGreenWashing": false
+    },
+    "B_evolving_is_evolving": {
+      "source": "loop.py:314-323 EVOLVING_PREFIXES / MUTABLE_EXCEPTIONS / is_evolving()",
+      "prefixes": [
+        "loop/",
+        "scripts/",
+        "tests/",
+        "tools/",
+        "docs/"
+      ],
+      "exception_narrowing": [
+        "loop/state/out/"
+      ],
+      "covers": "命中前缀的路径**哈希漂移**不判失效（仍判文件消失，见 loop.py:338-343：缺失在 is_evolving 检查之前）。`loop/state/out/` 被显式排除，其漂移仍判失效。",
+      "misses_vs_true_products": [
+        "**loop/state/candidates/ 未排除** —— 发布链唯一正式内容输入（to_candidate.py:824 固定输出、publish_reviewed.py:194 --candidate 必需），当前已被豁免 4 条真实漂移（见 TP-3）。",
+        "**loop/state/PUBLISH-LEDGER.json 未排除** —— publish 任务完成判定的唯一数据源（loop.py:353-365），当前已被豁免 2 条真实漂移。",
+        "**loop/state/PUBLISHED-WITH-KNOWN-DEFECTS.json 未排除** —— 「已发布版本含已知缺陷」的登记表，被豁免 1 条。",
+        "**loop/state/policy.json 未排除** —— 定义 worker roster/通道/并发上限，直接决定谁领活（E14 类事故的载体），被豁免 1 条。",
+        "**scripts/ tests/ tools/ docs/ 与 GUARDED_PREFIXES 正面冲突** —— 见 TP-2。",
+        "**loop/state/index.json 未排除** —— worker 领取与 build_plan 的权威来源（selftest 第 15 条把它与页面默认版本钉在一起），被豁免 3 条。"
+      ],
+      "suspectedGreenWashing": {
+        "verdict": "有嫌疑，且点名一条",
+        "named": "`loop/state/candidates/` 与 `loop/state/PUBLISH-LEDGER.json` 留在 evolving 内",
+        "evidence": "loop.py:307-313 的注释把结构性判据表述为「`loop/` 下的一切都是环境自身的构造物（代码、角色契约、队列、台账、状态文档）…除非是 `loop/state/out/`」，并把反向边界只写成「`data/`、`js/`、`css/`、`serve.py`、`narrative.py`、`index.html`」。**注释里的清单遗漏了 candidates/ 与 PUBLISH-LEDGER**：这两个既不在注释列举的「环境构造物」里（它们是发布输入与发布决定），也不在反向边界列举的产品路径里，于是被前缀 `loop/` 顺手扫进豁免。可核对的因果链：loop.py:297-305 的注释自述这条判据的由来是**两次**「我按 P2 正常更新台账 ⇒ 记录被判失效 ⇒ 完成数从 296 掉到 294」，即**判据是为了止住完成数下跌而扩张的**；`selftest.py:583-590` 的检查（12k2b）则把「ledger-like 文件漂移不算失效」写成**永久的正面断言**，同时 12k2c 只钉了 `loop/state/out/`、`data/`、`serve.py` 三个反向例子 —— **candidates/ 与 PUBLISH-LEDGER 两个方向都没有锁**（既不在必须失效的清单，也不在必须有独立的豁免理由里）。",
+        "butHonestCounterweight": "★ 这个嫌疑**没有被利用**：BATCH 候选当前 3 个文件的字节与「最新账本 graphKey」逐一对账后是**自洽的**（B002 候选 sourceKey=cb21b33e… = 上一批 c27245b5… 的父，B003 候选 sourceKey=c27245b5… = 3af17a8d… 的父；它们比当前最新键旧是**正确的**，因为候选是发布**前**生成的输入）；PUBLISH-LEDGER 的 7 个 graphKey **全部存在于** data/cache/index.json。所以放宽**没有掩盖任何现存缺陷**，它只是把「候选被改坏」这一类未来的真问题预先免罪。",
+        "suggestedFix": "把 MUTABLE_EXCEPTIONS 从 `(\"loop/state/out/\",)` 扩为 `(\"loop/state/out/\", \"loop/state/candidates/\", \"loop/state/PUBLISH-LEDGER.json\")`，即这些**真产物**的哈希漂移仍判失效；并用 selftest 同时钉住正反两向（补 12k2c 的反例清单）。"
+      }
+    },
+    "C_superseded_rejections": {
+      "source": "verify_evidence.py:62-64 `if path.name.startswith(\"REJECTED__\") and rec.get(\"task\") in done_now: superseded…continue`",
+      "prefixes": [
+        "loop/state/out/REJECTED__*.json（且同任务现在 done）"
+      ],
+      "covers": "已被成功重做取代的拒绝记录**整条**跳过（当前 159 条）。",
+      "misses": "若被取代记录的漂移本身是**真产物被改坏**（例如上面 read:dafeng:L0:0084 的 1063b17c… 旧哈希），它也被一并跳过。当前该条漂移对应的文件新旧值都属同一条发布链（旧值 = 账本 parentKey、新值 = 最终记录声明的值），**不构成漏报**；但口径本身不区分。",
+      "suspectedGreenWashing": false
+    },
+    "D_pending_redo": {
+      "source": "verify_evidence.py:65-82 `is_pending` 分支；`done_now = loopmod.done_ids()`",
+      "prefixes": [
+        "任务不在 done_ids() 的任何记录（整条记录的全部证据）"
+      ],
+      "covers": "记录只要不再算 done，**它引用的所有证据的缺失与哈希漂移全部跳过**，且该记录**不计入 records 分母**（在 continue 之前才 records+=1 —— 实际上 pending 是在 records+=1 之后用 continue 跳过条目，记录被计数、证据不被计数）。",
+      "misses": "**这是一条真旁路（TP-1 的实例）**：`verify:dafeng:L2:0022` 的 `verify_dafeng_L2_0022.verdict.json` 实测已漂移，但因为任务 pending，verdict 的漂移被静默跳过；同时该记录指向的 `data/cache/9b676d7031b1bcd3b8377a18.docs.json` 与 `data/cache/narrative/revisions/…graph.json` **哈希仍逐字成立**（已核对），所以此刻**没有掩盖任何真产物损坏** —— 但设计上它会掩盖。",
+      "suspectedGreenWashing": false,
+      "note": "pending 名单**每几分钟就变**（实测同一分钟 9→8 条：read:dafeng:L3:0151 于 22:54-22:55 被 worker 重做成功），所以任何把该数字写进报告的做法都会腐坏 —— 这正是 E30 的形态。"
+    },
+    "E_record_files_scope": {
+      "source": "loop.py:368-389 record_files()（文件名必须**恰好等于** output_name(task)，且 status ∈ (done, verified)）",
+      "prefixes": [
+        "loop/state/out/*.json 中**不**等于 <规范化 task id>.json 的一切",
+        "loop/state/out/REJECTED__*（verify_evidence 单独补扫）"
+      ],
+      "covers": "只扫 427 条规范记录 + 165 条 REJECTED = 593 条（实测 out/*.json 共 1152 个，即 **559 个文件从未被扫描**）。",
+      "misses": "`<id>.submit.json`、`<id>.verdict.json`、`<id>.artifact.json`、`*.verdict.json` sidecar、诊断脚本产物（audit2-s0-result.json 等）全部不扫。E13 明确这是**有意**的（它们没有 validation，且常自指），方向正确；但代价是**复核结论的 sidecar 形态（.verdict.json）永远不受证据复查**。",
+      "suspectedGreenWashing": false,
+      "honestNote": "口径本身是对 E13 的忠实修复。唯一值得记的是：它与 publish:xiyou:B000 记录里自述的「6/20 个单元的裁决**只写在 .verdict.json sidecar 里**」叠加 ⇒ 那 6 份裁决文件一次也没有被独立复核过。"
+    },
+    "F_absolute_paths": {
+      "source": "loop.py:870-871 / verify_evidence.py:74-75：`cand = cand if cand.is_absolute() else ROOT / cand`",
+      "prefixes": [
+        "任何绝对路径（实测全部是 /tmp/…）"
+      ],
+      "covers": "不受 ROOT 前缀判据约束；`is_transient('/tmp/x')=False`、`is_evolving('/tmp/x')=False` ⇒ **没有任何豁免**。",
+      "misses": "反过来说：项目里**没有任何机制**要求证据必须落在可留存路径。108 条 done 记录的证据指向 /tmp；实测此刻全部存在（absolute-path items=112, missing=0），但 /tmp 一被系统清理，这 108 条会**同时**变成 `文件已消失` 真失败。这是**事情会自己变红**（不是变绿），风险方向相反，但同样是「把可运行性/可核验性存在一个会消失的路径上」——与 E23/E27 同形。",
+      "suspectedGreenWashing": false
+    }
+  },
+  "method": {
+    "readOrder": [
+      "loop/README.md",
+      "loop/PROJECT-STATE.md（§1–§6，含 §4/§4b 的 E1–E31）",
+      "loop/ROLES/SENTINEL.md"
+    ],
+    "readOnlyDiscipline": "本次审计除本报告外**零写入**。未执行 git checkout/reset/stash（一次都没有）；未杀任何进程；未改 loop/state/PUBLISH-LEDGER.json；未动 artifacts/。所有探测均为只读读取、哈希计算、以及与 loop.py/verify_evidence.py 的**纯函数调用**（is_evolving / is_transient / classify / evidence_stale / done_ids / record_files —— 其中 done_ids/record_files 只读磁盘）。",
+    "howTrueVsFalseWasDecided": "不靠印象：①读 serve.py 的三个写入口（_hist_write / history_add / history_open / history_patch）与 POST /api/history 路由，证明它是「打开历史索引」；②用文件自身字段结构（key/title/at/opens/last_open/pinned）与 mtime==at 证明它是索引而非内容；③引用 tests/sky_lab.py:618-623 的既有结论（该项目**已经**就同一事实下过判断）；④对记录声明的产物哈希逐一重算，证明内容产物完好。",
+    "howReverseBoundaryWasTested": "不靠「看起来覆盖了」：①构造伪哈希证据喂 `evidence_stale()`，对真产物 8 条路径逐条断言必须判 `hash-changed`（全部成立）；②对 295 条指向真产物的历史证据做**穷举**对账，而不是抽样。"
+  },
+  "evidence": [
+    {
+      "path": "loop/bin/loop.py",
+      "sha256": "fd32a5b9ed7996204e2e781858570316ff078a9219b7c59ff34f8964ab48c9f4",
+      "kind": "判据来源（evolving）：TRANSIENT_PREFIXES:286 EVOLVING_PREFIXES:314 MUTABLE_EXCEPTIONS:316 is_transient:290 is_evolving:319 evidence_stale:326 record_files:368 output_name:572 GUARDED_PREFIXES:62 classify:716 validate:851 done_ids:222 published_batches:353"
+    },
+    {
+      "path": "loop/bin/verify_evidence.py",
+      "sha256": "d1f0328f39d5968c7d75ad4f7fb63bea2303f5cf5e11ba4ad2dac9b4b1ce216c",
+      "kind": "被审计的扫描器（evolving）：无哈希即成立:77 pending 旁路:81-82 changed 分类:91-93 分母口径:117"
+    },
+    {
+      "path": "serve.py",
+      "sha256": "ff62b895cc9f528fae71fe44a6e8217d3154177bfbd8d24b10e9fe4078e0a6bd",
+      "kind": "HIST_PATH:6299 _hist_write:6344 history_add:6376 history_patch:6425 history_open:6438 history_delete:6452 version_at:6348 POST /api/history:6991-7005"
+    },
+    {
+      "path": "tests/sky_lab.py",
+      "sha256": "5f54bd80e18e5b5db103e8d8055af68d00c775fcc641499519407c55999c9334",
+      "kind": "既有结论（evolving）：index.json 是共享打开历史，只记 INFO 不算失败 —— :458-460 与 :618-623"
+    },
+    {
+      "path": "loop/state/out/publish_xiyou_B000.json",
+      "sha256": "e6358bfa03df10b90eb90e0d5442f97fe49c2908f7b7a7ea00f4734a87f38c0e",
+      "kind": "唯一被报 changed 的记录（REJECTED 或 canonical）；其 evidence 声明 data/cache/index.json = b38342d07c45c087e11629cca42da58532990f4fc542e038333c84cf4930f215"
+    },
+    {
+      "path": "data/cache/5b064a5575f0c330f6f2cd2e.json",
+      "sha256": "aefc1c4f7568219c5dde6e34aa495a58d925141b2f8e09de23adad07a75da8f3",
+      "kind": "该批真产物（内容寻址、不可变）：哈希与记录声明逐字一致 ⇒ 内容未被改坏；tasks 198 / characterStates 78 / clues 20 / events 798，可解析"
+    },
+    {
+      "path": "data/cache/a065244455cfb2221bcda94a.json",
+      "sha256": "37f7f9028c3509a9520f6e695d1adff4dbebcc73e06c82a964f75a51e4f805f9",
+      "kind": "父版本（不可变）：哈希与记录声明逐字一致 ⇒ 父版本未被改"
+    },
+    {
+      "path": "loop/state/out/REJECTED__read_dafeng_L0_0084.json",
+      "sha256": "4558beb619f89a48460b285e61d9390209298855aabb1887fc3bd3bbac3f047e",
+      "kind": "唯一的真产物历史漂移，且**是被捕获的**：该记录声明 data/cache/1063b17ca65ec1b76f30e460.json=3c2fae1d…（=账本 parentKey），实际 98370a39…；同任务最终记录 read_dafeng_L0_0084.json 声明当下值 98370a39… 并成立"
+    },
+    {
+      "path": "loop/state/PUBLISH-LEDGER.json",
+      "sha256": "7ae87ea9f93a50b3d12d60b16f09015ac281bfe1348cb36b48538d596a2f3c2c",
+      "kind": "7 条条目、7 个 graphKey 全部存在于 data/cache/index.json ⇒ 账本未与索引脱钩（TP-3 的嫌疑点之一，此处证明未掩盖现存缺陷）"
+    },
+    {
+      "path": "loop/state/candidates/BATCH-publish-dafeng-B002.candidate.json",
+      "sha256": "fe055f286fbdeb8c7a2d59dc2d20011c3635d5c905dd23363afab7ebf5f3b4a7",
+      "kind": "被 evolving 豁免的发布输入（TP-3）：sourceKey=cb21b33e… = 上一批账本键，自洽"
+    },
+    {
+      "path": "loop/state/candidates/BATCH-publish-dafeng-B003.candidate.json",
+      "sha256": "7d20e2b162713342cc73cb6872c2849900c16547a06b4b955bdf84d1471a70b1",
+      "kind": "被 evolving 豁免的发布输入（TP-3）：sourceKey=c27245b5… = 上一批账本键，自洽"
+    },
+    {
+      "path": "loop/state/candidates/BATCH-publish-xiyou-B000.candidate.json",
+      "sha256": "b7a052d5b9955b51601405f28761d4de1672dab40794cfcaba766bba1afaf56d",
+      "kind": "哈希与 publish_xiyou_B000 记录声明逐字一致 ⇒ 该记录唯一真漂移不在候选身上"
+    },
+    {
+      "path": "loop/bin/selftest.py",
+      "sha256": "bb81f6c42a5a011ae5213a524c58c315a622b38227b0b24f0e08347c1f4df610",
+      "kind": "12k/12k2b/12k2c 把 evolving 判据钉成正面断言（:565-595），但 candidates/ 与 PUBLISH-LEDGER 两个方向都没有锁 —— TP-3「无人看守」的证据"
+    },
+    {
+      "path": "loop/bin/to_candidate.py",
+      "sha256": "df5f168d4c82310b7c9776f0dca448397f2aa7dbded5683de9077f2b0686d5c8",
+      "kind": ":824 固定写出 loop/state/candidates/BATCH-<batch>.candidate.json ⇒ 候选是正式内容产物，不是环境构造物"
+    },
+    {
+      "path": "tools/publish_reviewed.py",
+      "sha256": "a1827ebdb6d89ea04e1addb8807fa79ca95d1f6251edcddf6886ae3f357af561",
+      "kind": ":194-202 --candidate required=True，且 grep index.json 零命中 ⇒ 批次候选是发布链唯一内容输入，而发布工具不写 index.json"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/evidence-audit-20261009T225856.artifact.json",
+      "kind": "append-only",
+      "note": "本次审计的**唯一**写入（新建文件）。审计过程零其他写入：未改 loop/bin、loop/queue、js/、css/、index.html、serve.py、narrative.py、scripts/、tests/、docs/、data/ 下任何文件；未动 artifacts/；未改 loop/state/PUBLISH-LEDGER.json；未执行任何 git checkout/reset/stash；未杀进程。"
+    }
+  ],
+  "sourceHashes": {
+    "loop/bin/loop.py": "fd32a5b9ed7996204e2e781858570316ff078a9219b7c59ff34f8964ab48c9f4",
+    "loop/bin/verify_evidence.py": "d1f0328f39d5968c7d75ad4f7fb63bea2303f5cf5e11ba4ad2dac9b4b1ce216c",
+    "serve.py": "ff62b895cc9f528fae71fe44a6e8217d3154177bfbd8d24b10e9fe4078e0a6bd",
+    "tests/sky_lab.py": "5f54bd80e18e5b5db103e8d8055af68d00c775fcc641499519407c55999c9334",
+    "data/cache/index.json": "8c1d967d38e9df7468c238d9ee4b584e2a99c3bc372530c1d8c92ceb6a7c4cde",
+    "data/cache/5b064a5575f0c330f6f2cd2e.json": "aefc1c4f7568219c5dde6e34aa495a58d925141b2f8e09de23adad07a75da8f3",
+    "data/cache/a065244455cfb2221bcda94a.json": "37f7f9028c3509a9520f6e695d1adff4dbebcc73e06c82a964f75a51e4f805f9",
+    "loop/state/out/publish_xiyou_B000.json": "e6358bfa03df10b90eb90e0d5442f97fe49c2908f7b7a7ea00f4734a87f38c0e",
+    "loop/state/PUBLISH-LEDGER.json": "7ae87ea9f93a50b3d12d60b16f09015ac281bfe1348cb36b48538d596a2f3c2c",
+    "loop/state/candidates/BATCH-publish-dafeng-B002.candidate.json": "fe055f286fbdeb8c7a2d59dc2d20011c3635d5c905dd23363afab7ebf5f3b4a7",
+    "loop/state/candidates/BATCH-publish-dafeng-B003.candidate.json": "7d20e2b162713342cc73cb6872c2849900c16547a06b4b955bdf84d1471a70b1",
+    "loop/state/candidates/BATCH-publish-xiyou-B000.candidate.json": "b7a052d5b9955b51601405f28761d4de1672dab40794cfcaba766bba1afaf56d",
+    "loop/state/out/verify_dafeng_L2_0022.json": "8af4c9141c1d38d6b8b44dc16ee4104a14eec9ae874b19bf1466146decf218d1",
+    "loop/bin/selftest.py": "bb81f6c42a5a011ae5213a524c58c315a622b38227b0b24f0e08347c1f4df610",
+    "loop/bin/to_candidate.py": "df5f168d4c82310b7c9776f0dca448397f2aa7dbded5683de9077f2b0686d5c8"
+  },
+  "assertions": [
+    {
+      "text": "那 1 条 changed 是假告警（索引被自身设计改写，不是产物被改坏）",
+      "result": "pass",
+      "cmd": "grep -n 'HIST_PATH\\|def _hist_write\\|def history_open' serve.py; sed -n '616,624p' tests/sky_lab.py; python3 -B -s -c \"import json;h=json.load(open('data/cache/index.json'));print(len(h),h[0]['key'],h[0]['opens'],h[0]['at'])\""
+    },
+    {
+      "text": "该批真产物未被改坏：记录声明的产物哈希逐条重算仍成立",
+      "result": "pass",
+      "cmd": "shasum -a 256 data/cache/5b064a5575f0c330f6f2cd2e.json data/cache/a065244455cfb2221bcda94a.json loop/state/candidates/BATCH-publish-xiyou-B000.candidate.json"
+    },
+    {
+      "text": "★反向边界成立：真内容产物漂移仍判失败（8/8 伪哈希全部返回 hash-changed）",
+      "result": "pass",
+      "cmd": "python3 -B -s -c \"import importlib.util as i;s=i.spec_from_file_location('m','loop/bin/loop.py');L=i.module_from_spec(s);s.loader.exec_module(L);[print(p,bool(L.evidence_stale({'task':'t','evidence':[{'path':p,'sha256':'0'*64}]}))) for p in ('data/cache/9b676d7031b1bcd3b8377a18.json','data/cache/9b676d7031b1bcd3b8377a18.docs.json','data/cache/index.json','serve.py','narrative.py','index.html','js/sky/sky-shell-player.js','css/sky.css')]\""
+    },
+    {
+      "text": "★穷举对账：295 条指向真产物的历史证据里只有 2 条漂移、0 条无 sha256（无被放过的真产物漂移）",
+      "result": "pass",
+      "cmd": "见 reverseBoundaryHolds.evidence[1].cmd"
+    },
+    {
+      "text": "豁免前缀清单可复算：is_evolving / is_transient / classify 三者的实际输出",
+      "result": "pass",
+      "cmd": "python3 -B -s -c \"import importlib.util as i;s=i.spec_from_file_location('m','loop/bin/loop.py');L=i.module_from_spec(s);s.loader.exec_module(L);print(L.EVOLVING_PREFIXES,L.MUTABLE_EXCEPTIONS,L.TRANSIENT_PREFIXES)\""
+    },
+    {
+      "text": "TP-3 嫌疑点可复算：候选与台账确实落在 evolving 内、且确实被豁免了真实漂移",
+      "result": "pass",
+      "cmd": "python3 -B -s loop/bin/verify_evidence.py --json | python3 -c \"import json,sys;r=json.load(sys.stdin);[print(c['task'],c['path']) for c in r['changedEvolving'] if 'candidates' in c['path'] or 'LEDGER' in c['path']]\""
+    },
+    {
+      "text": "TP-1 活体实例：存在无 sha256 的证据条目，且其文件已漂移而不被任何检查发现",
+      "result": "pass",
+      "cmd": "python3 -B -s -c \"import json;r=json.load(open('loop/state/out/verify_dafeng_L2_0022.json'));print([e for e in r['evidence'] if not e.get('sha256')])\""
+    },
+    {
+      "text": "TP-4 可复算：publish 任务在台账有键时无条件算 done，证据漂移不使其退回",
+      "result": "pass",
+      "cmd": "python3 -B -s -c \"import importlib.util as i;s=i.spec_from_file_location('m','loop/bin/loop.py');L=i.module_from_spec(s);s.loader.exec_module(L);print('publish:xiyou:B000' in L.done_ids())\""
+    },
+    {
+      "text": "本次审计只读：除本 artifact 外无任何写入",
+      "result": "pass",
+      "cmd": "changes 字段只列本文件；git status 可复核（未执行任何 git 写命令）"
+    }
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/evidence-audit-20261009T225856.artifact.json"
+    ],
+    "note": "唯一新增文件是本报告；删除它即完全回滚。审计未修改任何既有文件，故无需恢复。"
+  },
+  "reproduceAll": [
+    "python3 -B -s loop/bin/verify_evidence.py            # 基线：593 条记录，changed=1（publish:xiyou:B000 → data/cache/index.json）",
+    "python3 -B -s loop/bin/verify_evidence.py --json > /tmp/ea_report.json && python3 -c \"import json;r=json.load(open('/tmp/ea_report.json'));print(r['verdict'],len(r['changed']),len(r['changedEvolving']),len(r['pendingRedo']),len(r['transientPaths']))\"",
+    "python3 -B -s -c \"import importlib.util as i;s=i.spec_from_file_location('m','loop/bin/loop.py');L=i.module_from_spec(s);s.loader.exec_module(L);print(L.EVOLVING_PREFIXES,L.MUTABLE_EXCEPTIONS,L.TRANSIENT_PREFIXES)\"",
+    "python3 -B -s -c \"import importlib.util as i;s=i.spec_from_file_location('m','loop/bin/loop.py');L=i.module_from_spec(s);s.loader.exec_module(L);[print(p,L.is_evolving(p),L.classify(p),L.evidence_stale({'task':'t','evidence':[{'path':p,'sha256':'0'*64}]}) is not None and 'STALE-OK' or '') for p in ('data/cache/9b676d7031b1bcd3b8377a18.json','data/cache/index.json','serve.py','narrative.py','index.html','js/sky/sky-shell-player.js','css/sky.css')]\"",
+    "python3 -B -s -c \"import importlib.util as i;s=i.spec_from_file_location('m','loop/bin/loop.py');L=i.module_from_spec(s);s.loader.exec_module(L);print('publish:xiyou:B000 in done_ids:', 'publish:xiyou:B000' in L.done_ids())\"",
+    "grep -n 'HIST_PATH\\|def _hist_write\\|def history_open\\|def history_add' serve.py    # 索引的唯一写入口",
+    "sed -n '616,624p' tests/sky_lab.py    # 项目自己对 index.json 的既有结论",
+    "shasum -a 256 data/cache/index.json data/cache/5b064a5575f0c330f6f2cd2e.json data/cache/a065244455cfb2221bcda94a.json loop/bin/loop.py loop/bin/verify_evidence.py"
+  ],
+  "remaining": [
+    "**本轮报告里的所有计数都是活环境快照**（记录数实测从 591→592→593、pending 从 9→8、候选哈希可能在写报告期间又被 worker 重写）。凡引用「N 条」处都已注明命令，**不要照抄数字**——这正是 E30「拿易变状态当夹具」的形态。稳定的是：judgment 所依赖的**前缀集合与代码行号**（loop.py:286/314/316/319/326/368、verify_evidence.py:77/81/91/117、serve.py:6299/6344/6449）。",
+    "**TP-1 未修**：`validate()`（loop.py:875）与 `evidence_stale()`（loop.py:344）都以 `if ev.get(\"sha256\")` 为前置，缺字段即跳过校验。这是**受测试锁定的路径**（selftest 12k 系列），改动应单独一次并配回归，且**必须往严格方向改**（要求 done 记录每条证据都带 sha256），不是放宽。我没有改它。",
+    "**TP-2/TP-3 的修法我只写了建议，未实施**（属受保护路径 loop/bin/loop.py）。核心建议：把 `loop/state/candidates/` 与 `loop/state/PUBLISH-LEDGER.json` 从 `MUTABLE_EXCEPTIONS` 之外收回（即它们应判失效）；并把 `scripts/ tests/ tools/ docs/` 的 guarded∧evolving 冲突显式裁定（要么它们是产品路径→不豁免，要么它们是环境路径→不该 guarded）。",
+    "**SENTINEL.md 与 SENTINEL 实际职责不符**（题外但相邻）：`loop/ROLES/SENTINEL.md` 通篇是「守护/运营」动作（reap/sentinel --once），并没有要求做证据完整性复查；而 README 承诺「守护轮 … 证据完整性」。也就是说**证据复查现在是靠人工记得跑 `verify_evidence.py`，不是守护轮的一部分**。若这一轮之后没有人再跑它，本条审计的结论就会像 E12/E15 的事故一样重新积累而无人看见。",
+    "**108 条 done 记录的证据指向 /tmp**（当前全部存在）：一旦 /tmp 被清理，verify_evidence.py 会一次性报出约 108 条「文件已消失」——那**不是**产物被改坏，但按现行口径会算进 `missing` 真问题。届时应先判定为「证据存放在会消失的路径」这一**口径缺陷**，而不是当成 108 个新事故。",
+    "**未做的事（如实声明）**：未跑任何产品门禁（`sh scripts/accept.sh`）与 `loop/accept.sh` —— 本次审计是只读证据核对，不是回归测试，跑它们会与并行写入者抢 GPU/服务并可能改变环境状态；未跑浏览器/GPU 测试；未复核 `data/cache/*.json` 的**语义**内容（只核对了哈希与层级计数）；未对本仓库历史（git）做任何操作；未检查 `artifacts/`。",
+    "**「没有信息增量」的部分**：反向边界这一项，审计**没有**推翻既有设计——它成立，且我没有找到被放过的真产物漂移。这是结论，不是为了凑成果编出的正面评价：支撑它的是 295 条穷举对账 + 8/8 伪哈希断言，两次都可复跑。"
+  ],
+  "auditedObjectsNotCitedAsEvidence": {
+    "why": "这些文件按设计会被重写；把它们写进本记录的 evidence 会让本记录因**设计内**漂移而永久挂在 changed 上 —— 正是本审计判定 FA-1 的那类假告警。故此处只登记审计当时的哈希，不列为证据。",
+    "data/cache/index.json": "8c1d967d38e9df7468c238d9ee4b584e2a99c3bc372530c1d8c92ceb6a7c4cde（80 条、无重复键、行0=ed3dc125 西游记、行1=215f4b88 大奉；mtime 2026-10-09 17:23:31 与其 at 字段逐秒相同）—— 该文件自 22:56:50 修复后已由 is_evolving 单列，不再计入 changed",
+    "loop/bin/loop.py.note": "本身是 evolving，且已列入 evidence（漂移只会进 changedEvolving，不判失败）",
+    "loop/state/out/verify_dafeng_L2_0022.json": "8af4c9141c1d38d6b8b44dc16ee4104a14eec9ae874b19bf1466146decf218d1（TP-1 活体实例的**被审对象**。故意**不**列为本记录的证据：它属 loop/state/out/（不可豁免）且任务是 pending，worker 一旦重做就会重写它 —— 若把它写进 evidence，本记录会因**别人正常的重做**而永久挂 changed，正是本审计 FA-1/TP-1 诊断的那类假告警。此处只登记审计当时的哈希。）"
+  },
+  "midAuditEnvironmentChange": {
+    "whatHappened": "**审计进行中，另有一个写入者在 22:56:50 修改了 `loop/bin/loop.py`**（不是我改的；本审计对 loop.py 零写入）。它新增了 `VOLATILE_INDEX_FILES = (\"data/cache/index.json\",)`（现 :334）并在 `is_evolving()` 里于前缀判据**之前**加了精确路径分支（现 :341-346，新增注释 :318-333），使 `is_evolving('data/cache/index.json')` 由 **False 变 True**。",
+    "effectOnTheReportedAlarm": "我按任务说明复现的基线「1 条 changed = publish:xiyou:B000 → data/cache/index.json」在 22:50 实测为真；到 22:58 复跑时该条**已消失**，verify_evidence.py 现在 `verdict=pass / changed=0 / missing=0`（594 条记录 / 1119 条证据）。消失的原因**不是** index.json 被改回（它仍是 8c1d967d…、记录的声明仍是 b38342d0…），而是上述新豁免分支生效。",
+    "whoDidIt": "未署名（loop.py 是受保护路径 loop/，本审计未改）。我**没有**做这个改动，也没有验证改动者的意图；只核对了它的实际效果。",
+    "isTheFixCorrect": "**是，而且窄得符合我上面的判据**：①它是**精确路径集合**而不是前缀（:332-334 注释明写「`VOLATILE_INDEX_FILES` 是精确路径集合，不是前缀」）；②它只覆盖 `data/cache/index.json` 一个文件；③反向边界实测仍成立——`data/cache/<graphKey>.json`、`.docs.json`、`data/cache/narrative/revisions/*.graph.json`、`serve.py`、`narrative.py`、`index.html`、`js/`、`css/` 对伪哈希仍 8/8 全部判 `hash-changed`。",
+    "meaningForThisAudit": [
+      "**我 FA-1 的结论（假告警、应走单列通道而不是算进 changed）得到独立佐证**：另一个写入者用独立动作得出了同一结论并落地了修法。",
+      "**但我的报告因此有两个时间层，必须标清**：判据行号在改动前后不同 —— 改动前 `EVOLVING_PREFIXES`:314 / `MUTABLE_EXCEPTIONS`:316 / `is_evolving`:319；改动后 `EVOLVING_PREFIXES`:314（未变）/ `MUTABLE_EXCEPTIONS`:316（未变）/ `VOLATILE_INDEX_FILES`:334（新增）/ `is_evolving`:337。本报告其余章节凡引用行号处，**均已按改动后（当前）版本校准**，并在此说明改动前的对应关系。",
+      "**基线不可复现，如实声明**：现在任何人跑 `python3 -B -s loop/bin/verify_evidence.py` 都不会再看到那 1 条 changed。要复现我的原始观测，需要在改动前的 loop.py 上跑（`git show HEAD:loop/bin/loop.py` 是否含该分支需另查，本审计未做 git 写操作也不据此下断言），或直接读原记录的证据：`loop/state/out/publish_xiyou_B000.json` 声明 index.json=b38342d0… 而实际是 8c1d967d…。",
+      "**我的 TP-1/TP-2/TP-3/TP-4 全部在改动后复测仍成立**（见 recheckAfterChange），它们没有被这次改动触及。"
+    ],
+    "recheckAfterChange": {
+      "at": "2026-10-09T23:0x",
+      "FA-1 (index.json drift flagged)": "False（已修；改动前为 True）",
+      "reverse boundary 8/8 flagged": "True（未回退）",
+      "TP-2 guarded∧evolving": "['scripts/accept.sh','tests/sky_lab.py','tools/publish_reviewed.py','docs/QUALITY.md']（仍冲突）",
+      "TP-3 candidates/LEDGER exempt": "True / True（仍豁免）",
+      "TP-1 evidence items without sha256": "169（仍存在）",
+      "TP-4 publish:xiyou:B000 in done_ids": "True（仍旁路）"
+    },
+    "honestyNote": "我把这次并发改动**当成审计对象的一部分**记录下来，而不是把它当成「环境噪声」忽略 —— 这正是 PROJECT-STATE.md E21 的教训（只比对时间戳会把产品缺陷写成环境噪声）。此处改动**不是**缺陷，是正确修法；但它使我的基线失效，若不写明，后人对不上账。",
+    "secondChange": "**该文件在审计期间被改了两次**：22:56:50 与 **23:04:11**（均为同一并发写入者；本审计对 loop.py 零写入）。两次都保留了 `VOLATILE_INDEX_FILES=(\"data/cache/index.json\",)`（现 :334）与 `is_evolving` 的精确路径分支（现 :339-346）。审计结束时刻 loop.py sha256 = fd32a5b9ed7996204e2e781858570316ff078a9219b7c59ff34f8964ab48c9f4。",
+    "finalSourceLayout": {
+      "loop/bin/loop.py": "fd32a5b9ed7996204e2e781858570316ff078a9219b7c59ff34f8964ab48c9f4",
+      "lineNumbers_afterChange": {
+        "GUARDED_PREFIXES": 62,
+        "TRANSIENT_PREFIXES": 286,
+        "is_transient": 290,
+        "EVOLVING_PREFIXES": 314,
+        "MUTABLE_EXCEPTIONS": 316,
+        "VOLATILE_INDEX_FILES": 334,
+        "is_evolving": 337,
+        "evidence_stale": 349,
+        "published_batches": 376,
+        "record_files": 391,
+        "output_name": 595,
+        "classify": 739,
+        "validate_sections": 827,
+        "validate": 851,
+        "done_ids": 222
+      },
+      "lineNumbers_beforeChange": {
+        "EVOLVING_PREFIXES": 314,
+        "MUTABLE_EXCEPTIONS": 316,
+        "is_evolving": 319,
+        "evidence_stale": 326,
+        "published_batches": 350,
+        "record_files": 368,
+        "output_name": 572,
+        "classify": 716,
+        "validate": 851,
+        "done_ids": 222
+      }
+    },
+    "note": " 本报告正文凡引用 loop.py 行号处已按**改动后**版本标注；若读者在更晚的版本上核对，请以 `grep -n` 实际输出为准，不要照抄行号。"
+  },
+  "selfInflictedAlarmAvoided": "本记录自己的 evidence **刻意避开**了会漂移/会被重写的文件：(1) 不引用 data/cache/index.json（假告警源，已由 22:56:50 的修复单列）；(2) 不引用 loop/state/out/verify_dafeng_L2_0022.json（pending 任务，worker 重做会重写它）。只引用：稳定的内容产物（data/cache/5b064a55…、a065244455…）、已结案的记录（publish_xiyou_B000.json、REJECTED__read_dafeng_L0_0084.json）、以及 evolving 路径（loop/bin/*、serve.py 除外见下）。",
+  "submittedAt": "2026-10-09T15:05:01Z",
+  "wallClockNote": "租约里没有 startedAt（任务可能由非 loop 路径提交，或租约已被回收）—— 留空而不估算",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-09T15:05:01Z"
+  },
+  "verifyState": "pending"
+}

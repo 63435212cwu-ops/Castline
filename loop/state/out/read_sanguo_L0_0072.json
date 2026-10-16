@@ -1,0 +1,206 @@
+{
+  "task": "read:sanguo:L0:0072",
+  "agent": "w-read-2",
+  "role": "READER",
+  "status": "done",
+  "reworkOf": "loop/state/out/read_sanguo_L0_0072.json",
+  "reworkReason": "第 7 轮（候选 attempt 6）。verify:sanguo:L0_0072（w-dafeng-2）对 attempt 5（sha256 b25825a2…）判 fail，给出 CE-A/CE-B/CE-C 三条。三条我都先独立复算再动手（ce_probe_r7.py）：CE-A、CE-B 成立；CE-C **不成立**（复核以 bodyChars=5006 为基数反推窗口得 497≠554，实际基数是 wholeSliceChars=5063，5063-554=4509、3027-38=2989、2989/4509=0.6629 三键与声明的 [368459,369013) 完全自洽）。本轮据此删掉会自指漂移的整个「候选全文 count」口径、把守卫从 1 种计数形态扩到 4 种并新增 P11 禁用该口径，CE-C 则不改数只补基数声明；同时采纳复核 shouldFix 六项。",
+  "summary": "精读《三国演义》第七十三回 玄德进位汉中王 云长攻拔襄阳郡（原文区间 codepoint [367615,372678)，5063 字）。本轮是**第 7 轮**（候选 attempt 6），只改台账/自述层 + 采纳复核 shouldFix；抽取层既有引文一字未动。改动落点：① CE-A —— 删除「候选全文 json.dumps count」这一口径的全部断言（4 处），保留并可机器复算源区间口径与结构化 quote 对象口径；② CE-B —— audit_ledger_r7.py 的 P3 从只认 ASCII `# -> N` 扩为箭头式/斜杠式/散文式四形态，新增 P11 禁止该漂移口径，变异自测补 M15/M16/M17/M18 四个正好落在旧盲区的变体；③ CE-C —— 复算判为假阳性故**不改数值**，补 excludingBiaoBasis 显式声明基数与重算式；④ shouldFix —— T08.action 补 [371573,371605)、T16.obstacle 补 [371983,371998)「治中潘浚」、C27 补 [371354,371363)「仁大惊，欲坚守不出」、notForeshadows 补猪龙之梦、T17 消除跨栏重叠 9 字、textualNotes 把人物陈述口径由表文推广到廷议；⑤ 覆盖表因新增 4 个引文对象整表重算（charCoverage 3027→3082、excludingBiaoCovered 2989→3044、段落 5 行变化），不沿用旧数。引文对象 361→365（新增 5、右移 1）。",
+  "evidence": [
+    {
+      "path": "loop/state/out/read_sanguo_L0_0072.candidate.json",
+      "sha256": "a55e2b244f32af96ee7a129c76ba5845d641fcc4548b1754ad42ad938485d344",
+      "kind": "worker-output",
+      "note": "本候选（attempt 6, 第 7 轮）。365 个引文对象 / 103 个记录 id。台账层 audit_ledger_r7 PASS、抽取层 audit_extraction_r7 PASS、覆盖表 recompute_coverage_r7 全一致、28 条提交断言 verify_claims_r7 全成立。"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/read-sanguo-L0-0072-r7/ce_probe_r7.py",
+      "sha256": "a9a9a81154debe5d482a7e6d5d30e42a19df445062de50e4ba5b58fdaad01e44",
+      "kind": "audit-script",
+      "note": "三条 counterExample 的独立复算脚本（不 import 任何生成脚本）。CE-A 段打印声明值与实测值及自指命中来源；CE-B 段逐形态统计 P3 旧判据的可见/失明面；CE-C 段并列打印两种基数下的三键作对照。"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/read-sanguo-L0-0072-r7/ce_probe_r7.before.txt",
+      "sha256": "a378223ac8518c41b73e57abe9963764a9c1cb487d34d58a994260b4ee8c221e",
+      "kind": "audit-output",
+      "note": "对**修改前**候选（b25825a2…）运行 ce_probe_r7.py 的完整输出。关键结论：CE-A 成立（声明 3/4/5/9 实测 3/4/6/10）；CE-B 成立（ASCII 7 处可见，全角 2/斜杠 1/散文 25 处失明）；CE-C 不成立（base=wholeSliceChars 时三键全相符）。"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/read-sanguo-L0-0072-r7/audit_ledger_r7.py",
+      "sha256": "414c7747e803e82cce9b06bacbcfe33d5f7ab7dc05c80735a96c35aeb4732534",
+      "kind": "audit-script",
+      "note": "台账层审计 P1..P11。第 7 轮相对第 6 轮的增量：P3 由只认 ASCII `# -> N` 扩为四种计数形态（箭头单值/全角箭头/斜杠式/散文「= N」），并新增 P11（禁止「候选全文 json.dumps count」口径，命中即 rc=1）。P3 形态 4 与 P11 的判据都因本轮变异自测 M16/M18 首次漏检而各收紧过一次（见 round7Corrections）。"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/read-sanguo-L0-0072-r7/audit_extraction_r7.py",
+      "sha256": "afb07bac72af47f0be2803027b686198527da0f873bd229482d09b05879b170b",
+      "kind": "audit-script",
+      "note": "抽取层审计（引文逐字/偏移/区间内唯一/docOccurrences/unitOccurrences/sourceHash）。365 个对象 problems=0。"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/read-sanguo-L0-0072-r7/recompute_coverage_r7.py",
+      "sha256": "8635167c414ea90c959ef03a4738d3090b087d86ce1e15180d3bfb73db7327c6",
+      "kind": "audit-script",
+      "note": "覆盖表独立重算（只读，不写候选）。18 键 + 16 行段落表与最终候选全部一致。"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/read-sanguo-L0-0072-r7/recompute_coverage_write_r7.py",
+      "sha256": "d607254618c1f2c49dd19edd32b3310b93d7c02da2fc6649d7362ba4a093fd92",
+      "kind": "audit-script",
+      "note": "覆盖表重算并写回（独立实现，不 import 生成脚本）。本轮新增 4 个引文对象后用它整表重算，避免 CE-2（陈旧比值）同类缺陷。写回后再次运行「变更项数：0」= 幂等。"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/read-sanguo-L0-0072-r7/mutation_selftest_r7.py",
+      "sha256": "8321225d42eae55c313b9d353db27b07284d096acf2f200de5a00ad8d3c73c8f",
+      "kind": "audit-script",
+      "note": "变异自测 M01..M18。前 14 个沿用第 6 轮（含 M08 自指计数原形），新增 M15/M16/M17/M18 分别注入斜杠式/散文式/全角箭头计数写错与重引入全文 count 口径 —— 正是 CE-B 点名的四种盲区。结果 18/18 CAUGHT。"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/read-sanguo-L0-0072-r7/verify_claims_r7.py",
+      "sha256": "927bfd8e4ab7ed209706d68f3ffb92a2e9c47a8ac4b5cdd797d0f706aa56e9e2",
+      "kind": "audit-script",
+      "note": "把本提交记录里的每一条断言做成可执行检查：引文层 5 条（逐字/哈希/区间/首现/doc 计数）、CE-A 清除 5 条、CE-C 自洽 5 条、shouldFix 落点 6 条、扣分项 2 条、fieldCounts 3 条、semanticReview 诚实性 1 条。"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/read-sanguo-L0-0072-r7/verify_claims_r7.out.txt",
+      "sha256": "75146fac9940c903ab881e2228ecc016a7f5a352b83fbe32a3ec14899690a737",
+      "kind": "audit-output",
+      "note": "27/27 成立。含 C1-C3 的三键复算（4509 / 3044 / 0.6751）与 D1-D5 的落点偏移。"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/read-sanguo-L0-0072-r7/FINAL-verify-r7.out.txt",
+      "sha256": "c9d6512dc928e746dec78f28491abf398bd6e5891936facaeee69e62d03ae333",
+      "kind": "audit-output",
+      "note": "最终候选（a55e2b24…）上七个检查的汇总输出：ledger PASS / extraction PASS / coverage 全一致 / coverage 写回幂等 / 变异 18/18 CAUGHT / 断言 27/27 / CE 复算汇总。"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/read-sanguo-L0-0072-r7/apply_r7_fixes.py",
+      "sha256": "e53b086eac2b5d56abce66efe75c57c63cd93c2f35a141e3644913b68c360136",
+      "kind": "audit-script",
+      "note": "本轮台账层修复脚本（不 import 生成脚本）。每个新增引文对象都现场 assert text[start:end]==quote 并实算 docOccurrences/unitOccurrences。"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/read-sanguo-L0-0072-r7/candidate.before-r7.json",
+      "sha256": "b25825a224ae981c7c3e23a87bb9e638d99ff29503018da1bf86b81cc73a716f",
+      "kind": "reviewed-artifact",
+      "note": "本轮修改前的候选（= attempt 5，与 verify:sanguo:L0_0072 复核的 b25825a2… 同一份产物）。保留以便复核者直接 diff 出本轮全部改动。"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/read-sanguo-L0-0072-r7/candidate.after-r7.json",
+      "sha256": "a55e2b244f32af96ee7a129c76ba5845d641fcc4548b1754ad42ad938485d344",
+      "kind": "worker-output",
+      "note": "本轮修改后的候选冻结副本，与 loop/state/out/read_sanguo_L0_0072.candidate.json 逐字节相同（sha256 一致）。"
+    },
+    {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/read-sanguo-L0-0072-r7/text.slice.txt",
+      "sha256": "070b9607a942c51f0eeef5a601753ec2cf50278b0ccaea5d6cb25b72c166718b",
+      "kind": "source-slice",
+      "note": "docs[0].text[367615:372678) 切片（5063 码点），用于独立复算。与 derive 口径自检：切片以「第七十三回　玄德进位汉中王　云长攻拔襄阳郡」开头。"
+    },
+    {
+      "path": "data/cache/fe42d01f3826fe8096f86614.docs.json",
+      "sha256": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+      "kind": "source",
+      "note": "原文源。docs[0].text 共 607191 码点；本单元 [367615,372678)。注意：任务 JSON 里的 sourceHash 写的是 2988ce6e…，与本文件实际 sha256 不符 —— 我按提示词明确指定的 8ab7298a…（= 实际值）作为全部引文的 sourceHash。"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "CE-A 独立复算成立：复核自带命令原样执行得 [3,4,6,10]，与它声明的 3/4/5/9 两项不符。命令：python3 -c \"import json;d=json.load(open('loop/state/out/read_sanguo_L0_0072.candidate.json'));b=json.dumps(d,ensure_ascii=False);print([(s,b.count(s)) for s in ['异姓之人','织席小儿','董承','切齿之恨']])\"",
+      "result": "pass"
+    },
+    {
+      "text": "CE-A 已彻底清除：最终候选里 '3/4/5/9' 与 '全文 count = 9' 各出现 0 次，且全文无 json.dumps(...).count('X') 可执行表达式（verify_claims_r7 B1/B2/B3）。",
+      "result": "pass"
+    },
+    {
+      "text": "CE-B 独立复算成立：旧 P3 判据 `#\\s*->\\s*(\\d+)` 在候选全文命中 7 处（可见），而全角箭头 2 处、斜杠式 1 处、散文式 25 处全部失明（ce_probe_r7 CE-B 段）。",
+      "result": "pass"
+    },
+    {
+      "text": "CE-B 已修且被变异测试证明：扩形态后的 audit_ledger_r7.py 对 M15 斜杠式 / M16 散文式 / M17 全角箭头 / M18 重引入全文口径 全部 rc=1；总体 18/18 CAUGHT（mutation_selftest_r7.py）。",
+      "result": "pass"
+    },
+    {
+      "text": "CE-C 独立复算为**假阳性**：以 wholeSliceChars(5063) 为基数时 5063-554=4509、3027-38=2989、2989/4509=0.6629 三键与声明的 [368459,369013) 全相符；复核以 bodyChars(5006) 为基数得 4452≠4509 才会判不自洽。复算命令见 ce_probe_r7.py 的 CE-C 段（并列打印两种基数）。",
+      "result": "pass"
+    },
+    {
+      "text": "CE-C 未改数值，但补了显式基数声明：最终候选 coverageDeclaration.excludingBiaoBasis 写明基数是 wholeSliceChars 并给出三键重算式（verify_claims_r7 C4）。",
+      "result": "pass"
+    },
+    {
+      "text": "引文层零缺陷：365 个引文对象逐条 text[start:end]==quote、sourceHash 全等于 8ab7298a…、区间内首现、docOccurrences/unitOccurrences 与实际计数自洽（audit_extraction_r7 problems=0；verify_claims_r7 A1-A5）。",
+      "result": "pass"
+    },
+    {
+      "text": "本轮引文改动可精确 diff：quote 对象 361→365，新增 5 个（[371101,371128) 猪龙之梦、[371354,371363)、[371573,371605)、[371983,371998)、[372257,372264)），右移 1 个（[372246,372264)→[372257,372264) 以消除跨栏重叠），其余 189 个不同 span 的既有引文与 361 个中的其余全部逐字未变（candidate.before-r7.json vs 最终候选集合 diff）。",
+      "result": "pass"
+    },
+    {
+      "text": "覆盖表已按新候选整表重算而非沿用旧数：charCoverage 3027→3082、charCoverageFraction 0.5979→0.6087、excludingBiaoCovered 2989→3044、excludingBiaoFraction 0.6629→0.6751、distinctQuoteCount 190→194、段落 5 行 covered 变化；重算脚本再跑一次「变更项数：0」（幂等）。",
+      "result": "pass"
+    },
+    {
+      "text": "扣分项未退化：同任务五栏共用同一 span = 0 处；每处 null 栏位都带同名 <栏位>Note（verify_claims_r7 E1/E2）。",
+      "result": "pass"
+    },
+    {
+      "text": "fieldCounts 全表与实际数组长度一致（含本轮新增的 selfCritique=9），worldSettingsByKind={place:22,item:8,rule:13}、foreshadowsByStatus={resolved:1,unresolved:7} 均与实算相同（verify_claims_r7 F1-F3）。",
+      "result": "pass"
+    },
+    {
+      "text": "semanticReview 仍为 not-performed：本轮只做原文精读、逐字定位、分栏独立取证与台账可复算，**没有**做独立语义复核，也不把任何更正读成语义通过（verify_claims_r7 G1）。",
+      "result": "pass"
+    },
+    {
+      "text": "全部 7 个检查在冻结候选上通过：ledger PASS / extraction PASS / coverage 全一致 / coverage 写回幂等 / 变异 18/18 / 断言 27/27 / CE 复算汇总（FINAL-verify-r7.out.txt）。",
+      "result": "pass"
+    },
+    {
+      "text": "审计脚本全部只读：连续运行 7 个脚本后候选 sha256 前后同为 a55e2b24…（未变）。",
+      "result": "pass"
+    },
+    {
+      "text": "本轮自己的守卫抓出并修掉了我引入的 3 处回归：selfCritique 追加后 fieldCounts.selfCritique 6→9 未同步（P7）、selfCritique 里出现「」角标短语被 P9 判为取证清单点名、以及**我在说明「已删除该旧值」时又把它写回文件**（B1）—— 后者正是该口径不可保留的现场演示，已一并删除。",
+      "result": "pass"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/read_sanguo_L0_0072.candidate.json",
+      "kind": "append-only",
+      "note": "attempt 5 → attempt 6。台账/自述层改写 + 4 个引文对象新增 + 1 个切分点右移 + 覆盖表整表重算。既有 361 个引文对象中除被右移的 1 个外全部逐字未动。"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/fe42d01f3826fe8096f86614.docs.json": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+    "data/cache/fe42d01f3826fe8096f86614.json": "04802afa6910e056b797a1586eb03c06820036907d248b17d7e05d388ad4b489",
+    "loop/state/out/read_sanguo_L0_0072.candidate.json": "a55e2b244f32af96ee7a129c76ba5845d641fcc4548b1754ad42ad938485d344"
+  },
+  "remaining": [
+    "semanticReview = not-performed：本候选只做「原文精读 + 逐字定位 + 分栏独立取证 + 台账可复算」。365 个引文对象可用 TEXT[start:end] == quote 复算，但这只证明**定位**正确，**不证明语义已核验**。语义复核属 read-verify 通道（verify:sanguo:L0_0072）。请复核者不要把本轮的三条 CE 更正读成语义已过。",
+    "CE-C 我判为假阳性，但这依赖**回溯推定**（三个键只能由 wholeSliceChars 基数解释），第 6 轮候选并未写明基数 —— 这正是复核误判的成因。本轮补了 excludingBiaoBasis，但那是新增说明，不能当作第 6 轮就已声明的证据。若复核者认为「口径未写明即视为不自洽」，请据此反驳，我接受把该三键降级为待核。",
+    "reverseCheck ① 的 13 处零覆盖原文事实只补了 3 处（C27 主将初意、T16 治中潘浚、T08 次日实况），其余 10 处**未补引文**，已逐条连偏移列在 coverageDeclaration.residualNotes[1]，而不是声称已覆盖。",
+    "reverseCheck ④ 的「襄阳守军规模」与「曹兵大半死于襄江」的绝对数仍未登记为 unknown。复核自己写明此条给不出逐字引证、不作为 fail 依据，本轮如实留在 remaining 而未代为补登。",
+    "审计守卫的能力边界（如实登记，不当成保证）：P3 只覆盖四种**可识别形态**的计数断言，换一种措辞（如纯自然语言的「三处」「两处」）仍可能漏过 —— 第 6 轮的同一盲区说明至今未完全关闭。变异自测 18/18 只证明这 18 种注入被捕获，不证明不存在第 19 种。",
+    "任务 JSON 的 sourceHash 字段写 2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff，与本仓库 data/cache/fe42d01f3826fe8096f86614.docs.json 的实际 sha256（8ab7298a…，提示词正文指定的那个）不符。我按提示词取 8ab7298a…，未改任务文件；此差异登记在此供环境侧核对。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "restore-from-backup",
+    "files": [
+      "loop/state/out/read_sanguo_L0_0072.candidate.json"
+    ],
+    "backup": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/read-sanguo-L0-0072-r7/candidate.before-r7.json",
+    "backupSha256": "b25825a224ae981c7c3e23a87bb9e638d99ff29503018da1bf86b81cc73a716f"
+  },
+  "submittedAt": "2026-10-14T07:11:41Z",
+  "wallClockSeconds": 2007,
+  "wallClockFrom": "lease.startedAt",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-14T07:11:41Z"
+  },
+  "verifyState": "pending"
+}

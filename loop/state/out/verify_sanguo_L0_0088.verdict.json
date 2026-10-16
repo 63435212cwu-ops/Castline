@@ -1,0 +1,196 @@
+{
+  "task": "verify:sanguo:L0:0088",
+  "agent": "w-dafeng-3",
+  "role": "VERIFIER",
+  "roleFile": "loop/ROLES/VERIFIER.md",
+  "status": "done",
+  "reviewedTask": "read:sanguo:L0:0088",
+  "reviewedArtifact": {
+    "path": "loop/state/out/read_sanguo_L0_0088.candidate.json",
+    "sha256": "2039434f6fa7b59057004a332a6a8a3bf8e5350f14efcf3373ad1d0e28abb835",
+    "producedBy": "w-xiyou-1",
+    "note": "开工时与收工时哈希一致（2039434f…），本轮未修改候选（任务 writes 只允许写 verdict 文件）"
+  },
+  "source": {
+    "path": "data/cache/fe42d01f3826fe8096f86614.docs.json",
+    "sha256": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+    "docIndex": 0,
+    "range": [
+      444148,
+      449690
+    ],
+    "codepoints": 5542,
+    "segmentSha256": "422ce0b43c598fa8c03ef851d49adc9700db3b637079921af32b1b34937e657a"
+  },
+  "method": "先自己通读原文区间（切片另存为 /Volumes/资源库/我的资源/回滚点/项目/星系-verify-0088/slice_0088.txt，sha256 422ce0b4…），并在打开候选**之前**写下独立事实清单（/Volumes/资源库/我的资源/回滚点/项目/星系-verify-0088/my_independent_reading.json，sha256 f7c7bced…，其 recordedAt 早于本文件读取候选的时刻）。随后按契约顺序执行：抽取项核对 → 反向验证 → 误杀检查 → 幻觉/越权检查 → 引用核验（随机 5 条）。全部结论由 /Volumes/资源库/我的资源/回滚点/项目/星系-verify-0088/verdict_0088_w-dafeng-3.py 复算，退出码 1 表示检出 1 条 FAIL 级发现。",
+  "verdict": "partial",
+  "summary": "**判 partial**。候选的引用定位层是全区间最强的部分：333 条引文逐条 text[start:end]==quote、find(quote)==start、落在区间内、sourceHash 全部一致，零失败——我做了**全量**核验而非抽样，这一层不得判 fail。反向覆盖自述（257 块/54 未覆盖）与跨分区复用自述（60 条）经独立重算对称差均为 0，也成立。但候选的**自述计数层仍有一个陈旧数字**（SC06 写「15 条 cost 为 null」，实测 16 条），且**内容级覆盖有实质缺口**：讨蛮的终极战略目的（伐魏吞吴/重安汉室/再兴汉室）在切片里被完整说出两次，候选 333 条引文**一条都没引**，20 条 objective 全部停在战术层。另有 2 处实体归属/概括偏强（S12 把蜀军的三个大营记成孟获的依托；S12.after 用「三寨尽失」原文只写「皆无人马」）。按契约「判 fail 必须有 counterExample 且 quote 逐字可查」——我能给出逐字引证，但这些缺陷属**读数层与覆盖层**，候选的全部引文可定位、无编造人物、无越权结局，故不判 fail 而判 partial，并逐条写明哪些可用、哪些必须降级。",
+  "priorReviewNote": "本任务是**二次复核**：w-verify-3 于 2026-10-14T05:29:59Z 已给出一份 verdict（同一候选哈希 2039434f…），但该文件没有 loop.py 提交记录所要求的字段（task/agent/status/summary/evidence/assertions/remaining/rollback 中的多数），故 `validated()` 为 False、`verify:sanguo:L0:0088` 至今不在 done_ids 里。我复核了它三条 counterExamples 中的两条并**独立证实**（SC06 的 15/16、quote_objectsNote 的 331/333），第三条（S12 实体归属读反）我也独立证实。凡与它重叠的发现，我在各自条目里注明「与 w-verify-3 一致」而不冒充新发现。",
+  "counterExamples": [
+    {
+      "claim": "候选 selfCritique SC06 自述「20 条任务里 15 条 cost 为 null」，实测为 16 条。",
+      "quote": "20 条任务里 15 条 cost 为 null。",
+      "quoteScope": "candidate-file",
+      "why": "逐条统计候选 tasks[]（20 条，ID T01–T20）：cost 为 None 的有 16 条 —— T01,T02,T04,T06,T07,T08,T09,T10,T12,T13,T14,T15,T16,T17,T18,T20；cost 非 None 的只有 4 条 —— T03,T05,T11,T19。16+4=20。我试了其它口径排除误判：cost 键缺失 0 条、cost 为 None 且无 costNote 0 条 —— 任何口径都不等于 15。注意 buildSelfCheck.counts 里**没有** cost-null 这一项，所以候选现有的自述计数脚本结构性地查不出这一条。这是「自述强于数据」在同一份候选里被踩到的第四次（SC07/SC10/SC12 已记三次），且**发生在专门记录该形态的 SC 系列内部**。与 w-verify-3 的 counterExamples[2] 一致（我独立复算得到同一数字）。",
+      "reproduce": "python3 -B -s /Volumes/资源库/我的资源/回滚点/项目/星系-verify-0088/verdict_0088_w-dafeng-3.py  # 见 'SC06 自述 cost=null 条数' 一行：FAIL 自述 15 / 实测 16",
+      "severity": "count-stale"
+    },
+    {
+      "claim": "候选 selfCritique SC10 自述「实测非 spans 子树 271 条、spans 60 条，271+60=331」，与同一候选 buildSelfCheck.quote_objectsNote 的「273+60=333」互相矛盾；实测 333。",
+      "quote": "实测非 spans 子树 271 条、spans 60 条，271+60=331 才成立",
+      "quoteScope": "candidate-file",
+      "why": "我独立递归统计候选内全部「同时带 quote/start/end」的对象：总数 333，其中 crossSectionQuoteReuse.spans 子树 60、非 spans 子树 273。即 quote_objectsNote 的 273+60=333 正确，SC10 的 271+60=331 是陈旧值。成因可复现：SC10 记录的是「上一版 267+60=327≠331」这一发现，此后本会话又为 notModeled 补入回目与回末联语 2 条引文，非 spans 由 271 升到 273，quote_objectsNote 同步改了，SC10 没有同步 —— 与本条前一项同因（定点修复后未回改自述）。与 w-verify-3 的 counterExamples[1] 一致（我独立复算得到同一数字）。",
+      "reproduce": "python3 -B -s /Volumes/资源库/我的资源/回滚点/项目/星系-verify-0088/verdict_0088_w-dafeng-3.py  # 见 '引文节点数 == 声明的 quote_objects' PASS 333 vs 333，反证 331 不成立",
+      "severity": "count-stale"
+    },
+    {
+      "claim": "候选 states S12 的 before 把蜀军的三个大营记成孟获的部署（S12.who 即「孟获的依托」）。原文该句主语是孔明/蜀军，且句末「以待蛮兵」明说这营是等蛮兵来的一方。",
+      "quote": "乃调大军于河北岸一字儿下寨，便以河为壕堑，以浮桥为门，垒土为城；过桥南岸，一字下三个大营，以待蛮兵。",
+      "quoteStart": 444319,
+      "why": "该句紧接在「孔明即调三万人入山，伐竹数十万根……搭起竹桥，阔十余丈。」之后，主语一路承接下来都是孔明；句末「以待蛮兵」直接点明这营属于等蛮兵来的一方。孟获此时尚未出场——他直到 @444373「却说孟获引数十万蛮兵，恨怒而来」才登场，且是来**攻**蜀寨的（@444398「直扣前寨搦战」）。候选自己在 T01.result 写对了（「大军在河北岸一字下寨……并过桥到南岸一字下三个大营，等蛮兵来」），故这是 S12 单条的实体归属读反，属候选**内部自相矛盾**。这一类缺陷既非悬空指针也非引文错误，全部引文复算脚本结构性地查不出。与 w-verify-3 的 counterExamples[0] 一致（我独立复算并引用同一原文句 @444319）。",
+      "reproduce": "python3 -B -s /Volumes/资源库/我的资源/回滚点/项目/星系-verify-0088/verdict_0088_w-dafeng-3.py  # S12 由 states 归属检查覆盖；原文句 @444319 可用 text[444319:444319+len(quote)]==quote 复算",
+      "severity": "entity-misattribution"
+    },
+    {
+      "claim": "候选 states S12 的 after 用「三寨尽失」概括，原文只写「皆无人马」（空寨），未写被夺/损失。属概括强于原文，非编造。",
+      "quote": "只见三个大寨，皆无人马，于内弃下粮草车仗数百余辆。",
+      "quoteStart": 444891,
+      "why": "S12.after 写「三寨尽失、退避秃龙洞」。原文叙述是蜀军**主动弃寨**（孔明密令「吾今弃此三寨，退过河北」@444760），孟获看到的是「三个大寨，皆无人马」——原文没有一句写孟获夺取或蜀军丢失这三个寨。用「尽失」是从孟获视角做的概括，方向不算错（他确实再也用不上这三寨），但把一个**主动弃守**写成了「失」，与候选自己在 T03.cost 把粮草车仗记为「主动弃在空寨里」的写法口径不一致。建议降级为 inferred 或改写为「三寨被蜀军自弃」。",
+      "reproduce": "python3 -c \"import json;d=json.load(open('data/cache/fe42d01f3826fe8096f86614.docs.json'));t=d[0]['text'];print(t[444891:444891+27])\"",
+      "severity": "overstated-paraphrase"
+    }
+  ],
+  "reverseChecks": [
+    {
+      "found": "**讨蛮的终极战略目的从未被任何引文引用，也从未进入任何 objective**：孔明在伏波将军庙祈祷时自陈「欲待蛮方既平，然后伐魏吞吴，重安汉室」，被老叟点出解法前又说「蛮方不平，安能并吞吴、魏，再兴汉室？」。这两处是本回唯一交代「为什么要平蛮」的句子（两处都在切片内），候选 333 条引文中一条都没引，20 条 objective 全部停在战术层（无一提到汉室/魏/吴/一统）。后果：T11「孔明拒绝蒋琬班师」这条边的**理由**只剩「一退彼必乘势追之」这一层，读不出他非打不可的战略约束。",
+      "quote": "欲待蛮方既平，然后伐魏吞吴，重安汉室。",
+      "quoteStart": 447082,
+      "quote2": "蛮方不平，安能并吞吴、魏，再兴汉室？",
+      "quote2Start": 447447,
+      "verified": "已独立复算：在剔除 reverseCoverage 自述的候选 JSON 里，'伐魏吞吴'/'重安汉室'/'再兴汉室'/'并吞吴、魏' 的出现次数均为 0。",
+      "note": "与 w-verify-3 的 reverseChecks[0] 一致（同一发现，我独立复算确认）。"
+    },
+    {
+      "found": "**出兵动因句未被引用**：「却说孔明连日不见孟获兵出，遂传号令教大军离西洱河，望南进发」是 T11 那个动作的**触发条件**——孔明南下不是因为探到敌情，是因为等不到孟获出战。候选 T11.objective 只引了后半句「遂传号令教大军离西洱河，望南进发。」，「连日不见孟获兵出」这半句（含显式连词「遂」）在候选任何分区都不存在。",
+      "quote": "却说孔明连日不见孟获兵出，遂传号令教大军离西洱河，望南进发。",
+      "quoteStart": 446535,
+      "verified": "已独立复算：剔除 reverseCoverage 后 '连日不见' 与 '不见孟获兵出' 出现次数均为 0；候选该栏引文起于「遂传号令」。"
+    },
+    {
+      "found": "**擒获得以完成的封锁环未被引用**：「蛮姑横截于帐上，谁敢近前。」是杨锋席上动手后阻止救援的机制句。候选 CE18 的**机制描述**本身写对了（「蛮姑横截于帐上」出现在 CE18.mechanism 的推理里），但该句**没有作为引文出现**在任何分区，CE18.quotes 只到「执下座来」。即：机制说对了，证据没落。",
+      "quote": "蛮姑横截于帐上，谁敢近前。",
+      "quoteStart": 449179,
+      "verified": "已独立复算：剔除 reverseCoverage 后 '横截' 与 '谁敢近前' 出现次数均为 0；CE18.quotes 最末一条为「二子举杯诣孟获、孟优前……执下座来。」(@449121-449163)。"
+    },
+    {
+      "found": "**杨锋五子的登场句未被引用**：「锋令五子入拜，皆彪躯虎体，威风抖擞。」是「五子武艺足备」这句自述的**叙述层兑现**，也是后来二子把盏得以近身的铺垫。候选 S14.before 引了杨锋自述「我有五子，皆武艺足备」，但叙述层这半句在候选里不存在。",
+      "quote": "锋令五子入拜，皆彪躯虎体，威风抖擞。",
+      "quoteStart": 449011,
+      "verified": "已独立复算：剔除 reverseCoverage 后 '彪躯虎体' 与 '威风抖擞' 出现次数均为 0。"
+    },
+    {
+      "found": "**老叟的认知与出身未被引用**：「老夫久闻大国丞相隆名，幸得拜见。」是老叟**先于孔明自报身份**就知道对方是谁的证据（他随后还说「蛮方之人，多蒙丞相活命，皆感恩不浅」）。这句与孔明「丈者高姓？」构成一组「谁先知道谁」的知识差，候选 S11 只记了孔明与孟节那一组知识差，这一组没有落点。",
+      "quote": "老夫久闻大国丞相隆名，幸得拜见。",
+      "quoteStart": 447207,
+      "verified": "已独立复算：剔除 reverseCoverage 后 '隆名' 出现次数为 0。"
+    },
+    {
+      "found": "**四首诗赞的结构化引文只有 2/4**：reverseCoverage.note 自述「①a 诗赞（两首南方苦热诗、两首后人赞诗：已整段记入 notModeled 并带引文）」，而 notModeled[0].quotes 只有 2 条（「山泽欲焦枯…」与「高士幽栖独闭关…」）。另两首（「赤帝施权柄…」与「为国平蛮统大兵…」）只在 notModeled[0].why 里以「首二句＋……」的形式被**提到**，没有结构化引文。其中「赤帝施权柄」一首的后 6 句（云蒸孤鹤喘／海热巨鳌惊／忍舍溪边坐／慵抛竹里行／如何沙塞客／擐甲复长征）在候选任何位置（剔除 reverseCoverage 自述后）都不存在。",
+      "quote": "赤帝施权柄，阴云不敢生。云蒸孤鹤喘，海热巨鳌惊。忍舍溪边坐？慵抛竹里行。如何沙塞客，擐甲复长征！",
+      "quoteStart": 446622,
+      "verified": "已独立复算：'云蒸孤鹤喘'/'忍舍溪边坐'/'慵抛竹里行'/'如何沙塞客' 在剔除 reverseCoverage 的候选里均为 0 次；'赤帝施权柄'/'为国平蛮统大兵' 仅出现在 notModeled[0].why。",
+      "note": "这是「自述强于数据」的又一实例，但弱于 counterExamples：note 说的是「诗赞已记入 notModeled 并带引文」，4 首中 2 首确实带引文、2 首以省略形式在 why 内被指名，属**自述精度不足**而非无中生有。"
+    },
+    {
+      "found": "【误杀检查：阴性结果】我按显式因果/顺承连词闭集（故／因此／遂／乃／于是／以致／致使）抽出区间内含连词的句子 34 条，逐句回查候选是否遗漏合法因果边。**未发现任何合法因果被词表或正则挡掉**；候选 rejectedCauseEdges 的 5 条拒绝理由我逐条核对，引文全部逐字可查，拒绝理由成立（尤其 RCE03「告天→得泉」拒绝写成 explicit，是主动放弃一个更容易的读法）。",
+      "quote": "是夜祝罢，平明视之，皆得满井甘泉。",
+      "quoteStart": 448682
+    },
+    {
+      "found": "【覆盖率量化，附可复算规则】按候选自己声明的 chunkingRule 独立重算得 257 块，其中与任何引文区间不相交者 54 块（与落盘集合对称差 0）。把 54 块文本去空白后在**剔除候选自身 reverseCoverage 自述**的候选 JSON 里做最长连续命中：L=0（完全无对应）18 块、0<L<8 弱对应 23 块、L>=8 有实质对应 13 块。即 54 块里有 18 块在候选任何分区都找不到对应表述。",
+      "quote": "咸以『未覆盖不等于漏读』自解，但其中 18 块确实无落点",
+      "quoteScope": "verifier-summary（非原文引证，仅量化记录）",
+      "note": "其中 2 块是纯引号残块（@447428『”』、@448515『”』），属切句边界产物，非实质缺口；实质无落点为 16 块。"
+    }
+  ],
+  "falseKills": [
+    {
+      "item": "候选把薤叶芸香标为 unresolved（F04）并写明「原文只写到吩咐采取为止」",
+      "verdict": "不是误杀，处理正确",
+      "why": "我通读原文确认：老叟交代了薤叶芸香的用法，隐者「令众军尽意采取」，此后再无一句写军士采取、口含或效果；后文蛮兵探报的「蜀兵不染瘴疫之气」与薤叶芸香之间没有归因句。标 unresolved 并拒绝连边是本回最克制也最正确的处置。"
+    },
+    {
+      "item": "候选把告天得泉写成 derived 而非 explicit（RCE03／CE16）",
+      "verdict": "不是误杀，处理正确",
+      "why": "原文是「是夜祝罢，平明视之，皆得满井甘泉」——两事并置，无「故／乃／遂」等归因连词。候选拒绝把神迹写成 explicit 因果，同时保留了人物语层（孔明自己的告天之辞），分层正确。"
+    },
+    {
+      "item": "候选把「孟获被擒→孟获心服」拒绝为因果边（RCE01）",
+      "verdict": "不是误杀，处理正确",
+      "why": "原文提供的机制方向相反：第四次被擒后他说「不似丞相专施诡计，吾如何肯服」，第五次被擒后说「非汝之能，乃吾洞中之人，自相残害，以致如此。要杀便杀，只是不服！」两次都是**拒绝**承认对方本事。"
+    },
+    {
+      "item": "候选把四泉方位的两处不一致登记为 unknowns（U03/U10）而不强行统一",
+      "verdict": "不是误杀，处理正确",
+      "why": "我独立对照两处原文：朵思版只列四泉名与杀法（哑、灭、黑、柔）不给方位；老叟版给方位（东南柔泉、正南黑泉、西南灭泉）却独缺哑泉方位，且次序不同。确实无法一一对应，登记为未决是正确处置。"
+    },
+    {
+      "item": "候选 16 条 cost 写 null",
+      "verdict": "不是误杀，但其中 1 条建议重估",
+      "why": "我逐条核对：原文确实没把这些行动写成行动方的损失或代价（无伤亡计量、无失地叙述），null 合理。唯一可议的是 T19.cost「各洞蛮兵皆走回本乡」——该句在原文里是段落转场（紧接着杨锋解俘赴孔明寨），把它读成孟获「失去部众」是从前后反差推出的，候选已自标 inferred 并在 SC03 写明可降级，处置诚实。"
+    }
+  ],
+  "checks": {
+    "quoteVerbatim": "333/333 全部 text[start:end]==quote（全量，非抽样）",
+    "quoteOffset": "333/333 全部 find(quote)==start；且原文中无一条引文出现 >1 次（无重复歧义）",
+    "quoteInRange": "333/333 落在 [444148,449690) 内",
+    "quoteSourceHash": "333/333 == 8ab7298a…",
+    "randomSpotCheck": "契约第 6 步：固定 seed=880088 随机抽 5 条，逐字命中、偏移一致、区间内（详见 verdict_0088_w-dafeng-3.py 输出）",
+    "selfReportedCountsVsDisk": "buildSelfCheck.counts 十键逐键 == len(落盘数组)，全部相符；但 SC06 的 cost-null=15 与 SC10 的非spans=271 两处自述数字错（见 counterExamples）",
+    "reverseCoverageRecomputed": "独立重算 257 块 / 54 未覆盖，与落盘集合对称差 0；块 text 逐字等于切片",
+    "crossSectionReuseRecomputed": "count==len(spans)==60，与独立重算的复用集合对称差 0",
+    "idIntegrity": "9 个分区共 109 个 ID，无重复",
+    "nullWithoutNote": "20 条任务的 cost/obstacle/result 等栏为 null 时均带同名 Note，0 处缺失",
+    "fabrication": "以 19 个原文外三国人物名与 6 个越权结局词扫描候选全文，0 命中；未发现原文没有的人物、结局、伏笔或成功判定",
+    "foreshadowDiscipline": "F02/F04 显式 resolved=false，未把未回收的铺陈写成已回收；F03 的 basisNote 明确「resolved=true 指铺设被后文回应，不是计策成功」",
+    "misattributionScan": "对 15 条 states 逐条比对 who/实体与原文主语链，检出 S12 一处实体归属读反（其余 14 条成立）"
+  },
+  "notes": "**总体判断**：候选在「引用可定位」这件事上做到了本区间可做到的上限——333 条引文全量复算零失败、偏移唯一、无编造人物、无越权结局、伏笔显式 unresolved、对神异事件分层克制（拒绝把告天得泉写成 explicit、拒绝把朵思的宣言当结局）。它的问题集中在两处：**自述数字**（SC06 的 15/16、SC10 的 271/333，都是定点修复后未同步的陈旧值）与**内容覆盖**（战略目的、出兵动因、封锁机制句、五子登场句无引文落点）。\n\n**为什么判 partial 而不是 pass**：counterExample 第 1、2 条是同一形态（自述与落盘不符）在同一份候选里的第 4、5 次复发，其中 SC10 发生在**专门记录该形态的 SC 系列内部**——这正是「机制存在、有产出、但不产生信息」的复发。反向验证第 1 条（战略目的从未被引）使 20 条 objective 全部停在战术层，是本回语义上最实质的缺口。\n\n**为什么判 partial 而不是 fail**：契约要求「判 fail 必须有 counterExample，且 quote 逐字可查」。我给的 counterExample 引文逐字可查，但其中 3 条属读数/计数层（不是编造），第 4 条（「三寨尽失」）原文方向不错只是概括偏强。候选没有任何无中生有的人物、结局或伏笔，也没有把未完成当成功。按契约精神，缺陷可由读者在 partial 下选择性使用，不应整体判死。\n\n**哪些条目可用**：tasks/causeEdges/states/foreshadows/worldSettings/themeReadings/unknowns 的**全部引文定位**可照用；CE01–CE20、S01–S11、S13–S15、F01–F06、WS 全部分区、U01–U12 的结论可照用。\n**哪些必须改**：① SC06 的 15 改 16；② SC10 的 271/331 改为 273/333（或直接删掉该陈旧算式，quote_objectsNote 已正确）；③ S12.before 的实体归属必须改（三个大营是蜀军的，见 counterExample 3），或把 S12 的 who 从「孟获的依托」改掉；④ S12.after 的「三寨尽失」建议降为 inferred 或改写为「蜀军自弃三寨」。\n**哪些建议补**：讨蛮的战略目的（@447082、@447447 两句）至少应进一条 objective 或一条 unknown；蛮姑封锁句（@449179）与五子登场句（@449011）应补进 CE18/S14 的引文；「连日不见孟获兵出」（@446535）应补进 T11.objective。\n\n**我自己的错（如实记录）**：我的第一版反向验证探针用子串在**包含 reverseCoverage 的整份候选**里做匹配，既产生假阴性（未覆盖块文本命中它自己）又产生假阳性（把候选的**转述**当成缺口命中）。剔除 reverseCoverage 后重算，54 块中「完全无对应」由 3 块变为 18 块，我的缺口清单也从 7 条订正到 12 条。另外我最初把 7 条子串级「未命中」直接当成漏读，人工核对后发现其中「蛮姑/鞍马/盗跖/耿恭」等候选其实用转述覆盖了，故本文件只把**经人工确认在候选任何分区都无对应表述**的项写进 reverseChecks。\n**存疑但不据此判 fail**：S12.after 的「三寨尽失」是否算缺陷，取决于把「主动弃守」概括为「失」是否可接受——我记为存疑级，列在 counterExamples 但注明方向不错、只是口径与 T03 不一致。\n**未做的事**：semanticReview 我未做（候选自述 not-performed，我同意本区间不宣称已完成语义审阅）；我未复核候选引用的回滚点脚本是否可复跑（那是 w-verify-3 做过的，不作为我的判据）。",
+  "evidenceArtifacts": {
+    "verdictFile": {
+      "path": "loop/state/out/verify_sanguo_L0_0088.verdict.json",
+      "role": "本文件（任务 writes 指定）"
+    },
+    "candidate": {
+      "path": "loop/state/out/read_sanguo_L0_0088.candidate.json",
+      "sha256": "2039434f6fa7b59057004a332a6a8a3bf8e5350f14efcf3373ad1d0e28abb835"
+    },
+    "source": {
+      "path": "data/cache/fe42d01f3826fe8096f86614.docs.json",
+      "sha256": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2"
+    },
+    "independentReading": {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-verify-0088/my_independent_reading.json",
+      "sha256": "f7c7bcedf5db66e675dc4895fa1250d0ecafe045626207ca646f63d405a5c6dc",
+      "note": "在打开候选之前写成的独立事实清单（先自己读原文的证据）"
+    },
+    "slice": {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-verify-0088/slice_0088.txt",
+      "sha256": "422ce0b43c598fa8c03ef851d49adc9700db3b637079921af32b1b34937e657a"
+    },
+    "script": {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-verify-0088/verdict_0088_w-dafeng-3.py",
+      "sha256": "793b65d631b7209054c32ed31b4e531ec5f767cdfcdfb5eedf86fcae10a79fc1",
+      "note": "本复核的全部判据可原样复跑；退出码 1 = 检出 1 条 FAIL 级发现（SC06 计数）"
+    },
+    "scriptOutput": {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-verify-0088/verdict_run_output.txt",
+      "sha256": "a0fbe9b05ea2d8ce7d243ccf6695c3d43f21aed1729a290f117fbd993d0491dc"
+    },
+    "priorVerdictBackup": {
+      "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-verify-0088/备份/verify_sanguo_L0_0088.verdict.pre-w-dafeng-3.json",
+      "sha256": "5df3517963c429f3b2164ca54031905b87683e758a2a2dbf0171caff8a2570bf",
+      "note": "覆盖前原样备份 w-verify-3 的 verdict（其 sha256 5df35179… 与覆盖前一致）"
+    }
+  }
+}

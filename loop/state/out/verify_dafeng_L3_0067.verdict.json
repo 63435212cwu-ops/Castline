@@ -1,0 +1,153 @@
+{
+  "task": "verify:dafeng:L3:0067",
+  "agent": "w-sanguo-1",
+  "role": "VERIFIER",
+  "reviewedTask": "read:dafeng:L3:0067",
+  "reviewedCandidate": "loop/state/out/read_dafeng_L3_0067.candidate.json",
+  "reviewedCandidateSha256": "cff4ccb5baed74fc06111c6b5025b384ca0c0e385ea07e4202e716adbe982c5e",
+  "reviewedAuthor": "w-dafeng-2",
+  "selfSign": false,
+  "verdict": "partial",
+  "method": "先自己通读原文区间 [207268,210224)（docs[0].text 切片，2956 字，两遍），再看候选。全部结论用独立复算得出，不采信候选自称：320 条 quote 逐条 T[start:end]==quote + find()==声明偏移；inSegmentOccurrences/inWholeTextOccurrences/isFirstOccurrenceInWholeText/inUnitRange/sourceHash/offsetUnit 六个派生字段逐条重算；40 项 keywordAbsence、15 项 stats、覆盖率并集、sceneSplit 连续性、@偏移归属、全库词频全部独立重算；对同一段做了三轮结构性的『还漏了什么』扫描（92 个句子的 8-gram 反查、quote-stripped 后的 3-gram 反查、仅被引用而未被任何 claim 分析的句子反查）。详见 mechanicalChecks。",
+  "source": {
+    "path": "data/cache/1063b17ca65ec1b76f30e460.docs.json",
+    "docsSha256": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "docsSha256Verified": true,
+    "segmentSelector": "docs[0].text[207268:210224]",
+    "segmentLen": 2956,
+    "segmentSha256": "08276075ac032b8bdf293e89bd995759a5b1df264fbe36f2ce041d9284d4dcbb",
+    "note": "候选 source.path 写的是 data/cache/9b676d7031b1bcd3b8377a18.docs.json；我用 `cmp` 确认它与本任务 index 指向的 data/cache/1063b17ca65ec1b76f30e460.docs.json **逐字节相同**（同一 sha256 fdde5558…，12652187 字节），故路径别名不影响任何结论。"
+  },
+  "mechanicalChecks": {
+    "quoteRoundTrip": {"checked": 320, "passed": 319, "failed": 1,
+      "failure": "unit.boundaryChecks.trailingDividerRef: quote『------------』在全文出现 1031 次，find()=0 而声明 start=210210。这是**通用章节分隔线**，候选自己在 inWholeTextOccurrences=1031 里如实标注了非唯一，且 T[210210:210222]==quote 成立。不构成缺陷。"},
+    "refMetadata": {"checked": 320, "mismatches": 0,
+      "fields": ["inSegmentOccurrences", "inWholeTextOccurrences", "isFirstOccurrenceInWholeText", "inUnitRange", "sourceHash", "offsetUnit"]},
+    "coverage": {"candidateClaims": 0.8285, "recomputed": 0.8285, "covered": 2449, "total": 2956,
+      "significantUncoveredRuns": {"candidateClaims": 0, "recomputed": 0},
+      "uncoveredNonWhitespace": 6,
+      "uncoveredChars": ["“轰！” @207824..207828", "呼！ @210091..210093"]},
+    "keywordAbsence": {"checked": 40, "mismatches": 0},
+    "statsCrossCheck": {"checked": 15, "mismatches": 0,
+      "note": "quoteRefs 320 / inUnitQuoteRefs 281 / outOfRangeQuoteRefs 39、null obstacle 4、null cost 8、segmentLen、segmentSha256、textSha256、coverage 全部逐项复算一致。"},
+    "sceneSplit": {"contiguous": true, "exactCover": true, "ranges": [[207268,207480],[207480,208179],[208179,208841],[208841,209540],[209540,210224]]},
+    "nullReasonCompleteness": {"nullSlots": 12, "withoutNullReason": 0,
+      "note": "任务 prompt 明令『缺哪一项写 null』并『在同名的 <栏位>Note 里写明为什么没有』。12 个 null 槽位全部带 *NullReason，无未标注的未知。"},
+    "outOfRangeOffsets": {"checked": 46, "note": "候选正文里 46 个 @偏移全部逐个回原文核对；除 TD3.detail 一处列举口径（见 counterExamples CE1）外全部命中。"},
+    "taskSlotSeparation": {"sharedSpanInstances": 14, "tasks": 13,
+      "note": "见 counterExamples CE3 与 falseKillCheck：14 处『同一句引文同时支撑 >=2 个五元组栏位』，是任务 prompt 明文禁止的形态，但多数是同一句里确实含两栏信息（如『你搞什么？』既是 action 也是 result 的同一句话），非编造。"}
+  },
+  "counterExamples": [
+    {
+      "id": "CE1",
+      "claim": "候选 textualDefects.TD3.detail 断言：全库『千穿百孔』6 次，并列举偏移『@208561、@456251、@1145214、@3579578、@3589034、@4021497』，其中本单元那一处标为 @208561。",
+      "quote": "常年累月的开采，把这座高耸的主峰破坏的千穿百孔。",
+      "quoteSource": "原文",
+      "quoteOffset": 208561,
+      "quoteEnd": 208585,
+      "quoteRoundTrip": true,
+      "quoteUnique": true,
+      "why": "引文本身逐字正确、回切成立（T[208561:208585]==quote），所以这不是编造。错的是**同一 detail 里列举的偏移所指的词**：`千穿百孔` 四字在全文的真实偏移是 208580，不是 208561；208561 是这句引文的**句首**。可复现：`python3 -c \"import json,re;T=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];print([m.start() for m in re.finditer('千穿百孔',T)])\"` → `[208580, 456251, 1145214, 3579578, 3589034, 4021497]`。六项里另五项都是**词偏移**、且精确到字（456251 等五项我逐个复算 delta=0），只有本单元这一项写成了句偏移——是同一份清单里的口径不一致。旁证：候选自己的 stats.keywordAbsence.千穿百孔.inUnit 计数正确（1），TD3 的 evidence 引文也正确，说明词频统计是对的，只有 detail 里这个手写偏移抄错。影响：仅限这一个坐标数字，不推翻『全库 6 次、写法一致、非本单元独有』这个结论（该结论我复算成立）。修法：将 @208561 改为 @208580（或统一标为引文偏移并注明口径）。"
+    },
+    {
+      "id": "CE2",
+      "claim": "候选 tasks.T10（吕青在饮水时解释灰户产业条件与税负）的 action 文本断言她『讲石灰岩、植被、漕运三样条件』。",
+      "quote": "“山脚又有河流，漕运也方便。柴省而灰美，力半而利厚。”",
+      "quoteSource": "原文",
+      "quoteOffset": 208700,
+      "quoteEnd": 208727,
+      "quoteRoundTrip": true,
+      "quoteUnique": true,
+      "why": "『漕运』这一栏在 T10 的**五元组 evidence 里完全没有支撑**。T10 的全部 evidence span 只有 (208627,208694)、(208733,208766)、(208772,208820)、(208826,208839) 四处；而含『漕运』的句子在 (208700,208727)，**不被其中任何一处包含**（可复现：`any(a<=208700 and 208727<=b for a,b in [(208627,208694),(208733,208766),(208772,208820),(208826,208839)])` → `False`）。该句在候选里只出现于 textualDefects.TD1 的 evidence[1]（作为『柴省而灰美』的旁证），即被**降格存放到另一个层**，没有进入 T10 的 action 依据。同一 action 文本里的『石灰岩、植被』在 (208627,208694) 内有据，『漕运』没有。影响：T10.action 的三分之二有据、三分之一无据——属于**平台契约要求的『每一栏必须引用各自的原文依据』未满足**，而非事实编造（原文确有此句，位置就在两段 evidence 之间的空隙）。修法：把 (208700,208727) 补进 T10.action.evidence。"
+    },
+    {
+      "id": "CE3",
+      "claim": "候选 tasks.T9（宋廷风与许七安聊荤话）把**同一句引文同时当作四个栏位**的依据：objective / obstacle / action / result 全部引用 span (208398,208453)。",
+      "quote": "宋廷风一愣，哈哈大笑：“你果然也注意到了，我就缺一个像你这么有趣的同伴，朱广孝是个三棍打不出一个屁的闷葫芦。”",
+      "quoteSource": "原文",
+      "quoteOffset": 208398,
+      "quoteEnd": 208453,
+      "quoteRoundTrip": true,
+      "quoteUnique": true,
+      "why": "任务 prompt 明文写着：『禁止把同一句话同时当作多栏的依据 —— 实测旧图谱里有 714/1664 个任务五栏共用一句』。T9 是全候选最严重的一处四栏共用；全候选共 14 处 span 被 >=2 栏共用，涉及 13/12 个任务（T8 是唯一零共用）。其中最极端的就是 T9：同一句宋廷风的台词既被写成他的 objective（『拉近关系』）、又被写成 obstacle（『朱广孝接不住』）、又是 action、又是 result。可复现：对每个 task 收集五栏的 (start,end)，找出现次数>1 的 span。为什么判 partial 而不是 fail：这 14 处**没有一处是编造**——原文确有该句，候选也没有声称该句之外还有依据；它是『引证粒度/平台契约』层面的缺陷。且 T9 的 obstacle 一栏本身在语义上可质疑（朱广孝的反应原文写在 (208492,208507)，候选在 result 里正确引了那一句，但 obstacle 却没有引它、而是复用了 208398 那句）——修法是把 obstacle 改引 (208492,208507) 或在 obstacleNote 里说明。"
+    }
+  ],
+  "reverseChecks": [
+    {
+      "id": "RC1",
+      "found": "本单元存在一条**带显式结论连词『所以』的完整因果链**——灰户不能采灰 ⇒ 断了生路 ⇒ 告到府衙 ⇒ 官府来人——候选只在 tasks.T10.result、T7.objective 里分散提到，**没有画成任何一条 causeEdges**（12 条边里无一涉及）。",
+      "quote": "所以税收也重，不能采灰后，就断了生路。",
+      "quoteOffset": 208746,
+      "quoteEnd": 208765,
+      "why": "可复现：`[k for k in ['断了生路','断生路','税收也重'] if k in json.dumps(c['causeEdges'],ensure_ascii=False)]` → `[]`（三项在 12 条因果边的 from/to/mechanism 里全部 0 命中）。而紧接的下一句原文又用『所以』把链条收到官府：『所以告到府衙去了....』@208772。这两句是**原文自己用连词写出的因果**，比候选已收的 CE3（自标 inferred、明确写『原文没有写出因为所以』）、CE10（自标 inferred、靠一个『敢』字推断）都更直白。候选显然读到了（T10.result 引了 208772 那句、T7.objective 写了『揭不开锅』），属于**降格存放**：事实没丢，但作为显式因果边被漏抽。这直接影响下游『灰户为什么告官 ⇒ 官府为什么来』这条主线的图谱连通性。注：这是口径判断而非事实判定——若本流派的收录口径是『只收非显然因果』，饥荒⇒告官确实偏显然；但同一候选收了一条更弱的 CE10，故按既有惯例判为**漏抽**，记为必修建议而非编造。"
+    },
+    {
+      "id": "RC2",
+      "found": "本单元的**拟声词『“轰！”』（爆炸）与『呼！』（起焰）没有任何一条引文登记**，是全文仅有的两处未被 320 条 ref 覆盖的非空白字符。",
+      "quote": "“轰！”",
+      "quoteOffset": 207824,
+      "quoteEnd": 207828,
+      "quoteOffsetScope": "本单元内偏移（in-unit offset）。注意该串**非全局唯一**：全文 41 次，首现 @14519，本单元内唯一命中即 @207824（T[207824:207828]==quote 成立）。",
+      "why": "复算：把 320 条 in-unit ref 的区间取并集后，**未覆盖的非空白字符只有 6 个**：207824..207828（“轰！”）与 210091..210093（呼！）。『呼！』虽未被引作 evidence，但被 CE7.mechanism 用文字提到（『原文把两个动作与现象紧接写出（『呼！』…）』）；而『“轰！”』在候选全文中**一次都没有出现**（`json.dumps(c,ensure_ascii=False).count('轰')` → 0）。T1.action 引的是 (207834,207851)『沉闷的爆炸声响起，河水溅起数丈高。』——把拟声词跳过了。影响：这是本单元唯一的战斗/实验爆点，拟声词是叙述强度的直接标记，漏登不影响语义主干（爆炸事件已由 207834 那句覆盖），属于**登记完整性**问题。候选 stats.coverageNote 自称『未覆盖部分主要是段间换行、行首四空格缩进与未被引用的过渡句』，与实际（两处拟声词）不符——这是把覆盖缺口**描述错了**，不是数字错了。旁注：『呼！』全文 19 次、『“轰！”』全文 41 次，两串都非唯一，所以候选若要用它们作证据，需按 in-unit 口径定位——这也是它们未被登记的一个可能原因，故本条只作建议、不作必修。"
+    },
+    {
+      "id": "RC3",
+      "found": "候选 states.ST2 的 before 写『先去灰户采集石灰岩的地区；山中搜寻许久仍继续往南』，但**本单元里主峰采石区那一趟是空手而归的**（『并没有发现什么有价值的东西』@208591），而 ST2 的 after 只把『南边窑子现场』记为被清理。两趟的差别原文写得很清楚，候选没有把『主峰采石区无所得』单独登记成一条状态或一条非因果对。",
+      "quote": "双方在山中漫无目的的搜寻了许久，并没有发现什么有价值的东西。",
+      "quoteOffset": 208591,
+      "quoteEnd": 208627,
+      "why": "候选把『无线索』压缩成 ST2 一条状态（after 写『两条路都无线索』），字面上没有错。但 reverse 看：本单元其实有**两处各自独立的『白跑一趟』**，且原因不同——主峰是『漫无目的的搜寻』（没有针对性，所以一无所获），南边窑子是『这里早给人清理过了』（有针对对象，但被人为清掉）。后者被候选提为 F2 伏笔与 K2 知识差（谁清的），前者则只在 ST2 里一笔带过、也没有对应 CE5 那样的『因为被清理所以无线索』机制边。这是一个**原因类别**的漏登：一种是无目标，一种是被抹除。属于建议补齐，不构成缺陷（ST2 的 after 用『两条路都无线索』已覆盖事实）。"
+    },
+    {
+      "id": "RC4",
+      "found": "候选把『宋廷风并不会因为这个女人胸大屁股翘而轻视她』（@208892，叙述者对宋廷风的**定调句**）只登记在 nonForeshadows.NF6『不算伏笔』里，**没有进入 characters 层的人物刻画，也没有进入 ST8 的关系/态度状态**。",
+      "quote": "虽然刚才还在馋人家的身子，但宋廷风并不会因为这个女人胸大屁股翘而轻视她。",
+      "quoteOffset": 208892,
+      "quoteEnd": 208928,
+      "why": "可复现：`轻视` 在候选里出现 3 次，全部在引文/NF6.item 内，非引文的分析性文本里 0 次。这句是本单元**唯一一处由叙述者出面评价宋廷风专业态度的句子**，而且直接接在他问吕青建议之前，是『他为什么向吕青请教』的动机铺垫。候选把荤话段落整体压进 UD1（unclaimedDescription，明确声明『不拿它去支撑任何案情结论』），这本身是克制的好做法；但结果是**叙述者的定调句**和**荤话躯体描写**被同一条 UD1/NF6 一起降格了——两者性质不同：前者是人物评价（有刻画价值），后者是躯体描写（可降格）。影响：不是编造也不是误读，是**粒度**问题；候选的 characters[2].宋廷风.note 与 ST8 的 after 都没有这句话。属于建议补齐。"
+    },
+    {
+      "id": "RC5",
+      "found": "本单元原文用**明确列举**给出灰户产业的四样便利（石灰岩、植被、漕运、柴省而灰美/力半而利厚），候选 T10.action 概括为『三样条件』并只引到其中两样之前的 span；第四样『柴省而灰美，力半而利厚』（@208714）同样落在 T10 evidence 的空隙外。",
+      "quote": "“山脚又有河流，漕运也方便。柴省而灰美，力半而利厚。”",
+      "quoteOffset": 208700,
+      "quoteEnd": 208727,
+      "why": "与 CE2 同源、但方向不同：CE2 说的是『漕运』这一栏无据（契约问题），RC5 说的是**概括本身漏了一样**——候选写『三样条件』，而 (208700,208727) 这一句里同时含『漕运』与『柴省而灰美，力半而利厚』两样，后者在候选里只作为 TD1『染料疑为燃料』的旁证出现（『紧接着的一句吕青自己的话就是『柴省而灰美』，『柴』字直接指向燃料』）。所以『力半而利厚』这个经济结论在候选里非引文性地出现 0 次。属于概括粒度问题，不构成缺陷（T10 的语义主干——讲产业条件与税负——成立）。"
+    }
+  ],
+  "falseKillCheck": {
+    "summary": "没有发现候选把**合法**内容误排除的情况；反倒找到了 3 处『候选主动降格/豁免』是否过严可以商榷的地方。",
+    "items": [
+      {"id": "FK1", "item": "候选把 f6『大奉对火药配方与材料的垄断管制』自标为『更像设定/背景而不是伏笔』并主动写明『如果复核者认为设定不算伏笔，我接受把它降级为背景登记』。", "verdict": "支持候选的保留。本任务 prompt 只要求 foreshadows『有铺设与回收才算伏笔』；F6 的铺设（207710、207754）与回收（210410『火药是大奉的秘术…大奉都管制的非常严格（主要是硝石）』）都逐字可查、且回收发生在本单元之后的第一段，满足『铺设+回收』。判**不误杀**，但同意它同时可以算世界设定——两者不互斥。"},
+      {"id": "FK2", "item": "候选 textualDefects.TD3 主动写明『本条只作为用字一致性登记，不作为本单元缺陷；把它当成本单元问题会误伤』。", "verdict": "正确且必要。我复算『千疮百孔』全文 0 次、『千穿百孔』6 次、六处写法一致，若某条机械规则按通行成语判定，会把本单元这条合法用字当缺陷——这正是计划100『整词判定把西游「遂行」挡掉』那类误杀的同类风险。候选的豁免是对的（尽管该条里的一个坐标数字写错了，见 CE1）。"},
+      {"id": "FK3", "item": "候选把『还是嗅出来的。』(@207791) 的无主语问题写进 unknowns.U2 而不是替它补主语，并把 K7 标 basis=unverified。", "verdict": "正确。该句全文仅 1 次、确无主语；不猜是唯一可验证的做法。**不误杀**。"},
+      {"id": "FK4", "item": "候选把『里长是否真的不知情』(U4/K3) 与『南边窑子是谁清的』(U3/K2) 都留作 unknowns 而不结。", "verdict": "正确。我把段外上下文读了一遍：@210583 吕青下令『绑起来带走』、@210618 叙述写『说毫不知情？不管如何，都得带回去审问』、@210691 才是许七安的推断『里长应该是不知情的』——本单元内确实无人裁决，段外也没有叙述裁决。候选的克制是对的，**不误杀**。"},
+      {"id": "FK5", "item": "候选 nonEdges.NE4 拒绝把『里长畏惧女捕头』写成因果（理由：畏惧的原因原文没写）。", "verdict": "正确。原文『“是！”里长似乎很畏惧这个女捕头。』(@209521) 只写现象。反例方向：同一候选在 NE4 里的判断标准（相邻≠因果）与它收 CE3(inferred) 的标准**不完全一致**（CE3 也是相邻、也自认机制未明写，却收了边）——这是**内部口径不一致**，但两处都写明了 caution，属于可接受的宽严并存，不判误杀。"},
+      {"id": "FK6", "item": "候选把荤话段落整体放入 unclaimedDescription.UD1，声明『不拿它去支撑任何案情结论』。", "verdict": "方向正确（不把闲聊抬成线索）。但它同时把**叙述者定调句**（@208892）一起降格了，见 RC4——这是『少做』而非『误杀』，故不记入误杀。"}
+    ]
+  },
+  "hallucinationCheck": {
+    "summary": "**未发现任何编造**：没有原文之外的人物、事件、结局、伏笔，也没有把结束当成功。",
+    "items": [
+      {"id": "H1", "check": "原文没有的人物", "result": "pass", "detail": "候选 characters 层 9 条全部在原文可查：许七安/吕青/宋廷风/朱广孝/里长/府衙捕快甲乙/白役们/妖物/灰户。我逐个反查：『白役』@207281、『朱广孝』@208434+208492、『老者』@209187 均在区间内。**没有**任何原文未出场者被当作出场人物。特别注意候选把『妖物』与『灰户』明确标为『本单元未出场』，没有编造其行动。"},
+      {"id": "H2", "check": "原文没有的结局 / 把结束当成功", "result": "pass", "detail": "本单元以许七安起焰、吕青质问收尾。候选 ST7.caution 明写『本单元停在吕青这句质问上，**没有**写许七安如何回答、众人是否接受解释』；T1.result 写『未达成』而非『失败』并给出理由（『原文没有写计策失败四字』）；stats.foreshadowResolvedInsideUnit=0、F3 标 unresolved、F4 标『部分回收』。我复算：本单元内确实没有任何目标达成的判定句。**没有把结束当成功。**"},
+      {"id": "H3", "check": "把说法当事实", "result": "pass", "detail": "这是本候选最强的一项。三种声源被系统分开：@207960 宋廷风评司天监 → SP1（标『是他的说法，不写成制度事实』）；@208021 许七安内心反驳 → SP2（标『本单元无法验证』+ 指出『“嗯”的点点头』是表面回应）；@210125『硝石？！』→ SP3/ST6/K4/U5 四处一致标为**内心判断**，并给出三条判据。我独立复核这三条判据成立：该短句无判断动词、后接生理反应『瞳孔一缩』、真正的口头确认『这是硝石。』在 @210243（下一单元）。**判得对。**"},
+      {"id": "H4", "check": "一次出现当伏笔", "result": "pass", "detail": "6 条 foreshadows 全部给出铺设+回收两端逐字引证；另设 6 条 nonForeshadows 专门登记被排除项（蒂法/灵气猜测/马甲线/千穿百孔/五十码/荤话），理由均为『全文只出现 N 次、无第二次』。我复算蒂法 1 次、五十码 1 次、马甲线 4 次均正确。**口径一致。**"},
+      {"id": "H5", "check": "时间相邻当因果", "result": "pass", "detail": "12 条 causeEdges 全部给出 mechanism；自标 explicit 8 / inferred 3 / derived 1，且 inferred 与 derived 各带 caution 说明『相邻不等于因果』。另设 6 条 nonEdges 明确拒绝 6 组相邻对（含 NE3『不能用结果解释结果』、NE4『不替她补一个原因』）。我抽查 CE1/CE3/CE6 的机制描述与原文顺序一致。**未发现裸相邻当因果。**"},
+      {"id": "H6", "check": "语义越权（semanticReview）", "result": "pass", "detail": "readingStatus.semanticReview=not_done、stats.semanticReview=not_done，且 semanticReviewNote 主动列出四处『需对抗式复核』并把自己的判断写进去。四处中我逐一复核：(1) 硝石内心判断——成立；(2) 『还是嗅出来的』无主语——成立（全文 1 次）；(3) 十余人 vs 二十余人——成立（我复算『十余人』4 次、『二十余人』3 次，@206391 确为吕青自己说的『二十余人』）；(4) 染料/燃料——旁证『柴省而灰美』确实指向燃料。**没有越权声明。**"},
+      {"id": "H7", "check": "越权/自签", "result": "pass", "detail": "复核者 w-sanguo-1 ≠ 原提交者 w-dafeng-2（record.agent 已核）。本复核文件仅写入任务 writes 指定的 loop/state/out/verify_dafeng_L3_0067.verdict.json，未触碰任何受保护路径。"}
+    ]
+  },
+  "referenceSpotCheck": {
+    "method": "按契约随机抽 5 条 quote，在 docs[0].text 上 find 一次并回切。seed=67（random.sample，非人工挑选）。",
+    "samples": [
+      {"path": "tasks[5].action.evidence[1]", "quote": "“带我们去。”吕青沉声道。", "declaredStart": 209502, "find": 209502, "offsetMatch": true, "sliceEqualsQuote": true},
+      {"path": "tasks[7].action.evidence[2]", "quote": "许七安手掌发力，气机涌动，“咔擦”声里，白色矿石被他捏成了粉末。", "declaredStart": 210033, "find": 210033, "offsetMatch": true, "sliceEqualsQuote": true},
+      {"path": "foreshadows[4].evidence[0]", "quote": "这好像不是石灰岩吧。", "declaredStart": 210017, "find": 210017, "offsetMatch": true, "sliceEqualsQuote": true},
+      {"path": "nonDefects[0].evidence[0]", "quote": "这事儿拖了小半年。", "declaredStart": 209280, "find": 209280, "offsetMatch": true, "sliceEqualsQuote": true},
+      {"path": "foreshadows[4].evidence[3]", "quote": "许七安缓缓扫过同僚们的脸，沉声道：“这是硝石。”", "declaredStart": 210243, "find": 210243, "offsetMatch": true, "sliceEqualsQuote": true}
+    ],
+    "result": "5/5 逐字命中，5/5 偏移一致（含 1 条段外回收 inUnitRange=false，偏移同样精确）。"
+  },
+  "notes": "总体判断：**这是一份质量显著高于本流平均水平的候选**，我判 partial 而非 pass，是因为找到了 3 条**逐字可查的、必须修的**缺陷；判 partial 而非 fail，是因为这 3 条全部落在『引证粒度/坐标/平台契约』层，**没有一条是编造，没有一条推翻语义主干**。\n\n为什么不是 pass（3 条必修）：CE1 是同一份清单内偏移口径不一致（千穿百孔 @208561 应为 @208580，其余五项都精确到字，只有本单元这项写成了句偏移）；CE2 是 T10.action 里『漕运』这一栏在其五元组 evidence 中完全无据（原文句在 (208700,208727)，落在两段 evidence 的空隙里，被降格到 TD1 当旁证）；CE3 是 T9 把同一句台词同时当四栏依据，正撞任务 prompt 明文禁止的『同一句话当多栏依据』（全候选 14 处）。这三条都给出可复现命令，属于必修。\n\n为什么不是 fail：候选在反编造与克制上几乎无可挑剔。我做了三轮结构性反查（92 句 8-gram、quote-stripped 后 3-gram、仅引用未分析句），**三条全部返回 0 命中**——候选没有漏掉任何一句原文的分析性覆盖；320 条 ref 的六个派生字段 0 处不符；40 项 keywordAbsence、15 项 stats、覆盖率 0.8285、sceneSplit 连续性、46 个 @偏移、26 项全库词频全部逐项复算一致；12 个 null 全部带 NullReason。三种声源（叙述/人物说法/内心）分离得比我预期的更严格，『硝石？！』的内心判断判定经我独立复核成立。这类候选的残余风险不在『编造』，而在『引用粒度』。\n\n可用 vs 须修（下游可直接采信 / 需处理后采信）：**可直接用**——320 条 quote/start/end/sourceHash 的**定位**（除分隔线那条非唯一外全部逐字可切）、12 条任务五元组的**语义结论**、12 条因果边、6 条非因果对、8 条状态、9 条知识差、6 条伏笔（含 4 条段外回收）、8 条文本缺陷、7 条言语行为、12 条 unknowns、3 条 declaredDerivations、characters 9 条；**须修后可用**——TD3.detail 的 @208561→@208580、T10.action 的『漕运』补 evidence（或降级该栏）、T9 的 obstacle 改引 (208492,208507) 或补 obstacleNote；**建议补齐（非阻断）**——RC1 显式『所以』链（税重→断生路→告官→官府来）未画边、RC2 『“轰！”』与『呼！』未被任何引文登记且 coverageNote 对缺口的描述与实际不符、RC3 主峰采石区『漫无目的所以无所得』与南边『被清理所以无所得』两种原因未分列、RC4 叙述者定调句 @208892 被连同躯体描写一起降格、RC5 T10『三样条件』的概括口径。\n\n不确定处（如实记录，未据此判 fail）：(1) RC1 是否『值得』画成边取决于本流派的收录粒度——若口径是『只收非显然因果』，则饥荒⇒告官偏显然；但同一候选收了更弱的 CE10（靠一个『敢』字推断、自标 inferred），故按既有惯例判为漏抽，承认这是口径判断而非事实判定。(2) CE3 的 14 处共用里，多数是『同一句里确实同时含两栏信息』（例如吕青一句问话既是她的 objective 也是她的 action），严格说 prompt 禁的是『整条任务只引一句』那种 714/1664 形态；本候选每栏另有独立引文的情形也不少（T8 零共用、T1 六段引文分三处），所以我把 CE3 记为**必修但非致命**，不排除平台校验器对这类『一句含双栏』有更宽松口径。(3) 我的反向验证本身是否成立：RC1-RC5 五条全部给出了逐字引证与可复现命令；但 RC3/RC4/RC5 三条本质是『粒度/建议』而非『事实缺失』，若复核标准只看『有没有漏掉原文事实』，则这三条不成立——我如实标注为建议补齐，不计入 fail 依据。(4) 候选 source.path 写的是 9b676d70…docs.json 而本任务 index 指向 1063b17c…docs.json；我用 cmp 确认两者逐字节相同（同 sha256），故不构成『读错版本』，仅记录该路径别名现象。\n\n纪律声明：本复核只写入 writes 指定的 loop/state/out/verify_dafeng_L3_0067.verdict.json；未修改任何受保护路径；未跑 GPU/浏览器测试；未执行 git checkout/reset/stash。所有反例与反向发现均给出文件路径 + 可复现命令 + 哈希。"
+}

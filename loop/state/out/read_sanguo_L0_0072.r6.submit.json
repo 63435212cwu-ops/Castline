@@ -1,0 +1,164 @@
+{
+ "task": "read:sanguo:L0:0072",
+ "agent": "w-dafeng-1",
+ "status": "done",
+ "reworkOf": "loop/state/out/read_sanguo_L0_0072.candidate.json",
+ "reworkReason": "verify:sanguo:L0_0072（复核者 w-sanguo-1，非本提交者）对 sha256 2c5d37ad…（attempt 4）判 verdict=fail，给出 3 条 counterExample，全部落在「候选关于自身产物的陈述」这一层（CE-1 自指计数、CE-2 陈旧比值、CE-3 取证清单不实）。本轮只修这三类，抽取层一字未动。",
+ "summary": "精读《三国演义》第七十三回 玄德进位汉中王 云长攻拔襄阳郡（原文区间 codepoint [367615,372678)，5063 字）。本轮是**第 6 轮**（候选 attempt=5），只做一件事：修掉 verify:sanguo:L0_0072 判 fail 的 3 条 counterExample。三条我都**先独立复算确认**再动手：CE-1 —— 两处声明「候选 JSON 内 count('切齿之恨') # -> 8」，实跑为 9，多出的 1 次正是那条声明注释**自己**（它把自己计进了它要数的东西）；CE-2 —— coverageDeclaration.wholeSliceCharCoverageFraction 仍是第 4 轮继承值 0.5783（= 旧 charCoverage 2928/5063），与同表 charCoverageFraction=0.5979 给出两个值；CE-3 —— residualNotes[2] 的表文取证清单点名「上臣为大司马、汉中王」，该短语在候选里出现 2 次但**都不是 quote 对象**（落点是 unknowns[3].why 与这条 note 自身；其原文位置 [368822,368832) 不与任何 quote 对象相交），且漏列真实存在的 themeReadings[0].counter[1].quotes[0] [368871,368880)「群僚见逼，迫臣以义」。改法：CE-1 两处计数改为**结构化 quote 对象**口径（= 2），并同时登记全文 count 口径（= 9）与逐路径清单，避免再次混用；CE-2 该键统一为 3027/5063 = 0.5979；CE-3 逐条列出表文内**实际存在**的 3 条引文及其偏移与落点。抽取层（tasks / causeEdges / states / knowledgeGaps / foreshadows / worldSettings / themeReadings / unknowns / selfCritique / textualNotes 等 13 个分区）与复核稿**逐字一致**，改动只落在 6 个顶层键（attempt / priorDefectCorrections / absorbedReverseChecks / coverageDeclaration / round5Corrections / round6Corrections）。为防同类复发，我另写了两个互不依赖的审计（audit_ledger.py P1..P10 台账层、audit_extraction.py 抽取层）与独立重算脚本 recompute_coverage.py：三者都**不 import 任何生成脚本**，从 docs.json 字节现场重算。对最终稿：台账层 0 处不符、抽取层 361 个引文对象 0 缺陷、覆盖表 18 个计数键与 16 行段落表全部一致。守卫有效性用变异自测证明：对同一份最终稿注入 14 种缺陷（M01..M14），断言至少一个审计 rc=1，实测 **14/14 CAUGHT**。过程中我抓到自己两个错并如实记下：① audit_extraction 第一版我自创了「引文里引号必须配对」判据，它误杀 44/361 条**逐字**合法引文（引文故意截断到句中），已整条删除而非放宽阈值；② 我在 round6Corrections 里一度写「注入 10 种缺陷」，实测脚本是 14 种，已更正。",
+ "evidence": [
+  {
+   "path": "loop/state/out/read_sanguo_L0_0072.candidate.json",
+   "sha256": "b25825a224ae981c7c3e23a87bb9e638d99ff29503018da1bf86b81cc73a716f",
+   "note": "本任务 writes 指定的唯一仓库内产物。抽取层与复核稿（2c5d37ad…）逐字一致：361 个引文对象 / 190 个不同 span；本轮改动只落在 6 个顶层键。"
+  },
+  {
+   "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/read-sanguo-L0-0072-r6/candidate.before-r6.json",
+   "sha256": "2c5d37ad50dacc8c233bd8da1abecb24aaf4a8e44b3503e757e7070f9747e945",
+   "note": "改动前备份，哈希与 verify_sanguo_L0_0072.verdict.json 的 reviewedCandidateSha256 逐字相同 —— 证明我改的确实是被判 fail 的那一版，不是在别的基线上作业。"
+  },
+  {
+   "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/read-sanguo-L0-0072-r6/audit_ledger.py",
+   "sha256": "6d1b1da47fb9bda44b46afd1158050bd099c6c58e055e880b0ed2004d387b7ca",
+   "note": "台账层审计 P1..P10：P1 具名指针须落在真实且非空字段（值为 null 合法）；P2/P2b 幽灵 id 须处于否定句；P3 每个 `# -> N` 按行归属并复算；P4 内嵌 python -c **真的执行**并比对输出；P5 覆盖表逐键独立重算；P6 同一比值不得同表两值；P7 fieldCounts 与实际长度；P8「含 X 的 quote 对象数」按结构化统计；P9/P10 取证清单点名与漏列。"
+  },
+  {
+   "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/read-sanguo-L0-0072-r6/audit_extraction.py",
+   "sha256": "afb07bac72af47f0be2803027b686198527da0f873bd229482d09b05879b170b",
+   "note": "抽取层审计：逐条复算 361 个引文的 TEXT[start:end]==quote、区间内唯一、首个命中偏移、sourceHash、docOccurrences/unitOccurrences；另查同一任务五栏跨栏共用 span 与 null 栏位的同名 Note。"
+  },
+  {
+   "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/read-sanguo-L0-0072-r6/recompute_coverage.py",
+   "sha256": "8635167c414ea90c959ef03a4738d3090b087d86ce1e15180d3bfb73db7327c6",
+   "note": "独立重算 coverageDeclaration：从 docs.json 字节重算文件哈希/切片哈希，再重算 18 个计数键与 16 行段落表。切句口径不是我猜的 —— 穷举 6 种口径，只有「[。！？\\n]+ 连续段切分、分隔符归前句」同时给出 n=233/strict=2/weak=164/union=2（与申报值及复核者独立复算值三方一致）。"
+  },
+  {
+   "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/read-sanguo-L0-0072-r6/mutation_selftest.py",
+   "sha256": "9cbc94488a1fd5726a4501f817b2eaf6b6f02aaf44fa534a55e25617cda30c2f",
+   "note": "变异自测：对**最终稿**注入 14 种缺陷，每种只注入一种，断言至少一个审计 rc=1。含三种 CE 的原形（M07 陈旧比值 / M08 自指计数 / M09 清单点名非引文）。一个从不报红的守卫等于没有守卫。"
+  },
+  {
+   "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/read-sanguo-L0-0072-r6/mutation_selftest.out.txt",
+   "sha256": "ffc5eb586c543273ea68579b986f698cf2d2608c819b172d55734e24419e2691",
+   "note": "变异自测输出：14/14 CAUGHT。M09（CE-3 原形）**第一版被漏掉**，我据此把 P9 从「只匹配『只取…三处』句式」改成按整句扫描 + 否定语境豁免，重跑才 14/14；这是我在自己产物上发现的真缺陷，不是装饰。"
+  },
+  {
+   "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/read-sanguo-L0-0072-r6/ce_probe.py",
+   "sha256": "4e1e608341927b9ab78cba37272459b274999820de773a6b958993f4d942fb9c",
+   "note": "三条 CE 的独立复算探针：CE-1 按 JSON 路径逐条列出「切齿之恨」的 9 次命中及其所属层；CE-2 复现 0.5783 = 2928/5063 的来源；CE-3 列出表文内真实存在的 3 个 quote 对象与「上臣为大司马」的 2 处散文落点。"
+  },
+  {
+   "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/read-sanguo-L0-0072-r6/ce_probe.out.txt",
+   "sha256": "a0fe9a95bf831f78310bb31a904a7f315c9dedbbfbb2bcf446fd3a2b0e52f13f",
+   "note": "CE 探针输出：全文 count=9、台账层 5 / 抽取层 4、源区间内=1；wholeSliceCharCoverageFraction 申报 0.5783 而 3027/5063=0.5979；表文 quote 对象 3 个、「上臣为大司马」作为 quote 0 个。"
+  },
+  {
+   "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/read-sanguo-L0-0072-r6/audit_ledger.out.txt",
+   "sha256": "f5891e62b2046971412a1b2983536ac885becf61f1d8030984d9b264538cefe6",
+   "note": "最终稿台账层审计输出：RESULT: PASS（0 处不符）。修复前同一脚本报 9 处，其中 6 处正是三条 CE 的两两落点，另 3 处是我第一版解析器的假阳性（跨行归属、null 误判、markdown 强调符）——已按实测修正解析器而不是放宽判据。"
+  },
+  {
+   "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/read-sanguo-L0-0072-r6/audit_extraction.out.txt",
+   "sha256": "4d14c2c5fb3e589ee6c5443db03ef801ec5a7002fdb5a03f623a012fa4cc0207",
+   "note": "最终稿抽取层审计输出：361 个引文对象、problems = 0、RESULT: PASS。"
+  },
+  {
+   "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/read-sanguo-L0-0072-r6/recompute_coverage.out.txt",
+   "sha256": "2aae1e37e3c70a2510a1fdb96d5b9e259a856657dfd9a6105085eb252ad43121",
+   "note": "最终稿覆盖表重算输出：18 个计数键全部 OK（含已改正的 wholeSliceCharCoverageFraction=0.5979），16 行段落表逐行 range/chars/covered 一致，RESULT: 全部一致。"
+  },
+  {
+   "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/read-sanguo-L0-0072-r6/apply_r6_fixes.py",
+   "sha256": "33097bbf5d366be93ca991ed31168dc858333ca24c69dd53940485b423f582b7",
+   "note": "本轮修复脚本：先断言基线 sha256 == 2c5d37ad…（不符即 rc=2 拒改），再逐条断言待替换文本存在且唯一，才替换；只动台账层 6 个键，不触碰抽取层。"
+  }
+ ],
+ "assertions": [
+  {
+   "text": "改动基线的确是被判 fail 的那一版：备份文件 `shasum -a 256` = 2c5d37ad50dacc8c233bd8da1abecb24aaf4a8e44b3503e757e7070f9747e945，与 verify_sanguo_L0_0072.verdict.json 的 reviewedCandidateSha256 逐字相同；apply_r6_fixes.py 在动手前硬断言该值。",
+   "result": "pass"
+  },
+  {
+   "text": "CE-1 复现并定位：`python3 -c \"import json;d=json.load(open('loop/state/out/read_sanguo_L0_0072.candidate.json'));print(json.dumps(d,ensure_ascii=False).count('切齿之恨'))\"` → 9（候选写 8）。逐路径分解：台账层 5（PDC[3].reproduce×2、ARC[3].how、ARC[3].verifiedBy、ARC[6].verifiedBy）+ 抽取层 4（tasks[10].objective.text、tasks[10].objective.quotes[0].quote、worldSettings[41].explain、worldSettings[41].quotes[0].quote）。多出的 1 次即那条声明注释自身。",
+   "result": "pass"
+  },
+  {
+   "text": "CE-1 已修且新口径可复算：两处改为结构化 quote 对象统计（只遍历带 quote/start 的引文对象），实跑 → 2；同一字段同时登记全文 count 口径 = 9。审计 P3/P4 对最终稿复算 0 处不符。",
+   "result": "pass"
+  },
+  {
+   "text": "CE-2 复现：`charCoverage/wholeSliceChars = 3027/5063 = 0.5979`，而同表 `wholeSliceCharCoverageFraction = 0.5783`，且 `2928/5063 = 0.5783` 正是第 4 轮的 charCoverage —— 旧稿残留。已改为 0.5979，审计 P5/P6 对最终稿复算 0 处不符。",
+   "result": "pass"
+  },
+  {
+   "text": "CE-3 复现：结构化遍历 361 个 quote 对象，含「上臣为大司马」的 quote 对象 = **0 个**；该短语全文出现 2 次，落点为 unknowns[3].why 与 residualNotes[2] 自身（皆散文）；其原文位置 [368822,368832) 与任一 quote 对象**不相交**。表文 [368459,369013) 内真实存在的 quote 对象恰好 3 个：[369007,369012)「谨拜表以闻」、[368607,368631)「臣昔与车骑将军董承，图谋讨操，机事不密，承见陷害」、[368871,368880)「群僚见逼，迫臣以义」（第三条原 note 漏列）。已逐条改写并给出落点；审计 P9/P10 对最终稿复算 0 处不符。",
+   "result": "pass"
+  },
+  {
+   "text": "抽取层一字未动（可机器复算）：最终稿与改动前备份的 13 个抽取分区逐个 `json.dumps(..., sort_keys=True)` 比对，全部 IDENTICAL；引文对象 361、不同 span 190，与复核者独立复算值一致。改动的顶层键恰为 6 个。",
+   "result": "pass"
+  },
+  {
+   "text": "361 个引文对象逐条零缺陷（audit_extraction.py，problems=0）：TEXT[start:end] == quote 逐字成立、区间内恰好命中 1 次、首个命中偏移与声明一致、sourceHash 全等于 docs.json 文件哈希 8ab7298a…、docOccurrences/unitOccurrences 与实测一致；同一任务五栏跨栏共用 span = 0 处，null 栏位全部带同名 Note。",
+   "result": "pass"
+  },
+  {
+   "text": "切句口径不是我猜的：穷举 6 种候选切分口径，只有「按 [。！？\\n]+ 的连续段切分、分隔符归入前一句」同时给出 n=233 / strict=2 / weak=164 / union=2，与候选申报值及复核者独立复算值三方一致；段落口径同样经比对确认（单换行分段、剔空段 → 16 行）。我第一版用的是空行分段（12 行）与逐字符切句（255 句），据此报出的 18 处 MISMATCH 全是我自己的口径错误，不是候选缺陷 —— 已改正后重跑。",
+   "result": "pass"
+  },
+  {
+   "text": "覆盖表整表独立重算一致：18 个计数键（sentenceCount 233、strict 2、union 2、weak 164、charCoverage 3027、wholeSliceChars 5063、bodyChars 5006、excludingBiaoChars 4509、excludingBiaoCovered 2989、excludingBiaoFraction 0.6629、quoteObjectCount 361、distinctQuoteCount 190 及各 fraction）全部 OK，16 行段落表逐行 range/chars/covered 一致。唯一不符项就是 CE-2 那一格，已改正。",
+   "result": "pass"
+  },
+  {
+   "text": "守卫不是摆设（变异自测）：对最终稿注入 14 种缺陷，断言至少一个审计 rc=1 —— **14/14 CAUGHT**。其中 M09（CE-3 原形）第一版**被漏掉**，我据此把 P9 由「只匹配『只取…三处』句式」改为按整句扫描 + 否定语境豁免，重跑才 14/14；M08（CE-1 原形）被台账层捕获，M07（CE-2 原形）被台账+覆盖层捕获。",
+   "result": "pass"
+  },
+  {
+   "text": "我抓到自己两个错并已更正：① audit_extraction.py 第一版自创「引文里引号必须配对」判据，实测误杀 44/361 条**逐字合法**引文（引文故意截断到句中，如 '费诗告曰：“未曾出师，先斩大将，于军不利'，TEXT[s:e]==quote 成立）——整条删除而非放宽阈值，理由记在代码注释里；② round6Corrections.verifiedBy 我一度写「注入 10 种缺陷」，实测脚本为 14 种，已改为 14 并写明 M01..M14。",
+   "result": "pass"
+  },
+  {
+   "text": "未跑 GPU/浏览器测试（任务未要求，且 GPU 全局串行）。未改动 js/ css/ index.html serve.py narrative.py scripts/ tests/ docs/ data/ 任何受保护路径：本会话我在仓库内只写过 loop/state/out/ 下的本任务产物与提交记录（皆属追加式 loop/ 路径）。工作树里 js/sky/*、css/sky-*、index.html 的改动来自用户声明保留的并行视觉任务（实测 mtime 03:05:38 晚于我的候选写入 03:05:02，且属天空/影院 UI 文件），我不认领、也不回滚。",
+   "result": "pass"
+  },
+  {
+   "text": "本轮**没有**做语义核验：候选 semanticReview 仍为 not-performed。三条 CE 全部是「候选关于自身产物的陈述」与产物不符，修掉它们**不等于**语义通过；本轮未判、也未暗示语义已核验。",
+   "result": "pass"
+  }
+ ],
+ "changes": [
+  {
+   "path": "loop/state/out/read_sanguo_L0_0072.candidate.json",
+   "kind": "append-only"
+  },
+  {
+   "path": "loop/state/out/read_sanguo_L0_0072.r6.submit.json",
+   "kind": "append-only"
+  }
+ ],
+ "sourceHashes": {
+  "data/cache/fe42d01f3826fe8096f86614.docs.json": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+  "loop/state/runs/task-read_sanguo_L0_0072.json": "06811e6c40be86c3277c0c0c06411ab9205f30d0e2595dd469a08386055e9ec1",
+  "loop/state/out/read_sanguo_L0_0072.candidate.json": "b25825a224ae981c7c3e23a87bb9e638d99ff29503018da1bf86b81cc73a716f",
+  "loop/state/out/read_sanguo_L0_0072.candidate.json#before-r6": "2c5d37ad50dacc8c233bd8da1abecb24aaf4a8e44b3503e757e7070f9747e945",
+  "loop/state/out/verify_sanguo_L0_0072.verdict.json": "ae8af85b7a8f1d9cb74b72a863a3e2379e05278947326a8b4aaf1f27a0f67909"
+ },
+ "remaining": [
+  "semanticReview = not-performed：本候选只做「原文精读 + 逐字定位 + 分栏独立取证 + 台账可复算」。361 个引文对象可用 TEXT[start:end] == quote 复算，但这只证明**定位**正确，**不证明语义已核验**。语义复核属 read-verify 通道（verify:sanguo:L0:0072）。请复核者不要把本轮的三条 CE 更正读成语义已过。",
+  "本轮复核结论（verify:sanguo:L0_0072，复核者 w-sanguo-1）判 fail，并明确写明「抽取层的质量很高且可用」——361 条引文零缺陷、19 条任务五元组未发现编造、41 条因果边机制可查、6 条被排除边未发现误杀、18 条 states / 8 条 knowledgeGaps / 8+5 条伏笔 / 43+4 条世界设定 / 16 条 unknowns / 2 条主题读法均未发现编造。该 fail **既没**否证语义层，**也绝不等于**语义通过。",
+  "单元内仍有未逐句引证的内容，已按四种口径如实登记在 coverageDeclaration（整句被单条引文完整包含 2/233、被并集完整包含 2/233、句内至少 1 字符被覆盖 164/233、字符级 3027/5063 = 59.8%）。其中**表文长句**（[368459,369013)，554 字）是取证策略的结果而非漏读：表文是玄德自陈文书，逐句取证会把人物陈述当叙述事实；表文内实际只取 3 条引文，第 6 轮已改为逐条列出偏移与落点。若复核者要求逐句覆盖表文，请指明口径，我补。",
+  "区间外前情未取证，一律记 unknowns 而不代为补往事：胡班「旧日相救之情」的具体事件（U-07）、云长「年近六旬」的年纪、张昭所说吴魏交恶的旧事（U-10）等，均需区间外原文才能核验。",
+  "**count 类断言的检测盲区仍在**（本轮已知未消除）：台账审计只覆盖 `# -> N` 与内嵌 `python3 -c` 两种**可执行**形态；散文里以自然语言写出的数字（如「三处」「两处」）只做了 P9/P10/P2/P8 的窄口径检查，换一种措辞仍可能漏过。这是我的启发式，不是语义判断。",
+  "**P9 的否定豁免可被绕过**：我给 P9 加了否定语境白名单（不单独引证/不是任何 quote/漏列/点名 等）以避免误杀合法散文；若有人把不实清单写进带这些词的句子里，P9 会放过。豁免词表是显式的、可复核的，但它仍是启发式。",
+  "本轮未跑 GPU/浏览器测试（任务未要求，且 GPU 全局串行）。未改动任何受保护路径。",
+  "工作树里 js/sky/*、css/sky-*、index.html 等处有**并行视觉任务**的未提交改动（mtime 晚于我的写入），按用户「另一个正在运行的任务保留」与我方纪律，我未触碰、未回滚、也未认领；其评审不属本任务。"
+ ],
+ "rollback": {
+  "kind": "append-only",
+  "strategy": "delete-added-files",
+  "files": [
+   "loop/state/out/read_sanguo_L0_0072.r6.submit.json"
+  ],
+  "note": "候选的改动前全文另存于 /Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/read-sanguo-L0-0072-r6/candidate.before-r6.json（sha256 2c5d37ad…），需要逐字回退到被复核版本时用它覆盖即可；本轮未改动任何受保护路径，故无源码需回滚。"
+ }
+}

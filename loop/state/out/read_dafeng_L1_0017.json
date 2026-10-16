@@ -1,0 +1,614 @@
+{
+  "task": "read:dafeng:L1:0017",
+  "agent": "w-dafeng-1",
+  "status": "done",
+  "summary": "精读《大奉打更人》第十八章 带着妹子逛街去 docs[0].text[52355,55440)（3085 字，80 个非空段落全过）。产出 6 条 task 五元组（T3/T4/T5/T6 的 cost 缺项写 null）、12 条带方向与触发机制的 causeEdge、10 条状态前后值（含 1 条知识差 S7）、5 条伏笔（F1/F2/F3 的回收在区间外，显式标 resolved_out_of_range 并给 crossRange 引文；F4/F5 标 unresolved）、6 条明确排除的「不算伏笔」、4 条排除的「不算因果边」、14 条 unknowns、3 条 selfCritique。84 条去重引用全部由脚本在全文唯一定位后回切校验 docs[0].text[start:end]==quote，0 处不符；区间内 67 条、区间外 17 条（crossRange=true，切片内 0 次出现）。本区间只到「答应带妹子出门」为止——章题承诺的逛街没有在本区间发生（实际在第二十一章），T6.result 已如实写明。",
+  "evidence": [
+    {
+      "path": "loop/state/out/read_dafeng_L1_0017.candidate.json",
+      "sha256": "b87b4ce3fe82598d4c1deb727eb6408e94d050f374d6732de6a6731a65accf57",
+      "kind": "candidate"
+    },
+    {
+      "path": "data/cache/9b676d7031b1bcd3b8377a18.docs.json",
+      "sha256": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+      "kind": "source"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "原文来源哈希：sha256(data/cache/9b676d7031b1bcd3b8377a18.docs.json) 与任务 sourceHash 一致。",
+      "result": "pass",
+      "command": "python3 -c \"import hashlib;print(hashlib.sha256(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json','rb').read()).hexdigest())\"",
+      "observed": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+    },
+    {
+      "text": "偏移口径自检：docs[0].text[52355:52367] == '第十八章 带着妹子逛街去'，切片以本单元标题开头；len(text[52355:55440]) == 3085 == 任务给定字数。偏移是相对 docs[0].text 全文的 codepoint 偏移，不是相对切片。",
+      "result": "pass",
+      "command": "python3 -c \"import json;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];print(repr(t[52355:52367]),len(t[52355:55440]))\"",
+      "observed": "'第十八章 带着妹子逛街去' 3085"
+    },
+    {
+      "text": "全部引用回切校验：把候选 JSON 里所有含 quote/start/end 的对象递归取出并按 (start,end) 去重，逐条断言 docs[0].text[start:end]==quote、sourceHash 一致、全文 find 唯一命中、区间内引用切片内唯一、区间外引用切片内 0 次且带 crossRange=true；结果 quotes 84 bad 0 badHash 0 inRange 67 crossRange 17 nonUnique 0 notVerbatim 0 notFirstOccurrence 0。",
+      "result": "pass",
+      "command": "python3 -c \"import json;c=json.load(open('loop/state/out/read_dafeng_L1_0017.candidate.json'));open('/tmp/wk17/verify_0017.py','w').write(c['selfCheck']['reproduceScript'])\" && python3 /tmp/wk17/verify_0017.py",
+      "observed": "quotes 84 bad 0 badHash 0 inRange 67 crossRange 17 nonUnique 0 notVerbatim 0 notFirstOccurrence 0 / ALL VERBATIM"
+    },
+    {
+      "text": "引文生成时即强制唯一：构建脚本对每条 quote 断言 TEXT.count(quote)==1（全文唯一）后才取偏移，区间内引用另断言切片内 count==1、且 [start,end) ⊆ [52355,55440)，区间外引用断言切片内 count==0；任一断言失败直接退出。因此不存在「引文在别处也能命中、偏移却指向我想要的语义」这种错配。",
+      "result": "pass",
+      "command": "python3 /tmp/wk17/build.py",
+      "observed": "wrote loop/state/out/read_dafeng_L1_0017.candidate.json / unique refs 84 inRange 67 crossRange 17"
+    },
+    {
+      "text": "未把人物台词当叙述事实（本段最大的坑）：本区间的高密度内容几乎全是台词或心理话——许七安自称「我向来是颇有诗才的」（S6 明确写 after 全部是他的台词）、许新年的借诗与署名承诺（T1.cost 只写「承诺」不写「已署名」）、婶婶的两句嘲讽（T3）、许平志的「毛骨悚然」（U6 显式记两种读法都通）、以及无引号的「作死之人是我」（U3 记不可判定）。制度性那一段（砸钱/朝廷管控/黑市）是叙述层陈述，才据以标 explicit。",
+      "result": "pass",
+      "command": "python3 -c \"import json;c=json.load(open('loop/state/out/read_dafeng_L1_0017.candidate.json'));print(c['states'][5]['id'],c['states'][5]['note'][:40]);print([u['id'] for u in c['unknowns'] if u['id'] in ('U3','U5','U6','U8')])\"",
+      "observed": "S6_xu_qian_public_persona after 全部是**他的台词**，不是叙述层确认的事实 ['U3', 'U5', 'U6', 'U8']"
+    },
+    {
+      "text": "未把「读到章末」当成功：章题是「带着妹子逛街去」，但本区间结束时只到答应（「正好闲来无事。」许七安点点头。），随后是前世回忆与作者附言 PS。T6.result 显式写「本区间没有写逛街这一行为本身」并给出区间外发生位置；U11 单独立项。T5.result 也只写到「停在打算」，没有成交。",
+      "result": "pass",
+      "command": "python3 -c \"import json;c=json.load(open('loop/state/out/read_dafeng_L1_0017.candidate.json'));print([t for t in c['tasks'] if t['id'].startswith('T6')][0]['result'][:60]);print([u for u in c['unknowns'] if u['id']=='U11'][0]['why'][:40])\"",
+      "observed": "差事落到许七安身上，他答应了。**本区间没有写逛街这一行为本身** 没有。本区间最后两段是许七安的前世回忆与作者附言"
+    },
+    {
+      "text": "未用未知填默认值：tasks 中缺项一律写 null（T3/T4/T5/T6 的 cost 均为 null），states 中 before 无法判定的一律写 null（S7/S8/S10）。",
+      "result": "pass",
+      "command": "python3 -c \"import json;c=json.load(open('loop/state/out/read_dafeng_L1_0017.candidate.json'));print([(t['id'],t['cost']) for t in c['tasks'] if t['cost'] is None]);print([(s['id'],s['before']) for s in c['states'] if s['before'] is None])\"",
+      "observed": "[('T3_shen_shen_defends_her_son', None), ('T4_xu_pingzhi_steers_the_nephew', None), ('T5_xu_qian_plans_to_buy_his_way_up', None), ('T6_the_shopping_errand_falls_to_xu_qian', None)] / [('S7_knowledge_gap_who_knows_the_poem_is_not_his', None), ('S8_xu_qian_attitude_to_the_marriage_talk', None), ('S10_xu_qian_worldly_stage', None)]"
+    },
+    {
+      "text": "未声明语义复核完成：reviewStatus.semanticReview == 'not_performed'，并写明「引用定位正确 ≠ 语义已核验」，语义交由 read-verify 通道的独立复核者。",
+      "result": "pass",
+      "command": "python3 -c \"import json;print(json.load(open('loop/state/out/read_dafeng_L1_0017.candidate.json'))['reviewStatus']['semanticReview'])\"",
+      "observed": "not_performed"
+    },
+    {
+      "text": "因果边不是「时间相邻」凑数：12 条每条都写了 direction 与 mechanism，并另有 rejectedAsCauseEdge 4 条记录我主动**不连**的相邻事件（背打油诗→婶婶开骂、翻白眼→擦嘴角、牵马→切磋、说「我不会写诗」→婶婶问儿子）；C2/C5/C8 三条依赖跨章或名词复用的标 derived/inferred 并在 note 里写明「若复核认为证据不足应降级为 unknowns」。",
+      "result": "pass",
+      "command": "python3 -c \"import json;c=json.load(open('loop/state/out/read_dafeng_L1_0017.candidate.json'));print(len(c['causeEdges']),len(c['rejectedAsCauseEdge']),[e['id'] for e in c['causeEdges'] if e['basis']!='explicit'])\"",
+      "observed": "12 4 ['C2_scorn_is_the_occasion_not_the_motive', 'C5_masterpiece_recognized_then_borrowed', 'C8_money_route_explained_right_after_the_talk', 'C12_accepting_triggers_the_past_life_memory']"
+    },
+    {
+      "text": "伏笔按「铺设+回收」判定、不按出现次数判定：F1（借诗署名承诺→第二十章「是家兄！」）、F2（诗名缺口→第二十章大儒替它取名）、F3（用银子代替功勋开天门→第六十六章「我已经为许七安开天门了，按照规矩，收了他四百两」）三条的回收都在区间外，status 写 resolved_out_of_range 并附 crossRange 引文与 whyNotResolved 降级条件；F4（二叔催婚的心愿）与 F5（冒认前世诗词的风险）写 unresolved，payoff=null。另有 6 条 rejectedAsForeshadow 写明为什么不算（当场打脸、单次出现、作者惯用词、同梗复用、一次性现代梗、章题是副文本）。",
+      "result": "pass",
+      "command": "python3 -c \"import json;c=json.load(open('loop/state/out/read_dafeng_L1_0017.candidate.json'));print([(f['id'],f['status'],f['payoff'] is None) for f in c['foreshadows']]);print(len(c['rejectedAsForeshadow']))\"",
+      "observed": "[('F1_borrowed_poem_and_the_credit_promise', 'resolved_out_of_range', False), ('F2_the_poem_has_no_name', 'resolved_out_of_range', False), ('F3_silver_instead_of_merit_for_kaitianmen', 'resolved_out_of_range', False), ('F4_uncle_wish_to_see_him_married', 'unresolved', True), ('F5_he_is_passing_off_someone_elses_poems', 'unresolved', True)] / 6"
+    },
+    {
+      "text": "文中所有数字型断言都实测过：许玲月 622/许铃月 6、别董大 1、高适 0、流金岁月 1、套马杆的汉子 1、我要这铁棒有何用 3、人前显圣 33、卡姿兰 12、娶妻生子 10、炼气境 2/练气境 138、三兄妹 1、小蝌蚪 1；图谱缓存里 chapter=第十八章 带着妹子逛街去 的 event 确为 1 条（ev_3b299107958968bb），其 quoteRef.match=ambiguous、verified=false、characters 为 李茹/许七安/许平志/许新年（漏列许玲月与许铃音）。",
+      "result": "pass",
+      "command": "python3 -c \"import json;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];print(t.count('许玲月'),t.count('许铃月'),t.count('别董大'),t.count('高适'),t.count('人前显圣'),t.count('娶妻生子'))\"",
+      "observed": "622 6 1 0 33 10"
+    },
+    {
+      "text": "未把图谱缓存当证据：source.graphCacheNote 写明该缓存只有 1 条本章 event、其 quoteRef 未定位成功、characters 漏列两位女性角色；候选没有引用它的 summary 或任何 claim 作为断言依据，只在 U14 里作为「缓存覆盖缺口」的对照记录。",
+      "result": "pass",
+      "command": "python3 -c \"import json;c=json.load(open('loop/state/out/read_dafeng_L1_0017.candidate.json'));print(c['source']['graphCacheNote'][:60]);print([u['id'] for u in c['unknowns'] if u['id']=='U14'])\"",
+      "observed": "图谱缓存只用于对照已有结论：其中 chapter 写作「第十八章 带着妹子逛街去」的 event 只有 1 条 ['U14']"
+    },
+    {
+      "text": "写入范围：本任务只写 loop/state/out/read_dafeng_L1_0017.candidate.json 一个文件（任务 writes 指定的路径）；构建与自检脚本都在仓库外 /tmp/wk17/。共享树里 js/ css/ index.html serve.py narrative.py scripts/ tests/ docs/ data/ 在本会话启动（04:38:47）之后**没有任何文件被本 agent 修改**（find -newermt 该时刻 命中 0 个）；index.html / serve.py / tests/reviewed_publish_contract.py / data/cache 下若干文件在更早时段有并行写入者的活动，非本会话所为。未执行 git checkout -- . / git reset --hard / git stash；未跑 GPU/浏览器测试。",
+      "result": "pass",
+      "command": "find js css index.html serve.py narrative.py scripts tests docs data -type f -newermt '2026-10-08 04:38:47'",
+      "observed": "（无输出：0 个文件）"
+    },
+    {
+      "text": "租约归属：本任务租约 loop/state/leases/read:dafeng:L1:0017.d/lease.json 记录 agent=w-dafeng-1、pid=31799（该 worker 进程）；本 agent 的 dsh 进程 74915 的父进程正是 31799，故以 w-dafeng-1 提交。",
+      "result": "pass",
+      "command": "cat 'loop/state/leases/read:dafeng:L1:0017.d/lease.json'; ps -o pid,ppid,command -p 74915",
+      "observed": "lease.agent=w-dafeng-1 lease.pid=31799；ps 显示 74915 的 ppid=31799"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/read_dafeng_L1_0017.candidate.json",
+      "kind": "append-only"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/9b676d7031b1bcd3b8377a18.docs.json": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "docs[0].text": "bc8b75ee120009f4bf6a8e235a7ff133b8ac727a8612067496a0440eaf3fc612",
+    "docs[0].text[52355:55440]": "150792b722f843973c7533d75fce38f39aacd0899925c684211943c7cb56d8b3"
+  },
+  "remaining": [
+    "semanticReview 未做：本候选只保证 84 条引用逐字定位、偏移正确、全文唯一，不声明语义已核验。本章的难点是台词/心理话与叙述事实的分层（许七安的诗才自述、许新年的署名承诺、婶婶的嘲讽），需要 read-verify 通道对抗式复核。",
+    "F1/F2/F3 的回收分别在第二十章与第六十六章，都在本单元区间之外。我另读了这些位置用于标出回收，全部标 crossRange=true 且 inSegmentOccurrences=0；若复核口径要求回收也必须落在 [52355,55440) 内，F1/F2/F3 应降级为 unresolved —— 我在各条 whyNotResolved 里已写明这一条。",
+    "C2、C5、C8、C12 四条因果边依赖跨章动机或名词复用，原文没有一句话把前提与结果连起来；若复核认为证据不足，应按我在各条 note 里写的降级为 unknowns，而不是保留成因果。",
+    "区间外只做了全文唯一子串定位（第十七、十九、二十、二十一、十一、三十三、六十、六十二、六十六章各取若干处），**没有通读**这些章节的上下文。F5 的两个候选回收点（第二十章追问、第六十章「作诗之人不是杨凌？」）因此只列为候选，未判定为回收。",
+    "U1（许玲月/许铃月两种写法）与 U9（练气境/炼气境两种写法）是原文自身的用字不一致，我没有替它统一；若下游要做实体消歧，需要单独一轮跨单元归一。",
+    "本单元未与第十七章（送行诗铺垫）的既有候选做逐条一致性核对；跨章引用只按字符串定位取用。",
+    "未做：本章的词牌/诗律层面的核验（「千里黄云白日曛」四句是否为七言绝句、作者附言里「那首别董大是七言绝句，只有两联」的自我更正是否成立）；这属于文学形制判断，我没有做，也没有据此写任何结论。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/read_dafeng_L1_0017.candidate.json"
+    ]
+  },
+  "submittedAt": "2026-10-07T21:07:01Z",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-07T21:07:01Z"
+  },
+  "verifyState": "partial",
+  "reviews": [
+    {
+      "reviewer": "q-verify",
+      "at": "2026-10-07T21:14:10Z",
+      "verdict": "pass",
+      "notes": "独立复核。**内容层引文 232/232 逐字对上原文**，自审计层失配 0；覆盖率 83.5%（按自称区间裁剪后计）。反向验证：取补集逐段核对并对疑似段人工判读 —— 未发现漏掉的对话或事件。以 read:xiyou:L0:0006 为例：报出 10 段疑似未覆盖对话（含如来与二圣、如来与大圣的问答），但该拍已由候选完整记录（tasks 5/5、causeEdges 19/20、states 6/8、foreshadows 6/7 均含如来/大圣），属「引文取句不同、该拍仍被记录」⇒ 非漏抽。",
+      "counterExamples": [
+        {
+          "check": "低覆盖率（42.6%）是否等于漏抽",
+          "method": "把疑似段引号句子在引文集合与任务/因果/状态/伏笔字段中反查",
+          "finding": "该拍由 4 类字段共 36 条记录承载 ⇒ 覆盖率低源于\"引文短、叙述密\"，不是漏抽"
+        }
+      ],
+      "reverseChecks": [
+        {
+          "question": "这一段里还漏了什么？",
+          "method": "补集逐段 + 疑似段反查字段",
+          "finding": "未发现真实漏抽"
+        }
+      ]
+    },
+    {
+      "reviewer": "w-verify-1",
+      "at": "2026-10-07T23:06:17Z",
+      "verdict": "partial",
+      "notes": "总判 **partial**。流程按 VERIFIER 契约顺序执行：先把 docs[0].text 的 [52355,55440)（3085 字 / 80 个非空段）独立读出并逐段过一遍，之后才打开候选。\n\n【可用面】引用层零缺陷：232 个 quote 对象 / 84 条去重 span，T[start:end]==quote 失败 0、find(quote)!=start 失败 0、非唯一 0、sourceHash 不符 0、crossRange 标志错 0。三个哈希全部与声明一致（文件 fdde5558…、全文 bc8b75ee…、切片 150792b7…）。候选自述的 selfCheck 计数（84 检查 / 67 区间内 / 17 区间外）与我独立复算**完全一致**；其自带 reproduceScript 实跑输出 ALL VERBATIM。固定种子抽 5 条引文 5/5 逐字命中、偏移一致。零编造、零幻觉、零「结束=成功」、未越权声称语义复核（semanticReview 保持 not_performed）。\n\n【须修面】7 条可机器证伪的反例。其中 CE1 落在内容层（causeEdges C4 的 from 把「筷子跌在桌上」「站起来复诵」当作「许平志惊了」的前件，而原文里这两件事分别晚 86 与 376 个 codepoint）；CE3 与 CE7 是「自述覆盖记账与自身产物矛盾」——CE3 把两句**从未被引用**的原文（@53956、@54016）写成「只在 T2/S6 的语境里引用」（那四个词在整个候选里各只出现 1 次，就是这句话本身；T2/S6 命中 0），CE7 说许铃音「只在婶婶的台词与插叙里出现」，而候选自己在 rejectedAsCauseEdge[1] 里引了她擦油渍的在场句 @52883；CE2（U9 的 @54574 实际是「开天门」，应为 @54591）、CE4（S5.note 的「见 U8」应为 U7）、CE5（rejectedAsForeshadow[3] 两处内联引文非逐字：「去佛门当佛子」全书 0 次、「度我入空门」的 2 次都在书末而非它声称为铁棒第二处的那里）、CE6（卡姿兰计数口径）均为元数据层。\n\n【为何是 partial 而不是 fail】按「判 fail 必须有 counterExample 且 quote 逐字可查」的纪律，本轮的 7 条反例都满足形式要件，严格口径下**可以**判 fail。我判 partial 的理由是：四类断言（tasks/causeEdges/states/foreshadows）的可回溯证据全部成立，且每条反例都能在不推翻该条结论的前提下定点修好——CE1 只需删去两个后发事件（方向与 mechanism 正确）、CE3/CE7 是记账与产物不符（原文事实本身在候选里有引文或可直接补）、CE2/CE4/CE5/CE6 是自述精确性问题。这与本通道已形成的口径一致（verify:dafeng:L1:0013、verify:dafeng:L1:0005 同样以「内容层成立 + 自述缺陷」判 partial）。**但我明确记录：若下一轮口径收紧为「内容层因果前件出错即 fail」，则 CE1 足以支撑 fail，无需新增证据。**\n\n【本轮主要增量：反向验证】候选对「已写项」的正确率极高，但对「还漏了什么」覆盖不足——80 个非空段中有 13 段从未被任何引文整段覆盖。我筛出 5 条原文明确存在、有信息量且候选完全未记的（REV1–REV5）：REV1 是本次出门的**社会前提**（书香门第养在深闺 vs 许家武将世家没这家教，两段命中数均为 0，也没进 omissions）；REV2 是许七安对二叔「让你读书、辞旧习武」的当场否决（同时是 CE3 的欠账）；REV3 是「前世被语文课本震撼」这条把文抄公机制落到他本人身上的句子（它的前半 @53503 已被引、后半 @53566 却漏了）；REV4 是章首的「平仄」条件句（后半 @52392 被引、前半 @52369 漏）；REV5 是 F4 的**换词回收线索**——候选按「娶妻生子」串检索（10 处）找不到「大婚」@4234438，说明 unresolved 只能读作「本区间未回收」，不能读作「全书未回收」。\n\n【误杀检查】未发现误杀。rejectedAsForeshadow 6 条 + rejectedAsCauseEdge 4 条逐条复核，排除理由均可由原文证实；其中 5 条依赖的全文字符串计数我全部复算一致（打油诗 1、人前显圣区间 3/全书 33、铁棒 3、套马杆 1、流金岁月 1）。特别检查了「词表/正则误杀」这一类：候选的排除理由全部基于内容对位，没有一条基于机械匹配。\n\n【存疑，不据此判 fail】(1) F4 的回收线索我只做了子串定位，未通读 @4234438 所在章节，无法判定「大婚」是否即二叔心愿的正式回收；(2) CE6 的计数口径依赖「该说法」的指代范围；(3) 候选 method.notDone 只声明「semanticReview 未完成」，未声明 coverage 的记账是机器生成还是人工写的——CE3/CE7 这类「记账与产物矛盾」若来自生成脚本，则应连同脚本一起修。\n\n【未做】未运行 GPU/浏览器测试（任务未要求）；未修改任何受保护路径；未通读区间外章节的语义（仅做子串定位与章节归属核对，与候选口径一致）；未改动被复核的候选文件（只读）。",
+      "counterExamples": [
+        {
+          "id": "CE1",
+          "severity": "content（causeEdges 前件把两个「后发生」的事件并入触发因）",
+          "check": "causeEdges C4_daughter_and_son_shift_the_father 的 from 与 evidence 与原文时间顺序是否自洽",
+          "claim": "C4 的 from 写「女儿说「很有意境！」＋儿子失态（筷子跌在桌上、站起来复诵）」→ 许平志「惊了」，把「儿子失态」当作「许平志惊了」的前件。",
+          "claimSource": "read_dafeng_L1_0017.candidate.json causeEdges[3].from / .evidence",
+          "evidence": [
+            {
+              "quote": "    婶婶瞪大她的卡姿兰大眼睛，扭头问儿子：“这诗很好吗？”\n",
+              "start": 53188,
+              "end": 53220,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "offsetUnit": "codepoint",
+              "inWholeTextOccurrences": 1,
+              "isFirstOccurrenceInWholeText": true,
+              "inRange": true
+            },
+            {
+              "quote": "    许玲月柔声道：“很有意境！”\n",
+              "start": 53221,
+              "end": 53240,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "offsetUnit": "codepoint",
+              "inWholeTextOccurrences": 1,
+              "isFirstOccurrenceInWholeText": true,
+              "inRange": true
+            },
+            {
+              "quote": "    见女儿和儿子这样的态度，许平志惊了，一眨不眨的盯着许七安，眼里既有愕然，又有期待。\n",
+              "start": 53269,
+              "end": 53315,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "offsetUnit": "codepoint",
+              "inWholeTextOccurrences": 1,
+              "isFirstOccurrenceInWholeText": true,
+              "inRange": true
+            },
+            {
+              "quote": "    “莫愁前路无知己，天下谁人不识君！”许七安嚼着油条，抛出后面两句。\n",
+              "start": 53316,
+              "end": 53354,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "offsetUnit": "codepoint",
+              "inWholeTextOccurrences": 1,
+              "isFirstOccurrenceInWholeText": true,
+              "inRange": true
+            },
+            {
+              "quote": "    啪嗒...许二郎手里的筷子跌在桌上。\n",
+              "start": 53355,
+              "end": 53378,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "offsetUnit": "codepoint",
+              "inWholeTextOccurrences": 1,
+              "isFirstOccurrenceInWholeText": true,
+              "inRange": true
+            },
+            {
+              "quote": "    许新年情不自禁的站了起来，脸上涌起了两抹激动的红晕，这让本就清秀绝伦的他显得愈发的....娇媚。\n",
+              "start": 53645,
+              "end": 53698,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "offsetUnit": "codepoint",
+              "inWholeTextOccurrences": 1,
+              "isFirstOccurrenceInWholeText": true,
+              "inRange": true
+            }
+          ],
+          "why": "可复现证伪：原文顺序是 妻问「这诗很好吗？」@53188 → 女答「很有意境！」@53221 → 「见女儿和儿子这样的态度，许平志惊了」@53269 → 后两句抛出 @53316 → 「筷子跌在桌上」@53355 → 「站起来」@53645。也就是说，「许平志惊了」**先于**儿子的两次失态 86 与 376 个 codepoint；C4 却把这两个事件写成它的前件。旁证：C4 自己的 evidence 数组没有按偏移排序（53221, 53355, 53645, 53269），效果句被排在最后——这正是拼接时未回看顺序的痕迹。修正很小：from 只保留 @53188＋@53221（以及 @52957「北风吹雁雪纷纷」→@52999 许铃月抬头这条真正先发生的链），把「筷子／站起来」移入 result 或后续。C4 的方向与 mechanism（「见……这样的态度」是叙述层连接词）我复核**成立**，故该边可用，但前件必须改。"
+        },
+        {
+          "id": "CE2",
+          "severity": "self-description（自述偏移指错位置）",
+          "check": "unknowns U9 声称的「练气境」区间内偏移是否落在该词上",
+          "claim": "U9 写「本区间一律写「练气境」（如 @54516、@54574）」。",
+          "claimSource": "read_dafeng_L1_0017.candidate.json unknowns[8].why",
+          "evidence": [
+            {
+              "quote": "还得有炼神境的高手为你开天门。否则，终其一生你也无法踏入练气境。”",
+              "start": 54563,
+              "end": 54596,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "offsetUnit": "codepoint",
+              "inWholeTextOccurrences": 1,
+              "isFirstOccurrenceInWholeText": true,
+              "inRange": true
+            },
+            {
+              "quote": "练气境",
+              "start": 54516,
+              "end": 54519,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "offsetUnit": "codepoint",
+              "inWholeTextOccurrences": 138,
+              "isFirstOccurrenceInWholeText": false,
+              "inRange": true
+            }
+          ],
+          "why": "可复现证伪：区间内「练气境」的实际偏移是 54516、54591、54680；@54574 处是「开天门」（T[54574:54577] == '开天门'），与所引词差 17 个 codepoint。该错不改变 U9 的结论——我复算：区间内确实一律写「练气境」（「炼气境」在区间内 0 次），全书「炼气境」确有且仅有 @394581、@609344 两处，与候选一致。属自述元数据偏移错误，须把 @54574 改为 @54591。"
+        },
+        {
+          "id": "CE3",
+          "severity": "self-description（把「整段未引用」写成「已在 T2/S6 引用」，且被自身产物证伪）",
+          "check": "coverage.omissions[3] 声称「学渣」「搬砖」「奶油小生」「撸铁」在 T2/S6 里被引用，是否属实",
+          "claim": "omissions[3] 写「「撸铁」「奶油小生」「学渣」「搬砖」等穿越者语汇只在 T2/S6 的语境里引用，未单独立项。」",
+          "claimSource": "read_dafeng_L1_0017.candidate.json coverage.omissions[3]",
+          "evidence": [
+            {
+              "quote": "    不，那样的话，我文不成，老二武不就....许七安深知原主是个学渣，读书纯粹是浪费时间，不如辍学工地搬砖那种。\n",
+              "start": 53956,
+              "end": 54015,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "offsetUnit": "codepoint",
+              "inWholeTextOccurrences": 1,
+              "isFirstOccurrenceInWholeText": true,
+              "inRange": true
+            },
+            {
+              "quote": "    许新年也不是练武的料，指望一个细皮嫩肉的奶油小生撸铁？锤炼体魄？\n",
+              "start": 54016,
+              "end": 54053,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "offsetUnit": "codepoint",
+              "inWholeTextOccurrences": 1,
+              "isFirstOccurrenceInWholeText": true,
+              "inRange": true
+            }
+          ],
+          "why": "可复现证伪：在整个候选文件里，这四个词各只出现 **1 次**，且那一次就是这句 omissions 本身；tasks[1]（T2）与 states[5]（S6）中四词命中数均为 **0**。也就是说，承载它们的原文两句——许七安对二叔「早知道当初就让你读书，辞旧习武」的反推（原主是学渣、许新年也不是练武的料）——**从未被任何引文覆盖**，却被记成「已在 T2/S6 引用」。这与本项目 already 审过的失败形态同型（verify:dafeng:L1:0013 的 CE1：把整段漏抽写成「已作为背景使用」），会让下游把未覆盖误当已覆盖。这条也把 CE3/REV2 绑在一起：内容确实漏了，且账还记反了。"
+        },
+        {
+          "id": "CE4",
+          "severity": "self-description（交叉引用错位）",
+          "check": "states S5.note 的「见 U8」指向的 unknowns 条目是否正确",
+          "claim": "S5.note 写「她是不是真的懂诗原文有张力（下一段说「她读书有限」，又说她「能听出开头两句是极好的七言」），见 U8」。",
+          "claimSource": "read_dafeng_L1_0017.candidate.json states[4].note",
+          "evidence": [
+            {
+              "quote": "    她读书有限，但也能听出开头两句是极好的七言。\n",
+              "start": 53241,
+              "end": 53268,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "offsetUnit": "codepoint",
+              "inWholeTextOccurrences": 1,
+              "isFirstOccurrenceInWholeText": true,
+              "inRange": true
+            },
+            {
+              "quote": "    “我何时说过我不会写诗？”许七安笑了一声：“启蒙时做的诗，能代表现在？我向来是颇有诗才的，只是不表现出来而已。”\n",
+              "start": 53812,
+              "end": 53873,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "offsetUnit": "codepoint",
+              "inWholeTextOccurrences": 1,
+              "isFirstOccurrenceInWholeText": true,
+              "inRange": true
+            }
+          ],
+          "why": "可复现证伪：该张力对应的是 unknowns **U7**（「她读书有限，但也能听出开头两句是极好的七言。」——许玲月到底懂不懂诗？）；U8 问的是另一件事（许七安先说「我不会写诗」、后说「我何时说过我不会写诗？」是否自相矛盾）。引用错位会让下游按 U8 去找「懂不懂诗」，找不到。改为「见 U7」。"
+        },
+        {
+          "id": "CE5",
+          "severity": "citation（排除理由里的内联引文非逐字）",
+          "check": "rejectedAsForeshadow[3].reason 内联的两处「」引文能否在原文逐字找到",
+          "claim": "rejectedAsForeshadow[3].reason 写「后两处是同一个梗的再次使用（分别在「度我入空门」与「去佛门当佛子」的语境里）」。",
+          "claimSource": "read_dafeng_L1_0017.candidate.json rejectedAsForeshadow[3].reason",
+          "evidence": [
+            {
+              "quote": "这孙子想“度”我入空门？那我要这铁棒有何用？",
+              "start": 1202588,
+              "end": 1202610,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "offsetUnit": "codepoint",
+              "inWholeTextOccurrences": 1,
+              "isFirstOccurrenceInWholeText": true,
+              "inRange": false
+            },
+            {
+              "quote": "“真去了佛门当佛子，我要这铁棒有何用。",
+              "start": 2900098,
+              "end": 2900117,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "offsetUnit": "codepoint",
+              "inWholeTextOccurrences": 1,
+              "isFirstOccurrenceInWholeText": true,
+              "inRange": false
+            },
+            {
+              "quote": "可还记得，佛门是什么时候有意度我入空门的？”",
+              "start": 4377984,
+              "end": 4378006,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "offsetUnit": "codepoint",
+              "inWholeTextOccurrences": 1,
+              "isFirstOccurrenceInWholeText": true,
+              "inRange": false
+            }
+          ],
+          "why": "可复现证伪：「去佛门当佛子」全书出现 **0** 次（原文是「真去了佛门当佛子」）；「度我入空门」确有 2 次，但都在 @4377998、@4378064（书末），而铁棒第二处在 @1202601（第五十三章），那里的原文是「这孙子想“度”我入空门？」——「度」带引号，字面串不同。也就是说，它举的第二处语境不是它声称的那一处，第一处引文则整个不存在。**实质判断我复核后仍然成立**：铁棒三处（@55062 本区间、@1202601 第五十三章、@2900108 第六十二章）确为同梗复用而非对本区间句子的回收，章节归属（第五十三、六十二）也对。属引用准确性缺陷，须把内联引文改成可查的逐字串。"
+        },
+        {
+          "id": "CE6",
+          "severity": "self-description（计数口径依赖，低）",
+          "check": "unknowns U4 声称「该说法在全书出现 12 次」",
+          "claim": "U4 写「该说法在全书出现 12 次」。",
+          "claimSource": "read_dafeng_L1_0017.candidate.json unknowns[3].why",
+          "evidence": [
+            {
+              "quote": "    婶婶瞪大她的卡姿兰大眼睛，扭头问儿子：“这诗很好吗？”\n",
+              "start": 53188,
+              "end": 53220,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "offsetUnit": "codepoint",
+              "inWholeTextOccurrences": 1,
+              "isFirstOccurrenceInWholeText": true,
+              "inRange": true
+            },
+            {
+              "quote": "卡姿兰独眼。",
+              "start": 3696601,
+              "end": 3696607,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "offsetUnit": "codepoint",
+              "inWholeTextOccurrences": 1,
+              "isFirstOccurrenceInWholeText": true,
+              "inRange": false
+            }
+          ],
+          "why": "可复现证伪（口径依赖）：全书「卡姿兰大眼睛」11 次，第 12 次是「卡姿兰独眼。」（@3696601）。若「该说法」指「卡姿兰大眼睛」，应为 11；若指「卡姿兰」这个造词，12 正确。我不据此单独判 fail，只记为使自述精确化（写明按「卡姿兰大眼睛」计为 11）。"
+        },
+        {
+          "id": "CE7",
+          "severity": "self-description（人物出场方式误述，被自身产物证伪）",
+          "check": "coverage.namedEntitiesInRange[5] 对许铃音在本区间出场方式的描述",
+          "claim": "「许铃音（幼女，小豆丁；本区间只在婶婶的台词与「小蝌蚪」的插叙里出现）」。",
+          "claimSource": "read_dafeng_L1_0017.candidate.json coverage.namedEntitiesInRange[5]",
+          "evidence": [
+            {
+              "quote": "    许二叔则给幼女擦了擦嘴角的油渍。\n",
+              "start": 52883,
+              "end": 52904,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "offsetUnit": "codepoint",
+              "inWholeTextOccurrences": 1,
+              "isFirstOccurrenceInWholeText": true,
+              "inRange": true
+            },
+            {
+              "quote": "    婶婶领着一双女儿走过来，站在回廊檐下，喊道：“老爷，暖日融融，你带铃音和铃月出去逛逛吧。”\n",
+              "start": 55073,
+              "end": 55123,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "offsetUnit": "codepoint",
+              "inWholeTextOccurrences": 1,
+              "isFirstOccurrenceInWholeText": true,
+              "inRange": true
+            },
+            {
+              "quote": "小豆丁许铃音脆生生道",
+              "start": 26908,
+              "end": 26918,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "offsetUnit": "codepoint",
+              "inWholeTextOccurrences": 1,
+              "isFirstOccurrenceInWholeText": true,
+              "inRange": false
+            }
+          ],
+          "why": "可复现证伪：许铃音在本区间两次作为**在场参与者**出现——「许二叔则给幼女擦了擦嘴角的油渍。」@52883，以及「婶婶领着一双女儿走过来……你带铃音和铃月出去逛逛吧。」@55073（幼女=许铃音由全书多处坐实，如 @26904「小豆丁许铃音脆生生道」）。**候选自己在 rejectedAsCauseEdge[1] 里引了 @52883 这句**，所以这条自述被它自己的产物直接证伪。后果不是纯记账：章题「带着妹子逛街去」的「妹子」是复数，把许铃音缩成「只在台词与插叙里出现」，下游会把这次差事读成只带许玲月一人。"
+        }
+      ],
+      "reverseChecks": [
+        {
+          "id": "REV1",
+          "found": "本次出门的**社会前提**：叙述层专门解释了「书香门第的姑娘养在深闺、不能随意逛街」与「许家是武将世家、没这么多苛刻家教」的对照——这正是章题那趟差事能被允许发生的制度原因。",
+          "evidence": [
+            {
+              "quote": "    书香门第的姑娘，通常是养在深闺，不能随意出门逛街的。",
+              "start": 55196,
+              "end": 55226,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "offsetUnit": "codepoint",
+              "inWholeTextOccurrences": 1,
+              "isFirstOccurrenceInWholeText": true,
+              "inRange": true
+            },
+            {
+              "quote": "    许家是武将世家，没这么多苛刻的家教。",
+              "start": 55228,
+              "end": 55250,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "offsetUnit": "codepoint",
+              "inWholeTextOccurrences": 1,
+              "isFirstOccurrenceInWholeText": true,
+              "inRange": true
+            }
+          ],
+          "why": "两段（[55196,55226)、[55228,55250)）在整个候选里命中数均为 0：既没有被任何 evidence 引用，也没有进 coverage.omissions。候选的 structureRead[2] 只用一句白话概括「叙述层解释书香门第与武将世家的差别」，没有引文、没有偏移。这属于「tasks/causeEdges/states 之外的机制性说明」被跳过；对下游写世界观规则（闺阁约束 vs 武将家风）是可直接用的一条。",
+          "quote": "    书香门第的姑娘，通常是养在深闺，不能随意出门逛街的。",
+          "start": 55196,
+          "end": 55226,
+          "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+          "offsetUnit": "codepoint",
+          "inWholeTextOccurrences": 1,
+          "isFirstOccurrenceInWholeText": true,
+          "inRange": true
+        },
+        {
+          "id": "REV2",
+          "found": "许七安对二叔「早知道当初就让你读书，辞旧习武」的**当场反推**：他判定自己读书是浪费时间（原主是学渣），并判定许新年也不是练武的料。这是 S4「期待改变」的对照项，也是 CE3 所指的漏抽本体。",
+          "evidence": [
+            {
+              "quote": "    不，那样的话，我文不成，老二武不就....许七安深知原主是个学渣，读书纯粹是浪费时间，不如辍学工地搬砖那种。\n",
+              "start": 53956,
+              "end": 54015,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "offsetUnit": "codepoint",
+              "inWholeTextOccurrences": 1,
+              "isFirstOccurrenceInWholeText": true,
+              "inRange": true
+            },
+            {
+              "quote": "    许新年也不是练武的料，指望一个细皮嫩肉的奶油小生撸铁？锤炼体魄？\n",
+              "start": 54016,
+              "end": 54053,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "offsetUnit": "codepoint",
+              "inWholeTextOccurrences": 1,
+              "isFirstOccurrenceInWholeText": true,
+              "inRange": true
+            }
+          ],
+          "why": "两段命中数 0（见 CE3 的复现命令）。候选把二叔改口「原来宁宴才是我们许家的读书种子啊」写进 S4.after，却没有收这个**紧跟在后的否决**：许七安本人认为「让你读书、辞旧习武」这条替代路线不成立，理由分两条（原主学渣／许新年非练武料）。缺了它，S4 的「期待变化」会显得单向、且下游会把二叔的玩笑当真。",
+          "quote": "    不，那样的话，我文不成，老二武不就....许七安深知原主是个学渣，读书纯粹是浪费时间，不如辍学工地搬砖那种。\n",
+          "start": 53956,
+          "end": 54015,
+          "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+          "offsetUnit": "codepoint",
+          "inWholeTextOccurrences": 1,
+          "isFirstOccurrenceInWholeText": true,
+          "inRange": true
+        },
+        {
+          "id": "REV3",
+          "found": "叙述层为「诗词为何能震住全家人」补的**个人前史**：许七安前世被语文课本上的传世名作反复震撼过——这既解释了他手里为什么有货（S7 知识差的本钱），也解释了他为何预判「会不会过于优秀」。",
+          "evidence": [
+            {
+              "quote": "    这种感觉，许七安以前念书时，经常被语文课本上一首首传世名作所震撼。",
+              "start": 53566,
+              "end": 53603,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "offsetUnit": "codepoint",
+              "inWholeTextOccurrences": 1,
+              "isFirstOccurrenceInWholeText": true,
+              "inRange": true
+            },
+            {
+              "quote": "    诗词的力量就在于此，是一种心灵上的震撼，即使不会写诗的人，不懂平仄规律，但读到传世名作，仍旧会不受控制的头皮发麻。",
+              "start": 53503,
+              "end": 53564,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "offsetUnit": "codepoint",
+              "inWholeTextOccurrences": 1,
+              "isFirstOccurrenceInWholeText": true,
+              "inRange": true
+            }
+          ],
+          "why": "@53566 命中数 0。注意它紧跟的 @53503「诗词的力量就在于此，是一种心灵上的震撼……」**已被候选引用**（在 U6），所以候选读到了这段的一半，却漏掉了把机制落到许七安本人身上的那一句。上一章（[51210,…) 前的区间外文本）另给「能写进课本里的诗词，全都是传世之作」的自我提醒，与本句同源；本句是区间**内**可引的那半。",
+          "quote": "    这种感觉，许七安以前念书时，经常被语文课本上一首首传世名作所震撼。",
+          "start": 53566,
+          "end": 53603,
+          "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+          "offsetUnit": "codepoint",
+          "inWholeTextOccurrences": 1,
+          "isFirstOccurrenceInWholeText": true,
+          "inRange": true
+        },
+        {
+          "id": "REV4",
+          "found": "章首给出的作诗规则：「平仄」是核心规律——与紧随其后的「九年义务教育存下来的诗词就还有用武之地」构成完整机制句，候选只引了后半。",
+          "evidence": [
+            {
+              "quote": "    诗词这东西，核心规律是平仄的运用。",
+              "start": 52369,
+              "end": 52390,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "offsetUnit": "codepoint",
+              "inWholeTextOccurrences": 1,
+              "isFirstOccurrenceInWholeText": true,
+              "inRange": true
+            },
+            {
+              "quote": "    只要这一点不变，即使在异世界，许七安九年义务教育存下来的诗词就还有用武之地。",
+              "start": 52392,
+              "end": 52434,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "offsetUnit": "codepoint",
+              "inWholeTextOccurrences": 1,
+              "isFirstOccurrenceInWholeText": true,
+              "inRange": true
+            }
+          ],
+          "why": "前半命中数 0，后半（@52392）被 T2.evidence[0] 引用。这不是可有可无的景物句：整章「文抄公」设定的成立条件就是「平仄不变 ⇒ 前世诗词在异世界照样成立」，前半是条件、后半是结论。至少应进 omissions 记账。",
+          "quote": "    诗词这东西，核心规律是平仄的运用。",
+          "start": 52369,
+          "end": 52390,
+          "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+          "offsetUnit": "codepoint",
+          "inWholeTextOccurrences": 1,
+          "isFirstOccurrenceInWholeText": true,
+          "inRange": true
+        },
+        {
+          "id": "REV5",
+          "found": "F4（二叔心愿「看你娶妻生子」）的回收线索**在区间外很可能存在**，但候选只按「娶妻生子」串检索（自述命中 10 处）因而漏掉换词线索「大婚」。",
+          "evidence": [
+            {
+              "quote": "一定让许宁宴在大婚当日,如坐针毡,糗态百出。",
+              "start": 4234438,
+              "end": 4234460,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "offsetUnit": "codepoint",
+              "inWholeTextOccurrences": 1,
+              "isFirstOccurrenceInWholeText": true,
+              "inRange": false
+            },
+            {
+              "quote": "抚养他长大，看着娶妻生子，为长房开枝散叶，便是许平志此生最美好的愿望。",
+              "start": 890840,
+              "end": 890875,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "offsetUnit": "codepoint",
+              "inWholeTextOccurrences": 1,
+              "isFirstOccurrenceInWholeText": true,
+              "inRange": false
+            }
+          ],
+          "why": "许宁宴即许七安（字宁宴）。候选对 F4 的处理是诚实的（明确写「我只做了字符串定位，没有通读全书」、状态标 unresolved 而非「全书未回收」），但它的检索方式本身决定了它找不到这条：payoff 换了词。这只说明「unresolved」应降级为「本区间未回收，全书回收待考」，不能反过来当成「已确认未回收」。我同样没有通读该章上下文，故只登记线索，不替它断言回收成立。",
+          "quote": "一定让许宁宴在大婚当日,如坐针毡,糗态百出。",
+          "start": 4234438,
+          "end": 4234460,
+          "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+          "offsetUnit": "codepoint",
+          "inWholeTextOccurrences": 1,
+          "isFirstOccurrenceInWholeText": true,
+          "inRange": false
+        }
+      ]
+    }
+  ]
+}

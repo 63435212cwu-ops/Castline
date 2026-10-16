@@ -1,0 +1,484 @@
+{
+  "schema": "castline/verify-verdict/1",
+  "task": "verify:dafeng:L1:0033",
+  "agent": "w-verify-1",
+  "status": "done",
+  "verdict": "partial",
+  "book": "dafeng",
+  "lane": 1,
+  "unitIndex": 33,
+  "unitHead": "第三十四章 许玲月：这辈子要好好报答大哥",
+  "reviewer": "w-verify-1",
+  "reviewerRole": "loop/ROLES/VERIFIER.md",
+  "reviewedTask": "read:dafeng:L1:0033",
+  "reviewedArtifact": "loop/state/out/read_dafeng_L1_0033.candidate.json",
+  "reviewedArtifactSha256": "9baaafc70f0e2ca1113ef6b6868459c2d082f192aeac3b0931302d17eb789c80",
+  "reviewedArtifactAgent": "w-dafeng-1",
+  "independenceCheck": "原提交者 agent=w-dafeng-1，本复核者=w-verify-1，不同一；loop.py verify 另做自签拒绝。按 ROLES/VERIFIER.md 顺序执行：先自读原文切片 [100023,103811)（3788 字，194 行，97 非空行）后才打开候选；随后逐条核对抽取项、做反向验证、误杀检查、幻觉检查与引用核验。",
+  "source": {
+    "path": "data/cache/9b676d7031b1bcd3b8377a18.docs.json",
+    "docIndex": 0,
+    "field": "text",
+    "range": [
+      100023,
+      103811
+    ],
+    "rangeChars": 3788,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "sliceSha256": "c34af536be804a496fcfdb898d27b4bc9bcce1fc2d174d63c8a596e581666677",
+    "sliceHead": "第三十四章 许玲月：这辈子要好好报答大哥\n\n",
+    "checkedAtSliceStart": "docs[0].text[100023:103811] 以标题「第三十四章 许玲月：这辈子要好好报答大哥」开头，自检式通过"
+  },
+  "summary": "判 **partial**。引用工艺层面几乎无可指摘：411 个引文对象全部逐字命中原文，t[start:end]==quote 零不符，47 条区间外引用全部显式标注 inRange=false + outOfRangeChapter 且章号逐个复核无误，section 覆盖率经我独立重算与候选自报一致（91/97 非空行，未覆盖的 6 行全是分隔线）。但候选在**语义层有 3 处可机器证伪的事实/归属错误**（CE1 张冠李戴台词、CE2 自相矛盾的计数与场景、CE3 场景误置），按角色契约「判 fail 必须有 counterExample」——三条都有逐字原文引证，故不能判 pass；三者都属局部、可定点修复、不污染其余结论，故判 partial 而非 fail。另反向验证产出 5 条候选未覆盖的原文事实。",
+  "counterExamples": [
+    {
+      "id": "CE1",
+      "check": "抽取项核对：台词归属张冠李戴（把许七安的话记成许铃音的话）",
+      "claim": "candidate['tasks'][5].action.text =「许七安先踢了她一脚，她摔倒后爬起来应战；他再问「你抽什么风？」时**她直接答「我是啊。」**」——把「我是啊。」归给许铃音。",
+      "quote": "    “我是啊。”许七安说。",
+      "quoteStart": null,
+      "quoteEnd": null,
+      "evidence": [
+        {
+          "note": "原文在「我是啊。」后由叙述者显式标注说话人「许七安说」——这是原文直述，不是推断。",
+          "quote": "    “我是啊。”许七安说。",
+          "start": 102486,
+          "end": 102501,
+          "inRange": true,
+          "sliceOK": true
+        },
+        {
+          "note": "「你抽什么风？」本身**就是许七安说的**（且句中带「踢在她小屁股蛋上」），所以「他再问…她答」这个问答配对在原文里不存在。",
+          "quote": "    “你抽什么风？”许七安轻轻一脚踢在她小屁股蛋上。",
+          "start": 102333,
+          "end": 102361,
+          "inRange": true,
+          "sliceOK": true
+        },
+        {
+          "note": "铃音在该段唯一的问句是「大哥你是在挑衅我吗。」——她问的是「是不是在挑衅」，与「我是啊。」（许七安承认「我就是在挑衅你」）构成**跨说话人**的一问一答。",
+          "quote": "    “我在练武呀。”许铃音爬起来，插着腰，挺着圆滚滚的小肚皮，很不满大哥的偷袭，小眉头倒竖：“大哥你是在挑衅我吗。”",
+          "start": 102379,
+          "end": 102439,
+          "inRange": true,
+          "sliceOK": true
+        }
+      ],
+      "why": "机器可判：`'我是啊' in candidate['tasks'][5]['action']['text']` == True，而同段引文 `candidate['tasks'][5]['action']['quotes'][5]['quote']` 恰恰就是「“我是啊。”许七安说。」——候选**自己引对了原文，却在自述里写反了说话人**。原文语义是：铃音问「大哥你是在挑衅我吗。」→ 许七安答「我是啊。」（承认挑衅）。候选写成「他问『你抽什么风？』她答『我是啊』」，把许七安的承认错记成铃音的话。这是硬红线「不许出现原文里没有的」在归属层面的违反：原文没有「铃音说『我是啊』」这句话。修法：把 action.text 改为「他答『我是啊。』」并把问答配对改成「她问『大哥你是在挑衅我吗。』→ 他答『我是啊。』」。",
+      "severity": "factual-attribution",
+      "localized": true
+    },
+    {
+      "id": "CE2",
+      "check": "抽取项核对：同一事实的计数与场景自相矛盾（绿娥出现次数与被放置的场景）",
+      "claim": "candidate['unknowns'][10] =「绿娥在本区间出现**两次**（**前厅**无台词、书房奉茶）」；而 candidate['tasks'][0].action.text 又写「再站在**前厅**听完丈夫的讲述；听完后当着丫鬟婆子的面吩咐绿娥」。",
+      "quote": "    绿娥诧异的抬头，难以置信：“夫人改变主意啦？”",
+      "quoteStart": null,
+      "quoteEnd": null,
+      "evidence": [
+        {
+          "note": "绿娥在本区间实际出现 **3 次**，且**没有一次**在前厅。第 1 次在婶婶屋内（吩咐缩减冬衣）。",
+          "quote": "    她扫了眼正在赶制冬衣的丫鬟婆子们，忽然说：“绿娥，把老爷和二郎的冬衣各缩减一件，等大郎回来后，量一量他的尺寸。”",
+          "start": 101442,
+          "end": 101502,
+          "inRange": true,
+          "sliceOK": true
+        },
+        {
+          "note": "第 2 次仍在**婶婶屋内**，是绿娥的反问（她之所以能当场反问，正因为在屋里），不在前厅。",
+          "quote": "    绿娥诧异的抬头，难以置信：“夫人改变主意啦？”",
+          "start": 101504,
+          "end": 101531,
+          "inRange": true,
+          "sliceOK": true
+        },
+        {
+          "note": "第 3 次在书房奉茶。前厅场景 [100296,101401) 内「绿娥」出现 0 次。",
+          "quote": "    绿娥奉上三杯热茶后，告退离开。",
+          "start": 103339,
+          "end": 103358,
+          "inRange": true,
+          "sliceOK": true
+        },
+        {
+          "note": "场景切换写在「回了屋子」之后——婶婶是**离开前厅回屋**才吩咐绿娥的，这直接否证「在前厅吩咐绿娥」。",
+          "quote": "    把幼女交给府里专门照料的丫鬟，又安抚了长女后，婶婶心事重重的回了屋子。",
+          "start": 101401,
+          "end": 101440,
+          "inRange": true,
+          "sliceOK": true
+        }
+      ],
+      "why": "机器可判：`s[100023:103811].count('绿娥')` == 3（非 2）；`'绿娥' in s[100296:101401]` == False（前厅段落无绿娥）。候选的 tasks[0].action.text 与 unknowns[10] 互相矛盾：前者把「吩咐绿娥」放在前厅，后者说「前厅无台词」——两处对同一动作给了两个互斥的场景。requirement 要求「每条断言给 basis」，但这里不是 basis 问题，是两条断言不能同真。修法：unknowns[10] 改「出现三次（均在婶婶屋内两次、书房一次）」，tasks[0].action.text 改为「回屋后吩咐绿娥」。",
+      "severity": "factual-count+scene",
+      "localized": true
+    },
+    {
+      "id": "CE3",
+      "check": "抽取项核对：场景误置（把书房的事写进饭桌）",
+      "claim": "candidate['tasks'][4].summary =「许新年在**饭桌**与书房两次给出与父亲相反的判断」——把许新年的一次发言放在饭桌上。",
+      "quote": "    书房！",
+      "quoteStart": null,
+      "quoteEnd": null,
+      "evidence": [
+        {
+          "note": "晚饭场景（「牵着小豆丁进了厅…」到「书房！」之前）里**许新年 / 许二郎均未出场**；饭桌上说话的是许玲月与许七安，婶婶在场但无台词。",
+          "quote": "    牵着小豆丁进了厅，不多时开宴，晚餐非常丰盛，像过节日似的。",
+          "start": 102797,
+          "end": 102830,
+          "inRange": true,
+          "sliceOK": true
+        },
+        {
+          "note": "许新年在本区间共出现 3 次：101224（前厅，内心）、103477、103712——**后两次全在「书房！」标记之后**。",
+          "quote": "    书房！",
+          "start": 103330,
+          "end": 103337,
+          "inRange": true,
+          "sliceOK": true
+        },
+        {
+          "note": "他的第 1 次发言确实在书房，不是饭桌。",
+          "quote": "    许新年皱了皱眉：“你想说，那个周公子可能还会报复？”",
+          "start": 103473,
+          "end": 103503,
+          "inRange": true,
+          "sliceOK": true
+        },
+        {
+          "note": "第 2 次发言同样在书房。",
+          "quote": "    许新年摇了摇头：“爹，大哥既然这么说，肯定有理由的。”",
+          "start": 103708,
+          "end": 103739,
+          "inRange": true,
+          "sliceOK": true
+        },
+        {
+          "note": "他在前厅的那次是**内心活动**（瞅着母亲「心里一动」），不是「给出与父亲相反的判断」，也不能算饭桌发言。",
+          "quote": "    许新年瞅着向来强势的母亲，如今眼里却满是后怕和懊悔，心里一动。",
+          "start": 101220,
+          "end": 101255,
+          "inRange": true,
+          "sliceOK": true
+        }
+      ],
+      "why": "机器可判：`'许新年' in s[102801:103334]` == False（晚饭场景无许新年）。「饭桌与书房两次」这个表述把一个不存在的场景写进了 summary。注意候选的 causeEdges / knowledgeGaps 并未据此连边（st_knowledge_gap_zhou_threat 把两次发言都标为书房语境），所以错误局限在 tasks[4].summary 的措辞，不影响因果图。修法：改为「许新年在书房两次给出与父亲相反的判断」。",
+      "severity": "scene-misplacement",
+      "localized": true
+    }
+  ],
+  "reverseChecks": [
+    {
+      "id": "REV1",
+      "found": "候选把「周公子」与「周侍郎」当成两条互不相干的线处理，**漏掉了原文自己给出的同一性提示**：区间内叙述者用「姓周」把两者串起来，而候选的 characterClaims / knowledgeGaps 从未指出许新年说的「周公子」与末句的「周侍郎」在区间内已被文本关联（「我料那个**姓周**的不敢在搅风搅雨」正夹在两句之间）。",
+      "evidence": [
+        {
+          "note": "叙述者写「堂堂**户部侍郎**的公子」——把恶少与户部侍郎之子等同，是区间内的原文直述。",
+          "quote": "    堂堂户部侍郎的公子，在一个小小胥吏手里栽跟头，肯定不会善罢甘休。",
+          "start": 103505,
+          "end": 103541,
+          "inRange": true,
+          "sliceOK": true
+        },
+        {
+          "note": "许二叔用「那个**姓周**的」指代同一个恶少，给出姓氏。",
+          "quote": "    许二叔摆摆手：“不会不会，若是平常也就罢了，但今天有云鹿书院的大儒，以及司天监的白衣出面，我料那个姓周的不敢在搅风搅雨。”",
+          "start": 103543,
+          "end": 103608,
+          "inRange": true,
+          "sliceOK": true
+        },
+        {
+          "note": "末句许七安点名「幕后黑手，是**周侍郎**」。三点合起来：恶少=户部侍郎之子=姓周；幕后黑手=周侍郎。候选只在 foreshadows[1].setup 里并列引用了前两句，没有把这条同一性写成 knowledgeGap/state（谁在区间内已经把两条线连起来——叙述者连了，人物尚未连）。",
+          "quote": "    许七安沉声道：“我今天刚在司天监得到一个消息，税银案的幕后黑手，是周侍郎。”",
+          "start": 103754,
+          "end": 103796,
+          "inRange": true,
+          "sliceOK": true
+        }
+      ],
+      "why": "这属于 knowledgeGap（叙述者已知 vs 人物未连）而非事实错误，所以不构成 counterExample；但它是区间内最有信息量的一处结构，候选的 13 条 knowledgeGaps 全无此项。"
+    },
+    {
+      "id": "REV2",
+      "found": "候选漏掉区间内**唯一的日历锚点**「11月16日」以及与之配套的主角年龄自述「我马上二十岁了」。这两个数字只出现在引文里，从未进入任何命题字段（tasks 的 text、states、knowledgeGaps 的 text 都没写），导致本区间在时间线上是悬空的。",
+      "evidence": [
+        {
+          "note": "日记开头的日期戳，是区间内唯一可定位的绝对日期。",
+          "quote": "    “11月16日，这是值得铭记的一天，因为我终于决定，放弃有钱人朴实无华又枯燥的生活，我需要权力，需要武力，对此，我有两个想法：",
+          "start": 101715,
+          "end": 101782,
+          "inRange": true,
+          "sliceOK": true
+        },
+        {
+          "note": "与日期同段的主角年龄自述（「马上二十岁」），是判断他「转换修行路线有点晚」这个 cost 的依据。",
+          "quote": "    第一种想法，缺点是又要回忆起被高三生活所支配的恐惧，而我未必是读书的料。我马上二十岁了，转换修行路线有点晚。",
+          "start": 101976,
+          "end": 102034,
+          "inRange": true,
+          "sliceOK": true
+        }
+      ],
+      "why": "机器可判：'11月16日' 与 '马上二十岁' 均 in source range 为 True，但在候选的**命题字段**（tasks[].*['text'] / states[].*.text / knowledgeGaps[].text）中 0 次出现（仅存在于 quotes 数组与 quoteIndex）。候选自报 metrics.uncoveredLines 只统计了行级覆盖，行被引 ≠ 事实被抽取——这正是计划100 说的「有引文、不产生信息」。建议补一条 state 或 anchor：本区间发生在 11 月 16 日，主角约二十岁。"
+    },
+    {
+      "id": "REV3",
+      "found": "候选漏掉一处**破伤信息**：管家报「铃音姐儿身上有血迹」，而全区间**没有任何一句**解释血迹的来源或伤情，候选的 unknowns 与 openThreads 都没有登记这条悬念（血迹在候选里只作为引文和报信内容出现）。",
+      "evidence": [
+        {
+          "note": "唯一的血迹来源句。区间内没有与之配套的受伤/处理描写（无「受伤」「擦伤」「包扎」等），也没有再提到铃音身上有伤。",
+          "quote": "    管家急的跺脚：“夫人，铃音姐儿身上有血迹，玲月小姐好像刚哭过，老爷和二郎脸色也难看，还有，大郎没有回来，定是出什么事了。”",
+          "start": 100347,
+          "end": 100412,
+          "inRange": true,
+          "sliceOK": true
+        }
+      ],
+      "why": "机器可判：'血迹' in range == True 且 `range.count('血迹')` == 1；而 `'血迹' in json.dumps(candidate['unknowns'])` == False、在 openThreads 中同样为 False。一个被报信强调、后文却不解释的身体异常，是标准的待回收悬念，按 READER.md 要求应进 unknowns 或 openThreads（显式 unresolved）。"
+    },
+    {
+      "id": "REV4",
+      "found": "候选把「婶婶已经先吩咐缩减冬衣、要给大郎量尺寸」与「许玲月在饭桌上请求给大哥做衣」当作两件并列的事登记（foreshadows[0].setup、openThreads[0]），**漏掉了两者之间的关系**：母亲的成命（101442）在女儿的请求（102989）**之前**，且女儿开口时说的正是「娘再给家里人做冬衣」——她并不知情母亲已经为她大哥改了名额。",
+      "evidence": [
+        {
+          "note": "母亲先下令：缩减老爷与二郎各一件，留给大郎量尺寸。发生在 [101442,101502)。",
+          "quote": "    她扫了眼正在赶制冬衣的丫鬟婆子们，忽然说：“绿娥，把老爷和二郎的冬衣各缩减一件，等大郎回来后，量一量他的尺寸。”",
+          "start": 101442,
+          "end": 101502,
+          "inRange": true,
+          "sliceOK": true
+        },
+        {
+          "note": "女儿后开口：在饭桌上请求亲手给大哥做，发生在 [102989,103050)，晚于母亲成命，措辞仍是「娘再给家里人做冬衣」（她按旧信息说话）。",
+          "quote": "    许玲月小筷小筷的吃饭，终于鼓足勇气，说：“哥哥，娘再给家里人做冬衣，稍后我给你量一量身段，我，我想亲手给哥哥做。”",
+          "start": 102989,
+          "end": 103050,
+          "inRange": true,
+          "sliceOK": true
+        }
+      ],
+      "why": "机器可判：`t.find('她扫了眼正在赶制冬衣')`==101446 < `t.find('许玲月小筷小筷的吃饭')`==102993；且两段之间的原文 [101531,102989) 中「玲月」「冬衣」「量一量」全部 0 次 —— 即**原文没有写母亲把决定告诉女儿**，也没写女儿知情。这是一处典型的「读者知 / 人物不知」知识差（母亲已改口且在场，女儿仍以为母亲只给「家里人」做）——而母女二人当晚同桌（「与身边的婶婶交相辉映」）。候选 13 条 knowledgeGaps 无一登记此项。"
+    },
+    {
+      "id": "REV5",
+      "found": "候选在 fs_three_plans 里把日记第三条「卖法器换开天门」登记为未执行，但**漏掉区间外后续其实在第二十章（远早于第三十九章）就已写明铃音学的不是武**——候选把它标为「相隔数百章」，与事实不符（它自己引的偏移 4240081 属第二十章）。此条只影响区间外对照的排序描述，不进入本区间结论。",
+      "evidence": [
+        {
+          "note": "候选 oor_lingyin_gu 引的这条，原文实际位于「第二十章 吃肉」（我按全文章节索引复核偏移 4240081）。候选在该条 text 里也写了「第二十章」，但在 foreshadows[4].whyVerdict 里却写成「到很后面（第二十章『吃肉』）…相隔数百章」——章号与偏移自洽，措辞「很后面／相隔数百章」与偏移位置不符（第 20 章在全书 476 万字里靠前）。",
+          "quote": "都是大郎做的主，说铃音不爱读书，又没有习武天分，便只能送去学习蛊术。",
+          "start": 4240081,
+          "end": 4240115,
+          "inRange": false,
+          "sliceOK": true
+        }
+      ],
+      "why": "这是措辞层面的不一致（同一文件里章号写对、相对位置写错），不影响本区间任何结论，仅登记为存疑级别的瑕疵。"
+    }
+  ],
+  "misKillCheck": {
+    "checked": "候选是否把合法的东西排除掉了（词表/正则误杀）。",
+    "result": "未发现误杀。候选的 rejectedCauseEdges / rejectedForeshadows 各 5 条，逐条核对后**拒绝理由均成立**：①「点头→嫣然一笑」确实只有相邻无机制；②「许新年 心里一动 → 婶婶缩减冬衣」确实跨场景且无传导链；③「化学知识/金疮药/味精/穿越设定/红楼梦」各自在区间内只出现一次，按「只出现一次不叫伏笔」拒绝是对的；④「急奔而出 ← 血迹」被降级为同一句内的相邻关系、而把触发点归给「大郎没有回来，定是出什么事了」是**正确且更细**的判断。",
+    "notablyGood": "候选保留 ce_fear_to_practice（把叙述者的「可能是…产生了阴影」按 inferred 而非 explicit 记）与 cl_pangzimen（把叙述者反事实句「如果没有她授意」标为 narrator-inference 而非事实）——这两处是最容易被写成「事实」的陷阱，候选守住了。"
+  },
+  "hallucinationCheck": {
+    "result": "未发现编造的人物、结局、伏笔或成功判定。",
+    "detail": "候选引用的区间外专名（张慎、周立）均出现在其自带的 outOfRangeCorroboration 引文内且标 inRange=false；区间内 0 次出现的「采薇」「监正」等是原文日记内的人物自述，有逐字引证。「她没有学到任何武艺」「本区间不能判他是否说服了家人」等 result 写法严格遵守了「结束≠成功」。",
+    "oneBoundary": "任务标注的『周立』（第三十五章内文「周立刻意报复」）在候选里既作引文出现、又未被当成本区间人物，处理正确；未发现把区间外人物写进区间内结论。"
+  },
+  "citationCheck": {
+    "method": "对全部 411 个引文对象做 t.find(quote) 与 t[start:end]==quote 全量重算（非抽样），另按角色契约随机抽 5 条单独报告。",
+    "fullScan": {
+      "quoteRefs": 411,
+      "notFoundInText": 0,
+      "sliceMismatch": 0,
+      "allVerbatim": true
+    },
+    "randomFive": [
+      {
+        "quote": "    “尊严？”",
+        "start": 102543,
+        "end": 102552,
+        "findMatchesStart": true,
+        "sliceEqual": true
+      },
+      {
+        "quote": "    “你老是瞅他不顺眼，觉得他习武花的银子多，觉得把他拉扯长大，说他几句又怎么样了，觉得他说话不中听，老是和你作对。”",
+        "start": 100969,
+        "end": 101030,
+        "findMatchesStart": true,
+        "sliceEqual": true
+      },
+      {
+        "quote": "    第三种想法，缺点是练气境依旧斗不过户部侍郎。而且，没有靠山的话，很难继续在武道之路勇猛精进，二叔卡在练气巅峰近十年，就是最好的例子。",
+        "start": 102083,
+        "end": 102153,
+        "findMatchesStart": true,
+        "sliceEqual": true
+      },
+      {
+        "quote": "    “你看，这回要不是宁宴，玲月和铃音就危险了。他脾气是倔了些，可对待家人也没差过，换成一般人，能为咱们女儿这么拼命？”",
+        "start": 100905,
+        "end": 100967,
+        "findMatchesStart": true,
+        "sliceEqual": true
+      },
+      {
+        "quote": "    许玲月嫣然一笑，与身边的婶婶交相辉映。",
+        "start": 103252,
+        "end": 103275,
+        "findMatchesStart": true,
+        "sliceEqual": true
+      }
+    ],
+    "outOfRangeDiscipline": {
+      "outOfRangeRefs": 47,
+      "undeclared": 0,
+      "chapterLabelsChecked": 16,
+      "chapterLabelMismatches": 0,
+      "note": "47 条区间外引用全部带 inRange=false（部分带 outOfRangeChapter）；16 条带章号标签的逐条与全文章节索引比对，全部正确。"
+    },
+    "coverageRecomputed": {
+      "nonEmptyLines": 97,
+      "claimedCovered": 91,
+      "recomputedCovered": 91,
+      "claimedUncoveredLines": [
+        10,
+        62,
+        74,
+        100,
+        162,
+        191
+      ],
+      "recomputedUncoveredLines": [
+        10,
+        62,
+        74,
+        100,
+        162,
+        191
+      ],
+      "note": "独立重算与候选自报一致；未覆盖的 6 行全是纯分隔行（「......」「....」「.....」「------------」）。行号口径为 0-based，候选自始至终一致。"
+    },
+    "countsReconciled": {
+      "totalQuoteRefs": 411,
+      "uniqueQuotes": 107,
+      "outOfRangeQuotes": 16,
+      "allMatchCandidateMetrics": true
+    }
+  },
+  "usableVsDiscard": {
+    "usable": "tasks[0..3]、tasks[5..7] 的五元组（除 CE1 涉及的 tasks[5].action.text 一句、CE2 涉及的 tasks[0].action.text 场景半句），全部 10 条 causeEdges，10 条 states，13 条 knowledgeGaps，5 条经核的 foreshadows（setup 均在区间内有据、payoff 均显式 unresolved-in-range），12 条 outOfRangeCorroboration（章号已复核对），quoteIndex 全部 107 条。",
+    "mustFix": [
+      "tasks[5].action.text：『他再问「你抽什么风？」时她直接答「我是啊。」』→ 改为『她问「大哥你是在挑衅我吗。」，他答「我是啊。」』（引文本身无需改）。",
+      "unknowns[10]：『出现两次（前厅无台词、书房奉茶）』→ 『出现三次：婶婶屋内两次（含一次反问）、书房奉茶一次』。",
+      "tasks[0].action.text：『再站在前厅听完丈夫的讲述；听完后…吩咐绿娥』→ 把吩咐绿娥移到回屋之后，与 unknowns[10] 及原文场景切换一致。",
+      "tasks[4].summary：『在饭桌与书房两次给出与父亲相反的判断』→ 『在书房两次给出与父亲相反的判断』。"
+    ],
+    "shouldAdd": [
+      "REV2：把 11月16日 / 马上二十岁 写入命题字段（state 或 anchor）。",
+      "REV3：把『铃音身上血迹无解释』登记为 unknowns/openThreads（显式 unresolved）。",
+      "REV4：把『母亲已改口而女儿不知情』登记为 knowledgeGap（含在场同席这一反差）。",
+      "REV1：把叙述者已连、人物未连的 周公子↔周侍郎 关系登记为 knowledgeGap。",
+      "REV5：把 oor_lingyin_gu 的相对位置描述从『相隔数百章』改为与偏移 4240081（第二十章）相符的措辞。"
+    ],
+    "discard": "无整条需丢弃的抽取项。三条 counterExample 都是措辞/归属级错误，不需要降级为 unknowns——它们是**写错了**，不是**不确定**。"
+  },
+  "notes": "总体判断：这是一份**引用工艺几乎满分、语义层有 3 处可证伪错误**的候选。先自读原文（3788 字 / 194 行）后再打开候选，因此下面的结论不依赖候选自述。\n\n可核验的强项：411 个引文对象全量重算 notFound=0、offsetMismatch=0；区间内外标注纪律严格（47 条区间外引用 0 条漏标，16 条章号 100% 正确）；行覆盖 91/97 与候选自报逐位一致；所有 107 条 quoteIndex 的 globalOccurrences/inRangeOccurrences 与我的独立计数完全相符；三项 sha256（整个 docs.json、切片、被复核候选自身）全部对得上，切片以本章标题开头。\n\n判 partial 而非 pass 的理由：CE1/CE2/CE3 都是**可机器证伪且带逐字原文引证**的事实/归属错误，且 CE1（把主角的台词记成配角说的）触碰了「不许出现原文里没有的」这条硬红线在归属层面的形态；按角色契约，有 counterExample 就不能判 pass。\n\n判 partial 而非 fail 的理由：三条错误全部**局限在个别字段的措辞**，没有一条污染因果图（causeEdges/states/knowledgeGaps 在这三处均未按错误表述连边），其余 7 个 task 的五元组、10 条因果边、10 条状态、13 条知识差、12 条区间外对照均可直接使用；且候选的自述与产物之间不存在系统性错位（对比 L1:0029 那次的 CE1/CE5 形态），错误是点状的。\n\n不确定处（存疑，不作为判 fail 依据）：① 「今早发生的事」与「今天下午的事」是否为同一起事件，候选记为存疑是正确的，我也无法由本区间断定；② 候选 paratext 把 PS 段记为 [100045,100288)，我实测 PS 首行起于 100045、末行止于 100286 附近，边界措辞有约 2 字符的宽松，不构成事实错误；③ REV5 那条「相隔数百章」的措辞不一致，我按存疑登记，因为章号本身写对了。\n\n自我审计（角色契约允许判自己错）：我最初怀疑候选漏抽了「叮」「翻墙」等大量细节，但用 6-gram 全量缺席扫描（源文每个 6-gram 是否出现在候选序列化文本中）得到 0 处缺席，说明候选的引文覆盖是穷尽的；我据此撤回了「覆盖不足」这个指控，把 REV2/REV3/REV4 精确重述为「**行被引用 ≠ 事实进入命题字段**」——这三条是语义抽取层的遗漏，不是引文缺失。我也复核了自己的反向验证：REV1 依赖「姓周」这一处指代，若把「姓周」读作泛指则 REV1 降级为存疑，我保留它是因为原文同时给了「户部侍郎的公子」这一显式同位语。",
+  "verdictRule": "pass 要求：抽取项全部有原文对应、反向验证无重大遗漏、无归属/场景错误。本候选在归属与场景上有 3 处逐字可证伪的错误（CE1–CE3），故不满足 pass；错误点状且不污染其余结论、不需要整条丢弃，故为 partial 而非 fail。",
+  "evidence": [
+    {
+      "path": "loop/state/out/read_dafeng_L1_0033.candidate.json",
+      "sha256": "9baaafc70f0e2ca1113ef6b6868459c2d082f192aeac3b0931302d17eb789c80",
+      "kind": "被复核候选（只读，未修改；sha256 复核前后一致）"
+    },
+    {
+      "path": "data/cache/9b676d7031b1bcd3b8377a18.docs.json",
+      "sha256": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+      "kind": "原文（只读引用，未修改）"
+    },
+    {
+      "path": "loop/state/out/verify_dafeng_L1_0033.verdict.json",
+      "kind": "本复核文件（任务 writes 唯一指定路径）"
+    },
+    {
+      "path": "loop/state/runs/task-verify_dafeng_L1_0033.json",
+      "kind": "本轮任务定义（只读）"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "全量重算 411 个引文对象：t.find(quote) 全部命中、t[start:end]==quote 全部相等（notFound=0 / offsetMismatch=0）",
+      "result": "pass",
+      "cmd": "python3 -B -s /tmp/cl_audit_0033.py"
+    },
+    {
+      "text": "切片自检：docs[0].text[100023:103811] 以本章标题开头，长度 3788，sha256=c34af536be804a496fcfdb898d27b4bc9bcce1fc2d174d63c8a596e581666677",
+      "result": "pass"
+    },
+    {
+      "text": "47 条区间外引用全部显式 inRange=false；16 条章号标签与全文章节索引逐条比对 0 处不符",
+      "result": "pass"
+    },
+    {
+      "text": "行覆盖独立重算 91/97 非空行，未覆盖行号 [10,62,74,100,162,191] 与候选自报完全一致",
+      "result": "pass"
+    },
+    {
+      "text": "CE1 可证伪：'我是啊' 所在的原文句是「“我是啊。”许七安说。」，候选 tasks[5].action.text 却写成铃音所说",
+      "result": "fail-in-candidate",
+      "cmd": "python3 -c \"import json;d=json.load(open('loop/state/out/read_dafeng_L1_0033.candidate.json'));print(d['tasks'][5]['action']['text'])\""
+    },
+    {
+      "text": "CE2 可证伪：区间内 '绿娥' 出现 3 次（非候选所说的 2 次），且前厅段 [100296,101401) 内 0 次",
+      "result": "fail-in-candidate",
+      "cmd": "python3 -c \"import json;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];print(t[100023:103811].count('绿娥'), '绿娥' in t[100296:101401])\""
+    },
+    {
+      "text": "CE3 可证伪：晚饭场景 [102801,103334) 内 '许新年' 出现 0 次；其两次发言均在「书房！」(103330) 之后",
+      "result": "fail-in-candidate",
+      "cmd": "python3 -c \"import json;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];print('许新年' in t[102801:103334])\""
+    },
+    {
+      "text": "REV2/REV3/REV4 可证伪：'11月16日'、'马上二十岁'、'血迹' 均在区间内，但在候选命题字段（tasks/states/knowledgeGaps 的 text）中 0 次；母亲成命 101446 早于女儿请求 102993 且其间无告知",
+      "result": "gap-confirmed"
+    },
+    {
+      "text": "反向验证覆盖面：源文每个 6-gram 在候选序列化文本中的缺席扫描结果为 0，证明引文覆盖穷尽，遗漏在语义抽取层而非定位层",
+      "result": "pass"
+    }
+  ],
+  "auditScript": "/tmp/cl_audit_0033.py",
+  "auditCmd": "python3 -B -s /tmp/cl_audit_0033.py",
+  "auditNote": "审计脚本为一次性探针，放在 /tmp（未写入项目 docs/、tests/），仅做只读重算，不修改任何文件。核心一行可复现命令见 assertions。",
+  "sourceHashes": {
+    "data/cache/9b676d7031b1bcd3b8377a18.docs.json": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "loop/state/out/read_dafeng_L1_0033.candidate.json": "9baaafc70f0e2ca1113ef6b6868459c2d082f192aeac3b0931302d17eb789c80"
+  },
+  "changes": [
+    {
+      "path": "loop/state/out/verify_dafeng_L1_0033.verdict.json",
+      "kind": "append-only",
+      "note": "本轮唯一写入（任务 writes 指定路径）。未改 js/ css/ index.html serve.py narrative.py scripts/ tests/ docs/ data/ 等受保护路径；未改被复核候选（其 sha256 仍为 9baaafc70f0e2ca1113ef6b6868459c2d082f192aeac3b0931302d17eb789c80）。"
+    }
+  ],
+  "remaining": [
+    "CE1–CE3 三处缺陷须由原提交者或后续合并任务修正；本复核只读候选，未改动被复核文件（sha256 仍为 9baaafc70f0e2ca1113ef6b6868459c2d082f192aeac3b0931302d17eb789c80）。",
+    "REV1–REV5 五条漏抽建议补入候选；本复核只列证，未代写。REV4（母亲已改口而女儿不知情、二人同席）与 REV3（血迹无解释）建议优先补为 knowledgeGap / openThread。",
+    "候选 semanticReview=not-performed 是正确自述，本次复核也**不**代替它完成语义审查——本文件只对「抽取项与原文的对应关系」负责。",
+    "本区间 3 处存疑（今早/下午口径、paratext 边界 2 字符、REV5 相对位置措辞）未判 fail，留待原提交者或后续轮次处理。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/verify_dafeng_L1_0033.verdict.json"
+    ]
+  },
+  "submittedAt": "2026-10-08T00:33:25Z",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-08T00:33:25Z"
+  },
+  "verifyState": "pending"
+}

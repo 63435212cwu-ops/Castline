@@ -1,0 +1,302 @@
+{
+  "task": "read:dafeng:L0:0000",
+  "agent": "w-dafeng-0",
+  "status": "done",
+  "summary": "精读《大奉打更人》第一章 牢狱之灾，原文区间 codepoint [35,3106)（3071 字，实际落在 docs[0].text 上）。产出 tasks[5]（五元组，缺项一律 null 并附 resultNote/costNote）、causeEdges[9]（每条带机制，其中 2 条 inferred、1 条 dialogue）、states[7]、knowledgeGaps[5]、foreshadows[2]（均显式标 unresolved-in-range）+ rejectedForeshadows[3]、characterClaims[6]（人物说法 vs 叙述事实分列）、openThreads[3]、unknowns[8]、selfCritique[4]。全部 138 条引文由脚本按“段内行号”构造（非手打），并已用 docs[0].text.find(quote) 独立重验：0 失败，区间内唯一命中，start/end 与源哈希一致。语义未核验，semanticReview 保持 not-performed。",
+  "evidence": [
+    {
+      "path": "loop/state/out/read_dafeng_L0_0000.candidate.json",
+      "sha256": "7fa9925116b690cb4783892013fa4f29ec6ff7dcbd0e68eca81c4cbfe7c03005",
+      "kind": "candidate-read-output"
+    },
+    {
+      "path": "data/cache/9b676d7031b1bcd3b8377a18.docs.json",
+      "sha256": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+      "kind": "source-text (只读引用，未修改)"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "源文件哈希与任务 sourceHash 一致：sha256(data/cache/9b676d7031b1bcd3b8377a18.docs.json) == fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+      "result": "pass",
+      "cmd": "python3 -c \"import hashlib;print(hashlib.sha256(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json','rb').read()).hexdigest())\""
+    },
+    {
+      "text": "原文切片长度与任务声明一致：len(docs[0].text[35:3106]) == 3071；切片 sha256 = 76889b51de3a2fbe1377f413157b922197fc9106d7d7d11cc692b357eeb2a3c7（已写入候选 source.segmentSha256）",
+      "result": "pass",
+      "cmd": "python3 -c \"import json,hashlib;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];s=t[35:3106];print(len(s),hashlib.sha256(s.encode()).hexdigest())\""
+    },
+    {
+      "text": "全部 138 条引文逐字命中且偏移自洽：对每条断言跑 text[start:end]==quote 且 text.find(quote)>=0 且 35<=start<end<=3106，并核对 sourceHash 字段",
+      "result": "pass",
+      "cmd": "python3 -B -s /tmp/build_dafeng_L0_0000.py --verify   # 输出：引文条目：138  失败：0"
+    },
+    {
+      "text": "引文不是手打的：脚本只按“段内行号”整行 strip 提取（函数 L(n)），构造时即校验 find() 唯一命中，命中失败直接 SystemExit，人无法把错引文写进去",
+      "result": "pass",
+      "cmd": "python3 -B -s /tmp/build_dafeng_L0_0000.py --write   # 输出：引文条目：138，区间内唯一命中，全部通过构造性校验"
+    },
+    {
+      "text": "区间末句就是索要卷宗的问句，故 tasks[0].result(tasks 里是 task_xu_qian_self_rescue/…get_casefile) 记 null 而非成功：segmentTail 指向 '“你能弄到卷宗吗？税银丢失案的卷宗。”'，其后仅 '------------' 分隔符",
+      "result": "pass",
+      "cmd": "python3 -c \"import json;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];print(repr(t[35:3106][-60:]))\""
+    },
+    {
+      "text": "人物说法未被当成叙述事实：许新年“三百两打点士卒”“已被革除功名”两处 claimStatus=dialogue 且 characterClaims.narratorConfirmed=false；许七安“酒精中毒”“入贱籍”“你想自尽？！”三处标 protagonist-inference/质问未确认",
+      "result": "pass"
+    },
+    {
+      "text": "未把‘时间相邻/同场景’当因果：9 条 causeEdges 每条都写了 mechanism 字段（身份+律令 / ‘因为…因此’显式句 / ‘这意味着’推论 / 信息门槛+人身限制等），其中 cause_deadlock_to_request 与 cause_infer_to_suicide_question 明标 inferred",
+      "result": "pass"
+    },
+    {
+      "text": "未把‘一次出现’当伏笔：仅 2 处有明确铺设且本区间未回收（卷宗、自尽质问+‘活下去’），均标 unresolved-in-range；把‘系统’‘二哈’‘前世醉酒’三条移入 rejectedForeshadows 并写明拒收理由",
+      "result": "pass"
+    },
+    {
+      "text": "没有冒充语义核验：候选 semanticReview='not-performed'，并附 semanticReviewNote 说明本文件只做了引用定位核验",
+      "result": "pass"
+    },
+    {
+      "text": "未写编造字段：缺项一律 null（tasks 里的 result/cost、task_throne 的 obstacle、foreshadows 的 payoff），并附 <field>Note 说明为何是 null，未填 0/0.5/‘未提及’以外的编造值",
+      "result": "pass"
+    },
+    {
+      "text": "改动只落在任务 writes 指定的两个路径（loop/ 前缀属 append-only，非受保护路径）；未触碰 js/ css/ index.html serve.py narrative.py scripts/ tests/ docs/ data/",
+      "result": "pass",
+      "cmd": "git status --porcelain | grep -E '^(.{2}) (js/|css/|index.html|serve.py|narrative.py|scripts/|tests/|docs/|data/)' | wc -l   # 本轮未新增此类改动"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/read_dafeng_L0_0000.candidate.json",
+      "kind": "append-only"
+    },
+    {
+      "path": "loop/state/out/read_dafeng_L0_0000.json",
+      "kind": "append-only"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/9b676d7031b1bcd3b8377a18.docs.json": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+  },
+  "remaining": [
+    "语义核验未做：本文件只完成‘引用定位核验’。每条断言是否符合上下文语义、是否有误读，需独立复核者对着原文判。semanticReview 保持 not-performed。",
+    "本区间只有第一章开头，故事未完成：税银如何丢失、十五万两去向、许平志是否被斩、女眷是否入教坊司、卷宗是否到手、许新年生死意图——全部未写，已进 unknowns，不用区间外内容补写。",
+    "图谱缓存 data/cache/9b676d7031b1bcd3b8377a18.json 里的 tasks/causeEdges/characterStates 覆盖的是全书（引用到第三章等），与本章区间不可比；本轮只把它的 synopsis 当对照，未作为证据，也没有据它写任何一条断言。",
+    "‘许新年其实关心堂哥’等 4 处解读已在 selfCritique 里逐条交代（含我为何仍这样判断），复核者若判为过度解读，可直接降级或删除该条，不影响其余引文。",
+    "3 条引文（'系统不搭理他。'、'寂静无声。'、'无解！'）在整篇 doc 中多次出现；脚本已强制选取落在 [35,3106) 内的那一次并记录在 quoteWarnings，但整篇去重未做。",
+    "未跑任何 GPU/浏览器测试（本任务不需要，且 GPU 全局串行）；未用 quoteLocationOnly 之外的能力。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/read_dafeng_L0_0000.candidate.json",
+      "loop/state/out/read_dafeng_L0_0000.json"
+    ]
+  },
+  "reproduce": {
+    "build": "python3 -B -s /tmp/build_dafeng_L0_0000.py --write",
+    "verify": "python3 -B -s /tmp/build_dafeng_L0_0000.py --verify",
+    "builderSha256": "05a690d0dc7b30d17e8bf26a9c3b1597fe389b47e64615458bd86ae655a2f99f",
+    "note": "构建脚本放在 /tmp（非仓库路径），避免往受保护路径写文件；脚本内容已按 builderSha256 固定，可要求复核者按此哈希核对。"
+  },
+  "submittedAt": "2026-10-07T18:30:45Z",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-07T18:30:45Z"
+  },
+  "verifyState": "partial",
+  "reviews": [
+    {
+      "reviewer": "w-verify-0",
+      "at": "2026-10-07T18:45:07Z",
+      "verdict": "partial",
+      "notes": "总体判断：候选的**引用层**是干净的、可机器复现的 —— 276/276 逐字命中、偏移一致、多命中引文的出现次数声明属实，没有编造人物/事件/结局，没有把区间末尾当成功，人物说法与叙述事实分列得很细（characterClaims/cl_*），foreshadows 全部显式 unresolved-in-range，semanticReview 诚实保持 not-performed。这些是这份候选最有价值的部分。缺陷集中在**措辞的越界**而非**事实的编造**：把“起身欲离”写成“已离开”（tasks[3].result、states[4].anchor），把第一人称内省标成 narrator（tasks[0].obstacle，且该条 text 已把归属写对，仅标签需校准），以及一个排他量词“唯一”（causeEdges[8]）。因此判 partial 而非 fail：fail 会连带丢弃大量已核验可用的条目，partial 让发布方按 usableVsDiscard 精确删除/降级三处即可。反向验证的自我审查：我列的第 5 条（外貌/牢房环境）可能本就不属抽取范围，已在该条 why 里如实标注，不作为判分依据；第 3 条“唯一”我未能找到证伪它的原文（原文既未肯定也未否定其他族人能否走动），故按纪律记为存疑。不确定处：tasks[1] 把“呼唤系统失败”记为 result=失败 —— 该否定结论在原文有直述（“没有系统，竟然没有系统！”），我判定这不属于“结束当成功”，故未列为反例，但它是本区间内唯一一处把否定写成 result 的地方，留档备查。",
+      "counterExamples": [
+        {
+          "claim": "tasks[3].result.text = '已发生：完成探视告知并离开' —— 把“离开”当作已完成的结果；states[4].anchor 同错（“说完‘活下去’后决然离开”）。",
+          "quotes": [
+            {
+              "quote": "说罢，他决然的踏步离开！",
+              "start": 3008,
+              "end": 3020,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "docOccurrences": 1,
+              "inRangeOccurrences": 1
+            },
+            {
+              "quote": "许新年顿住，沉默的看着他。",
+              "start": 3053,
+              "end": 3066,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "docOccurrences": 1,
+              "inRangeOccurrences": 1
+            },
+            {
+              "quote": "“等等！”许七安手伸出栅栏，抓住他的衣袖。",
+              "start": 3026,
+              "end": 3047,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "docOccurrences": 1,
+              "inRangeOccurrences": 1
+            },
+            {
+              "quote": "“你能弄到卷宗吗？税银丢失案的卷宗。”",
+              "start": 3072,
+              "end": 3091,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "docOccurrences": 1,
+              "inRangeOccurrences": 1
+            }
+          ],
+          "why": "原文 3008 写许新年“决然的踏步离开”，但 3026 许七安抓住其衣袖喊“等等！”，3053 他“顿住”，区间最后一实句（3072）是悬置的问句。也就是说探视在本区间内**没有结束**，这正是候选自己在 tasks[0].resultNote 里写的“全段停在问句上”。把“离开”写成已完成结果与该红线冲突。修正：tasks[3].result 应只记到“被告知后起身欲离、被叫住”，或整体降级为 unknowns。注：这条不影响 tasks[3] 其余部分（自述行贿、探视告知均有原文引证）。",
+          "severity": "must-fix"
+        },
+        {
+          "claim": "tasks[0].obstacle 标 claimStatus=narrator，但其核心内容来自第一人称内省（“我是炼精巅峰……越狱是不可能的”）；knowledgeGaps[4].basis=explicit 同源。",
+          "quotes": [
+            {
+              "quote": "我是炼精巅峰，身体素质强的吓人.....但在这个世界属于不屈白银，越狱是不可能的.....",
+              "start": 1584,
+              "end": 1629,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "docOccurrences": 1,
+              "inRangeOccurrences": 1
+            },
+            {
+              "quote": "许家并非大族，族人分散各地，而整整十五万两的税银被劫，谁敢在这个节骨眼上求情？",
+              "start": 1648,
+              "end": 1687,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "docOccurrences": 1,
+              "inRangeOccurrences": 1
+            }
+          ],
+          "why": "“我是炼精巅峰……越狱是不可能的”是第一人称内心判断，不是叙述者旁白。候选自己在 selfCritique[1] 立了标准（“我穿越了....”只记为主角认定，不写叙述证实超自然事实），states[1]/characterClaims/cl_* 也照此办理，唯独 tasks[0].obstacle 标成 narrator。【从轻认定】该条 text 本身已写“越狱被自己判定为不可能”，把归属讲对了，因此这是**标签校准**问题而非内容编造：只需把 claimStatus 降为 protagonist-inference / basis 改为 inferred，或统一改写为“许七安自认”，不必丢弃该条。",
+          "severity": "label-fix"
+        },
+        {
+          "claim": "causeEdges[8].from 断言堂弟是“此刻唯一能自由走动的许家人”。",
+          "quotes": [
+            {
+              "quote": "因为婶婶讨厌他的关系，许家除了二叔，其他人并不怎么待见许七安。至少堂弟堂妹不会表现的与他太过亲近。",
+              "start": 2515,
+              "end": 2564,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "docOccurrences": 1,
+              "inRangeOccurrences": 1
+            },
+            {
+              "quote": "许家并非大族，族人分散各地，而整整十五万两的税银被劫，谁敢在这个节骨眼上求情？",
+              "start": 1648,
+              "end": 1687,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "docOccurrences": 1,
+              "inRangeOccurrences": 1
+            },
+            {
+              "quote": "许新年在京都赫赫有名的白鹿书院求学，颇受重视，又是新晋举人。因此，二叔出事后，他没有被下狱，但不允许离开京都，多天来一直各方奔走。",
+              "start": 2674,
+              "end": 2739,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "docOccurrences": 1,
+              "inRangeOccurrences": 1
+            }
+          ],
+          "why": "【存疑级，单独不足以判 fail，按纪律记录】原文出现“堂弟堂妹”（复数）并写“许家并非大族，族人分散各地”，但没有给出“唯一”这一排他量词，也没有逐一交代其他族人的下落。“唯一”是候选的强化措辞，超出原文证据。该 edge 已标 basis=inferred，建议仅删去“唯一”二字，或改写为“此刻在场且被写明能走动的许家人”。",
+          "severity": "downgrade"
+        }
+      ],
+      "reverseChecks": [
+        {
+          "found": "候选完全未覆盖：父死因/母病逝（十九年前‘山海战役’）与叙述者对“父母双亡”的戏谑句 —— 候选 JSON 中“父母/父亲/母亲/老卒/山海/双亡”命中数均为 0。",
+          "quotes": [
+            {
+              "quote": "父亲是老卒，死于十九年前的‘山海战役’，随后，母亲也因病去世......想到这里，许七安稍稍有些欣慰。",
+              "start": 464,
+              "end": 515,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "docOccurrences": 1,
+              "inRangeOccurrences": 1
+            },
+            {
+              "quote": "众所周知，父母双亡的人都不简单。",
+              "start": 521,
+              "end": 537,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "docOccurrences": 1,
+              "inRangeOccurrences": 1
+            }
+          ],
+          "why": "这是原主身世的可核对事实（也是“山海战役”这一名词在本区间的唯一出处），states[0] 只记了捕快身份与搬离许宅，未记双亲。"
+        },
+        {
+          "found": "候选完全未覆盖：自救方案之所以可信的**能力前提**由原文直述（警校毕业、理论/逻辑/推理能力极强、阅读过无数案例）。候选只引“或许可以试着从破案这方面入手”，并把这条链的机制标为 inferred。",
+          "quotes": [
+            {
+              "quote": "他是正儿八经的警校毕业，理论知识丰富，逻辑清晰，推理能力极强，又阅读过无数的案例。",
+              "start": 1768,
+              "end": 1809,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "docOccurrences": 1,
+              "inRangeOccurrences": 1
+            }
+          ],
+          "why": "causeEdges[4]/[8] 把“想到破案追银”的关键环节记为候选自己的推断；原文其实用一句 explicit 的能力陈述托住了它。属遗漏的显式因果前提，应补引用。"
+        },
+        {
+          "found": "候选完全未覆盖：原主情绪对许七安的反作用（“不受控制的，心里涌起了悲伤”）—— 候选 JSON 中“悲伤/涌起/不受控制”命中数均为 0。",
+          "quotes": [
+            {
+              "quote": "不受控制的，心里涌起了悲伤.....我明明都不认识他。",
+              "start": 2910,
+              "end": 2937,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "docOccurrences": 1,
+              "inRangeOccurrences": 1
+            }
+          ],
+          "why": "这是 states[6]（与堂弟关系）与 states[4]（行动性）之间缺失的一环：身体/原主情绪在“我明明都不认识他”的前提下仍不受控地发动。候选的 causeEdges[7] 只写了“主角推断→质问”，漏了这条被原文标为“不受控制”的触因。"
+        },
+        {
+          "found": "候选未覆盖流放之酷的**量化与定性**两句：发配“仅次于死刑的重刑”、“大部分被发配边境的犯人，都活不过十年”。（公平说明：候选已引“凄苦荒凉的边陲之地，在劳碌中度过下半辈子”，方向对，但缺这两句的分量。）",
+          "quotes": [
+            {
+              "quote": "荒凉，气候恶劣，大部分被发配边境的犯人，都活不过十年。而更多的人，还没到边陲就因为各种意外、疾病，死于途中。",
+              "start": 1162,
+              "end": 1216,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "docOccurrences": 1,
+              "inRangeOccurrences": 1
+            },
+            {
+              "quote": "在古代，发配是仅次于死刑的重刑。",
+              "start": 2049,
+              "end": 2065,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "docOccurrences": 1,
+              "inRangeOccurrences": 1
+            }
+          ],
+          "why": "“两天后流放”之所以构成 tasks[0].objective 的利害，靠的是这两句；候选引的是同一段的抒情句，而未引“活不过十年／仅次于死刑”这一可核对的量级。属覆盖度不足（非编造），建议在 tasks[0].objective 或 states[0] 补引。"
+        },
+        {
+          "found": "次要未覆盖：许新年外貌（月白色袍子/玉簪/剑眉星目/嘴唇很薄）与牢房环境（石块墙壁/三个方块窗/破烂草席）等场景事实。",
+          "quotes": [
+            {
+              "quote": "书生穿着月白色的袍子，乌黑的长发束在玉簪上，模样甚是俊俏，剑眉星目，嘴唇很薄。",
+              "start": 2301,
+              "end": 2340,
+              "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+              "docOccurrences": 1,
+              "inRangeOccurrences": 1
+            }
+          ],
+          "why": "【我自己的反向验证可能不成立，如实记录】这些属场景描写，未必在“任务/因果/状态/伏笔”的抽取范围内，我不据此判 fail，只作为覆盖度参考。"
+        }
+      ]
+    }
+  ]
+}

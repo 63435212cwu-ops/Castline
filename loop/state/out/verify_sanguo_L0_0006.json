@@ -1,0 +1,114 @@
+{
+  "task": "verify:sanguo:L0:0006",
+  "agent": "w-dafeng-2",
+  "status": "done",
+  "summary": "独立反向复核《三国演义》第七回（原文 [30001,34719)，4718 字）：先自读原文再核候选。469 条引文全部逐字命中/落区间/sourceHash 一致（0 失配），切片内唯一性 0 违例；覆盖率 98.54%、47 处直接引语全覆盖、markerCensus 与 connectiveAudit 逐位复算相符、basisDistribution 穷举口径后复现，未发现任何编造的人物/地点/结局，9/11 条 notSuccess 判定成立。判 partial：5 处可机器判定的硬错误（CE1 T4/T5 把「刺于马下」写成「刺死」并标 explicit，而 59 字后原文仍写麴义斩将搴旗；CE2 C14 把本单元内 31476 的句子标成「前一回（第七回前半）」；CE3 U06 称「将星」全书只出现 1 次，其自带复现命令实打输出 12；CE4「本单元共 6 处 却说」与表内 7 条不符；CE5 审计词表漏掉限定副词「独」——恰是它自己引用的关键句），另反向验证发现 6 项原文明确存在但候选未在任何断言层覆盖的事实。反对意见均已给逐字原文引证与可复现偏移。",
+  "evidence": [
+    {
+      "path": "loop/state/out/verify_sanguo_L0_0006.verdict.json",
+      "sha256": "8531b1b995bc770e8707a7492959bec0b62f31377c7661f4e827bffb17cdcd88",
+      "kind": "verifier-verdict"
+    },
+    {
+      "path": "loop/state/out/read_sanguo_L0_0006.candidate.json",
+      "sha256": "2f4c04ec1ba3aae185dbc2d1f0a1c1ff74a3f30c90cc7f0c81cd8af9c14402e5",
+      "kind": "reviewed-candidate"
+    },
+    {
+      "path": "data/cache/152e2a6eed94f1075e7e7070.docs.json",
+      "sha256": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+      "kind": "source-text"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "全部 469 条候选引文节点机械复算：TEXT[s:e]==quote、切片内 find 唯一、[s,e)⊆[30001,34719)、sourceHash 一致——四项均 0 失配；distinct spans 119 与自报相符",
+      "result": "pass"
+    },
+    {
+      "text": "独立复算 coverage：469 条引文并集做字符级掩码，未覆盖 18 段共 69 字符、每段去空白 <4 字，charCoverage=98.54% 与自报逐位相符；47 处 “…” 引号各 47 个无未闭合且全部被已登记引文完整包含",
+      "result": "pass"
+    },
+    {
+      "text": "独立复算 markerCensus 6 类（使/令/遣/差/便/欲）的 count 与 offsets、connectiveAudit 51 条 offset 处 text[o:o+len(marker)]==marker——全部相符",
+      "result": "pass"
+    },
+    {
+      "text": "独立复算 counts 与 basisDistribution：11/42/21(13+8)/8/8/20/12/51/6/47 全对；basis 三元组 {explicit:130,derived:13,inferred:3} 穷举 12 分区组合后仅一种口径可复现",
+      "result": "pass"
+    },
+    {
+      "text": "原文区间与哈希自检：t[30001:30020]=='第七回　袁绍磐河战公孙　孙坚跨江击刘表'、t.find('第八回')==34719、file sha256==2988ce6e…、slice sha256==22e1b4c8…（与候选 source 声明一致）",
+      "result": "pass"
+    },
+    {
+      "text": "随机抽 5 条 quote（30279/34579/32520/30217/33684）用切片 find 与全文 find 双向复核：5/5 逐字命中、偏移 delta 全为 0",
+      "result": "pass"
+    },
+    {
+      "text": "CE1 越权判定反证：31708「一枪刺麴义于马下」、31767「回报麴义斩将搴旗，追赶败兵」——相隔 59 字，原文未写「刺死」（切片内出现 0 次），候选 T4.cost 与 T5.action(basis=explicit) 却写「刺死麴义」，且 unknowns 0 处登记该张力",
+      "result": "fail"
+    },
+    {
+      "text": "CE2 出处标注反证：C14 引的「傍竖大红圈金线帅字旗于马前」全局偏移 31476 ∈ [30001,34719)，就在本单元内，候选 mechanism 却标为「前一回（第七回前半）」",
+      "result": "fail"
+    },
+    {
+      "text": "CE3 自报数字反证：原样重放候选 U06 自带命令得「将星 count 12」，与其 finding「整本书只出现 1 次」矛盾；真正成立的命题是「本单元内只出现 1 次」（切片复算=1）",
+      "result": "fail"
+    },
+    {
+      "text": "CE4 自报处数反证：切片内「却说」实为 7 处（30023/30619/31756/32186/32443/32796/33721），connectiveAudit 带「却说」条目也是 7 条，候选 note 却写「本单元共 6 处」且未标口径（32796 处非段首）",
+      "result": "fail"
+    },
+    {
+      "text": "CE5 审计覆盖缺口：限定副词「独」在切片内 2 次（30493/34151），既不在 51 条关联词审计也不在 6 类标记普查；同段「只」11 次、「但」2 次、「止」1 次同样 0 审计——审计口径按词表选，非穷举",
+      "result": "fail"
+    },
+    {
+      "text": "反向验证 6 项：R1 交叉射击命令「令在左者射公孙瓒右军，在右者射公孙瓒左军」(31387) 从未进入断言层；R2「盟友」全书 0 次却被写进 T1 的 explicit obstacle；R3 袁术书信第二项指控「今本初又与表私议欲袭江东」(32542) 未单独登记为不可验证；R4 黄盖两次部署（守船 33193／进泊汉江 33441）只引不断言；R5 孙坚家族五个字号（伯符/叔弼/早安/女名仁/公礼）落在引文里但 prose 0 命中；R6 麴义被刺后仍活动未登记",
+      "result": "pass"
+    },
+    {
+      "text": "幻觉/越权检查：候选 prose 全部实体名（含严纲/张虎/陈生/吕公/桓阶/孙静/沮授/许攸/田丰/辛评/马日磾/赵岐/蒯越/铁脊矛/门旗/羌人 等）回原文逐字核对——未发现原文没有的人物、地点、事件、结局；「张飞/孙权/孙静」三处均为元语言引用（拒绝假边、拒绝把名单当伏笔、叙述称名），非幻觉；9 条 notSuccess 无一把结束当成功",
+      "result": "pass"
+    },
+    {
+      "text": "误杀检查：12 条 rejectedEdges 逐条回核——未发现词表/正则造成的硬误杀；意外发现 2 处「条件边被写成无条件边」（蒯良计「若能取胜，放起连珠号炮」的条件性在 C37 的 from→to 形态中丢失）与 1 处「成立但不单列」的边只留在拒绝表（孙坚之死→江东诸军大乱），已记入 miskillCheck 供下游判断",
+      "result": "pass"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/verify_sanguo_L0_0006.verdict.json",
+      "kind": "append-only"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/152e2a6eed94f1075e7e7070.docs.json": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+    "loop/state/out/read_sanguo_L0_0006.candidate.json": "2f4c04ec1ba3aae185dbc2d1f0a1c1ff74a3f30c90cc7f0c81cd8af9c14402e5",
+    "loop/state/out/verify_sanguo_L0_0006.verdict.json": "8531b1b995bc770e8707a7492959bec0b62f31377c7661f4e827bffb17cdcd88"
+  },
+  "remaining": [
+    "判 partial 的 5 处硬错误已逐条给出修法与可复现偏移（见 counterExamples），但**我没有代改候选文件**——候选 read_sanguo_L0_0006.candidate.json 复核前后哈希均为 2f4c04ec…，未被我修改一个字节；verdict 文件里也写明哪些条目可保留、哪些必须降级。",
+    "反向验证另有 6 项事实未落盘为条目（R1 交叉射击命令、R3 袁术书信第二指控、R4 黄盖两次部署、R5 五个字号），已建议补为条目或 unknowns 但未代写。",
+    "未做跨单元核对：未打开第八回核对回末悬置（桓阶性命、父尸是否换回、黄祖是否放回）——任务明确要求不读下一回来补答案，我遵守。",
+    "我的反向验证局限：R2/R4/R5 按「未在任何磁盘 prose 出现」判定；候选的生成器 /tmp/castline-artifacts/q6_core.py 已不在磁盘上，若中间层讨论过这些事实我无法看到——我只能对磁盘上这一份候选负责。",
+    "未跑 GPU/浏览器测试（任务未要求，且全局串行）。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/verify_sanguo_L0_0006.verdict.json"
+    ]
+  },
+  "submittedAt": "2026-10-09T14:56:02Z",
+  "wallClockSeconds": 2599,
+  "wallClockFrom": "lease.startedAt",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-09T14:56:02Z"
+  },
+  "verifyState": "pending"
+}

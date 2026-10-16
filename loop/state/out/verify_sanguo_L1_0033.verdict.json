@@ -1,0 +1,214 @@
+{
+ "verdict": "partial",
+ "task": "verify:sanguo:L1:0033",
+ "verifier": "w-dafeng-3",
+ "verdictOf": "read:sanguo:L1:0033",
+ "candidateFile": "loop/state/out/read_sanguo_L1_0033.candidate.json",
+ "candidateAgent": "w-read-2",
+ "scope": {
+  "method": "按 ROLES/VERIFIER.md 顺序未换：① 先独立读 docs[0].text[171704,176133) 全 4429 codepoint（切片落盘 /Volumes/资源库/我的资源/回滚点/verify-0033/slice.txt，带行号偏移版 slice.numbered.txt），之后才打开候选；② 抽取项全量核对：254 条带偏移 quote 逐条机器复算；③ 反向验证：把候选全部字段序列化成「断言空间」（2188 个字符串字段，143695 字符），再对原文逐事实探针求差；④ 误杀检查：逐条审 4 条 rejectedEdges 的拒因是否被区间内原文支持；⑤ 幻觉/越权检查：40 个专名回原文计数 + 结果类词扫描；⑥ 固定种子 random.seed(33) 抽 5 条去重引文 find 核验。",
+  "reproduce": [
+   "python3 -B -s /Volumes/资源库/我的资源/回滚点/verify-0033/audit.py     # 254 条引文/偏移/哈希/出现次数",
+   "python3 -B -s /Volumes/资源库/我的资源/回滚点/verify-0033/gaps.py      # 区间未覆盖跨度",
+   "python3 -B -s /Volumes/资源库/我的资源/回滚点/verify-0033/assertspace.py # 断言空间 + 事实探针",
+   "python3 -B -s /Volumes/资源库/我的资源/回滚点/verify-0033/check2.py    # 指标复算 / 五栏共用引文 / 专名",
+   "python3 -B -s /Volumes/资源库/我的资源/回滚点/verify-0033/check7.py    # coverage 记账复算",
+   "python3 -B -s /Volumes/资源库/我的资源/回滚点/verify-0033/final.py    # 反向发现逐条带偏移",
+   "全部脚本只读仓库，输出落 /Volumes/资源库/我的资源/回滚点/verify-0033/。"
+  ],
+  "hashes": {
+   "docSha256": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+   "taskDeclaredSourceHash": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+   "candidateDeclaredSourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+   "sliceSha256": "f87df3f4b992e78a1114e22aadcdea559c67e81c938010cc966641a60268a199",
+   "candidateDeclaredSliceSha256": "f87df3f4b992e78a1114e22aadcdea559c67e81c938010cc966641a60268a199",
+   "sliceSha256Match": true
+  },
+  "sourceHashVerdict": "候选在 source.sourceHashDiscrepancy 里的解释**经独立复算成立**：data/cache/152e2a6eed94f1075e7e7070.docs.json 与 f0b45e85aac6c95e584075a2.docs.json 的 sha256 均为任务冻结的 2988ce6e…，且与本候选实读的 fe42d01f3826fe8096f86614.docs.json **解析后完全相等**（json.load 后 a==b 为 True，docs[0].text 逐字相同、长度同 607191，仅对象键序 path,name,text,kind / kind,name,path,text 不同）。故两套哈希指向同一文本，不构成引文风险。"
+ },
+ "locatingLayer": {
+  "result": "pass",
+  "quoteRefs": 254,
+  "uniqueQuotes": 164,
+  "verbatim": 254,
+  "offsetExact": 254,
+  "firstOccurrence": 254,
+  "inRange": 254,
+  "hashMatch": 254,
+  "occurrenceCountMatch": 254,
+  "failures": [],
+  "note": "254/254 全部满足 docs[0].text[start:end]==quote、start==text.find(quote)、[start,end)⊆[171704,176133)、sourceHash 与文件实际 sha256 一致；occurrencesInWholeDoc/occurrencesInSlice 声明值与实际计数 0 处不符。候选 metrics 的 22 项声明值全部复算一致（含 worldSettingsByKind、placeArrived/Mentioned、foreshadowsResolved/Unresolved、tasksWithNullField/NullAndNote、knowledgeGaps）。voice/insideQuotedSpan 254 条无矛盾（179 narration/False、75 speech/True）。"
+ },
+ "counterExamples": [
+  {
+   "claim": "T14_xuande_fu_xiangyang.objective 文本「刘备认为受刘表之命不能不去：既有兄命，不敢不从。」标 basis=explicit，依据引文「吾本不敢当此；既有兄命，不敢不从。」",
+   "quote": "遂与赵云即日赴襄阳。",
+   "why": "引文位于全文 174924，而「遂与赵云即日赴襄阳。」在 174792——引文晚于动身 **132 codepoint**，是刘备**到达襄阳之后**回答刘琦「特请叔父待客」的话（答应代为主持待客之礼），不是他决定赴会的原因。原文在决定处（174720）写的原因是采纳云长之言：「玄德曰：“云长之言是也。”」，随后「遂与赵云即日赴襄阳。」。故该引文支持的是「受兄命主持待客」，不支持「受命不能不去赴会」这一 objective。此为**引用与断言不对位**（定位层无误，语义归属有误），不是编造；修法二选一：把该栏改写为「到襄阳后接受代为主持待客之兄命」，或把 basis 由 explicit 降为 derived 并补 174720 处的决策引文。T14.action 已正确引到决策处的三句，故修复面仅此一栏。"
+  },
+  {
+   "claim": "coverage.narrativeChars=4379，同时 coverage.boilerplate 声明「切片末两行是站点页脚（「------------------」与「枫林晚 整理校对…」），在 coverage 中排除」",
+   "quote": "未知蔡瑁性命如何，且听下文分解。\n\n　　------------------",
+   "why": "页脚自 slice 下标 **4372** 起：「换行+换行+两个全角空格」+ 该破折号行 + 「枫林晚…」行，全长 57。而声明的 narrativeChars=4379 落在**破折号行内部**：SL[4372:4379] == '\\n\\n\\u3000\\u3000---'，即 narrativeChars 仍计入了页脚的 7 个 codepoint，与同一对象里 boilerplate 的「在 coverage 中排除」自相矛盾。按声明口径应为 4372（若按整行口径则为 4373）。此为**记账口径错误**，不影响任何引文与结论，但它使 coverage 的「正文 4379 字」不可复算。复现：python3 -B -s /Volumes/资源库/我的资源/回滚点/verify-0033/check7.py。"
+  }
+ ],
+ "reverseChecks": [
+  {
+   "found": "**本回最著名的情感段「髀肉复生」在候选的全部抽取项里没有落点**：既不是 task，也不是 state，也不是 themeReadings 的 support 正文；「髀肉」二字只在 unknowns.U3 的 evidence 括注里作为「如厕后的髀肉之叹」出现一次，其内容（功业焦虑）从未登记。",
+   "quote": "备往常身不离鞍，髀肉皆散；分久不骑，髀里肉生。日月磋跎，老将至矣，而功业不建：是以悲耳！",
+   "offsets": [
+    173697,
+    173741
+   ],
+   "context": "前接 173655「因见己身髀肉复生，亦不觉潸然流涕。少顷复入席。表见玄德有泪容，怪问之。」（173655-173697 共 166 codepoint 的整段在候选 254 条引文里无一条覆盖）。按 tasks 五元组口径，「功业不建」是刘备自陈的 objective/obstacle 级材料，按 states 口径是刘备「在荆州的处境」之外的另一条状态（志向受挫）。候选 ST2 只记了处境（被遣新野→赴襄阳险遭暗算），未记这条。"
+  },
+  {
+   "found": "**T12/W18 整条围绕「反诗」，但诗的四句正文从未被引用**，读者无法从候选中看到这首被嫁祸的诗到底写了什么；W18 的引文取的是「削去此诗」的销毁动作，T12.objective 取的是蔡瑁的谎报。",
+   "quote": "数年徒守困，空对旧山川。龙岂池中物，乘雷欲上天！",
+   "offsets": [
+    174289,
+    174313
+   ],
+   "context": "前接 174285「诗曰：“」。候选 T12.note 说「壁上那首诗是蔡瑁自己写的（「乃写诗一首于壁间」）」，但对诗的内容零引用；这段 29 codepoint 在候选引文里无覆盖。"
+  },
+  {
+   "found": "曹操「有五子、惟植性敏慧、平日最爱之」——这是 T1「留曹植与曹丕在邺郡造台」这一 result 的直接理由，候选零覆盖（「惟植性敏慧」「善文章」「平日最爱之」在候选断言空间中计数均为 0）。",
+   "quote": "原来曹操有五子，惟植性敏慧，善文章，曹操平日最爱之。",
+   "offsets": [
+    171920,
+    171946
+   ]
+  },
+  {
+   "found": "「表赠郭嘉为贞侯，养其子奕于府中」——与候选 W3 已引的「大封功臣」同属一句群的具体封赏动作，候选零覆盖（「贞侯」「奕于府中」「养其子」计数均为 0）；W3 的 explain 只写到「大封功臣、表赠郭嘉」而未记封号与养子于府。",
+   "quote": "又表赠郭嘉为贞侯，养其子奕于府中。",
+   "offsets": [
+    171993,
+    172010
+   ]
+  },
+  {
+   "found": "刘表两子的具体性格——这是 T9 立嗣两难的实际内容，候选 T9.obstacle 只引「废长立幼恐碍礼法／蔡氏掌军务」一段，对两个儿子本身的贤/柔懦/聪明零覆盖（「陈氏」「柔懦不足立事」「颇聪明」计数均为 0），两难因此缺了一半依据。",
+   "quote": "前妻陈氏所生长子琦，为人虽贤，而柔懦不足立事；后妻蔡氏所生少子琼，颇聪明。",
+   "offsets": [
+    173470,
+    173507
+   ]
+  },
+  {
+   "found": "刘禅出生的**系年**「建安十二年春」与伊籍的**籍贯字号**「乃荆州幕宾伊籍，字机伯，山阳人也」均零覆盖。后者尤其要紧：ST8.note 自己写「也没写他的官职除「荆州幕宾」以外的信息」，但支撑这句判断的原文（字机伯、山阳人）在候选 254 条引文里一条都没有引，属**判断有原文依据却未取证**。",
+   "quote": "玄德视之，乃荆州幕宾伊籍，字机伯，山阳人也。",
+   "offsets": [
+    172869,
+    172891
+   ],
+   "context": "同批零覆盖的具体事实还包括「建安十二年春，甘夫人生刘禅。」（172998-173012，NF1 只引了白鹤那句）、「此时曹操正统兵北征。」（173071-173081）。"
+  },
+  {
+   "found": "襄阳之会的**场面与座次**零覆盖：开筵的规格（杀牛宰马）与堂上座次（玄德主席、二公子两边、其余依次）在候选 254 条引文里无一条覆盖；T14.result 只写到「蔡瑁出郭迎接、意甚谦谨」与「见二公子俱在，并不疑忌」为止。",
+   "quote": "当日杀牛宰马，大张筵席。",
+   "offsets": [
+    175197,
+    175209
+   ],
+   "context": "紧接 175227「众官皆至堂中。玄德主席，二公子两边分坐，其余各依次而坐。」（175227-175255，28 codepoint）。同一段的「次日，人报九郡四十二州官员，俱已到齐。」（174942-174961）亦零覆盖——这场会的规模（九郡四十二州）与候选 W8 襄阳条目相关却未引。"
+  }
+ ],
+ "falseKillCheck": {
+  "result": "未发现误杀",
+  "detail": "逐条审 4 条 rejectedEdges（REJ1 请客→行刺、REJ2 窃听→心恨、REJ3 相马→救主、REJ4 刘禅异象→刘备事业）：四条拒因均由区间内原文支持——REJ1 的两面在同一段写出（「以示抚劝之意」/「就彼处谋之」）、REJ2 的「闻玄德此言，心甚恨之」是同一句内的同时刻状态、REJ3 原文确无以马为灵性来历的文字（跃溪用「忽」字带过）、REJ4 的异象在区间内只出现一次且随即被「故乳名阿斗」交代用途。未发现因词表/正则把真实因果挡掉的情形（本项目已知的计划100 西游「遂行」类误杀在本候选里无对应物：本候选的因果边 17 条已把「遂」「乃」「即」类连接词所在的动作链基本收全）。",
+  "grayZone": "一处**存疑**（不据此判 fail，按契约只记录）：T5_liubiao_huanma_qian_xinye.cost=null，理由写在 T5.costNote「本区间没有写刘表为送还这匹马付出的代价（马本是刘备所赠）」。但原文确有交还动作与交还物：「表听其言。次日请玄德饮宴，因言曰：“昨承惠良马，深感厚意。但贤弟不时征进，可以用之。敬当送还。”」——刘表把已到手的马交还，是可引证的「付出」。候选 selfCritique.SC1 已自行指出此判据可被反驳（「若复核者认为「送回一匹马」本身就是代价，T5.cost 应改写」）。我把它记为**判据分歧**而非误杀：按本题第 1 条「缺哪一项写 null，不要补一个听起来合理的值」的取向，把赠马退回记为 cost 属于偏宽的读法，两种都站得住；但若下游要统计「代价」分布，T5 会因这条口径而不一致。"
+ },
+ "hallucinationCheck": {
+  "result": "pass",
+  "detail": "40 个专名逐个回原文计数，候选引用的专名全部在区间内出现，无原文没有的人物/事件/结局：曹操9、荀攸1、曹植2、曹丕1、张燕1、郭嘉1、刘表12、刘备6、张武6、陈孙4、赵云12、张飞3、蔡瑁15、蔡夫人7、蒯越2、蒯良1、伊籍7、甘夫人2、刘禅1、阿斗1、刘琦2、刘琮1、孙乾1、文聘2、王威2、蔡和1、蔡中1、蔡勋1、荀彧1、孙权3、张鲁2、袁绍1、苏学士1。",
+  "notPerformed": "未发现候选把「结束」当「成功」：T2.result=null＋resultNote「南征刘表是否成行不在本区间内」、T1.objectiveStatus=partial_in_unit＋note「他日台成是曹操的预期」、U11「不写 result=成功（结束≠成功）」三处都按红线处理。",
+  "minorNaming": "候选用「关羽」作 T14.actor 与 note 的标签，而区间原文只作「云长」（「玄德曰：“云长之言是也。”」）。二者同指一人（关羽字云长），属现代通行名的归一化而非编造；但候选在引文里保留「云长」、在自写字段里用「关羽」，同一实体两种写法，建议统一或加一行说明。"
+ },
+ "quoteSpotCheck": {
+  "method": "random.seed(33)，对 164 条互异引文去重后抽 5 条，在 docs[0].text 上 find 一次",
+  "result": "5/5 逐字命中，偏移与声明一致，且均为该引文在全文的首次出现",
+  "samples": [
+   {
+    "quote": "操将所得袁绍之兵，共五六十万，班师回许都。",
+    "declared": [
+     171967,
+     171988
+    ],
+    "find": 171967,
+    "verbatim": true
+   },
+   {
+    "quote": "吾有心事，前者欲诉与贤弟，未得其便。",
+    "declared": [
+     173419,
+     173437
+    ],
+    "find": 173419,
+    "verbatim": true
+   },
+   {
+    "quote": "大军方北征而回，未可复动。且待半年，养精蓄锐，刘表、孙权可一鼓而下也。",
+    "declared": [
+     172029,
+     172064
+    ],
+    "find": 172029,
+    "verbatim": true
+   },
+   {
+    "quote": "瑁悔恨无及，乃写诗一首于壁间，径入见表曰：“刘备有反叛之意，题反诗于壁上，不辞而去矣。”",
+    "declared": [
+     174224,
+     174268
+    ],
+    "find": 174224,
+    "verbatim": true
+   },
+   {
+    "quote": "表曰：“可往新野请玄德待客。”",
+    "declared": [
+     174542,
+     174557
+    ],
+    "find": 174542,
+    "verbatim": true
+   }
+  ]
+ },
+ "selfCritiqueAudit": {
+  "result": "候选 SC8 的两处可疑字声明**经独立复算成立**",
+  "detail": "① 区间内「瑁」28 次、「瑚」1 次，且「瑚曰」仅 1 处（檀溪边蔡瑁答话），候选照录未改，正确。② 区间内开引号「“」75 次、闭引号「”」74 次，差 1，候选所称「今日妨吾」处引号未闭合属实（原文作「…今日妨吾！言毕，那马忽从水中涌身而起…」），候选所引片段止于「今日妨吾！」不含引号，逐字成立。两处声明都是真的，不是掩饰。",
+  "reworkOfCheck": "run 摘要称「见 reworkOf」；候选 JSON 顶层无 reworkOf 字段，但 run 记录 loop/state/out/read_sanguo_L1_0033.json 内确有 reworkOf，指针在同一文件内可解析，非断链。"
+ },
+ "usableVsDiscard": {
+  "usableAsIs": [
+   "tasks T1–T13、T15–T17",
+   "causeEdges CE1–CE17（CE15 已自标 unverified，处理正确）",
+   "rejectedEdges REJ1–REJ4",
+   "states ST1–ST13",
+   "foreshadows FS1–FS7",
+   "notForeshadows NF1–NF5",
+   "worldSettings W1–W25（placeState/itemStates/institution 三态字段齐全，16 地点=13 arrived+3 mentioned 复算一致）",
+   "notWorldSettings NW1–NW3",
+   "themeReadings TH1–TH2",
+   "speechAsClueNotFact SP1–SP13",
+   "unknowns U1–U15"
+  ],
+  "mustRepair": [
+   "T14_xuande_fu_xiangyang.objective：引文与断言不对位（见 counterExamples[0]）——改写文本或把 basis 由 explicit 降为 derived 并补 174720 决策处引文。",
+   "coverage.narrativeChars：4379 → 4372（见 counterExamples[1]），否则该字段不可复算。"
+  ],
+  "mustDowngradeOrAdd": [
+   "髀肉复生整段（173655-173741）应补为 state 或 task 级条目，或至少作为 TH1/ST2 的 support 引文；现仅在 U3 括注里被提及。",
+   "反诗四句正文（174289-174313）应补进 T12/W18 的 quoteRefs。",
+   "「有五子/惟植性敏慧/平日最爱之」（171920-171946）应补为 T1.result 的第二依据。",
+   "「表赠郭嘉为贞侯，养其子奕于府中」（171993-172010）应补进 W3 的引文或 explain。",
+   "「前妻陈氏所生长子琦…颇聪明」（173470-173507）应补进 T9.obstacle。",
+   "ST8.note 关于伊籍官职的判断缺引文支撑，应补「乃荆州幕宾伊籍，字机伯，山阳人也」（172869-172891）。",
+   "「九郡四十二州官员俱已到齐」（174942-174961）、「杀牛宰马/玄德主席」座次段（175197-175255）应补进 T14/W8 相关条目。",
+   "「建安十二年春，甘夫人生刘禅。」（172998-173012）应补进 NF1 或 W21。"
+  ],
+  "semanticReviewStance": "候选语义层**不可整批判 fail**：254/254 引文逐字可查、0 编造、0 幻觉，缺陷集中在「未覆盖」与两处记账/归属问题。故判 partial 而非 fail；反向发现按契约作为增量补入，不推翻既有条目。"
+ },
+ "notes": "总体判断：**定位层满分，抽取层有真实遗漏，故判 partial。** 候选的机器自检（254 条引文、22 项 metrics、voice/insideQuotedSpan）经我用**独立脚本从磁盘重读**全部复算通过，0 失败，其 sourceHash 差异解释也经复算成立——这不是「机制存在但不产生信息」的那类失败，引文层是真做了的。判 partial 的两条硬理由是：(1) T14.objective 的 explicit 引文位于其所述决策之后 132 codepoint（说「既有兄命」时刘备已在襄阳城内，是被请代为主持待客时的答复），引用与断言不对位；(2) coverage.narrativeChars=4379 与其自身 boilerplate 声明矛盾，仍计入页脚 7 个 codepoint。\n\n反向验证是本次最有产出的部分：候选把 4429 codepoint 里的 2755 覆盖为引文、1674 未覆盖，逐跨度审下来，**未覆盖里至少 8 处是原文明确的实质事实**，其中「髀肉复生」整段（含 173655-173697 的 166 字与 173697-173741 的 44 字独白）是本回最著名的一段却只以括注形式出现一次；「反诗」四句正文从未被引，而 T12/W18 整条都建立在这首诗上。这两条是我认为最该补的。其余 6 条（五子爱植、贞侯郭奕、二子性格、伊籍字号、九郡四十二州与座席、建安十二年）属具体事实的漏登记。\n\n不确定处与自我纠正：① 我的误杀检查**没有发现误杀**（4 条 rejectedEdges 拒因均可由原文支持，未发现计划100 西游「遂行」式的词表误杀）——这是与我预期相反的结果，如实记下，不为了凑一条反对意见而把 T5.cost 的口径分歧升级为误杀。② T5.cost 我记为「存疑」而非误杀，因为原文「敬当送还」确实可读作付出，但把赠马退回算 cost 属偏宽读法，且候选 SC1 已自行披露该判据可被反驳——两种读法都站得住。③ 我用「候选断言空间 vs 原文探针」做反向验证，方法上只能发现「候选一个字都没提到」的遗漏；对「提到了但说浅了」的遗漏（如 W16 把铜雀台记 mentioned 是否过严）这个方法不敏感，故我的 reverseChecks 是**遗漏的下界**，不是全部遗漏。④ 候选 SC4 自承 CE15（呼喝→马跃溪）的「言毕」是否算因果标记是最脆一处：我复核原文后认同其判 unverified 的处理——原文在同段只给了先后顺序，未给机制，升级为 explicit 会把时间相邻写成因果，正是计划禁止的。"
+}

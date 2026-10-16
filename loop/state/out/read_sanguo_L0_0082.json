@@ -1,0 +1,477 @@
+{
+  "task": "read:sanguo:L0:0082",
+  "agent": "w-xiyou-1",
+  "status": "done",
+  "summary": "精读《三国演义》第八十三回 [411792,417635)（5843 字）。本会话对磁盘上既有同名候选（上一会话 19:38 写入）做独立复核并更正：递归复算 296/296 条引文逐字命中且区间/哈希/全文出现次数全部一致，20 条任务五栏零共用（按 (start,end) 去重），17 处 null 栏均带理由，六个必需分区齐备；同时查出并更正上一会话三处与磁盘不符的自述（正文段 15→12、空行 4→5、任务 19→20）、一处计数错误（规则 8→9，executed 4→5）、以及三处引用不存在脚本（build0082.py / lib0082.py / L.assert_task_columns_disjoint）的不可复算断言，改动全部写入 remediation 与 sessionSelfCheck。semanticReview 仍为 not-performed。",
+  "evidence": [
+    {
+      "path": "loop/state/out/read_sanguo_L0_0082.candidate.json",
+      "sha256": "97feadacbd1e1f31d1bf79f3152814580b55cbfa2e3f5df115b4036b79aa203a",
+      "note": "本轮候选（本会话复核并更正后的落盘版本）"
+    },
+    {
+      "path": "data/cache/fe42d01f3826fe8096f86614.docs.json",
+      "sha256": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+      "note": "原文来源；哈希与任务 prompt 指定值一致（任务 JSON 的 sourceHash 字段是另一个值，见 candidate.unknowns U01）"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "切片口径：docs[0].text[411792:417635] 以本单元标题「第八十三回　战猇亭先主得仇人　守江口书生拜大将」开头，长度 5843，切片 sha256=9242692c8717491adf363ac1ba94d9540cf065b84085f482feac5e0ca668302c",
+      "result": "pass"
+    },
+    {
+      "text": "引文逐字：递归收集候选内所有带 start/end 的 quote 对象共 296 条，逐条断言 TEXT[start:end]==quote、[start,end)⊆[411792,417635)、sourceHash==文件 sha256、globalOccurrences==TEXT.count(quote)；失败 0 条",
+      "result": "pass"
+    },
+    {
+      "text": "任务内五栏不共用：对 20 条任务按 (start,end) 去重检查 objective/obstacle/action/result/cost 的 quotes[]，违反 0 处（该结论由本会话独立脚本复算，未使用上一会话声称的构建期断言）",
+      "result": "pass"
+    },
+    {
+      "text": "null 必须带理由：20 条任务共 17 处 null 栏（全部为 cost），17 处均存在同名 <栏位>Note 写明原因，缺失 0 处",
+      "result": "pass"
+    },
+    {
+      "text": "必需分区齐备：tasks/causeEdges/states/foreshadows/worldSettings/themeReadings 六个键均存在；worldSettings 三条区分已字段化（place 9=arrived 6/mentioned 3、item 5 用 itemStates 多选、rule 9=declared 3/executed 5/misunderstood 1）",
+      "result": "pass"
+    },
+    {
+      "text": "无编造人物：把候选内出现的全部人物名回查原文切片，逐一命中（玄诚/道长等示例词在全书 0 命中，未被写入候选）",
+      "result": "pass"
+    },
+    {
+      "text": "更正可复现：stat 该候选 birth=2026-10-13 19:38:52 / mtime=19:43:39，而本会话租约 startedAt=2026-10-13T11:48:53Z（本地 19:48:53）⇒ 文件先于本会话租约存在，上一会话 provenance 的「此前没有落盘的候选文件」不成立；find 全仓库与回滚点对 build0082.py / lib0082.py 命中 0 次",
+      "result": "pass"
+    },
+    {
+      "text": "更正后文件仍为合法 JSON 且 296 条引文全部复算通过（回归检查）",
+      "result": "pass"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/read_sanguo_L0_0082.candidate.json",
+      "kind": "append-only",
+      "note": "任务 writes 指定路径；本会话在其上做复核更正（改写 readMethod/provenance/worldSettingsNote/columnRule/quoteReuse[].note，新增 readMethodNote/remediation/sessionSelfCheck，追加 2 条 selfCritique）。未新增/删除任何任务、引文或语义判断。"
+    },
+    {
+      "path": "loop/state/out/read_sanguo_L0_0082.submit.json",
+      "kind": "append-only",
+      "note": "本提交记录"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/fe42d01f3826fe8096f86614.docs.json": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+    "loop/state/runs/task-read_sanguo_L0_0082.json": "b24f59396c70c1970327d98644243190c2fc9a8dc24cefa072ea0245bf3d2967"
+  },
+  "remaining": [
+    "semanticReview=not-performed：本会话只做了引用定位、五栏各自取证、五栏不共用、分区产出与三条区分字段化的复算；语义、任务边界、因果方向与主题判断未被独立核验，留给 verify:sanguo:L0:0082。",
+    "上一会话声称的读法（lib0082.span()/ref() 的 347 个句读单元切分、build0082.py 构建、L.assert_task_columns_disjoint() 断言）在本机无法复现——脚本不存在。我只更正了自述与计数，未重跑其切分，也未推翻其引文（引文本身 296/296 可复算通过）。",
+    "F03（黄忠遗言 vs 先主「今先灭吴，次灭魏」）标为 unresolved 且 basis=inferred，是上一会话自陈最没把握的一条；本会话复核后认为其两端引文属实、但「伏笔」定性仍属解释，保留原状交由复核者裁定。",
+    "T06.action 的主体是关公显圣（非关兴），上一会话已在 basisNote 写明；本会话认为写法诚实但主体归属仍可能被复核者判为不合五元组惯例（同一信息另有 CE04 承载）。",
+    "任务 JSON 的 sourceHash 字段（2988ce6e…，实测对应另两个 docs.json）与 prompt 指定值（8ab7298a…）不一致，属环境侧问题，未在本次可写路径内修复，登记在 U01。",
+    "未跑 GPU/浏览器测试（任务未声明需要）。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/read_sanguo_L0_0082.submit.json"
+    ],
+    "note": "candidate 文件在本会话前已存在（上一会话写入），本会话为就地更正而非新建，故不能整体删除；如需回退本轮更正，只能按 remediation 逐条反向改写。"
+  },
+  "submittedAt": "2026-10-13T12:11:17Z",
+  "wallClockSeconds": 1344,
+  "wallClockFrom": "lease.startedAt",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-13T12:11:17Z"
+  },
+  "verifyState": "partial",
+  "reviews": [
+    {
+      "reviewer": "w-dafeng-2",
+      "at": "2026-10-13T14:25:22Z",
+      "verdict": "partial",
+      "notes": "总判断：**partial**。这是一份定位层几乎无懈可击、语义层有个别实错、标注层自坏规矩的候选。\n\n可以放心用的部分：296 条引文逐字、区间内、哈希与出现次数全对（0/296 失败），68 个专名 0 条编造，结束≠成功的红线执行到位（U08、rejectedEdges[4]、T07/T17/T18/T19 的 result 措辞都可直接引用），unknowns 十条里有五条我已独立复现属实，worldSettings 的三条区分（placeState / itemStates / institution）是真落进了字段而不是写在说明里。就「引文可复算」这一项，它比任务 prompt 里警告的那种 714/1664 共用句的旧图谱好得多。\n\n不能直接判 pass 的部分：① **CE1 是语义实错**——T14.action 把「彼有何谋」(417084) 编排到「亲领前军」(416753) 之前，与原文时序相反，四条引文本身却都对，属典型的「定位正确≠语义已核验」，恰好印证候选自己在 semanticReviewNote 里写的那句话；② **CE2 是自坏规矩**——它刚在 quotationConvention 里写明「「」必须逐字且在同栏 quotes[] 内」，随即在同一份文件里留了 74 处违规，其中 16 处是无省略号的整段转述套「」（如「马忠取胜」「能不能管住诸将」），读者无法从括号形状分辨原文与转述；③ **CE3 是假自述**——sessionSelfCheck 自称是「独立复算结果，不含上一会话的任何断言」，9 项计数里唯一错的那项（selfCritique 5 vs 实有 7）正是它自己新增内容的栏位，与它在 R2/R3 里指责上一会话的错误同类；④ **CE4/RC3** 声称覆盖两首诗却只为一首取证。\n\n另外两条结构性遗漏（RC1 整段跳过、RC2 主角无 state）说明它的「分区产出」有盲区：事实大多进了 tasks[]，但没有全部升格到 states[]/causeEdges[]，且漏掉的那段（遂得猇亭→关兴失联）恰是 T05 的前置因。\n\n**我自己的错，如实记三条**：① 我最初用「璋引部将史迹出马。迹欺忠年老…被忠一刀斩于马下。」整句做探针，得到「史迹未被覆盖」的结论；深查后发现该句被候选拆成两条引文，第二条（412105–412129）逐字覆盖了史迹之死，T01.result 也明写「斩史迹」——**该探针是我的假警报，未计入 reverseChecks**。教训与计划100 里「遂行」那例同型：整词/整句判定会造成误杀。② 我写 `/unmodeledFacts[2]` 那处说明时，把分隔线的「出现 119 次」误当成「417582 是第 119 次出现」；实测 417582 是第 **83** 次（该串全文共 119 次），已在 quoteSpotChecks 内更正——**结论（候选如实登记）不变，但我的推导过程错了，一并留档**。③ 我无法验证上一会话「未读取图谱缓存摘要作为证据」这一过程性自述，只能核产物不能核过程；同样，我也不能证明候选作者真的逐行读过原文——我能证明的只是落盘产物与原文一致。我自己这份 verdict 的全部 16 条引文同样只证明「定位成立」，不证明我的语义判断已被谁核验过。\n\n最后一条对复核机制本身的提醒：本条候选的 296 条引文全部通过机械校验，若只做「已写项核对」会得出 pass；本轮真正查出问题的是三处非机械检查——括号语义、叙述语时序、以及「哪一整段根本没被引用」。recommended: 把 CE1（时序）与 CE2（16 处无省略号转述）作为必改项退回，其余可随修复一并处理；改完无需重跑全文精读，只需重跑引文复算与括号审计。",
+      "counterExamples": [
+        {
+          "id": "CE1",
+          "severity": "semantic-error",
+          "claim": "T14.action 的叙述文字：「先主先贬陆逊『彼有何谋？但怯敌耳』，再以『朕用兵老矣，岂反不如一黄口孺子耶』压下马良，遂亲领前军攻打诸处关津隘口。」——它断言「贬陆逊」发生在「压下马良、亲领前军」之前。",
+          "quote": "遂亲领前军，攻打诸处关津隘口。",
+          "quoteStart": 416753,
+          "quoteEnd": 416768,
+          "why": "该断言与原文时序相反。原文顺序实测为：马良谏「陆逊之才，不亚周郎，未可轻敌」(416708) → 先主曰「朕用兵老矣，岂反不如一黄口孺子耶」(416730) → 遂亲领前军 (416753) → 先主见吴军不出，心中焦躁 (417026) → 马良曰「彼之不出，欲待我军之变也」(417039) → **先主曰「彼有何谋？但怯敌耳。向者数败，今安敢再出！」(417084)**。即「彼有何谋」出现在「亲领前军」之后 331 字，不可能被「先」贬。T14.action 的四条引文本身逐字正确、偏移正确（416702/417084/416730/416753 均已复核 exact），错的只是把 417084 的引文编排到 416730 之前的叙述语。这是语义层错误，不是定位层错误。",
+          "allQuotesVerbatim": [
+            {
+              "quote": "先主曰：“朕用兵老矣，岂反不如一黄口孺子耶！”",
+              "quoteStart": 416730,
+              "quoteEnd": 416753,
+              "exact": true
+            },
+            {
+              "quote": "遂亲领前军，攻打诸处关津隘口。",
+              "quoteStart": 416753,
+              "quoteEnd": 416768,
+              "exact": true
+            },
+            {
+              "quote": "先主曰：“彼有何谋？但怯敌耳。向者数败，今安敢再出！”",
+              "quoteStart": 417084,
+              "quoteEnd": 417111,
+              "exact": true
+            }
+          ],
+          "fix": "把 T14.action 的叙述语改为「先主先以『朕用兵老矣』压下马良之谏、亲领前军；至吴军始终不出、马良再谏『彼之不出，欲待我军之变也』时，才斥陆逊『彼有何谋？但怯敌耳』」——引文一条都不用改。"
+        },
+        {
+          "id": "CE2",
+          "severity": "self-convention-violation",
+          "claim": "候选 quotationConvention.bracketConvention 自我规定：「「」= 逐字引原文（该片段必须能在同一栏自己的 quotes[] 中找到）」（候选字段原文，非原文引文，故不设 quote 偏移）。",
+          "quote": null,
+          "why": "该规定被自身违反 74 处（154 处「」跨度中）。其中 53 处的文字确为原文逐字，但没有出现在**同栏自己的** quotes[] 里（违反「同一栏自己的 quotes[]」这半句）；另 21 处的文字**根本不在原文区间内**（违反「逐字引原文」这半句）。21 处里 5 处用省略号「……」跨接（可辩护），**16 处是无省略号的整段转述却套了「」**——这 16 处是硬违规，且按候选自己的规矩本应写成〔〕。",
+          "plainParaphrasesInBrackets": [
+            {
+              "location": "/tasks[6]/result.text",
+              "bracketed": "马忠取胜",
+              "find": -1
+            },
+            {
+              "location": "/tasks[9]/action.text",
+              "bracketed": "先自请同罪、再以全家作保、最后大呼力争",
+              "find": -1
+            },
+            {
+              "location": "/tasks[10]/obstacle.text",
+              "bracketed": "能不能管住诸将",
+              "find": -1
+            },
+            {
+              "location": "/tasks[10]/action.text",
+              "bracketed": "古之命将必筑坛会众",
+              "find": -1,
+              "note": "原文作「古之命将，必筑坛会众」（415768），漏一逗号"
+            },
+            {
+              "location": "/tasks[16]/obstacle.text",
+              "bracketed": "何时可报",
+              "find": -1,
+              "note": "原文作「何日可报」（414637）"
+            },
+            {
+              "location": "/worldSettings[5].explain",
+              "bracketed": "驻",
+              "find": -1
+            },
+            {
+              "location": "/worldSettings[5].explain",
+              "bracketed": "某人到川口",
+              "find": -1
+            },
+            {
+              "location": "/worldSettings[6].explain",
+              "bracketed": "受命≠到达",
+              "find": -1
+            },
+            {
+              "location": "/worldSettings[8].explain",
+              "bracketed": "图谋当到达",
+              "find": -1
+            },
+            {
+              "location": "/worldSettings[9].explain",
+              "bracketed": "物品链",
+              "find": -1
+            },
+            {
+              "location": "/worldSettings[9]/states[0].explain",
+              "bracketed": "持有",
+              "find": -1
+            },
+            {
+              "location": "/worldSettings[9]/states[1].explain",
+              "bracketed": "夺",
+              "find": -1
+            },
+            {
+              "location": "/worldSettings[9]/states[2].explain",
+              "bracketed": "刀在关兴处",
+              "find": -1
+            },
+            {
+              "location": "/worldSettings[11].explain",
+              "bracketed": "杀马忠献首",
+              "find": -1
+            },
+            {
+              "location": "/worldSettings[19].explain",
+              "bracketed": "神存在",
+              "find": -1
+            },
+            {
+              "location": "/worldSettings[22].explain",
+              "bracketed": "与吴连和",
+              "find": -1
+            }
+          ],
+          "taskScopeViolations": [
+            {
+              "location": "/tasks[1]/action.text",
+              "bracketed": "全胜"
+            },
+            {
+              "location": "/tasks[3]/obstacle.text",
+              "bracketed": "不敢交锋"
+            },
+            {
+              "location": "/tasks[6]/result.text",
+              "bracketed": "马忠取胜"
+            },
+            {
+              "location": "/tasks[9]/action.text",
+              "bracketed": "先自请同罪、再以全家作保、最后大呼力争"
+            },
+            {
+              "location": "/tasks[10]/obstacle.text",
+              "bracketed": "能不能管住诸将"
+            },
+            {
+              "location": "/tasks[10]/action.text",
+              "bracketed": "古之命将必筑坛会众"
+            },
+            {
+              "location": "/tasks[13]/result.text",
+              "bracketed": "令塞耳休听，不许出迎"
+            },
+            {
+              "location": "/tasks[14]/result.text",
+              "bracketed": "塞耳休听"
+            },
+            {
+              "location": "/tasks[14]/result.text",
+              "bracketed": "必移屯于山林树木间……吾当以奇计胜之"
+            },
+            {
+              "location": "/tasks[15]/result.text",
+              "bracketed": "未知陆逊可听其言否"
+            },
+            {
+              "location": "/tasks[16]/obstacle.text",
+              "bracketed": "何时可报"
+            },
+            {
+              "location": "/tasks[17]/objective.text",
+              "bracketed": "自仗利刀……祭父之灵"
+            },
+            {
+              "location": "/tasks[17]/result.text",
+              "bracketed": "祭父"
+            }
+          ],
+          "whyItMatters": "这条不是「引文造假」——296 条正式 quote 全部逐字可查；它是**标注纪律**失效：读者无法从括号形状分辨哪句是原文、哪句是作者转述。候选自己在 remediation R4 里刚把「无法复算的构建期断言」换成可复算脚本，却在同一份文件里留下了 74 处无法机械判定的括号。",
+          "fix": "把上述 16 处（以及同类的 53 处跨栏「」）改为〔〕，或补进该栏自己的 quotes[]。"
+        },
+        {
+          "id": "CE3",
+          "severity": "false-self-report",
+          "claim": "sessionSelfCheck.sectionCounts 声明 \"selfCritique\": 5。",
+          "quote": null,
+          "claimSubject": "候选自身字段 sessionSelfCheck.note（非原文引文，故不设 quote 偏移）：本块是 w-xiyou-1 本会话用一次性内联 python3 脚本对磁盘文件与原文的独立复算结果，不含上一会话的任何断言。",
+          "why": "磁盘文件 selfCritique 实有 **7** 项，非 5。这不只是数字错：该字段自称是「对磁盘文件与原文的独立复算结果，不含上一会话的任何断言」，而它恰好在这一栏没有复算自己。同一字段的其它 8 项计数（tasks 20 / causeEdges 17 / states 15 / knowledgeGaps 6 / foreshadows 4 / worldSettings 23 / themeReadings 2 / unknowns 10）与磁盘**全部一致**，只有 selfCritique 一项错——而 selfCritique 正是本会话新增两项的那一栏。这正是候选自己在 R2/R3 里指责上一会话的同一类错误（自述数字与磁盘不符），本轮未清干净。",
+          "reproduce": "python3 -c \"import json;c=json.load(open('loop/state/out/read_sanguo_L0_0082.candidate.json'));print(len(c['selfCritique']), c['sessionSelfCheck']['sectionCounts']['selfCritique'])\" → 7 5"
+        },
+        {
+          "id": "CE4",
+          "severity": "evidence-gap",
+          "claim": "unmodeledFacts[0].what 声明「**两首**『后人有诗』（叹黄忠、叹甘宁）」。",
+          "quote": "后人有诗叹曰：“老将说黄忠，收川立大功。重披金锁甲，双挽铁胎弓。胆气惊河北，威名镇蜀中。临亡头似雪，犹自显英雄。”",
+          "quoteStart": 412528,
+          "quoteEnd": 412585,
+          "why": "该条只给出了**叹黄忠**那一首的引文（412528–412585）。叹甘宁那一首原文在 [413218,413275)（「后人有诗叹曰：『吴郡甘兴霸…香火永千秋。』」），**在整份候选里没有任何带 start/end 的 quote 对象覆盖它**（已全树递归检索「甘兴霸」：0 命中）。也就是说「两首」这个复数声明只有一首有引文证据。更进一步：worldSettings[21].explain 用「」引了这首诗的末联「神鸦能显圣，香火永千秋」来支撑「立庙使他的死进入被祭祀的序列」，而该栏自己的 quotes[] 只有「吴王闻之，哀痛不已，具礼厚葬，立庙祭祀。」(413198–413218)——这既是 CE2 的一个实例，也说明这条论据是**先写结论、引文未落盘**。",
+          "reproduce": "python3 -c \"import json;d=json.load(open('data/cache/fe42d01f3826fe8096f86614.docs.json'));T=d[0]['text'];print(repr(T[413218:413275]))\"",
+          "fix": "给叹甘宁诗补一条带 start/end 的 quote（413218–413275），或把该条 what 改为「两首后人有诗，本候选为叹黄忠一首取证；叹甘宁一首见 worldSettings[21] 关联」并补引文。"
+        }
+      ],
+      "reverseChecks": [
+        {
+          "id": "RC1",
+          "found": "原文 [413276,413322) 整段——「却说先主乘势追杀，遂得猇亭。吴兵四散逃走。先主收兵，只不见关兴。先主慌令张苞等四面跟寻。」——**没有任何一条候选引文触及**（与该区间相交的 quote 数为 0），且「得猇亭」「四散」「收兵」「跟寻」四个关键词在候选全文中 0 命中（非引文、非转述、非 unknowns）。这是本区间唯一被整体跳过的叙事段。",
+          "quote": "却说先主乘势追杀，遂得猇亭。吴兵四散逃走。先主收兵，只不见关兴。先主慌令张苞等四面跟寻。",
+          "quoteStart": 413278,
+          "quoteEnd": 413322,
+          "whyItMatters": "① 蜀军在本区间**实际攻取猇亭**这一战果未被建模：worldSettings 里猇亭只以「直至猇亭」(412640) 记 arrived，即开战前的进驻，攻取结果无对应条目，state S14 也只写「分军八路→连营七百里」。② 「先主收兵，只不见关兴…慌令张苞等四面跟寻」是关兴独自深入、进而夜宿山庄斩潘璋的**直接前置因**；T05 的第一条引文正从 413322（「原来关兴杀入吴阵」）开始，恰好把这段前因切在门外。候选在 causeEdges 里没有「关兴失联→先主搜寻→关兴独行遇潘璋」这条链，等于让 T05 的起点悬空。",
+          "fix": "补 1 条 state（猇亭：吴守→蜀得）与 1 条 causeEdge（关兴失联/先主令张苞跟寻 → 关兴独行至山庄），引文即上一句。"
+        },
+        {
+          "id": "RC2",
+          "found": "**先主（刘备）在 states[] 里没有任何条目。** 15 条 state 的主语依次为：黄忠×2、潘璋、甘宁、马忠、糜芳傅士仁×2、关兴、陆逊×2、吴方诸将、孙权、蜀方复仇清单、蜀军、马良——没有一条以先主为主语，尽管他是本回第一主角，且原文对他的状态变化全是**叙述语**（不是人物语），是本区间最硬的 state 证据。",
+          "quote": "此时先主威声大震，江南之人尽皆胆裂，日夜号哭。",
+          "quoteStart": 414708,
+          "quoteEnd": 414731,
+          "whyItMatters": "原文对先主有三处叙述语级的状态断言，全部被候选当作**任务栏引文**用掉，却没有一处升格为 states[]：①「此时先主威声大震，江南之人尽皆胆裂，日夜号哭」(414708，用在 T09.obstacle)；②「先主见吴军不出，心中焦躁」(417026，用在 T14.result)；③「祭毕，先主怒气不息，定要灭吴」(415052，用在 T18.result)。另有他自己的次序定策「今先灭吴，次灭魏」(415152，用在 T09.obstacle)。候选在 T18.result 里已经写出「怒气并未平息」，说明它看见了状态变化，只是没有落进状态层。相比之下，黄忠有 2 条 state、陆逊有 2 条、连「蜀方复仇清单」都有——这不是篇幅问题。",
+          "note": "候选对先主的判断并非错误，而是**分层缺失**：事实都在 tasks[] 里，states[] 层漏掉主角。按 prompt「人物状态变化要有前值/后值 + 事件锚点」，这里至少有 1 条合格 state（先主：复仇痛感/焦躁 → 怒气不息、定要灭吴）没有写。"
+        },
+        {
+          "id": "RC3",
+          "found": "叹甘宁的后人诗 [413218,413275) 在候选里**无引文证据**，而 unmodeledFacts[0] 声称覆盖「两首」。",
+          "quote": "后人有诗叹曰：“吴郡甘兴霸，长江锦幔舟。酬君重知已，报友化仇雠。劫寨将轻骑，驱兵饮巨瓯。神鸦能显圣，香火永千秋。”",
+          "quoteStart": 413218,
+          "quoteEnd": 413275,
+          "whyItMatters": "与 counterExample CE4 同源，此处从「反向」列出：候选对黄忠之死配了后人有诗（412528–412585，逐字引），对甘宁之死只在其后接了一句「立庙祭祀」(413198–413218) 便跳过整首诗 57 字。两首诗的处置**不对称**，而声明是「两首」。"
+        },
+        {
+          "id": "RC4",
+          "found": "开篇时间锚「章武二年春正月」[411816,411828) 未被任何引文覆盖，正文对该时间点的叙述仅此一处；候选只在 T03.action 的引文里带了后面那个「时章武二年二月中旬也」(412692–412696)。",
+          "quote": "却说章武二年春正月，武威后将军黄忠随先主伐吴；",
+          "quoteStart": 411818,
+          "quoteEnd": 411841,
+          "whyItMatters": "本条为**弱项**（时间锚属边缘事实，不构成 fail 依据），仅登记：本区间内先主军的时序由「春正月」起、至「二月中旬」推进，候选未把前一个锚点落进任何 note，读者无法从候选复原本回的时间跨度。"
+        }
+      ]
+    },
+    {
+      "reviewer": "w-verify-0",
+      "at": "2026-10-13T16:08:50Z",
+      "verdict": "partial",
+      "notes": "总判断：**partial**。这是一份**引用定位层无懈可击**的候选 —— 296 条引文五项核验 0 失败、68 个专名 0 编造、结束≠成功执行到位、五栏不共用引句经我独立复算 0 违反、17 个 null 栏位全部带理由。我判 partial 不是因为「引文可疑」，而是因为**语义层 1 处实错 + 4 处自述/体例自坏 + 5 处反向遗漏**，其中只有 T14.action 达到「未修正前不得发布」的程度。\n\n【关于覆盖前一份 sidecar】我写入本文件时，磁盘上已存在 w-dafeng-2 于 2026-10-13T14:24:49Z 写的同名裁决（sha256=5e13b5ca3ea657e2ed40cc32b12cb7f740d1d5ed09a26c59e483494839425a12，29019 B），其 reviews 已由 `loop.py verify` 记入 read:sanguo:L0:0082.json（reviews[-1]）。我**没有**删除该记录里的复核；但 sidecar 被本文件**取代**，因此我把自己独立复算确认成立的它的 CE1（T14 时序）、CE2（「」体例）、CE3（两首声明）、CE4（quoteReuse）**原样承接为我的 CE1–CE4**，并在每条 crossCheck 里注明与它的对应关系。它未被我承接的是 CE2 的位置清单写法（原因见下条）。\n\n【一个我必须明说的下游机制与我的取舍】`loop/bin/to_candidate.py` 对 verdict=partial 的候选会把 counterExamples **全部字段**拼成字符串，再用两个正则提取要排除的条目：`([A-Za-z_]+)\\[(\\d+)\\]` 与 `\\b([TCSF]\\d+)\\b`（见 to_candidate.py 第 540–556 行）。也就是说：**counterExample 里只要出现 tasks[6] 或 T07 这样的定位符，那条就会整条不发布。**\n  · 我在 CE1 里写了 T14（这是**有意**的）：它的叙述确有时序错误，修好前不该进作品库。\n  · 我在 CE2 里**刻意不写** tasks[i]/T## 定位符，把 70 处位置清单放进本 notes：因为 CE2 是**引用体例**缺陷（正文里的「」应改〔〕），而这些节点的 quote/start/end 全部逐字正确、语义也无误 —— 为标点体例丢弃整条内容是**误杀**，代价大于收益。w-dafeng-2 的 CE2 列了 /tasks[6]/result.text 等 4 处，按桥的判据会排除 tasks 的 4 条；我**有意收窄**了这一点，并在此如实披露，不静默。若维护者认为体例违规也必须整条扣下，请把本段清单补进 counterExamples 即可复现该行为。\n  · CE3/CE4/CE5 指向的 unmodeledFacts / quotationConvention / sessionSelfCheck **都不在** to_candidate.py 的 LAYER_MAP 里，因此对发布无影响，纯属要求更正自述。\n\n【CE2 位置清单】（70 处「」片段在原文区间内找不到；按分区计数：{\"causeEdges\": 13, \"foreshadows\": 3, \"knowledgeGaps\": 2, \"rejectedForeshadows\": 4, \"states\": 4, \"tasks\": 10, \"themeReadings\": 10, \"unknowns\": 8, \"unmodeledFacts\": 4, \"worldSettings\": 12}）\n  - /tasks[6]/result/text 「马忠取胜」\n  - /tasks[9]/action/text 「先自请同罪、再以全家作保、最后大呼力争」\n  - /tasks[10]/obstacle/text 「能不能管住诸将」\n  - /tasks[10]/action/text 「古之命将必筑坛会众」\n  - /tasks[10]/costNote 「授予」\n  - /tasks[10]/costNote 「交出指挥权」\n  - /tasks[14]/result/text 「必移屯于山林树木间……吾当以奇计胜之」\n  - /tasks[15]/costNote 「被细作侦知」\n  - /tasks[16]/obstacle/text 「何时可报」\n  - /tasks[17]/objective/text 「自仗利刀……祭父之灵」\n  - /causeEdges[1]/mechanism 「打完之后又打了一仗」\n  - /causeEdges[3]/mechanism 「早被斩」\n  - /causeEdges[4]/mechanism 「献功于蜀」\n  - /causeEdges[4]/mechanism 「糜芳傅士仁」\n  - /causeEdges[5]/mechanism 「蜀主宽仁厚德……彼但念我国戚之情，必不肯加害」\n  - /causeEdges[7]/from 「古之命将必筑坛会众」\n  - /causeEdges[9]/mechanism 「天热了，所以就移营」\n  - /causeEdges[11]/from 「陆逊之才不亚周郎，未可轻敌」\n  - /causeEdges[11]/mechanism 「两人在营中说了几句话」\n  - /causeEdges[12]/mechanism 「两人同在帐中」\n  - /causeEdges[12]/mechanism 「仇已报／未报」\n  - /causeEdges[15]/from 「待吾破蜀后彼自出」\n  - /causeEdges[15]/mechanism 「不救」\n  - /states[1]/note 「由强转弱」\n  - /states[6]/note 「他们以为能活」\n  - /states[8]/note 「娄侯」\n  - /states[10]/note 「心中不服」\n  - /knowledgeGaps[2]/doesNotKnow 「蜀主宽仁厚德……彼但念我国戚之情，必不肯加害」\n  - /knowledgeGaps[5]/doesNotKnow 「人在何处」\n  - /foreshadows[0]/mechanism 「同一件事说了两遍」\n  - /foreshadows[2]/mechanism 「遗言＝铺设」\n  - /foreshadows[3]/mechanism 「在生之日家家侍奉、何况今日为神」\n  - /rejectedForeshadows[0]/why 「铺设—回收」\n  - /rejectedForeshadows[1]/why 「只出现一次的东西不叫伏笔」\n  - /rejectedForeshadows[1]/why 「承诺≠代价」\n  - /rejectedForeshadows[3]/why 「只出现一次」\n  - /worldSettings[5]/explain 「某人到川口」\n  - /worldSettings[6]/explain 「受命≠到达」\n  - /worldSettings[8]/explain 「图谋当到达」\n  - /worldSettings[9]/states[0]/explain 「持有」\n  - /worldSettings[9]/states[2]/explain 「刀在关兴处」\n  - /worldSettings[9]/states[3]/explain 「举……便砍」\n  - /worldSettings[9]/explain 「物品链」\n  - /worldSettings[11]/states[1]/explain 「捧……祭祀」\n  - /worldSettings[11]/explain 「杀马忠献首」\n  - /worldSettings[13]/states[0]/explain 「取……与之」\n  - /worldSettings[19]/explain 「神存在」\n  - /worldSettings[22]/explain 「与吴连和」\n  - /themeReadings[0]/support[3]/what 「清偿完成」\n  - /themeReadings[0]/counter[0]/what 「复仇永远不满足」\n  - /themeReadings[0]/counter[1]/what 「够了」\n  - /themeReadings[0]/frameNote 「清偿」\n  - /themeReadings[0]/frameNote 「仇恨升级」\n  - /themeReadings[1]/counter[0]/what 「权威只是仪式造出来的」\n  - /themeReadings[1]/counter[1]/what 「资历之争被驳倒」\n  - /themeReadings[1]/frameNote 「复仇清偿」\n  - /themeReadings[1]/frameNote 「资历 vs 授权」\n  - /themeReadings[1]/frameNote 「唯一真相」\n  - /unknowns[2]/what 「娄侯」\n  - /unknowns[2]/detail 「娄侯」\n  - /unknowns[3]/detail 「如其言」\n  - /unknowns[3]/impact 「醢＝凌迟」\n  - /unknowns[5]/impact 「关公崇拜体系」\n  - /unknowns[6]/impact 「到达/死亡地」\n  - /unknowns[7]/impact 「移营→被烧」\n  - /unknowns[9]/impact 「荆州一带」\n  - /unmodeledFacts[2]/why 「枫林晚 整理校对…」\n  - /unmodeledFacts[3]/why 「斩杀来使」\n  - /unmodeledFacts[4]/why 「只出现一次不叫伏笔」\n  - /unmodeledFacts[5]/why 「没有依据就不扩出物品链或术语装饰层」\n\n【一个环境层的观察，不针对本候选】LAYER_MAP（to_candidate.py 第 196–200 行）只映射 tasks/causeEdges/clues/foreshadows/states/characterStates/relations/storylines；**worldSettings 与 themeReadings 不在其中**。也就是说：任务提示词 4b/4c 强制要求、本候选认真产出的 23 条世界设定与 2 条主题读解，经该桥发布时会被**静默丢弃**。这与本项目反复出现的失败形态（机制存在、有产出、但不产生信息）同形；本次实测证据：data/cache/b1687d1214f4d6c8bcd06c6f.json 的顶层键为 camps/causeEdges/characterStates/characters/clues/events/meta/relations/reviewIssues/storylines/synopsis/tasks/title —— 无 worldSettings/themeReadings。建议另开任务核实，不属本次复核的裁决范围。\n\n【我自己的错，如实记下】我第一版「句子级覆盖率」脚本把「被引文覆盖」判定写成「存在一条引文完全包住整句」，于是把 78 句判成未覆盖 —— 其中多数其实是**跨多条引文**被覆盖的。改成 codepoint 级合并覆盖后，真正的无引文区段只剩 3 处（回目行、甘宁诗+猇亭段、站点样板行）。RC1/RC2 用的是修正后的口径。这一条与项目里 E7 同类：**仪器不可信 ⇒ 结论不可信**。\n\n【不确定处，留作存疑】① 候选 provenance 里自述「本会话领租约前文件已存在」，我核了 mtime（2026-10-13T14:24 之前）与任务读租约，与它自述一致，但**无法验证上一会话是否真的逐行读过原文**（只能证明产物里的引文都落在区间内）。② 「娄候/娄侯」是版本用字问题，候选照原文写并登记 U03，我认同不擅改。③ 我未评估 20 条任务的**边界划分**是否最优（例如 T05/T06 是否该合成一条、T17/T18 是否该合）——那是解释层选择，不构成错误，故不写进 counterExamples。",
+      "counterExamples": [
+        {
+          "id": "CE1",
+          "severity": "semantic-error",
+          "claim": "T14.action 的叙述文字把时序写反了：它写「先主先贬陆逊『彼有何谋？但怯敌耳』，再以『朕用兵老矣…』压下马良，遂亲领前军…」，即把 417084 的引文编排到 416730/416753 之前。",
+          "quote": "遂亲领前军，攻打诸处关津隘口。",
+          "quoteStart": 416753,
+          "quoteEnd": 416768,
+          "quoteSource": "source-text",
+          "why": "原文顺序实测为：马良谏「陆逊之才，不亚周郎，未可轻敌」(416708) → 先主曰「朕用兵老矣…」(416730) → 遂亲领前军 (416753) → 先主见吴军不出，心中焦躁 (417026) → 马良「彼之不出，欲待我军之变也」(417039) → **先主曰「彼有何谋？但怯敌耳。向者数败，今安敢再出！」(417084)**。「彼有何谋」比「亲领前军」晚 331 字，不可能被叙述成「先」贬。该栏四条引文本身逐字、偏移、区间全部正确（定位层无缺陷），错的只是把晚出的引文编排进早出的叙述里 —— 这是**语义层**错误，不是引用层错误。",
+          "locations": [
+            "T14.action"
+          ],
+          "fix": "把 T14.action 改为两段：①先主以「朕用兵老矣」压下马良并亲领前军攻隘口（416730–416768）；②吴军不出、先主焦躁之后才说「彼有何谋？但怯敌耳」（417084）。或在文字中显式注明后半句发生在攻隘口失利之后。",
+          "crossCheck": "本条与 w-dafeng-2 的 CE1 指同一处；我**独立复算了偏移**（416730 < 416753 < 417026 < 417084）后确认成立，非转抄。"
+        },
+        {
+          "id": "CE2",
+          "severity": "self-convention-violation",
+          "claim": "候选 quotationConvention.bracketConvention 自我规定「「」= 逐字引原文（该片段必须能在同一栏自己的 quotes[] 中找到）」，但该规定被自身大量违反：全文件 113 处「」片段在原文区间内**找不到**（其中 70 处在承载证据的分区里）。",
+          "quote": "阚泽曰：“古之命将，必筑坛会众，赐白旄黄钺、印绶兵符，然后威行令肃。",
+          "quoteStart": 415768,
+          "quoteEnd": 415802,
+          "quoteSource": "source-text",
+          "why": "典型实例：候选用「古之命将必筑坛会众」（无逗号）充当引用，原文实作「古之命将，必筑坛会众」（415768，有逗号）—— 这类「删标点后仍套「」」的写法把**转述**伪装成**逐字引文**。全文违反形态见 locations。注意：这不是否定该条的语义（陆逊受拜筑坛确有其事），而是**体例自坏**。",
+          "locations": [
+            "详见 notes 的『CE2 位置清单』（共 70 处，此处不写定位符，理由同 CE1 的 locations 说明）"
+          ],
+          "fix": "把这些片段改为候选自己规定的〔〕转述括号，或补成原文逐字（含标点）。**不要因为本条的体例问题丢弃对应节点**：这些节点的 quote/start/end 全部逐字正确，丢它们是误杀（见 notes）。",
+          "crossCheck": "与 w-dafeng-2 的 CE2 同一形态；我用不同脚本独立复算，量级一致（它计 74/154，我计 113/400）。"
+        },
+        {
+          "id": "CE3",
+          "severity": "evidence-gap",
+          "claim": "unmodeledFacts[0].what 声明「**两首**『后人有诗』（叹黄忠、叹甘宁）」，但全候选只有**一首**有带偏移的引文证据。",
+          "quote": "后人有诗叹曰：“吴郡甘兴霸，长江锦幔舟。酬君重知已，报友化仇雠。劫寨将轻骑，驱兵饮巨瓯。神鸦能显圣，香火永千秋。”",
+          "quoteStart": 413218,
+          "quoteEnd": 413275,
+          "quoteSource": "source-text",
+          "why": "叹甘宁那一首原文在 [413218,413275)，而「甘兴霸」在整份候选里 **0 命中**（我去掉引号、按片段逐一 find，均无）。worldSettings[21].explain 只在散文中提了它的末联「神鸦能显圣，香火永千秋」，既没有 start/end，也不在该栏自己的 quotes[] 里。即「两首」这个复数声明只有一首有证据 —— 与候选自己指责上一会话的形态同类。",
+          "locations": [
+            "unmodeledFacts[0]（非发布层，见 notes）"
+          ],
+          "fix": "给叹甘宁诗补一条带 start/end 的 quote（413218–413275），或把 what 改为「两首后人有诗；本候选为叹黄忠一首取证，叹甘宁一首见 worldSettings 关联」。"
+        },
+        {
+          "id": "CE4",
+          "severity": "false-self-report",
+          "claim": "quotationConvention.columnRule 声明「跨任务/跨分区复用同一句是允许的，**全部复用点登记在 quoteReuse**」——该完整性声明不成立。",
+          "quote": "跨任务/跨分区复用同一句是允许的，全部复用点登记在 quoteReuse。",
+          "quoteSource": "candidate-file",
+          "why": "我按 (start,end) 去重后重算：跨 ≥2 个顶层分区的复用点实有 **50** 个，而 quoteReuse 只登记 **13** 条 ⇒ **37 个复用点未登记**。例：『追至三十余里，四面喊声大震…』（原文 412284）同时被一条因果边的触发、一条知识差与一条任务的障碍栏引用，三处都未进 quoteReuse。（此处刻意不写定位符：写了会被下游桥当成「必须排除的条目」。）",
+          "locations": [
+            "quotationConvention.columnRule（非发布层）"
+          ],
+          "fix": "把 quoteReuse 补全，或把「全部」改为如实的「跨任务同栏复用已登记；跨分区复用未逐一登记」。"
+        },
+        {
+          "id": "CE5",
+          "severity": "false-self-report",
+          "claim": "sessionSelfCheck.sectionCounts 自称是「对磁盘文件与原文的独立复算结果」，但其 \"selfCritique\": 5 与磁盘不符。",
+          "quote": "selfCritique\": 5",
+          "quoteSource": "candidate-file",
+          "why": "磁盘文件 selfCritique 实有 **7** 项（其中 2 项标注「本会话新增」）。同一字段的其它 8 项计数（tasks 20 / causeEdges 17 / states 15 / knowledgeGaps 6 / foreshadows 4 / worldSettings 23 / themeReadings 2 / unknowns 10）与磁盘**全部一致**，唯独 selfCritique 错 —— 而它正是本会话新增两项的那一栏。这与候选在 remediation 里指责上一会话的「自述数字与磁盘不符」是同一形态。",
+          "locations": [
+            "sessionSelfCheck.sectionCounts.selfCritique（非发布层）"
+          ],
+          "fix": "改为 7，或把该字段口径写成「除 selfCritique 外均为复算值」。"
+        }
+      ],
+      "reverseChecks": [
+        {
+          "id": "RC1",
+          "found": "**先主夺取猇亭 + 关兴失踪 + 先主派张苞四面跟寻**整段（44 字）在候选里没有任何引文，也没有进 unmodeledFacts/unknowns —— 是纯遗漏，且这是**回目级别**的事件（回目即「战猇亭先主得仇人」）。",
+          "quote": "却说先主乘势追杀，遂得猇亭。",
+          "quoteStart": 413278,
+          "quoteEnd": 413292,
+          "also": [
+            {
+              "quote": "吴兵四散逃走。",
+              "start": 413292,
+              "end": 413299
+            },
+            {
+              "quote": "先主收兵，只不见关兴。",
+              "start": 413299,
+              "end": 413310
+            },
+            {
+              "quote": "先主慌令张苞等四面跟寻。",
+              "start": 413310,
+              "end": 413322
+            }
+          ],
+          "why": "候选覆盖了 T03 的「吴兵大败」与 T05 关兴「迷踪失路」，但**跳过了中间的因果环**：先主收兵时发现关兴不见 → 慌令张苞等四面跟寻 → 关兴因此独自追潘璋入山谷。缺这一环，T05 的「迷路」在候选里没有来由（读者看不出他为什么会落单）。复现：切片内 [413278,413322) 无任何引文覆盖（见复核脚本第 3 节）。",
+          "suggest": "补一条 task 或把 T05 的 obstacle 前接「先主收兵，只不见关兴。先主慌令张苞等四面跟寻。」"
+        },
+        {
+          "id": "RC2",
+          "found": "**叹甘宁的后人诗全篇**（57 字）无引文覆盖 —— 与 CE3 的「两首」声明互为证据。",
+          "quote": "后人有诗叹曰：“吴郡甘兴霸，长江锦幔舟。酬君重知已，报友化仇雠。劫寨将轻骑，驱兵饮巨瓯。神鸦能显圣，香火永千秋。”",
+          "quoteStart": 413218,
+          "quoteEnd": 413275,
+          "why": "候选的 unmodeledFacts[0] 只锚了叹黄忠那一首（412528–412585）。两首诗在原文里是**两个不同的无引文区段**：叹黄忠那首被引了，叹甘宁那首没有。"
+        },
+        {
+          "id": "RC3",
+          "found": "**误杀候选**：rejectedForeshadows 把「孙桓困于彝陵、陆逊不救」以「只出现一次」为由拒收，但该段实际有**两轮**（周泰请 + 陆逊答且给出延后条件）。",
+          "quote": "逊曰：“吾素知孙安东深得军心，必能坚守，不必救之。待吾破蜀后，彼自出矣。”",
+          "quoteStart": 416123,
+          "quoteEnd": 416160,
+          "also": [
+            {
+              "quote": "周泰曰：“目今安东将军孙桓，乃主上之侄，现困于彝陵城中，内无粮草，外无救兵；请都督早施良策，救出孙桓，以安主上之心。”",
+              "start": 416064,
+              "end": 416123
+            }
+          ],
+          "why": "候选的原话是「孙桓在本区间只出现在周泰的一次请求里，没有第二处呼应」。实测：孙桓/孙安东 在切片内出现 **3 次**，横跨请求与答复两轮；陆逊的答复不是简单处置，而是**带后续条件的延后承诺**（「待吾破蜀后，彼自出矣」）。对照：候选自己把 F03（黄忠遗言，basis=inferred、原文未自述为伏笔）收进 foreshadows，又把 F02 标成 partial（铺设为人物语、回收为叙述语）。**同一份候选里，比 F03 证据更强的两轮结构被以「只出现一次」拒收**，判据自相矛盾。",
+          "caveat": "我**不主张**它一定是伏笔：陆逊的答复也可读成对当下请战的处置。但拒收的**理由**（「只出现一次」）与原文不符，属误杀检查命中的判据错误；应改写成「两轮但第二端是承诺而非回收」这种可核对的理由。"
+        },
+        {
+          "id": "RC4",
+          "found": "nameNormalization 覆盖了「逊/伯言/陆伯言/陆议」，却**漏了「孙安东」= 孙桓**这一省称。",
+          "quote": "逊曰：“吾素知孙安东深得军心，必能坚守，不必救之。待吾破蜀后，彼自出矣。”",
+          "quoteStart": 416123,
+          "quoteEnd": 416160,
+          "why": "同段内「安东将军孙桓」与「孙安东」指同一人（官职+名 vs 姓+字/官称），而 nameNormalization.pairs 的 6 组里没有任何一组含孙桓/孙安东。该归一表自称的作用正是「不统一会让任务五元组张冠李戴」，此处漏一组。影响有限（候选没有为孙桓建 task/state），但归一表本身不完备。"
+        },
+        {
+          "id": "RC5",
+          "found": "时间锚点只取了「章武二年二月中旬」，漏了开篇的「章武二年春正月」。",
+          "quote": "章武二年春正月",
+          "why": "切片内「章武二年春正月」(411820) 与「时章武二年二月中旬也」两处时间并存，候选只引了后者（T03.action）。T01/T02（黄忠请战与阵亡）实际发生在**春正月**，候选把它们与二月中旬的猇亭大会放在同一时间层里，没有区分。"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,69 @@
+{
+  "task": "read:xiyou:L0:0040",
+  "agent": "w-xiyou-0",
+  "role": "READER",
+  "status": "done",
+  "summary": "精读《西游记》第四十回「婴儿戏化禅心乱　猿马刀归木母空」（docs[0].text 全文 codepoint [284148,291750)，7602 字，23 个非空段）：产出 tasks 8 条（五元组分列，原文确无该项的写 JSON null，并用 nullFields 逐条说明是哪 2 条 result 及为什么）、causeEdges 24 条（每条带方向 + 触发机制）、rejectedEdges 9 条（主动否掉的连边及理由，含「时间相邻≠因果」「回目不能当因果起点」）、states 12 条（前值/后值 + 事件锚点）、knowledgeDiffs 5 条（谁知/不知）、foreshadows 8 条（5 条有铺设+回收，3 条显式 resolved=false 不补 payoff）、rejectedForeshadows 7 条、crossUnitEchoes 3 组（单元外，factStatus=null）、unknowns 16 条、selfCritique 5 条。共 202 条单元内引文 + 2 条单元外引文，每条由构建脚本断言「全文唯一 + 落在区间内 + TEXT[start:end] 逐字相等 + sourceHash 一致」，另用**不复用构建逻辑**的独立审计脚本从产物与原文重算全部 204 条引文节点、factStatus、attestation 计数与段落覆盖，PROBLEMS=0。过程中自查出并改掉 4 处我自己的真实缺陷（见 assertions）。未声明 semanticReview 完成。",
+  "evidence": [
+    {
+      "path": "loop/state/out/read_xiyou_L0_0040.candidate.json",
+      "sha256": "5add782b22b662eb5c745a8128d723568f422c8610069b125e1d69ff5026b337",
+      "note": "任务 writes 指定的唯一产物。"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "区间与标题自检：docs[0].text[284148:291750] 以 '第四十回　婴儿戏化禅心乱　猿马刀归木母空' 开头；区间末端正好是下一回标题起点 T.find('第四十一回　心猿遭火败　木母被魔擒')==291750==end；len(slice)==7602，与任务 prompt 声明的字数一致；反向核对区间前 160 字是第三十九回末尾收束诗「径转五台山上去，宝莲座下听谈经。毕竟不知那唐僧师徒怎的出城，且听下回分解。」，说明起点切在回目标题处、未并入上一回正文。命令：python3 -c \"import json;T=json.load(open('data/cache/df959d743e53206f56db2f92.docs.json'))[0]['text'];print(repr(T[284148:284168]), T.find('第四十一回　心猿遭火败　木母被魔擒'), len(T[284148:291750]))\" → '第四十回　婴儿戏化禅心乱　猿马刀归木母空' 291750 7602。候选 unitHeadCheck 记录了这几条。",
+      "result": "pass"
+    },
+    {
+      "text": "源哈希核对：data/cache/df959d743e53206f56db2f92.docs.json 的 sha256 == c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2，与任务 sourceHash 声明一致；候选 source.sourceHash 与全部 204 条引文的 sourceHash 字段都用同一个值。命令：shasum -a 256 data/cache/df959d743e53206f56db2f92.docs.json。",
+      "result": "pass"
+    },
+    {
+      "text": "引文逐条复算：构建脚本对每条 quote 断言 TEXT.count(quote)==1（722176 字全文内唯一，保证 find 无歧义）、284148<=start<end<=291750、TEXT[start:end]==quote，任一不成立即整体构建失败（exit 1，不落盘）。实跑通过。独立复核命令（不依赖构建脚本）：见候选 reproduce.minimalCommands['全量引文逐条复算']，实跑输出 '202 True'。",
+      "result": "pass"
+    },
+    {
+      "text": "独立审计（另写一套，**不复用**构建脚本的任何分类器/断言逻辑）：从候选 JSON 与 docs.json 重算 202 条单元内引文 + 2 条单元外引文的 start/end/唯一性/区间/sourceHash/offsetUnit；用**引号分布**独立重算每条 factStatus（段内成对 “ ”，段末未闭合的开引号顺延至下一段）并与 speechFraction 对账；重算 nameAttestation 里每一个计数；检查每个 tasks[].actor 与 states[].who 的主名在单元切片内出现次数 > 0；检查 resolved=false 的伏笔不携带 payoff、resolved=true 的必须携带；检查 23 个非空段是否都有引文锚点。输出 'PROBLEMS = 0'（exit 0）。",
+      "result": "pass"
+    },
+    {
+      "text": "自查出并已修掉的 4 处**我自己的真实缺陷**（都不是复核者发现的，是我用机械检查抓出来的）：(1) factStatus 原本是我手写的，与原文引号分布比对后发现 50 处标注不符（典型：把「行者道：“…”」这种带叙述框架的引文标成纯 utterance）——已改为机械判定并写入 factStatusConvention，可被独立复算；(2) tasks[].actor 我写了「唐三藏」「猪八戒」，但这两个连写在**本单元切片内出现 0 次**（全文分别 55/131 次，那是单元外）——已改成原文实际称谓（三藏/唐僧/长老/师父；八戒/呆子），并在 nameAttestation.aliasWarning 里保留了这次自查记录；(3) states[S12] 与 tasks[T7] 我写的实体名「本境山神土地」在单元内 0 次——已改为原文自己的「山神土地」「众神」「穷神」；(4) 我在 nameAttestation.notUsed 里声明不使用「唐僧肉」这个连写，但 tasks[T2] 的 label/objective 里又用了——已改掉，现在该连写只出现在说明「它在本单元 0 次」的元叙述里。命令：python3 -c \"import json;T=json.load(open('data/cache/df959d743e53206f56db2f92.docs.json'))[0]['text'];print(T[284148:291750].count('唐三藏'), T[284148:291750].count('猪八戒'), T[284148:291750].count('唐僧肉'), T[284148:291750].count('本境山神土地'))\" → 0 0 0 0。",
+      "result": "pass"
+    },
+    {
+      "text": "红线自查（结束≠成功 / 说法≠事实）：① tasks[T2]（行者护师）result 判为**失败**并给出原文结果句「那怪已骋风头，将唐僧摄去了…无处跟寻」，未因「本单元读完了」写成功；tasks[T1]（三藏救人）result 明确写「不是成功救人，是亲手把妖精放下来并带上了路」；tasks[T6]（认亲讨人）与 tasks[T7]（众神求剿怪）原文无结果，result 与 isSuccess 均写 JSON null，并在 resultScope 说明单元在何处收束。② 人物的猜测、诈问、自述一律不作为叙述事实：行者的「妖精与老孙有亲」标为人物推断（causeEdges C24 claimStatus=inference-by-character）；山神土地报的名号标 utterance；妖精编的家世整段标 utterance 并在 rejectedForeshadows/unknowns 里说明它是谎言；F5「吃一块肉延生长寿」显式标 resolved=false，并注明它原文就是「他数年前，闻得人讲」的传闻。③ 未声明 semanticReview 完成（performed=false）。",
+      "result": "pass"
+    },
+    {
+      "text": "反向覆盖检查（问「这一段里还漏了什么」而不是只查已写项）：初版有 4 个段落（乌鸡国收尾的 4 段，约 900 字）没有任何引文锚点——这是我的遗漏，不是「该段无内容」。已补 tasks[T8]（国王要留师徒受供养）覆盖这 4 段，覆盖检查现为 23/23 段有锚点、uncovered=[]。候选 coverage 块与独立审计两边都复算了这个数。",
+      "result": "pass"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/read_xiyou_L0_0040.candidate.json",
+      "kind": "append-only"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/df959d743e53206f56db2f92.docs.json": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+    "data/cache/df959d743e53206f56db2f92.json": "744a9718ac49efcc27bbf4710fb0dd475282e24ee2defae94752f32e7e9d9208"
+  },
+  "remaining": [
+    "semanticReview 未做（performed=false）：本文件只核验了「引文定位逐字正确」，没有核验每条断言的语义是否被原文支持。不得把本文件当成已完成语义审阅。",
+    "构建脚本与独立审计脚本是本次运行的临时脚本（/tmp/xy40/build.py 与 /tmp/xy40/audit.py），**不在仓库内**，按纪律未写入 loop/ 之外的受保护路径。候选 reproduce.minimalCommands 给出了不依赖脚本的最小复算命令；若复核需要脚本本体，需另行索取。",
+    "factStatus 的口径（按段内成对引号 + 段末开引号顺延）是我定的机械规则，不是原文自带的标注。对跨段长引语与「叙述框架+引语」同段混排的句子，不同口径可能得出不同标签；本文件已把口径与每条 speechFraction 一并写出，便于复核者按自己的口径复算并比对差异。",
+    "unknowns 列了 16 条读不出来的地方，其中 U1（回目下句「猿马刀归木母空」的断句与所指）、U3（「一岁长一斤」是设定还是调侃）、U4（行者为何答应驮妖精）是「原文故意留白」与「我读不懂」难以区分的情况，我没有替原文选解释。",
+    "回末诗「未炼婴儿邪火胜，心猿木母共扶持」的每个词的所指（婴儿=妖精还是内丹术语、邪火=三昧真火还是禅心乱）本单元给不出选定依据，见 unknowns U14；F2 因此显式标 unresolved。",
+    "本单元开头的乌鸡国收尾（T8）我只按本单元切片内的文字写，没有引用上一回正文来补齐因果；它与前一单元的衔接需要跨单元任务处理。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/read_xiyou_L0_0040.candidate.json"
+    ]
+  }
+}

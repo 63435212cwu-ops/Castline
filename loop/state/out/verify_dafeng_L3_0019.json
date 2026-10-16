@@ -1,0 +1,127 @@
+{
+  "task": "verify:dafeng:L3:0019",
+  "agent": "w-dafeng-3",
+  "status": "done",
+  "summary": "独立反向复核 read:dafeng:L3:0019 的候选 read_dafeng_L3_0019.candidate.json（原文 docs[0].text[58189,61514)，3325 字）。结论 partial：引文层零缺陷（217/217 条 text[start:end]==quote、find 一致、越界 0、sourceHash 不符 0、occurrence 计数不符 0、isFirstOccurrence 误标 0，三项哈希相符，stats 十一项自洽），无编造人物、无越权结局、无把预测当结果；但 3 处语义/归属缺陷须修（CE13 因果方向与原文时序相反、T2.cost/ST7.before 用了切片内 0 次的关系词却标 explicit、K1.note 内部指针指错条目），另反向验证发现 6 处真实漏抽（青史留名动机段等）。",
+  "evidence": [
+    {
+      "path": "loop/state/out/verify_dafeng_L3_0019.verdict.json",
+      "sha256": "c1300b770c1fe04ce06b3d7cce7b8a5fa37f38b6ad75b80c739b178bf3adf5ab",
+      "kind": "worker-output",
+      "note": "本任务 writes 指定的复核结论文件（本提交的主证据）"
+    },
+    {
+      "path": "loop/state/out/read_dafeng_L3_0019.candidate.json",
+      "sha256": "f49e4516ca28b0a77ee73f716238289ad48e873c162e76585a761494c3b7b9fe",
+      "kind": "reviewed-candidate",
+      "note": "被复核候选，全程只读，复核前后哈希一致"
+    },
+    {
+      "path": "data/cache/9b676d7031b1bcd3b8377a18.docs.json",
+      "sha256": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+      "kind": "source-document",
+      "note": "任务 sourceHash 所指原文；本单元=docs[0].text[58189,61514)"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "源文件哈希与任务 sourceHash 一致；切片以标题『第二十章 半阙七律惊大儒』开头、长度 3325，切片 sha256=33ebb1cdcdbdfa2c678fb4d19dcf2af69c4da881c8a69a29e3ce18e4dccc3f4a。",
+      "result": "pass",
+      "cmd": "shasum -a 256 data/cache/9b676d7031b1bcd3b8377a18.docs.json; python3 -c \"import json,hashlib;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];s=t[58189:61514];print(repr(t[58189:58201]),len(s),hashlib.sha256(s.encode()).hexdigest())\"",
+      "observed": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839 | '第二十章 半阙七律惊大儒' 3325 33ebb1cdcdbdfa2c678fb4d19dcf2af69c4da881c8a69a29e3ce18e4dccc3f4a"
+    },
+    {
+      "text": "全量 217 条 quote 回切核验（含 evidence 嵌套、textualDefects 的 quote2/quote3、foreshadows 的 setup/payoff）：text[start:end]==quote 不符 0、find(quote)!=start 不符 0、越界 0、sourceHash 不符 0、inSegment/inWholeText 计数不符 0、isFirstOccurrenceInWholeText 误标 0。",
+      "result": "pass",
+      "cmd": "python3 - <<'PY' (递归 walker：对候选 JSON 所有含 quote/start/end 的对象做回切与 find 双重核验) PY",
+      "observed": "refs=217 | roundtrip mismatches=0 | find mismatches=0 | out_of_range=0 | sourceHash mismatch=0 | occurrence_count mismatch=0 | isFirstOccurrence mismatch=0"
+    },
+    {
+      "text": "候选 stats 十一项与文件实际内容逐项相符（quoteRefs 217 / task 6 / causeEdge 13 / nonEdge 4 / state 9 / foreshadow 4 / resolved 2 / unresolved 2 / unknown 13 / defect 7 / knowledgeGap 5）。",
+      "result": "pass",
+      "cmd": "python3 -c \"len() 逐项比对 candidate 各数组与 stats\"",
+      "observed": "11/11 相符，0 处不符"
+    },
+    {
+      "text": "随机抽 5 条 quote 用 find() 复核（seed=1919）：5/5 逐字命中且 find()==start，偏移与候选声明一致。",
+      "result": "pass",
+      "cmd": "python3 - <<'PY' random.seed(1919); random.sample(refs,5); 逐条 T.find(q) PY",
+      "observed": "#86@59913 #24@60750 #104@60810 #125@60190 #46@58436 —— 全部 match=True"
+    },
+    {
+      "text": "反例 1（CE13 因果方向）可用原文逐字引证：CE13.to『…未尝不是一段佳话』@[61049,61089)，CE13.from『…这学生老夫收定了』@[61249,61286)，to 早于 from 200 codepoint；真正的先发句是李慕白 @[61009,61043)。",
+      "result": "pass",
+      "cmd": "python3 -c \"t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];print(t.find('未尝不是一段佳话'),t.find('这学生老夫收定了'))\"",
+      "observed": "61079 61276（引号内起点 61049/61249）"
+    },
+    {
+      "text": "反例 2（关系词无支撑）可用原文计数引证：『同桌』『同席』『同僚』在切片 [58189,61514) 内出现 0/0/0 次（全库 4/7/245 次），而 T2.cost 与 ST7.before 均将其标为 basis=explicit。",
+      "result": "pass",
+      "cmd": "python3 -c \"t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];s=t[58189:61514];print(s.count('同桌'),s.count('同席'),s.count('同僚'))\"",
+      "observed": "0 0 0"
+    },
+    {
+      "text": "反例 3（K1.note 交叉引用指错）可复现：K1.note 写『张慎的认知另见 K3』，而 K3.proposition 是『两位大儒是否听懂了紫阳居士临别那句“不能明珠蒙尘”的用意』；张慎认知实际在 K2.whoKnows/ST5，原文句 @[60100,60129)。",
+      "result": "pass",
+      "cmd": "python3 -c \"c=json.load(open('loop/state/out/read_dafeng_L3_0019.candidate.json'));print(c['knowledgeGaps'][0]['note']);print(c['knowledgeGaps'][2]['proposition'])\"",
+      "observed": "note 指 K3；K3.proposition 为『明珠蒙尘』主题，非作者身份认知"
+    },
+    {
+      "text": "反向覆盖扫描（结构性地发现遗漏）：按句切分 124 句得 18 处零引文覆盖句，人工判读后确认 6 条为真实漏抽（青史留名动机段、同窗数年、首联场景评价×2、打开双臂、张慎为师之喜、对骂收束台词），逐条给出逐字原文引证。",
+      "result": "pass",
+      "cmd": "python3 - <<'PY' 覆盖位图 ∪quote 区间，逐句判零覆盖 PY",
+      "observed": "covered=2223/3325=0.6686，distinct intervals=114，zeroCoverageContentSentences=18"
+    },
+    {
+      "text": "幻觉/越权检查：段内 12 个专名实体全部被候选使用；段外人物（监正/临安/怀庆/褚采薇/宋卿/李妙真/楚元缜/恒远/楚州/曹国公/陈府尹/婶婶/绿娥/小豆丁/许平志/许玲月/许铃音）在候选中出现 0 次；T4/T5.result=null、U9 明写无结果、NE4 拒绝把预测连成因果。",
+      "result": "pass",
+      "cmd": "python3 - <<'PY' 段内实体清单 × 候选 JSON 全文计数 PY",
+      "observed": "fabricatedEntities=[] outOfRangeEntities=[] endingOverreach=无"
+    },
+    {
+      "text": "受保护路径未被本会话改动：本轮唯一写入为任务 writes 指定的 verdict 文件，加上 `loop.py verify` 依设计向被复核记录的 reviews[] 追加一条与 verifyState 置 partial；js/ css/ index.html serve.py narrative.py scripts/ tests/ docs/ data/ 全程只读。",
+      "result": "pass",
+      "cmd": "git status --porcelain 复核（只读，不做任何 checkout/reset/stash）",
+      "observed": "本会话写入仅 loop/state/out/ 下的 verdict 文件与被复核记录的 reviews 追加"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/verify_dafeng_L3_0019.verdict.json",
+      "kind": "append-only",
+      "note": "任务 writes 指定的复核结论（本产物首次创建，写入前该路径不存在）。"
+    },
+    {
+      "path": "loop/state/out/read_dafeng_L3_0019.json",
+      "kind": "append-only",
+      "note": "由 `python3 loop/bin/loop.py verify --task read:dafeng:L3:0019 --file …/verify_dafeng_L3_0019.verdict.json --agent w-dafeng-3` 依设计写入：向 reviews[] 追加本复核、verifyState 置为 partial。机制自身写入，未手工改写被复核内容；候选文件与原文未动。"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/9b676d7031b1bcd3b8377a18.docs.json": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "loop/state/out/read_dafeng_L3_0019.candidate.json": "f49e4516ca28b0a77ee73f716238289ad48e873c162e76585a761494c3b7b9fe",
+    "loop/state/out/read_dafeng_L3_0019.json": "9cd1037266eee489425e7be6e9b811a42bfcce2f8d02de664066ff9d101f199c",
+    "loop/queue/read.jsonl": "e2f491727d19826038850a32dd2d906b3d427a759d441bc7afbd0edba06bb90b"
+  },
+  "remaining": [
+    "语义正确性未独立复核：本次做的是引用定位全量核验 + 反向覆盖 + 误杀 + 幻觉/越权 + 内部一致性，未判断候选对人物动机与世界观的文学解读是否最优。",
+    "复核只覆盖原文区间 [58189,61514)。区间外内容仅用于核实两处对照：CE12 的『彩头/博头筹』设定（[57226,57380)）与 U10 的『纯靖/谨言』身份（[78357]/[124504]/[756572]）——这些段外证据没有作为本区间任何事实的背书依据。",
+    "RC4/RC5/RC6 三条覆盖缺口强度低于 RC1–RC3，未计入 counterExamples；是否补记由发布方决定，不作为判 fail 依据。",
+    "『纯靖=李慕白、谨言=张慎』在本单元内无直述（候选 U10 已标 derived）。段外证据方向一致，但段外证据不能替本单元背书，故我未据此升级为 explicit，也未判为幻觉。",
+    "未能证明『受保护路径未被本会话改动』的强命题：共享工作树内有并行会话的未提交改动，无法用 git 区分归属，按 unknown 记，不按 pass 记。",
+    "未跑 GPU/浏览器测试（本任务未要求，且与精读复核无关）。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/verify_dafeng_L3_0019.verdict.json"
+    ]
+  },
+  "submittedAt": "2026-10-08T05:46:43Z",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-08T05:46:43Z"
+  },
+  "verifyState": "pending"
+}

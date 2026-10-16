@@ -1,0 +1,120 @@
+{
+ "task": "read:dafeng:L3:0051",
+ "agent": "w-dafeng-2",
+ "status": "done",
+ "stream": "read",
+ "book": "dafeng",
+ "lane": 3,
+ "unitIndex": 51,
+ "summary": "精读《大奉打更人》第五十二章 一家人就是要整整齐齐，原文区间 docs[0].text[156335,159869)（3534 字）。产出：12 名人物（含 8 条把『衣着/称呼』绑定到姓名或实体的显式推导、7 条已验证的指称次数）；8 条任务五元组（T4/T7 的 objective、T6/T7 的 obstacle、以及全部 8 条的 cost 均按原文缺项写 JSON null 并逐项附 nullReasons，不补默认值；T1/T3 的 objective 标 inferred，因为原文只有否定式结果）；17 条带方向与触发机制的 causeEdge（CE2/CE14 标 inferred、CE12 标 derived、CE16 标 unverified，其余 explicit，每条 mechanism 非空）；6 条明确排除的 nonEdge（把『时间相邻但方向相反/无机制』的组合单独登记）；6 条人物状态变化（前值/后值 + 事件锚点 + 范围限定）；6 条知识差（谁知晓/谁不知晓，含 2 条由缺席推出的并写明是缺席推断）；5 条伏笔判定（F3 在区间内当场回收；F1/F4 回收在段外并单列段外偏移；F2/F5 显式 unresolved，其中 F2 依据全库『许平安』仅 1 次）；5 条『不算伏笔』；8 条原文瑕疵（含区间末尾分隔线、『都没是在喝酒』『也不拍不出来』『竟然每一个人能对上』『粉丝薄纱』『徒然愣住』，词面不一致的『酒屋/茶室』）；10 条 unknowns；7 条 selfCritique；7 条段外检索记录；6 条显式声明的推导；6 条未认领描写。引文共 284 条：264 条区间内引文由脚本在 docs[0].text 上 find 命中后取 start/end，并回切校验 TEXT[start:end]==quote，0 处不符；20 条段外引用单独标记 inUnitRange=false，只出现在 outOfRangeNotes[].quoteRefs、foreshadows[].payoff 与 boundaryChecks.nextHeadRef，不进入任何 evidence 数组。区间内引文并集覆盖率 84.30%（含汉字的极大未覆盖连续段 0 个）。未声明语义复核完成（readingStatus.semanticReview = stats.semanticReview = not_done）；未把人物台词、内心猜测或推断当成叙述事实。",
+ "evidence": [
+  {
+   "path": "loop/state/out/read_dafeng_L3_0051.candidate.json",
+   "sha256": "5d8823a72b30b9f91e21cc49fe4a489827f2acce8980134ab6b977abc6c58240",
+   "kind": "candidate",
+   "note": "候选本体；含 284 条引文对象（区间内 264 / 段外 20）。"
+  }
+ ],
+ "assertions": [
+  {
+   "text": "原文来源哈希与任务声明一致：sha256(data/cache/9b676d7031b1bcd3b8377a18.docs.json) == fdde5558…39839。",
+   "result": "pass",
+   "command": "shasum -a 256 data/cache/9b676d7031b1bcd3b8377a18.docs.json",
+   "observed": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+  },
+  {
+   "text": "偏移口径自检（任务明确警告过的坑）：切片以本单元标题开头，长度 3534 与任务声明一致；start/end 是相对 docs[0].text 全文的 codepoint 偏移，不是相对切片。",
+   "result": "pass",
+   "command": "python3 -c \"import json;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];s=t[156335:159869];print(len(s),s.startswith('第五十二章 一家人就是要整整齐齐'))\"",
+   "observed": "3534 True"
+  },
+  {
+   "text": "全量引文回切校验：对候选里每一个带 quote/start/end 的对象复算 docs[0].text[start:end]==quote，失败 0 条；区间内引文全部落在 [156335,159869) 内，段外引文全部落在区间外。",
+   "result": "pass",
+   "command": "python3 - <<'PY' (遍历候选全部 quote 对象复算回切与区间归属)",
+   "observed": "evidence objects 284；roundtrip/range problems 0"
+  },
+  {
+   "text": "引文对象计数以**实际写进文件的对象**为准（不是构建期日志）：inUnitQuoteRefs=264、outOfRangeQuoteRefs=20、quoteRefs=284，与独立遍历结果一致。",
+   "result": "pass",
+   "command": "python3 - <<'PY' (独立遍历候选统计 inUnitRange 真/假)",
+   "observed": "264 / 20 / 284"
+  },
+  {
+   "text": "三项哈希与任务口径一致：docs 文件哈希、docs[0].text 全长文本哈希、切片哈希均记录在 source 块，且与独立复算相符。",
+   "result": "pass",
+   "command": "python3 -c \"import json,hashlib;d=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'));t=d[0]['text'];print(hashlib.sha256(t.encode()).hexdigest());print(hashlib.sha256(t[156335:159869].encode()).hexdigest())\"",
+   "observed": "text=bc8b75ee…3fc612 segment=64a10c87…b86df4"
+  },
+  {
+   "text": "人物红线：区间内出现的全部人名/称谓实体都被登记并用到；未引入原文没有的人物（区间内没有魏渊、监正、临安等段外人物）。",
+   "result": "pass",
+   "command": "python3 - <<'PY' (穷举区间内『某公子/某姑娘/某娘子/某捕头/某花魁』类实体并与 characters 对照)",
+   "observed": "区间内实体：王捕头/婶婶/许玲月/褚采薇/浮香/赵公子/许平安/杨凌/宁宴/辞旧/小老弟，全部在 characters 内且有别名计数"
+  },
+  {
+   "text": "『结束≠成功』红线：区间末句『这下，许家的三个男人彻底坐不住了。』被显式登记为反应句而非结果句（readingStatus.cliffhangerWarning 与 SC4），没有任何一条把『被请进屋』写成成功或目标达成。",
+   "result": "pass",
+   "command": "python3 -c \"import json;c=json.load(open('loop/state/out/read_dafeng_L3_0051.candidate.json'));print(c['readingStatus']['cliffhangerWarning'][:80])\"",
+   "observed": "cliffhangerWarning 非空且显式否认写成达成/破灭"
+  },
+  {
+   "text": "台词≠事实红线：花魁的真实态度、许平志的到访缘由、赵公子被选中的理由、三人的『值班/没时间』说法全部按人物主张或不可判处理（K4/K5/U2/U3/SC1/SC5），未升格为叙述事实。",
+   "result": "pass",
+   "command": "python3 -c \"import json;c=json.load(open('loop/state/out/read_dafeng_L3_0051.candidate.json'));print([u['id'] for u in c['unknowns']])\"",
+   "observed": "U1–U10 共 10 条 unknowns，其中 U2/U3/U4 专门隔离台词与段外动机"
+  },
+  {
+   "text": "未声明语义复核完成：readingStatus.semanticReview 与 stats.semanticReview 均为 not_done，并写明『定位逐字正确 ≠ 语义已核验』及三处对抗式复核难点。",
+   "result": "pass",
+   "command": "python3 -c \"import json;c=json.load(open('loop/state/out/read_dafeng_L3_0051.candidate.json'));print(c['readingStatus']['semanticReview'], c['stats']['semanticReview'])\"",
+   "observed": "not_done not_done"
+  },
+  {
+   "text": "图谱缓存未作为证据：data/cache/9b676d7031b1bcd3b8377a18.json 未打开；readingStatus.graphCacheUsedAsEvidence=false。",
+   "result": "pass",
+   "command": "python3 -c \"import json;print(json.load(open('loop/state/out/read_dafeng_L3_0051.candidate.json'))['readingStatus']['graphCacheUsedAsEvidence'])\"",
+   "observed": "False"
+  },
+  {
+   "text": "受保护路径未改动：本轮只在 loop/state/out/ 追加写入，未触碰 js/ css/ index.html serve.py narrative.py scripts/ tests/ docs/ data/。",
+   "result": "pass",
+   "command": "git status --porcelain -- js css index.html serve.py narrative.py scripts tests docs data | head",
+   "observed": "本次会话未对这些路径执行任何写操作（工作树中已有的既有改动与本轮无关，见 remaining）"
+  },
+  {
+   "text": "证据文件在提交时刻真实存在且哈希对得上（提交记录 evidence[0] 与本文件当前哈希一致）。",
+   "result": "pass",
+   "command": "shasum -a 256 loop/state/out/read_dafeng_L3_0051.candidate.json",
+   "observed": "5d8823a72b30b9f91e21cc49fe4a489827f2acce8980134ab6b977abc6c58240"
+  }
+ ],
+ "changes": [
+  {
+   "path": "loop/state/out/read_dafeng_L3_0051.candidate.json",
+   "kind": "append-only",
+   "note": "本轮新建的候选文件；不覆盖任何既有文件。"
+  }
+ ],
+ "sourceHashes": {
+  "data/cache/9b676d7031b1bcd3b8377a18.docs.json": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+  "docs[0].text": "bc8b75ee120009f4bf6a8e235a7ff133b8ac727a8612067496a0440eaf3fc612",
+  "docs[0].text[156335:159869]": "64a10c872d7ceb78836a555f63df82787ec412f4c211b28fff311bc413b86df4"
+ },
+ "remaining": [
+  "semanticReview 未做：本候选只保证引文定位逐字正确，不声明语义已核验。三处最需要对抗式复核：(1) 花魁对三人水平的真实态度全篇只有许七安用肢体语言做出的结论（U2/SC1）；(2) 『竟然每一个人能对上』与上下文相反，我按疑似漏字登记但结论仍照原文引用（TD4/SC3）；(3) 『都没是在喝酒』字面不通，导致许平志被嫌弃的机制不可判（TD1/CE16/U1）。",
+  "『许平安』这条假名全库只出现 1 次，没有任何回收，故 F2 只能标 unresolved；若后续单元出现回收需回补。",
+  "本单元的段外回收（F1 假名杨凌、F4 诗词这条口子）都发生在第五十三章，本候选只登记线索、未把段外内容当本单元证据；回收的语义强度留给复核者判。",
+  "『酒屋/茶室』的用词不一致（TD5）与『徒然愣住』（TD7）我只登记了现象与两边计数，没有断定哪个是错的。",
+  "工作树里存在大量与本轮无关的既有未提交改动（css/、js/ 等），我没有读取也没有触碰；这些不是本轮产物。",
+  "本任务与邻近的 read:dafeng:L3:0047（第四十八章）同属 lane 3，人物命名口径（宁宴/辞旧/许平安）沿用了同一套段外推导写法，但两轮的推导链是各自独立建的。"
+ ],
+ "rollback": {
+  "kind": "append-only",
+  "strategy": "delete-added-files",
+  "files": [
+   "loop/state/out/read_dafeng_L3_0051.candidate.json"
+  ],
+  "note": "本轮只新增一个候选文件；删除它即回滚。未改动任何受保护路径，无需还原工作树。"
+ }
+}

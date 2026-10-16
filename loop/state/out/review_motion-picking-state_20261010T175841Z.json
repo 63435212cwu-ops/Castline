@@ -1,0 +1,315 @@
+{
+  "task": "review:motion-picking-state:20261010T175841Z",
+  "agent": "motion-picking-state-20261010T175841Z",
+  "status": "done",
+  "summary": "M99 四态真实接线方案已核对：shell 持状态、M91菜单和现有roving承载键盘焦点、player提供轻量current引用，现有帧钩子画最多4个真实锚点；识别模型同ID误报及脚本加载顺序风险。",
+  "evidence": [
+    {
+      "path": "docs/QUALITY.md",
+      "sha256": "dff26cfff8d8e5d488eb11278dd4121eee9f6d9a2a70c1c1a0b34738f0b7e948"
+    },
+    {
+      "path": "docs/SCHEMA.md",
+      "sha256": "d6f938cb1be0d6f81d4c241e7e62766136ae5a3638faff51a3aa2e3f1751cbfb"
+    }
+  ],
+  "sourceHashes": {
+    "docs/QUALITY.md": "dff26cfff8d8e5d488eb11278dd4121eee9f6d9a2a70c1c1a0b34738f0b7e948",
+    "docs/SCHEMA.md": "d6f938cb1be0d6f81d4c241e7e62766136ae5a3638faff51a3aa2e3f1751cbfb",
+    "index.html": "b8bbed7950d99ef179a76a4ee50108ea13cc1bdc90fb5a85639fd33341d962b1",
+    "js/app.js": "0432d38ac89a1af61a0499d5825e2a69bbbab464842c238bcb8ba0b9df0fabe5",
+    "js/scene.js": "0c1333594e8da4ee1968a2dfe5722ad21ad66933cb03041e2b692b440f1976ca",
+    "js/core/scene-core.js": "296c89b6bdeef8073754198109f204df9e4b14a40453d9083363550cef30ca71",
+    "js/sky/sky-selection-model.js": "91a92bb20c7afaed53af115cf977c60f8ab73b156ccb0d223fc8054fdf38b314",
+    "js/sky/sky-shell.js": "c6308db4f316ecb376925da90274ecfe08a28ea5444ec4ea89db9f3efcbdd34b",
+    "js/sky/sky-shell-cards.js": "e982663e4b1f048f01f267553bd56eccf81438fca77e8024f77e1a049402de4b",
+    "js/sky/sky-shell-camera.js": "2c8682ed04f848fef97043d14d0a56a4195f9e4ce3d547fab0cd08e6895fb4a5",
+    "js/sky/sky-shell-player.js": "0e0630d14df10a5537f076d9b89902fea20d1aadfab1ff34e8781d0e6db444ba",
+    "js/sky/sky-disc.js": "61ae19a1a1dd2b4843883cdf678128d482e51c91108ce58370361860c9aa2576",
+    "tests/sky_selection_model_contract.js": "23af01aa2a44b7227fe6fad63c09fc0c56a5ff49ca7bc318b8665053dd8daf4d",
+    "tests/p4_selection_model_render_probe.py": "bd4a12bc3eaf409a850329a7d5f45e1afc6dc65e5cd2e42e5bf7c3c0042a00bb",
+    "tests/sky_shell_lifecycle.py": "c53c6886b2909be7695ccafda763cd7433bb75342e110f2d3c7306214010c84d",
+    "tests/sky_shell_lifecycle_state.js": "c5944ffae586600448e941e2081df0b5199cfcc2052d4955c1c9fb1d8f36ef4f"
+  },
+  "assertions": [
+    {
+      "text": "核对实际 hover/select/focus DOM/player current 数据入口与SVG投影出口，方案不以纯函数字典冒充产品已实现。",
+      "result": "pass"
+    },
+    {
+      "text": "执行 Node 只读重放，确认 audit 将合法同ID双状态及两个不同对象都误报混同；set(focus)保留selection成立。",
+      "result": "pass"
+    },
+    {
+      "text": "只新增此artifact，未改受保护路径，未运行GPU/浏览器。",
+      "result": "pass"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/review_motion-picking-state_20261010T175841Z.artifact.json",
+      "kind": "append-only"
+    }
+  ],
+  "remaining": [
+    "主线程代码实施、实际输入四态同屏签收、version stamp和accept仍待完成。",
+    "current的章节模式必须保留既有章节语义，不得从第一条pos冒称当前事件。",
+    "跨图谱书键和图谱对象引用需共同隔离，稳定ID未必全球唯一。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "retain-review-ignore-unadopted-pieces",
+    "files": [
+      "loop/state/out/review_motion-picking-state_20261010T175841Z.artifact.json"
+    ]
+  },
+  "createdAt": "2026-10-10T18:03:13.046872+00:00",
+  "keyFindings": [
+    {
+      "path": "index.html",
+      "lines": [
+        1053,
+        1072
+      ],
+      "fact": "sky-shell.js在sky-selection-model.js之前加载。",
+      "implication": "shell顶层直接调用Model.empty会失败；主线程可前移纯模块到shell前，或onGraph惰性初始化。前移后版本戳与manifest按既有流程。"
+    },
+    {
+      "path": "js/sky/sky-disc.js",
+      "lines": [
+        227,
+        269,
+        414
+      ],
+      "fact": "focusId由明确点击focus(id)更新，实际语义是已选故事线；emph把focusId或hoverId合用做视觉强调。",
+      "implication": "M99键盘focus不能复用disc.focus(id)，否则上下键会真实选线/改高亮/开卡。"
+    },
+    {
+      "path": "js/sky/sky-selection-model.js",
+      "lines": [
+        206,
+        213
+      ],
+      "fact": "audit用字符串相等判selection/current混同；str(object)返回空串。",
+      "implication": "允许同实体同时拥有两态。对操作隔离做前后对比，不能从终态ID相等判错误。"
+    },
+    {
+      "path": "js/app.js",
+      "lines": [
+        2951,
+        3081,
+        3093,
+        3104
+      ],
+      "fact": "星名已有唯一tabindex=0的roving及focusin/out；方向键仅在已挂出可见姓名集移动。",
+      "implication": "复用现有DOM焦点，不给全图几百人新增Tab停靠位；新增M91候选自身另设单一roving/listbox。"
+    },
+    {
+      "path": "js/core/scene-core.js",
+      "line": 47,
+      "fact": "scene.on只追加监听，无返回unsubscribe。",
+      "implication": "shell在每scene只安装一次hover/select状态监听，不能每次onGraph重复安装；旧scene回调须有scene身份守卫。"
+    },
+    {
+      "path": "js/sky/sky-shell-player.js",
+      "lines": [
+        880,
+        884,
+        977
+      ],
+      "fact": "seek(c)整章模式会把pos放本章第一事件，但eventLevel=false；state()同时生成章节和旅程明细。",
+      "implication": "不每帧调用完整state；currentRef只提供当前实际语义，不将整章游标偷换为首事件。"
+    },
+    {
+      "path": "tests/p4_selection_model_render_probe.py",
+      "lines": [
+        153,
+        172,
+        182
+      ],
+      "fact": "现有实页探针只证明模块加载与人物行稳定键；selectedIsStable或任一.is-focus即可过，跨书只比较前4条样本。",
+      "implication": "该责任脚本正适合扩充M99实际输入、四个可见形状、状态独立与真换书清理，现有检查不足以签收四态。"
+    }
+  ],
+  "stateContract": {
+    "owner": "sky-shell.js 一份 interactionState；Model仍保持纯函数，只被真实控制器调用。",
+    "shape": "{ graphKey:CLApp.key(), graphRef:G, epoch:number, values:{hover:null,focus:null,selection:null,current:null}, catalog:{typedStableKey -> current entity + projection resolver} }",
+    "valueChoice": "最小实现让Model四槽存 character:<id>/event:<id>/line:<id> 字符串，graphKey与graphRef放owner外层；避免当前audit对对象的空串问题，但仍应修复sameID误报。若改存typed对象，需模型identityOf明确解析type/id，不能str对象。",
+    "identity": "按归一后的 c.id/c.entityId 建唯一索引，重复/缺失ID一律不创建确定引用；当前scene用名字取节点只是最终渲染适配，须先由同graph的唯一稳定ID反解姓名。原名字不作为跨书恢复键。",
+    "minimumAPI": [
+      "CLSky.interactionState() 返回四槽、作用域和已投影marker状态的副本，供页面责任检查。",
+      "setInteraction(kind, typedId, origin) 唯一写入口：验证作用域/实体、调用Model.set；只有对应字段发生变化。",
+      "setKeyboardTarget(typedId, ownerElement, source) 只写focus；不调任何选中/飞镜/player API。",
+      "commitCharacter(stableId) 在用户明确操作后解析并调用focusReading/openCompass；仅成功后写selection。",
+      "playerUnit.currentRef() O(1)只读当前graph/id/index/eventLevel/模式/stage，不渲染不取焦。"
+    ],
+    "sameId": "相同实体同时focus/selection/current合法；用一个渲染组组合四角/实环/当前事件符号。不同实体只是投影碰巧重合不可合并身份。"
+  },
+  "eventWiring": [
+    {
+      "state": "hover",
+      "input": "scene.on(\"hover\", {name}) 与现有 onDiscHover(p)；候选行pointerenter/leave只在真实指针操作写hover。",
+      "where": [
+        "js/scene.js:2993–3006",
+        "js/sky/sky-shell-cards.js:43 onDiscHover",
+        "shell init的一次scene监听"
+      ],
+      "rule": "将唯一人名映射为该图的稳定ID；未知/冲突只保留候选文本不亮错人。pointerleave/窗口blur撤hover，不清selection/current。menu上下键不要调用CLSkyDeep.hoverStar冒充焦点。"
+    },
+    {
+      "state": "focus",
+      "input": "M91候选列表active row；已有#labels .cl-lab.char的真实focusin/focusout；后续已有可交互人物入口可共用data-entity-id。",
+      "where": [
+        "js/app.js:3081/3093已有roving的委托事件",
+        "M91面板keydown/activeId",
+        "shell.handlesKey与keys让位"
+      ],
+      "rule": "focusin解析真实DOM对应节点，focusout只清自己拥有的焦点；用relatedTarget避免同面板行切换闪空。列表重新渲染按稳定ID找回active，不默认第一条成为selection。"
+    },
+    {
+      "state": "selection",
+      "input": "M91 Enter/Space/点击确认、M04 focusReading成功、openCompass成功、onDiscSelect真实选线；明确清选动作。",
+      "where": [
+        "js/sky/sky-shell.js:317 focusReading",
+        "js/sky/sky-shell.js:232 openCompass",
+        "js/sky/sky-shell-cards.js:55 onDiscSelect"
+      ],
+      "rule": "成功落位/读板被允许才提交，不在候选出现或pointerdown先选第一项。readPanel关闭/hover离开/焦点迁移不清此槽；已有clearReadingFocus只收阅读显影，不等于抹除用户选择。"
+    },
+    {
+      "state": "current",
+      "input": "player本身的seekEventAt/advancePhase/startTimer/clearCursor/refresh真实当前状态。",
+      "where": [
+        "js/sky/sky-shell-player.js:375 current",
+        "js/sky/sky-shell-player.js:891 seekEventAt",
+        "js/sky/sky-shell-player.js:906 advancePhase",
+        "shell既有frame hook ~548"
+      ],
+      "rule": "通过currentRef同步，不反向驱动播放器。暂停继续保留；章节模式eventLevel=false只保留章节游标，不能画第一事件当前圈。选择人物/菜单移动不得修改当前事件。原文态暂停仍保留当前事件语义，覆盖层按可见模式决定是否显示。"
+    }
+  ],
+  "renderPlan": {
+    "mount": "在shell HUD下创建1个SVG id=skyInteractionMarks，pointer-events:none，aria-hidden=true；标签可选一处静态小图例。≤4个锚点，不开新rAF。",
+    "frame": "插入shell已存在registerFrameHook，位于disc.frame/field.frame/deep.frame后；读取四槽和轻量currentRef，按当前相机投影更新最多4个g的transform；只在值变化时写属性。",
+    "character": "先由typedStableKey反解当前人物，再使用cameraUnit.starScreens([最多3个名字])；保持同一画布矩形及过滤z/屏幕可见范围。不要依赖标签是否因LOD挂出；若投影不合法，保留状态说明但不画错位。",
+    "event": "current/event selection使用disc.eventPoint(eventIndex)；以stable eventId核对该index仍属同graph；plot=false或compass时不把事件珠投影到星座位置。",
+    "line": "已选/hover故事线可用disc.lineScreen(id)加两种小标记；初片若只覆盖人物+事件，需诚实声明并避免把selInfo冒充四态全覆盖。",
+    "shapes": {
+      "hover": "细虚线括号，无填色、无脉冲",
+      "focus": "高对比四角；由真实键盘活动行同步出现",
+      "selection": "固定实线环；关闭候选和移开鼠标仍在",
+      "current": "既有当前事件珠位置的小固定符号/当前标记；不复制第二颗事件珠，不加假箭头"
+    },
+    "coincidence": "按(graphKey,type,id)合并一组，保留组合形状与简短状态词；不叠四圈强光。不同对象重叠时不合并ID，可把说明文字轻移并用无箭头导线回原锚点。",
+    "timing": "状态同步即时，opacity或stroke样式≤120ms；不设120ms定时器延迟身份更新；reduced直接终态。",
+    "labelsAndPanels": "覆盖层在正文/主面板下面；完整名称来自当前实体，不自动飞镜让所有标记挤入；离屏状态给文本而不是夹到错误屏幕坐标。",
+    "selectionPersistence": "原M28 locate是一次脉冲，不能承担M99持久实环；新增最多1个持久selection标记与它短时间去重即可，不改节点属性。"
+  },
+  "keyboardM91": {
+    "structure": "一个role=listbox的焦点容器，aria-activedescendant指当前option；或真实按钮roving二选一。最多6行首屏且所有候选可滚动；别混合两个focus管理方案。",
+    "start": "明确打开候选后可以把DOM focus放列表容器，保存触发元素；focus可先为null直到第一箭头，也可显示首候选焦点，但selection必须保持旧值。",
+    "arrows": "ArrowUp/Down/Home/End仅activeId与focus；更新aria-activedescendant及小四角，必要时scrollIntoView(nearest)。不调用select、disc.focus、player.seek、camera.flyTo、S.setSearchSet。",
+    "commit": "Enter/Space/触摸点击同一commit(stableId)，先核对snapshotGraphRef/key/epoch、实体仍合法，再交原选择路径；preventDefault并在捕获键归属判定上让shell/keys知道菜单持有，防Space开播或方向键转镜头。",
+    "cancel": "Esc只关闭本菜单并恢复仍连接且可见的触发元素；焦点进入触发元素后按实际target更新focus。selection/current不变。点击外部/拖动关闭菜单，但不要随后触发旧候选确认；pointercancel取消快照。",
+    "focusRestoration": "只在用户明确关菜单/确认导致聚焦控件移除时归还焦点；异步投影/hover/播放推进绝不调用focus()。来源已销毁时放到既有菜单打开按钮或主导航，而不是第一人物。",
+    "rovingIntegration": "不改现有星名tabIndex权威写者app.domainsLabelState。shell可用scene.core().nodes中el===target查一次稳定对象；不要从DOM文字重新猜身份。持续帧只检查ownerElement.isConnected/activeElement，不扫描所有节点。"
+  },
+  "cleanupMatrix": [
+    [
+      "pointer leaves canvas or window blur",
+      "hover=null；候选尚在时focus随实际DOM保留；selection/current不动"
+    ],
+    [
+      "focusout to ordinary control",
+      "focus=null或新合法实体focus；hover不被重写"
+    ],
+    [
+      "candidate close/Esc",
+      "作废snapshot与菜单回调，清菜单拥有的focus并按实际返回入口重建；保留selection/current"
+    ],
+    [
+      "new pointer drag or resize invalidates picking snapshot",
+      "取消候选；持续selection标记按新投影跟随；不反向修改布局/相机"
+    ],
+    [
+      "view switches within same graph",
+      "hover/focus撤旧视图引用；selection稳定ID保留并由目标图resolver重算；current依player实际clearCursor决定，不借mode硬猜"
+    ],
+    [
+      "clearCursor / no current event",
+      "current=null，selection不变"
+    ],
+    [
+      "pause / open source reading",
+      "current保持同一eventId；所有自动推进停，不用重置current假装消失"
+    ],
+    [
+      "cl:graph-loading / onGraph different G or key",
+      "epoch++，四态全清，菜单/overlay旧引用/异步回调作废；不把跨书同名或同字符ID自动对应"
+    ],
+    [
+      "graph redraw with same identity scope",
+      "按stableId恢复选择；对象不在新数据时清或标不可见原因，不选第一条"
+    ],
+    [
+      "selected object filtered out",
+      "保留选择语义及原因说明，主图不画错误替身；用户明确新选后更新"
+    ],
+    [
+      "scene replacement / component disposal",
+      "清DOM引用，移除有返回句柄的frame hook；scene.on旧回调以scene身份校验成为no-op，避免onGraph不断追加"
+    ]
+  ],
+  "modelFix": {
+    "problem": "audit是结果值相等启发式，不能证明状态混同。QUALITY M99明确允许多个状态同对象。",
+    "fix": "audit报告sameTargetKinds/coincidentStates而不将合法相等判红；独立性由set/advance的others前后相等或transition审计验证。修改既有纯契约中的反向测试为同ID合法+操作隔离负例。",
+    "observedProbe": {
+      "command": "node require sky-selection-model; audit同字符串与不同typed对象；set focus前后比较selection",
+      "sameStringResult": "ok=false, conflated=[selection 与 current 取同一个值]",
+      "differentObjectsResult": "ok=false, conflated=[selection 与 current 取同一个值]",
+      "setFocusPreservesSelection": true
+    }
+  },
+  "responsibilityTests": [
+    {
+      "path": "tests/sky_selection_model_contract.js",
+      "newCases": [
+        "same typedStableId允许selection/current并存",
+        "set focus不清selection/current；advance只改current",
+        "跨scope同name甚至同id仍清四态",
+        "无ID/重复ID不能自动选首项；恢复按ID而非数组index"
+      ],
+      "why": "已有四态纯函数责任，扩展即可；不能代替实际渲染。"
+    },
+    {
+      "path": "tests/p4_selection_model_render_probe.py",
+      "newCases": [
+        "真实CDP指针hover A后，hover虚括号出现，选择保持B且仍有实环",
+        "M91真实keydown移动focus到C，DOM active descendant与C四角同ID，player当前事件E不变；Enter后才selection=C",
+        "同一个人hover/focus/selection并存只一个identity渲染g，三种形状仍可读",
+        "暂停保留current；真实下一事件只移动current，selection不变；章节模式不假标第一事件",
+        "Esc关闭菜单恢复trigger焦点，已选与事件不清；拖动/pointercancel不提交",
+        "同页真实换书四态与旧标记立即清空；旧callback不能覆盖新书；不存在的恢复ID不选首人",
+        "390宽、reduced、低档同一路径；全图新增Tab停靠位数量不膨胀"
+      ],
+      "fixtureRule": "缺需要的实际对象/候选/事件须失败或明确测试前置失败，不能skip变绿；已有两书固定夹具可挑唯一身份和不同事件，重叠命中部分由M91候选责任路径提供。",
+      "assertionRule": "不能只读interactionState字典；同时检查真实SVG/DOM data-entity-id、shape、visibility/rect及原plot/player状态；保留至少一次完整输入录像给视觉复核。"
+    },
+    {
+      "path": "tests/sky_shell_lifecycle.py + tests/sky_shell_lifecycle_state.js",
+      "newCases": [
+        "菜单→返回→重开→seek之后没有旧hover/focus接管",
+        "loader A→B竞争期间旧候选/旧selected无法映射到新G",
+        "帧钩子/菜单DOM数量在多次换书后稳定"
+      ],
+      "why": "已有真实生命周期/加载竞争责任，不再新增M99专用脚本。"
+    }
+  ],
+  "submittedAt": "2026-10-10T18:03:20Z",
+  "wallClockNote": "租约里没有 startedAt（任务可能由非 loop 路径提交，或租约已被回收）—— 留空而不估算",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-10T18:03:20Z"
+  },
+  "verifyState": "pending"
+}

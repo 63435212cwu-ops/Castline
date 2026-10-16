@@ -1,0 +1,86 @@
+{
+ "task": "merge:p3-retry-backoff-gate:20261009",
+ "agent": "reform-lead",
+ "at": "2026-10-08T20:49:04Z",
+ "gateLock": "持有 GATE.lock（agent=reform-lead）",
+ "defect": {
+  "id": "P3-CRASHLOOP",
+  "fact": "拒绝服务级失败热循环：worker 失败路径**没有退避**、也不区分失败类型，立刻领回同一任务。",
+  "denominator": [
+   "read:dafeng:L0:0080   尝试 1626 次（1510 次 rc=127）",
+   "verify:dafeng:L3:0099 尝试 1213 次（1116 次 rc=127）",
+   "read:xiyou:L0:0058   尝试  181 次（180 次 rc=127）",
+   "ops:accept-full      尝试  241 次（205 次 rc=127）",
+   "整体去重后：575 次尝试中 rc=1 占 25.0%、rc=124 占 16.9%"
+  ],
+  "rootCause": "`dsh: profile \"castline\" does not exist`（worker 缺 DSH_HOME）使 dsh 启动即退（rc=127）；而失败后无退避 ⇒ 立刻重领同一任务。外层环境问题已由 sentinel 的 repair_path/discover_dsh_home 修掉，但**放大器**（无退避、无类型区分）留在 worker 侧。"
+ },
+ "fix": {
+  "loop/bin/worker.py": {
+   "sha256": "3ffd075e711cfbe600307582b596c0e6991bd452033400ce564a49ba2b00c6e8",
+   "changes": [
+    "_backoff_plan()：rc=127/125 → base 60s/cap 3600s；rc=124/1 → base 30s/cap 900s",
+    "_note_failure()：指数退避并写 retryAfter 到 loop/state/FAILED-TASKS.json",
+    "_clear_failure()：rc=0 即清零（避免把好任务拖进退避）",
+    "失败后本进程也退避 min(wait,300)s"
+   ]
+  },
+  "loop/bin/loop.py": {
+   "sha256": "c7b703eb00f23fe2b2e2fe952b7304ffd6a8c25951273787a3f572be0019787a",
+   "changes": [
+    "backoff_blocked()：返回仍在 retryAfter 窗口内的任务",
+    "pick() 里 `if tid in blocked: continue`——调度侧真的跳过"
+   ]
+  },
+  "loop/bin/selftest.py": {
+   "sha256": "0fe84c0ddc5b913a08d0bfedcb41239ae23156395eee703dd0bb642576c6cc91",
+   "changes": [
+    "12q6/12q6b/12q6c：钉住『有退避』『调度侧真的跳过』『必须自愈不能永久暂停』"
+   ]
+  }
+ },
+ "designChoice": "**指数退避（自愈）** 而非『连续失败永久暂停』。原因：永久暂停只能靠跑成功解除，而暂停后它永远不跑 ⇒ **永久锁死**，把热循环换成静默卡死。实测修复前的第一版正是永久暂停，`_clear_failure` 永远等不到成功 —— 自查时发现并推翻。",
+ "effect": {
+  "rc127_first_hour": "约 6 次（60+120+240+480+960+1920s）而非 1510 次",
+  "long_run": "之后约 1 次/小时（cap 3600s），且持续自愈"
+ },
+ "verification": {
+  "selftest": "123/123（合并前 120/120，新增 3 条全绿）",
+  "negativeControl": "旧 worker+旧 loop + 新 selftest ⇒ **120/123**，3 条全红 ⇒ 检查能击穿",
+  "behavioral": "沙箱实测 rc=127 退避序列 60/120/240/480/960/1920/3600；窗口内 pick 跳过；把 retryAfter 拨到过去 ⇒ 立即可领（自愈）",
+  "productAccept": "sh scripts/accept.sh → 133/133"
+ },
+ "rollout": "worker.py/loop.py 属常驻进程启动时载入；需重启 worker 与 sentinel 才生效（E15）。",
+ "assertions": [
+  {
+   "text": "失败退避是指数且有上限",
+   "command": "沙箱退避序列 60→3600 封顶",
+   "result": "pass"
+  },
+  {
+   "text": "调度侧真的跳过（不是只记不退避）",
+   "command": "pick 对窗口内任务返回 None",
+   "result": "pass"
+  },
+  {
+   "text": "自愈，不会永久锁死",
+   "command": "retryAfter 过期后立即可领",
+   "result": "pass"
+  },
+  {
+   "text": "回归能击穿缺陷",
+   "command": "旧代码 120/123",
+   "result": "pass"
+  },
+  {
+   "text": "门禁全绿",
+   "command": "selftest 123/123；accept 133/133",
+   "result": "pass"
+  }
+ ],
+ "remaining": [
+  "超时上限（2700s）与中位耗时（p50 1858s）的关系仍未调整；属独立议题。",
+  "需重启常驻进程使退避生效。",
+  "失败类型 rc=1（agent 自行报错）里混有『跑到预算耗尽』的情况，其根因（任务粒度/预算）未解决。"
+ ]
+}

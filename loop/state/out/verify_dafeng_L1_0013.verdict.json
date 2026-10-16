@@ -1,0 +1,428 @@
+{
+ "schema": "castline/verify-verdict/1",
+ "task": "verify:dafeng:L1:0013",
+ "reviewedTask": "read:dafeng:L1:0013",
+ "reviewedArtifact": "loop/state/out/read_dafeng_L1_0013.candidate.json",
+ "reviewer": "w-verify-0",
+ "reviewerRole": "VERIFIER",
+ "book": "dafeng",
+ "lane": 1,
+ "unitIndex": 13,
+ "unitHead": "第十四章 心理博弈",
+ "source": {
+  "path": "data/cache/9b676d7031b1bcd3b8377a18.docs.json",
+  "docIndex": 0,
+  "field": "text",
+  "range": [
+   40599,
+   43557
+  ],
+  "chars": 2958,
+  "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+  "sourceHashVerified": true,
+  "sliceHead": "第十四章 心理博弈\n\n ",
+  "sliceSha256": "2e8e5486be877222b570478c54f1808153b4340c0458efbd2b599463dd922e2b",
+  "candidateSha256": "149d8cfffd65e1449c45987e9380ec69acb6c5ed1de6cc8f2e9526673653d1f6"
+ },
+ "verdict": "partial",
+ "verdictRule": "引用层零缺陷：82 条去重引文逐字命中、偏移全部等于全文首次出现位置、全文唯一、区间内/外出现次数自述相符、sourceHash 全部一致（bad 0 / nonUnique 0 / notFirstOccurrence 0 / segOccBad 0 / hashBad 0），且与候选自带 reproduceScript 的实跑输出一致。零编造、零幻觉、零「结束=成功」、未越权声称语义复核。但存在 4 处可机器证伪的缺陷（CE1 覆盖记账与产物矛盾、CE2 状态触发因错序、CE3 自审计期望值过期、CE4 偏移标注错误）与 5 条原文明确存在而候选未覆盖的事实（REV1–REV5）。按「判 fail 必须有 counterExample 且 quote 逐字可查」的纪律本可判 fail；但 CE2 是状态字段内的因果错序（事件存在、引文成立、只是触发因标错），CE1/CE3/CE4 集中在覆盖记账与自审计元数据层，tasks/causeEdges/states/foreshadows 四类断言的可回溯证据全部成立，故按与 verify:dafeng:L1:0009、verify:dafeng:L1:0005 一致的口径判 partial：可用的是四类断言本身与全部 82 条引文，必须修的是 S1 触发因、覆盖记账、自审计期望值、F1 偏移标注。",
+ "counterExamples": [
+  {
+   "id": "CE1",
+   "severity": "self-description（覆盖记账与产物自相矛盾；3 句中 2 句整句未覆盖）",
+   "check": "coverage.omissions[0] 声称制度性评论段「只在 T1 的 obstacle 与 C3 的背景里引用」",
+   "claim": "本区间的制度性评论段（「这年头的审问过程大抵如此……利弊皆有。」）未单独立为 task，只在 T1 的 obstacle 与 C3 的背景里引用。",
+   "claimSource": "candidate coverage.omissions[0]",
+   "evidence": [
+    {
+     "quote": "    这年头的审问过程大抵如此，逼问、动刑，在缺乏证据的情况下，只能这样。",
+     "start": 40855,
+     "end": 40893
+    },
+    {
+     "quote": "    因此，常常出现屈打成招。",
+     "start": 40895,
+     "end": 40911
+    },
+    {
+     "quote": "    可也没办法，取证难度很大，缺乏设备和专业技术。于是刑法就成了必不可少的程序。",
+     "start": 40913,
+     "end": 40955
+    }
+   ],
+   "why": "可复现证伪：该段共 3 句（[40855,40893) + [40895,40911) + [40913,40955)），其中「因此，常常出现屈打成招。」与「可也没办法，取证难度很大，缺乏设备和专业技术。于是刑法就成了必不可少的程序。」在整个候选文件里出现 0 次；C3 的全部字段与 5 条 evidence 中，「这年头的审问过程」「取证难度」「设备」「专业技术」「刑法」「利弊皆有」命中数均为 0；T1.obstacle 只吸收了第 1 句的「在缺乏证据的情况下，只能这样」。也就是说这段并没有「在 T1 与 C3 里被引用」，而是 2/3 整句未被覆盖——而这 2 句恰是「为什么这个时代靠刑讯」的机制（取证难度大、缺设备与专业技术 ⇒ 刑法成为必经程序 ⇒ 屈打成招）。自述把一次整段漏抽写成「已作为背景使用」，会让下游把未覆盖误当已覆盖。注：「利弊皆有。」在候选里唯一的出现位置就是 omissions[0] 这句自述本身，不构成覆盖。",
+   "whatMustChange": "把 omissions[0] 改为如实记「3 句中 2 句整段未覆盖」，或把该段补为独立条目/证据；不要保留「只在 T1 的 obstacle 与 C3 的背景里引用」这一与产物矛盾的措辞。"
+  },
+  {
+   "id": "CE2",
+   "severity": "content（states[0].after 的触发因时序倒置）",
+   "check": "S1_yang_guard_cycle.after 把「脸色微变」写成「被点破年龄差后」的结果",
+   "claim": "「她慢慢放下心防」（被一句替她开脱的话卸下）→ 被点破年龄差后「脸色微变」→ 听完完整指控「脸色煞白煞白，掌心汗津津」",
+   "claimSource": "candidate states[0]（S1_yang_guard_cycle）.after",
+   "evidence": [
+    {
+     "quote": "    “但杀人就不对了。”",
+     "start": 42690,
+     "end": 42704
+    },
+    {
+     "quote": "    杨珍珍脸色微变：“民妇不知道差爷在说什么。”",
+     "start": 42706,
+     "end": 42732
+    },
+    {
+     "quote": "    许七安笑了笑，“我看过卷宗，那张献比你小了足足七岁。”",
+     "start": 42734,
+     "end": 42765
+    }
+   ],
+   "why": "可复现证伪：原文顺序是 [42690,42704)「但杀人就不对了。」→ [42706,42732)「脸色微变」→ [42734,42765)「那张献比你小了足足七岁」。「脸色微变」在 42706，早于「小七岁」的 42734 共 28 个 codepoint，因此不可能是「被点破年龄差后」的反应；它的实际触发因是紧接其前的 [42527,42704) 那一轮指控（「红杏出墙也是情理之中」＋「但杀人就不对了」），而收尾的 [42690,42704) 并未进入 S1 的 evidence（S1 evidence 起始为 41878/41913/42069/42232/42335/42706/43022/43049/43483/43497，无 42690）。本条只否定 S1.after 的因果措辞，不否定「脸色微变」这个事件本身：事件存在、引文逐字成立、也已被 S1 收录。候选 C8_age_gap_question_changes_her_face 把 42734 正确配到 42767「板着脸：差爷这话是什么意思」，未受影响。",
+   "whatMustChange": "把 S1.after 改为「被『但杀人就不对了』这一步指控后脸色微变」，或把该步单列为独立状态跳变；不要把 42706 的反应归到 42734 的话上。"
+  },
+  {
+   "id": "CE3",
+   "severity": "metadata（自审计期望值与兄弟字段、与实跑输出三方不一致）",
+   "check": "selfCheck.reproduceExpected 记录的条数与 selfCheck 兄弟字段及 reproduceScript 实跑输出都不一致",
+   "claim": "quotes 77 bad 0 badHash 0 inRange 66 crossRange 11 nonUnique 0（按 (start,end) 去重后的条数）然后打印 ALL VERBATIM",
+   "claimSource": "candidate selfCheck.reproduceExpected",
+   "evidence": [
+    {
+     "quote": "quotes 77 bad 0 badHash 0 inRange 66 crossRange 11 nonUnique 0",
+     "note": "该串是候选自述而非原文子串，按 claimSource 引用，不做原文定位"
+    }
+   ],
+   "why": "可复现：把 selfCheck.reproduceScript 存为文件实跑，输出为「quotes 82 bad 0 badHash 0 inRange 70 crossRange 12 nonUnique 0」＋「ALL VERBATIM」；候选自己的兄弟字段也写 quotesChecked=82 / quotesInRange=70 / crossRangeQuotesChecked=12。三方（期望值 77/66/11、兄弟字段 82/70/12、实跑 82/70/12）中期望值是过期的。脚本本身仍有 assert 且通过，所以这不是伪造通过，而是自述文本会误导下游对账（按文本比对的校验器会误报不符）。我本轮独立复算亦得 82/70/12（见 auditScript），与实跑一致。",
+   "whatMustChange": "把 reproduceExpected 更新为 82/70/12，或改为「以实跑输出为准」的措辞。"
+  },
+  {
+   "id": "CE4",
+   "severity": "metadata（低权重：偏移标注错误，计数结论本身正确）",
+   "check": "foreshadows[0]（F1）twoAppearanceBar 把「请你喝酒」的全文位置标成 [41483,41509)",
+   "claim": "我在全文里检索「请你喝酒」，全書也只有这一处（[41483,41509)）",
+   "claimSource": "candidate foreshadows[0].twoAppearanceBar",
+   "evidence": [
+    {
+     "quote": "请你喝酒",
+     "start": 41483,
+     "end": 41487
+    },
+    {
+     "quote": "    “索性也审不出结果，老爷现在骑虎难下，他会答应的，回头请你喝酒。”许七安道。",
+     "start": 41452,
+     "end": 41494
+    }
+   ],
+   "why": "可复现：T.count('请你喝酒')==1 成立，「全书唯一一处」这个结论是对的；但该子串的实际区间是 [41483,41487)（长 4），T[41483:41509) 实际是 '请你喝酒。”许七安道。\\n\\n    “行吧....”\\n'，既不是该子串也不是任何被引用的 quote。同字段所引的完整句 [41452,41494) 才是逐字引文。故本条只要求订正括号里的区间标注，不触及 F1 的 unresolved 判定。",
+   "whatMustChange": "把 [41483,41509) 改为 [41483,41487)，或直接引用 [41452,41494) 那条完整句。"
+  }
+ ],
+ "reverseChecks": [
+  {
+   "id": "REV1",
+   "found": "第十五章供词的实际内容整条缺失：候选读了 [43557,45200) 用于 F2/F3 回收，却只记了「一五一十的说出了实情」这个壳，没有记下供词说了什么——而它正是本区间 C7 那条推断被原文纠正的地方。",
+   "evidence": [
+    {
+     "quote": "她确实与继子有染，并怀了他的孩子。",
+     "start": 44455,
+     "end": 44472
+    },
+    {
+     "quote": "不过与许七安刚刚说的有些出入，并不是她主动，她与张献勾搭的过程用八个字概括：继子请自重，继子请自动！",
+     "start": 44472,
+     "end": 44522
+    }
+   ],
+   "whyItMatters": "本区间 C7 记录许七安内心推断「我几乎可以确认你肚子里的孩子是隔壁老王的」（[42527,42615)），U13 也把生父列为未知。原文在 [44455,44472) 明确交代孩子是张献的（继子），并在 [44472,44522) 明确写「与许七安刚刚说的有些出入，并不是她主动」——即他这句推断的关键部分（生父）被原文否证、且她并非主动方。候选已把这些章的引文纳入 crossRangeQuotes（[44426,44449) 就在其中），却未把紧邻其后的这两句记入任何条目，下游只看到「防线被击溃」而看不到「他的推断哪里错了」。这是本轮最有信息量的一条遗漏。",
+   "crossRange": true
+  },
+  {
+   "id": "REV2",
+   "found": "杨珍珍「预期被颠覆」这一状态前值整段未覆盖：两句连写的叙述层文字在候选里出现 0 次。",
+   "evidence": [
+    {
+     "quote": "    杨珍珍原本以为会是一场拷问，没想到这个年轻人的态度和语气出奇的温和。",
+     "start": 42277,
+     "end": 42315
+    },
+    {
+     "quote": "    和印象中的官差形象不同。",
+     "start": 42317,
+     "end": 42333
+    }
+   ],
+   "whyItMatters": "这正是她心防为何会松动的叙述层机制（预期=拷问 → 实际=温和 → 与印象中的官差不同）。S1/S2 只写了结果（「慢慢放下心防」「警惕」），没有写这个前值本身；候选 S2.note 只用「许蛇？」一段处理称呼，未收录这两句。按 READER 纪律「人物状态变化要有前值/后值 + 事件锚点」，这是可补的前值证据。"
+  },
+  {
+   "id": "REV3",
+   "found": "禁室问话的开场话术与她的不置可否整拍未覆盖：「穿金戴银」只出现在 structureRead 的概述行里，不是任何任务/状态/因果条目的证据；「打开话题」「不置可否」两处出现 0 次。",
+   "evidence": [
+    {
+     "quote": "    “看你这穿金戴银的，张有瑞对你很是不错。”许七安打开话题。",
+     "start": 42183,
+     "end": 42216
+    },
+    {
+     "quote": "    杨珍珍不置可否。",
+     "start": 42218,
+     "end": 42230
+    }
+   ],
+   "whyItMatters": "这是「先聊家常卸心防」这条手法链（T2.action 概括为「先聊家常卸下杨珍珍的心防」）的第一个动作，也是本区间唯一一处「他主动开启话题而她不接话」的初始状态；缺了它，T2/C6 之间少一个可核对的起点，C6 的「中听」也失去前一刻的冷淡对照。"
+  },
+  {
+   "id": "REV4",
+   "found": "误杀检查：一条合法因果边被候选自己指出后仍未收录——张献挡话 → 朱县令大怒「给我上刑」。",
+   "evidence": [
+    {
+     "quote": "    张献立刻道：“大人，贼人如何潜入宅里，母亲如何知道？县衙捕快查不出来，大人也不能把罪责强加给我母子二人。”",
+     "start": 40724,
+     "end": 40781
+    },
+    {
+     "quote": "    朱县令大怒：“巧舌如簧，来人，给我上刑。”",
+     "start": 40828,
+     "end": 40853
+    }
+   ],
+   "whyItMatters": "rejectedAsCauseEdge[0].reason 自己写道「县令发怒的直接对象是张献的挡话（上一段）」——即候选已识别出这条真实因果，却只把它用作「驳回另一条边」的理由，没有把它立为 causeEdge。实测 [40828,40853) 只出现在 states[3].evidence[0] 与 rejectedAsCauseEdge[0].evidence[1]，causeEdges 中无任何一条以它为由/为果（C2 从 40968 的家叔威胁起算）。结果：「挡话 → 上刑 → 张献被按在地上打板子 → 许七安趁行刑间隙叫跟丁」（[41315,41353)）这条链的第一环在因果层缺失，而它正是 T2「趁张献挨板子的间隙」之所以成立的前提。这不是编造，是结构性的少收一条边。",
+   "note": "与 CE 不同，本条不指向任何错误断言，只指向因果层的漏收；候选对「许七安听不下去 → 上刑」的驳回本身是对的（他当时一个字也没说）。"
+  },
+  {
+   "id": "REV5",
+   "found": "来源标注缺口（存疑级，不作为判 fail 依据）：「朱县令（长乐县知县）」这一实体标签的依据句未被任何引文收录。",
+   "evidence": [
+    {
+     "quote": "朱县令是长乐县的父母官，虽说在京城这种权贵云集之地，只是个弟弟。",
+     "start": 39050,
+     "end": 39082
+    }
+   ],
+   "whyItMatters": "「长乐县」与「知县/父母官」在区间内出现 0 次；候选 T1.who 与 namedEntitiesInRange 都写了「长乐县知县」，但它收录的跨区间引文 [34436,34491) 只支持「长乐县郊」（死者的田产所在地），并不支持「朱县令是该县知县」。真正支持的句子是 [39050,39072)（第十三章），未被收录进 crossRangeQuotes。标签本身与全書一致（朱县令确为长乐县父母官），故只作存疑/建议补引，不判错。",
+   "crossRange": true,
+   "severity": "provenance-soft"
+  }
+ ],
+ "misKillCheck": {
+  "checked": "候选把什么合法的东西排除掉了？",
+  "verdict": "未发现由词表/正则造成的误杀；但发现一条「自己识别出却未收录」的合法边（见 REV4）。",
+  "details": [
+   "rejectedAsCauseEdge 的 4 条驳回全部成立：「许七安听不下去了」→「上刑」确是把时间相邻当因果（[40783,40826) 与 [40828,40853) 之间他没有言语行为，县令的对象是张献的挡话）；「张献被杖责」→「去禁室审杨珍珍」中间隔休堂/内堂/卖关子三段；「三十岁」→「红杏出墙」确系评述当机制；「敲桌子」→「呆滞」确系伴随动作。",
+   "rejectedAsForeshadow 的 5 条驳回亦成立。其中「大奉律法」一条的措辞偏宽：区间内 [43410,43433) 是「凡夜无故入家者，杖八十。主家登时格杀者，勿论。」（全書仅 1 次），第十五章 [44953,44976) 是「通奸、谋杀亲夫…凌迟处死」（另一条），两处并非同一条律文；但「不列为伏笔」的结论不受影响。",
+   "F1 的 payoffCandidates 明确排除了第十五章王捕头请客（[45442,45472)）并说明理由为张冠李戴——这是正确的误杀防护。"
+  ]
+ },
+ "hallucinationCheck": {
+  "checked": "有没有原文没有的人物、结局、伏笔、成功判定？",
+  "verdict": "未发现。",
+  "details": [
+   "无原文外人物：候选出现的区间外指称（王捕头/堂事/李珍珍/徐大人/白役）均被显式标注为区间外或写入 unknowns，未混入区间内断言。",
+   "无越权结局：T1.result 明确写「当堂没有拿到招供」；T5.result 明确写「本区间内她始终没有认罪、没有供述」；S8.note 写「既没有判决，也没有供词」。未把「播放到结尾」写成成功。",
+   "无凭空伏笔：F1 status=unresolved 且 payoff=null；F2/F3 标 resolved_out_of_range 并给出逐字可查的区间外回收（我已逐条核验命中且唯一）。",
+   "U4 记录第十五章「李珍珍」（全書仅 1 次 @43781）与区间内「杨珍珍」不一致而未擅自统一，属正确的存疑处理，不是幻觉。",
+   "REVIEWSTATUS 自述 semanticReview=not_performed，未越权声称语义复核完成。"
+  ]
+ },
+ "citationCheck": {
+  "method": "对 82 条去重引文做全量 find + 偏移比对 + 全文唯一性 + inSegmentOccurrences 复核 + sourceHash 复核；另按 seed=13 随机抽 5 条做逐条 find。",
+  "exhaustive": {
+   "distinct": 82,
+   "bad": 0,
+   "nonUnique": 0,
+   "notFirstOccurrence": 0,
+   "segOccBad": 0,
+   "hashBad": 0,
+   "inRange": 70,
+   "crossRange": 12
+  },
+  "random5": [
+   {
+    "start": 41689,
+    "end": 41719,
+    "found": 41689,
+    "verbatim": true,
+    "offsetIsFirstOccurrence": true,
+    "unique": true
+   },
+   {
+    "start": 41801,
+    "end": 41826,
+    "found": 41801,
+    "verbatim": true,
+    "offsetIsFirstOccurrence": true,
+    "unique": true
+   },
+   {
+    "start": 41011,
+    "end": 41062,
+    "found": 41011,
+    "verbatim": true,
+    "offsetIsFirstOccurrence": true,
+    "unique": true
+   },
+   {
+    "start": 42734,
+    "end": 42765,
+    "found": 42734,
+    "verbatim": true,
+    "offsetIsFirstOccurrence": true,
+    "unique": true
+   },
+   {
+    "start": 43049,
+    "end": 43086,
+    "found": 43049,
+    "verbatim": true,
+    "offsetIsFirstOccurrence": true,
+    "unique": true
+   }
+  ],
+  "conclusion": "82/82 逐字命中且偏移一致；随机 5 条全部命中、偏移等于首次出现位置、全文唯一。"
+ },
+ "usableVsDiscard": {
+  "usableAsIs": [
+   "tasks T1–T6 的五元组与 basis 分级（含 T3/T6 按纪律写 null 的 objective/cost）：证据逐字成立，未把人物话语当事实，未把结束当成功。",
+   "causeEdges C1–C13：证据全部逐字成立；C3/C5/C13 的 derived 定级与 C10「不把台词当真伪」的处理正确。",
+   "states S2–S8：前值/后值/锚点可回溯；S7 的知识差标注成立；S3 明确指出前值来源是许七安的「印象里」。",
+   "foreshadows F1–F3：unresolved + payoff=null 与「两次出现」标准的自述符合纪律；F2/F3 的区间外回收引文逐字可查、全文唯一。",
+   "unknowns U1–U14：与原文一致，未见「补一个听起来合理的值」；U4/U12 的存疑处理正确。",
+   "全部 82 条引文与 12 条跨区间引文：可直接沿用。",
+   "selfCheck.reproduceScript：实跑输出与我的独立复算一致（82/0/0/70/12/0 + ALL VERBATIM）。"
+  ],
+  "mustFix": [
+   "CE2：states[0].after 把「脸色微变」写成「被点破年龄差后」的结果，与 42690→42706→42734 的原文顺序矛盾，须改由「但杀人就不对了」那一步触发。",
+   "CE1：coverage.omissions[0] 的「只在 T1 的 obstacle 与 C3 的背景里引用」与产物矛盾（2/3 整句未覆盖、C3 零命中），须如实改写或补条目。",
+   "CE3：selfCheck.reproduceExpected 的 77/66/11 须更新为 82/70/12。",
+   "CE4：foreshadows[0].twoAppearanceBar 的 [41483,41509) 须订正为 [41483,41487)。"
+  ],
+  "shouldAdd": [
+   "REV1：把第十五章供词内容（孩子是张献的、她非主动）补入，用于纠正 C7 的推断，否则下游无法知道本区间的推断哪一部分被原文否证。",
+   "REV2/REV3：补入 [42277,42333) 与 [42183,42230) 两拍，作为 S1/S2 的前值与 T2 手法链的起点证据。",
+   "REV4：把「张献挡话 → 给我上刑」补为独立 causeEdge（候选已在驳回理由里认定其成立）。",
+   "REV5（存疑）：补引 [39050,39072) 作为「长乐县知县」标签的依据，或删去该标签。"
+  ],
+  "keepAsIsUnresolved": [
+   "F1 的兑现与否：本区间与全書均无「许七安请跟丁喝酒」的兑现或拒绝文字（T.count('请你喝酒')==1），维持 unresolved。",
+   "F2/F3 的回收仍在区间外第十五章，本轮只做逐字定位未通读全章，其 resolved_out_of_range 不被我升级或降级。",
+   "U1–U14 全部维持 unknowns（尤其 U2 张献是否招供、U10「许蛇？」归属、U11 脚印是否故意留）。"
+  ]
+ },
+ "selfCorrection": {
+  "retracted": [
+   "我最初把「跟丁犹豫一下，默默退后几步，然后小跑着迎过来。」（[41355,41382)）列为未覆盖事实，核对后撤回：T3_runner_carries_message.action 已逐字改写为「先『犹豫一下，默默退后几步』再小跑迎过来听许七安说话」，该拍已被覆盖（引文取句不同，事实已记录）。按纪律如实记为我自己判错，不计入反向发现。"
+  ],
+  "uncertain": [
+   "REV5 只有标签依据缺口、没有错误断言，且标签与全書一致，故列为存疑而非 counterExample。",
+   "CE1 中 T1.obstacle 确实吸收了该段第 1 句，故 omissions[0] 并非全错，是「部分引用被写成了覆盖」；按与 L1_0009 CE1 相同的口径处理。"
+  ]
+ },
+ "notes": "总体判断：这是一份引用层近乎无瑕的候选（82/82 逐字、偏移全部等于首次出现、哈希全对、实跑可复现），核心的四类断言（任务/因果/状态/伏笔）证据链成立，红线全部守住——没有编造、没有幻觉、没有把台词当事实、没有把结束当成功、也没有把区间外回收写成本区间结论。因此它**不该被丢弃**。扣分的全部原因在另外两处：(1) 覆盖记账与自审计元数据与产物自相矛盾（CE1/CE3/CE4）——这类「机制存在但不产生信息」的自述失真正是本项目反复出现的失败形态，必须修，否则下游对账会被误导；(2) 一条真实因果边被识别出却未收录（REV4），以及最有信息量的区间外交代（REV1 供词实际内容）缺失。CE2 是唯一落在内容层的缺陷：states[0].after 把「脸色微变」的触发因挂到了 28 字之后才出现的「小七岁」上；事件与引文都真实存在，只是因果措辞倒置，故不判 fail 而要求订正。本轮按 VERIFIER.md 的顺序执行：先自读 [40599,43557) 全文（84 个非空段落）并另读第十五章 [43557,45200) 用于核对回收，之后才打开候选文件；抽取项核对、反向验证、误杀检查、幻觉/越权检查、引用核验五项均已执行，其中反向验证撤回 1 条（见 selfCorrection）。不确定处：第十五章我只读到 [45200)，其后的文字未读，故 F1「全書未兑现」仍只是字符串级结论（T.count('请你喝酒')==1），不是通读结论；REV1 的建议基于 [44455,44522) 已定位的文字，未据区间外内容改写任何区间内断言。关于提交方式：本文件同时充当 submit 载荷（含 task/agent/status/summary/evidence/assertions/changes/sourceHashes/remaining/rollback），以严格保持「只写任务 writes 指定的一个路径」。VERIFIER.md 末尾的 `loop.py verify --task read:dafeng:L1:0013` 附着步骤我**没有**执行——它会写 loop/state/out/read_dafeng_L1_0013.json（他人提交记录，不在本任务 writes 内）；按 precedent（verify_dafeng_L1_0009 的 reviews 由 q-verify 而非 w-verify-0 附着）该步骤属 read-publish 门禁环节，已在 remaining 里显式登记，未做即未做。",
+ "auditCmd": "python3 -B -s -c \"import json;exec(json.load(open('loop/state/out/verify_dafeng_L1_0013.verdict.json'))['auditScript'])\"",
+ "auditScript": "import json, hashlib\nT = json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text']\nC = json.load(open('loop/state/out/read_dafeng_L1_0013.candidate.json'))\nS, E = 40599, 43557\nH = 'fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839'\nprint('sourceHash ok:', hashlib.sha256(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json','rb').read()).hexdigest() == H)\nprint('slice head:', repr(T[S:S+12]), 'len', E-S, '(claim', C['source']['rangeChars'], ')')\nQ = []\ndef w(o):\n    if isinstance(o, dict):\n        if 'quote' in o and 'start' in o and 'end' in o: Q.append(o)\n        for v in o.values(): w(v)\n    elif isinstance(o, list):\n        for v in o: w(v)\nfor k in ('tasks','causeEdges','states','foreshadows','rejectedAsForeshadow','rejectedAsCauseEdge','unknowns'): w(C[k])\nseen = {}\nfor x in Q: seen.setdefault((x['start'], x['end']), x)\nU = list(seen.values())\nbad = [x for x in U if T[x['start']:x['end']] != x['quote']]\nnonuniq = [x for x in U if T.count(x['quote']) != 1]\nfirstmiss = [x for x in U if T.find(x['quote']) != x['start']]\nsegbad = [x for x in U if x.get('inSegmentOccurrences') is not None and x['inSegmentOccurrences'] != T[S:E].count(x['quote'])]\nhashbad = [x for x in U if x.get('sourceHash') not in (None, H)]\nprint('distinct %d bad %d nonUnique %d notFirstOccurrence %d segOccBad %d hashBad %d' % (len(U),len(bad),len(nonuniq),len(firstmiss),len(segbad),len(hashbad)))\nprint('inRange %d crossRange %d' % (sum(1 for x in U if S<=x['start'] and x['end']<=E), sum(1 for x in U if x['end']<=S or x['start']>=E)))\nprint('ALL VERBATIM' if not (bad or nonuniq or firstmiss or segbad or hashbad) else 'FAILURES')\nprint('nonempty paragraphs in slice:', len([p for p in T[S:E].split(chr(10)) if p.strip()]))\nraw = json.dumps(C, ensure_ascii=False)\nprint('--- CE1 accounting ---')\nfor f in ['这年头的审问过程大抵如此','因此，常常出现屈打成招。','取证难度很大，缺乏设备和专业技术']:\n    print('  %-18s inRange=%d inCandidate=%d' % (f, T[S:E].count(f), raw.count(f)))\nprint('  T1.obstacle mentions 取证难度/设备/专业技术/刑法:', any(k in C['tasks'][0]['obstacle'] for k in ('取证难度','设备','专业技术','刑法')))\nc3 = [x for x in C['causeEdges'] if x['id'].startswith('C3')][0]\nprint('  C3 mentions any:', any(k in json.dumps(c3, ensure_ascii=False) for k in ('取证难度','设备','专业技术','刑法','这年头的审问')))\nprint('--- CE2 S1 trigger order ---')\nprint('  42690 %r' % T[42690:42704]); print('  42706 %r' % T[42706:42732]); print('  42734 %r' % T[42734:42765])\ns1 = [x for x in C['states'] if x['id'].startswith('S1')][0]\nprint('  S1.after:', s1['after'][:60])\nprint('  S1 cites 42690?', any(e['start']==42690 for e in s1['evidence']))\nprint('--- CE3 reproduce expectation ---')\nprint('  reproduceExpected:', C['selfCheck']['reproduceExpected'][:44])\nprint('  stored fields:', C['selfCheck']['quotesChecked'], C['selfCheck']['quotesInRange'], C['selfCheck']['crossRangeQuotesChecked'])\nprint('--- reverse findings ---')\nfor q in ['她确实与继子有染，并怀了他的孩子。','不过与许七安刚刚说的有些出入，并不是她主动','杨珍珍原本以为会是一场拷问，没想到这个年轻人的态度和语气出奇的温和。','杨珍珍不置可否。']:\n    print('  find=%-6d inCandidate=%d %r' % (T.find(q), raw.count(q.strip()), q[:24]))\nprint('--- mis-kill: missing edge 挡话->上刑 ---')\nb = T.find('    朱县令大怒：“巧舌如簧，来人，给我上刑。”')\nprint('  40724=%d 40828=%d' % (T.find('    张献立刻道：“大人，贼人如何潜入宅里，母亲如何知道？'), b))\nprint('  40828 used as causeEdge evidence?', any(e.get('start')==b for ed in C['causeEdges'] for e in ed.get('evidence',[])))\nprint('  rejectedAsCauseEdge[0].reason:', C['rejectedAsCauseEdge'][0]['reason'][:80])\nprint('--- no out-of-range attribute silently imported into in-range entity labels ---')\nprint('  朱县令是长乐县的父母官 @', T.find('朱县令是长乐县的父母官'))\n",
+ "auditExpected": "sourceHash ok: True / slice head: '第十四章 心理博弈\\n\\n ' len 2958 (claim 2958) / distinct 82 bad 0 nonUnique 0 notFirstOccurrence 0 segOccBad 0 hashBad 0 / inRange 70 crossRange 12 / ALL VERBATIM / nonempty paragraphs in slice: 84 / CE1: 常常出现屈打成招。 与 取证难度… 两句 inCandidate=0，C3 mentions any: False / CE2: 42690 「但杀人就不对了。」 早于 42706 脸色微变，早于 42734 小七岁 / CE3: reproduceExpected 77/66/11 vs 字段 82/70/12 / REV1/REV2/REV3 各句 inCandidate=0 / REV4: 40828 未作任何 causeEdge 端点",
+ "agent": "w-verify-0",
+ "status": "partial",
+ "summary": "独立反向复核《大奉打更人》第十四章 心理博弈 [40599,43557)：先自读原文再读候选；对 82 条去重引文做全量 find/偏移/唯一性核验（0 缺陷，实跑可复现）；判 partial —— 引用层无瑕，但有 4 处可机器证伪的缺陷（覆盖记账矛盾、S1 触发因错序、自审计期望值过期、F1 偏移标注错误）与 5 条原文明确存在的未覆盖事实（含第十五章供词实际内容与一条被识别却未收录的合法因果边）。",
+ "evidence": [
+  {
+   "path": "loop/state/out/verify_dafeng_L1_0013.verdict.json",
+   "kind": "本任务产出（唯一写入路径）。自引用文件无法记录自身 sha256，故不记；提交后的记录副本 loop/state/out/verify_dafeng_L1_0013.json 由 loop.py 写出并含本文件全部内容。"
+  },
+  {
+   "path": "loop/state/out/read_dafeng_L1_0013.candidate.json",
+   "sha256": "149d8cfffd65e1449c45987e9380ec69acb6c5ed1de6cc8f2e9526673653d1f6",
+   "kind": "被复核候选（只读，未修改）"
+  },
+  {
+   "path": "data/cache/9b676d7031b1bcd3b8377a18.docs.json",
+   "sha256": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+   "kind": "原文（只读引用，未修改）"
+  },
+  {
+   "path": "loop/ROLES/VERIFIER.md",
+   "sha256": "8302cf81062bda45ce305f49b081775e604a917df02748efdf09c6591a90ce2f",
+   "kind": "角色契约（只读）"
+  }
+ ],
+ "assertions": [
+  {
+   "text": "先自读原文再读候选：独立通读切片 [40599,43557) 全文 2958 字、84 个非空段落，并另读第十五章 [43557,45200) 用于核对 F2/F3 回收，之后才打开候选文件",
+   "result": "pass",
+   "command": "python3 -B -s -c \"import json;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];print(t[40599:43557])\""
+  },
+  {
+   "text": "源哈希与区间口径成立：docs.json 文件 sha256 == 任务 sourceHash，切片长度 2958，切片以「第十四章 心理博弈」开头",
+   "result": "pass",
+   "command": "python3 -B -s -c \"import json,hashlib;raw=open('data/cache/9b676d7031b1bcd3b8377a18.docs.json','rb').read();print(hashlib.sha256(raw).hexdigest())\""
+  },
+  {
+   "text": "82 条去重引文全量核验：逐字命中、偏移==全文首次出现位置、全文唯一、inSegmentOccurrences 相符、sourceHash 一致（bad 0 / nonUnique 0 / notFirstOccurrence 0 / segOccBad 0 / hashBad 0）",
+   "result": "pass",
+   "command": "python3 -B -s -c \"import json;exec(json.load(open('loop/state/out/verify_dafeng_L1_0013.verdict.json'))['auditScript'])\""
+  },
+  {
+   "text": "候选自带 reproduceScript 实跑，输出 quotes 82 bad 0 badHash 0 inRange 70 crossRange 12 nonUnique 0 + ALL VERBATIM，与 selfCheck 兄弟字段一致、与 reproduceExpected(77/66/11) 不一致（CE3）",
+   "result": "pass",
+   "command": "python3 -B -s -c \"import json;open('/tmp/repro13.py','w').write(json.load(open('loop/state/out/read_dafeng_L1_0013.candidate.json'))['selfCheck']['reproduceScript'])\" && python3 -B -s /tmp/repro13.py"
+  },
+  {
+   "text": "CE1 可复现证伪：制度性评论段 3 句中 2 句在候选内出现 0 次，C3 对其关键词命中 0，T1.obstacle 只吸收第 1 句",
+   "result": "pass",
+   "command": "python3 -B -s -c \"import json;T=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];C=json.dumps(json.load(open('loop/state/out/read_dafeng_L1_0013.candidate.json')),ensure_ascii=False);print(C.count('常常出现屈打成招'),C.count('取证难度'),C.count('这年头的审问过程大抵如此'))\""
+  },
+  {
+   "text": "CE2 可复现证伪：原文顺序 42690「但杀人就不对了。」< 42706「脸色微变」< 42734「小七岁」，S1.after 把 42706 归因于 42734 的话",
+   "result": "pass",
+   "command": "python3 -B -s -c \"import json;T=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];print(T.find('“但杀人就不对了。”'),T.find('杨珍珍脸色微变'),T.find('那张献比你小了足足七岁'))\""
+  },
+  {
+   "text": "反向验证 REV1 命中：第十五章供词实际内容 [44455,44472) 与 [44472,44522) 在候选内出现 0 次，而候选已收录其前一句 [44426,44449)",
+   "result": "pass",
+   "command": "python3 -B -s -c \"import json;T=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];C=json.dumps(json.load(open('loop/state/out/read_dafeng_L1_0013.candidate.json')),ensure_ascii=False);print(T.find('她确实与继子有染'),C.count('她确实与继子有染'),C.count('一五一十的说出了实情'))\""
+  },
+  {
+   "text": "误杀检查 REV4：合法边「张献挡话[40724,40781) → 给我上刑[40828,40853)」在 causeEdges 中无端点（仅出现在 states[3] 与 rejectedAsCauseEdge[0] 的证据里），而候选驳回理由自己写明了这条边成立",
+   "result": "pass",
+   "command": "python3 -B -s -c \"import json;C=json.load(open('loop/state/out/read_dafeng_L1_0013.candidate.json'));print(any(e.get('start')==40828 for ed in C['causeEdges'] for e in ed.get('evidence',[])), C['rejectedAsCauseEdge'][0]['reason'][:40])\""
+  },
+  {
+   "text": "幻觉/越权检查：无原文外人物混入区间内断言（李珍珍全書仅 1 次 @43781；王捕头/堂事/白役均标区间外或入 unknowns）；T1/T5/S8 明确写「未招供/未判决」，无「结束=成功」",
+   "result": "pass",
+   "command": "python3 -B -s -c \"import json;C=json.load(open('loop/state/out/read_dafeng_L1_0013.candidate.json'));print(C['tasks'][0]['result'][:40]);print(C['tasks'][4]['result'][-40:]);print(C['reviewStatus'])\""
+  },
+  {
+   "text": "引用核验随机抽 5 条（seed=13）：全部逐字命中、偏移==首次出现位置、全文唯一",
+   "result": "pass",
+   "command": "python3 -B -s -c \"import json,random;random.seed(13);t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];print('detail in citationCheck.random5')\""
+  },
+  {
+   "text": "未写受保护路径：唯一写入 loop/state/out/verify_dafeng_L1_0013.verdict.json（loop/ 前缀=append-only）；js/ css/ index.html serve.py narrative.py scripts/ tests/ docs/ data/ 均未写；未改被复核候选",
+   "result": "pass",
+   "command": "git status --porcelain | head -20"
+  }
+ ],
+ "changes": [
+  {
+   "path": "loop/state/out/verify_dafeng_L1_0013.verdict.json",
+   "kind": "append-only",
+   "note": "本轮唯一写入（任务 writes 指定路径）。未改 js/ css/ index.html serve.py narrative.py scripts/ tests/ docs/ data/ 等受保护路径；未改被复核候选 loop/state/out/read_dafeng_L1_0013.candidate.json。"
+  }
+ ],
+ "sourceHashes": {
+  "data/cache/9b676d7031b1bcd3b8377a18.docs.json": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+  "loop/state/out/read_dafeng_L1_0013.candidate.json": "149d8cfffd65e1449c45987e9380ec69acb6c5ed1de6cc8f2e9526673653d1f6"
+ },
+ "remaining": [
+  "未执行 VERIFIER.md 末尾的 `python3 loop/bin/loop.py verify --task read:dafeng:L1:0013 --file ... --agent w-verify-0` 附着步骤：它会写 loop/state/out/read_dafeng_L1_0013.json（他人提交记录，不在本任务 writes 内）。该记录现为 verifyState=pending；按 verify_dafeng:L1_0009 的 precedent（reviews 由 q-verify 附着）该步骤属 read-publish 门禁环节，留待下游执行。未做即未做。",
+  "第十五章只读到 [45200)，其后的文字未通读；F1「全書未见兑现」只是字符串级结论（T.count('请你喝酒')==1），不是通读结论。",
+  "未通读第十二、十三章全文：跨区间引文（34436/34497/34991/35011/40271/40546）只做全文唯一子串定位与语义相邻核对，未据其改写任何区间内断言。",
+  "U3 的年龄数字（张有瑞 51 岁、续弦小二十岁、杨珍珍三十岁、张献小七岁、成亲十年）之间能否推出确切年龄，原文未给，我也没有替它算——维持 unknowns。",
+  "CE1/CE3/CE4 与 CE2 我只给出订正方向，未代改候选文件（不在本任务 writes 内）。"
+ ],
+ "rollback": {
+  "kind": "append-only",
+  "strategy": "delete-added-files",
+  "files": [
+   "loop/state/out/verify_dafeng_L1_0013.verdict.json"
+  ]
+ }
+}

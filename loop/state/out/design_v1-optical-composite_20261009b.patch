@@ -1,0 +1,179 @@
+--- a/js/core/scene-mats.js
++++ b/js/core/scene-mats.js
+@@ -588,7 +588,10 @@
+       'uniform float uCosmos; uniform float uFrost; uniform float uBiref; uniform float uEcho; uniform float uSteps; uniform float uWire;',
+       /* P07 材质层隔离（plan100/P07）：每层一个 0/1 开关，默认 1 = 当前生产行为。
+          关闭只削弱该层自己的贡献，不重算任何其他层的数值（单变量 A/B 的前提）。 */
+-      'uniform float uLyrVolume; uniform float uLyrSurface; uniform float uLyrRough; uniform float uLyrTrans; uniform float uLyrInner; uniform float uLyrRefl; uniform float uLyrBackAtt;',
++      /* V1 前后光路：uPass 由**绘制通道**给出这一片是近面还是远面。
++         0 = 远面（BackSide 通道）· 1 = 近面（FrontSide 通道）· 0.5 = 生产单趟 DoubleSide。
++         0.5 时 passLegacy 精确为 1 ⇒ frontness 逐字等于 gl_FrontFacing，行为与改动前逐像素相同。 */
++      'uniform float uPass; uniform float uLyrVolume; uniform float uLyrSurface; uniform float uLyrRough; uniform float uLyrTrans; uniform float uLyrInner; uniform float uLyrRefl; uniform float uLyrBackAtt;',
+       'varying vec3 vN; varying vec3 vW; varying vec3 vL; varying vec3 vB; varying float vH; varying float vF; varying float vAx; varying float vFc; varying vec3 vAxisW;',
+       'float h3(vec3 p){ return fract(sin(dot(p, vec3(127.1, 311.7, 74.7))) * 43758.5453); }',
+       'float vn3(vec3 p){ vec3 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f);',
+@@ -599,6 +602,9 @@
+       'void main(){',
+       '  if (uOn <= 0.0 || uWire >= 1.0) { gl_FragColor = vec4(0.0); return; }',
+       '  vec3 V = normalize(cameraPosition - vW); vec3 N = normalize(vN); if (dot(N, V) < 0.0) N = -N;',
++      '  float passFront = smoothstep(0.25, 0.75, uPass);',
++      '  float passLegacy = 1.0 - abs(uPass - 0.5) * 2.0;',
++      '  float frontness = mix(gl_FrontFacing ? 1.0 : 0.0, passFront, 1.0 - passLegacy);',
+       '  float ndv = max(1e-4, dot(N, V));',
+       '  float viewWeight = smoothstep(0.0, 0.24, ndv);',
+       '  float f0 = pow((uIor - 1.0) / (uIor + 1.0), 2.0);',
+@@ -635,8 +641,8 @@
+       '  vec3 pin = entry + Vl * chord * uInner;',
+       '  float veil = vn3(pin * uCaust * 1.7 + vec3(0.0, uTime * 0.06, 0.0));',
+       '  // 弱色散光路微扰',
+-      '  float detail = gl_FrontFacing ? viewWeight : 0.0;',
+-      '  if (gl_FrontFacing && uSteps > 2.0) {',
++      '  float detail = frontness * viewWeight;',
++      '  if (frontness > 0.5 && uSteps > 2.0) {',
+       '    vec3 rp = vec3(veil - 0.5, (veil - 0.5) * 0.55, 0.5 - veil) * uRipple;',
+       '    float dsp = uDisp * (0.24 + 1.45 * fr);',
+       '    vec3 Tr = refract(-V, normalize(N + rp), 1.0 / max(1.05, uIor - dsp));',
+@@ -695,7 +701,7 @@
+       '  float cosInternal1 = clamp(dot(-Tg_o, bncN1), 0.0, 1.0);',
+       '  float tir1 = smoothstep(0.42, 0.75, 1.0 - cosInternal1);',
+       '  inner = mix(inner, bnc1 * (1.0 + tir1 * 0.85), 0.32 + 0.18 * tir1);',
+-      '  if (gl_FrontFacing && uSteps > 2.0) {',
++      '  if (frontness > 0.5 && uSteps > 2.0) {',
+       '    vec3 bncN2 = normalize(N + vec3(0.32, 0.24, -0.28));',
+       '    vec3 bnc2R = reflect(-Tg_e, bncN2);',
+       '    vec3 bnc2 = gemLight(bnc2R);',
+@@ -735,7 +741,8 @@
+       '  vec3 scatterLight = transmitted * 0.62 + bnc1 * 0.38;',
+       '  volume += body * (vec3(1.0) - transmission) * scatterLight * (0.30 + 0.15 * echo) * (1.0 - fr) * facetGain;',
+       '  // 表面反射与通透光路',
+-      '  vec3 surfacePath = gl_FrontFacing ? vec3(1.0) : mix(vec3(1.0), transmission, viewWeight);',
++      /* 远面才是「透过整块晶体看到的那一面」：它自己的表面反射也要走同一段光程。 */
++      '  vec3 surfacePath = mix(mix(vec3(1.0), transmission, viewWeight), vec3(1.0), frontness);',
+       '  vec3 surface = (spec * fr * 1.45 * uLyrRefl + uRim * (s1 + s2) * 0.52 * uLyrRefl) * surfacePath;',
+       '  vec3 col = volume + surface;',
+       '  // 腰环中央辉光耦合（Physical waist continuity）：统一双锥与罗盘中央 waist 的过渡',
+@@ -751,9 +758,24 @@
+       '  }',
+       '  // 轴向高亮与棱线保留独立的读数响应',
+       '  float hlWave = hl * exp(-pow(fract(vH * 1.3 - uTime * 0.35) - 0.5, 2.0) * 22.0);',
+-      '  float facing = gl_FrontFacing ? 1.0 : mix(1.0, 0.32, viewWeight);',
++      '  float facing = mix(1.0, mix(1.0, 0.32, viewWeight), 1.0 - frontness);',
+       '  col += mix(body, uRim, 0.28) * ed * uEdge * (0.04 + 0.24 * fr) * facing + uRim * (hl * 0.25 + hlWave * 0.45);',
+-      '  float a = 0.14 + 0.64 * thk + 0.34 * fr + 0.04 * caust + hl * 0.12 + hlWave * 0.14 + needleV * (1.0 - fr) * 0.16;',
++      /* 前后覆盖度守恒：**守恒对象是生产的两面合成**，不是单面的 aSingle。
++         生产是一张 DoubleSide 网格、depthWrite:false ⇒ 内外两个小面**都**着色，
++         合成覆盖是 aProd = 1-(1-aSingle)^2（这是基线实测口径，不是新系数）。
++         远面按 Beer-Lambert 光程衰减，近面补足剩余，使
++             1-(1-aFar)(1-aNear) 精确等于 aProd
++         于是双趟合成与生产单趟**同覆盖**，差别只在「远面按光程被吸收掉多少」：
++         薄棱 pathT≈1 ⇒ 远面几乎全透出；厚处 pathT 小 ⇒ 远面被体吸收压掉、
++         近面承担覆盖 ⇒ 遮挡后景。单变量性：只把「交错的一趟」拆成「先远后近两趟」，
++         没有引入任何新的观感系数；uPass = 0.5 时该式不参与，a 与改动前逐字相同。 */
++      '  float aSingle = 0.14 + 0.64 * thk + 0.34 * fr;',
++      '  float pathT = clamp(dot(transmission, vec3(0.2126, 0.7152, 0.0722)), 0.0, 1.0);',
++      '  float aProd = 1.0 - (1.0 - aSingle) * (1.0 - aSingle);',
++      '  float aFar = aProd * mix(1.0, pathT, uLyrBackAtt);',
++      '  float aNear = clamp((aProd - aFar) / max(1e-3, 1.0 - aFar), 0.0, 1.0);',
++      '  float a = mix(aSingle, mix(aFar, aNear, passFront), 1.0 - passLegacy)',
++      '          + 0.04 * caust + hl * 0.12 + hlWave * 0.14 + needleV * (1.0 - fr) * 0.16;',
+       '  if (vF > 1.5 && vF < 2.5) a *= 0.76;',
+       '  if (vF > 2.5) a = min(0.82, a + 0.06 * clamp(uFrost, 0.0, 1.0));',
+       '  col = col / (1.0 + col * 0.38);',
+@@ -801,7 +823,11 @@
+           uLyrVolume: { value: LAYER_SWITCHES.uLyrVolume }, uLyrSurface: { value: LAYER_SWITCHES.uLyrSurface },
+           uLyrRough: { value: LAYER_SWITCHES.uLyrRough }, uLyrTrans: { value: LAYER_SWITCHES.uLyrTrans },
+           uLyrInner: { value: LAYER_SWITCHES.uLyrInner }, uLyrRefl: { value: LAYER_SWITCHES.uLyrRefl },
+-          uLyrAdd: { value: LAYER_SWITCHES.uLyrAdd }, uLyrBackAtt: { value: LAYER_SWITCHES.uLyrBackAtt } } });
++          uLyrAdd: { value: LAYER_SWITCHES.uLyrAdd }, uLyrBackAtt: { value: LAYER_SWITCHES.uLyrBackAtt },
++          /* uPass 默认 0.5 = 单趟 DoubleSide（= 改动前行为）。只有显式拆成前后两趟的调用点
++             才把它写成 0 / 1；默认值单点放在这里，避免两个调用点各自漂移。
++             这里写字面量 0.5 而不是新常量：改动前本文件没有那个名字。 */
++          uPass: { value: 0.5 } } });
+       mm.userData.gemName = o.name || '';   // W5 · 探针要能报出用的是哪张材质
+       return mm;
+     }
+--- a/js/scene.js
++++ b/js/scene.js
+@@ -1522,9 +1522,24 @@
+     // v24.4 · 晶体着色：顶点携带重心坐标 aBary（棱线刃光用 fwidth 求出，与三角形大小无关）与
+     // 局部坐标 vL（火彩锚在晶体身上而不是屏幕像素上，旧版一转动就露出纱窗状的固定网格）
+     /* warm = true：只造不挂（着色器预热用，见 S.prewarmCrown），返回这座晶冠，不动当前晶冠 / 图例 / 八维节点 */
++    /* V1 前后光路：给一张晶体基底材质造出「另一趟」。
++       three.js 的 ShaderMaterial uniform 按材质上传，所以两趟必须各持一个材质实例才能拿到
++       不同的 uPass；material.side 又必须是固定值（在 onBeforeRender 里改，材质 id 不变时不会
++       重新应用）。uPass 之外的 uniform **对象**按引用共享，逐帧动画因此不需要任何拷贝。
++       near=true 的返回值由调用方挂进同一父级，并在 non-wire 相位与宿主一起显隐。 */
++    function splitPass(hostMat, which, side, baseOrder) {
++      var U = {}, k;
++      for (k in hostMat.uniforms) { if (Object.prototype.hasOwnProperty.call(hostMat.uniforms, k)) U[k] = hostMat.uniforms[k]; }
++      U.uPass = { value: which === 0 ? 0.0 : 1.0 };
++      var m = new T.ShaderMaterial({ vertexShader: hostMat.vertexShader, fragmentShader: hostMat.fragmentShader,
++        transparent: hostMat.transparent, depthWrite: hostMat.depthWrite, blending: hostMat.blending,
++        side: side, extensions: { derivatives: true }, uniforms: U });
++      m.userData.gemName = (hostMat.userData.gemName || 'gem') + (which === 0 ? '-far' : '-near');
++      return m;
++    }
+     /* 把入场线框相写进晶冠的各层晶体材质（只写有这枚 uniform 的，别的层没有就跳过） */
+     function crownWire(cr, v) {
+-      var ms = [cr.gem, cr.gemBase, cr.core, cr.gem2, cr.gem2Base], i, u;
++      var ms = [cr.gem, cr.gemBase, cr.gemBaseNear, cr.core, cr.gem2, cr.gem2Base, cr.gem2BaseNear], i, u;
+       for (i = 0; i < ms.length; i++) {
+         u = ms[i] && ms[i].material && ms[i].material.uniforms;
+         if (u && u.uWire) u.uWire.value = v;
+@@ -1609,9 +1624,20 @@
+       var gem = new T.Mesh(gg, gemMat(CROWN_FS, gemSpec('berylFire')));
+       gem.frustumCulled = false; gem.renderOrder = 2; upper.add(gem);
+       // 暗玻璃基底（正常混合，先画）+ 内核宝石（缩小 0.52、更暖更亮、色散更猛）+ 台座焦散
+-      var gemBase = new T.Mesh(gg, gemMat(CROWN_BASE_FS, gemSpec('beryl', { blend: T.NormalBlending,
+-        cen: new T.Vector3(0, (apex.y - CR_H * 0.22) * 0.5, 0), rad: new T.Vector3(CR_R0 + CR_R1 + 4, (apex.y + CR_H * 0.22) * 0.5 + 6, CR_R0 + CR_R1 + 4), thk: 1 / (2 * (CR_R0 + CR_R1 + 4)) })));
++      /* V1 前后光路：暗玻璃基底不再用一张 DoubleSide 网格按三角形缓冲序提交
++         （前后小面在同一趟里交错，远面的透射率无法只乘进它自己的覆盖度）。
++         改成远面 / 近面两趟：几何、混合、depthWrite、uniform 全部沿用，只有「哪一趟画哪一面」变了。
++         两趟各持一个材质实例：ShaderMaterial 的 uniform 按材质上传，共享一个材质无法让两趟
++         拿到不同的 uPass；同时 side 必须是固定值，onBeforeRender 里改 side 在材质 id 不变时不会重新生效。
++         uPass 之外的 uniform 对象与宿主**按引用共享**，所以晶冠逐帧动画（uTime/uOn/uHl/uWire）自动同步。 */
++      var gemBaseSpec = gemSpec('beryl', { blend: T.NormalBlending,
++        cen: new T.Vector3(0, (apex.y - CR_H * 0.22) * 0.5, 0), rad: new T.Vector3(CR_R0 + CR_R1 + 4, (apex.y + CR_H * 0.22) * 0.5 + 6, CR_R0 + CR_R1 + 4), thk: 1 / (2 * (CR_R0 + CR_R1 + 4)) });
++      var gemBase = new T.Mesh(gg, gemMat(CROWN_BASE_FS, gemBaseSpec));
++      /* 宿主 = 远面趟：BackSide + uPass 0（gemMat 默认是单趟 DoubleSide / 0.5）。 */
++      gemBase.material.side = T.BackSide; gemBase.material.uniforms.uPass.value = 0.0;
+       gemBase.frustumCulled = false; gemBase.renderOrder = 1; upper.add(gemBase);
++      var gemBaseNear = new T.Mesh(gg, splitPass(gemBase.material, 1, T.FrontSide, gemBase.renderOrder));
++      gemBaseNear.frustumCulled = false; gemBaseNear.renderOrder = 1.5; gemBaseNear.visible = false; upper.add(gemBaseNear);
+       var core = new T.Mesh(gg, gemMat(CROWN_FS, gemSpec('coreFire')));
+       core.scale.set(0.52, 0.62, 0.52); core.position.y = CR_H * 0.12; core.frustumCulled = false; core.renderOrder = 3; upper.add(core);
+       // 色散重影 ×2：外扩一片偏暖红、内收一片偏冷青，轮廓因此裂成棱镜边
+@@ -1786,9 +1812,14 @@
+       // 底谱走紫晶：更高的 IOR / 更强的色散与吸收，越深越浓 —— 与上谱的薄荷-琥珀成一冷一热的对峙
+       var gem2 = new T.Mesh(gg2, gemMat(CROWN_FS, gemSpec('amethystFire')));
+       gem2.frustumCulled = false; gem2.renderOrder = 2; lower.add(gem2);
+-      var gem2Base = new T.Mesh(gg2, gemMat(CROWN_BASE_FS, gemSpec('amethyst', { blend: T.NormalBlending,
+-        cen: new T.Vector3(0, (-CR_GAP + nadir2.y) * 0.5, 0), rad: new T.Vector3(CR_R2_0 + CR_R2_1 + 6, (CR_GAP + Math.abs(nadir2.y)) * 0.52, CR_R2_0 + CR_R2_1 + 6), thk: 1 / (2 * (CR_R2_0 + CR_R2_1 + 6)) })));
++      /* 下谱同一处置（见上冠的前后光路注释）。 */
++      var gem2BaseSpec = gemSpec('amethyst', { blend: T.NormalBlending,
++        cen: new T.Vector3(0, (-CR_GAP + nadir2.y) * 0.5, 0), rad: new T.Vector3(CR_R2_0 + CR_R2_1 + 6, (CR_GAP + Math.abs(nadir2.y)) * 0.52, CR_R2_0 + CR_R2_1 + 6), thk: 1 / (2 * (CR_R2_0 + CR_R2_1 + 6)) });
++      var gem2Base = new T.Mesh(gg2, gemMat(CROWN_BASE_FS, gem2BaseSpec));
++      gem2Base.material.side = T.BackSide; gem2Base.material.uniforms.uPass.value = 0.0;
+       gem2Base.frustumCulled = false; gem2Base.renderOrder = 1; lower.add(gem2Base);
++      var gem2BaseNear = new T.Mesh(gg2, splitPass(gem2Base.material, 1, T.FrontSide, gem2Base.renderOrder));
++      gem2BaseNear.frustumCulled = false; gem2BaseNear.renderOrder = 1.5; gem2BaseNear.visible = false; lower.add(gem2BaseNear);
+       var ghost2A = new T.Mesh(gg2, ghostMat(0xff2ab4, 7.0)), ghost2B = new T.Mesh(gg2, ghostMat(0x5a3aff, 7.0));
+       ghost2A.scale.setScalar(1.012); ghost2B.scale.setScalar(0.988);
+       ghost2A.frustumCulled = ghost2B.frustumCulled = false; ghost2A.renderOrder = ghost2B.renderOrder = 4;
+@@ -2079,6 +2110,8 @@
+       var wireK = calm ? 0 : 1 - smooth01(t, 0.35, 1.15);   /* calm = prefers-reduced-motion（本文件顶上就是这个判断） */
+       crownWire(crown, wireK);
+       crown.gemBase.scale.y = crown.gem.scale.y; crown.gemBase.material.uniforms.uOn.value = gemOn * k; crown.gemBase.material.uniforms.uTime.value = tAnim; crown.gemBase.material.uniforms.uHl.value = crownHl;
++      /* 近面趟与宿主同一变换与显隐；uOn/uTime/uHl 与宿主共享 uniform 对象，无需重写。 */
++      crown.gemBaseNear.scale.copy(crown.gemBase.scale); crown.gemBaseNear.visible = crown.gemBase.visible;
+       crown.lines.scale.y = crown.gem.scale.y;
+       crown.unknownTop.scale.y = crown.gem.scale.y;
+       if (crown.refTop) crown.refTop.scale.y = crown.gem.scale.y;
+@@ -2142,6 +2175,7 @@
+       crown.gem2.material.uniforms.uOn.value = g2On; crown.gem2.material.uniforms.uTime.value = tAnim; crown.gem2.material.uniforms.uHl.value = crownHl2;
+       crown.gem2.scale.y = 0.08 + 0.92 * easeOutBack(smooth01(t, 0.85, 1.95));
+       crown.gem2Base.scale.y = crown.gem2.scale.y; crown.gem2Base.material.uniforms.uOn.value = g2On * 0.8; crown.gem2Base.material.uniforms.uTime.value = tAnim; crown.gem2Base.material.uniforms.uHl.value = crownHl2;
++      crown.gem2BaseNear.scale.copy(crown.gem2Base.scale); crown.gem2BaseNear.visible = crown.gem2Base.visible;
+       crown.lines2.material.uniforms.uOn.value = l2On * 0.62; crown.lines2.material.uniforms.uGrow.value = easeOut(smooth01(t, 0.8, 1.8)); crown.lines2.material.uniforms.uTime.value = tAnim; crown.lines2.material.uniforms.uHl.value = crownHl2;
+       crown.lines2.scale.y = crown.gem2.scale.y;
+       crown.unknownBottom.scale.y = crown.gem2.scale.y;

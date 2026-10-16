@@ -1,0 +1,125 @@
+{
+  "task": "verify:dafeng:L2:0186",
+  "agent": "w-verify-0",
+  "status": "done",
+  "role": "VERIFIER（独立反向复核者）",
+  "roleFile": "loop/ROLES/VERIFIER.md",
+  "verdict": "partial",
+  "reviewedTask": "read:dafeng:L2:0186",
+  "reviewedArtifact": "loop/state/out/read_dafeng_L2_0186.candidate.json",
+  "reviewedAuthor": "w-dafeng-0",
+  "reviewedCandidateSha256": "67c274223e6f1f09764373457cfa8e7e24fae401ee2e85be64ad5e7c766efced",
+  "verifierIsNotOriginalAuthor": "候选 agent=w-dafeng-0，本复核 agent=w-verify-0 ⇒ 非自签（loop.py verify 会机器校验）",
+  "verdictFile": "loop/state/out/verify_dafeng_L2_0186.verdict.json",
+  "summary": "独立反向复核第 186 章，verdict=partial。**编造 = 0**：自写脚本全量复算 265 条引文 text[start:end]==quote ⇒ 0 不符 / 0 越界 / sourceHash 全一致；265 条 para 字段独立重算 0 不符；coverage 五数（2878/3189/0.9025/84/99）逐项复现；266 条「」内联引文全量重扫 0 条非逐字；固定种子抽 5 条引文 5/5 命中且偏移一致；专名逐个回查无幻觉。本轮**新增 2 条**定点缺陷（CE-G：W6 酒杯条目缺自己 explain 所引的 use 证据；CE-H：T5.action.note 指向不存在的 K4），并**独立复现** w-verify-4 的 CE-A/B/C/D/E/F 六条（全部成立）；反向验证另出 6 条（RCA–RCF）。无编造、无结论级红线违反 ⇒ 判 partial 不判 fail；上述 8 处须改或降级为 unknowns。",
+  "newThisRound": [
+    "CE-G（worldSettings[5] W6 证据错配）",
+    "CE-H（tasks[4].action.note 悬空引用 K4）"
+  ],
+  "reproducedPriorFindings": [
+    "CE-A",
+    "CE-B",
+    "CE-C",
+    "CE-D",
+    "CE-E",
+    "CE-F"
+  ],
+  "reverseCheckCount": 6,
+  "counterExampleCount": 8,
+  "environmentFinding": "复核任务存在**自失效回路**（超出本任务 writes，只记录不修）：VERIFIER.md 要求 `loop.py verify --task <被复核任务 id>`，而该命令会重写 loop/state/out/read_dafeng_L2_0186.json（追加 reviews）；若复核者把该文件列为 evidence，自己的复核提交就会让它哈希失效 ⇒ evidence_stale() 命中 ⇒ 任务被重新派发。实测本任务确在 stats.staleEvidence 名单，原因是 read_dafeng_L2_0186.json 哈希不符（声明 808b913e… 实际 2cbaa252…），而它正是 cmd_verify 的写入目标；同形另有 verify:dafeng:L0:0196 与 verify:dafeng:L3:0183。本轮处置：把该文件从 evidence 移除（不在 writes 内，只读引用），避免复现同一回路。",
+  "evidence": [
+    {
+      "path": "loop/state/out/verify_dafeng_L2_0186.verdict.json",
+      "sha256": "66ea5cdec2275e92321699f24c62b3e7b706b75f95255aa98e72dd7fc1729b24",
+      "kind": "本复核产出（verdict/counterExamples/reverseChecks/notes）"
+    },
+    {
+      "path": "data/cache/2a051246a0ed28d5e90e0fc8.docs.json",
+      "sha256": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+      "kind": "原文（只读引用，未修改；等于任务 sourceHash）"
+    },
+    {
+      "path": "loop/state/out/read_dafeng_L2_0186.candidate.json",
+      "sha256": "67c274223e6f1f09764373457cfa8e7e24fae401ee2e85be64ad5e7c766efced",
+      "kind": "被复核候选（只读，未修改）"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/2a051246a0ed28d5e90e0fc8.docs.json": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "loop/state/out/read_dafeng_L2_0186.candidate.json": "67c274223e6f1f09764373457cfa8e7e24fae401ee2e85be64ad5e7c766efced"
+  },
+  "assertions": [
+    {
+      "text": "265/265 引文逐字成立、0 越界、sourceHash 全一致（自写脚本全量现算，未采信候选自检）",
+      "result": "pass"
+    },
+    {
+      "text": "265 条 para 字段按候选自己的段切分独立重算 = 0 处不符；段数 99 复现",
+      "result": "pass"
+    },
+    {
+      "text": "coverage 五数（union 2878 / nonSpace 3189 / 0.9025 / 触及段 84 / 段 99）逐项复现一致",
+      "result": "pass"
+    },
+    {
+      "text": "266 条「」内联引文全量重扫 = 0 条非逐字；15 段零覆盖处置表与零覆盖集合完全相等",
+      "result": "pass"
+    },
+    {
+      "text": "固定种子（20261014）抽 5 条引文：5/5 逐字命中，text.find 与记录 start 一致",
+      "result": "pass"
+    },
+    {
+      "text": "专名回查：玄诚/齐王/元景帝等本区间 0 次且候选 0 次 ⇒ 编造 = 0；无『结束当成功』（成功/如愿以偿仅出现在否定式 note）",
+      "result": "pass"
+    },
+    {
+      "text": "w-verify-4 的 CE-A/B/C/D/E/F 六条逐条独立复现，全部成立",
+      "result": "pass"
+    },
+    {
+      "text": "本轮新增 CE-G（W6 缺 use 证据）与 CE-H（K4 悬空指针），均带逐字原文引证与偏移",
+      "result": "pass"
+    },
+    {
+      "text": "误杀检查 rejectedEdges R01–R08：未见合法因果被挡（R07 排除正确但措辞有误，已分列为 CE-E）",
+      "result": "pass"
+    },
+    {
+      "text": "如实记录我自己的一个错：第一版 P### 检查器假阳性 5/6（正则跨句抓错片段），按内容比对修正后仅 CE-D 成立",
+      "result": "pass"
+    }
+  ],
+  "remaining": [
+    "跨单元核验未做（超出本区间职责）：F3/F4 的 unresolved 是否在后文回收、章题『失之交臂』在后文是否另有照应。",
+    "sceneBeats 14 条 / notWorldSettings 7 条 / selfCritique 6 条的**逐条语义**归属未评估；只做了其引文逐字性、P### 落点与专名回查。",
+    "CE-A/B/C/D/E/F/G/H 的修复未落地 —— 复核者不改被复核者产物；修复属 READER 或发布环节的合并任务。",
+    "存疑未决（不作为 fail 依据）：RCD 的 K2 证据边界；U13 所述 P074 说话人原文写作『浮香』是否为作者笔误（原文该处字面确实是『浮香』，本区间无法判定）。",
+    "环境级问题已在 environmentFinding 记录但未修：根治需在合并任务里改 loop/bin/loop.py（把 loop/state/out/read_*.json 纳入 MUTABLE_EXCEPTIONS 的判据，或让 verify 不重写被复核记录）或改 VERIFIER.md 的 evidence 指引。"
+  ],
+  "changes": [],
+  "writeScope": "只写 loop/state/out/verify_dafeng_L2_0186.verdict.json（任务 writes 指定）。未改 js/ css/ index.html/ serve.py/ narrative.py/ scripts/ tests/ docs/ data/ 任何文件；原文与候选均只读。",
+  "reproduce": [
+    "shasum -a 256 data/cache/2a051246a0ed28d5e90e0fc8.docs.json   # fdde5558…39839 = 任务 sourceHash",
+    "shasum -a 256 loop/state/out/read_dafeng_L2_0186.candidate.json # 67c27422…efced",
+    "python3 -B -c \"import json;t=json.load(open('data/cache/2a051246a0ed28d5e90e0fc8.docs.json'))[0]['text'];print(t.count('喝了一杯酒当做赔礼'))\"  # 1，但不在 W6.quotes ⇒ CE-G",
+    "python3 -B -c \"import json;d=json.load(open('loop/state/out/read_dafeng_L2_0186.candidate.json'));print([k['id'] for k in d['knowledgeDiffs']])\"  # ['K1','K2','K3'] 无 K4 ⇒ CE-H",
+    "python3 -B -c \"import json;t=json.load(open('data/cache/2a051246a0ed28d5e90e0fc8.docs.json'))[0]['text'];print(t.find('“方才来了几位京城的大人'))\"  # 678955，候选自身 para 元数据=74 ⇒ CE-D",
+    "python3 -B -s loop/bin/loop.py stats   # staleEvidence 含 verify:dafeng:L2:0186（自失效回路）"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/verify_dafeng_L2_0186.verdict.json"
+    ]
+  },
+  "processNote": "第一次 verify 调用误传了提交包装文件 ⇒ reviews 里留了一条 w-verify-0 空条目（CE=[]/RC=[]/notes=\"\"）；已用真正的 verdict 文件重跑，实质内容落在 reviews[3]。cmd_verify 只 append 不替换，且 read_dafeng_L2_0186.json 不在本任务 writes 内，故未手改 —— 详见 verdict 文件的 processNote。",
+  "submittedAt": "2026-10-14T14:43:37Z",
+  "wallClockNote": "租约里没有 startedAt（任务可能由非 loop 路径提交，或租约已被回收）—— 留空而不估算",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-14T14:43:37Z"
+  },
+  "verifyState": "pending"
+}

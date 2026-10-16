@@ -1,0 +1,453 @@
+{
+  "task": "publish:dafeng:B003",
+  "agent": "w-publish",
+  "status": "done",
+  "decision": "NOT_WRITTEN_GATE_LOCK_HELD_BY_ANOTHER_AGENT_AND_BRIDGE_WOULD_WRITE_FALSE_SCOPE_AND_EMPTY_CONTENT",
+  "publishedThisRound": false,
+  "publishKey": null,
+  "parentKey": "9b676d7031b1bcd3b8377a18",
+  "summary": "【本轮**没有**执行 --write，有两个各自独立、各自充分的理由，都可复算。】\n\n**理由一（硬性、当下）：GATE.lock 不在我手上，且写回目标属受保护路径。** 任务声明 `gateLock: true`，发布产物落在 `data/cache/`（新版本键 + index），`loop.py classify()` 对 `data/cache/*.json` 判定为 **guarded**（`python3 -c \"import sys;sys.path.insert(0,'loop/bin');import loop as L;print(L.classify('data/cache/NEW.json'))\"` → `guarded`）。AGENTS.md 与 `loop/ROLE` 纪律：受保护路径只能在合并任务里改并持 GATE.lock。我按规程去取锁（`python3 -B -s loop/bin/loop.py gate --agent w-publish --reason ...`），**被拒**：锁被 `p16` 持有（reason=「P1.6 发布者契约（P1 唯一无契约的包）+ 工具链路径锁」，startedAt=2026-10-08T17:56:26Z，TTL 5400s 内有效）。**我无权抢锁、也不会为了发出去而无锁写受保护路径。** 上一轮 B002 与我处境相同但没遇到锁竞争；这一轮的锁竞争是外部事实，不是我的判断。\n\n**理由二（内容、与锁无关）：即便有锁，桥现在这批候选也会把三处**已量化**的失真写进作品库元数据与节点。** 这不是「跑不动」或「没时间」——链路我完整跑通了，契约机检也过了（见下），是**机检过了不等于该发**：\n\n  * **D-A（scope 记账失真，会永久留在 reviewHistory 里）**：桥产出的批次候选 `scope.start=0`、`scope.end=248192`、`chapters` 只有 16 个（其中一个还是空串）。真值是 `[185812,254204)`、20 章。缺的 5 章是第六十四章、第六十八章、第七十二章、第七十六章、第八十章 —— 其中**第八十章整章落在写出的 end 之外**。发布工具只用 scope 校验 sourceId/textHash 绑定（`_review_source_binding` 只读这两个字段），**不校验 start/end 是否覆盖任务区间** ⇒ 这个错区间会原样写进新版本的 `meta.reviewHistory` 与 `meta.enrichment.scope`。已发布的 `1063b17ca65ec1b76f30e460` 里，B000 那次留下的正是同一个错误（`start=0`），即**同类失真已经进过一次作品库**。\n  * **D-B（区间解析退化 ⇒ 59 条丢弃被误记原因）**：桥不认 `source.segmentSelector`（`docs[0].text[194909:197876]` 形态，5 个 lane3 单元）也不认 L2 那 5 个单元「连 range 都没有」的写法（`source` 只有 docsJson/textField 等键）。本批 **20 个单元里 10 个**的 scope 退化成 `[0,1)`。这 10 个单元共丢 328 条，其中 **59 条被记成「本章图谱零事件（unit_has_no_anchorable_event）」——而其中 9 个单元在真区间里**有**事件（L2:0062 与 L0:0064 才是真的零事件章）。这是把「桥没解析出区间」记成了「图谱没有事件」，归因错，会误导下一轮去补根本不缺的事件锚点。本批 10 个退化单元**贡献 0 个保留节点**，40 个保留节点全部来自另外 10 个区间正常的单元 —— 也就是说桥的这段产出与「本章有没有内容」无关，只与「区间写在哪」有关。\n  * **D-C（13 个 tasks 的 name 落成占位符）**：`name` 为「（未命名任务）」的节点 **13/24**。复核这一点不是「桥写错字段」，而是 **READER 原始候选里根本没有 name/summary 字段**（我逐条核过：`read_dafeng_L0_0068` 的 9 条与 `read_dafeng_L1_0069` 的 4 条，keys 里只有 id/character/objective/obstacle/action/result/cost，无任何 name 类字段）⇒ 桥按 `item.get('summary') or item.get('name') or '（未命名任务）'` 取到兜底串是**忠实**的，真正缺的是上游没给可读名。后果是界面上会出现 13 个同名任务（js 侧按 name 展示），与项目已登记的 E20「同一事实四处四种名字」同型。**这一条不能靠改桥解决**，属精读产出的字段缺口。\n\n另有 4 个 clues 的 `description` 是「：（未提供）」（原候选只有 `item`/`setup.what`，没有 `setup.text`），其中 1 个（`clue_review_f7d1bde531c50a24eca5`）的主引文还落在**本单元区间之外**（@97599，而该单元是 [210224,214449)）—— 这属桥的 `refs[0]` 取序问题（它把区间外对照引文排在了第一位），会把一条跨区间引文当成该线索的主引文写进作品库。\n\n**关于纪律 1（只提交通过独立复核的条目）——我做了四层独立对账，结论是这一层本轮**没有**泄漏，我不据此拒发：**\n  ① 桥自述按 `claim` 排除了 25 条 verifier_flagged；\n  ② 我扫 counterExample **全部字段**复算：38 个发布层点名条目**全部**被判为 excluded，泄漏 0（`leak.py`）；\n  ③ 加固版（四种证据：索引式 / 完整 raw id / 字母+数字短前缀 / 中文长片段）对 40 个保留节点复查：仅 2 条疑似，**逐条人工判定后均为假阳性**（L1:0069 的 `T10_song_xianliao` 命中来自 CE4 引用了它自己那条引文、被质疑的是 unknowns[7] 的偏移数字而非该任务；L0:0076 的 `st_xu_dizong_knowledge` 命中来自 CE1 用它的引文当**反例的对照物**，复核结论明写「不改变下游可用的锚点集合」）（`leak3.py`）；\n  ④ 专扫复核记录的**负面语境字段**（mustFix/mustCorrect/mustNarrow/usableVsDiscard.discard 等）：40 个保留节点命中 0（`leak4.py`）。\n  我第一版扫描器误报 5 条，根因是 `st_xu_...` 切出 2 字母前缀 `st`、`t_xu_...` 切出 `t`，会在任何中文复核正文里偶然命中；改正为「只认 `[A-Za-z]{1,3}\\d+` 形态的短前缀」后归零。**这个更正过程如实记录，不隐藏。**\n\n**不声称全书完成**：本批只覆盖 20/912 个单元 = **2.1930%**、68392/4760263 码点 = **1.4367%**。已发布内容仍只在 B000 的 [35,61514) 区间（且其 scope 起点被记成 0）。",
+  "scope": {
+    "sourceRangeRequired": [
+      185812,
+      254204
+    ],
+    "unitsRequired": 20,
+    "unitsContributingNodes": 7,
+    "unitsWithZeroNodes": 13,
+    "zeroNodeUnits": [
+      "read:dafeng:L0:0060",
+      "read:dafeng:L1:0061",
+      "read:dafeng:L2:0062",
+      "read:dafeng:L3:0063",
+      "read:dafeng:L0:0064",
+      "read:dafeng:L2:0066",
+      "read:dafeng:L3:0067",
+      "read:dafeng:L2:0070",
+      "read:dafeng:L3:0071",
+      "read:dafeng:L2:0074",
+      "read:dafeng:L3:0075",
+      "read:dafeng:L2:0078",
+      "read:dafeng:L3:0079"
+    ],
+    "contributingUnits": {
+      "read:dafeng:L1:0065": 3,
+      "read:dafeng:L0:0068": 14,
+      "read:dafeng:L1:0069": 4,
+      "read:dafeng:L0:0072": 10,
+      "read:dafeng:L1:0073": 4,
+      "read:dafeng:L0:0076": 4,
+      "read:dafeng:L1:0077": 1
+    },
+    "unitHeads": [
+      "第六十一章 铁证如山",
+      "第六十二章 资质测试",
+      "第六十三章 许七安：我还有抢救的机会",
+      "第六十四章 各大修行体系",
+      "第六十五章 绝世天才？！",
+      "第六十六章 突发任务",
+      "第六十七章 案件分析",
+      "第六十八章 矿",
+      "第六十九章 神来之笔的射击",
+      "第七十章 许七安：我要去教坊司一雪前耻",
+      "第七十一章 诡异的信息（为盟主“诗修”加更）",
+      "第七十二章 道门地宗",
+      "第七十三章 惊悚",
+      "第七十四章 只有勾栏听曲能抚慰我的心灵",
+      "第七十五章 枪意",
+      "第七十六章 夜会",
+      "第七十七章 在下陈近南",
+      "第七十八章 互相试探",
+      "第七十九章 背靠组织的好处",
+      "第八十章 天地一刀斩"
+    ],
+    "sourceId": "src_3af1f8739d030d7a1a8b",
+    "textHash": "bc8b75ee120009f4bf6a8e235a7ff133b8ac727a8612067496a0440eaf3fc612",
+    "mergedScopeAsWrittenByBridge": {
+      "start": 0,
+      "end": 248192,
+      "chaptersCount": 16,
+      "blankChapterEntries": 1,
+      "note": "**start=0 与 end=248192 都是错的**：任务区间是 [185812,254204)。缺 5 章（第六十四章、第六十八章、第七十二章、第七十六章、第八十章），且第八十章完全落在写出的 end 之外。若 --write，这个错区间会写进 meta.reviewHistory 与 meta.enrichment.scope。本轮未写，故未新增该失真。"
+    },
+    "coverageOfWholeBook": {
+      "codepoints": "68392/4760263 = 1.4367%",
+      "units": "20/912 = 2.1930%",
+      "books": "大奉 1/1 书的 1 批；西游、三国全部未覆盖"
+    }
+  },
+  "counts": {
+    "batchCandidatePath": "loop/state/candidates/BATCH-publish-dafeng-B003.candidate.json",
+    "batchCandidateSha256": "f5f33ec6529ac015289326ae0d7ed996ea75fbff5092b08ae26218cc6a7c0b4e",
+    "bridge": {
+      "units": 20,
+      "kept": 40,
+      "dropped": 596,
+      "digest": "61ef3f10acfc"
+    },
+    "keptByLayer": {
+      "tasks": 24,
+      "clues": 9,
+      "characterStates": 7
+    },
+    "dryRun": {
+      "ok": true,
+      "contractProblems": 0,
+      "referencePrecision": "109/109 = 100%",
+      "claimedVerifiedAnchorPrecision": "310/310 = 100%",
+      "originalPreserved": true,
+      "cannotJudge": [
+        "semantic_entailment_and_completeness"
+      ],
+      "cmd": "python3 -B -s tools/publish_reviewed.py --source-key 9b676d7031b1bcd3b8377a18 --candidate loop/state/candidates/BATCH-publish-dafeng-B003.candidate.json --dry-run"
+    },
+    "verdictsAmong20Units": {
+      "partial": 20,
+      "fail": 0,
+      "pass": 0
+    },
+    "verdictSourceSplit": {
+      "两来源都有verdict": 11,
+      "仅sidecar有verdict": 9,
+      "仅record有verdict": 0,
+      "note": "9 个单元的裁决只写在 .verdict.json sidecar，提交记录 verdict=None。桥两个来源都读（E11 修复的成果），故无整份结论被无视；两来源不一致 0 个。"
+    },
+    "dropped": {
+      "total": 596,
+      "byReason": {
+        "no_anchored_event": 232,
+        "no_two_distinct_events": 200,
+        "unit_has_no_anchorable_event": 65,
+        "unresolvable_character": 49,
+        "no_verbatim_quote": 25,
+        "verifier_flagged": 25
+      },
+      "reasonMeaning": {
+        "no_anchored_event": "状态/伏笔锚不到图谱既有事件，无法机检",
+        "no_two_distinct_events": "因果边两端锚不到两个不同真实事件",
+        "unit_has_no_anchorable_event": "记为「本章图谱零事件」—— **本批 65 条中 59 条属 D-B 误判**（10 个退化单元），仅 6 条来自真实零事件章",
+        "unresolvable_character": "人物不在图谱 453 人表内，需先建身份（不改写成他人）",
+        "no_verbatim_quote": "引证无法在原文逐字切出，不予发布",
+        "verifier_flagged": "复核者点名须修正，桥按纪律排除"
+      },
+      "verifierFlaggedByLayer": {
+        "tasks": 14,
+        "foreshadows": 8,
+        "states": 2,
+        "causeEdges": 1
+      }
+    }
+  },
+  "discipline1Reconciliation": {
+    "conclusion": "本轮**未发现**复核点名条目泄漏进候选；纪律 1 不是本轮的阻断理由。",
+    "methods": [
+      {
+        "name": "桥自述",
+        "result": "按 counterExample.claim 排除 verifier_flagged 25 条"
+      },
+      {
+        "name": "leak.py：扫 counterExample 全部字段（索引式 + 候选 id）",
+        "result": "发布层点名 38 条，全部 excluded，泄漏 0"
+      },
+      {
+        "name": "leak3.py：四种证据（索引式 / 完整 raw id / 字母+数字短前缀 / 中文长片段）对 40 个保留节点",
+        "result": "疑似 2 条，人工判定均为假阳性（见 summary ③）"
+      },
+      {
+        "name": "leak4.py：专扫复核记录负面语境字段（mustFix/mustCorrect/mustNarrow/discard 等）",
+        "result": "40 个保留节点命中 0"
+      }
+    ],
+    "selfCorrection": "leak4.py 第一版用 rid.split('_')[0] 取短前缀，`st_xu_...`→`st`、`t_xu_...`→`t`，在任何中文复核正文里偶然命中，误报 5 条。改为只认 `[A-Za-z]{1,3}\\d+` 形态后归零。同源问题也存在于桥自身的 id 正则 `\\b([TCSF]\\d+)\\b`（匹配不到 `ST5`/`CE1`）—— 但本批未因此漏排除（我用更宽的正则复算过，结果一致），故不据此拒发，仅登记为**下一个要修的定位符缺口**。"
+  },
+  "defectsFound": [
+    {
+      "id": "D-A-batch-scope-collapse",
+      "severity": "high",
+      "status": "未修复（属受保护路径 loop/bin/to_candidate.py，本轮按纪律未改，也未绕道改）",
+      "what": "批次合并的 scope 由各单元 scope 取 min(start)/max(end) 与 chapters 并集。退化单元把 start 拉到 0，且 5 个单元因 unitHead 缺失/为空未进 chapters。发布工具只用 scope 做 sourceId/textHash 绑定，不校验 start/end 是否覆盖任务区间 ⇒ 错区间会写进 reviewHistory。",
+      "evidence": "BATCH 候选 scope.start=0 / end=248192 / chapters=16（含 1 个空串）；真值 [185812,254204) / 20 章。缺失章：第六十四章、第六十八章、第七十二章、第七十六章、第八十章。5 个缺 unitHead 的原始候选：read_dafeng_L3_0063/0067/0071/0075/0079（其 source 只有 segmentSelector）。",
+      "alreadyInCorpus": "已发布 `1063b17ca65ec1b76f30e460` 的 reviewHistory 里 B000 那次 scope 同为 start=0（应 35）、chapters=16（应 20），即同类失真已进过一次作品库。",
+      "suggestedFix": "批次合并后用 requires 的 20 个单元区间**直接构造** scope；chapters 由 index.json 的 unitHead 取，而不是取各单元 scope 的并集；并对「chapters 数 != 单元数」直接报错。"
+    },
+    {
+      "id": "D-B-source-range-not-parsed",
+      "severity": "high",
+      "status": "未修复（同上）",
+      "what": "桥解析区间只认 `source.range` 或 `source.start/end`。lane3 把区间写在 `source.segmentSelector`（`docs[0].text[a:b]`）；L2 的 5 个单元连 range 都没有（source 只有 docsJson/textField/textCodepoints 等键）⇒ 区间退化成 [0,1) ⇒ unit_events 为空 ⇒ 该单元 tasks 全部被记为「本章图谱零事件」。",
+      "evidence": "退化 10/20 单元：L2:0062, L3:0063, L2:0066, L3:0067, L2:0070, L3:0071, L2:0074, L3:0075, L2:0078, L3:0079（shape: 5 个 none / 5 个 selector）。这 10 个单元贡献 0 个保留节点，共丢 328 条，其中 59 条被误记为「本章图谱零事件」。真区间事件数：L3:0063=2, L2:0066=2, L3:0067=1, L2:0070=1, L3:0071=1, L2:0074=1, L3:0075=2, L2:0078=1, L3:0079=1（仅 L2:0062 为真 0）。",
+      "reproduce": "python3 -B -s /tmp/cl-pub-B003/audit.py  # == A. 每个单元的真实区间 vs 桥解析出的 scope ==",
+      "suggestedFix": "区间解析补兜底 `re.match(r'docs\\[(\\d+)\\]\\.text\\[(\\d+):(\\d+)\\]', source.segmentSelector)`；L2 那类无 range 无 selector 的候选应**报错**而不是静默退化成 [0,1)（静默退化正是本缺陷能潜伏 3 批的原因）。"
+    },
+    {
+      "id": "D-C-task-name-placeholder-from-upstream",
+      "severity": "medium",
+      "status": "不可在本任务内修复（缺口在 READER 产出，不在桥；桥已按 summary→name→占位符 忠实兜底）",
+      "what": "13/24 个 tasks 节点的 `name` 为「（未命名任务）」。根因是 READER 候选里**根本没有** name/summary 类字段，不是桥取错键。",
+      "evidence": "read_dafeng_L0_0068 的 9 条与 read_dafeng_L1_0069 的 4 条，keys 仅 [id, character|who, objective, obstacle, action, result, cost, basis, claimStatus, evidence] —— 逐条核过，无 summary/name/title。对照：read_dafeng_L0_0072 的 12 条有 summary，其 10 个保留节点 name 全部正常。",
+      "impact": "界面上会出现 13 个同名任务（js/sky/sky-search.js:34 与 sky-deconstruction.js:768 按 name/summary/description 展示），与已登记缺陷 E20「同一事实四处四种名字」同型。**注**：已发布版本 1063b17ca65ec1b76f30e460 里已有 15 个同名占位任务（同一个上游缺口的既有后果），故本条是**已存在问题的延续**，不是本批新增的退化；我不据此单独拒发，但它使「本批发布」在内容层面仍不完整。",
+      "suggestedFix": "READER 契约要求 tasks 必须给出可读 name/summary（或桥在 tasks 缺 name 且五元组齐全时，用 objective 首句生成——但那属内容加工，须显式记账，不能静默）。"
+    },
+    {
+      "id": "D-D-primary-ref-taken-from-out-of-unit-quote",
+      "severity": "medium",
+      "status": "未修复（同上）",
+      "what": "桥用 `refs[0]['quote']` 当节点主引文（`node['quote']`），而 refs 的顺序来自候选里引文出现的先后，**不区分区间内外**。于是区间外对照引文可能被当成主引文。",
+      "evidence": "`clue_review_f7d1bde531c50a24eca5`（属 read:dafeng:L0:0068，区间 [210224,214449)）的主引文是 @97599「第二件是护心镜…」，落在第三章。`characterState_review_c93aae3b19d53afc621c`（属 L1:0073，区间 [231801,234954)）主引文 @184057，也远在区间外。全批 241 条 refs 中 4 条落在任务总区间 [185812,254204) 之外。",
+      "reproduce": "python3 -B -s /tmp/cl-pub-B003/facts.py  # 主引文不在本单元区间内的节点",
+      "suggestedFix": "取主引文时优先选落在本单元区间内的 ref；若全部在区间外，如实标注（而不是把区间外引文当门面）。"
+    },
+    {
+      "id": "D-E-clue-description-（未提供）",
+      "severity": "low",
+      "status": "未修复（同上）",
+      "what": "4/9 个 clues 的 `description` 是「：（未提供）」—— 原候选只有 `item` 与 `setup.what`，没有 `setup.text`，桥写 `\"%s：%s\" % (name, setup_text or '（未提供）')`，而这些候选连 name 也没有。",
+      "evidence": "clue_review_f7d1bde531c50a24eca5 / e02bd92517562dbaf972 / 9ac0b5eda8dd2c287514（均属 L0:0068）、7c29ec2fbc86fb88e36b（属 L0:0072）。原候选有可用文字：例如 fs_heart_mirror 的 setup.what=「宋卿所赠护心镜（可挡炼神境三次攻击）」、payoff.what=「区间内：被长舌击中后他活着，内心归因『如果不是宋卿给我的护心镜立功的话....』」。",
+      "suggestedFix": "clues 的 description 兜底链扩成 `setup.text → setup.what → item → payoff.what`，并优先取 item 作标题。"
+    },
+    {
+      "id": "D-F-bridge-locator-id-regex-incomplete",
+      "severity": "medium",
+      "status": "未修复（同上；**本批未因此产生泄漏**，登记供后续修）",
+      "what": "桥提取复核点名的候选 id 用 `\\b([TCSF]\\d+)\\b`，匹配不到 `ST5`、`CE1` 这类「前缀两字母 + 数字」（states 原始 id 是 `ST5_...`、causeEdges 是 `CE1_...`）。复核者写「ST5 的 anchorEvent」时该定位符被静默漏过。",
+      "evidence": "verify_dafeng_L1_0077.verdict.json CE1 原文：「T3（金莲道长任务）的 result 写…；ST5 的 anchorEvent 写「玖号发问（偏移 247092 起）」」——`\\b([TCSF]\\d+)\\b` 只匹配到 T3，漏掉 ST5；换成 `([TCSF]\\d+)` 则得 [T3, ST5]。",
+      "whyNotBlockingThisBatch": "我用更宽的正则（含 ST/CE 形态）对 20 个单元复算过点名集合，与桥实际排除集合一致（本批 25 条 verifier_flagged 无遗漏）。也就是本批的 ST5/CE1 类定位符恰好没有落在**发布层**条目上。属**下一个批次可能爆发**的缺口。",
+      "suggestedFix": "id 正则改为 `\\b([A-Za-z]{1,3}\\d+)\\b` 并要求该 token 能在该单元原始候选的 id 集合里解析（避免把 `第3` 之类误当 id）；同时保留对「token 匹配不到任何条目」的记账。"
+    }
+  ],
+  "gateLock": {
+    "required": true,
+    "acquiredByMe": false,
+    "holder": {
+      "agent": "p16",
+      "reason": "P1.6 发布者契约（P1 唯一无契约的包）+ 工具链路径锁",
+      "startedAt": "2026-10-08T17:56:26Z"
+    },
+    "attemptCmd": "python3 -B -s loop/bin/loop.py gate --agent w-publish --reason \"publish:dafeng:B003 追加式写回（新版本键 + index）串行化\"",
+    "attemptResult": "GATE.lock 被占用（rc=1）",
+    "whyItMatters": "发布产物 data/cache/<新键>.json 与 data/cache/index.json 被 `loop.classify()` 判为 guarded；无锁写受保护路径违反 AGENTS.md 与发布纪律 3。故即便内容无缺陷，本轮也不具备写回条件。",
+    "reproduce": "python3 -c \"import sys;sys.path.insert(0,'loop/bin');import loop as L;print(L.classify('data/cache/NEW.json'))\"  # -> guarded"
+  },
+  "honestyMarkers": {
+    "claimVerified": false,
+    "provenance": "assistant-reviewed-source",
+    "semanticStatus": "assistant-reviewed-source",
+    "modelCalls": 0,
+    "automaticModelCalls": 0,
+    "semanticReview": "not_performed",
+    "note": "以上标记在本轮**没有任何一条**被写入作品库（本轮未 --write）。候选文件里这四类字段齐备（桥保证）：node.claimVerified=false、node.provenance=assistant-reviewed-source、candidate.modelCalls=0、candidate.coverageGaps 含 semantic_review_not_performed。引用定位与身份合同通过 ≠ 语义已核验。"
+  },
+  "evidence": [
+    {
+      "path": "loop/state/candidates/BATCH-publish-dafeng-B003.candidate.json",
+      "sha256": "f5f33ec6529ac015289326ae0d7ed996ea75fbff5092b08ae26218cc6a7c0b4e",
+      "kind": "bridge-output（任务指定链路的正式产出，未手工改动）"
+    },
+    {
+      "path": "loop/bin/to_candidate.py",
+      "sha256": "4875e76edaab055dfd45275cc59e55973dd7c522d3ec5d9e33a6a1332b2a4caa",
+      "kind": "格式桥（只读引用；缺陷 D-A/D-B/D-D/D-E/D-F 的责任文件）"
+    },
+    {
+      "path": "tools/publish_reviewed.py",
+      "sha256": "a1827ebdb6d89ea04e1addb8807fa79ca95d1f6251edcddf6886ae3f357af561",
+      "kind": "发布工具（只读引用，未改）"
+    },
+    {
+      "path": "/tmp/cl-pub-B003/audit.py",
+      "sha256": "6e3e7b078b80e9bcf89fe5edf0b9c117410db67890027dd1c5d37184c0dcec8e",
+      "kind": "audit-script：区间/丢弃原因/引文全量对账"
+    },
+    {
+      "path": "/tmp/cl-pub-B003/leak.py",
+      "sha256": "b30a21e44398cf0261c6e83125afba2e3a046f7f602660956f1f0d910ed9c8bc",
+      "kind": "audit-script：纪律 1 对账（扫 counterExample 全字段）"
+    },
+    {
+      "path": "/tmp/cl-pub-B003/leak3.py",
+      "sha256": "ea109265b45fedf45be97972a46c8ce8ac3e8cae1078ed20327de92ca3000466",
+      "kind": "audit-script：纪律 1 加固对账（四种证据）"
+    },
+    {
+      "path": "/tmp/cl-pub-B003/leak4.py",
+      "sha256": "1d739201be7da3f29343ffe229e83752c0539c57c440f4acf481bfdf32c3d426",
+      "kind": "audit-script：纪律 1 负面语境字段对账"
+    },
+    {
+      "path": "/tmp/cl-pub-B003/facts.py",
+      "sha256": "e8078a015d4a7c32881bb8c4b35eb09d5d336b733cc4645555ebee96bbceb115",
+      "kind": "audit-script：逐节点事实表（主引文是否在单元区间内等）"
+    },
+    {
+      "path": "/tmp/cl-pub-B003/content.py",
+      "sha256": "2f0ce4bbe437fd248c584eba56f3de7849eb757e23153f624f6305bc5fac42c4",
+      "kind": "audit-script：内容搬运损失（D-C/D-E）"
+    },
+    {
+      "path": "/tmp/cl-pub-B003/keyshape.py",
+      "sha256": "7750a33df63a3a83987a2290974e8b0ac6bfba1b9859de99364e87adc7426b60",
+      "kind": "audit-script：子字段键形态（value vs text）"
+    },
+    {
+      "path": "/tmp/cl-pub-B003/quoteclash.py",
+      "sha256": "68898cb60e0eaa0c0383a8a4444dd5f463c92f8fbbc2de776297fe5673c354c1",
+      "kind": "audit-script：保留节点引文与复核质疑引文的重合检查"
+    },
+    {
+      "path": "/tmp/cl-pub-B003/pre.txt",
+      "sha256": "745a0d0ef85b885a2afe57b7e94f9484aa4b65d8787926734c25b875058a3b82",
+      "kind": "pre-write 快照（父图/台账/候选哈希，写前实测）"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "任务声明 gateLock=true，发布产物在受保护路径：data/cache/<新键>.json 被 classify() 判为 guarded",
+      "result": "pass",
+      "cmd": "python3 -c \"import sys;sys.path.insert(0,'loop/bin');import loop as L;print(L.classify('data/cache/NEW.json'))\""
+    },
+    {
+      "text": "GATE.lock 被 p16 持有，我取锁被拒（rc=1）",
+      "result": "pass",
+      "cmd": "python3 -B -s loop/bin/loop.py gate --agent w-publish --reason probe; cat loop/state/leases/GATE.lock"
+    },
+    {
+      "text": "链路完整跑通：桥产出批次候选，units=20 kept=40 dropped=596",
+      "result": "pass",
+      "cmd": "python3 -B -s loop/bin/to_candidate.py --batch publish:dafeng:B003"
+    },
+    {
+      "text": "dry-run 契约机检通过：ok=true, contractProblems=[], referencePrecision 109/109, claimedVerifiedAnchorPrecision 310/310",
+      "result": "pass",
+      "cmd": "python3 -B -s tools/publish_reviewed.py --source-key 9b676d7031b1bcd3b8377a18 --candidate loop/state/candidates/BATCH-publish-dafeng-B003.candidate.json --dry-run"
+    },
+    {
+      "text": "D-A：写出的 scope=[0,248192) chapters=16（1 个空串），真值 [185812,254204) 20 章，缺 5 章",
+      "result": "pass",
+      "cmd": "python3 -B -s /tmp/cl-pub-B003/audit.py  # == A =="
+    },
+    {
+      "text": "D-B：10/20 单元 scope 退化成 [0,1)，这 10 个单元贡献 0 个保留节点，59 条丢弃被误记为「本章图谱零事件」",
+      "result": "pass",
+      "cmd": "python3 -B -s /tmp/cl-pub-B003/audit.py  # == A =="
+    },
+    {
+      "text": "D-C：13/24 tasks 的 name 为占位符，且对应原始候选确无 name/summary 字段（缺口在上游，非桥取错键）",
+      "result": "pass",
+      "cmd": "python3 -B -s /tmp/cl-pub-B003/facts.py; python3 -c \"import json;c=json.load(open('loop/state/out/read_dafeng_L0_0068.candidate.json'));print([list(t.keys()) for t in c['tasks']][:3])\""
+    },
+    {
+      "text": "D-D：4 条 sourceRefs 落在任务总区间 [185812,254204) 之外，其中 2 条被当成节点主引文",
+      "result": "pass",
+      "cmd": "python3 -B -s /tmp/cl-pub-B003/facts.py"
+    },
+    {
+      "text": "D-E：4/9 clues 的 description 为「：（未提供）」，原候选只有 setup.what/item",
+      "result": "pass",
+      "cmd": "python3 -B -s /tmp/cl-pub-B003/content.py"
+    },
+    {
+      "text": "D-F：桥的 id 正则 \\b([TCSF]\\d+)\\b 匹配不到 ST5/CE1；bridge 与我的扫描器同源缺口，本批未致泄漏",
+      "result": "pass",
+      "cmd": "python3 -c \"import re;print(re.findall(r'\\\\b([TCSF]\\\\d+)\\\\b','T3（金莲道长任务）…；ST5 的 anchorEvent'), re.findall(r'([TCSF]\\\\d+)','T3…；ST5 的 anchorEvent'))\""
+    },
+    {
+      "text": "纪律 1 对账（扫 counterExample 全字段）：38 个发布层点名条目全部 excluded，泄漏 0",
+      "result": "pass",
+      "cmd": "python3 -B -s /tmp/cl-pub-B003/leak.py"
+    },
+    {
+      "text": "纪律 1 加固对账（四种证据）：40 个保留节点中 2 条疑似，人工判定均为假阳性",
+      "result": "pass",
+      "cmd": "python3 -B -s /tmp/cl-pub-B003/leak3.py"
+    },
+    {
+      "text": "纪律 1 负面语境字段对账：40 个保留节点命中 0",
+      "result": "pass",
+      "cmd": "python3 -B -s /tmp/cl-pub-B003/leak4.py"
+    },
+    {
+      "text": "原版本字节未变（本轮未写；发布前后父图哈希一致）",
+      "result": "pass",
+      "cmd": "shasum -a 256 data/cache/9b676d7031b1bcd3b8377a18.json data/cache/9b676d7031b1bcd3b8377a18.docs.json"
+    },
+    {
+      "text": "20 个单元的复核裁决全部为 partial（fail 0 / pass 0），无整单元应当跳过",
+      "result": "pass",
+      "cmd": "python3 -c \"import json;from pathlib import Path;U=json.load(open('loop/state/index.json'))['books']['dafeng']['chapterUnits'][60:80];print([ (json.load(open('loop/state/out/verify_dafeng_L%d_%04d.verdict.json'%(u['lane'],u['i']))).get('verdict')) for u in U])\""
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/publish_dafeng_B003.artifact.json",
+      "kind": "append-only",
+      "note": "本任务 writes 声明的产出（本文件）。"
+    },
+    {
+      "path": "loop/state/candidates/BATCH-publish-dafeng-B003.candidate.json",
+      "kind": "append-only",
+      "note": "由任务指定链路 `to_candidate.py --batch` 生成（固定输出路径）；本任务 prompt 明令使用该文件，非我另写合并脚本。"
+    },
+    {
+      "path": "loop/state/candidates/read_dafeng_L{0,1,2,3}_00{60..79}.candidate.json",
+      "kind": "append-only",
+      "note": "同上，桥的逐单元产出（20 个，内容确定、可重放）。"
+    },
+    {
+      "path": "loop/state/leases/publish:dafeng:B003.d/lease.json",
+      "kind": "transient",
+      "note": "任务租约（由 worker 机制维护，会被设计性回收）。"
+    },
+    {
+      "path": "loop/state/leases/GATE.lock",
+      "kind": "none",
+      "note": "**我未取得、也未改写它** —— 取证时它已由 p16 持有；我的 gate 调用被拒，未产生写入。"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/9b676d7031b1bcd3b8377a18.json": "3c2fae1d399d6768719f2d5476fa0cfd88fb4fbbc12abdf080323fa4b846ebdf",
+    "data/cache/9b676d7031b1bcd3b8377a18.docs.json": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "data/cache/index.json": "37ed116b5df7678a43f9ec0f8b80c2ab67c9d062b0fc27a175e9f4ba52a47a2b",
+    "loop/state/PUBLISH-LEDGER.json": "b257014efb11d123531affa978a195f208df2a9285f9486369773a9eb2a32b21",
+    "loop/state/PUBLISHED-WITH-KNOWN-DEFECTS.json": "fe9ed52e02ed1bf3f824157989f3a707bdf9ea29a2d9c69ce65ce384dbfba945",
+    "loop/bin/to_candidate.py": "4875e76edaab055dfd45275cc59e55973dd7c522d3ec5d9e33a6a1332b2a4caa",
+    "tools/publish_reviewed.py": "a1827ebdb6d89ea04e1addb8807fa79ca95d1f6251edcddf6886ae3f357af561",
+    "loop/state/candidates/BATCH-publish-dafeng-B003.candidate.json": "f5f33ec6529ac015289326ae0d7ed996ea75fbff5092b08ae26218cc6a7c0b4e"
+  },
+  "remaining": [
+    "**本批未发布**：publish:dafeng:B003 仍待做。发布键为 null —— 没有任何新版本写入作品库，原图 9b676d7031b1bcd3b8377a18 字节未变。",
+    "**D-A 建议先修**（受保护路径 loop/bin/to_candidate.py，须开合并任务并持 GATE.lock）：批次 scope 用 requires 的 20 个单元区间直接构造，chapters 取自 index.json 的 unitHead，并对 chapters 数 != 单元数直接报错。不修则每次发布都会把错区间写进 reviewHistory（B000 已经留下一次 start=0）。",
+    "**D-B 建议先修**（同上）：区间解析补 segmentSelector 兜底；对「既无 range 又无 selector」的候选**报错**而非静默退化成 [0,1)。本批因此丢 328 条、其中 59 条归因错。",
+    "**D-F 建议尽快修**（同上）：点名 id 正则扩到 `[A-Za-z]{1,3}\\d+`（覆盖 ST5/CE1）。本批侥幸未泄漏，但下一个批次可能爆发。",
+    "**D-C 需上游修**：READER 契约要求 tasks 必须给可读 name/summary；否则每批都会有 N/24 个同名占位任务进作品库。",
+    "**D-D/D-E 为桥的取值顺序与兜底链问题**：主引文应优先取区间内 ref；clues 的 description 兜底应扩到 setup.what/item。",
+    "**语义正确性未核验**：本轮只做引用定位/身份合同机检 + 独立对账，未判断候选对人物动机与世界观的解读是否文学上最优；semanticReview 保持 not_performed。",
+    "**未做的事**：未跑 GPU/浏览器测试（本任务不需要）；未改写任何受保护路径文件；未抢 p16 持有的 GATE.lock；未用旁路（手工删节点/内存补丁）伪造一次成功的发布 —— B001 已记过这条教训（用旁路验证出来的成功不能证明主路能走通）。",
+    "**全书覆盖率**：本批 20/912 单元 = 2.1930%、68392/4760263 码点 = 1.4367%。作品库现有已发布内容仅覆盖 B000 的 [35,61514)（且 scope 起点被记成 0），全书远未完成。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/publish_dafeng_B003.artifact.json"
+    ],
+    "note": "本轮**未写作品库**（无新图谱键、未改 data/cache/index.json、未改 PUBLISH-LEDGER.json），故除本 artifact 外无任何需要回滚的写入。桥生成的批次/逐单元候选文件是任务指定链路的正常产出（内容确定、可重放），删除会破坏发布链可追溯性，故不列入回滚清单。/tmp/cl-pub-B003 下的审计脚本是临时物，可随时删除，不属仓库改动。"
+  },
+  "auditScripts": {
+    "note": "五个只读对账脚本的路径与 sha256 见 evidence 字段。它们写在 /tmp（任务 writes 只允许本 artifact，故脚本不放仓库）；tested 命令见 assertions[].cmd。若 /tmp 被清理，可按 assertions 的 cmd 语义重写：audit.py（区间/丢弃原因/引文全量）、leak.py（点名全字段）、leak3.py（四证据）、leak4.py（负面语境字段）、facts.py（逐节点事实表）、content.py（内容搬运损失）、quoteclash.py（引文重合）。",
+    "keyCommands": [
+      "python3 -B -s loop/bin/to_candidate.py --batch publish:dafeng:B003",
+      "python3 -B -s tools/publish_reviewed.py --source-key 9b676d7031b1bcd3b8377a18 --candidate loop/state/candidates/BATCH-publish-dafeng-B003.candidate.json --dry-run",
+      "python3 -B -s /tmp/cl-pub-B003/audit.py",
+      "python3 -B -s /tmp/cl-pub-B003/leak.py",
+      "python3 -B -s /tmp/cl-pub-B003/leak3.py",
+      "python3 -B -s /tmp/cl-pub-B003/leak4.py",
+      "python3 -B -s /tmp/cl-pub-B003/facts.py"
+    ]
+  },
+  "submittedAt": "2026-10-08T18:11:17Z",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-08T18:11:17Z"
+  },
+  "verifyState": "pending"
+}

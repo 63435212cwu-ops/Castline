@@ -1,0 +1,99 @@
+{
+ "task": "verify:dafeng:L0:0084",
+ "agent": "w-verify-0",
+ "status": "done",
+ "summary": "独立反向复核 read:dafeng:L0:0084（《大奉打更人》第八十五章 卑职有事禀告，原文区间 [267530,270916)，3386 字）。按 VERIFIER.md 顺序执行：先不通读候选、先把原文整片读完并手写要点，再打开候选逐条比对。裁决 partial。机器复核：148 条 quote 对象（74 条去重）逐条 text[s:e]==quote、end-start==len(quote)、find()==start、独占计数复算全对；inRange / chapterAtOffset / occurrencesInFullText / occurrencesInUnit / sourceHash 逐字段复算，metadataProblems=1（仅 F2 的章节归属）；随机种子 20261009 抽 5 条 quote 独立 find，5/5 逐字命中且偏移一致；8 条区间外引文重定位，7 条正确、1 条错误；候选散文里 9 处「offset N」数字全部回原文切片核对，无一虚构；任务五栏从「相等判定」升级为「区间求交」。两条 counterExample 均有逐字可查的原文引证：(1) F2 回收点章节归属错 61 章——引文 start=2507409 的真实前置标题是 offset 2507355 的「第两百六十章 技高一筹」，候选写成「第一百九十九章 浮香的小故事」（真实标题在 offset 2097874）；根因可复现：索引正则不含「两」，全文 932 个标题只有 808 个可解析，99 个「第两百X章」被整体跳过，回退到最后一个可解析章号，再按章号取到最后一个同名标题。(2) 候选自报 verification.taskColumnsShareNoQuote=true 且在 selfCritique 里宣称「已真删掉 4 处共用而不是辩解」，但 T2 的 action 引文 [269081,269113) 是 objective 引文 [269062,269122) 的真子串——包含型共用，相等判定抓不到，T2 是三个任务里唯一仍有共用的。反向验证给出 5 条候选未覆盖的原文事实（元景帝当面斥责魏渊、都察院御史上书弹劾魏渊、二号试探三号提问动机、四号与女子国师有交情、六号「贫僧也想天天出门捡银子啊」跨线呼应）。误杀检查 2 条（牙子伏笔与 F9 同用「回收点在紧邻下一章」却一拒一收，口径不一致；R-02 与 CC12 对同一句的证据等级判定相反）。编造检查：无原文外人物/事件/结局，无「结束当成功」。同时如实登记我自己的 3 处检查器错误（预设引文唯一、边界切片 off-by-one、我最初的章节正则同样缺「两」），未据此写入 counterExamples。semanticReview 保持 not-performed。",
+ "evidence": [
+  {
+   "path": "loop/state/out/verify_dafeng_L0_0084.verdict.json",
+   "sha256": "769ec54ff1289c47d428fbc01a28972e6e15cc3d7cf3f0ad67c77a3019a2b630",
+   "kind": "verifier-verdict（本轮产物）"
+  },
+  {
+   "path": "loop/state/out/read_dafeng_L0_0084.candidate.json",
+   "sha256": "e045ca4196eeb685652c91face7acfc3f2ebd5137868ba8b00349b1e45e553ed",
+   "kind": "被复核候选（只读，未修改）"
+  },
+  {
+   "path": "data/cache/1063b17ca65ec1b76f30e460.docs.json",
+   "sha256": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+   "kind": "source-text（只读引用，未修改）"
+  }
+ ],
+ "assertions": [
+  {
+   "text": "复核者独立性：本轮复核者 w-verify-0 ≠ 被复核候选的 agent w-xiyou-0；submit 前先跑 verify 子命令，脚本未拒自签（rc=0，输出「复核已记录：read:dafeng:L0:0084 → partial」），复核结果已落进 loop/state/out/read_dafeng_L0_0084.json 的 reviews[] 与 verifyState",
+   "result": "pass",
+   "cmd": "python3 loop/bin/loop.py verify --task read:dafeng:L0:0084 --file loop/state/out/verify_dafeng_L0_0084.verdict.json --agent w-verify-0"
+  },
+  {
+   "text": "源文件哈希与任务 sourceHash 一致；切片哈希独立复算一致（候选 source.sliceSha256）",
+   "result": "pass",
+   "cmd": "shasum -a 256 data/cache/1063b17ca65ec1b76f30e460.docs.json; python3 -c \"import json,hashlib;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];print(hashlib.sha256(t[267530:270916].encode()).hexdigest())\""
+  },
+  {
+   "text": "边界独立复算：text[267530:267542]=='第八十五章 卑职有事禀告'、text[270916:270931]=='第八十六章 一个成熟的双面间谍'，区间长度 3386 —— 与候选 unitHeadCheck 一致（我第一版用固定 13 字符切片得到假阳性 False，已更正）",
+   "result": "pass",
+   "cmd": "python3 -c \"import json;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];print(t[267530:267542],len(t[267530:270916]),t[270916:270931])\""
+  },
+  {
+   "text": "全量引文复算：148 条 quote 对象（74 条去重区间）逐条 text[start:end]==quote、end-start==len(quote)、find()==start 全部成立；元数据复算 metadataProblems=1，仅 F2 的 payoff chapterAtOffset 不符，其余 inRange/occurrencesInFullText/occurrencesInUnit/sourceHash 全部一致",
+   "result": "pass",
+   "cmd": "python3 -B -s /tmp/verify-0084/audit.py"
+  },
+  {
+   "text": "随机抽 5 条 quote（random.seed(20261009) 固定种子可复现）在原文 find 一次：5/5 逐字命中、5/5 偏移与声明一致（含 1 条区间外第170章引文）",
+   "result": "pass",
+   "cmd": "python3 -B -s /tmp/verify-0084/audit.py"
+  },
+  {
+   "text": "counterExample 1 的原文引证逐字可查：「第两百六十章 技高一筹」find=2507355、count=1；「这些狐尾来自万妖国公主，九尾天狐。」find=2507409、count=1；真实「第一百九十九章 浮香的小故事」标题在 2097874，相差 409535 个 codepoint。根因复现：正则 第[一二三四五六七八九十百千零]+章\\s 解析出 808 个标题，加「两」后为 932 个，offset 2507409 的前置标题变为 2507355 的「第两百六十章 技高一筹」",
+   "result": "pass",
+   "cmd": "python3 -c \"import json,re;from bisect import bisect_right;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];print(t.find('第两百六十章 技高一筹'))\""
+  },
+  {
+   "text": "counterExample 2 的原文引证逐字可查且为包含关系：objective 引文 [269062,269122)、action 引文 [269081,269113)，后者是前者的真子串（区间求交非空且被包含），而候选 verification.taskColumnsShareNoQuote 声明为 true、taskColumnSharedQuotes 为 []",
+   "result": "pass",
+   "cmd": "python3 -c \"import json;c=json.load(open('loop/state/out/read_dafeng_L0_0084.candidate.json'));T=[x for x in c['tasks'] if x['id']=='T2'][0];o=T['objective']['quotes'][0];a=T['action']['quotes'][0];print(o['start'],o['end'],a['start'],a['end'],o['start']<=a['start'] and a['end']<=o['end'],c['verification']['taskColumnsShareNoQuote'])\""
+  },
+  {
+   "text": "5 条 reverseChecks 的原文引证逐字可查且 count=1：「元景帝狠狠的斥责了京城五卫的指挥使，以及打更人指挥使魏渊。」[270018,270047)、「…都察院御史上书弹劾魏渊。」[269981,270012)、「这时，二号试探道…」[268311,268337)、「与女子国师有交情的四号问道：【一品？】」[267791,267810)、「贫僧也想天天出门捡银子啊。」[269756,269769)；且候选 JSON 对这 5 处关键串的计数为 0（元景帝/斥责/都察院/弹劾/女子国师/想起了三号/贫僧也想天天出门捡银子）",
+   "result": "pass",
+   "cmd": "python3 -c \"import json;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];b=json.dumps(json.load(open('loop/state/out/read_dafeng_L0_0084.candidate.json')),ensure_ascii=False);print([(s,t.count(s),b.count(s)) for s in ['元景帝','斥责','都察院','弹劾','女子国师','贫僧也想天天出门捡银子']])\""
+  },
+  {
+   "text": "误杀检查两条都基于候选自身文本：「牙子」被 rejectedForeshadows 以「本区间无回收（后文第86章才…）」拒收，而 F9 的回收点同样在第八十六章却被收为 resolved；R-02 写「态度消极…不是叙述层的定论」，而同一文件 CC12 把该句标 narratorConfirmed=true。两条均以候选文件内自相矛盾为据，不是我的主观否决",
+   "result": "pass",
+   "cmd": "python3 -c \"import json;c=json.load(open('loop/state/out/read_dafeng_L0_0084.candidate.json'));print([x['why'] for x in c['rejectedForeshadows'] if x['claim']=='「平远伯私底下养了牙子」']);print(c['rejectedCauseEdges'][1]['why']);print([x for x in c['characterClaims'] if x['id']=='CC12'][0]['narratorConfirmed'])\""
+  },
+  {
+   "text": "受保护路径未改：以本 worker 租约 startedAt=2026-10-09T08:56:06Z（本地 17:14:06）为界，js/ css/ index.html serve.py narrative.py scripts/ tests/ docs/ data/ 下无任何文件 mtime 晚于它——本轮只在 loop/ 下追加写入",
+   "result": "pass",
+   "cmd": "find js css index.html serve.py narrative.py scripts tests docs data -newermt '2026-10-09 17:14:06' -type f"
+  }
+ ],
+ "changes": [
+  {
+   "path": "loop/state/out/verify_dafeng_L0_0084.verdict.json",
+   "kind": "append-only"
+  }
+ ],
+ "sourceHashes": {
+  "data/cache/1063b17ca65ec1b76f30e460.docs.json": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+ },
+ "remaining": [
+  "语义未认证：本复核只复算「引文定位 + 元数据 + 章节归属 + 分区口径」，不认证解释层。semanticReview 保持 not-performed。",
+  "必修项未由我执行：F2 的 payoff 章节归属（改「第两百六十章 技高一筹」）与产生它的章节索引正则（缺「两」）、以及 T2 的 objective/action 包含型共用，都需 READER 侧定点修复；我按 VERIFIER 契约只裁断不改他人产物。",
+  "章节索引缺陷的影响面我只量化到「99 个『第两百X章』标题在缺『两』的正则下失解析、全文可解析标题由 932 降为 808」，未逐条枚举历史候选里有多少条跨过第两百章的区间继承同一错误——那需要跨任务扫描，超出本区间。",
+  "unknowns[7] 与第147章的冲突（原文在那里其实归因于魏渊「补交了善款」）我只核到单点：第147章许七安自陈「我把六号的信息透露给魏公，他没动六号，而是补交了善款。」我未通读第93→147章之间是否还有别的归因叙述，故只作「建议修」而不作 counterExample。",
+  "牙子伏笔的「正确口径」我判为存疑而非 fail：伏笔粒度（是否允许「传闻铺设 + 下一章制度性确认」）的定义权在 READER/计划侧，我拿不出禁止它的原文条款，按契约不得据此判 fail。",
+  "我未核验候选 8 条区间外引文的「是否是最贴切的回收点」（候选自己在 unknowns[13] 声明是关键词检索而非通读）；我只核了它们逐字存在与章节归属。"
+ ],
+ "rollback": {
+  "kind": "append-only",
+  "strategy": "delete-added-files",
+  "files": [
+   "loop/state/out/verify_dafeng_L0_0084.verdict.json"
+  ]
+ }
+}

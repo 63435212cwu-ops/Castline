@@ -1,0 +1,168 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""生成并提交 read:sanguo:L0:0004 的提交记录。"""
+import hashlib
+import json
+from pathlib import Path
+
+ROOT = Path("/Users/carmen/Desktop/星系")
+CAND = ROOT / "loop/state/out/read_sanguo_L0_0004.candidate.json"
+SUBMIT = ROOT / "loop/state/out/read_sanguo_L0_0004.submit.json"
+DOCS = "data/cache/152e2a6eed94f1075e7e7070.docs.json"
+SRC_HASH = "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff"
+
+d = json.loads(CAND.read_text(encoding="utf-8"))
+chk = d["machineSelfCheck"]
+
+rec = {
+    "task": "read:sanguo:L0:0004",
+    "agent": "w-dafeng-3",
+    "status": "done",
+    "summary": (
+        "精读《三国演义》第五回「发矫诏诸镇应曹公　破关兵三英战吕布」"
+        "（docs[0].text[20054:25766)，5712 字）：%d 条任务五元组、%d 条因果边（另有 %d 条主动不连的边）、"
+        "%d 条状态/知识差、%d 条伏笔（%d 条本单元内回收、%d 条 unresolved）、%d 条不够格当伏笔的反复出现、"
+        "%d 条 unknowns、%d 条 selfCritique。候选内 %d 处引文（%d 条去重区间）全部由脚本 str.find 派生偏移并回切校验，"
+        "0 处偏移/哈希不符；切片内 74 处直接引语（含诗、谚语、题字）全部登记归属，0 处未覆盖；"
+        "字符级反向覆盖 %.2f%%，未覆盖的 %d 个显著片段（全为对话引导语与回目）逐条登记在 notQuoteCovered，未静默丢弃。"
+    ) % (
+        len(d["tasks"]), len(d["causeEdges"]), len(d["rejectedEdges"]),
+        len(d["states"]), len(d["foreshadows"]), chk["foreshadowsResolved"], chk["foreshadowsUnresolved"],
+        len(d["notForeshadows"]), len(d["unknowns"]), len(d["selfCritique"]),
+        chk["quoteRefsChecked"], chk["quoteRefsDistinctSpans"], chk["charCoverage"], len(d["notQuoteCovered"]),
+    ),
+    "evidence": [
+        {
+            "path": "loop/state/out/read_sanguo_L0_0004.candidate.json",
+            "sha256": hashlib.sha256(CAND.read_bytes()).hexdigest(),
+        },
+    ],
+    "assertions": [
+        {
+            "text": "原文区间自检：docs[0].text[20054:20075] == '第五回　发矫诏诸镇应曹公　破关兵三英战吕布'（回目在全文仅出现 1 次）；"
+                    "docs[0].text[25766:25785] == '第六回　焚金阙董卓行凶　匿玉玺孙坚背约'，右端恰为下一回回目起点。"
+                    "两侧断言在生成器 core.py 里以 assert 硬性执行，不通过即退出。",
+            "result": "pass",
+        },
+        {
+            "text": "源哈希：shasum -a 256 data/cache/152e2a6eed94f1075e7e7070.docs.json == %s，与任务 sourceHash 一致。"
+                    "候选里 source.sourceHash 与全部 %d 处 quoteRef.sourceHash 均等于该值。" % (SRC_HASH, chk["quoteRefsChecked"]),
+            "result": "pass",
+        },
+        {
+            "text": "切片哈希与长度：sha256(text[20054:25766]) == %s，len == 5712 == source.rangeChars。"
+                    "切片哈希另起字段 source.sliceSha256，未覆盖 sourceHash。" % d["source"]["sliceSha256"],
+            "result": "pass",
+        },
+        {
+            "text": "引文逐字（独立复核脚本 /tmp/castline-artifacts/verify_candidate.py，不 import 生成器，从磁盘现读原文）："
+                    "递归抽出候选全部 %d 处带 quote+start/end 的条目，逐条断言 docs[0].text[start:end] == quote，mismatch=0；"
+                    "同时断言 start/end 全部落在 [20054,25766) 内，outOfRange=0，offsetUnit 全为 codepoint。" % chk["quoteRefsChecked"],
+            "result": "pass",
+        },
+        {
+            "text": "偏移不是手抄：引文库（cases.py，162 条）每条 quote 在切片内 str.find，命中数 != 1 即抛错退出；"
+                    "start = 20054 + 命中下标。构建过程中因此发现并修掉 3 处非唯一命中："
+                    "「忠义」（改为「上书“忠义”二字」）、「愿往。」（出现 2 次，改为「玄德曰：“愿往。”」）。",
+            "result": "pass",
+        },
+        {
+            "text": "引语全量（扫描式对账）：对切片做 “…” 成对扫描得 74 处（无未闭合左引号），"
+                    "与候选 speechInventory 长度一致且 spanStart/spanEnd/spanText 逐条与原文相符；"
+                    "74/74 都被至少一条断言引文完整包含或包含之，speechSpansUncoveredByAnyQuoteRef == []。",
+            "result": "pass",
+        },
+        {
+            "text": "反向覆盖（字符级）：把切片 5712 位逐一标成是否被任一已登记引文覆盖，charCoverage == %.2f%%；"
+                    "未覆盖的 %d 个「去空白标点后 >=4 字」显著片段逐条登记进顶层 notQuoteCovered（class + note），"
+                    "其中 %d 条为对话引导语、1 条为「回目+首段引导语」，**无一条属于被丢弃的正文事实**。"
+                    % (chk["charCoverage"], len(d["notQuoteCovered"]),
+                       sum(1 for x in d["notQuoteCovered"] if x["class"] == "dialogue-frame")),
+            "result": "pass",
+        },
+        {
+            "text": "红线·话语不当事实：切片内 74 处直接引语全部标 hasQuotedSpeech/speaker（无人称者标 null），"
+                    "并区分 7 类 kind（speech/thought/document/report/poem/proverb/inscription）。"
+                    "重点处置：曹操对陈宫离去原因的推断（U03/S07）、张飞「此必董卓」的伞盖判断（F05/C25）、"
+                    "「或」劝袁术断粮（U02）、李儒「倘或里应外合」（U01）、袁隗「同谋」未被叙述层证实——"
+                    "以上一律不写成叙述事实；C25 因伞盖→董卓只有人物话语而标 derived。",
+            "result": "pass",
+        },
+        {
+            "text": "红线·结束≠成功：11 条五元组中 T1/T2/T3/T4/T5/T6/T7/T8/T9/T10 十条 result 显式带 notSuccess=true 与 resultNote，"
+                    "逐条说明「本单元结束时实际到手的是什么、objective 的哪一部分未达成」（如 T8 董卓：回末「未知胜负如何」是原文主动悬置）；"
+                    "T11（陈宫离去）objective 确实达成，未强标 notSuccess。",
+            "result": "pass",
+        },
+        {
+            "text": "红线·时间相邻不当因果：26 条 causeEdges 每条都要求 from/to/direction/mechanism/trigger/quoteRefs，"
+                    "mechanism 一律写出原文的关联词或动作链（「于是」「得…乃…」「去后」「接得…径来禀…」「幸得…方…」等）；"
+                    "9 条只同场景/时间相邻的关系主动列进 rejectedEdges 并写明为什么不连（含「断粮→斩华雄」长链、「骂声→吕布退走」、「牛酒→关羽归曹」等）。",
+            "result": "pass",
+        },
+        {
+            "text": "红线·一次出现当伏笔：7 条 foreshadows 全部要求 setup+payoff 两段并存；"
+                    "赤帻线（F01/F06，7 次出现且有功能升级）、热酒线（F03）、华雄自许与反向结局（F02）标 resolved_in_unit；"
+                    "张飞「此贼」→回末擒董卓（F04）、青罗伞盖（F05）、赤帻归属（F06）、颜良文丑（F07）标 unresolved；"
+                    "另有 7 条单次出现的物件/语句（「人中吕布，马中赤兔」「忠义」旗、古锭刀、军令状等）主动列进 notForeshadows 说明为何不算。",
+            "result": "pass",
+        },
+        {
+            "text": "红线·用未知填默认值：tasks[T5].obstacle 与 tasks[T11].obstacle 写 null（鲍信、陈宫在本单元内原文未写任何阻碍），"
+                    "各带 obstacleNote 说明「原文未写」，coverage.nullFields 如实只列这两项；"
+                    "吕布一方伤亡、曹操散家资数额、卫弘出资数额等原文未给的量一律不补（U13/T9.costNote）。",
+            "result": "pass",
+        },
+        {
+            "text": "红线·定位当语义：semanticReview=not_performed、claimVerification=not_performed，"
+                    "并在 semanticReviewNote 里显式声明本候选只做「引文逐字命中 + 定位一致 + basis 标注 + 话语/叙述分层」，"
+                    "语义层是否正确未经核验；machineSelfCheck.notDone 复述同一界限。",
+            "result": "pass",
+        },
+        {
+            "text": "红线·工作量冒充质量：coverage 里不写任何评分，只列可复算的计数（tasks/causeEdges/states/foreshadows/unknowns/quoteRefs/"
+                    "charCoverage）；selfCritique 6 条逐条写出「我最可能读错的三处以上」及仍然这么判断的理由，"
+                    "且每条 reproduction 的原文检查式由 cite() 从引文库派生（非手写偏移）。",
+            "result": "pass",
+        },
+        {
+            "text": "受保护路径未被本任务改动：本任务 writes 只有 loop/state/out/read_sanguo_L0_0004.candidate.json（与提交记录 .submit.json），"
+                    "两者均在 loop/ 下（append-only）。未改 js/ css/ index.html serve.py narrative.py scripts/ tests/ docs/ data/，"
+                    "未跑 GPU/浏览器测试，未用 git checkout/reset/stash。",
+            "result": "pass",
+        },
+        {
+            "text": "语料用字差异只记录不改字（U05「李催/李傕」同段并存、U06「孙融/孔融」、U18「平原令/平原县令」、U04「十七镇/十八路」），"
+                    "版本校勘不在本任务范围，候选里一律按原文各自措辞引用。",
+            "result": "pass",
+        },
+    ],
+    "changes": [
+        {"path": "loop/state/out/read_sanguo_L0_0004.candidate.json", "kind": "append-only"},
+        {"path": "loop/state/out/read_sanguo_L0_0004.submit.json", "kind": "append-only"},
+    ],
+    "sourceHashes": {
+        DOCS: SRC_HASH,
+    },
+    "remaining": [
+        "语义层核验（semanticReview）未做：只完成了引文逐字命中、定位一致与 basis/话语分层，人物动机、因果读法是否正确未经复核，交由 read-verify 通道对抗式复核。",
+        "未与 data/cache/152e2a6eed94f1075e7e7070.json 图谱缓存摘要逐条对照（任务说明它不算原文证据，本轮未使用）。",
+        "未做版本校勘：「李催/李傕」「孙融/孔融」「平原令/平原县令」「十七镇/十八路」只作为 unknowns 记录，未改字、未判定哪处是笔误。",
+        "tasks[T5].obstacle 与 tasks[T11].obstacle 为 null（原文确实未写阻碍），未做反事实推断填补。",
+        "T8（董卓）的 result 只在「两关未失 + 回末悬置」这一层给出；张飞上关擒董卓的成败、赤帻的最终归属、袁绍何时得知叔父被杀，均在本单元区间内无答案，已列 F05/F06/S12/U12。",
+        "反向覆盖剩余 %.2f%% 未覆盖字符全部是对话引导语与回目（已登记 notQuoteCovered），未逐条建断言；若复核者认为引导语也需覆盖，需补引文。" % (100 - chk["charCoverage"]),
+        "未运行 GPU/浏览器测试（本任务未要求，且全局串行）。",
+    ],
+    "rollback": {
+        "kind": "append-only",
+        "strategy": "delete-added-files",
+        "files": [
+            "loop/state/out/read_sanguo_L0_0004.candidate.json",
+            "loop/state/out/read_sanguo_L0_0004.submit.json",
+        ],
+    },
+}
+
+SUBMIT.write_text(json.dumps(rec, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+print("wrote", SUBMIT)
+print("candidate sha256:", rec["evidence"][0]["sha256"])

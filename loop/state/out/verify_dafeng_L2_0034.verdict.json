@@ -1,0 +1,152 @@
+{
+ "task": "verify:dafeng:L2:0034",
+ "verifier": "w-sanguo-1",
+ "reviewedTask": "read:dafeng:L2:0034",
+ "reviewedArtifact": {
+  "path": "loop/state/out/read_dafeng_L2_0034.candidate.json",
+  "sha256": "039dbeb06ba8916095722904fd5f5d836f850e433179720d3ea1da66a81781a3",
+  "bytes": 280953,
+  "agent": "w-sanguo-0",
+  "readAt": "2026-10-08T01:11:50Z"
+ },
+ "sourceUnderReview": {
+  "path": "data/cache/9b676d7031b1bcd3b8377a18.docs.json",
+  "fileSha256": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+  "docIndex": 0,
+  "range": [103811, 107014],
+  "codepoints": 3203,
+  "segmentSha256": "837a302dec0329905d97f7efe39bc09fbacb9503ea2bea3a2430b5c6a1e2d775",
+  "boundarySelfCheck": "独立复算：sha256(文件字节)=fdde5558…9839 与任务 sourceHash 逐字一致；sha256(docs[0].text 的 UTF-8 字节)=bc8b75ee…c612 与候选 docsTextSha256 一致；len(docs[0].text[103811:107014])=3203 与任务 sourceRange 宽度一致；docs[0].text[103811:103821]=='第三十五章 书房议事'（slice 内 1 次）；前接 '周侍郎。”\\n------------\\n\\n'（第三十四章末），后接 '第三十六章 捣蛋鬼'（@107014）。"
+ },
+ "independence": "被复核候选 agent=w-sanguo-0；本复核 agent=w-sanguo-1，非同一提交者。按 VERIFIER 契约顺序执行：先落盘 docs[0].text[103811:107014) 并逐段通读（77 个非空段全部打印编号阅读，含前接第三十四章末 900 字作边界对照），在此之前未读候选结论；随后才打开候选做抽取项核对。候选文件在本轮未被改动。",
+ "method": "全部本地 python3 一次性脚本，未联网、未跑 GPU/浏览器。① 抽取项核对：递归枚举候选内**全部 347 条** {quote,start,end} 实例（区间内 322 + 区间外 25），逐条复算 T[start:end]==quote、T.count(quote)==occurrencesInSource、inSourceRange 落点、sourceHash 归属；② 反向验证：把候选的**解释层散文**（剥掉一切引文对象与 coverageNote）取出，对区间 77 段逐段取特征词判断该段内容是否进入过任何分析区（tasks/causeEdges/notCauseEdges/states/knowledgeGaps/foreshadows/singleAppearance/unknowns/characters/redLines/selfCritique），并统计「仅出现在 coverageNote 登记册」的段；另核 276 条散文「」片段是否机器可 find；③ 误杀检查：逐条读 18 条 notCauseEdges 与 7 条 causeEdges，比对原文承接语与遮挡关系；④ 幻觉检查：把图谱 characters[].aliases 全集与一批专名回到区间内 find；⑤ 引用核验：固定随机种子 random.seed(34) 抽 5 条 quote 做 find() 与偏移比对。",
+ "verdict": "partial",
+ "counterExamples": [
+  {
+   "id": "CEX1",
+   "claim": "CE4（causeEdges[3]）把 trigger 写成「还算不错.....许新年赞许的颔首，接口道」，direction 写成「许七安给出京察在即 + 京察是祖制 + 礼制这一制度缝隙 → 许新年把打法收缩到不打周侍郎本人，打他儿子」，mechanism 写成「原文用「接口道」明写承接：许新年在**许七安说完后**接话」。",
+   "quote": "还算不错.....许新年赞许的颔首，接口道：“再退一步，我们不用去对付周侍郎，堂堂四品大员，心机手腕都有，不是现在的我们能对付，但是人就有弱点。”",
+   "quoteStart": 106428,
+   "quoteEnd": 106501,
+   "why": "「接口道」的直接前接句不是那段京察分析，而是**驱虎吞狼 + 「至于怎么做，他还没想好」**：京察段结束于 @105399，接口道起于 @106428，中间隔 **1029 codepoint**（含「许新年吃了一惊」「我只是古装剧看的多」「史书是最没用的东西」整段议论、表弟段、以及周侍郎动机推理 @105892-105999、@106024「便没有说出口」、@106105 二叔抢答、@106204 反问、@106356 驱虎吞狼、@106410 还没想好）。「接口道」紧邻的前文是 @106404「…最后一根稻草。」与 @106410「至于怎么做，他还没想好。」，间隔仅 24 codepoint。因此 CE4 声明的那对因果**在原文里不相邻**，原文用「接口道」锁住的承接对象是**驱虎吞狼框架**，不是京察分析。同一句引文同时被 CE4.trigger 与 CE7.quotes[2] 当作锚（两处 start 均为 106428），而 CE7 才把承接写在正确的对象上——即 CE4 与 CE7 争夺同一个「接口道」，CE4 的 from 端落在 1029 字之外。可复现：`python3 -c \"import json;T=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];print(T.find('许七安摸着下巴，思索着说：'),T.find('还算不错'),T.find('许七安指尖轻扣桌面'))\"` → 105287 106428 106356（106428-105399=1029；106428-106404=24）。",
+   "severity": "因果端点错挂（断言把不相邻的两端写成「接口道」承接；不是发明原文，是错配已存在的两端）",
+   "note": "CE4 的 caveat 已声明「周立更好对付」是人物评估，这一点没问题；问题只在 from 端的落点。若把 from 端改为「许七安的驱虎吞狼框架 + 尚未想好」，CE4 与 CE7 需合并或重划，否则两条边共享同一 trigger 会重复计数。"
+  },
+  {
+   "id": "CEX2",
+   "claim": "notCauseEdges[4]（NC5）的 why 写：「许辞旧随后谈的是云鹿书院，**不是司天监**。」",
+   "quote": "许辞旧接着说：“税银案时，我不也是云鹿书院的学生？今天大哥能回来，是因为周立不占理，手段太低级，但如果是周侍郎出手，再来一次税银案，合理合法的让许家满门抄斩，司天监和云鹿书院难不成还能为我们劫狱？为了我们对抗大奉律法？”",
+   "quoteStart": 104713,
+   "quoteEnd": 104823,
+   "why": "该 why 是**对候选自己引文的错误陈述**：它引的正是这条许辞旧台词，而这条台词里「司天监」逐字出现（「**司天监**和云鹿书院难不成还能为我们劫狱？」）。整句以「司天监和云鹿书院」并列反问两者都救不了许家，并非「谈的是云鹿书院，不是司天监」。NC5 想表达的遮挡关系（税银案本身也算朝堂案件，与「白衣不插手朝堂政事」如何相容，区间内无叙述层解释）是成立的，但支撑它的这句事实描述与自己的引文矛盾。可复现：`python3 -c \"import json;T=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'][103811:107014];q=T[T.find('许辞旧接着说'):T.find('为了我们对抗大奉律法？”')+12];print('司天监' in q)\"` → True。",
+   "severity": "断言与自身引文矛盾（引文层事实描述错误；结论方向不受影响）"
+  },
+  {
+   "id": "CEX3",
+   "claim": "notCauseEdges[3]（NC4）登记为「非因果」条目：id=NC4，pair=「许平志『训斥儿子』→ 许七安否决」，放在 notCauseEdges 数组内。",
+   "quote": "他刚说完，就被侄儿冷酷无情的否决：“我觉得二郎的想法是对的。”",
+   "quoteStart": 104417,
+   "quoteEnd": 104448,
+   "why": "NC4 的 why 字段（候选自身文本，非原文引文，全文 find 结果为 -1）写着：「这一对**是有方向因果的**（见 CE2），此处列出是为了说明方向不能反：否决发生在训斥「刚说完」之后，且否决者是被训者的堂兄，不是被训者本人。」——即作者自己认定这**不是**一条「非因果边」。它却仍被放进 notCauseEdges 数组并计为 18 条之一，使 redLines.noAdjacencyCausality 自报的「18 条 notCauseEdges 显式拒绝相邻即因果」失真：NC4 拒绝的不是「相邻即因果」而是「方向反转」，属另一个类别。下游若按 notCauseEdges 长度或逐条语义做「被排除的伪因果」统计，会把一条**真因果**计入排除集。上引 quote 是 NC4 自己引用的、证明该对有因果的那句原文（逐字命中 @104417），可作对照。",
+   "severity": "分类错误（数组语义与自述冲突；下游计数/语义消费者会被误导）",
+   "evidenceKind": "candidate-self-text（判据在候选文件内，非原文；对照原文引文逐字命中 @104417）",
+   "note": "这不是编造：NC4 引用与否决相关的两句原文都在区间内且逐字命中（@104323、@104417）。仅数组归类与计数问题。可复现：`python3 -c \"import json;c=json.load(open('loop/state/out/read_dafeng_L2_0034.candidate.json'));n=[x for x in c['notCauseEdges'] if x['id']=='NC4'][0];print(n['why'][:60])\"` → 「这一对**是有方向因果的**（见 CE2）…」。"
+  },
+  {
+   "id": "CEX4",
+   "claim": "coverageNote.note 写：「77 个非空段落各有一条可定位引文（registry）」；redLines.noFabrication 等处以 noScopeOverclaim 声明区间外引文「不参与 tasks/states/knowledgeGaps 的任何结论」。",
+   "quote": "喜欢读史的许七安原本对这句话嗤之以鼻，后来发现有一定的道理。",
+   "quoteStart": 105585,
+   "quoteEnd": 105615,
+   "why": "这不是反引文，而是引用核验附带的**覆盖口径**发现，用来说明「登记即有引文」与「内容被分析」是两件事。机器复算：区间 77 个非空段确实 100% 被区间内引文逐字覆盖（我独立重算 union 后 uncovered=0，此项属实、非虚报）。但把 coverageNote 登记册整体剔除后，有 **13 个非空段的内容从未进入任何分析区**（tasks/causeEdges/notCauseEdges/states/knowledgeGaps/foreshadows/singleAppearance/unknowns/characters/redLines/selfCritique 的引文与散文均不涉及），只存在于 coverageNote.paragraphRegistry 的 quote+note 里，例如本条 @105585 以及 @104508 嫡子段、@105781「下巴一扬…那大哥觉得应该怎么做」、@106005「『所以？』许新年嘴角一挑」等。因此「段落覆盖 77/77」为真，但**不能**据此认为 77 段都已被理解/分析；下游若把 paragraphCoverage 当理解度指标会高估。可复现：剥掉 coverageNote 后对 77 段逐段求特征词命中，见 reverseChecks RC5 的段列表。",
+   "severity": "口径风险（覆盖 ≠ 分析；不影响已写条目的正确性）"
+  }
+ ],
+ "reverseChecks": [
+  {
+   "id": "RC1",
+   "found": "候选**完全没有覆盖**区间内最长的一段劝说台词的第二步论据：许七安在「我们得罪的不是周立，而是户部侍郎周显平」之后，紧接着给出周显平**必然**再动手的两条实质理由——「坏了他的好事」+「打伤了他的嫡子」，以及**量级对比**「许府在周侍郎眼里，与蝼蚁何异」。候选在 CE2/tasks[0].action 只写到「指出对手是周显平」为止，该段（65 codepoint，区间内单段较长）在 tasks/causeEdges/states/knowledgeGaps 全部无痕，只出现在 coverageNote.paragraphRegistry[19] 的 quote 与其 note「给出周显平必然再动手的理由（嫡子被打、许府如蝼蚁）」。这是**许七安说服二叔的关键一步**（把「也许不敢再报复」的侥幸彻底掐掉），也是本单元对接第三十四章「打伤周立」事件的唯一回指。",
+   "quote": "“我们不但坏了他的好事，还打伤了他的嫡子，这笔账，只要是个有烟火气的人，就绝对没道理忍着。况且，许府在周侍郎眼里，与蝼蚁何异？他更没道理放过我们。”",
+   "quoteStart": 104508,
+   "quoteEnd": 104582,
+   "why": "原文明确、逐字可查，且属本单元主线因果（为什么必须应对而不是安分守己）。候选的 NC17 只处理了「转述不等于叙述层认定」，没有处理这一段的归因结构：嫡子被打是**已发生的既成事实**（第三十四章周立被打伤），而「绝对没道理忍着」是许七安的推断——两层需要分开标注，候选两层都没登记。可复现：`python3 -c \"import json;T=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];print(T.find('还打伤了他的嫡子'))\"` → 104537。",
+   "severity": "遗漏（区间内明确存在的主线因果与量级论据未覆盖）"
+  },
+  {
+   "id": "RC2",
+   "found": "候选漏掉了本单元**最具结构性的一组对照**：许七安在 @106024 心里已经想好一套完整方案（找出真正原因→破案→让周侍郎无所遁形→认罪伏法），却因看见许二郎似笑非笑的眼神而**没说出口**；紧接着 @106105 许二叔高声抢答出一句措辞几乎相同的话（同样用「无所遁形」），随即被反问击碎。也就是说：二叔抢答的内容**正是许七安咽回去的那句**。原文用同一个词「无所遁形」把两段锁在一起（区间内该词共 2 次，恰好一次在咽回段、一次在抢答段）。候选把 @106105 引了 10 次（含 CE6、T3.action、K4），却从未引用 @106024 这一段，因而看不到这层对照，NC9 把「多谢二叔趟雷」只解释为「事后私下评价」，未看到「二叔替他说出了他刚咽回的话，并被证伪」这层。",
+   "quote": "所以我们要找出周侍郎贪污税银的真正原因，我们要破案，好让周侍郎无所遁形，认罪伏法....许七安正想这么说，猛然看见许二郎似笑非笑的眼神，便没有说出口。",
+   "quoteStart": 106024,
+   "quoteEnd": 106099,
+   "why": "两段各自的「无所遁形」逐字可查：@106050 与 @106140。这一对照直接支撑候选自己在 U1/SC2 关心的「许七安到底有没有办法」问题——他在本单元其实**已经想出过**一条（破案路线），只是判断它不该说，这与他后来给的「驱虎吞狼」正相反；候选 T1.result 写「拿到了方向而不是办法」因此不够精确：办法出现过并被**主动**撤下。可复现：`python3 -c \"import json;T=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'][103811:107014];print(T.count('无所遁形'))\"` → 2。",
+   "severity": "遗漏（区间内明确存在的行为对照与对 U1 的实质修正）"
+  },
+  {
+   "id": "RC3",
+   "found": "「考校」这一动作在区间内构成一次**镜像反转**，候选只登记了单向：@104191 许七安「考校道：『二郎有什么看法。』」→ @105781 许新年「**下巴一扬，用考校的口吻**：『那大哥觉得应该怎么做。』」——被考校者用同一姿态反问考校者，紧接着 @106005 许新年「嘴角一挑」只说「所以？」把话逼下去。候选的 S3 只写到「他赢了父亲，却没赢堂兄」，T2.result 停在「请大哥赐教」，没有登记「考校姿态易位」这一可逐字核对的状态变化（原文对同一个词「考校」的两处使用）。",
+   "quote": "许新年下巴一扬，用考校的口吻：“那大哥觉得应该怎么做。”",
+   "quoteStart": 105781,
+   "quoteEnd": 105809,
+   "why": "「考校」在区间内出现 3 次（@104198、@104236、@105790），其中 @105790 明确把姿态派给许新年对大哥。这是 S3「被考校者 → 出方案的人」之外更精确的一层：他夺回了考校权。可复现：`python3 -c \"import json;T=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'][103811:107014];print([m for m in range(len(T)) if T.startswith('考校',m)])\"`（相对切片）→ 3 处。",
+   "severity": "遗漏（粒度不足：状态反转的对称锚点未登记）"
+  },
+  {
+   "id": "RC4",
+   "found": "候选对许平志在「安分守己」路线被拆时的**心理否定句**零覆盖：「真的是这样吗？」（@104662，紧接在许平志 @104588 的两层靠山论之后、许七安 @104675 拆第一条之前）。这是叙述层对二叔路线的直接怀疑插入语，也是本轮唯一一段叙述层对「安分守己」路线的定性。候选 S1.before 只引「许平志不服…」与拍茶几，未登记这句转折；该段只存在于 registry[21]（note：「许七安对二叔路线的反问式怀疑」）。",
+   "quote": "真的是这样吗？",
+   "quoteStart": 104662,
+   "quoteEnd": 104669,
+   "why": "它把「谁在怀疑、什么时候怀疑」写清楚了：叙述层在许七安开口之前先否定了二叔的路线，属事件链上的一环（可作 S1 的 eventAnchor 前置）。可复现：`python3 -c \"import json;T=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];print(T.find('真的是这样吗？'))\"` → 104662。",
+   "severity": "遗漏（区间内明确存在的叙述层判断未覆盖）"
+  },
+  {
+   "id": "RC5",
+   "found": "覆盖口径：把 coverageNote.paragraphRegistry 整体剔除后，机器复算显示 **13 个非空段**的内容从未进入任何分析区（只作为「已登记引文」存在），分别是 @104066「许七安有些欣喜，知道这场谈话不会白费」（**开密谈的动机自述**）、@104154「粗鄙的武夫，砍人他在行，算计人就抓瞎了，专业领域不同」、@104508 嫡子段（见 RC1）、@104662「真的是这样吗？」（见 RC4）、@104926「『二郎觉得呢？』」（把发言权递给二郎的过渡）、@105452 古装剧/@105478 学史/@105585「嗤之以鼻」/@105621 劝学/@105675 没人当一回事/@105688 被社会毒打/@105781 下巴一扬（见 RC3）、@106005「『所以？』」；另有 @106024 咽回段（见 RC2）虽无任何条目，但其内容被 selfCritique 的散文提及，故不计入这 13 段。因此 coverageNote 的「77/77 非空段落覆盖」为真但**不等于** 77 段都被分析：有独立分析痕迹的约 64 段。其中 @104066 与 @104926 是**结构性的过渡句**（发起密谈的理由、把发言权递回二郎），漏掉会让 tasks[0].objective 缺少原文依据——候选 T1.objective 用的是区间外「他召集密谈」的前情，没有用区间内 @104066 的自述。",
+   "quote": "许七安有些欣喜，知道这场谈话不会白费。",
+   "quoteStart": 104066,
+   "quoteEnd": 104085,
+   "why": "该段在区间内，且与 @104091「如果只是许二叔的话，他不会提出这场密谈，那样毫无意义」（候选已引）是同一心理段的上下句，互为支撑；候选引了后者而漏了前者。可复现：`python3 -c \"import json;T=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];print(T.find('知道这场谈话不会白费'))\"` → 104066。注：@106024 咽回段虽不在任何分析区的**引文**里，但其内容以散文形式出现在 selfCritique.items[0].whyIStillJudgeSo（「他此前正想这么说……便没有说出口」），故不计入这 13 段；它是被**提及**而非被登记为条目，仍属 RC2 的遗漏（无条目、无因果边、无状态）。",
+   "severity": "遗漏/口径（多为议论与过渡段；对主线结论无颠覆性影响）"
+  },
+  {
+   "id": "RC6",
+   "found": "误杀检查结果：候选的 18 条 notCauseEdges **没有发现因词表或正则误挡合法因果**的情况。逐条核对后，NC1/NC7/NC9/NC12/NC13/NC14/NC16/NC18 的遮挡判断与原文相符（都属「人物台词/心理/议论/相邻」，不构成叙述层因果）；NC5 的结论方向成立但 why 有一句与自身引文矛盾（见 CEX2）；NC4 归类错误（见 CEX3）。未发现「因整词判定而挡掉真实因果边」的计划100 式误杀。",
+   "quote": "随着儿子的层层剖析，许二叔的思路越来越清晰，越想越觉得可能。忍不住兴奋的拍桌：",
+   "quoteStart": 106790,
+   "quoteEnd": 106830,
+   "why": "以 NC14 为例：它拒绝把「越想越觉得可能」当成方案被验证可行，这是**正确**的遮挡——原文写的是许平志的个人感受，同段无任何外部检验；紧接着 @106836 的「我儿辞旧有首辅之资」也是夸赞而非验收。候选把它降级为「不能推导外部有效性」是保守且正确的方向，属合法排除。",
+   "severity": "无误杀（此项为阴性结果，如实登记）"
+  }
+ ],
+ "extractionChecks": {
+  "quoteInstancesTotal": 347,
+  "quoteInstancesInRange": 322,
+  "quoteInstancesOutOfRange": 25,
+  "distinctQuotes": 150,
+  "offsetMismatch": 0,
+  "verbatimMismatch": 0,
+  "occurrenceCountMismatch": 0,
+  "inSourceRangeFlagMismatch": 0,
+  "sourceHashMismatch": 0,
+  "paraIndexErrors": 0,
+  "method": "递归遍历候选全部对象，凡含 {quote,start,end} 即计一条实例；逐条 T[start:end]==quote 且 T.count(quote)==occurrencesInSource 且 inSourceRange==(S<=start and end<=E)。区间外 25 条全部带 inSourceRange=false 且逐条附 outsideChapterLabel，我按其 start 反查章节标题，11 个不同章节标签与全文实际章首一致。",
+  "conclusion": "零编造：没有任何一条抽取项在原文找不到对应文字。tasks(5)/causeEdges(7)/notCauseEdges(18)/states(7)/knowledgeGaps(6)/foreshadows(7)/singleAppearanceNotForeshadow(7)/unknowns(11) 的每一条引文均逐字命中，偏移与 occurrencesInSource 全对。"
+ },
+ "fabricationCheck": {
+  "result": "未发现编造",
+  "detail": "① 图谱 characters[].aliases 全集回区间 find：唯一在候选出现而区间内 0 命中的专名是「绿娥」，且它明确出现在 unknowns U10 的**区间外对照**语境（第三十四章末「绿娥奉上三杯热茶后，告退离开」），带 inSourceRange=false，不是凭空人物（全文 @23450 首次出现，第三十四章末再次出现）。② 未出现原文没有的人物、结局、伏笔或成功判定：T4/T5 的 result 均为 null；T1.result 明写「拿到了方向而不是办法」；F7 明写回收方向与本单元说法相反。③ 「告别即成功」类越权未见：末段是「许二叔急道：『快说。』」，候选据此写「话未说完即被二叔『快说』打断」，与原文一致。④ 两个畏罪自杀者未给身份，「表弟」未给名字。"
+ },
+ "quoteSpotCheck": {
+  "method": "random.seed(34) 从 322 条区间内实例中抽 5 条，做 find() 位置 + 逐字 + 偏移比对。",
+  "picked": [
+   {"quote": "“那怎么办？”许二叔下意识的问。", "declaredStart": 105261, "findStart": 105261, "verbatim": true, "occ": 1, "match": true},
+   {"quote": "至于怎么做，他还没想好。", "declaredStart": 106410, "findStart": 106410, "verbatim": true, "occ": 1, "match": true},
+   {"quote": "还算不错.....许新年赞许的颔首，接口道：“再退一步，我们不用去对付周侍郎，堂堂四品大员，心机手腕都有，不是现在的我们能对付，但是人就有弱点。”", "declaredStart": 106424, "findStart": 106424, "verbatim": true, "occ": 1, "match": true},
+   {"quote": "他把褚采薇的话转述了一遍。", "declaredStart": 103969, "findStart": 103969, "verbatim": true, "occ": 1, "match": true},
+   {"quote": "他兴奋坏了，觉得自己脑壳终于灵光了一次。", "declaredStart": 106156, "findStart": 106156, "verbatim": true, "occ": 1, "match": true}
+  ],
+  "result": "5/5 逐字命中，偏移与声明完全一致，occurrencesInSource 全对。",
+  "proseQuoteConventionCheck": "候选自报「散文里所有「」片段都已在 docs[0].text 上验证逐字命中」。机器复算 274 条去重后的散文「」片段：254 条在区间内逐字可 find，19 条只在区间外可 find（均为 foreshadows 回收端与 K2 明标「区间外」的对照，符合其 noScopeOverclaim 声明），**0 条在全文找不到**（唯一一条例外是 coverageNote.paragraphRegistry[76] 的 locatorNote 里自述性文字『区间内最后一次出现』，属对 1031 次重复串的定位说明，不是引文，不构成违规）。"
+ },
+ "notes": "总判 partial。候选的抽取层质量很高且经得起机器复核：347/347 条引文 T[start:end]==quote、occurrencesInSource 全对、区间内外标记全对，四大哈希（sourceHash / docsTextSha256 / sliceSha256 / graphCacheSha256，后者我按哈希反查到 data/cache/9b676d7031b1bcd3b8377a18.json）全部独立复算相符，3203 codepoint 边界与章节标题自检通过 —— **没有一条编造**，这是本判最重的结论，因此不判 fail。判 partial 的唯一实体理由是 CEX1/CEX2/CEX3 三条**可在候选自身文本内证实**的缺陷：CE4 的 from 端错挂在 1029 字之前（「接口道」的真正前接是驱虎吞狼框架，间隔 24 字），且与 CE7 共用同一 trigger 造成重复；NC5 的 why 写「许辞旧随后谈的是云鹿书院，不是司天监」，而它自己的引文里「司天监」逐字出现；NC4 自述「这一对是有方向因果的」却仍计入 notCauseEdges，使 redLines 自报的「18 条显式拒绝相邻即因果」失真。这三条都不推翻主线，但会让下游按 notCauseEdges 计数或按 CE4 端点建图时拿到错的数据，故不能判 pass。\n\n可用与需降级的分界（按要求写清）：\n【可用】tasks T1/T2/T3 的 objective/obstacle/action（引文全对、basis 标注保守）、states S1/S2/S3/S6/S7、knowledgeGaps K1-K6、foreshadows F1-F7（回收端均区间外且带标签）、unknowns U1-U11、charactersInRange/charactersNotPresent 的在场判定、boundaryCheck、selfCritique SC1-SC3（SC1 对「许大郎」的处理尤其审慎：我核到区间内「许大郎」仅 1 次、紧接「多谢二叔趟雷」，候选登记为 derived/U7 而非 explicit，处理正确；另可补一条区间外旁证——第三十四章末「婆子们可不敢这么优待许大郎」紧接在「许七安」之后，方向一致，但那是区间外信息，候选不依赖它是对的）。\n【需降级/修正】(1) CE4 的 from 端须改为「许七安的驱虎吞狼框架 + 至于怎么做他还没想好」，或与 CE7 合并，否则同一 trigger 被两条边重复使用；(2) NC5.why 中「不是司天监」一句须删除或改写为「司天监与云鹿书院被并列反问，但两问在原文中的性质不同」；(3) NC4 应从 notCauseEdges 移出（它是方向说明，不是伪因果），并同步修正 redLines.noAdjacencyCausality 的「18 条」计数；(4) coverageNote 的「77/77 段落覆盖」应补注「其中 13 段仅登记引文、未进入分析」，或把 paragraphCoverage 改名为「引文覆盖」以免被当理解度指标。\n\n我自己的反向验证中**不成立**的部分，如实登记：我最初怀疑「税银案的幕后黑手是周侍郎....」（@103823 段首，位于 @103843 之前）是叙述层认定，并想据此指控候选 NC17「转述≠叙述层认定」漏读了它。复核后**撤回**：该句实为第三十四章末许七安台词的续行（第三十四章结束于「许七安沉声道：『我今天刚在司天监得到一个消息，税银案的幕后黑手，是周侍郎。』」，本单元体例把说话人与引号留在上一章，本章续写内容），仍是人物台词而非叙述层。候选把它当作既定前情、只引 @103843 起的身体反应，处理正确，我的指控不成立。另有 RC6 为阴性结果（未发现误杀），一并如实登记，不凑数当发现。\n\n未做之事：未跑 GPU/浏览器；未联网；未读第三十五章之外的内容做全书一致性校验（除按需反查区间外引文的所属章节标题）；未对候选的图谱 graphIdHint 做逐个人物存在性核验（仅核到周显平 appearances=0 与候选 note 一致、许新年/许平志/周立 id 与图谱 characters[].id 一致）。"
+}

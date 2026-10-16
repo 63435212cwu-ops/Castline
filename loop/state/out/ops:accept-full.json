@@ -1,0 +1,381 @@
+{
+  "task": "ops:accept-full",
+  "agent": "w-smoke",
+  "status": "done",
+  "title": "全量离线门禁 + 哈希稳定性对账",
+  "summary": "`sh scripts/accept.sh`（离线门，无 --browser，不碰 GPU）结果 97/100 通过、3 项失败、exit 1。测量窗口内受保护路径零漂移（3757 个文件，前后 sha256 全等），3 项失败是稳定树状态而非竞态。归因：3 项全部由**并行写入者**（非本队列的第三方会话）造成，且可复现地收敛到同一个未提交改动 `js/atlas/atlas-source.js`。本 agent 未改任何受保护路径，未回滚任何人的代码。",
+  "gate": {
+    "command": "sh scripts/accept.sh",
+    "mode": "offline (no --browser)",
+    "gpu": false,
+    "started_local": "2026-10-08 02:16:32",
+    "ended_local": "2026-10-08 02:17:09",
+    "wall_seconds": 37,
+    "total": 100,
+    "passed": 97,
+    "failed": 3,
+    "exit_code": 1,
+    "tail": "ACCEPT: 97/100 passed\nFAILED CHECKS:\n30\t1\tnode tests/sky_chapter_axis_contract.js\n98\t1\tpython3 tests/script_load_audit.py\n100\t1\tpython3 tests/version_stamp.py --check",
+    "raw_output_sha256": "239c2781fb9120b0d45c1b89e66764741cb2f7cb41356a1915267c243308a900",
+    "log_dir": "/var/folders/49/4b6n279x5lv4_npcx71vxxwh0000gn/T/castline-accept.EUIj31 (mktemp -d，临时)"
+  },
+  "failures": [
+    {
+      "n": 30,
+      "cmd": "node tests/sky_chapter_axis_contract.js",
+      "exit": 1,
+      "raw": "PASS adjacent full, bare and end-of-chapter names share one position and preserve all events\nPASS a later full title improves the chapter label without dropping the bare-name event\nPASS different titles, explicit volumes and reset chapter numbers never merge\nPASS appendices and chapter ranges remain separate and never invent a chapter number\nPASS short excerpts retain large original chapter numbers and missing chapters are not fabricated\nPASS card projection preserves appendix and range labels instead of coercing them to chapter zero\nPASS compact chapter labels keep volume identity and source numbers without taking over event titles\nnode:assert:150\n  throw new AssertionError(obj);\n  ^\n\nAssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n\n'seq' !== 'no'\n\n    at /Users/carmen/Desktop/星系/tests/sky_chapter_axis_contract.js:82:10\n    at test (/Users/carmen/Desktop/星系/tests/sky_chapter_axis_contract.js:21:28)\n    at Object.<anonymous> (/Users/carmen/Desktop/星系/tests/sky_chapter_axis_contract.js:79:1)\n    at Module._compile (node:internal/modules/cjs/loader:1705:14)\n    at Object..js (node:internal/modules/cjs/loader:1838:10)\n    at Module.load (node:internal/modules/cjs/loader:1441:32)\n    at Function._load (node:internal/modules/cjs/loader:1263:12)\n    at TracingChannel.traceSync (node:diagnostics_channel:328:14)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:237:24)\n    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5) {\n  generatedMessage: true,\n  code: 'ERR_ASSERTION',\n  actual: 'seq',\n  expected: 'no',\n  operator: 'strictEqual',\n  diff: 'simple'\n}\n\nNode.js v22.22.2\n",
+      "attribution": "真缺陷，但**不是本队列产生的**：由并行写入者对 js/atlas/atlas-source.js 的未提交改动引入。",
+      "evidence_locator": "tests/sky_chapter_axis_contract.js:82 `assert.equal(m.axis.mode, 'no')` → actual 'seq'"
+    },
+    {
+      "n": 98,
+      "cmd": "python3 tests/script_load_audit.py",
+      "exit": 1,
+      "raw": "[INFO] manifest scripts: 249; HTML scripts: 249\n[FAIL] js/atlas/atlas-source.js hash 4663022f != actual 86e189ae\n[FAIL] js/app.js hash 5de9f4c2 != actual 3342e65e\n[FAIL] js/sky/sky-shell-player.js hash b8f4af31 != actual d2879839\n",
+      "attribution": "并行写入者未提交的 js 改动导致清单哈希漂移（非本队列）；受保护路径，不自行回滚。",
+      "evidence_locator": "js/atlas/atlas-source.js, js/app.js, js/sky/sky-shell-player.js"
+    },
+    {
+      "n": 100,
+      "cmd": "python3 tests/version_stamp.py --check",
+      "exit": 1,
+      "raw": "VERSION STAMP FAIL · 总数 315 · 匹配 312 · 漂移 3 处\n  [DRIFT] js/atlas/atlas-source.js: 哈希漂移 -> 86e189ae\n  [DRIFT] js/app.js: 哈希漂移 -> 3342e65e\n  [DRIFT] js/sky/sky-shell-player.js: 哈希漂移 -> d2879839\n",
+      "attribution": "与 #98 同源：同 3 个 js 文件的版本戳哈希漂移（非本队列）。",
+      "evidence_locator": "VERSION STAMP FAIL · 总数 315 · 匹配 312 · 漂移 3 处"
+    }
+  ],
+  "attribution": {
+    "method": [
+      "写入足迹（mtime + 体积 + 标识符交叉出现）",
+      "进程血缘（ps -eo pid,ppid,lstart,command）",
+      "测量期 mtime 轮询（3s 间隔，1500s 窗口）",
+      "前后两次全量 sha256 对账",
+      "HEAD 替换隔离实验（把单个文件换成 HEAD 版本重跑真实契约文件）"
+    ],
+    "not_used_as_evidence": [
+      "「文件里含某关键词」类推断",
+      "锁文件存在性（roleFile 明确禁止）"
+    ],
+    "verdict": "parallel-writer",
+    "writer_footprint": {
+      "window_local": "2026-10-08 02:00:00 – 02:15:10（本会话开始前）",
+      "files_written_in_window": [
+        "js/app.js",
+        "js/atlas/atlas-source.js",
+        "js/sky/sky-shell-player.js",
+        "scripts/accept.sh",
+        "serve.py",
+        "tests/atlas_source_contract.js",
+        "tests/journey_timeline_contract.js",
+        "tests/material_layer_ab.py",
+        "tests/schema_migration_contract.js",
+        "tests/sky_internal_review_shots.py",
+        "tests/sky_journey_browser.py",
+        "tests/sky_reduced_structure_browser.py",
+        "tools/plan100/build_journey_timeline.py"
+      ],
+      "git": "全部为未提交改动（HEAD 仍是 2026-10-04 a008cb8）；js/atlas/atlas-source.js vs HEAD +940 行",
+      "in_this_queue_writes": false,
+      "concurrent_non_loop_writer": {
+        "observed_command": "python3 tools/publish_reviewed.py --source-key 6940e2ab77991fa75bd4b954 --candidate /tmp/q3/order-fix.json --write --report /tmp/q3/w-order.json",
+        "pid": 19893,
+        "started_local": "2026-10-08 02:15:11",
+        "touches": [
+          "data/cache/*"
+        ],
+        "note": "碰 data/cache（受保护），不是 js；与 #30/#98/#100 无因果关系"
+      }
+    },
+    "isolated_cause": {
+      "file": "js/atlas/atlas-source.js",
+      "head_vs_current": "HEAD +940 行（未提交）",
+      "experiment": {
+        "A": "node tests/sky_chapter_axis_contract.js  （当前树）→ exit 1，assert actual 'seq' expected 'no'",
+        "B": "同一契约文件在仅有 js/atlas/atlas-source.js 换成 HEAD 版本的沙箱里运行 → exit 0，全部 PASS，输出 'Three Kingdoms: 111 positions; 109 回已解析 · 2 段其他材料; ends at 120'"
+      },
+      "conclusion": "把且只把该文件回退到 HEAD，契约即恢复；当前 js/atlas/atlas-source.js 的改动是 #30 的充分原因。",
+      "mechanism": {
+        "symptom": "normalize() 产出的 chapter 轨道有 111 个 distinct label 而非 125：'第十回/第十二回/第五十回/第五十八回' 这 4 个早期回目被排到 idx 119–122（'第一百十八回' 与 '第一百十九回' 之间）",
+        "consequence": "sky-model.js:96 `if (n <= prev) mono = false` 触发 → axis.mode 由 'no' 变 'seq'；'seq' 下章节号改用序号 → m.chapters.at(-1).no 由 120 变 111",
+        "why_the_change_matters": "新逻辑按 label 归一化身份，使 (chapter, order) 冲突不再被 preference order 消解（diff 注释原文：'conflict instead of being resolved by preference order'）；本数据里 352 个事件的 chapter 字段因此相对 HEAD 发生了变化",
+        "seed_data_note": "data/cache/f0b45e85aac6c95e584075a2.json 未改动（git 干净），135 个后续事件引用了 4 个早期回目标签，构成真实冲突"
+      }
+    }
+  },
+  "hash_stability": {
+    "scope": "受保护路径 js/ css/ index.html serve.py narrative.py distill.py scripts/ tests/ tools/ docs/ data/（排除 __pycache__/.DS_Store）",
+    "files": 3757,
+    "pre": {
+      "at": "2026-10-08T02:16:12Z",
+      "manifest_sha256": "d87ad9be0e3dbf2f5750262f2fa1c9ced70c503612d26bb8de637ed5055b2db9"
+    },
+    "post": {
+      "at": "2026-10-08T02:17:5xZ",
+      "manifest_sha256": "c65d68f72e9da786e782085907e5d8401f510fa298ef4e58f8607024a30f64df"
+    },
+    "post2": {
+      "at": "2026-10-08T02:2xZ",
+      "manifest_sha256": "e53c781f66c91c5e84d4ea26ed4549e34dbe49e33c167a6248791b611c8f8071"
+    },
+    "modified_during_accept_window": [],
+    "modified_during_whole_session": [
+      "tests/material_layer_ab_analysis.py"
+    ],
+    "created_during_whole_session": [],
+    "interpretation": "accept 运行窗口（02:16:32–02:17:09）内受保护文件 0 改动、0 新增、0 删除 → 3 项失败不是测量期竞态/半文件。#98/#100 的漂移在测量前就已存在。",
+    "post_window_third_party_write": {
+      "path": "tests/material_layer_ab_analysis.py",
+      "detected_by": "3s mtime 轮询",
+      "size": 15778,
+      "note": "本会话测量窗口之后由第三方写入；本 agent 未触碰，未回滚。"
+    }
+  },
+  "third_party_drift_after_window": [
+    {
+      "at": "2026-10-07T18:17:41Z",
+      "event": "modified",
+      "path": "tests/material_layer_ab_analysis.py",
+      "mtime": 1791397060,
+      "size": 15778
+    }
+  ],
+  "assertions": [
+    {
+      "text": "跑 `sh scripts/accept.sh`（离线模式）并记录通过数/失败项原文",
+      "result": "pass",
+      "how": "sh scripts/accept.sh > /tmp/cl-sentinel-w-smoke/accept-out.txt；尾部 ACCEPT: 97/100 passed，failures.tsv 3 行，exit 1"
+    },
+    {
+      "text": "对每个受保护文件跑前后两次 sha256，识别测量期间是否被第三方改写",
+      "result": "pass",
+      "how": "python3 hashman.py 生成 pre/post 双清单，3757 文件逐一比对：modified 0 / added 0 / removed 0"
+    },
+    {
+      "text": "用 3s mtime 轮询独立复核测量窗口内的漂移",
+      "result": "pass",
+      "how": "watch.py 轮询 3757 文件 1500s；accept 窗口内 0 事件"
+    },
+    {
+      "text": "归因 #30：并行写入者 还是 真缺陷",
+      "result": "pass",
+      "how": "HEAD 替换隔离实验：仅 js/atlas/atlas-source.js 用 HEAD 版本 → 真实契约文件 exit 0；当前版本 exit 1"
+    },
+    {
+      "text": "归因 #98/#100：确认与 #30 同源或独立",
+      "result": "pass",
+      "how": "两者漂移集合完全一致（同 3 个 js 文件），且这 3 个文件 mtime 02:03:05–02:13:31 落在并行写入者足迹窗口内"
+    },
+    {
+      "text": "确认本 agent 未改任何受保护路径",
+      "result": "pass",
+      "how": "本会话仅写 /tmp/cl-sentinel-w-smoke/* 与任务 writes 指定的 loop/state/out/ops_accept-full.json"
+    },
+    {
+      "text": "执行角色固定动作 stats / reap / sentinel",
+      "result": "pass",
+      "how": "loop.py stats → tasks 2328 done 0；loop.py reap → reaped []（我自己的租约因进程存活被正确跳过）；sentinel.py --once --no-spawn → 「完成 0/2328，worker 0 个，正常」"
+    },
+    {
+      "text": "GPU/浏览器门（accept.sh --browser）",
+      "result": "unknown",
+      "how": "未跑：任务 gpu=false 且未声明要跑浏览器，GPU 全局串行。本报告不含浏览器/GPU 结论。"
+    }
+  ],
+  "evidence": [
+    {
+      "path": "scripts/accept.sh",
+      "sha256": "882ffc734d14cb3e0ad321636685536d57db7e2c5c1f624bea13004b48095daf",
+      "kind": "被测门禁（未改动，并行写入者 mtime 02:06:54）",
+      "resolvedPath": "/Users/carmen/Desktop/星系/scripts/accept.sh"
+    },
+    {
+      "path": "tests/sky_chapter_axis_contract.js",
+      "sha256": "e441234571eab4840f3bc80fbc449e9e5b2635eebbd7195b8229916f0493e330",
+      "kind": "失败契约原文（未跟踪文件，mtime 2026-10-06 07:14:54，早于本会话 2 天）",
+      "resolvedPath": "/Users/carmen/Desktop/星系/tests/sky_chapter_axis_contract.js"
+    },
+    {
+      "path": "js/atlas/atlas-source.js",
+      "sha256": "86e189ae1e098c40807d156dda39036b59056675cb912dcd557f32843eb16a7a",
+      "kind": "#30 隔离出的充分原因（并行写入者未提交改动）",
+      "resolvedPath": "/Users/carmen/Desktop/星系/js/atlas/atlas-source.js"
+    },
+    {
+      "path": "js/sky/sky-model.js",
+      "sha256": "048576a0b96c334eb65c809835ba7896eada7cf5a777215bf1ff1c4fb843e7fd",
+      "kind": "axisOf() 判定逻辑（未在本次改动，属既有实现）",
+      "resolvedPath": "/Users/carmen/Desktop/星系/js/sky/sky-model.js"
+    },
+    {
+      "path": "data/cache/f0b45e85aac6c95e584075a2.json",
+      "sha256": "942198157fa527a27c9c1acd0b6d29a37a59195cc6b510998859dd9488558252",
+      "kind": "三国原文缓存（git 干净，未改动）",
+      "resolvedPath": "/Users/carmen/Desktop/星系/data/cache/f0b45e85aac6c95e584075a2.json"
+    },
+    {
+      "path": "/tmp/cl-sentinel-w-smoke/pre.json",
+      "sha256": "d87ad9be0e3dbf2f5750262f2fa1c9ced70c503612d26bb8de637ed5055b2db9",
+      "kind": "测量前 3757 文件 sha256 清单",
+      "resolvedPath": "/tmp/cl-sentinel-w-smoke/pre.json"
+    },
+    {
+      "path": "/tmp/cl-sentinel-w-smoke/post.json",
+      "sha256": "c65d68f72e9da786e782085907e5d8401f510fa298ef4e58f8607024a30f64df",
+      "kind": "测量后清单（与 pre 全等）",
+      "resolvedPath": "/tmp/cl-sentinel-w-smoke/post.json"
+    },
+    {
+      "path": "/tmp/cl-sentinel-w-smoke/post2.json",
+      "sha256": "e53c781f66c91c5e84d4ea26ed4549e34dbe49e33c167a6248791b611c8f8071",
+      "kind": "结算清单（捕获窗口后第三方写入）",
+      "resolvedPath": "/tmp/cl-sentinel-w-smoke/post2.json"
+    },
+    {
+      "path": "/tmp/cl-sentinel-w-smoke/watch.jsonl",
+      "sha256": "292ca475455a53feab2854fb564c68a88ca6b4e9cfa6381dfdc3cdfacc0b6f97",
+      "kind": "3s mtime 轮询事件流",
+      "resolvedPath": "/tmp/cl-sentinel-w-smoke/watch.jsonl"
+    },
+    {
+      "path": "/tmp/cl-sentinel-w-smoke/accept-out.txt",
+      "sha256": "239c2781fb9120b0d45c1b89e66764741cb2f7cb41356a1915267c243308a900",
+      "kind": "accept.sh 完整 stdout/stderr + EXIT",
+      "resolvedPath": "/tmp/cl-sentinel-w-smoke/accept-out.txt"
+    },
+    {
+      "path": "/tmp/cl-sentinel-w-smoke/A.txt",
+      "sha256": "131016860651999b7871fe801a79dc091331990b2f1e3d74412e28ed76874783",
+      "kind": "对照 A：当前树跑失败契约 → exit 1",
+      "resolvedPath": "/tmp/cl-sentinel-w-smoke/A.txt"
+    },
+    {
+      "path": "/tmp/cl-sentinel-w-smoke/B.txt",
+      "sha256": "10736683269bf426ab13b6e826f802f9b3d87ed57bee39d78f0824226d82b90b",
+      "kind": "对照 B：仅 atlas-source.js 换 HEAD → exit 0",
+      "resolvedPath": "/tmp/cl-sentinel-w-smoke/B.txt"
+    },
+    {
+      "path": "/tmp/cl-sentinel-w-smoke/isolate2.js",
+      "sha256": "0a2e5f1a1206de36e507d9cda59edbdbddd3e30c66e2d61ced850e4efe8ec6d8",
+      "kind": "isolation 实验脚本（可复现）",
+      "resolvedPath": "/tmp/cl-sentinel-w-smoke/isolate2.js"
+    },
+    {
+      "path": "/tmp/cl-sentinel-w-smoke/repro-axis3.js",
+      "sha256": "8e25200b32d00f72c03cb19a425a89763a0944cc1e993fb8dd8a869ace2e96e4",
+      "kind": "monotonicity drop 定位脚本（可复现）",
+      "resolvedPath": "/tmp/cl-sentinel-w-smoke/repro-axis3.js"
+    },
+    {
+      "path": "/tmp/cl-sentinel-w-smoke/hashman.py",
+      "sha256": "260140490e20871d04b30ebc47eb862f4dc227363ae53049c73957d043e23efd",
+      "kind": "前后哈希清单生成器（可复现）",
+      "resolvedPath": "/tmp/cl-sentinel-w-smoke/hashman.py"
+    }
+  ],
+  "commands": [
+    "cd /Users/carmen/Desktop/星系 && sh scripts/accept.sh",
+    "python3 /tmp/cl-sentinel-w-smoke/hashman.py /tmp/cl-sentinel-w-smoke/pre.json",
+    "python3 /tmp/cl-sentinel-w-smoke/hashman.py /tmp/cl-sentinel-w-smoke/post.json",
+    "node tests/sky_chapter_axis_contract.js",
+    "node /tmp/cl-sentinel-w-smoke/isolate2.js",
+    "node /tmp/cl-sentinel-w-smoke/repro-axis3.js",
+    "python3 tests/script_load_audit.py ; python3 tests/version_stamp.py --check",
+    "python3 loop/bin/loop.py stats ; python3 loop/bin/loop.py reap ; python3 loop/bin/sentinel.py --once --no-spawn",
+    "ps -eo pid=,ppid=,lstart=,command=  |  pgrep -fl <pat> | wc -l"
+  ],
+  "recommended_actions": [
+    {
+      "priority": "P0",
+      "owner": "合并任务（持 GATE.lock 的 js 所有者）",
+      "action": "把 js/atlas/atlas-source.js 的未提交改动收敛为一次显式提交，并同时更新 tests/version_stamp.py 期望戳 + script_load_audit 清单；三份 js（atlas-source/app.js/sky-shell-player）必须同一提交，否则 #98/#100 会持续红。",
+      "why": "#98/#100 是纯清单漂移，随提交自然消解。",
+      "do_not": "SENTINEL 不回滚、不代改 js/。"
+    },
+    {
+      "priority": "P0",
+      "owner": "js/atlas 所有者 + 契约所有者",
+      "action": "修 #30：让 normalize() 不再把早期回目标签重排到章末，或让 tests/sky_chapter_axis_contract.js:82 的期望与新的 label 归一化语义对齐（二选一，需人判断哪个是意图）。复现：node tests/sky_chapter_axis_contract.js。",
+      "why": "当前 111/125 位置错位会让星图章节轴对三国真实回目显示错误编号（末章显示 111 而非 120）。",
+      "do_not": "不要为了让门变绿而放宽断言——先判定数据侧还是契约侧的意图。"
+    },
+    {
+      "priority": "P1",
+      "owner": "并行会话协调人",
+      "action": "确认 /tmp/q3/ 那个会话（pid 19893 `tools/publish_reviewed.py --write`）与写 js/ 的会话是否为同一 owner；两条流都在写受保护路径且都不在本队列 writes 内，需先协调再合并。",
+      "why": "roleFile 记录本工作树历史上持续存在不属于本队列的写入；本次测得 13 个受保护文件在会话开始前 16 分钟内被改。"
+    },
+    {
+      "priority": "P2",
+      "owner": "队列维护者",
+      "action": "#30 这类「并行写入者把门弄红」的失败目前会记到 ops 轮头上。建议任务模板增加 `writes` 之外的 `ownedPaths` 字段，门禁失败时按 ownedPaths 归属，避免把第三方改动计成 ops 的失败。",
+      "why": "本轮 3/3 失败均非本队列产生，但提交格式里没有地方结构化表达这一点。"
+    }
+  ],
+  "remaining": [
+    "accept.sh --browser（GPU/浏览器段，约 80 项）未跑：任务 gpu=false 且未声明；GPU 全局串行。故本报告不含浏览器行为、帧率、真机结论。",
+    "未验证 #30 是否已在第三方会话内部被察觉：只读了文件与进程足迹，未与写 js/atlas/atlas-source.js 的会话通信（无该渠道）。",
+    "未定位写 js/atlas/atlas-source.js 的具体会话 id：那些改动发生在 02:03–02:13，早于本会话进程存在；本机 ps 无法回溯已退出进程，仅能由 mtime+体积+git 未提交状态证明非本队列产物。",
+    "未做 git blame 级定位：HEAD 早于改动 4 天且改动未提交，blame 不可用；改用 HEAD 替换隔离实验代替（见 attribution.isolated_cause.experiment）。",
+    "未跑 sentinel --once 的 spawn 分支：以 --no-spawn 运行以免与正在跑的 worker 争抢租约。"
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/ops_accept-full.json",
+      "kind": "append-only"
+    }
+  ],
+  "sourceHashes": {
+    "js/atlas/atlas-source.js": "86e189ae1e098c40807d156dda39036b59056675cb912dcd557f32843eb16a7a",
+    "js/app.js": "3342e65e8bb1bb9c91026413fc14ca3d7c0a9d748e4273b920e058c536badce1",
+    "js/sky/sky-shell-player.js": "d28798392e2c620a308841119a6f02d21d0487a9858207f295b618269b145ce1",
+    "js/sky/sky-model.js": "048576a0b96c334eb65c809835ba7896eada7cf5a777215bf1ff1c4fb843e7fd",
+    "tests/sky_chapter_axis_contract.js": "e441234571eab4840f3bc80fbc449e9e5b2635eebbd7195b8229916f0493e330",
+    "scripts/accept.sh": "882ffc734d14cb3e0ad321636685536d57db7e2c5c1f624bea13004b48095daf",
+    "data/cache/f0b45e85aac6c95e584075a2.json": "942198157fa527a27c9c1acd0b6d29a37a59195cc6b510998859dd9488558252",
+    "index.html": "a93c4c66c84c9abab246762971fb0f25dbb9283ab54bc71ab05cc8a69ada01ca",
+    "serve.py": "e9b8e18b847fa7c0b677cee34834e12e86106f19191c61c9c60a49a75963a4b2",
+    "narrative.py": "ac10f98e4f4eef2789d6098bc234de456c521ad47abe6bdb58b299ec2dd679c6",
+    "_note": "以上均为本会话**未改动**的受保护文件；pre/post 全量清单证明 3757 个受保护文件在测量窗口内零漂移。"
+  },
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/ops_accept-full.json"
+    ]
+  },
+  "parallelWriterFootprint": [
+    {
+      "path": "js/atlas/atlas-source.js",
+      "mtime": "2026-10-08 02:11:16",
+      "minutes_before_session": 3.9,
+      "sha256": "86e189ae1e098c40807d156dda39036b59056675cb912dcd557f32843eb16a7a",
+      "bytes": 69553,
+      "diff_vs_HEAD_insertions": 918
+    },
+    {
+      "path": "js/app.js",
+      "mtime": "2026-10-08 02:13:31",
+      "minutes_before_session": 1.6,
+      "sha256": "3342e65e8bb1bb9c91026413fc14ca3d7c0a9d748e4273b920e058c536badce1",
+      "bytes": 353782,
+      "diff_vs_HEAD_insertions": 450
+    },
+    {
+      "path": "js/sky/sky-shell-player.js",
+      "mtime": "2026-10-08 02:03:05",
+      "minutes_before_session": 12.1,
+      "sha256": "d28798392e2c620a308841119a6f02d21d0487a9858207f295b618269b145ce1",
+      "bytes": 61144,
+      "diff_vs_HEAD_insertions": 695
+    }
+  ],
+  "submittedAt": "2026-10-07T18:21:37Z",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-07T18:21:37Z"
+  },
+  "verifyState": "pending"
+}

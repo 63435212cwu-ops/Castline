@@ -1,0 +1,186 @@
+{
+  "task": "verify:dafeng:L3:0211",
+  "verifier": "w-verify-3",
+  "role": "VERIFIER",
+  "reviewedTask": "read:dafeng:L3:0211",
+  "reviewedCandidate": "loop/state/out/read_dafeng_L3_0211.candidate.json",
+  "reviewedCandidateSha256": "cf202535fe1929fbb7185ae438de401a60276c9ffef9eed77a0f39fa3946b6ce",
+  "reviewedAuthor": "w-dafeng-0",
+  "selfSign": false,
+  "source": {
+    "path": "data/cache/1063b17ca65ec1b76f30e460.docs.json",
+    "sha256": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "docIndex": 0,
+    "range": [783557, 787905],
+    "codepoints": 4348,
+    "segmentSha256": "4658bbbac0a0a1c902c635e0677af20ec88725b9b961af820141dc928a4c44a3",
+    "unitHead": "第两百一十章 返程"
+  },
+
+  "verdict": "partial",
+
+  "method": [
+    "1. 先自己通读原文切片 [783557,787905)（4348 码点 / 118 非空段），未先打开候选结论。三段式结构：白帝城军营军帐（李妙真听汇报、写信、驳苏苏）→ 清屏县酒楼（张巡抚站队试探、杨川南收密信反转）→ 白帝城驿站（返程收尾、账簿台词、张巡抚顿住）。",
+    "2. 自建独立切片并与候选 boundary 交叉验证：以单元标题开头、以作者说明后分隔线收尾，segmentSha256 与我复算一致。",
+    "3. 抽取项核对：把候选全树里所有含 quote+start+end 的对象抽出来（194 条），逐条在原文找对应文字。",
+    "4. 反向验证：不看已写项，改为从原文出发逐段问『这一段有什么事实是候选整个文件没有承载的』，再用关键词分布复算确认（某词在除 coverageDispositions 外的所有语义分区 0 命中 ⇒ 未登记）。",
+    "5. 误杀检查：把候选主动排除掉的东西（RC1/RC2/RC3/RC4/RC5/RC6、NF1–NF4、disposition 中被去重的段）逐条回查原文，判断排除是否合法。",
+    "6. 幻觉/越权检查：原文外人物与结局、伏笔是否被冒称回收、台词是否被升格为叙述事实、结束是否被当成功。",
+    "7. 引用核验：固定种子 20261013 随机抽 5 条 quote 在原文 find 一次，报告逐字命中与偏移一致性。",
+    "8. 账目复算：独立重算 coverageDeclaration 的每一项与闭包恒等式。"
+  ],
+
+  "quoteAudit": {
+    "instances": 194,
+    "uniqueStrings": 93,
+    "assertions": [
+      "T[start:end]==quote（逐字）",
+      "T.find(quote)==start",
+      "T.count(quote)==occurrencesInWholeDoc",
+      "slice.count(quote)==occurrencesInSlice",
+      "783557<=start<end<=787905",
+      "sourceHash==全文件 sha256"
+    ],
+    "failures": 0,
+    "randomSpotCheck": {
+      "seed": 20261013,
+      "sampleSize": 5,
+      "hits": "5/5 逐字命中且偏移与 find() 一致",
+      "picked": [
+        {"quote": "许七安咬牙道：“五次！”", "declaredStart": 784505, "findStart": 784505, "end": 784517, "unique": true},
+        {"quote": "整个云州官场孤立、打压杨川南的风气，在巡视期间培养成型。", "declaredStart": 786262, "findStart": 786262, "end": 786290, "unique": true},
+        {"quote": "一切都进展的非常顺利，张巡抚和宋布政使配合下，透出一个“我们准备搞杨川南”的信号给众官员，迫使他们纷纷站队。", "declaredStart": 786792, "findStart": 786792, "end": 786846, "unique": true},
+        {"quote": "目光落在杨川南手里的迷信，其余官员同样如此，纷纷猜测信上写的是什么，让杨川南底气忽然足了。", "declaredStart": 786452, "findStart": 786452, "end": 786497, "unique": true},
+        {"quote": "马车停靠在驿站门口，张巡抚踏着随从铺好的木凳下车，留守在驿站的几名铜锣在院子里恭候，包括许七安三人。", "declaredStart": 787223, "findStart": 787223, "end": 787273, "unique": true}
+      ]
+    },
+    "conclusion": "引用层零缺陷。194/194 逐字命中、偏移一致、唯一性成立、区间内计数一致；未发现任何编造引文。"
+  },
+
+  "counterExamples": [
+    {
+      "id": "CE1",
+      "field": "coverageDeclaration.closureExact / closureSum / indentCodepoints",
+      "severity": "must-fix",
+      "claim": "coverageDeclaration 自称闭包恒等式成立：closureExact=true、closureSum=4348，并称『五项之和必须逐字等于区间长度，构造期断言 closureExact 为真』。",
+      "quote": "切片 = 引文覆盖 + 行内缩进 + 纯标点/空白 + 未覆盖正文 + 段间换行；五项之和必须逐字等于区间长度，构造期断言 closureExact 为真。",
+      "quoteRef": {"path": "loop/state/out/read_dafeng_L3_0211.candidate.json", "jsonPointer": "/coverageDeclaration/closureIdentity"},
+      "why": "这条自述的等式**不成立**。用候选自己声明的五项相加：coveredCodepoints 2824 + uncoveredContentCodepoints 802 + punctOnlyCodepoints 34 + indentCodepoints 128 + paragraphSeparatorCodepoints 236 = **4024**，比区间长度 4348 少 **324**。缺口可精确定位：引文区间并集在切片内的补集里，有 81 个『恰好 4 个前导空格』的纯空白 run（那些整行都被引文覆盖的段落，其行首缩进落在补集内），81×4=324，被 indentCodepoints=128 整批漏掉。我按逐码点不相交划分独立复算得 INDENT=452（=32 个未覆盖正文段的缩进 120 + 4 个纯标点段的缩进 8 + 上述 324），此时 2824+802+34+452+236=4348 才成立。要害不在算术本身，而在候选把它称作**构造期断言**：一个被机器盖章『逐字等于区间长度』的不变量实际不闭合，会让下游把这条审计当作已核验而跳过。**注意：这只影响审计账目字段，不影响覆盖结论本身** —— 我独立复算的 coveredCodepoints=2824、coverdRatio=0.6495、32 条 disposition 与补集段起点逐一精确对齐，均正确。",
+      "reproduce": "python3 - <<'PY'\nimport json,re\ntext=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text']\nS,E=783557,787905\nd=json.load(open('loop/state/out/read_dafeng_L3_0211.candidate.json'))\nn=[]\ndef w(o):\n    if isinstance(o,dict):\n        if all(k in o for k in ('quote','start','end')) and isinstance(o.get('start'),int): n.append(o)\n        [w(v) for v in o.values()]\n    elif isinstance(o,list): [w(v) for v in o]\nw(d)\niv=sorted((max(x['start'],S),min(x['end'],E)) for x in n if max(x['start'],S)<min(x['end'],E))\nm=[]\nfor s,e in iv:\n    if m and s<=m[-1][1]: m[-1][1]=max(m[-1][1],e)\n    else: m.append([s,e])\ncomp=[];cur=S\nfor s,e in m:\n    if cur<s: comp.append((cur,s))\n    cur=max(cur,e)\nif cur<E: comp.append((cur,E))\nspace=[(a,b) for a,b in comp if text[a:b].strip()=='']\nprint('space runs',len(space),'cp',sum(b-a for a,b in space))\ndc=d['coverageDeclaration']\nprint('declared sum',sum(dc[k] for k in ['coveredCodepoints','uncoveredContentCodepoints','punctOnlyCodepoints','indentCodepoints','paragraphSeparatorCodepoints']),'N',E-S)\nPY",
+      "observed": "space runs 81 cp 324 / declared sum 4024 N 4348",
+      "fix": "把 indentCodepoints 改为 452（或把 81 个纯缩进 run 单列一类并在 punctRule 里说明其归属），重算 closureSum 后再发布。**不要**只把 closureExact 改成 false 了事 —— 覆盖结论是对的，该修的是账目口径。"
+    },
+    {
+      "id": "CE2",
+      "field": "textualNotes.TX4.text",
+      "severity": "minor",
+      "claim": "TX4 称区间末尾分隔线之后的作者更新说明是『三段（更新晚些 / 今天状态不好 / 嗯，不算请假）』。",
+      "quote": "区间末尾「------------」之后的三段（更新晚些 / 今天状态不好 / 嗯，不算请假）是作者的更新说明，不是小说正文；本候选不为它们立任务、因果或设定。",
+      "quoteRef": {"path": "loop/state/out/read_dafeng_L3_0211.candidate.json", "jsonPointer": "/textualNotes/3/text"},
+      "why": "分隔线之后实际有**四段**作者说明，不是三段：『更新晚些』(787765)、『今天状态不好……』(787771)、『抱歉抱歉……』(787809)、『嗯，不算请假……』(787850)。TX4 的括注既漏了『抱歉抱歉……』这一段，又把『更新晚些』当未覆盖段列举 —— 而它其实**已被 TX4 自己的引文覆盖**（TX4.quotes 唯一一条即『更新晚些』@787765-787769），所以也不该出现在『未覆盖段』的列举里。实质口径（作者说明≠正文、四段都没被立为叙事内容）正确，故只是描述性计数不准，不影响任何结论。",
+      "reproduce": "python3 -c \"import json,re;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];print([(787751+m.start(),m.group(0)[:30]) for m in re.finditer(r'[^\\n]+', t[787751:787905])])\"",
+      "observed": "分隔线后共 4 个非空内容行（另加首尾两条分隔线）"
+    },
+    {
+      "id": "CE3",
+      "field": "coverageDispositions[#25].reason（@786925）",
+      "severity": "must-fix",
+      "claim": "disposition #25 以『该分工在 P093 与 T6.objective 里被张巡抚接受』为由，判定姜律中给出的『官面/武力/查案』三分工已被别处承载，故不另立引文、不进入任何语义分区。",
+      "quote": "——姜律中的宽慰台词，交代了官面/武力/查案三分工；该分工在 P093 与 T6.objective 里被张巡抚接受，本句本身未产生行动或结论，不另立引文。",
+      "quoteRef": {"path": "loop/state/out/read_dafeng_L3_0211.candidate.json", "jsonPointer": "/coverageDispositions", "offset": 786925},
+      "why": "该去重理由**不成立**，属误杀。P093 是『张巡抚沉吟着点头：“只能寄希望于宁宴了，希望他能尽早破解谜题，找到周旻留下的证据。”』，T6.objective 是『要许七安尽早破解周旻留下的暗号、找到证据；他只能把希望寄托在宁宴身上』—— 两处都只讲**破解暗号/找证据**，都没有承载『官面归巡抚、武力归姜律中、查案归许七安』这一分工。复算证据：『武力』一词在候选全文中，除 coverageDispositions 外**所有语义分区 0 命中**（tasks/causeEdges/states/knowledgeGaps/worldSettings/foreshadows/unknowns/textualNotes... 全部为空）。因此这条有原文直证、且紧接着被张巡抚以『沉吟着点头』接受的分工安排，在整个语义层零登记 —— 它不是『已被别处承载』，而是被一个不正确的去重判断排除掉了。",
+      "reproduce": "python3 -c \"import json;d=json.load(open('loop/state/out/read_dafeng_L3_0211.candidate.json'));print(d['tasks'][5]['objective']['text']);print([x['reason'] for x in d['coverageDispositions'] if x['offset']==786925]);import json as j;print({k:j.dumps(v,ensure_ascii=False).count('武力') for k,v in d.items() if '武力' in j.dumps(v,ensure_ascii=False)})\"",
+      "observed": "T6.objective 只含『破解暗号/找到证据』；『武力』命中集合 = {coverageDispositions: 2}"
+    }
+  ],
+
+  "reverseChecks": [
+    {
+      "id": "R1",
+      "severity": "must-fix",
+      "found": "姜律中当场给出、并获张巡抚接受的『官面/武力/查案』三分工 —— 一条明确的分工安排，在候选的语义层零登记。",
+      "quote": "“不管如何，巡抚大人只要解决官面上的问题，武力方面有我，查案则有许七安。”姜律中握着马缰，宽慰道。",
+      "quoteRef": {"start": 786925, "end": 786974, "inRange": true},
+      "absentEvidence": "『武力』在候选全文除 coverageDispositions 外 0 次命中；T4/T6 均未收录该分工。紧随其后的接受动作 @786980『张巡抚沉吟着点头：“只能寄希望于宁宴了……”』也只承接了『查案』那一支。这是 CE3 误杀的直接后果。",
+      "why": "它是本区间唯一一处把三方职责写明的安排，且被张巡抚明确接受（『沉吟着点头』），构成后续缉拿行动的分工前提。"
+    },
+    {
+      "id": "R2",
+      "severity": "minor",
+      "found": "云州布政使的本名『宋长辅』在区间内出现（与张巡抚、杨川南并列为三位大佬之一），候选通篇只称其官称『宋布政使』。",
+      "quote": "午膳后，张巡抚、杨川南、宋长辅三位大佬为首，十余位云州高官作陪，在酒楼的包厢里交流巡视后的感想。",
+      "quoteRef": {"start": 785971, "end": 786019, "inRange": true},
+      "absentEvidence": "候选全文『宋长辅』仅 1 次命中，且位于 coverageDispositions[#19] 的引文里；人物指称一律作『宋布政使』。",
+      "why": "名字本身不改变因果判断，但同一人物在记录里没有可对齐的实名锚点，后续与其他单元对读时会发生指称断裂（该人物在后续章节是核心角色）。"
+    },
+    {
+      "id": "R3",
+      "severity": "major",
+      "found": "张巡抚公开施压发言的**具体指控内容**（匪患系有人暗中扶持、输送军需；食君之禄却做窃国之事）没有进入任何语义分区。",
+      "quote": "“根据密报，云州的匪患是因为有人暗中扶持，输送军需。”张巡抚意有所指：",
+      "quoteRef": {"start": 786111, "end": 786146, "inRange": true},
+      "absentEvidence": "『输送军需』在候选全文仅 1 次命中且位于 coverageDispositions；『窃国』『食君之禄』各 1 次（tasks 的引文内），未进入任何分析字段。紧接的第二句 @786152『“有些人，食君之禄，却做着窃国之事。”』同样只在 disposition 里出现。",
+      "why": "这是本轮站队博弈中唯一写出**施压所依据的罪名**的两句。CE4 只写了『透出信号→被迫站队』，没有写信号所依托的罪名，于是『官员为什么必须选边』这个动机层信息在因果/规则层完全缺席。"
+    },
+    {
+      "id": "R4",
+      "severity": "minor",
+      "found": "苏苏汇报里给出的**时间对齐**：坟墓被动的时间点被推到『巡抚队伍抵达白帝城的当天』，而这与李妙真开始盯梢、许七安行为异常的时段是同一个时间窗。",
+      "quote": "“嗯，周旻的坟有被动过的痕迹，根据时间推测，应该是在巡抚队伍抵达白帝城的当天....”",
+      "quoteRef": {"start": 785089, "end": 785132, "inRange": true},
+      "absentEvidence": "候选把这条分派到 K4（知识差）与 NF2（不立伏笔），把『许七安天天捡银子』分派到 U8/NF3，把连日盯梢分派到 T3，但没有任何一处指出这三条线索指向同一时间窗。",
+      "why": "处理本身克制、我认可不立伏笔；但**时间对齐这一层信息没有被任何分区消费**，属『存了引文但没产出信息』，不是编造。"
+    }
+  ],
+
+  "misKillCheck": {
+    "verdict": "误杀 1 条实质项（CE3/R1：三分工被不正确的去重理由排除）。其余排除逐条回查后成立。",
+    "checked": [
+      {"item": "RC1 拒把李妙真送出的信与杨川南收到的密信接成同一封", "result": "成立，非误杀", "why": "我独立回查全文，两处之间确无桥接文字（无送信人、无信的形态描述、无时间对齐），原文也从未把二者并提。拒立此边正确且克制。"},
+      {"item": "NF4 拒把『.....』『------------』登记为引文（理由：不具唯一性）", "result": "成立，非误杀；但计数不准", "why": "『.....』作为字面串全文出现 16075 次（非候选写的 2841），作为独立成行分隔符为 181 次；2841 实为『\\n    .....』这一前缀串的命中数（会把 6 点及更长的行一并算入）。『------------』1031 次与候选一致。无论取哪个口径都远非唯一，结论不变。"},
+      {"item": "disposition #13 以『“我没笑。”全文 2 次、不具唯一性』为由不登记", "result": "成立，非误杀", "why": "我复算为 2 次（另一次 @3029391，李灵素/李妙真对话），唯一性确实不成立。"},
+      {"item": "I3 字据只标 hold 不标 transfer", "result": "成立，非误杀", "why": "原文只有『那你立字据』与『说着，扬了扬手里的字据』，未写许七安递交的动作。候选『缺失的一环不补』正确。"},
+      {"item": "P4 教坊司 / P5 勾栏 / P6 周旻的坟标 mentioned 而非 arrived", "result": "成立，非误杀", "why": "区间内无人动身或抵达这些地点；『提及≠到达』的口径正确。"},
+      {"item": "RC2 拒把『密信内容→杨川南底气』立为内容层因果", "result": "成立，非误杀", "why": "原文用『似的』『让……忽然足了』夹在官员『纷纷猜测』之间，确属表象描述。"},
+      {"item": "RC6 拒把宵禁立为阻碍", "result": "成立，非误杀", "why": "原文方向相反：『巡抚便是云州最大的官，宵禁无法限制他』。"}
+    ],
+    "selfCorrection": "我最初准备把 RC1 写成一条误杀（担心候选过度保守、把作者有意铺设的线切断），回查全文后确认无桥接文字，故撤回，改记于此。同理，我最初把 disposition #25 的排除视作可接受，是在复算『武力』一词的分布后才改判为误杀 —— 该改判依赖 CE3 的可复现命令，不是凭感觉。"
+  },
+
+  "hallucinationCheck": {
+    "inventedCharacters": "无。区间内专名（张巡抚/杨川南/宋布政使/宋长辅/姜律中/许七安/宋廷风/朱广孝/李妙真/苏苏/周旻/魏渊）逐个复算，未出现原文外人物。",
+    "inventedEndings": "无。F1–F4 全部 resolved=false / unresolved=true / payoff=null 并写明理由；未把『已经拿到账簿了』写成账簿已到手，未把『他忽然顿住』写成想通了什么。",
+    "falseSuccess": "无。T1.result 保留条件并把人名归属交代清楚（TX5 把『友情足够真挚』判给宋廷风自述）；T4.result 明确区分『已达成部分』与『反噬』；T6.result 明确账簿只是台词（U4/K3）。",
+    "overreach": "无越权。semanticReview 诚实保持 not-performed 并写明『不得据此写语义已核验』；U13 主动标出 R3 的 institution=executed 是口径选择并给出替代方案，属已声明口径而非无标记错填。speechAsClueNotFact 5 条把台词与叙述分得很干净。"
+  },
+
+  "selfReportAudit": {
+    "recomputed": {
+      "quoteNodes": {"declared": 194, "actual": 194},
+      "uniqueQuoteStrings": {"declared": 93, "actual": 93},
+      "claimStatus": {"declared": {"mixed": 75, "narration": 108, "dialogue": 11}, "actual": {"mixed": 75, "narration": 108, "dialogue": 11}},
+      "claimStatusRuleMismatches": 0,
+      "sliceCodepoints": {"declared": 4348, "actual": 4348},
+      "nonEmptyParagraphs": {"declared": 118, "actual": 118},
+      "coveredCodepoints": {"declared": 2824, "actual": 2824},
+      "coveredRatio": {"declared": 0.6495, "actual": 0.6495},
+      "uncoveredContentSpans": {"declared": 32, "actual": 32},
+      "uncoveredContentCodepoints": {"declared": 802, "actual": 802},
+      "dispositionEntries": {"declared": 32, "actual": 32},
+      "dispositionOffsetsAlignToContentSpanStarts": true,
+      "segmentSha256Matches": true,
+      "graphCacheSha256Matches": true
+    },
+    "conclusion": "14 项自述数字中 12 项复算一致、1 项（indentCodepoints/closureSum）如 CE1 所述不成立、1 项（NF4 的 2841）口径不符但结论不受影响。未发现虚报完成的迹象。"
+  },
+
+  "coverageFinding": {
+    "coveredCodepoints": 2824,
+    "coveredRatio": 0.6495,
+    "dispositionAlignment": "32/32 精确对齐（我复算的补集段起点集合与 coverageDispositions 的 32 个 offset 逐元素相等）",
+    "closure": "COVER=2824 / CONTENT=802 / PUNCT=34 / INDENT=452 / SEP=236，总和 4348，无未标注码点 —— 恒等式在正确口径下成立，但候选声明的 indentCodepoints=128 使其次声明之和仅为 4024（见 CE1）。",
+    "verdict": "覆盖结论可靠，账目口径有误。"
+  },
+
+  "notes": "总体判断：**partial**。分三层说清楚。\n\n【可以用、我核过的部分】引用层零缺陷 —— 194 个引文实例（93 条唯一串）逐条通过 T[start:end]==quote、find==start、全书唯一、区间内计数、sourceHash 六项断言，失败 0/194；固定种子 20261013 抽 5 条，5/5 逐字命中且偏移一致。候选 14 项自述数字我独立复算，12 项完全一致（含 claimStatus 三分类 75/108/11 与规则复算 0 例外、coveredCodepoints=2824、32 条 disposition 与补集段起点逐一精确对齐）。幻觉侧干净：无原文外人物/结局、伏笔全 unresolved、未把台词升格为叙述事实 —— RC1/RC2/U3/U9 这组『拒接不存在的线』写得尤其克制，是本候选最强的地方。这些结论可以直接用；主题读法 TH1/TH2 标 inferred 且 TH2 自陈解释力弱于 TH1，处理诚实。\n\n【必须修、否则不宜按现状发布的部分】两条，都在『声称已核验』这一层。① coverageDeclaration 的 closureExact=true / closureSum=4348 为假：五项相加只有 4024，缺口 324 = 81 个被整行引文覆盖段落的行首缩进（81×4）被 indentCodepoints=128 整批漏算，正确值为 452。要害是候选自称这是**构造期断言** —— 一个被机器盖章『逐字等于区间长度』的不变量实际不闭合，会让下游把这条审计当作已核验而跳过。这正是本项目反复出现的『机制存在、有检查、但不产生信息』形态的一个小号复制品。建议改成 452（或把 81 个纯缩进 run 单列一类），重算 closureSum；**不要**只把 closureExact 改成 false 了事，覆盖结论本身是对的，该修的是账目口径。② disposition #25 以『该分工在 P093 与 T6.objective 里被张巡抚接受』为由排除姜律中的『官面/武力/查案』三分工，该理由经复算不成立（两处都只讲破解暗号/找证据），『武力』在除 coverageDispositions 外的所有语义分区 0 命中 —— 这是一条真误杀，应补登记。\n\n【降级/存疑、不据此判 fail 的部分】TX4 说作者说明『三段』实为四段（漏『抱歉抱歉……』，又把已被自己引文覆盖的『更新晚些』当未覆盖段列举）；NF4 的 2841 不是字面串计数（16075）也不是独立成行数（181）；T4.action.note 的指引『见 R-note』是**悬空引用**（候选内不存在 R-note 字段，实际内容在 disposition #25 的理由里）；R3/R4 两条反向发现更接近『引文存了但语义层没有消费』，是否必须补成分区条目取决于上游对『存了引文算不算处理过』的口径，我未据此降级。\n\n【判 fail 的门槛说明】按 VERIFIER.md『判 fail 必须有 counterExample，且 quote 逐字可查』，CE1 与 CE3 两条均有逐字引证与可复现命令，技术上有判 fail 的资格；我判 **partial** 的理由是：两条缺陷都不动摇任何实质结论（覆盖范围、因果方向、伏笔未回收、无幻觉），引用层与幻觉层是干净的，修好账目与补一条分工登记后即可用。若上游口径要求『自述的机器断言必须真』从严，则 CE1 单项即可构成 fail。\n\n【我没做的事】未做独立语义评审（主题读法的解释力排序、说话人归属之外的语义正确性），候选 semanticReview=not-performed，本复核同样不背书语义层；未核对区间外后续章节是否回收 F1–F4（契约要求以本区间为界）；未跑任何 GPU/浏览器测试（本任务不涉及，且 GPU 全局串行）。\n\n【自省】见 misKillCheck.selfCorrection：我撤回了一条原本要写的 RC1 误杀，并把 disposition #25 的判定从『可接受』改判为『误杀』，改判依据是可复现的分布复算而非印象。"
+}

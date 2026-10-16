@@ -1,0 +1,202 @@
+{
+  "task": "read:dafeng:L2:0090",
+  "agent": "w-dafeng-0",
+  "status": "done",
+  "summary": "精读《大奉打更人》第九十一章 一字马（原文区间 codepoint [287678,291095)，3417 codepoint / 2909 非空白 / 85 个非空段落，含章标题、1 个分段符「....」与章末分隔线）。产物 222486 字节：tasks 7 条五元组（T1 长公主求证身份 / T2 魏渊 / T3 杨砚改判 / T4 南宫倩柔 / T5 许七安讲课 / T6 许七安对魏渊的策略 / T7 宋卿；七条 cost 一律 null 并各附 costNote——本区间没有任何已执行代价描写，「心虚」「面红耳赤」「一字马」按 prompt 明令不折算成 cost）。causeEdges 9 条（每条 direction/from/to/mechanism/trigger；CE1/CE3/CE9 标 derived，CE8 标 inferred，其余 explicit）+ notCauseEdges 8 条显式拒绝相邻即因果。states 7 条（前值/后值 + 事件锚点）、knowledgeGaps 8 条（谁知/不知）、foreshadows 6 条（每条给可逐字命中的铺设端与回收端；F6 无回收端，显式 unresolved + unresolvedFlag=true + basis=unverified）、rejectedForeshadows 8 条（给出全书/区间内命中次数，记录只出现一次因而不算伏笔的物件）。characterClaims 14 条，narratorConfirmed=True 仅 2 条。unknowns 17 条 / sourceAnomalies 7 条 / selfCritique 6 条。semanticReview 显式 not-performed。\n\n本轮为**重做并修正**：上一轮（rc=124，2700s 超时两次）留下的同一路径产物存在一处真实缺陷，已定位并修复——构建脚本的 metrics harvest 只遍历 8 个容器（tasks/cause/notCause/states/foreshadows/rejectedForeshadows/characterClaims/sourceAnomalies），漏掉 knowledgeGaps(8)/openThreads(5)/wantsVsGets(14) 三个同样承载 quoteRef 的容器，导致 quoteRefInstances 少报 182→155、quoteRefs 少报 85→82、quoteRefsInRange 少报 75→72。已补齐桶并加装一条**全量自洽断言**（对写出的候选做全文件 quoteRef 收割，(start,end,quote) 多重集必须与 metrics 所收完全一致，否则构建即失败），防止再次漏桶。修正后 metrics = quoteRefs 85 / inRange 75 / outOfRange 10 / instances 182。\n\n全部 182 条引用实例（85 条去重，含 75 条区间内）由独立复算脚本从磁盘重读候选与原文逐条核验：roundtripFail=0 / notFound=0 / badHash=0 / badOffsetUnit=0 / badKind=0 / badInRangeFlag=0 / badCounts=0 / badPara=0 / badChapterLabel=0 / ALLPASS=True。区间内引文按「区间内恰好命中 1 次」口径全部通过（另有 3 条在区间外亦有命中，如「啪！」全书 45 次，其 occurrencesInSource 已如实记录）。",
+  "evidence": [
+    {
+      "path": "loop/state/out/read_dafeng_L2_0090.candidate.json",
+      "sha256": "d4b4f73484588093824f82b2071d499a6e23dfe8a45a404ecf3807deaaf22c40",
+      "kind": "worker-output",
+      "note": "本轮候选产物（修正 metrics 漏桶后重建）。构建确定性已验证：连续两次 build 输出 sha256 完全一致。"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "源文件 sha256 == 任务 sourceHash：python3 -c \"import hashlib;print(hashlib.sha256(open('data/cache/1063b17ca65ec1b76f30e460.docs.json','rb').read()).hexdigest())\" → fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839（与任务 sourceHash 逐字一致；构建脚本 lib90.load_text() 内 assert，不符即退出）",
+      "result": "pass"
+    },
+    {
+      "text": "偏移口径自检（全文偏移、非相对切片）：docs[0].text[287678:287687] == '第九十一章 一字马'，切片以本单元标题开头；len(text[287678:291095]) == 3417 == 任务声明字数；紧跟切片末尾的下一单元标题在 @291095（'第九十二章 监正的'），边界闭合。命令：python3 -c \"import json;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];print(len(t[287678:291095]),repr(t[287678:287687]))\"",
+      "result": "pass"
+    },
+    {
+      "text": "全部引用机器回切（独立复算，从磁盘重读候选，不 import 构建脚本、不复用构建期内存）：python3 -B -s /tmp/r90/verify_dafeng_L2_0090.py → refs=182 inRange=166 outRange=16 / roundtripFail=0 / notFound=0 / badHash=0 / badOffsetUnit=0 / badKind=0 / badInRangeFlag=0 / badCounts=0 / badPara=0 / badChapterLabel=0 / ALLPASS=True（退出码 0）。该脚本本轮在任务「reproduce」字段里被声明存在但实际缺失，已补写。",
+      "result": "pass"
+    },
+    {
+      "text": "构建确定性：连续两次运行 python3 -B -s /tmp/r90/build_dafeng_L2_0090.py，产物 sha256 两次均为 d4b4f73484588093824f82b2071d499a6e23dfe8a45a404ecf3807deaaf22c40（退出码 0）。",
+      "result": "pass"
+    },
+    {
+      "text": "本轮修正的真实缺陷（metrics 漏桶）：修正前构建脚本 harvest 仅遍历 (tasks, cause, notcause, states, fores, rejf, claims, anoms) 8 个容器，漏 knowledgeGaps/openThreads/wantsVsGets；实测漏 27 个引用实例（182-155）。独立复算首轮以 metrics.quoteRefInstances 155 != 实测 182 抓出。已补齐 11 个桶，并加装全文件自洽断言：对写出的 candidate 做全量 quoteRef 收割，断言 len==metrics 所收且 (start,end,quote) 多重集相等。修正前后对比可复现：修正前 155/82/72，修正后 182/85/75。",
+      "result": "pass"
+    },
+    {
+      "text": "五栏共用一句红线（实测旧图谱 714/1664）：机器审计任一任务内部 objective/obstacle/action/result/cost 五栏的 quotes，按 quote 文本分组，跨栏重复数 == 0。7 条任务全部通过。同时 T1-T7 的 cost 均为 null 且各自 costNote 非空（check「cost=null 的条目都写了 costNote」通过），null 栏位均有对应 <栏位>Note。",
+      "result": "pass"
+    },
+    {
+      "text": "basis 取值机器审计：候选内 74 个 basis 字段全部落在 {explicit, inferred, derived, unverified} 内，无非法值；无「把定位当语义」的字段。",
+      "result": "pass"
+    },
+    {
+      "text": "红线字段逐项机器核验（verify 脚本内）：semanticReview == 'not-performed' 且 semanticReviewNote 非空；causeEdges 每条 direction/trigger/mechanism 非空（9 条）；states 每条 before/after/anchor 齐备（7 条）；未回收伏笔 F6 显式 unresolvedFlag=true；unknowns 非空（17 条）；selfCritique 非空（6 条）。",
+      "result": "pass"
+    },
+    {
+      "text": "计数断言逐条机器核算（候选内 countAssertions，19 项，含一字马/许七安/炼金术/领域/监正等）：全部与实测一致，countAssertionFailures=[]；构建期 assert not fails。独立复算脚本第二轮重算并比对，badCounts=0。",
+      "result": "pass"
+    },
+    {
+      "text": "专名反编造：charactersInRange 9 个条目，每个在区间内 count>0（构建期 assert，0 次即失败）；absentInRangeControl 逐项复算（李玉春/陶满/怀庆/临安/地书/天地会/桑泊等 25 项，区间内均 0 次）与候选声明完全一致，用于证明没有把区间外的人/事写进区间内。",
+      "result": "pass"
+    },
+    {
+      "text": "逐段反向覆盖核对（回答「这一段里还漏了什么」）：85 个非空段中 70 段被区间内引文直接覆盖，与候选 paragraphCoverage.coveredByInRangeQuotes 声明一致（独立复算重算并比对通过）；未直接覆盖段逐条给出归属拍号与理由，其中 2 段为章标题与分段符「....」（非叙事）。",
+      "result": "pass"
+    },
+    {
+      "text": "「结束≠成功」落地：区间末尾只写到许七安「摒除杂念，让重心回到课堂上」+ 魏渊颔首，讲课未讲完、答案未给出（「为什么」之后本区间即切换视角）。T5.result/T7.result 一律按「尚未发生」写，真正的答案与魏渊评价升级明确标注在第九十二章、不得预支。",
+      "result": "pass"
+    },
+    {
+      "text": "「说法不当事实」落地：characterClaims 14 条中 narratorConfirmed=True 仅 2 条（CC1/CC7，CC7 有第九十章 @284941「连本带利的还」独立印证），False 5 条、None 7 条。本区间最高危三处（CC8「监正说过」/CC9「我与监正的看法一致」/CC10「监正批评了他」）都是转述或人物判断，全部标 None 或 False；本区间没有监正本人的台词。",
+      "result": "pass"
+    },
+    {
+      "text": "受保护路径未由本 agent 改动：本轮只写任务 writes 指定的 loop/state/out/read_dafeng_L2_0090.candidate.json（changes 里也只有这一条，classify() 判定为 append-only）。构建/复算脚本全部落在系统临时目录 /tmp/r90/（非仓库路径）。共享树 js/ css/ index.html scripts/ tests/ docs/ data/ 确有 93 处未提交改动，但均为**其他并行会话/合并任务**在跑（本轮期间 index.html mtime 22:05:27、tests 22:05:44 仍在变动，而本 agent 全程只对 loop/state/out/ 下一个路径写入）。",
+      "result": "pass"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/read_dafeng_L2_0090.candidate.json",
+      "kind": "append-only"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/1063b17ca65ec1b76f30e460.docs.json": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "data/cache/1063b17ca65ec1b76f30e460.json": "98370a39df4f8105063004d6bc8194e50aa8008e111a584ffec32f7ad14a14df"
+  },
+  "remaining": [
+    "语义未核验：本文件只保证引文逐字命中、偏移正确、计数可复算；因果归属、伏笔判断、人物动机、视角归属均**未经独立复核**，需复核者按 VERIFIER 契约反向验证。semanticReview 保持 not-performed。",
+    "最脆弱的三处判断（已在 selfCritique/unknowns 标注）：段38「许七安，果然是他！」的视角归属（判给长公主，原文无内心标记）、段42「这个铜锣只能在他麾下」的归属、段82 魏渊颔首的含义。若归属改写，T1.result / ST1 / F1.payoff / F6 需连带改写。",
+    "跨章回收端只核了逐字命中、章节标签与卷号，**没有读完它们所在的整章**（第九十章只读邀约段、第八十九章只读姜律中转述与南宫倩柔否定两段、第二十五/三十一章只读禁闭与禁令段、第九十二章只读答案与赠礼段）。",
+    "「缺席判断」有边界：rejectedForeshadows 与 F6 的立论基于当前缓存文本的全文计数（全书 4760263 codepoint），换版本必须重算；「全文只出现 N 次」证明不了后文绝对没有。",
+    "区间内 3 条引文在全书另有命中（「啪！」全书 45 次、「许公子....」2 次），已如实记录 occurrencesInSource；区间内唯一性按「区间内恰好命中 1 次」口径成立。",
+    "本轮修复了 metrics 口径缺陷，但该缺陷**是否同样存在于 L2 线其他已提交单元**未做排查（不在本任务 writes 范围内）；如需排查应另开任务，本轮不越界修改他人产物。",
+    "未跑 GPU/浏览器测试（本任务未要求，且 GPU 全局串行）。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/read_dafeng_L2_0090.candidate.json"
+    ]
+  },
+  "submittedAt": "2026-10-08T14:08:10Z",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-08T14:08:10Z"
+  },
+  "verifyState": "partial",
+  "reviews": [
+    {
+      "reviewer": "w-dafeng-2",
+      "at": "2026-10-08T17:04:28Z",
+      "verdict": "partial",
+      "notes": "判 partial。\n\n可用的部分（抽取主体）：182 条引用实例全部逐字命中、偏移零错、四种命中计数全对；27 条计数断言与 26 项区间词频全对；未发现编造的人物/引文/结局；三条红线（结束≠成功、转述不当事实、相邻非因果）执行得比一般水准严格（notCauseEdges 8、rejectedForeshadows 8、unknowns 17，cost 一律 null 并逐条给理由）。\n\n必须丢弃或修正的 4 项：\n(1) CE-1 @96379 章归属：第三十一章 → **第三十二章**，连同全部 volumeLabel；硬错误，且候选自带校验对它具有**结构性失明**（正则要求章号后带标题，而第三十二章无标题），故 ALLPASS=True 不能为该字段背书。\n(2) CE-2 CE1.mechanism 的「杨砚看到宋卿拍桌后才改判」被 @289246 < @290556 证伪，须删该步或降级重写。\n(3) CE-3 redLines 的 1/6/7 与 dialogueAudit.note 的「只有 CC7 标 True」→ 实际 2/5/7。\n(4) CE-4 paragraphCoverage.breakdown 的 34≠27，coveredElsewhere 标 7 而 notes 实有 8 条。\n\n判 partial 而非 fail：四项中两项（CE-3/CE-4）是账面不一致、一项（CE-1）是派生标签错而引文本身可靠、一项（CE-2）是机制层错误；抽取内容本体未发现伪证。按「有 counterExample 即 fail」会抹掉真正可用的部分；但也不能 pass，因为 CE-1/CE-2 会让下游把跨章前因挂到错章、并把一条不可能的机制当 explicit 采纳。\n\n反向验证 5 条中最该补的是第 4 条（段59 魏渊当众站到监正一边而许七安不知情），第 3 条（段57 质疑者其实敬佩许七安）也建议补，否则 CE4 会把白衣读成单纯对立方。\n\n存疑（按契约只记，不据此判 fail）：\n- T1.who 用「封号怀庆」，该事实在区间外 @313837 才交代；与「专名皆来自本区间逐字引用」口径有张力。\n- boundaryCheck.nextUnitHead 截断。\n- volumeAssignmentEvidence.fact「第 1 卷」与 volumeLabel「第2卷」是 0-based/1-based 措辞差，分卷锚点我复核正确。\n- 我无法独立确认 /tmp/r90 脚本就是产出该候选的那一版（临时目录、无哈希锚定）；我的结论全部自建复算，不依赖它们。\n\n复现：\n  python3 -c \"import json,hashlib;raw=open('data/cache/1063b17ca65ec1b76f30e460.docs.json','rb').read();t=json.loads(raw)[0]['text'];print(hashlib.sha256(raw).hexdigest());print(hashlib.sha256(t[287678:291095].encode()).hexdigest());print(repr(t[94332:94337]), 94332<=96379<97034, t.find('杨砚盯着许七安看了片刻') < t.find('宋卿一拍桌子'))\"",
+      "counterExamples": [
+        {
+          "id": "CE-1",
+          "claim": "章归属错误。候选把区间外引文 @96379 的 chapterLabel 写成「第三十一章 这不是薅羊毛，这是等价交换」，并据此把 CE3.from、F3.setup、CC8.why 的跨章前因写成「第三十一章」，volumeLabel 写成「第2卷 · 第三十一章 这不是薅羊毛，这是等价交换」。中文叙述里「第三十一章」出现 12 次、「第三十二章」0 次。",
+          "quote": "第三十二章",
+          "quoteOffset": [
+            94332,
+            94337
+          ],
+          "why": "@96379 落在 [94332,97034)，该单元标题即「第三十二章」（无副标题）；第三十一章区间是 [91423,94332)，@96379 不在其中。旁证：'生命不在炼金术' 在第三十一章 0 次 / 第三十二章 1 次；'植物' 0/2；'禁闭' 0/2。故三处章归属与全部 volumeLabel 各错一章。",
+          "severity": "事实性错误：引文逐字正确、偏移正确，错的是派生出的章标签",
+          "whyUndetected": "候选校验脚本与构建脚本共用 lib90.CHAPTER_RE = r'第[一二三四五六七八九十百零]+章 [^\\n]{0,60}'，该正则**要求章号后跟空格+标题**；「第三十二章」无标题 → 匹配不到 → chapter_of() 回退到「第三十一章 …」。故 badChapterLabel=0 / ALLPASS=True 对该字段不构成证据。实测 re.match(CHAPTER_RE,'第三十二章\\n\\n    许二叔…') is None。"
+        },
+        {
+          "id": "CE-2",
+          "claim": "CE1.mechanism 写：「本区间提供了独立的目击验证——司天监公认的炼金术第一人宋卿当众为一个武夫拍桌失态、催他快说。杨砚看到这一幕后，把姜律中的转述从『不信』改判为『实话』。」",
+          "quote": "原来姜律中说的都是实话....杨砚盯着许七安看了片刻，微不可查的颔首。",
+          "quoteOffset": [
+            289246,
+            289281
+          ],
+          "why": "杨砚改判落点 @289246（段41）比宋卿拍桌 @290556（段71）与催逼 @290577（段72）**早 1310 个 codepoint**。本区间是同一场课堂的连续顺叙、无倒叙标记，杨砚颔首时不可能已看到拍桌；截至 @289246 他只有段40 的「隐约看见了许七安」。CE1.caveat 自己也写「原文没有写杨砚是『因为看到了宋卿的反应』才信的」——正文断言被同条 caveat 撤回，且被偏移直接证伪。",
+          "severity": "因果机制错误，且 CE1 标 basis=explicit",
+          "fix": "删去 mechanism 里「宋卿拍桌失态」这一步，或整条降级为 inferred 并改写为「仅凭看到许七安本人讲课即改判」；后者已不足以支撑原机制，建议降级或拆分。"
+        },
+        {
+          "id": "CE-3",
+          "claim": "redLines.speechNotTreatedAsFact 写「narratorConfirmed=True 仅 1 条（CC7…）；False 6 条、None 7 条」；dialogueAudit.note 写「只有 CC7 标 True」。两者都与自身数据及提交记录 summary（写「仅 2 条」）不一致。",
+          "quote": "“义父，司天监什么时候出了一个姓许的？”",
+          "quoteOffset": [
+            288058,
+            288078
+          ],
+          "why": "characterClaims 实测 tally = True:2 / False:5 / None:7。标 True 的是 CC1 与 CC7；CC1 的 why 明写其内容「已被叙述者独立交代」并置 narratorConfirmed=true（上面引文即 CC1 的原句）。dialogueAudit 的三个计数字段（2/5/7）与 narratorConfirmedIds=[CC1,CC7] 与数据一致，但同一对象的 note 与 redLines 仍是陈旧口径 1/6/7。",
+          "severity": "账面不一致：不影响抽取内容，但会误导下游「人物说法是否被当事实」的审计"
+        },
+        {
+          "id": "CE-4",
+          "claim": "paragraphCoverage.breakdown 加不起来：notDirectlyQuoted=27、notes 长度 27，而 breakdown={structural:2, belongsToAdjacentBeat:25, coveredElsewhereNotDoubleCounted:7}，和为 34；且 notes 里自称「不重复计」的实测 8 条（段38/41/42/63/67/78/79/84），与 breakdown 的 7 不一致。",
+          "quote": "白衣术士们微微颔首。",
+          "quoteOffset": [
+            289536,
+            289546
+          ],
+          "why": "上面引文取自被计入「已覆盖 70 段」的段46，用来证明覆盖口径本身成立（我独立按 quote.para 归因复算，确有 70 段被区间内引文命中）；数量矛盾见 claim 正文：2+25+7=34≠27，而 structural+belongsToAdjacentBeat=27 恰等于 notDirectlyQuoted——说明 coveredElsewhere 是与前两类**重叠**的附加标签，不该并列求和，且其取值 7 与 notes 实有的 8 条不符。",
+          "severity": "账面不一致：覆盖口径成立，仅计数与标签自洽性有问题"
+        }
+      ],
+      "reverseChecks": [
+        {
+          "found": "段46 白衣术士们对「金属」这个例子集体颔首——课堂即时反馈被整条漏掉，tasks/causeEdges/states/knowledgeGaps/foreshadows/characterClaims 均未引用。",
+          "quote": "白衣术士们微微颔首。",
+          "quoteOffset": [
+            289536,
+            289546
+          ]
+        },
+        {
+          "found": "段32 众人对「都不算对」的评语露出思考的表情——现场从「肃然起敬」转向「思考」的中间态没进任何分析条目。",
+          "quote": "众人露出思考的表情。",
+          "quoteOffset": [
+            288851,
+            288861
+          ]
+        },
+        {
+          "found": "段57 叙述者点明质疑者「敬佩许七安」但受训诫约束——那次质疑是原则性的、不是敌意。候选 CE4 只把它当「场面僵住」的触发，未记这条限定，读起来会把白衣写成单纯对立方。",
+          "quote": "虽然很敬佩许七安在炼金术领域的造诣，但这些话违背了监正老师的训诫，与他的理念相悖。",
+          "quoteOffset": [
+            289986,
+            290027
+          ]
+        },
+        {
+          "found": "段59 魏渊当众说「我与监正的看法一致」，等于站到许七安刚宣称的「活物也在炼金术领域内」的反面。候选记了 CC9/W7，但**没有任何 knowledgeGap 记「许七安不知道魏渊已表态与监正一致」**——KG8/ST5 只记「不知长公主在场」「不知被发现」。漏的是对他处境最不利的一条信息不对称。",
+          "quote": "后者笑了笑，轻声道：“我与监正的看法一致。”",
+          "quoteOffset": [
+            290075,
+            290097
+          ]
+        },
+        {
+          "found": "段68「为什么人不吃饭就要饿死」在候选 JSON 里 0 次命中——是我按 8-gram 与最长缺失串双向扫过 85 段后，除段57 句尾外唯一 ≥6 字的整段文字缺口。该段虽在 notDirectlyQuotedNotes 归入 B12，内容侧完全没落地。",
+          "quote": "在白衣术士们看来，许七安的这个问题，就仿佛是在问：为什么太阳从东边升起；为什么人不吃饭就要饿死；为什么一天有十二个时辰。",
+          "quoteOffset": [
+            290428,
+            290488
+          ]
+        }
+      ]
+    }
+  ]
+}

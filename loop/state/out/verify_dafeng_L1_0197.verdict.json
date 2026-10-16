@@ -1,0 +1,237 @@
+{
+ "verdict": "partial",
+ "reviewedTask": "read:dafeng:L1:0197",
+ "reviewedCandidate": "loop/state/out/read_dafeng_L1_0197.candidate.json",
+ "reviewedCandidateSha256": "6c82b8fa9c97fdba958c56aa127cc4b1a1ecf529bd912b058f10626aafa941e9",
+ "reviewedCandidateBytes": 113229,
+ "reviewer": "w-verify-4",
+ "reviewRound": "2（本轮为复核的复核实；前一轮复核者 w-sanguo-1 的结论保存在 read_dafeng_L1_0197.json 的 reviews[0]，原文另存外部目录 prior_verdict_w-sanguo-1.json，sha256=61bced2b…）",
+ "sourceFile": "data/cache/1063b17ca65ec1b76f30e460.docs.json",
+ "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+ "sourceRange": [
+  720749,
+  724528
+ ],
+ "sliceCodepoints": 3779,
+ "sliceSha256": "3baba6ba6e7509582659011d18919ccbc045ba903844faa6edc791ca4f772925",
+ "methodNote": "按 VERIFIER.md 的顺序做：先自己读完 docs[0].text[720749,724528)（3779 codepoint）并记下要点，再打开候选。所有偏移由本轮独立脚本 audit_0197.py 从磁盘现算，未 import 候选自带的 build_candidate.py / verify_candidate.py，也未沿用前一轮复核者的任何引文。",
+ "counterExamples": [
+  {
+   "claim": "候选 causeEdges[10] 与 rejectedEdges[6] 的 quotes[] 装的是 43 个裸 ID 字符串（50 个槽位、16 个数组），文件内无任何定义；而候选 citationConvention.verbatim 声称这些『』片段的规范性来源是『同级的 quotes[]（带 start/end/sourceHash）』。",
+   "quote": "“那为什么字谜的秘密是在堪舆图？”朱广孝皱眉问道。",
+   "quoteObj": {
+    "quote": "“那为什么字谜的秘密是在堪舆图？”朱广孝皱眉问道。",
+    "start": 721276,
+    "end": 721301,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+   },
+   "target": "causeEdges[0].quotes（`q_zhu_asks_map`）与 citationConvention.verbatim",
+   "why": "q_zhu_asks_map 本该指向上面这条原文（我已在原文 721276-721301 逐字命中），但候选全文件 0 处定义它。公开桥 to_candidate.py::collect_refs() 只接受带 quote/start/end 的 dict，实测对本候选 causeEdges 取到 0/10 条引用 ⇒ 10 条边全部以 no_verbatim_quote 丢弃（bridgeCollectRefsCauseEdges=0）。『』片段本身在原文全部逐字成立（165 个不同片段、0 个不命中），但因果层无法机检，且自述与文件内容不符。",
+   "severity": "必须修：这是整整一层证据失去机器可验证性；但请同时读 notes 里我对它的两点削弱（本单元只有 1 个可锚定事件，修完仍发不出去）。"
+  },
+  {
+   "claim": "候选 t4 的 actor 写成『张巡抚挑选出的六名打更人（回来复命的是前去探查的铜锣）』、t7 的 actor 写成『姜律中与张巡抚（先后把纸条抢到手里的两人）』，两处身份都无法解析到图谱里的唯一人物。",
+   "quote": "一伙人动作整齐划一的扭头，望向门口，看着许七安带着两位同僚返回。",
+   "quoteObj": {
+    "quote": "一伙人动作整齐划一的扭头，望向门口，看着许七安带着两位同僚返回。",
+    "start": 723593,
+    "end": 723625,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+   },
+   "target": "tasks[3]（t4_huanbai_street_scouts_come_back_empty）、tasks[6]（t7_two_officials_read_the_note_and_fail）",
+   "why": "用发布桥自己的解析器实测：resolve_character() 对这两条的 actor 返回 None（t4 是六人群体、t7 是两人并列），桥随即以 no_resolvable_character 丢弃，不进发布。t4 引文本身逐字成立（721840-721865、723180-723219 等），问题不在证据而在身份字段的写法：候选 actorNote 明确知道主体是群体/两人，却把它整体填进 actor。10 条任务里 2 条因此发不出去。",
+   "severity": "应当修：原文事实无误，但身份字段须落到图谱可解析的单一人物（或按『不可解析的群体主体』如实降级）。"
+  },
+  {
+   "claim": "候选 worldSettingsNote 第④项把区间内唯一的玉器表述记作『半块玉佩』，并以此作为不单列为 item 的理由。",
+   "quote": "“仅仅只靠一块玉佩是传达不出信息的",
+   "quoteObj": {
+    "quote": "“仅仅只靠一块玉佩是传达不出信息的",
+    "start": 721165,
+    "end": 721182,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+   },
+   "target": "worldSettingsNote 第④项",
+   "why": "本区间没有『半块玉佩』：SEG.count('半块玉佩')==0（独立实测 probe 同值）。区间内唯一玉器表述是『一块玉佩』（721170 起，我引的这条 721165-721182 逐字命中）。『半块玉佩』在全文确有 6 次，首次出现在 706903，落在上一个单元 0193 的区间 [704916,709317) 内（0193 的 sourceRange 已核对）。这是把区间外的措辞带进了本单元的说明文字。",
+   "severity": "轻微：只出现在说明性字段，未污染任何带偏移的节点引文。"
+  }
+ ],
+ "reverseChecks": [
+  {
+   "found": "候选完全没有覆盖『莺莺夫人』这条线：区间里她被点名两次，其中一次是叙述明确指出她被周旻瞒过——这是本区间唯一把「谁不知道」指认到具体人物的知识差。候选 states[].knowledge 分列了许七安/张巡抚/姜律中/黄伯街队/在场众人五方，唯独没有这条。独立实测：候选全文 '莺莺' 出现 0 次。",
+   "quotes": [
+    {
+     "quote": "周旻会想办法让莺莺夫人带去更多的信息",
+     "start": 721183,
+     "end": 721201,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+    },
+    {
+     "quote": "他瞒过了所有人，包括莺莺夫。",
+     "start": 721219,
+     "end": 721233,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+    }
+   ],
+   "whyItMatters": "任务提示词第 3 条明写『知识差要写清谁知/不知』。被瞒过的一方不在候选的任何 knowledge 字段里。"
+  },
+  {
+   "found": "玉佩传信机制被完整交代：单靠玉佩传不出信息，所以周旻改用字谜夹带——这是本单元『为什么会有字谜』的唯一机制说明。候选只在 worldSettingsNote 里引用了它的前半句片段，且用途是『解释为什么不列为 item』，没有把它作为任何因果边或设定条目的依据，也没写进 unknowns。",
+   "quotes": [
+    {
+     "quote": "“仅仅只靠一块玉佩是传达不出信息的",
+     "start": 721165,
+     "end": 721182,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+    },
+    {
+     "quote": "但为了保密，他采用了猜字谜的方式。",
+     "start": 721202,
+     "end": 721219,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+    }
+   ],
+   "whyItMatters": "这比候选现有 c1（被追问→给理由）更接近真正的『手段—目的』机制边，属结构性遗漏而非措辞问题。"
+  },
+  {
+   "found": "姜律中有一条被候选整条漏掉的参与线：张巡抚的嘀咕声先把姜律中（与几位银锣）拉进来，他在众人返回时第一个开口追问『怎么样？』，之后才去抢纸条。候选 s3 把姜律中的介入写成从『抢纸条』开始。",
+   "quotes": [
+    {
+     "quote": "他的嘀咕声，一字不漏的进了几位银锣和姜律中耳里。",
+     "start": 723536,
+     "end": 723560,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+    },
+    {
+     "quote": "“怎么样？”姜律中连忙问。",
+     "start": 723631,
+     "end": 723644,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+    }
+   ],
+   "whyItMatters": "这两句是原文直写的信息传递与首次发问，正好是提示词所说「不能因为时间相邻就连边」的反面：原文给了传递，候选没接。"
+  },
+  {
+   "found": "宋廷风对纸条的第一反应是当面追问『啥意思哦？』——这是纸条难度在本区间第二次被他人当场证实（第一次是许七安自己的『我怎么知道』）。候选只在 t8 一带而过，foreshadows f1 的铺设只用了『我怎么知道』一处人证。独立实测：候选全文 '啥意思哦' 出现 0 次。",
+   "quotes": [
+    {
+     "quote": "宋廷风和朱广孝对视一眼，前者茫然道：“啥意思哦？”",
+     "start": 722862,
+     "end": 722887,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+    }
+   ],
+   "whyItMatters": "伏笔 f1 的『难解』铺设因此少了一处独立人证。"
+  },
+  {
+   "found": "『众人哗啦啦涌到桌边，与他一起看地图』是五字核对得以进行的组织性动作（谁到场、如何围拢）。候选 t2 的 action 只引了『默念/搜索』一句，未收这句，而 t2 的 objective 恰恰写的是『把推理摊开让人一起验』。",
+   "quotes": [
+    {
+     "quote": "众人哗啦啦涌到桌边，与他一起看地图。",
+     "start": 721462,
+     "end": 721480,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+    }
+   ],
+   "whyItMatters": "支撑『一起』这个说法的现场叙述没被引用，属证据链上的一处薄弱，不是编造。"
+  },
+  {
+   "found": "许七安对紫阳居士的推断是完整两段：先给出方法（『只需要仔细询问』），再给出结论（『必然能勘破』）。候选 r2 只引了结论整句，未把『仔细询问』这一前提动作单列。它与上面知识差那条互补：能勘破的前提是仔细询问，而被瞒过的恰是莺莺夫人。",
+   "quotes": [
+    {
+     "quote": "“但以紫阳居士的智慧，只需要仔细询问，必然能勘破字谜的秘密。”",
+     "start": 721239,
+     "end": 721270,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+    }
+   ],
+   "whyItMatters": "候选 r2 的判断（这是对不在场者的推断、不是已发生的事）我复核后认同；此处只记证据链不完整，不构成反对。"
+  },
+  {
+   "found": "候选 foreshadowsNote 把『二哈是什么？』排除出伏笔时写『本区间没有第二次出现』，但『二哈』在本区间实际出现两次（722236 的玩笑句与 722296 的追问）。排除结论我认同（它确实不指向后事），但给出的理由与原文不符。",
+   "quotes": [
+    {
+     "quote": "“你们俩就像北方的狼，来南方冻成了二哈。”许七安大笑着说。",
+     "start": 722225,
+     "end": 722254,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+    },
+    {
+     "quote": "二哈是什么？",
+     "start": 722296,
+     "end": 722302,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+    }
+   ],
+   "whyItMatters": "与候选自己对『只出现一次』的判据相冲突；属理由写错而非结论错。"
+  },
+  {
+   "found": "南北方过冬的对比实际是写实交代（南方穷人靠稻草与住处挨过冬天；北方买不起炭的贫苦人在冬天无声无息死去），不全是玩笑。候选 worldSettingsNote ① 只处理了『大奉的北方没有暖气』这一句现代梗，foreshadowsNote 把同类内容整体称作玩笑。",
+   "quotes": [
+    {
+     "quote": "北方不同，北方很多买不起炭的贫苦人，在冬天无声无息的死去。",
+     "start": 722367,
+     "end": 722396,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+    }
+   ],
+   "whyItMatters": "归类过宽；这段世界背景没有进入任何设定条目。属可辩护的取舍，我按纪律只记为存疑，不据此判 fail。"
+  }
+ ],
+ "misKillCheck": {
+  "note": "本候选是产出型（只新增条目、不移除他人条目），所以『误杀』只能发生在它自己的说明性排除里：foreshadowsNote 排除 5 项、worldSettingsNote 排除 6 项。逐条核对后，foreshadowsNote 的 5 项结论全部成立（『真的有东西！』当场兑现、踱步握拳区间内即兑现、青苔只作景物、二哈与暖气不指向后事），其中『二哈』一项理由写错（见 reverseChecks[6]）。worldSettingsNote 的 6 项里 5 项成立，第④项用词越界（见 counterExamples[2]）。",
+  "regExOrWordlistKill": "未发现词表/正则式误杀：候选没有用任何过滤规则去挡原文事实，165 个『』片段全部逐字成立、0 个不命中（独立实测）。我逐词反查了可能被词表挡掉的合法因果（『正是因为』唯一一处已收在 c4；『因为』另两处分别是 c1/c3 的依据）。"
+ },
+ "hallucinationCheck": {
+  "result": "未发现编造",
+  "detail": "候选提到的全部专名都在区间内逐字可查（许七安/许宁宴/宁宴、张巡抚、姜律中、朱广孝、宋廷风、周旻、紫阳居士、白帝城、云州、京城、思明桥、黄伯街、驿站、大奉、运河、金锣/银锣/铜锣、打更人、暗子、堪舆图、锦囊、纸条、玉佩、石砖、青苔、巨人图、金狮咆哮图、炼神境、元神、练气境、狗市、晚宴、官场、都指挥使司、周经历）。未出现区间外人物。四条红线守住：r1 拒『开头设问=已解开』；r2 拒把不在场者的推断当事实；r5/t5 costNote 明确『十二天没睡觉』是自述；r6/t10 resultNote 拒把邀约写成晚宴办成；semanticReview 保持 not_performed 未被冒充。"
+ },
+ "citationVerification": {
+  "method": "固定种子 random.seed(197) 从 162 个引用对象中随机抽 5 条，各自在 T 上 find() 一次。",
+  "sampled": 5,
+  "verbatimHits": 5,
+  "offsetMatches": 5,
+  "detail": "5/5 逐字命中且 find()==start；另对全部 162 条做了完整机检：text[start:end]==quote 0 违规、find()==start 0 违规、落在区间内 0 违规、切片内唯一命中 0 违规、docOccurrences 与实际全文次数 0 不符、sourceHash 0 不符。"
+ },
+ "usableVsDiscard": {
+  "usable": [
+   "tasks 10 条：内容与引文全部可用（其中 t4/t7 的身份字段须修，见 counterExamples[1]）。五栏互斥检查 0 违规，null 栏全部带同名 Note。",
+   "states 5 条：前后值/锚点/knowledge 内容可用，引文全部逐字成立。",
+   "foreshadows 3 条：status=unresolved 且 payoff=null 带 payoffNote；f2 把指向性引文单列 pointerToPayoff 而非冒充回收，这一处比多数候选严格。",
+   "worldSettings 12 条：判别字段全部合法（placeState∈{arrived,mentioned}、itemStates⊂{hold,transfer,use,lose}、institution∈{declared,executed,misunderstood}），p4/p5 判 mentioned 有据。",
+   "themeReadings 2 条：perspective/support/counter 三件齐全，counter 是真实不利证据，未用事件密度/死亡人数/篇幅中点定义高潮，未套三幕。",
+   "unknowns 15 条：u5（姜律中同段『已经知道』vs『猜测』）是真矛盾；u13/u15 是正当存疑。",
+   "rejectedEdges 6 条的判断全部正确且有据（r1-r6 我逐条核对认同）。"
+  ],
+  "mustDiscardOrDowngrade": [
+   "causeEdges[10]：在修好 quotes[] 之前，按桥的逻辑整层以 no_verbatim_quote 丢弃（机器无法验证）。",
+   "causeEdges 即使修好引文，本单元仍只锚得到 1 个事件（ev_0525710c70dfa594），10/10 会改判 no_two_distinct_events —— 这是图谱事件锚点缺口，不是精读质量。",
+   "citationConvention.verbatim 的自述须收窄：『』片段的规范性来源只对 tasks/states/foreshadows/worldSettings 成立，对 causeEdges/rejectedEdges 不成立。",
+   "worldSettingsNote ④ 的『半块玉佩』须改为原文用词『一块玉佩』。",
+   "w1.explain 写『本区间没有引用任何诏、令、法原文，这一点写进 unknowns』，但 unknowns[15] 中含『诏』0 条、含『令』0 条（『法』5 处全是『无法/办法』的构词），该承诺未兑现：应补一条 unknown 或删掉该自述。",
+   "foreshadowsNote 关于『二哈』的『本区间没有第二次出现』应改为『出现两次但不指向后事』。"
+  ]
+ },
+ "notes": "总判 partial，与我复核前一轮 w-sanguo-1 的结论方向一致，但理由不同、发现的缺陷也不同，两份复核不重复：它抓到的是 causeEdges 的悬空 ID + citationConvention 自述 + 半块玉佩；我独立复现了前者，并新增了三条它没有报出的缺陷 —— ① tasks[3]/tasks[6] 的 actor 无法解析到唯一人物（用桥自己的 resolve_character() 实测 2/10 丢弃，这是发布层的真实丢弃，与 causeEdges 那条不同）；② w1.explain 承诺『写进 unknowns』但没兑现；③ foreshadowsNote 关于『二哈』的理由与原文不符（说没有第二次出现，实际出现 2 次）。\n\n候选的引用精度确实罕见地高，这不是客套：162 个引用对象在五项机检上全部 0 违规（逐字/偏移/区间/切片唯一/docOccurrences/sourceHash），165 个『』片段 0 个不命中，脚本与命令都在本文件 repro 里，任何人可复跑。零编造、四条红线全守住。所以判 partial 不是因为内容不可用，而是因为有一整层（causeEdges）失去了机器可验证性，加上两处说明性字段与原文不符。\n\n我必须如实写下对自己这三条缺陷的削弱（VERIFIER.md 允许我判自己错）：\n(a) 关于 causeEdges 的悬空 ID：即使把 43 个 ID 全换成真引用，这 10 条边依然发不出去 —— 本单元在图谱里只有 1 个可锚定事件，而桥要求因果边两端锚到两个不同真实事件。我用施工目录恢复的 96 条 ID→原文映射做了模拟修复，实测仍是 0/10 可发布。所以这条缺陷的发布层边际影响在本单元为零；真实危害是『这一层的引证无法被机器读懂』与『自述与文件内容不符』。\n(b) rejectedEdges 根本不在桥的 LAYER_MAP 里，那 6 个悬空数组不进发布，属可读性缺陷。\n(c) 我新报的 actor 缺陷（tasks[3]/tasks[6]）才是本单元真正的发布层丢弃：10 条任务里 2 条会因 no_resolvable_character 被丢。但也要说清：t4 的主体是六人群体、t7 是两人并列，候选把群体写进单一 actor 字段是如实的（它在 actorNote 里明说了是六人/两人），桥的解析器无法承载群体主体是桥的已知结构性限制（注释里已写明 B002 的同类情况）。所以这条更准确的定性是『身份字段写法与桥的契约不匹配』，而不是『候选写错了原文事实』。\n\n关于反向验证：我做了字符级覆盖扫描（不是句子级，避免标点把句子切碎造成假遗漏）：切片 3161 个非空白字符中 804 个未被任何引文覆盖。我逐段甄别后只把有内容价值的 8 条写进 reverseChecks，并主动剔除了纯玩梗/方言句（『小黄人』『鼻涕水就出来了』）与气氛句（『原地踏步』『恐怖如斯』）—— 把它们记成『候选漏掉的事实』会让反向验证退化成清单攀比，这正是计划100 警告的『机制存在但不产生信息』。最实质的两条遗漏是：莺莺夫人这条被瞒过的知识差（候选全文 0 次提及）与玉佩→字谜的机制说明，两者都直接对应提示词第 3 条的要求。\n\n关于本单元的可发布性，我需要如实指出一个与候选质量无关的环境事实：本单元图谱里只有 1 个可锚定事件（ev_0525710c70dfa594，区间 [721125,721136)），于是 states 5/5 会以 no_anchored_event 丢弃、foreshadows 3/3 同样丢弃、修好引文的 causeEdges 10/10 会以 no_two_distinct_events 丢弃，唯一能进发布的是 tasks 层里能解析身份的 8 条。这是 unit_has_no_anchorable_event 同类缺口（桥的注释已记载大奉 2990 个事件里 748 个没有偏移），根因在图谱事件锚点，不在精读质量，不应记到候选账上。\n\n遗留不确定（记为存疑，不作为判 fail 依据）：① w1 把『皇』字犯忌讳记 institution=executed。按提示词定义 executed 需有执行动作，而区间内只有『地图上没有这个字』这一静止状态，且『太犯忌讳』是叙述的判断（不在引号内）。严格说更接近 misunderstood。候选已自认无诏令法原文并记 basis=inferred，属可辩护的归类分歧。② t2 把『告』『皇』找不到放进 obstacle 栏，原文位置在 result 之后；候选已在 selfCritique① 自曝，且该栏确实改变了后续动作，我认可其判断。③ t5 的 result 记 explicit 但含『被打断』的因果，候选已在 selfCritique④ 自认口径不一致 —— 自曝到位，不另扣分。④ t4 的 cost 把情绪（郁闷、泄气）算作代价，候选已在 selfCritique② 提示复核者可改判 null；我倾向认可，因为区间内确实没有别的代价描写，属可辩护的读法。\n\n我对自己复核本身的一处自查：我最初用『按标点切句 + 判断句子是否被引文包含』做覆盖扫描，得到 103/133 句未被覆盖，这个数字是假的 —— 切句会把『“告”和“皇”两个字…』这类被引号截断的句子切碎，导致已覆盖内容被误报为遗漏。我改成字符级覆盖位图重算，才得到 804/3161 这个可用数字。这里如实记下，因为角色契约明确说「你可以判自己错」。",
+ "repro": {
+  "sourceHashCmd": "shasum -a 256 data/cache/1063b17ca65ec1b76f30e460.docs.json",
+  "candidateHashCmd": "shasum -a 256 loop/state/out/read_dafeng_L1_0197.candidate.json",
+  "sliceSelfCheck": "python3 -c \"import json,hashlib;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];s=t[720749:724528];print(len(s),hashlib.sha256(s.encode()).hexdigest())\"  => 3779 3baba6ba6e7509582659011d18919ccbc045ba903844faa6edc791ca4f772925",
+  "fullAudit": "python3 -B '/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/verify-L1-0197-w-verify-4-20261013/audit_0197.py' > report.json",
+  "bridgeDryRun": "见 audit_0197.py 第 8 节 bridgeDryRun：causeEdges 10/10 no_verbatim_quote（bridgeCollectRefsCauseEdges=0），tasks 2/10 no_resolvable_character（t4、t7），states 5/5 no_anchored_event，foreshadows 3/3 no_anchored_event"
+ },
+ "evidenceFiles": [
+  {
+   "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/verify-L1-0197-w-verify-4-20261013/audit_0197.py",
+   "kind": "本轮独立复核脚本（只读，未 import 候选自带脚本）"
+  },
+  {
+   "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/verify-L1-0197-w-verify-4-20261013/audit_report.json",
+   "kind": "上述脚本输出（全部机检数字与桥的 dry-run 丢弃清单）"
+  },
+  {
+   "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/verify-L1-0197-w-verify-4-20261013/prior_verdict_w-sanguo-1.json",
+   "kind": "前一轮复核者 w-sanguo-1 的结论备份（sha256=61bced2b…，同内容亦存于 read_dafeng_L1_0197.json 的 reviews[0]）"
+  }
+ ]
+}

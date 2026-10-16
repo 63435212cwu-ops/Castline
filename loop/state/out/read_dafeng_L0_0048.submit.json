@@ -1,0 +1,82 @@
+{
+ "task": "read:dafeng:L0:0048",
+ "agent": "w-dafeng-1",
+ "status": "done",
+ "summary": "精读《大奉打更人》第四十九章「社会性死亡」（docs[0].text 绝对 codepoint [146809,149848)，3039 字）：拆出 4 条任务五元组（含 2 处 cost=null）、8 条因果边（3 条标 inferred）、3 条被拒因果边、7 条人物状态、8 条知识差、6 条伏笔（4 条区间外回收／2 条显式 unresolved）、3 条被拒伏笔、12 条 unknowns、4 条 knowledgeGaps、5 条 selfCritique、5 条 textCritical。全部 100 条引文偏移由生成脚本从磁盘重读原文现算（不手写），独立复核脚本复算 398 个引文字典 problems=0。",
+ "evidence": [
+  {
+   "path": "loop/state/out/read_dafeng_L0_0048.candidate.json",
+   "sha256": "5ea05bbc78eb9c0a0c9686c5b8f8c9f72f73b60cdfd0bc0177336738f021738e",
+   "kind": "candidate"
+  },
+  {
+   "path": "loop/state/out/read_dafeng_L0_0048.submit.json",
+   "sha256": "PLACEHOLDER_SELF"
+  }
+ ],
+ "assertions": [
+  {
+   "text": "源文件哈希与任务声明一致：shasum -a 256 data/cache/9b676d7031b1bcd3b8377a18.docs.json = fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839，与 task JSON 的 sourceHash 逐字相同。",
+   "result": "pass"
+  },
+  {
+   "text": "区间边界自检（不是只看长度）：docs[0].text[146809:146820] == '第四十九章 社会性死亡'，左端紧接 t[146803:146809] == '----\\n\\n'，右端 t[149848:149855] == '第五十章 投壶'，区间内含章级分隔行 t[149834:149846] == '------------'。切片长度 3039 codepoints、sha256 f8fbf7793e9f3f904005ef38eca64819c17ebdd1e8afa0144dc733a03566e9b1。",
+   "result": "pass"
+  },
+  {
+   "text": "全部引文逐字命中且偏移自洽：独立脚本 /tmp/cl0048/verify.py 从磁盘重读 docs.json，遍历候选里 398 个含 quote/start/end 的字典，断言 T[start:end]==quote、end-start==len(quote)、sourceHash==整个 docs.json 的 sha256、inRange 与 (146809<=start and end<=149848) 一致、globalOccurrences/inRangeOccurrences 与重叠命中口径复算一致、区间外条目 chapter 与落点所属章一致 —— problems=0。",
+   "result": "pass"
+  },
+  {
+   "text": "定位 bug 被独立复核抓出并已修：第一版 Q() 用 T.find(q) 取全书第一处命中，导致 '------------' 落到偏移 0、'许新年陷入了沉思。' 落到 137084（都在区间外）。复核脚本以「inRange=false 但区间内确有命中」为特征扫出该缺陷；改成优先取区间内命中后复扫，该特征计数 0。这是本轮唯一一处我自己没先发现的实质错误。",
+   "result": "pass"
+  },
+  {
+   "text": "章号写错被自查抓出并已修：散文里把 '要走武道一途…' 与王捕头的言论都写成「第一章」，实际按偏移现算是第十一章（32513）与第十五章（45842/46137）。已改为由 chap_of() 现算章名并加 assert（CH_RULE_S=='第十一章'、CH_WANG_S=='第十五章'），复查全文「第一章」残留 0 处。",
+   "result": "pass"
+  },
+  {
+   "text": "数字类断言逐条复算：'无双' 全书 87 处且无一处作人名（'无双姑娘'/'无双公子'/'无双道人'/'“无双' 均 0 处）、'双手拢在袖中' 3 处、'睡一晚这辈子就值了' 全书仅 1 处（在本区间）、'诗写的' 9 处而 '诗写得' 0 处、[149848,180000] 内 '户部尚书'/'尚书'/'易容'/'乔装'/'暴揍'/'揍' 全部 0 处、采薇在 [138000,146809) 内 0 处、切片内 '京城'/'内城'/'许府'/'书房'/'县衙'/'衙门' 全部 0 处。全部与文件内声称一致。",
+   "result": "pass"
+  },
+  {
+   "text": "章标题口径矛盾已查清：「913」是宽松口径（行首、以「第」开头且含「章」），「814」是严格口径（章号字符集限定 [一二三四五六七八九十百零]），差额 99 行全部是「第两百章」这类含「两」的章号（抽样验证）。已在文件里写明两个口径及差额来源，不再单引一个数。",
+   "result": "pass"
+  },
+  {
+   "text": "受保护路径未改：任务 writes 只声明 loop/state/out/read_dafeng_L0_0048.candidate.json（loop/ = append-only）。js/ css/ index.html serve.py narrative.py scripts/ tests/ docs/ data/ 下近 60 分钟内变更的文件 mtime 全部落在 13:18–13:34（我持有租约是 13:37、写盘是 14:04），属并行 agent 的既有未提交工作，非本轮改动；本轮未执行任何 checkout/reset/stash。",
+   "result": "pass"
+  },
+  {
+   "text": "未跑 GPU／浏览器测试（本任务不要求；GPU 全局串行）。未写 semanticReview 完成：文件里 semanticReview=not-performed，只声明做了引用定位核验，语义正确性留给 read-verify 独立复核。",
+   "result": "pass"
+  }
+ ],
+ "changes": [
+  {
+   "path": "loop/state/out/read_dafeng_L0_0048.candidate.json",
+   "kind": "append-only"
+  }
+ ],
+ "sourceHashes": {
+  "data/cache/9b676d7031b1bcd3b8377a18.docs.json": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839"
+ },
+ "remaining": [
+  "语义正确性未核验：人物动机、因果机制是否成立、伏笔回收是否被作者认可，全部留待 read-verify 独立复核（本文件只做了引用定位核验）。",
+  "fs_husangbu 我判为 unresolved：区间内指认政敌为户部尚书，但周侍郎线完整收束段 [149848,180000) 内「户部尚书」「尚书」0 次命中，找不到回收。若复核能给出区间内落点，应升级为 resolved；我不能替它编一个回收。",
+  "u_sizhai_same：本区间报告的无匾私宅与第五十七章使用的「周立的私宅」是否同一座，原文无唯一标识（无地址/匾额），只凭三处吻合判为同一，basis=derived。若复核认为证据不足，应降级为「两处相似的私宅」并从 resolved 列表移出。",
+  "u_samebu_attribution：「而正是因为同在户部，所以…」一句缺归属标记，旁白/许新年内心两读都自洽，记 null 未定。若复核判定为旁白，应把 characterClaims cc_same_bu 的 narratorConfirmed 改为 true，而非删句。",
+  "u_wushuang：'无双拢在袖中' 疑为 '双手拢在袖中' 之讹（全书 87 处「无双」无一处作人名，另 3 处拢手均作「双手」），标 typo-likely 未断言；无第二版本可交叉核对。",
+  "u_wangbu_misquote：许七安归给王捕头的「睡一晚这辈子就值了」全书仅此 1 处、且是他自己的内心问句；第十五章王捕头实际言论是另一套并被旁白定性为吹牛。是作者记岔还是角色记岔，无法判定。",
+  "u_meeting_place：议事地点/时间区间内无一字交代（无地点词），我拒绝补「许府书房」。",
+  "覆盖率 75/76 非空段落（0.9868），剩余 1 段是章级分隔行 '------------'，非正文；另 4 条非空段落仅以「我引用的整段」形式覆盖。",
+  "本文件不产生质量分；八维评分仍须按 docs/QUALITY.md 逐条判。"
+ ],
+ "rollback": {
+  "kind": "append-only",
+  "strategy": "delete-added-files",
+  "files": [
+   "loop/state/out/read_dafeng_L0_0048.candidate.json"
+  ]
+ }
+}

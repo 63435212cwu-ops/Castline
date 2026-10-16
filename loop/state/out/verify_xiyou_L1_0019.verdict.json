@@ -1,0 +1,336 @@
+{
+  "verdict": "partial",
+  "task": "verify:xiyou:L1:0019",
+  "reviewedTask": "read:xiyou:L1:0019",
+  "reviewedCandidate": "loop/state/out/read_xiyou_L1_0019.candidate.json",
+  "reviewer": "w-dafeng-2",
+  "reviewedAgent": "w-xiyou-1",
+  "source": {
+    "path": "data/cache/df959d743e53206f56db2f92.docs.json",
+    "sha256": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+    "range": [
+      129251,
+      136016
+    ],
+    "rangeChars": 6765,
+    "sliceSha256": "807bc3708d42d646a099f5b9369e3d9c14de6cdfe84761d8ef0e7ca5c624ff82",
+    "boundarySelfCheck": "text.find('第十九回')==129251==rangeStart；text.find('第二十回')==136016==rangeEnd；len(text[129251:136016])==6765；text[129251:129273]=='第十九回 云栈洞悟空收八戒 浮屠山玄奘受心经'。全部实测成立。",
+    "note": "任务 JSON 未给 docs 路径；按 sourceHash 在 data/cache 反查得到 df959d743e53206f56db2f92.docs.json（整文件 sha256 与任务 sourceHash 一致）。"
+  },
+  "candidateSha256": "f6a1d86d0c8421533c1edd5060700ea7c04d4a9e5cde2eaf3640147f13217b3f",
+  "method": {
+    "order": "按 ROLES/VERIFIER.md 第 1 条：先把 [129251,136016) 切片落 /tmp/xy19.txt（6765 字 / 58 行）通读一遍，读完才打开候选文件。读原文时只看了候选的顶层键名（为了知道有哪些分区），未读任何结论条目。",
+    "mechanical": "独立重写遍历（不复用候选的 verify.py），对候选全部 304 个引文节点逐条断言 text[start:end]==quote、text.count(quote)==1、区间包含、sourceHash 单值一致；另在候选 JSON 全部字符串值里独立重抽「」片段对切片 find；再复算候选自报的全部计数（nameUsageAudit 14+9 项、段落数、引号配对、心经四种计数、selfCritique 的 8 组全书计数）。",
+    "reverse": "取『全部引文节点 ∪ gapAnchors』的区间并集，对 [129251,136016) 取补集，得到既未被断言、也未被点名的空隙，逐一读原文；再按题目、人物、场景逐项问『这里还有什么』，把候选字符串里搜不到的事实列举出来。",
+    "candidateScripts": "候选自带的 /tmp/rd0019/verify.py 与 /tmp/rd0019/prose_audit.py 是只读的（只 open(SRC)/open(CAND) 读，无写操作），我复跑了它们：verify.py → 'RESULT: PASS (problems=0)'，prose_audit.py → '散文片段里 「」 引文总数: 200 逐字命中: 200'。这两份复跑结果我认，但注意它们**复用的是候选自己的口径**，所以它们 PASS 不能推出候选的自述无误（见 counterExamples CE2/CE5）。"
+  },
+  "mechanicalResult": {
+    "quoteNodesAll": 304,
+    "distinctQuotes": 178,
+    "countNonUnique": 0,
+    "countSliceNeQuote": 0,
+    "countOutOfRange": 0,
+    "sourceHashMismatch": 0,
+    "proseBracketSpansReExtracted": 216,
+    "proseBracketNotFound": 2,
+    "citationSample": [
+      {
+        "quote": "若遇魔瘴之处，但念此经，自无伤害。",
+        "declared": [
+          135084,
+          135101
+        ],
+        "find": 135084,
+        "sliceEq": true,
+        "count": 1
+      },
+      {
+        "quote": "野猪挑担子，水怪前头遇",
+        "declared": [
+          135645,
+          135656
+        ],
+        "find": 135645,
+        "sliceEq": true,
+        "count": 1
+      },
+      {
+        "quote": "既从吾善果，要做徒弟，我与你起个法名，早晚好呼唤。",
+        "declared": [
+          133137,
+          133162
+        ],
+        "find": 133137,
+        "sliceEq": true,
+        "count": 1
+      },
+      {
+        "quote": "我今日去做和尚了，不及面辞",
+        "declared": [
+          134146,
+          134159
+        ],
+        "find": 134146,
+        "sliceEq": true,
+        "count": 1
+      },
+      {
+        "quote": "三藏殷勤致意，再回",
+        "declared": [
+          135016,
+          135025
+        ],
+        "find": 135016,
+        "sliceEq": true,
+        "count": 1
+      }
+    ],
+    "citationSampleNote": "固定种子 random.seed(20261009) 抽 5 条，5/5 逐字命中且 find()==declared.start（偏移一致），无一条错位。",
+    "selfReportedCountsVerify": "候选自报的计数我逐项复算，**绝大多数属实**：nameUsageAudit.used 14 项全对（行者 44 / 悟空 10 / 三藏 34 / 八戒 16 / 悟能 5 / 那怪 23 / 老高 9 / 禅师 16 / 乌巢禅师 2 / 菩萨 8 / 天蓬 3 / 云栈洞 3 / 浮屠山 2 / 钉钯 6）；forbiddenZero 9 项全对（高翠兰 0、翠兰 0、沙僧 0、流沙 0、红孩儿 0、白骨 0、花果山 1、水帘洞 1、猪八戒 1）；nonEmptyParagraphs 29=29；每段引号配对 min 求和 89=89；心经四口径（整段 331 码位/271 汉字、去题名冒号 316/259、全标点切 53 段、句末标点切 15 句）全部复算相等；selfCritique 里 8 组全书唯一性计数（好，好，好！=2、师兄息怒=2、何尝骂你=2、谨遵师命=3、饶他去罢=3、可怜，可怜=2、三藏又道=2、好山！但见那=2）全部属实；『那怪王』全书 3 处、另 2 处在第八十九回（643066 起）也属实。U8 说的私用区字符 U+E485 在切片内确实存在。"
+  },
+  "counterExamples": [
+    {
+      "id": "CE1_phantom_rejection_it_says_it_rejected_an_edge_it_never_listed",
+      "claim": "候选 tasks[0]（T1_wukong_must_take_the_monster）的 resultNote 写：「我在 T2 里另记了怪的这一面，在 rejectedAsCauseEdge 里拒掉了『钯筑不动→投降』这条因果，避免把这个 true 读成『播放到结尾=成功』。」",
+      "quote": "在 rejectedAsCauseEdge 里拒掉了『钯筑不动→投降』这条因果",
+      "why": "rejectedAsCauseEdge 里**没有这一条**。它的 10 条是 RCE1–RCE10（天亮→败走、景语→禅师出现、八戒旧识→禅师识他、拜菩萨→得经、偈语→骂、田产许诺→拿住、金银→降妖、回末联→后文灾难、天明→回庄、挂脚粮→给鞋），逐条 pair 里既无「投降」也无「筑」字。而且被保留的 CE4 恰恰是**最接近**这条的一支（from『那怪真个举起钯，着气力筑将来』/『更不曾筑动一些儿头皮』→ to『那怪手麻脚软、出声赞叹，此后不再以钯决胜』），也就是说候选对这一段是**保留**了一条边、并未否决。这是对本文件自身内容的错误陈述：说它拒了什么，它没拒。判 fail 的标准（编造原文）不适用——它没有编造原文；但这是「声称强于验证」，正是本项目反复出现的失败形态，必须记。核实方式：grep 该 resultNote 与 10 条 RCE 的 pair 字段。",
+      "severity": "medium",
+      "checkCmd": "python3 -B -s -c \"import json;c=json.load(open('loop/state/out/read_xiyou_L1_0019.candidate.json'));print([r['id'] for r in c['rejectedAsCauseEdge']]);print([r['id'] for r in c['rejectedAsCauseEdge'] if '投降' in json.dumps(r,ensure_ascii=False) or '筑' in json.dumps(r,ensure_ascii=False)])\" → ['RCE1'…'RCE10'] / []",
+      "sourceCitation": {
+        "quote": "那怪真个举起钯，着气力筑将来",
+        "start": 131807,
+        "end": 131821,
+        "why": "这是被保留的 CE4 的 from 侧引文：候选对这一段的处理是**保留一条边**，不是「拒掉」。"
+      }
+    },
+    {
+      "id": "CE2_coverage_label_includes_rejectedAs_but_number_excludes_them",
+      "claim": "候选 coverage.reverseCoverage.evidenceOnly 的 span 声明为「全部引文节点（tasks + causeEdges + rejectedAs* + states + knowledgeDiffs + foreshadows + unknowns）的区间并集」，其 covered 报 2118、pct 31.3%、gaps 122。",
+      "quote": "全部引文节点（tasks + causeEdges + rejectedAs* + states + knowledgeDiffs + foreshadows + unknowns）的区间并集",
+      "why": "2118 这个数**只对得上把 rejectedAs* 排除在外的那个子集**。实测：子集 tasks+causeEdges+states+knowledgeDiffs+foreshadows+unknowns = 243 节点 → covered 2118（与声明相等）；把 rejectedAsCauseEdge 与 rejectedAsForeshadow 按它自己写的说明加进去 = 278 节点 → covered 2267、gaps 131。也就是说标签里写的那一套（含 rejectedAs*）**算不出 2118**。连带的问题：coverage.quoteNodes 报 243，既不是全部节点数（304，见它自己 summary 的「共 304 个引文节点」），也不是不同引文数（178，见 quoteAudit.distinctQuoteNodes）——同一个文件里对「引文节点」有三个互不相等的数（304 / 243 / 178），而 243 没有任何一处说明它指的是哪个子集。上面 span 的标签正是唯一能反推 243 的线索，偏偏标签与数字对不上。",
+      "severity": "medium",
+      "checkCmd": "见本文件 assertions 中 A5 条；口径为对 (start,end) 去重后合并区间取长度和。",
+      "sourceCitation": {
+        "quote": "野猪挑担子，水怪前头遇",
+        "start": 135645,
+        "end": 135656,
+        "why": "本条的核对对象是候选自身字段而非原文；引此句仅为给出可复现的区间定位锚（它在 rejectedAsForeshadow RFS5 的引文集合内，属被排除在 2118 之外的那 35 个节点之一）。"
+      }
+    },
+    {
+      "id": "CE3_forbiddenZeroNote_says_two_words_are_zero_while_its_own_dict_says_one",
+      "claim": "候选 nameUsageAudit.forbiddenZeroNote 写：「『花果山』『水帘洞』在本切片内为 0 —— 那两处出现在那怪的自述里（『家住在东胜神洲傲来国花果山水帘洞里』）」。",
+      "quote": "『花果山』『水帘洞』在本切片内为 0",
+      "why": "同一对象的 forbiddenZero 字典里，花果山=1、水帘洞=1（这两个数**是对的**，实测切片内各 1 次，位置 132027 与 132030，就在它紧接着引的那句那怪自述里）。所以这句话与它自己的字典、与紧随其后的分句、与原文三处互相矛盾。从后半句看，作者想说的应是「作为**叙述层地点**为 0」（即只出现在人物自述 utterance 里），那是成立的；但字面写的「在本切片内为 0」是假的。属措辞缺陷而非实质误判，仍必须改，因为 forbiddenZero 这一栏的全部作用就是声明「本词在本单元不出现」。",
+      "severity": "low",
+      "checkCmd": "python3 -B -s -c \"import json;t=json.load(open('data/cache/df959d743e53206f56db2f92.docs.json'))[0]['text'];s=t[129251:136016];print(s.count('花果山'),s.count('水帘洞'))\" → 1 1",
+      "sourceCitation": {
+        "quote": "家住在东胜神洲傲来国花果山水帘洞里",
+        "start": 132017,
+        "end": 132034,
+        "why": "原文这一句就是 forbiddenZero 字典里 花果山=1、水帘洞=1 的唯一来源，位置在切片内，故「在本切片内为 0」不成立。"
+      }
+    },
+    {
+      "id": "CE4_RFS5_supporting_count_is_wrong_dan_zi_occurs_twice_not_once",
+      "claim": "候选 rejectedAsForeshadow 第 5 条（RFS5_the_two_verse_lines_about_team_roles）的 why_rejected 写：「……且『担子』一词在全单元只各出现一次。原文没有一句把二者联系起来。」",
+      "quote": "『担子』一词在全单元只各出现一次。",
+      "why": "「担子」在切片内出现 **2** 次：135648（偈中『野猪挑担子』）与 135872（行者复述该偈『他说野猪挑担子，是骂的八戒』）。「挑担子」也是 2 次。原文此处根本没有「各」的两个对象可分配——它与「八戒担着」（134297，1 次）分属不同词。RFS5 的**结论**（形似即因果、不升格为伏笔）我认同，且候选主动否掉自己本可写的伏笔是负责任的；但它用来支撑结论的计数是错的，而这类计数正是本文件宣称可复算的部分。",
+      "severity": "low",
+      "checkCmd": "python3 -B -s -c \"import json;t=json.load(open('data/cache/df959d743e53206f56db2f92.docs.json'))[0]['text'];s=t[129251:136016];print(s.count('担子'),[129251+i for i in range(len(s)) if s.startswith('担子',i)])\" → 2 [135648, 135872]",
+      "sourceCitation": {
+        "quote": "他说野猪挑担子，是骂的八戒",
+        "start": 135867,
+        "end": 135880,
+        "why": "「担子」的第二次出现就在这里（与第一次 135648 的偈语分属两层），故「只各出现一次」不成立。"
+      }
+    },
+    {
+      "id": "CE5_hygiene_audit_claims_all_string_fields_but_skips_anchorEvent_and_one_violation_survives",
+      "claim": "候选 proseQuoteHygiene.audit 写：「由 /tmp/rd0019/prose_audit.py 独立扫描候选 JSON 的**所有字符串字段**，抽出所有 「...」 片段并断言其在**切片**内 find 得到；发现不可 find 的片段即报告（本轮实跑曾抓出 10 条，已全部改为『』或补登记）。」",
+      "quote": "独立扫描候选 JSON 的所有字符串字段",
+      "why": "脚本并没有扫「所有字符串字段」，它按 PROSE_KEYS 白名单过滤；该白名单**不含 anchorEvent**。而 states[2].anchorEvent 正是『行者回报（「他本是天蓬元帅临凡…其实性灵尚存」）→ …』——这个「」片段跨了原文 [130489,130505) 与 [130516,130522) 两段、中间隔着「，嘴脸象一个野猪模样，」（130505–130516），**逐字 find 不到**，按它自己声明的规则（「」只包逐字原文）就是一条真实违规。这条既没被抓出、也没像 crossUnitReferences 那样另立字段登记。连带：CE5 说明「已全部改为『』或补登记」的收口结论不成立（至少漏 1 条）。我另跑的独立扫描（不限白名单）在 216 个「」片段里找到 2 个 find 不到：本条，以及 proseQuoteHygiene.audit 自身示例里的 『「...」』（后者是举例，不算违规）。",
+      "severity": "low",
+      "checkCmd": "python3 -B -s -c \"import json,re;t=json.load(open('data/cache/df959d743e53206f56db2f92.docs.json'))[0]['text'];s=t[129251:136016];c=json.load(open('loop/state/out/read_xiyou_L1_0019.candidate.json'));f='他本是天蓬元帅临凡…其实性灵尚存';print(f in s, c['states'][2]['anchorEvent'])\" → False",
+      "sourceCitation": {
+        "quote": "他本是天蓬元帅临凡，只因错投了胎",
+        "start": 130489,
+        "end": 130505,
+        "why": "这是 states[2].anchorEvent 里「」片段的前半；后半「其实性灵尚存」在 130516–130522，中间隔着 130505–130516，故整段 find 不到。"
+      }
+    }
+  ],
+  "reverseChecks": [
+    {
+      "id": "RC1_the_master_once_asked_bajie_to_cultivate_and_bajie_refused",
+      "found": "乌巢禅师与八戒的旧关系原文写得比候选呈现的更具体：八戒说禅师「倒也有些道行」，并且**禅师当年曾劝八戒跟他修行，八戒没去**。这是原文里唯一解释两人相识经过的一句。",
+      "quote": "他倒也有些道行。他曾劝我跟他修行，我不曾去罢了。",
+      "start": 134536,
+      "end": 134560,
+      "why": "治理意义：这条直接触及候选 KD4（禅师识八戒不识行者）与 CE13（八戒旧识带路）的边界。CE13.caveat 说「原文没写何时何地」，KD4.caveat 说「原文没有第二处说明他为何识得八戒」——但原文**给了**一段相识内容（曾被劝同修、当场拒绝）。候选全篇零次出现「劝我跟他修行」（我实测候选 JSON 里该字符串计数为 0）。这不是要推翻 KD4 的结论（禅师为何认得他仍无定论），而是候选把一个**存在的事实**说成了空白，并把「不知何时何地」误当成「无第二处说明」。建议：补为一条状态/knowledgeDiff 的锚点，或至少进 gapAnchors。"
+    },
+    {
+      "id": "RC2_the_binding_has_a_stated_release_condition_and_an_on_page_release",
+      "found": "『绑』这件事在原文里有完整的头尾，候选只取了头（拔毫毛变麻绳背绑、揪耳）而丢了尾：行者当场说明放人条件是「只等见了我师父，果有真心，方才放你」；到庄后三藏下令「悟空放了他绳」，行者抖身收毛、「其缚自解」。",
+      "quote": "行者道：“轻不成，顾你不得！常言道，善猪恶拿。只等见了我师父，果有真心，方才放你。”",
+      "start": 132635,
+      "end": 132677,
+      "why": "治理意义：T1.action/result 与 ST1 都把『背绑』写成终点（『到庄见三藏』），于是这条因果链在候选里断在半途——绑定是有条件的、而且**条件在单元内被满足并解除**。缺了「方才放你」+「教：悟空放了他绳」+「其缚自解」，读者无法知道绑是临时的还是永久的，T1 的 result（『拿住了』）因此缺一个收口证据。三条原文位置：132658（条件）、133063–133074（命放绳）、133076–133096（收毛自解）。候选字符串里这三处均查无。"
+    },
+    {
+      "id": "RC3_what_sanzang_refused_and_what_he_actually_accepted",
+      "found": "三藏辞谢布施时给了**理由**（受一丝之贿千劫难修），并且**明确说了他收什么**：只带席上吃不了的饼果做干粮。候选 T3.cost 只处理了金银与衣物的流向，没记三藏这一侧的实际收受。",
+      "quote": "我出家人，若受了一丝之贿，千劫难修。只是把席上吃不了的饼果，带些去做干粮足矣。",
+      "start": 133954,
+      "end": 133993,
+      "why": "治理意义：T3.result 说老高「实际付出的只是被拒的金银与给了八戒的一双鞋、一领褊衫」——但原文里老高**确实送出了东西并被收下**（饼果做干粮），因此『被拒的金银』不等于『什么都没收』。这条影响 cost 一侧的记账完整性（谁付了什么、谁收了什么）。原文两处：133954–133972（拒贿理由）、133972–133993（实际收受）。"
+    },
+    {
+      "id": "RC4_bajie_states_his_own_reason_for_keeping_a_way_back",
+      "found": "八戒在被行者喝止后，自己给出了留后路的理由：怕万一取经不成，和尚与老婆两头都误。这是 T7 那条『保留退路』的当事人自述依据，候选只记了行为、没记理由。",
+      "quote": "八戒道：“哥呵，不是胡说，只恐一时间有些儿差池，却不是和尚误了做，老婆误了娶，两下里都耽搁了？”",
+      "start": 134218,
+      "end": 134266,
+      "why": "治理意义：T7.resultIsSuccess=false 的依据是『这条被师兄师父当场否掉，原文也没有给他任何承诺』。原文确实在否掉之前先给了他的理由，且这个理由是**成本计算**（两头耽搁）而非抗命——它让这条从『八戒胡说』变成『八戒在算风险』。不改变 false 的判定，但改变这条的定性，且它是 T7 五元组里 obstacle→result 之间缺失的一环。"
+    },
+    {
+      "id": "RC5_they_crossed_the_utsang_border",
+      "found": "高老庄与浮屠山之间，原文唯一给出的行程事实是「有个月平稳」并且**行过了乌斯藏界**。候选引了「有个月平稳」（在 RCE4 里）却漏了乌斯藏界。",
+      "quote": "三众进西路途，有个月平稳。行过了乌斯藏界，猛抬头见一座高山。",
+      "start": 134417,
+      "end": 134447,
+      "why": "治理意义：这是本单元唯一的空间推进标记（出了乌斯藏界才见浮屠山），浮屠山场景因此有明确的地理前置。候选既未引用、也未在 gapAnchors 里点名（我实测 134430 落在『既无引文也无 gapAnchor』的空隙内）。它同时是把本单元与后文地貌衔接的一个可核对锚点。"
+    },
+    {
+      "id": "RC6_gapAnchors_themselves_have_sizeable_unanchored_holes",
+      "found": "候选 remaining 说 gapAnchors 的用途是「让复核者能按图索骥去问『这一段里还漏了什么』」，coverage 也说它把『我没有下断言的段落』逐条点名。实测：把全部引文节点 ∪ 26 条 gapAnchors 后取补集，仍有 4 段 100 字以上的连续区间**既无断言也未被点名**：[129432,129690) 258 字、[129706,129922) 216 字、[134513,134694) 181 字、[132590,132764) 174 字。",
+      "quote": "八戒道：“他倒也有些道行。他曾劝我跟他修行，我不曾去罢了。”师徒们说着话，不多时，到了山上。",
+      "start": 134531,
+      "end": 134577,
+      "why": "治理意义：这是本轮**结构性**的发现——点名机制本身有盲区，所以只统计『有多少 gapAnchors』会高估披露度。上面 RC1–RC5 五条我抽到的遗漏，全部落在这类未点名空隙里（RC1/RC2/RC3/RC4/RC5 经逐条判定 inUnanchoredHole=True）。建议：把这类空隙按段补齐 gapAnchors（只登记位置、不写断言，成本低且不引入新结论）。"
+    }
+  ],
+  "misKillCheck": {
+    "result": "未发现被词表/正则**误杀**的合法因果边或伏笔；但 RCE1 的口径偏窄，记为存疑（不足以判 fail）。",
+    "detail": "逐条读了 10 条 rejectedAsCauseEdge 与 8 条 rejectedAsForeshadow 的理由，全部是『中间没有机制句』『把并置当因果』『把修辞当事实』『一次出现不升格为伏笔』这类有原文依据的判断，不是关键词挡掉的：RCE5（偈→骂）否得尤其对，因为三藏当场给了相反读法；RCE8/RFS4（回末联→后文）与 RFS5（野猪挑担子→八戒担着）都是主动否掉自己本可写的形似因果，方向正确。CE17（『那相识』＝行者）候选自标 derived 并在 caveat 里写明可能只是抢白——我认同它是推导，但把它留在 causeEdges 而非移入 rejectedAs* 是可接受的（它没有被当成事实断言）。",
+    "suspicionRecorded": "RCE1（『看看战到天将晓／直斗到东方发白』→『那怪不能迎敌，败阵而逃』）我倾向认为**不应整条否掉**：原文把『战到天将晓』与『两膊觉酸麻』写在同一句里，再把『不能迎敌』接上，天明至少是与体力并置的因素。但按角色契约第 6 条，我拿不出原文中『天明致败』的机制句（原文给的身体状态是『酸麻』），所以这只能记为**存疑**，不能据此判 fail；而且候选自己已在 selfCritique 把它列为最可能误读的第 1 位、并给了降级方案（改 mechanism 而非删边），处理是恰当的。"
+  },
+  "hallucinationCheck": {
+    "result": "未发现编造的人物、事件、结局、伏笔，也未发现把结束当成功。唯一不实陈述是关于它**自己产物**的（CE1），不是关于原文的。",
+    "detail": "① 人物：候选正文里不出现切片内没有的人物——它的 forbidden 词表里 高翠兰/翠兰/沙僧/流沙 全为 0 属实（我复核：高翠兰全书 0；翠兰全书 2 次，都在第十八回 [123461,129251) 即区间外），且它明确用『女儿／浑家／拙荆』通称而不写名字（U10），不把『水怪前头遇』指认为沙僧（U5）。我一开始把 高翠兰/沙僧 在我的实体扫描里标成『出现在候选但不在切片』，复核后确认它们只出现在它自己的 forbiddenZero 清单与说明里，属声明而非使用——**我的这一条指控不成立，如实撤回**。② 结局：3 条 resultIsSuccess=false（T5 路程没拿到、T6 打乌巢一无所获、T7 退路被否），FS5.caveat 明确写『回收不能用来支持行者武力取胜』，T1.resultNote 明确拒绝『播放到结尾=成功』。③ 越权：KD3/U11 把整条皈依链的支点（菩萨劝善受戒）标为无旁证，FS1.caveat 同；U14 拒绝把『晓得过去未来』写成叙述事实。④ 唯一的越权形态是 CE1：声称自己拒了一条它没拒的边。"
+  },
+  "usableVsDiscard": {
+    "直接可用": [
+      "tasks 8 条的五元组与全部 evidence（77 个引文节点全部逐字可查、偏移一致）——T1–T8 的 objective/obstacle/action/result 我都回原文核过，无编造；6 条 cost=null 与 basis.cost=null 的用法合规。",
+      "causeEdges 17 条（CE1–CE17）：每条 3–4 个引文节点全部核过；CE4/CE14/CE17 三条候选已自标较弱（分别标 inferred 部分、建议降级、标 derived），采信时按它自己的降级说明处理即可。",
+      "states 8 条、knowledgeDiffs 7 条、foreshadows 7 条（FS6 已自标 inferred）、unknowns 14 条：引文全部核过；FS 的 status/payoff/payoffAnchor 一致性实测 7/7 成立（resolved 三条三字段齐全、unresolved 四条 payoff 与 payoffAnchor 皆为 null）。",
+      "rejectedAsCauseEdge 10 条 / rejectedAsForeshadow 8 条：理由逐条读毕，均有原文依据，未发现误杀。",
+      "gapAnchors 26 条的**位置**可用（claim/basis 实测 26/26 皆为 null，未夹带断言，这一点它做得干净）。"
+    ],
+    "必须修或降级": [
+      "CE1：删掉 T1.resultNote 里『在 rejectedAsCauseEdge 里拒掉了「钯筑不动→投降」』，或改指它真正保留的 CE4。",
+      "CE2：coverage.reverseCoverage.evidenceOnly 的 span 与数字二者改一（含 rejectedAs* 时是 2267/278 节点；不含时保持 2118/243 但要把标签改成不含 rejectedAs*）；coverage.quoteNodes=243 必须写明它指哪个子集（全部节点=304、去 gapAnchors=278、distinct=178 三个数已在同文件出现，不定义就会继续被误读）。",
+      "CE3：nameUsageAudit.forbiddenZeroNote 的『在本切片内为 0』改为『作为叙述层地点为 0』（或直接删该分句，因为后半句已经说对了）。",
+      "CE4：RFS5 的『『担子』一词在全单元只各出现一次』改为 2 次，或删去该支撑句（结论不变）。",
+      "CE5：proseQuoteHygiene.audit 的『所有字符串字段』改为『白名单 PROSE_KEYS 内的字段』，并补上 states[*].anchorEvent 这条真实违规（把拼接引文改成『』，或像 crossUnitReferences 那样另立字段登记两段偏移 130489–130505 与 130516–130522）。",
+      "建议补进 gapAnchors（只登记位置、不带断言）：[129432,129690)、[129706,129922)、[132590,132764)、[133500,133613)、[134513,134694) 等既无断言也未点名的空隙。"
+    ],
+    "不得据此判 fail 的理由": "全部 304 个引文节点零编造、零错位、零哈希不符，5/5 抽样逐字命中；三条红线（台词≠叙述事实、结束≠成功、一次出现≠伏笔）都有明确执行痕迹；未误杀合法条目。上面 5 条 counterExamples 都是**可核对的自述/口径缺陷**，不是对原文的编造——按角色契约，这类问题应当判 partial 并要求修正，而不是整条退回重做。"
+  },
+  "notes": "总判 **partial**。分层说结论：\n\n(1) 引用定位层：**干净**。全部 304 个引文节点（含 gapAnchors）逐条满足 text[start:end]==quote、全书唯一、区间包含、sourceHash 单值一致，零失败；固定种子抽 5 条，find() 与声明偏移全部一致。源文件 sha256 与任务 sourceHash 相等，切片 sha256 与候选自报的 sliceSha256 相等，边界 129251/136016 与 6765 字全部复算成立。\n\n(2) 抽取内容层：**可用且有纪律**。8 条任务、17 条因果边、8 条状态、7 条知识差、7 条伏笔、14 条 unknowns 我都回原文核过。『台词不当叙述事实』执行得好（factStatus=utterance 用得克制且准；KD3/U11 把菩萨劝善整条标为无旁证；U14 拒绝把禅师的预知写成叙述事实）。『结束≠成功』执行得好（3 条 resultIsSuccess=false 并写明机制；T1.resultNote 明确拒绝把播放到结尾读成胜利）。『一次出现≠伏笔』执行得好（8 条主动否掉，含它本可以写成伏笔的『野猪挑担子→八戒担着』）。\n\n(3) 为什么仍是 partial 而不是 pass：5 条 counterExamples 都是**可被原文或候选自身产物直接证伪**的陈述，其中 CE1 是声称自己拒了一条从未列出的因果边（而它真正保留的 CE4 恰是最近的那一支），CE2 让同一个文件里『引文节点』出现 304/243/178 三个互不相等的数而其中一个的标签与数字对不上，CE5 让『已全部改为『』或补登记』的收口结论不成立。这些不是文风问题——本项目的失败形态正是『声称强于验证』，而这三条都属于同一形态。\n\n(4) 反向验证的实际收成：找到 5 条原文明确、候选未覆盖的事实（RC1–RC5），最重的是 RC1（禅师曾劝八戒跟他修行、八戒拒绝——候选全篇零次提及，而它的 KD4.caveat 恰好把这段说成空白）与 RC2（绑缚的放人条件与当页解除全部缺失，使 T1 的 result 断在半途）。更要紧的是 RC6：这些遗漏**全部落在既无断言、也未被 gapAnchors 点名的空隙里**——也就是说候选引以为披露机制的『点名』本身有 4 段 100 字以上的盲区。这条比任何单条遗漏都更值得修。\n\n(5) 我自己的反向验证有一条不成立，如实撤回：实体扫描时我把 高翠兰/沙僧 标为『出现在候选但不在切片』，复核后确认它们只出现在候选自己的 forbiddenZero 清单与说明文字里，属正确声明（两者在切片内确实为 0，翠兰全书仅 2 次且都在第十八回），不是幻觉。另：RCE1 我怀疑否得过宽，但拿不出原文的机制句，按契约只记为存疑，不据此判 fail。\n\n(6) 未做：不跑 GPU/浏览器测试（任务未声明）；未使用图谱缓存 data/cache/df959d743e53206f56db2f92.json 做语义对照（任务只允许它作对照，我未采信其中任何结论）；不做经义解读（G23 的处理我认同）。",
+  "evidence": [
+    {
+      "path": "loop/state/out/read_xiyou_L1_0019.candidate.json",
+      "sha256": "f6a1d86d0c8421533c1edd5060700ea7c04d4a9e5cde2eaf3640147f13217b3f",
+      "kind": "reviewed-candidate"
+    },
+    {
+      "path": "data/cache/df959d743e53206f56db2f92.docs.json",
+      "sha256": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+      "kind": "source-text"
+    },
+    {
+      "path": "loop/state/out/read_xiyou_L1_0019.json",
+      "kind": "reviewed-task-record",
+      "note": "被复核任务的提交记录（agent=w-xiyou-1，verifyState 原为 pending）。"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/df959d743e53206f56db2f92.docs.json": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+    "loop/state/out/read_xiyou_L1_0019.candidate.json": "f6a1d86d0c8421533c1edd5060700ea7c04d4a9e5cde2eaf3640147f13217b3f"
+  },
+  "assertions": [
+    {
+      "text": "区间与哈希：shasum -a 256 data/cache/df959d743e53206f56db2f92.docs.json == c282cf39…52a2（== 任务 sourceHash）；text.find('第十九回')==129251、text.find('第二十回')==136016、len(text[129251:136016])==6765；切片 sha256 == 807bc370…4ff82（== 候选 source.sliceSha256）。",
+      "result": "pass"
+    },
+    {
+      "text": "引文全量：独立重写遍历（不复用候选脚本），对 304 个引文节点断言 text[start:end]==quote、count==1、区间包含、sourceHash 一致 → problems=0；distinct quote=178。",
+      "result": "pass"
+    },
+    {
+      "text": "引用抽样：random.seed(20261009) 抽 5 条，逐条 find() 与声明 start 一致、切片相等、全书唯一 → 5/5 命中。",
+      "result": "pass"
+    },
+    {
+      "text": "自报计数复算：nameUsageAudit 14+9 项、nonEmptyParagraphs 29、引号配对 89、心经四口径（331/271、316/259、53、15）、selfCritique 8 组全书计数、『那怪王』3 处（2 处在第八十九回）、U+E485 私用区字符 → 全部与实测相等。",
+      "result": "pass"
+    },
+    {
+      "text": "CE1：候选 rejectedAsCauseEdge 的 10 条 pair/why_rejected 中，无一条含『投降』或『筑』；而 T1.resultNote 声称在其中拒掉了『钯筑不动→投降』；被保留的 CE4 恰是最接近该对的一条 → 该自述不实。",
+      "result": "fail"
+    },
+    {
+      "text": "CE2：按候选自己写的 span（含 rejectedAs*）复算得 covered=2267 / 278 节点 / gaps=131，与声明的 2118 / 122 不符；改为不含 rejectedAs* 的子集则得 2118 / 243 节点 → 标签与数字分属两套口径；coverage.quoteNodes=243 未定义子集，且与 summary 的 304、quoteAudit 的 178 三数并存。",
+      "result": "fail"
+    },
+    {
+      "text": "CE3：nameUsageAudit.forbiddenZero 字典自报 花果山=1、水帘洞=1（实测各 1，位置 132027/132030），同对象 forbiddenZeroNote 却写『在本切片内为 0』→ 自相矛盾。",
+      "result": "fail"
+    },
+    {
+      "text": "CE4：RFS5 称『『担子』一词在全单元只各出现一次』，实测 2 次（135648、135872）。",
+      "result": "fail"
+    },
+    {
+      "text": "CE5：prose_audit.py 的 PROSE_KEYS 白名单不含 anchorEvent；states[2].anchorEvent 内的「他本是天蓬元帅临凡…其实性灵尚存」跨 130489–130505 与 130516–130522 两段、切片内 find 不到，违反候选自定的『「」只包逐字原文』规则；独立全字段扫描 216 个「」片段中 2 个 find 不到（另一为脚本示例『「...」』）。",
+      "result": "fail"
+    },
+    {
+      "text": "反向验证：RC1–RC5 五条原文事实（134536–134560、132635–132677+133063–133096、133954–133993、134218–134266、134417–134447）在候选 JSON 里搜不到对应字符串；RC6 用『引文 ∪ gapAnchors』补集法证明这五条全落在 4 段 100 字以上的未点名空隙内（最长 258 字）。",
+      "result": "pass"
+    },
+    {
+      "text": "误杀检查：10 条 rejectedAsCauseEdge + 8 条 rejectedAsForeshadow 理由逐条读毕，未发现被误杀的合法条目；RCE1 口径偏窄仅记为存疑（无原文机制句支持反对意见，按契约不据此判 fail）。",
+      "result": "pass"
+    },
+    {
+      "text": "幻觉检查：候选正文无切片外人物/事件/结局；高翠兰/沙僧 仅出现在其 forbiddenZero 声明中（切片内实测 0）；3 条 resultIsSuccess=false 与多处 caveat 证明未把结束当成功。我先前对 高翠兰/沙僧 的怀疑不成立，已撤回。",
+      "result": "pass"
+    },
+    {
+      "text": "候选自带脚本复跑：/tmp/rd0019/verify.py → 'RESULT: PASS (problems=0)'；/tmp/rd0019/prose_audit.py → '「」 引文总数: 200 逐字命中: 200'。两脚本经检查为只读（仅 open 读），无写操作。注意它们复用候选自身口径，其 PASS 不能反推候选自述无误。",
+      "result": "pass"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/verify_xiyou_L1_0019.verdict.json",
+      "kind": "append-only"
+    }
+  ],
+  "remaining": [
+    "本复核只覆盖 [129251,136016) 切片与候选文件；不评价《西游记》其他回目，不用图谱缓存 data/cache/df959d743e53206f56db2f92.json 的既有结论做交叉印证。",
+    "未跑 GPU/浏览器测试（任务未声明要跑）。",
+    "RCE1（天明是否为败走并置因素）留作存疑，需原文外的版本校勘或作者意图材料才能定论，本轮不作判定。",
+    "U7（『那怪王』断句）、U8（心经自称 54 句/270 字与机械计数不符）、U9（前年/这几年/三年时间口径）我复核后**认同应保持 unknowns**：我也没有在切片内找到能定论的材料，不替它们补一个答案。",
+    "建议下一轮把 CE1–CE5 作为返修项退回原 reader（或由后续合并任务统一修）：五条都是局部字段修改，不影响已定位引文的可用性。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/verify_xiyou_L1_0019.verdict.json"
+    ]
+  }
+}

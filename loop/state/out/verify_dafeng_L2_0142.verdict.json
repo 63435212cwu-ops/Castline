@@ -1,0 +1,184 @@
+{
+  "schemaVersion": "reader-verdict/1",
+  "task": "verify:dafeng:L2:0142",
+  "reviewedTask": "read:dafeng:L2:0142",
+  "reviewer": "w-verify-1",
+  "candidate": {
+    "path": "loop/state/out/read_dafeng_L2_0142.candidate.json",
+    "sha256": "5b99de60571043c7c1bb1dffa26ea6903dacd3242f1e53643df4a01db3e73509",
+    "bytes": 163643,
+    "agent": "w-dafeng-1",
+    "selfSignCheck": "复核者 w-verify-1 ≠ 原提交者 w-dafeng-1，非自签"
+  },
+  "source": {
+    "docsPath": "data/cache/1063b17ca65ec1b76f30e460.docs.json",
+    "docsSha256": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "verifiedAgainstTaskSourceHash": true,
+    "range": [498216, 502903],
+    "segmentChars": 4687,
+    "segmentSha256": "83088532700d34db1e76c830051ae6ed2beb4b1d29c24bb57851bfbf6cab4ad7",
+    "note": "文件哈希与任务声明的 sourceHash 一致；切片哈希与候选 source.segmentSha256 一致。两者均为本次现算。"
+  },
+  "verdict": "partial",
+  "reviewMethod": "先自己读原文（docs[0].text[498216:502903)，4687 码点，逐段列成 122 段带绝对偏移的清单），再看候选。全部数字用独立脚本现算，不采信候选 machineSelfCheck / deliverableIndex 的任何自述。反向验证按『原文逐段列举 → 候选引文区间求交 → 差集即漏项』，并额外加做第二层：对每个被候选计为 covered 的段落，求『未被任何断言引文触及的尾部片段』。脚本与完整输出见 evidence：independent_verify.py / independent_verify.out.txt。",
+  "priorReviewNote": "本路径此前已存在 w-dafeng-2 的复核结论（sha256 b5c9e2148d5fac8b825d22849854c3f85b896568e737f61819c21aa681d155c8，2026-10-12T22:46:56Z）。本轮任务是**重新签发**给我（租约 loop/state/leases/verify:dafeng:L2:0142.d/lease.json 的 agent=w-verify-1、startedAt=2026-10-12T23:05:34Z，晚于上一版 19 分钟），写入路径与任务 writes 相同，故本文件覆盖该路径；上一版已逐字节保全到 evidence 的 PRIOR-verdict-w-dafeng-2.json（cmp 相同）。**我不是第一个复核者**，也不主张 w-dafeng-2 漏做核验：其两条 counterExamples（时序倒置、T1 objective 越权）我独立复算**成立**，保留为 CEX-A/CEX-B 并写明系其先报；我另查出三条它未覆盖的缺陷（CEX-C/D/E），其中 CEX-C 是本任务提示词点名的硬性红线形态。",
+  "counterExamples": [
+    {
+      "id": "CEX-C_dialogue_as_narration",
+      "severity": "must-fix（任务硬性红线：不许把人物说的话当成叙述事实）",
+      "field": "states[0].before（ST1 浮香）",
+      "claim": "ST1.before 写『叙述同时写她『精神恍惚』『心里难以平静下来』』——把『精神恍惚』当作叙述层对浮香的直接陈述，并以此支撑前值。",
+      "quote": "“娘子最近精神恍惚的，也不太高兴，是在想许公子吗？”",
+      "offsets": {"start": 499113, "end": 499139},
+      "contradictedPhrase": {"phrase": "精神恍惚", "start": 499118, "end": 499122},
+      "why": "**把台词当叙述**。『精神恍惚』四字（@499118，全书仅此 1 次）整句落在**丫鬟的问话**里（引号内），不是叙述者的陈述。同段两个支撑只有后一个成立：『心里难以平静下来』@499407 确实是叙述层。所以 ST1 前值有一半建在人物的探问上——而那句正是**试探**（候选自己的 coverageDeclaration.uncoveredItems[start=499113] 就写着『丫鬟的试探台词。它支撑 ST1 前值里的『精神恍惚』』），候选在断言区却把它升格为『叙述同时写』，与自己登记表的定性直接矛盾。平心而论：底层结论（她心绪不宁）并不因此垮掉——499407 与 499389–499421 仍支撑它；错的是**证据归属**这一层，属红线点名的形态。修复：把『精神恍惚』从『叙述同时写』摘出、改标为丫鬟台词的转述，或只保留 499407。",
+      "reproduce": "python3 -c \"import json;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];i=t.find('精神恍惚');print(i,t.count('精神恍惚'),repr(t[499109:499140]))\"  # → 499118 1 '    “娘子最近精神恍惚的，也不太高兴，是在想许公子吗？”'（在引号内）"
+    },
+    {
+      "id": "CEX-D_rule_executed_cites_proposal",
+      "severity": "should-fix（误杀形态：可用且唯一的执行证据进不了产物，改用提议句顶替标签）",
+      "field": "worldSettings 的 W_rule_xingjiuling.quote ＋ institution=executed",
+      "claim": "该条标 institution=executed（＝有执行动作），但唯一 quote 是**提议**句，本身不含任何执行动作。",
+      "quote": "一位颇有才女气质的花魁提议玩行酒令。",
+      "offsets": {"start": 501635, "end": 501653},
+      "why": "**引文与标签不同级**。候选自己的 explain 承认执行证据在别处（『花魁提议后众人真的玩了起来（『酒过三巡』；话题也在这套玩法里展开）』），却没给它 quote。原因应是唯一性判据（machineSelfCheck.note：『start 为全文首次出现且全书唯一』）挡掉了『酒过三巡』——该四字全书 5 次、首现在 45662（区间外），确实不可用。**但区间内存在一条既唯一、又完整承载执行结果的句子**：『酒过三巡，许七安表现的平平无奇，没有脍炙人口的诗词问世，这让因他而来的几位花魁颇为失望。』（@501659–501703，全书 count=1）。候选**已经**把它当 T5.obstacle 与 T7.obstacle 的引文用过两次，可见跨条目复用是它允许的（T5/T7 就是同一句），故不存在真正的阻挡。这正是角色契约警告的**误杀**：口径把真实执行证据挡在门外，于是用一句提议句顶上 executed 标签。修复：补 501659 那句作 quote，或把 institution 降为 declared / misunderstood。",
+      "reproduce": "python3 -c \"import json;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];q='酒过三巡，许七安表现的平平无奇，没有脍炙人口的诗词问世，这让因他而来的几位花魁颇为失望。';print('酒过三巡 全书',t.count('酒过三巡'),'@',t.find('酒过三巡'));print('执行句 全书',t.count(q),'@',t.find(q))\"  # → 酒过三巡 全书 5 @45662（区间外）；执行句 全书 1 @501659（区间内，可用）"
+    },
+    {
+      "id": "CEX-E_covered_tails_substantive_unused",
+      "severity": "should-fix（覆盖数字优于实际产出；把一个孤例推广为 9 处）",
+      "field": "coverageDeclaration.coveredItems 的『已覆盖』判定",
+      "claim": "候选把 62 段计为 covered，但其中 9 段的**尾部实质内容**在断言区（tasks/causeEdges/states/knowledgeDiffs/foreshadows/worldSettings/themeReadings）**一次都没出现**；覆盖判定用『引文区间与段落区间有交』，于是数字好看而信息未产出。",
+      "quote": "当然，浮香现在一波成功的炒作，早已今非昔比，力压教坊司众花魁。",
+      "offsets": {"start": 498452, "end": 498483},
+      "uncoveredTail": {"start": 498452, "end": 498474, "text": "当然，浮香现在一波成功的炒作，早已今非昔比，"},
+      "why": "**这是独立事实，且是全场赌注的地位前提**：浮香靠一波成功炒作『力压教坊司众花魁』——七位花魁为何闻讯赶来、明砚为何要半途截人、浮香为何敢当众宣布主权，都建在这条地位差上。候选把它计为 covered（coveredItems 内含 start=498452），但**全文（含断言区与登记区）没有出现过『炒作』『力压』『今非昔比』**。我按同一口径现算出 9 处（脚本第 3b 节）：498452 / 498489 / 498849 / 499850 / 500166 / 500515 / 501010 / 501709 / 501853。其中 501010『，她自己得了大便宜，成为艳名远播的名妓，也该知足了。』与 w-dafeng-2 的 reverseChecks 第 2 条命中同一段（它按单例报出，我这里是结构性复现，并给出另外 8 处）。另：候选的 W_rule_jingzheng 解释了竞争生态，却没有解释**为什么被围攻的是浮香**，缺的正是这段。修复：这 9 段尾部要么补为断言依据，要么从 coveredItems 移入 uncoveredItems 并给理由。",
+      "reproduce": "python3 -B <artifacts>/independent_verify.py 的第 3b 节逐条列出 9 个片段的偏移、长度与『是否出现在断言区』的布尔值"
+    },
+    {
+      "id": "CEX-A_R1_T4_temporal_inversion",
+      "severity": "should-fix（时序倒置当因果。w-dafeng-2 先报，我独立复算成立并保留）",
+      "field": "tasks[3].obstacle（T4 明砚）＋ rejectedEdges[0]（R1）",
+      "claim": "T4 把『浮香当做没听见』当作明砚那句逐客令的阻碍/触发；R1 否掉一条边时也声称『真正的触发是浮香当做没听见地坐到许七安身边』。",
+      "quote": "浮香当做没听见",
+      "offsets": {"start": 500849, "end": 500856},
+      "why": "**触发晚于结果**：被当作触发的 500849 落在被当作结果的明砚那句（500792–500843）**之后** 6 个码点。真正的触发在两段**之间**且逐字可查：浮香的话术『“听说许郎来了教坊司，奴家也想来凑个热闹，和明砚姑娘一起伺候。”』@500669–500701，叙述层随即定性『既宣布了主权，敲打了明砚花魁』@500744–500758——明砚的逐客令是对这句的回应。R1 的否定**结论**方向可接受（引 500849 作触发确实错），但它替换上的『真正触发』同样不成立，须一并改写。",
+      "reproduce": "python3 -c \"import json;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];[print(t.find(q),q[:22]) for q in ['明砚扯起一个热情的微笑','浮香当做没听见','“听说许郎来了教坊司，奴家也想来凑个热闹，和明砚姑娘一起伺候。”','既宣布了主权，敲打了明砚花魁']]\"  # → 500792 < 500849；真触发在 500669 / 500744"
+    },
+    {
+      "id": "CEX-B_T1_objective_unsupported_explicit",
+      "severity": "should-fix（无直述依据却标 explicit，且与自身 note、自身覆盖理由三处互相矛盾。w-dafeng-2 先报，我独立复算成立并保留）",
+      "field": "tasks[0].objective（T1 明砚请客）",
+      "claim": "objective 正文写『她派人守在影梅小阁门外，专等他出现』并标 basis=explicit。",
+      "quote": "“许公子，我家明砚姑娘想请公子喝茶。”清秀少年躬着身，笑容谄媚。",
+      "offsets": {"start": 498355, "end": 498387},
+      "why": "**三个无据词 ＋ 三处自相矛盾**。『守在』『专等』『派人』在本区间出现次数均为 **0**（全书层面『专等』一次都没有）。该引文只支持『明砚想请许七安喝茶』，不含守候/蹲点信息。矛盾一：候选自己的 objective.note 承认这是『少年的转述（人物的话）』、可靠性靠后文兜底——转述＋兜底恰是 explicit 的反面。矛盾二：唯一潜在支撑（498312『与影梅小阁门口伫立的少年打扮一致』）被候选自己在 uncoveredItems[start=498312] 判为『人物描写…不含可提取的断言』——即先拒绝提取它，随后又用它的意思写了 explicit。修复：降为 inferred/derived，或改写为有直述依据的表述。",
+      "reproduce": "python3 -c \"import json;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];s=t[498216:502903];print({w:s.count(w) for w in ['守在','专等','派人']})\"  # → {'守在': 0, '专等': 0, '派人': 0}"
+    }
+  ],
+  "reverseChecks": [
+    {
+      "found": "明砚一方**尝试拦阻浮香并且失败**——浮香是硬闯进来的。这是浮香『登门』这条线的实际阻力，候选未用于任何断言。",
+      "quote": "“娘子，浮香来啦，我，我们拦不住。”",
+      "offsets": {"start": 500352, "end": 500370},
+      "why": "候选 uncoveredItems[start=500329] 的理由只写『侍女通报浮香到场，是 C5/T3 之前的过场；本候选未从中立独立断言』，把『拦不住』三个字当过场丢掉。但它是独立事实：明砚院里的人**试过阻止**。它同时解释了浮香为何『沉着脸』进门（500605）与明砚为何只能改用话术应对。T3 的 obstacle 只写了『她晚了一步』与『不能摆出兴师问罪姿态』，缺这一层。"
+    },
+    {
+      "found": "浮香已近一旬未见许七安，且叙述层给出她的处境定性：『花前月下时就喊她小甜甜，兴致过了，便将她冷落』——这是 ST1 前值（冷处理）的**叙述依据**，比候选引用的台词更硬。",
+      "quote": "这男人，快一旬没见到了，花前月下时就喊她小甜甜，兴致过了，便将她冷落。",
+      "offsets": {"start": 499839, "end": 499874},
+      "why": "该段被候选登记为未覆盖。候选的 C4 quote 确实带了前半句『这男人，快一旬没见到了』（我核对过 C4.quotes[0] 含此串），但**后半句是叙述层给她的处境定性**，而候选的 tasks / states / knowledgeDiffs 三个分区里『一旬』出现 0 次、『冷落』出现 0 次。ST1 前值用的是她口头的『一个臭男人，我想他干嘛』和丫鬟的顶嘴（两者都是台词），反而没用这条叙述旁白。"
+    },
+    {
+      "found": "浮香在群体里的**地位**：靠一波成功炒作『力压教坊司众花魁』，与明砚同级却已今非昔比。候选把该段计为 covered，断言区零使用。",
+      "quote": "当然，浮香现在一波成功的炒作，早已今非昔比，力压教坊司众花魁。",
+      "offsets": {"start": 498452, "end": 498483},
+      "why": "见 CEX-E。它不是装饰：它为『七位花魁闻讯赶来』『明砚要抢人』『浮香敢当众宣布主权』提供地位差前提；缺了它，W_rule_jingzheng 只解释了竞争生态，解释不了为什么被围攻的是浮香。"
+    },
+    {
+      "found": "众花魁到场后**先集体行礼**（站成一排、欠身、问『许公子好！』），是场面礼仪程序；候选断言区未把它当事件。",
+      "quote": "“许公子好！”花魁们站成一排，欠了欠身，嗓音悦耳动听。",
+      "offsets": {"start": 501298, "end": 501325},
+      "why": "该段在 uncoveredItems 里有理由（『集体问候的场面动作，属礼节；不改变任何断言』），故**不算漏登记**。但它对 W_rule_jingzheng『保持花魁的身份和气度』是**动作级证据**（行礼而非争抢），比候选引用的评价句『都是人精…保持着花魁的身份和气度』更直接。作为可补项登记，不据此判 fail。"
+    },
+    {
+      "found": "许七安在本区间有明确的**身体接受**：浮香依偎过来时他顺势搂住小纤腰。候选 TH2.counter 论证『他并不抗拒』时只引了心理句。",
+      "quote": "“嗯。”许七安见花魁依偎过来，顺势搂住小纤腰。",
+      "offsets": {"start": 500919, "end": 500942},
+      "why": "候选把它登记为未覆盖（理由：『亲密互动描写，展示两人关系的当下状态；本候选未据此立状态』），故**不是漏登记**。但 TH2.counter 引的是 500491 心理句（『没觉得不开心或者厌烦』），行为句反而没引——属论证强度可提升处，不是缺陷。"
+    }
+  ],
+  "citationCheck": {
+    "method": "random.seed(20261013)，从候选 108 条证据引文（已排除 unquotedDialogue 登记表）中抽 5 条，逐条在 docs[0].text 上 find() 一次并比对 start/end 与切片。",
+    "picked": 5,
+    "verbatimHits": 5,
+    "offsetConsistent": 5,
+    "uniqueInBook": 5,
+    "detail": [
+      {"path": "root.foreshadows[1].setup[0]", "declared": [500948, 500981], "find": 500948, "sliceHit": true, "wholeBookOccurrences": 1},
+      {"path": "root.rejectedEdges[2].quotes[0]", "declared": [501490, 501523], "find": 501490, "sliceHit": true, "wholeBookOccurrences": 1},
+      {"path": "root.tasks[3].cost.quotes[0]", "declared": [500987, 501010], "find": 500987, "sliceHit": true, "wholeBookOccurrences": 1},
+      {"path": "root.knowledgeDiffs[4].quotes[0]", "declared": [500213, 500286], "find": 500213, "sliceHit": true, "wholeBookOccurrences": 1},
+      {"path": "root.worldSettings[1].arrivalQuotes[1]", "declared": [501389, 501428], "find": 501389, "sliceHit": true, "wholeBookOccurrences": 1}
+    ]
+  },
+  "checksRerun": {
+    "note": "候选 machineSelfCheck / deliverableIndex 的自述**一律重算**，不采信。命令：python3 -B <artifacts>/independent_verify.py；输出见 independent_verify.out.txt。",
+    "docsFileSha256": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839（== 任务声明）",
+    "candidateSha256": "5b99de60571043c7c1bb1dffa26ea6903dacd3242f1e53643df4a01db3e73509",
+    "quoteRefsTotal": 130,
+    "evidenceQuotesExclRegistry": 108,
+    "distinctEvidenceQuotes": 64,
+    "candidateSelfClaimedQuoteRefs": 64,
+    "sliceEqualsQuoteFailures": 0,
+    "offsetOutsideUnit": 0,
+    "sourceHashMismatch": 0,
+    "quotesNotUniqueInDoc": 1,
+    "quotesNotUniqueNote": "唯一一条非全是 unquotedDialogue[21]（『天下谁人不识君』全书 2 次）。候选**自己**在登记表里如实标了 wholeTextOccurrences=2 / uniqueInBook=false / isEvidence=false，且该句本就是引文内的转述句——候选既未把它当证据、也未谎报唯一性，**不构成缺陷**。证据区 64 条去重引文全部全书唯一。",
+    "quotesStartNotFirstOccurrence": 0,
+    "selfReportedMetadataMismatch": 0,
+    "selfReportedMetadataNote": "重算了候选自报的 wholeTextOccurrences / inRange / startIsFirstOccurrence 三类字段，全部与实际相符（0 失配）。",
+    "taskCrossFieldSameQuote": 0,
+    "taskCrossFieldSpanOverlap": 0,
+    "coveragePartition": "122 非空段；候选 covered 62 ＋ uncovered 60；我按段落正则＋区间求交独立重算的段划分与候选两表并集**完全相同**，两表交集 0，每条 start 都落在段首。",
+    "deliverableIndex": "13 项计数与各分区实际 len() 全部相符（含 selfCritiqueItems=7 ↔ selfCritique.items 长度 7）。",
+    "worldSettingTagLegality": "place.placeState / item.itemStates / rule.institution 全部合法，0 条非法。",
+    "dialogueRegistrationCompleteness": "区间内 >=6 字的『』台词 50 条，**全部**被引用或登记（既未引用也未登记 = 0）。",
+    "graphCrossCheck": "G1/G2/G3 逐条复算成立：ev_2ed432f98c82b12d 的 quoteRef=[502953,502979) 确实在区间外，章标题『第一百四十三章 女妖』在 502903 —— 图谱把该句挂在第一百四十二章，与正文自身章标题冲突，候选不引用它是对的；图谱 tasks 24 条的 start/end 共 442 个，落在本区间的 0 个；G3 七个名字词频（27/26/15/4/1/1/2）与切片逐一相符。"
+  },
+  "hallucinationCheck": {
+    "verdict": "未发现编造",
+    "detail": "断言区出现的人名（许七安/浮香/明砚/阿雅/怀庆/紫阳居士/长公主/皇帝/黛玉）全部能在切片内 find 到，无区间外人物，无替原文补结局。最关键的越权风险候选主动避开：F1 标 unresolved，payoffNote 明写回收在区间外 502953（第一百四十三章 女妖）——我在原文核对 502953 确实存在该句、且确实在区间之后，这是『没有把后文当本区间回收』的正确做法；K3/U2 同样未把半首七言的作者写成已揭晓。T6.result 照实写『全章停在她的问句上』，没有把结束当成功。"
+  },
+  "falseKillCheck": {
+    "verdict": "发现 1 处误杀形态（CEX-D）",
+    "detail": "候选的唯一性判据（『start 为全文首次出现且全书唯一』）在 CEX-D 上把一条**真实且可用的执行证据**挡在门外：W_rule_xingjiuling 需要 executed 的执行锚点，而『酒过三巡』全书 5 次、首现在区间外（45662）不可用；但区间内 @501659 存在全书唯一的完整执行句，候选没用它、改用提议句顶替标签。这不是『整词判定挡住真实因果边』的原版形态（候选没有被挡掉任何因果边），但同属『口径导致真实证据进不了产物』。另：rejectedEdges 三条我逐条对照原文——R2（视为禁脔→许七安不悦）被 500491『没觉得不开心或者厌烦』明确否掉，R3（眉来眼去→较劲）把社会关系写成个人行为后果，两条否定正确；R1 结论方向可接受但理由含时序错误（CEX-A）。候选对 C4/C6/C8 显式标 derived 并写 caveat，未把推导冒充 explicit。"
+  },
+  "selfCorrection": {
+    "iWasWrong": "我的独立脚本第 7 节（台词登记完整性）**初版口径错**：只拿『证据引文 ＋ unquotedDialogue』求交，报出 4 条台词（『特别厉害』『许公子好！』『快说快说。』『是长公主？』）『完全未登记』。登记场所还包括 coverageDeclaration 的两张表，补上后未登记数为 **0**。该条发现**已作废**，不计入任何判定。保留此段是因为角色契约允许并鼓励复核者如实登记自己的反向验证不成立。"
+  },
+  "usable": {
+    "keepAsIs": [
+      "引文层：130 条引用逐字成立、偏移落在区间内、sourceHash 一致；64 条去重证据引文全书唯一且 start 为首现（全部重算，0 失手）",
+      "F1（半首七言作者）：四处铺设 ＋ unresolved ＋ 区间外回收点标注（边界处理正确，我核对过 502953 与 502903 章标题）",
+      "K1/K2/K3/K4 知识差；K4（侍女分两段报告）有 499781 停顿句支撑",
+      "ST2/ST3/ST5 的前后值与事件锚点",
+      "C2/C3/C5/C7 四条因果边（方向与机制同引文相符）",
+      "R2/R3 两条被否边",
+      "unknowns U1–U14（U2/U5/U9/U11 的边界处理尤其稳）",
+      "themeReadings 两条均带 counter，未把读法写成定论",
+      "notForeshadows / notWorldSettings 的排除理由",
+      "G1/G2/G3 跨图谱对照（我复算成立）"
+    ],
+    "mustFixOrDowngrade": [
+      "CEX-C：states[0].before 把丫鬟台词『精神恍惚』写成『叙述同时写』——红线，须改标注或换证据（底层结论可由 499407 单独支撑）",
+      "CEX-D：W_rule_xingjiuling 标 executed 却引提议句——补 501659 执行句，或把 institution 降级",
+      "CEX-E：9 处被计为 covered 的段落尾部实质内容未进断言区（首要 498452『力压教坊司众花魁』；次 501010『得了大便宜…也该知足了』）——补提取或改登记",
+      "CEX-A：R1.whyRejected 与 T4.obstacle 的『真正触发』须改为 500669/500744；引 500849 当触发是时序倒置（否定结论本身可保留）",
+      "CEX-B：T1.objective『派人守在门外、专等他出现』须降为 inferred 或改写（现标 explicit，与自身 note 及自身覆盖理由三处矛盾）",
+      "附带可补项（不单独要求）：500352『拦不住』作为 T3/T4 的阻力；499839『快一旬没见…将她冷落』作为 ST1 前值的叙述依据；501298 集体行礼作为 W_rule_jingzheng 的动作级证据；TH2.counter 可加 500919 行为句"
+    ],
+    "downgradeToUnknowns": []
+  },
+  "notes": "总判 **partial**，不判 fail。理由：① 抽取层与引文层经我全部重算**零失手**——130 条引用、108 条证据引文、64 条去重全部逐字成立、偏移落区间内、sourceHash 一致、全书唯一、start 为首现；候选自报的 wholeTextOccurrences/inRange/startIsFirstOccurrence 三类元数据 0 失配；覆盖表 122 段完整互斥划分；13 项计数全对；设定标签全合法；50 条台词全部有登记；G1/G2/G3 复算成立。② 无编造人物/结局/伏笔，F1 的区间外回收边界处理得比一般候选严谨。③ 但五条反例都有逐字原文引证、达到判分门槛：其中 **CEX-C 是本任务提示词点名的硬性红线**（把人物说的话当叙述事实，且候选自己的登记表就把它定性为『台词』），CEX-D 是误杀形态，CEX-E 使『已覆盖 62 段』这个数字优于实际产出。主干（任务五元组、因果骨架、状态、伏笔、设定、未知项）均成立且可核，按 partial 定点修复比整体推翻更符合『哪些能用、哪些必须丢弃』的口径。**不确定处／存疑（未据此判 fail）**：① CEX-E 的覆盖面依赖『尾部实质内容』这一阈值——我取 >=12 字且未被任何断言引文触及；若采用『只要区间有交即算覆盖、尾部可由 covered 段概括』的口径，CEX-E 应降为『覆盖粒度问题』而非漏项。两种口径我都如实列出，且 CEX-E 单独不足以判 fail。② CEX-B 的『派人守候』是否可由 498312 伫立少年 ＋ 498234 被叫住**合成**为 explicit：我倾向不能（那是两段叙述的拼合而非直述），但若复核者认为可，该条应降为存疑。③ 我的第 7 节初版口径错、已作废（见 selfCorrection），未计入任何判定。④ 本路径此前有 w-dafeng-2 的复核结论（hash b5c9e214…），本轮系重新签发（租约 agent=w-verify-1，startedAt 晚于其 19 分钟），我覆盖了该路径并把原文件逐字节保全为 evidence 中的 PRIOR-verdict-w-dafeng-2.json；我明确不主张 w-dafeng-2 漏做核验——CEX-A/CEX-B 是它先报、我独立复算成立后保留并注明出处的。⑤ **semanticReview 仍为 not-performed**：引用定位正确与抽取有据，都不等于文学解释已被核验。"
+}

@@ -1,0 +1,36 @@
+{
+ "task": "ops:restart-after-merge-2:20261009",
+ "agent": "reform-lead",
+ "at": "2026-10-08T19:52:58Z",
+ "why": "E15 教训：常驻进程启动时 import 一次核心模块。我本轮改了 loop/bin/loop.py（is_evolving 结构性判据）与 selftest.py，但运行中的 sentinel（pid 57263，启动 03:33:06）早于改动（03:42:34）⇒ 新判据未生效。",
+ "action": [
+  "SIGTERM 13 worker + sentinel；等待优雅退出（w-ops 跑完一个 1116s 的任务后才退，符合设计）",
+  "重启 sentinel --watch（新 pid 16431）",
+  "sentinel --once ×3 按 roster 拉起 worker"
+ ],
+ "observation": "重启窗口内一度出现 roster 13 / 实际 11-12、以及瞬时 15 个进程 —— 那是**优雅退出期间**新旧进程并存的正常现象（worker 承诺『跑完当前任务再退』）。稳定后复核：13 个进程、无重复、无 stray。",
+ "verification": {
+  "finalWorkers": "13（与 roster 完全一致，无 DUP、无 stray）",
+  "doctor": "干活 10 / 卡住 0 / 空闲 3 / 不在 1",
+  "selftest": "116/116（新判据已载入：12k2b 含 PROJECT-STATE.md）",
+  "progress": "done 309 → 310 继续增长，停滞告警已清零"
+ },
+ "noteForOthers": "GATE 现由 rosterfix 持有（它正在修『12f 在 worker 周期性重启窗口内误报缺跑』—— 正是我本轮观察到的同一现象）。我不与其争锁。",
+ "assertions": [
+  {
+   "text": "运行的 sentinel 是新代码",
+   "command": "新 pid 启动时间晚于 loop.py mtime",
+   "result": "pass"
+  },
+  {
+   "text": "重启后 worker 数量与 roster 一致",
+   "command": "13 进程、无重复、无 stray",
+   "result": "pass"
+  },
+  {
+   "text": "重启未造成持久停顿",
+   "command": "done 309→310；停滞告警清零",
+   "result": "pass"
+  }
+ ]
+}

@@ -1,0 +1,200 @@
+{
+  "task": "verify:sanguo:L1:0081",
+  "verifier": "w-verify-4",
+  "role": "VERIFIER（独立反向复核者）",
+  "reviewedTask": "read:sanguo:L1:0081",
+  "reviewedCandidate": "loop/state/out/read_sanguo_L1_0081.candidate.json",
+  "reviewedCandidateSha256": "45d1768d3f46c977b98cbef595270597fe4f2a3aea38d595a9ec65a7863c0a42",
+  "reviewedAuthor": "w-read-4",
+  "selfSign": false,
+  "selfSignNote": "复核者 w-verify-4 ≠ 候选规范记录 loop/state/out/read_sanguo_L1_0081.json 的 agent 字段 w-read-4；也 ≠ 前序未提交候选的 agent 字段 w-read-2。loop.py verify 会独立再拒一次自签。",
+  "verdict": "partial",
+  "verdictReason": "判 partial 而非 fail：引文骨架零缺陷（318/318 逐字成立、find==start、全篇唯一、区间内含、sourceHash 统一），未发现编造、幻觉、越权与误杀。判 partial 的依据是 4 条可机器复算的内容层缺陷：CE1 覆盖率残段计数为补引文前的旧值（声明 194/177，实测 192/175，两条已失效样本仍在数组里）、CE2 quotationConvention.crossTaskReuse 举例指向 foreshadows 分区零出现的句子、CE3 bodyRange 右端点截断它自己声明的截止句、CE4（本轮新发现，前序复核未记录）SC4 引用的 R.receiveSurrender 是无对应条目的悬空引用。另有 17 条反向遗漏（R1–R17），其中 R1/R4 属因果链因端缺位、R7 属同一事实两处不一致。缺陷均可定点修补，不推翻整体抽取。",
+  "quoteAudit": {
+    "quoteObjects": 318,
+    "exactSliceMatch": 318,
+    "findEqualsStart": 318,
+    "globallyUnique": 318,
+    "inRange": 318,
+    "sourceHashConsistent": 318,
+    "violations": 0,
+    "method": "递归取全部带 quote+start+end 的对象（318 个），逐条断言 docs[0].text[start:end]==quote、text.find(quote)==start、text.count(quote)==1、[start,end)⊆[407319,411792)、sourceHash=='8ab7298a…'。复算脚本 verify_audit.py 第 1 节。",
+    "bracketAudit": {
+      "fragmentsScanned": 514,
+      "notFoundInSource": 0,
+      "method": "正则 「([^」]*)」 递归扫候选全部字符串字段，逐条要求 docs[0].text 里 find 到。",
+      "note": "前序复核 w-verify-2 的产物记 512 个片段；我用同一正则实测 514（raw.count('「')==514，嵌套不改变计数）。差 2 属前序产物自身的计数笔误，不影响其结论方向（not-in-source 均为 0）。如实登记，不作为对候选的指控。"
+    }
+  },
+  "coverageAudit": {
+    "declared": {"bodyRange": [407343, 411722], "bodyCJK": 3534, "coveredCJK": 2582, "residualCJK": 952, "residualRuns": 194, "runs_ge3": 177, "wholeSliceCJK": 3595, "wholeSliceCoveredCJK": 2593},
+    "recomputed": {"bodyCJK": 3534, "coveredCJK": 2582, "residualCJK": 952, "residualRuns": 192, "runs_ge3": 175, "wholeSliceCJK": 3595, "wholeSliceCoveredCJK": 2593},
+    "verdict": "coveredCJK/residualCJK/wholeSlice* 全部一致；residualRuns 与 runs_ge3 不一致（CE1）。",
+    "alternativeConventions": {
+      "excludeAddedQuote_冯习等大喜": {"residualRuns": 225, "runs_ge3": 183},
+      "note": "把修复轮补进 D1/D2 的那一句从引文集合里剔除后复算，仍得不出 194/177（得 225/183，因该句同时消解了多处相邻残段）；即 194/177 不是另一种口径的结果，而是补引文前的磁盘状态残值——prior-unsubmitted.ae8fdf52 实测恰为 194/177。"
+    }
+  },
+  "counterExamples": [
+    {
+      "id": "CE1",
+      "where": "coverageDeclaration.residualRuns / residualRunsMeaning / residualRunSamplesMeaning / residualRunSamples",
+      "quote": "冯习等大喜，遂依计而行。",
+      "claim": "coverageDeclaration 声明 residualRuns=194、「长度≥3 的残段共 177 条」，并在 residualRunSamples 里列出 (410825,410830)『冯习等大喜』与 (410831,410836)『遂依计而行』两条。",
+      "why": "修复轮（repairNote D1/D2）把「冯习等大喜，遂依计而行。」[410825,410837) 补进 worldSettings[23] 与 foreshadows[6] 的 quotes，恰好覆盖了上述两条残段（各 5 个汉字），但两条样本仍留在 residualRunSamples 数组里，两个计数也仍是补引文前的旧值。按候选自己声明的口径（掩码法；bodyRange=[407343,411722)；只数汉字；任一汉字落在任一引文区间内即已覆盖）独立复算：residualRuns 实测 192（声明 194）、长度≥3 实测 175（声明 177）。差值恰为 2，来源就是这两条已不再成立的样本。同文件内 coveredCJK 已从 2572 更新为 2582、residualCJK 从 962 更新为 952，说明更新是选择性的（分母同步、run 计数未同步）。属「声明的元数据与自身引文集合不自洽」，不改写任何抽取结论。",
+      "reproduce": "python3 verify_audit.py 第 3 节（脚本见 evidence 的 audit-script 条目）",
+      "evidence": {
+        "declared": {"residualRuns": 194, "runs_ge3": 177},
+        "recomputed": {"residualRuns": 192, "runs_ge3": 175},
+        "staleSampleEntries": [
+          {"start": 410825, "end": 410830, "cjk": 5, "text": "冯习等大喜"},
+          {"start": 410831, "end": 410836, "cjk": 5, "text": "遂依计而行"}
+        ],
+        "coveringQuote": {"quote": "冯习等大喜，遂依计而行。", "start": 410825, "end": 410837, "globalOccurrences": 1},
+        "priorFileCrossCheck": "loop/state/out/read_sanguo_L1_0081.prior-unsubmitted.ae8fdf52.json 实测 residualRuns=194、样本 177 条、coveredCJK=2572 ⇒ 现文件的 194/177 即该状态残值。",
+        "blindSpot": "候选自述的 selfcheck 判据 P07 系列只复算 bodyCJK/coveredCJK 与 quoteUnion，不覆盖 residualRuns/residualRunSamples ⇒ 该缺陷能穿过 problems=0 的绿灯。"
+      }
+    },
+    {
+      "id": "CE2",
+      "where": "quotationConvention.crossTaskReuse",
+      "quote": "斩首沥血，祭了死马。",
+      "claim": "quotationConvention.crossTaskReuse 举例：「例如 T09.cost 与 foreshadows/F06 指向同一句『斩首沥血，祭了死马』」。",
+      "why": "该句（及其任何片段）在整个 foreshadows 分区零出现：「斩首沥血」in foreshadows = False、「祭了死马」in foreshadows = False。F06 是「连结四十余寨（本区间铺设的连营部署 → 结局在本区间之外）」，其 setupQuotes 实测为「却说先主从巫峡建平起，直接彝陵界分，七十余里，连结四十余寨；」[411470,411500) 与「正言间，忽报韩当、周泰领兵来到。先主方欲遣将迎敌，」[411546,411571)，与该句无关。该句实际被五个不同分区的条目引用：tasks[8].cost.quotes[0]、states[7].afterQuotes[0]、worldSettings[22].quotes[2]、worldSettings[26].quotes[1]、unknowns[5].quotes[1]。缺陷位置特殊：它在**定义引用约定本身的字段**里，而这条约定的用途正是供下游分辨「同任务多栏共用」与「跨条目复用」，举例指错使该约定无法被样例校验。",
+      "reproduce": "python3 verify_audit.py 第 4 节",
+      "evidence": {
+        "anyForeshadowQuoteContains": false,
+        "actualCarriers": ["tasks[8].cost.quotes[0]", "states[7].afterQuotes[0]", "worldSettings[22].quotes[2]", "worldSettings[26].quotes[1]", "unknowns[5].quotes[1]"],
+        "F06setupQuotes": ["却说先主从巫峡建平起，直接彝陵界分，七十余里，连结四十余寨；", "正言间，忽报韩当、周泰领兵来到。先主方欲遣将迎敌，"],
+        "sentenceItself": {"start": 410572, "end": 410591, "globalOccurrences": 1}
+      }
+    },
+    {
+      "id": "CE3",
+      "where": "coverageDeclaration.bodyRange / bodyRangeMeaning",
+      "quote": "未知黄忠此去如何，且看下文分解。",
+      "claim": "bodyRange=[407343,411722)，bodyRangeMeaning 写「至『未知黄忠此去如何，且看下文分解。』止」。",
+      "why": "该句实测位于 [411719,411735)，而声明的右端点是 411722——落在该句第 4 字「黄」与第 5 字「忠」之间，把自述的截止句截断：按声明区间，「未知黄」在区间内、「忠此去如何，且看下文分解」在区间外。复算：区间外仍被引文覆盖的汉字共 11 个，恰是「忠此去如何且看下文分解」。这不是口径之争——该句本身被 5 个条目以 [411719,411735) 完整引用（tasks[12].result.quotes[1]、rejectedCauseEdges[5].quotes[1]、states[11].anchorQuotes[0]、knowledgeGaps[3].quotes[1]、unknowns[8].quotes[2]），而是声明的端点与它自己写的截止句不一致；连带使 bodyCJK=3534 偏小 11（右端取 411735 则为 3545）。residualCJK=952 不受影响。",
+      "reproduce": "python3 verify_audit.py 第 5 节",
+      "evidence": {
+        "closingSentence": [411719, 411735],
+        "declaredBodyEnd": 411722,
+        "cutInsideSentence": true,
+        "coveredCJKOutsideBodyRange": "忠此去如何且看下文分解",
+        "coveredCJKOutsideBodyRangeCount": 11,
+        "bodyCJKIfEnd411735": 3545
+      }
+    },
+    {
+      "id": "CE4",
+      "where": "selfCritique[3]/SC4 正文",
+      "quote": "我已在 T02.result、C04、R.receiveSurrender 三处分别写明",
+      "quoteSource": "candidate-internal（非原文引证）：本条反对意见的依据是候选自身的内部自洽性，不需要原文即成立；CE1/CE2/CE3 三条的 quote 均为原文逐字（已 find 命中）。",
+      "claim": "SC4 声称把「降诏封王易被误读为魏国履约」这一点已在 T02.result、C04、R.receiveSurrender 三处写明。",
+      "why": "本轮新发现，前序复核产物未记录此条。候选全文里 R.receiveSurrender 出现 1 次，而 rejectedCauseEdges 的 id 只有 R01–R07，没有任何条目的 id 是 receiveSurrender，也没有同名的 rule 条目：与「纳降」相关的规则条目名为「纳降的利害判准：攻已以礼服者会沮天下欲降者之心」。即这是一条**悬空的内部引用**：读者按该指引去查第三处落点时找不到目标。属候选内部自洽性缺陷，机器可复算（不需要原文）。数值上：候选的编号型引用（T01…TN5 形态）悬空 0 条，命名型引用悬空 1 条（本条）——即判据若只查编号型引用，同样会放过它。",
+      "reproduce": "python3 verify_audit.py 第 7 节",
+      "evidence": {
+        "occurrences": 1,
+        "context": "我已在 T02.result、C04、R.receiveSurrender 三处分别写明，但这是本候选最容易被误读的一处结果归属。",
+        "existingRejectedIds": ["R01", "R02", "R03", "R04", "R05", "R06", "R07"],
+        "idNamedReceiveSurrenderExists": false,
+        "nearestRealEntry": "worldSettings 的「纳降的利害判准：攻已以礼服者会沮天下欲降者之心」（rule）",
+        "numberedRefsDangling": 0,
+        "namedRefsDangling": 1
+      }
+    }
+  ],
+  "reverseChecks": [
+    {"id": "R1", "found": "本回第一场戏的因端整段未覆盖：先主原本拒见吴使（「先主传旨教休放入」），是黄权献「可从则从、不可则借彼口说与孙权，令知问罪有名」这一两用之策才使召见发生。缺的是因果链的因端——T01 读起来像常规接见，实际是谏后召入且带宣示意图。", "quote": "黄权奏曰：“瑾弟在蜀为相，必有事而来。陛下何故绝之？当召入，看他言语。可从则从；如不可，则就借彼口说与孙权，令知问罪有名也。”", "span": [407400, 407463], "candidateOccurrences": 0, "note": "字符串探针：「黄权」在候选全文 0 次（原文区间 1 次 [407400,407402)）、「教休放入」0 次、「问罪有名」0 次。"},
+    {"id": "R1b", "found": "先主原拟拒见来使的动作本身未覆盖。", "quote": "先主传旨教休放入。", "span": [407391, 407400], "candidateOccurrences": 0},
+    {"id": "R2", "found": "曹丕在召见赵咨之前就已点破来意；候选把 T03 写成「要当面核验来降者的底细」，与「已知来意」不同，也解释了「不助吴亦不助蜀」为何是既定方针。", "quote": "曹丕笑曰：“此欲退蜀兵故也。”", "span": [408339, 408354], "candidateOccurrences": 0},
+    {"id": "R3", "found": "赵咨第二问对整段未覆盖（吴主颇知学乎→浮江万艘…不效书生寻章摘句）。", "quote": "丕又问曰：“吴主颇知学乎？”咨曰：“吴主浮江万艘，带甲百万，任贤使能，志存经略；少有余闲，博览书传，历观史籍，采其大旨，不效书生寻章摘句而已。”", "span": [408523, 408595], "candidateOccurrences": 0},
+    {"id": "R3b", "found": "「朕欲伐吴，可乎」与「吴畏魏乎」两答未覆盖（评国/评势，与第一问的褒词性质不同）。", "quote": "丕曰：“朕欲伐吴，可乎？”咨曰：“大国有征伐之兵，小国有御备之策。”", "span": [408595, 408629], "candidateOccurrences": 0},
+    {"id": "R3c", "found": "「车载斗量」自谦收尾句未覆盖。", "quote": "丕曰：“东吴如大夫者几人？”咨曰：“聪明特达者八九十人；如臣之辈，车载斗量，不可胜数。”", "span": [408659, 408703], "candidateOccurrences": 0},
+    {"id": "R4", "found": "劫寨之计的首倡者是张南、冯习，不是吴班。候选 T11 的 action 与 F07 把定计主体写成吴班（并用以支撑「先锋之印」的职权），原文次序是张南冯习先倡、吴班再指出水军风险、张南给伏兵方案、吴班最后补诈降一层。不推翻 F07（吴班确在末轮定计），但「主持定计」过强。", "quote": "张南、冯习谓吴班曰：“目今吴兵势败，正好乘虚劫寨。”", "span": [410645, 410671], "candidateOccurrences": 0},
+    {"id": "R5", "found": "斩崔禹之后的叙述层效果判定（大赏三军＋江南诸将胆寒）未覆盖；T10 只登记到「传旨将崔禹斩却」。属 explicit 可登记项。", "quote": "先主大喜，传旨将崔禹斩却，大赏三军。自此威风震动，江南诸将无不胆寒。", "span": [411281, 411315], "candidateOccurrences": 0},
+    {"id": "R6", "found": "孙权对使者的当面行为约束未覆盖；它解释了赵咨在魏廷为何要逐条夸吴并自誓。T02.objective 截断在「此计最善」。", "quote": "权曰：“此计最善。但卿此去，休失了东吴气象。”", "span": [408223, 408246], "candidateOccurrences": 0},
+    {"id": "R7", "found": "孙桓身世整段被 NW03 整段排除，但该段同时是 T06.obstacle「侄虽英勇，争奈年幼」的直接依据：候选用了「侄」这句引文，却不登记解释它的那一句；而 TH2 又写了「一名二十五岁的少年将出场」这个数字却无引文落点。属同一事实两处不一致（边界处理不完整），不是误杀。", "quote": "其父名河，本姓俞氏，孙策爱之，赐姓孙，因此亦系吴王宗族。河生四子，桓居其长，弓马熟娴，常从吴王征讨，累立奇功，官授武卫都尉；时年二十五岁。", "span": [409531, 409600], "candidateOccurrences": 0},
+    {"id": "R8", "found": "张苞写表报捷这一向先主的正式上报动作未覆盖。", "quote": "遂写表差人赴先主处报捷。", "span": [410591, 410603], "candidateOccurrences": 0},
+    {"id": "R9", "found": "首日阵前骂战（双方互骂，含孙桓以「汝父已作无头之鬼」激张苞）整段未覆盖。", "quote": "苞大骂曰：“孙桓竖子！死在临时，尚敢抗拒天兵乎！”桓亦骂曰：“汝父已作无头之鬼；今汝又来讨死，好生不智！”", "span": [410057, 410110], "candidateOccurrences": 0},
+    {"id": "R10", "found": "张苞与李异「二十余合，不分胜负」未覆盖；它是谭雄放冷箭的直接前提（见张苞英勇、李异不能胜）。", "quote": "张苞与战二十余合，不分胜负。", "span": [410171, 410185], "candidateOccurrences": 0},
+    {"id": "R11", "found": "谢旌先败走、苞乘胜赶来未覆盖；它才是李异轮斧接战的触发点。", "quote": "桓背后谢旌，骤马来迎。两将战有三十余合，旌败走，苞乘胜赶来。", "span": [410122, 410152], "candidateOccurrences": 0},
+    {"id": "R12", "found": "先主准二将同行并嘱「须谨慎，不可造次」未覆盖。", "quote": "先主曰：“二侄同行甚妙，但须谨慎，不可造次。”", "span": [409931, 409954], "candidateOccurrences": 0},
+    {"id": "R13", "found": "两阵对圆的布阵描写（银盔银铠、白马白旗）未覆盖。", "quote": "见蜀营中，拥出二员大将，皆银盔银铠，白马白旗：", "span": [410013, 410036], "candidateOccurrences": 0},
+    {"id": "R14", "found": "李异轮斧欲砍张苞的动作句未覆盖；它是关兴救援必要性的直接依据。", "quote": "李异急向前轮起大斧，望张苞脑袋便砍。", "span": [410249, 410267], "candidateOccurrences": 0},
+    {"id": "R15", "found": "先主「朕正欲观汝壮气」未覆盖；它是关兴请战被准的当场理由，由它才接「即命关兴前往」。", "quote": "先主曰：“朕正欲观汝壮气。”即命关兴前往。", "span": [409884, 409905], "candidateOccurrences": 0},
+    {"id": "R16", "found": "诸葛瑾追述荆州旧事整段（求亲不允、曹操致书使袭荆州、吕蒙不睦擅自兴兵）未覆盖；这是吴方对「害弟」责任的完整自辩，T01 只登了结论句「此乃吕蒙之罪」。", "quote": "前者，关公在荆州时，吴侯数次求亲，关公不允。后关公取襄阳，曹操屡次致书吴侯，使袭荆州；吴侯本不肯许，因吕蒙与关公不睦，故擅自兴兵，误成大事，今吴侯悔之不及。", "span": [407522, 407600], "candidateOccurrences": 0},
+    {"id": "R17", "found": "先主对吴使的最后通牒「洗颈就戮」未覆盖（T01.obstacle 只引到「不看丞相之面，先斩汝首」）。", "quote": "今且放汝回去，说与孙权：洗颈就戮！”", "span": [407888, 407906], "candidateOccurrences": 0}
+  ],
+  "falseKillCheck": {
+    "verdict": "未发现误杀",
+    "checked": [
+      "rejectedCauseEdges R01–R07 的 15 条引文逐条回原文复算 exact=True，7 条排除理由方向全部成立；R07 方向判据尤其正确（「见关兴、张苞屡立大功」在 411500、关兴请战在 409854，前者在后 ⇒ 二将立功是叹老将的原因而非结果，候选拒绝连边是对的）",
+      "notForeshadows NF01–NF04 排除理由成立（回末对句、红光插入语、徐盛哭、柴桑旧事均为单次出现或未被回收）",
+      "notWorldSettings NW01–NW04 对「不列为世界规则」成立（六项褒词确无资源/约束效果；「江东将相如此」确未影响决策）；NW03 连带使 T06.obstacle 引文失去来处，记为边界不完整（R7）而非误杀",
+      "worldSettings 的三条区分字段抽查与原文相符：[15] 汉中判 mentioned 并写明魏未执行、[16] 荆州判 mentioned 并写明「取荆州」是旧事回顾不等于到达、[4] 判 executed 有「收拾」「赍进」两个动词链",
+      "候选在 4 处显式拒绝推演（R03 不把「使袭汉中」连成结果、R04 不把先主对黄忠动机的推断写成事实、R05 不替甘宁补区间外结局、R07 拒绝反向连边），均为合法排除而非误杀"
+    ],
+    "note": "本候选的负数分区理由是语义型而非词表/正则型，未发现任何合法因果边、伏笔、地点或物件被挡掉。"
+  },
+  "hallucinationCheck": {
+    "verdict": "未发现编造、幻觉、越权",
+    "properNounsProbed": 41,
+    "namesAbsentFromSource": 0,
+    "details": [
+      "41 个三国专名探针中，候选出现而原文区间不存在的为 0 个；方向相反（原文有、候选无）的是黄权、关公、曹操，属遗漏方向而非编造方向",
+      "无原文之外的结局：4 处显式拒绝推演（见 falseKillCheck）；黄忠结局、甘宁结局、韩当等十万人战果、黄忠是否被追上均写明「本区间无记载」或引「未知黄忠此去如何，且看下文分解」留扣",
+      "无把结束当成功：T07/T08 明写「目标未达成（孙桓未被擒）」；T12/T13 明写战果在本区间无记载",
+      "新增幻觉探针：候选正文里的手写 codepoint 区间共 15 处，其中 9 处与真实引文对象跨度完全相同；其余 6 处经逐条回原文核对全部指向正确文本（回目标题行 [407319,407340)、不避斧钺 [407507,407522)、受封进献 [409293,409329)、秭归三处 [409392,409394)/[409832,409834)/[411277,411279)），无一处指向错误文本"
+    ]
+  },
+  "citationSpotCheck": {
+    "seed": "random.Random(82)",
+    "sampled": 5,
+    "passed": 5,
+    "items": [
+      {"quote": "却说孙权受了封爵，众文武官僚拜贺已毕，", "start": 409293, "end": 409312, "exact": true, "count": 1},
+      {"quote": "苞大喜，同回本营，斩首沥血，祭了死马。", "start": 410572, "end": 410591, "exact": true, "count": 1},
+      {"quote": "苞视之，乃昨日放冷箭的谭雄也。苞大喜，同回本营，斩首沥血，祭了死马。", "start": 410557, "end": 410591, "exact": true, "count": 1},
+      {"quote": "孙桓引败军逃走，问部将曰：“前去何处城坚粮广？”", "start": 411195, "end": 411219, "exact": true, "count": 1},
+      {"quote": "崔禹大惊，方欲奔走，正遇张苞；交马只一合，被苞生擒而回。朱然听知危急，将船往下水退五六十里去了。", "start": 411147, "end": 411195, "exact": true, "count": 1}
+    ],
+    "method": "以候选 sha256 派生固定种子，random.sample 抽 5 条，逐条 text[start:end]==quote、find==start、count==1、区间包含。5/5 通过。"
+  },
+  "selfReportedCountsAudit": {
+    "fieldCountsAllMatch": true,
+    "fieldCountsMismatches": 0,
+    "quoteObjects": 318,
+    "distinctQuotes": 154,
+    "worldSettingsBreakdown": "11 place / 7 item / 9 rule 与实测一致",
+    "foreshadowsBreakdown": "3 resolved / 4 unresolved 与实测一致",
+    "nullColumns": 8,
+    "nullColumnsWithNote": 8,
+    "note": "14 个顶层分区计数全部与实测一致。前序复核产物称「9 处 null 栏」，我实测 8 处（T01/T02/T03/T04/T06/T08/T11/T13 的 cost），全部带 *Note —— 前序产物该处计数笔误，如实登记。",
+    "occurrenceClaimsChecked": 3,
+    "occurrenceClaimsDetail": [
+      "「先锋之印」声明 1 次、实测 1 次（[409782,409787)）",
+      "「秭归」声明 3 次、实测 3 次（[409392,409394)、[409832,409834)、[411277,411279) 三处全部正确）",
+      "「印」声明 1 次、实测 1 次"
+    ],
+    "terminusClaimsDetail": "repairNote D3–D7 修过的 5 处「其后仍有正文 N 个汉字」全部逐字复算正确（413/262/250/2454 与 262），修复有效。"
+  },
+  "source": {
+    "path": "data/cache/fe42d01f3826fe8096f86614.docs.json",
+    "docsJsonSha256": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+    "sliceRange": [407319, 411792],
+    "sliceChars": 4473,
+    "sliceSha256": "167c452d60c96e863e5604621362821b21139cba7a6a1f4f7f153cace3bc3fa2",
+    "indexDeclaredGraphKey": "b1687d1214f4d6c8bcd06c6f",
+    "crossVariantCheck": "索引声明的 b1687d1214f4d6c8bcd06c6f.docs.json 与候选自报的 fe42d01f3826fe8096f86614.docs.json 的 docs[0].text 逐字全同（实测 True）；任务 JSON 的 sourceHash 2988ce6e… 实测属 data/cache/152e2a6eed94f1075e7e7070.docs.json 与 data/cache/f0b45e85aac6c95e584075a2.docs.json，其 docs[0].text 亦逐字全同。即三份变体的正文一致，本复核结论不受来源变体影响；候选在 sourceHashDiscrepancy 里对这一不一致的登记成立。",
+    "taskJsonSourceHashDiscrepancyReproduced": true
+  },
+  "method": {
+    "order": "先自己读原文切片全文（docs[0].text[407319,411792) 全 4473 codepoint 通读），再读候选；未先看候选结论。",
+    "scripts": "verify_audit.py（单一可复算脚本，8 节：引文骨架/五栏互斥/覆盖率/CE2/CE3/反向探针/幻觉误杀/引用抽检）",
+    "reproduce": "python3 verify_audit.py",
+    "notDone": "未做区间外（后续回目）核验，故不评价 F04/F05/F06/F07 四条 unresolved 伏笔在下一回是否被回收；未做独立语义复核（semanticReview 不在本角色范围）；未推翻也未支持 SC1 对 T05.cost 的口径选择。"
+  },
+  "priorReviewNote": "本轮开始前，写入路径上已存在一份**未被提交**的复核产物（mtime 2026-10-14 14:56，verifier=w-verify-2，sha256 7e758eec…），而 loop/state/out/verify_sanguo_L1_0081.json 不存在 ⇒ 从未 submit，read_sanguo_L1_0081.json 的 reviews 为 null、verifyState=pending。w-verify-2 现已转做 verify:dafeng:L0:0172（心跳 2026-10-14T07:22:07Z）。该产物已字节级留存于外置盘（prior-verdict-w-verify-2.7e758eec.json，sha256 7e758eec…）后才被本轮产物替换。我独立复算后**确认其 CE1/CE2/CE3 三条全部成立**（数字与引文逐项对上），并新发现它未记录的 CE4；同时登记它的两处计数笔误（「」片段 512 实为 514、null 栏 9 处实为 8 处），二者不影响其结论方向。",
+  "notes": "【总判】partial。判 partial 而不是 fail，理由与判定纪律一致：引文骨架干净、无编造、无误杀、无幻觉，4 条缺陷全部可定点修补，且都不是「原文里找不到对应文字」这一最严重形态。\n\n【引文层（全量复算，非抽样）】318 个带 quote+start+end 的对象逐条断言 text[start:end]==quote、find(quote)==start（即 start 为首现位置）、全篇 count==1、区间包含、sourceHash 统一 8ab7298a…，⇒ 318/318 通过、0 例外。514 个「」逐字片段全部能在原文 find 到（not-in-source=0）。13 条任务的五栏引文区间两两零相交、字符串两两零相等；8 处 null 栏全部带同名 *Note 且理由具体。\n\n【为什么是 partial 而不是 pass】CE1 是最实质的一条：覆盖率残段计数是补引文前的旧值，且两条已失效样本仍留在数组里，而候选自己的 selfcheck 判据 P07 系列不覆盖 residualRuns/residualRunSamples ⇒ problems=0 的绿灯放过了它。这正是「机制存在、有代码、有产出，但不产生信息」的形态，与计划100 的教训同型。CE2 位于定义引用约定本身的字段里，使该约定无法被样例校验。CE3 的端点与它自述的截止句不一致。CE4 是悬空的命名引用（编号型引用悬空 0 条，命名型 1 条 ⇒ 只查编号型引用的判据同样会放过它）。\n\n【反向验证的 17 条发现为什么不足以判 fail】契约规定遗漏不等于编造；R1–R17 全部是「原文有、候选零覆盖」，没有一条与候选已有断言直接冲突。其中 R1/R4 值得下游注意，因为它们不是「少写一句」而是因果链的因端缺位：R1 缺「先主本拒见→黄权谏→召入且带宣示意图」，使 T01 的性质从问罪宣告退化为常规接见；R4 缺劫寨之计的首倡者，使 F07 对吴班职权的表述过强。R7 是同一事实被两处不一致对待（T06.obstacle 用「侄/年幼」却不登记解释它的身世段，TH2 又用了「时年二十五岁」这个数字而无引文落点）。\n\n【引用核验（随机抽 5 条）】以候选 sha256 为种子抽样 5 条：5/5 逐字命中、find==start、count==1、区间包含。\n\n【我自己可能错的地方】1) CE1 的复算依赖「候选自己声明的口径」；我换过口径复算（剔除补入的那句后得 225/183，另有含裁剪/整切片等），194/177 在任何口径下都对不上，故 CE1 不是口径之争——但若有人认为分母应取补引文前的状态，那也应由字段自己写明版本，候选未写。2) R1–R17 的「零覆盖」用字符串探针＋区间掩码判定，对**改写过的转述**不敏感：候选若以转述覆盖同一事实而不用逐字片段，探针会误报为遗漏。我逐条读过涉及的段落，未见转述覆盖（如「黄权」二字在候选全文 0 次，不可能有转述），但这一层依赖我的通读，不如引文层那样机器可复算。3) 我未做区间外核验，故不评价四条 unresolved 伏笔在后续回目是否回收。4) CE4 只证明引用悬空，未判定该候选是否另有未标号的等价落点覆盖同一风险；SC4 的实质提醒（勿把降诏读成履约）本身成立。5) 前序复核产物的两处计数笔误（512/514、9/8）我如实登记，但**不据此**对其结论做任何降级——它是一条未被提交的中间产物，不是本轮被复核对象；本轮被复核对象始终是候选文件 sha256 45d1768d…。\n\n【给下游的处置建议】a) 13 条任务、16 条 causeEdges、12 条 states、7 条 knowledgeGaps、7 条 foreshadows、27 条 worldSettings 的引文骨架可原样采用（318/318 逐字成立、五栏零共用、零编造、零误杀）；b) 采用前应定点修掉四处：coverageDeclaration 的 residualRuns/两处 meaning 文案/residualRunSamples 同步为 192/175 并剔除两条陈旧样本；crossTaskReuse 的例子换成该句的真实载体（或改用确实跨分区的句子）；bodyRange 右端改为 411735 并同步 bodyCJK=3545；SC4 的 R.receiveSurrender 改为真实条目名或删去该指引；c) R1（黄权的因端）与 R4（劫寨首倡者）建议补进 T01/T11，否则下游从 T01 得到的因果起点与从 F07 得到的职权表述都与原文有偏差。"
+}

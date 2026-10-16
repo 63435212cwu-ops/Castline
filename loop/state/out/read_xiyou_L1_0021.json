@@ -1,0 +1,402 @@
+{
+  "task": "read:xiyou:L1:0021",
+  "agent": "w-xiyou-1",
+  "role": "READER",
+  "status": "done",
+  "summary": "精读《西游记》第二十一回「护法设庄留大圣 须弥灵吉定风魔」（docs[0].text 全文 codepoint [143025,150074)，7049 字 / 25 个非空段落）：产出 tasks 8 条（五元组；T3/T6/T7/T8 四条 cost 原文无记载写 JSON null 且 basis.cost 同为 null，8 条全部在 resultNote 里限定『objective 在本单元内达成』并同时写出失败面/外援依赖——T1 判 false，其余 true 逐条写明达成靠的不是当事人武力，见 T2 的三环外援）、causeEdges 12 条（每条带 direction + mechanismKind + mechanismOwner + caveat，mechanism 全部写成机制而非时间相邻：信息命中克星、打断施法窗口、感官能力剥夺、威慑当战法条件、管辖权移交等）、rejectedAsCauseEdge 8 条（主动否掉的并置关系：围攻→风、天暗→眼坏、犬吠→庄院、景物→老者、药→救师、回头→消失、轻敌话→出战、回末联→妖精伏法）、states 7 条（前值/后值 + 事件锚点 + 谁知情）、knowledgeDiffs 5 条（含两条『本单元未解开』的知识差：老妖至终以为行者已死、至终以为虎先锋死于毛脸和尚）、foreshadows 6 条（5 条 resolved、FS6 显式 unresolved 且 payoff/payoffAnchor 为 null）、rejectedAsForeshadow 8 条、unknowns 14 条、gapAnchors 26 条（只登记位置、claim 与 basis 皆 null）、crossUnitReferences 5 条（第二十回区间外对照，刻意不用 quote/start 键名以免被误当引文节点）。共 364 个引文节点（承担断言的 338 + gapAnchors 26；不同引文 160/140）。构建期对每条引文断言 text.count(quote)==1 且 text[start:end]==quote 且落在区间内，任一不成立即中止不落盘；另写独立复核脚本 verify.py（不复用构建逻辑，显式路径栈遍历）从磁盘重算 A1-A12 得 problems=0。factStatus 不是手贴标签而是从原文 “ ” 配对机械判定的（166 utterance / 193 narration / 5 mixed），并由 attribution_audit.py 反向抽查。未声明 semanticReview 完成。",
+  "evidence": [
+    {
+      "path": "loop/state/out/read_xiyou_L1_0021.candidate.json",
+      "sha256": "32ead0e4ab5e774e870b7b396b38696755e6b6ffb1daf3e7c7c3e8805965309e",
+      "kind": "candidate",
+      "note": "任务 writes 指定的唯一产物。"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "区间与标题自检：TEXT.find('第二十一回')==143025==区间起点；TEXT.find('第二十二回')==150074==区间终点；len(TEXT[143025:150074])==7049，与任务 prompt 声明的字数一致；切片以原文标题开头（含 U+3000 全角空格）。命令：python3 -B -s -c \"import json;t=json.load(open('data/cache/df959d743e53206f56db2f92.docs.json'))[0]['text'];print(t.find('第二十一回'),t.find('第二十二回'),len(t[143025:150074]),repr(t[143025:143055]))\" → 143025 150074 7049 '第二十一回\\u3000护法设庄留大圣\\u3000须弥灵吉定风魔\\n\\n却说那五十个败'。注意任务 JSON 的 unitHead 字段把全角空格写成了普通空格，本候选按原文写法并在 unitHeadCheck 里记下这个差异。",
+      "result": "pass"
+    },
+    {
+      "text": "sourceHash 口径：任务声明 c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2；实测 shasum -a 256 data/cache/df959d743e53206f56db2f92.docs.json == 该值（**整文件**哈希）。切片自身哈希另记在 source.sliceSha256=153a5c0fb01f187b428444b6554ccf715b31561e55a089e4c6ce64c255286657，构建脚本断言两者是不同字段、不互相冒充。",
+      "result": "pass"
+    },
+    {
+      "text": "引文逐字校验：构建脚本对每条被引用的 quote 断言 TEXT.count(quote)==1（全文 722176 字内唯一）、完全落在 [143025,150074) 内、TEXT[start:end]==quote、sourceHash 正确、crossRange==false，任一不成立即抛异常、整体不落盘。实跑输出 'WROTE … quoteNodes(distinct)=364'。命令：python3 -B -s /tmp/rd0021/build.py。",
+      "result": "pass"
+    },
+    {
+      "text": "独立复核（不复用构建脚本逻辑，另写一套显式路径栈遍历）：/tmp/rd0021/verify.py 从磁盘读候选 JSON 与 docs.json，重算 A1 文件哈希与区间边界、A2 全部 364 个引文节点的 count/find/偏移/sourceHash/crossRange/offsetUnit、A3 全部 basis 合法性与『null 格 basis 也为 null』配对、A4 gapAnchors 不带断言（claim 与 basis 皆 null）、A5 覆盖率四栏从候选自身重算并按 0.06 容差比对声明值、A6 foreshadows 的 status/payoff/payoffAnchor 一致性、A7 causeEdges 结构（direction/mechanism/mechanismKind/mechanismOwner 齐全且 mechanism 有实质长度）、A8 rejectedAs* 必须各带 why_rejected、A9 各节 id 唯一与语义未声称完成、A10 散文 「」 逐字可命中、A11 factStatus 与原文引号机械对账、A12 散文自述计数与数据双向对账。实跑 'RESULT: PASS (problems=0)'。命令：python3 -B -s /tmp/rd0021/verify.py。",
+      "result": "pass"
+    },
+    {
+      "text": "事实归属机械对账（本轮抓得最狠的一类缺陷）：factStatus **不是**我口头贴的标签，而是构建期从原文 “ ” 配对建出 108 个对白区间后机械判定的——落在引号内 ⇒ utterance（只证明『被这样说过/写过』），引号外 ⇒ narration；U() 断言 frac>=0.9、N() 断言 frac<=0.1，不符即抛异常不落盘。改用这条判据后构建期立刻抓出两处错标：『教他不得睁开，宁心睡觉，明早就好。』我标了 utterance，原文实为叙述句中的间接引语（无引号）；『比常更有百分光明！』我标了叙述，原文实有引号（行者原话）。另有一批漏标（『你莫怪他，我们且去救师父来。』『刚才一个打令字旗的妖精，被我赶了去也。』『原来师父被他绑在定风桩上哭哩。』『此处到那黄风洞口不远。』『悟空啊，想杀我也！』『你两人怎生捉得妖精？』『恩人！恩人！……』『老猪学得个乌龟法，得缩头时且缩头。』『庄居非是俗人居……』『上复齐天大圣听……』）与一批跨引号边界的混合句（『老者用手向南指道：“这条羊肠路就是了。”』『行者闻言，低头唱喏道：“愿求些儿，点试，点试。”』『众妖道：“大王……』等），已全部改成 N(叙述引导语)+U(引号内话语) 两条或补标。修后 attribution_audit.py 从磁盘独立重算：标为 utterance 却落在引号外 = 0、标为 narration 却落在引号内 = 0。命令：python3 -B -s /tmp/rd0021/attribution_audit.py。",
+      "result": "pass"
+    },
+    {
+      "text": "散文引文卫生：我原先在散文里用 「」 同时包装原文引文与我自己的术语/转述，构建期硬断言把它们挡下 5 处（『要救师父且等再处』漏字、两处带省略号的缩引、两处 pair 字段里的截断引文），全部改为逐字完整引文或改『』；另有一处更隐蔽的：T1.objective 里我写了「且莫吃他着」并注明『此句在第二十回』，但没登记偏移——prose_audit.py 从不信任注释、只做 find，把它抓出来，已登记进 crossUnitReferences（textStart=140888）并改用『』。修后实跑 265/265 逐字命中本单元切片，'RESULT: PASS (find 不到且非省略号的片段=0)'。命令：python3 -B -s /tmp/rd0021/prose_audit.py。",
+      "result": "pass"
+    },
+    {
+      "text": "自述计数与数据对账（并做了负向对照）：nullFieldsRule 与 remaining 里我原先手写『T3/T4/T6/T7/T8 五条 cost 为 null』，从磁盘重算 tasks 的 cost/basis.cost 配对后实际是**四条**（T3/T6/T7/T8）——T4 的 cost 在原文里有依据（『用玉簪儿蘸出少许与行者点上』＋一顿斋饭、一夜铺盖），应为 explicit。已按实测改写，并做成 verify.py 的 A12 双向自动对账。**关键的一点**：A12 第一版**抓不到**注入的漂移——我用『四条→五条』与『把 T4 加进清单』两种注入跑负向对照，第一版全部放过（RESULT: PASS）；重写成双向判据后再跑同样两种注入，分别报出 2 条与 5 条 problems。这条负向对照也写进了候选 selfCritique，避免把『有校验』误当『校验有效』。",
+      "result": "pass"
+    },
+    {
+      "text": "引文唯一性自查（构建期真抓到的）：142 条候选引文里 2 条在全书非唯一——『善哉！善哉！』13 处、『毕竟不知向后如何，且听下回分解。』2 处；第二轮另有 3 条被挡下——『那老妖闻说，十分烦恼，正低头不语，默思计策』（我把原文的『老妖闻说』误写成『那老妖闻说』，n=0）、『请进，请进。』4 处、『毕竟不知向后如何，且听下回分解。』2 处。全部换成更长的唯一窗口（如末句改用『找大路向西而去。毕竟不知向后如何，且听下回分解。』），那句非唯一的『善哉！善哉！』则如实登记为 U13 的水印断句问题而不是换掉。",
+      "result": "pass"
+    },
+    {
+      "text": "红线自检：(1) **不把人物之言当叙述事实**——166 个 utterance 节点全部由原文引号机械判定，只用于『某人说了这话』；最典型的是 T5 与 KD1：『如来赐了我一颗定风丹，一柄飞龙宝杖』『我受了如来法令，在此镇押黄风怪』整条授权链只有菩萨自己的话，本单元如来未出场；T7 的 objective 因此标 inferred（他们一句话都没有，职责全靠行者转述+八戒推断）。(2) **结束≠成功**——T1 显式 resultIsSuccess=false（两次出战都没拿到行者，第二次呼风未成即被擒）；其余 true 逐条限定并写出失败面（T2 明写擒妖是菩萨的杖、他自己两次正面战斗都没赢；T5 明写定罪要到如来处、本单元未发生；T8 明写『生擒≠已伏法』）。(3) **未编造人物/事件/结局**——韵文里出现的一串名字（文殊、普贤、真武、梓橦、老君、寿星、王母、二郎、哪吒、天王、鲁班、龙王、雷公、阎王、牛头、马面、判官、盘古、观音）经 nameUsageAudit 逐处机械定位（zone=verse:<段名> 或 prose）：19 个名字**无一落在散文里**，一个都没进 tasks/states。此处我曾写错一次并已改正：原稿声称他们『全部只在黄风威力韵文的列举句里』，机械定位后发现『寿星』另在李长庚外貌韵文（『却似寿星出洞』）、『阎王』另在交战韵文（『打着的定见阎王』），准确说法是只出现在**韵文**里而非只出现在**那一首**韵文里。『黄风岭』在本切片内 0 次，我因此一律用原文的『黄风山』『黄风洞』。(4) **时间相邻不当因果**——rejectedAsCauseEdge 8 条主动否掉，保留的 12 条每条都有 mechanismKind + mechanism + mechanismOwner + caveat，CE2 自标『一般本事』四字的最小解读风险、CE5 自标『收回责怪只能从行为读出』。(5) **一次出现当伏笔**——rejectedAsForeshadow 8 条（虎皮、玛瑙药罐、二千里、三千里韵文、犬吠、定风桩/定风丹字面呼应、九头八尾骂语、风势韵文末句）；保留 6 条，其中 FS6 显式 unresolved 且 payoff/payoffAnchor 为 null。(6) **不用未知填默认值**——4 处 cost 为 null 且 basis.cost 同为 null，1 处 payoff/payoffAnchor 为 null，逐条列在 nullFieldsRule 与各条 caveat 里。(7) **定位≠语义**——semanticReview=not_performed，verify.py 的 A9 反向断言该字段必须为 not_performed。",
+      "result": "pass"
+    },
+    {
+      "text": "只写指定路径：本轮唯一写入的共享树文件是 loop/state/out/read_xiyou_L1_0021.candidate.json（任务 writes 指定路径）与提交记录 loop/state/out/read_xiyou_L1_0021.submit.json（loop/ 属追加式路径）。可复现检查：find js css index.html serve.py narrative.py scripts tests docs data -newermt '-30 minutes' -type f | wc -l → 0（未在共享树触碰任何受保护路径）。构建、复核、散文卫生、事实归属四个脚本都放在 /tmp/rd0021/，不入库、不影响并行 agent。未运行 GPU/浏览器测试（任务未声明要跑）；未执行 git checkout/reset/stash。",
+      "result": "pass"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/read_xiyou_L1_0021.candidate.json",
+      "kind": "append-only",
+      "note": "任务 writes 指定的候选文件，本轮新增。"
+    },
+    {
+      "path": "loop/state/out/read_xiyou_L1_0021.submit.json",
+      "kind": "append-only",
+      "note": "本提交记录，本轮新增。"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/df959d743e53206f56db2f92.docs.json": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+    "loop/state/out/read_xiyou_L1_0021.candidate.json": "32ead0e4ab5e774e870b7b396b38696755e6b6ffb1daf3e7c7c3e8805965309e"
+  },
+  "remaining": [
+    "语义未独立复核：本文件只保证引文逐字可定位、字段结构可由脚本重算、计数与覆盖可复现、factStatus 与原文引号对得上，不保证引文被放在正确的条目下，也不保证语义读对。semanticReview=not_performed，需 read-verify 由别的 agent 反向复核。",
+    "最可能被推翻的三处已写进 selfCritique.mostLikelyMisread：(1) CE1 把老妖出战的机制归给『损失程度升级』（败→死、烦恼→愈加烦恼）而非一次连续通报；(2) ST2/U7/KD1 用『缺失证据』判定行者不知老妖来历；(3) FS5 把『延迟揭示本相』算作伏笔。复核可优先攻击这三条。",
+    "自标较弱的条目：CE2（『一般本事』四字指什么是我据紧接着的风读出的）、CE5（行者『收回责怪』只能从行为读出）、CE8（『妖精怕她』是菩萨单方断言）、KD5（标 derived，唐僧是否知道点药靠反推）、T7.objective（标 inferred，护法神一句话都没有）。verify.py 对这五条只校验结构，不校验语义强度。",
+    "cost 口径：T1 与 T5 的 cost 标 inferred（T1 含『被擒』这一结果性描述、T5 含『宝杖是否回收原文未写』这一步推断）；T2 与 T4 的 cost 标 explicit 但都只是在原文里读到的实际支出（T2 眼睛受创与败退、T4 一小罐药里的少许 + 一顿斋饭 + 一夜铺盖），不含原文未写的损失；T3/T6/T7/T8 **四条**的 cost 为 null（原文无可读代价），basis.cost 同为 null。",
+    "FS6（飞龙宝杖的去向）严格说是『本单元未交代的物件去向』而不是叙事学意义的伏笔；RF1-RF8 八条是我主动否掉的『形似伏笔』（虎皮、药罐、二千里、三千里韵文、犬吠、定风桩/定风丹字面呼应、九头八尾骂语、风势韵文末句）。FS6 若被判不成立应移入 rejectedAsForeshadow。",
+    "unknowns 14 条多为原文自身的落差，本单元内无解：U1『张了三张』与巽地是否为术法规矩；U2 三花九子膏的『异人』；U3 老妖为何不立刻吃唐僧（理由在第二十回，区间外）；U4 两批小妖对虎先锋结局的两种说法；U5 老妖为何当众说出克星；U6 老者是否为伽蓝所化；U7 李长庚为何必须化身；U8『陈了一遍』的具体内容；U9 收尾被打死的四类兽名是原形还是动物；U10 黄风洞是否还在；U11 叙述层为何不给老妖名字；U12 伽蓝颂子是预告还是劝勉；U13 站点水印断句；U14 虎先锋之死在两方情报里的归属不一致。",
+    "5 条 mixed 引文节点：2 条承担断言（foreshadows[3].payoffAnchor frac=0.21、rejectedAsCauseEdge[3].evidence[2] frac=0.36，都在 narration 一侧）、3 条在 gapAnchors 里不承担断言。它们是『叙述句中夹一个称呼』的正常写法，未拆分；逐条记在 quoteAttributionAudit.mixedBoundaryNodes 里供复核直接核对。",
+    "gapAnchors 26 条只登记位置、claim 与 basis 都是 null，不计入任何断言；它们的用途是让复核者能按图索骥去问『这一段里还漏了什么』。覆盖率四栏分报（tasks 最窄一套 28.0% / 全部引文节点 40.2% / 加 gapAnchors 45.8% / 加整段区间 99.3%），并写明覆盖率不是分数。",
+    "crossUnitReferences 5 条（第二十回『且莫吃他着』偏移 140888、『且把他绑在后园定风桩上，待三五日』偏移 141004、『却被八戒一钯，筑得九个窟窿鲜血冒，一头脑髓尽流干。』偏移 142602、『这个功劳算你的』偏移 142857、虎先锋描述两个徒弟那整句偏移 140870）刻意不用 quote/start 键名，以免被任何遍历逻辑误当成本单元的引文节点；它们只作处境前值与归属对照，不承担断言。",
+    "未做：不跑 GPU/浏览器测试（任务未声明要跑）；不写回任何受保护路径；不做语义评审（属 read-verify 流）；不推算觔斗云的速度/里程换算（『二千里』与『三千里』两个口径我拒绝相减）；不解读《法华经》与『般若波罗』等义理句；不清理站点水印（清理会改动原文，只登记为 U13）。",
+    "图谱缓存 data/cache/df959d743e53206f56db2f92.json 未用于任何断言，也未做与本单元的差异对照（任务要求它只能用来对照已有结论）。",
+    "verify.py 的 A12 第一版抓不到注入漂移（负向对照全放过），重写后才有效；这说明本候选的 12 条自动判据里，A12 是唯一经过负向对照验证的一条，其余各条尚未逐条做注入测试——它们『跑出 PASS』不等于『有判别力』，这一点如实登记，不声称全部判据都已被证明有效。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/read_xiyou_L1_0021.candidate.json",
+      "loop/state/out/read_xiyou_L1_0021.submit.json"
+    ]
+  },
+  "submittedAt": "2026-10-08T02:02:40Z",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-08T02:02:40Z"
+  },
+  "verifyState": "partial",
+  "reviews": [
+    {
+      "reviewer": "w-dafeng-2",
+      "at": "2026-10-09T08:49:20Z",
+      "verdict": "partial",
+      "notes": "总体判断：这是一个**引用层质量很高、但语义层有可核验错误**的候选。它最大的优点是自审计诚实且可复现：我按它 remaining/selfCritique 里自查过的每一条（cost 四条非五条、引文唯一性 142→140、寿星/阎王不止一首韵文、黄风岭 0 次、定风丹未使用、老者≠伽蓝）逐条回原文复现，**没有一条是虚报**；364 个引文节点零编造、零错位，40+ 项自述计数我重算全部相符。这在本次复核里是最值得肯定的部分，也说明它的构建期硬校验（count==1 + TEXT[start:end]==quote）确实在跑。\n\n但它仍然带着 6 处必须更正的缺陷，其中最重的是 CE3：它把『风只剥夺瞄准能力、没伤到身体』写进机制，而行者本人那句『刮得我站立不住，收了本事，冒风而逃』在候选全文中一次都没出现——**只查已写项是发现不了这一条的**，它是反向验证（先自己读原文再比对）才捞出来的。KD3 那条同理：漏掉的是与结论**方向相反**的一句，只核『他写的对不对』永远查不出来。\n\n哪些可以用：tasks 的骨架（T1 复仇 false / T2 救师靠三环外援 / T4 施药 / T5 受法令 / T7 伽蓝 / T8 生擒）、CE1/CE2/CE4–CE12 的多数机制、states、rejectedAs* 16 条排除、gapAnchors 26 条位置登记、以及全部 364 条引文的**定位**——这些我核过，可继续作为下游发布输入。\n\n哪些必须丢弃或降级：①CE3.mechanism 的『风没有伤到他的身体或力气』必须删改（semanticReview 层面）；②KD3 必须补入 147251 或改写为『认知发生翻转』；③ST1.knowledge 的『向师父陈述伤情』必须降级/删除；④T1.caveat 的说话人必须对调；⑤crossUnitReferences 两条 textStart 改为 140950 / 140790，remaining 的『4 条』改为『5 条』、覆盖率 40.0/45.5 改为 40.2/45.8；⑥『黄风洞主』『云多庄院』两个自造专名应改回原文用词。\n\n不确定处（记为存疑，不据此判 fail）：①CE1（两报触发出战）我认为候选的『严重度升级』读法在原文里站得住（第一报后写的是『默思计策』而非披挂），但这确实依赖叙述顺序；②CE5（行者收回责怪）只能从行为读出，候选已自标，我同意保留但不宜当 explicit；③FS5（延迟揭示算不算伏笔）属术语之争，候选已给移出路径，我不改判；④我对『云多庄院』的语义判断（描述而非庄名）依据是全书 0 次 + 上下文，若有人能证明它是约定俗成的庄名，CE6 应只保留计数漂移部分。\n\n诚实边界：本轮我**没有**做的工作——不跑 GPU/浏览器测试（任务未声明）；不读图谱缓存 data/cache/df959d743e53206f56db2f92.json 做差异对照；不做跨单元整体叙事评估（只在本单元区间 [143025,150074) 内取证，crossUnitReferences 的 5 条区间外原文我只用于核对**偏移**，不用来支撑任何语义结论）；不对候选的 every 条 caveat 做穷尽仲裁（只覆盖上述 6 条缺陷 + 6 条反向发现 + 16 条排除项）。我的复核脚本自写、不复用候选的 /tmp/rd0021/*.py，落在 /tmp/castline-verify-0021/ 不入库。",
+      "counterExamples": [
+        {
+          "id": "CE1_CE3机制断言与原文相反",
+          "claim": "候选 causeEdges CE3（the_wind_blinds_the_true_eyes_so_the_staff_fails）的 mechanism 写：「风本身没有伤到他的身体或力气，它切断的是瞄准能力——金箍棒要打中目标需要看得见。」",
+          "quote": "刮得我站立不住，收了本事，冒风而逃",
+          "why": "这是行者本人对八戒复盘时说的原话：风**直接**让他站不住，他因此收本事逃走。『风没有伤到他的身体或力气』与这句逐字相反。候选在同一文件里另有两条自相矛盾的表述：T2.cost 与 CE4.from 都写「吹得我眼珠酸痛，这会子冷泪常流」——眼珠酸痛本身就是身体受创。CE3 把机制收窄成纯『瞄准能力』是把原文的**身体失能 + 视力剥夺**两环压成一环，属于机制层面的实质读错（它是候选最核心的因果边之一）。该句在整个候选文件里 0 次出现，从未被引用过。",
+          "evidence": [
+            {
+              "quote": "刮得我站立不住，收了本事，冒风而逃",
+              "start": 144899,
+              "end": 144916,
+              "occurrencesInWholeText": 1,
+              "crossRange": false,
+              "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2"
+            },
+            {
+              "quote": "我被那怪一口风喷将来，吹得我眼珠酸痛，这会子冷泪常流。",
+              "start": 145078,
+              "end": 145105,
+              "occurrencesInWholeText": 1,
+              "crossRange": false,
+              "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2"
+            }
+          ],
+          "severity": "高（语义/机制错误）",
+          "suggestedFix": "把 CE3.mechanism 改回原文的两环：先失能（站立不住、收本事、冒风而逃）再失视（眼紧闭难使棒）；或把 CE3 拆成两条边。"
+        },
+        {
+          "id": "CE2_KD3漏掉老妖更早的相反判断",
+          "claim": "候选 knowledgeDiffs KD3（the_old_monster_believes_the_monkey_is_dead）把知识差定义为『老妖以为行者已死』，who_knows 一栏只给一句证据：老妖在洞里当众判断「孙行者不在，想必是风吹死也，再不便去那里求救兵去了！」（147662），并断言该知识差『本单元内没有解开』。",
+          "quote": "只怕昨日那阵风不曾刮死孙行者，他今日必定还来，来时定教他一命休矣。",
+          "why": "原文在**更早**的位置（147251，行者变蚊虫入洞后听到的第一段老妖吩咐）写着老妖的判断恰好相反：他怕行者**没被刮死**、断定行者『今日必定还来』，并据此吩咐各门谨慎、收拾兵器。到 147662 他才改口猜行者已死。KD3 只登记后一句，等于把一个**前后翻转**的认知过程写成了单向的『他以为行者已死』——漏掉的这句正是推翻该框架的关键证据（它证明老妖并非一直误判，而是先怕其活、后猜其死）。该句在候选文件里 0 次出现。",
+          "evidence": [
+            {
+              "quote": "只怕昨日那阵风不曾刮死孙行者，他今日必定还来，来时定教他一命休矣。",
+              "start": 147251,
+              "end": 147284,
+              "occurrencesInWholeText": 1,
+              "crossRange": false,
+              "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2"
+            },
+            {
+              "quote": "孙行者不在，想必是风吹死也，再不便去那里求救兵去了！",
+              "start": 147662,
+              "end": 147688,
+              "occurrencesInWholeText": 1,
+              "crossRange": false,
+              "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2"
+            }
+          ],
+          "severity": "高（知识差框架被反向证据推翻）",
+          "suggestedFix": "把 KD3 改成两段认知（147251『怕他没死、必来』→ 147662『想必已死』），或降级并写明该差在本单元内发生了翻转。"
+        },
+        {
+          "id": "CE3_ST1编造了第三次伤情陈述",
+          "claim": "候选 states ST1（wukongs_eyes）的 knowledge 写：「伤情由行者自己向八戒、向老者、向师父**三处**陈述；治好由行者自己在五更判定，无第三方复核。」",
+          "quote": "你莫要心焦，少得烦恼，我们务必拿住妖精，方才救得你的性命。",
+          "why": "原文里行者对师父（唐僧）的那一整段对话（147374–147540）**一个字都没提眼睛**：我实测该段 眼=0、泪=0、酸痛=0。行者对唐僧说的是『你莫要心焦』『拿你的那虎怪，已被八戒打死了』『你放心莫哭』。全切片内『眼珠酸痛』只出现在 145092（对八戒）与 145772（对老者）两处；146812/146875 提到『点眼』的是**八戒**而非行者。所以『向师父陈述伤情』这第三次陈述不存在——这是把三处压成一句的**编造**（虽然量级小，但属于候选自己在别处严令禁止的那类『替原文加戏』）。",
+          "evidence": [
+            {
+              "quote": "你莫要心焦，少得烦恼，我们务必拿住妖精，方才救得你的性命。",
+              "start": 147438,
+              "end": 147467,
+              "occurrencesInWholeText": 1,
+              "crossRange": false,
+              "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2"
+            },
+            {
+              "quote": "拿你的那虎怪，已被八戒打死了",
+              "start": 147492,
+              "end": 147506,
+              "occurrencesInWholeText": 1,
+              "crossRange": false,
+              "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2"
+            }
+          ],
+          "computedCheck": {
+            "dialogueSpanToMaster": [
+              147374,
+              147540
+            ],
+            "count_eye": 0,
+            "count_tear": 0,
+            "count_sore": 0,
+            "eyeSoreOffsetsInSlice": [
+              145092,
+              145772,
+              146036
+            ],
+            "note": "145092=对八戒；145772=对老者；146036=对老者第二次。三处无一是对师父。"
+          },
+          "severity": "中（编造一处不存在的陈述）",
+          "suggestedFix": "ST1.knowledge 改为『向八戒、向老者两处陈述』；若要保留师父一侧，应写明『对师父全程未提眼伤』。"
+        },
+        {
+          "id": "CE4_T1caveat把两个称呼的说话人对调",
+          "claim": "候选 tasks T1 的 caveat 写：「另：『黄风怪』这一称呼在本单元只由**老者**用过一次（叙述层写「黄风大圣」），我不把两个称呼合并成叙述层定名。」",
+          "quote": "我受了如来法令，在此镇押黄风怪。",
+          "why": "说反了。原文里「黄风怪」在本切片内唯一一次出现在 149203，说话人是**灵吉菩萨**；「黄风大圣」唯一一次出现在 145839，说话人是**老者**（『那老者道：……那黄风大圣风最利害。』）。候选把两者的说话人对调了。这不是含糊其辞：同一份候选的 U11 写的是正确版本（『山中老者称他「黄风大圣」……菩萨则称「黄风怪」』），所以 T1.caveat 与 U11 **在同一文件内自相矛盾**。",
+          "evidence": [
+            {
+              "quote": "我受了如来法令，在此镇押黄风怪。",
+              "start": 149191,
+              "end": 149207,
+              "occurrencesInWholeText": 1,
+              "crossRange": false,
+              "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2"
+            },
+            {
+              "quote": "那黄风大圣风最利害。",
+              "start": 145838,
+              "end": 145848,
+              "occurrencesInWholeText": 1,
+              "crossRange": false,
+              "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2"
+            }
+          ],
+          "severity": "中（说话人归属错误 + 文件内自相矛盾）",
+          "suggestedFix": "T1.caveat 改为『「黄风怪」只由菩萨用过一次；「黄风大圣」只由老者用过一次』，与 U11 对齐。"
+        },
+        {
+          "id": "CE5_crossUnitReferences两条偏移错误",
+          "claim": "候选 crossUnitReferences.items 逐条给出 textStart，并注明『列出偏移是为了让复核者能直接核对』。remaining 又自述『crossUnitReferences 4 条』并复述了其中两条的偏移。",
+          "quote": "且把他绑在后园定风桩上，待三五日",
+          "why": "5 条里 2 条的偏移是错的：①『且把他绑在后园定风桩上，待三五日』声明 textStart=141004，实测 find=140950（差 -54；141004 处实际是『煮或蒸，或煎或炒……』）；②虎先锋描述两个徒弟那一整句声明 textStart=140870，实测 find=140790（差 -80；140870 处实际是『奉献大王，聊表一餐之敬。』）。其余 3 条（140888／142602／142857）我逐条复核**全对**。因为该字段的存在意义就是『让复核者能直接核对』，两处错值直接破坏了它自己的用途；且 remaining 复述的正是这两个错值。此外 remaining 说『4 条』而实际是 5 条（submit.summary 又写 5 条）。",
+          "evidence": [
+            {
+              "quote": "且把他绑在后园定风桩上，待三五日",
+              "start": 140950,
+              "end": 140966,
+              "occurrencesInWholeText": 1,
+              "crossRange": true,
+              "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2"
+            },
+            {
+              "quote": "他有两个徒弟：先来的，使一柄九齿钉钯，他生得嘴长耳大；又一个，使一根金箍铁棒，他生得火眼金睛。",
+              "start": 140790,
+              "end": 140837,
+              "occurrencesInWholeText": 1,
+              "crossRange": true,
+              "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2"
+            }
+          ],
+          "computedCheck": {
+            "declared_vs_actual": [
+              {
+                "text": "且莫吃他着",
+                "declared": 140888,
+                "actual": 140888,
+                "ok": true
+              },
+              {
+                "text": "且把他绑在后园定风桩上，待三五日",
+                "declared": 141004,
+                "actual": 140950,
+                "ok": false,
+                "delta": -54
+              },
+              {
+                "text": "却被八戒一钯，筑得九个窟窿鲜血冒，一头脑髓尽流干。",
+                "declared": 142602,
+                "actual": 142602,
+                "ok": true
+              },
+              {
+                "text": "这个功劳算你的",
+                "declared": 142857,
+                "actual": 142857,
+                "ok": true
+              },
+              {
+                "text": "他有两个徒弟：……他生得火眼金睛。",
+                "declared": 140870,
+                "actual": 140790,
+                "ok": false,
+                "delta": -80
+              }
+            ],
+            "declaredCountInRemaining": 4,
+            "actualCount": 5
+          },
+          "severity": "中（定位字段错误，但该字段的用途就是被核对）",
+          "suggestedFix": "两条 textStart 改为 140950 与 140790；remaining 的『4 条』改为『5 条』。"
+        },
+        {
+          "id": "CE6_自述计数漂移与自造专名",
+          "claim": "候选 remaining 写『覆盖率四栏分报（tasks 最窄一套 28.0% / 全部引文节点 40.0% / 加 gapAnchors 45.5% / 加整段区间 99.3%）』；T1.actor 写『老妖（**黄风洞主**……）』；T4.actor 写『老者（**云多庄院**的主人……）』。",
+          "quote": "此间乃云多人少之处",
+          "why": "①覆盖率漂移：coverage 数据栏是 28.0 / **40.2** / **45.8** / 99.3，remaining 散文写成 40.0 / 45.5，属于手写自述与数据不符——正是候选自称已用 A12『双向对账』根治的那类缺陷（显然 A12 只覆盖了 cost-null 计数，没覆盖覆盖率）。②自造专名：『黄风洞主』与『云多庄院』在全书中出现 0 次（我按整本 722176 字实测）。原句『此间乃云多人少之处』是老者对庄院的描述（云/人多的偏僻处），不是『云多庄院』这个庄名。这两个词都落在 actor 等**散文**字段、未加 「」，所以不是引文造假；但与候选全程严守的『不用原文没有的名字』（它专门立了 nameUsageAudit 把『黄风岭』挡在 0 次之外）标准不一致，属标准执行不齐。",
+          "evidence": [
+            {
+              "quote": "此间乃云多人少之处",
+              "start": 145535,
+              "end": 145544,
+              "occurrencesInWholeText": 1,
+              "crossRange": false,
+              "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2"
+            },
+            {
+              "quote": "那老者道：“善哉！善哉！",
+              "start": 145793,
+              "end": 145805,
+              "occurrencesInWholeText": 1,
+              "crossRange": false,
+              "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2"
+            }
+          ],
+          "computedCheck": {
+            "全书出现次数": {
+              "黄风洞主": 0,
+              "云多庄院": 0,
+              "黄风岭": 6,
+              "此间乃云多人少之处": 1
+            },
+            "coverageDeclared": {
+              "taskEvidenceOnly": 28.0,
+              "evidenceOnly": 40.2,
+              "evidencePlusGapAnchors": 45.8,
+              "withParagraphs": 99.3
+            },
+            "coverageStatedInRemainingProse": [
+              28.0,
+              40.0,
+              45.5,
+              99.3
+            ]
+          },
+          "severity": "低-中（计数漂移 + 自造描述性专名，未冒充引文）",
+          "suggestedFix": "remaining 的 40.0/45.5 改为 40.2/45.8；『黄风洞主』『云多庄院』改为原文用词（如『黄风山黄风洞的妖王』『那家庄院的老者』）。"
+        }
+      ],
+      "reverseChecks": [
+        {
+          "id": "R1_老妖的认知在本单元内发生翻转",
+          "found": "候选 KD3 只登记『老妖以为行者已死』，漏掉更早的相反判断：他先怕行者没被刮死、断定『今日必定还来』并下令各门谨慎收拾兵器，后来才改口猜行者已死。",
+          "quote": "只怕昨日那阵风不曾刮死孙行者，他今日必定还来，来时定教他一命休矣。",
+          "where": [
+            147251,
+            147284
+          ],
+          "whyItMatters": "这不是补一条细节，而是推翻 KD3 的单向框架：该知识差在本单元内**翻转过一次**。"
+        },
+        {
+          "id": "R2_老者给药的真实触发条件是行者的『来头』",
+          "found": "候选 T4.action 列了『承认自己有些迎风冷泪→取罐点药』，但没登记老者**为什么**决定给药：是行者那句『我们虽不是神仙，神仙还是我的晚辈』让他判定来客『也是个有来头的人』，这才接上『我这敝处却无卖眼药的』并取出三花九子膏。",
+          "quote": "既如此说，也是个有来头的人",
+          "where": [
+            146048,
+            146061
+          ],
+          "whyItMatters": "这是一条原文明确写出、候选未覆盖的因果环（身份声称→重新评估→施药）。候选的 causeEdges 有 12 条却漏了这条有直接文本连接词的机制。"
+        },
+        {
+          "id": "R3_行者自己就用过「黄风大王」这个称呼",
+          "found": "候选 U11 断言『全单元一律写「老妖」「那怪」；山中老者称他「黄风大圣」，行者在请菩萨时说的是「我师父在黄风山有难」』——但行者在本单元更早处（向老者借宿时）明确说过『被黄风大王拿了我师父去了』。U11 的称呼清单漏了这一条，而这正是行者自己对敌手的命名。",
+          "quote": "被黄风大王拿了我师父去了",
+          "where": [
+            145478,
+            145490
+          ],
+          "whyItMatters": "U11 的论点是『原文没有给他名字』；该论点本身成立，但支撑它的枚举不完整，且漏掉的恰恰是**行者用过的一个名号**，会直接影响 T1 与 U11 的称呼归属结论。"
+        },
+        {
+          "id": "R4_行者对败退的自述与候选的机制措辞冲突",
+          "found": "行者向八戒复盘时把败退原因说成**身体失能**（站不住→收本事→冒风而逃）。整句在候选文件中 0 次出现。",
+          "quote": "刮得我站立不住，收了本事，冒风而逃",
+          "where": [
+            144899,
+            144916
+          ],
+          "whyItMatters": "这是 CE3 的反向证据（见 counterExample CE1），也是候选『风只剥夺瞄准能力』这一措辞的直接反例。"
+        },
+        {
+          "id": "R5_八戒的『进退两难』被漏",
+          "found": "候选 T3/ST5 写八戒守担，但没有登记原文对他处境的正面描述：他既不敢上门、又无人看守马匹行李，『果是进退两难，怆惶不已』。",
+          "quote": "又没人看守马匹、行李，果是进退两难，怆惶不已",
+          "where": [
+            144744,
+            144768
+          ],
+          "whyItMatters": "T3.obstacle 只用巡山小妖的暴露风险来论证他的困境，漏了叙述层直接给出的两难处境。"
+        },
+        {
+          "id": "R6_李长庚对取经目的的误解被漏",
+          "found": "化身老者听完行者问路后问『汝等是取他的经去了？』，行者否认（『不是取他的经，我有一事烦他』）。候选 T6 只登记了指路信息，没有这组问答。",
+          "quote": "汝等是取他的经去了？",
+          "where": [
+            148334,
+            148344
+          ],
+          "whyItMatters": "它是本单元唯一一处把『取经』与『取灵吉的经』并置的误会，也是 T6 里化身『半答不答』态度的直接体现；属可登记而未登记的对话事实。"
+        }
+      ]
+    }
+  ]
+}

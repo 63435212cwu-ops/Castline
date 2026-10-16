@@ -1,0 +1,492 @@
+{
+  "schema": "verify-verdict/1",
+  "task": "verify:sanguo:L1:0097",
+  "agent": "w-sanguo-1",
+  "roleFile": "loop/ROLES/VERIFIER.md",
+  "status": "done",
+  "book": "sanguo",
+  "lane": 1,
+  "unitIndex": 97,
+  "unitHead": "第九十八回　追汉军王双受诛　袭陈仓武侯取胜",
+  "sourceRange": [
+    493949,
+    499135
+  ],
+  "sourceHash": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+  "segmentSha256": "2e352af3ad1d365066e28be2da5d16b7c31738da0c92ccf71f66660971e19789",
+  "reviewedTask": "read:sanguo:L1:0097",
+  "reviewedArtifact": "loop/state/out/read_sanguo_L1_0097.candidate.json",
+  "reviewedArtifactSha256": "6632a8c6e2c1ee227ffa6f56a586d76cf0a1aac8f561f424a1ca9d4c97b32721",
+  "reviewedAuthor": "w-xiyou-1",
+  "verifierIsNotAuthor": true,
+  "source": {
+    "path": "data/cache/fe42d01f3826fe8096f86614.docs.json",
+    "docIndex": 0,
+    "range": [
+      493949,
+      499135
+    ],
+    "fileSha256": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+    "segmentSha256": "2e352af3ad1d365066e28be2da5d16b7c31738da0c92ccf71f66660971e19789"
+  },
+  "verdict": "partial",
+  "verdictRationale": "先自读原文全区间（5186 码点）再看候选，逐条核对抽取项。**候选在事实层没有一条被原文证伪**：411/411 引文逐字可切、偏移全等、全落在区间内、sourceHash 全一致；18 条任务五栏无一处跨栏复用同一句（逐字层与子串层均为 0）；无编造人物（46 个人名全部在区间内出现）；未把人物话语当叙述事实（单列 20 条 speechAsClueNotFact）；把「长安可图」等 3 条显式标 unresolved，没有把结束当成功。因此不能判 fail —— 本角色契约明令：拿不出原文引证的反对意见只能记为存疑，而判 fail 必须有 counterExample。判 partial 的原因是我独立查出 3 条**已写项自身的引证错位/字段退化**（CE1–CE3，均有逐字原文引证）与 6 条候选未覆盖的原文事实（RCH1–RCH6）；其中 CE1 是本单元整体退化而非个别笔误，RCH1 会反转一条语义（禁令→授权）。",
+  "summary": "独立反向复核《三国演义》第九十八回（[493949,499135)，5186 码点）：先自读原文全区间再看候选。**事实层零证伪** —— 411/411 引文逐字可切、偏移全等、区间内、sourceHash 一致；5 条随机抽样（固定种子）100% 命中；18 条任务五栏无跨栏复用（逐字层与子串层均 0）；46 个人名全部在区间内出现；12 条主动排除项理由成立；3 条 unresolved 与 13 条 unknowns 均为「确认原文没有」。判 **partial**：3 条 counterExample（C21 cause/effect 引文互换；fieldCounts.quoteRefs 少计 17 条 themeReadings 引文；voiceSurface 411/411 恒为 character 的字段退化）+ 6 条反向发现（最重者为「可以出军」出战授权整句缺失，使候选把奉命出战误写成违令）。已实跑复算每条结论。",
+  "counterExamples": [
+    {
+      "id": "CE1",
+      "severity": "should-fix",
+      "summary": "C21 的 causeQuote 与 effectQuote 互换：标为「因」的引文写的是「果」，标为「果」的引文写的是「因」。",
+      "claim": "C21：cause=「满宠等上表称东吴…」，effect=「曹睿举止失措、甚是惊慌，遂召司马懿商议」。",
+      "quote": "睿闻知两处危急，举止失措，甚是惊慌。此时曹真病未痊，即召司马懿商议。",
+      "quoteRange": [
+        498592,
+        498626
+      ],
+      "why": "候选把 [498592,498626)（写曹睿的反应与召见）系在 cause 栏，把 [498538,498564)（写满宠表文内容）系在 effect 栏，两栏正好互换：原文顺序是「忽又奏满宠等有表…」→「睿闻知两处危急，举止失措」。按候选自己写的 mechanism（「两线压力叠加超过君主承受」），压力源是表文、反应是失措，故 causeQuote 应为表文句、effectQuote 应为失措句。两栏文字描述正确、引证指向互换，属引证错位。",
+      "reproduce": "python3 -c \"import json;t=json.load(open('data/cache/fe42d01f3826fe8096f86614.docs.json'))[0]['text'];c=json.load(open('loop/state/out/read_sanguo_L1_0097.candidate.json'));e=[x for x in c['causeEdges'] if x['id']=='C21'][0];print(e['causeQuotes'][0]['start'],e['effectQuotes'][0]['start'])\"  # 498592 498538 → cause 在 effect 之后",
+      "impact": "不改事实，但让该条因果边的两个端点各自指向相反的一端；下游若按 causeQuotes/effectQuotes 建边会把方向接反。"
+    },
+    {
+      "id": "CE2",
+      "severity": "should-fix",
+      "summary": "自报 fieldCounts.quoteRefs=394，实际 411，差 17 条 —— 全部是 themeReadings 的引文（统计枚举漏了该分区）。",
+      "claim": "fieldCounts.quoteRefs = 394",
+      "quote": "\"quoteRefs\": 394",
+      "quoteRange": null,
+      "quoteNote": "此条引证取自候选自身的 fieldCounts 字段（非原文），故无原文偏移。",
+      "why": "逐分区独立复算：十四个被枚举分区合计 394，themeReadings 另含 17，总计 411。distinctQuotes=259 之所以看不出问题，是因为 themeReadings 的 17 条引文全部已出现在其他分区中。",
+      "reproduce": "python3 -c \"import json;d=json.load(open('loop/state/out/read_sanguo_L1_0097.candidate.json'));f=lambda o:(1 if isinstance(o,dict) and isinstance(o.get('quote'),str) and 'start' in o else 0)+sum(f(v) for k,v in (o.items() if isinstance(o,dict) else []) if k!='quote')+sum(f(v) for v in (o if isinstance(o,list) else []));print(f(d),f(d['themeReadings']),d['fieldCounts']['quoteRefs'])\"  # 411 17 394",
+      "impact": "计数层失真；引文本身经我全量复算 411/411 无误，不构成编造。"
+    },
+    {
+      "id": "CE3",
+      "severity": "should-fix",
+      "summary": "voiceSurface 退化：411/411 条全部等于 character，该字段在本单元不携带信息（判据在引号不平衡的电子本上恒等返回单值）。",
+      "claim": "voiceLegend 声明机械判据 frac=引文落在 “…” 引号内的比例；frac=0→narration，frac=1→character，其余→mixed。",
+      "quote": "却说孙礼把军伏于山西，只待蜀兵到。",
+      "quoteRange": [
+        495279,
+        495296
+      ],
+      "why": "这是纯叙述句（「却说」是叙述层套语），候选标 voiceSurface=character。我按 lib_q.py 的实现逐字复现：掩码从 docs[0].text 的第 0 个字符起累计引号深度，而该电子本全篇引号不平衡（“ 9327 次 vs ” 9263 次，净差 64），到区间起点 [493949) 时累计深度已达 49，且区间内最小深度仍为 49 ⇒ 区间 5186/5186 个字符全被判为「引号内」，判据恒等返回 character。我用独立实现（同一规则、重新编码）复算 411 条，与候选标注 0 处不符 —— 即候选忠实执行了这条坏判据。",
+      "reproduce": "python3 -c \"import json;T=json.load(open('data/cache/fe42d01f3826fe8096f86614.docs.json'))[0]['text'];A,B=493949,499135;d=0;m=bytearray(len(T));exec('for i,ch in enumerate(T):\\n if ch==chr(8220): d+=1;m[i]=1\\n elif ch==chr(8221): m[i]=1;d=max(0,d-1)\\n else: m[i]=1 if d>0 else 0');print(sum(m[A:B]),B-A)\"  # 5186 5186 → 100.0%",
+      "impact": "该字段不进 LAYER_MAP 任何发布层，故不改事实内容；但候选与提交记录都以它作「人物话语/叙述层」的区分凭据，实际为零信息。"
+    }
+  ],
+  "reverseChecks": [
+    {
+      "id": "RCH1",
+      "severity": "high（反转语义）",
+      "found": "曹真向头营另行下达的**出战授权**整句在候选内完全不存在（「可以出军」在候选 JSON 内出现 0 次），而候选把张虎、乐綝当夜出寨判为「违令」。",
+      "quote": "可以出军，如此如此。",
+      "quoteRange": [
+        495254,
+        495264
+      ],
+      "why": "候选 X08 写「张虎、乐綝当夜出战，违反的是前者（不许出战之令）」，worldSettings「头营之令」一条亦据此记 declared。但原文在「不许出战」[494722,494726) 之后另有一段：曹真得孙礼飞报后「遣人去头营分付张虎、乐綝：『看今夜山西火起，蜀兵必来救应。可以出军，如此如此。』」候选只引到「看今夜山西火起，蜀兵必来救应。」[495239,495254)，把紧接的授权句 [495254,495264) 整段丢掉。有授权则「违令」不成立，应作「奉命出战」。",
+      "reproduce": "python3 -c \"import json;b=open('loop/state/out/read_sanguo_L1_0097.candidate.json').read();print(b.count('可以出军'))\"  # 0",
+      "impact": "反转一条禁令/授权的语义，并连带影响 X08 与 worldSettings 规则条的 institution 判定。"
+    },
+    {
+      "id": "RCH2",
+      "severity": "medium",
+      "found": "魏方自己的**情报接力**两句未覆盖：魏兵探知蜀军劫粮意图 → 报孙礼 → 孙礼飞报曹真 → 曹真下授权令。",
+      "quote": "魏兵探知蜀兵要来劫粮，慌忙报与孙礼。礼令人飞报曹真。",
+      "quoteRange": [
+        495198,
+        495224
+      ],
+      "why": "候选 C05/C06 都从孔明一侧或火起一侧写机制，没有一条记录魏方这条情报链；它正是 RCH1 授权令的前提。",
+      "reproduce": "python3 -c \"b=open('loop/state/out/read_sanguo_L1_0097.candidate.json').read();print(b.count('探知蜀兵'),b.count('飞报曹真'))\"  # 0 0",
+      "impact": "缺此则祁山夜战的魏方一侧动因不完整。"
+    },
+    {
+      "id": "RCH3",
+      "severity": "medium",
+      "found": "「登楼专看号火」这一观察动作未覆盖 —— 它是火光被误读为号火在魏方一侧的执行环节（张虎、乐綝与孙礼共用同一套火光信号）。",
+      "quote": "二将受计，令人登楼专看号火。",
+      "quoteRange": [
+        495265,
+        495279
+      ],
+      "why": "候选 C06 只写孙礼一侧的误读；同时触发两路魏军出动的机制因此缺一半。",
+      "reproduce": "python3 -c \"b=open('loop/state/out/read_sanguo_L1_0097.candidate.json').read();print(b.count('登楼'))\"  # 0",
+      "impact": "机制描述不完整，不致错。"
+    },
+    {
+      "id": "RCH4",
+      "severity": "medium",
+      "found": "孙礼诈粮计的两处**执行细节**未覆盖：「某去祁山虚妆做运粮兵」「却教人虚报陇西运粮到」——候选只引了车上装载物，没引伪装与假情报这两步。",
+      "quote": "某去祁山虚妆做运粮兵，",
+      "quoteRange": [
+        494563,
+        494574
+      ],
+      "why": "候选 T02.objective 引「若蜀人无粮，必然来抢…」与车上装载物，但「虚妆」与「虚报」是把车队做成可信诱饵的两个动作；「虚妆」在候选 JSON 内出现 0 次、「虚报陇西」0 次。缺此则「诱敌」只剩装置、没有伪装环节。",
+      "reproduce": "python3 -c \"b=open('loop/state/out/read_sanguo_L1_0097.candidate.json').read();print(b.count('虚妆'),b.count('虚报陇西'))\"  # 0 0",
+      "impact": "遗漏行动细节，不致错。"
+    },
+    {
+      "id": "RCH5",
+      "severity": "medium",
+      "found": "司马懿**送韩暨出城**并当面嘱托这一场景未覆盖 —— 候选只引了嘱托内容，没记「送于城外」这一私下交代的场合。",
+      "quote": "司马懿送韩暨于城外，嘱之曰：“",
+      "quoteRange": [
+        494315,
+        494330
+      ],
+      "why": "候选 G01 处理的是「教保守为上」的作者隐瞒，引「公见子丹，休言是吾所陈之意…」[494339,494366)；但「送于城外」[494315,494330) 是这段话之所以能私下说的场合（公开场合无法嘱托隐瞒），候选内出现 0 次。",
+      "reproduce": "python3 -c \"b=open('loop/state/out/read_sanguo_L1_0097.candidate.json').read();print(b.count('送韩暨于城外'))\"  # 0",
+      "impact": "细节缺失，不致错。"
+    },
+    {
+      "id": "RCH6",
+      "severity": "low",
+      "found": "两处**回报闭环**未覆盖：魏延取散关后「令人报知孔明」、张虎乐綝出战致本寨空虚「寨中却不见一人」。",
+      "quote": "延回到关上，令人报知孔明。",
+      "quoteRange": [
+        498156,
+        498169
+      ],
+      "why": "前者是袭散关一役的复命环节（候选 T14 止于「张颌大败而去」，无回报）；后者是「蜀寨无人」这一空营事实的另一处独立表述（与 [495870,495882) 的退兵叙述互为印证）。",
+      "reproduce": "python3 -c \"b=open('loop/state/out/read_sanguo_L1_0097.candidate.json').read();print(b.count('令人报知孔明'),b.count('寨中却不见一人'))\"  # 0 0",
+      "impact": "低：两条均为叙述闭环，不影响已有结论。"
+    }
+  ],
+  "falseKillCheck": {
+    "checked": "候选是否把合法内容误排除（词表/正则误杀）",
+    "finding": "未发现误杀。候选未做词表过滤式抽取：它用 notForeshadows（6 条）与 notWorldSettings（6 条）显式登记**主动排除**的项，并逐条给理由与原文引证。我复核了这 12 条排除理由，均可接受：例如「德配唐、虞」是劝进颂词（不约束行动）、「三公/上将军」等官名只有任命事实而无职权描写（符合计划「没有依据就不扩出术语装饰层」）、「姜尚父年九十」是辩论用典而非本区间生效的规则。另：候选把「阴平、武都」「雍城」判 mentioned 而非 arrived，我核对原文只有命令、无到达动作，判得对；这是本任务最易误判处（「取武都」是图谋不是到达），候选主动在 SC2 里点名了该风险。",
+    "verdict": "无误杀"
+  },
+  "hallucinationCheck": {
+    "checked": "原文没有的人物/事件/结局/伏笔，以及把结束当成功",
+    "finding": "① 人名：我抽取候选内出现的 46 个人名逐一在区间内 find，全部命中，无区间外人物被写进候选（「刘禅」在候选内出现 0 次，原文该区间只用「后主」，候选亦统一用「后主」）。② 结局：候选未把任何未完成事项写成成功 —— F05「长安可图」标 unresolved 并写明「图谋不等于达成」；T15.result 记 null 并注明「本区间止于『二人领兵去了』」；U07/U10 分别登记陆逊是否真出兵、阴平武都战果为未知。③ 人物话语：候选单列 20 条 speechAsClueNotFact，逐一标注说话人，未把奏对/推断当叙述事实；尤其在「东吴必不举兵」上明确记为司马懿的推断而非事实（G06/S18/F08 三处一致）。④ 未发现原文没有的伏笔或设定。",
+    "verdict": "无幻觉"
+  },
+  "citationCheck": {
+    "method": "固定种子（random.seed(20261015)）从 411 条带偏移引文中随机抽 5 条，逐条核对 text[start:end]==quote 与 text.find(quote)==start。",
+    "sample": [
+      {
+        "path": "$.causeEdges[8].effectQuotes[0]",
+        "quote": "双急勒马回时，只见一片火光冲天，慌令退军。",
+        "range": [
+          496150,
+          496171
+        ],
+        "sliceEq": true,
+        "findEq": true,
+        "globalOccurrences": 1
+      },
+      {
+        "path": "$.causeEdges[5].effectQuotes[0]",
+        "quote": "孙礼只道蜀兵到魏寨内放号火，急引兵一齐掩至。",
+        "range": [
+          495375,
+          495397
+        ],
+        "sliceEq": true,
+        "findEq": true,
+        "globalOccurrences": 1
+      },
+      {
+        "path": "$.foreshadows[5].payoffQuotes[0]",
+        "quote": "后主依言，遂令太尉陈震，将名马、玉带、金珠、宝贝，入吴作贺。",
+        "range": [
+          497209,
+          497239
+        ],
+        "sliceEq": true,
+        "findEq": true,
+        "globalOccurrences": 1
+      },
+      {
+        "path": "$.worldSettings[2].quotes[1]",
+        "quote": "自在祁山上凭高而坐。",
+        "range": [
+          495184,
+          495194
+        ],
+        "sliceEq": true,
+        "findEq": true,
+        "globalOccurrences": 1
+      },
+      {
+        "path": "$.tasks[0].action.quotes[1]",
+        "quote": "吾以此功让与子丹；公见子丹，休言是吾所陈之意，只道天子降诏，教保守为上。",
+        "range": [
+          494330,
+          494366
+        ],
+        "sliceEq": true,
+        "findEq": true,
+        "globalOccurrences": 1
+      }
+    ],
+    "fullSweep": "不止抽样：我对全部 411 条做了全量复算 —— text[start:end]==quote 411/411 成立、区间包含 411/411 成立、sourceHash 411/411 等于实测文件哈希。其中 5 条 text.find(quote)!=start，原因是该串在全书更早处另有出现（如「可将计就计而行。」全书 3 次、首次在 90078），候选取的是区间内那一次并如实记了 nthOccurrence，定位正确；故此 5 条不算定位错误，仅说明「find==start」对重复串不能作为通用判据。",
+    "verdict": "5/5 抽样逐字命中且偏移一致；全量 411/411 切片相等"
+  },
+  "usableAndDiscardable": {
+    "usable": [
+      "tasks[] 18 条五元组（引证独立、空栏带 Note）",
+      "causeEdges[] 除 C21 外 23 条",
+      "states[] 18 条",
+      "foreshadows[] 10 条（7 resolved / 3 显式 unresolved）",
+      "knowledgeGaps[] 11 条",
+      "worldSettings[] 35 条",
+      "unknowns[] 13 条",
+      "speechAsClueNotFact[] 20 条",
+      "textualNotes[] 9 条",
+      "themeReadings[] 2 条（各含 counter）"
+    ],
+    "discardOrFix": [
+      "C21.causeQuotes/effectQuotes 互换（CE1）：改为 cause=表文句[498538,498564)、effect=失措句[498592,498626)",
+      "fieldCounts.quoteRefs 394→411（CE2）",
+      "voiceSurface 全字段退化（CE3）：修判据或整列降级为 unknown",
+      "X08 与 worldSettings「头营之令」的「违令」表述需按 RCH1 改写为「奉命出战」"
+    ],
+    "mustKeepUnknown": [
+      "U02 张体/张休",
+      "U07 陆逊是否真出兵",
+      "U10 阴平武都战果",
+      "U12 回末对句所指",
+      "F05/F08/F10 三条 unresolved"
+    ]
+  },
+  "priorReviewPreserved": {
+    "note": "本路径此前已有 agent `w-verify-4` 于 2026-10-15T02:47:32Z 产出的复核结论，其 verdict 同为 partial。我按任务 writes 覆盖本文件，故在此**完整保留**其结论要点与哈希，以免其工作因覆盖而不可追溯；其完整原文另存于 `loop/state/out/verify_sanguo_L1_0097.submit.w-verify-4.json`（sha256 38281837…）与 `loop/state/out/read_sanguo_L1_0097.json` 的 reviews[0]。",
+    "priorVerdictFileSha256": "b6a45a28d6b5df559eac2da6e5e236d8dd11501bdae16f7b213e0c6a7ca0739a",
+    "priorVerdict": "partial",
+    "priorCounterExamples": [
+      {
+        "id": "CE1",
+        "severity": "must-fix",
+        "summary": "voiceSurface 系统性失效：411/411 条引文全部标为 character，而其中大量是纯叙述句。这不是个别误标，是判据整体退化 —— 该字段因此不携带任何信息。",
+        "quote": "却说孙礼把军伏于山西，只待蜀兵到。",
+        "quoteRange": [
+          495279,
+          495296
+        ]
+      },
+      {
+        "id": "CE2",
+        "severity": "must-fix",
+        "summary": "自报计数 fieldCounts.quoteRefs=394 与自身实际 411 不符，差 17 条，全部是 themeReadings 的引文。",
+        "quote": "394 条引文全部逐字、区间内、哈希一致，满足 text.find(quote)==start 与 text[start:end]==quote 两个口径",
+        "quoteRange": null
+      },
+      {
+        "id": "CE3",
+        "severity": "should-fix",
+        "summary": "提交记录断言「满足 text.find(quote)==start 两个口径」，实测有 5 条不满足（find 返回的是全篇首次出现位置，落在本单元区间之外）。",
+        "quote": "可将计就计而行。",
+        "quoteRange": [
+          90078,
+          90086
+        ]
+      }
+    ],
+    "priorReverseChecks": [
+      {
+        "id": "RCH1",
+        "severity": "high（反转语义）",
+        "found": "曹真向头营下达的**出战授权**整句在候选内完全不存在，而它正是张虎、乐綝当夜出寨的直接原因；候选反而把这次出战写成「违令」。",
+        "quote": "真遣人去头营分付张虎、乐綝：“看今夜山西火起，蜀兵必来救应。可以出军，如此如此。”",
+        "quoteRange": [
+          495224,
+          495265
+        ]
+      },
+      {
+        "id": "RCH2",
+        "severity": "medium",
+        "found": "祁山火攻的**情报接力**两整句未被任何分区覆盖：魏兵探知蜀军劫粮意图 → 报孙礼 → 孙礼飞报曹真 → 曹真下授权令。",
+        "quote": "魏兵探知蜀兵要来劫粮，慌忙报与孙礼。礼令人飞报曹真。",
+        "quoteRange": [
+          495198,
+          495224
+        ]
+      },
+      {
+        "id": "RCH3",
+        "severity": "medium",
+        "found": "「登楼专看号火」这一**观察动作**未被覆盖 —— 它是「火光被误读为号火」在魏方一侧的执行环节。",
+        "quote": "二将受计，令人登楼专看号火。",
+        "quoteRange": [
+          495265,
+          495279
+        ]
+      },
+      {
+        "id": "RCH4",
+        "severity": "medium",
+        "found": "司马懿开篇自陈「臣尝奏陛下…今果然矣」这一**前情应验**句未被覆盖，而它是本回司马懿全部预判的起点。",
+        "quote": "臣尝奏陛下，言孔明必出陈仓，故以郝昭守之，今果然矣。",
+        "quoteRange": [
+          493982,
+          494008
+        ]
+      },
+      {
+        "id": "RCH5",
+        "severity": "medium",
+        "found": "两处**报知/回报**的交接动作未被覆盖：陈震回汉中报知孔明、细作报知王双。",
+        "quote": "却说陈震回到汉中，报知孔明。",
+        "quoteRange": [
+          497376,
+          497390
+        ]
+      },
+      {
+        "id": "RCH6",
+        "severity": "low",
+        "found": "张颌「追蜀兵不上」这一败退动作的落点句未覆盖（候选只从「回到寨中」之后起引）。",
+        "quote": "且说张颌追蜀兵不上，回到寨中。",
+        "quoteRange": [
+          496387,
+          496402
+        ]
+      },
+      {
+        "id": "RCH7",
+        "severity": "low",
+        "found": "群臣对张昭劝进奏议的**当场应和**未被覆盖。",
+        "quote": "多官皆应曰：“子布之言是也。”",
+        "quoteRange": [
+          496577,
+          496592
+        ]
+      },
+      {
+        "id": "RCH8",
+        "severity": "low",
+        "found": "司马懿在曹真府上两次辞让的**完整话语**未被覆盖（候选只引了其中半句）。",
+        "quote": "懿曰：“都督少虑。某愿助一臂之力，只不敢受此印也。”",
+        "quoteRange": [
+          498920,
+          498946
+        ]
+      }
+    ],
+    "relationToMyFindings": "不冲突、可并存。其 CE1–CE3 为 voiceSurface 退化 / quoteRefs 计数 / find==start 断言三事；我的 CE1–CE3 为 C21 引证互换 / quoteRefs 计数（与其 CE2 同源，我独立复算确认）/ voiceSurface 退化（与其 CE1 同源，我按其实现独立复现并固定根因：区间内最小引号深度仍为 49 ⇒ 5186/5186 恒判「引号内」）。我的 RCH1/RCH2/RCH3 与其 RCH1/RCH2/RCH3 指向同一段（头营授权链），结论一致；我的 RCH4（虚妆/虚报两步）、RCH5（送韩暨于城外）、RCH6（两处回报闭环）未见其覆盖，为增量发现。",
+    "independence": "我未读取其结论即先行自读原文与候选（先原文、后候选、再对照），故上述重合系独立得出。"
+  },
+  "environmentFinding": {
+    "id": "ENV1",
+    "severity": "medium",
+    "title": "自指时效陷阱：verify 记录的 evidence 若引用被 cmd_verify 自行追加 reviews[] 的 read 记录，必然自伤为 hash-changed",
+    "measured": {
+      "readRecordPath": "loop/state/out/read_sanguo_L1_0097.json",
+      "hashDeclaredByPriorVerify": "eb4d1a4d5b77cbf0c9d591737bfb27327bb2ed49e27a62ad8f8a1dca8c4fe77f",
+      "hashNow": "0704a4084d3f1d71721cb6bdb034678ae6ae839dd7b2a295a1c09ece8e4f882f",
+      "priorVerifySubmittedAt": "2026-10-15T02:47:32Z",
+      "reviewAppendedAt": "2026-10-15T02:47:36Z"
+    },
+    "why": "`cmd_verify`（loop/bin/loop.py:1083）先由 `--file` 取复核结论，随后 `rec.setdefault('reviews',[]).append(...)` 并把 `verifyState` 改成复核结论，最后写回 `OUT/output_name(被复核任务)` —— 即 read 记录。因此只要复核记录把该 read 记录列为 evidence（这是最自然的写法），它固化的哈希必然在下一次同任务复核时被自己改掉 ⇒ `evidence_stale()` 判 hash-changed ⇒ 任务重新进入队列。",
+    "evidenceNeighbours": "实测同批四单元：0003/0091/0093/0095 的 verify 记录同样引用各自 read 记录却**都不 stale**，差别只在顺序 —— 它们的 verify 记录 submittedAt **晚于** read 记录 reviews[] 的最后一次追加；0097 的则早 4 秒（02:47:32 vs 02:47:36）。故本例是顺序依赖造成的**假失效**，不是产物被改坏。",
+    "reproduce": "python3 -c \"import importlib.util,json;s=importlib.util.spec_from_file_location('lp','loop/bin/loop.py');m=importlib.util.module_from_spec(s);s.loader.exec_module(m);r=m.load_json(m.OUT/'verify_sanguo_L1_0097.json');print(m.evidence_stale(r))\"  # [{'path': 'loop/state/out/read_sanguo_L1_0097.json', 'why': 'hash-changed'}]",
+    "myMitigation": "本轮我**不把** read 记录列入本复核记录的 evidence（改为只引用不可变的候选、原文与 lib_q.py），并在 sourceHashes 里如实登记该 read 记录在复核后的哈希。这样本记录不再自伤，而环境层的修法（cmd_verify 不修改被复核记录，或把 reviews[] 移出被哈希的产物）不在本任务 writes 内，我未改。"
+  },
+  "evidence": [
+    {
+      "path": "loop/state/out/read_sanguo_L1_0097.candidate.json",
+      "sha256": "6632a8c6e2c1ee227ffa6f56a586d76cf0a1aac8f561f424a1ca9d4c97b32721",
+      "kind": "被复核候选（全程只读，未修改）"
+    },
+    {
+      "path": "data/cache/fe42d01f3826fe8096f86614.docs.json",
+      "sha256": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+      "kind": "原文（只读引用，未修改）——实测文件哈希，含本单元切片"
+    },
+    {
+      "path": "data/cache/152e2a6eed94f1075e7e7070.docs.json",
+      "sha256": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+      "kind": "同文本的另一份 docs 版本：用于说明任务 JSON 的 sourceHash 差异不影响引文"
+    },
+    {
+      "path": "loop/state/out/read_sanguo_L1_0097.w-xiyou-1.build/lib_q.py",
+      "sha256": "4d2214834cbd7aa9a60dea6bd2061e0e8e0a4de58dec0af614bbb0b49cc75029",
+      "kind": "CE3 判据根因的实现文件（只读；我按其逻辑独立复现掩码）"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "原文区间与切点：docs[0].text[493949:499135] 长 5186，以本单元标题开头。命令：python3 -c \"import json;t=json.load(open('data/cache/fe42d01f3826fe8096f86614.docs.json'))[0]['text'];print(repr(t[493949:493979]),len(t[493949:499135]))\"",
+      "result": "pass"
+    },
+    {
+      "text": "411 条 quoteRef 全量复算：text[start:end]==quote 411/411；区间包含 411/411；sourceHash 411/411 == 实测文件哈希 8ab7298a…。独立脚本重算，不 import 候选生成器。",
+      "result": "pass"
+    },
+    {
+      "text": "随机 5 条（random.seed(20261015)）逐条 find：5/5 逐字命中且 find==start（该 5 条均为区间内唯一出现）。全量中另 5 条 find!=start 系全书更早另有同串（如「可将计就计而行。」全书 3 次、首次 90078），候选取区间内 occurrence 并如实记 nthOccurrence，定位正确。",
+      "result": "pass"
+    },
+    {
+      "text": "CE1（C21 引文互换）：causeQuotes[0].start=498592 > effectQuotes[0].start=498538，且引文内容与所标端点相反。命令：python3 -c \"import json;c=json.load(open('loop/state/out/read_sanguo_L1_0097.candidate.json'));e=[x for x in c['causeEdges'] if x['id']=='C21'][0];print(e['causeQuotes'][0]['start'],e['effectQuotes'][0]['start'])\"",
+      "result": "pass"
+    },
+    {
+      "text": "CE2（计数少计）：独立复算 quoteRef 总数 411、themeReadings 17、fieldCounts.quoteRefs 自报 394；distinctQuotes 259 与实际一致故掩盖了漏计。",
+      "result": "pass"
+    },
+    {
+      "text": "CE3（voiceSurface 退化）：按 lib_q.py 逻辑从第 0 字符累计引号深度复现掩码，区间内 5186/5186=100.0% 被判「引号内」，区间起点深度 49、区间内最小深度 49；全篇 “ 9327 次 vs ” 9263 次（净差 64）。按该规则重算 411 条 voiceSurface，与候选标注 0 处不符（即候选忠实执行了坏判据）。",
+      "result": "pass"
+    },
+    {
+      "text": "无编造人物：候选内出现的 46 个人名逐一在 [493949,499135) 内 find，全部命中；无只在区间外出现的人名被写入。",
+      "result": "pass"
+    },
+    {
+      "text": "RCH1（出战授权缺失）：「可以出军」在候选 JSON 内出现 0 次，而原文 [495254,495264) 存在该授权句，位于候选已引的「不许出战」[494722,494726) 之后。",
+      "result": "pass"
+    },
+    {
+      "text": "未改受保护路径：本轮只写 loop/state/out/verify_sanguo_L1_0097.verdict.json（classify=append-only）；被复核候选 sha256 仍为 6632a8c6…（复核前后一致）。",
+      "result": "pass"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/fe42d01f3826fe8096f86614.docs.json": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+    "data/cache/152e2a6eed94f1075e7e7070.docs.json": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+    "data/cache/f0b45e85aac6c95e584075a2.docs.json": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff"
+  },
+  "changes": [
+    {
+      "path": "loop/state/out/verify_sanguo_L1_0097.verdict.json",
+      "kind": "append-only"
+    }
+  ],
+  "remaining": [
+    "未修候选本身：候选不在本任务 writes 内，CE1–CE3 与 RCH1–RCH6 需由返工任务或原作者处理。",
+    "CE3 的修法需 lane 级裁定：voiceSurface 口径在 READER.md 与 docs/SCHEMA.md 中均无定义。",
+    "RCH1 是否把「违令」改写为「奉命出战」，取决于对 C03 与 X08/worldSettings 规则条的取舍；我只登记「原文有、候选无」。",
+    "ENV1（自指时效陷阱）的修法不在本任务 writes 内（需改 loop/bin/loop.py 或 reviews[] 落点），我只登记复现与规避，未改机制。",
+    "环境层发现（自指时效陷阱）：verify 记录的 evidence 若引用被 cmd_verify 自行追加 reviews[] 的 read 记录，必然自伤为 hash-changed。本轮未改该机制（loop/bin/loop.py 不属本任务 writes）。",
+    "本轮未做：GPU 测试、页面路径验收、sh scripts/accept.sh（均非本任务范围）。"
+  ],
+  "rollback": "删除/覆盖 loop/state/out/verify_sanguo_L1_0097.verdict.json 即可；该 read 记录的 reviews[] 追加与 verifyState 由 loop.py verify 写入，回滚需一并还原。被复核候选 read_sanguo_L1_0097.candidate.json 我全程未改动，sha256 仍为 6632a8c6e2c1ee227ffa6f56a586d76cf0a1aac8f561f424a1ca9d4c97b32721。",
+  "notes": "总体判断：**候选的事实层是干净的，我判 partial 而非 fail**。本角色契约明令「拿不出原文引证的反对意见只能记为存疑，不能据此判 fail」，而我没能证伪任何一条已写抽取项：411/411 引文逐字可切、区间内、哈希一致；18 条任务五栏各自独立引证（逐字层与子串层跨栏复用均为 0）；6 条被拒因果边理由成立；12 条主动排除项（notForeshadows/notWorldSettings）理由成立；3 条 unresolved 伏笔与 13 条 unknowns 都是「确认原文没有」而非「我没找到」；无编造人物、无把结束当成功、无把人物话语当事实。partial 的依据是 3 条已写项自身的引证错位/字段退化（CE1–CE3，均有逐字原文引证）与 6 条反向发现的遗漏（RCH1–RCH6）。\n\n**本轮最重要的一条是 RCH1**：候选看到了「不许出战」的禁令，却漏了同一段里曹真另行下达的「可以出军，如此如此」授权，于是把一个有令在身的出击写成了「违令」。这不是漏一条细节，是漏了一条会让语义反向的事实（禁令→授权；违令→奉命），正是计划100「只查已写项在结构上发现不了遗漏」那条教训的兑现处。\n\n关于 CE3 我需要说明一处**我先怀疑、后证实**的过程：该字段声明了机械判据却输出单一取值，我起初怀疑是标注造假，于是按 lib_q.py 的实现逐字独立复现，结果是 411/411 与候选一致 —— 即候选忠实执行了这条判据，错的是判据本身（该电子本全篇引号不平衡，净差 64，到区间起点累计深度已达 49，区间内最小深度仍为 49，故 5186/5186 个字符恒被判为「引号内」）。因此我把它记为**字段退化**而非造假，severtiy=should-fix。\n\n**关于重复复核**：本轮我发现 `verify:sanguo:L1:0097` 此前已由 agent `w-verify-4` 于 2026-10-15T02:47:32Z 完成并判 partial，其结论已写入 `loop/state/out/verify_sanguo_L1_0097.json` 的 reviews[]（该任务因此不在 done 集合内），但那次的 evidence 引用了 `loop/state/out/read_sanguo_L1_0097.json` 并固化了它当时的哈希；而 `cmd_verify` 会在写复核记录**之后**把本次复核追加进该 read 记录的 reviews[] 并改 verifyState，使该文件哈希必然改变 ⇒ `evidence_stale()` 判 hash-changed ⇒ 任务被重新领取。这是**自指的时效陷阱**：任何 verify 任务的 evidence 一旦引用被它自己修改的那条 read 记录，就必然自伤。对照实测：邻单元 0003/0091/0093/0095 的 verify 记录同样引用 read 记录却都不 stale，差别只在它们的 read 记录 reviews[] 的最后一次追加时间**早于**其 verify 记录的 submittedAt；0097 的则晚 4 秒（02:47:36 vs 02:47:32）。故这是一次**顺序依赖**导致的假失效，不是产物被改坏。本轮我未删除、未改写 `w-verify-4` 的任何结论；它的 3 条 counterExample 与 8 条 reverseCheck 仍完整保存在`loop/state/out/verify_sanguo_L1_0097.json` 与 `loop/state/out/verify_sanguo_L1_0097.submit.w-verify-4.json` 中，我的 CE1–CE3/RCH1–RCH6 是**在其之外的独立发现**（CE1 的 C21 引证互换、CE2 的计数漏算、RCH4–RCH6 均未被其 RCH1–RCH8 覆盖），两者不冲突、可并存。\n\n存疑（如实登记，不据此判 fail）：① 我未能判定应当修字段还是修判据 —— voiceSurface 的口径在 READER.md 与 docs/SCHEMA.md 中均无定义，我不替作者裁定取值，只固定「该字段在本单元为零信息」这一可复算事实。② CE1 的「互换」判定依赖候选自己写的 mechanism（压力源=表文、反应=失措）；若作者本意是把 C21 写成「失措→召懿」这一后果链，则两栏文字需改写而非互换引证。我按 mechanism 的表述判定为引证错位，此处存在解释余地。③ 本轮未做：GPU 测试、页面路径验收、sh scripts/accept.sh（均非本任务范围，任务未声明要跑）。④ 未改候选本身：`loop/state/out/read_sanguo_L1_0097.candidate.json` 不在本任务 writes 内，我全程只读（哈希仍为 6632a8c6…）。",
+  "environmentFinding2": {
+    "id": "ENV2",
+    "severity": "low（不影响引文；影响任何按 task.sourceHash 校验文件的做法）",
+    "title": "任务 JSON 的 sourceHash 指向**另一部图键**的 docs 文件；该文件与本单元提示词点名的文件**正文逐字相同**",
+    "measured": {
+      "taskSourceHash": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+      "taskSourceHashResolvesTo": [
+        "data/cache/152e2a6eed94f1075e7e7070.docs.json",
+        "data/cache/f0b45e85aac6c95e584075a2.docs.json"
+      ],
+      "promptNamedFile": "data/cache/fe42d01f3826fe8096f86614.docs.json",
+      "promptNamedFileSha256": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+      "allThreeTextLen": 607191,
+      "allThreeTextSha256": "9d28638de0b0a89fa080cc2defb4a1f8de6adb1260c4545c04ef80f73cbb221e",
+      "allThreeSliceSha256": "2e352af3ad1d365066e28be2da5d16b7c31738da0c92ccf71f66660971e19789"
+    },
+    "scope": "**系统性**，非本单元个例：我扫描 loop/state/runs/ 下 466 个 read/read-verify 任务 JSON，其中 386 个「提示词点名的 docs 文件哈希 == 任务 sourceHash」，**80 个不符**，且不符者集中在 sanguo（task 的 sourceHash 恒为 2988ce6e…，指向 152e2a6e / f0b45e85 两部较早图键）。",
+    "why": "候选在 sourceHashDiscrepancy 里如实登记了这个差异，并判定 impact=none on quotes —— 我复算确认该判定成立，且能把它**说死**：这三个 docs 文件的 file 哈希虽不同，但其 docs[0].text 的 SHA-256 完全相等（9d28638d…），本单元切片 [493949,499135) 的 SHA-256 也完全相等（2e352af3…）。即差异只在**文件封装的字节**（同正文不同图键的 JSON 存档），不在**正文内容**。这解释了为何候选 411 条引文全部逐字可切：正文根本没变。",
+    "reproduce": "python3 -c \"import hashlib,json;fs=['data/cache/152e2a6eed94f1075e7e7070.docs.json','data/cache/f0b45e85aac6c95e584075a2.docs.json','data/cache/fe42d01f3826fe8096f86614.docs.json'];[print(f,hashlib.sha256(open(f,'rb').read()).hexdigest()[:12],hashlib.sha256(json.load(open(f))[0]['text'].encode()).hexdigest()[:12]) for f in fs]\"  # file 哈希分别是 2988ce6e/2988ce6e/8ab7298a，而 text 哈希三者同为 9d28638de0b0",
+    "candidateHandling": "候选把它记为 sourceHashDiscrepancy 且引文一律采用提示词正文的 8ab7298a…（可实测复现），并写明 impact。该处置正确 —— 我不把它记为缺陷，只把范围从「本单元」升级为「80/466 个任务」。"
+  }
+}

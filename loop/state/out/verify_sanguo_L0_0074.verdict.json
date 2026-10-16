@@ -1,0 +1,327 @@
+{
+ "schema": "castline/read-verify-verdict/v1",
+ "task": "verify:sanguo:L0:0074",
+ "reviewer": "w-verify-4",
+ "role": "VERIFIER",
+ "roleFile": "loop/ROLES/VERIFIER.md",
+ "book": "sanguo",
+ "lane": 0,
+ "unitIndex": 74,
+ "unitHead": "第七十五回　关云长刮骨疗毒　吕子明白衣渡江",
+ "sourceRange": [
+  377206,
+  381297
+ ],
+ "reviewedTask": "read:sanguo:L0:0074",
+ "reviewedCandidate": "loop/state/out/read_sanguo_L0_0074.candidate.json",
+ "reviewedCandidateSha256": "82895cfa59d1942f8ea997611a42787aa0b4d3b304e74907339bf51676de89e6",
+ "reviewedAuthor": "w-read-2",
+ "reviewedRecord": "loop/state/out/read_sanguo_L0_0074.json",
+ "reviewedRecordSha256": "795b886d5b92ffbbc294de07021998ded89ff47706c962a9640fd53a2d43910f",
+ "selfSign": false,
+ "independentOf": "read:sanguo:L0:0074",
+ "source": {
+  "path": "data/cache/fe42d01f3826fe8096f86614.docs.json",
+  "docIndex": 0,
+  "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+  "textSha256": "9d28638de0b0a89fa080cc2defb4a1f8de6adb1260c4545c04ef80f73cbb221e",
+  "segmentSha256": "4ebcf70b895bf54ec6216a1fdd0ddaae0cea47db8100ece97e96a987d0df2835",
+  "rangeCodepoints": 4091,
+  "taskJsonSourceHash": "2988ce6e36c80c4effc81f73a65221adf779631682da848bb67ef6f52a5a97ff",
+  "taskJsonSourceHashNote": "任务 JSON 顶层 sourceHash=2988ce6e…，与提示词内嵌的 8ab7298a… 不同。我独立复算三份缓存：fe42d01f…=8ab7298a…、152e2a6eed…=2988ce6e…、f0b45e85…=2988ce6e…，三者 docs[0].text 逐字相同（均 607191 codepoint、text sha256=9d28638de0b0a89f…），切片 sha256 均为 4ebcf70b895bf54e…。两个哈希指向同一文本，候选对此的登记属实。"
+ },
+ "verdict": "partial",
+ "verdictRationale": "本轮我**独立于前任复核者**重做了全流程（自己读原文 → 自建事实清单 → 自写覆盖扫描 → 自取引证），结论与前任 w-verify-1 在方向上一致但不完全重合：候选的**机械层是干净的**（我全量复算 208 个定位引文 + 25 个自由文本引文，逐字/偏移/区间/哈希/重数五项失败数全为 0；我用自己的种子 random.seed(20261013) 另抽 5 条，5/5 逐字命中且偏移一致），**事实骨架基本可靠**，任务点名的三条红线（提及≠到达、人物语≠叙述事实、结束≠成功）候选都主动守住了。但**散文层仍有 5 条可用逐字原文击穿的错误**，其中 2 条是绝对/上界断言（CE2「没有任何交集描写」、CE4「只有三处」），1 条是动作链截断（CE3），2 条是计数/全称断言（CE1「两次」、CE5「一字未写」）——**全部落在没有引文强制的散文里**。故判 partial：机械层与绝大部分抽取项可直接进下游，CE1–CE5 必须改述，其中的落点结论（RX01 不连因果、U12 不把读到回末当成功）可保留。判 partial 而非 fail 的理由：这 5 条都是**局部表述错误**，不是编造人物/事件/结局，也不是伪造引文；错误没有像姊妹单元 0072 那样扩散成一条自洽的错误叙事线（那条由 C18/C21/S09/W_P04/R04 五处互相呼应）。我把这个口径差异如实登记，供下游判断。",
+ "counterExamples": [
+  {
+   "id": "CE1",
+   "severity": "minor-but-must-fix",
+   "target": "rejectedEdges RX06.why",
+   "claim": "RX06 写道「同一人（于禁）在区间内出现两次，但前一次是曹操在许都的感叹，后一次是孙权在荆州释放他」，并在同句结尾重复「同一人物出现两次不构成因果」。「两次」是可机器复算的事件重数断言。",
+   "claimQuote": "同一人（于禁）在区间内出现两次，但前一次是曹操在许都的感叹，后一次是孙权在荆州释放他。",
+   "quote": "却说关公擒了于禁，斩了庞德，威名大震，华夏皆惊。",
+   "quoteStart": 378232,
+   "quoteEnd": 378256,
+   "why": "独立复算：TEXT[377206:381297].count(\"于禁\") == 6，偏移 378238 / 378296 / 378344 / 378486 / 378655 / 380788。RX06 的分项描述只覆盖了其中 2 处（378486 曹操语、380788 叙述语），漏掉叙述语 378238、曹操语 378296、司马懿语 378344、张昭语 378655 共 4 处。RX06 的**结论**（同一人物重复出现不构成因果、拒绝连边）本身稳妥，我不反对；被判错的是它的计数依据。修复：删去计数，或改为「本区间『于禁』共 6 处，无论几处都未写因果」。（与姊妹单元 verify:sanguo:L0:0072 的 CE1 同形——那条把 1 次写成 2 次判 fail，本条是反方向。我在 notes 里说明为何本条判 partial 而非 fail。）",
+   "reproduce": "python3 -c \"import json;t=json.load(open('data/cache/fe42d01f3826fe8096f86614.docs.json'))[0]['text'][377206:381297];print(t.count('于禁'))\"  # 6"
+  },
+  {
+   "id": "CE2",
+   "severity": "must-fix",
+   "target": "rejectedEdges RX01.why + reverseFindings[4]",
+   "claim": "RX01.why 与 reverseFindings[4] 断言华佗来源「江东」与孙权一方在本区间内「没有任何交集描写」，并以此作为拒绝把刮骨与白衣渡江连成因果的理由之一。reverseFindings[4] 原句：「华佗来源「江东」与孙权一方在本区间内没有任何交集描写」。",
+   "claimQuote": "华佗来源「江东」与孙权一方在本区间内没有任何交集描写",
+   "quote": "平曰：“莫非昔日医东吴周泰者乎？”佗曰：“然。”",
+   "quoteStart": 377563,
+   "quoteEnd": 377587,
+   "why": "该绝对断言被原文直接击穿：377563 处关平当面问「莫非昔日医东吴周泰者乎？」，华佗答「然」——这是在场景内把华佗与东吴（周泰）显式连上，且由华佗本人确认。周泰在本区间另处 380177 又以吴军七员大将之一出现（区间内「周泰」共 2 次）。候选全文『周泰』出现 **0** 次，说明这不是「写错」而是**根本没读到**——正是 VERIFIER.md 第 3 步要抓的结构性遗漏。边界必须说清：这**不**证明华佗受孙权指使（原文确无指使/探报关系，候选在 U01/RF01 的谨慎是对的），故 RX01 的**落点结论可以保留**，但它的**理由句必须改写**为「本区间有华佗—东吴（周泰）的医术旧事交集（377563），但无任何指使或探报关系」。",
+   "reproduce": "python3 -c \"import json;t=json.load(open('data/cache/fe42d01f3826fe8096f86614.docs.json'))[0]['text'];i=t.find('莫非昔日医东吴周泰者乎');print(i)\"  # 377574"
+  },
+  {
+   "id": "CE3",
+   "severity": "must-fix",
+   "target": "tasks T11.action",
+   "claim": "T11.action.text 写「实际动作是把招降书写在箭上射入城中」，把虞翻说降傅士仁这一条的动作收束在**箭书**一环。但 T11.objective 引的正是虞翻自请「某凭三寸不烂之舌，说公安傅士仁来降」，而原文的说降兑现发生在**入城面谈**：请虞翻入城 → 各诉旧情 → 翻说吴侯宽洪大度、礼贤下土 → 士仁投降。",
+   "claimQuote": "实际动作是把招降书写在箭上射入城中。",
+   "quote": "即令大开城门，请虞翻入城。二人礼毕，各诉旧情。翻说吴侯宽洪大度，礼贤下土；士仁大喜，即同虞翻赍印绶来荆州投降。",
+   "quoteStart": 381046,
+   "quoteEnd": 381101,
+   "why": "原文明写两步：箭书只把人叫开门（381001「射入城中」），真正的说降在入城之后——381046「即令大开城门，请虞翻入城」，381059「二人礼毕，各诉旧情」，随即「翻说吴侯宽洪大度，礼贤下土」，然后才是「士仁大喜…投降」。候选全文『各诉旧情』『宽洪大度』『礼贤下土』各出现 **0** 次；「请虞翻入城」仅 1 次且来自 C21.mechanism。即 T11.action 漏掉了本条目**自身目标**的关键兑现环节，并与自家 C21.mechanism（已写「即令大开城门请虞翻入城」）互相矛盾。性质是**动作链截断 + 自相矛盾**，不是编造（箭书确有其事）。修复：T11.action 补入城面谈，或显式注明「面谈一环登记在 C21」。",
+   "reproduce": "python3 -c \"import json;t=json.load(open('data/cache/fe42d01f3826fe8096f86614.docs.json'))[0]['text'][377206:381297];print(t.count('各诉旧情'),t.count('宽洪大度'),t.count('礼贤下土'))\"  # 1 1 1"
+  },
+  {
+   "id": "CE4",
+   "severity": "minor",
+   "target": "unknowns U12.text",
+   "claim": "U12.text 写「叙述者明确给出结果的只有三处：关公箭疮既愈、曹操不迁都、荆州被袭取」，并以「只有三处」作为本区间结果数的上界断言。",
+   "claimQuote": "叙述者明确给出结果的只有三处",
+   "quote": "自是三军震肃。",
+   "quoteStart": 380740,
+   "quoteEnd": 380747,
+   "why": "「只有三处」作为**上界**不成立：同一候选自己的 tasks 分区里，至少有 4 条 result 的引文是叙述语写出的既成结果，而不是指令或预判——T01「平等默然而退」（377448）、T07「孙权乃召吕蒙还建业养病」（379416）、T08 的吴使回报虽属人物语，T09 的 cost 侧、T10「自是三军震肃」（380740）、T11「孙权大悦，仍令去守公安」（381101）均为叙述语结果。特别是 380740「自是三军震肃」由原文自带因果词「自是」标记，是本区间 **C18 这条因果边的落点**，其性质与「关公箭疮既愈」同为叙述语结果，却被排除在「三处」之外。候选把「我挑选的三处」写成了「只有三处」。这**不影响** U12 的落点（不把读到回末当成功），但上界断言与它自己的 tasks 分区不一致。修复：改为「叙述者给出结果的至少有…」或删去「只有」。",
+   "reproduce": "python3 -c \"import json;t=json.load(open('data/cache/fe42d01f3826fe8096f86614.docs.json'))[0]['text'][377206:381297];print(t.count('自是三军震肃'),t.count('平等默然而退'),t.count('孙权大悦，仍令去守公安'))\"  # 1 1 1"
+  },
+  {
+   "id": "CE5",
+   "severity": "minor",
+   "target": "themeReadings TH01.support[1].text",
+   "claim": "TH01.support[1] 写「失血写得具体，痛觉一字未写」，即断言本区间完全没有痛觉的文字。",
+   "claimQuote": "失血写得具体，痛觉一字未写。",
+   "quote": "时关公本是臂疼，恐慢军心，无可消遣，正与马良弈棋；",
+   "quoteStart": 377605,
+   "quoteEnd": 377630,
+   "why": "原文 377605 是**叙述语**且直写「时关公本是臂疼」——「疼」字在本区间出现 1 次、「痛」出现 3 次（377940 关公语「吾岂比世间俗子惧痛者耶」、378002 叙述语「全无痛苦之色」、378051 关公语「并无痛矣」）。候选全文『本是臂疼』0 次。候选在同一段的 TH01.note 里其实写了「引文本身只证脸色与血流，不证痛觉」，态度谨慎；但 support[1] 把谨慎收窄成了与原文相反的绝对断言。修复建议：「术中痛觉未作正面描写；叙述语另有术前『本是臂疼』（377605）与术中『全无痛苦之色』（378002）」。",
+   "reproduce": "python3 -c \"import json;t=json.load(open('data/cache/fe42d01f3826fe8096f86614.docs.json'))[0]['text'][377206:381297];print(t.count('疼'),t.count('痛'))\"  # 1 3"
+  }
+ ],
+ "counterExamplesNote": "五条均给出逐字可查的原文引证与绝对偏移，满足 VERIFIER.md「判 fail 必须有 counterExample 且 quote 逐字可查」的证据门槛。**性质分层**：CE2/CE3 是 must-fix（一个是读漏导致绝对断言为假，一个是动作链截断并与自家 C21 矛盾）；CE1/CE4/CE5 是 minor（局部计数/上界措辞不严），但同属「拿不出引文强制」的散文层，建议一并改述。我**不代改候选**，只判定。",
+ "reverseChecks": [
+  {
+   "found": "华佗的自我介绍、衣着与籍贯整段未被登记：原文写明他「方巾阔服，臂挽青囊」，自陈「乃沛国谯郡人，姓华，名伦，字元化」。候选全文『方巾』『阔服』『青囊』『沛国』『谯郡』『名伦』『元化』各出现 0 次。附一处版本用字事实：原文此处写作**「名伦」**（另见 391678 曹操问「大王知有神医华伦否」），候选未登记「华伦/华伦」这一用字分叉（区间内华佗 3 次、华伦 0 次；全书华佗 14 次、华伦 2 次）。",
+   "quote": "方巾阔服，臂挽青囊；自言姓名，乃沛国谯郡人，姓华，名伦，字元化。",
+   "start": 377510,
+   "end": 377542,
+   "note": "本区间内该串出现 1 次；候选全文出现 0 次。"
+  },
+  {
+   "found": "关平当场认出华佗即「昔日医东吴周泰者」，华佗答「然」——本区间把华佗与东吴的旧事显式连上，周泰随后（380177）又作为吴军七员大将之一出现。候选『周泰』0 次。同一条同时是 CE2 的原文依据。",
+   "quote": "平曰：“莫非昔日医东吴周泰者乎？”佗曰：“然。”",
+   "start": 377563,
+   "end": 377587,
+   "note": "本区间内该串出现 1 次；候选全文出现 0 次。"
+  },
+  {
+   "found": "吴军袭荆州的实际编成被整段略过：除「点兵三万、快船八十余只」外，原文还列了**七员大将的名字**与后援安排。候选『韩当』『蒋钦』『朱然』『潘璋』『徐盛』『丁奉』『七员大将』各 0 次。T09 只登记白衣与船数，吴方这一役的将领层因此是空的。",
+   "quote": "次调韩当、蒋钦、朱然、潘璋、周泰、徐盛、丁奉等七员大将，相继而进。",
+   "start": 380163,
+   "end": 380196,
+   "note": "本区间内该串出现 1 次；候选全文出现 0 次。"
+  },
+  {
+   "found": "陆口继任的**制度先例**被略过：孙权当面对吕蒙说「陆口之任，昔周公谨荐鲁子敬以自代，后子敬又荐卿自代，今卿亦须荐一才望兼隆者，代卿为妙」。候选『周公谨』『鲁子敬』『自代』各 0 次。这是本回人事任命（荐陆逊）的规则依据，与候选已收的 W_R06（周瑜程普不睦）性质相同却未被收。",
+   "quote": "昔周公谨荐鲁子敬以自代，后子敬又荐卿自代，今卿亦须荐一才望兼隆者，代卿为妙。",
+   "start": 379445,
+   "end": 379483,
+   "note": "本区间内该串出现 1 次；候选全文出现 0 次。"
+  },
+  {
+   "found": "三处人物**动作/神态**被略过，且都不是装饰：① 孙权闻吕蒙患病「心甚怏怏」；② 陆逊探病时吕蒙「目视陆逊，良久不语」（屏退左右之前的关键沉默）；③ 陆逊献计后吕蒙「惊谢」并说「伯言之语，如见我肺腑」。候选『心甚怏怏』『良久不语』『如见我肺腑』各 0 次。",
+   "quote": "蒙目视陆逊，良久不语。",
+   "start": 379128,
+   "end": 379139,
+   "note": "本区间内该串出现 1 次；候选全文出现 0 次。"
+  },
+  {
+   "found": "陆逊受拜时的**辞让**被略过：原文「逊谢曰：某年幼无学，恐不堪重任」，孙权答「子明保卿，必不差错。卿毋得推辞」，陆逊才「拜受印绶」。候选『年幼无学』『毋得推辞』各 0 次。这使 S04 的 after 少了一次「辞—不许—受」的授予过程（原文的授予是有阻力的，不是径直拜受）。",
+   "quote": "逊谢曰：“某年幼无学，恐不堪重任。”",
+   "start": 379560,
+   "end": 379578,
+   "note": "本区间内该串出现 1 次；候选全文出现 0 次。"
+  },
+  {
+   "found": "孙权入荆州一节的**迎送**被略过：原文「不一日，孙权领众至。吕蒙出郭迎接入衙。权慰劳毕，仍命潘浚为治中，掌荆州事」。候选收了后半（W_R03/S06 引到「仍命潘浚为治中」，S06.anchor 也写了「孙权领众至」），但『出郭』『权慰劳毕』各 0 次——「出郭迎接入衙」这一迎送动作在候选里无引证。（诚实边界：『领众至』候选出现 2 次、均在其 anchor 的转写里，故本条不主张该词零覆盖。）",
+   "quote": "不一日，孙权领众至。吕蒙出郭迎接入衙。",
+   "start": 380747,
+   "end": 380766,
+   "note": "本区间内该串出现 1 次；候选全文出现 0 次。"
+  },
+  {
+   "found": "虞翻的字与面谈内容被略过（同 CE3）：孙权当众唤其字「仲翔有何良策」，面谈时「翻说吴侯宽洪大度，礼贤下土」，且「二人礼毕，各诉旧情」（虞翻自陈「某自幼与士仁交厚」的兑现）。候选『仲翔』『宽洪大度』『礼贤下土』『各诉旧情』各 0 次。",
+   "quote": "权曰：“仲翔有何良策，可使傅士仁归降？”",
+   "start": 380889,
+   "end": 380909,
+   "note": "本区间内该串出现 1 次；候选全文出现 0 次。"
+  },
+  {
+   "found": "吕蒙对同乡定罪的**正面理由**被半略：候选 T10.action 的 note 引了「吾固知汝为覆官铠，然终是不应取民间之物」（该句候选引到 3 次），但紧接其前的「汝虽系我同乡，但吾号令已出，汝故犯之，当按军法」候选 0 次——而它才是「法—亲」冲突的正面表述（候选 T10.obstacle 只引了犯者的求情语，没引吕蒙回应求情的原话）。",
+   "quote": "汝虽系我同乡，但吾号令已出，汝故犯之，当按军法。",
+   "start": 380630,
+   "end": 380654,
+   "note": "本区间内该串出现 1 次；候选全文出现 0 次。"
+  },
+  {
+   "found": "关公在治疗现场的两句**主动表态**被略过：「任汝医治，吾岂比世间俗子惧痛者耶！」与术前华佗的「某便下手，君侯勿惊」。候选『俗子惧痛』『君侯勿惊』各 0 次。这与 TH01 的读法直接相关，漏引使该读法少了两条当事人语支撑。",
+   "quote": "某便下手，君侯勿惊。",
+   "start": 377912,
+   "end": 377922,
+   "note": "本区间内该串出现 1 次；候选全文出现 0 次。"
+  },
+  {
+   "found": "叙述语明写关公「本是臂疼」且以弈棋掩饰。候选『本是臂疼』『恐慢军心』『无可消遣』各 0 次。这一句同时是 TH01.support[1]「痛觉一字未写」的反证（见 CE5）。",
+   "quote": "时关公本是臂疼，恐慢军心，无可消遣，正与马良弈棋；",
+   "start": 377605,
+   "end": 377630,
+   "note": "本区间内该串出现 1 次；候选全文出现 0 次。"
+  },
+  {
+   "found": "「后人有诗曰」对刮骨一事的**史评**被整段略过：「治病须分内外科，世间妙艺苦无多。神威罕及惟关将，圣手能医说华佗。」候选只把末句当作 TH01 的旁证提到，但『后人有诗曰』『治病须分内外科』0 次——即候选用了这首诗的后半却未登记这首诗的存在（它既是叙述者的评价装置，也是「神威/圣手」并置的来源）。",
+   "quote": "后人有诗曰：“治病须分内外科，世间妙艺苦无多。神威罕及惟关将，圣手能医说华佗。”",
+   "start": 378085,
+   "end": 378125,
+   "note": "本区间内该串出现 1 次；候选全文出现 0 次。"
+  },
+  {
+   "found": "孙权提议与孙皎并领时，原文附了孙皎的**身份**：「孙皎字叔明，乃孙权叔父孙静之次子也」。候选 S09 收了『叔明』（4 次，均来自吕蒙语）但『孙静』『乃孙权叔父』0 次。吕蒙反对并领的理由正是亲族身份（「叔明之亲胜于普」），缺这层身份说明，W_R06 的机制少一半前提。",
+   "quote": "孙皎字叔明，乃孙权叔父孙静之次子也。",
+   "start": 379953,
+   "end": 379971,
+   "note": "本区间内该串出现 1 次；候选全文出现 0 次。"
+  },
+  {
+   "found": "荆州入城处置链的**收尾**被略：「一面遣人申报孙权。」候选『申报孙权』0 次。它在原文里是吕蒙入城后处置链的最后一环（传军令 → 原任官吏仍旧职 → 关公家属另养 → 申报孙权），S06 的 anchor 因此少了最后一环。",
+   "quote": "一面遣人申报孙权。",
+   "start": 380567,
+   "end": 380576,
+   "note": "本区间内该串出现 1 次；候选全文出现 0 次。"
+  },
+  {
+   "found": "傅士仁拆书前的**传递链**未登记为引证：「军士拾得，献与傅士仁。」（381001）候选 C21.mechanism 已把它转写进机制叙述（「军士拾得献与傅士仁」，该串候选出现 1 次），但**没有把它登记为带偏移的引证**（候选在该处只引了 381012「士仁拆书视之，乃招降之意」）。即本条是**引证覆盖不足**，不是零覆盖——我把它从「未覆盖事实」降为「引证缺口」如实登记。",
+   "quote": "军士拾得，献与傅士仁。",
+   "start": 381001,
+   "end": 381012,
+   "note": "本区间内该串出现 1 次；候选全文出现 0 次。"
+  },
+  {
+   "found": "吕蒙还建业后**入见孙权**的动作被略：「蒙至，入见权，权问曰」。候选『蒙至』『入见权』各 0 次。这是陆口继任那段对话的进入动作（无此则荐陆逊的问答没有场景入口）。",
+   "quote": "蒙至，入见权，权问曰：",
+   "start": 379428,
+   "end": 379439,
+   "note": "本区间内该串出现 1 次；候选全文出现 0 次。"
+  }
+ ],
+ "reverseChecksNote": "这 15 条是我自选事实、按「候选里有没有」逐条按键串计数得到的（脚本见 reproduce.reverseCoverage），不是复用候选的覆盖脚本。方法已知限制：按键串计数对**同义改写**会误判为未覆盖，我对每条都做了短词交叉确认（如「华佗自我介绍」拆成方巾/阔服/青囊/沛国/谯郡/名伦/元化七个词逐一计数，全部为 0，排除「用别的词写了」）；但这一层无法用计数穷举证明。要区分两类：① **结构性遗漏**（华佗自我介绍与周泰交集、七员大将名单、陆口继任先例、虞翻面谈、「本是臂疼」）——这些有原文、且在候选的叙事骨架里留下了空位；② **过程细节省略**（出郭迎接、申报孙权、蒙至入见权）——不构成缺陷，登记只为如实说明覆盖边界。另有 1 条（军士拾得转献）经我自查发现候选已在 mechanism 里**转写**、只是缺带偏移的引证，故我把它降为「引证缺口」并明确写出，不当作未覆盖事实充数。",
+ "misKillCheck": {
+  "conclusion": "未发现候选把原文中合法的因果边误挡（即计划100 的「遂行」式误杀）。",
+  "checked": [
+   "原文自带因果连接词逐处核对：『于是』2、『由是』1、『自是』1、『遂』7、『乃』16、『果然』2、『只得』1、『故』4。候选 22 条 causeEdges 覆盖了其中构成机制的全部：C02 用『只得』、C08/C10 用『由是』、C12 用『果然』、C18 用『自是』、C16 用『于是』。",
+   "候选 rejectedEdges 6 条逐条复核，**均非误杀**：RX01 落点（不把刮骨与渡江连因果）成立（理由句有错见 CE2，但落点不因理由句有错而变成误杀）；RX02/RX04/RX05 的拒绝理由与原文相符；RX03（不连「因骄致撤」）是主动抵制过度连边；RX06 的落点成立（计数句有错见 CE1）。",
+   "值得肯定的一处**防误杀**：C12 只把『果然』连到「撤兵」这一事实，拒绝增设「因骄致撤」的心理边（RX03 + U04）。这是主动抵制过度连边，方向正确。",
+   "特别复核『只得』（377469「只得四方访问名医」）：这是一个**唯一性措辞**，候选 C02 明确用它建立「无其他办法 → 只能访医」的机制，未被词表挡掉，属正确连边。"
+  ],
+  "notChecked": "我没有为「哪些合法边**应当**连而候选漏连」做穷举——那需要一份我自己的完整因果清单并与候选做集合差。本次只按原文连接词逐处核对，故结论限定为「未发现误杀」而非「已证无误杀」。"
+ },
+ "hallucinationCheck": {
+  "conclusion": "未发现原文没有的人物、事件、结局，也未发现把结束当成功。",
+  "checked": [
+   "人物：把候选散文分词后与区间文本比对，未出现区间内不存在的人名。候选提到的区间外人物（王甫、周瑜、程普、于禁、庞德）均逐字出现在区间文本中（王甫仅见于回末诗，周瑜程普仅见于吕蒙语，于禁庞德见于复述）。",
+   "结局：候选 U12 显式拒绝把读到回末当成功；T12.result 写「结果是**未写**」，并引回末套语为证。我复算「未知此去如何，且看下文分解。」位于 381226–381240，正文结束 381240，候选的 bodyEnd 判断准确。",
+   "把人物语当叙述事实：候选在落在引号内的引用中，凡作为结论使用者均在 note 标注「人物语」（如 T04.result 用叙述语、T08.result 明确标为使者回报、T02.obstacle 标为预判）。未见把诈问/猜测写成真相。",
+   "地点状态：任务点名禁止「提及≠到达」混淆。候选 W_P01 记荆州=arrived（唯一引「吴兵齐入，袭了荆州」）、樊城=mentioned、南郡=mentioned、徐州=mentioned、阳陵坡=mentioned，判据与原文相符。我复核了 23 处『荆州』与 9 处『樊城』的语境，未发现把图谋写成到达。",
+   "物件四态：候选 8 条 item 分态记录，未合成单一「物品链」，文言动词照录（酬、坚辞不受、赍、留、取）。我特别核了 W_I02：『transfer』（关公以金百两酬之）与『hold』（坚辞不受 → 金仍在关公处）分列是**正确**的——受赠方拒收则转移未完成，候选没有把它写成「华佗收下金子」。"
+  ]
+ },
+ "citationCheck": {
+  "method": "定种子 random.seed(20261013)（我自己的种子，不用前任的 74）从 208 个带 start/end 的定位引用中抽 5 条，逐条 TEXT.find(quote) 一次并比对 find()==start 与 TEXT[start:end]==quote；抽样之外另做全量复算。",
+  "sampleSize": 5,
+  "populationLocated": 208,
+  "populationFreeText": 25,
+  "hits": 5,
+  "results": [
+   {
+    "path": "$.worldSettings[10].quotes[0]",
+    "quote": "使者回见陆逊曰：“关公欣喜，无复有忧江东之意。”",
+    "declaredStart": 379822,
+    "declaredEnd": 379846,
+    "findResult": 379822,
+    "verbatim": true,
+    "offsetConsistent": true
+   },
+   {
+    "path": "$.states[5].quotes[2]",
+    "quote": "原任官吏，并依旧职。",
+    "declaredStart": 380540,
+    "declaredEnd": 380550,
+    "findResult": 380540,
+    "verbatim": true,
+    "offsetConsistent": true
+   },
+   {
+    "path": "$.tasks[10].obstacle.quotes[0]",
+    "quote": "却说傅士仁听知荆州有失，急令闭城坚守。",
+    "declaredStart": 380959,
+    "declaredEnd": 380978,
+    "findResult": 380959,
+    "verbatim": true,
+    "offsetConsistent": true
+   },
+   {
+    "path": "$.worldSettings[4].quotes[1]",
+    "quote": "吾取樊城，只在目前；取了樊城，即当长驱大进，径到许都，剿灭操贼，以安汉室。",
+    "declaredStart": 377391,
+    "declaredEnd": 377428,
+    "findResult": 377391,
+    "verbatim": true,
+    "offsetConsistent": true
+   },
+   {
+    "path": "$.worldSettings[17].quotes[1]",
+    "quote": "军士信之，遂任其停泊江边。",
+    "declaredStart": 380310,
+    "declaredEnd": 380323,
+    "findResult": 380310,
+    "verbatim": true,
+    "offsetConsistent": true
+   }
+  ],
+  "fullAudit": "全量复算 233 个引文对象（208 定位 + 25 自由文本）：TEXT[start:end]==quote 失败 0；find(quote)!=start 失败 0；超出区间失败 0；sourceHash 不符 0；inUnitOccurrences 与实际 count 不符 0；自由文本 quote 全部命中。**候选的引用层是干净的**；本轮 5 条 counterExample 全部落在引文之外的散文层。"
+ },
+ "sectionsAudit": {
+  "note": "本复核任务提示词的产出要求为 verdict / counterExamples[] / reverseChecks[] / notes。我用 loop.py 的 required_sections() 复算 verify 任务的必需分区为 ['counterExamples','reverseChecks']，本文件两者均为非空数组。另：被复核记录 read_sanguo_L0_0074.json 的 6 个内容分区（tasks/causeEdges/states/foreshadows/worldSettings/themeReadings）我用同一函数复算 validate_sections() 返回空、validate() 返回空——**不存在需要把 pass 降级为 partial 的分区缺失**，本 partial 完全出自我的独立判断。"
+ },
+ "processFinding": {
+  "title": "本任务为何在已有复核结论后仍被重新派发（我这一轮的触发原因）",
+  "finding": "verify:sanguo:L0:0074 曾由 w-verify-1 于 2026-10-13T01:30Z 提交（validation problems=[]，reviewer 记录了 verdict=partial）。但该记录**不在** done_ids() 里，因此被 pick() 重新派发给我。根因是**证据自失效**：w-verify-1 的证据里固化了被复核记录 loop/state/out/read_sanguo_L0_0074.json 的 sha256 = c762726aea4ae5d31ef9be6930560ff70f1f67eca0d3b97e361d1f3e35ca3256，而它自己的复核动作（cmd_verify → write_json_atomic）又**必然**改写这同一个文件。我复现了该哈希：把当前记录的 reviews 去掉、verifyState 还原为 pending、按 write_json_atomic 的 indent=2 + 结尾换行序列化，得到的 sha256 正是 c762726aea…（逐位相符）。即：**verify 的写入对象与它自己的证据对象是同一个文件** —— 复核一旦执行，证据必然漂移。",
+  "scope": "我全量扫描 1133 个 read-verify 任务：14 条已被 validated() 通过却不在 done_ids() 里，其中 **5 条**是这一形态（证据指向被复核的 read 记录/候选，而复核又会改写它）：verify:dafeng:L0:0044、verify:dafeng:L2:0022、verify:dafeng:L3:0183、verify:dafeng:L3:0207、verify:sanguo:L0:0074（我自己这一条）。其余 9 条是 /tmp 证据缺失（历史口径）。",
+  "whyItMatters": "这不是我这一个任务的偶发问题，而是一个**结构性的重复派发环**：复核者读 read 记录 → 把它的哈希写成证据 → cmd_verify 追加 reviews 改写同一记录 → evidence_stale() 报 hash-changed → 任务离开 done_ids → pick() 再派发 → 下一位复核者重复一遍。它对环境的真实影响是：这 5 个单元的 verify 永远不算完成，且每轮都在烧一次完整复核的墙钟。",
+  "notFixedByMe": "按 AGENTS.md「同一文件只设一个写入负责人」与我的任务 writes 限制，我**不改** loop/bin/loop.py。修复方向（留给守护轮/合并任务判断）：verify 的证据应指向**不可变的只读快照**（或把被复核记录的哈希记在 reviews 条目内、由 evidence_stale 对 loop/state/out/ 下的read 记录豁免 hash-changed 判定），而不是直接固化一个复核动作自己会改写的文件。",
+  "reproduce": "python3 -c \"import importlib.util,json;s=importlib.util.spec_from_file_location('lp','loop/bin/loop.py');m=importlib.util.module_from_spec(s);s.loader.exec_module(m);print('verify:sanguo:L0:0074' in m.done_ids());print(m.evidence_stale(m.load_json(m.OUT/'verify_sanguo_L0_0074.json')))\"  # False / [{path: read_sanguo_L0_0074.json, why: hash-changed}]"
+ },
+ "notes": "总判 **partial**。\n\n【本轮与前任的关系】我按 VERIFIER.md 的顺序**先自己读完原文**（导出 [377206,381297) 逐行读完、自建事实清单）才打开候选，也用**自己的种子**（20261013）与**自写的扫描脚本**独立复算，不依赖前任 w-verify-1 的结论。两人的结论在方向上一致（候选机械层干净、散文层有错），但我不照抄它的清单：我这一轮独立得到 5 条 counterExamples（与它 3 条中 CE1/CE2/CE3 重合 3 条，我另加 CE4「只有三处」、CE5「痛觉一字未写」）与 15 条 reverseChecks（它 14 条）。它的 CE1/CE2/CE3 我逐条独立复算**全部成立**，其 18 条引用我也逐条 find() 验过、0 处不逐字——即前任的复核本身是可靠的。我保留它在 read 记录 reviews[] 里的条目，不覆盖。\n\n【must-fix（原 READER 侧返工，我不代改）】\n  · CE2：RX01.why / reverseFindings[4] 的「没有任何交集描写」必须改写。原文 377563 有华佗—东吴（周泰）的医术旧事交集。**落点可保留**（无指使/探报关系）。\n  · CE3：T11.action 补入城面谈（381046「请虞翻入城」→ 381059「各诉旧情」→「翻说吴侯宽洪大度，礼贤下土」），或显式注明面谈登记在 C21，以消除与自家 C21 的矛盾。\n\n【minor-but-must-fix】\n  · CE1：RX06 的「于禁出现两次」改为 6 处，或删去计数只留落点。\n  · CE4：U12 的「只有三处」删除上界措辞（它自己的 tasks 分区里 T01/T07/T10/T11 的 result 都是叙述语结果；尤其 380740「自是三军震肃」带原文因果词『自是』）。\n  · CE5：TH01.support[1]「痛觉一字未写」改为「术中痛觉未作正面描写」（原文 377605 叙述语有「本是臂疼」、378002 有「全无痛苦之色」）。\n\n【我为什么判 partial 而不是 fail —— 如实交代，留给下游】\n姊妹单元 verify:sanguo:L0:0072 以「计数错误（把 1 次写成 2 次）」判了 fail，而本案 CE1 是同一形态的反方向（把 6 次写成 2 次）。我判 partial 的理由是**错误的扩散范围不同**：0072 的错误由 C18/C21/S09/W_P04/R04 五处互相呼应、被当成一条叙事线；本案 5 条各自独立、都是局部表述，其中两条（CE1/CE5）连落点结论都不受影响。这是我的判断而非事实分歧，**若下游认为口径应与 0072 完全一致，本判定可上调为 fail，我不会争辩**。\n\n【我自己的方法限制，如实登记】\n  ① reverseChecks 的「候选有没有」是**按键串命中计数**，对同义改写会误判为未覆盖；我对每条都做了短词交叉确认（如华佗自我介绍拆成 7 个词逐一计数），但该层无法穷举证明。\n  ② 误杀一节结论是「未发现」而非「已证无」，理由见 misKillCheck.notChecked。\n  ③ CE4 的「上界不成立」我用自己的 tasks 分区作依据，若把「结果」狭定义为「因果链终点的成功判定」，则 U12 的三处口径可以自洽——我把这条标为 minor 而非 must-fix，正是因为存在这个合理的狭解释。\n\n【范围声明】本次复核未跑 GPU、未起浏览器（任务未要求，且 GPU 全局串行）；未改动 js/ css/ index.html serve.py narrative.py scripts/ tests/ docs/ data/ 任何受保护路径；仓库内只新增任务 writes 指定的唯一文件 loop/state/out/verify_sanguo_L0_0074.verdict.json。我的脚本与只读快照放在仓库外 CL_ARTIFACTS（按 AGENTS.md 约定）。\n\n【本文件自审】counterExamples+reverseChecks 共 21 条引证，写盘前逐条断言逐字/偏移/区间，失败 0。",
+ "remaining": [
+  "CE1–CE5 由 READER 侧返工（复核者不代改候选）。",
+  "reverseChecks 的 15 条为候选未覆盖事实；其中结构性遗漏（华佗自我介绍/周泰交集、七员大将名单、陆口继任先例、虞翻面谈、「本是臂疼」）建议由 READER 判断是否补入 tasks/states/worldSettings，我不代为扩写。",
+  "processFinding 记录的重复派发环（5 个 verify 任务因自身证据漂移而永远不算完成）我未修——改 loop/bin/loop.py 超出本任务 writes 限制，留给守护轮/合并任务。",
+  "本复核未跑 GPU/浏览器测试；未改动任何受保护路径。",
+  "口径差异（本案 partial vs 0072 fail）已写在 notes，留给下游复核判断，我不擅自对齐。"
+ ],
+ "reproduce": {
+  "readOriginal": "python3 -c \"import json;t=json.load(open('data/cache/fe42d01f3826fe8096f86614.docs.json'))[0]['text'];print(len(t[377206:381297]))\"  # 4091",
+  "segmentHash": "python3 -c \"import json,hashlib;t=json.load(open('data/cache/fe42d01f3826fe8096f86614.docs.json'))[0]['text'];print(hashlib.sha256(t[377206:381297].encode()).hexdigest())\"  # 4ebcf70b895bf54ec6216a1fdd0ddaae0cea47db8100ece97e96a987d0df2835",
+  "candidateHash": "shasum -a 256 loop/state/out/read_sanguo_L0_0074.candidate.json  # 82895cfa59d1942f8ea997611a42787aa0b4d3b304e74907339bf51676de89e6",
+  "reviewedRecordHash": "shasum -a 256 loop/state/out/read_sanguo_L0_0074.json  # 795b886d5b92ffbbc294de07021998ded89ff47706c962a9640fd53a2d43910f",
+  "fullQuoteAudit": "$CL_ARTIFACTS/verify-sanguo-L0-0074-w-verify-4/audit1_citations.py (208 定位 + 25 自由文本；五项失败数均 0)",
+  "reverseCoverage": "$CL_ARTIFACTS/verify-sanguo-L0-0074-w-verify-4/audit2_reverse.py (220 条自选短语 + 40 个人名；候选零覆盖 54 条短语、8 个人名)",
+  "counterExample1": "python3 -c \"import json;t=json.load(open('data/cache/fe42d01f3826fe8096f86614.docs.json'))[0]['text'][377206:381297];print(t.count('于禁'))\"  # 6",
+  "counterExample2": "python3 -c \"import json;t=json.load(open('data/cache/fe42d01f3826fe8096f86614.docs.json'))[0]['text'];i=t.find('莫非昔日医东吴周泰者乎');print(i)\"  # 377574",
+  "counterExample3": "python3 -c \"import json;t=json.load(open('data/cache/fe42d01f3826fe8096f86614.docs.json'))[0]['text'][377206:381297];print(t.count('各诉旧情'),t.count('宽洪大度'),t.count('礼贤下土'))\"  # 1 1 1",
+  "processFinding": "python3 -c \"import importlib.util;s=importlib.util.spec_from_file_location('lp','loop/bin/loop.py');m=importlib.util.module_from_spec(s);s.loader.exec_module(m);print('verify:sanguo:L0:0074' in m.done_ids())\"  # False",
+  "runVerify": "python3 -B -s loop/bin/loop.py verify --task read:sanguo:L0:0074 --file loop/state/out/verify_sanguo_L0_0074.verdict.json --agent w-verify-4"
+ },
+ "selfAudit": {
+  "checked": 21,
+  "failures": 0,
+  "coverageClaimsChecked": 27,
+  "coverageClaimFailures": 0,
+  "note": "本文件 counterExamples + reverseChecks 的 21 条引证，写盘前逐条断言 TEXT[start:end]==quote 且 TEXT.find(quote)==start 且区间内，失败 0。另机器复算本文件全部 27 处「候选 0 次」计数断言（seg>0 且 cand==0），失败 0。"
+ }
+}

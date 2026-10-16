@@ -1,0 +1,390 @@
+{
+  "task": "verify:sanguo:L0:0038",
+  "agent": "w-verify-2",
+  "status": "rejected",
+  "verdict": "partial",
+  "candidateVerdict": "pass-with-defects",
+  "reviewedTask": "read:sanguo:L0:0038",
+  "reviewedArtifact": {
+    "path": "loop/state/out/read_sanguo_L0_0038.candidate.json",
+    "sha256": "4c571a5472760b7babccf48f8dfed8dfd02c8fdbdfd3a6b33b99de0849e46b44",
+    "producedBy": "w-read-2"
+  },
+  "source": {
+    "path": "data/cache/fe42d01f3826fe8096f86614.docs.json",
+    "sha256": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+    "docIndex": 0,
+    "docName": "0014《三国演义》-罗贯中 著",
+    "range": [
+      194245,
+      199104
+    ],
+    "codepoints": 4859,
+    "segmentSha256": "987d0d583db72d7d907400b91be1af9f573885e7e057d85a12b4d1b19e43fabb",
+    "offsetBase": "docs[0].text 全文 codepoint 偏移（非切片偏移）",
+    "boundaryHead": "第三十九回　荆州城公子三求计　博望坡军师初用兵",
+    "boundaryNote": "199104 起为「第四十回　蔡夫人议献荆州　诸葛亮火烧新野」回目；199049-199104 为站点样板，非正文。"
+  },
+  "summary": "先自己逐段读完原文 [194245,199104)（13 个非空段 + 2 段站点样板），再读候选。引用层零编造、零偏移错误：全量 270 条引文实例四项核验（t[start:end]==quote、find(quote)==start、sourceHash 一致、inRange 边界）失败 0；occurrence 计数 0 处不符；固定种子抽 5 条 5/5 逐字命中且偏移一致；metrics 全部 14 个分区计数可复算为真；无编造人物/结局/越权成功判定。反向验证查出 3 处可被原文或候选自身文件直接证伪的自述错误（FS5 回收地点写「合淝」实为「濡须」；U3「袅 全书 1 次」实为 6 次；readMethod 的 4841 与本候选 rangeCodepoints=4859 自相矛盾），另查出 6 条原文明确存在而候选未覆盖的事实。判 partial：无编造，但三处可机器证伪。复核中我推翻了自己最初 2 条反向发现（关羽拦李典、十面埋伏），已如实记录。",
+  "counterExamples": [
+    {
+      "id": "CE-A1",
+      "field": "foreshadows[4].payoff.text (FS5_lingtong_feud)",
+      "severity": "factual-error",
+      "claim": "FS5 的 payoff 写「区间外回收：**后文孙权攻合淝时**甘宁一箭救下凌统，凌统顿首拜谢」。",
+      "evidence_in_candidate": "区间外回收：后文孙权攻合淝时甘宁一箭救下凌统，凌统顿首拜谢，两人「结为生死之交，再不为恶」。",
+      "quote": "孙权在濡须口收拾军马，忽报曹操自汉中领兵四十万前来救合淝。",
+      "start": 342395,
+      "end": 342424,
+      "why": "回收现场是**濡须**不是合淝。第 68 回（342369 起）开篇即「孙权在濡须口收拾军马」；凌统请战「统遂领兵五千，离濡须。」（343321）、甘宁百骑劫营后「回到濡须」、凌统被曹休射落马、甘宁放箭救他、二人和解（343542），全程都在濡须。合淝在原文里是曹操「前来救」的对象（342406），不是孙权的进攻方向，也不是回收发生地。复算：python3 -c \"import json;t=json.load(open('data/cache/fe42d01f3826fe8096f86614.docs.json'))[0]['text'];W=t[342369:344000];print(W.count('濡须'),W.count('合淝'))\" → 8 1（唯一的 1 次在开篇「救合淝」）。不影响 FS5 的伏笔成立判断，错的是地点自述，属可被原文直接证伪。",
+      "impact": "FS5 的 status=resolved-out-of-unit 仍成立；payoff 的地点须改为「濡须」。"
+    },
+    {
+      "id": "CE-B1",
+      "field": "unknowns[2].what (U3_niaoshou)",
+      "severity": "numeric-error",
+      "claim": "U3 写「苏飞一处作「权命将苏飞袅首」（**「袅」全书 1 次**），黄祖两处作「枭其首级」「枭首」（5 次）」。",
+      "evidence_in_candidate": "（「袅」全书 1 次）",
+      "quote": "大军既至吴会，权命将苏飞袅首，与黄祖首级一同祭献。",
+      "start": 194665,
+      "end": 194690,
+      "why": "「袅」全书共 **6** 次（16829「袅袅双飞燕」、16830、36955「风袅一枝新」、112372「专为袅雄」、116884「騕袅」、194677 本条），只有「袅首」这个组合是 1 次。候选把组合次数写成了字次数。复算：python3 -c \"import json;t=json.load(open('data/cache/fe42d01f3826fe8096f86614.docs.json'))[0]['text'];print(t.count('袅'),t.count('袅首'))\" → 6 1。同条后半「枭首 5 次」在全库层面为真，但**区间内「枭首」0 次**、区间内黄祖处实际用「枭其首级」（全库 4 次、区间内 1 次）——而它自己的引文正是「宁枭其首级…」，自述与自引不一致。",
+      "impact": "U3 的结论方向（底本两种写法并用、疑一处为讹字）不受影响；两个计数须改正。"
+    },
+    {
+      "id": "CE-C1",
+      "field": "source.readMethod",
+      "severity": "internal-inconsistency",
+      "claim": "readMethod 写「本会话逐段通读 [194245,199104) 全部 **4841** codepoint」。",
+      "evidence_in_candidate": "本会话逐段通读 [194245,199104) 全部 4841 codepoint（13 个非空段落）",
+      "quote": "第三十九回　荆州城公子三求计　博望坡军师初用兵",
+      "start": 194245,
+      "end": 194268,
+      "why": "与本候选自己的 source.rangeCodepoints=4859 直接矛盾，且 199104-194245=4859。4841 恰是**上一条任务 read:sanguo:L0:0036 的区间长度**（read_sanguo_L0_0036.candidate.json 的 rangeCodepoints=4841、其 readMethod 亦写 4841），属跨任务复制残留。复算：python3 -c \"import json;c=json.load(open('loop/state/out/read_sanguo_L0_0038.candidate.json'));print(c['source']['rangeCodepoints'],199104-194245)\" → 4859 4859。coverage.bodyCodepoints=4802 与 bodyRange [194245,199047] 自洽（199047-194245=4802），这一处无误。",
+      "impact": "不影响内容断言，但「通读范围」自述可机器证伪，须改为 4859。"
+    }
+  ],
+  "reverseChecks": [
+    {
+      "id": "RC1",
+      "found": "刘备集团内部对「要不要荆州」有分歧：孔明**以目视玄德**示意接受，事后又当面质疑刘备为何推辞，并叹「真仁慈之主也」——候选 T5 只写了刘备单方面的辞让。",
+      "quote": "孔明以目视玄德。",
+      "start": 195586,
+      "end": 195594,
+      "quote2": {
+        "quote": "孔明曰：“景升欲以荆州付主公，奈何却之？”",
+        "start": 195619,
+        "end": 195640
+      },
+      "quote3": {
+        "quote": "孔明叹曰：“真仁慈之主也！”",
+        "start": 195665,
+        "end": 195679
+      },
+      "why": "检索「以目视」「以目」「奈何却之」「真仁慈」「仁慈」在候选全文均 0 命中。T5 把此行定为「按行前口径周旋」，却漏掉孔明当场示意与事后反对——这是本区间最清楚的一处君臣路线分歧，也是 RCE2 之所以重要的语境。"
+    },
+    {
+      "id": "RC2",
+      "found": "刘备自陈辞荆州的理由（恩礼交至、不忍乘危夺之）；黄祖临阵向甘宁求情的原话（自称不曾轻待他）——两条人物自述均未覆盖。",
+      "quote": "玄德曰：“景升待我，恩礼交至，安忍乘其危而夺之？”",
+      "start": 195640,
+      "end": 195665,
+      "quote2": {
+        "quote": "祖于马上谓宁曰：“我向日不曾轻待汝，今何相逼耶？”",
+        "start": 194353,
+        "end": 194378
+      },
+      "why": "「恩礼交至」「恩礼」「安忍乘其危」「不曾轻待」「轻待汝」在候选全文均 0 命中。前者是 T5 结果的动机原话（候选只写了辞谢动作）；后者是 T1 的对手视角——T1.objective 只引甘宁的复仇语，缺黄祖的辩解，使「旧怨」只有一方说法。"
+    },
+    {
+      "id": "RC3",
+      "found": "新野百姓望尘遮道而拜，把「吾属生全」归功于刘备得到「贤人之力」——战果的民间确认，候选未覆盖。",
+      "quote": "新野百姓望尘遮道而拜，曰：“吾属生全，皆使君得贤人之力也！”",
+      "start": 198925,
+      "end": 198955,
+      "why": "候选有 ST7（关张信任反转）、FS9（庆功筵席），但「望尘遮道」「吾属生全」「遮道而拜」全文 0 命中；「百姓」仅在 T11.costNote 里作为「未写成百姓的损失」出现，与这句无关。它是孔明信用在军民层的回收，与 ST7 的将领层回收并列。"
+    },
+    {
+      "id": "RC4",
+      "found": "张飞「哥哥何不使水去？」——直接讥讽刘备「吾得孔明，犹鱼之得水也」，候选未覆盖。",
+      "quote": "张飞曰：“哥哥何不使水去？”",
+      "start": 197266,
+      "end": 197280,
+      "why": "检索「何不使水去」「使水去」「水去」在候选全文均 0 命中。候选 RCE4 引了「犹鱼之得水」（196974）作另一用途（论证礼遇→不服不连边），并在 KG4 引用同句，但**没有**收录张飞这句回指比喻的反讽。它把刘备的评语变成关张的笑柄，是 T9 内部阻力的最锋利一处。"
+    },
+    {
+      "id": "RC5",
+      "found": "夏侯敦战前当面骂赵云「汝等随刘备，如孤魂随鬼耳」——轻敌的当面表述，候选未覆盖。",
+      "quote": "敦骂曰：“汝等随刘备，如孤魂随鬼耳！”",
+      "start": 198120,
+      "end": 198139,
+      "why": "检索「孤魂随鬼」「随鬼」在候选全文均 0 命中。候选已在 KG1.note 引了「敌军如此，虽十面埋伏，吾何惧哉」（198214）作旁证，但漏了这句对赵云说的当面辱骂；它与 TH2「按过去名声估算对手」这一读法直接相关。"
+    },
+    {
+      "id": "RC6",
+      "found": "刘表曾欲斩蔡瑁之首为刘备出气、因众人告危而止；刘备当场替蔡瑁开脱——这段和解性对话候选只用了「襄阳之事」四字，未收录任何一方原话。",
+      "quote": "表曰：“吾已悉知贤弟被害之事。当时即欲斩蔡瑁之首，以献贤弟；因众人告危，故姑恕之。",
+      "start": 195390,
+      "end": 195431,
+      "quote2": {
+        "quote": "玄德曰：“非干蔡将军之事，想皆下人所为耳。”",
+        "start": 195439,
+        "end": 195461
+      },
+      "why": "「蔡瑁之首」「众人告危」「非干蔡将军」「下人所为」在候选全文均 0 命中；「蔡瑁」全候选仅出现 1 次，且是在 KG6 里作**否定性**陈述（「蔡夫人/蔡瑁的立场在本区间完全没有出现」）。T5.objective 只写「先谢襄阳之事」（指孔明行前定的口径），而原文这里刘表主动提起欲斩蔡瑁、刘备反为蔡瑁开脱，是「谢襄阳之事」的**实际执行场景**，也是 RCE2 里刘备辞让姿态的同一场对话。属明确的覆盖遗漏。"
+    }
+  ],
+  "misKillCheck": {
+    "note": "误杀检查：逐条复核 rejected* 分区的判据是否把合法项错误排除。",
+    "items": [
+      {
+        "id": "RCE1",
+        "verdict": "不误杀，成立",
+        "why": "本区间给曹操出兵的直接理由只有夏侯敦「必为后患，可早图之」；荀彧/徐庶的话是谏阻语，曹操以「汝早报捷书」回应＝未采纳。把谏语当动因是方向性错误。"
+      },
+      {
+        "id": "RCE2",
+        "verdict": "不误杀，成立",
+        "why": "「我死之后，弟便为荆州之主也」是许诺，刘备当场辞谢，区间内无交割动作；连到几十回后的荆州归属确属把时间跨度当因果。"
+      },
+      {
+        "id": "RCE3",
+        "verdict": "不误杀，成立",
+        "why": "原文给江夏空虚的理由是「黄祖新亡，江夏乏人守御」与「今江夏失守，黄祖遇害」，没有一句把孙权撤军与刘琦受命连成因果。"
+      },
+      {
+        "id": "RCE4",
+        "verdict": "不误杀，但偏严",
+        "why": "原文两事紧邻（「玄德自得孔明，以师礼待之。关、张二人不悦」），关张自陈的理由是才学/效验而非反对礼遇。按「有机制才连边」的口径不连边可接受，但原文已给出因果并列，判为「相关不连边」属从严，记为存疑而非误杀。"
+      },
+      {
+        "id": "RF1..RF4",
+        "verdict": "不误杀，全部成立",
+        "why": "RF1（苏飞未逃、条件未触发）、RF2（古书单次出现且被搁置）、RF3（蠫牛尾同段闭环）、RF4（夏侯敦未献首级）判据经原文复核均正确。RF1 与 FS5 的对照（同为誓言、一有回收一无回收）处理得当。"
+      },
+      {
+        "id": "RWS1..RWS4",
+        "verdict": "不误杀，RWS4 建议升格",
+        "why": "RWS1（古书无四态动作）、RWS2（小车装饰性）、RWS3（罗川口仅地标）成立。RWS4（吴会）候选自写「本可立条…若复核认为应立条，这一条可原样升级」：原文「大军既至吴会」是明确到达、「又命孙静引一枝军守吴会」是驻守，按 placeState 判据应立 arrived 条。属从严取材而非误杀，不据此判 fail。"
+      },
+      {
+        "id": "词表误杀",
+        "verdict": "未发现",
+        "why": "未发现整词/正则把合法项挡掉的痕迹：唯一被拒的因果候选（孙权弃江夏→刘琦守江夏）有原文理由（RCE3），非词表误伤。"
+      }
+    ]
+  },
+  "hallucinationCheck": {
+    "result": "未发现编造",
+    "items": [
+      {
+        "check": "原文外人物",
+        "result": "pass",
+        "detail": "候选正文全部人名在区间内均出现。区间内 0 次的少数名字（关羽、蔡夫人、刘琮、曹仁/曹洪/张辽/张颌/夏侯渊）只出现在**区间外引文**或**明确标注为「本区间出现 0 次」的否定陈述**中（KG6、outOfRangeCitations），不构成编造。"
+      },
+      {
+        "check": "原文外结局",
+        "result": "pass",
+        "detail": "T8.result 只到「引军登程」并明写曹操亲征未发生；T11.result 写「本区间不交代这三千人的下落」（derived）；FS7/U10 对回末「亮有一计」保持 unresolved；FS8/U8 对张昭预判保持 unresolved。"
+      },
+      {
+        "check": "把结束当成功",
+        "result": "pass",
+        "detail": "T9.result.note 明写「『破曹』这个更大的目标未达成」，并把「初出茅庐第一功」标注为后人题诗；T2.result.note 明写张昭预言无兑现「不得写成 result=成功」；T4.result.note 明写结果是物理隔离而非和解。"
+      },
+      {
+        "check": "人物语当事实",
+        "result": "pass",
+        "detail": "T8.objective.note 明写动机借用进言者说法；T10.objective.note 明写「愿将首级献与丞相」是自誓且未执行；KG2 明写曹操立场原文未表。"
+      },
+      {
+        "check": "一次出现当伏笔",
+        "result": "pass",
+        "detail": "RF2（古书 1 次）、RF3（蠫牛尾 1 次且同段闭环）被正确拒绝；FS9 自行标注回收强度需打折。"
+      },
+      {
+        "check": "定位当语义",
+        "result": "pass",
+        "detail": "semanticReview 保持 not-performed，并有 semanticReviewNote 列出待复核的语义维度。"
+      }
+    ]
+  },
+  "citationSample": {
+    "method": "固定种子 random.seed(20261009) 从 265 条 in-range 带偏移引文中抽 5 条，各做 find() 与 t[start:end]==quote 核验。",
+    "result": "5/5 逐字命中且偏移一致，occurrences 均为 1",
+    "samples": [
+      {
+        "path": "causeEdges/7/quotes/0",
+        "quote": "刘表犹豫未决，请玄德共议。",
+        "start": 196371,
+        "end": 196384,
+        "find": 196371,
+        "exact": true
+      },
+      {
+        "path": "unknowns/0/quotes/0",
+        "quote": "操即命夏侯敦为都督，于禁、李典、夏侯兰、韩浩为副将，领兵十万，直抵博望城，以窥新野。",
+        "start": 196628,
+        "end": 196670,
+        "find": 196628,
+        "exact": true
+      },
+      {
+        "path": "tasks/9/obstacle/quotes/0",
+        "quote": "韩浩拍马向前谏曰：“赵云诱敌，恐有埋伏。”",
+        "start": 198189,
+        "end": 198210,
+        "find": 198189,
+        "exact": true
+      },
+      {
+        "path": "foreshadows/3/payoff/quote",
+        "quote": "云大怒，纵马来战。两马相交，不数合，云诈败而走。",
+        "start": 198139,
+        "end": 198163,
+        "find": 198139,
+        "exact": true
+      },
+      {
+        "path": "tasks/5/action/quotes/2",
+        "quote": "只见楼梯已撤去。",
+        "start": 196109,
+        "end": 196117,
+        "find": 196109,
+        "exact": true
+      }
+    ],
+    "fullSweep": {
+      "quoteObjects": 270,
+      "sliceMismatch": 0,
+      "notFound": 0,
+      "offsetSelfInconsistent": 0,
+      "occurrenceCountMismatch": 0,
+      "outOfRangeOffsets": 5,
+      "outOfRangeDetail": "5 条落在区间外，位于 foreshadows[4].payoff、foreshadows[5].payoff 与 outOfRangeCitations（3 条），全部显式标注 inRange=false/outOfRange=true，并在 outOfRangeCitations.note 声明「不作为本区间任何断言的证据」。经核验均逐字命中、偏移正确，属知情且合规的区间外引用，不计缺陷。"
+    }
+  },
+  "coverage": {
+    "readWholeSlice": true,
+    "paragraphs": 13,
+    "myRead": "独立通读 [194245,199104) 全 4859 codepoint（13 个非空段 + 2 段站点样板），逐段建立偏移地图后再读候选。",
+    "candidateCoverageNote": "候选 coverage.paragraphMap 的 13 段切分与我的独立切分逐段一致（起止偏移全部吻合）；bodyCodepoints 4802 与 bodyRange [194245,199047] 自洽。"
+  },
+  "usableVsDiscard": {
+    "usable": "tasks(11)/causeEdges(14)/states(9)/knowledgeGaps(6)/worldSettings(21)/themeReadings(2)/unknowns(14)/selfCritique(6) 的**实体与引文全部可用**：抽取项经原文核验为真，270 条引文零偏移错误，无编造。FS1-FS8 的伏笔判定、rejected* 四分区的判据经误杀检查全部成立。",
+    "mustFix": "（1）FS5.payoff 地点「合淝」→「濡须」（CE-A1）；（2）U3 的「袅 全书 1 次」→ 6 次（「袅首」才是 1 次），并补注区间内「枭首」0 次／实际用「枭其首级」（CE-B1）；（3）source.readMethod 的「4841」→「4859」（CE-C1）。",
+    "shouldAdd": "RC1（孔明以目视玄德＋事后质疑）、RC2（刘备辞荆州理由＋黄祖求情原话）、RC3（新野百姓望尘遮道）、RC4（张飞「何不使水去」）、RC5（「孤魂随鬼」）、RC6（刘表欲斩蔡瑁＋刘备开脱）。",
+    "suggestUpgrade": "rejectedWorldSettings 的 RWS4（吴会）按候选自设条件可升为 place/arrived 条。",
+    "downgradeNone": "未发现「该存疑却写成确定」的实体；候选 unknowns 已覆盖主要不确定处（U1-U14）。"
+  },
+  "notes": "总体判断：这是一份**引用层与实体层都经得起复核**的候选——270 条引文零失败、metrics 可全量复算、无编造无越权、区间外引用做过知情隔离。selfCritique 六条多数经我复核**成立**（SC1 的 T5 编排偏乐观、SC2 的 T2.result 依据强度只到 derived、SC4 的 cost 口径不一致、SC5 的 TH2 反证三成立、SC6 的 T11 否定性结论最脆）。判 partial 不是因为它「错得多」，而是有三处可被原文或自身文件直接证伪的自述错误（A/B/C），按纪律不能给 pass；三处都不触及抽取项的成立，改掉即可通过。\n\n不确定处（按纪律记为存疑，不据此判 fail）：\n① FS9 把「分赏将士」当作「庆喜筵席／功劳簿」的回收。我核到「庆喜筵席」「功劳簿」在调令之后各出现 0 次，回收是功能性的而非字面的——但候选已在 note 主动写明并给出「若复核要求字面回收应改为 unresolved」的让步，我认可它标 resolved-in-unit 是**有保留的**判断，不改判。\n② RCE4 不连「刘备礼遇→关张不服」这条边：原文把两事并列写出，判「有机制才连边」属从严，记为存疑而非误杀。\n③ U13 报告的任务顶层 sourceHash（2988ce6e…，属 152e2a6eed94f1075e7e7070.docs.json）与 prompt 指定的fe42d01f3826fe8096f86614.docs.json（8ab7298a…）不一致。我复算了这两份缓存：docs[0].text 长度均为 607191、text sha256 均为 9d28638d…、[194245,199104) 切片逐字相同 ⇒ **两份文件正文完全一致**，此不一致不影响任何结论。候选对此保持未复算（写「没有再复算」）是诚实的。\n④ 我的反向发现用「候选文件内该 token 0 命中」判定遗漏，并额外检索同义改写以防误判（如「拦截李典」「百姓」「仁慈」「恩礼」「以目」「生全」等）。「0 命中」只能证明候选没有以这些字面覆盖，不能排除它用别的概括句涵盖同一事实——我逐段读过候选的 tasks/causeEdges/states/worldSettings，未发现这样的概括句，故维持 RC1-RC6 为有效发现。\n\n**我推翻了自己的两条最初发现（如实记录）**：\n⑤ 我最初把「关羽在博望坡实际拦截李典（与调令『焚其粮草』不同）」列为遗漏，复核后发现它**已被覆盖**：worldSettings 的「豫山、安林」条目 explain 里写明「回收发生在战斗后段：李典『急奔回博望城』被关云长拦住——但那是在博望城下，不在豫山」，并据此正确判为 mentioned 而非 arrived。这条反向发现**不成立**，已删除。\n⑥ 我最初把「夏侯敦『虽十面埋伏，吾何惧哉』」列为遗漏，复核后发现该句**已被引用**（KG1.quotes 里以 start=198214 收录）。我真正该指出的是同段另一句「孤魂随鬼」未被收录，已把该条改写为 RC5，并如实保留这处自我更正。",
+  "evidence": [
+    {
+      "path": "loop/state/out/verify_sanguo_L0_0038.verdict.json",
+      "sha256": "44b1efe3b52162a88e9b79d87a2340deab4d04dc9d15376a0278cabe37d4ab13",
+      "note": "任务 writes 声明的产出：本复核结论（主副本）"
+    },
+    {
+      "path": "loop/state/out/read_sanguo_L0_0038.candidate.json",
+      "sha256": "4c571a5472760b7babccf48f8dfed8dfd02c8fdbdfd3a6b33b99de0849e46b44",
+      "note": "被复核候选；270 条引文出处"
+    },
+    {
+      "path": "data/cache/fe42d01f3826fe8096f86614.docs.json",
+      "sha256": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+      "note": "原文底本；docs[0].text 长度 607191，text sha256=9d28638de0b0a89fa080cc2defb4a1f8de6adb1260c4545c04ef80f73cbb221e"
+    },
+    {
+      "path": "loop/state/out/read_sanguo_L0_0036.candidate.json",
+      "sha256": "5f4fa87eef87340ae2686311ec5a2c40a2f4b987e55a3796db34603d70eb6332",
+      "note": "CE-C1 对照：其 rangeCodepoints=4841，即 0038 readMethod 里 4841 的来源"
+    },
+    {
+      "path": "loop/state/runs/task-verify_sanguo_L0_0038.json",
+      "sha256": "076ccc398315e595f0b81c5979dd0e3d80648515b95aeedfe34088469349267d",
+      "note": "本轮任务定义"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/fe42d01f3826fe8096f86614.docs.json": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+    "loop/state/out/read_sanguo_L0_0038.candidate.json": "4c571a5472760b7babccf48f8dfed8dfd02c8fdbdfd3a6b33b99de0849e46b44"
+  },
+  "sourceHashesNote": "提交前后未改动任何受保护路径；本复核只写 loop/state/out/verify_sanguo_L0_0038.verdict.json（任务 writes 指定），以及 loop.py verify 机制自身对 read 记录 reviews[]/verifyState 的写入。",
+  "assertions": [
+    {
+      "text": "270 条引文全部 t[start:end]==quote 且 find(quote)==start（失败 0）",
+      "result": "pass"
+    },
+    {
+      "text": "全量 occurrence 计数与原文复算一致（失败 0）",
+      "result": "pass"
+    },
+    {
+      "text": "metrics 全部 14 个分区计数与数组实际长度一致",
+      "result": "pass"
+    },
+    {
+      "text": "固定种子抽 5 条引用 find() 逐字命中、偏移一致",
+      "result": "pass"
+    },
+    {
+      "text": "FS5 回收地点「合淝」被原文证伪（该窗口内合淝 1 次且为「救合淝」，濡须 8 次）",
+      "result": "fail"
+    },
+    {
+      "text": "U3 的「袅 全书 1 次」被原文证伪（实际 6 次，袅首 1 次）",
+      "result": "fail"
+    },
+    {
+      "text": "readMethod 的 4841 与本候选 rangeCodepoints=4859 自相矛盾",
+      "result": "fail"
+    },
+    {
+      "text": "反向验证查出 6 条原文明确存在而候选未覆盖的事实（RC1-RC6）",
+      "result": "pass"
+    },
+    {
+      "text": "未发现编造人物/结局/伏笔，未发现把结束当成功",
+      "result": "pass"
+    },
+    {
+      "text": "复核中推翻自己最初 2 条反向发现并如实记录（notes ⑤⑥）",
+      "result": "pass"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/verify_sanguo_L0_0038.verdict.json",
+      "kind": "append-only",
+      "note": "任务 writes 声明的产出：本复核结论（主副本）。"
+    },
+    {
+      "path": "loop/state/out/verify_sanguo_L0_0038.json",
+      "kind": "append-only",
+      "note": "本复核任务的提交记录（供机器校验与发布桥读取）。"
+    },
+    {
+      "path": "loop/state/out/read_sanguo_L0_0038.json",
+      "kind": "append-only",
+      "note": "由 `loop.py verify --task read:sanguo:L0:0038 --file …/verify_sanguo_L0_0038.verdict.json --agent w-verify-2` 写入：向 reviews[] 追加本复核、verifyState 置为 partial（机制自身的写入，非手工改写被复核内容）。"
+    }
+  ],
+  "remaining": [
+    "候选方需修正 CE-A1/CE-B1/CE-C1 三处自述错误（改后本复核可复审为 pass）。",
+    "RC1-RC6 六条遗漏建议补入 tasks/causeEdges/states/worldSettings。",
+    "RWS4（吴会）建议按候选自设条件升为 place/arrived。",
+    "本复核未做的事：未读 [199104,199124) 之后的第四十回正文（仅取回目确认边界，及第 68 回用于核验 FS5 回收地点）；未改动任何候选内容；未跑 GPU/浏览器测试（本任务不需要）。"
+  ],
+  "rollback": {
+    "kind": "none"
+  },
+  "submittedAt": "2026-10-09T18:48:59Z",
+  "wallClockSeconds": 1466,
+  "wallClockFrom": "lease.startedAt",
+  "validation": {
+    "problems": [
+      "证据不能是瞬态路径（loop/state/runs/task-verify_sanguo_L0_0038.json）：租约/心跳/锁/运行日志会按设计被回收，请改为引用留存产物"
+    ],
+    "at": "2026-10-09T18:48:59Z"
+  }
+}

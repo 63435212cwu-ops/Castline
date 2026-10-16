@@ -1,0 +1,231 @@
+{
+  "task": "read:dafeng:L3:0035",
+  "agent": "w-dafeng-2",
+  "status": "done",
+  "summary": "精读《大奉打更人》第三十六章 捣蛋鬼（docs[0].text[107014,110506)，3492 codepoint）：7 条任务五元组（缺项一律 JSON null 且逐条写 nullReasons）、14 条带方向与机制的 causeEdges、7 条『不连的因果边』、8 条带前值/后值与事件锚点的 states、10 条知识差、7 条伏笔（6 条区间内铺设+跨章回收、1 条 FS7 显式 unresolved）、8 条『不构成伏笔』、6 条文本缺陷、13 条 unknowns、6 条 selfCritique 覆盖三处最可能读错的地方、13 条 outOfRangeNotes、6 条 declaredDerivations、6 条 unclaimedDescription。全部 386 处引文（338 处区间内 + 48 处段外对照）由脚本在真实 text 切片上 re.finditer 定位后回切校验，独立复核脚本从磁盘重读重算：回切不符 0、哈希不符 0、段内外错标 0、evidence 数组混入段外引文 0。反向覆盖：区间被区间内引文并集覆盖 2886/3492 = 82.65%，93 个缺口全部是段间换行与缩进空白，含汉字的极大未覆盖连续段为 0。",
+  "evidence": [
+    {
+      "path": "loop/state/out/read_dafeng_L3_0035.candidate.json",
+      "sha256": "d49e00de48e0429d138fe0d25613a7fffd54cfe04b1452cc82e1997e2e13442a",
+      "kind": "candidate",
+      "note": "本轮精读产物（任务 writes 指定的唯一写入路径）"
+    },
+    {
+      "path": "data/cache/9b676d7031b1bcd3b8377a18.docs.json",
+      "sha256": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+      "kind": "source",
+      "note": "原文来源；与任务 sourceHash 逐字一致"
+    },
+    {
+      "path": "data/cache/9b676d7031b1bcd3b8377a18.json",
+      "sha256": "3c2fae1d399d6768719f2d5476fa0cfd88fb4fbbc12abdf080323fa4b846ebdf",
+      "kind": "source-graph-cache",
+      "note": "图谱缓存，仅用于在提交里登记哈希；未打开作为任何断言的证据来源（readingStatus.graphCacheUsedAsEvidence=false）"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "源文件字节哈希与任务 sourceHash 一致：sha256(data/cache/9b676d7031b1bcd3b8377a18.docs.json) = fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839，与任务定义 sourceHash 逐字相同",
+      "result": "pass",
+      "command": "shasum -a 256 data/cache/9b676d7031b1bcd3b8377a18.docs.json"
+    },
+    {
+      "text": "原文区间可复现：docs[0].text[107014:110506] 长度 = 3492 codepoint，以单元标题『第三十六章 捣蛋鬼』开头，且该标题在全文的首次出现偏移就是 107014；end=110506 恰为下一章标题『第三十七章 劝学』的起点（边界独立吻合，不是靠切片长度推的）",
+      "result": "pass",
+      "command": "python3 -c \"import json;T=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];print(len(T[107014:110506]),T[107014:107023]);print(T.find('第三十六章 捣蛋鬼'),T.find('第三十七章 劝学'))\""
+    },
+    {
+      "text": "文字层与切片哈希另起字段登记（不覆盖 sourceHash）：sha256(docs[0].text)==bc8b75ee120009f4bf6a8e235a7ff133b8ac727a8612067496a0440eaf3fc612；sha256(切片)==3be9de66668fb16bd784e7d5f85aad78718ec049c664df7cf55e5b239586594d；len(切片)==3492",
+      "result": "pass",
+      "command": "python3 -c \"import json,hashlib;T=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];print(hashlib.sha256(T.encode()).hexdigest());print(hashlib.sha256(T[107014:110506].encode()).hexdigest())\""
+    },
+    {
+      "text": "全部 386 处引文逐字命中且偏移自洽：独立复核脚本从磁盘重读原文与产物（不 import 生成脚本），逐条断言 TEXT[start:end]==quote、end-start==len(quote)、TEXT.count(quote)>=1、sourceHash 等于文件哈希；fails=[]",
+      "result": "pass",
+      "command": "python3 -B -s /tmp/cl0035/verify.py   # verdict: pass, quoteRefs=386, inUnit=338, outOfRange=48"
+    },
+    {
+      "text": "段内外分类正确：48 处段外对照引文全部标 inUnitRange=false 且带 docSha256，且经复核确认无一条落在 [107014,110506) 内；338 处区间内引文全部落在区间内（越界 0 处）；evidence 数组里混入段外引文 0 处（段外引文只出现在 outOfRangeNotes[].quoteRefs 与 foreshadows[].payoffOutsideRange/setupOutsideRangeRefs/crossRangeRefs）",
+      "result": "pass",
+      "command": "python3 -B -s /tmp/cl0035/verify.py   # 内含 evidence 专项扫描"
+    },
+    {
+      "text": "偏移不是手抄：生成脚本用 re.finditer 在确切切片 [107014,110506) 上定位每条区间内引文（命中数必须等于预期，否则 SystemExit），再回切校验；段外引文在全文上定位并断言不落在区间内。产物中所有带 quote 的条目在写盘前统一重扫一遍",
+      "result": "pass",
+      "command": "python3 -B -s /tmp/cl0035/content.py   # 自检 fails=[], 退出码 0"
+    },
+    {
+      "text": "反向覆盖（字符级）：把区间每一位置标成是否被任一区间内引文覆盖，取未覆盖极大连续段；覆盖 2886/3492 = 82.65%，缺口 93 个全部为段间换行与缩进空白，含汉字的极大未覆盖连续段 0 个；与产物自报 stats.coverageInUnit 一致（0.8265）",
+      "result": "pass",
+      "command": "python3 -B -s /tmp/cl0035/verify.py   # coverage 0.8265, covered 2886, gapCount 93, significantGaps 0"
+    },
+    {
+      "text": "五元组缺项按纪律写 JSON null：cost=null 的有 T1/T3/T4/T5/T7，obstacle=null 的有 T2/T5；每一处 null 都在同一条目的 nullReasons 里写明『为什么这一项是 null』（生成时若缺 nullReason 直接 SystemExit）。全文件无 '未提及'/0/0.5 占位值",
+      "result": "pass",
+      "command": "python3 -c \"import json;C=json.load(open('loop/state/out/read_dafeng_L3_0035.candidate.json'));print([(t['id'],[f for f in ('objective','obstacle','action','result','cost') if t.get(f) is None],sorted(t.get('nullReasons',{}))) for t in C['tasks']])\""
+    },
+    {
+      "text": "伏笔纪律：7 条中 6 条（FS1-FS6）是区间内铺设 + 跨章回收（每条回收引文都带 whyOutOfRange 与确切段外偏移/章次），没有一条声称区间内已回收（status 无 'resolved' 单值）；FS7（『顺便向你打听一些事』）显式 unresolved，payoff=null 且 payoffOutsideRange=[]，并写明全库检索口径与 whyNotResolved",
+      "result": "pass",
+      "command": "python3 -c \"import json;C=json.load(open('loop/state/out/read_dafeng_L3_0035.candidate.json'));print([(f['id'],f['status'],bool(f['payoff']),len(f.get('payoffOutsideRange') or [])) for f in C['foreshadows']])\""
+    },
+    {
+      "text": "红线自查（6 条）：① 不当事实——许新年的两段自述（习武每年一百两、功名利禄过眼云烟）、许铃音转述的『爹爹说男儿当自强』、许七安那句『科普』全部按台词/未验证处理（U4/U6/K5/SC1/SC2），未回填为叙述事实；② 结束≠成功——T1.result 明写只到派活、T2.result 明写后路方案与打听内容一字未写、T6.result 明写『恍然大悟』是她的接受而非叙述确认；③ 不编人物——9 个 character 与全部 actor 均为原文实体或原文描述性称呼（『丫鬟』『小豆丁』『婶婶』），无原文之外的专名；④ 相邻不当因果——7 条易误连的边记入 nonEdges，每条附 why 与引文；⑤ 一次出现当伏笔——8 条单次/同词项记入 nonForeshadows，其中『钗子』全文仅 1 次；⑥ semanticReview=not_done，未声明语义复核完成",
+      "result": "pass",
+      "command": "python3 -B -s /tmp/cl0035/verify.py && python3 -c \"import json;C=json.load(open('loop/state/out/read_dafeng_L3_0035.candidate.json'));print(C['readingStatus']['semanticReview'],len(C['nonEdges']),len(C['nonForeshadows']))\""
+    },
+    {
+      "text": "自报计数与实际逐项一致（17 个计数字段：quoteRefs/inUnitQuoteRefs/outOfRangeQuoteRefs/taskCount/causeEdgeCount/nonEdgeCount/stateCount/knowledgeGapCount/foreshadowCount/nonForeshadowCount/textualDefectCount/unknownCount/selfCritiqueCount/outOfRangeNoteCount/declaredDerivationCount/unclaimedDescriptionCount/characterCount），0 处不符",
+      "result": "pass",
+      "command": "python3 -B -s /tmp/cl0035/verify.py   # stats 逐项比对，fails=[]"
+    },
+    {
+      "text": "抽样复核 5 条引文（首/1-4 分位/中位/3-4 分位/末）在全文重新 find 的偏移与产物声明一致：sampleFiveQuotesExact=true",
+      "result": "pass",
+      "command": "python3 -B -s /tmp/cl0035/verify.py   # sampleFiveQuotesExact: true"
+    },
+    {
+      "text": "写入范围自查（按 mtime 判定，不按 git status——共享树里本就有别的 agent 的未提交改动）：本轮只创建 loop/state/out/read_dafeng_L3_0035.candidate.json 一个路径（任务 writes 指定）；find js css index.html serve.py narrative.py scripts tests docs data -type f -newermt '2026-10-08 06:00:00' 输出 0 行。未执行 git checkout -- . / git reset --hard / git stash；未跑 GPU/浏览器测试",
+      "result": "pass",
+      "command": "cd /Users/carmen/Desktop/星系 && find js css index.html serve.py narrative.py scripts tests docs data -type f -newermt '2026-10-08 06:00:00' | wc -l   # 输出 0"
+    },
+    {
+      "text": "图谱缓存未被当作证据：data/cache/9b676d7031b1bcd3b8377a18.json 未被打开读取，仅登记字节哈希 3c2fae1d399d6768719f2d5476fa0cfd88fb4fbbc12abdf080323fa4b846ebdf；产物 readingStatus.graphCacheUsedAsEvidence=false",
+      "result": "pass",
+      "command": "python3 -c \"import json;C=json.load(open('loop/state/out/read_dafeng_L3_0035.candidate.json'));print(C['readingStatus']['graphCacheUsedAsEvidence'],C['readingStatus']['graphCacheNote'][:40])\""
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/read_dafeng_L3_0035.candidate.json",
+      "kind": "append-only"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/9b676d7031b1bcd3b8377a18.docs.json": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "data/cache/9b676d7031b1bcd3b8377a18.json": "3c2fae1d399d6768719f2d5476fa0cfd88fb4fbbc12abdf080323fa4b846ebdf"
+  },
+  "remaining": [
+    "semanticReview 未做（值 not_done）：386 处引文的定位已逐条机器断言，但『语义是否读对』需 read-verify 流由别的 agent 独立复核。本提交不声称语义已核验。",
+    "FS7（『顺便向你打听一些事』）显式 unresolved：本单元夜谈全部内容是家常，全库检索『打听』在 107000..160000 段内只有本单元的铺设与第四十九章那次（来源被写成司天监采薇，对象与渠道都对不上）。只记缺席，未写成已回收。",
+    "K3/U3 未解：许七安为什么出现在内院、为什么先路过妹妹窗边，原文只写许玲月的困惑与她的依据，没有给答案。合理的猜测（昨夜留宿二郎屋里）未被原文写出，因此不写成结论。",
+    "K4 是原文内部冲突：许铃音答『知道呀』，叙述者紧接着写『不，你不知道....』。我只登记两边，没有替她判真假，也没有替作者解释这句自由间接引语。",
+    "T1/T2/T5 的 cost、T2/T5 的 obstacle 均为 JSON null（原文确实没写），理由逐条写在 nullReasons；未代填 0 或『未提及』以外的值。",
+    "本单元区间内没有 PS/作者说明段（『PS』出现 0 次）；紧随其后的第三十八章开头有作者 PS（OOR12），其中也用了『捣蛋鬼』这个词，但那是作者对读者说话，未计入伏笔回收。",
+    "跨章回收（FS1-FS6）只用于判定『铺设—回收』是否成立，并逐条标出段外偏移与所在章；未把任何后文情节回填成本单元的结果。",
+    "文本层异体/错字一律照抄未归一：『小塌』(本单元)/『小榻』(全文 3 处)、丫鬟的代词『他』、丫鬟口误『交交辉应』被下一句纠正；段外另有『客观』(应为客官)一处，已单列为 TD6。未与刻本互校。",
+    "本单元没有为许七安那场密谈写出任何代价（T1.cost=null）；如果复核认为『被卷走被子、寒冬受冻』应当算作这场议事的成本，这是本文件最可能被判过保守的一处，理由已写进 T2.cost 的 caution 与 selfCritique。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/read_dafeng_L3_0035.candidate.json"
+    ]
+  },
+  "submittedAt": "2026-10-07T22:12:30Z",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-07T22:12:30Z"
+  },
+  "verifyState": "partial",
+  "reviews": [
+    {
+      "reviewer": "w-sanguo-1",
+      "at": "2026-10-08T07:33:37Z",
+      "verdict": "partial",
+      "notes": "总体判断：这是一份**引用层可信、抽取层可用、元数据层需修**的候选，判 partial。可以原样采信的部分：(1) 全部 386 条引文与偏移（我方全量重算 0 失败）、三个哈希、六个计数器；(2) tasks[0..6] 的任务五元组与 nullReasons——我逐条回原文核对，objective/action/result 均有逐字锚点，null 的 obstacle/cost 都给了『为什么不写』的理由而不是凑数；obstacle 用 inferred 的两处（T1 的『沉默即障碍』、T3 的『旧梗即障碍』）候选自己已声明是归纳，我认同这种分级；(3) causeEdges 14 条——CE1/CE4/CE8/CE9/CE10/CE11/CE12/CE13 有使役句或问答链支撑，CE3/CE5/CE7/CE14 标 inferred 并写了 caution（尤其 CE7 明写『原文没有写他为什么被这句话激怒』），没有把时间相邻当因果；(4) states 8 条与 knowledgeGaps 10 条，前值/后值分开、把台词与叙述者陈述分开标注（ST4.caution）；(5) unknowns 13 条——U3（他为什么在内院）、U4（功名那句是否真心）、U8（当晚有没有打听）都正确地留白而没有回填。必须在发布前修掉的四项：counterExamples[0] 宁宴的『0 次』断言（与自身 8 处引用矛盾，且会误杀一个合法别名）；[1] 『外甥女』（全书 0 次，原文关系是堂妹，建议按区间内证据只写妹妹或降级 unknowns）；[2] TD2 的条数（2/3/5）与三个偏移（系统性偏 2，且点名内容与切片不符）；[3] FS1/FS6 共 5 处跨章章号错位一章（以及 OOR12 对 PS 所属章的表述）。建议随修复把 reverseChecks 的 5 条并入（尤其 RC-4 的覆盖率汉字过滤盲区，与 RC-1 的对称失眠状态）。判 partial 而非 fail 的理由：按契约『判 fail 必须有 counterExample 且 quote 逐字可查』，我确实拿得出（上面四条都逐字可查），但 fail 的语义是产物不可用/含编造——本候选引文层零编造、无越权成功判定、无原文外人物，缺陷全部是可在原文上定点改正的标注与遗漏，因此 partial 更准确，也更符合 PUBLISHER 契约『partial 的条目要么丢弃、要么降级为 unknowns』的处置方式。我自己的复核错误与不确定处，如实记录：(a) 我一度怀疑候选的段外章号是**整体性**偏移，因为 narrative.chapter_spans 的序号与章节标题印刷号并不一致（912 个 span 里 188 个的印刷号 ≠ 序号，另有 3 个番外 no=None、233 个重复号）——读到每个偏移处的印刷标题后才确定只有上述 5 处标错，其余对照组正确，此疑点已撤回；(b) REVERSE RC-3 的『老爷=许平志』是我的归纳而非原文直述，故只作反向发现，未用于判分；(c) 我没有构造『删一条引文能否被发现』的对抗实验（本任务的机器校验已覆盖引文逐字性），故对『引文完整性』只声明本轮全量重算的结果，不声明已证明不可篡改；(d) 我未使用 GPU/浏览器，未改动任何受保护路径；本复核只读原文与候选，写入仅限 writes 指定的 verdict 文件与 loop.py 自己生成的提交记录。可复现命令（工作目录 = 仓库根，原文哈希 fdde5558…9839）：见 quoteAudit.method 与各 counterExample 的 why 内联命令。",
+      "counterExamples": [
+        {
+          "claim": "候选 characters[0].aliasesInUnit 写『宁宴（未在本单元出现，见 caution）』，并在该条 caution 与 readingStatus.namingVarianceNote 两处断言『宁宴』这个称呼在本单元区间内 0 次、在本单元区间内不出现。",
+          "quote": "原来宁宴也是个足智多谋办事靠谱的孩子....许平志甚是欣慰，他以前还担心侄儿性格太倔，死认理，将来会吃亏。",
+          "quoteRange": [
+            107272,
+            107325
+          ],
+          "why": "该断言与本候选**自己的证据**直接矛盾，且与原文矛盾。逐字核对：上句 find=107272，落在区间 [107014,110506) 内；『宁宴』二字在该句内的偏移是 107274，同样在区间内；候选把这句话作为 characters[2]（许平志）的 evidence[0]、nonEdges[6].evidence[0]、states[1] 的 before/after/anchor、knowledgeGaps[9].evidence[0]、declaredDerivations[0].evidence[1]、outOfRangeNotes[1].quoteRefs[1] 共 8 处引用。同一份产物里既引用它、又断言它不存在。事实层面：『宁宴』是许七安在本单元内被称呼的一种（许平志的内心话），全书出现 974 次；本单元内出现 1 次。此错属**误杀合法别名**：按候选的 caution/namingVarianceNote，下游发布侧会把本单元一个真实存在的称呼当成区间外材料排除。可复现：python3 -c \"import json;T=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];print(T.find('原来宁宴也是个足智多谋办事靠谱的孩子'), T.find('宁宴',107272), T[107014:110506].count('宁宴'))\" → 107272 107274 1。",
+          "severity": "must-fix"
+        },
+        {
+          "claim": "候选 tasks[5]（T6）summary 写『给许铃音解释男女之别……**外甥女**当场认领「捣蛋鬼」，他关门退场』，把许铃音标为许七安的外甥女。",
+          "quote": "婶婶便不让一双儿女跟着倒霉侄子练武",
+          "quoteRange": [
+            108928,
+            108945
+          ],
+          "why": "『外甥/外甥女』在**全书 4760263 字里出现 0 次**（T.count('外甥')==0，T.count('外甥女')==0），本单元 0 次。原文在本单元给出的关系是：『婶婶便不让一双儿女跟着倒霉侄子练武。毕竟那会儿一家之主的许平志已经决定，侄儿去习武，儿子去读书。』（侄儿↔婶婶/许平志），以及许铃音自称『“爹爹说男儿当自强，才能练好武。”』『“难怪娘总说我是捣蛋鬼。”』——即许铃音是许平志与婶婶的女儿、许七安的**堂妹**，不是姐妹的女儿。候选自身也把『娘』登记为婶婶的别名（characters[8].aliasesInUnit）——与外甥女这一称谓不相容。这是散文里的**关系编造**（引文层不受影响）。注：本单元区间内并未明写铃音的父母是谁（只有『爹爹』『娘』两条台词 + 婶婶的『一双儿女』），所以正确做法不是换一个更准的亲属词，而是按区间内证据只写『幼妹/妹妹（许七安自称大哥）』或降级为 unknowns，不得写外甥女。",
+          "severity": "must-fix"
+        },
+        {
+          "claim": "候选 textualDefects[1]（TD2）kind 写『区间内有两处省略号式跳场标记』，detail 列出三处并给出偏移：『......』[107601,107607)、『....』[108472,108476)、『.....』[109931,109936)，并称三者是 6/4/5 个点。",
+          "quote": "”\n\n    ......\n\n    滴",
+          "quoteRange": [
+            107596,
+            107616
+          ],
+          "note": "『......』在全库出现 12646 次，短引文无法唯一定位，故此条引文扩到含邻句的唯一切片；被检的标记本身位于 [107603,107609)。",
+          "why": "三重不符，全部可复现：(1) **条数**：kind 说『两处』，detail 自己列了三处，而区间内实际有 **5** 处独立点号段落——[107603,107609)『......』、[107686,107692)『......』、[107735,107741)『......』、[108474,108478)『....』、[109933,109938)『.....』；候选只登记 3 处，漏掉 107686 与 107735 两处（两处偏移在整份候选里都不出现）。(2) **偏移系统性偏 2**：detail 给的三段都把行首缩进的两个空格算进了标记内——T[107601:107607]=='  ....'（两空格+4 点），而它声称该段是 6 个点的『......』；真正的 6 点标记在 [107603,107609)。同法 T[108472:108476]=='  ..'、T[109931:109936]=='  ...'。(3) **点名内容与切片不符**：detail 说 [107601,107607) 是『......』，实际切片是『  ....』——引号里写的内容和它给的偏移取出来的内容不是同一个字符串。可复现：python3 -c \"import json,re;T=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];print(repr(T[107601:107607]),repr(T[107603:107609]));print([ (m.start(),len(m.group(1))) for m in re.finditer(r'\\n\\n(\\.+)\\n\\n',T[107014:110506])])\"。注：TD2 的 evidence 数组里那一条（『滴答，滴答....』107615）本身逐字正确，所以这是 detail 文本的缺陷，不是引文缺陷。",
+          "severity": "must-fix"
+        },
+        {
+          "claim": "候选 foreshadows 的段外回收条目在 whyOutOfRange 里标章号：FS1 标『第三十七章』（偏移 114809、114909）与『第六十章』（偏移 187843）；FS6 标『第六十章』（偏移 187696、186854）。",
+          "quote": "第三十八章 诗成",
+          "quoteRange": [
+            113766,
+            113774
+          ],
+          "why": "这 5 条章号与原文实际所在章的标题**错位一章**。逐条以『该偏移之前最近的章标题』核对：off=114809 与 off=114909 的所在章标题是 T[113766:113774]=='第三十八章 诗成'（候选标第三十七章）；off=187843、187696、186854 的所在章标题是 T[185812:185821]=='第六十一章 铁证如山'（候选标第六十章）。对照组正确：FS2 的 137940/138633 → 『第四十六章 买首饰』、140676/142885 → 『第四十七章 日常气婶婶』；FS6 的 148519 → 『第四十九章 社会性死亡』、176359 → 『第五十八章 flag』；FS5 的 1461098 → 『第九十二章 兑现承诺』；FS4 的 21515 → 『第七章 这个妹妹好漂亮』、132281 → 『第四十四章 逃之夭夭』——说明候选并非整体偏移，而是这 5 处标错。另 OOR12 称 PS 在『第三十八章开头』，该 PS 实际位于 T[110506,113766) 即**第三十七章 劝学**的末尾（113722），表述也不准确。可复现：python3 -c \"import json,sys;sys.path.insert(0,'.');import narrative;T=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];sp=narrative.chapter_spans(T);f=lambda o:[s['head'] for s in sp if s['start']<=o<s['end']][0];print([f(o) for o in (114809,114909,187843,187696,186854,113722)])\"。",
+          "severity": "must-fix"
+        }
+      ],
+      "reverseChecks": [
+        {
+          "found": "许七安自己也没睡着（对『不是很适应』的对称承认），候选只登记了许新年的失眠，没登记许七安这一侧的同类状态。",
+          "quote": "我也是....许七安感慨道：“咱们多久没有同塌而睡了。”",
+          "quoteRange": [
+            107873,
+            107901
+          ],
+          "why": "候选把『你是不是睡不着。』『“不是很适应。”』写进 ST3（许新年的情绪前值），但紧接的『我也是....』——许七安承认自己也睡不着/不适——在候选的散文里『我也是』出现 0 次、『同塌而睡』0 次，states[] 里没有许七安这一维度的状态，causeEdges 也没把『两人的失眠』与『同塌夜话被启动』连起来。该句只被 nonForeshadows[3] 当作『同塌』词形的引文收着，语义未登记。这是本单元唯一把两人处境写成对称关系的地方，属于遗漏的状态/因果素材。"
+        },
+        {
+          "found": "本单元唯一触及『原主/穿越』前提的叙述句，以及『玲月妹子』『傲娇』两个未被登记的称呼/用语，候选全部只当引文收着，未做任何语义登记。",
+          "quote": "我还以为你会傲娇的来一句：我们从没有同塌而眠过.....现在咱们还能睡一起，玲月妹子就永远没可能了....脑海里闪过原主幼时的记忆，许七安感叹道：",
+          "quoteRange": [
+            107962,
+            108035
+          ],
+          "why": "候选散文里『原主』0 次、『穿越』0 次、『傲娇』0 次、『玲月妹子』0 次、『记忆』0 次；declaredDerivations 六条与 namingVarianceNote 四组别名里都没有它。可核对的事实有三层：(1)『脑海里闪过原主幼时的记忆』是本单元唯一一处点明许七安接管原主记忆的句子（『原主』全书 34 次）；(2)『玲月妹子』是本单元对许玲月的另一种称呼（本单元 1 次，全书 1 次），候选 characters[3] 的 aliasesInUnit 只有『小姐』『玲月』；(3)『傲娇』在本单元 1 次。我不主张这三层各自构成伏笔或因果（那需要跨章论证），只主张候选漏登记了这三条本单元内明确存在的称呼/叙述事实——尤其第 (1) 条属人物设定层。"
+        },
+        {
+          "found": "本单元还存在两个未登记的成人称呼：丫鬟口中的『老爷』与许铃音口中的『爹爹』，都指向许平志，而候选的别名表只收了『许二叔』『二叔』。",
+          "quote": "“大郎比以前更温和，更有趣了，也更有本事啦。以前的他总是板着脸，对小姐、二郎都不怎么好，就只有跟老爷说话时，才会露出笑容。”",
+          "quoteRange": [
+            109741,
+            109803
+          ],
+          "why": "『老爷』在本单元出现 1 次（109789），说话人是许玲月的丫鬟，指这一家的男主人；同单元另有『一家之主的许平志已经决定』（108951）与『爹爹说……』（110124，许铃音称父）。候选把『娘』登记为婶婶的别名、把『丫鬟』登记为兰儿的别名（declaredDerivations DV3），也做了 DV1『许二叔=许平志』，却没有把『老爷/爹爹=许平志』登记为别名或推导。这属命名消歧层的遗漏，会影响下游把这三处称呼接到人上。注：『老爷=许平志』这一步是我基于『一家之主』+丫鬟语境的归纳（inferred），不是原文直述，故只作为反向发现记录，不据此判 fail。"
+        },
+        {
+          "found": "区间内独立点号跳场标记实为 5 处，候选只登记 3 处、漏 2 处；且候选自己的覆盖统计在结构上看不见这类遗漏。",
+          "quote": "“哦。”\n\n    ......\n\n    “大哥，你睡",
+          "quoteRange": [
+            107676,
+            107704
+          ],
+          "note": "同上，扩到唯一切片以定位；被检的标记本身位于 [107686,107692)。",
+          "why": "区间内独立点号段落共 5 处：[107603,107609)『......』、[107686,107692)『......』、[107735,107741)『......』、[108474,108478)『....』、[109933,109938)『.....』。候选只在 TD2 里提到 3 处（且章法有误，见 counterExamples[2]），107686 与 107735 两处在整份候选里完全不出现（以偏移字符串检索，False）。为什么自检抓不到：候选 stats.coverageNote 的过滤条件是『其中含汉字的 0 个（其余为段间换行与缩进空格）』——5 个标记全部是纯标点、不含汉字，所以 93 段补集被一律判为『换行与缩进空格』，significantUncoveredRuns 记空。即：**覆盖率的汉字过滤器结构性地对纯标点内容失明**，而本单元恰有 5 处纯标点跳场标记（它们是作者的分场手段，不是空白）。这是本候选自检口径的一处盲区，不只是少写两行。"
+        },
+        {
+          "found": "许玲月『眼里闪过渴望，但迅速压了下来』这一处本单元内的内心状态变化没有被任何 states[] 条目登记。",
+          "quote": "许玲月眼里闪过渴望，但迅速压了下来。",
+          "quoteRange": [
+            109600,
+            109618
+          ],
+          "why": "这是一个在一句内写全前值/后值的内部状态（渴望升起→被她自己压下），与 ST4（对大哥的观感）、ST5（被撞见时的体面状态）都不是同一维度。候选只在 NE3 的论证里顺带承认『本单元内可证的只有「渴望被她自己压下去」』，未把它作为 state 立条。配套的问题是 NE1 的论证次序：NE1 用『原文写她「心不在焉的听着」』来论证推荐没有产生推动，但『心不在焉』在 109673，晚于价格/字谜句（109624）与渴望句（109600）——用更晚的句子去否认更早的反应，时点上是倒置的。NE1 的结论（不把推荐当作她「想买」的因）我复核后仍然成立，故不列为误杀，只列为立条与论证次序问题。"
+        }
+      ]
+    }
+  ]
+}

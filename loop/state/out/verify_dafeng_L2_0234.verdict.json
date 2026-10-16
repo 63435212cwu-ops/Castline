@@ -1,0 +1,340 @@
+{
+ "verdict": "partial",
+ "reviewerNote": "本轮复核是**重复领取**：该任务在我领取前已由 w-dafeng-3 复核过一次（read 记录 reviews[0]/[1]，verdict 均为 partial），且被复核候选的 sha256（f652b135…）与我复核时**完全一致**，即候选自上次复核后未被修改。我没有把前者的裁决当成自己的发现：VCE1/VCE2/VCE3 与 VRC1/VRC2/VRC4 是我**独立复现**的（下条 notes 逐条标明哪些与前次重合），VCE4 与 VRC3/VRC5/VRC6/VRC7 是本次**新增**发现。",
+ "counterExamples": [
+  {
+   "id": "VCE1",
+   "candidatePath": "states[9].who = \"许二郎（许新年）\"",
+   "claim": "许二郎（许新年）",
+   "kind": "越界导入（区间外名称，且区间内无法核验）",
+   "severity": "low",
+   "why": "候选把许二郎的名字写成『许新年』并写进 states[].who 这个读起来像在场事实的字段。该字符串在本区间（[923035,929759)）出现 0 次，区间内一律只称『许二郎』『二郎』。全库 1189 次，最早出现在 @2368『许家二郎，许新年。』——所以人物对应关系在全库层面为真，**不是编造**；但它是本区间读不出来的区间外信息。按『越界导入』登记，不按幻觉登记。",
+   "sourceSideCheck": "python3 -B -s -c \"import json;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];print('inRange=',t[923035:929759].count('许新年'),'wholeBook=',t.count('许新年'))\" ⇒ inRange= 0 wholeBook= 1189",
+   "bookLevelCorroboration": {
+    "quote": "许家二郎，许新年。",
+    "start": 2368,
+    "end": 2377,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "offsetUnit": "codepoint",
+    "offsetBase": "docs[0].text 全文绝对 codepoint 偏移（0-based，左闭右开）",
+    "match": "exact",
+    "verbatim": true,
+    "inRange": false,
+    "wholeTextOccurrences": 1,
+    "occurrencesInRange": 0,
+    "quoteScope": "source-OUT-OF-RANGE(CORROBORATION-ONLY)",
+    "note": "此引文**不在**本复核区间内，只用于核对 CE1 的人名对应关系在全库层面是否为真；未作为本区间证据写入任何断言。"
+   }
+  },
+  {
+   "id": "VCE2",
+   "candidatePath": "tasks[0].obstacle.text",
+   "claim": "挡在前面的是**皇帝本人已经起杀心并当众问出口**：『许七安，你以为朕不会杀你？』……他的障碍不是案情难办，而是他此刻站在一个一句话就能杀他的君主面前。",
+   "kind": "说明性文字说了超出证据的话，且与候选自身注明相抵",
+   "severity": "medium",
+   "why": "该栏写〔皇帝本人已经起杀心〕，但『起杀心』在全书出现 **0 次**、『杀心』在区间内 0 次、『杀意』在区间内 0 次；区间内对元景帝的用词只有『脸色刷的阴沉下去』（立威）与『厉声道：你以为朕不会杀你？』（威胁）。更关键：候选自己在 causeEdges[0].note 里写明『我**没有**把它写成〔皇帝想杀他〕』——同一份产物里 obstacle 写了杀心、E1.note 声明没写成杀心，两处互相矛盾。该栏引文全部逐字成立、note 也写了『不写他面临死刑』，所以这不是抽取项编造，而是**说明性文字越出证据**。",
+   "selfContradictingQuote": "判 explicit：改口这一动作与原因由叙述者同一句写出。我**没有**把它写成〔皇帝想杀他〕 —— 原文只给了威胁与气氛（『一时间竟说不出狠话』说明连皇帝也停了一下，该句归 S6）。",
+   "selfContradictingQuoteScope": "candidate",
+   "selfContradictingPath": "causeEdges[0].note",
+   "sourceSideEvidence": [
+    {
+     "quote": "元景帝脸色刷的阴沉下去",
+     "start": 923151,
+     "end": 923162,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+     "offsetUnit": "codepoint",
+     "offsetBase": "docs[0].text 全文绝对 codepoint 偏移（0-based，左闭右开）",
+     "match": "exact",
+     "verbatim": true,
+     "inRange": true,
+     "wholeTextOccurrences": 1,
+     "occurrencesInRange": 1
+    },
+    {
+     "quote": "元景帝厉声道：“许七安，你以为朕不会杀你？”",
+     "start": 923352,
+     "end": 923374,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+     "offsetUnit": "codepoint",
+     "offsetBase": "docs[0].text 全文绝对 codepoint 偏移（0-based，左闭右开）",
+     "match": "exact",
+     "verbatim": true,
+     "inRange": true,
+     "wholeTextOccurrences": 1,
+     "occurrencesInRange": 1
+    }
+   ],
+   "sourceSideCheck": "python3 -B -s -c \"import json;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];print('起杀心 wholeBook=',t.count('起杀心'),'| 杀心 wholeBook=',t.count('杀心'),'| 杀意 wholeBook=',t.count('杀意'))\" ⇒ 起杀心 wholeBook= 0"
+  },
+  {
+   "id": "VCE3",
+   "candidatePath": "causeEdges[0].note",
+   "claim": "判 explicit：……原文只给了威胁与气氛（『一时间竟说不出狠话』说明连皇帝也停了一下，该句归 S6）。",
+   "kind": "指路错误（自述与产物不符）",
+   "severity": "low",
+   "why": "E1.note 说『该句归 S6』。但该引文实际挂在 states[3]（S4，许七安／面对皇帝时的姿态）的 after.quotes[1]；S6（元景帝／对许七安的态度）的四条引文里没有这一句。可机器复算的自述与产物不符，影响仅限指路，抽取内容本身没错。",
+   "affectedQuote": "元景帝盯着他，一时间竟说不出狠话。",
+   "quoteScope": "source-in-range",
+   "sourceSideEvidence": [
+    {
+     "quote": "元景帝盯着他，一时间竟说不出狠话。",
+     "start": 923679,
+     "end": 923696,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+     "offsetUnit": "codepoint",
+     "offsetBase": "docs[0].text 全文绝对 codepoint 偏移（0-based，左闭右开）",
+     "match": "exact",
+     "verbatim": true,
+     "inRange": true,
+     "wholeTextOccurrences": 1,
+     "occurrencesInRange": 1
+    }
+   ],
+   "sourceSideCheck": "python3 -B -s -c \"import json;c=json.load(open('loop/state/out/read_dafeng_L2_0234.candidate.json'));q='元景帝盯着他，一时间竟说不出狠话。';print([ (s['id'],r) for s in c['states'] for r in ('before','after','anchor') if isinstance(s.get(r),dict) for x in (s[r].get('quotes') or []) if x['quote']==q])\" ⇒ [('S4','after')]"
+  },
+  {
+   "id": "VCE4",
+   "candidatePath": "states[0].anchor.text / tasks[4].costNote",
+   "claim": "事件锚点：**太子被废与福妃案这一串噩耗**落到她身上 …… ；以及 costNote：**不用〔太子被废〕当她的代价** —— 那在本区间开始前就已发生，是她的处境而不是她付出的东西。",
+   "kind": "把未完成的、被担忧的事件写成已发生的事实（『把说法当事实』家族）",
+   "severity": "medium",
+   "why": "候选两处把『太子被废』当成**本区间开始前已经发生的既成事实**。这与本区间原文直接冲突：原文写的是『太子还没被废呢』（明确否定）与『太子哥哥被废的话』（反事实条件句），另一处只写『母女俩忧心太子的前途』（忧虑将来）。『太子被废』这个字符串**全书出现 0 次**。区间的真实状态是〔废立之争正在进行、太子尚未被废〕；把它写成既成事实，会让读者以为废黜已经落地。注意：候选自己的 states[1].anchor 就引了『太子还没被废呢』那句，因此这是**同一份产物内部的自相矛盾**，不是我引入的读法。",
+   "sourceSideEvidence": [
+    {
+     "quote": "“狗东西，连你也敢戏耍本宫了？太子还没被废呢。”",
+     "start": 926453,
+     "end": 926477,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+     "offsetUnit": "codepoint",
+     "offsetBase": "docs[0].text 全文绝对 codepoint 偏移（0-based，左闭右开）",
+     "match": "exact",
+     "verbatim": true,
+     "inRange": true,
+     "wholeTextOccurrences": 1,
+     "occurrencesInRange": 1
+    },
+    {
+     "quote": "但她不蠢，在笃定太子哥哥是冤枉的前提下，只要动动脑筋，想一想太子哥哥被废的话，谁得利最大，",
+     "start": 925968,
+     "end": 926013,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+     "offsetUnit": "codepoint",
+     "offsetBase": "docs[0].text 全文绝对 codepoint 偏移（0-based，左闭右开）",
+     "match": "exact",
+     "verbatim": true,
+     "inRange": true,
+     "wholeTextOccurrences": 1,
+     "occurrencesInRange": 1
+    }
+   ],
+   "sourceSideCheck": "python3 -B -s -c \"import json;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];print('太子被废 wholeBook=',t.count('太子被废'),'| 太子还没被废=',t.count('太子还没被废'))\" ⇒ 太子被废 wholeBook= 0 | 太子还没被废= 1",
+   "misKillSelfAudit": "我核对过反方向：本区间**确实**存在持续发酵的废立危机，候选若写『废立之争』或『太子前途危机』就是对的。我反对的只是『被废』这个**已完成**的措辞（『在本区间开始前就已发生』）。这一条属于措辞越界，不是候选整体读错。"
+  }
+ ],
+ "reverseChecks": [
+  {
+   "id": "VRC1",
+   "found": "同一区间内，许七安对皇帝自述『斩敌两名人』，对临安讲述同一场战斗时变成『斩敌两百』—— 一百倍的自我夸大；两处都在本区间、都逐字可查。候选 K5 只写了『做了改编／美化凸显自己的作用』这个定性，**没有记下这个可逐字对账的数字**，而这恰恰是它自己那条结论最硬的证据。",
+   "quote": {
+    "quote": "最后，许七安开始讲述自己一人直面千军万马，被数千人围困，面临箭矢如雨，枪戈如林的困境，半步不退，斩敌两百，最终撑到援军到来。",
+    "start": 928318,
+    "end": 928380,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "offsetUnit": "codepoint",
+    "offsetBase": "docs[0].text 全文绝对 codepoint 偏移（0-based，左闭右开）",
+    "match": "exact",
+    "verbatim": true,
+    "inRange": true,
+    "wholeTextOccurrences": 1,
+    "occurrencesInRange": 1
+   },
+   "contrastQuote": {
+    "quote": "“陛下恕罪，卑职在云州保护巡抚大人，与叛军戮战，斩敌两名人。",
+    "start": 923501,
+    "end": 923531,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "offsetUnit": "codepoint",
+    "offsetBase": "docs[0].text 全文绝对 codepoint 偏移（0-based，左闭右开）",
+    "match": "exact",
+    "verbatim": true,
+    "inRange": true,
+    "wholeTextOccurrences": 1,
+    "occurrencesInRange": 1
+   },
+   "candidateCoverage": "candidate 全文 0 次出现「斩敌两百」；御前版本「斩敌两名人」有被引用。K5.note 只写『改编的**具体内容**原文只给了方向……我不去重建真实经过』——但数字差额是原文**直接给出的**内容，不属于需要重建的部分。",
+   "uncertainty": "哪个数字为真，本区间判不了（@881038 是区间外的『斩敌两百余人』，@1101378 是第三方复述），需跨单元定性；我没有代填。"
+  },
+  {
+   "id": "VRC2",
+   "found": "临安『以为许七安已死』的来源被漏掉：原文写出这是**公开流传的说法** —— 她之前听皇兄说过，大家都说许七安壮烈殉职、拯救了巡抚和打更人衙门的金锣。候选 S2 只记了她的认知与后值，没记来源。",
+   "quote": {
+    "quote": "大家都说许七安是壮烈殉职，拯救了巡抚和打更人衙门的金锣。",
+    "start": 928513,
+    "end": 928541,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "offsetUnit": "codepoint",
+    "offsetBase": "docs[0].text 全文绝对 codepoint 偏移（0-based，左闭右开）",
+    "match": "exact",
+    "verbatim": true,
+    "inRange": true,
+    "wholeTextOccurrences": 1,
+    "occurrencesInRange": 1
+   },
+   "candidateCoverage": "candidate 全文 0 次出现「壮烈殉职」「殉职」。"
+  },
+  {
+   "id": "VRC3",
+   "found": "临安『一直无忧无虑、顺风顺水』有原文给出的原因被整段跳过：元景帝修道的早、子女不算多、皇子皇女间勾心斗角没那么厉害。候选 S1 只引了结论句，把解释结论的因果句跳过了。",
+   "quote": {
+    "quote": "因为元景帝修道的早，子女虽不少，但也算不上多，皇子皇女之间的勾心斗角没那么厉害。",
+    "start": 925656,
+    "end": 925696,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "offsetUnit": "codepoint",
+    "offsetBase": "docs[0].text 全文绝对 codepoint 偏移（0-based，左闭右开）",
+    "match": "exact",
+    "verbatim": true,
+    "inRange": true,
+    "wholeTextOccurrences": 1,
+    "occurrencesInRange": 1
+   },
+   "candidateCoverage": "candidate 全文 0 次出现「勾心斗角」。"
+  },
+  {
+   "id": "VRC4",
+   "found": "他向临安说明来意时报的是『奉了陛下的旨意，来彻查福妃案』—— 这是他能在韶音苑开口问案的**授权来源**，也是两人信息差的起点；候选 T4 只写他『立刻开工』与方向，没记他向临安亮出的这道旨意。同段临安回的『你回来就能为太子哥哥洗刷冤屈』也未覆盖。",
+   "quote": {
+    "quote": "吹完牛逼，许七安想起了正事，道：“对了，我这次进宫，是奉了陛下的旨意，来彻查福妃案的。”",
+    "start": 928547,
+    "end": 928591,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "offsetUnit": "codepoint",
+    "offsetBase": "docs[0].text 全文绝对 codepoint 偏移（0-based，左闭右开）",
+    "match": "exact",
+    "verbatim": true,
+    "inRange": true,
+    "wholeTextOccurrences": 1,
+    "occurrencesInRange": 1
+   },
+   "candidateCoverage": "candidate 全文 0 次出现「旨意」「洗刷」。"
+  },
+  {
+   "id": "VRC5",
+   "found": "向临安讲云州故事的内容被整段跳过：临安听得拍桌叫好、身临其境，许七安一边吹一边心里吐槽她当年招揽自己是**为了和怀庆争风吃醋**。这一段同时是 K5『临安全盘相信改编版』的正面证据，也是两人关系的反讽层。",
+   "quote": {
+    "quote": "许七安表示谢过公主殿下的慧眼识珠，心里吐槽，你不是为了和怀庆争风吃醋才强行招揽我的吗。",
+    "start": 928269,
+    "end": 928312,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "offsetUnit": "codepoint",
+    "offsetBase": "docs[0].text 全文绝对 codepoint 偏移（0-based，左闭右开）",
+    "match": "exact",
+    "verbatim": true,
+    "inRange": true,
+    "wholeTextOccurrences": 1,
+    "occurrencesInRange": 1
+   },
+   "candidateCoverage": "candidate K5 引的是『他把云州案的经过讲给临安公主听，稍稍做了改编……』与『裱裱用力点头，很相信。』，中间这一整段（P138–P147）未覆盖；全文 0 次出现「争风吃醋」。"
+  },
+  {
+   "id": "VRC6",
+   "found": "候选 T5 的问答链漏掉一问：他问『福妃长的如何』得到『自然是极美的』之后，心里感慨『元景帝真是暴殄天物啊』，**这一句才是他紧接着问『太子，好色吗？』的动机**。候选 T5.action 把四问并列，丢掉了这个把前后两问接起来的心理环节。",
+   "quote": {
+    "quote": "元景帝真是暴殄天物啊.....许七安心里感慨，又问道：“太子，好色吗？”",
+    "start": 928733,
+    "end": 928769,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "offsetUnit": "codepoint",
+    "offsetBase": "docs[0].text 全文绝对 codepoint 偏移（0-based，左闭右开）",
+    "match": "exact",
+    "verbatim": true,
+    "inRange": true,
+    "wholeTextOccurrences": 1,
+    "occurrencesInRange": 1
+   },
+   "candidateCoverage": "candidate 全文 0 次出现「暴殄天物」。"
+  },
+  {
+   "id": "VRC7",
+   "found": "候选机器自检 machineSelfCheck 与 selfCritique[3]（SC4）自述『另立 crossSectionQuoteReuse 分区，把每一处跨分区共用的跨度……逐条列出来』，但该分区**在产物里根本不存在**：全文件只有 1 次该字符串，只出现在 SC4 的自述句里，不是 JSON 键。实际跨分区复用的跨度有 64 处。这是可机器复算的自述与产物不符（与 VCE3 同形）。",
+   "quote": null,
+   "quoteNote": "此条为产物内部自述核验，不涉原文引证。",
+   "candidateCoverage": "python3 -B -s -c \"import json;c=json.load(open('loop/state/out/read_dafeng_L2_0234.candidate.json'));print('crossSectionQuoteReuse' in c, json.dumps(c,ensure_ascii=False).count('crossSectionQuoteReuse'))\" ⇒ False 1",
+   "uncertainty": "候选 SC4 说这条是『写进字段』的；如果该分区被放在我未检查的嵌套位置，我这条不成立——我已用递归键搜索全文件，未命中，故判定成立。"
+  }
+ ],
+ "citationSample": {
+  "method": "固定种子 234，从 264 个引文节点里随机抽 5 条，逐条 text.find(quote) 与 t[start:end]==quote 双判。",
+  "reproduce": "python3 -B -s -c \"import json,random;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];n=[];w=lambda o:[n.append(o) if isinstance(o,dict) and isinstance(o.get('quote'),str) and isinstance(o.get('start'),int) else None, [w(v) for v in (o.values() if isinstance(o,dict) else o)] if isinstance(o,(dict,list)) else None];w(json.load(open('loop/state/out/read_dafeng_L2_0234.candidate.json')));random.seed(234);print([ (t.find(x['quote'])==x['start'], t[x['start']:x['end']]==x['quote']) for x in random.sample(n,5)])\"",
+  "result": "5/5 逐字命中且偏移一致（全部 t[start:end]==quote 且 find()==start）"
+ },
+ "extractionCheck": {
+  "quotesAudited": 264,
+  "verbatimFailures": 0,
+  "offsetFailures": 0,
+  "outOfRangeFailures": 0,
+  "sourceHashFailures": 0,
+  "selfReportedOccurrenceCountMismatches": 0,
+  "note": "264 条引文实例（含跨分区索引副本）逐条核验 t[start:end]==quote、落在 [923035,929759) 内、sourceHash 为整文件 sha256；候选自报的 wholeTextOccurrences 264 项全部与实算一致。**抽取项未发现凭空编造**：候选引用的每一个人物、每一句台词都能在区间内逐字找到。",
+  "caveatOnMyOwnTooling": "我第一版用朴素 t.find(quote)==start 判定，报出 2 处「find!=start」——复核后确认是**我自己的假阳性**：『韶音苑。』（区间内出现 2 次）与『许府。』（全书 56 次）都是有意的场景标题锚点，候选选了正确的那个出现位置并已在字段里申报 wholeTextOccurrences=5/56。按契约第 4 条，这两条不构成反对意见。"
+ },
+ "misKillCheck": {
+  "what": "候选把什么**合法**的东西排除掉了？",
+  "findings": [
+   {
+    "target": "rejectedEdges R01（『三法司推诿』→〔元景帝改用许七安查案〕）",
+    "verdict": "未误杀，理由充分",
+    "why": "候选拒这条边的理由是：三法司推诿出现在魏渊授课段，是叙述者的背景说明；而用许七安的由头由『但眼下要用许七安，元景帝不介意给点好处。』一句交代。原文写的是『在这样的背景下……正是绝佳的查案人选』——『在这样的背景下』是**背景并置**用词，不是触发机制，候选的拒绝与原文用词一致。另注：R01 的 note 把该句归给『眼下要用许七安』，我核对该句实际是 T1.result 引文（@924064），归属正确。"
+   },
+   {
+    "target": "notWorldSettings NW1（脱胎丸）",
+    "verdict": "未误杀",
+    "why": "区间内脱胎丸只有一句感慨（『同时感慨脱胎丸不愧是百年罕见的灵丹妙药』）与一句产量（『监正一甲子也才炼出三粒』），确实无持有/转移/使用/丢失动作，也不改变人物行动。按 P3.10『只提取影响行动、资源、约束或后果的明确设定』排除正确。"
+   },
+   {
+    "target": "notForeshadows NF1（周旻）／NF2（金莲道长）／NF4（韩国）",
+    "verdict": "未误杀",
+    "why": "三者在本区间均只出现一次、无回收动作，符合『一次出现不叫伏笔』。金莲道长虽在传书里被叫到，但本区间确实没有他的出场或回应（候选 U14 已如实登记为未知）。"
+   },
+   {
+    "target": "T2.cost / T6.cost 判 null",
+    "verdict": "未误杀，且是正确做法",
+    "why": "区间内确无魏渊付出代价的描写（他『泰然自若』、出门『笑容淡淡』），恒远一侧也只有被拒与收下银子。两栏都写了 costNote 说明为什么没有，符合任务『缺哪一项写 null 并写明理由』。"
+   }
+  ],
+  "note": "未发现因词表/正则把真实因果挡掉的实例。候选的 rejectedEdges/notWorldSettings/notForeshadows 三组「拒绝登记」我逐条回原文核对，拒绝理由均成立。"
+ },
+ "hallucinationCheck": {
+  "result": "未发现原文没有的人物、结局、伏笔或成功判定",
+  "evidence": "我按区间内全部人名（许七安/魏渊/元景帝/临安/恒远/许二郎/许平志/老张/金莲道长/怀庆/四皇子/太子/福妃/皇后/周旻/宋长辅/杨川南/监正/许宁宴/太子妃）逐一比对，全部在区间内实有其文；区间外人物（南宫倩柔/张开泰/王首辅）候选**未**引入。",
+  "successJudgment": "候选未把任何未完成的事写成成功：T3.result 明写『本区间结束时**一点进展都没有**』；T4.result 明写『不写成〔查案成功〕』；T5.result 明写『你破案了吗』这一问没有回答；F2/F3/F4 均标 resolved=false 并写 unresolvedNote。这条纪律执行得好。",
+  "theOneException": "例外是 VCE4：把『太子被废』写成已发生的事实——属于把未完成状态写成完成，但它不在福妃案这条主线上，故未升级为整体判 fail 的依据。"
+ },
+ "bracketDiscipline": {
+  "note": "候选自定『〔…〕= 我的措辞（原文 0 次）／『』「」= 原文逐字跨度』。我按其**实际口径**复算（第一版我按相反极性测，得出 143 处「违规」，复核后确认是我读错约定，已作废）：〔…〕中原文实有串 = 0 处；『』/「…」中非逐字串 = 0 处。角标纪律成立。"
+ },
+ "selfAuditOfMyOwnReverseChecks": {
+  "what": "我有没有做出不成立的反向验证？",
+  "retracted": [
+   "我第一版把『能在皇帝面前，泰然自若的只有魏渊。』列为遗漏，复核后发现候选虽未引用该句，但在 T2.who／T2.costNote／W4.explain／nullFieldDisposition 四处**用文字表达了同一语义**（全文 4 次『泰然自若』）。按『语义已覆盖、只是未作引文』处理，**已撤回**，不计入 reverseChecks。",
+   "我第一版用朴素 find 判定报出 2 处偏移不符（『韶音苑。』『许府。』），复核后确认是我的假阳性，已撤回（见 extractionCheck.caveatOnMyOwnTooling）。",
+   "我第一版把 T5.costNote 的『太子被废』整条读成幻觉；复核后降级为**措辞越界**（废立危机确实存在且持续，候选若写『废立之争』即正确），只反对『被废』这一完成态措辞。"
+  ],
+  "survivingUncertainty": [
+   "VRC1 的『哪个数字为真』本区间判不了，需跨区间定性，我没有代填。",
+   "VCE2 是否降级为措辞问题，取决于发布口径是否允许 obstacle 栏写叙述未明言的强度判断（『起杀心』）。"
+  ]
+ },
+ "coverage": {
+  "sliceCodepoints": 6724,
+  "nonEmptyParagraphs": 187,
+  "paragraphsTouchedByQuotes": 122,
+  "paragraphsUntouched": 65,
+  "untouchedSubstantive": 56,
+  "codepointsCovered": 4100,
+  "codepointCoveragePct": 61.0,
+  "note": "候选自报 coverage（6724/187/264）与实算一致。61% 码点覆盖、65 个整段未引用；其中 56 段是有实质内容的散文/对白（9 段是标题、省略号行、PS 与分隔线等噪声）。未被覆盖的段落里，VRC1–VRC6 是最有信息量的六处。",
+  "reproduce": "python3 -B -s -c \"import json,re;t=json.load(open('data/cache/1063b17ca65ec1b76f30e460.docs.json'))[0]['text'];LO,HI=923035,929759;c=json.load(open('loop/state/out/read_dafeng_L2_0234.candidate.json'));iv=[];w=lambda o:[iv.append((o['start'],o['end'])) if isinstance(o,dict) and isinstance(o.get('quote'),str) and isinstance(o.get('start'),int) else None,[w(v) for v in (o.values() if isinstance(o,dict) else o)] if isinstance(o,(dict,list)) else None];w(c);m=[];[ (m.append([s,e]) if not m or s>m[-1][1] else m[-1].__setitem__(1,max(m[-1][1],e))) for s,e in sorted(set(iv))];p=[(x.start(),x.end()) for x in re.finditer(r'[^\\n]+',t[LO:HI])];print(len(p),sum(1 for a,b in p if not any(s<LO+b and LO+a<e for s,e in m)),sum(e-s for s,e in m))\""
+ },
+ "notes": "总体判断：这是一份**引用层几乎无瑕**的候选 —— 264 条引文实例零失败（逐字／偏移／区间内次数／自报出现次数四项全量核验），角标纪律 0 违规，五栏零共用判据我独立复算为 0 违规，worldSettings 依据零重叠，semanticReview 如实保持 not-performed。它自带的构建器（build_candidate.py）与独立重算脚本（verify_independent.py）我复跑均全 PASS，其 13 条判据与我的复核结论一致。缺陷全部落在**说明性文字**与**反向覆盖**两个面上，不在抽取项本身。\n\n【与本轮复核的关系，必须说明】本条任务在我之前已由 w-dafeng-3 复核过（verdict=partial ×2 次记录），且候选 sha256 未变。按契约我不继承前次裁决，**先自己通读原文切片再打开候选**。我的 VCE1/VCE2/VCE3 与 VRC1/VRC2/VRC4 与前次 CE1/CE2/CE3、RC1/RC2/RC5 属**独立复现**（结论一致，非抄袭：我的判据、脚本与引证偏移是自算的）；**本次新增**发现为 VCE4（太子被废写成既成事实，前次未提『太子被废』四字）与 VRC3/VRC5/VRC6/VRC7（争风吃醋段、勾心斗角原因段、暴殄天物动机句、以及 crossSectionQuoteReuse 分区的自述与产物不符）。重复领取本身是已知环境缺陷（见 verify_dafeng_L1_0233 的同类记录），不是候选的问题。\n\n【为什么判 partial 而不是 fail】判 fail 必须有一条能推翻候选可信度的 counterExample。这里没有：候选的**全部 264 条引文**逐字可查、偏移自洽，没有一条编造的人物、事件或结局；四条 counterExamples 里两条（VCE1/VCE3）是影响有限的越界/指路问题，两条（VCE2/VCE4）是说明性文字说重了话，且候选自己在同文件的其他字段里给了正确表述。这与「写了假的」有本质区别。\n\n【为什么不是 pass】两条 medium 级问题都属任务点名的红线家族：VCE2 是『把说法当事实』的近亲（把威胁升级为叙述未写的杀心），VCE4 是『结束≠成功』的镜像（把未完成的废立写成已完成）。二者都会误导下游发布者。\n\n【哪些条目可以用、哪些必须降级】可直接用：tasks 六条的引文骨架、causeEdges E1/E4/E6/E7/E9/E11、states S1–S10 的引文、worldSettings W1–W12 的判别字段、foreshadows F1–F4 的 resolved 判定、unknowns U1–U14、rejectedEdges R01–R07。**必须降级或改写**：① tasks[0].obstacle.text 的『起杀心』改为叙述实际给的内容（威胁出口＋气氛压人，删去『起杀心』）；② states[9].who 的『（许新年）』删掉或标注为区间外补充；③ states[0].anchor.text 与 tasks[4].costNote 的『太子被废』改为『废立之争／太子前途危机』，不得写成已完成；④ causeEdges[0].note 的『该句归 S6』改为 S4；⑤ selfCritique[3] 声称的 crossSectionQuoteReuse 分区要么真的产出、要么删掉该自述。**必须补记**：VRC1 的『斩敌两名人／斩敌两百』数字差额应写进 K5（它是 K5 结论最硬的可对账证据），VRC2/VRC4 的来源与授权句应补进 S2 与 T4。\n\n【不确定处】VRC1 的哪个数字为真，本区间判不了（区间外两处旁证相互独立），需跨单元定性，我没有代填。VCE2 是否应降级为措辞问题，取决于发布口径是否允许 obstacle 栏写叙述未明言的强度判断 —— 这需要口径决定，不是我能单方面判定的。"
+}

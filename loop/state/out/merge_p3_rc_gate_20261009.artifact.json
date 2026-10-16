@@ -1,0 +1,74 @@
+{
+ "task": "merge:p3-rc-gate:20261009",
+ "agent": "reform-lead",
+ "at": "2026-10-08T20:36:24Z",
+ "gateLock": "持有 GATE.lock（agent=reform-lead）",
+ "merged": {
+  "loop/bin/worker.py": {
+   "sha256": "aa31078e6f0d7cdd2f210d59e9c8b6d69fd78b5640dd840a19c8ac15a74b6c57",
+   "changes": [
+    "submit_if_needed(task, agent, rc=None) 接收 agent 退出码",
+    "rc≠0 → status=partial + agentExitRc，写 REJECTED__，**不**产 done",
+    "rc=0 → 保留原代提交路径，并写 autoSubmitted=True / agentExitRc=0（可区分）",
+    "one_round 调用点传 rc=rc"
+   ]
+  },
+  "loop/bin/selftest.py": {
+   "sha256": "73ba2b75e7623458b1ffc1b1b4d3aa35c11e1e120697e6234b5e81c0d2214c82",
+   "changes": [
+    "12q5/12q5b/12q5c/12q5d 四条回归（两向都钉：rc 必须进闸门、合法路径必须保留）"
+   ]
+  }
+ },
+ "backup": "/tmp/castline-artifacts/r0-20261009/backup-p3-042659/（worker.py.premerge / selftest.py.premerge）",
+ "defectClosed": {
+  "id": "P3-AUTOSUBMIT-RC",
+  "before": "45 条代提交里 rc=124 的 18 条、rc=1 的 7 条、rc=127 的 1 条，把**被超时杀掉/报错退出**的中断态记成 done。",
+  "after": "rc≠0 一律 partial 并进 REJECTED__；rc=0 的 19 条合法代提交不受影响。"
+ },
+ "verification": {
+  "selftest": "120/120（合并前 116/116，新增 4 条全绿）",
+  "negativeControl": "把 worker.py 换回合并前版本 + 新 selftest ⇒ **116/120**，4 条全红 ⇒ 检查确实能击穿缺陷",
+  "behavioral": "真实调用 submit_if_needed：rc=124/127/1 → agent-rcN-not-done(partial) 且写出 REJECTED__；rc=0 → 仍走原代提交分支",
+  "productAccept": "sh scripts/accept.sh → 133/133 passed",
+  "versionStamp": "tests/version_stamp.py --check OK"
+ },
+ "rolloutState": {
+  "note": "worker.py 属**常驻进程启动时载入**的模块（E15 教训）。",
+  "measured": "合并后实测：运行新代码的 worker 3 个，仍持旧代码 9 个。",
+  "whyNotForced": "旧代码的 9 个 worker 正**持租约跑任务**（心跳新鲜），SIGTERM 的契约是『跑完当前任务再退出』——强杀会丢掉在跑的工作，违反 loop/ROLES 与 worker.install_signal_handlers 的设计。故让其自然退出后由 sentinel 以新代码补位。",
+  "boundedWindow": "在最后 9 个旧进程退出前（每任务上限 2700s），它们仍可能把 rc=124 代提交为 done。窗口有界，且新代码一接管即生效。"
+ },
+ "e15Lesson": "又一次印证 E15：『我改了代码』≠『系统在跑新代码』。所以本次不只合并，还实测了新旧代码的进程分布并如实登记过渡窗口。",
+ "assertions": [
+  {
+   "text": "rc≠0 不再产 done",
+   "command": "行为测试 4 个 rc 全对",
+   "result": "pass"
+  },
+  {
+   "text": "合法代提交未被误关",
+   "command": "rc=0 仍走原分支",
+   "result": "pass"
+  },
+  {
+   "text": "回归能击穿缺陷",
+   "command": "旧 worker + 新 selftest = 116/120",
+   "result": "pass"
+  },
+  {
+   "text": "门禁全绿",
+   "command": "selftest 120/120；accept 133/133",
+   "result": "pass"
+  },
+  {
+   "text": "过渡窗口如实登记（不声称已全部生效）",
+   "command": "实测新/旧代码进程数并写明理由",
+   "result": "pass"
+  }
+ ],
+ "remaining": [
+  "9 个旧代码 worker 将在跑完当前任务后自然退出并由新代码补位；期间 rc=124 的代提交仍可能发生（有界）。",
+  "超时上限与中位耗时的关系（2700s vs p50 1858s）尚未调整，属独立议题。"
+ ]
+}

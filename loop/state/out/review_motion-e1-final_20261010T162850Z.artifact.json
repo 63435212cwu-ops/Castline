@@ -1,0 +1,170 @@
+{
+  "task": "review:motion-e1-final:20261010T162850Z",
+  "agent": "motion-e1-final-20261010T162850Z",
+  "createdAt": "2026-10-10T17:22:16.944922+00:00",
+  "verdict": "approve_m83_m85_code_and_cpu_review",
+  "summary": "本批M83/M85独立代码与CPU复核通过；复核发现的取消、暂停相位、生命周期及解释并发缺陷均已修复。页面/GPU结论引用主线程final-v3回执，本审阅未运行GPU。",
+  "resolvedFindings": [
+    {
+      "id": "E1-R1",
+      "issue": "结构动画首帧前progress=0时切模式，旧tween未取消。",
+      "resolution": "setMode按structureOn/structureTw/progress任一清理；final-v3含同任务内首帧取消反例。",
+      "path": "js/sky/sky-deep.js"
+    },
+    {
+      "id": "E1-R2",
+      "issue": "结构态自动体姿/材质仍运动；仅冻结赋值会在退出时追补时间。早期10秒持有后upperY47.27967跳27.02082，正确下一帧约47.12653。",
+      "resolution": "晶体采用扣除结构阅读段的本地时间；nebula/cosmos/orrery停止结构装饰时钟；crown契约覆盖600帧持有和一帧恢复。",
+      "path": "js/scene.js"
+    },
+    {
+      "id": "E1-R3",
+      "issue": "共享scene在结构关闭时仍无条件读取CLSkyTokens.ALPHA，扩大默认路径依赖。",
+      "resolution": "由deep将已算出的wire因子传入scene，scene自身不再读取该令牌。",
+      "path": "js/scene.js"
+    },
+    {
+      "id": "E1-R4",
+      "issue": "M83/M85可同时进行主解释运动。",
+      "resolution": "开启M85先finishStructure，开启M83先finishParticipants；保留静态终态，不推进剧情。CPU与主线程真实页面双向验证。",
+      "paths": [
+        "js/sky/sky-deep.js",
+        "js/sky/sky-shell-player.js"
+      ]
+    },
+    {
+      "id": "E1-R5",
+      "issue": "新增结构时差未接crownReuse/rebuild/settle；真实复用后3秒visualAge=-7，gemOn=0。",
+      "resolution": "crownReuse清结构时差及上次时钟/灯/挂钟快照；changed-model保存恢复新增运动字段；settle重新对齐基线。真实生产函数提取的三条责任用例通过。",
+      "counterexample": "/tmp/castline-artifacts/motion-e1-20261010T162850Z/review-crown-reuse-counterexample.json",
+      "path": "js/scene.js"
+    },
+    {
+      "id": "E1-R6",
+      "issue": "轴灯仍沿radar/tAcc轮换，未随结构态静止；crown CPU提取夹具最初缺structureMix。",
+      "resolution": "结构段沿前帧快照固定lamp与wallClock；既有crown测试补正确初值及held-lamp断言，不移除原默认/calming验证。",
+      "paths": [
+        "js/scene.js",
+        "tests/crown_motion_contract.js"
+      ]
+    }
+  ],
+  "reverseChecks": [
+    {
+      "check": "身份不误并",
+      "result": "pass",
+      "detail": "M85使用唯一alias owner、唯一稳定ID、唯一规范名；id/entityId冲突及多义token拒绝连线，实际scene节点data.id再次对账。完整文本名单保留，前景去重最多6人。"
+    },
+    {
+      "check": "真实投影及非因果含义",
+      "result": "pass",
+      "detail": "事件点消费disc.eventPoint，人物消费既有starScreens；端点缺失/身份不符不画线；SVG无因果箭头。CPU反例与主线程页面回执一致。"
+    },
+    {
+      "check": "生命周期与旧请求",
+      "result": "pass",
+      "detail": "seek、上下文、换图、退出/关闭参与说明清旧状态；M83换模式/换图取消；SVG显隐使用真实hidden属性。"
+    },
+    {
+      "check": "时间源与默认行为",
+      "result": "pass",
+      "detail": "新增动效沿宿主帧钩子/SkyMotion tick，无新增rAF/interval循环；结构参数归零恢复旧表现，不写人物分值或用户calm。"
+    },
+    {
+      "check": "本批修改边界",
+      "result": "pass",
+      "detail": "只读实现及既有CPU责任测试；未修改受保护源码、数据、原文、发布版本、用户配置或运行中的artifacts。"
+    }
+  ],
+  "verification": {
+    "independentlyRunCpu": [
+      {
+        "command": "node tests/sky_event_player_contract.js",
+        "result": "pass",
+        "checks": 33
+      },
+      {
+        "command": "node tests/crown_motion_contract.js",
+        "result": "pass",
+        "checks": 11,
+        "note": "最后生命周期修订后单独重跑；早一轮8项结果已被此11项复验取代"
+      },
+      {
+        "command": "node tests/sky_nebula_rttype_contract.js",
+        "result": "pass",
+        "checks": 78,
+        "cases": 5
+      },
+      {
+        "command": "node tests/scene_camera_pose_contract.js",
+        "result": "pass"
+      }
+    ],
+    "suppliedBrowserReceipt": {
+      "path": "/tmp/castline-shots/motion-e1-20261010T162850Z/final-v3/motion-e1.json",
+      "checks": 23,
+      "allPass": true,
+      "viewports": [
+        [
+          1440,
+          900
+        ],
+        [
+          390,
+          844
+        ]
+      ],
+      "note": "已读主线程回执；本审阅者未独立启动浏览器/GPU，不将通过数计作审美分"
+    },
+    "gpuRunByReviewer": false,
+    "productCodeChangedByReviewer": false
+  },
+  "requiredModifications": [],
+  "remaining": [
+    "本结论仅覆盖本批M83/M85代码、身份/投影/生命周期及CPU责任复核，非108项动画或完整E1所有后续项签收。",
+    "完整scripts/accept.sh最终收口与连续操作录像/视觉判断由主线程负责；本审阅不代写真机、长期性能或审美签收。"
+  ],
+  "evidence": [
+    {
+      "path": "/tmp/castline-artifacts/motion-e1-20261010T162850Z/independent-final-cpu.json",
+      "sha256": "a0e316f5d72953d4aeab34608210b6fefda6b7fa0047ed94c3a04ace5fbd286d"
+    },
+    {
+      "path": "/tmp/castline-artifacts/motion-e1-20261010T162850Z/independent-final-cpu-lifecycle.json",
+      "sha256": "ab14ef37693a05e5271c92aa86e58449fee2ec840c147a41392d8eb0200c05fe"
+    },
+    {
+      "path": "/tmp/castline-artifacts/motion-e1-20261010T162850Z/review-crown-reuse-counterexample.json",
+      "sha256": "a4ceff6dd336dffc6bf0349d3ada7d13fe99f43a9302572fdc10143d54923f1b"
+    },
+    {
+      "path": "/tmp/castline-shots/motion-e1-20261010T162850Z/final-v3/motion-e1.json",
+      "sha256": "c3bb4ba06c5a81502c2225168df0d73db7b1e49b4bab9b134699106444f47716"
+    }
+  ],
+  "sourceHashes": {
+    "js/scene.js": "0c1333594e8da4ee1968a2dfe5722ad21ad66933cb03041e2b692b440f1976ca",
+    "js/sky/sky-deep.js": "6f0c1241dd609bc0badc26068d03fba3008fa989ec0ff4a19de52713018eac61",
+    "js/sky/sky-cosmos.js": "5119dced106b21353ff4ca6b4da5f8685ecf48a792ec34cfbf955d60b51dc510",
+    "js/sky/sky-nebula.js": "ec7bfca4810cf2303ac485f41ede37f42f6614ec2603318d352624265247a9d6",
+    "js/sky/sky-stars.js": "ee32251bedeca049ac935f6f3b06579475bf81c8be96c447cf763c3aa1a65dfe",
+    "js/sky/sky-rings.js": "cc3bcf76d8db3fa0dc9da902e4426279eea21a568dafa961adce7a345a45d1ff",
+    "js/sky/sky-rings-fx.js": "92bb407e4f818f31959f2551e7b717cca2d77bdc595f1642dfb2a1435ba714a5",
+    "js/sky/sky-orrery.js": "66e69d274b531b20b55aae292d67660b60963d2f5247dbd869c585eab287de1d",
+    "js/sky/sky-shell-player.js": "0e0630d14df10a5537f076d9b89902fea20d1aadfab1ff34e8781d0e6db444ba",
+    "js/sky/sky-shell.js": "c6308db4f316ecb376925da90274ecfe08a28ea5444ec4ea89db9f3efcbdd34b",
+    "js/sky/sky-shell-camera.js": "2c8682ed04f848fef97043d14d0a56a4195f9e4ce3d547fab0cd08e6895fb4a5",
+    "js/sky/sky-tokens.js": "70d46aaf198769d147bdf618a937eea9202b5984c3ccf63215cf080279ec2c19",
+    "css/sky-reading.css": "5726eb244009253d8954043678c2dcdf191e6fe0b94227d663cd54da0c8282b5",
+    "tests/sky_event_player_contract.js": "0e517bfaaced5386e17b5430e5a18311f32fdb2a92b7b939f457c90b4bff9ef4",
+    "tests/crown_motion_contract.js": "94e283a517a953ee6066163293cff58de1d50d5045037eaf3a69b30a608bacb7",
+    "tests/sky_nebula_rttype_contract.js": "40680159e9da7e9e9be025cfdc71ac8b2e7859d8ee03e7048a6447fe2c9532b2",
+    "tests/scene_camera_pose_contract.js": "c5ebbf85b3cbd15123e3c5d99b55f944663b3dc7148e50aef00ee900983e8e91"
+  },
+  "changes": [
+    {
+      "path": "loop/state/out/review_motion-e1-final_20261010T162850Z.artifact.json",
+      "kind": "append-only"
+    }
+  ]
+}

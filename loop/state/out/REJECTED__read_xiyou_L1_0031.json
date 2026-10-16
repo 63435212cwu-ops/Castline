@@ -1,0 +1,101 @@
+{
+  "task": "read:xiyou:L1:0031",
+  "agent": "w-dafeng-0",
+  "status": "rejected",
+  "reworkOf": "loop/state/out/REJECTED__read_xiyou_L1_0031.json",
+  "reworkReason": "上一轮（agent w-sanguo-0）未产出 writes 指定的候选文件，被机器判 rejected（证据条目带 missing:true）。本轮补齐该文件：完整精读第三十一回 [213984,222747)，8763 字。",
+  "summary": "精读《西游记》第三十一回「猪八戒义激猴王 孙行者智降妖怪」（docs[0].text 全文 codepoint [213984,222747)，8763 字 / 38 个非空段落）：tasks 6 条（五元组逐栏自带独立引文，T1 八戒请行者、T2 八戒沙僧掼孩子诱敌、T3 黄袍怪回洞查子、T4 公主思归、T5 沙僧脱身、T6 行者降妖上天查勘；**T1/T2/T5 的 cost 原文确无代价描写，写 JSON null 并在 costNote 里写明为什么没有**；T4.cost 与 T3.cost 标 inferred 并注明哪部分是归纳）、causeEdges 7 条（每条带 direction + mechanism + mechanismKind + caveat，机制写成『辱骂→怒气→改写成报仇目标』『人质对价交换』『亲子消息牵动离城』『棍子失效→推断→点名册核对』『自曝禁忌→被照做』『命令→念咒召回→押见→贬官』『解术动作→虎气退』；另设 rejectedAsCauseEdge 3 条，主动否掉『时间相邻』式连边）、states 4 条（行者回水帘洞→出山归队、沙僧被绑→解索、唐僧虎形→现原身、奎木狼隐藏星官→被收受贬；每条 before/after + 事件锚点 + 谁知/不知）、foreshadows 3 条（奎星缺员与内丹两条 resolved_in_unit 标 inferred；紧箍儿咒『那话儿』两次提及无兑现 ⇒ 显式 unresolved；另 rejectedAsForeshadow 2 条）、worldSettings 8 条（rule 3 / place 2 / item 3；地点均 arrived 并有到达动作，物件按 hold/transfer/use/lose 多选分列、文言动词照录『吐/吸在肚里/抢/收』，WS3 奎宿自辩记 misunderstood 并说明它如何解释人物；WS1 加了单实例泛化的 caveat）、themeReadings 2 条（各带 perspective/support/counter，未套三幕）、reverseChecks 6 条（本区间内存在但未立条的事实，含两条对我自己机制的反向证据）、unknowns 8 条、selfCritique 3 条。所有 128 个 quote 节点由生成脚本在 docs[0].text 上 find 计算偏移，count!=1 或越界即抛错不落盘。",
+  "evidence": [
+    {
+      "path": "loop/state/out/read_xiyou_L1_0031.candidate.json",
+      "sha256": "38e0b1d6173fade5101d9b362e04d30036c395080ba4930a831af80794a579a8"
+    },
+    {
+      "path": "loop/state/runs/task-read_xiyou_L1_0031.json",
+      "sha256": "795e3ee3466cd854e381f4c982839ad9dd89b17f643006aad2726b36903e3e89"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "区间与标题自检：切片以本回回目开头且长度与任务声明一致。命令：python3 -c \"import json;t=json.load(open('data/cache/a065244455cfb2221bcda94a.docs.json'))[0]['text'];s=t[213984:222747];print(len(s),repr(s[:22]),t.find('第三十一回\\u3000猪八戒义激猴王\\u3000孙行者智降妖怪'))\" → 8763 '第三十一回\\u3000猪八戒义激猴王\\u3000孙行者智降妖怪\\n\\n义结孔怀' 213984",
+      "result": "pass"
+    },
+    {
+      "text": "sourceHash 口径：整个 docs.json 的 sha256。命令：shasum -a 256 data/cache/a065244455cfb2221bcda94a.docs.json → c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2，与任务 sourceHash 逐字相同；切片哈希单列在 source.segmentSha256（673e90c2…），未覆盖 sourceHash。",
+      "result": "pass"
+    },
+    {
+      "text": "全部引文逐字可定位、偏移一致、全文唯一、且落在区间内。命令：python3 /tmp/verify31.py（脚本遍历候选里所有含 quote/start/end 的节点，断言 docs[0].text[start:end]==quote、quote 全文 count==1、区间包含、sourceHash 相同）→ 'quote nodes checked: 128 bad: 0'。生成侧同样断言：越界或 count!=1 直接 SystemExit，不落盘。",
+      "result": "pass"
+    },
+    {
+      "text": "五元组不共用引文（提示词点名的 714/1664 缺陷）。命令：python3 /tmp/verify31.py → 'tasks: 6 all 5 columns quote-disjoint'；脚本对每条 task 收集五栏全部 quote，任一引文跨栏重复即 AssertionError。",
+      "result": "pass"
+    },
+    {
+      "text": "内容分区核对（validate_sections 的那 6 个键）：python3 -c \"import json,sys;sys.path.insert(0,'loop/bin');import loop;c=json.load(open('loop/state/out/read_xiyou_L1_0031.candidate.json'));print([k for k in loop.required_sections(loop.load_tasks()['read:xiyou:L1:0031']['prompt']) if k not in c])\" → []（无缺失）。",
+      "result": "pass"
+    },
+    {
+      "text": "null 栏位都带理由：三条 cost 为 null 的 task 均存在同名 costNote（T1/T2/T5），脚本校验通过；cost 未用『待验证/待核』『法律规定』充数——T1/T2/T5 明确写『本区间未写代价』并说明为何不拿现有损失顶替。",
+      "result": "pass"
+    },
+    {
+      "text": "worldSettings 三态区分落在字段上：place 两条都写 placeState=arrived 并附到达动作引文（金銮殿/朝房、波月洞）；item 三条写 itemStates 多选（内丹 hold+transfer+use、钵盂 hold+transfer+use、金牌 hold+transfer+lose），照录原文文言动词；rule 三条写 institution（executed×2、misunderstood×1）。脚本抽查字段合法性 → 无非法值。",
+      "result": "pass"
+    },
+    {
+      "text": "反向验证（提示词要求的『这一段里还漏了什么』）：按段落做覆盖扫描，python3 遍历 38 个非空段落找出候选未引用的段落 → 12 段未被引用，逐段核对后把其中 6 条有实质内容的登记为 reverseChecks，其余为回目/回前诗/对话续行（引文已覆盖其内容）。命令与输出见本轮工作记录。",
+      "result": "pass"
+    },
+    {
+      "text": "语义未核验如实声明：候选写 semanticReview=not_performed 并附 semanticReviewNote，未声称语义已复核；引文定位正确与语义正确在文件里分开表述。",
+      "result": "pass"
+    },
+    {
+      "text": "未跑 GPU/浏览器测试（本轮任务未声明需要），未改任何受保护路径。",
+      "result": "pass"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/read_xiyou_L1_0031.candidate.json",
+      "kind": "append-only",
+      "note": "任务 writes 指定的候选文件，本轮新增（此前不存在，见 REJECTED 记录里的 missing:true）。"
+    },
+    {
+      "path": "loop/state/out/read_xiyou_L1_0031.submit.json",
+      "kind": "append-only",
+      "note": "本提交记录，本轮新增。"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/a065244455cfb2221bcda94a.docs.json": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+    "loop/state/out/read_xiyou_L1_0031.candidate.json": "38e0b1d6173fade5101d9b362e04d30036c395080ba4930a831af80794a579a8"
+  },
+  "remaining": [
+    "语义未独立复核：本文件只保证引文逐字可定位、字段结构可由脚本重算、五栏引文互不复用、计数可复现、null 栏位都带理由。不保证引文被放在正确的条目下，也不保证语义读对。semanticReview=not_performed，须由 read-verify 换 agent 反向核验。",
+    "最可能被推翻的三处已写进 selfCritique：(1) T3.cost 与 ST4 的贬谪同源，若复核认为玉帝的处置只是外部判决、不算他自己的成本，T3.cost 应降为 null；(2) FS1（打不死的怪→点名册缺员）我按伏笔登记，但原文没有预先暗示，严格口径下应撤下或与 CE4 合并；(3) WS3 奎宿自辩记 misunderstood，若作者本意是前世因缘即真相，应改记 declared。",
+    "自标较弱的条目：CE1 的触发依赖八戒的转述，而黄袍怪当面否认骂过（『我何尝骂你？』『是猪八戒说的』），原文无第三方证实，复核可据此把 CE1 降为 unverified（已写进 CE1.caveat 与 RC6）；CE5 的『自家供了』是行者内心评语，机制本身另有叙述动作链支撑。",
+    "cost 口径：T1/T2/T5 三条 cost 写 null 是因为原文确无代价描写（T1 的直裰被揪破属遭遇不是写定的代价；T2 担心的偿命没有发生；T5 被擒是上一单元的事）。若复核认为『遭遇』可算 cost，请给出原文依据再改，我不自行放宽。",
+    "未覆盖但已如实登记为 unknowns 的 8 项（沙尼一词、水气隐妖云、十七个宫娥、二子尸身、水解法原理、内丹后续、金牌是否发还、紧箍儿咒是否继续念）在本区间内都读不出答案，没有编结论。",
+    "本轮未做：跨单元对照（如上一回黄袍怪本相、下一回是否再提内丹），不在本任务 sourceRange 内；本区间之外的一切推断均未写入条目。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/read_xiyou_L1_0031.candidate.json",
+      "loop/state/out/read_xiyou_L1_0031.submit.json"
+    ]
+  },
+  "submittedAt": "2026-10-09T04:54:10Z",
+  "wallClockSeconds": 1237,
+  "wallClockFrom": "lease.startedAt",
+  "validation": {
+    "problems": [
+      "证据不能是瞬态路径（loop/state/runs/task-read_xiyou_L1_0031.json）：租约/心跳/锁/运行日志会按设计被回收，请改为引用留存产物"
+    ],
+    "at": "2026-10-09T04:54:10Z"
+  }
+}

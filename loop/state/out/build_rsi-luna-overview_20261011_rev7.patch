@@ -1,0 +1,21 @@
+--- a/js/sky/sky-deconstruction.js
++++ b/js/sky/sky-deconstruction.js
+@@ -1184,7 +1184,7 @@
+     var total = fact.count || 0;
+     if (!total) return '共 0 条记录';
+     if (!sample) return '共 ' + total + ' 条记录 · 暂无唯一示例';
+-    var summary = '记录样本 1 / ' + total + (anchor ? ' · 当前有投影' : ' · 当前视图未投影');
++    var summary = '示例 1 / ' + total;
+     if (key === 'groups') summary += ' · 成员已解析并展示 ' + sample.members.length + ' / ' + sample.memberTotal;
+     return summary;
+   }
+@@ -1214,7 +1214,8 @@
+       var detail = !exists ? '当前无记录' : !sample ? '有记录；当前未取得唯一对象引用' : key === 'events' && !anchor && !plotNow ? '当前视图未展开事件' : key === 'events' && !anchor ? '此事件在当前剧情视图没有投影' : !anchor ? '当前视图未投影此对象' : (name || labels[key]);
+       var sourceId = m84SourceId(key, sample), sourceIndex = sample && sample.index;
+       var sourcePoints = anchors.map(function (p) { return p.point[0] + ',' + p.point[1]; }).join(';');
+-      return '<article class="sd-structure-copy layer-' + key + (m84.selected === key ? ' is-selected' : '') + (anchor ? ' has-source' : '') + '" data-structure-copy="' + key + '" data-layer-depth="' + i + '"' + (anchor ? ' data-source-x="' + anchor[0] + '" data-source-y="' + anchor[1] + '" data-source-points="' + sourcePoints + '"' : '') + (sourceId != null ? ' data-source-id="' + esc(sourceId) + '"' : '') + (key === 'groups' && sample ? ' data-source-members="' + esc(sample.ids.join(',')) + '"' : key === 'relations' && sample ? ' data-source-members="' + esc(sample.a.id + ',' + sample.b.id) + '"' : '') + (sourceIndex != null ? ' data-source-index="' + sourceIndex + '"' : '') + '><small>' + labels[key] + '</small><b>' + esc(detail) + '</b>' + (sample && anchor ? '<span>' + esc(key === 'relations' ? sample.kind + ' · ' + sample.scope : key === 'events' ? sample.chapter : sample.identity || '身份未提供') + '</span>' : '') + '<span class="sd-structure-count">' + esc(m84CountSummary(key, f, sample, anchor)) + '</span></article>';
++      var meta = key === 'groups' && sample ? '展示成员：' + sample.members.map(function (person) { return person.name; }).join('、') : key === 'relations' ? sample && sample.kind + ' · ' + sample.scope : key === 'events' ? sample && sample.chapter : sample && (sample.identity || '身份未提供');
++      return '<article class="sd-structure-copy layer-' + key + (m84.selected === key ? ' is-selected' : '') + (anchor ? ' has-source' : '') + '" data-structure-copy="' + key + '" data-layer-depth="' + i + '"' + (anchor ? ' data-source-x="' + anchor[0] + '" data-source-y="' + anchor[1] + '" data-source-points="' + sourcePoints + '"' : '') + (sourceId != null ? ' data-source-id="' + esc(sourceId) + '"' : '') + (key === 'groups' && sample ? ' data-source-members="' + esc(sample.ids.join(',')) + '"' : key === 'relations' && sample ? ' data-source-members="' + esc(sample.a.id + ',' + sample.b.id) + '"' : '') + (sourceIndex != null ? ' data-source-index="' + sourceIndex + '"' : '') + '><small>' + labels[key] + '</small><b>' + esc(detail) + '</b>' + (meta && (anchor || key === 'groups') ? '<span>' + esc(meta) + '</span>' : '') + '<span class="sd-structure-count">' + esc(m84CountSummary(key, f, sample, anchor)) + '</span></article>';
+     }).join('');
+     var lines = mobile ? '' : keys.map(function (key) { var ps = positions[key] || [], i = keys.indexOf(key), target = ps.length ? ps[0].point : null; if (!target) return ''; return ps.map(function (p, j) { return '<line data-guide="' + key + '" data-guide-index="' + j + '" x1="' + p.point[0] + '" y1="' + p.point[1] + '" x2="' + target[0] + '" y2="' + (target[1] - (i + 1) * 28) + '" />'; }).join(''); }).join('');
+     return '<div class="sd-structure-stage' + (mobile ? ' is-inline' : '') + '" aria-hidden="' + String(!mobile) + '"><div class="sd-structure-stage-title">同一张图的组成' + (mobile ? '<button type="button" class="sd-structure-stage-close" data-action="structure-stage">收起</button>' : '') + '</div><svg class="sd-structure-guides" viewBox="0 0 ' + g.innerWidth + ' ' + g.innerHeight + '" preserveAspectRatio="none">' + lines + '</svg><div class="sd-structure-copies">' + cards + '</div></div>';

@@ -1,0 +1,269 @@
+{
+  "task": "read:xiyou:L0:0020",
+  "agent": "w-sanguo-1",
+  "status": "done",
+  "summary": "精读《西游记》第二十回 黄风岭唐僧有难 半山中八戒争先：读 docs[0].text[136016,143025) 全部 7009 字原文，产出 tasks(7)/causeEdges(13)/rejectedEdges(12)/states(13)/knowledgeDiffs(8)/foreshadows(10)/rejectedForeshadows(8)/crossUnitEchoes(8)/unknowns(15)/selfCritique(5)；并对上一轮（同 agent 超时被代提交）的产物做自审，修掉 7 类可证缺陷。",
+  "evidence": [
+    {
+      "path": "loop/state/out/read_xiyou_L0_0020.candidate.json",
+      "sha256": "b1cd295fc6e9539a3995be011071bd54f265c28c02431f2a6ee5061f0d8db719",
+      "kind": "candidate-json"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "切片口径：docs[0].text[136016:143025] 长度 7009，与任务 prompt 一致；TEXT.find('第二十回')==136016，TEXT.find('第二十一回')==143025；切片以本单元回目标题开头。",
+      "command": "python3 -c \"import json;T=json.load(open('data/cache/df959d743e53206f56db2f92.docs.json'))[0]['text'];print(len(T[136016:143025]),T.find('第二十回'),T.find('第二十一回'))\"",
+      "result": "pass"
+    },
+    {
+      "text": "sourceHash 口径：整份 docs.json 文件 sha256 = c282cf39…52a2，与任务声明相同；切片 sha256 另记 segmentSha256=1cb39931…e534（两者不相等，未互相冒充）。",
+      "command": "shasum -a 256 data/cache/df959d743e53206f56db2f92.docs.json",
+      "result": "pass"
+    },
+    {
+      "text": "全部 392 个引文节点逐条断言 TEXT[start:end]==quote、全文字串唯一（count==1）、sourceHash 与会话一致；失败 0。",
+      "command": "python3 -B -s /tmp/cl20/verify_final.py",
+      "result": "pass"
+    },
+    {
+      "text": "无未定义的占位 token（原文件里的 buji/dai_guixia/… 等 15 个无定义拼音 token 已全部换成可 find 的 {start,end,quote}）；剩余唯一 ascii 值是 book='xiyou'。",
+      "command": "python3 -B -s /tmp/cl20/tokens.py",
+      "result": "pass"
+    },
+    {
+      "text": "修掉的可证缺陷 7 类，逐条 before/after/why/proof 记在文件 repairLog.repairs 里。",
+      "command": "python3 -c \"import json;d=json.load(open('loop/state/out/read_xiyou_L0_0020.candidate.json'));print(len(d['repairLog']['repairs']))\"",
+      "result": "pass"
+    },
+    {
+      "text": "未声称 semanticReview 完成：semanticReview.performed=false，语义是否读对仍由 read-verify 流的别的 agent 判定。",
+      "command": "python3 -c \"import json;print(json.load(open('loop/state/out/read_xiyou_L0_0020.candidate.json'))['semanticReview']['performed'])\"",
+      "result": "pass"
+    },
+    {
+      "text": "未改任何受保护路径：本任务只写 loop/state/out/ 下两个文件。",
+      "command": "git status --porcelain -- js css index.html serve.py narrative.py scripts tests docs data",
+      "result": "pass"
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/read_xiyou_L0_0020.candidate.json",
+      "kind": "overwrite-in-writes-path"
+    },
+    {
+      "path": "loop/state/out/read_xiyou_L0_0020.submit.json",
+      "kind": "append-only"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/df959d743e53206f56db2f92.docs.json": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+    "data/cache/df959d743e53206f56db2f92.json": "744a9718ac49efcc27bbf4710fb0dd475282e24ee2defae94752f32e7e9d9208"
+  },
+  "remaining": [
+    "原 quoteAudit.crossesPairBoundary 的分组判据不可复原：12 个拼音 token 按拼音还原出 11 条引文，但五种机械判据没有一条能复现 11 条。本轮改为显式判据（与错配区间相交=5 条）并记入 U15；原 11 条的猜测偏移留在 repairLog.legacyTokenGuess，标 unverified。",
+    "factStatusConvention 声明 factStatus 是机械位置判定，但原有 371 个节点里有 13 个与该机械判据不符（8 个 narrated→mixed、5 个 mixed→utterance）。本轮只保证同一句话全文件唯一标签、且新增节点与既有共识一致，**没有**改动这 13 个原有节点；口径与实现的落差记在 repairLog.factStatusRuleGap，留给复核者裁量。",
+    "causeEdges[C13] 的方向在本轮被改正（原先把果当因）；改正后的机制是「应对方式分歧 → 行者取证」。这是自审结论，仍需 read-verify 独立判定。",
+    "本单元仍有 5 段无引文覆盖（回目标题行、138723 斋饭对答、139922/139978 两段韵语、141307 行者揭穿金蝉脱壳的半句），coverage 里已列出，未补写。",
+    "unknowns 15 条里 U1/U2/U3/U5/U7/U8/U15 在本单元内不可判定，未给出结论。",
+    "本轮另起的独立对抗审计 subagent 在超时前未返回任何结论（被中断、无收尾消息），故全部修复均为自查，不构成独立复核；read-verify 流仍是唯一独立判定环节。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/read_xiyou_L0_0020.submit.json"
+    ],
+    "note": "candidate.json 覆盖了上一轮同路径产物（上一轮被机器拒绝、且同为本 agent 所写），如需回退到上一版哈希为 0e56ab1a491e913a9a4ed5e9ed1542e71eace3211af92b8ceba612b3e6418c78。"
+  },
+  "submittedAt": "2026-10-08T00:50:48Z",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-08T00:50:48Z"
+  },
+  "verifyState": "partial",
+  "reviews": [
+    {
+      "reviewer": "w-dafeng-3",
+      "at": "2026-10-09T06:58:01Z",
+      "verdict": "partial",
+      "notes": "总体判断：这是**引用层零编造、零错位**的候选 —— 392/392 引文逐字命中且 T[start:end]==quote 全部成立，sourceHash 零失配，全文唯一性 TEXT.count(quote)==1 全部成立，区间外 13 条全部位于自标 outsideUnit 的 crossUnitEchoes；7 任务/13 因果/13 状态/8 知识差/10 伏笔的**证据本身**在原文逐字可查，红线执行比多数候选自觉（semanticReview=not-performed、无成功判定、被拒边与伏笔都给了逐字理由、跨单元对照显式标注）。因此**不判 fail**：不存在 counterExample 意义上的编造，没有原文外的人物、结局、伏笔或成功判定。**也不判 pass**：有 5 条可被文件自身或原文机器证伪的缺陷（CE1 条数 136 vs 实测 138 且与其自身分布之和矛盾；CE2 dangling 两字段与原文引号计数及文件自身 anomalies 三方互斥；CE3 368+21≠392 而姊妹字段写 371；CE4 未替换占位符 %d；CE5 omittedDeliberately 称两段未收录却都被引为证据）。缺陷**全部集中在记账层与自述层，没有一条需要丢弃抽取内容**。\n\n反向验证另查得 6 条五层抽取未覆盖的原文事实（RC1–RC6），其中 RC2 与 RC6 最有价值：RC2（次日八戒整担）是 T2.result「『有力气好挑行李』未被兑现成战果」这句判断的**反面材料**；RC6（三藏坠马）是比候选 S6 起点更早的一次状态变化，原文把它与虎出现写成同句因果。\n\n误杀检查：18 条被拒项未发现词表/正则式误杀。唯一可争议的是 R07/U2（洞主=黄风大王）—— 候选按「同一句内互指」口径拒绝，字面为真，但叙述层用紧邻同场指称（虎先锋说「报大王」→「那洞主传令」；小妖报「大王」→「那黄风怪正坐间」）已足以在同一单元内并到一人。我**能拿出原文引证**，故记为可争议项与建议，但因它不改变判定（CE1–CE5 已足够）且候选已把不确定性显式登记进 U2，我不据此加判。\n\n不确定处与自我更正：① 我的审计脚本第一版有两处**我自己的**错误并已如实修正：把段落口径写成裸 `\\n\\n` 切分（实测 35 段含 1 空段，候选的 34 = 非空段，属口径措辞不精确而非缺陷），以及 RC6 的偏移笔误（误写 139772，实为 139779）。② CE5 我最初误判为「修复改了原节点标签」，复核后确认是**我的假阳性**：该引文的 8 个原有节点本来就是 narrated，本轮只把新增节点由 mixed 对齐为 narrated，修复方向正确；脚本里已把该断言改写为澄清项，此处如实记录这次自我更正。③ 候选自述的「371 个原节点中 13 处机械判据不符」与 criterionSearch 的「13」我都无法复现（我的 LIFO 复算得 14 处；criterionSearch 那条判据实测 40），但候选口径（按新增**字段条目** 21 计 vs 按承载**节点** 46 计）存在歧义，且候选自己已在 U15 声明原判据不可复原，故记存疑不记 CE。④ **语义正确性未独立复核**：本轮做的是引用层全量机器复核 + 抽取内容逐条回原文 + 反向验证，不等于语义层已核验；semanticReview 保持 not-performed。",
+      "counterExamples": [
+        {
+          "id": "CE1",
+          "field": "counts.factStatusDistribution + counts.factStatusDistributionUnit",
+          "evidenceKind": "candidate-internal（文件自身两处数字互斥，且可复算）",
+          "claim": "factStatusDistributionUnit 正文写「按 distinct 引文计（共 **136** 条登记引文，每句唯一标签已断言）」，但同段 factStatusDistribution 的三个数 {narrated:61, mixed:71, utterance:6} **之和为 138**；实测全文件 distinct 引文也正是 **138** 条（单元内 125 + 单元外 13）。分布本身与实测完全一致，错的只是「136」这个条数。",
+          "measured": {
+            "declaredTextCount": 136,
+            "sumOfDeclaredDistribution": 138,
+            "actualDistinctQuotes": 138,
+            "actualInUnit": 125,
+            "actualOutOfUnit": 13,
+            "definitionsYielding136": []
+          },
+          "why": "可机器证伪的自相矛盾：声明条数与其自身分布之和不符，且与实测不符。我另试「排除 2 条回目引文」这一唯一能凑出 136 的口径，但其 narrated 会变成 59 ≠ 声明的 61，故无一致口径可复现 136。修法：把「136」改为 138，或显式声明统计口径。不影响任何抽取内容。"
+        },
+        {
+          "id": "CE2",
+          "field": "quotePairingCheck.danglingOpenAtSliceEnd / danglingOpenOffsets",
+          "evidenceKind": "source-verbatim（原文引号计数可复算）",
+          "claim": "quotePairingCheck 声明 `danglingOpenAtSliceEnd: false`、`danglingOpenOffsets: []`，但切片内 “ 出现 113 次、” 出现 112 次，**恰多 1 个未闭合**；按其自述判据（「遇 “ 开区间；遇 ” 则闭合」= LIFO）配对，切片结束时栈中残留偏移 **[136466]**。同文件 quotePairingCheck.anomalies[0] 又自述「本切片实测 **1 处**引号不平衡……三藏那句缺后引号」——三处互相矛盾。",
+          "quoteRef": {
+            "quote": "三藏闻之道：“悟能，你若是在家心重呵，不是个出家的了，你还回去罢。",
+            "start": 136460,
+            "end": 136493,
+            "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+            "offsetBase": "full text of docs[0].text (absolute codepoint index)"
+          },
+          "measured": {
+            "openCount": 113,
+            "closeCount": 112,
+            "diff": 1,
+            "lifoUnclosedAtSliceEnd": [
+              136466
+            ],
+            "lifoPairedSpans": 112,
+            "declaredDangling": false,
+            "declaredOffsets": [],
+            "selfAnomalyText": "本切片实测 1 处引号不平衡（原文数据自身的问题，不是本文件造成的）：nested-open@136502"
+          },
+          "why": "该字段是**机械可复算**的，而声明值与原文实测、以及与文件自己的 anomalies 描述三方互斥。注意：**这不是候选造成的**（缺后引号是原文数据本身的问题，候选在 anomalies 里已正确指出），错的是 dangling 两个字段没跟着 anomalies 一起更新。修法：`danglingOpenAtSliceEnd: true`、`danglingOpenOffsets: [136466]`。不影响任何抽取内容。"
+        },
+        {
+          "id": "CE3",
+          "field": "repairLog.factStatusRepair.note",
+          "evidenceKind": "candidate-internal（文件内两处节点总数互斥，且可复算）",
+          "claim": "note 写「本条修复只碰我新增的 **21** 个节点，未改动原文件 **368** 个节点中的任何一个」，但 368+21=**389** ≠ 实测节点总数 **392**；同文件 repairLog.factStatusRuleGap.finding 写的是「重算原有 **371** 个引文节点」（371+21=392，自洽）。实测：payoffEvidenceInUnit 条目 16 + crossesPairBoundary 条目 5 = 21（与「新增 21」一致），故原节点数应为 392−21=**371**，368 为笔误。",
+          "measured": {
+            "declaredOriginal": 368,
+            "declaredNew": 21,
+            "sum": 389,
+            "actualTotalNodes": 392,
+            "siblingFieldSays": 371,
+            "payoffEvidenceInUnitEntries": 16,
+            "crossesPairBoundaryEntries": 5
+          },
+          "why": "可机器证伪的算术不一致，且同文件另一字段已给出正确值。修法：368 → 371。不影响任何抽取内容。"
+        },
+        {
+          "id": "CE4",
+          "field": "repairLog.factStatusRuleGap.action",
+          "evidenceKind": "candidate-internal（字符串可复算）",
+          "claim": "action 字段残留**未替换的格式占位符**「%d」：「我**没有**去改这 %d 个原有节点的标签（那会把 368 个原节点的语义判断一起动掉……）」。全文 `%[ds]` 命中 1 处，即此处；同段其他数字（368）已替换，只有该处漏了。",
+          "measured": {
+            "placeholdersFound": [
+              "%d"
+            ],
+            "count": 1,
+            "location": "repairLog.factStatusRuleGap.action"
+          },
+          "why": "机器可复算的模板残留，读者无法知道「这 %d 个」是多少。修法：按上下文替换为实际数字（按 CE3 应为 13 或该口径下的不符节点数），或删去「%d 个」。不影响任何抽取内容。"
+        },
+        {
+          "id": "CE5",
+          "field": "reverseCheck.omittedDeliberately[1] 与 omittedDeliberately[2]",
+          "evidenceKind": "candidate-internal（自述与其自身证据层互斥）",
+          "claim": "omittedDeliberately 声明两处「未收录」：(1)「行者在老王门前的**全部自我介绍**（其中包括他从花果山到齐天大圣的完整履历）」；(2)「八戒关于『**高老庄**吓杀二三十人』的自述。它与本单元情节无关，且涉及另一个单元的事件，引用它只会把区间外的内容混进来」。但候选**自己**把这两段都作为 evidence 引用了：行者履历 → `states[3]/evidence[2]`（@137211，含「东胜神洲海东傲来国花果山水帘洞」「齐天大圣」）；八戒高老庄自述 → `tasks[1]/obstacle/evidence[2]`（@138026）。",
+          "quoteRef": {
+            "quote": "八戒道：“不瞒师父说，老猪自从跟了你，这些时俊了许多哩。若象往常在高老庄走时，把嘴朝前一掬，把耳两头一摆，常吓杀二三十人哩。”",
+            "start": 138026,
+            "end": 138089,
+            "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+            "offsetBase": "full text of docs[0].text (absolute codepoint index)"
+          },
+          "secondQuoteRef": {
+            "quote": "行者道：“老孙祖贯东胜神洲海东傲来国花果山水帘洞居住。",
+            "start": 137211,
+            "end": 137238,
+            "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+            "offsetBase": "full text of docs[0].text (absolute codepoint index)",
+            "citedAt": "states[3]/evidence[2]"
+          },
+          "why": "可机器证伪的自述/实现互斥：两段被明确称作「未收录」的内容，实际都进了证据层（且都用于支撑一个状态变化）。这会让下游读者据此以为这两段没有证据支撑。修法：把 omittedDeliberately 改写为真实口径（例如「只用作 S4 改口触发与行装履历的证据，不把履历本身当本单元事实」），或从证据层移除。**注意**：这两条引文的定位与逐字性本身没问题（已核验），缺陷只在自述与实现的账目不符。"
+        }
+      ],
+      "reverseChecks": [
+        {
+          "id": "RC1",
+          "found": "八戒斋饭的**对照计数**（三藏、行者各吃不上两碗）——候选只写了「把他一家子饭都吃得罄尽」，未记这条把食量写成对照关系的原文事实",
+          "quoteRef": {
+            "quote": "三藏、行者俱各吃不上两碗，呆子不住，便还吃哩。",
+            "start": 138698,
+            "end": 138721,
+            "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+            "offsetBase": "full text of docs[0].text (absolute codepoint index)"
+          },
+          "liesIn": "原文 138698–138721；五层抽取（tasks/causeEdges/states/knowledgeDiffs/foreshadows）任何非 quote 文本均未承接",
+          "why": "候选 T2/S3 写八戒食量时只引「罄尽」与「十数碗」，漏了同段把三藏/行者作对照的量化句。它使「食肠大」从孤立夸张变成有基准的对照。"
+        },
+        {
+          "id": "RC2",
+          "found": "次日晨的**行装分工**（行者背马、八戒整担）与老王一家整治点心汤水——候选只写「次早备点心汤水」与「三众方致谢告行」，未记具体分工",
+          "quoteRef": {
+            "quote": "次日天晓，行者去背马，八戒去整担",
+            "start": 138847,
+            "end": 138863,
+            "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+            "offsetBase": "full text of docs[0].text (absolute codepoint index)"
+          },
+          "liesIn": "原文 138847–138888；五层抽取非 quote 文本未承接「背马/整担」的分工",
+          "why": "这是八戒「挑行李」这一自陈目标（T2.objective）在原文里的**实际兑现形态**：次日整担的确实是八戒。T2.result 说「『有力气好挑行李』这个理由没有在原文里被兑现成任何战果」——这条原文事实正好是那句判断的反面材料，漏掉它会削弱该结论的完整性。"
+        },
+        {
+          "id": "RC3",
+          "found": "叙述者写老者「果然眼花」——候选记了「老儿眼花」是行者的话，未记叙述层对这一点的**确认**",
+          "quoteRef": {
+            "quote": "老儿果然眼花，忽抬头细看",
+            "start": 137579,
+            "end": 137591,
+            "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+            "offsetBase": "full text of docs[0].text (absolute codepoint index)"
+          },
+          "liesIn": "原文 137579；五层抽取非 quote 文本未承接",
+          "why": "行者说「这老儿眼花」（人物的话）与叙述者写「老儿果然眼花」（叙述事实）是两回事。候选在对白层引了前者，叙述层的确认未被任何状态/因果条目承接——按候选自己的口径（人物的话≠叙述事实），这条叙述确认本应登记。"
+        },
+        {
+          "id": "RC4",
+          "found": "八戒对行者部署的**即时回应**（「不消吩咐，请快去」）——候选记了行者把八戒安置在藏风山凹（C10/T5.action），未记八戒的回应",
+          "quoteRef": {
+            "quote": "八戒道：“不消吩咐，请快去。”",
+            "start": 141685,
+            "end": 141700,
+            "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+            "offsetBase": "full text of docs[0].text (absolute codepoint index)"
+          },
+          "liesIn": "原文 141684–141699；五层抽取非 quote 文本未承接",
+          "why": "C10 是一条 basis=derived 的因果边（部署→截击成功）。八戒这句当场应承是「部署被接受」的原文证据，缺它则该边的**触发**一侧只有行者单方命令，没有接受方的回应。"
+        },
+        {
+          "id": "RC5",
+          "found": "一家人被安置睡在**门楼下竹床板铺**——候选在 T7 写「师徒一行吃饱、住下」，未记睡处的具体交代",
+          "quoteRef": {
+            "quote": "却才收了家火，在那门楼下，安排了竹床板铺睡下。",
+            "start": 138822,
+            "end": 138845,
+            "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+            "offsetBase": "full text of docs[0].text (absolute codepoint index)"
+          },
+          "liesIn": "原文 138822–138845；五层抽取非 quote 文本未承接",
+          "why": "T7.result 说「师徒一行吃饱、住下」并据此判 achieved，但「住下」的具体形态（门楼下、竹床板铺——不是房内）在原文里写得很清楚。T1.cost 又写「本单元未写他为借宿付出代价」；睡在门楼下这一细节是判断「接待到什么程度」的原文依据。"
+        },
+        {
+          "id": "RC6",
+          "found": "三藏被虎惊得**跌下白马**（坐不稳雕鞍→翻根头跌下→斜倚路旁→魂飞魄散）——这是本单元三藏第一次、也是唯一一次身体失控，候选未把「受惊坠马」立为独立状态/事件",
+          "quoteRef": {
+            "quote": "慌得那三藏坐不稳雕鞍，翻根头跌下白马，斜倚在路旁，真个是魂飞魄散。",
+            "start": 139779,
+            "end": 139812,
+            "sourceHash": "c282cf39b2ae739a15a3efe4a0e83af546c525bcaad3bac6e21c9d6179a152a2",
+            "offsetBase": "full text of docs[0].text (absolute codepoint index)"
+          },
+          "liesIn": "原文 139779–139811；该引文虽出现在 tasks[2].result/evidence、rejectedEdges[5]、states[9]、foreshadows[2]、unknowns[12] 等处，但**没有任何一条任务的 obstacle/result、也没有任何 states 条目**把「三藏坠马」本身当作被抽取出的事实——它每次都只是别的条目的旁证，从未成为抽取项",
+          "why": "候选 S6 把三藏的安危翻转写成「安然坐在路旁念经 → 被擒」，跳过了中间这次坠马。原文把「虎出现」与「三藏失能」写成同一句因果（「慌得那三藏坐不稳雕鞍，翻根头跌下白马」），这是比 S6 起点更早的一次状态变化。"
+        }
+      ]
+    }
+  ]
+}

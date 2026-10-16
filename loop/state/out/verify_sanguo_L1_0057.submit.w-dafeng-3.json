@@ -1,0 +1,98 @@
+{
+ "task": "verify:sanguo:L1:0057",
+ "agent": "w-dafeng-3",
+ "role": "VERIFIER",
+ "status": "done",
+ "book": "sanguo",
+ "lane": 1,
+ "unitIndex": 57,
+ "unitHead": "第五十八回　马孟起兴兵雪恨　曹阿瞒割须弃袍",
+ "sourceRange": [
+  285596,
+  290931
+ ],
+ "reviewedTask": "read:sanguo:L1:0057",
+ "reviewedCandidate": "loop/state/out/read_sanguo_L1_0057.candidate.json",
+ "reviewedCandidateSha256": "3f9876382dd1315c4a627c7136399b1636fbecf49a317c8a247039ea60b0e97a",
+ "reviewedAuthor": "w-dafeng-0",
+ "selfSign": false,
+ "verdict": "partial",
+ "verdictFile": "loop/state/out/verify_sanguo_L1_0057.verdict.json",
+ "summary": "独立反向复核《三国演义》第五十八回：311/311 条引文逐字命中且偏移与声明一致（复算 0 处不符），覆盖 4892/5335=0.917 与残余清单可独立复算，未发现编造人物/结局/伏笔，『结束≠成功』守住。判 partial：T14.label 写「两败一死」断言李通战死，而原文只写「一枪刺李通于马下」，候选自己的 T14.action/T14.cost/RCE10/U16 四处均判定该死亡不可知 —— label 与正文直接矛盾且最易被下游读取。另有三处自述计数无法复算（metrics.basisCounts explicit 少报 7、A12 的『186 处』、coverage.uncoveredResidue 的 19/247），selfCritique 键名 why_still/whyStill 不一致；反向扫描另发现 6 组遗漏（刘备书信正文整段无引证最值得补）。",
+ "evidence": [
+  {
+   "path": "loop/state/out/verify_sanguo_L1_0057.verdict.json",
+   "sha256": "44aeab89310b213a149dfd3679df4eb0901f355bdb759cc960eeadc7361269b0",
+   "kind": "worker-output",
+   "note": "复核结论本体：verdict=partial、counterExamples[1]、reverseChecks[6]、misKillCheck、hallucinationCheck、selfReportChecks[5]、quoteVerification（311/311 + 5 条随机抽样）、notes。"
+  },
+  {
+   "path": "loop/state/out/read_sanguo_L1_0057.candidate.json",
+   "sha256": "3f9876382dd1315c4a627c7136399b1636fbecf49a317c8a247039ea60b0e97a",
+   "kind": "reviewed-artifact",
+   "note": "被复核候选（另一个 agent w-dafeng-0 写的）。我独立递归抽取其 311 条引文并复算，不 import 其构建脚本。"
+  },
+  {
+   "path": "data/cache/fe42d01f3826fe8096f86614.docs.json",
+   "sha256": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+   "kind": "source",
+   "note": "原文来源；切片 [285596,290931) 段哈希 5707168c6b8b29fe… 与候选声明一致，我独立复算过。"
+  },
+  {
+   "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-tools-20261012/cl0057-sanguo-xiyou0/audit_independent.py",
+   "sha256": "615ff96fd446d1458bbc797bf87f387f8b34bf03d9051c114e80898fa6ec3746",
+   "kind": "tool",
+   "note": "候选自报的独立复算脚本（仓库外）。我实跑过它：C0–C13 全 pass，同时它自己报出 C13 残余中有 3 段实质正文 —— 与我的反向扫描互相印证。"
+  }
+ ],
+ "assertions": [
+  {
+   "text": "先自己读原文再看候选：先逐段通读 docs[0].text[285596,290931)（30 行 / 12 个非空段，正文止于 290819，其后为分隔线与站点导航），做完事实清单后才打开候选文件。",
+   "result": "pass"
+  },
+  {
+   "text": "独立复算全部 311 条引文：TEXT[s:e]==quote、end-start==len(quote)、TEXT.find==start、区间归属、sourceHash、globalOccurrences==1。结果 0 处不符、0 条越界、0 条全文不唯一。",
+   "result": "pass"
+  },
+  {
+   "text": "随机抽 5 条 quote 用 TEXT.find 复核（seed=57）：tasks[4].obstacle、knowledgeGaps[3].quotes[1]、unknowns[17]、unknowns[25]、tasks[2].objective，5/5 逐字命中且偏移与声明一致。",
+   "result": "pass"
+  },
+  {
+   "text": "反向验证（计划100 教训）：对引文区间之外的每一句做包含判定 + 非引文正文的 n-gram 匹配，找出 6 组既无引文节点也无说明的原文事实；其中最先误判的 4 句（马超军日夜轮流来骂、西凉兵弃马抛戈而走、留曹仁守寨、不可令他创立营寨）经区间包含判定确认其实被更长引文覆盖，已从发现中剔除。",
+   "result": "pass"
+  },
+  {
+   "text": "误杀检查：逐条读候选排除的 11 条 RCE 与 6 条 NF，并为每条尝试构造反例；全部有原文支撑，未发现误杀。",
+   "result": "pass"
+  },
+  {
+   "text": "自述计数复算：coverage 主指标（4892/0.917/46/443/311）逐项一致；basisCounts、A12 指针数、uncoveredResidue 三项在两种自然口径下都无法重现，已如实记为不可复算而非直接判错。",
+   "result": "pass"
+  },
+  {
+   "text": "实跑候选自报的 audit_independent.py（仓库外工具）：C0–C13 全 pass，其 C13 自报 3 段实质正文残余，与我的独立反向扫描一致。",
+   "result": "pass"
+  }
+ ],
+ "changes": [],
+ "sourceHashes": {
+  "data/cache/fe42d01f3826fe8096f86614.docs.json": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+  "loop/state/out/read_sanguo_L1_0057.candidate.json": "3f9876382dd1315c4a627c7136399b1636fbecf49a317c8a247039ea60b0e97a",
+  "loop/state/out/verify_sanguo_L1_0057.verdict.json": "44aeab89310b213a149dfd3679df4eb0901f355bdb759cc960eeadc7361269b0"
+ },
+ "rollback": {
+  "kind": "append-only",
+  "strategy": "restore-backup",
+  "files": [
+   "loop/state/out/verify_sanguo_L1_0057.verdict.json"
+  ],
+  "note": "只新增复核结论文件，未改动任何受保护路径、未改动被复核的候选文件（其 sha256 复核前后一致 3f987638…）。"
+ },
+ "remaining": [
+  "未做语义终审：不裁决「曹操为何闻添兵而喜」（候选 KG4/U4 已如实记为未闭合知识差）、不裁决庞德密计内容（U1）、不裁决李通生死（U16）——候选已标未知，我未改判。",
+  "三处自述计数（basisCounts/A12/uncoveredResidue）的『正确值』取决于构建侧口径，我只报不可复算与我的复算值，未替其选定口径。",
+  "反向扫描发现的 6 组遗漏属『遗漏而非错误』：未收引文的散文事实是否应升级为硬缺陷，取决于下游对『概述是否必须携带偏移』的验收口径；候选未写出错误断言。",
+  "T14.label 的修正（删『一死』或改为『两败一落马』）属原提交者或合并任务的动作，我作为复核者不代改，只登记为 mustFix。"
+ ]
+}

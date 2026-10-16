@@ -1,0 +1,98 @@
+{
+  "task": "read:dafeng:L1:0037",
+  "agent": "w-dafeng-1",
+  "status": "done",
+  "summary": "精读《大奉打更人》第三十八章「诗成」原文区间 codepoint [113766,116337)（2571 字，逐段读完），产出 5 条任务五元组、7 条带方向与机制的 causeEdges、6 条带前值/后值与事件锚点的 states、4 条伏笔（3 条 resolved + 1 条 unresolved，另列 5 条「不构成伏笔」的说明）、13 条 unknowns、4 条 selfCritique。全部 130 条引用由真实 text 定位后切片生成并回验 TEXT[start:end]==quote 且 TEXT.find(quote)==start，0 处不符（区间内 110 条全部落在本单元内，区间外 20 条一律标 inRange=false）。本区间内没有给出任何诗评：章末只写三儒「沉默的盯着宣纸」，所以 T3.result 只记条件性许诺，不写成功。",
+  "evidence": [
+    {
+      "path": "loop/state/out/read_dafeng_L1_0037.candidate.json",
+      "sha256": "aa4fc6eac48ac8f8d1e78f622cab2cc1013c01e70533ba18946dbe1700678526",
+      "kind": "candidate",
+      "note": "本轮精读产物（任务 writes 指定路径）"
+    },
+    {
+      "path": "data/cache/9b676d7031b1bcd3b8377a18.docs.json",
+      "sha256": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+      "kind": "source",
+      "note": "原文来源；sha256(整个文件) 与 task.sourceHash 一致"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "原文区间与切片：docs[0].text[113766:116337] 长度 2571 字，与任务 sourceRange 一致，且切片以本章标题「第三十八章 诗成」开头",
+      "result": "pass",
+      "command": "python3 -c \"import json;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];print(len(t[113766:116337]),repr(t[113766:113774]))\""
+    },
+    {
+      "text": "sourceHash 对得上：任务声明 fdde5558…39839 == sha256(data/cache/9b676d7031b1bcd3b8377a18.docs.json) 实际值",
+      "result": "pass",
+      "command": "shasum -a 256 data/cache/9b676d7031b1bcd3b8377a18.docs.json"
+    },
+    {
+      "text": "全部 130 条引用逐字命中且偏移自洽：TEXT[start:end]==quote 且 TEXT.find(quote)==start，0 处不符",
+      "result": "pass",
+      "command": "python3 -c \"import json;T=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];C=json.load(open('loop/state/out/read_dafeng_L1_0037.candidate.json'));Q=[o for b in ('tasks','causeEdges','states','foreshadows','rejectedAsForeshadow') for i in C[b] for o in (i.get('evidence') or [])+(i.get('payoffEvidence') or [])+(i.get('continuationEvidence') or [])+([i['quote']] if isinstance(i.get('quote'),dict) else [])];bad=[o for o in Q if T[o['start']:o['end']]!=o['quote'] or T.find(o['quote'])!=o['start']];print('quotes',len(Q),'bad',len(bad));print('ALL VERBATIM' if not bad else 'MISMATCH')\""
+    },
+    {
+      "text": "区间内外不混：110 条标 inRange=true 的引用全部落在 [113766,116337) 内；20 条区间外引用无一落进本单元",
+      "result": "pass",
+      "command": "python3 -c \"import json;T=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];C=json.load(open('loop/state/out/read_dafeng_L1_0037.candidate.json'));Q=[o for b in ('tasks','causeEdges','states','foreshadows','rejectedAsForeshadow') for i in C[b] for o in (i.get('evidence') or [])+(i.get('payoffEvidence') or [])+(i.get('continuationEvidence') or [])];inr=[o for o in Q if o.get('inRange')];xr=[o for o in Q if not o.get('inRange')];print('inRange',len(inr),all(113766<=o['start'] and o['end']<=116337 for o in inr));print('cross',len(xr),all(not(113766<=o['start']<116337) for o in xr))\""
+    },
+    {
+      "text": "区间外引文的章号经机器复核：每条按偏移判定实际落在哪个章标题之后，结果写入 selfCheck.crossRangeChapterMap（本轮据此把一处误写的「第五十七章」改为实际的「第五十四章」）",
+      "result": "pass",
+      "command": "python3 -c \"import json;C=json.load(open('loop/state/out/read_dafeng_L1_0037.candidate.json'));[print(v['offset'],v['chapter'],'|',k) for k,v in C['selfCheck']['crossRangeChapterMap'].items()]\""
+    },
+    {
+      "text": "红线自查：不把人物话当事实——T3.result 只记陈泰的条件性许诺（「如果你能现场…老夫就做主」）与三儒沉默；全文未出现「三儒满意/诗成即成功」的判定",
+      "result": "pass",
+      "command": "python3 -c \"import json;C=json.load(open('loop/state/out/read_dafeng_L1_0037.candidate.json'));print([t['result'] for t in C['tasks'] if t['id']=='T3_xiongdi_qiu_bihu'])\""
+    },
+    {
+      "text": "红线自查：不把一次出现当伏笔——列 4 条伏笔（3 resolved 有区间外逐字回收证据，1 unresolved 显式标 unresolved），另列 5 条 rejectedAsForeshadow 说明为何不算",
+      "result": "pass",
+      "command": "python3 -c \"import json;C=json.load(open('loop/state/out/read_dafeng_L1_0037.candidate.json'));print([(f['id'],f['status'],len(f.get('payoffEvidence') or [])) for f in C['foreshadows']]);print(len(C['rejectedAsForeshadow']))\""
+    },
+    {
+      "text": "未越权声明语义核验：reviewStatus.semanticReview == not_performed",
+      "result": "pass",
+      "command": "python3 -c \"import json;C=json.load(open('loop/state/out/read_dafeng_L1_0037.candidate.json'));print(C['reviewStatus'])\""
+    },
+    {
+      "text": "只写任务 writes 指定路径：本轮仓库内写入只有 loop/state/out/read_dafeng_L1_0037.candidate.json 与 .submit.json（均在 loop/ 追加式路径）。受保护路径零写入——按 mtime 判定，自我本轮开工（本地 2026-10-08 07:43）起没有任何 js/css/index.html/serve.py/narrative.py/scripts/tests/docs/data 下的文件被改",
+      "result": "pass",
+      "command": "find js css index.html serve.py narrative.py scripts tests docs data -type f -newermt \"2026-10-08 07:43\" | wc -l   # 输出 0"
+    },
+    {
+      "text": "说明（不是本轮改动）：`git status --porcelain` 在受保护路径下会列出 282 项改动，那些是并行写入者的既有未提交工作，mtime 早于本轮开工时间，与本 worker 无关；我没有触碰、也没有回滚它们",
+      "result": "pass",
+      "command": "git status --porcelain -- js css index.html serve.py narrative.py scripts tests docs data | wc -l   # 输出 282（全部早于本轮）"
+    }
+  ],
+  "changes": [
+    {"path": "loop/state/out/read_dafeng_L1_0037.candidate.json", "kind": "append-only"},
+    {"path": "loop/state/out/read_dafeng_L1_0037.json", "kind": "append-only"}
+  ],
+  "sourceHashes": {
+    "data/cache/9b676d7031b1bcd3b8377a18.docs.json": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "data/cache/9b676d7031b1bcd3b8377a18.json": "3c2fae1d399d6768719f2d5476fa0cfd88fb4fbbc12abdf080323fa4b846ebdf"
+  },
+  "remaining": [
+    "semanticReview 未做：本产物只完成引用定位与自洽校验，「引用定位正确 ≠ 语义已核验」。需独立 agent 反向复核，优先看 T1.objective（derived）、T5.objective（inferred）、C2/C4（inferred/derived）与 F3（derived）。",
+    "F3（劝学诗是开篇「这个活儿」的回收）是我最没把握的一条：铺设与回收各有逐字原文，但「两者是同一件事」是我接的。原文没有一句把它们连起来。若复核者不接受，应在 F3.limits 的基础上直接改判为 rejectedAsForeshadow。",
+    "F4（周侍郎报复许府）保持 unresolved：本区间内它只是许七安为求情说出的威胁推测，没有被证实或证伪。我给的四条 continuationEvidence 只证明该线在区间外仍在推进，不构成回收。",
+    "「保她们周全」这一层未核验收束：我只为判定回收抽读了第三十九章与第四十七至第五十九章的部分片段，没有通读第四十八至第五十八章，无法声称周府威胁已解除。",
+    "「这个活儿」具体指什么在本区间内读不出来（只写「这个活儿」「此道」）；我据区间外第三十七章读作书院劝学之事，标 derived。若只以本区间为准，T1.objective 应为 unverified。",
+    "「岸边」疑为「案边」笔误（雅室在悬崖侧无墙，室内无岸）：已记入 unknowns，未作改写或合并断言。",
+    "图谱缓存 data/cache/9b676d7031b1bcd3b8377a18.json 本轮只在 source 字段登记与哈希记录，未逐条比对本轮结论与已有图谱结论的一致性。",
+    "「代笔」在第五十四章被用作对外说辞，但该章距本单元较远（约 46,000 字），是否属于紧密回收可再议；我按「有铺设+有回收」记为 resolved，并在 F2.limits 说明其局限。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/read_dafeng_L1_0037.candidate.json",
+      "loop/state/out/read_dafeng_L1_0037.json"
+    ]
+  }
+}

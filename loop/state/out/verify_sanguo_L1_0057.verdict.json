@@ -1,0 +1,179 @@
+{
+ "verdict": "partial",
+ "task": "verify:sanguo:L1:0057",
+ "verifier": "w-dafeng-3",
+ "role": "VERIFIER",
+ "reviewedCandidate": "loop/state/out/read_sanguo_L1_0057.candidate.json",
+ "reviewedCandidateSha256": "3f9876382dd1315c4a627c7136399b1636fbecf49a317c8a247039ea60b0e97a",
+ "source": {
+  "path": "data/cache/fe42d01f3826fe8096f86614.docs.json",
+  "docsFileSha256": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+  "textSha256": "9d28638de0b0a89fa080cc2defb4a1f8de6adb1260c4545c04ef80f73cbb221e",
+  "segmentRange": [
+   285596,
+   290931
+  ],
+  "segmentSha256": "5707168c6b8b29feb74f7c89e9f38ab5eeed0b6afc896ba2ea2963316dd27ca4"
+ },
+ "method": "先自行逐段通读 docs[0].text[285596,290931)（30 行 / 12 个非空段），再独立递归抽取候选全部 311 条引文，用 TEXT.find/TEXT.count/TEXT[s:e] 复算，然后做反向扫描（引文区间之外的文字逐句检查是否被引用或被说明）。全过程不 import 候选的 spec_*/quotes/assemble。",
+ "reproduce": [
+  "python3 -c \"import json;T=json.load(open('data/cache/fe42d01f3826fe8096f86614.docs.json'))[0]['text'];print(hashlib.sha256(T[285596:290931].encode()).hexdigest())\"",
+  "python3 -B -s '/Volumes/资源库/我的资源/回滚点/项目/星系-tools-20261012/cl0057-sanguo-xiyou0/audit_independent.py'"
+ ],
+ "quoteVerification": {
+  "allQuotesChecked": 311,
+  "exactSliceMatch": 311,
+  "offsetMismatch": 0,
+  "globalOccurrencesGt1": 0,
+  "outOfRange": 0,
+  "randomSample": [
+   {
+    "path": "tasks[4].obstacle.quotes[0]",
+    "quote": "内云：“若将马超擒赴许都，即封汝为西凉侯。",
+    "start": 286649,
+    "end": 286670,
+    "find": 286649,
+    "exact": true
+   },
+   {
+    "path": "knowledgeGaps[3].quotes[1]",
+    "quote": "三日后又报关上又添军马。操又大喜，就于帐中设宴作贺。诸将皆暗笑。",
+    "start": 288980,
+    "end": 289012,
+    "find": 288980,
+    "exact": true
+   },
+   {
+    "path": "unknowns[17].quote",
+    "quote": "正遇着曹仁部将曹永，被庞德一刀砍于马下，夺其马，杀开一条血路，救出韩遂，投东南而走。",
+    "start": 290501,
+    "end": 290543,
+    "find": 290501,
+    "exact": true
+   },
+   {
+    "path": "unknowns[25].quote",
+    "quote": "肃领命，随即修书使人送玄德，玄德看了书中之意，留使者于馆舍，差人往南郡请孔明。",
+    "start": 285930,
+    "end": 285969,
+    "find": 285930,
+    "exact": true
+   },
+   {
+    "path": "tasks[2].objective.quotes[0]",
+    "quote": "孔明曰：“也不消动江南之兵，也不必动荆州之兵，自使曹操不敢正觑东南。",
+    "start": 285987,
+    "end": 286021,
+    "find": 285987,
+    "exact": true
+   }
+  ],
+  "conclusion": "5/5 逐字命中且偏移与声明的 start/end 完全一致；扩检全部 311 条同样成立。引用定位这一层未发现任何缺陷。"
+ },
+ "counterExamples": [
+  {
+   "claim": "T14_caocao_zhenqian_zhiwen.label（总结栏）写「三将接连迎战，两败一死」——断言于禁、张颌之外有一将（李通）战死。",
+   "quote": "一枪刺李通于马下",
+   "why": "原文只写「刺李通于马下」（落马动作），全区间没有一句写李通被杀、收尸或事后计点提到他；本回写死亡时用的是「成宜被夏侯渊所杀」（『成宜被夏侯渊所杀。』）这种明确措辞。**关键在于候选自己三处都持这个判断**：T14.action 写「两败一被刺落马」、T14.cost 写「李通是否死亡，原文只写『刺李通于马下』，故不在此写成『损失一员大将』」、RCE10 把「李通阵亡」登记为『A→B（不成立：落马≠死）』、U16 也登记为未知。因此 label 的「一死」与同一文件内的 action/cost/RCE10/U16 直接矛盾，且以总结栏断言了正文拒绝断言的事实。这是本候选唯一一处越权断言，也是下游消费者最可能直接读到的一栏（label）。处置：删去「一死」或改为「两败一落马（生死原文未写）」，并与 RCE10/U16 对齐。另注：李通全书仅 3 次出现（前面一次在汝南受封），全书没有任何一处写他死亡，故该断言在整本书内也无可引证的支撑。"
+  }
+ ],
+ "reverseChecks": [
+  {
+   "found": "刘备致马超书信**正文的煽动性内容**（控诉曹操、『同受密诏』、『不共天地、不同日月之仇』）在候选全文中既无引文节点、也无任何说明。候选只引了信的末句承诺（286524–286574），而『不共天地』『不同日月』这两个词组在候选文件里检索为空——而被省略的这段正是这封信能煽动马超的机制本身（T3 与 F1 都把它当成『以道义相结』，却没有引证道义的具体说法）。",
+   "quote": "伏念汉室不幸，操贼专权，欺君罔上，黎民凋残。备昔与令先君同受密诏，誓诛此贼。今令先君被操所害，此将军不共天地、不同日月之仇也。（另：「书不尽言，立待回音。」同段亦无引文）",
+   "evidence": "候选文件内 grep「伏念汉室」「不共天地」「不同日月」零命中（出现在 coverage 的 gap 摘录字段中的除外，那是机器生成的残余清单，不是结论）。区间 [286461,286523) 与 [286574,286583) 不在任何 quote 区间内。"
+  },
+  {
+   "found": "陈群献策的**收束句（三阶段战略序列：得江东→荆州可平→徐图西川→天下定矣）**没有引文节点。候选 T1/CE1 只引了第一句（『径取江南』）与曹操的采纳语。（公平说明：其**内容**已由 T1.objective 以概述形式写出『先取江南、再平荆州、后图西川』，故这是『有概述无引证』，不是内容遗漏；但它是本条策略的完整论证，CE1 的 mechanism 正是建立在这个三段序列上，缺引证使机制无法逐字复算。）",
+   "quote": "若得江东，则荆州一鼓可平也；荆州既平，然后徐图西川：天下定矣。",
+   "evidence": "区间 [285740,285771) 不在任何 quote 区间内；候选仅以概述覆盖其内容。"
+  },
+  {
+   "found": "庞德密计的**执行过程句**（各部军马渐渐退去）没有引文。候选引的是下令句（『即时差“令”字旗传与各部，尽教退军』，见 NF5）与守方的反应（KG3 的『军皆退了』），唯独跳过了西凉军实际渐次退去这一句；而 CE5 的机制断言『退军→哨探确认→开城门』里的第一步，原文正是用这一句写的。",
+   "quote": "各部军马渐渐退去。",
+   "evidence": "区间 [287081,287090) 不在任何 quote 区间内，且候选非引文正文中无对应说明。"
+  },
+  {
+   "found": "渭南之战的**持续时间**（战至日暮方回）没有任何引证或说明：候选 T4.cost/T13 只取『计点人马，折了将佐程银、张横…』的数字，跳过了它前面紧邻的『战至日暮方回』——这一句决定了那 200 余人的损失是**一整日鏖战**的结果，而不是一次遭遇。",
+   "quote": "战至日暮方回。",
+   "evidence": "区间 [290570,290577) 不在任何 quote 区间内，候选非引文正文中无对应说明。"
+  },
+  {
+   "found": "马岱战胜钟繇后的**追击动作**（岱提刀赶来）没有引证或说明。候选 T12.result 的引文止于『钟繇出马答话』、T11.obstacle 引文止于『繇大败奔走』，把中间这一句跳过去了——它正是钟繇败退入城的直接原因。",
+   "quote": "岱提刀赶来。",
+   "evidence": "区间 [286919,286925) 不在任何 quote 区间内，候选非引文正文中无对应说明。"
+  },
+  {
+   "found": "另有一批叙述小句同样落在引文区间之外且无说明（未逐条展开，仅登记以便补齐）：『超视之，乃马岱也。』『使者去了。』『比及人马到河口时，日光初起。』（其中「日光初起」给出渡河的时辰，T18 引文从它之后才开始）。",
+   "quote": "超视之，乃马岱也。",
+   "evidence": "三句分别位于 [286353,286362)、[286052,286057)、[289393,289407)，均不在任何 quote 区间内。"
+  }
+ ],
+ "misKillCheck": {
+  "conclusion": "未发现实质性误杀：候选主动排除的边（RCE1 承诺≠出兵、RCE2 梦非死因、RCE3 割须弃袍≠脱身、RCE4 兵法预言未兑现、RCE5 一鼓可擒未达成、RCE7 求援≠江南无患、RCE8 许褚≠唯一脱险原因、RCE9 丁斐进言未改变方案、RCE11 夏侯渊未赶走马超）逐条都有原文引证，且方向与原文用词一致；NF1–NF6 的不立伏笔也都有『只出现一次/同场景内重复』的原文依据。我尝试构造的误杀候选（把『马超军日夜轮流来骂』『西凉兵弃马抛戈而走』『留曹仁守寨』『不可令他创立营寨』等当作被排除项）经查**全部位于候选引文区间内部**，属于已覆盖，不构成误杀。唯一接近误杀的是 RCE10：它把『李通阵亡』排除为不成立——这个排除本身有原文支撑（见 counterExamples），问题不在排除，而在 label 同时断言了它。"
+ },
+ "hallucinationCheck": {
+  "conclusion": "未发现编造的人物、结局或伏笔：候选出现的人名、地名、官名逐条可在区间内找到出处（含「张颌」这一站点用字，候选已注明通行本作「张郃」并逐字照抄）；区间结束时原文以『未知胜负若何，且看下文分解』收束，候选在 T7.result/T10.result/RCE5 三处都明确拒绝写成功或失败，未把『结束』当成功。唯一越权断言是 counterExamples 中的 T14.label『一死』，属总结栏与正文自相矛盾，而非凭空造人。",
+  "checkedItems": [
+   "无区间外人物出场",
+   "无区间外结局断言",
+   "无未回收伏笔谎称已回收（F3 显式标 unresolved=true）",
+   "无『计策成功』类判定（T7.result=null 并给了 resultNote）"
+  ]
+ },
+ "selfReportChecks": [
+  {
+   "field": "metrics.basisCounts",
+   "claimed": {
+    "explicit": 165,
+    "inferred": 3,
+    "derived": 4,
+    "unverified": 11
+   },
+   "recomputed": {
+    "explicit": 172,
+    "inferred": 3,
+    "derived": 4,
+    "unverified": 11
+   },
+   "verdict": "不可复算：explicit 少报 7（总数 183 vs 190）。我按两种口径各算一次（递归全部 basis 字段 / 只算各分区顶层条目），两者都得 explicit=172；因此不是口径差异。最可能是该 metrics 在后续增补（A12 注释自称『2026-10-13 实修后新增』）之前生成，属**陈旧计数**而非编造。处置：重算 metrics 或删除该字段。"
+  },
+  {
+   "field": "machineSelfCheck.A12_noDanglingPointer",
+   "claimed": "扫描 186 处内部指针",
+   "recomputed": "长 id 形式（如 T1_caocao_nanzheng）出现 160 次且 160 个 id 全部可解析；短形式（如 T14/CE5/U16）出现 219 次（排除 coverage/metrics/machineSelfCheck 三个自述字段后 217 次），84 个不同短引用，可解析率 100%。",
+   "verdict": "『186』在两种口径下都不重现（160 / 219 / 217）。**指针完整性本身是真的**（长、短两种形式的悬空引用均为 0，含短形式跨区引用），但该计数无法复算。处置：改正计数或写明计数口径。"
+  },
+  {
+   "field": "coverage.uncoveredResidue",
+   "claimed": {
+    "gapsWithProse": 19,
+    "proseCjkChars": 247,
+    "boilerplateGaps": 1,
+    "boilerplateCjkChars": 31
+   },
+   "recomputed": "按 6-gram 对『去掉引文后的候选正文』匹配：gapsWithProse=12、proseCjkChars=196；按 4-gram 对『整份候选 JSON』匹配：21、281。boilerplateCjkChars=31 可复算（站点页脚）。",
+   "verdict": "gapsWithProse 与 proseCjkChars 在给出的两种自然口径下都不重现，且该字段没有写明匹配方法，故不可复算。boilerplateCjkChars 一致。处置：写明口径并重算（这一项影响的是『残余里有多少已被说明』的自我评价，不影响引文定位）。"
+  },
+  {
+   "field": "coverage 主指标",
+   "claimed": {
+    "quoteSpans": 311,
+    "mergedSpans": 46,
+    "coveredCodepoints": 4892,
+    "coveredFraction": 0.917,
+    "uncoveredCodepoints": 443,
+    "uncoveredGapCount": 46
+   },
+   "recomputed": "完全一致（我独立求并集复算：covered 4892/5335=0.9170，merged 46，gaps 46，uncovered 443）。",
+   "verdict": "可复算，一致。"
+  },
+  {
+   "field": "selfCritique schema",
+   "claimed": "6 条自查记录",
+   "recomputed": "selfCritique[0] 用键 why_still，[1]–[5] 用键 whyStill（同一数组内两种键名）。",
+   "verdict": "键名不一致：按 whyStill 取值的下游消费者会漏掉第 1 条。属格式缺陷，内容本身有引文且逐字命中。"
+  }
+ ],
+ "notes": "结论：**partial**。可取的部分很大：311/311 条引文逐字命中、偏移与声明的 start/end 完全一致、全部落在 [285596,290931) 内且全文唯一，覆盖 4892/5335=0.917 与残余清单可复算；未发现编造人物/结局/伏笔；区间以『未知胜负若何』收束，候选在三处显式拒绝写成功，『结束≠成功』这条守住了；主动排除的 11 条边与 6 条不立伏笔都有原文依据，未发现误杀。必须丢弃或修正的只有一处——T14.label 的『两败一死』断言了李通战死，而原文只写『刺李通于马下』，且候选自己在 T14.action、T14.cost、RCE10、U16 四处都判定该死亡不可知；这四处与 label 直接矛盾，label 又是最容易被下游直接读取的总结栏，**在修正前不应发布**。需要降级/补齐的是：①metrics.basisCounts（explicit 少报 7）、A12 的『186 处』、coverage.uncoveredResidue 的 19/247 三处自述计数无法复算（前两者属陈旧/口径不明，不是编造，但会让机器复核失败）；②selfCritique 的键名 why_still/whyStill 不一致；③反向扫描发现的 6 组遗漏（刘备书信正文的煽动性内容整段无引证、陈群策收束句无引证、庞德密计的执行句、渭南战至日暮、岱提刀赶来、以及三处叙述小句）——这些是**遗漏而非错误**，应补引文或登记为 unknowns，其中刘备书信正文那一段最值得补，因为 T3/F1 把它当作计策成立的机制却没有引证机制本身。关于我自己的复核：我最初用整串精确匹配判断『未覆盖』，把若干其实被更长引文**包含**的句子（如「马超军日夜轮流来骂」「西凉兵弃马抛戈而走」「留曹仁守寨」「不可令他创立营寨」）误判为遗漏，改用区间包含判定后已更正，这些均已从反向发现中剔除；上文列出的 6 组都经过包含判定复核。另外任务 JSON 顶层 sourceHash 为 2988ce6e…，与实测 docs.json 的 8ab7298a… 不同——经查该值对应另一份 docs[0].text 逐字相同的缓存文件（键顺序不同），候选已在 C3b 记录，我确认这不是候选的缺陷。"
+}

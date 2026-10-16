@@ -1,0 +1,375 @@
+{
+ "verdict": "partial",
+ "task": "verify:sanguo:L1:0075",
+ "reviewer": "w-verify-2",
+ "reviewedCandidate": "loop/state/out/read_sanguo_L1_0075.candidate.json",
+ "reviewedCandidateSha256": "84c399a5ded354f41a42322f9d6e8fc17b2b89c9be8d3ea4edf29d7f463e1e64",
+ "reviewedCandidateSubmittedBy": "w-read-3",
+ "roleFile": "loop/ROLES/VERIFIER.md",
+ "source": {
+  "path": "data/cache/b1687d1214f4d6c8bcd06c6f.docs.json",
+  "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+  "range": [
+   381297,
+   386120
+  ],
+  "sliceLen": 4823,
+  "sliceHead": "第七十六回　徐公明大战沔水　关云长败走麦城",
+  "segmentSha256": "ffa53b4ca18b3c442225bf55dc708102be2767994c52eddd3842ef2a97dae9ab",
+  "selfCheck": "docs[0].text[381297:386120] 逐字以回目「第七十六回　徐公明大战沔水　关云长败走麦城」开头、长 4823；实测文件 sha256 与提示词正文一致（任务 JSON 写的 2988ce6e… 实测属另两份 docs.json，两份的 docs[0].text 同为 607191 码点且本切片逐字相同——我独立复算确认，见 notes/N1）"
+ },
+ "method": "按 VERIFIER.md 顺序执行：**先把原文切片读完全文**（4823 码点，18 段，含被截断的长段），自建偏移表；**之后**才打开候选。机械层用自写脚本 `$CL_ARTIFACTS/verify-sanguo-L1-0075-w-verify-2/recompute.py` 从原文独立重算（不采信候选任何自报值），再做反向验证、误杀检查、幻觉/越权检查、引用核验。**我自己两次仪器出错并已改正**（掩码基数、元组解包），如实记在 notes/N5。",
+ "mechanicalLayer": {
+  "quoteObjectsTotal": 449,
+  "quoteObjectsWithOffsets": 449,
+  "verbatimMismatch": 0,
+  "offsetNotSliceEqual": 0,
+  "outOfRange": 0,
+  "wrongSourceHash": 0,
+  "globalOccurrencesMismatch": 0,
+  "nthOccurrenceMismatch": 0,
+  "intraTaskSameQuoteAcrossColumns": 0,
+  "intraTaskIntervalOverlap": 0,
+  "crossTaskQuoteReuse": 3,
+  "nullColumns": 24,
+  "nullColumnsWithNote": 24,
+  "nullColumnsMissingNote": [],
+  "duplicateQuoteStringsCrossSection": 118,
+  "usedAtPointersChecked": 192,
+  "usedAtPointersBad": 0,
+  "fieldCountsChecked": 14,
+  "fieldCountsMismatch": {},
+  "coverage": {
+   "body": {
+    "covered": 3518,
+    "denom": 3848,
+    "fraction": 0.91424
+   },
+   "wholeSlice": {
+    "covered": 3526,
+    "denom": 3898,
+    "fraction": 0.90457
+   },
+   "residualCJK": 330,
+   "residualRuns": 26,
+   "candidateClaimed": {
+    "body": [
+     3518,
+     3848,
+     0.91424
+    ],
+    "whole": [
+     3526,
+     3898,
+     0.90457
+    ],
+    "residual": [
+     330,
+     26
+    ]
+   },
+   "match": "逐位一致；我另用区间并集求交法交叉验算，结论相同"
+  },
+  "candidateSelfReportedVsMyRecompute": "上列每一项均为我从原文重算的结果，与候选自报值逐位一致；不一致的项为 0（这也是我不判 fail 的机械层依据）"
+ },
+ "counterExamples": [
+  {
+   "id": "CE1",
+   "gap": "C19（causeEdges，basis=explicit）的 mechanism 把封赏理由写成由「周亚夫之风」的判断给出，但 C19 的 5 条 quotes 里**没有这一句**——它正好落在第 4、5 条引文之间的缝里，两侧引文逐字为真，中间被跳过的恰是 mechanism 用来支撑结论的那句。",
+   "claim": "C19.mechanism：「封赏与任命由亲眼所见与「周亚夫之风」的判断给出」",
+   "quote": "操大喜曰：“徐将军真有周亚夫之风矣！”",
+   "start": 383652,
+   "end": 383671,
+   "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+   "inRange": true,
+   "why": "不是编造：这句原文确实存在（@383652-383671，区间内仅 1 次），也确实是封赏的直接前言（紧接下一句就是「遂封徐晃为平南将军」）。缺陷在**证据链断口**：C19.quotes 收了 @383637-383652「见晃军皆按队伍而行，并无差乱。」与 @383671-383696「遂封徐晃为平南将军…」，唯独跳过中间这 19 字；而 mechanism 又明确引用「周亚夫之风」。下游若按 quotes 逐字抽取生成因果图，这条机制的依据会命中 0 次。修法：把该句补入 C19.quotes（并同步 T14.result），或从 mechanism 里删去「周亚夫之风」。",
+   "severity": "medium"
+  },
+  {
+   "id": "CE2",
+   "gap": "C26（causeEdges）的 trigger 用「」引了一个**全篇不存在**的串「以山城之众敌两家之强兵」——原文是「量我等山城之众，安能敌得两家之强兵？」（@385097-385115）。这是把原文压缩改写后又加引号，等于制造了一个不可 find 的「引文」。同一现象在 C01 的「迟则斩解粮者」上重复（原文只有「如迟立斩。」@381529-381534）。",
+   "claim": "C26.trigger：「孟达把出兵说成「以山城之众敌两家之强兵」」；C01.mechanism：「把「迟则斩解粮者」读成…」",
+   "quote": "量我等山城之众，安能敌得两家之强兵？",
+   "start": 385097,
+   "end": 385115,
+   "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+   "inRange": true,
+   "why": "**不判 fail**：改写只发生在 trigger/mechanism 的叙述文字里，两条边各自的 quotes 字段存的是完整原文逐字串（C26.quotes[0] = @385046-385121 整段含此句），所以不是伪造引证，是行文里用了引号却不是原文。但本项目下游会对引号内字符串做逐字 find（与 CE1 同一风险面），这两个串 find 均返回 -1。修法：trigger/mechanism 里的引号要么补成原文（「量我等山城之众，安能敌得两家之强兵」），要么去掉引号。",
+   "severity": "medium"
+  },
+  {
+   "id": "CE3",
+   "gap": "**樊城**在本区间出现 7 次、是本回军事转折的枢纽（被围→射书→围解），却**没有任何 worldSettings.place 条目**；18 条 place 覆盖了偃城、四冢寨、第一屯、襄阳、荆州×2、公安、南郡、麦城、上庸、摩陂、阳陵坡、沔水、襄江、许都、成都、陆口、南山冈，独缺樊城。也没有一条 unknowns 登记这个缺口。候选自己的判据（「有到达与驻守动作记 arrived」）在樊城上无法解释缺项：曹仁出城会合、曹操解围、「樊城围解」三段都有动作。",
+   "claim": "candidate.worldSettings 无「樊城（place）」条目；unknowns 无对应登记（连续两次机器复核 place 名单一致）",
+   "quote": "原来是樊城曹仁闻曹操救兵至，引军杀出城来，与徐晃会合",
+   "start": 383087,
+   "end": 383113,
+   "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+   "inRange": true,
+   "why": "不是编造，是**反向验证发现的遗漏**（VERIFIER 契约第 3 步）。同段还有 @383497-383519「却说樊城围解，曹仁引众将来见曹操，泣拜请罪。」与 @381790-381816「今樊城被困，引颈望救…」。对照候选把「荆州」拆成 arrived/mentioned 两条、并为「许都」「陆口」这类只出现一次的地点单独建条，樊城（7 次、含守军出城与被解围两个动作）缺席属口径不一致，而非有意的取舍。附带同源缺口：**曹仁**（本回守城方主角，3 次）也没有 states 条目，16 条 states 里没有一条以他为 subject。",
+   "severity": "medium"
+  },
+  {
+   "id": "CE4",
+   "gap": "K06（knowledgeGaps，basis=explicit）的 unknownTo 写「直到廖化回报才清楚」，但本区间内**没有任何廖化回报关公的记载**：廖化最后一次出现是 @385466「遂上马大骂出城，望成都而去」，此后直到区间结束（@386063「且看下文分解。」）再无廖化，也没有关公得知上庸拒援的句子。该句把下一回（或读者推断）的内容写成了本区间的事实。",
+   "claim": "K06.unknownTo：「关公：…直到廖化回报才清楚。」",
+   "quote": "遂上马大骂出城，望成都而去。",
+   "start": 385483,
+   "end": 385497,
+   "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+   "inRange": true,
+   "why": "不是编造人物或结局（廖化确实去了成都），是**越出本区间**：本条 basis 标 explicit，而「廖化回报」在 [381297,386120) 内 find 为 0 次。对照候选自己的处理——U15 明确写「本区间止于『遂上马大骂出城，望成都而去』；他到成都见到谁、是否发兵，不在本区间内」。同一条时间线在 U15 被正确截断，在 K06 却被续写。修法：K06.unknownTo 删去该分句，或降级 basis 并写明「续写自下一回，不在本区间证据内」。",
+   "severity": "low"
+  },
+  {
+   "id": "CE5",
+   "gap": "**上庸一段的关键动作被整段吞掉**：候选 T21/T22 的引文覆盖了孟达的利害账（@385046-）、刘封的追问（@385314-）与次日答复（@385365-），但刘封接见廖化时的三个动作——「封令请人问之。」「封曰：『将军且歇，容某计议。』」「化乃至馆驿安歇，专候发兵。」——**一处未引**，也未见任何 unknowns 登记。少了这三个动作，T21 的 action 直接从「孟达摆利害」跳到「刘封从其言」，看不出刘封先用了「计议」这个拖延动作、廖化由此进入等待状态。",
+   "claim": "tasks[20]/tasks[21]（T21/T22）的 5 栏引文均不含这三句；coverageDeclaration.residualRunSamples 20 条样本中也不含",
+   "quote": "封曰：“将军且歇，容某计议。”",
+   "start": 384996,
+   "end": 385011,
+   "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+   "inRange": true,
+   "why": "反向验证发现，非编造。同段还有 @384917-384924「封令请人问之。」与 @385014-385027「化乃至馆驿安歇，专候发兵。」——三者是同一段连续的叙事（接见→拖延→等待），而候选对同段的其他句子都逐字引了。这不是「未引不等于未读」能解释的口径：候选在 SC7/T13.resultNote 等处对「为什么留空」都有说明，此处没有任何说明。对照 @384234-384247「关公愈加恨怒，遂催军前进。」与 @384062-384075「使者辞别吕蒙，蒙亲送出城。」同属被吞的动作句——前者是败局中「逃兵反而加速进军」这一层，后者是吕蒙「亲送」这个动作的落点。",
+   "severity": "medium"
+  },
+  {
+   "id": "CE6",
+   "gap": "**「三百余人」与「五六百人」在区间内前后矛盾，候选两处都引了、却没有一处把它登记为冲突。**@384553 写「部从止有三百余人。」；968 字之后 @385521 写「手下止有五六百人，多半带伤」，中间只隔了关平建议退麦城、赵累建议求上庸、廖化突围三件事——兵力不可能凭这三件事回升。候选为**更弱**的同类问题立了 U02（「权重赏二人」断句歧义）与 U07（「鹿角十重」vs「围堑鹿角数重」），并在 SC4 主动讨论「同名拆两条是否凑数」，唯独漏掉这条更硬的数字冲突。",
+   "claim": "S10.after 与 T19.cost 同时引两个数字且并列陈述；unknowns U01–U17 中无一条登记该冲突",
+   "quote": "部从止有三百余人。",
+   "start": 384553,
+   "end": 384562,
+   "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+   "inRange": true,
+   "conflictingQuote": "手下止有五六百人，多半带伤；城中无粮，甚是苦楚。",
+   "conflictingOffset": [
+    385521,
+    385545
+   ],
+   "why": "不是编造（两个数字都逐字存在于原文，候选也各自引对了），是**遗漏的语义冲突**。按 READER 契约「unknowns：你确实读不出来、或者有矛盾的地方」，这正是应登记项；候选在 S10 里把两者写成一条连续状态（「部从止有三百余人；退麦城时手下止有五六百人」），用分号把矛盾并成了递进。修法：补一条 unknown（两处数字的关系原文未交代），或在 S10.after 注明「原文两处数字不一致，本候选并列保留、不合并」。",
+   "severity": "medium"
+  }
+ ],
+ "reverseChecks": [
+  {
+   "found": "**刘封、孟达在廖化到达之前就已经知道关公兵败**——原文用「当日探知关公兵败，二人正议间，忽报廖化至」写明上庸方面的信息状态：他们的商议不是被求救触发的，求救只是插进一场已在进行的商议。候选 T21/T22 把整段写成「廖化来求→孟达算利害→刘封要措辞」的单向流程，`探知` 二字全候选 0 次、`当日探知关公兵败` 0 次，该句未进任何引文。这直接影响 K06 的知识差建模：拒援方的情报起点比候选写的更早。",
+   "quote": "当日探知关公兵败，二人正议间，忽报廖化至。",
+   "start": 384892,
+   "end": 384913,
+   "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+   "inRange": true,
+   "impact": "K06 / T21 / T22 的时间起点；若按候选写法生成图谱，上庸节点会缺失「先已知情」这一状态。"
+  },
+  {
+   "found": "**士卒逃亡反而使关公加速进军**——「关公率兵取荆州，军行之次，将士多有逃回荆州者。关公愈加恨怒，遂催军前进。」候选 T18 的 objective 引了前半句（用作 F02 的回收），但**没有引后半句**，`愈加恨怒` 与 `催军前进` 全候选均 0 次。于是 C22（家眷无恙→无战心→逃回）的因果链在「逃回」处就停了，缺了原文明确写出的下一步反应：逃亡没有让关公收缩，反而让他催军。这正是候选 TH1「消息失灵」主题最该收的一处反证。",
+   "quote": "关公愈加恨怒，遂催军前进。",
+   "start": 384234,
+   "end": 384247,
+   "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+   "inRange": true,
+   "impact": "C22 的 effect 边界、TH1 的 counter 素材；缺失使「无战心→逃回」少了后续处置。"
+  },
+  {
+   "found": "**吕蒙「亲送出城」这个动作被吞**——「使者辞别吕蒙，蒙亲送出城。」紧接在候选已引的「遂设宴款待，送归馆驿安歇。」之后，且与后文「吕蒙出郭迎接入城，以宾礼相待」构成一来一往的完整礼数。候选 T15 的 result 写「随后设宴款待、送归馆驿安歇」为止，`蒙亲送出城` 全候选 0 次。该动作是 C21「以供给代替掠取」这条机制在**外交礼节**上的同构证据（迎也亲、送也亲），候选收了迎、漏了送。",
+   "quote": "使者辞别吕蒙，蒙亲送出城。",
+   "start": 384062,
+   "end": 384075,
+   "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+   "inRange": true,
+   "impact": "T15.result / C21 mechanism 的证据完整度。"
+  },
+  {
+   "found": "**樊城的军事位置在候选里没有落点**（与 CE3 同源，此处补反向验证的正面证据）：「原来是樊城曹仁闻曹操救兵至，引军杀出城来，与徐晃会合」是本回战局反转的唯一直接动作句，候选 C15 引了它（逐字为真），但樊城本身没有 place 条目、曹仁没有 state 条目、「却说樊城围解，曹仁引众将来见曹操，泣拜请罪。」也只作为 T14.objective 的引文出现。7 次提及与 0 条地点/人物条目之间的落差，是我这次反向验证里最大的一处结构性缺口。",
+   "quote": "却说樊城围解，曹仁引众将来见曹操，泣拜请罪。",
+   "start": 383497,
+   "end": 383519,
+   "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+   "inRange": true,
+   "impact": "worldSettings 地点层与 states 层的分母；直接影响下游图谱的据点节点完整性。"
+  },
+  {
+   "found": "**「贼兵不敢到此」是关平判断沔水防线时的原话，候选只引了半句**：候选 T05.objective 引「若第一屯有失，诸营岂得安宁？此间皆靠沔水，贼兵不敢到此。吾与汝同去救第一屯。」（整句已收，逐字为真）。但 worldSettings 的沔水条 explain 只写「同一条水既是通路也是他误判的依据」，没有把「贼兵不敢到此」这句话登记为**人物判断**（speechAsClueNotFact 11 条里没有这一条）。同段徐晃恰恰是「循沔水去袭偃城之后」——判断与事实的对照在原文里是明写的，候选把它留在了引文层。",
+   "quote": "此间皆靠沔水，贼兵不敢到此。",
+   "start": 382319,
+   "end": 382333,
+   "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+   "inRange": true,
+   "impact": "speechAsClueNotFact 分区；与 V09（部将自恃鹿角十重）同类却未收，口径不一致。"
+  }
+ ],
+ "falseKillCheck": {
+  "verdict": "无误杀",
+  "detail": "6 条 rejectedCauseEdges（R01–R06）逐条回原文核对，排除理由**全部成立**，且判据是语义的、不是字符串匹配的，没有出现「因词表/正则把真实因果挡掉」这类误杀（计划100 的西游「遂行」案例）。逐条如下：",
+  "items": [
+   {
+    "id": "R01",
+    "check": "徐晃喊话 → 廖化所报「人言」",
+    "quote": "关平贤侄，好不知死！汝荆州已被东吴夺了，犹然在此狂为！",
+    "start": 382149,
+    "end": 382176,
+    "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+    "inRange": true,
+    "why": "排除正确。徐晃喊话的对象是关平（当面），而廖化的报告出现在关平退到四冢寨之后；原文没有写传言渠道。同辞不同源，不连边是对的——这正是「时间相邻当因果」的典型形态。"
+   },
+   {
+    "id": "R02",
+    "check": "曹仁出城 → 封徐晃",
+    "quote": "操重赏三军，亲至四冢寨周围阅视，顾谓众将曰",
+    "start": 383536,
+    "end": 383557,
+    "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+    "inRange": true,
+    "why": "排除正确。封赏的当场理由原文写明是曹操亲至四冢寨阅视＋徐晃军容整肃（C19 已按此连边），曹仁出城与封赏之间没有机制。"
+   },
+   {
+    "id": "R03",
+    "check": "卜得地水师卦 → 吕蒙之计",
+    "quote": "卦象正合某之机也。",
+    "start": 386001,
+    "end": 386010,
+    "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+    "inRange": true,
+    "why": "排除正确且是本候选最有价值的一处判断。吕蒙自己说「卦象正合某之机也」——计策在他手里，卦只是相符，把卜卦写成计策的原因会把方向反过来（巧合当因果）。C31 改连「劝降失败→改用计策」是对的。"
+   },
+   {
+    "id": "R04",
+    "check": "喝斥讹言 → 荆州未失守",
+    "quote": "此敌人讹言，以乱我军心耳！",
+    "start": 382701,
+    "end": 382714,
+    "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+    "inRange": true,
+    "why": "排除正确。判断不改变事实；原文随后即以流星马报坐实荆州已失。排除这条空转边是对的。"
+   },
+   {
+    "id": "R05",
+    "check": "退守麦城 → 麦城被围",
+    "quote": "正议间，忽报吴兵已至，将城四面围定。",
+    "start": 384716,
+    "end": 384734,
+    "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+    "inRange": true,
+    "why": "排除正确。围城的直接原因是吴兵追至，不是退守决策；麦城城小无粮是它自身条件。"
+   },
+   {
+    "id": "R06",
+    "check": "廖化突围成功 → 上庸出兵来救",
+    "quote": "言此山城初附之所，未能分兵相救。",
+    "start": 385373,
+    "end": 385389,
+    "sourceHash": "8ab7298a6960c6fec50e26338092abf2693e2cb39f1547f1a99ee2701ef29ec2",
+    "inRange": true,
+    "why": "排除正确，且是本任务红线「结束≠成功」的正面落实：突围成功与救兵到达是两件事，原文明确写拒援。候选没有把「突围成功」写成「求援成功」。"
+   }
+  ]
+ },
+ "hallucinationCheck": {
+  "verdict": "未发现编造；发现 1 处越出区间的续写（CE4）",
+  "items": [
+   {
+    "check": "原文没有的人物",
+    "detail": "人名集合逐个 grep：候选断言层（非引文文字）出现的本区间外人物 0 个；区间内人物（糜芳/傅士仁/吕蒙/孙权/曹操/董昭/徐晃/曹仁/关平/廖化/徐商/吕建/王甫/赵累/马良/伊籍/夏侯尚/蒋钦/韩当/周泰/丁奉/徐盛/刘封/孟达/申耽/诸葛瑾/吕范/陆逊/孔明/汉中王）全部在原文出现且次数合理。机器扫描的 300+ 个「疑似人名」token 逐条判读后全部是散文片段（如「任务元数据」「傅士仁劝」），非人物。",
+    "result": "pass"
+   },
+   {
+    "check": "越权结局（把未发生写成已发生）",
+    "detail": "成功/结局词逐个扫：「城破」1 次仅在 T23 引关公原话「城若破，有死而已」内；「被擒」1 次仅指守台士卒；「被俘」1 次仅出现在 U12 的**否定**句（「不合并成『家眷被俘后获优待』」）；「斩首」「身亡」「遇害」「麦城陷」「就擒」全 0；「败走麦城」2 次均为回目标题。F06 如实标 unresolved、T24.result 记 null、U13「派出去了不等于求到了」——结束≠成功的纪律落实到位。",
+    "result": "pass"
+   },
+   {
+    "check": "一次出现当伏笔",
+    "detail": "6 条 foreshadows 的 setup/payoff 均为同一物在同一区间内的两处（粮：取粮令→城中无粮；将士之家：厚待→无战心→逃回；旧伤：谏阻→右臂少力→疮口迸裂；麦城：足可屯扎→四面围定；上庸：可速差人→未能分兵相救；卦象：显式标 unresolved）。5 条 notForeshadows 主动排除了「沿江举火」「螟蛉之子」「诸葛瑾之逐」等单次项，排除理由成立。",
+    "result": "pass"
+   },
+   {
+    "check": "越出区间的续写",
+    "detail": "K06.unknownTo 的「直到廖化回报才清楚」在本区间内无对应文字（见 counterExamples/CE4）。这是唯一一处越权，且候选自己在 U15 已给出正确截断口径，属内部口径不一致而非系统性越权。",
+    "result": "partial"
+   }
+  ]
+ },
+ "citationCheck": {
+  "seed": 75,
+  "sampled": 5,
+  "verbatimHit": 5,
+  "offsetConsistent": 5,
+  "method": "random.seed(75); random.sample(449 个引文节点, 5)，对每条做 src.find(quote) 并比对声明的 start/end",
+  "items": [
+   {
+    "path": "/causeEdges[29]/quotes[2]",
+    "quote": "遂令左右逐出诸葛瑾。",
+    "declared": [
+     385869,
+     385879
+    ],
+    "find": 385869,
+    "sliceExact": true,
+    "offsetConsistent": true
+   },
+   {
+    "path": "/states[12]/afterQuotes[1]",
+    "quote": "权问吕蒙曰：“卦主敌人远奔，卿以何策擒之？”",
+    "declared": [
+     385974,
+     385996
+    ],
+    "find": 385974,
+    "sliceExact": true,
+    "offsetConsistent": true
+   },
+   {
+    "path": "/causeEdges[27]/quotes[0]",
+    "quote": "次日，请廖化至，言此山城初附之所，未能分兵相救。",
+    "declared": [
+     385365,
+     385389
+    ],
+    "find": 385365,
+    "sliceExact": true,
+    "offsetConsistent": true
+   },
+   {
+    "path": "/causeEdges[30]/quotes[1]",
+    "quote": "孙权曰：“真忠臣也！似此如之奈何？’",
+    "declared": [
+     385910,
+     385928
+    ],
+    "find": 385910,
+    "sliceExact": true,
+    "offsetConsistent": true,
+    "note": "该串含原文的标点瑕疵（收尾引号作 ’），候选已在 textualNotes TX02 登记并逐字照引，未擅改"
+   },
+   {
+    "path": "/tasks[3]/objective/quotes[1]",
+    "quote": "关平贤侄，好不知死！汝荆州已被东吴夺了，犹然在此狂为！",
+    "declared": [
+     382149,
+     382176
+    ],
+    "find": 382149,
+    "sliceExact": true,
+    "offsetConsistent": true
+   }
+  ]
+ },
+ "usableItems": {
+  "keep": "24 条 tasks 五元组、31 条 causeEdges、16 条 states、8 条 knowledgeGaps、6 条 foreshadows、5 条 notForeshadows、32 条 worldSettings、4 条 notWorldSettings、2 条 themeReadings、11 条 speechAsClueNotFact、5 条 textualNotes、449 个引文实例 —— 全部可用（逐字、偏移、哈希、五栏互斥、覆盖算术、内部指针均经我独立复算通过）。",
+  "fixBeforeDownstream": [
+   "CE1：C19.quotes 补入 @383652-383671（或删 mechanism 里的「周亚夫之风」）",
+   "CE2：C26.trigger / C01.mechanism 里两个 find 为 -1 的加引号串补成原文或去引号",
+   "CE3：补「樊城」place 条目（并可补「曹仁」state 条目）",
+   "CE4：K06.unknownTo 删去「直到廖化回报才清楚」或降级 basis",
+   "CE5：T21/T22 补引 @384917-384924、@384996-385011、@385014-385027；或登记为 unknowns",
+   "CE6：补一条 unknown 登记「三百余人 vs 五六百人」的数字冲突（或并列保留并注明）"
+  ],
+  "discardOrDowngrade": "按 READER 契约「缺字段写 null」的口径，**没有发现需要整体丢弃的条目**；CE4 涉及的分句须降级为 unknowns/下一回内容，CE1/CE2 须修证据而不动结论。",
+  "unknownsToAdd": [
+   "CE3（樊城/曹仁无条目）",
+   "CE6（两处兵力数字冲突）",
+   "CE5 三句动作句未引（若作者认为不承载独立断言则无需补引文，但应登记）"
+  ]
+ },
+ "notes": "判 **partial**，不判 fail。理由：VERIFIER 契约规定判 fail 必须有 counterExample 且 quote 逐字可查，而 fail 的典型形态是**编造**（原文没有的人物/事件/结局/伏笔）。本次逐条对抗后**没有找到任何编造**——449 个带偏移引文逐条 src[start:end]==quote、全在区间内、sourceHash 全对；globalOccurrences/nthOccurrence 449/449 复核一致；同任务五栏共用同句 0、区间重叠 0；24 个 null 栏 24/24 带同栏 Note；192 个内部 usedAt 指针全部可解析且指向同一引文串；14 个分区计数全一致；覆盖算术（掩码法与并集法两套独立实现）与自报 3518/3848/0.91424、3526/3898/0.90457、330/26 逐位一致；随机 seed=75 抽 5 条 find 5/5 命中且偏移一致。反例 0 条（无原文没有的人物、无越权结局、无一次出现当伏笔）。核对不上的是 CE1–CE6 六处**可复算缺陷**，每处都带逐字原文引证或可复算文件事实，性质分三类：① 证据链断口与引号内非原文串（CE1/CE2，机制的依据不在自己的 quotes 里）；② 反向验证发现的遗漏（CE3 樊城 7 次提及 0 条目、CE5 上庸三句动作句、CE6 数字冲突未登记）；③ 越出区间的续写（CE4，且与候选自己的 U15 口径矛盾）。三类都不推翻已抽取的结论，故判 partial 而非 fail。\n\n【N1 sourceHash 双口径】任务 JSON 写 2988ce6e…、提示词正文写 8ab7298a…。我实测：fe42d01f…/b1687d… .docs.json = 8ab7298a…；f0b45e85…/152e2a6e… .docs.json = 2988ce6e…，四份的 docs[0].text 同为 607191 码点、本切片 [381297,386120) 逐字相同。候选按提示词与实测文件取 8ab7298a…并把差异登记在 sourceHashDiscrepancy/U01/SC9，**未改校验规则或任务元数据**——处理正确，我复核确认。\n【N2 我没有独立重跑候选的 selfcheck.py】候选证据里声明了 $CL_ARTIFACTS/read-sanguo-L1-0075-w-read-3/selfcheck.py（problems=0）。我用自写 recompute.py 独立重算了它声称覆盖的每一项（结果一致），但**没有**执行那个脚本本身，因此不对它的代码质量背书。\n【N3 覆盖率的残余不是我的判据】候选自报 body 残余 330 字/26 段，我复算一致；但「未引」不等于「未读」也不等于「漏项」——我把 CE5 判为缺陷的依据不是覆盖率数字，而是同段其他句子都逐字引了、唯独三句连续动作句没有引、也没有像别处那样写明理由。\n【N4 一处我判为「不成立」的怀疑】我最初怀疑 K03 的「knownBy: 吕蒙与东吴一方」缺乏原文依据，回原文后确认：号令出自吕蒙（「却说吕蒙在荆州，传下号令」），使者回报「吕蒙极其恩恤」，两处都有文字，怀疑不成立，已撤。\n【N5 我自己的仪器错误】recompute.py 首版有两处 bug：mask_cover 收到 (path,obj) 元组而非 obj、残余段循环用 LO 而非 BODY_LO 索引掩码。两次都是我修脚本后重跑，最终结果以修正版为准；修正前后的机械层结论相同（这两处只影响能否跑通，不影响数字）。如实登记，避免留下「一次就跑对」的假象。\n【N6 未能核验的项】① 卦象「地水师卦＋玄武临应→主敌人远奔」的易理解释：候选记 U09 说不作解释，我同样无法在原文内核验，同意留 unknowns。② 「【舟冓】【舟鹿】」的通行字形：候选照引不代换，我核对全篇 3 次（@380152/@380328 属第七十五回、@383360 属本单元），其 TX03 修正后的两个口径计数正确。③ 本区间外（第七十五回、第七十七回）的任何事实，我一律未用作判据。"
+}

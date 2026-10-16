@@ -1,0 +1,441 @@
+--- a/js/sky/sky-shell.js
++++ b/js/sky/sky-shell.js
+@@ -956,6 +956,8 @@
+     seekEventAt: function (index) { return playerUnit.seekEventAt(index); },
+     /* 书签 / 外部定位：与拖轨 commit 同语义（locateEvent 归 shell-player） */
+     locateEvent: function (index) { return playerUnit.locateEvent(index); },
++    /* M84 read-only character screen projection; it reuses the host camera. */
++    starScreens: starScreens,
+     setFollow: setFollow,
+     followRestore: function () { return playerUnit.followRestore(); },
+     journeyPlan: function (layer, id) { return playerUnit.journeyPlan(layer, id); },
+--- a/js/sky/sky-deconstruction.js
++++ b/js/sky/sky-deconstruction.js
+@@ -17,6 +17,7 @@
+   var PAGE_SIZE = 24, TRACK_BINS = 48, searchTimer = null;
+   var browse = { people: { query: '', filter: 'all', page: 0 }, evidence: { query: '', filter: 'all', kind: 'all', person: '', order: 'time', page: 0 }, arc: { page: 0 }, quotes: { page: 0 } };
+   var personDetail = null;
++  var m84 = { open: false, selected: 'characters', request: 0, selectionProgress: 1 };
+   var LAYERS = { tasks: '任务', relations: '人物关系', causeEdges: '因果', clues: '伏笔', characterStates: '状态', narrativeUnits: '剧情单元', reviewIssues: '核验批注' };
+   browse.mechanics = { query: '', filter: 'all', layer: 'tasks', page: 0, selected: null };
+   browse.mechanicQuotes = { page: 0 }; browse.references = { page: 0 }; browse.attributes = { page: 0 };
+@@ -91,7 +92,7 @@
+ 
+   function arr(v) { return Array.isArray(v) ? v : []; }
+   function str(v) { return v == null ? '' : String(v); }
+-  function num(v, d) { var n = +v; return isFinite(n) ? n : (d == null ? 0 : d); }
++  function num(v, d) { if (v == null || v === '') return d == null ? 0 : d; var n = +v; return isFinite(n) ? n : (d == null ? 0 : d); }
+   function esc(v) {
+     return str(v).replace(/[&<>"']/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]; });
+   }
+@@ -403,6 +404,78 @@
+     }).join('') + (issues.length > 3 ? '<p>另有 ' + (issues.length - 3) + ' 条，可在核验批注中查阅。</p>' : '') + '</aside>';
+   }
+   function searchText(values) { return values.map(str).join(' ').toLocaleLowerCase(); }
++
++  /* One graph-scoped, read-only source for the structure overview and M84 copies.
++     Missing fields stay missing; representatives require unique stable IDs. */
++  function structureFacts() {
++    var own = Object.prototype.hasOwnProperty, chars = arr(graph.characters), events = arr(graph.events), camps = arr(graph.camps), relations = arr(graph.relations);
++    function recordId(row) { var id = row && (row.id != null ? row.id : row.entityId); return id == null || id === '' ? null : String(id); }
++    function counts(rows) { var out = Object.create(null); rows.forEach(function (row) { var id = recordId(row); if (id != null) out[id] = (out[id] || 0) + 1; }); return out; }
++    var relationProjection = g.CLSkyModel && g.CLSkyModel.relationPeople ? g.CLSkyModel.relationPeople(graph).people : [];
++    var personIds = counts(chars), eventIds = counts(events), relationIds = counts(relations), peopleByName = Object.create(null), projectedById = Object.create(null);
++    chars.forEach(function (row) { if (row && row.name != null) (peopleByName[String(row.name)] || (peopleByName[String(row.name)] = [])).push(row); });
++    relationProjection.forEach(function (row) { if (row && row.id != null) (projectedById[String(row.id)] || (projectedById[String(row.id)] = [])).push(row); });
++    function uniquePerson(name) {
++      if (typeof name !== 'string' || !name) return null;
++      var found = peopleByName[String(name)] || [];
++      if (found.length !== 1) return null;
++      var id = recordId(found[0]), projected = id && personIds[id] === 1 ? projectedById[id] || [] : [];
++      return id && personIds[id] === 1 && projected.length === 1 && projected[0].selectable
++        ? { id: id, name: found[0].name, identity: found[0].identity || found[0].role || '' } : null;
++    }
++    function tally(field) {
++      var provided = own.call(graph, field), value = graph[field];
++      return { provided: provided && Array.isArray(value), count: provided && Array.isArray(value) ? value.length : null };
++    }
++    var personRows = chars.filter(function (row) { return row && typeof row === 'object'; }), personSample = null;
++    for (var pi = 0; pi < personRows.length && !personSample; pi++) personSample = uniquePerson(personRows[pi].name);
++    var groupRows = camps.filter(function (row) { return row && typeof row === 'object'; }), groupNames = counts(groupRows.map(function (row) { return { id: row.name }; })), groupSample = null;
++    for (var gi = 0; gi < groupRows.length && !groupSample; gi++) {
++      var group = groupRows[gi], memberNames = arr(group.members).filter(function (name) { return typeof name === 'string'; }), members = [];
++      memberNames.forEach(function (name) { var p = uniquePerson(name); if (p && members.length < 4 && !members.some(function (x) { return x.id === p.id; })) members.push(p); });
++      if (group.name && groupNames[String(group.name)] === 1 && members.length) groupSample = { name: String(group.name), index: gi, ids: members.map(function (p) { return p.id; }), members: members, key: 'camps:' + gi + ':' + String(group.name) };
++    }
++    var relationSample = null;
++    for (var ri = 0; ri < relations.length && !relationSample; ri++) {
++      var relation = relations[ri]; if (!relation || typeof relation !== 'object') continue;
++      var relationId = recordId(relation), a = uniquePerson(relation.a), b = uniquePerson(relation.b);
++      if (relationId && relationIds[relationId] === 1 && a && b && a.id !== b.id) {
++        var scope = g.CLSkyRelationScope && relation ? g.CLSkyRelationScope.of(relation) : null;
++        relationSample = { id: relationId, a: a, b: b, kind: relation.kind || '关系类型未提供',
++          scope: scope && scope.scopeLabel || '范围未标明' };
++      }
++    }
++    var eventSample = null;
++    for (var ei = 0; ei < events.length && !eventSample; ei++) {
++      var event = events[ei]; if (!event || typeof event !== 'object') continue;
++      var eventId = recordId(event);
++      if (eventId && eventIds[eventId] === 1) eventSample = { id: eventId, index: ei,
++        title: event.title || event.summary || '剧情点', chapter: event.chapter || '章节范围未提供' };
++    }
++    var allLines = arr(model.mains).concat(arr(model.lines));
++    function provenance(line) { return g.CLSkyModel && g.CLSkyModel.storylineProvenance ? g.CLSkyModel.storylineProvenance(graph, line) : line && line.provenance || ''; }
++    var autoLines = allLines.filter(function (line) { return line && line.autoSegment === true; }).length;
++    var derivedLines = allLines.filter(function (line) { return line && !line.autoSegment && (line.derived === true || provenance(line) === 'derived'); }).length;
++    var synthesisLines = allLines.filter(function (line) { return line && !line.autoSegment && provenance(line) === 'synthesis'; }).length;
++    var reviewedLines = allLines.filter(function (line) { return line && !line.autoSegment && provenance(line) === 'assistant-reviewed-source'; }).length;
++    var unknownLines = allLines.filter(function (line) { return line && !line.autoSegment && ['derived', 'synthesis', 'assistant-reviewed-source'].indexOf(provenance(line)) < 0; }).length;
++    var chapterRows = arr(model.chapters), axisRows = chapterRows.filter(function (chapter) { return chapter && chapter.raw != null && !chapter.special; }).length;
++    var otherAxisRows = chapterRows.filter(function (chapter) { return !chapter || chapter.raw == null || chapter.special; }).length;
++    return {
++      scope: '当前载入图谱全量记录',
++      people: { provided: own.call(graph, 'characters') && Array.isArray(graph.characters), count: own.call(graph, 'characters') && Array.isArray(graph.characters) ? chars.length : null, sample: personSample },
++      groups: tally('camps'), groupSample: groupSample,
++      relations: { provided: own.call(graph, 'relations') && Array.isArray(graph.relations), count: own.call(graph, 'relations') && Array.isArray(graph.relations) ? relations.length : null, sample: relationSample },
++      events: { provided: own.call(graph, 'events') && Array.isArray(graph.events), count: own.call(graph, 'events') && Array.isArray(graph.events) ? events.length : null, sample: eventSample },
++      axis: { summary: model.axis && model.axis.summary || '原文顺序轴说明未提供', sequential: axisRows, otherMaterials: otherAxisRows },
++      units: tally('narrativeUnits'), clues: tally('clues'), causes: tally('causeEdges'),
++      routes: { mains: arr(model.mains).length, branches: arr(model.lines).filter(function (line) { return line && (line.kind === 'branch' || line.kind === 'twig'); }).length,
++        mainDeclared: arr(model.mains).filter(function (line) { return line && !line.autoSegment && provenance(line) === 'assistant-reviewed-source'; }).length,
++        branchDeclared: arr(model.lines).filter(function (line) { return line && !line.autoSegment && provenance(line) === 'assistant-reviewed-source'; }).length,
++        autoSegments: autoLines, derived: derivedLines,
++        synthesis: synthesisLines, sourceUnclear: unknownLines, reviewed: reviewedLines }
++    };
++  }
+ 
+   function buildIndex() {
+     var eventChapter = {}, people = Object.create(null), eventIds = Object.create(null), list, ch, n, events = [], kinds = [], roles = [], layers = {};
+@@ -462,6 +535,7 @@
+     });
+     stateRows.sort(function (a, b) { return (a.raw.eventIndex == null ? Infinity : a.raw.eventIndex) - (b.raw.eventIndex == null ? Infinity : b.raw.eventIndex); });
+     return { eventChapter: eventChapter, people: list, peopleByName: people, events: events, kinds: kinds.sort(), roles: roles, eventIds: eventIds, layers: layers, stateRows: stateRows,
++      structure: structureFacts(),
+       coverage: g.CLSkyCoverage ? g.CLSkyCoverage.summarize(graph, g.CLAtlasSource) : null };
+   }
+ 
+@@ -520,7 +594,7 @@
+       if (e.target.closest && e.target.closest('.skg-deck')) return;
+       close();
+     });
+-    g.addEventListener('keydown', function (e) { if (state.open && e.key === 'Escape' && !e.defaultPrevented) { e.preventDefault(); close(true); } }, true);
++    g.addEventListener('keydown', function (e) { if (state.open && e.key === 'Escape' && !e.defaultPrevented) { e.preventDefault(); if (m84.open) cancelM84(true); else close(true); } }, true);
+     return root;
+   }
+ 
+@@ -532,9 +606,12 @@
+   }
+   function setMode(mode) {
+     if (['overview', 'lines', 'people', 'evidence', 'mechanics', 'causal', 'foreshadow', 'states'].indexOf(mode) < 0) mode = 'overview';
++    if (mode !== 'overview' && m84.open) cancelM84(true);
+     if (mode !== 'people') { if (g.CLSky && g.CLSky.clearNeighborCompare) g.CLSky.clearNeighborCompare(); browse.neighbors.bId = ''; browse.neighbors.result = null; browse.neighbors.demoCounts = null; browse.neighbors.origin = null; }
+     if (searchTimer != null) { g.clearTimeout(searchTimer); searchTimer = null; }
+-    state.mode = mode; state.focus = null; render();
++    state.mode = mode; state.focus = null;
++    if (mode === 'overview' && m84.selected) state.restore = { attr: 'data-structure-layer', value: m84.selected };
++    render();
+   }
+   function open() {
+     if (!state.ready) syncGraph();
+@@ -543,6 +620,7 @@
+     var closeBtn = root.querySelector('.sd-close'); if (closeBtn && closeBtn.focus) closeBtn.focus({ preventScroll: true });
+   }
+   function close(refocus) {
++    cancelM84(true);
+     if (g.CLSky && g.CLSky.clearNeighborCompare) g.CLSky.clearNeighborCompare();
+     browse.neighbors.bId = ''; browse.neighbors.result = null; browse.neighbors.demoCounts = null; browse.neighbors.origin = null; browse.neighbors.returnAfterBasis = false;
+     state.open = false; syncButton();
+@@ -569,6 +647,11 @@
+     if (searchTimer != null) { g.clearTimeout(searchTimer); searchTimer = null; }
+     var action = b.getAttribute('data-action'), mode = b.getAttribute('data-mode');
+     var layer = b.getAttribute('data-layer');
++    if (m84.open && action !== 'structure-stage' && action !== 'structure-layer') cancelM84(true);
++    if (action === 'structure-stage') { if (m84.open) cancelM84(true); else if (structureReady()) openM84(); return; }
++    if (action === 'structure-layer') { selectM84Layer(b.getAttribute('data-structure-layer')); return; }
++    if (action === 'structure-plot') { cancelM84(true); if (g.CLSky && g.CLSky.setPlot) g.CLSky.setPlot(true); return; }
++    if (action === 'structure-nav') { navigateStructure(b.getAttribute('data-structure-nav')); return; }
+     if (LAYERS[layer]) {
+       browse.mechanics.layer = layer; browse.mechanics.filter = 'all'; browse.mechanics.page = 0; browse.mechanics.selected = null;
+       state.restore = { attr: 'data-layer', value: layer }; render(); return;
+@@ -657,6 +740,19 @@
+     if (line) { focusLine(line); return; }
+     if (event != null && event !== '' && /^\d+$/.test(event)) { focusEvent(+event); return; }
+     if (person) { focusPerson(person); }
++  }
++
++  function navigateStructure(which) {
++    cancelM84(true);
++    m84.returning = true;
++    if (which === 'people') { browse.people.query = ''; browse.people.filter = 'all'; setMode('people'); }
++    else if (which === 'groups') { browse.people.query = ''; browse.people.filter = 'all'; setMode('people'); setText('skyDeconMeta', '群组/阵营记录通过人物条目的阵营字段浏览；此入口不合并人物身份。'); }
++    else if (which === 'relations') { browse.mechanics.layer = 'relations'; browse.mechanics.query = ''; browse.mechanics.filter = 'all'; browse.mechanics.page = 0; browse.mechanics.selected = null; setMode('mechanics'); }
++    else if (which === 'events') { browse.evidence.query = ''; browse.evidence.filter = 'all'; browse.evidence.kind = 'all'; browse.evidence.person = ''; browse.evidence.page = 0; setMode('evidence'); }
++    else if (which === 'chapters') { browse.evidence.query = ''; browse.evidence.filter = 'all'; browse.evidence.kind = 'all'; browse.evidence.person = ''; browse.evidence.page = 0; setMode('evidence'); }
++    else if (which === 'units') { browse.mechanics.layer = 'narrativeUnits'; browse.mechanics.query = ''; browse.mechanics.filter = 'all'; browse.mechanics.page = 0; browse.mechanics.selected = null; setMode('mechanics'); }
++    else if (which === 'lines') setMode('lines');
++    else if (which === 'clues') setMode('foreshadow');
+   }
+   function onInput(e) {
+     var el = e.target, mode = el.getAttribute && el.getAttribute('data-search');
+@@ -986,7 +1082,12 @@
+       (summary.malformed ? '<p class="sd-evidence-note">部分历史范围记录格式无效，未据此计算覆盖。</p>' : '') +
+       (rows || '<p class="sd-empty">尚未保存明确的精读范围；不能从节点数量推算全文覆盖。</p>') + (view.pages > 1 ? pager('coverage', view) : '') + '</section>';
+   }
++  function structureReady() {
++    var stats = g.CLSkyDeep && g.CLSkyDeep.stats ? g.CLSkyDeep.stats() : null;
++    return !!(stats && stats.structure && stats.structure.progress >= 1 && !stats.structure.moving);
++  }
+   function renderOverview() {
++    var facts = index.structure || structureFacts();
+     var density = arr(model.density), stride = Math.max(1, Math.ceil(density.length / 128)), buckets = [];
+     for (var lo = 0; lo < density.length; lo += stride) {
+       var hi = Math.min(density.length, lo + stride), sum = 0, first = null;
+@@ -1001,9 +1102,146 @@
+       return '<button type="button" class="sd-pulse-bar" data-event-index="' + first + '" data-sd-h="' + (8 + b.n / max * 92).toFixed(2) + '" aria-label="' + esc(title + '，点击定位') + '" title="' + esc(title) + '"><i></i></button>';
+     }).join('');
+     var key = index.events.slice().sort(function (a, b) { return b.score - a.score || a.i - b.i; }).slice(0, 6);
+-    return renderCoverage() + '<section class="sd-section"><div class="sd-section-head"><b>叙事脉冲</b><span>横轴 = ' + esc(model.axis && model.axis.unit || '章节') + ' · 高度 = 区间事件数</span></div><div class="sd-pulse" data-sd-cols="' + Math.max(1, buckets.length) + '">' + (pulse || '<span class="sd-empty">暂无章节事件密度</span>') + '</div></section>' +
+-      '<section class="sd-section"><div class="sd-section-head"><b>全书状态</b><span>结构先于氛围</span></div><div class="sd-stats">' + stat('章节', model.nCh) + stat('主线', model.mains.length) + stat('支线', model.lines.length) + stat('人物', graph.characters.length) + stat('剧情点', graph.events.length) + '</div></section>' +
++    return renderStructureOverview(facts) + renderCoverage() + '<section class="sd-section"><div class="sd-section-head"><b>叙事脉冲</b><span>横轴 = ' + esc(model.axis && model.axis.unit || '章节') + ' · 高度 = 区间事件数</span></div><div class="sd-pulse" data-sd-cols="' + Math.max(1, buckets.length) + '">' + (pulse || '<span class="sd-empty">暂无章节事件密度</span>') + '</div></section>' +
+       '<section class="sd-section"><div class="sd-section-head"><b>关键转折</b><button type="button" class="sd-link" data-mode="evidence">进入证据层 →</button></div><div class="sd-event-list">' + (key.length ? key.map(function (x) { return eventRow(x.i, false); }).join('') : '<p class="sd-empty">暂未识别关键转折。</p>') + '</div></section>';
++  }
++
++  function shownCount(fact) { return !fact || !fact.provided ? '未提供记录' : String(fact.count); }
++  function structureButton(label, value, action, extra) {
++    return '<button type="button" class="sd-detail-action sd-structure-link" data-action="structure-nav" data-structure-nav="' + esc(action) + '"' + (extra || '') + '><b>' + esc(label) + '</b><span>' + esc(value) + ' →</span></button>';
++  }
++  function renderStructureOverview(f) {
++    var r = f.routes || {}, groups = shownCount(f.groups), units = shownCount(f.units), clues = shownCount(f.clues);
++    var plotNow = g.CLSky && g.CLSky.state && g.CLSky.state().plot;
++    var routeHint = '来源标记主线 ' + (r.mainDeclared || 0) + ' · 来源标记支线 ' + (r.branchDeclared || 0) + ' · 模型综合 ' + (r.synthesis || 0) + ' · 自动分段 ' + (r.autoSegments || 0) + ' · 其他推导 ' + (r.derived || 0) + ' · 来源未明确 ' + (r.sourceUnclear || 0);
++    var axisText = f.axis.sequential + ' 个原文顺序章节 + ' + f.axis.otherMaterials + ' 项其他材料；' + f.axis.summary;
++    var layers = ['characters', 'groups', 'relations', 'events'].map(function (key) {
++      var checked = m84.selected === key;
++      return '<button type="button" class="sd-structure-layer" data-action="structure-layer" data-structure-layer="' + key + '" aria-pressed="' + checked + '">' + ({characters:'人物',groups:'群组',relations:'关系',events:'事件'}[key]) + '</button>';
++    }).join('');
++    var structureMode = structureReady();
++    return '<section class="sd-section sd-structure-overview"><div class="sd-section-head"><b>同一张图的组成</b><span>' + esc(f.scope) + '</span></div>' +
++      '<div class="sd-structure-grid">' +
++      structureButton('人物', shownCount(f.people), 'people') +
++      structureButton('群组 / 阵营', groups, 'groups') +
++      structureButton('人物关系', shownCount(f.relations), 'relations') +
++      structureButton('事件', shownCount(f.events), 'events') +
++      structureButton('章节轴', model.nCh + ' 项 · ' + f.axis.sequential + ' 正文 / ' + f.axis.otherMaterials + ' 其他', 'chapters', ' title="' + esc(axisText) + '"') +
++      structureButton('剧情单元', units, 'units') +
++      structureButton('主线 / 支线', (r.mains || 0) + ' / ' + (r.branches || 0), 'lines', ' title="' + esc(routeHint) + '"') +
++      structureButton('伏笔记录', clues, 'clues') + '</div>' +
++      '<p class="sd-evidence-note">路线来源：' + esc(routeHint) + '。主线/支线的总数包含自动分段与推导记录，不能视作作者已声明的结构。伏笔显示已提供的记录数；没有兑现记录不等于没有伏笔。</p>' +
++      '<div class="sd-structure-actions"><div class="sd-controls">' + (structureMode ? '<button type="button" class="sd-detail-action" data-action="structure-stage">分层解释</button>' : '') + (f.events.provided && f.events.count > 0 && !plotNow ? '<button type="button" class="sd-detail-action" data-action="structure-plot">进入剧情视图以展开事件位置</button>' : '') + '</div><div class="sd-structure-layers" role="group" aria-label="选择结构副本层">' + layers + '</div></div>' +
++      '<p class="sd-evidence-note">分层只移动说明副本；原对象与镜头留在原位。</p></section>';
++  }
++
++  var m84Stage = null, m84Tween = null, m84InputCancel = null;
++  function m84Projection(key, sample) {
++    var sky = g.CLSky, pt = null;
++    if (!sample || !sky) return null;
++    if (key === 'characters') {
++      var map = sky.starScreens ? sky.starScreens([sample.name]) : null;
++      pt = map && map[sample.name];
++    } else if (key === 'groups') {
++      var points = sky.starScreens ? sky.starScreens(sample.members.map(function (p) { return p.name; })) : null;
++      var visible = sample.members.map(function (p) { var xy = points && points[p.name]; return xy && isFinite(xy[0]) && isFinite(xy[1]) ? { id: p.id, point: xy } : null; }).filter(Boolean);
++      if (visible.length) pt = visible[0].point;
++      m84Projection.anchors = visible;
++    } else if (key === 'relations') {
++      var both = sky.starScreens ? sky.starScreens([sample.a.name, sample.b.name]) : null, a = both && both[sample.a.name], b = both && both[sample.b.name];
++      if (a && b) { pt = a; m84Projection.anchors = [{ id: sample.a.id, point: a }, { id: sample.b.id, point: b }]; }
++    } else if (key === 'events') {
++      var skyState = sky.state && sky.state(), disc = skyState && skyState.plot && sky.disc && sky.disc(), event = disc && disc.eventPoint && disc.eventPoint(sample.index);
++      if (event) pt = [event.x, event.y];
++    }
++    if (key !== 'groups' && key !== 'relations') m84Projection.anchors = pt ? [{ id: sample.id, point: pt }] : [];
++    return pt && isFinite(pt[0]) && isFinite(pt[1]) ? pt : null;
++  }
++  function m84Sample(key, f) { return key === 'characters' ? f.people.sample : key === 'groups' ? f.groupSample : key === 'relations' ? f.relations.sample : f.events.sample; }
++  function m84SourceId(key, sample) { return key === 'groups' ? sample && sample.key : sample && sample.id; }
++  function cancelM84(clear) {
++    if (m84Tween && g.CLSkyMotion) g.CLSkyMotion.cancelAll('m84');
++    if (m84InputCancel) { m84InputCancel(); m84InputCancel = null; }
++    m84Tween = null;
++    if (clear && m84Stage && m84Stage.parentNode) m84Stage.parentNode.removeChild(m84Stage);
++    if (clear) m84Stage = null;
++    m84.open = false;
++  }
++  function stageMarkup(f) {
++    var keys = ['characters', 'groups', 'relations', 'events'], labels = {characters:'人物',groups:'群组',relations:'关系',events:'事件'}, positions = {};
++    var mobile = g.innerWidth <= 680;
++    var cards = keys.map(function (key, i) {
++      var sample = m84Sample(key, f), exists = key === 'groups' ? f.groups.provided && f.groups.count > 0 : f[key === 'characters' ? 'people' : key].provided && f[key === 'characters' ? 'people' : key].count > 0;
++      var anchor = exists ? m84Projection(key, sample) : null, anchors = anchor ? (m84Projection.anchors || []) : [], name = sample ? (key === 'characters' ? sample.name : key === 'groups' ? sample.name : key === 'relations' ? sample.a.name + ' ↔ ' + sample.b.name : sample.title) : '';
++      positions[key] = anchors;
++      var plotNow = g.CLSky && g.CLSky.state && g.CLSky.state().plot;
++      var detail = !exists ? '当前无记录' : !sample ? '有记录；当前未取得唯一对象引用' : key === 'events' && !anchor && !plotNow ? '当前视图未展开事件' : key === 'events' && !anchor ? '此事件在当前剧情视图没有投影' : !anchor ? '当前视图未投影此对象' : (name || labels[key]);
++      var sourceId = m84SourceId(key, sample), sourceIndex = sample && sample.index;
++      var sourcePoints = anchors.map(function (p) { return p.point[0] + ',' + p.point[1]; }).join(';');
++      return '<article class="sd-structure-copy layer-' + key + (m84.selected === key ? ' is-selected' : '') + (anchor ? ' has-source' : '') + '" data-structure-copy="' + key + '" data-layer-depth="' + i + '"' + (anchor ? ' data-source-x="' + anchor[0] + '" data-source-y="' + anchor[1] + '" data-source-points="' + sourcePoints + '"' : '') + (sourceId != null ? ' data-source-id="' + esc(sourceId) + '"' : '') + (key === 'groups' && sample ? ' data-source-members="' + esc(sample.ids.join(',')) + '"' : key === 'relations' && sample ? ' data-source-members="' + esc(sample.a.id + ',' + sample.b.id) + '"' : '') + (sourceIndex != null ? ' data-source-index="' + sourceIndex + '"' : '') + '><small>' + labels[key] + '</small><b>' + esc(detail) + '</b>' + (sample && anchor ? '<span>' + esc(key === 'relations' ? sample.kind + ' · ' + sample.scope : key === 'events' ? sample.chapter : sample.identity || '源对象') + '</span>' : key === 'events' && exists && !anchor ? '<span class="sd-structure-hop">转到剧情</span>' : '') + '</article>';
++    }).join('');
++    var lines = mobile ? '' : keys.map(function (key) { var ps = positions[key] || [], i = keys.indexOf(key), target = ps.length ? ps[0].point : null; if (!target) return ''; return ps.map(function (p, j) { return '<line data-guide="' + key + '" data-guide-index="' + j + '" x1="' + p.point[0] + '" y1="' + p.point[1] + '" x2="' + target[0] + '" y2="' + (target[1] - (i + 1) * 28) + '" />'; }).join(''); }).join('');
++    return '<div class="sd-structure-stage" aria-hidden="true"><svg class="sd-structure-guides" viewBox="0 0 ' + g.innerWidth + ' ' + g.innerHeight + '" preserveAspectRatio="none">' + lines + '</svg><div class="sd-structure-copies">' + cards + '</div><div class="sd-structure-stage-title">同一张图的组成</div></div>';
++  }
++  function openM84() {
++    if (m84.open) return;
++    m84.open = true; m84.request++;
++    m84.returning = false;
++    if (g.CLSky) {
++      if (g.CLSky.clearNeighborCompare) g.CLSky.clearNeighborCompare();
++      if (g.CLSky.showParticipants) g.CLSky.showParticipants(false);
++      if (g.CLSky.state && g.CLSky.state().playing && g.CLSky.stop) g.CLSky.stop();
++    }
++    var f = index.structure || structureFacts();
++    m84Stage = doc.createElement('div'); m84Stage.innerHTML = stageMarkup(f); m84Stage = m84Stage.firstChild;
++    doc.body.appendChild(m84Stage);
++    var dismiss = function (event) { if (event && root && root.contains(event.target)) return; if (m84.open) cancelM84(true); };
++    g.addEventListener('resize', dismiss, { once: true });
++    g.addEventListener('pointerdown', dismiss, { once: true, capture: true });
++    g.addEventListener('wheel', dismiss, { once: true, capture: true, passive: true });
++    m84InputCancel = function () { g.removeEventListener('resize', dismiss); g.removeEventListener('pointerdown', dismiss, true); g.removeEventListener('wheel', dismiss, true); };
++    var copies = m84Stage.querySelectorAll('.sd-structure-copy');
++    Array.prototype.forEach.call(copies, function (card) {
++      var i = num(card.getAttribute('data-layer-depth'));
++      var x = num(card.getAttribute('data-source-x'), g.innerWidth * (.2 + i * .2)), y = num(card.getAttribute('data-source-y'), g.innerHeight * .72);
++      card.style.setProperty('--sd-x', x + 'px'); card.style.setProperty('--sd-y', y + 'px');
++      var label = card.querySelector('small'); if (label) label.style.opacity = '0';
++    });
++    var prefersReduced = g.matchMedia && g.matchMedia('(prefers-reduced-motion: reduce)').matches;
++    function paint(v) {
++      if (!m84Stage || !m84Stage.isConnected) return;
++      m84Stage.style.opacity = String(Math.min(1, v / .18));
++      var lift = Math.max(0, Math.min(1, (v - .2) / .4));
++      Array.prototype.forEach.call(m84Stage.querySelectorAll('.sd-structure-copy'), function (card) {
++        var depth = num(card.getAttribute('data-layer-depth'));
++        if (g.innerWidth > 680) card.style.transform = 'translate(-50%, -100%) translateY(' + (-28 * (depth + 1) * lift) + 'px)';
++        card.style.opacity = String(v < .18 ? 0 : 1);
++        var label = card.querySelector('small'); if (label) label.style.opacity = String(Math.max(0, Math.min(1, (v - .6) / .2)));
++      });
++      Array.prototype.forEach.call(m84Stage.querySelectorAll('[data-guide]'), function (line) {
++        var key = line.getAttribute('data-guide'), card = m84Stage.querySelector('[data-structure-copy="' + key + '"]');
++        if (!card) return;
++        line.setAttribute('y2', String(num(card.getAttribute('data-source-y'), g.innerHeight * .72) - (num(card.getAttribute('data-layer-depth')) + 1) * 28 * lift));
++        line.setAttribute('x2', String(num(card.getAttribute('data-source-x'), g.innerWidth / 2)));
++        line.style.opacity = String(lift);
++      });
++      var title = m84Stage.querySelector('.sd-structure-stage-title');
++      if (title) title.style.opacity = String(Math.max(0, Math.min(1, (v - .6) / .2)));
++      m84Stage.setAttribute('data-progress', String(v));
++      m84Stage.setAttribute('data-phase', v < .2 ? 'create' : v < .6 ? 'lift' : v < .8 ? 'labels' : 'settled');
++    }
++    if (prefersReduced || !g.CLSkyMotion) paint(1);
++    else { m84Tween = g.CLSkyMotion.tween({ from: 0, to: 1, dur: .9, ease: function (v) { return v; }, tag: 'm84', onUpdate: paint, onDone: function () { m84Tween = null; } }); }
++  }
++  function selectM84Layer(key) {
++    if (['characters','groups','relations','events'].indexOf(key) < 0) return;
++    m84.selected = key;
++    if (root) Array.prototype.forEach.call(root.querySelectorAll('[data-structure-layer]'), function (b) { var on = b.getAttribute('data-structure-layer') === key; b.setAttribute('aria-pressed', String(on)); });
++    if (m84Stage) {
++      Array.prototype.forEach.call(m84Stage.querySelectorAll('.sd-structure-copy'), function (card) { var on = card.getAttribute('data-structure-copy') === key; card.classList.toggle('is-selected', on); });
++      m84Stage.style.setProperty('--sd-select-progress', '1');
++    }
++    if (!m84.open && root && state.mode === 'overview' && !m84.returning) { state.restore = { attr: 'data-structure-layer', value: key }; render(); }
+   }
+   function renderLines() {
+     var rows = arr(model.mains).map(function (line) { return { line: line, main: true }; }).concat(arr(model.lines).slice().sort(function (a, b) { return num(a.c0) - num(b.c0) || num(b.n) - num(a.n); }).map(function (line) { return { line: line, main: false }; }));
+@@ -1350,6 +1588,7 @@
+     var nextGraph = app.graph(), nextModel = sky.model();
+     if (!nextGraph || !nextModel || !nextModel.ok) return false;
+     if (nextGraph !== graph) {
++      cancelM84(true);
+       if (searchTimer != null) { g.clearTimeout(searchTimer); searchTimer = null; }
+       Object.keys(browse).forEach(function (key) { browse[key].page = 0; if (browse[key].query != null) browse[key].query = ''; if (browse[key].filter != null) browse[key].filter = 'all'; });
+       browse.evidence.kind = 'all'; browse.evidence.person = ''; personDetail = null; state.focus = null;
+@@ -1359,9 +1598,9 @@
+     graph = nextGraph; model = nextModel; index = buildIndex(); state.ready = true; ensure(); render(); syncButton(); return true;
+   }
+   doc.addEventListener('cl:sky-deconstruct-toggle', toggle);
+-  doc.addEventListener('cl:sky-plot', function () { if (state.open && state.restore) closeToPlot(); });
++  doc.addEventListener('cl:sky-plot', function () { if (m84.open) cancelM84(true); if (state.open && state.restore) closeToPlot(); });
+   doc.addEventListener('cl:sky-compass', function () { if (state.open) close(false); });
+-  doc.addEventListener('cl:graph-ready', function () { g.setTimeout(syncGraph, 0); });
++  doc.addEventListener('cl:graph-ready', function () { if (m84.open) cancelM84(true); g.setTimeout(syncGraph, 0); });
+   g.addEventListener('DOMContentLoaded', function () { g.setTimeout(syncGraph, 0); });
+   function showRecord(layer, key) {
+     if (!state.ready) syncGraph();
+--- a/css/sky-reading.css
++++ b/css/sky-reading.css
+@@ -173,6 +173,37 @@
+ .sd-coverage-record { border-top: 1px solid var(--skd-hair); margin-top: var(--abyss-space-sm); padding: var(--abyss-space-sm) 0; }
+ .sd-coverage-record summary { cursor: pointer; min-height: 44px; }
+ .sd-coverage-record small { display: block; color: var(--skd-ink-3); font-size: var(--skd-fs-sm); }
++.sd-structure-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--abyss-space-xs); margin: var(--abyss-space-sm) 0; }
++.sd-structure-link { display: grid; gap: var(--abyss-space-xs); align-content: start; min-height: 54px; text-align: left; }
++.sd-structure-link b { color: var(--skd-ink); font: var(--skd-fs-sm)/1.45 var(--skd-font-sans); }
++.sd-structure-link span { color: var(--skd-brass); font: var(--skd-fs-sm)/1.45 var(--skd-font-mono); overflow-wrap: anywhere; }
++.sd-structure-actions { display: grid; gap: var(--abyss-space-xs); }
++.sd-structure-layers { display: flex; flex-wrap: wrap; gap: var(--abyss-space-xs); }
++.sd-structure-layer { min-height: 38px; padding: var(--abyss-space-xs) var(--abyss-space-sm); border: 1px solid var(--skd-hair-2); border-radius: var(--skd-radius-s); background: var(--skd-void-1); color: var(--skd-ink-2); font: var(--skd-fs-sm)/1.4 var(--skd-font-sans); cursor: pointer; }
++.sd-structure-layer[aria-pressed="true"] { border-color: var(--skd-hair-brass); color: var(--skd-brass-hot); background: color-mix(in oklch, var(--skd-brass) 8%, var(--skd-void-1)); }
++.sd-structure-stage { position: fixed; inset: 0; z-index: var(--z-chart); overflow: hidden; pointer-events: none; background: color-mix(in oklch, var(--skd-void-0) 62%, transparent); }
++.sd-structure-stage-title { position: absolute; top: 12%; left: 50%; transform: translateX(-50%); padding: var(--abyss-space-sm) var(--abyss-space-md); border: 1px solid var(--skd-hair); border-radius: var(--skd-radius-s); background: var(--skd-glass-strong); color: var(--skd-ink); font: var(--skd-fs-lg)/1.4 var(--skd-font-sans); white-space: nowrap; }
++.sd-structure-guides { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
++.sd-structure-guides line { stroke: var(--skd-hair-brass); stroke-width: 1; stroke-dasharray: 2 5; opacity: .72; }
++.sd-structure-copies { position: absolute; inset: 0; }
++.sd-structure-copy { position: absolute; left: var(--sd-x, 50%); top: var(--sd-y, 56%); display: grid; gap: 1px; width: min(240px, 28vw); min-height: 38px; box-sizing: border-box; padding: var(--abyss-space-xs) var(--abyss-space-sm); border: 1px solid color-mix(in oklch, var(--skd-hair-brass) 64%, var(--skd-hair)); border-radius: var(--skd-radius-s); background: var(--skd-glass-strong); color: var(--skd-ink-2); transition: border-color 120ms ease, opacity 120ms ease; }
++.sd-structure-copy small { color: var(--skd-brass); font: var(--skd-fs-xs)/1.3 var(--skd-font-sans); }
++.sd-structure-copy b { color: var(--skd-ink); font: var(--skd-fs-sm)/1.35 var(--skd-font-sans); overflow-wrap: anywhere; }
++.sd-structure-copy span { color: var(--skd-ink-3); font: var(--skd-fs-xs)/1.3 var(--skd-font-sans); overflow-wrap: anywhere; }
++.sd-structure-copy:not(.is-selected) { border-color: var(--skd-hair); }
++.sd-structure-copy:not(.is-selected) b { color: var(--skd-ink-2); }
++.sd-structure-copy.is-selected { border-color: var(--skd-brass-hot); box-shadow: 0 0 0 1px color-mix(in oklch, var(--skd-brass) 36%, transparent); }
++@media (max-width: 680px) {
++  .sd-structure-grid { grid-template-columns: minmax(0, 1fr); }
++  .sd-structure-stage { display: grid; align-content: center; gap: var(--abyss-space-sm); padding: var(--abyss-space-lg); box-sizing: border-box; }
++  .sd-structure-stage-title { position: static; transform: none; width: fit-content; }
++  .sd-structure-guides { display: none; }
++  .sd-structure-copies { position: static; display: grid; gap: var(--abyss-space-sm); }
++  .sd-structure-copy { position: static; width: 100%; min-height: 44px; transform: none !important; opacity: 1 !important; }
++}
++@media (prefers-reduced-motion: reduce) {
++  .sd-structure-copy { transition: none; }
++}
+ .sd-mechanics-card:focus-visible, .sd-evidence-detail:focus-visible { outline: 2px solid var(--skd-brass); outline-offset: -2px; }
+ .sd-mechanics-card, .sd-evidence-detail { scroll-margin-top: var(--abyss-space-sm); }
+ .sd-event-meta { line-height: 1.65; }
+--- a/tests/sky_story_browser.py
++++ b/tests/sky_story_browser.py
+@@ -151,6 +151,17 @@
+   check('trusted Space on previous-event control restores one event without a hidden scene shortcut','CLSky.playerState().eventId===CLApp.graph().events[184].id&&!CLSky.state().playing')
+   key('Escape','Escape',27)
+   check('Escape closes reading and restores the playback-button focus','document.getElementById("skyStoryPanel").hidden&&document.activeElement.id==="skyPlay"')
++  # M84 extends this real-book structure and reading journey.
++  ev('CLSky.setPlot(true)');time.sleep(1)
++  if not ev('document.body.classList.contains("sk-structure")'):click('#skyStructure');time.sleep(.9)
++  ev('CLSkyDeconstruction.open();CLSkyDeconstruction.setMode("overview")');time.sleep(.3)
++  check('structure overview leads with real record counts and the source-axis split','(()=>{let t=document.getElementById("skyDeconBody").textContent;return t.includes("219")&&t.includes("20")&&t.includes("798")&&t.includes("58")&&t.includes("100 正文 / 17 其他")&&t.indexOf("同一张图的组成")<t.indexOf("审阅范围");})()')
++  check('overview distinguishes route provenance and reuses its eight reader paths','(()=>{let e=document.querySelector(".sd-structure-overview");return !!e&&e.textContent.includes("主线 / 支线")&&e.textContent.includes("自动分段")&&e.querySelectorAll("[data-action=structure-nav]").length===8;})()')
++  click('#skyDeconBody [data-action="structure-stage"]');time.sleep(1.05)
++  check('M84 reaches its settled state on the host clock with four source-keyed copies','(()=>{let s=document.querySelector(".sd-structure-stage"),c=s&&Array.from(s.querySelectorAll(".sd-structure-copy"));return !!s&&s.dataset.phase==="settled"&&c.length===4&&c.every(x=>x.dataset.sourceId);})()')
++  click('#skyDeconBody [data-structure-layer="relations"]')
++  key('Escape','Escape',27)
++  check('selecting a layer highlights its copy and closing the stage preserves that layer','!document.querySelector(".sd-structure-stage")&&document.querySelector("[data-structure-layer=relations]").getAttribute("aria-pressed")==="true"')
+   ev('CLSkyDeconstruction.open();CLSkyDeconstruction.setMode("mechanics")');time.sleep(.3)
+   # Shared page integration; pure calibration semantics stay in sky_gold_throughput_contract.js.
+   check('calibration modules are loaded in the real reading page','!!(window.CLSkyGoldStandard&&typeof CLSkyGoldStandard.coverage==="function"&&window.CLSkyThroughput&&typeof CLSkyThroughput.qualifiedRate==="function")')
+--- a/tests/sky_legend_parity_contract.js
++++ b/tests/sky_legend_parity_contract.js
+@@ -132,6 +132,16 @@
+ 
+ const env = bootPanel(graph);
+ 
++const overview = env.render('overview');
++check('structure totals lead the review scope and match the loaded records',
++  overview.indexOf('同一张图的组成') >= 0 && overview.indexOf('同一张图的组成') < overview.indexOf('审阅范围') &&
++  overview.indexOf('>' + graph.characters.length + ' →<') >= 0 && overview.indexOf('>' + graph.events.length + ' →<') >= 0);
++check('story route summary keeps source-marked, synthesized, derived and automatic counts distinct',
++  /来源标记主线/.test(overview) && /模型综合/.test(overview) && /其他推导/.test(overview) && /自动分段/.test(overview) && /来源未明确/.test(overview));
++check('structure links remain on the existing six reader paths',
++  (overview.match(/data-action="structure-nav"/g) || []).length === 8 &&
++  ['people', 'groups', 'relations', 'events', 'chapters', 'units', 'lines', 'clues'].every(k => overview.indexOf('data-structure-nav="' + k + '"') >= 0));
++
+ /* --- 1 · 图例存在，且声明了因果角色与断裂态 ------------------------------- */
+ check('the resident footer legend renders at all', env.foot.length > 0 && env.footItems.length >= 4);
+ 

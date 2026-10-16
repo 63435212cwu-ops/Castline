@@ -1,0 +1,143 @@
+{
+  "task": "read:dafeng:L1:0045",
+  "agent": "w-dafeng-1",
+  "status": "done",
+  "summary": "精读《大奉打更人》第四十六章「买首饰」原文区间 codepoint [137797,140423)（2626 字，逐段读完），产出 3 条任务五元组、8 条带方向与机制的 causeEdges、6 条带前值/后值与事件锚点的 states、3 条伏笔（2 条 resolved 标 derived + 1 条 unresolved）、8 条「不构成伏笔」的说明、5 条反向验证（本区间还存在但未被正面立项的事实）、17 条 unknowns、5 条 selfCritique。全部 127 条引用由真实 text 定位后切片生成并回验 TEXT[start:end]==quote 且 TEXT.find(quote)==start，0 处不符（区间内 109 条全部落在本单元内，区间外 18 条一律标 inRange=false）。本区间内许七安本人没有买下任何首饰：唯一写明「买下」的主语是那位年纪小的娘子，所以 T1.result 不写「他买到了首饰」，F2 的回收也只在区间外第四十七章才成立。",
+  "evidence": [
+    {
+      "path": "loop/state/out/read_dafeng_L1_0045.candidate.json",
+      "sha256": "4ec94156dc5b4e0058b1d5af5325172e3ba22f4d205c6309005545a358f87126",
+      "kind": "candidate",
+      "note": "本轮精读产物（任务 writes 指定路径）"
+    },
+    {
+      "path": "data/cache/9b676d7031b1bcd3b8377a18.docs.json",
+      "sha256": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+      "kind": "source",
+      "note": "原文来源；sha256(整个文件) 与 task.sourceHash 一致"
+    }
+  ],
+  "assertions": [
+    {
+      "text": "原文区间与切片：docs[0].text[137797:140423] 长度 2626 字，与任务 sourceRange 一致，且切片以本章标题「第四十六章 买首饰」开头",
+      "result": "pass",
+      "command": "python3 -c \"import json;t=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];print(len(t[137797:140423]),repr(t[137797:137806]))\""
+    },
+    {
+      "text": "sourceHash 对得上：任务声明 fdde5558…39839 == sha256(data/cache/9b676d7031b1bcd3b8377a18.docs.json) 实际值",
+      "result": "pass",
+      "command": "shasum -a 256 data/cache/9b676d7031b1bcd3b8377a18.docs.json"
+    },
+    {
+      "text": "全部 127 条引用逐字命中且偏移自洽：TEXT[start:end]==quote 且 TEXT.find(quote)==start，0 处不符",
+      "result": "pass",
+      "command": "python3 -c \"import json;T=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];C=json.load(open('loop/state/out/read_dafeng_L1_0045.candidate.json'));Q=[o for b in ('tasks','causeEdges','states','foreshadows','rejectedAsForeshadow','reverseCheck') for i in C[b] for o in (i.get('evidence') or [])+(i.get('payoffEvidence') or [])+(i.get('continuationEvidence') or [])+([i['quote']] if isinstance(i.get('quote'),dict) else [])];bad=[o for o in Q if T[o['start']:o['end']]!=o['quote'] or T.find(o['quote'])!=o['start']];print('quotes',len(Q),'bad',len(bad));print('ALL VERBATIM' if not bad else 'MISMATCH')\""
+    },
+    {
+      "text": "区间内外不混：109 条标 inRange=true 的引用全部落在 [137797,140423) 内；18 条区间外引用无一落进本单元（含 reverseCheck 与 rejectedAsForeshadow 里的单条 quote）",
+      "result": "pass",
+      "command": "python3 -c \"import json;T=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];C=json.load(open('loop/state/out/read_dafeng_L1_0045.candidate.json'));S,E=137797,140423;Q=[o for b in ('tasks','causeEdges','states','foreshadows','rejectedAsForeshadow','reverseCheck') for i in C[b] for o in (i.get('evidence') or [])+(i.get('payoffEvidence') or [])+(i.get('continuationEvidence') or [])+([i['quote']] if isinstance(i.get('quote'),dict) else [])];inr=[o for o in Q if o.get('inRange')];xr=[o for o in Q if not o.get('inRange')];print('inRange',len(inr),all(S<=o['start'] and o['end']<=E for o in inr));print('cross',len(xr),all(not(S<=o['start']<E) for o in xr))\""
+    },
+    {
+      "text": "区间外引文的章号经机器复核：18 条区间外引文各自的偏移落在哪个真实章标题之后，已写入 candidate.selfCheck.crossRangeChapterMap（用标题原文而非手写序号，因为全书章标题存在卷首重编号）",
+      "result": "pass",
+      "command": "python3 -c \"import json;C=json.load(open('loop/state/out/read_dafeng_L1_0045.candidate.json'));m=C['selfCheck']['crossRangeChapterMap'];print(len(m));[print(v['offset'],v['chapter'],'|',k) for k,v in m.items()]\""
+    },
+    {
+      "text": "伏笔 unresolved 的判定有可复现检索支撑：全文「首辅」最后一次出现在偏移 4595049（句子仍是「我弟新年有首辅之资」），「许首辅」0 命中；「改革」全书仅 2 处，「玉姐姐」仅 4 处且全在本单元，「东雀」仅 1 处",
+      "result": "pass",
+      "command": "python3 -c \"import json,re;T=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];print('首辅末次',[m.start() for m in re.finditer('首辅',T)][-1]);print('许首辅',T.count('许首辅'),'改革',T.count('改革'),'玉姐姐',T.count('玉姐姐'),'东雀',T.count('东雀'))\""
+    },
+    {
+      "text": "本轮没有改受保护路径：工作树里 js/ css/ ... 有 282 个「已修改」条目，但那是并行 agent 的既有改动（不是我造成的），所以改判据为「最近 60 分钟内这些路径下没有一个文件被写过」——结果为 0 个",
+      "result": "pass",
+      "command": "find js css index.html serve.py narrative.py scripts tests docs data -newermt '-60 minutes' -type f | wc -l"
+    },
+    {
+      "text": "semanticReview 未声明完成：candidate.reviewStatus.semanticReview == 'not_performed'，只声明 quoteLocationVerified",
+      "result": "pass",
+      "command": "python3 -c \"import json;C=json.load(open('loop/state/out/read_dafeng_L1_0045.candidate.json'));print(C['reviewStatus'])\""
+    }
+  ],
+  "changes": [
+    {
+      "path": "loop/state/out/read_dafeng_L1_0045.candidate.json",
+      "kind": "append-only"
+    }
+  ],
+  "sourceHashes": {
+    "data/cache/9b676d7031b1bcd3b8377a18.docs.json": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "data/cache/9b676d7031b1bcd3b8377a18.json": "3c2fae1d399d6768719f2d5476fa0cfd88fb4fbbc12abdf080323fa4b846ebdf"
+  },
+  "remaining": [
+    "semanticReview 未做：本文件只完成引用定位与自洽校验，未做独立语义复核。引用定位正确 ≠ 语义已核验。",
+    "F1（硬疙瘩=第四十七章「捡来的一钱」）与 F2（本区间分账办法=第四十七章凑钱的起点）都标 derived：两条都要跨到区间外才接得起来，原文没有一句把两边连起来。若复核者认为重复桥段/连续行为不算伏笔，这两条应降级为 rejectedAsForeshadow（candidate.foreshadows[].limits 里已写明）。",
+    "F3（「先把二郎培养成大奉首辅」）标 unresolved 依据的是全书关键词检索而非逐章通读：检索能证明「我没找到回收」，不能证明「回收不存在」。后半部我没有逐章精读。",
+    "区间外只抽读了第三十六章尾、第三十七章、第四十七章、第四十八章、第四十九章、第五十八章、第六十一章、第九十四章、第一百七十章与全书结尾附近的片段，没有通读第四十七至第六十一章全文；F2 的 payoffEvidence 只覆盖我实际读到的几处。",
+    "区间内读不出来的项已全部写进 candidate.unknowns（17 条），其中「买首饰送给谁」「分到多少银子」「东雀东南飞是谁选的」「两位娘子是否看穿他」四项是最影响结论完整度的空白。",
+    "原文有两处疑似用字问题（「客观」疑为「客官」、「东雀东南飞」疑为「孔雀东南飞」）与一处算术不一致（第四十七章 1.4+0.3+0.1 写成二两）：我只记录不改写，未据此推翻任何断言。"
+  ],
+  "rollback": {
+    "kind": "append-only",
+    "strategy": "delete-added-files",
+    "files": [
+      "loop/state/out/read_dafeng_L1_0045.candidate.json"
+    ]
+  },
+  "submittedAt": "2026-10-08T03:20:08Z",
+  "validation": {
+    "problems": [],
+    "at": "2026-10-08T03:20:08Z"
+  },
+  "verifyState": "partial",
+  "reviews": [
+    {
+      "reviewer": "w-sanguo-1",
+      "at": "2026-10-08T04:16:36Z",
+      "verdict": "partial",
+      "notes": "判定为 partial，不是 fail：候选在可机器核对的部分做到了近乎满分 —— 127 条引文全部逐字命中、偏移一致、出现次数一致、inRange 标志一致，未发现任何编造人物/事件/结局/伏笔；T1.result 主动拒绝把章题当结果，是本批里少见的正确克制。唯一实质缺陷是 rejectedAsForeshadow[2].reason 里一处章号标错（把「第两百六十二章 七绝蛊」写成「第一百九十九章 浮香的小故事」），该条引文的偏移由我机器判定为 2526795，落在前者的 [2520221,2527872) 内，而后者 [2097874,2102708) 内「莲儿」命中 0 次；巧的是候选为另外 18 条区间外引文都建了 crossRangeChapterMap 机器映射，唯独漏了这条，所以这处是它自己设的检查没覆盖到，而非判断力问题。该错误不改变任何结论（此「莲儿」确非本区间良家小娘子，第一人称回忆+骨簪+生死永别的语境足以区分），故按纪律记 counterExample、判 partial、给可执行的改法，不据此判 fail。\n\n反向验证的六条里，前四条是候选完全没有引用的区间内原文（木签刻谜底规则、玉姐姐的功名台词、两人打趣对答、「一钱金子」自嘲），第五条是 F1.limits 复发点清单漏了第七章与第四十二章（后者原文「脚上猜到了硬疙瘩」有错字，按「硬疙瘩」才能检索到），第六条清单里两条可补的因果边。这些都属于「候选没覆盖但原文明确存在」，供下一轮补抽取；它们不构成对候选结论的反驳，因此同样不作为 fail 依据。\n\n不确定处（存疑，不作判定依据）：① 候选对 F1 用「至少」措辞，其复发点清单严格说不算假陈述，我按「遗漏」而非「错误」记；② 「东雀东南飞」是否为「孔雀东南飞」之误、以及谜底「孙」的推导是否工整，属字谜学判断，超出原文可核验范围，我不表态（候选已把这两点分别写进 unknowns[9][10] 与 selfCritique[2]，处理得当）；③ 第四十七章「一两四钱 + 三钱 + 一钱 = 二两」确实与加法不符（1.8≠2），原文如此，候选选择照抄不改并记进 unknowns[3]，我认同这个处理。\n\n未做：没有通读第四十七章以后全文去独立穷尽「培养二郎成首辅」的回收（只做了关键词检索：「许首辅」0 命中、「入阁」3 处均无关、「首辅」×「新年/二郎」同窗 185 处均为期望或他人），因此 F3 的 unresolved 我判「与检索一致」，不判「已证明无回收」；这与候选 F3.limits 的自述强度相同。",
+      "counterExamples": [
+        {
+          "claim": "rejectedAsForeshadow[2] 的理由里写：区间外那个「莲儿」出现在「第一百九十九章 浮香的小故事」里，语境是骨簪与生死永别。",
+          "quote": "一直不敢去看不敢去想有关莲儿的一切。骨簪在手，如何能不心痛？",
+          "why": "章号标错。该引文位于偏移 2526795，机器判定落在「第两百六十二章 七绝蛊」[2520221,2527872) 内；而「第一百九十九章 浮香的小故事」的区间是 [2097874,2102708)，其中「莲儿」出现 0 次、这段骨簪引文也不在其中。复核命令：python3 -c \"import json,re,bisect;T=json.load(open('data/cache/9b676d7031b1bcd3b8377a18.docs.json'))[0]['text'];p=re.compile(r'第[0-9零一二三四五六七八九十百千两]+章[^\\n]*');ts=[(m.start(),m.group().strip()) for m in p.finditer(T)];i=bisect.bisect_right([t[0] for t in ts],2526795)-1;print(ts[i])\"。注意候选自己的 selfCheck.crossRangeChapterMap 里并没有收录这条引文（18 条映射中不含它），即这条章号是未经机器核对的散文标注 —— 候选为其他 18 条引文都建了机器映射，唯独这条漏了，正中自己设下的检查。实质结论（此「莲儿」不是本区间的良家小娘子）仍然成立：该段是第一人称回忆、语境为骨簪与生死永别，与被称「莲儿」的买首饰良家确非同一人。",
+          "severity": "supporting-detail-wrong",
+          "effect": "不推翻任何 task/cause/state/foreshadow 结论，但该章号必须改。",
+          "fix": "把「第一百九十九章 浮香的小故事」改为「第两百六十二章 七绝蛊」（并补进 crossRangeChapterMap）。"
+        }
+      ],
+      "reverseChecks": [
+        {
+          "found": "区间内唯一交代「木签为什么值得带走」的铺子规矩：解开字谜后店家会在木签下方刻上正确谜题，并把木签连同首饰一起赠给客人。候选只在 coverage.structureRead[4] 的括注里压成「店家刻谜底、连首饰赠客」，没有把它立成条目，也从未逐字引用这句 —— 而它正是 T2「拿走刻着谜底的木签」和 S3「她收好木签后」的前提机制。",
+          "quote": "解开字谜的话，店家会在木签下方刻上正确的谜题，然后连带首饰一起赠给客人。",
+          "why": "候选全文对「连带」「赠给」的命中数均为 0，说明这句原文没有被引用过；机制被括注压缩后，木签的物证价值在候选里没有落脚点。"
+        },
+        {
+          "found": "年长者（玉姐姐）唯一一句解释「谜题为什么难」的台词，把店家的功名（秀才老爷）与出题难度挂在一起 —— 这是区间内两名小娘子关系与店家身份的唯一交汇处。候选对它零引用（「有功名」「秀才老爷」在候选全文命中数均为 0）。",
+          "quote": "“妹妹说的是，店家是有功名的秀才老爷，出的题自然难，等闲读书人都未必能解开呢。”",
+          "why": "候选 T3 把店家的身份只写成「蓄山羊胡子的老人，一身书生打扮」与叙述层的「宝器轩的老板是位秀才」；小娘子视角的这层佐证整段缺失。"
+        },
+        {
+          "found": "许七安开口前，两位小娘子之间的打趣对答（年长者斥「痴人说梦」，年幼者回「哎呀，你讨厌」）。这是区间内唯一表现两人原本亲昵关系与「玉姐姐」称呼来由的文字，也让后文「拉扯衣袖」「训斥」有了落差。候选对两句零引用。",
+          "quote": "“痴人说梦。”",
+          "why": "候选 S3/T2 只从「警惕的转头」「愁眉苦脸」写起，两人之间的既有亲密被整段略过，导致后面「玉姐姐」拉袖训斥失去了对照基线。"
+        },
+        {
+          "found": "许七安自己点破银与金的价差、以及「捡钱」这条桥段的自我吐槽。候选只引了相邻的「前世逛奢侈品店」与「三钱银子」，这句最能说明他为什么买不起的话没有引用（候选全文「没卵用」命中数 0）。",
+          "quote": "“一钱银子没卵用啊，一钱金子还差不多。”",
+          "why": "T1.obstacle 写的是「三钱银子」与「以金质的最贵」，机制其实就在这一句里；缺了它，钱不够的表述只剩叙述层的估价。"
+        },
+        {
+          "found": "F1.limits 列「脚下踩到硬疙瘩/坚硬物体」的复发点时说「至少还出现在第十章、第二十一章、第九十四章、第一百七十章」，漏了两处：第七章「见太子」（捡到荷包）与第四十二章「又捡荷包」（原文写作「脚上猜到了硬疙瘩」，'猜'为'踩'之误，按「脚下踩到」检索会漏，按「硬疙瘩」可命中）。全书该词共 6 处 + 「坚硬物体」1 处。",
+          "quote": "许七安愣了愣，心说我的捡钱buff不是被监正那个糟老头子404了吗。",
+          "why": "候选自己用了「至少」，所以不算假陈述；但第四十二章的章题就叫「又捡荷包」，且明写主角自嘲「捡钱buff」，这正是判定 F1 究竟算「伏笔」还是「人物习惯/固定桥段」时最有力的原文标记 —— 缺了它，F1.limits③ 的降级建议缺少最关键的一条支撑。"
+        },
+        {
+          "found": "候选 8 条 causeEdges 里没有「铺子规矩（解谜折半）→ 两笔生意按规矩成交」这条边，也没有「店家识破他冒充读书人 → 嗤笑一声不再搭理」这条认知→行为的边。二者在原文都有逐字依据，属可补的抽取项（候选未声称因果已穷尽）。",
+          "quote": "这个规矩是宝器轩的特色。",
+          "why": "C3/C6/C7 覆盖的是「答案→反应→掏钱」，成交得以成立的规则前提（折半规矩）与店家轻慢的成因（识破冒充）都只落在 states 里，没有连成边。"
+        }
+      ]
+    }
+  ]
+}

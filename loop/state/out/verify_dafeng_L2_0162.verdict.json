@@ -1,0 +1,328 @@
+{
+ "task": "verify:dafeng:L2:0162",
+ "reviewer": "w-dafeng-3",
+ "roleFile": "loop/ROLES/VERIFIER.md",
+ "candidateUnderReview": "loop/state/out/read_dafeng_L2_0162.candidate.json",
+ "candidateAgent": "w-xiyou-0",
+ "candidateSha256": "5333fcca0be21d1b37ed0790927c5e649d7765471f1788229dd400ee340ba1a2",
+ "source": {
+  "path": "data/cache/1063b17ca65ec1b76f30e460.docs.json",
+  "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+  "range": [
+   578460,
+   582192
+  ],
+  "segmentSha256": "560dde6fc12a5273e5f020ffd78086f7660485a149e79e17039c9631bfd8af58",
+  "boundaryCheck": "复核者独立复算：docs[0].text[578460:578474]=='第一百六十二章 二五仔的出手'；切片 3732 codepoint、88 个非空段，与候选 source 块自述一致。"
+ },
+ "method": "先自读原文再打开候选（未先看结论）。自读步骤：切片落盘 → 逐行通读 88 段 → 按段做「未被任何候选引文触及的字符补集」→ 逐条抽取项找原文对应 → 对候选 183 个引文对象全量复算 t[start:end]==quote / len==end-start / 区间内 / count==wholeTextOccurrences / find==firstOccurrenceAt / startIsFirstOccurrence / para 段号，再随机抽 5 条 find() 核验。反向验证用「全切片按标点切句 + 与全部已引串比对」独立求补集，不依赖候选自述。",
+ "verdict": "partial",
+ "verdictRationale": "**引用层零缺陷**：183/183 引文逐字命中、偏移/长度/区间/全书出现次数/首现位置/startIsFirstOccurrence 全部复算通过（失败 0），183 个 para 段号与独立枚举逐条一致（失配 0），覆盖声明完全可复现（我独立算出的零引文段落集合 {1,14,44,88} 与候选 uncoveredItems 逐项相同），6 条任务五元组齐全（含 action），空栏 T1.obstacle/T1.cost/T2.cost/T3.result/T5.cost 全部带同名 Note 写明理由，同任务跨栏共用同句 0、跨度重叠 0，未发现原文外的人物/事件/结局，未把结束当成功（F1–F4 与 T3.result 都显式标未回收/未写结果）。**但存在 3 处可用原文逐字证伪的断言错误**（1 条计数错误、1 条把原文没有的词写成「叙述直述」、1 条叙述视角归属错误），另有 6 条反向验证发现的遗漏。缺陷局部、不动摇主体抽取，故判 partial 而非 fail；亦不能判 pass，因为其中两处会让下游把错误事实当成原文事实继承。",
+ "counterExamples": [
+  {
+   "claim": "notForeshadows.NF4.why 与 notWorldSettings.NW7.why 均断言「王党」「阉党」这两个党派名「各出现一次」。",
+   "quote": {
+    "quote": "王党就是上一届京察中崛起的",
+    "start": 580030,
+    "end": 580043,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "inRange": true,
+    "findHits": 1
+   },
+   "counterQuote": {
+    "quote": "“魏渊与我说过，如今当朝之上，王党和打更人势力最强。而今王党损兵折将。魏渊代表的阉党，肯定要做削弱了。”",
+    "start": 580940,
+    "end": 580992,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "inRange": true,
+    "findHits": 1
+   },
+   "why": "原文「王党」在本区间出现 **3 次**（p41 一次：580030；p60 两次：580955「王党和打更人势力最强」、580966「而今王党损兵折将」），「阉党」1 次（580975）。独立复算：切片内 王党=3、阉党=1。候选把 3 次写成「各出现一次」，是**可复算的量化错误**。这与计划100 记过的错误同形：结论（不构成伏笔、不登记为世界设定）可能仍成立，但给出的理由是错的，下游照抄会继承一个错误计数。同段 p60 还给出「王党」本区间唯一一次的状态描写（损兵折将），候选在 S7 引了 p60 整句却未在 NF4/NW7 里对账这个计数。",
+   "severity": "moderate",
+   "fixHint": "改为「王党 3 次（p41 一次、p60 两次）、阉党 1 次」，或去掉计数只保留「不构成铺设＋回收」的结论。"
+  },
+  {
+   "claim": "tasks[0]（T1_xingbu_proposal）result.note 断言「「交给三司」是叙述直述」。",
+   "quote": {
+    "quote": "此案交由刑部大理寺卿、府衙联手处理，三天之内，朕要结果。",
+    "start": 578914,
+    "end": 578942,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "inRange": true,
+    "findHits": 1
+   },
+   "why": "「三司」在本单元区间内出现 **0 次**（独立复算 sl.count('三司')=0；该词在全书中出现 44 次，全部在本区间之外）；且原文用的是「此案交**由**」，不是「交给」。候选把「交给三司」放进「」并断言「是叙述直述」——这等于**给原文安了一个它没有的词**，并声称它是直述。原文实际只点出两方：「刑部大理寺卿、府衙联手处理」（p13）；一号传书里另说「由府衙、刑部、大理寺共同处理」（p53，人物来源）。这不是措辞小疵：本任务明令「引文必须是原文里能 text.find(quote) 找得到的」，「交给三司」find 不到。sceneBeats.B5 里另有一处「三司共同处理」的无引号转述，同属术语回填。",
+   "severity": "moderate",
+   "fixHint": "T1.result.note 改为「此案交由刑部大理寺卿、府衙联手处理」是叙述直述；B5 的「三司共同处理」改为「府衙、刑部、大理寺共同处理（一号传书）」。"
+  },
+  {
+   "claim": "tasks[4]（T5_chu_well）label 写「褚采薇查明井底有古怪，亲自下井查看，在井底**看见**趴着的白衣女子」，result.text 写「**她和跟下来的许七安看见了**井底趴着的白衣女子」。",
+   "quote": {
+    "quote": "许七安游过去，接着八卦盘散发出的亮光，看见井底趴着一个白衣女子。",
+    "start": 582088,
+    "end": 582120,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "inRange": true,
+    "findHits": 1
+   },
+   "counterQuote": {
+    "quote": "她摘下了腰间的八卦盘，像是与什么东西对峙。",
+    "start": 582061,
+    "end": 582082,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "inRange": true,
+    "findHits": 1
+   },
+   "why": "原文井底「看见」的主语只有**许七安**一人（p86）。对本区间内全部含「看见」的句子做主语点名，涉及褚采薇的只有两处，且她都不是「看见井底白衣女子」的主语：p85「许七安忽然看见褚采薇停了下来」、p86「许七安游过去……看见井底趴着一个白衣女子」；她自己的动作止于「摘下了腰间的八卦盘，像是与什么东西对峙」（而「像是」还是许七安的观感）。p87「她似乎也有所察觉」同样只有「似乎」。候选把它写成「她和……看见了」，是把许七安的视觉归属给了她；label 里的「查明」也强于原文——她原话是「我怀疑井底有古怪」（p78），并未在本区间确认任何结论。**注**：候选自身在 T5.action.note 与 C10 里正确标明了「许七安的观感」「叙述用『似乎』留了不确定」，所以这是同一候选内部的**自相矛盾**，不是整体口径问题。",
+   "severity": "minor-to-moderate",
+   "fixHint": "label 改为「褚采薇下井查看，许七安在井底看见趴着的白衣女子」；result.text 改为「许七安看见了……（她的所见区间内未写）」。"
+  }
+ ],
+ "reverseChecks": [
+  {
+   "found": "许七安明确自陈「我肯定没有贪污」，并对事实本身给出一个态度：事实如何不重要（他断定自己会栽在「事实如何不重要」上）。候选通篇没有登记这一句（独立复算：候选 JSON 中 '没有贪污' 出现 0 次、'我肯定没有贪污' 0 次）。这是本区间唯一一处当事人对自己是否涉案的直接自陈，却被 T4.objective.note 的措辞「他**没有**说自己有罪或无罪以外的打算」挡在了外面。",
+   "quote": {
+    "quote": "我肯定没有贪污，但事实如何不重要",
+    "start": 581507,
+    "end": 581523,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "inRange": true,
+    "findHits": 1
+   },
+   "whyItMatters": "K5 的结论是「无人确知他是否在名单上」——但当事人自己说了「我肯定没有贪污」，这是与『不知』并列的第二层事实：他不知名单、却确知自己无罪。缺这一句会让 K5 读起来像他对自身处境完全无知。"
+  },
+  {
+   "found": "许七安的退路里点名了一个具体的人：府衙的陈府尹与我关系不错。候选全篇未出现「陈府尹」（候选 JSON 中计数 0），而 T4 只保留了「进府衙倒是不怕，就怕落入刑部大牢」这个结论。",
+   "quote": {
+    "quote": "府衙的陈府尹与我关系不错",
+    "start": 581461,
+    "end": 581473,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "inRange": true,
+    "findHits": 1
+   },
+   "whyItMatters": "这是本区间唯一被点名的、许七安自认可依靠的关系人；他在同一段里刚得罪不起刑部（「就怕落入刑部大牢」），阿附府衙的底气正来自这个名字。缺了它，T4 的自保盘算就只剩抽象地名。"
+  },
+  {
+   "found": "许七安自己给出了朱阳反叛的**动机链**：『不出所料的话，肯定是因为我的缘故……而我非但无事，反而升职加薪。』——即对方伤残、自己受益。候选的 V6 引 p58 时**恰好止于**这一转折之前（V6 引文 end=580817，而该句起点正是 580817），候选 JSON 中「升职加薪」计数 0。",
+   "quote": {
+    "quote": "而我非但无事，反而升职加薪。",
+    "start": 580817,
+    "end": 580831,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "inRange": true,
+    "findHits": 1
+   },
+   "whyItMatters": "R2 拒绝「私怨→反叛」这条边时写的理由是「这是许七安的猜测」，但被截掉的这半句正是他猜测的**内容与逻辑**（受益者=他）。截断会让读者看不到候选其实丢掉了该猜测的核心，也可能让复核者误以为候选完整引用了 p58。"
+  },
+  {
+   "found": "许七安在推演皇帝为何要打压魏渊时，列举了具体的旧案与阵营：从税银案到桑泊案，再到这段时间的斗争，文官集团们狗脑子都打出来了，勋贵大致保持完好。候选 JSON 中「税银案」「桑泊案」「文官集团」三词计数均为 0（「勋贵」仅在 notWorldSettings/世界设定讨论中以一般性议论出现）。",
+   "quote": {
+    "quote": "从税银案到桑泊案，再到这段时间的斗争，文官集团们狗脑子都打出来了，勋贵大致保持完好",
+    "start": 580866,
+    "end": 580907,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "inRange": true,
+    "findHits": 1
+   },
+   "whyItMatters": "S7 把 p59 概括为「推演朱阳反叛的后果」，但真正被登记的是 p57/p60 两段；p59 给出的**势力对比证据链**（文官集团互斗、勋贵旁观且无权）是「为什么这轮轮到阉党被削」的推理基础，四段一起才是完整的推演，只留 p60 会把它压成一句结论。"
+  },
+  {
+   "found": "许七安对地书另一端「一号」的判断是贬义的：他认为以一号的段位不该看不透这么简单的道理，甚至在心里说这问题愚蠢。候选把一号登记为「提问方」（V3）与「一号的传书」（K1），但完全没有登记这条**评价性事实**（候选 JSON 中「一号的段位」计数 0）。",
+   "quote": {
+    "quote": "以一号的段位难道还看不透这么简单的道理？",
+    "start": 581175,
+    "end": 581195,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "inRange": true,
+    "findHits": 1
+   },
+   "whyItMatters": "K1 讨论知识分布时只用『一号提问、四号作答』的角色分工，而原文在这里给出了许七安对一号段位的**负面判断**——这是本区间唯一一处对地书成员能力高低的明写评价，属于人物状态/知识差的可登记内容。"
+  },
+  {
+   "found": "元景帝的决定紧接在他看认罪伏法的魏渊之后：元景帝看了眼认罪伏法的魏渊，沉声道：『此案交由……』。候选 C5 与 T1.result 都只用 p7（点出举报人）与 p13（交办）两端，中间这个「看了眼认罪伏法的魏渊」的动作未被任何分区登记（候选 JSON 中计数 0），B1 的 span 描述也只写「皇帝没有下斩令」。",
+   "quote": {
+    "quote": "元景帝看了眼认罪伏法的魏渊",
+    "start": 578895,
+    "end": 578908,
+    "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+    "inRange": true,
+    "findHits": 1
+   },
+   "whyItMatters": "p13 的「认罪伏法」是叙述对魏渊姿态的**定性用词**，而候选在 V1/S1 里反复声明「叙述不做裁定」「认罪不等于罪名成立」。两处需要对齐：叙述在 p13 确实用了一个带定性的词，候选要么登记它、要么说明为何不计入——现在的处理是把它留在补集里，而结论却说叙述不表态。"
+  }
+ ],
+ "quotationAudit": {
+  "method": "对候选全部 183 个含 quote 字段的对象逐条复算；另按 VERIFIER 契约随机抽 5 条用 text.find 单跑一次并比对偏移。",
+  "quoteObjects": 183,
+  "uniqueQuoteStrings": 127,
+  "declared": {
+   "quoteRefs": 183,
+   "uniqueQuoteStrings": 127
+  },
+  "checks": {
+   "sliceEqualsQuote_fails": 0,
+   "lengthEqualsEndMinusStart_fails": 0,
+   "inRange_fails": 0,
+   "wholeTextOccurrences_mismatch": 0,
+   "firstOccurrenceAt_mismatch": 0,
+   "startIsFirstOccurrence_mismatch": 0,
+   "paraField_mismatch": 0,
+   "sourceHash_mismatch": 0
+  },
+  "random5": {
+   "seed": 162,
+   "picked": 5,
+   "verbatimHit": 5,
+   "offsetMatch": 5,
+   "samples": [
+    {
+     "quote": "“咱们这个陛下啊，是不会放心看我做大的。”",
+     "start": 579788,
+     "end": 579809,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+     "inRange": true,
+     "findHits": 1
+    },
+    {
+     "quote": "父子俩驻足回首，追上来的是大理寺卿，他穿着绣云雁绯袍，正四品大员。",
+     "start": 579003,
+     "end": 579036,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+     "inRange": true,
+     "findHits": 1
+    },
+    {
+     "quote": "黄昏，早早结束看房的许七安，花了一个小时陪褚采薇逛街，看见什么好吃的就买什么。",
+     "start": 580154,
+     "end": 580193,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+     "inRange": true,
+     "findHits": 1
+    },
+    {
+     "quote": "不管怎么样，先把宅子给买了，拥有一套不动产比什么都重要。",
+     "start": 581427,
+     "end": 581455,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+     "inRange": true,
+     "findHits": 1
+    },
+    {
+     "quote": "“举报你的，正是打更人衙门的金锣朱阳。”",
+     "start": 578661,
+     "end": 578681,
+     "sourceHash": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+     "inRange": true,
+     "findHits": 1
+    }
+   ]
+  },
+  "proseQuoteAudit": "对候选**非 quote 字段**（note/why/explain/trigger 等）里出现的 364 处「」『』“”内嵌串做逐字比对：89 处不在原文中，逐条看过——88 处是候选自己的术语（如「结束≠成功」「一栏一依据」「位置不对称」）或对原文的省略号拼接（如「准备站出来攻讦……的给事中们」），属正常行文；**只有 1 处是问题**，即 T1.result.note 的「交给三司」（见 counterExamples 第 2 条）。",
+  "bookkeeping": {
+   "fiveTupleComplete": 6,
+   "tasksMissingAction": 0,
+   "emptySlotsWithNamedNote": [
+    "T1.obstacle→obstacleNote",
+    "T1.cost→costNote",
+    "T2.cost→costNote",
+    "T3.result→resultNote",
+    "T5.cost→costNote"
+   ],
+   "crossSlotSharedQuoteStrings": 0,
+   "crossSlotSpanOverlaps": 0,
+   "coverage": {
+    "declaredCovered": 84,
+    "declaredUncovered": [
+     1,
+     14,
+     44,
+     88
+    ],
+    "independentlyComputedZeroQuoteParas": [
+     1,
+     14,
+     44,
+     88
+    ],
+    "match": true,
+    "meanCharCoverageOfCoveredParas": 0.884,
+    "parasUnder60pct": 13,
+    "parasUnder35pct": 4
+   }
+  }
+ },
+ "falseKillCheck": {
+  "checked": "候选的 6 条 rejectedEdges（R1–R6）、7 条 notWorldSettings、5 条 notForeshadows，逐条回原文找是否被「合法但被排除」。",
+  "findings": [
+   {
+    "item": "R1（举报→失宠）、R3（索取→交出密信）、R4（交镜→躲过追查）、R5（党争→举报）",
+    "judgement": "**不是误杀**。四条的反向证据我都在原文找到了：R1 的「即将失宠」确实只是一号的问句（p53「这是不是意味着……」，findHits=1）；R3 有 p38 明写「不是答应了大理寺卿的交换」；R4 区间内确无任何交镜后果；R5 的党争叙述在许七安的回顾里，原文没有一句把它归为举报原因。"
+   },
+   {
+    "item": "R6（褚采薇说女鬼白天不出现 → 女鬼真的白天不出现）",
+    "judgement": "**不算误杀，但暴露一处口径不一致（存疑）**。拒绝把它当世界事实是对的（无白天下井的对照）。但候选把「每次京察都是一次大动荡」（南宫倩柔的叹息＋叙述概括）登记成 W-rule-2 并标 misunderstood，却把「白日里阳气充沛，井里的女鬼不会出现」（同样出自人物之口、且被两人据此行动）只留在 C8/T5 而不入 worldSettings。两条的性质高度相似，一取一舍缺少写明的判据。按契约「拿不出原文引证的反对意见只能记为存疑」，此处**只记存疑，不据此判 fail**。"
+   },
+   {
+    "item": "R2（朱阳私怨→反叛）",
+    "judgement": "拒绝连边本身站得住（人物猜测），但见 reverseChecks 第 3 条：候选用来支撑该拒绝的 p58 引用被截断在关键转折处，理由是残缺的。"
+   },
+   {
+    "item": "W-rule-2（京察必然造成各党损失）",
+    "judgement": "候选自己在 note 里写明「若复核认为它只该记在 states/knowledgeDiffs，本条可降级删除而不影响其他条目」——这属于**自我标注的过度登记**，不是误杀，我认可其可降级处理。"
+   }
+  ]
+ },
+ "fabricationCheck": {
+  "characters": "候选提到的全部人物（魏渊/元景帝/南宫倩柔/许七安/褚采薇/朱阳/大理寺卿/李玉春/杨砚/都给事中/京兆府尹）在本切片内均有原文出处；未出现原文外人物。",
+  "eventsEndings": "未发现把区间外结局写进区间内：F1–F4 全部显式标 unresolved 或写明「未回收」，T3.result 明写「许七安到区间结束都还在鬼宅的井里」，T5.result 明写「她是否清除了对方，区间内没有写」。",
+  "importedTerms": "发现两个本单元区间内不存在的词被当作区间内内容使用：**三司**（切片 count=0，全书 44 次）已列为 counterExample 第 2 条；**地书**（切片 count=0，图谱缓存 225 次）在 T4.action.note、K1、V3 等处被用作渠道名称，属从图谱缓存/全书引入的术语（任务原文明确「图谱缓存不算原文证据」）。地书未加引号、未声称直述，勉强可作译名使用，但与三司同属「术语回填」，建议一并改为「玉石小镜传书」或注明为全书术语。",
+  "successJudgement": "未发现把『播放到结尾』当成功；T6.result 是唯一「当场达成」项，且候选明确限定为「达成的是哄开心，不是任何案子或前程上的结果」。"
+ },
+ "mustFixOrDowngrade": [
+  "NF4.why / NW7.why 的「各出现一次」：改为 王党 3 次（p41×1、p60×2）、阉党 1 次。",
+  "T1.result.note 的「「交给三司」是叙述直述」：删去或改为原文实际用词（本案交由刑部大理寺卿、府衙联手处理）；B5 的「三司共同处理」同改。",
+  "T5 label / result.text 的叙述视角归属：井底「看见」的主语是许七安，不是褚采薇；label 的「查明」宜降为「怀疑/下井查看」。",
+  "T4.objective.note 的「他没有说自己有罪或无罪以外的打算」与原文「我肯定没有贪污，但事实如何不重要」相抵，措辞必须改写。"
+ ],
+ "usableAsIs": [
+  "全部 183 条引文的定位与偏移（可与 counterExamples 分开使用，逐字可查）。",
+  "tasks 五元组骨架（6 条齐全，含 action）、空栏 Note 的写法、跨栏不共用引文的做法。",
+  "causeEdges C1–C10 的方向与触发机制、rejectedEdges R1–R6 中的 R1/R3/R4/R5。",
+  "states S1–S7、knowledgeDiffs K1–K7、foreshadows F1–F4 的 resolved/unresolved 判定、worldSettings 中除 W-rule-2 外的 13 条、themeReadings TH1–TH2（含 counter）、unknowns 15 条、selfCritique 6 条。",
+  "coverageDeclaration 与 machineSelfCheck 的自述数字（独立复算完全一致）。"
+ ],
+ "notes": "判定 partial 的依据：引用层经全量复算**零缺陷**（183 条无一条错位、无一条非原文），主体抽取（任务/因果/状态/知识差/伏笔/设定/主题）均有原文对应，未发现编造人物、结局或把结束当成功，候选自己的 unknowns 与 selfCritique 也如实标注了最可疑处——这些足以否定 fail。但三条可用原文逐字证伪的断言错误（「王党各出现一次」实为 3 次；「交给三司」是原文里 find 不到的、却被称「叙述直述」；把许七安的「看见」写成褚采薇的所见）会让下游把错误事实当原文事实继承，且第一、二条属于**可机器复算**的硬错误而非口径分歧，因此不能判 pass。\n\n我对自己反向验证的保留：① reverseChecks 里第 5、6 条（一号的段位、元景帝看了眼认罪伏法的魏渊）属于『可登记但未登记』的边界情形，原文只说了一次、不构成事件链，若判者认为它们本就不该入分区，这两条应当撤回，撤回后反向发现仍有 4 条；② 误杀检查中我认为 R6/W-rule-2 的口径不一致只是「存疑」，因为我拿不出「该规则必须是世界设定」的原文强制依据——按契约，这类反对意见不能用来判 fail，我也没有据此加权重；③ 我在复核中发现**我自己**第一版把「王党各出现一次」误读成「唯一一次」，是先数了 p41 才回头数 p60 才发现是 3 次——这个自查过程本身说明计数类断言必须机器复算，我已把复算结果写进 counterExamples 第 1 条而不是凭印象。\n\n不确定处：T2 的「交换被拒绝」是采用南宫倩柔的问句预设（p37「义父为什么拒绝？」）得出的，候选已在 T2.obstacle.note 与 selfCritique 第 4 条声明依赖人物推断；我认为该处理可接受（问句本身把『拒绝』当预设说出），但若更严的口径要求「叙述确认才算事实」，则 T2.result 与 K3.topic 应降级为「含义不明」——这一条我保留为存疑，不计入 counterExamples。",
+ "evidence": [
+  {
+   "path": "loop/state/out/verify_dafeng_L2_0162.verdict.json",
+   "kind": "本任务 writes 唯一产物（复核结论）",
+   "note": "提交时另在提交记录里登记自身 sha256（写盘后现算）"
+  },
+  {
+   "path": "loop/state/out/read_dafeng_L2_0162.candidate.json",
+   "sha256": "5333fcca0be21d1b37ed0790927c5e649d7765471f1788229dd400ee340ba1a2",
+   "kind": "被复核候选（只读，未修改；复核前后哈希相同）"
+  },
+  {
+   "path": "data/cache/1063b17ca65ec1b76f30e460.docs.json",
+   "sha256": "fdde555867aaccc2e676da9e9f3afecceab5d56114ae3e236af089e712539839",
+   "kind": "原文（全部引文在此文件的 docs[0].text[578460,582192) 内逐字复算）"
+  },
+  {
+   "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/verify_dafeng_L2_0162/audit.py",
+   "sha256": "c06e41550f85da5a97959e759a0044a3b9b0edbf38dcb830f5353ccb9daa77f3",
+   "kind": "复核者复算脚本（引文层全量/覆盖/反向补集/计数事实 四段，可 python3 -B 直接重跑）"
+  },
+  {
+   "path": "/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/verify_dafeng_L2_0162/slice-read-before-candidate.txt",
+   "sha256": "560dde6fc12a5273e5f020ffd78086f7660485a149e79e17039c9631bfd8af58",
+   "kind": "我读候选**之前**独立落盘的原文切片（88 非空段），反向发现与逐行自读的依据"
+  }
+ ],
+ "reproduce": {
+  "cmd": "python3 -B '/Volumes/资源库/我的资源/回滚点/项目/星系-ac256e2134/20261012-120107-247966-43404/测试产物/verify_dafeng_L2_0162/audit.py'",
+  "note": "脚本独立现算：① 183 条引文的 t[s:e]==quote/长度/区间/全书重数/首现位置/para 段号/哈希；② 零引文段落集合与候选 uncoveredItems 对比；③ 按标点切句求「未被任何已引串覆盖」的补集；④ 王党/阉党/三司/地书等计数事实。不读候选自述数字。",
+  "observed": "fails 全 0（见 quotationAudit.checks）；零引文段 {1,14,44,88} 与候选声明一致；王党 inSlice=3、阉党=1、三司 inSlice=0/全书 44。"
+ }
+}
