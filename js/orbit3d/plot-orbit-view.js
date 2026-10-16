@@ -243,8 +243,11 @@
     function off(t, fn) { var a = L[t] || [], i = a.indexOf(fn); if (i >= 0) a.splice(i, 1); }
     function emit(t, p) { var a = L[t]; if (!a || !a.length) return; a = a.slice(); for (var i = 0; i < a.length; i++) { try { a[i](p); } catch (e) {} } }
 
+    var rimTries = 0;
     function tryRim() {
-      if (ready || tried) return; tried = true;
+      if (ready || tried) return;
+      if (rimTries > 600) return;
+      tried = true; rimTries++;
       var q = grp(); if (!q) { tried = false; return; }
       var r = findRing(q); if (!r) { tried = false; return; }
       ring = r; ready = true; if (tree) rebuild();
@@ -259,10 +262,15 @@
       renderGeometry(); apply(); states(); draw(true);
     }
 
-    function loop() { raf = g.requestAnimationFrame(loop); if (mode !== 'plot') return; if (!ready) tryRim(); draw(false); }
+    function loop() {
+      if (mode !== 'plot') { raf = 0; return; }
+      if (!ready) tryRim();
+      draw(false);
+      raf = g.requestAnimationFrame(loop);
+    }
 
     function setTree(t) { tree = t; rebuild(); return view; }
-    function setMode(m) { m = m === 'plot' ? 'plot' : 'constellation'; if (m === mode) return mode; mode = m; apply(); if (mode === 'plot') { if (!ready) tryRim(); draw(true); } emit('mode', mode); return mode; }
+    function setMode(m) { m = m === 'plot' ? 'plot' : 'constellation'; if (m === mode) return mode; mode = m; apply(); if (mode === 'plot') { rimTries = 0; if (!ready) tryRim(); draw(true); if (!raf) raf = g.requestAnimationFrame(loop); } emit('mode', mode); return mode; }
     function toggle() { setMode(mode === 'plot' ? 'constellation' : 'plot'); return visible(); }
     function visible() { return mode === 'plot'; }
     function focusEvent(ev) { var v = (typeof ev === 'number' && ev >= 0) ? ev : -1; if (v === focusEv) return; focusEv = v; apply(); states(); rebuildFocus(); draw(true); emit('focus', focusEv); }

@@ -21,6 +21,7 @@
 
   function clamp(v, lo, hi) { return v < lo ? lo : (v > hi ? hi : v); }
   function wrapPi(a) {
+    if (!isFinite(a)) return 0;
     while (a > PI) a -= PI2;
     while (a < -PI) a += PI2;
     return a;

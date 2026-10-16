@@ -177,7 +177,7 @@
       var off = reg.call(sceneApi, frameFn);
       hook = typeof off === 'function' ? off : null;
     }
-    else if (!reduced) { (function loop() { raf = g.requestAnimationFrame(loop); frame(); })(); }
+    else if (!reduced) { (function loop() { if (ownVersion !== mountVersion) { raf = 0; return; } raf = g.requestAnimationFrame(loop); frame(); })(); }
     else { timer = g.setInterval(frame, 250); }
     var closed = false;
     return function () {

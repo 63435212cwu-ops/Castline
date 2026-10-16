@@ -399,13 +399,16 @@
     var lib = doc.getElementById('library');
     if (lib && lib !== libWired) {
       libWired = lib;
+      var libOpen = false;
       new MO(function () {
-        if (lib.classList.contains('on') || (!lib.hidden && lib.getAttribute('aria-hidden') !== 'true')) {
-          var cards = lib.querySelectorAll('.lbc, .hist');
-          for (var i = 0; i < Math.min(cards.length, 16); i++) {
-            cards[i].style.setProperty('--ci', String(i));
-            transientClass(cards[i], 'skd-cine-row', 700);
-          }
+        var now = lib.classList.contains('on') || (!lib.hidden && lib.getAttribute('aria-hidden') !== 'true');
+        if (now === libOpen) return;
+        libOpen = now;
+        if (!now) return;
+        var cards = lib.querySelectorAll('.lbc, .hist');
+        for (var i = 0; i < Math.min(cards.length, 16); i++) {
+          cards[i].style.setProperty('--ci', String(i));
+          transientClass(cards[i], 'skd-cine-row', 700);
         }
       }).observe(lib, { attributes: true, attributeFilter: ['class', 'hidden', 'aria-hidden'], childList: true, subtree: true });
     }
@@ -464,6 +467,17 @@
     }
   }
 
+  var scanScheduled = false, scanning = false;
+  function scheduleScan() {
+    if (scanScheduled) return;
+    scanScheduled = true;
+    (g.requestAnimationFrame || function (f) { return setTimeout(f, 16); })(function () {
+      scanScheduled = false;
+      if (scanning) return;
+      scanning = true;
+      try { scan(); } finally { scanning = false; }
+    });
+  }
   function onBodyMutate() {
     var plotNow = BC.contains('sky-plot-on');
     var compNow = BC.contains('sky-compass-on');
@@ -474,7 +488,7 @@
       prevPlot = plotNow;
       triggerWarp('warp-plot');
     }
-    scan();
+    scheduleScan();
   }
 
   function wireInteractions() {

@@ -178,6 +178,7 @@
 
   function approach(cur, target, k) {
     var d = target - cur;
+    if (!isFinite(d)) return cur;
     while (d > Math.PI) d -= TWO;
     while (d < -Math.PI) d += TWO;
     return k >= 1 ? target : cur + d * k;

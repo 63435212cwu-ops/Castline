@@ -165,6 +165,7 @@ create: function (opts) {
     if (reducedMotion) nA = nT;
     else {
       var d = nT - nA;
+      if (!isFinite(d)) d = 0;
       while (d > Math.PI) d -= P2;
       while (d < -Math.PI) d += P2;
       nA += d * k;

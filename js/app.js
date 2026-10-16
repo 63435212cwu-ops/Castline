@@ -1445,6 +1445,14 @@
       apiMsg('测试异常：' + (e && e.message ? e.message : String(e)), 'err');
     });
   }
+  $('apiNew').addEventListener('click', function () {
+    apiForm.reset();
+    apiForm.id.value = '';
+    $('apiFormTitle').textContent = '新建档案';
+    apiMsg('');
+    if (apiForm.name) apiForm.name.focus();
+  });
+  $('apiTest').addEventListener('click', function () { runApiTest(); });
 
   function selectModel(mId, triggerTest) {
     if (!mId) return;

@@ -86,7 +86,7 @@
   if (typeof window !== 'undefined' && window.matchMedia) {
     try {
       var mq = window.matchMedia('(prefers-reduced-motion: reduce)');
-      var mqHandler = function () {};
+      var mqHandler = function () { try { if (isReducedMotion()) clearHighlight(); } catch (e) {} };
       if (mq.addEventListener) {
         mq.addEventListener('change', mqHandler);
       } else if (mq.addListener) {

@@ -752,8 +752,20 @@
   if (typeof document !== 'undefined' && typeof MutationObserver !== 'undefined') {
     (function installR5EFold() {
       var scheduled = false;
-      var observer = new MutationObserver(function () {
+      var observer = new MutationObserver(function (records) {
         if (scheduled) return;
+        var hit = false;
+        for (var ri = 0; ri < records.length && !hit; ri++) {
+          var added = records[ri].addedNodes || [];
+          for (var ai = 0; ai < added.length; ai++) {
+            var nd = added[ai];
+            if (!nd || nd.nodeType !== 1) continue;
+            if (nd.classList && nd.classList.contains('cl-holo-frame')) { hit = true; break; }
+            if (nd.querySelector && nd.querySelector('.cl-holo-frame')) { hit = true; break; }
+            if (nd.closest && nd.closest('.cl-holo-frame')) { hit = true; break; }
+          }
+        }
+        if (!hit) return;
         if (!document.querySelector(".cl-holo-frame:not([data-r5e-folded])")) return;
         scheduled = true;
         var run = function () { scheduled = false; foldAllFrames(document); };

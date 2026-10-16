@@ -294,7 +294,7 @@
     var G = 172 * SPREAD, k = G / (Math.PI * 2), r0 = 34 * SPREAD;
     var pos = new Array(n), glyphEdges = [], guides = [], chain = [];
     var th = 0, sAcc = 0, dth = 0.02;
-    function advance(ds) { var target = sAcc + ds; while (sAcc < target) { var r = r0 + k * th; var dl = Math.sqrt(r * r + k * k) * dth; sAcc += dl; th += dth; } }
+    function advance(ds) { var target = sAcc + ds; if (!isFinite(target)) return; var guard = 0; while (sAcc < target && guard++ < 100000) { var r = r0 + k * th; var dl = Math.sqrt(r * r + k * k) * dth; if (!(dl > 0)) break; sAcc += dl; th += dth; } }
     function pointAt(theta) { var r = r0 + k * theta; return { x: Math.cos(theta) * r, y: Math.sin(theta) * r }; }
     var th0 = Math.PI * 0.62;
     var cur = 0;

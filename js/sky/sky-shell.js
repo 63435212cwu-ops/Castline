@@ -307,16 +307,18 @@
   var PANEL_IDS = ['skyDeconPanel', 'skyStoryPanel', 'skySearchPanel', 'skyEnrichPanel'];
   function armPanelMotion(e) {
     if (!e || e.__skdPm) return; e.__skdPm = 1;
-    var exiting = false, hideT = 0, skipNext = false;
+    var exiting = false, hideT = 0, lastHidden = !!e.hidden;
     function dur() { return reduced() ? 0 : ((g.CLSkyTokens && g.CLSkyTokens.DUR ? g.CLSkyTokens.DUR.panel : 0.24) * 1000); }
-    function writeHidden(v) { if (!!e.hidden !== !!v) { skipNext = true; e.hidden = v; } }
+    function writeHidden(v) { if (!!e.hidden !== !!v) { e.hidden = v; } lastHidden = !!v; }
     function finishHide() {
       clearTimeout(hideT); hideT = 0; exiting = false;
       e.classList.remove('skd-pm-pre', 'skd-pm-out');
       writeHidden(true);
     }
     var mo = new g.MutationObserver(function () {
-      if (skipNext) { skipNext = false; return; }
+      var now = !!e.hidden;
+      if (now === lastHidden) return;
+      lastHidden = now;
       if (e.hidden) {
         if (exiting) { finishHide(); return;    }
         if (!dur()) return;
