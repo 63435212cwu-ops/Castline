@@ -32,6 +32,29 @@ python3 serve.py 8000
 - **星盘**：顶栏「剧情」或按 `P`。整条故事卷成一枚指环，从 12 点顺时针转一圈，就是从第一回读到最后一回。底部有播放条，可以逐回推进。
 - **罗盘**：点任意一颗星，或搜索人名。镜头落到这个人身上：中间是八维性格晶体，外圈三道轨道走的是亲近、对抗和其他关系，下弧是他一路走来的因果链。
 
+### 界面预览
+
+以《三国演义》为例：507 位人物、数千条关系，全部挂在一张夜空上。
+
+<table>
+  <tr>
+    <td width="50%"><img src="assets/screenshots/01-constellation-sanguo.jpg" alt="星座 · 悬停角色卡"><br><sub><b>星座</b> · 悬停任意一颗星，它牵连的关系全部亮起，并给出这个人的阵营、身份与事件数</sub></td>
+    <td width="50%"><img src="assets/screenshots/02-camp-shu.jpg" alt="蜀汉阵营"><br><sub><b>阵营</b> · 一势力一片星云：蜀汉 121 人，326 组内部、460 组跨阵营关系</sub></td>
+  </tr>
+  <tr>
+    <td><img src="assets/screenshots/03-camp-wei.jpg" alt="曹魏阵营"><br><sub><b>曹魏</b> · 164 人，316 组内部、475 组跨阵营关系</sub></td>
+    <td><img src="assets/screenshots/04-stance.jpg" alt="立场分组"><br><sub><b>立场</b> · 对立 239 / 主角方 113 / 中立 91 / 摇摆 64</sub></td>
+  </tr>
+  <tr>
+    <td><img src="assets/screenshots/05-identity.jpg" alt="身份分组"><br><sub><b>身份</b> · 主角 / 核心配角 / 反派 / 功能性 / 配角 五档，507 人各归其位</sub></td>
+    <td><img src="assets/screenshots/06-mainline.jpg" alt="主线阶段"><br><sub><b>主线阶段</b> · 17 个阶段，每段标注起止回目、人物与事件数</sub></td>
+  </tr>
+  <tr>
+    <td><img src="assets/screenshots/07-plot-disc.jpg" alt="剧情星盘"><br><sub><b>剧情星盘</b> · 主线 23 段、支线 11 条，按回目绕成一圈，从 12 点顺时针读完全书</sub></td>
+    <td></td>
+  </tr>
+</table>
+
 ### 打开方式
 
 ```
